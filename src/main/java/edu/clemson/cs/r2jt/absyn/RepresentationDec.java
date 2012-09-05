@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * RepresentationDec.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -93,14 +93,8 @@ public class RepresentationDec extends Dec {
 
     public RepresentationDec() {};
 
-    public RepresentationDec(
-            PosSymbol name,
-            Ty representation,
-            Exp convention,
-            Exp correspondence,
-            InitItem initialization,
-            FinalItem finalization)
-    {
+    public RepresentationDec(PosSymbol name, Ty representation, Exp convention,
+            Exp correspondence, InitItem initialization, FinalItem finalization) {
         this.name = name;
         this.representation = representation;
         this.convention = convention;
@@ -118,44 +112,68 @@ public class RepresentationDec extends Dec {
     // -----------------------------------------------------------
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the representation variable. */
-    public Ty getRepresentation() { return representation; }
+    public Ty getRepresentation() {
+        return representation;
+    }
 
     /** Returns the value of the convention variable. */
-    public Exp getConvention() { return convention; }
+    public Exp getConvention() {
+        return convention;
+    }
 
     /** Returns the value of the correspondence variable. */
-    public Exp getCorrespondence() { return correspondence; }
+    public Exp getCorrespondence() {
+        return correspondence;
+    }
 
     /** Returns the value of the initialization variable. */
-    public InitItem getInitialization() { return initialization; }
+    public InitItem getInitialization() {
+        return initialization;
+    }
 
     /** Returns the value of the finalization variable. */
-    public FinalItem getFinalization() { return finalization; }
+    public FinalItem getFinalization() {
+        return finalization;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the representation variable to the specified value. */
-    public void setRepresentation(Ty representation) { this.representation = representation; }
+    public void setRepresentation(Ty representation) {
+        this.representation = representation;
+    }
 
     /** Sets the convention variable to the specified value. */
-    public void setConvention(Exp convention) { this.convention = convention; }
+    public void setConvention(Exp convention) {
+        this.convention = convention;
+    }
 
     /** Sets the correspondence variable to the specified value. */
-    public void setCorrespondence(Exp correspondence) { this.correspondence = correspondence; }
+    public void setCorrespondence(Exp correspondence) {
+        this.correspondence = correspondence;
+    }
 
     /** Sets the initialization variable to the specified value. */
-    public void setInitialization(InitItem initialization) { this.initialization = initialization; }
+    public void setInitialization(InitItem initialization) {
+        this.initialization = initialization;
+    }
 
     /** Sets the finalization variable to the specified value. */
-    public void setFinalization(FinalItem finalization) { this.finalization = finalization; }
+    public void setFinalization(FinalItem finalization) {
+        this.finalization = finalization;
+    }
 
     // ===========================================================
     // Public Methods
@@ -175,27 +193,27 @@ public class RepresentationDec extends Dec {
         sb.append("RepresentationDec\n");
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         if (representation != null) {
-            sb.append(representation.asString(indent+increment,increment));
+            sb.append(representation.asString(indent + increment, increment));
         }
 
         if (convention != null) {
-            sb.append(convention.asString(indent+increment,increment));
+            sb.append(convention.asString(indent + increment, increment));
         }
 
         if (correspondence != null) {
-            sb.append(correspondence.asString(indent+increment,increment));
+            sb.append(correspondence.asString(indent + increment, increment));
         }
 
         if (initialization != null) {
-            sb.append(initialization.asString(indent+increment,increment));
+            sb.append(initialization.asString(indent + increment, increment));
         }
 
         if (finalization != null) {
-            sb.append(finalization.asString(indent+increment,increment));
+            sb.append(finalization.asString(indent + increment, increment));
         }
 
         return sb.toString();

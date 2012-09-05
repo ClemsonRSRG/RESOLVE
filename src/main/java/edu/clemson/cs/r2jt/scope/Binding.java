@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * Binding.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -78,7 +78,7 @@ public class Binding {
     // ===========================================================
     // Variables
     // ===========================================================
-	private CompileEnvironment myInstanceEnvironment;
+    private CompileEnvironment myInstanceEnvironment;
     private ErrorHandler err;
 
     private Scope scope;
@@ -87,18 +87,18 @@ public class Binding {
 
     private Map<TypeID, Type> mathTypes = new Map<TypeID, Type>();
 
-    private Map<TypeID, Location> mathTypeDefinitionLocations = 
-    	new Map<TypeID, Location>();
+    private Map<TypeID, Location> mathTypeDefinitionLocations =
+            new Map<TypeID, Location>();
 
-    private Map<TypeID, Location> programTypeDefinitionLocations = 
-    	new Map<TypeID, Location>();
+    private Map<TypeID, Location> programTypeDefinitionLocations =
+            new Map<TypeID, Location>();
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     public Binding(Scope scope, CompileEnvironment instanceEnvironment) {
-    	myInstanceEnvironment = instanceEnvironment;
+        myInstanceEnvironment = instanceEnvironment;
         this.scope = scope;
         this.err = myInstanceEnvironment.getErrorHandler();
     }
@@ -154,8 +154,7 @@ public class Binding {
 
     public void addProgramIndirectName(PosSymbol qual, PosSymbol name) {
         TypeID tid = new TypeID(qual, name, 0);
-        Location loc = (qual != null) ?
-            qual.getLocation() : name.getLocation();
+        Location loc = (qual != null) ? qual.getLocation() : name.getLocation();
         if (!mathTypes.containsKey(tid)) {
             mathTypes.put(tid, new VoidType());
             mathTypeDefinitionLocations.put(tid, loc);
@@ -167,37 +166,37 @@ public class Binding {
     }
 
     public void addMathIndirectName(PosSymbol qual, PosSymbol name) {
-    	TypeID tid = new TypeID(qual, name, 0);
-        Location loc = (qual != null) ?
-            qual.getLocation() : name.getLocation();
+        TypeID tid = new TypeID(qual, name, 0);
+        Location loc = (qual != null) ? qual.getLocation() : name.getLocation();
         if (!mathTypes.containsKey(tid)) {
             mathTypes.put(tid, new VoidType());
             mathTypeDefinitionLocations.put(tid, loc);
         }
     }
 
-    public void addConstructedName(PosSymbol qual, PosSymbol name,
-                                   int params) {
-    	TypeID tid = new TypeID(qual, name, params);
-        if (!mathTypes.containsKey(tid)) { mathTypes.put(tid, new VoidType()); }
-        Location loc = (qual != null) ?
-            qual.getLocation() : name.getLocation();
+    public void addConstructedName(PosSymbol qual, PosSymbol name, int params) {
+        TypeID tid = new TypeID(qual, name, params);
+        if (!mathTypes.containsKey(tid)) {
+            mathTypes.put(tid, new VoidType());
+        }
+        Location loc = (qual != null) ? qual.getLocation() : name.getLocation();
         mathTypeDefinitionLocations.put(tid, loc);
     }
 
-    public void addRenaming(PosSymbol newname, PosSymbol qual,
-                            PosSymbol oldname) {
+    public void addRenaming(PosSymbol newname, PosSymbol qual, PosSymbol oldname) {
 
         TypeID tid = new TypeID(null, newname, 0);
         Type type = new IndirectType(qual, oldname, this);
-        if (!mathTypes.containsKey(tid)) { mathTypes.put(tid, type); }
+        if (!mathTypes.containsKey(tid)) {
+            mathTypes.put(tid, type);
+        }
         addMathIndirectName(qual, oldname);
     }
 
     public void addTypeMapping(TypeEntry entry) {
-    	int params = 0;
+        int params = 0;
         if (entry.getType() instanceof PrimitiveType) {
-            params = ((PrimitiveType)entry.getType()).paramCount();
+            params = ((PrimitiveType) entry.getType()).paramCount();
         }
         TypeID tid = new TypeID(null, entry.getName(), params);
         if (mathTypes.containsKey(tid)) {
@@ -227,24 +226,26 @@ public class Binding {
         TypeID tid = new TypeID(null, name, params);
         PrimitiveType type = castToPrimitiveType(mathTypes.get(tid));
         //if(type == null) look in the imports & add to the current binding?
-        if(type == null) {
-        	TypeLocator tloc = new TypeLocator(scope, myInstanceEnvironment);
-        	try {
-        		TypeEntry te = tloc.locateMathType(tid);
-        		return te.getScope().getScopeID().getModuleID().getName();
-         	}
-        	catch(SymbolSearchException ex1) {
-        		try {
-            		TypeEntry te = tloc.locateProgramType(tid);
-            		return te.getScope().getScopeID().getModuleID().getName();
-        		}
-        	    catch(SymbolSearchException ex2) {
-        	        if(type == null) return null;
-        	        return type.getQualifier();
-        	    }
-        	}
+        if (type == null) {
+            TypeLocator tloc = new TypeLocator(scope, myInstanceEnvironment);
+            try {
+                TypeEntry te = tloc.locateMathType(tid);
+                return te.getScope().getScopeID().getModuleID().getName();
+            }
+            catch (SymbolSearchException ex1) {
+                try {
+                    TypeEntry te = tloc.locateProgramType(tid);
+                    return te.getScope().getScopeID().getModuleID().getName();
+                }
+                catch (SymbolSearchException ex2) {
+                    if (type == null)
+                        return null;
+                    return type.getQualifier();
+                }
+            }
         }
-        if(type == null) return null;
+        if (type == null)
+            return null;
         return type.getQualifier();
     }
 
@@ -268,15 +269,15 @@ public class Binding {
     }
 
     public Binding instantiate(PosSymbol facility, ModuleScope newscope,
-                               Binding replBind, Map<Symbol, Type> typeMap) {
-    	
+            Binding replBind, Map<Symbol, Type> typeMap) {
+
         Binding newbind = new Binding(newscope, myInstanceEnvironment);
         Iterator<TypeID> i = mathTypes.keyIterator();
         while (i.hasNext()) {
             TypeID tid = i.next();
             Type type = mathTypes.get(tid);
             Type newtype = type.instantiate(scope.getScopeID(), replBind);
-            
+
             if (type instanceof FormalType) {
                 newtype = getReplacementType(tid, typeMap);
             }
@@ -285,19 +286,20 @@ public class Binding {
             }
             newbind.mathTypes.put(tid, newtype);
         }
-        
+
         return newbind;
     }
 
     public void simplifyNames(PosSymbol name) {
-        
-    	Iterator<TypeID> i = mathTypes.keyIterator();
+
+        Iterator<TypeID> i = mathTypes.keyIterator();
         while (i.hasNext()) {
             TypeID tid = i.next();
             if (mathTypes.get(tid) instanceof NameType) {
-                NameType nametype = (NameType)mathTypes.get(tid);
-                NameType newtype = new NameType(nametype.getModuleID(),
-                                   nametype.getName(), nametype.getType());
+                NameType nametype = (NameType) mathTypes.get(tid);
+                NameType newtype =
+                        new NameType(nametype.getModuleID(),
+                                nametype.getName(), nametype.getType());
                 mathTypes.put(tid, newtype);
             }
         }
@@ -306,8 +308,7 @@ public class Binding {
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("==================================================\n");
-        sb.append("Binding for scope " + scope.getScopeID().toString()
-                  + "\n");
+        sb.append("Binding for scope " + scope.getScopeID().toString() + "\n");
         sb.append("==================================================\n");
         sb.append("Program Types: " + programTypes.toString() + "\n");
         sb.append("Mapping: " + mathTypes.toString() + "\n");
@@ -320,7 +321,7 @@ public class Binding {
     // -----------------------------------------------------------
 
     public void bindTypeNames() {
-    	
+
         TypeLocator locator = new TypeLocator(scope, myInstanceEnvironment);
         Iterator<TypeID> i = mathTypes.keyIterator();
         while (i.hasNext()) {
@@ -332,24 +333,29 @@ public class Binding {
                 try {
                     TypeEntry typeEntry = locator.locateProgramType(curTypeID);
                     Type type;
-                    if(typeEntry == null)
+                    if (typeEntry == null)
                         type = new VoidType();
                     else
                         type = typeEntry.getType();
                     mathTypes.put(curTypeID, type);
-                } catch (SymbolSearchException ex) {
-                    err.error(programTypeDefinitionLocations.get(curTypeID), ex.getMessage());
                 }
-            } else { // type is math type
+                catch (SymbolSearchException ex) {
+                    err.error(programTypeDefinitionLocations.get(curTypeID), ex
+                            .getMessage());
+                }
+            }
+            else { // type is math type
                 try {
                     TypeEntry typeEntry = locator.locateMathType(curTypeID);
                     Type type = typeEntry.getType();
                     mathTypes.put(curTypeID, type);
-                } catch (SymbolSearchException ex) {
-//                   	System.out.println(tid.toString() + " (MATH)");
-//                   	System.out.println(scope.getClass());
-//                   	System.out.println(scope);
-                    err.error(mathTypeDefinitionLocations.get(curTypeID), ex.getMessage());
+                }
+                catch (SymbolSearchException ex) {
+                    //                   	System.out.println(tid.toString() + " (MATH)");
+                    //                   	System.out.println(scope.getClass());
+                    //                   	System.out.println(scope);
+                    err.error(mathTypeDefinitionLocations.get(curTypeID), ex
+                            .getMessage());
                 }
             }
         } // continue loop
@@ -358,33 +364,28 @@ public class Binding {
     // ===========================================================
     // Private Methods
     // ===========================================================
-    
+
     // -----------------------------------------------------------
     // Cast Methods
     // -----------------------------------------------------------
 
     private PrimitiveType castToPrimitiveType(Type type) {
-        assert type instanceof PrimitiveType :
-                "type is not a PrimitiveType";
+        assert type instanceof PrimitiveType : "type is not a PrimitiveType";
         return (PrimitiveType) type;
     }
 
-
     private ConcType castToConcType(Type type) {
-        assert type instanceof ConcType :
-                "typs is not a ConcType";
+        assert type instanceof ConcType : "typs is not a ConcType";
         return (ConcType) type;
     }
 
     private ModuleScope castToModuleScope(Scope scope) {
-        assert scope instanceof ModuleScope :
-                "scope is not a ModuleScope";
+        assert scope instanceof ModuleScope : "scope is not a ModuleScope";
         return (ModuleScope) scope;
     }
 
     private ProcedureScope castToProcedureScope(Scope scope) {
-        assert scope instanceof ProcedureScope :
-                "scope is not a ProcedureScope";
+        assert scope instanceof ProcedureScope : "scope is not a ProcedureScope";
         return (ProcedureScope) scope;
     }
 
@@ -402,9 +403,11 @@ public class Binding {
 
     private Type getNameType(Type type, PosSymbol facility) {
         //Environment env = Environment.getInstance();
-        ModuleID id = myInstanceEnvironment.getModuleID(facility.getLocation().getFile());
+        ModuleID id =
+                myInstanceEnvironment.getModuleID(facility.getLocation()
+                        .getFile());
         ConcType conctype = castToConcType(type);
-        return new NameType(id, facility, conctype.getName(),
-                            conctype.getType());
+        return new NameType(id, facility, conctype.getName(), conctype
+                .getType());
     }
 }

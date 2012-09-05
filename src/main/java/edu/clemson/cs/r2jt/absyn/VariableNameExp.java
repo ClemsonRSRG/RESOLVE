@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * VariableNameExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -88,18 +88,15 @@ public class VariableNameExp extends VariableExp {
 
     public VariableNameExp() {};
 
-    public VariableNameExp(
-            Location location,
-            PosSymbol qualifier,
-            PosSymbol name)
-    {
+    public VariableNameExp(Location location, PosSymbol qualifier,
+            PosSymbol name) {
         this.location = location;
         this.qualifier = qualifier;
         this.name = name;
     }
-    
+
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	return new VariableNameExp(location, qualifier, name);
+        return new VariableNameExp(location, qualifier, name);
     }
 
     // ===========================================================
@@ -111,26 +108,38 @@ public class VariableNameExp extends VariableExp {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the qualifier variable. */
-    public PosSymbol getQualifier() { return qualifier; }
+    public PosSymbol getQualifier() {
+        return qualifier;
+    }
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the qualifier variable to the specified value. */
-    public void setQualifier(PosSymbol qualifier) { this.qualifier = qualifier; }
+    public void setQualifier(PosSymbol qualifier) {
+        this.qualifier = qualifier;
+    }
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     // ===========================================================
     // Public Methods
@@ -142,8 +151,7 @@ public class VariableNameExp extends VariableExp {
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getVariableNameExpType(this);
     }
 
@@ -156,16 +164,16 @@ public class VariableNameExp extends VariableExp {
         sb.append("VariableNameExp\n");
 
         if (qualifier != null) {
-            sb.append(qualifier.asString(indent+increment,increment));
+            sb.append(qualifier.asString(indent + increment, increment));
         }
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
-    
+
     /** Returns a text string of the Variable */
     public String toString(int indent) {
 
@@ -183,9 +191,9 @@ public class VariableNameExp extends VariableExp {
 
         return sb.toString();
     }
-    
+
     public String toString() {
-    	return name.getName();
+        return name.getName();
     }
 
     /** Returns true if the variable is found in any sub expression
@@ -193,58 +201,58 @@ public class VariableNameExp extends VariableExp {
     public boolean containsVar(String varName, boolean IsOldExp) {
         return false;
     }
-    
-    public Object clone(){
-   	 	VariableNameExp clone = new VariableNameExp();
-   	 	clone.setName(createPosSymbol(this.getName().toString()));
-   	 	clone.setQualifier(this.getQualifier());
-   	 	clone.setLocation(this.getLocation());
-   	 	return clone;
-   }
-    
-    private PosSymbol createPosSymbol(String name){
-    	PosSymbol posSym = new PosSymbol();
-    	posSym.setSymbol(Symbol.symbol(name));
-    	return posSym;
-    	
+
+    public Object clone() {
+        VariableNameExp clone = new VariableNameExp();
+        clone.setName(createPosSymbol(this.getName().toString()));
+        clone.setQualifier(this.getQualifier());
+        clone.setLocation(this.getLocation());
+        return clone;
     }
-    
-    public Exp replace(Exp old, Exp replacement){
-    	if(name != null){
-    		if(old instanceof VarExp){
-    			if(((VarExp)old).getName().toString().equals(name.toString())){
-    				return (Exp)replacement.clone();
-    			}
-    		}
-    	}
-    	return null;
+
+    private PosSymbol createPosSymbol(String name) {
+        PosSymbol posSym = new PosSymbol();
+        posSym.setSymbol(Symbol.symbol(name));
+        return posSym;
+
     }
-    
+
+    public Exp replace(Exp old, Exp replacement) {
+        if (name != null) {
+            if (old instanceof VarExp) {
+                if (((VarExp) old).getName().toString().equals(name.toString())) {
+                    return (Exp) replacement.clone();
+                }
+            }
+        }
+        return null;
+    }
+
     public List<Exp> getSubExpressions() {
-    	return new List<Exp>();
+        return new List<Exp>();
     }
-    
-    public void setSubExpression(int index, Exp e) {
-    }
-    
+
+    public void setSubExpression(int index, Exp e) {}
+
     public Exp copy() {
-    	Exp result = new VariableNameExp(location, qualifier, name);
-    	result.setType(type);
-    	
-    	return result;
+        Exp result = new VariableNameExp(location, qualifier, name);
+        result.setType(type);
+
+        return result;
     }
-    
+
     public boolean equivalent(Exp e) {
-    	boolean retval = e instanceof VariableNameExp;
-    	
-    	if (retval) {
-    		VariableNameExp eAsVNE = (VariableNameExp) e;
-    		
-    		retval = posSymbolEquivalent(qualifier, eAsVNE.qualifier) &&
-    				posSymbolEquivalent(name, eAsVNE.name);
-    	}
-    	
-    	return retval;
+        boolean retval = e instanceof VariableNameExp;
+
+        if (retval) {
+            VariableNameExp eAsVNE = (VariableNameExp) e;
+
+            retval =
+                    posSymbolEquivalent(qualifier, eAsVNE.qualifier)
+                            && posSymbolEquivalent(name, eAsVNE.name);
+        }
+
+        return retval;
     }
 
 }

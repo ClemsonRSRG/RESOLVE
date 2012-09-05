@@ -51,75 +51,75 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
  */
 public class IncrementalBindingIterator implements Iterator<Map<PExp, PExp>> {
 
-	private static final Map<PExp, PExp> EMPTY_MAP = new HashMap<PExp, PExp>();
-	
-	private final PExp myPattern;
-	private final Iterator<PExp> myFacts;
-	
-	private final Map<PExp, PExp> myAssumedBindings;
-	
-	private Map<PExp, PExp> myCurrentIncrementalBindings;
-	
-	public IncrementalBindingIterator(PExp pattern, Iterator<PExp> facts, 
-			Map<PExp, PExp> assumedBindings) {
-		
-		myPattern = pattern.substitute(assumedBindings);
-		myFacts = facts;
-		myAssumedBindings = assumedBindings;
-		
-		setUpNext();
-	}
-	
-	public IncrementalBindingIterator(PExp pattern, Iterable<PExp> facts, 
-			Map<PExp, PExp> assumedBindings) {
-		this(pattern, facts.iterator(), assumedBindings);
-	}
-	
-	public IncrementalBindingIterator(PExp pattern, Iterator<PExp> facts) {
-		this(pattern, facts, EMPTY_MAP);
-	}
-	
-	public IncrementalBindingIterator(PExp pattern, Iterable<PExp> facts) {
-		this(pattern, facts.iterator(), EMPTY_MAP);
-	}
-	
-	private void setUpNext() {
-		
-		myCurrentIncrementalBindings = null;
-		while (myCurrentIncrementalBindings == null && myFacts.hasNext()) {
-			PExp fact = myFacts.next().substitute(myAssumedBindings);
-			
-			try {
-				myCurrentIncrementalBindings = myPattern.bindTo(fact);
-			}
-			catch (BindingException e) {
-				
-			}
-		}
-	}
-	
-	@Override
-	public boolean hasNext() {
-		return myCurrentIncrementalBindings != null;
-	}
+    private static final Map<PExp, PExp> EMPTY_MAP = new HashMap<PExp, PExp>();
 
-	@Override
-	public Map<PExp, PExp> next() {
-		Map<PExp, PExp> retval = new HashMap<PExp, PExp>();
-		
-		//TODO : Might be good, eventually, to have a "chaining map" that makes
-		//       this a constant-time operation
-		retval.putAll(myCurrentIncrementalBindings);
-		retval.putAll(myAssumedBindings);
-		
-		setUpNext();
-		
-		return retval;
-	}
+    private final PExp myPattern;
+    private final Iterator<PExp> myFacts;
 
-	@Override
-	public void remove() {
-		throw new UnsupportedOperationException();
-	}
+    private final Map<PExp, PExp> myAssumedBindings;
+
+    private Map<PExp, PExp> myCurrentIncrementalBindings;
+
+    public IncrementalBindingIterator(PExp pattern, Iterator<PExp> facts,
+            Map<PExp, PExp> assumedBindings) {
+
+        myPattern = pattern.substitute(assumedBindings);
+        myFacts = facts;
+        myAssumedBindings = assumedBindings;
+
+        setUpNext();
+    }
+
+    public IncrementalBindingIterator(PExp pattern, Iterable<PExp> facts,
+            Map<PExp, PExp> assumedBindings) {
+        this(pattern, facts.iterator(), assumedBindings);
+    }
+
+    public IncrementalBindingIterator(PExp pattern, Iterator<PExp> facts) {
+        this(pattern, facts, EMPTY_MAP);
+    }
+
+    public IncrementalBindingIterator(PExp pattern, Iterable<PExp> facts) {
+        this(pattern, facts.iterator(), EMPTY_MAP);
+    }
+
+    private void setUpNext() {
+
+        myCurrentIncrementalBindings = null;
+        while (myCurrentIncrementalBindings == null && myFacts.hasNext()) {
+            PExp fact = myFacts.next().substitute(myAssumedBindings);
+
+            try {
+                myCurrentIncrementalBindings = myPattern.bindTo(fact);
+            }
+            catch (BindingException e) {
+
+            }
+        }
+    }
+
+    @Override
+    public boolean hasNext() {
+        return myCurrentIncrementalBindings != null;
+    }
+
+    @Override
+    public Map<PExp, PExp> next() {
+        Map<PExp, PExp> retval = new HashMap<PExp, PExp>();
+
+        //TODO : Might be good, eventually, to have a "chaining map" that makes
+        //       this a constant-time operation
+        retval.putAll(myCurrentIncrementalBindings);
+        retval.putAll(myAssumedBindings);
+
+        setUpNext();
+
+        return retval;
+    }
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException();
+    }
 
 }

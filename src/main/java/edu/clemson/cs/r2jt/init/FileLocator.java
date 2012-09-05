@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,23 +34,23 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 
 /*
  * ModuleLocator.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -70,8 +70,10 @@ public class FileLocator {
     // ===========================================================
     // Constructors
     // ===========================================================
-    
-    public FileLocator() { ; }
+
+    public FileLocator() {
+        ;
+    }
 
     // ===========================================================
     // Public Methods
@@ -85,17 +87,18 @@ public class FileLocator {
      * multi-files-found exception is thrown.
      */
     public File locateFileInTree(String name, File dir)
-        throws FileLocatorException
-    {
+            throws FileLocatorException {
         List<File> files = recursivelyLocateFiles(name, dir);
         if (files.size() == 0) {
             String msg = noFileMessage(name, dir.getName());
             throw new FileLocatorException(msg);
-        } else if (files.size() == 1) {
+        }
+        else if (files.size() == 1) {
             return files.get(0);
-        } else { // files.size() > 1
-            String msg = multiFilesMessage(name, dir.getName(),
-                                           files.toString());
+        }
+        else { // files.size() > 1
+            String msg =
+                    multiFilesMessage(name, dir.getName(), files.toString());
             throw new FileLocatorException(msg);
         }
     }
@@ -108,9 +111,7 @@ public class FileLocator {
      * found, a multi-files-found exception is thrown.
      */
     public File locateFileInTree(String name1, String name2, String name3,
-                                 File dir)
-        throws FileLocatorException
-    {
+            File dir) throws FileLocatorException {
         List<File> files = new List<File>();
         files.addAll(recursivelyLocateFiles(name1, dir));
         files.addAll(recursivelyLocateFiles(name2, dir));
@@ -118,11 +119,14 @@ public class FileLocator {
         if (files.size() == 0) {
             String msg = noFileMessage3(name1, name2, name3, dir.getName());
             throw new FileLocatorException(msg);
-        } else if (files.size() == 1) {
+        }
+        else if (files.size() == 1) {
             return files.get(0);
-        } else { // files.size() > 1
-            String msg = multiFilesMessage3(name1, name2, name3, dir.getName(),
-                                            files.toString());
+        }
+        else { // files.size() > 1
+            String msg =
+                    multiFilesMessage3(name1, name2, name3, dir.getName(),
+                            files.toString());
             throw new FileLocatorException(msg);
         }
     }
@@ -133,8 +137,7 @@ public class FileLocator {
      * file-not-found exception is thrown.
      */
     public File locateFileInDir(String name, File dir)
-        throws FileLocatorException
-    {
+            throws FileLocatorException {
         //System.out.println("locating: "+name+" : "+dir.getAbsolutePath());
         File resultFile = null;
         File[] fileArray = dir.listFiles();
@@ -155,7 +158,8 @@ public class FileLocator {
         if (resultFile == null) {
             String msg = noFileInDirMessage(name, dir.getName());
             throw new FileLocatorException(msg);
-        } else {
+        }
+        else {
             return resultFile;
         }
     }
@@ -177,7 +181,8 @@ public class FileLocator {
             File file = i.next();
             if (file.isDirectory()) {
                 resultFiles.addAll(recursivelyLocateFiles(name, file));
-            } else if (file.getName().equals(name)) {
+            }
+            else if (file.getName().equals(name)) {
                 resultFiles.add(file);
             }
         }
@@ -189,37 +194,42 @@ public class FileLocator {
     // -----------------------------------------------------------
 
     private String noFileMessage(String name, String dir) {
-        String msg = "Could not find a file with name " + name
-            + " in the directory " + dir + " or any of its subdirectories.";
+        String msg =
+                "Could not find a file with name " + name
+                        + " in the directory " + dir
+                        + " or any of its subdirectories.";
         return msg;
     }
 
     private String multiFilesMessage(String name, String dir, String files) {
-        String msg = "Found multiple files with name " + name
-            + " in the directory " + dir + " or its subdirectories: "
-            + files;
+        String msg =
+                "Found multiple files with name " + name + " in the directory "
+                        + dir + " or its subdirectories: " + files;
         return msg;
     }
 
     private String noFileInDirMessage(String name, String dir) {
-        String msg = "Could not find a file with name " + name
-            + " in the directory " + dir + ".";
+        String msg =
+                "Could not find a file with name " + name
+                        + " in the directory " + dir + ".";
         return msg;
     }
 
-    private String noFileMessage3(String name1, String name2,
-                                  String name3, String dir) {
-        String msg = "Could not find a file with name " + name1
-            + " or " + name2 + " or " + name3 + " in the directory " + dir
-            + " or any of its subdirectories.";
+    private String noFileMessage3(String name1, String name2, String name3,
+            String dir) {
+        String msg =
+                "Could not find a file with name " + name1 + " or " + name2
+                        + " or " + name3 + " in the directory " + dir
+                        + " or any of its subdirectories.";
         return msg;
     }
 
     private String multiFilesMessage3(String name1, String name2, String name3,
-                                      String dir, String files) {
-        String msg = "Found multiple files with name " + name1
-            + " or " + name2 + " or " + name3 + " in the directory " + dir
-            + " or its subdirectories: " + files;
+            String dir, String files) {
+        String msg =
+                "Found multiple files with name " + name1 + " or " + name2
+                        + " or " + name3 + " in the directory " + dir
+                        + " or its subdirectories: " + files;
         return msg;
     }
 

@@ -12,102 +12,104 @@ import edu.clemson.cs.r2jt.init.CompileEnvironment;
  */
 
 public class MetaFile {
-	private String myFileName;
-	private String myAssocConcept;
-	private String myPkg;
-	private String myFileSource;
-	private ModuleKind myKind;
-        private boolean myCustom;
-        private String myCustomPath;
-	
-	public MetaFile(String fileName, String assocConcept, String pkg, String fileSource, ModuleKind kind){
-		myFileName = fileName;
-		myAssocConcept = assocConcept;
-		myPkg = pkg;
-		myFileSource = fileSource;
-		myKind = kind;
-                myCustom = false;
-	}
 
-	public void setMyFileName(String myFileName) {
-		this.myFileName = myFileName;
-	}
+    private String myFileName;
+    private String myAssocConcept;
+    private String myPkg;
+    private String myFileSource;
+    private ModuleKind myKind;
+    private boolean myCustom;
+    private String myCustomPath;
 
-	public void setMyAssocConcept(String myAssocConcept) {
-		this.myAssocConcept = myAssocConcept;
-	}
+    public MetaFile(String fileName, String assocConcept, String pkg,
+            String fileSource, ModuleKind kind) {
+        myFileName = fileName;
+        myAssocConcept = assocConcept;
+        myPkg = pkg;
+        myFileSource = fileSource;
+        myKind = kind;
+        myCustom = false;
+    }
 
-	public void setMyPkg(String pkg) {
-		this.myPkg = pkg;
-	}
+    public void setMyFileName(String myFileName) {
+        this.myFileName = myFileName;
+    }
 
-	public void setMyFileSource(String myFileSource) {
-		this.myFileSource = myFileSource;
-	}
-        
-        public void setIsCustomLoc(){
-                myCustom = true;
+    public void setMyAssocConcept(String myAssocConcept) {
+        this.myAssocConcept = myAssocConcept;
+    }
+
+    public void setMyPkg(String pkg) {
+        this.myPkg = pkg;
+    }
+
+    public void setMyFileSource(String myFileSource) {
+        this.myFileSource = myFileSource;
+    }
+
+    public void setIsCustomLoc() {
+        myCustom = true;
+    }
+
+    public void setMyCustomPath(String customPath) {
+        myCustomPath = customPath;
+    }
+
+    /*public void setMyKind(ModuleKind myKind) {
+    	this.myKind = myKind;
+    }*/
+
+    public String getMyFileName() {
+        return myFileName;
+    }
+
+    public String getMyAssocConcept() {
+        return myAssocConcept;
+    }
+
+    public String getMyPkg() {
+        return myPkg;
+    }
+
+    public String getMyFileSource() {
+        return myFileSource;
+    }
+
+    public ModuleKind getMyKind() {
+        return myKind;
+    }
+
+    public boolean getIsCustomLoc() {
+        return myCustom;
+    }
+
+    public File getMyCustomFile() {
+        String filePath = myCustomPath;
+        if (myKind.equals(ModuleKind.FACILITY)) {
+            filePath += File.separator + "Facilities" + File.separator;
         }
-        
-        public void setMyCustomPath(String customPath){
-                myCustomPath = customPath;
+        else {
+            filePath += File.separator + "Concepts" + File.separator;
         }
+        filePath += myPkg + File.separator + myFileName + myKind.getExtension();
+        return new File(filePath);
+    }
 
-	/*public void setMyKind(ModuleKind myKind) {
-		this.myKind = myKind;
-	}*/
-	
-	public String getMyFileName() {
-		return myFileName;
-	}
-
-	public String getMyAssocConcept() {
-		return myAssocConcept;
-	}
-
-	public String getMyPkg() {
-		return myPkg;
-	}
-
-	public String getMyFileSource() {
-		return myFileSource;
-	}
-
-	public ModuleKind getMyKind() {
-		return myKind;
-	}
-        
-        public boolean getIsCustomLoc(){
-            return myCustom;
+    public File getMyFile(File mainDir) {
+        String filePath = mainDir.getAbsolutePath();
+        if (myKind.equals(ModuleKind.FACILITY)) {
+            filePath += File.separator + "Facilities" + File.separator;
         }
-        
-        public File getMyCustomFile(){
-                String filePath = myCustomPath;
-		if(myKind.equals(ModuleKind.FACILITY)){
-			filePath += File.separator + "Facilities" + File.separator;
-		}
-		else{
-			filePath += File.separator + "Concepts" + File.separator;
-		}
-		filePath += myPkg + File.separator + myFileName + myKind.getExtension();
-		return new File(filePath);
+        else {
+            filePath += File.separator + "Concepts" + File.separator;
         }
-	
-	public File getMyFile(File mainDir){
-		String filePath = mainDir.getAbsolutePath();
-		if(myKind.equals(ModuleKind.FACILITY)){
-			filePath += File.separator + "Facilities" + File.separator;
-		}
-		else{
-			filePath += File.separator + "Concepts" + File.separator;
-		}
-                if(myPkg.equals("Static_Array_Template")){
-                    myPkg = "Standard" + File.separator + "Static_Array_Template";
-                }
-                else if(myPkg.equals("Location_Linking_Template_1")){
-                    myPkg = "Standard" + File.separator + "Location_Linking_Template_1";
-                }
-		filePath += myPkg + File.separator + myFileName + myKind.getExtension();
-		return new File(filePath);
-	}
+        if (myPkg.equals("Static_Array_Template")) {
+            myPkg = "Standard" + File.separator + "Static_Array_Template";
+        }
+        else if (myPkg.equals("Location_Linking_Template_1")) {
+            myPkg = "Standard" + File.separator + "Location_Linking_Template_1";
+        }
+        filePath += myPkg + File.separator + myFileName + myKind.getExtension();
+        return new File(filePath);
+    }
 }

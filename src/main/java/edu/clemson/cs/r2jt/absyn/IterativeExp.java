@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * IterativeExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -105,20 +105,15 @@ public class IterativeExp extends Exp {
 
     public IterativeExp() {};
 
-    public IterativeExp(
-            Location location,
-            int operator,
-            MathVarDec var,
-            Exp where,
-            Exp body)
-    {
+    public IterativeExp(Location location, int operator, MathVarDec var,
+            Exp where, Exp body) {
         this.location = location;
         this.operator = operator;
         this.var = var;
         this.where = where;
         this.body = body;
     }
-    
+
     // ===========================================================
     // Accessor Methods
     // ===========================================================
@@ -128,57 +123,75 @@ public class IterativeExp extends Exp {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the operator variable. */
-    public int getOperator() { return operator; }
+    public int getOperator() {
+        return operator;
+    }
 
     /** Returns the value of the var variable. */
-    public MathVarDec getVar() { return var; }
+    public MathVarDec getVar() {
+        return var;
+    }
 
     /** Returns the value of the where variable. */
-    public Exp getWhere() { return where; }
+    public Exp getWhere() {
+        return where;
+    }
 
     /** Returns the value of the body variable. */
-    public Exp getBody() { return body; }
+    public Exp getBody() {
+        return body;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the operator variable to the specified value. */
-    public void setOperator(int operator) { this.operator = operator; }
+    public void setOperator(int operator) {
+        this.operator = operator;
+    }
 
     /** Sets the var variable to the specified value. */
-    public void setVar(MathVarDec var) { this.var = var; }
+    public void setVar(MathVarDec var) {
+        this.var = var;
+    }
 
     /** Sets the where variable to the specified value. */
-    public void setWhere(Exp where) { this.where = where; }
+    public void setWhere(Exp where) {
+        this.where = where;
+    }
 
     /** Sets the body variable to the specified value. */
-    public void setBody(Exp body) { this.body = body; }
+    public void setBody(Exp body) {
+        this.body = body;
+    }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
-    
+
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	return new IterativeExp(location, operator, var,
-    			substitute(where, substitutions), 
-    			substitute(body, substitutions));
+        return new IterativeExp(location, operator, var, substitute(where,
+                substitutions), substitute(body, substitutions));
     }
-    
+
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitIterativeExp(this);
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getIterativeExpType(this);
     }
 
@@ -190,19 +203,19 @@ public class IterativeExp extends Exp {
         printSpace(indent, sb);
         sb.append("IterativeExp\n");
 
-        printSpace(indent+increment, sb);
+        printSpace(indent + increment, sb);
         sb.append(printConstant(operator) + "\n");
 
         if (var != null) {
-            sb.append(var.asString(indent+increment,increment));
+            sb.append(var.asString(indent + increment, increment));
         }
 
         if (where != null) {
-            sb.append(where.asString(indent+increment,increment));
+            sb.append(where.asString(indent + increment, increment));
         }
 
         if (body != null) {
-            sb.append(body.asString(indent+increment,increment));
+            sb.append(body.asString(indent + increment, increment));
         }
 
         return sb.toString();
@@ -211,129 +224,148 @@ public class IterativeExp extends Exp {
     /** Returns true if the variable is found in any sub expression   
         of this one. **/
     public boolean containsVar(String varName, boolean IsOldExp) {
-    	Boolean found = false;
-    	if(where != null) {
-    		found = where.containsVar(varName,IsOldExp);
-    	}
-    	if(!found && body != null) {
-    		found = body.containsVar(varName,IsOldExp);
-    	}
+        Boolean found = false;
+        if (where != null) {
+            found = where.containsVar(varName, IsOldExp);
+        }
+        if (!found && body != null) {
+            found = body.containsVar(varName, IsOldExp);
+        }
         return found;
     }
 
     private String printConstant(int k) {
         StringBuffer sb = new StringBuffer();
-        switch(k) {
-        case 1: sb.append("SUM"); break;
-        case 2: sb.append("PRODUCT"); break;
-        case 3: sb.append("CONCATENATION"); break;
-        case 4: sb.append("UNION"); break;
-        case 5: sb.append("INTERSECTION"); break;
-        default: sb.append(k);
+        switch (k) {
+        case 1:
+            sb.append("SUM");
+            break;
+        case 2:
+            sb.append("PRODUCT");
+            break;
+        case 3:
+            sb.append("CONCATENATION");
+            break;
+        case 4:
+            sb.append("UNION");
+            break;
+        case 5:
+            sb.append("INTERSECTION");
+            break;
+        default:
+            sb.append(k);
         }
         return sb.toString();
     }
-    
+
     public List<Exp> getSubExpressions() {
-    	List<Exp> list = new List<Exp>();
-    	list.add(where);
-    	list.add(body);
-    	return list;
+        List<Exp> list = new List<Exp>();
+        list.add(where);
+        list.add(body);
+        return list;
     }
-    
+
     public void setSubExpression(int index, Exp e) {
-    	switch (index) {
-    	case 0:
-    		where = e;
-    		break;
-    	case 1:
-    		body = e;
-    		break;
-    	}
+        switch (index) {
+        case 0:
+            where = e;
+            break;
+        case 1:
+            body = e;
+            break;
+        }
     }
-    
+
     public boolean shallowCompare(Exp e2) {
-    	if(!(e2 instanceof IterativeExp)) {
-    		return false;
-    	}
-    	if(operator != ((IterativeExp)e2).getOperator()) {
-    		return false;
-    	}
-    	return true;
+        if (!(e2 instanceof IterativeExp)) {
+            return false;
+        }
+        if (operator != ((IterativeExp) e2).getOperator()) {
+            return false;
+        }
+        return true;
     }
-    
+
     public String toString(int indent) {
-    	
+
         StringBuffer sb = new StringBuffer();
 
         printSpace(indent, sb);
 
-        
-    	if(operator == SUM) sb.append("Sum ");
-    	else if(operator == PRODUCT) sb.append("Product ");
-    	else if(operator == CONCATENATION) sb.append("Concatenation ");
-    	else if(operator == UNION) sb.append("Union ");
-    	else sb.append("Intersection ");
-    	sb.append(var.toString(0) + " where ");
+        if (operator == SUM)
+            sb.append("Sum ");
+        else if (operator == PRODUCT)
+            sb.append("Product ");
+        else if (operator == CONCATENATION)
+            sb.append("Concatenation ");
+        else if (operator == UNION)
+            sb.append("Union ");
+        else
+            sb.append("Intersection ");
+        sb.append(var.toString(0) + " where ");
 
-    	sb.append(where.toString(0) + ", ");  
-    	sb.append(body.toString(0));
-    	
-    	return sb.toString();
+        sb.append(where.toString(0) + ", ");
+        sb.append(body.toString(0));
+
+        return sb.toString();
 
     }
-    
+
     public void prettyPrint() {
-    	if(operator == SUM) System.out.print("Sum ");
-    	else if(operator == PRODUCT) System.out.print("Product ");
-    	else if(operator == CONCATENATION) System.out.print("Concatenation ");
-    	else if(operator == UNION) System.out.print("Union ");
-    	else System.out.print("Intersection ");
-    	var.prettyPrint();
-    	System.out.print(", ");
-    	where.prettyPrint();
-    	System.out.print(", ");
-    	body.prettyPrint();
+        if (operator == SUM)
+            System.out.print("Sum ");
+        else if (operator == PRODUCT)
+            System.out.print("Product ");
+        else if (operator == CONCATENATION)
+            System.out.print("Concatenation ");
+        else if (operator == UNION)
+            System.out.print("Union ");
+        else
+            System.out.print("Intersection ");
+        var.prettyPrint();
+        System.out.print(", ");
+        where.prettyPrint();
+        System.out.print(", ");
+        body.prettyPrint();
     }
-    
-    public Exp copy() {
-    	int newOperator = operator;
-    	MathVarDec newVar = var.copy();
-    	Exp newWhere = null;
-    	if(where != null) newWhere = where.copy();
-    	Exp newBody = body.copy();
-    	return new IterativeExp(null, newOperator, newVar, newWhere, newBody);
-    }
-    
-    
-    public Exp clone() {
-    	int newOperator = operator;
-    	MathVarDec newVar = (MathVarDec)var.clone();
-    	Exp newWhere = null;
-    	if(where != null) newWhere = (Exp)where.clone();
-    	Exp newBody = (Exp)body.clone();
-    	return new IterativeExp(null, newOperator, newVar, newWhere, newBody);
-    }
-    
-    
-    public Exp replace(Exp old, Exp replacement){
-    	if(!(old instanceof QuantExp)){
-    		if(where != null){
-    			Exp whr = where.replace(old, replacement);
-        		if(whr != null)
-        			this.setWhere(whr); 
-    		}
-    		if(body != null){
-    			Exp bdy = body.replace(old, replacement);
-    			if (bdy != null)
-    				this.setBody(bdy);
-    			String str = bdy.toString(0, 0);
-    		}
-    		return this;
-    	}
-    	else 
-    		return this;
-    }
-    
-}
 
+    public Exp copy() {
+        int newOperator = operator;
+        MathVarDec newVar = var.copy();
+        Exp newWhere = null;
+        if (where != null)
+            newWhere = where.copy();
+        Exp newBody = body.copy();
+        return new IterativeExp(null, newOperator, newVar, newWhere, newBody);
+    }
+
+    public Exp clone() {
+        int newOperator = operator;
+        MathVarDec newVar = (MathVarDec) var.clone();
+        Exp newWhere = null;
+        if (where != null)
+            newWhere = (Exp) where.clone();
+        Exp newBody = (Exp) body.clone();
+        return new IterativeExp(null, newOperator, newVar, newWhere, newBody);
+    }
+
+    public Exp replace(Exp old, Exp replacement) {
+        if (!(old instanceof QuantExp)) {
+            if (where != null) {
+                Exp whr = where.replace(old, replacement);
+                if (whr != null)
+                    this.setWhere(whr);
+            }
+            if (body != null) {
+                Exp bdy = body.replace(old, replacement);
+                if (bdy != null)
+                    this.setBody(bdy);
+                String str = bdy.toString(0, 0);
+            }
+            return this;
+        }
+        else
+            return this;
+    }
+
+}

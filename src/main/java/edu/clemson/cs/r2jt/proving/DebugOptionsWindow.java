@@ -12,20 +12,20 @@ import javax.swing.JFrame;
 
 public class DebugOptionsWindow extends JDialog implements ItemListener {
 
-	private JCheckBox myBindDebugBox = new JCheckBox("Bind Debug");
-	
-	public DebugOptionsWindow(Window parent) {
-		super(parent, Dialog.ModalityType.MODELESS);
-		setTitle("Debug Options");
-		add(myBindDebugBox);
-		myBindDebugBox.addItemListener(this);
-		pack();
-		setVisible(true);
-	}
+    private JCheckBox myBindDebugBox = new JCheckBox("Bind Debug");
 
-	public void itemStateChanged(ItemEvent arg0) {
-		if (arg0.getSource() == myBindDebugBox) {
-			Utilities.setBindDebugFlag(myBindDebugBox.getModel().isSelected());
-		}
-	}
+    public DebugOptionsWindow(Window parent) {
+        super(parent, Dialog.ModalityType.MODELESS);
+        setTitle("Debug Options");
+        add(myBindDebugBox);
+        myBindDebugBox.addItemListener(this);
+        pack();
+        setVisible(true);
+    }
+
+    public void itemStateChanged(ItemEvent arg0) {
+        if (arg0.getSource() == myBindDebugBox) {
+            Utilities.setBindDebugFlag(myBindDebugBox.getModel().isSelected());
+        }
+    }
 }

@@ -4,28 +4,27 @@ import java.util.Iterator;
 
 public class ConsequentWeakeningStep implements VCTransformer {
 
-    private final ConsequentConjunctWeakeningTransformer 
-    		myConsequentTransformer;
-    
+    private final ConsequentConjunctWeakeningTransformer myConsequentTransformer;
+
     private final boolean myIntroducesQuantifiedVariablesFlag;
 
     public ConsequentWeakeningStep(Antecedent theoremAntecedent,
             Consequent theoremConsequent) {
 
-    	myIntroducesQuantifiedVariablesFlag = 
-    		theoremConsequent.containsQuantifiedVariableNotIn(
-    				theoremAntecedent);
-    	
+        myIntroducesQuantifiedVariablesFlag =
+                theoremConsequent
+                        .containsQuantifiedVariableNotIn(theoremAntecedent);
+
         myConsequentTransformer =
                 new ConsequentConjunctWeakeningTransformer(theoremAntecedent,
-                theoremConsequent);
+                        theoremConsequent);
     }
 
     @Override
     public Iterator<VC> transform(VC original) {
-        return new StaticAntecedentIterator(original.getSourceName(),
-                original.getAntecedent(),
-                myConsequentTransformer.transform(original.getConsequent()));
+        return new StaticAntecedentIterator(original.getSourceName(), original
+                .getAntecedent(), myConsequentTransformer.transform(original
+                .getConsequent()));
     }
 
     @Override
@@ -43,8 +42,8 @@ public class ConsequentWeakeningStep implements VCTransformer {
         return myConsequentTransformer.getTheoremConsequent();
     }
 
-	@Override
-	public boolean introducesQuantifiedVariables() {
-		return myIntroducesQuantifiedVariablesFlag;
-	}
+    @Override
+    public boolean introducesQuantifiedVariables() {
+        return myIntroducesQuantifiedVariablesFlag;
+    }
 }

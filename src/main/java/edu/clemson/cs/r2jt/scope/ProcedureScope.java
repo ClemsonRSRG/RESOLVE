@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * ProcedureScope.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -78,10 +78,9 @@ public class ProcedureScope extends Scope {
 
     private List<Entry> parameters = new List<Entry>();
 
-    private Map<Symbol, ModuleEntry> facilities
-        = new Map<Symbol, ModuleEntry>();
-    private Map<Symbol, VarEntry> variables
-        = new Map<Symbol, VarEntry>();
+    private Map<Symbol, ModuleEntry> facilities =
+            new Map<Symbol, ModuleEntry>();
+    private Map<Symbol, VarEntry> variables = new Map<Symbol, VarEntry>();
 
     private Binding binding = null;
 
@@ -89,7 +88,8 @@ public class ProcedureScope extends Scope {
     // Constructors
     // ===========================================================
 
-    public ProcedureScope(ModuleScope scope, ScopeID sid, CompileEnvironment instanceEnvironment) {
+    public ProcedureScope(ModuleScope scope, ScopeID sid,
+            CompileEnvironment instanceEnvironment) {
         this.sid = sid;
         this.moduleScope = scope;
         binding = new Binding(this, instanceEnvironment);
@@ -99,9 +99,13 @@ public class ProcedureScope extends Scope {
     // Public Methods
     // ===========================================================
 
-    public ScopeID getScopeID() { return sid; }
+    public ScopeID getScopeID() {
+        return sid;
+    }
 
-    public ModuleScope getModuleScope() { return moduleScope; }
+    public ModuleScope getModuleScope() {
+        return moduleScope;
+    }
 
     // -----------------------------------------------------------
     // Import Methods
@@ -130,10 +134,10 @@ public class ProcedureScope extends Scope {
     // -----------------------------------------------------------
 
     public boolean addPermitted(Symbol sym) {
-        if (  facilities.containsKey(sym) ||
-              variables.containsKey(sym)) {
+        if (facilities.containsKey(sym) || variables.containsKey(sym)) {
             return false;
-        } else {
+        }
+        else {
             return true;
         }
     }
@@ -141,9 +145,11 @@ public class ProcedureScope extends Scope {
     public Entry getAddObstructor(Symbol sym) {
         if (facilities.containsKey(sym)) {
             return facilities.get(sym);
-        } else if (variables.containsKey(sym)) {
+        }
+        else if (variables.containsKey(sym)) {
             return variables.get(sym);
-        } else {
+        }
+        else {
             assert false : "getAddObstructor failed";
             return null;
         }
@@ -156,8 +162,6 @@ public class ProcedureScope extends Scope {
     public void addVariable(VarEntry entry) {
         variables.put(entry.getSymbol(), entry);
     }
-    
-  
 
     // -----------------------------------------------------------
     // Get Entry Methods
@@ -186,7 +190,9 @@ public class ProcedureScope extends Scope {
     // Get Binding Method
     // -----------------------------------------------------------
 
-    public Binding getBinding() { return binding; }
+    public Binding getBinding() {
+        return binding;
+    }
 
     // -----------------------------------------------------------
     // To String Method
@@ -207,6 +213,5 @@ public class ProcedureScope extends Scope {
         sb.append("----- end procedure scope ---------------------------\n");
         return sb.toString();
     }
-        
 
 }

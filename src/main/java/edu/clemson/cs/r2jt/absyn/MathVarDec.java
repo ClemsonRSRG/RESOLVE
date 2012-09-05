@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * MathVarDec.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -76,7 +76,7 @@ public class MathVarDec extends Dec {
 
     /** The ty member. */
     private Ty ty;
-    
+
     private boolean confirm = false;
 
     // ===========================================================
@@ -85,10 +85,7 @@ public class MathVarDec extends Dec {
 
     public MathVarDec() {};
 
-    public MathVarDec(
-            PosSymbol name,
-            Ty ty)
-    {
+    public MathVarDec(PosSymbol name, Ty ty) {
         this.name = name;
         this.ty = ty;
     }
@@ -102,24 +99,36 @@ public class MathVarDec extends Dec {
     // -----------------------------------------------------------
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the ty variable. */
-    public Ty getTy() { return ty; }
-    
-    public boolean getConfirm() { return confirm; }
+    public Ty getTy() {
+        return ty;
+    }
+
+    public boolean getConfirm() {
+        return confirm;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the ty variable to the specified value. */
-    public void setTy(Ty ty) { this.ty = ty; }
-    
-    public void setConfirm(boolean confirm) { this.confirm = confirm; }
+    public void setTy(Ty ty) {
+        this.ty = ty;
+    }
+
+    public void setConfirm(boolean confirm) {
+        this.confirm = confirm;
+    }
 
     // ===========================================================
     // Public Methods
@@ -139,46 +148,44 @@ public class MathVarDec extends Dec {
         sb.append("MathVarDec\n");
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         if (ty != null) {
-            sb.append(ty.asString(indent+increment,increment));
+            sb.append(ty.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
-    
+
     public String toString(int indent) {
-    	//Environment   env	= Environment.getInstance();
-    	//if(env.isabelle()){return toIsabelleString(indent);};
-    	
+        //Environment   env	= Environment.getInstance();
+        //if(env.isabelle()){return toIsabelleString(indent);};
+
         String str = new String();
-        
+
         if (name != null) {
-			String strName = name.toString();	  
-			int index = 0;
-        	int num = 0;
-        	while((strName.charAt(index))== '?'){
-        		num++;
-        		index++;
-        	}
-        	str = str.concat(strName.substring(index, strName.length()));
-        	for(int i=0;i<num;i++){ 
-        		str = str.concat("'");
-        	}
+            String strName = name.toString();
+            int index = 0;
+            int num = 0;
+            while ((strName.charAt(index)) == '?') {
+                num++;
+                index++;
+            }
+            str = str.concat(strName.substring(index, strName.length()));
+            for (int i = 0; i < num; i++) {
+                str = str.concat("'");
+            }
         }
-        
-        
+
         str = str.concat(":");
-        if(ty instanceof NameTy)
-        	str = str.concat(((NameTy)ty).getName().toString());
+        if (ty instanceof NameTy)
+            str = str.concat(((NameTy) ty).getName().toString());
         else
-        	str = str.concat(ty.toString(0));
-        return str;    
+            str = str.concat(ty.toString(0));
+        return str;
     }
-    
-    
+
     /*public String toIsabelleString(int indent) {
        
         VarExp tmp = new VarExp(null, null, name);
@@ -190,16 +197,16 @@ public class MathVarDec extends Dec {
         	str = str.concat(ty.toString(0));
         return str;    
     }*/
-    
+
     public void prettyPrint() {
-    	System.out.print(name.getName() + ": ");
-    	ty.prettyPrint();
+        System.out.print(name.getName() + ": ");
+        ty.prettyPrint();
     }
-    
+
     public MathVarDec copy() {
-    	PosSymbol newName = name.copy();
-    	Ty newTy = ty.copy();
-    	return new MathVarDec(newName, newTy);
+        PosSymbol newName = name.copy();
+        Ty newTy = ty.copy();
+        return new MathVarDec(newName, newTy);
     }
 
 }

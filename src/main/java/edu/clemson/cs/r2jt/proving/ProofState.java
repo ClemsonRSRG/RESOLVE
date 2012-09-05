@@ -7,11 +7,12 @@ package edu.clemson.cs.r2jt.proving;
  * the proof process so far.</p>
  */
 public class ProofState {
-	public final VC vc;
-	public final ProofData data;
-	
-	public ProofState(VC vc, ProofData data) {
-		this.vc = vc;
-		this.data = data;
-	}
+
+    public final VC vc;
+    public final ProofData data;
+
+    public ProofState(VC vc, ProofData data) {
+        this.vc = vc;
+        this.data = data;
+    }
 }

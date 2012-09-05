@@ -9,44 +9,45 @@ import java.util.Iterator;
  */
 public class TetheredTransformationChooser implements TransformationChooser {
 
-	private static final Iterator<ProofPathSuggestion> 
-			TYPE_SAFE_ITERATOR = null;
-	
-	private final TransformationChooser mySourceChooser;
-	private final int myMaxDepth;
-	
-	public TetheredTransformationChooser(TransformationChooser sourceChooser,
-			int maxDepth) {
-		
-		mySourceChooser = sourceChooser;
-		myMaxDepth = maxDepth;
-	}
-	
-	@Override
-	public void preoptimizeForVC(VC vc) {
-		mySourceChooser.preoptimizeForVC(vc);
-	}
+    private static final Iterator<ProofPathSuggestion> TYPE_SAFE_ITERATOR =
+            null;
 
-	@Override
-	public Iterator<ProofPathSuggestion> suggestTransformations(VC vc, 
-			int curLength, Metrics metrics, ProofData d) {
-		
-		Iterator<ProofPathSuggestion> retval;
-		
-		if (curLength >= myMaxDepth) {
-			retval = DummyIterator.getInstance(TYPE_SAFE_ITERATOR);
-		}
-		else {
-			retval = mySourceChooser.suggestTransformations(vc, curLength, 
-					metrics, d);
-		}
-		
-		return retval;
-	}
+    private final TransformationChooser mySourceChooser;
+    private final int myMaxDepth;
 
-	@Override
-	public String toString() {
-		return "Tethered(" + mySourceChooser + ", tethered to " + myMaxDepth + 
-				" steps.)";
-	}
+    public TetheredTransformationChooser(TransformationChooser sourceChooser,
+            int maxDepth) {
+
+        mySourceChooser = sourceChooser;
+        myMaxDepth = maxDepth;
+    }
+
+    @Override
+    public void preoptimizeForVC(VC vc) {
+        mySourceChooser.preoptimizeForVC(vc);
+    }
+
+    @Override
+    public Iterator<ProofPathSuggestion> suggestTransformations(VC vc,
+            int curLength, Metrics metrics, ProofData d) {
+
+        Iterator<ProofPathSuggestion> retval;
+
+        if (curLength >= myMaxDepth) {
+            retval = DummyIterator.getInstance(TYPE_SAFE_ITERATOR);
+        }
+        else {
+            retval =
+                    mySourceChooser.suggestTransformations(vc, curLength,
+                            metrics, d);
+        }
+
+        return retval;
+    }
+
+    @Override
+    public String toString() {
+        return "Tethered(" + mySourceChooser + ", tethered to " + myMaxDepth
+                + " steps.)";
+    }
 }

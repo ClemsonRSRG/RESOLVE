@@ -33,13 +33,17 @@ public class ExistentialInstantiationStep implements VCTransformer {
         for (PExp e : original.getConsequent()) {
 
             if (e.containsExistential()) {
-                soFar = new ChainingIterator<VC>(soFar,
-                        new StaticAntecedentIterator(original.getSourceName(),
-                            originalAntecedent,
-                            new SingleExistentialInstantiator(e,
-                                originalAntecedent,
-                                originalConsequent.removed(
-                                    consequentIndex))));
+                soFar =
+                        new ChainingIterator<VC>(
+                                soFar,
+                                new StaticAntecedentIterator(
+                                        original.getSourceName(),
+                                        originalAntecedent,
+                                        new SingleExistentialInstantiator(
+                                                e,
+                                                originalAntecedent,
+                                                originalConsequent
+                                                        .removed(consequentIndex))));
             }
 
             consequentIndex++;
@@ -58,8 +62,7 @@ public class ExistentialInstantiationStep implements VCTransformer {
         throw new UnsupportedOperationException("Not applicable.");
     }
 
-    private class SingleExistentialInstantiator
-            implements Iterator<Consequent> {
+    private class SingleExistentialInstantiator implements Iterator<Consequent> {
 
         private final PExp myExistential;
         private final Consequent myOriginal;
@@ -70,8 +73,9 @@ public class ExistentialInstantiationStep implements VCTransformer {
                 Antecedent vcAntecedent, Consequent remainingConsequent) {
             myExistential = existentialExpression;
             myOriginal = remainingConsequent;
-            myFactIterator = new ChainingIterator<PExp>(vcAntecedent.iterator(),
-                    myGlobalFacts.iterator());
+            myFactIterator =
+                    new ChainingIterator<PExp>(vcAntecedent.iterator(),
+                            myGlobalFacts.iterator());
 
             setUpNext();
         }
@@ -85,8 +89,8 @@ public class ExistentialInstantiationStep implements VCTransformer {
 
                 try {
                     binding = myExistential.bindTo(curFact);
-                } catch (BindingException e) {
                 }
+                catch (BindingException e) {}
             }
 
             if (binding != null) {
@@ -122,8 +126,8 @@ public class ExistentialInstantiationStep implements VCTransformer {
         return "Bind Existential";
     }
 
-	@Override
-	public boolean introducesQuantifiedVariables() {
-		return false;
-	}
+    @Override
+    public boolean introducesQuantifiedVariables() {
+        return false;
+    }
 }

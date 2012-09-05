@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * ProofScope.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -77,14 +77,12 @@ public class ProofScope extends Scope {
 
     private ModuleScope moduleScope = null;
 
-    private Map<Symbol, ModuleEntry> facilities
-        = new Map<Symbol, ModuleEntry>();
-    private Map<Symbol, VarEntry> variables
-        = new Map<Symbol, VarEntry>();
-    private Map<Symbol, DefinitionEntry> definitions
-        = new Map<Symbol, DefinitionEntry>();
-    private Map<Symbol, TypeEntry> types
-    = new Map<Symbol, TypeEntry>();
+    private Map<Symbol, ModuleEntry> facilities =
+            new Map<Symbol, ModuleEntry>();
+    private Map<Symbol, VarEntry> variables = new Map<Symbol, VarEntry>();
+    private Map<Symbol, DefinitionEntry> definitions =
+            new Map<Symbol, DefinitionEntry>();
+    private Map<Symbol, TypeEntry> types = new Map<Symbol, TypeEntry>();
 
     private Binding binding = null;
 
@@ -92,7 +90,8 @@ public class ProofScope extends Scope {
     // Constructors
     // ===========================================================
 
-    public ProofScope(ModuleScope scope, ScopeID sid, CompileEnvironment instanceEnvironment) {
+    public ProofScope(ModuleScope scope, ScopeID sid,
+            CompileEnvironment instanceEnvironment) {
         this.sid = sid;
         this.moduleScope = scope;
         binding = new Binding(this, instanceEnvironment);
@@ -102,9 +101,13 @@ public class ProofScope extends Scope {
     // Public Methods
     // ===========================================================
 
-    public ScopeID getScopeID() { return sid; }
+    public ScopeID getScopeID() {
+        return sid;
+    }
 
-    public ModuleScope getModuleScope() { return moduleScope; }
+    public ModuleScope getModuleScope() {
+        return moduleScope;
+    }
 
     // -----------------------------------------------------------
     // Import Methods
@@ -133,11 +136,11 @@ public class ProofScope extends Scope {
     // -----------------------------------------------------------
 
     public boolean addPermitted(Symbol sym) {
-        if (  facilities.containsKey(sym) ||
-              variables.containsKey(sym) ||
-              definitions.containsKey(sym)) {
+        if (facilities.containsKey(sym) || variables.containsKey(sym)
+                || definitions.containsKey(sym)) {
             return false;
-        } else {
+        }
+        else {
             return true;
         }
     }
@@ -145,11 +148,14 @@ public class ProofScope extends Scope {
     public Entry getAddObstructor(Symbol sym) {
         if (facilities.containsKey(sym)) {
             return facilities.get(sym);
-        } else if (variables.containsKey(sym)) {
+        }
+        else if (variables.containsKey(sym)) {
             return variables.get(sym);
-        } else if(definitions.containsKey(sym)) {
-        	return definitions.get(sym);
-        } else {
+        }
+        else if (definitions.containsKey(sym)) {
+            return definitions.get(sym);
+        }
+        else {
             assert false : "getAddObstructor failed";
             return null;
         }
@@ -162,15 +168,15 @@ public class ProofScope extends Scope {
     public void addVariable(VarEntry entry) {
         variables.put(entry.getSymbol(), entry);
     }
-    
+
     public void addDefinition(DefinitionEntry entry) {
-    	definitions.put(entry.getSymbol(), entry);
+        definitions.put(entry.getSymbol(), entry);
     }
-    
+
     public void addType(TypeEntry entry) {
         types.put(entry.getSymbol(), entry);
     }
-    
+
     public boolean addDefinitionTypePermitted(Symbol sym) {
         if (types.containsKey(sym)) {
             return false;
@@ -189,17 +195,17 @@ public class ProofScope extends Scope {
     public VarEntry getVariable(Symbol sym) {
         return variables.get(sym);
     }
-    
+
     public boolean containsDefinition(Symbol sym) {
-    	return definitions.containsKey(sym);
+        return definitions.containsKey(sym);
     }
-    
+
     public DefinitionEntry getDefinition(Symbol sym) {
-    	return definitions.get(sym);
+        return definitions.get(sym);
     }
-    
+
     public boolean containsType(Symbol sym) {
-        if(types.containsKey(sym)) {
+        if (types.containsKey(sym)) {
             return true;
         }
         return false;
@@ -227,7 +233,9 @@ public class ProofScope extends Scope {
     // Get Binding Method
     // -----------------------------------------------------------
 
-    public Binding getBinding() { return binding; }
+    public Binding getBinding() {
+        return binding;
+    }
 
     // -----------------------------------------------------------
     // To String Method
@@ -251,6 +259,5 @@ public class ProofScope extends Scope {
         sb.append("----- end Proof scope ---------------------------\n");
         return sb.toString();
     }
-        
 
 }

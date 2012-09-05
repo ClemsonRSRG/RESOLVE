@@ -10,14 +10,14 @@ import edu.clemson.cs.r2jt.verification.AssertiveCode;
  * @author H. Smith
  */
 public class UnableToProveException extends ProverException {
-	private static final long serialVersionUID = 1L;
 
-	public UnableToProveException(Metrics metrics) {
-		super(metrics);
-	}
-	
-	public UnableToProveException(String msg, AssertiveCode VC, 
-			Metrics metrics) {
-		super(msg, VC, metrics);
-	}
+    private static final long serialVersionUID = 1L;
+
+    public UnableToProveException(Metrics metrics) {
+        super(metrics);
+    }
+
+    public UnableToProveException(String msg, AssertiveCode VC, Metrics metrics) {
+        super(msg, VC, metrics);
+    }
 }

@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * CallStmt.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -78,7 +78,6 @@ public class CallStmt extends Statement {
 
     /** The arguments member. */
     private List<ProgramExp> arguments;
-    
 
     // ===========================================================
     // Constructors
@@ -86,11 +85,8 @@ public class CallStmt extends Statement {
 
     public CallStmt() {};
 
-    public CallStmt(
-            PosSymbol qualifier,
-            PosSymbol name,
-            List<ProgramExp> arguments)
-    {
+    public CallStmt(PosSymbol qualifier, PosSymbol name,
+            List<ProgramExp> arguments) {
         this.qualifier = qualifier;
         this.name = name;
         this.arguments = arguments;
@@ -105,26 +101,38 @@ public class CallStmt extends Statement {
     // -----------------------------------------------------------
 
     /** Returns the value of the qualifier variable. */
-    public PosSymbol getQualifier() { return qualifier; }
+    public PosSymbol getQualifier() {
+        return qualifier;
+    }
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the arguments variable. */
-    public List<ProgramExp> getArguments() { return arguments; }
+    public List<ProgramExp> getArguments() {
+        return arguments;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the qualifier variable to the specified value. */
-    public void setQualifier(PosSymbol qualifier) { this.qualifier = qualifier; }
+    public void setQualifier(PosSymbol qualifier) {
+        this.qualifier = qualifier;
+    }
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the arguments variable to the specified value. */
-    public void setArguments(List<ProgramExp> arguments) { this.arguments = arguments; }
+    public void setArguments(List<ProgramExp> arguments) {
+        this.arguments = arguments;
+    }
 
     // ===========================================================
     // Public Methods
@@ -157,14 +165,13 @@ public class CallStmt extends Statement {
 
         return sb.toString();
     }
-    
+
     /** Returns a formatted text string of this class. */
     public String toString(int indent) {
 
         StringBuffer sb = new StringBuffer();
 
         printSpace(indent, sb);
-
 
         if (qualifier != null) {
             sb.append(qualifier.getName().toString() + ".");
@@ -180,17 +187,16 @@ public class CallStmt extends Statement {
 
         return sb.toString();
     }
-    
+
     String argumentsToString(List<ProgramExp> arguments) {
-    	String str = new String();
-    	Iterator<ProgramExp> i = arguments.iterator();
-		while(i.hasNext()) {
-			ProgramExp exp = (ProgramExp)i.next();
-			str = str.concat(exp.toString(0));
-			if(i.hasNext())
-				str = str.concat(", ");
-		}
+        String str = new String();
+        Iterator<ProgramExp> i = arguments.iterator();
+        while (i.hasNext()) {
+            ProgramExp exp = (ProgramExp) i.next();
+            str = str.concat(exp.toString(0));
+            if (i.hasNext())
+                str = str.concat(", ");
+        }
         return str;
     }
 }
-

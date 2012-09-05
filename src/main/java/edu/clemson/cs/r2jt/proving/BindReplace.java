@@ -15,51 +15,51 @@ import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
  */
 public class BindReplace implements MatchReplace {
 
-	private MathExpTypeResolver myTyper;
-	private Exp myFindPattern, myReplacePattern;
-	private Map<Exp, Exp> myBindings;
-	
-	/**
-	 * <p>Creates a new <code>BindReplace</code> that will replace expressions 
-	 * that can be bound to <code>findPattern</code> with copies of the 
-	 * provided replace pattern in which expansions have been made based on the
-	 * binding step.</p>
-	 * 
-	 * @param findPattern The pattern to bind with.
-	 * @param replacePattern The pattern to expand as a replacement.
-	 * @param typer Something to help figure out types.
-	 */
-	public BindReplace(Exp findPattern, Exp replacePattern,
-			MathExpTypeResolver typer) {
+    private MathExpTypeResolver myTyper;
+    private Exp myFindPattern, myReplacePattern;
+    private Map<Exp, Exp> myBindings;
 
-		myFindPattern = findPattern;
-		myReplacePattern = replacePattern;
-		myTyper = typer;
-	}
-	
-	public boolean couldReplace(Exp e) {
+    /**
+     * <p>Creates a new <code>BindReplace</code> that will replace expressions 
+     * that can be bound to <code>findPattern</code> with copies of the 
+     * provided replace pattern in which expansions have been made based on the
+     * binding step.</p>
+     * 
+     * @param findPattern The pattern to bind with.
+     * @param replacePattern The pattern to expand as a replacement.
+     * @param typer Something to help figure out types.
+     */
+    public BindReplace(Exp findPattern, Exp replacePattern,
+            MathExpTypeResolver typer) {
 
-		myBindings = Utilities.newBind(myFindPattern, e, myTyper);
-		
-		return (myBindings != null);
-	}
-	
-	public Exp getReplacement() {		
-		return myReplacePattern.substitute(myBindings);
-	}
-	
-	public String toString() {
-		return "Replace " + myFindPattern.toString(0) + " with " + 
-			myReplacePattern.toString(0);
-	}
+        myFindPattern = findPattern;
+        myReplacePattern = replacePattern;
+        myTyper = typer;
+    }
 
-	@Override
-	public Exp getExpansionTemplate() {
-		return myReplacePattern.copy();
-	}
+    public boolean couldReplace(Exp e) {
 
-	@Override
-	public Exp getPattern() {
-		return myFindPattern.copy();
-	}
+        myBindings = Utilities.newBind(myFindPattern, e, myTyper);
+
+        return (myBindings != null);
+    }
+
+    public Exp getReplacement() {
+        return myReplacePattern.substitute(myBindings);
+    }
+
+    public String toString() {
+        return "Replace " + myFindPattern.toString(0) + " with "
+                + myReplacePattern.toString(0);
+    }
+
+    @Override
+    public Exp getExpansionTemplate() {
+        return myReplacePattern.copy();
+    }
+
+    @Override
+    public Exp getPattern() {
+        return myFindPattern.copy();
+    }
 }

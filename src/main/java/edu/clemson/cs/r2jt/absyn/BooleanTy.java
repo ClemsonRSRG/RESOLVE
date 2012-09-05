@@ -16,7 +16,7 @@ public class BooleanTy extends Ty {
 
     /** The name member. */
     private PosSymbol name;
-    
+
     private Type retType = BooleanType.INSTANCE;
 
     // ===========================================================
@@ -25,10 +25,7 @@ public class BooleanTy extends Ty {
 
     public BooleanTy() {};
 
-    public BooleanTy(
-            PosSymbol qualifier,
-            PosSymbol name)
-    {
+    public BooleanTy(PosSymbol qualifier, PosSymbol name) {
         this.qualifier = qualifier;
         this.name = name;
     }
@@ -42,20 +39,28 @@ public class BooleanTy extends Ty {
     // -----------------------------------------------------------
 
     /** Returns the value of the qualifier variable. */
-    public PosSymbol getQualifier() { return qualifier; }
+    public PosSymbol getQualifier() {
+        return qualifier;
+    }
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the qualifier variable to the specified value. */
-    public void setQualifier(PosSymbol qualifier) { this.qualifier = qualifier; }
+    public void setQualifier(PosSymbol qualifier) {
+        this.qualifier = qualifier;
+    }
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     // ===========================================================
     // Public Methods
@@ -67,9 +72,8 @@ public class BooleanTy extends Ty {
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
-    	return retType;
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
+        return retType;
         //return v.getNameTyType(this);
     }
 
@@ -82,33 +86,35 @@ public class BooleanTy extends Ty {
         sb.append("BooleanTy\n");
 
         if (qualifier != null) {
-            sb.append(qualifier.asString(indent+increment,increment));
+            sb.append(qualifier.asString(indent + increment, increment));
         }
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
-    
+
     public void prettyPrint() {
-    	if(qualifier != null) System.out.print(qualifier.getName() + ".");
-    	System.out.print(name.getName());
+        if (qualifier != null)
+            System.out.print(qualifier.getName() + ".");
+        System.out.print(name.getName());
     }
-    
+
     public String toString(int indent) {
-    	StringBuffer sb = new StringBuffer();
-   // 	if(qualifier != null) sb.append(qualifier.getName() + ".");
-    	sb.append(name.getName());
-    	return sb.toString();
+        StringBuffer sb = new StringBuffer();
+        // 	if(qualifier != null) sb.append(qualifier.getName() + ".");
+        sb.append(name.getName());
+        return sb.toString();
     }
-    
+
     public Ty copy() {
-    	PosSymbol newQualifier = null;
-    	if(qualifier != null) newQualifier = qualifier.copy();
-    	PosSymbol newName = name.copy();
-    	return new NameTy(newQualifier, newName);
+        PosSymbol newQualifier = null;
+        if (qualifier != null)
+            newQualifier = qualifier.copy();
+        PosSymbol newName = name.copy();
+        return new NameTy(newQualifier, newName);
     }
 
 }

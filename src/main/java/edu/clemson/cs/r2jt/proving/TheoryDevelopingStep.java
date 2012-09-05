@@ -20,21 +20,22 @@ public class TheoryDevelopingStep implements VCTransformer {
     private final AntecedentDeveloper myDerivedTransformer;
     private final Antecedent myAntecedent;
     private final Consequent myConsequent;
-    
+
     private final boolean myIntroducesQuantifiedVariablesFlag;
 
     public TheoryDevelopingStep(Antecedent theoremAntecedent,
             Consequent theoremConsequent, Iterable<PExp> globalFacts) {
 
-        myDerivedTransformer = new AccumulatingAntecedentExtender(
-                new ConditionalAntecedentExtender(theoremAntecedent,
-                theoremConsequent, globalFacts));
+        myDerivedTransformer =
+                new AccumulatingAntecedentExtender(
+                        new ConditionalAntecedentExtender(theoremAntecedent,
+                                theoremConsequent, globalFacts));
 
         myAntecedent = theoremAntecedent;
         myConsequent = theoremConsequent;
-        
-        myIntroducesQuantifiedVariablesFlag = 
-        	myConsequent.containsQuantifiedVariableNotIn(myAntecedent);
+
+        myIntroducesQuantifiedVariablesFlag =
+                myConsequent.containsQuantifiedVariableNotIn(myAntecedent);
     }
 
     @Override
@@ -44,7 +45,7 @@ public class TheoryDevelopingStep implements VCTransformer {
 
         return new StaticConsequentIterator(original.getSourceName(),
                 new AntecedentDevelopmentIterator(originalAntecedent,
-                myDerivedTransformer.transform(originalAntecedent)),
+                        myDerivedTransformer.transform(originalAntecedent)),
                 original.getConsequent());
     }
 
@@ -63,8 +64,8 @@ public class TheoryDevelopingStep implements VCTransformer {
         return myConsequent;
     }
 
-	@Override
-	public boolean introducesQuantifiedVariables() {
-		return myIntroducesQuantifiedVariablesFlag;
-	}
+    @Override
+    public boolean introducesQuantifiedVariables() {
+        return myIntroducesQuantifiedVariablesFlag;
+    }
 }

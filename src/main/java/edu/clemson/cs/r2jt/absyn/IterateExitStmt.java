@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * IterateExitStmt.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -82,10 +82,7 @@ public class IterateExitStmt extends Statement {
 
     public IterateExitStmt() {};
 
-    public IterateExitStmt(
-            ProgramExp test,
-            List<Statement> statements)
-    {
+    public IterateExitStmt(ProgramExp test, List<Statement> statements) {
         this.test = test;
         this.statements = statements;
     }
@@ -99,20 +96,28 @@ public class IterateExitStmt extends Statement {
     // -----------------------------------------------------------
 
     /** Returns the value of the test variable. */
-    public ProgramExp getTest() { return test; }
+    public ProgramExp getTest() {
+        return test;
+    }
 
     /** Returns the value of the statements variable. */
-    public List<Statement> getStatements() { return statements; }
+    public List<Statement> getStatements() {
+        return statements;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the test variable to the specified value. */
-    public void setTest(ProgramExp test) { this.test = test; }
+    public void setTest(ProgramExp test) {
+        this.test = test;
+    }
 
     /** Sets the statements variable to the specified value. */
-    public void setStatements(List<Statement> statements) { this.statements = statements; }
+    public void setStatements(List<Statement> statements) {
+        this.statements = statements;
+    }
 
     // ===========================================================
     // Public Methods
@@ -132,15 +137,16 @@ public class IterateExitStmt extends Statement {
         sb.append("IterateExitStmt\n");
 
         if (test != null) {
-            sb.append(test.asString(indent+increment,increment));
+            sb.append(test.asString(indent + increment, increment));
         }
 
         if (statements != null) {
-            sb.append(statements.asString(indent+increment,increment));
+            sb.append(statements.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
+
     /** Returns a formatted text string of this class. */
     public String toString(int indent) {
 
@@ -150,29 +156,28 @@ public class IterateExitStmt extends Statement {
 
         sb.append("when (" + test.toString(0) + ")");
 
-    //	printSpace(indent, sb);
-    	sb.append("do\n");
-    	Iterator<Statement> i = statements.iterator();
-    	while(i.hasNext()){
-    		sb.append((i.next()).toString(indent + 4 * 2) + ";\n");
-    	}
-    	printSpace(indent, sb);
-    	sb.append("exit");
-
+        //	printSpace(indent, sb);
+        sb.append("do\n");
+        Iterator<Statement> i = statements.iterator();
+        while (i.hasNext()) {
+            sb.append((i.next()).toString(indent + 4 * 2) + ";\n");
+        }
+        printSpace(indent, sb);
+        sb.append("exit");
 
         return sb.toString();
     }
-    
+
     String argumentsToString(List<ProgramExp> arguments) {
-    	String str = new String();
-    	Iterator i = arguments.iterator();
-		while(i.hasNext()) {
-			ProgramExp exp = (ProgramExp)i.next();
-			str = str.concat(exp.toString(0));
-			if(i.hasNext())
-				str = str.concat(", ");
-		}
+        String str = new String();
+        Iterator i = arguments.iterator();
+        while (i.hasNext()) {
+            ProgramExp exp = (ProgramExp) i.next();
+            str = str.concat(exp.toString(0));
+            if (i.hasNext())
+                str = str.concat(", ");
+        }
         return str;
     }
-    
+
 }

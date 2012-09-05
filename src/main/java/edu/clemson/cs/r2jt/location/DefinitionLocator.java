@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * DefinitionLocator.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -83,18 +83,19 @@ public class DefinitionLocator {
     //private Environment env = Environment.getInstance();
 
     private SymbolTable table;
-    
+
     private boolean showErrors = true;
-    
+
     private boolean local = false;
-    
+
     private TypeMatcher tm;
 
     // ===========================================================
     // Constructors
     // ===========================================================
-    
-    public DefinitionLocator(SymbolTable table, boolean err, TypeMatcher tm, ErrorHandler eh) {
+
+    public DefinitionLocator(SymbolTable table, boolean err, TypeMatcher tm,
+            ErrorHandler eh) {
         this.table = table;
         showErrors = err;
         this.tm = tm;
@@ -106,35 +107,34 @@ public class DefinitionLocator {
     // ===========================================================
 
     public DefinitionEntry locateDefinition(PosSymbol name)
-        throws SymbolSearchException {
-    	List<DefinitionEntry> opers = locateDefinitionsInStack(name);
-    	if(opers.size() == 0) {
-		    opers = locateDefinitionsInImports(name);
-	    }
-	    if(opers.size() > 1) {
+            throws SymbolSearchException {
+        List<DefinitionEntry> opers = locateDefinitionsInStack(name);
+        if (opers.size() == 0) {
+            opers = locateDefinitionsInImports(name);
+        }
+        if (opers.size() > 1) {
             List<Location> locs = getLocationList(opers);
-            if(showErrors) {
-                String msg = ambigDefRefMessage(name.toString(),
-                                                 locs.toString());
+            if (showErrors) {
+                String msg =
+                        ambigDefRefMessage(name.toString(), locs.toString());
                 err.error(name.getLocation(), msg);
             }
             throw new SymbolSearchException();
-	    }
-	    else if(opers.size() == 0) {
-    		if(showErrors) {
+        }
+        else if (opers.size() == 0) {
+            if (showErrors) {
                 String msg = cantFindDefMessage(name.toString());
                 err.error(name.getLocation(), msg);
-    	    }
+            }
             throw new SymbolSearchException();
-	    }
-	    else {
-        	return opers.get(0);
-    	}
+        }
+        else {
+            return opers.get(0);
+        }
     }
-    
+
     public DefinitionEntry locateDefinition(PosSymbol name, List<Type> argtypes)
-        throws SymbolSearchException
-    {
+            throws SymbolSearchException {
         List<DefinitionEntry> defs = locateDefinitionsInStack(name);
         if (defs.size() == 0) {
             defs = locateDefinitionsInImports(name);
@@ -157,60 +157,64 @@ public class DefinitionLocator {
      * @throw SymbolSearchException If such a definition cannot be found.
      */
     public DefinitionEntry locateDefinition(PosSymbol qual, PosSymbol name)
-    		throws SymbolSearchException {
-    	
-    	if (qual == null) {
-    		return locateDefinition(name);
-    	}
-    	
-    	QualifierLocator qualifierLocator = new QualifierLocator(table, err);
+            throws SymbolSearchException {
+
+        if (qual == null) {
+            return locateDefinition(name);
+        }
+
+        QualifierLocator qualifierLocator = new QualifierLocator(table, err);
         ModuleScope scope;
         try {
             scope = qualifierLocator.locateMathModule(qual);
         }
-        catch(SymbolSearchException sx1) {
-        	scope = qualifierLocator.locateProgramModule(qual);
+        catch (SymbolSearchException sx1) {
+            scope = qualifierLocator.locateProgramModule(qual);
         }
         if (scope.containsDefinition(name.getSymbol())) {
-        	DefinitionEntry def = scope.getDefinition(name.getSymbol());
+            DefinitionEntry def = scope.getDefinition(name.getSymbol());
             return def;
-        } else {
-        	if(showErrors) {
-                String msg = cantFindDefInModMessage(name.toString(),
-                                                      qual.toString());
+        }
+        else {
+            if (showErrors) {
+                String msg =
+                        cantFindDefInModMessage(name.toString(), qual
+                                .toString());
                 err.error(qual.getLocation(), msg);
-        	}
+            }
             throw new SymbolSearchException();
         }
     }
-    
+
     public DefinitionEntry locateDefinition(PosSymbol qual, PosSymbol name,
-                                    List<Type> argtypes)
-        throws SymbolSearchException
-    {
-        if (qual == null) { return locateDefinition(name, argtypes); }
+            List<Type> argtypes) throws SymbolSearchException {
+        if (qual == null) {
+            return locateDefinition(name, argtypes);
+        }
         QualifierLocator qlocator = new QualifierLocator(table, err);
         ModuleScope scope;
         try {
             scope = qlocator.locateMathModule(qual);
         }
-        catch(SymbolSearchException sx1) {
-        	scope = qlocator.locateProgramModule(qual);
+        catch (SymbolSearchException sx1) {
+            scope = qlocator.locateProgramModule(qual);
         }
         if (scope.containsDefinition(name.getSymbol())) {
-        	DefinitionEntry def = scope.getDefinition(name.getSymbol());
+            DefinitionEntry def = scope.getDefinition(name.getSymbol());
             checkDefinitionArguments(name, argtypes, def);
             return def;
-        } else {
-        	if(showErrors) {
-                String msg = cantFindDefInModMessage(name.toString(),
-                                                      qual.toString());
+        }
+        else {
+            if (showErrors) {
+                String msg =
+                        cantFindDefInModMessage(name.toString(), qual
+                                .toString());
                 err.error(qual.getLocation(), msg);
-        	}
+            }
             throw new SymbolSearchException();
         }
     }
-            
+
     /*public DefinitionEntry locateDefinition(PosSymbol qual, PosSymbol name,
             PosSymbol index) throws SymbolSearchException {
     	if (qual == null) { return locateDefinition(name); }
@@ -236,14 +240,13 @@ public class DefinitionLocator {
     		throw new SymbolSearchException();
     	}
     }*/
-    
+
     // ===========================================================
     // Private Methods
     // ===========================================================
 
-	private List<DefinitionEntry> locateDefinitionsInStack(PosSymbol name)
-        throws SymbolSearchException
-    {
+    private List<DefinitionEntry> locateDefinitionsInStack(PosSymbol name)
+            throws SymbolSearchException {
         List<DefinitionEntry> defs = new List<DefinitionEntry>();
         Stack<Scope> stack = table.getStack();
         Stack<Scope> hold = new Stack<Scope>();
@@ -253,60 +256,66 @@ public class DefinitionLocator {
                 hold.push(scope);
                 if (scope instanceof ProcedureScope) {
                     defs.addAll(locateDefinitionsInProc(name,
-                                     (ProcedureScope)scope));
-                    if (defs.size() > 0) { break; }
-                } else if (scope instanceof ProofScope) {
-                	defs.addAll(locateDefinitionsInProof(name, (ProofScope)scope));
-                	if(defs.size() > 0) { break; }
-                } else if (scope instanceof ModuleScope) {
-                    ModuleScope mscope = (ModuleScope)scope;
+                            (ProcedureScope) scope));
+                    if (defs.size() > 0) {
+                        break;
+                    }
+                }
+                else if (scope instanceof ProofScope) {
+                    defs.addAll(locateDefinitionsInProof(name,
+                            (ProofScope) scope));
+                    if (defs.size() > 0) {
+                        break;
+                    }
+                }
+                else if (scope instanceof ModuleScope) {
+                    ModuleScope mscope = (ModuleScope) scope;
                     if (mscope.containsDefinition(name.getSymbol())) {
-                    	defs.add(mscope.getDefinition(name.getSymbol()));
+                        defs.add(mscope.getDefinition(name.getSymbol()));
                     }
                     // FIX: Check for recursive operation
                     // should be added here.
-                } else {
+                }
+                else {
                     // continue
                 }
             }
             return defs;
-        } finally {
+        }
+        finally {
             while (!hold.isEmpty()) {
                 stack.push(hold.pop());
             }
         }
     }
-        
-	private List<DefinitionEntry> locateDefinitionsInProc(PosSymbol name,
-            ProcedureScope scope)
-            	throws SymbolSearchException
-    {
-	    List<DefinitionEntry> defs = new List<DefinitionEntry>();
-	    Iterator<ModuleScope> i = scope.getVisibleModules();
-	    while (i.hasNext()) {
-	        ModuleScope iscope = i.next();
-	        if (iscope.containsDefinition(name.getSymbol())) {
-	            defs.add(iscope.getDefinition(name.getSymbol()));
-	            }
-	        }
-	    return defs;
-	}
-	
-	private List<DefinitionEntry> locateDefinitionsInProof(PosSymbol name,
-			ProofScope scope) throws SymbolSearchException {
-		List<DefinitionEntry> defs = new List<DefinitionEntry>();
-		if(scope.containsDefinition(name.getSymbol())) {
-			defs.add(scope.getDefinition(name.getSymbol()));
-		}
-		return defs;
-	}
-	
-    private List<DefinitionEntry> locateDefinitionsInImports(PosSymbol name)
-        throws SymbolSearchException
-    {
+
+    private List<DefinitionEntry> locateDefinitionsInProc(PosSymbol name,
+            ProcedureScope scope) throws SymbolSearchException {
         List<DefinitionEntry> defs = new List<DefinitionEntry>();
-        Iterator<ModuleScope> i
-            = table.getModuleScope().getMathVisibleModules();
+        Iterator<ModuleScope> i = scope.getVisibleModules();
+        while (i.hasNext()) {
+            ModuleScope iscope = i.next();
+            if (iscope.containsDefinition(name.getSymbol())) {
+                defs.add(iscope.getDefinition(name.getSymbol()));
+            }
+        }
+        return defs;
+    }
+
+    private List<DefinitionEntry> locateDefinitionsInProof(PosSymbol name,
+            ProofScope scope) throws SymbolSearchException {
+        List<DefinitionEntry> defs = new List<DefinitionEntry>();
+        if (scope.containsDefinition(name.getSymbol())) {
+            defs.add(scope.getDefinition(name.getSymbol()));
+        }
+        return defs;
+    }
+
+    private List<DefinitionEntry> locateDefinitionsInImports(PosSymbol name)
+            throws SymbolSearchException {
+        List<DefinitionEntry> defs = new List<DefinitionEntry>();
+        Iterator<ModuleScope> i =
+                table.getModuleScope().getMathVisibleModules();
         while (i.hasNext()) {
             ModuleScope iscope = i.next();
             if (iscope.containsDefinition(name.getSymbol())) {
@@ -317,29 +326,27 @@ public class DefinitionLocator {
     }
 
     private DefinitionEntry getUniqueDefinition(PosSymbol name,
-                                              List<Type> argtypes,
-                                              List<DefinitionEntry> defs)
-        throws SymbolSearchException
-    {
+            List<Type> argtypes, List<DefinitionEntry> defs)
+            throws SymbolSearchException {
         if (defs.size() == 0) {
-        	if(showErrors) {
+            if (showErrors) {
                 String msg = cantFindDefMessage(name.toString());
                 err.error(name.getLocation(), msg);
-        	}
+            }
             throw new SymbolSearchException();
-        } else if (defs.size() == 1) {
+        }
+        else if (defs.size() == 1) {
             checkDefinitionArguments(name, argtypes, defs.get(0));
             return defs.get(0);
-        } else { // defs.size() > 1
+        }
+        else { // defs.size() > 1
             return disambiguateDefinitions(name, argtypes, defs);
         }
     }
 
     private DefinitionEntry disambiguateDefinitions(PosSymbol name,
-                                                  List<Type> argtypes,
-                                                  List<DefinitionEntry> defs)
-        throws SymbolSearchException
-    {
+            List<Type> argtypes, List<DefinitionEntry> defs)
+            throws SymbolSearchException {
         List<DefinitionEntry> newdefs = new List<DefinitionEntry>();
         Iterator<DefinitionEntry> i = defs.iterator();
         while (i.hasNext()) {
@@ -350,19 +357,22 @@ public class DefinitionLocator {
         }
         if (newdefs.size() == 0) {
             List<Location> locs = getLocationList(defs);
-            if(showErrors) {
-                String sig = getSignatureString(defs.get(0).getName(), argtypes);
+            if (showErrors) {
+                String sig =
+                        getSignatureString(defs.get(0).getName(), argtypes);
                 String msg = cantFindDefMessage(sig, locs.toString());
                 err.error(name.getLocation(), msg);
             }
             throw new SymbolSearchException();
-        } else if (newdefs.size() == 1) {
+        }
+        else if (newdefs.size() == 1) {
             return newdefs.get(0);
-        } else { // newdefs.size() > 1
+        }
+        else { // newdefs.size() > 1
             List<Location> locs = getLocationList(defs);
-            if(showErrors) {
-                String msg = ambigDefRefMessage(name.toString(),
-                                                 locs.toString());
+            if (showErrors) {
+                String msg =
+                        ambigDefRefMessage(name.toString(), locs.toString());
                 err.error(name.getLocation(), msg);
             }
             throw new SymbolSearchException();
@@ -370,22 +380,19 @@ public class DefinitionLocator {
     }
 
     private void checkDefinitionArguments(PosSymbol name, List<Type> argtypes,
-                                         DefinitionEntry def)
-        throws SymbolSearchException
-    {
+            DefinitionEntry def) throws SymbolSearchException {
         if (!argumentTypesMatch(def, argtypes)) {
-        	if(showErrors) {
+            if (showErrors) {
                 String defsig = getSignatureString(def);
                 String targsig = getSignatureString(def.getName(), argtypes);
                 String msg = argTypeMismatchMessage(defsig, targsig);
                 err.error(name.getLocation(), msg);
-        	}
+            }
             throw new SymbolSearchException();
         }
     }
 
-    private boolean argumentTypesMatch(DefinitionEntry def,
-                                       List<Type> argtypes) {
+    private boolean argumentTypesMatch(DefinitionEntry def, List<Type> argtypes) {
         List<Type> partypes = new List<Type>();
         Iterator<VarEntry> i = def.getParameters();
         while (i.hasNext()) {
@@ -400,8 +407,8 @@ public class DefinitionLocator {
         while (j.hasNext()) {
             Type argtype = j.next();
             Type partype = k.next();
-//            System.out.println("A1: " + argtype.toString());
-//            System.out.println("B1: " + partype.toString());
+            //            System.out.println("A1: " + argtype.toString());
+            //            System.out.println("B1: " + partype.toString());
             if (!tm.mathMatches(argtype, partype)) {
                 return false;
             }
@@ -417,12 +424,14 @@ public class DefinitionLocator {
         while (i.hasNext()) {
             VarEntry entry = i.next();
             sb.append(entry.getType().getProgramName().toString());
-            if (i.hasNext()) { sb.append(","); }
+            if (i.hasNext()) {
+                sb.append(",");
+            }
         }
         sb.append(")");
         return sb.toString();
     }
-         
+
     private String getSignatureString(PosSymbol name, List<Type> argtypes) {
         StringBuffer sb = new StringBuffer();
         sb.append(name.toString());
@@ -431,7 +440,9 @@ public class DefinitionLocator {
         while (i.hasNext()) {
             Type type = i.next();
             sb.append(type.getProgramName().toString());
-            if (i.hasNext()) { sb.append(","); }
+            if (i.hasNext()) {
+                sb.append(",");
+            }
         }
         sb.append(")");
         return sb.toString();
@@ -453,26 +464,26 @@ public class DefinitionLocator {
 
     private String cantFindDefInModMessage(String name, String module) {
         return "Cannot find a definition named " + name + " in module "
-            + module + ".";
+                + module + ".";
     }
 
     private String ambigDefRefMessage(String name, String mods) {
         return "The definition named " + name + " is found in more than one "
-            + "module visible from this scope: " + mods + ".";
+                + "module visible from this scope: " + mods + ".";
     }
 
     private String cantFindDefMessage(String name) {
         return "Cannot find a definition named " + name + ".";
     }
-        
+
     private String cantFindDefMessage(String sig, String mods) {
         return "Cannot find the definition with signature " + sig
-            + ", but found definitions: " + mods + ".";
+                + ", but found definitions: " + mods + ".";
     }
 
     private String argTypeMismatchMessage(String opersig, String targsig) {
         return "Expected a definition with the signature " + targsig
-            + " but found one with the signature " + opersig + ".";
+                + " but found one with the signature " + opersig + ".";
     }
 
 }

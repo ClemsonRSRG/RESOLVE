@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * ConstructedTy.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -87,11 +87,7 @@ public class ConstructedTy extends Ty {
 
     public ConstructedTy() {};
 
-    public ConstructedTy(
-            PosSymbol qualifier,
-            PosSymbol name,
-            List<Ty> args)
-    {
+    public ConstructedTy(PosSymbol qualifier, PosSymbol name, List<Ty> args) {
         this.qualifier = qualifier;
         this.name = name;
         this.args = args;
@@ -106,26 +102,38 @@ public class ConstructedTy extends Ty {
     // -----------------------------------------------------------
 
     /** Returns the value of the qualifier variable. */
-    public PosSymbol getQualifier() { return qualifier; }
+    public PosSymbol getQualifier() {
+        return qualifier;
+    }
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the args variable. */
-    public List<Ty> getArgs() { return args; }
+    public List<Ty> getArgs() {
+        return args;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the qualifier variable to the specified value. */
-    public void setQualifier(PosSymbol qualifier) { this.qualifier = qualifier; }
+    public void setQualifier(PosSymbol qualifier) {
+        this.qualifier = qualifier;
+    }
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the args variable to the specified value. */
-    public void setArgs(List<Ty> args) { this.args = args; }
+    public void setArgs(List<Ty> args) {
+        this.args = args;
+    }
 
     // ===========================================================
     // Public Methods
@@ -137,8 +145,7 @@ public class ConstructedTy extends Ty {
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getConstructedTyType(this);
     }
 
@@ -151,78 +158,82 @@ public class ConstructedTy extends Ty {
         sb.append("ConstructedTy\n");
 
         if (qualifier != null) {
-            sb.append(qualifier.asString(indent+increment,increment));
+            sb.append(qualifier.asString(indent + increment, increment));
         }
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         if (args != null) {
-            sb.append(args.asString(indent+increment,increment));
+            sb.append(args.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
-    
+
     public void prettyPrint() {
-    	if(qualifier != null) System.out.print(qualifier.getName() + ".");
-    	System.out.print(name.getName());
-    	Iterator<Ty> it = args.iterator();
-    	System.out.print("(");
-    	if(it.hasNext()) {
-    		it.next().prettyPrint();
-    	}
-    	while(it.hasNext()) {
-    		System.out.print(", ");
-    		it.next().prettyPrint();
-    	}
-    	System.out.print(")");
+        if (qualifier != null)
+            System.out.print(qualifier.getName() + ".");
+        System.out.print(name.getName());
+        Iterator<Ty> it = args.iterator();
+        System.out.print("(");
+        if (it.hasNext()) {
+            it.next().prettyPrint();
+        }
+        while (it.hasNext()) {
+            System.out.print(", ");
+            it.next().prettyPrint();
+        }
+        System.out.print(")");
     }
-    
+
     public String toString(int indent) {
-    	StringBuffer sb = new StringBuffer();
-    	if(qualifier != null) sb.append(qualifier.getName() + ".");
-    	sb.append(name.getName());
-    	Iterator<Ty> it = args.iterator();
-    	sb.append("(");
-    	if(it.hasNext()) {
-    		sb.append(it.next().toString(0));
-    	}
-    	while(it.hasNext()) {
-    		sb.append(", ");
-    		sb.append(it.next().toString(0));
-    	}
-    	sb.append(")");
-    	return sb.toString();
+        StringBuffer sb = new StringBuffer();
+        if (qualifier != null)
+            sb.append(qualifier.getName() + ".");
+        sb.append(name.getName());
+        Iterator<Ty> it = args.iterator();
+        sb.append("(");
+        if (it.hasNext()) {
+            sb.append(it.next().toString(0));
+        }
+        while (it.hasNext()) {
+            sb.append(", ");
+            sb.append(it.next().toString(0));
+        }
+        sb.append(")");
+        return sb.toString();
     }
-    
+
     public String toString() {
-    	StringBuffer sb = new StringBuffer();
-    	if(qualifier != null) sb.append(qualifier.getName() + ".");
-    	sb.append(name.getName());
-    	Iterator<Ty> it = args.iterator();
-    	sb.append("(");
-    	if(it.hasNext()) {
-    		sb.append(it.next().toString(0));
-    	}
-    	while(it.hasNext()) {
-    		sb.append(", ");
-    		sb.append(it.next().toString(0));
-    	}
-    	sb.append(")");
-    	return sb.toString();
+        StringBuffer sb = new StringBuffer();
+        if (qualifier != null)
+            sb.append(qualifier.getName() + ".");
+        sb.append(name.getName());
+        Iterator<Ty> it = args.iterator();
+        sb.append("(");
+        if (it.hasNext()) {
+            sb.append(it.next().toString(0));
+        }
+        while (it.hasNext()) {
+            sb.append(", ");
+            sb.append(it.next().toString(0));
+        }
+        sb.append(")");
+        return sb.toString();
     }
-    
+
     public Ty copy() {
-    	PosSymbol newQualifier = null;
-    	if(qualifier != null) newQualifier = qualifier.copy();
-    	PosSymbol newName = name.copy();
-    	Iterator<Ty> it = args.iterator();
-    	List<Ty> newArgs = new List<Ty>();
-    	while(it.hasNext()) {
-    		newArgs.add(it.next().copy());
-    	}
-    	return new ConstructedTy(newQualifier, newName, newArgs);
+        PosSymbol newQualifier = null;
+        if (qualifier != null)
+            newQualifier = qualifier.copy();
+        PosSymbol newName = name.copy();
+        Iterator<Ty> it = args.iterator();
+        List<Ty> newArgs = new List<Ty>();
+        while (it.hasNext()) {
+            newArgs.add(it.next().copy());
+        }
+        return new ConstructedTy(newQualifier, newName, newArgs);
     }
 }

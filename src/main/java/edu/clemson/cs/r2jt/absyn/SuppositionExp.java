@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * SuppositionExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2006
  * Reusable Software Research Group
  * Department of Computer Science
@@ -79,34 +79,30 @@ public class SuppositionExp extends LineNumberedExp {
 
     /** The exp member. */
     private Exp exp;
-    
+
     private List<MathVarDec> vars;
-    
+
     // ===========================================================
     // Constructors
     // ===========================================================
 
     public SuppositionExp() {
-    	super(null);
+        super(null);
     }
 
-    public SuppositionExp(
-            Location location,
-            PosSymbol lineNum,
-            Exp exp,
-            List<MathVarDec> vars)
-    {
-    	super(lineNum);
+    public SuppositionExp(Location location, PosSymbol lineNum, Exp exp,
+            List<MathVarDec> vars) {
+        super(lineNum);
         this.location = location;
         this.exp = exp;
         this.vars = vars;
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	return new SuppositionExp(location, this.getLineNum(), 
-    			substitute(exp, substitutions), vars);
+        return new SuppositionExp(location, this.getLineNum(), substitute(exp,
+                substitutions), vars);
     }
-    
+
     // ===========================================================
     // Accessor Methods
     // ===========================================================
@@ -116,24 +112,36 @@ public class SuppositionExp extends LineNumberedExp {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the exp variable. */
-    public Exp getExp() { return exp; }
-    
-    public List<MathVarDec> getVars() { return vars; }
+    public Exp getExp() {
+        return exp;
+    }
+
+    public List<MathVarDec> getVars() {
+        return vars;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the exp variable to the specified value. */
-    public void setExp(Exp exp) { this.exp = exp; }
-    
-    public void setVars(List<MathVarDec> vars) { this.vars = vars; }
+    public void setExp(Exp exp) {
+        this.exp = exp;
+    }
+
+    public void setVars(List<MathVarDec> vars) {
+        this.vars = vars;
+    }
 
     // ===========================================================
     // Public Methods
@@ -145,8 +153,7 @@ public class SuppositionExp extends LineNumberedExp {
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getSuppositionExpType(this);
     }
 
@@ -157,82 +164,83 @@ public class SuppositionExp extends LineNumberedExp {
 
         printSpace(indent, sb);
         sb.append("SuppositionExp\n");
-        
+
         sb.append(super.proofCheckInfoToString());
-        
+
         if (myLineNumber != null) {
-        	printSpace(indent+increment, sb);
-        	sb.append("Line: " + myLineNumber.asString(0, increment));
+            printSpace(indent + increment, sb);
+            sb.append("Line: " + myLineNumber.asString(0, increment));
         }
 
         if (exp != null) {
-            sb.append(exp.asString(indent+increment,increment));
+            sb.append(exp.asString(indent + increment, increment));
         }
-        
-        if(vars != null) {
-        	sb.append("Vars: ");
-        	Iterator<MathVarDec> it = vars.iterator();
-        	while(it.hasNext()) {
-        		sb.append(it.next().asString(indent, increment));
-        	}
+
+        if (vars != null) {
+            sb.append("Vars: ");
+            Iterator<MathVarDec> it = vars.iterator();
+            while (it.hasNext()) {
+                sb.append(it.next().asString(indent, increment));
+            }
         }
 
         return sb.toString();
     }
-    
-    public boolean containsVar(String varName, boolean IsOldExp) {
-    	return false;
-    }
-    
-    public List<Exp> getSubExpressions() {
-    	List<Exp> list = new List<Exp>();
-    	list.add(exp);
-    	return list;
-    }
-    
-    public void setSubExpression(int index, Exp e) {
-    	exp = e;
-    }
-    
-    public boolean shallowCompare(Exp e2) {
-    	if(!(e2 instanceof SuppositionExp)) {
-    		return false;
-    	}
-    	return true;
-    }
-    
-    public void prettyPrint() {
-    	if(myLineNumber != null) 
-    		System.out.print(myLineNumber.getName() + ": ");
-    	System.out.print("Supposition ");
-    	Iterator<MathVarDec> it = vars.iterator();
-    	boolean printed = false;
-    	if(it.hasNext()) {
-    		it.next().prettyPrint();
-    		printed = true;
-    	}
-    	while(it.hasNext()) {
-    		System.out.print(", ");
-    		it.next().prettyPrint();
-    		printed = true;
-    	}
-    	if(exp != null) {
-           	if(printed) System.out.print(" and ");
-           	exp.prettyPrint();
-    	}
-    }
-    
-    public Exp copy() {
-    	PosSymbol newLineNum = null;
-    	if(myLineNumber != null) newLineNum = myLineNumber.copy();
-    	Exp newExp = exp.copy();
-    	Iterator<MathVarDec> it = vars.iterator();
-    	List<MathVarDec> newVars = new List<MathVarDec>();
-    	while(it.hasNext()) {
-    		newVars.add(it.next().copy());
-    	}
-    	return new SuppositionExp(null, newLineNum, newExp, newVars);
-    }
-    
-}
 
+    public boolean containsVar(String varName, boolean IsOldExp) {
+        return false;
+    }
+
+    public List<Exp> getSubExpressions() {
+        List<Exp> list = new List<Exp>();
+        list.add(exp);
+        return list;
+    }
+
+    public void setSubExpression(int index, Exp e) {
+        exp = e;
+    }
+
+    public boolean shallowCompare(Exp e2) {
+        if (!(e2 instanceof SuppositionExp)) {
+            return false;
+        }
+        return true;
+    }
+
+    public void prettyPrint() {
+        if (myLineNumber != null)
+            System.out.print(myLineNumber.getName() + ": ");
+        System.out.print("Supposition ");
+        Iterator<MathVarDec> it = vars.iterator();
+        boolean printed = false;
+        if (it.hasNext()) {
+            it.next().prettyPrint();
+            printed = true;
+        }
+        while (it.hasNext()) {
+            System.out.print(", ");
+            it.next().prettyPrint();
+            printed = true;
+        }
+        if (exp != null) {
+            if (printed)
+                System.out.print(" and ");
+            exp.prettyPrint();
+        }
+    }
+
+    public Exp copy() {
+        PosSymbol newLineNum = null;
+        if (myLineNumber != null)
+            newLineNum = myLineNumber.copy();
+        Exp newExp = exp.copy();
+        Iterator<MathVarDec> it = vars.iterator();
+        List<MathVarDec> newVars = new List<MathVarDec>();
+        while (it.hasNext()) {
+            newVars.add(it.next().copy());
+        }
+        return new SuppositionExp(null, newLineNum, newExp, newVars);
+    }
+
+}

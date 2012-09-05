@@ -17,88 +17,89 @@ import java.util.NoSuchElementException;
  */
 public class NoBacktrackChooser implements TransformationChooser {
 
-	private static final NoBacktrackWrappingMapper NO_BACKTRACK_MAP =
-		new NoBacktrackWrappingMapper();
-	
-	private final TransformationChooser myBaseChooser;
-	
-	public NoBacktrackChooser(TransformationChooser base) {
-		myBaseChooser = base;
-	}
-	
-	@Override
-	public void preoptimizeForVC(VC vc) {
-		myBaseChooser.preoptimizeForVC(vc);
-	}
+    private static final NoBacktrackWrappingMapper NO_BACKTRACK_MAP =
+            new NoBacktrackWrappingMapper();
 
-	@Override
-	public Iterator<ProofPathSuggestion> suggestTransformations(VC vc, 
-			int curLength, Metrics metrics, ProofData d) {
-		
-		return new ZeroOrOneIterator(
-					new LazyMappingIterator<ProofPathSuggestion, 
-					                        ProofPathSuggestion>(
-							myBaseChooser.suggestTransformations(vc, curLength, 
-									metrics, d), 
-							NO_BACKTRACK_MAP));
-	}
-	
-	@Override
-	public String toString() {
-		return "" + myBaseChooser;
-	}
-	
-	private static class ZeroOrOneIterator 
-			implements Iterator<ProofPathSuggestion> {
+    private final TransformationChooser myBaseChooser;
 
-		private final Iterator<ProofPathSuggestion> myBaseIterator;
-		private ProofPathSuggestion myLastSuggestion;
-		
-		public ZeroOrOneIterator(Iterator<ProofPathSuggestion> base) {
-			myBaseIterator = base;
-		}
-		
-		@Override
-		public boolean hasNext() {
-			boolean retval = true;
-			
-			if (myLastSuggestion != null) {
-				retval = !((NoBacktrackTransformer) myLastSuggestion.step)
-							.hasReturned();
-			}
-			
-			retval &= myBaseIterator.hasNext();
-			
-			return retval;
-		}
+    public NoBacktrackChooser(TransformationChooser base) {
+        myBaseChooser = base;
+    }
 
-		@Override
-		public ProofPathSuggestion next() {
-			if (myLastSuggestion!= null && 
-					((NoBacktrackTransformer) myLastSuggestion.step)
-						.hasReturned()) {
-				throw new NoSuchElementException();
-			}
-			
-			myLastSuggestion = myBaseIterator.next();
-			
-			return myLastSuggestion;
-		}
+    @Override
+    public void preoptimizeForVC(VC vc) {
+        myBaseChooser.preoptimizeForVC(vc);
+    }
 
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-	}
-	
-	private static class NoBacktrackWrappingMapper 
-			implements Mapper<ProofPathSuggestion, ProofPathSuggestion> {
+    @Override
+    public Iterator<ProofPathSuggestion> suggestTransformations(VC vc,
+            int curLength, Metrics metrics, ProofData d) {
 
-		@Override
-		public ProofPathSuggestion map(ProofPathSuggestion i) {
-			return new ProofPathSuggestion(new NoBacktrackTransformer(i.step),
-					i.data);
-		}
-	}
+        return new ZeroOrOneIterator(
+                new LazyMappingIterator<ProofPathSuggestion, ProofPathSuggestion>(
+                        myBaseChooser.suggestTransformations(vc, curLength,
+                                metrics, d), NO_BACKTRACK_MAP));
+    }
+
+    @Override
+    public String toString() {
+        return "" + myBaseChooser;
+    }
+
+    private static class ZeroOrOneIterator
+            implements
+                Iterator<ProofPathSuggestion> {
+
+        private final Iterator<ProofPathSuggestion> myBaseIterator;
+        private ProofPathSuggestion myLastSuggestion;
+
+        public ZeroOrOneIterator(Iterator<ProofPathSuggestion> base) {
+            myBaseIterator = base;
+        }
+
+        @Override
+        public boolean hasNext() {
+            boolean retval = true;
+
+            if (myLastSuggestion != null) {
+                retval =
+                        !((NoBacktrackTransformer) myLastSuggestion.step)
+                                .hasReturned();
+            }
+
+            retval &= myBaseIterator.hasNext();
+
+            return retval;
+        }
+
+        @Override
+        public ProofPathSuggestion next() {
+            if (myLastSuggestion != null
+                    && ((NoBacktrackTransformer) myLastSuggestion.step)
+                            .hasReturned()) {
+                throw new NoSuchElementException();
+            }
+
+            myLastSuggestion = myBaseIterator.next();
+
+            return myLastSuggestion;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private static class NoBacktrackWrappingMapper
+            implements
+                Mapper<ProofPathSuggestion, ProofPathSuggestion> {
+
+        @Override
+        public ProofPathSuggestion map(ProofPathSuggestion i) {
+            return new ProofPathSuggestion(new NoBacktrackTransformer(i.step),
+                    i.data);
+        }
+    }
 
 }

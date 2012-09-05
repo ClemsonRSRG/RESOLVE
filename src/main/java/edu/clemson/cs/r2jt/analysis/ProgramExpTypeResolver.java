@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * ProgramExpTypeResolver.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -75,15 +75,16 @@ import edu.clemson.cs.r2jt.scope.SymbolTable;
 import edu.clemson.cs.r2jt.scope.TypeHolder;
 import edu.clemson.cs.r2jt.type.*;
 
-// changed this to add: public OperationEntry getOperationEntry(ProgramFunctionExp exp)
+// changed this to add: public OperationEntry
+// getOperationEntry(ProgramFunctionExp exp)
 public class ProgramExpTypeResolver extends TypeResolutionVisitor {
 
     // ===========================================================
     // Variables 
     // ===========================================================
-  
+
     private SymbolTable table;
-    
+
     //private Environment env;
     //private CompileEnvironment myInstanceEnvironment;
 
@@ -93,10 +94,11 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     // Constructors
     // ===========================================================
 
-    public ProgramExpTypeResolver(SymbolTable table, CompileEnvironment instanceEnvironment) {
-    	//this.env = new Environment(instanceEnvironment);
-    	//myInstanceEnvironment = instanceEnvironment;
-        this.table = table;   
+    public ProgramExpTypeResolver(SymbolTable table,
+            CompileEnvironment instanceEnvironment) {
+        //this.env = new Environment(instanceEnvironment);
+        //myInstanceEnvironment = instanceEnvironment;
+        this.table = table;
         this.err = instanceEnvironment.getErrorHandler();
     }
 
@@ -107,30 +109,32 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     public boolean isVariable(ProgramExp exp) {
         ProgramExp sem = null;
         if (exp instanceof ProgramDotExp) {
-            sem = ((ProgramDotExp)exp).getSemanticExp();
-        } else if (exp instanceof ProgramParamExp) {
-            sem = ((ProgramParamExp)exp).getSemanticExp();
-        } else {
+            sem = ((ProgramDotExp) exp).getSemanticExp();
+        }
+        else if (exp instanceof ProgramParamExp) {
+            sem = ((ProgramParamExp) exp).getSemanticExp();
+        }
+        else {
             sem = exp;
         }
 
         assert sem != null : "sem is null";
         if (sem instanceof VariableExp) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
 
     public void checkReplica(Location loc, Type atype)
-        throws TypeResolutionException
-    {
-    	/* Variables 
-    	 * - YS */
+            throws TypeResolutionException {
+        /* Variables 
+         * - YS */
         OperationLocator locator = new OperationLocator(table, err);
         PosSymbol name = new PosSymbol(loc, Symbol.symbol("Replica"));
         PosSymbol qual = null;
-        
+
         /* Old code, not needed - YS
         Symbol qualsym = atype.getProgramName().getFacilityQualifier();
 
@@ -138,24 +142,25 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
 
         PosSymbol  qual = null;
         if(qualsym != null) qual = new PosSymbol(loc, qualsym);*/
-        
+
         /* Find the type of the array 
          * - YS */
-        atype = getArrayType(loc, atype);        
+        atype = getArrayType(loc, atype);
         if (atype instanceof IndirectType) {
-        	/* We got something of type Entry, 
-        	 * we need to know what type is it exactly 
-        	 * - YS */
-        	atype = ((IndirectType) atype).getType();
+            /* We got something of type Entry, 
+             * we need to know what type is it exactly 
+             * - YS */
+            atype = ((IndirectType) atype).getType();
         }
-        
+
         /* Add the type to the arg type list - YS */
         List<Type> args = new List<Type>();
-    	args.add(atype);
+        args.add(atype);
 
         try {
             OperationEntry oper = locator.locateOperation(qual, name, args);
-        } catch (SymbolSearchException ex) {
+        }
+        catch (SymbolSearchException ex) {
             throw new TypeResolutionException();
         }
     }
@@ -165,14 +170,12 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     // ===========================================================
 
     public Type getProgramExpType(ProgramExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         return exp.accept(this);
     }
 
     public Type getVariableExpType(VariableExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         return exp.accept(this);
     }
 
@@ -181,29 +184,64 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     // ===========================================================
 
     public Type getProgramOpExpType(ProgramOpExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         // create program function name
         String str = null;
         switch (exp.getOperator()) {
-        case ProgramOpExp.AND:         str = "And";              break;
-        case ProgramOpExp.OR:          str = "Or";               break;
-        case ProgramOpExp.EQUAL:       str = "Are_Equal";        break;
-        case ProgramOpExp.NOT_EQUAL:   str = "Are_Not_Equal";    break;
-        case ProgramOpExp.LT:          str = "Less";             break;
-        case ProgramOpExp.LT_EQL:      str = "Less_Or_Equal";    break;
-        case ProgramOpExp.GT:          str = "Greater";          break;
-        case ProgramOpExp.GT_EQL:      str = "Greater_Or_Equal"; break;
-        case ProgramOpExp.PLUS:        str = "Sum";              break;
-        case ProgramOpExp.MINUS:       str = "Difference";       break;
-        case ProgramOpExp.MULTIPLY:    str = "Product";          break;
-        case ProgramOpExp.DIVIDE:      str = "Quotient";         break;
-        case ProgramOpExp.REM:         str = "Rem";              break;
-        case ProgramOpExp.MOD:         str = "Mod";              break;
-        case ProgramOpExp.DIV:         str = "Div";              break;
-        case ProgramOpExp.EXP:         str = "Power";            break;
-        case ProgramOpExp.NOT:         str = "Not";              break;
-        case ProgramOpExp.UNARY_MINUS: str = "Negate";         break;
+        case ProgramOpExp.AND:
+            str = "And";
+            break;
+        case ProgramOpExp.OR:
+            str = "Or";
+            break;
+        case ProgramOpExp.EQUAL:
+            str = "Are_Equal";
+            break;
+        case ProgramOpExp.NOT_EQUAL:
+            str = "Are_Not_Equal";
+            break;
+        case ProgramOpExp.LT:
+            str = "Less";
+            break;
+        case ProgramOpExp.LT_EQL:
+            str = "Less_Or_Equal";
+            break;
+        case ProgramOpExp.GT:
+            str = "Greater";
+            break;
+        case ProgramOpExp.GT_EQL:
+            str = "Greater_Or_Equal";
+            break;
+        case ProgramOpExp.PLUS:
+            str = "Sum";
+            break;
+        case ProgramOpExp.MINUS:
+            str = "Difference";
+            break;
+        case ProgramOpExp.MULTIPLY:
+            str = "Product";
+            break;
+        case ProgramOpExp.DIVIDE:
+            str = "Quotient";
+            break;
+        case ProgramOpExp.REM:
+            str = "Rem";
+            break;
+        case ProgramOpExp.MOD:
+            str = "Mod";
+            break;
+        case ProgramOpExp.DIV:
+            str = "Div";
+            break;
+        case ProgramOpExp.EXP:
+            str = "Power";
+            break;
+        case ProgramOpExp.NOT:
+            str = "Not";
+            break;
+        case ProgramOpExp.UNARY_MINUS:
+            str = "Negate";
+            break;
 
         default:
             assert false : "Invalid Operator: " + exp.getOperator();
@@ -217,14 +255,13 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
             arguments.add(exp.getSecond());
         }
         // create program function exp
-        ProgramFunctionExp func = new ProgramFunctionExp(exp.getLocation(),
-                                          null, name, arguments);
+        ProgramFunctionExp func =
+                new ProgramFunctionExp(exp.getLocation(), null, name, arguments);
         return getProgramFunctionExpType(func);
     }
 
     public Type getProgramDotExpType(ProgramDotExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         if (exp.getSemanticExp() == null) {
             exp.setSemanticExp(extractSemanticExp(exp));
         }
@@ -232,34 +269,36 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     }
 
     public Type getProgramParamExpType(ProgramParamExp exp)
-        throws TypeResolutionException
-    {
-    	/* Checks for if the function operation exists before we call it
-    	 * Note: This may not be the place that we throw this exception. - YS
-    	 */
-    	try {
-    		if (exp.getSemanticExp() == null) {
-    			exp.setSemanticExp(extractSemanticExp(exp));
-    			exp.getSemanticExp().setType(
-            		getProgramExpType(exp.getSemanticExp()));
-    		}
-    		
-    		return getProgramExpType(exp.getSemanticExp());
-    	} catch (TypeResolutionException ex) {
-    		String msg;
-    		if (exp.getName().getName().equals("Replica")) {
-    			msg = "Cannot locate a Replica operation for this variable";
-    		} else {
-    			msg = "Cannot locate an operation with this name: " + exp.getName().getName();
-    		}
-    		err.error(exp.getLocation(), msg);
-    		throw new TypeResolutionException();
-    	}
+            throws TypeResolutionException {
+        /* Checks for if the function operation exists before we call it
+         * Note: This may not be the place that we throw this exception. - YS
+         */
+        try {
+            if (exp.getSemanticExp() == null) {
+                exp.setSemanticExp(extractSemanticExp(exp));
+                exp.getSemanticExp().setType(
+                        getProgramExpType(exp.getSemanticExp()));
+            }
+
+            return getProgramExpType(exp.getSemanticExp());
+        }
+        catch (TypeResolutionException ex) {
+            String msg;
+            if (exp.getName().getName().equals("Replica")) {
+                msg = "Cannot locate a Replica operation for this variable";
+            }
+            else {
+                msg =
+                        "Cannot locate an operation with this name: "
+                                + exp.getName().getName();
+            }
+            err.error(exp.getLocation(), msg);
+            throw new TypeResolutionException();
+        }
     }
 
     public Type getProgramFunctionExpType(ProgramFunctionExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         try {
             List<Type> argtypes = new List<Type>();
             Iterator<ProgramExp> i = exp.getArguments().iterator();
@@ -268,15 +307,18 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
                 Type argtype = getProgramExpType(argexp);
                 argtypes.add(argtype);
             }
-            
+
             OperationLocator locator = new OperationLocator(table, err); //Problem's here
             if (exp.getName().getSymbol().getName().equals("LessThanOrEqual")) {
-            	System.out.println("ProgramExpTypeResolver.getProgramFunctionExpType");
+                System.out
+                        .println("ProgramExpTypeResolver.getProgramFunctionExpType");
             }
-            OperationEntry oper = locator.locateOperation(exp.getQualifier(),
-                                                 exp.getName(), argtypes);
+            OperationEntry oper =
+                    locator.locateOperation(exp.getQualifier(), exp.getName(),
+                            argtypes);
             return oper.getType();
-        } catch (SymbolSearchException ex) {
+        }
+        catch (SymbolSearchException ex) {
             throw new TypeResolutionException();
         }
     }
@@ -285,34 +327,35 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     // that file altogether, because this operation seems to be the only difference between the two replicated files!
     // Also remove the correspondponding file from verification package.
     public OperationEntry getOperationEntry(ProgramFunctionExp exp)
-    throws TypeResolutionException
-	{
-	    try {
-	        List<Type> argtypes = new List<Type>();
-	        if(exp.getArguments() != null) {
-	            Iterator<ProgramExp> i = exp.getArguments().iterator();
-	            while (i.hasNext()) {
-	                ProgramExp argexp = i.next();
-	                Type argtype = getProgramExpType(argexp);
-	                argtypes.add(argtype);
-	            }
-	        }
-	        OperationLocator locator = new OperationLocator(table, err);
-	        OperationEntry oper = locator.locateOperation(exp.getQualifier(),
-	                                             exp.getName(), argtypes);
-	        return oper;
-	    } catch (SymbolSearchException ex) {
-	        throw new TypeResolutionException();
-	    }
-	}
-    
+            throws TypeResolutionException {
+        try {
+            List<Type> argtypes = new List<Type>();
+            if (exp.getArguments() != null) {
+                Iterator<ProgramExp> i = exp.getArguments().iterator();
+                while (i.hasNext()) {
+                    ProgramExp argexp = i.next();
+                    Type argtype = getProgramExpType(argexp);
+                    argtypes.add(argtype);
+                }
+            }
+            OperationLocator locator = new OperationLocator(table, err);
+            OperationEntry oper =
+                    locator.locateOperation(exp.getQualifier(), exp.getName(),
+                            argtypes);
+            return oper;
+        }
+        catch (SymbolSearchException ex) {
+            throw new TypeResolutionException();
+        }
+    }
+
     public Type getProgramIntegerExpType(ProgramIntegerExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         TypeHolder holder = table.getTypeHolder();
         if (holder.containsTypeInteger()) {
             return holder.getTypeInteger();
-        } else {
+        }
+        else {
             String msg = cantFindType("Std_Integer_Fac.Integer");
             err.error(exp.getLocation(), msg);
             throw new TypeResolutionException();
@@ -320,25 +363,25 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     }
 
     public Type getProgramCharExpType(ProgramCharExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         TypeHolder holder = table.getTypeHolder();
         if (holder.containsTypeChar()) {
             return holder.getTypeChar();
-        } else {
+        }
+        else {
             String msg = cantFindType("Std_Character_Fac.Character"); //Changed this from Char to Character
             err.error(exp.getLocation(), msg);
             throw new TypeResolutionException();
         }
     }
-    
+
     public Type getProgramStringExpType(ProgramStringExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         TypeHolder holder = table.getTypeHolder();
         if (holder.containsTypeChar_Str()) {
             return holder.getTypeChar_Str();
-        } else {
+        }
+        else {
             String msg = cantFindType("Std_Char_Str_Fac.Char_Str");
             err.error(exp.getLocation(), msg);
             throw new TypeResolutionException();
@@ -346,12 +389,12 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     }
 
     public Type getProgramDoubleExpType(ProgramDoubleExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         TypeHolder holder = table.getTypeHolder();
         if (holder.containsTypeReal()) {
             return holder.getTypeReal();
-        } else {
+        }
+        else {
             String msg = cantFindType("Std_Real_Number_Fac.Real");
             err.error(exp.getLocation(), msg);
             throw new TypeResolutionException();
@@ -359,8 +402,7 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     }
 
     public Type getVariableDotExpType(VariableDotExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         if (exp.getSemanticExp() == null) {
             exp.setSemanticExp(extractSemanticExp(exp));
         }
@@ -368,26 +410,27 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     }
 
     public Type getVariableNameExpType(VariableNameExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         VariableLocator locator = new VariableLocator(table, err);
         try {
-            VarEntry entry = locator.locateProgramVariable(exp.getQualifier(),
-                                                           exp.getName());
+            VarEntry entry =
+                    locator.locateProgramVariable(exp.getQualifier(), exp
+                            .getName());
             return entry.getType();
-        } catch (SymbolSearchException ex) {
+        }
+        catch (SymbolSearchException ex) {
             throw new TypeResolutionException();
         }
     }
 
     public Type getVariableArrayExpType(VariableArrayExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         VariableLocator locator = new VariableLocator(table, err);
         try {
-            VarEntry entry = locator.locateProgramVariable(exp.getQualifier(),
-                                                           exp.getName());
-            
+            VarEntry entry =
+                    locator.locateProgramVariable(exp.getQualifier(), exp
+                            .getName());
+
             /* The preprocessor changes all ArrayTy to a Facility, so we will when we try to check the type of entry,
              * it will never be of ArrayType 
              * - YS
@@ -395,21 +438,22 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
             //checkArrayIndex(exp.getArgument());
             ArrayType arrtype = castToArrayType(entry.getType());
             return arrtype.getEntry();
-            */
-            
+             */
+
             return entry.getType();
-        } catch (SymbolSearchException ex) {
+        }
+        catch (SymbolSearchException ex) {
             throw new TypeResolutionException();
         }
     }
 
     public Type getVariableRecordExpType(VariableRecordExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         try {
             VariableLocator locator = new VariableLocator(table, err);
-            VarEntry entry = locator.locateProgramVariable(exp.getQualifier(),
-                                                           exp.getName());
+            VarEntry entry =
+                    locator.locateProgramVariable(exp.getQualifier(), exp
+                            .getName());
             Type type = entry.getType();
             Type fieldtype = null;
             Iterator<VariableExp> i = exp.getFields().iterator();
@@ -423,7 +467,8 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
                 }
             }
             return fieldtype;
-        } catch (SymbolSearchException ex) {
+        }
+        catch (SymbolSearchException ex) {
             throw new TypeResolutionException();
         }
     }
@@ -433,37 +478,39 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     // ===========================================================
 
     private VariableExp extractSemanticExp(VariableDotExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         List<ProgramExp> segs = new List<ProgramExp>();
         Iterator<VariableExp> i = exp.getSegments().iterator();
         while (i.hasNext()) {
-            segs.add((ProgramExp)i.next());
+            segs.add((ProgramExp) i.next());
         }
-        ProgramDotExp dexp = new ProgramDotExp(exp.getLocation(), segs,
-                                               exp.getSemanticExp());
+        ProgramDotExp dexp =
+                new ProgramDotExp(exp.getLocation(), segs, exp.getSemanticExp());
         ProgramExp pexp = extractSemanticExp(dexp);
         return castToVariableExp(pexp);
     }
 
     private ProgramExp extractSemanticExp(ProgramDotExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         ProgramExp exp1 = exp.getSegments().get(0);
         ProgramExp exp2 = exp.getSegments().get(1);
         if (isProgramQualifier(exp1)) {
             PosSymbol qual = getProgramQualifier(exp1);
             if (exp.getSegments().size() == 2) {
                 if (exp2 instanceof VariableNameExp) {
-                    return getQualifiedName(qual, (VariableNameExp)exp2);
-                } else if (exp2 instanceof VariableArrayExp) {
-                    return getQualifiedArray(qual, (VariableArrayExp)exp2);
-                } else if (exp2 instanceof ProgramParamExp) {
-                    return extractSemanticExp(qual, (ProgramParamExp)exp2);
-                } else {
+                    return getQualifiedName(qual, (VariableNameExp) exp2);
+                }
+                else if (exp2 instanceof VariableArrayExp) {
+                    return getQualifiedArray(qual, (VariableArrayExp) exp2);
+                }
+                else if (exp2 instanceof ProgramParamExp) {
+                    return extractSemanticExp(qual, (ProgramParamExp) exp2);
+                }
+                else {
                     assert false : "exp2 is an invalid expression type";
                 }
-            } else { // more than 2 segments
+            }
+            else { // more than 2 segments
                 return convertToRecord(qual, exp);
             }
         }
@@ -471,96 +518,92 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     }
 
     private ProgramExp extractSemanticExp(ProgramParamExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         return extractSemanticExp(null, exp);
     }
 
-//      private ProgramExp extractSemanticExp(PosSymbol qual, ProgramParamExp exp)
-//          throws TypeResolutionException
-//      {
-//          try {
-//              VariableLocator locator = new VariableLocator(table);
-//              if (locator.isArrayVariable(qual, exp.getName())) {
-//                  if (exp.getArguments().size() > 1) {
-//                      String msg = multArgsInArrayMessage();
-//                      err.error(exp.getLocation(), msg);
-//                      throw new TypeResolutionException();
-//                  }
-//                  return new VariableArrayExp(exp.getLocation(), qual,
-//                                 exp.getName(), exp.getArguments().get(0));
-//              } else {
-//                  return new ProgramFunctionExp(exp.getLocation(), qual,
-//                                 exp.getName(), exp.getArguments());
-//              }
-//          } catch (SymbolSearchException ex) {
-//              throw new TypeResolutionException();
-//          }
-//      }
+    //      private ProgramExp extractSemanticExp(PosSymbol qual, ProgramParamExp exp)
+    //          throws TypeResolutionException
+    //      {
+    //          try {
+    //              VariableLocator locator = new VariableLocator(table);
+    //              if (locator.isArrayVariable(qual, exp.getName())) {
+    //                  if (exp.getArguments().size() > 1) {
+    //                      String msg = multArgsInArrayMessage();
+    //                      err.error(exp.getLocation(), msg);
+    //                      throw new TypeResolutionException();
+    //                  }
+    //                  return new VariableArrayExp(exp.getLocation(), qual,
+    //                                 exp.getName(), exp.getArguments().get(0));
+    //              } else {
+    //                  return new ProgramFunctionExp(exp.getLocation(), qual,
+    //                                 exp.getName(), exp.getArguments());
+    //              }
+    //          } catch (SymbolSearchException ex) {
+    //              throw new TypeResolutionException();
+    //          }
+    //      }
 
     private ProgramExp extractSemanticExp(PosSymbol qual, ProgramParamExp exp)
-        throws TypeResolutionException
-    {
-//          try {
-            VariableLocator locator = new VariableLocator(table, err);
-            if (exp.getArguments().size() == 1
+            throws TypeResolutionException {
+        //          try {
+        VariableLocator locator = new VariableLocator(table, err);
+        if (exp.getArguments().size() == 1
                 && locator.isArrayVariable(qual, exp.getName())) {
-                try {
-                    checkArrayIndex(exp.getArguments().get(0));
-                } catch (TypeResolutionException trex) {
-                    return new ProgramFunctionExp(exp.getLocation(), qual,
-                               exp.getName(), exp.getArguments());
-                }
-                return new VariableArrayExp(exp.getLocation(), qual,
-                               exp.getName(), exp.getArguments().get(0));
-            } else {
-                return new ProgramFunctionExp(exp.getLocation(), qual,
-                               exp.getName(), exp.getArguments());
+            try {
+                checkArrayIndex(exp.getArguments().get(0));
             }
-//          } catch (SymbolSearchException ex) {
-//              throw new TypeResolutionException();
-//          }
+            catch (TypeResolutionException trex) {
+                return new ProgramFunctionExp(exp.getLocation(), qual, exp
+                        .getName(), exp.getArguments());
+            }
+            return new VariableArrayExp(exp.getLocation(), qual, exp.getName(),
+                    exp.getArguments().get(0));
+        }
+        else {
+            return new ProgramFunctionExp(exp.getLocation(), qual, exp
+                    .getName(), exp.getArguments());
+        }
+        //          } catch (SymbolSearchException ex) {
+        //              throw new TypeResolutionException();
+        //          }
     }
 
-    private VariableNameExp getQualifiedName(PosSymbol qual,
-                                             VariableNameExp exp) {
+    private VariableNameExp getQualifiedName(PosSymbol qual, VariableNameExp exp) {
         return new VariableNameExp(exp.getLocation(), qual, exp.getName());
     }
 
     private VariableArrayExp getQualifiedArray(PosSymbol qual,
-                                               VariableArrayExp exp) {
-        return new VariableArrayExp(exp.getLocation(), qual, exp.getName(),
-                                    exp.getArgument());
+            VariableArrayExp exp) {
+        return new VariableArrayExp(exp.getLocation(), qual, exp.getName(), exp
+                .getArgument());
     }
 
     private VariableArrayExp convertToArray(ProgramParamExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         if (exp.getArguments().size() > 1) {
             String msg = multArgsInArrayMessage();
             err.error(exp.getLocation(), msg);
             throw new TypeResolutionException();
         }
-        return new VariableArrayExp(exp.getLocation(), null, exp.getName(),
-                                    exp.getArguments().get(0));
+        return new VariableArrayExp(exp.getLocation(), null, exp.getName(), exp
+                .getArguments().get(0));
     }
 
     private VariableRecordExp convertToRecord(ProgramDotExp exp)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         return convertToRecord(null, exp);
     }
 
-    private VariableRecordExp convertToRecord(PosSymbol qual,
-                                              ProgramDotExp exp)
-        throws TypeResolutionException
-    {
+    private VariableRecordExp convertToRecord(PosSymbol qual, ProgramDotExp exp)
+            throws TypeResolutionException {
         VariableNameExp nexp = null;
         int start = 0;
         if (qual != null) {
             nexp = castToVariableNameExp(exp.getSegments().get(1));
             start = 2;
-        } else {
+        }
+        else {
             nexp = castToVariableNameExp(exp.getSegments().get(0));
             start = 1;
         }
@@ -570,8 +613,9 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
             ProgramExp pexp = exp.getSegments().get(i);
             VariableExp vexp = null;
             if (pexp instanceof ProgramParamExp) {
-                vexp = convertToArray((ProgramParamExp)pexp);
-            } else {
+                vexp = convertToArray((ProgramParamExp) pexp);
+            }
+            else {
                 vexp = castToVariableExp(pexp);
             }
             segs.add(vexp);
@@ -579,10 +623,10 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
         Location loc = (qual == null) ? exp.getLocation() : qual.getLocation();
         return new VariableRecordExp(loc, qual, name, segs);
     }
-    
+
     private boolean isProgramQualifier(ProgramExp exp) {
         if (exp instanceof VariableNameExp) {
-            PosSymbol qual = ((VariableNameExp)exp).getName();
+            PosSymbol qual = ((VariableNameExp) exp).getName();
             QualifierLocator locator = new QualifierLocator(table, err);
             return locator.isProgramQualifier(qual);
         }
@@ -591,17 +635,16 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
 
     private PosSymbol getProgramQualifier(ProgramExp exp) {
         if (exp instanceof VariableNameExp) {
-            return ((VariableNameExp)exp).getName();
+            return ((VariableNameExp) exp).getName();
         }
         assert false : "exp is not an instance of VariableNameExp";
         return null;
     }
 
     private void checkArrayType(VariableExp exp, Type type)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         while (type instanceof IndirectType) {
-            type = ((IndirectType)type).getType();
+            type = ((IndirectType) type).getType();
         }
         if (!(type instanceof ArrayType)) {
             String msg = expectingArrayMessage(type.toString());
@@ -610,22 +653,22 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
         }
     }
 
-    private void checkArrayIndex(ProgramExp exp)
-        throws TypeResolutionException
-    {
+    private void checkArrayIndex(ProgramExp exp) throws TypeResolutionException {
         Type type = getProgramExpType(exp);
         TypeHolder holder = table.getTypeHolder();
         if (holder.containsTypeInteger()) {
             Type itype = holder.getTypeInteger();
             TypeMatcher matcher = new TypeMatcher();
             if (!matcher.programMatches(type, itype)) {
-                String msg = expectedDiffTypeMessage(
-                                 itype.getRelativeName(exp.getLocation()),
-                                 type.getRelativeName(exp.getLocation()));
+                String msg =
+                        expectedDiffTypeMessage(itype.getRelativeName(exp
+                                .getLocation()), type.getRelativeName(exp
+                                .getLocation()));
                 err.error(exp.getLocation(), msg);
                 throw new TypeResolutionException();
             }
-        } else {
+        }
+        else {
             String msg = cantFindType("Std_Integer_Fac.Integer");
             err.error(exp.getLocation(), msg);
             throw new TypeResolutionException();
@@ -633,52 +676,53 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     }
 
     private void checkRecordType(VariableExp exp, Type type)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         //NOTE: Try establishing the progress metric for this loop!
         while (type instanceof IndirectType) {
-            type = ((IndirectType)type).getType();
+            type = ((IndirectType) type).getType();
         }
         if (!(type instanceof RecordType)) {
             String msg;
             String progTypeName = type.getRelativeName(exp.getLocation());
             if (type instanceof ArrayType) {
                 msg = expectingRecordFoundArrayMessage(progTypeName);
-            } else {
+            }
+            else {
                 msg = expectingRecordFoundHiddenMessage(progTypeName);
             }
             err.error(exp.getLocation(), msg);
             throw new TypeResolutionException();
         }
     }
-        
+
     private Type getFieldType(RecordType rectype, VariableExp field)
-        throws TypeResolutionException
-    {
+            throws TypeResolutionException {
         PosSymbol name = null;
         if (field instanceof VariableNameExp) {
-            name = ((VariableNameExp)field).getName();
-        } else if (field instanceof VariableArrayExp) {
-            name = ((VariableArrayExp)field).getName();
-            checkArrayIndex(((VariableArrayExp)field).getArgument());
-        } else {
+            name = ((VariableNameExp) field).getName();
+        }
+        else if (field instanceof VariableArrayExp) {
+            name = ((VariableArrayExp) field).getName();
+            checkArrayIndex(((VariableArrayExp) field).getArgument());
+        }
+        else {
             assert false : "field is an invalid type.";
-        	throw new TypeResolutionException();
+            throw new TypeResolutionException();
         }
         Iterator<FieldItem> i = rectype.getFields().iterator();
         while (i.hasNext()) {
             FieldItem item = i.next();
             if (item.getName().getSymbol() == name.getSymbol()) {
-                if (  item.getType() instanceof ArrayType &&
-                      field instanceof VariableArrayExp) {
-                    return ((ArrayType)item.getType()).getEntry();
-                } else {
+                if (item.getType() instanceof ArrayType
+                        && field instanceof VariableArrayExp) {
+                    return ((ArrayType) item.getType()).getEntry();
+                }
+                else {
                     return item.getType();
                 }
             }
         }
-        String msg = fieldNotFoundMessage(name.toString(),
-                                          rectype.toString());
+        String msg = fieldNotFoundMessage(name.toString(), rectype.toString());
         err.error(name.getLocation(), msg);
         throw new TypeResolutionException();
     }
@@ -689,11 +733,12 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
 
     private ArrayType castToArrayType(Type type) {
         if (type instanceof IndirectType) {
-            type = ((IndirectType)type).getType();
+            type = ((IndirectType) type).getType();
         }
         if (type instanceof ArrayType) {
-            return (ArrayType)type;
-        } else {
+            return (ArrayType) type;
+        }
+        else {
             assert false : "type is invalid";
             return null;
         }
@@ -701,11 +746,12 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
 
     private RecordType castToRecordType(Type type) {
         if (type instanceof IndirectType) {
-            type = ((IndirectType)type).getType();
+            type = ((IndirectType) type).getType();
         }
         if (type instanceof RecordType) {
-            return (RecordType)type;
-        } else {
+            return (RecordType) type;
+        }
+        else {
             assert false : "type is invalid";
             return null;
         }
@@ -713,8 +759,9 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
 
     private VariableNameExp castToVariableNameExp(ProgramExp exp) {
         if (exp instanceof VariableNameExp) {
-            return (VariableNameExp)exp;
-        } else {
+            return (VariableNameExp) exp;
+        }
+        else {
             assert false : "exp is invalid";
             return null;
         }
@@ -722,32 +769,34 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
 
     private VariableExp castToVariableExp(ProgramExp exp) {
         if (exp instanceof VariableExp) {
-            return (VariableExp)exp;
-        } else {
+            return (VariableExp) exp;
+        }
+        else {
             assert false : "exp is invalid";
             return null;
         }
     }
-    
+
     // -----------------------------------------------------------
     // Array Facility Type Methods
     // -----------------------------------------------------------
-    
-    /* Finds the type of the array */ 
+
+    /* Finds the type of the array */
     private Type getArrayType(Location loc, Type type)
-    		throws TypeResolutionException
-    {
-    	/* Gets rid of all the IndirectType wrappers */
-    	while (type instanceof IndirectType) {
-    		type = ((IndirectType)type).getType();
-    	}
-    	
-    	/* Check if it is a NameType containing a FunctionType */
-    	if (type instanceof NameType && ((NameType) type).getType() instanceof FunctionType) {
-    		FunctionType fType = (FunctionType) ((NameType) type).getType();
-    		return fType.getRange();
-    	} else {
-    		String msg = expectingArrayMessage(type.toString());
+            throws TypeResolutionException {
+        /* Gets rid of all the IndirectType wrappers */
+        while (type instanceof IndirectType) {
+            type = ((IndirectType) type).getType();
+        }
+
+        /* Check if it is a NameType containing a FunctionType */
+        if (type instanceof NameType
+                && ((NameType) type).getType() instanceof FunctionType) {
+            FunctionType fType = (FunctionType) ((NameType) type).getType();
+            return fType.getRange();
+        }
+        else {
+            String msg = expectingArrayMessage(type.toString());
             err.error(loc, msg);
             throw new TypeResolutionException();
         }
@@ -762,8 +811,7 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     }
 
     private String expectedDiffTypeMessage(String t1, String t2) {
-        return "  Expected type: " + t1 + "\n"
-            + "  Found type: " + t2;
+        return "  Expected type: " + t1 + "\n" + "  Found type: " + t2;
     }
 
     private String multArgsInArrayMessage() {
@@ -776,16 +824,16 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
 
     private String expectingRecordFoundArrayMessage(String type) {
         return "  Expected a type represented by a record" + "\n"
-            + "  Found type: " + type + " represented by an array.";
+                + "  Found type: " + type + " represented by an array.";
     }
 
     private String expectingRecordFoundHiddenMessage(String type) {
         return "  Expected a type represented by a record" + "\n"
-            + "  Found type: " + type + " whose representation is hidden.";
+                + "  Found type: " + type + " whose representation is hidden.";
     }
 
     private String fieldNotFoundMessage(String field, String record) {
-        return "Could not find a field with name " + field
-            + " in record " + record + ".";
+        return "Could not find a field with name " + field + " in record "
+                + record + ".";
     }
 }

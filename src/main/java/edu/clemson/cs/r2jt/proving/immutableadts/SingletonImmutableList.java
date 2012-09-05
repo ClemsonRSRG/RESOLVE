@@ -6,67 +6,67 @@ import edu.clemson.cs.r2jt.proving.SingletonIterator;
 
 public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
 
-	private final EmptyImmutableList<E> EMPTY = new EmptyImmutableList<E>();
-	
-	private final E myElement;
-	
-	public SingletonImmutableList(E e) {
-		myElement = e;
-	}
+    private final EmptyImmutableList<E> EMPTY = new EmptyImmutableList<E>();
 
-	@Override
-	public E get(int index) {
-		if (index != 0) {
-			throw new IndexOutOfBoundsException();
-		}
-		
-		return myElement;
-	}
+    private final E myElement;
 
-	@Override
-	public SimpleImmutableList<E> head(int length) {
-		SimpleImmutableList<E> retval;
-		
-		switch (length) {
-		case 0:
-			retval = EMPTY;
-			break;
-		case 1:
-			retval = this;
-			break;
-		default:
-			throw new IndexOutOfBoundsException();
-		}
-		
-		return retval;
-	}
+    public SingletonImmutableList(E e) {
+        myElement = e;
+    }
 
-	@Override
-	public Iterator<E> iterator() {
-		return new SingletonIterator<E>(myElement);
-	}
+    @Override
+    public E get(int index) {
+        if (index != 0) {
+            throw new IndexOutOfBoundsException();
+        }
 
-	@Override
-	public int size() {
-		return 1;
-	}
+        return myElement;
+    }
 
-	@Override
-	public SimpleImmutableList<E> tail(int startIndex) {
-		
-		SimpleImmutableList<E> retval;
-		
-		switch (startIndex) {
-		case 0:
-			retval = this;
-			break;
-		case 1:
-			retval = EMPTY;
-			break;
-		default:
-			throw new IndexOutOfBoundsException();
-		}
-		
-		return retval;
-	}
+    @Override
+    public SimpleImmutableList<E> head(int length) {
+        SimpleImmutableList<E> retval;
+
+        switch (length) {
+        case 0:
+            retval = EMPTY;
+            break;
+        case 1:
+            retval = this;
+            break;
+        default:
+            throw new IndexOutOfBoundsException();
+        }
+
+        return retval;
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return new SingletonIterator<E>(myElement);
+    }
+
+    @Override
+    public int size() {
+        return 1;
+    }
+
+    @Override
+    public SimpleImmutableList<E> tail(int startIndex) {
+
+        SimpleImmutableList<E> retval;
+
+        switch (startIndex) {
+        case 0:
+            retval = this;
+            break;
+        case 1:
+            retval = EMPTY;
+            break;
+        default:
+            throw new IndexOutOfBoundsException();
+        }
+
+        return retval;
+    }
 }

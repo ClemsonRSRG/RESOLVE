@@ -5,9 +5,9 @@ import java.util.Map;
 
 public class ProverResult {
 
-	private Map<VC, ProofResult> myResults = new HashMap<VC, ProofResult>();
-	
-	public void addVCResult(VC vc, ProofResult result) {
-		myResults.put(vc, result);
-	}
+    private Map<VC, ProofResult> myResults = new HashMap<VC, ProofResult>();
+
+    public void addVCResult(VC vc, ProofResult result) {
+        myResults.put(vc, result);
+    }
 }

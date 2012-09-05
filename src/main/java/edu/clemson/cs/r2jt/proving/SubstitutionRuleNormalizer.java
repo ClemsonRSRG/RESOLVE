@@ -19,26 +19,26 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
  * a warning when it filters out a rule.</p>
  */
 public class SubstitutionRuleNormalizer extends AbstractEqualityRuleNormalizer {
-	
-	public SubstitutionRuleNormalizer(MathExpTypeResolver r, boolean noisy) {
-		super(r, noisy);
-	}
-	
-	public SubstitutionRuleNormalizer(MathExpTypeResolver r) {
-		this(r, true);
-	}
-	
-	@Override
-	protected List<VCTransformer> doNormalize(PExp left, PExp right) {
-		List<VCTransformer> retval = new ArrayList<VCTransformer>(2);
-		
-		//Substitute left expression for right
-		retval.add(new MatchReplaceStep(new NewBindReplace(left, right)));
-		
-		//Substitute right expression for left
-		retval.add(new MatchReplaceStep(new NewBindReplace(right, left)));
-		
-		return retval;
-	}
+
+    public SubstitutionRuleNormalizer(MathExpTypeResolver r, boolean noisy) {
+        super(r, noisy);
+    }
+
+    public SubstitutionRuleNormalizer(MathExpTypeResolver r) {
+        this(r, true);
+    }
+
+    @Override
+    protected List<VCTransformer> doNormalize(PExp left, PExp right) {
+        List<VCTransformer> retval = new ArrayList<VCTransformer>(2);
+
+        //Substitute left expression for right
+        retval.add(new MatchReplaceStep(new NewBindReplace(left, right)));
+
+        //Substitute right expression for left
+        retval.add(new MatchReplaceStep(new NewBindReplace(right, left)));
+
+        return retval;
+    }
 
 }

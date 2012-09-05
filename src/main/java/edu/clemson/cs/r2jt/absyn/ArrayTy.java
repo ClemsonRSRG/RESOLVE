@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * ArrayTy.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -88,15 +88,10 @@ public class ArrayTy extends Ty {
     // ===========================================================
 
     public ArrayTy() {
-        // Empty
+    // Empty
     }
 
-    public ArrayTy(
-            Location location,
-            ProgramExp lo,
-            ProgramExp hi,
-            Ty entryType)
-    {
+    public ArrayTy(Location location, ProgramExp lo, ProgramExp hi, Ty entryType) {
         this.location = location;
         this.lo = lo;
         this.hi = hi;
@@ -112,32 +107,48 @@ public class ArrayTy extends Ty {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the lo variable. */
-    public ProgramExp getLo() { return lo; }
+    public ProgramExp getLo() {
+        return lo;
+    }
 
     /** Returns the value of the hi variable. */
-    public ProgramExp getHi() { return hi; }
+    public ProgramExp getHi() {
+        return hi;
+    }
 
     /** Returns the value of the entryType variable. */
-    public Ty getEntryType() { return entryType; }
+    public Ty getEntryType() {
+        return entryType;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the lo variable to the specified value. */
-    public void setLo(ProgramExp lo) { this.lo = lo; }
+    public void setLo(ProgramExp lo) {
+        this.lo = lo;
+    }
 
     /** Sets the hi variable to the specified value. */
-    public void setHi(ProgramExp hi) { this.hi = hi; }
+    public void setHi(ProgramExp hi) {
+        this.hi = hi;
+    }
 
     /** Sets the entryType variable to the specified value. */
-    public void setEntryType(Ty entryType) { this.entryType = entryType; }
+    public void setEntryType(Ty entryType) {
+        this.entryType = entryType;
+    }
 
     // ===========================================================
     // Public Methods
@@ -149,8 +160,7 @@ public class ArrayTy extends Ty {
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getArrayTyType(this);
     }
 
@@ -176,16 +186,16 @@ public class ArrayTy extends Ty {
 
         return sb.toString();
     }
-    
-    public String toString(){
 
-    	StringBuffer sb = new StringBuffer();
+    public String toString() {
+
+        StringBuffer sb = new StringBuffer();
 
         sb.append("Array ");
         sb.append(lo.toString(0));
         sb.append("..");
         sb.append(hi.toString(0));
-        sb. append(" of ");
+        sb.append(" of ");
         sb.append(entryType.toString(0));
         return sb.toString();
     }

@@ -8,14 +8,14 @@ import edu.clemson.cs.r2jt.verification.AssertiveCode;
  * @author H. Smith
  */
 public class VCInconsistentException extends ProverException {
-	private static final long serialVersionUID = -468415982459853594L;
 
-	public VCInconsistentException(Metrics metrics) {
-		super(metrics);
-	}
-	
-	public VCInconsistentException(String msg, AssertiveCode VC, 
-			Metrics metrics) {
-		super(msg, VC, metrics);
-	}
+    private static final long serialVersionUID = -468415982459853594L;
+
+    public VCInconsistentException(Metrics metrics) {
+        super(metrics);
+    }
+
+    public VCInconsistentException(String msg, AssertiveCode VC, Metrics metrics) {
+        super(msg, VC, metrics);
+    }
 }

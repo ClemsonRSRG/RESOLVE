@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * ProgramParamExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -91,12 +91,8 @@ public class ProgramParamExp extends ProgramExp {
 
     public ProgramParamExp() {};
 
-    public ProgramParamExp(
-            Location location,
-            PosSymbol name,
-            List<ProgramExp> arguments,
-            ProgramExp semanticExp)
-    {
+    public ProgramParamExp(Location location, PosSymbol name,
+            List<ProgramExp> arguments, ProgramExp semanticExp) {
         this.location = location;
         this.name = name;
         this.arguments = arguments;
@@ -104,19 +100,21 @@ public class ProgramParamExp extends ProgramExp {
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	Exp retval;
-    	
-    	List<ProgramExp> newArguments = new List<ProgramExp>();
-    	for (ProgramExp a : arguments) {
-    		newArguments.add((ProgramExp) substitute(a, substitutions));
-    	}
-    	
-    	retval = new ProgramParamExp(location, name, newArguments,
-    			(ProgramExp) substitute(semanticExp, substitutions));
-    	
-    	retval.setType(type);
-    	return retval;
+        Exp retval;
+
+        List<ProgramExp> newArguments = new List<ProgramExp>();
+        for (ProgramExp a : arguments) {
+            newArguments.add((ProgramExp) substitute(a, substitutions));
+        }
+
+        retval =
+                new ProgramParamExp(location, name, newArguments,
+                        (ProgramExp) substitute(semanticExp, substitutions));
+
+        retval.setType(type);
+        return retval;
     }
+
     // ===========================================================
     // Accessor Methods
     // ===========================================================
@@ -126,33 +124,47 @@ public class ProgramParamExp extends ProgramExp {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the arguments variable. */
-    public List<ProgramExp> getArguments() { return arguments; }
+    public List<ProgramExp> getArguments() {
+        return arguments;
+    }
 
     /** Returns the value of the semanticExp variable. */
-    public ProgramExp getSemanticExp() { return semanticExp; }
+    public ProgramExp getSemanticExp() {
+        return semanticExp;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the arguments variable to the specified value. */
-    public void setArguments(List<ProgramExp> arguments) { this.arguments = arguments; }
+    public void setArguments(List<ProgramExp> arguments) {
+        this.arguments = arguments;
+    }
 
     /** Sets the semanticExp variable to the specified value. */
-    public void setSemanticExp(ProgramExp semanticExp) { 
-    	this.semanticExp = semanticExp; 
+    public void setSemanticExp(ProgramExp semanticExp) {
+        this.semanticExp = semanticExp;
     }
 
     // ===========================================================
@@ -165,8 +177,7 @@ public class ProgramParamExp extends ProgramExp {
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getProgramParamExpType(this);
     }
 
@@ -179,41 +190,38 @@ public class ProgramParamExp extends ProgramExp {
         sb.append("ProgramParamExp\n");
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         if (arguments != null) {
-            sb.append(arguments.asString(indent+increment,increment));
+            sb.append(arguments.asString(indent + increment, increment));
         }
 
         if (semanticExp != null) {
-            sb.append(semanticExp.asString(indent+increment,increment));
+            sb.append(semanticExp.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
-    
+
     /** Returns a formatted text string of this class. */
     public String toString(int indent) {
 
         StringBuffer sb = new StringBuffer();
         printSpace(indent, sb);
 
-        
         if (semanticExp != null) {
             sb.append(semanticExp.toString(0));
         }
-        else{
-        	printSpace(indent, sb);
-
-
+        else {
+            printSpace(indent, sb);
 
             if (name != null) {
                 sb.append(name.getName().toString());
             }
 
             if (arguments != null) {
-            	sb.append("(" + argumentsToString(arguments) + ")");
+                sb.append("(" + argumentsToString(arguments) + ")");
             }
         }
 
@@ -221,54 +229,52 @@ public class ProgramParamExp extends ProgramExp {
     }
 
     String argumentsToString(List<ProgramExp> arguments) {
-    	String str = new String();
-    	Iterator<ProgramExp> i = arguments.iterator();
-		while(i.hasNext()) {
-			ProgramExp exp = (ProgramExp)i.next();
-			str = str.concat(exp.toString(0));
-			if(i.hasNext())
-				str = str.concat(", ");
-		}
+        String str = new String();
+        Iterator<ProgramExp> i = arguments.iterator();
+        while (i.hasNext()) {
+            ProgramExp exp = (ProgramExp) i.next();
+            str = str.concat(exp.toString(0));
+            if (i.hasNext())
+                str = str.concat(", ");
+        }
         return str;
     }
-    
-    public String toString() {
-    	return name.getName();
-    }
 
-    
+    public String toString() {
+        return name.getName();
+    }
 
     /** Returns true if the variable is found in any sub expression
         of this one. **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Iterator<ProgramExp> i = arguments.iterator();
-        while(i.hasNext()) {
+        while (i.hasNext()) {
             ProgramExp temp = i.next();
-            if(temp != null) {
-                if(temp.containsVar(varName,IsOldExp)) {
+            if (temp != null) {
+                if (temp.containsVar(varName, IsOldExp)) {
                     return true;
                 }
             }
         }
-        if(semanticExp != null) {
-            if(semanticExp.containsVar(varName,IsOldExp)) {
+        if (semanticExp != null) {
+            if (semanticExp.containsVar(varName, IsOldExp)) {
                 return true;
             }
         }
         return false;
     }
-    
+
     public List<Exp> getSubExpressions() {
-    	List<Exp> list = new List<Exp>();
-    	Iterator<ProgramExp> argIt = arguments.iterator();
-    	while(argIt.hasNext()) {
-    		list.add((Exp)(argIt.next()));
-    	}
-    	return list;
+        List<Exp> list = new List<Exp>();
+        Iterator<ProgramExp> argIt = arguments.iterator();
+        while (argIt.hasNext()) {
+            list.add((Exp) (argIt.next()));
+        }
+        return list;
     }
-    
+
     public void setSubExpression(int index, Exp e) {
-    	arguments.set(index, (ProgramExp) e);
+        arguments.set(index, (ProgramExp) e);
     }
 
 }

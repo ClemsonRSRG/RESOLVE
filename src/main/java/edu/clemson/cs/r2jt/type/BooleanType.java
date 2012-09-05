@@ -10,8 +10,8 @@ import edu.clemson.cs.r2jt.scope.ScopeID;
 
 public class BooleanType extends Type {
 
-	public static final BooleanType INSTANCE = new BooleanType();
-	
+    public static final BooleanType INSTANCE = new BooleanType();
+
     // ===========================================================
     // Variables
     // ===========================================================
@@ -21,25 +21,26 @@ public class BooleanType extends Type {
     private PosSymbol myQualifier = new PosSymbol();
 
     private PosSymbol myName = new PosSymbol();
-    
-	
-	private BooleanType(){
-		myQualifier.setSymbol(Symbol.symbol("Boolean"));
-		myName.setSymbol(Symbol.symbol("B"));
-	}
+
+    private BooleanType() {
+        myQualifier.setSymbol(Symbol.symbol("Boolean"));
+        myName.setSymbol(Symbol.symbol("B"));
+    }
 
     // ===========================================================
     // Accessors
     // ===========================================================
 
-    public PosSymbol getName() { return myName; }
-	
+    public PosSymbol getName() {
+        return myName;
+    }
+
     // ===========================================================
     // Public Methods
     // ===========================================================
-  
+
     public Type instantiate(ScopeID sid, Binding replBind) {
-    	return new BooleanType();
+        return new BooleanType();
     }
 
     public Type toMath() {
@@ -55,9 +56,10 @@ public class BooleanType extends Type {
         sb.append(myName.toString());
         return sb.toString();
     }
+
     public String asString() {
         StringBuffer sb = new StringBuffer();
-    //    sb.append("*");
+        //    sb.append("*");
         if (myQualifier != null) {
             sb.append(myQualifier.toString() + ".");
         }
@@ -65,15 +67,15 @@ public class BooleanType extends Type {
         return sb.toString();
     }
 
-	@Override
-	public TypeName getProgramName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public TypeName getProgramName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public String getRelativeName(Location loc) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public String getRelativeName(Location loc) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

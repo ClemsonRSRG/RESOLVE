@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * FacilityDec.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -99,16 +99,11 @@ public class FacilityDec extends Dec {
 
     public FacilityDec() {};
 
-    public FacilityDec(
-            PosSymbol name,
-            PosSymbol conceptName,
+    public FacilityDec(PosSymbol name, PosSymbol conceptName,
             List<ModuleArgumentItem> conceptParams,
-            List<EnhancementItem> enhancements,
-            PosSymbol bodyName,
-            PosSymbol profileName,
-            List<ModuleArgumentItem> bodyParams,
-            List<EnhancementBodyItem> enhancementBodies)
-    {
+            List<EnhancementItem> enhancements, PosSymbol bodyName,
+            PosSymbol profileName, List<ModuleArgumentItem> bodyParams,
+            List<EnhancementBodyItem> enhancementBodies) {
         this.name = name;
         this.conceptName = conceptName;
         this.conceptParams = conceptParams;
@@ -128,56 +123,88 @@ public class FacilityDec extends Dec {
     // -----------------------------------------------------------
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the conceptName variable. */
-    public PosSymbol getConceptName() { return conceptName; }
+    public PosSymbol getConceptName() {
+        return conceptName;
+    }
 
     /** Returns the value of the conceptParams variable. */
-    public List<ModuleArgumentItem> getConceptParams() { return conceptParams; }
+    public List<ModuleArgumentItem> getConceptParams() {
+        return conceptParams;
+    }
 
     /** Returns the value of the enhancements variable. */
-    public List<EnhancementItem> getEnhancements() { return enhancements; }
+    public List<EnhancementItem> getEnhancements() {
+        return enhancements;
+    }
 
     /** Returns the value of the bodyName variable. */
-    public PosSymbol getBodyName() { return bodyName; }
+    public PosSymbol getBodyName() {
+        return bodyName;
+    }
 
     /** Returns the value of the profileName variable. */
-    public PosSymbol getProfileName() { return profileName; }
+    public PosSymbol getProfileName() {
+        return profileName;
+    }
 
     /** Returns the value of the bodyParams variable. */
-    public List<ModuleArgumentItem> getBodyParams() { return bodyParams; }
+    public List<ModuleArgumentItem> getBodyParams() {
+        return bodyParams;
+    }
 
     /** Returns the value of the enhancementBodies variable. */
-    public List<EnhancementBodyItem> getEnhancementBodies() { return enhancementBodies; }
+    public List<EnhancementBodyItem> getEnhancementBodies() {
+        return enhancementBodies;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the conceptName variable to the specified value. */
-    public void setConceptName(PosSymbol conceptName) { this.conceptName = conceptName; }
+    public void setConceptName(PosSymbol conceptName) {
+        this.conceptName = conceptName;
+    }
 
     /** Sets the conceptParams variable to the specified value. */
-    public void setConceptParams(List<ModuleArgumentItem> conceptParams) { this.conceptParams = conceptParams; }
+    public void setConceptParams(List<ModuleArgumentItem> conceptParams) {
+        this.conceptParams = conceptParams;
+    }
 
     /** Sets the enhancements variable to the specified value. */
-    public void setEnhancements(List<EnhancementItem> enhancements) { this.enhancements = enhancements; }
+    public void setEnhancements(List<EnhancementItem> enhancements) {
+        this.enhancements = enhancements;
+    }
 
     /** Sets the bodyName variable to the specified value. */
-    public void setBodyName(PosSymbol bodyName) { this.bodyName = bodyName; }
+    public void setBodyName(PosSymbol bodyName) {
+        this.bodyName = bodyName;
+    }
 
     /** Sets the profileName variable to the specified value. */
-    public void setProfileName(PosSymbol name) { this.profileName = name; }
+    public void setProfileName(PosSymbol name) {
+        this.profileName = name;
+    }
 
     /** Sets the bodyParams variable to the specified value. */
-    public void setBodyParams(List<ModuleArgumentItem> bodyParams) { this.bodyParams = bodyParams; }
+    public void setBodyParams(List<ModuleArgumentItem> bodyParams) {
+        this.bodyParams = bodyParams;
+    }
 
     /** Sets the enhancementBodies variable to the specified value. */
-    public void setEnhancementBodies(List<EnhancementBodyItem> enhancementBodies) { this.enhancementBodies = enhancementBodies; }
+    public void setEnhancementBodies(List<EnhancementBodyItem> enhancementBodies) {
+        this.enhancementBodies = enhancementBodies;
+    }
 
     // ===========================================================
     // Public Methods
@@ -197,31 +224,33 @@ public class FacilityDec extends Dec {
         sb.append("FacilityDec\n");
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         if (conceptName != null) {
-            sb.append(conceptName.asString(indent+increment,increment));
+            sb.append(conceptName.asString(indent + increment, increment));
         }
 
         if (conceptParams != null) {
-            sb.append(conceptParams.asString(indent+increment,increment));
+            sb.append(conceptParams.asString(indent + increment, increment));
         }
 
         if (enhancements != null) {
-            sb.append(enhancements.asString(indent+increment,increment));
+            sb.append(enhancements.asString(indent + increment, increment));
         }
 
         if (bodyName != null) {
-            sb.append(bodyName.asString(indent+increment,increment));
+            sb.append(bodyName.asString(indent + increment, increment));
         }
 
         if (bodyParams != null) {
-            sb.append(bodyParams.asString(indent+increment,increment));
+            sb.append(bodyParams.asString(indent + increment, increment));
         }
 
         if (enhancementBodies != null) {
-            sb.append(enhancementBodies.asString(indent+increment,increment));
+            sb
+                    .append(enhancementBodies.asString(indent + increment,
+                            increment));
         }
 
         return sb.toString();

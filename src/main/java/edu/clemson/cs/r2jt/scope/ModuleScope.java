@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * ModuleScope.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -85,7 +85,7 @@ public class ModuleScope extends Scope {
     // ===========================================================
 
     //private Environment env = Environment.getInstance();
-	private CompileEnvironment myInstanceEnvironment;
+    private CompileEnvironment myInstanceEnvironment;
 
     private ErrorHandler err;
 
@@ -101,29 +101,25 @@ public class ModuleScope extends Scope {
     private List<ModuleID> specs = new List<ModuleID>();
     private List<ModuleID> associates = new List<ModuleID>();
 
-    private Map<Symbol, ModuleEntry> progModules
-        = new Map<Symbol, ModuleEntry>();
-    private Map<Symbol, ModuleEntry> mathModules
-        = new Map<Symbol, ModuleEntry>();
+    private Map<Symbol, ModuleEntry> progModules =
+            new Map<Symbol, ModuleEntry>();
+    private Map<Symbol, ModuleEntry> mathModules =
+            new Map<Symbol, ModuleEntry>();
 
-    private Map<Symbol, TheoremEntry> theorems
-        = new Map<Symbol, TheoremEntry>();
-    private Map<Symbol, ProofEntry> proofs
-        = new Map<Symbol, ProofEntry>();
-    private Map<Symbol, DefinitionEntry> definitions
-        = new Map<Symbol, DefinitionEntry>();
-    private Map<Symbol, VarEntry> variables
-        = new Map<Symbol, VarEntry>();
-    private Map<Symbol, OperationEntry> operations
-        = new Map<Symbol, OperationEntry>();
-    private Map<Symbol, TypeEntry> types
-        = new Map<Symbol, TypeEntry>();
-    
-    private List<TypeCorrespondence> typeCorrespondences
-        = new List<TypeCorrespondence>();
-    
-    private List<MathVarDec> alternateVarTypes
-        = new List<MathVarDec>();
+    private Map<Symbol, TheoremEntry> theorems =
+            new Map<Symbol, TheoremEntry>();
+    private Map<Symbol, ProofEntry> proofs = new Map<Symbol, ProofEntry>();
+    private Map<Symbol, DefinitionEntry> definitions =
+            new Map<Symbol, DefinitionEntry>();
+    private Map<Symbol, VarEntry> variables = new Map<Symbol, VarEntry>();
+    private Map<Symbol, OperationEntry> operations =
+            new Map<Symbol, OperationEntry>();
+    private Map<Symbol, TypeEntry> types = new Map<Symbol, TypeEntry>();
+
+    private List<TypeCorrespondence> typeCorrespondences =
+            new List<TypeCorrespondence>();
+
+    private List<MathVarDec> alternateVarTypes = new List<MathVarDec>();
 
     private Binding binding = null;
 
@@ -136,7 +132,7 @@ public class ModuleScope extends Scope {
     // ===========================================================
 
     public ModuleScope(ModuleID id, CompileEnvironment instanceEnvironment) {
-    	myInstanceEnvironment = instanceEnvironment;
+        myInstanceEnvironment = instanceEnvironment;
         sid = ScopeID.createModuleScopeID(id);
         List<ModuleID> theories = myInstanceEnvironment.getTheories(id);
         Iterator<ModuleID> i = theories.iterator();
@@ -151,8 +147,9 @@ public class ModuleScope extends Scope {
     }
 
     public ModuleScope(FacilityDec dec, CompileEnvironment instanceEnvironment) {
-    	myInstanceEnvironment = instanceEnvironment;
-    	ModuleID mid = myInstanceEnvironment.getModuleID(dec.getName().getFile());
+        myInstanceEnvironment = instanceEnvironment;
+        ModuleID mid =
+                myInstanceEnvironment.getModuleID(dec.getName().getFile());
         sid = ScopeID.createFacilityScopeID(dec.getName(), mid);
         fdec = dec;
         this.err = myInstanceEnvironment.getErrorHandler();
@@ -164,13 +161,21 @@ public class ModuleScope extends Scope {
     // Accessor Methods
     // ===========================================================
 
-    public ScopeID getScopeID() { return sid; }
+    public ScopeID getScopeID() {
+        return sid;
+    }
 
-    public FacilityDec getFacilityDec() { return fdec; }
+    public FacilityDec getFacilityDec() {
+        return fdec;
+    }
 
-    public ModuleID getModuleID() { return sid.getModuleID(); }
-    
-    public Map<Symbol, TypeEntry> getTypes() { return types; }
+    public ModuleID getModuleID() {
+        return sid.getModuleID();
+    }
+
+    public Map<Symbol, TypeEntry> getTypes() {
+        return types;
+    }
 
     // ===========================================================
     // Public Methods
@@ -189,9 +194,9 @@ public class ModuleScope extends Scope {
     public List<Entry> getModuleParameters() {
         return params;
     }
-    
+
     public List<MathVarDec> getAlternateVarTypes() {
-    	 return alternateVarTypes;
+        return alternateVarTypes;
     }
 
     // -----------------------------------------------------------
@@ -233,10 +238,9 @@ public class ModuleScope extends Scope {
     // Methods Related to Imported Modules
     // -----------------------------------------------------------
 
-    /** Adds the specified uses item to the module scope. */ 
+    /** Adds the specified uses item to the module scope. */
     public void addUsesItem(ModuleID id) {
-        assert (id.getModuleKind() == ModuleKind.THEORY ||
-                id.getModuleKind() == ModuleKind.FACILITY);
+        assert (id.getModuleKind() == ModuleKind.THEORY || id.getModuleKind() == ModuleKind.FACILITY);
         addMathVisible(id);
         if (id.getModuleKind() == ModuleKind.FACILITY) {
             addProgramVisible(id);
@@ -312,7 +316,7 @@ public class ModuleScope extends Scope {
     public void addParameter(VarEntry entry) {
         params.add(entry);
     }
-    
+
     // -----------------------------------------------------------
     // Population Methods
     // -----------------------------------------------------------
@@ -327,25 +331,27 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> i = specs.iterator();
         while (i.hasNext()) {
             ModuleID id = i.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
-            if (  scope.containsLocalVariable(sym) ||
-                  scope.containsLocalNonConcType(sym)) {
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            if (scope.containsLocalVariable(sym)
+                    || scope.containsLocalNonConcType(sym)) {
                 return false;
             }
         }
         Iterator<ModuleID> j = associates.iterator();
         while (j.hasNext()) {
             ModuleID id = j.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocal(sym)) {
                 return false;
             }
         }
         return true;
     }
-    
+
     public boolean addDefinitionTypePermitted(Symbol sym) {
-    	if (mathModules.containsKey(sym)) {
+        if (mathModules.containsKey(sym)) {
             return false;
         }
         if (containsLocalType(sym)) {
@@ -354,7 +360,8 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> i = specs.iterator();
         while (i.hasNext()) {
             ModuleID id = i.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalNonConcType(sym)) {
                 return false;
             }
@@ -362,7 +369,8 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> j = associates.iterator();
         while (j.hasNext()) {
             ModuleID id = j.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalType(sym)) {
                 return false;
             }
@@ -380,16 +388,18 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> i = specs.iterator();
         while (i.hasNext()) {
             ModuleID id = i.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
-            if (  scope.containsLocalVariable(sym) ||
-                  scope.containsLocalNonConcType(sym)) {
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            if (scope.containsLocalVariable(sym)
+                    || scope.containsLocalNonConcType(sym)) {
                 return scope.getLocal(sym);
             }
         }
         Iterator<ModuleID> j = associates.iterator();
         while (j.hasNext()) {
             ModuleID id = j.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocal(sym)) {
                 return scope.getLocal(sym);
             }
@@ -402,14 +412,14 @@ public class ModuleScope extends Scope {
     public void addTheorem(TheoremEntry entry) {
         theorems.put(entry.getSymbol(), entry);
     }
-    
+
     public void addProof(ProofEntry entry) {
-    	proofs.put(entry.getSymbol(), entry);
+        proofs.put(entry.getSymbol(), entry);
     }
-    
+
     /** Adds a math definition to the module scope. */
     public void addDefinition(DefinitionEntry entry) {
-    	definitions.put(entry.getSymbol(), entry);
+        definitions.put(entry.getSymbol(), entry);
     }
 
     /** Adds a variable to the module scope. */
@@ -426,18 +436,18 @@ public class ModuleScope extends Scope {
     public void addType(TypeEntry entry) {
         types.put(entry.getName().getSymbol(), entry);
     }
-    
+
     public void addTypeCorrespondence(Type t1, Type t2) {
-    	TypeCorrespondence newTc = new TypeCorrespondence(t1, t2);
-    	typeCorrespondences.add(newTc);
+        TypeCorrespondence newTc = new TypeCorrespondence(t1, t2);
+        typeCorrespondences.add(newTc);
     }
-    
+
     public List<TypeCorrespondence> getTypeCorrespondences() {
-    	return typeCorrespondences;
+        return typeCorrespondences;
     }
-    
+
     public void addAlternateVarType(MathVarDec dec) {
-    	alternateVarTypes.add(dec);
+        alternateVarTypes.add(dec);
     }
 
     // -----------------------------------------------------------
@@ -451,7 +461,8 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> i = specs.iterator();
         while (i.hasNext()) {
             ModuleID id = i.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalVariable(sym)) {
                 return true;
             }
@@ -459,7 +470,8 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> j = associates.iterator();
         while (j.hasNext()) {
             ModuleID id = j.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalVariable(sym)) {
                 return true;
             }
@@ -474,7 +486,8 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> i = specs.iterator();
         while (i.hasNext()) {
             ModuleID id = i.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalVariable(sym)) {
                 return scope.getLocalVariable(sym);
             }
@@ -482,7 +495,8 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> j = associates.iterator();
         while (j.hasNext()) {
             ModuleID id = j.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalVariable(sym)) {
                 return scope.getLocalVariable(sym);
             }
@@ -490,30 +504,32 @@ public class ModuleScope extends Scope {
         assert false : "getVariable failed";
         return null;
     }
-   
+
     public boolean containsTheorem(Symbol sym) {
-    	if(containsLocalTheorem(sym)) {
-    		return true;
-    	}
-    	Iterator<ModuleID> i = associates.iterator();
-    	while(i.hasNext()) {
-    		ModuleID id = i.next();
-    		ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
-    		if(scope.containsLocalTheorem(sym)) {
-    			return true;
-    		}
-    	}
-    	return false;
-    }
-    
-    public TheoremEntry getTheorem(Symbol sym) {
-    	if(containsLocalTheorem(sym)) {
-    		return getLocalTheorem(sym);
-    	}
-    	Iterator<ModuleID> i = associates.iterator();
-    	while (i.hasNext()) {
+        if (containsLocalTheorem(sym)) {
+            return true;
+        }
+        Iterator<ModuleID> i = associates.iterator();
+        while (i.hasNext()) {
             ModuleID id = i.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            if (scope.containsLocalTheorem(sym)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public TheoremEntry getTheorem(Symbol sym) {
+        if (containsLocalTheorem(sym)) {
+            return getLocalTheorem(sym);
+        }
+        Iterator<ModuleID> i = associates.iterator();
+        while (i.hasNext()) {
+            ModuleID id = i.next();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalTheorem(sym)) {
                 return scope.getLocalTheorem(sym);
             }
@@ -521,30 +537,32 @@ public class ModuleScope extends Scope {
         assert false : "getDefinition failed";
         return null;
     }
-    
+
     public boolean containsProof(Symbol sym) {
-    	if(containsLocalProof(sym)) {
-    		return true;
-    	}
-    	Iterator<ModuleID> i = associates.iterator();
-    	while(i.hasNext()) {
-    		ModuleID id = i.next();
-    		ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
-    		if(scope.containsLocalProof(sym)) {
-    			return true;
-    		}
-    	}
-    	return false;
-    }
-    
-    public ProofEntry getProof(Symbol sym) {
-    	if(containsLocalProof(sym)) {
-    		return getLocalProof(sym);
-    	}
-    	Iterator<ModuleID> i = associates.iterator();
-    	while (i.hasNext()) {
+        if (containsLocalProof(sym)) {
+            return true;
+        }
+        Iterator<ModuleID> i = associates.iterator();
+        while (i.hasNext()) {
             ModuleID id = i.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            if (scope.containsLocalProof(sym)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public ProofEntry getProof(Symbol sym) {
+        if (containsLocalProof(sym)) {
+            return getLocalProof(sym);
+        }
+        Iterator<ModuleID> i = associates.iterator();
+        while (i.hasNext()) {
+            ModuleID id = i.next();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalProof(sym)) {
                 return scope.getLocalProof(sym);
             }
@@ -552,30 +570,32 @@ public class ModuleScope extends Scope {
         assert false : "getDefinition failed";
         return null;
     }
-    
+
     public boolean containsDefinition(Symbol sym) {
-    	if(containsLocalDefinition(sym)) {
-    		return true;
-    	}
-    	Iterator<ModuleID> i = associates.iterator();
-    	while(i.hasNext()) {
-    		ModuleID id = i.next();
-    		ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
-    		if(scope.containsLocalDefinition(sym)) {
-    			return true;
-    		}
-    	}
-    	return false;
-    }
-    
-    public DefinitionEntry getDefinition(Symbol sym) {
-    	if(containsLocalDefinition(sym)) {
-    		return getLocalDefinition(sym);
-    	}
-    	Iterator<ModuleID> i = associates.iterator();
+        if (containsLocalDefinition(sym)) {
+            return true;
+        }
+        Iterator<ModuleID> i = associates.iterator();
         while (i.hasNext()) {
             ModuleID id = i.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            if (scope.containsLocalDefinition(sym)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public DefinitionEntry getDefinition(Symbol sym) {
+        if (containsLocalDefinition(sym)) {
+            return getLocalDefinition(sym);
+        }
+        Iterator<ModuleID> i = associates.iterator();
+        while (i.hasNext()) {
+            ModuleID id = i.next();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalDefinition(sym)) {
                 return scope.getLocalDefinition(sym);
             }
@@ -591,7 +611,8 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> i = associates.iterator();
         while (i.hasNext()) {
             ModuleID id = i.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalOperation(sym)) {
                 return true;
             }
@@ -606,7 +627,8 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> i = associates.iterator();
         while (i.hasNext()) {
             ModuleID id = i.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalOperation(sym)) {
                 return scope.getLocalOperation(sym);
             }
@@ -622,7 +644,8 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> i = specs.iterator();
         while (i.hasNext()) {
             ModuleID id = i.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalNonConcType(sym)) {
                 return true;
             }
@@ -630,7 +653,8 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> j = associates.iterator();
         while (j.hasNext()) {
             ModuleID id = j.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalType(sym)) {
                 return true;
             }
@@ -645,7 +669,8 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> i = associates.iterator();
         while (i.hasNext()) {
             ModuleID id = i.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalNonConcType(sym)) {
                 return scope.getLocalType(sym);
             }
@@ -653,7 +678,8 @@ public class ModuleScope extends Scope {
         Iterator<ModuleID> j = associates.iterator();
         while (j.hasNext()) {
             ModuleID id = j.next();
-            ModuleScope scope = myInstanceEnvironment.getSymbolTable(id).getModuleScope();
+            ModuleScope scope =
+                    myInstanceEnvironment.getSymbolTable(id).getModuleScope();
             if (scope.containsLocalType(sym)) {
                 return scope.getLocalType(sym);
             }
@@ -667,49 +693,52 @@ public class ModuleScope extends Scope {
     // -----------------------------------------------------------
 
     public boolean containsLocal(Symbol sym) {
-        return (  theorems.containsKey(sym) ||
-        		  definitions.containsKey(sym) ||
-        		  proofs.containsKey(sym) ||
-                  variables.containsKey(sym) ||
-                  operations.containsKey(sym) ||
-                  types.containsKey(sym));
+        return (theorems.containsKey(sym) || definitions.containsKey(sym)
+                || proofs.containsKey(sym) || variables.containsKey(sym)
+                || operations.containsKey(sym) || types.containsKey(sym));
     }
 
     public Entry getLocal(Symbol sym) {
         if (theorems.containsKey(sym)) {
             return theorems.get(sym);
-        } else if (definitions.containsKey(sym)) {
-        	return definitions.get(sym);
-        } else if (proofs.containsKey(sym)) {
-        	return proofs.get(sym);
-        } else if (variables.containsKey(sym)) {
+        }
+        else if (definitions.containsKey(sym)) {
+            return definitions.get(sym);
+        }
+        else if (proofs.containsKey(sym)) {
+            return proofs.get(sym);
+        }
+        else if (variables.containsKey(sym)) {
             return variables.get(sym);
-        } else if (operations.containsKey(sym)) {
+        }
+        else if (operations.containsKey(sym)) {
             return operations.get(sym);
-        } else if (types.containsKey(sym)) {
+        }
+        else if (types.containsKey(sym)) {
             return types.get(sym);
-        } else {
+        }
+        else {
             assert false : "getLocal failed";
             return null;
         }
     }
 
     public boolean containsLocalProof(Symbol sym) {
-    	return (proofs.containsKey(sym));
+        return (proofs.containsKey(sym));
     }
-    
+
     public ProofEntry getLocalProof(Symbol sym) {
-    	return proofs.get(sym);
+        return proofs.get(sym);
     }
-    
+
     public boolean containsLocalTheorem(Symbol sym) {
-    	return (theorems.containsKey(sym));
+        return (theorems.containsKey(sym));
     }
-    
+
     public TheoremEntry getLocalTheorem(Symbol sym) {
-    	return theorems.get(sym);
+        return theorems.get(sym);
     }
-    
+
     /**
      * <p>Returns a <code>List</code> of the names of all the theorems defined 
      * locally in this module, in lexical order.</p>
@@ -718,20 +747,20 @@ public class ModuleScope extends Scope {
      *         locally in this module in lexical order.
      */
     public List<Symbol> getLocalTheoremNames() {
-    	List<Symbol> retval = new List<Symbol>();
-    	
-    	Set<Symbol> keys = theorems.keySet();
-    	Symbol[] alphabeticalKeys = new Symbol[keys.size()];
-    	keys.toArray(alphabeticalKeys);
-    	Arrays.sort(alphabeticalKeys);
-    	
-    	for (Symbol s : alphabeticalKeys) {
-    		retval.add(s);
-    	}
-    	
-    	return retval;
+        List<Symbol> retval = new List<Symbol>();
+
+        Set<Symbol> keys = theorems.keySet();
+        Symbol[] alphabeticalKeys = new Symbol[keys.size()];
+        keys.toArray(alphabeticalKeys);
+        Arrays.sort(alphabeticalKeys);
+
+        for (Symbol s : alphabeticalKeys) {
+            retval.add(s);
+        }
+
+        return retval;
     }
-    
+
     public boolean containsLocalVariable(Symbol sym) {
         return (variables.containsKey(sym));
     }
@@ -739,13 +768,13 @@ public class ModuleScope extends Scope {
     public VarEntry getLocalVariable(Symbol sym) {
         return variables.get(sym);
     }
-    
+
     public boolean containsLocalDefinition(Symbol sym) {
-    	return (definitions.containsKey(sym));
+        return (definitions.containsKey(sym));
     }
-    
+
     public DefinitionEntry getLocalDefinition(Symbol sym) {
-    	return definitions.get(sym);
+        return definitions.get(sym);
     }
 
     public boolean containsLocalOperation(Symbol sym) {
@@ -753,20 +782,20 @@ public class ModuleScope extends Scope {
     }
 
     public List<Symbol> getLocalOperationNames() {
-    	List<Symbol> retval = new List<Symbol>();
-    	
-    	Set<Symbol> keys = operations.keySet();
-    	Symbol[] alphabeticalKeys = new Symbol[keys.size()];
-    	keys.toArray(alphabeticalKeys);
-    	Arrays.sort(alphabeticalKeys);
-    	
-    	for (Symbol s : alphabeticalKeys) {
-    		retval.add(s);
-    	}
-    	
-    	return retval;
+        List<Symbol> retval = new List<Symbol>();
+
+        Set<Symbol> keys = operations.keySet();
+        Symbol[] alphabeticalKeys = new Symbol[keys.size()];
+        keys.toArray(alphabeticalKeys);
+        Arrays.sort(alphabeticalKeys);
+
+        for (Symbol s : alphabeticalKeys) {
+            retval.add(s);
+        }
+
+        return retval;
     }
-    
+
     public OperationEntry getLocalOperation(Symbol sym) {
         return operations.get(sym);
     }
@@ -776,13 +805,11 @@ public class ModuleScope extends Scope {
     }
 
     public boolean containsLocalConcType(Symbol sym) {
-        return (types.containsKey(sym) &&
-                types.get(sym).getType() instanceof ConcType);
+        return (types.containsKey(sym) && types.get(sym).getType() instanceof ConcType);
     }
 
     public boolean containsLocalNonConcType(Symbol sym) {
-        return (types.containsKey(sym) &&
-                !(types.get(sym).getType() instanceof ConcType));
+        return (types.containsKey(sym) && !(types.get(sym).getType() instanceof ConcType));
     }
 
     public TypeEntry getLocalType(Symbol sym) {
@@ -794,13 +821,16 @@ public class ModuleScope extends Scope {
     // -----------------------------------------------------------
 
     /** Returns a handle to this scope's binding. */
-    public Binding getBinding() { return binding; }
+    public Binding getBinding() {
+        return binding;
+    }
 
-    public TypeHolder getTypeHolder() { return holder; }
+    public TypeHolder getTypeHolder() {
+        return holder;
+    }
 
     public void setFacbind(Binding facbind) {
-        assert this.facbind == null :
-                "this.facbid != null: " + this.facbind;
+        assert this.facbind == null : "this.facbid != null: " + this.facbind;
         this.facbind = facbind;
     }
 
@@ -808,9 +838,7 @@ public class ModuleScope extends Scope {
     // Instantiation Methods
     // -----------------------------------------------------------
 
-    public void merge(List<ModuleScope> scopes)
-        throws InstantiationException
-    {
+    public void merge(List<ModuleScope> scopes) throws InstantiationException {
         Iterator<ModuleScope> i = scopes.iterator();
         while (i.hasNext()) {
             ModuleScope scope = i.next();
@@ -832,7 +860,8 @@ public class ModuleScope extends Scope {
             addDefinitionsFromScope(scope);
             addOperationsFromScope(scope);
             addTypesFromScope(scope);
-        } catch (InstantiationException ex) {
+        }
+        catch (InstantiationException ex) {
             ex.printStackTrace();
             throw new RuntimeException();
         }
@@ -847,48 +876,48 @@ public class ModuleScope extends Scope {
         }
     }
 
-    public ModuleScope instantiate(FacilityDec fdec,
-                           Map<Symbol, Type> typeMap, Binding replBind) {
+    public ModuleScope instantiate(FacilityDec fdec, Map<Symbol, Type> typeMap,
+            Binding replBind) {
         PosSymbol facility = fdec.getName();
         ModuleScope newscope = new ModuleScope(fdec, myInstanceEnvironment);
         Iterator<Symbol> i = variables.keyIterator();
         while (i.hasNext()) {
             Symbol sym = i.next();
-            VarEntry newentry
-                = variables.get(sym).instantiate(sid, replBind);
+            VarEntry newentry = variables.get(sym).instantiate(sid, replBind);
             newscope.variables.put(sym, newentry);
         }
         Iterator<Symbol> j = operations.keyIterator();
         while (j.hasNext()) {
             Symbol sym = j.next();
-            OperationEntry newentry
-                = operations.get(sym).instantiate(sid, replBind);
+            OperationEntry newentry =
+                    operations.get(sym).instantiate(sid, replBind);
             newscope.operations.put(sym, newentry);
         }
         Iterator<Symbol> m = definitions.keyIterator();
-        while(m.hasNext()) {
-        	Symbol sym = m.next();
-        	DefinitionEntry newentry
-        	    = definitions.get(sym).instantiate(sid, replBind);
-        	newscope.definitions.put(sym, newentry);
+        while (m.hasNext()) {
+            Symbol sym = m.next();
+            DefinitionEntry newentry =
+                    definitions.get(sym).instantiate(sid, replBind);
+            newscope.definitions.put(sym, newentry);
         }
         Iterator<Symbol> k = types.keyIterator();
         while (k.hasNext()) {
             Symbol sym = k.next();
             Type type = types.get(sym).getType();
-            if (type instanceof FormalType) { continue; }
-            Type newtype
-                = type.instantiate(sid, replBind);
+            if (type instanceof FormalType) {
+                continue;
+            }
+            Type newtype = type.instantiate(sid, replBind);
             if (type instanceof ConcType) {
                 newtype = getNameType(newtype, facility);
             }
-            TypeEntry newentry = new TypeEntry(replBind.getScope(),
-                                               types.get(sym).getName(),
-                                               newtype);
+            TypeEntry newentry =
+                    new TypeEntry(replBind.getScope(),
+                            types.get(sym).getName(), newtype);
             newscope.types.put(sym, newentry);
         }
-        newscope.binding = binding.instantiate(facility, newscope, replBind,
-                                               typeMap);
+        newscope.binding =
+                binding.instantiate(facility, newscope, replBind, typeMap);
         return newscope;
     }
 
@@ -898,13 +927,14 @@ public class ModuleScope extends Scope {
         while (i.hasNext()) {
             Symbol sym = i.next();
             if (types.get(sym).getType() instanceof NameType) {
-                NameType nametype = (NameType)types.get(sym).getType();
-                NameType newtype = new NameType(nametype.getModuleID(),
-                                   nametype.getName(), nametype.getType());
+                NameType nametype = (NameType) types.get(sym).getType();
+                NameType newtype =
+                        new NameType(nametype.getModuleID(),
+                                nametype.getName(), nametype.getType());
 
-                TypeEntry newentry = new TypeEntry(binding.getScope(),
-                                                   types.get(sym).getName(),
-                                                   newtype);
+                TypeEntry newentry =
+                        new TypeEntry(binding.getScope(), types.get(sym)
+                                .getName(), newtype);
                 types.put(sym, newentry);
             }
         }
@@ -940,7 +970,9 @@ public class ModuleScope extends Scope {
         sb.append("---------- Types ---------------------------------\n");
         sb.append(types.toString() + "\n");
         sb.append(binding.toString());
-        if (facbind != null) { sb.append(facbind.toString()); }
+        if (facbind != null) {
+            sb.append(facbind.toString());
+        }
         sb.append(holder.toString() + "\n");
         sb.append("----- end module scope ---------------------------\n");
         return sb.toString();
@@ -951,8 +983,7 @@ public class ModuleScope extends Scope {
     // ===========================================================
 
     private void addVariablesFromScope(ModuleScope scope)
-        throws InstantiationException
-    {
+            throws InstantiationException {
         Iterator<Symbol> i = scope.variables.keyIterator();
         while (i.hasNext()) {
             Symbol sym = i.next();
@@ -960,38 +991,35 @@ public class ModuleScope extends Scope {
             if (this.containsLocal(sym)) {
                 String loc1 = this.getLocal(sym).getLocation().toString();
                 String loc2 = var.getLocation().toString();
-                String msg = cantInstantiateMessage(sym.toString(),
-                                                    loc1, loc2);
+                String msg = cantInstantiateMessage(sym.toString(), loc1, loc2);
                 throw new InstantiationException(msg);
-            } else {
+            }
+            else {
                 this.addVariable(var);
             }
         }
     }
-    
+
     private void addDefinitionsFromScope(ModuleScope scope)
-        throws InstantiationException
-    {
-    	Iterator<Symbol> i = scope.definitions.keyIterator();
-    	while(i.hasNext()) {
-    		Symbol sym = i.next();
-    		DefinitionEntry def = scope.getLocalDefinition(sym);
-    		if(this.containsLocal(sym)) {
-    			String loc1 = this.getLocal(sym).getLocation().toString();
+            throws InstantiationException {
+        Iterator<Symbol> i = scope.definitions.keyIterator();
+        while (i.hasNext()) {
+            Symbol sym = i.next();
+            DefinitionEntry def = scope.getLocalDefinition(sym);
+            if (this.containsLocal(sym)) {
+                String loc1 = this.getLocal(sym).getLocation().toString();
                 String loc2 = def.getLocation().toString();
-                String msg = cantInstantiateMessage(sym.toString(),
-                                                    loc1, loc2);
+                String msg = cantInstantiateMessage(sym.toString(), loc1, loc2);
                 throw new InstantiationException(msg);
-    		}
-    		else {
-    			this.addDefinition(def);
-    		}
-    	}
+            }
+            else {
+                this.addDefinition(def);
+            }
+        }
     }
-            
+
     private void addOperationsFromScope(ModuleScope scope)
-        throws InstantiationException
-    {
+            throws InstantiationException {
         Iterator<Symbol> i = scope.operations.keyIterator();
         while (i.hasNext()) {
             Symbol sym = i.next();
@@ -999,18 +1027,17 @@ public class ModuleScope extends Scope {
             if (this.containsLocal(sym)) {
                 String loc1 = this.getLocal(sym).getLocation().toString();
                 String loc2 = oper.getLocation().toString();
-                String msg = cantInstantiateMessage(sym.toString(),
-                                                    loc1, loc2);
+                String msg = cantInstantiateMessage(sym.toString(), loc1, loc2);
                 throw new InstantiationException(msg);
-            } else {
+            }
+            else {
                 this.addOperation(oper);
             }
         }
     }
-            
+
     private void addTypesFromScope(ModuleScope scope)
-        throws InstantiationException
-    {
+            throws InstantiationException {
         Iterator<Symbol> i = scope.types.keyIterator();
         while (i.hasNext()) {
             Symbol sym = i.next();
@@ -1018,15 +1045,15 @@ public class ModuleScope extends Scope {
             if (this.containsLocal(sym)) {
                 String loc1 = this.getLocal(sym).getLocation().toString();
                 String loc2 = type.getLocation().toString();
-                String msg = cantInstantiateMessage(sym.toString(),
-                                                    loc1, loc2);
+                String msg = cantInstantiateMessage(sym.toString(), loc1, loc2);
                 throw new InstantiationException(msg);
-            } else {
+            }
+            else {
                 this.addType(type);
             }
         }
     }
-            
+
     private void addMathVisible(ModuleID id) {
         Symbol sym = id.getName();
         ModuleEntry entry = new ModuleEntry(id, myInstanceEnvironment);
@@ -1045,11 +1072,13 @@ public class ModuleScope extends Scope {
 
     private Type getNameType(Type type, PosSymbol facility) {
         //Environment env = Environment.getInstance();
-        ModuleID id = myInstanceEnvironment.getModuleID(facility.getLocation().getFile());
+        ModuleID id =
+                myInstanceEnvironment.getModuleID(facility.getLocation()
+                        .getFile());
         ConcType conctype = castToConcType(type);
-        return new NameType(id, facility, conctype.getName(),
-                            conctype.getType());
-    }        
+        return new NameType(id, facility, conctype.getName(), conctype
+                .getType());
+    }
 
     private ConcType castToConcType(Type type) {
         assert type instanceof ConcType;
@@ -1057,8 +1086,8 @@ public class ModuleScope extends Scope {
     }
 
     private static String cantInstantiateMessage(String sym, String loc1,
-                                                 String loc2) {
+            String loc2) {
         return "Can't instantiate generic - Symbol " + sym + " has "
-            + "duplicate definition at " + loc1 + " and " + loc2;
+                + "duplicate definition at " + loc1 + " and " + loc2;
     }
 }

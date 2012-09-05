@@ -18,31 +18,31 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
  * this class can be put into <em>noisy mode</em>, in which it will print
  * a warning when it filters out a rule.</p>
  */
-public class AntecedentExtenderRuleNormalizer 
-		extends AbstractEqualityRuleNormalizer {
+public class AntecedentExtenderRuleNormalizer
+        extends
+            AbstractEqualityRuleNormalizer {
 
-	public AntecedentExtenderRuleNormalizer(MathExpTypeResolver r, 
-			boolean noisy) {
-		super(r, noisy);
-	}
-	
-	public AntecedentExtenderRuleNormalizer(MathExpTypeResolver r) {
-		this(r, true);
-	}
-	
-	@Override
-	protected List<VCTransformer> doNormalize(PExp left, PExp right) {
-		List<VCTransformer> retval = new ArrayList<VCTransformer>(2);
-		
-		//Substitute left expression for right
-		retval.add(new MatchReplaceDevelopmentStep(
-				new NewBindReplace(left, right)));
-		
-		//Substitute right expression for left
-		retval.add(new MatchReplaceDevelopmentStep(
-				new NewBindReplace(right, left)));
-		
-		return retval;
-	}
-	
+    public AntecedentExtenderRuleNormalizer(MathExpTypeResolver r, boolean noisy) {
+        super(r, noisy);
+    }
+
+    public AntecedentExtenderRuleNormalizer(MathExpTypeResolver r) {
+        this(r, true);
+    }
+
+    @Override
+    protected List<VCTransformer> doNormalize(PExp left, PExp right) {
+        List<VCTransformer> retval = new ArrayList<VCTransformer>(2);
+
+        //Substitute left expression for right
+        retval.add(new MatchReplaceDevelopmentStep(new NewBindReplace(left,
+                right)));
+
+        //Substitute right expression for left
+        retval.add(new MatchReplaceDevelopmentStep(new NewBindReplace(right,
+                left)));
+
+        return retval;
+    }
+
 }

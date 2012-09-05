@@ -19,53 +19,53 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
  */
 public class NewBindReplace implements NewMatchReplace {
 
-	private PExp myFindPattern, myReplacePattern;
-	private Map<PExp, PExp> myBindings;
-	
-	/**
-	 * <p>Creates a new <code>BindReplace</code> that will replace expressions 
-	 * that can be bound to <code>findPattern</code> with copies of the 
-	 * provided replace pattern in which expansions have been made based on the
-	 * binding step.</p>
-	 * 
-	 * @param findPattern The pattern to bind with.
-	 * @param replacePattern The pattern to expand as a replacement.
-	 * @param typer Something to help figure out types.
-	 */
-	public NewBindReplace(PExp findPattern, PExp replacePattern) {
+    private PExp myFindPattern, myReplacePattern;
+    private Map<PExp, PExp> myBindings;
 
-		myFindPattern = findPattern;
-		myReplacePattern = replacePattern;
-	}
-	
-	public boolean couldReplace(PExp e) {
-		myBindings = null;
-		
-		try {
-			myBindings = myFindPattern.bindTo(e);
-		}
-		catch (BindingException ex) {
-			
-		}
-		
-		return (myBindings != null);
-	}
-	
-	public PExp getReplacement() {		
-		return myReplacePattern.substitute(myBindings);
-	}
-	
-	public String toString() {
-		return "Replace " + myFindPattern + " with " + myReplacePattern;
-	}
+    /**
+     * <p>Creates a new <code>BindReplace</code> that will replace expressions 
+     * that can be bound to <code>findPattern</code> with copies of the 
+     * provided replace pattern in which expansions have been made based on the
+     * binding step.</p>
+     * 
+     * @param findPattern The pattern to bind with.
+     * @param replacePattern The pattern to expand as a replacement.
+     * @param typer Something to help figure out types.
+     */
+    public NewBindReplace(PExp findPattern, PExp replacePattern) {
 
-	@Override
-	public PExp getExpansionTemplate() {
-		return myReplacePattern;
-	}
+        myFindPattern = findPattern;
+        myReplacePattern = replacePattern;
+    }
 
-	@Override
-	public PExp getPattern() {
-		return myFindPattern;
-	}
+    public boolean couldReplace(PExp e) {
+        myBindings = null;
+
+        try {
+            myBindings = myFindPattern.bindTo(e);
+        }
+        catch (BindingException ex) {
+
+        }
+
+        return (myBindings != null);
+    }
+
+    public PExp getReplacement() {
+        return myReplacePattern.substitute(myBindings);
+    }
+
+    public String toString() {
+        return "Replace " + myFindPattern + " with " + myReplacePattern;
+    }
+
+    @Override
+    public PExp getExpansionTemplate() {
+        return myReplacePattern;
+    }
+
+    @Override
+    public PExp getPattern() {
+        return myFindPattern;
+    }
 }

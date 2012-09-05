@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * OperationDec.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -94,14 +94,8 @@ public class OperationDec extends Dec implements ModuleParameter {
 
     public OperationDec() {};
 
-    public OperationDec(
-            PosSymbol name,
-            List<ParameterVarDec> parameters,
-            Ty returnTy,
-            List<AffectsItem> stateVars,
-            Exp requires,
-            Exp ensures)
-    {
+    public OperationDec(PosSymbol name, List<ParameterVarDec> parameters,
+            Ty returnTy, List<AffectsItem> stateVars, Exp requires, Exp ensures) {
         this.name = name;
         this.parameters = parameters;
         this.returnTy = returnTy;
@@ -119,44 +113,68 @@ public class OperationDec extends Dec implements ModuleParameter {
     // -----------------------------------------------------------
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the parameters variable. */
-    public List<ParameterVarDec> getParameters() { return parameters; }
+    public List<ParameterVarDec> getParameters() {
+        return parameters;
+    }
 
     /** Returns the value of the returnTy variable. */
-    public Ty getReturnTy() { return returnTy; }
+    public Ty getReturnTy() {
+        return returnTy;
+    }
 
     /** Returns the value of the stateVars variable. */
-    public List<AffectsItem> getStateVars() { return stateVars; }
+    public List<AffectsItem> getStateVars() {
+        return stateVars;
+    }
 
     /** Returns the value of the requires variable. */
-    public Exp getRequires() { return requires; }
+    public Exp getRequires() {
+        return requires;
+    }
 
     /** Returns the value of the ensures variable. */
-    public Exp getEnsures() { return ensures; }
+    public Exp getEnsures() {
+        return ensures;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the parameters variable to the specified value. */
-    public void setParameters(List<ParameterVarDec> parameters) { this.parameters = parameters; }
+    public void setParameters(List<ParameterVarDec> parameters) {
+        this.parameters = parameters;
+    }
 
     /** Sets the returnTy variable to the specified value. */
-    public void setReturnTy(Ty returnTy) { this.returnTy = returnTy; }
+    public void setReturnTy(Ty returnTy) {
+        this.returnTy = returnTy;
+    }
 
     /** Sets the stateVars variable to the specified value. */
-    public void setStateVars(List<AffectsItem> stateVars) { this.stateVars = stateVars; }
+    public void setStateVars(List<AffectsItem> stateVars) {
+        this.stateVars = stateVars;
+    }
 
     /** Sets the requires variable to the specified value. */
-    public void setRequires(Exp requires) { this.requires = requires; }
+    public void setRequires(Exp requires) {
+        this.requires = requires;
+    }
 
     /** Sets the ensures variable to the specified value. */
-    public void setEnsures(Exp ensures) { this.ensures = ensures; }
+    public void setEnsures(Exp ensures) {
+        this.ensures = ensures;
+    }
 
     // ===========================================================
     // Public Methods
@@ -176,27 +194,27 @@ public class OperationDec extends Dec implements ModuleParameter {
         sb.append("OperationDec\n");
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         if (parameters != null) {
-            sb.append(parameters.asString(indent+increment,increment));
+            sb.append(parameters.asString(indent + increment, increment));
         }
 
         if (returnTy != null) {
-            sb.append(returnTy.asString(indent+increment,increment));
+            sb.append(returnTy.asString(indent + increment, increment));
         }
 
         if (stateVars != null) {
-            sb.append(stateVars.asString(indent+increment,increment));
+            sb.append(stateVars.asString(indent + increment, increment));
         }
 
         if (requires != null) {
-            sb.append(requires.asString(indent+increment,increment));
+            sb.append(requires.asString(indent + increment, increment));
         }
 
         if (ensures != null) {
-            sb.append(ensures.asString(indent+increment,increment));
+            sb.append(ensures.asString(indent + increment, increment));
         }
 
         return sb.toString();
@@ -208,65 +226,77 @@ public class OperationDec extends Dec implements ModuleParameter {
         is used there, an error string is returned. **/
     public String checkRequiresEnsures() {
         Iterator<ParameterVarDec> i = parameters.iterator();
-        final String ALTERS    = "alters";
+        final String ALTERS = "alters";
         final String EVALUATES = "evalutates";
-        final String REPLACES  = "replaces";
-        final String RESTORES  = "restores";
+        final String REPLACES = "replaces";
+        final String RESTORES = "restores";
         final String PRESERVES = "preserves";
         String msg = null;
-        while(msg == null && i.hasNext()) {
+        while (msg == null && i.hasNext()) {
             ParameterVarDec param = i.next();
             String varName = (param.getName()).getName();
-            if(ALTERS.equals((param.getMode()).getModeName())) {
+            if (ALTERS.equals((param.getMode()).getModeName())) {
                 /* "alters" - The ensures clause cannot contain the changed value
                               of the variable. */
-                if(ensures.containsVar(varName,false)) {
-                    msg = "Because of parameter mode 'alters', ensures clause of Operation " + name.getName()
-                                 + " cannot contain " + varName;
+                if (ensures.containsVar(varName, false)) {
+                    msg =
+                            "Because of parameter mode 'alters', ensures clause of Operation "
+                                    + name.getName() + " cannot contain "
+                                    + varName;
                 }
             }
-            else if(EVALUATES.equals((param.getMode()).getModeName())) {
+            else if (EVALUATES.equals((param.getMode()).getModeName())) {
                 /* "evaluates" - The ensures clause cannot contain the initial
                                  value of the variable. */
-                if(ensures != null && ensures.containsVar(varName,true)) {
-                    msg = "Because of parameter mode 'evaluates', ensures clause of Operation " + name.getName()
-                                 + " cannot contain #" + varName;
+                if (ensures != null && ensures.containsVar(varName, true)) {
+                    msg =
+                            "Because of parameter mode 'evaluates', ensures clause of Operation "
+                                    + name.getName() + " cannot contain #"
+                                    + varName;
                 }
             }
-            else if(REPLACES.equals((param.getMode()).getModeName())) {
+            else if (REPLACES.equals((param.getMode()).getModeName())) {
                 /* "replaces" - The requires clause cannot contain the variable and
                                 the ensures clause cannot contain the initial value
                                 of the variable. */
-                if(requires != null && requires.containsVar(varName,false)) {
-                    msg = "Because of parameter mode 'replaces', requires clause of Operation " + name.getName()
-                                 + " cannot contain " + varName;
+                if (requires != null && requires.containsVar(varName, false)) {
+                    msg =
+                            "Because of parameter mode 'replaces', requires clause of Operation "
+                                    + name.getName() + " cannot contain "
+                                    + varName;
                 }
-                if(ensures != null && ensures.containsVar(varName,true)) {
-                    msg = "Because of parameter mode 'replaces', ensures clause of Operation " + name.getName()
-                                 + " cannot contain #" + varName;
+                if (ensures != null && ensures.containsVar(varName, true)) {
+                    msg =
+                            "Because of parameter mode 'replaces', ensures clause of Operation "
+                                    + name.getName() + " cannot contain #"
+                                    + varName;
                 }
             }
-            else if(RESTORES.equals((param.getMode()).getModeName())
+            else if (RESTORES.equals((param.getMode()).getModeName())
                     || PRESERVES.equals((param.getMode()).getModeName())) {
                 /* "restores"/"preserves" - The ensures clause cannot contain the
                                             initial value of the variable. */
-                if(ensures != null && ensures.containsVar(varName,true)) {
-                    if(RESTORES.equals((param.getMode()).getModeName())) {
-                        msg = "Because of parameter mode 'restores', ensures clause of Operation " + name.getName()
-                               + " cannot contain #" + varName;
+                if (ensures != null && ensures.containsVar(varName, true)) {
+                    if (RESTORES.equals((param.getMode()).getModeName())) {
+                        msg =
+                                "Because of parameter mode 'restores', ensures clause of Operation "
+                                        + name.getName() + " cannot contain #"
+                                        + varName;
                     }
                     else {
-                        msg = "Because of parameter mode 'preserves', ensures clause of Operation " + name.getName()
-                                 + " cannot contain #" + varName;
+                        msg =
+                                "Because of parameter mode 'preserves', ensures clause of Operation "
+                                        + name.getName() + " cannot contain #"
+                                        + varName;
                     }
                 }
             }
         }
         return msg;
     }
-    
-    public String toString(){
-    	return name.toString();
+
+    public String toString() {
+        return name.toString();
     }
 
 }

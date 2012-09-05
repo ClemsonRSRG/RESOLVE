@@ -22,8 +22,8 @@ import edu.clemson.cs.r2jt.absyn.Exp;
  */
 public class PruningAntecedentDeveloper implements AntecedentDeveloper {
 
-	@Override
-	public Iterator<Antecedent> transform(Antecedent source) {
-		throw new UnsupportedOperationException("Not yet implemented");
-	}
+    @Override
+    public Iterator<Antecedent> transform(Antecedent source) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
 }

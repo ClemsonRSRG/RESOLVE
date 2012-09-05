@@ -25,94 +25,93 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
  * quantified state, not a top-level quantifying expression.)</p>
  */
 public class TotalBindingIterator implements Iterator<Map<PExp, PExp>> {
-	
-	private final Iterable<PExp> myFacts;
-	private final Map<PExp, PExp> myAssumedBindings;
-	
-	private Map<PExp, PExp> myNextBinding;
-	
-	private final Iterator<Map<PExp, PExp>> myLocalPatternBinder;
-	private final Antecedent myRemainingPatterns;
-	
-	private Iterator<Map<PExp, PExp>> myRemainderBindings;
-	
-	public TotalBindingIterator(Antecedent patterns, Iterable<PExp> facts, 
-			Map<PExp, PExp> assumedBindings) {
-		
-		myFacts = facts;
-		myAssumedBindings = assumedBindings;
-		
-		if (patterns.size() > 0) {
-			myLocalPatternBinder = new IncrementalBindingIterator(
-					patterns.get(0), myFacts.iterator(), 
-					myAssumedBindings);
-			myRemainingPatterns = patterns.subConjuncts(1, patterns.size());
-		}
-		else {
-			myLocalPatternBinder = 
-				new SingletonIterator<Map<PExp, PExp>>(assumedBindings);
-			myRemainingPatterns = null;
-		}
-		
-		setUpNext();
-	}
-	
-	private void setUpNext() {
-		
-		myRemainderBindings = DummyIterator.getInstance(myRemainderBindings);
-		
-		while(myLocalPatternBinder.hasNext() && 
-				!myRemainderBindings.hasNext()) {
-			
-			Map<PExp, PExp> nextLocalBinding = myLocalPatternBinder.next();
-			Map<PExp, PExp> unifiedBindings = 
-					unifyMaps(nextLocalBinding, myAssumedBindings);
-			
-			if (myRemainingPatterns != null) {
-				myRemainderBindings = new TotalBindingIterator(
-						myRemainingPatterns, myFacts, unifiedBindings);
-			}
-			else {
-				myRemainderBindings = 
-					new SingletonIterator<Map<PExp, PExp>>(unifiedBindings);
-			}
-		}
-		
-		if (myRemainderBindings.hasNext()) {
-			myNextBinding = myRemainderBindings.next();
-		}
-		else {
-			myNextBinding = null;
-		}
-	}
-	
-	private static <K, V> Map<K, V> unifyMaps(Map<K, V> map1, Map<K, V> map2) {
-		Map<K, V> retval = new HashMap<K, V>();
-		
-		retval.putAll(map1);
-		retval.putAll(map2);
-		
-		return retval;
-	}
-	
-	
-	@Override
-	public boolean hasNext() {
-		return myNextBinding != null;
-	}
 
-	@Override
-	public Map<PExp, PExp> next() {
-		
-		Map<PExp, PExp> retval = myNextBinding;
-		
-		setUpNext();
-		
-		return retval;
-	}
+    private final Iterable<PExp> myFacts;
+    private final Map<PExp, PExp> myAssumedBindings;
 
-	@Override
-	public void remove() {
-		throw new UnsupportedOperationException();
-	}
+    private Map<PExp, PExp> myNextBinding;
+
+    private final Iterator<Map<PExp, PExp>> myLocalPatternBinder;
+    private final Antecedent myRemainingPatterns;
+
+    private Iterator<Map<PExp, PExp>> myRemainderBindings;
+
+    public TotalBindingIterator(Antecedent patterns, Iterable<PExp> facts,
+            Map<PExp, PExp> assumedBindings) {
+
+        myFacts = facts;
+        myAssumedBindings = assumedBindings;
+
+        if (patterns.size() > 0) {
+            myLocalPatternBinder =
+                    new IncrementalBindingIterator(patterns.get(0), myFacts
+                            .iterator(), myAssumedBindings);
+            myRemainingPatterns = patterns.subConjuncts(1, patterns.size());
+        }
+        else {
+            myLocalPatternBinder =
+                    new SingletonIterator<Map<PExp, PExp>>(assumedBindings);
+            myRemainingPatterns = null;
+        }
+
+        setUpNext();
+    }
+
+    private void setUpNext() {
+
+        myRemainderBindings = DummyIterator.getInstance(myRemainderBindings);
+
+        while (myLocalPatternBinder.hasNext() && !myRemainderBindings.hasNext()) {
+
+            Map<PExp, PExp> nextLocalBinding = myLocalPatternBinder.next();
+            Map<PExp, PExp> unifiedBindings =
+                    unifyMaps(nextLocalBinding, myAssumedBindings);
+
+            if (myRemainingPatterns != null) {
+                myRemainderBindings =
+                        new TotalBindingIterator(myRemainingPatterns, myFacts,
+                                unifiedBindings);
+            }
+            else {
+                myRemainderBindings =
+                        new SingletonIterator<Map<PExp, PExp>>(unifiedBindings);
+            }
+        }
+
+        if (myRemainderBindings.hasNext()) {
+            myNextBinding = myRemainderBindings.next();
+        }
+        else {
+            myNextBinding = null;
+        }
+    }
+
+    private static <K, V> Map<K, V> unifyMaps(Map<K, V> map1, Map<K, V> map2) {
+        Map<K, V> retval = new HashMap<K, V>();
+
+        retval.putAll(map1);
+        retval.putAll(map2);
+
+        return retval;
+    }
+
+    @Override
+    public boolean hasNext() {
+        return myNextBinding != null;
+    }
+
+    @Override
+    public Map<PExp, PExp> next() {
+
+        Map<PExp, PExp> retval = myNextBinding;
+
+        setUpNext();
+
+        return retval;
+    }
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException();
+    }
 }

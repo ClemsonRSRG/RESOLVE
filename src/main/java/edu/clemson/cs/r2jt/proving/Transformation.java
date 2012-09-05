@@ -9,5 +9,6 @@ import java.util.Iterator;
  * @param <T> The type accepted by the transformation.
  */
 public interface Transformation<T> {
-	public Iterator<T> transform(T original);
+
+    public Iterator<T> transform(T original);
 }

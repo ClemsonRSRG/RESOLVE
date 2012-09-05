@@ -10,15 +10,15 @@ import java.util.Iterator;
  */
 public class Simplifier implements VCTransformer {
 
-	@Override
-	public Iterator<VC> transform(VC original) {
-		return new SingletonIterator<VC>(original.simplify());
-	}
+    @Override
+    public Iterator<VC> transform(VC original) {
+        return new SingletonIterator<VC>(original.simplify());
+    }
 
-	@Override
-	public String toString() {
-		return "simplification";
-	}
+    @Override
+    public String toString() {
+        return "simplification";
+    }
 
     @Override
     public Antecedent getPattern() {
@@ -30,8 +30,8 @@ public class Simplifier implements VCTransformer {
         throw new UnsupportedOperationException("Not applicable.");
     }
 
-	@Override
-	public boolean introducesQuantifiedVariables() {
-		return false;
-	}
+    @Override
+    public boolean introducesQuantifiedVariables() {
+        return false;
+    }
 }

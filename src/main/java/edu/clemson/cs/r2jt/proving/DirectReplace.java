@@ -9,39 +9,40 @@ import edu.clemson.cs.r2jt.absyn.Exp;
  * @author H. Smith
  */
 public class DirectReplace implements MatchReplace {
-	private final Exp myFind, myReplace;
-	
-	/**
-	 * <p>Creates a new <code>DirectReplace</code> which will replace instances
-	 * of <code>find</code> with clones of <code>replace</code>.</p>
-	 * 
-	 * @param find The thing to match against with <code>equals</code>().
-	 * @param replace The thing to replace matches with.
-	 */
-	public DirectReplace(final Exp find, final Exp replace) {
-		myFind = find;
-		myReplace = replace;
-	}
-	
-	public boolean couldReplace(Exp e) {
-		return (e.equivalent(myFind));
-	}
-	
-	public Exp getReplacement() {
-		return (Exp) myReplace.clone();
-	}
-	
-	public String toString() {
-		return myFind.toString(0) + " --> " + myReplace.toString(0);
-	}
 
-	@Override
-	public Exp getExpansionTemplate() {
-		return myFind.copy();
-	}
+    private final Exp myFind, myReplace;
 
-	@Override
-	public Exp getPattern() {
-		return myReplace.copy();
-	}
+    /**
+     * <p>Creates a new <code>DirectReplace</code> which will replace instances
+     * of <code>find</code> with clones of <code>replace</code>.</p>
+     * 
+     * @param find The thing to match against with <code>equals</code>().
+     * @param replace The thing to replace matches with.
+     */
+    public DirectReplace(final Exp find, final Exp replace) {
+        myFind = find;
+        myReplace = replace;
+    }
+
+    public boolean couldReplace(Exp e) {
+        return (e.equivalent(myFind));
+    }
+
+    public Exp getReplacement() {
+        return (Exp) myReplace.clone();
+    }
+
+    public String toString() {
+        return myFind.toString(0) + " --> " + myReplace.toString(0);
+    }
+
+    @Override
+    public Exp getExpansionTemplate() {
+        return myFind.copy();
+    }
+
+    @Override
+    public Exp getPattern() {
+        return myReplace.copy();
+    }
 }

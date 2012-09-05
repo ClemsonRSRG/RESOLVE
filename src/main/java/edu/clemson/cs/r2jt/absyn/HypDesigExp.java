@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * HypDesigExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2006
  * Reusable Software Research Group
  * Department of Computer Science
@@ -69,10 +69,10 @@ public class HypDesigExp extends Exp {
     // ===========================================================
     // Variables
     // ===========================================================
-    
+
     /** The location member. */
     private Location location;
-    
+
     /** The mathExp1 member. */
     private MathRefExp mathExp;
 
@@ -82,10 +82,7 @@ public class HypDesigExp extends Exp {
 
     public HypDesigExp() {};
 
-    public HypDesigExp(
-            Location location,
-            MathRefExp mathExp)
-    {
+    public HypDesigExp(Location location, MathRefExp mathExp) {
         this.location = location;
         this.mathExp = mathExp;
     }
@@ -99,38 +96,45 @@ public class HypDesigExp extends Exp {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the mathExp1 variable. */
-    public MathRefExp getMathExp() { return mathExp; }
-    
+    public MathRefExp getMathExp() {
+        return mathExp;
+    }
+
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the value of the location variable. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the value of the mathExp1 variable. */
-    public void setMathExp(MathRefExp mathExp) { this.mathExp = mathExp; }
+    public void setMathExp(MathRefExp mathExp) {
+        this.mathExp = mathExp;
+    }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	return new HypDesigExp(location, 
-    			(MathRefExp) substitute(mathExp, substitutions));
+        return new HypDesigExp(location, (MathRefExp) substitute(mathExp,
+                substitutions));
     }
-    
+
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitHypDesigExp(this);
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getHypDesigExpType(this);
     }
 
@@ -143,33 +147,33 @@ public class HypDesigExp extends Exp {
         sb.append("HypDesigExp\n");
 
         if (mathExp != null) {
-            sb.append(mathExp.asString(indent+increment,increment));
+            sb.append(mathExp.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
-    
+
     public boolean containsVar(String varName, boolean IsOldExp) {
-	    return false;
+        return false;
     }
-    
+
     public List<Exp> getSubExpressions() {
-    	List<Exp> list = new List<Exp>();
-    	list.add((Exp)mathExp);
-    	return list;
+        List<Exp> list = new List<Exp>();
+        list.add((Exp) mathExp);
+        return list;
     }
-    
+
     public void setSubExpression(int index, Exp e) {
-    	mathExp = (MathRefExp) e;
+        mathExp = (MathRefExp) e;
     }
-    
+
     public void prettyPrint() {
-    	mathExp.prettyPrint();
+        mathExp.prettyPrint();
     }
-    
+
     public Exp copy() {
-    	MathRefExp newMathExp = (MathRefExp)(mathExp.copy());
-    	return new HypDesigExp(null, newMathExp);
+        MathRefExp newMathExp = (MathRefExp) (mathExp.copy());
+        return new HypDesigExp(null, newMathExp);
     }
-    
+
 }

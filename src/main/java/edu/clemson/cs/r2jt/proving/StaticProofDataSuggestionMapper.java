@@ -1,16 +1,17 @@
 package edu.clemson.cs.r2jt.proving;
 
 public class StaticProofDataSuggestionMapper
-		implements Mapper<VCTransformer, ProofPathSuggestion> {
+        implements
+            Mapper<VCTransformer, ProofPathSuggestion> {
 
-	private final ProofData myData;
+    private final ProofData myData;
 
-	public StaticProofDataSuggestionMapper(ProofData data) {
-		myData = data;
-	}
+    public StaticProofDataSuggestionMapper(ProofData data) {
+        myData = data;
+    }
 
-	@Override
-	public ProofPathSuggestion map(VCTransformer i) {
-		return new ProofPathSuggestion(i, myData);
-	}
+    @Override
+    public ProofPathSuggestion map(VCTransformer i) {
+        return new ProofPathSuggestion(i, myData);
+    }
 }

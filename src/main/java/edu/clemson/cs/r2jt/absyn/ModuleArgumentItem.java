@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * ModuleArgumentItem.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -84,11 +84,8 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
 
     public ModuleArgumentItem() {};
 
-    public ModuleArgumentItem(
-            PosSymbol qualifier,
-            PosSymbol name,
-            ProgramExp evalExp)
-    {
+    public ModuleArgumentItem(PosSymbol qualifier, PosSymbol name,
+            ProgramExp evalExp) {
         this.qualifier = qualifier;
         this.name = name;
         this.evalExp = evalExp;
@@ -103,26 +100,38 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     // -----------------------------------------------------------
 
     /** Returns the value of the qualifier variable. */
-    public PosSymbol getQualifier() { return qualifier; }
+    public PosSymbol getQualifier() {
+        return qualifier;
+    }
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the evalExp variable. */
-    public ProgramExp getEvalExp() { return evalExp; }
+    public ProgramExp getEvalExp() {
+        return evalExp;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the qualifier variable to the specified value. */
-    public void setQualifier(PosSymbol qualifier) { this.qualifier = qualifier; }
+    public void setQualifier(PosSymbol qualifier) {
+        this.qualifier = qualifier;
+    }
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the evalExp variable to the specified value. */
-    public void setEvalExp(ProgramExp evalExp) { this.evalExp = evalExp; }
+    public void setEvalExp(ProgramExp evalExp) {
+        this.evalExp = evalExp;
+    }
 
     // ===========================================================
     // Public Methods
@@ -142,15 +151,15 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
         sb.append("ModuleArgumentItem\n");
 
         if (qualifier != null) {
-            sb.append(qualifier.asString(indent+increment,increment));
+            sb.append(qualifier.asString(indent + increment, increment));
         }
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         if (evalExp != null) {
-            sb.append(evalExp.asString(indent+increment,increment));
+            sb.append(evalExp.asString(indent + increment, increment));
         }
 
         return sb.toString();

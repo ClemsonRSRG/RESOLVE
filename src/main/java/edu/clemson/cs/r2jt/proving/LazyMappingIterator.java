@@ -14,26 +14,26 @@ import java.util.Iterator;
  */
 public final class LazyMappingIterator<I, O> implements Iterator<O> {
 
-	private final Iterator<I> mySource;
-	private final Mapper<I, O> myMapper;
-	
-	public LazyMappingIterator(Iterator<I> source, Mapper<I, O> mapper) {
-		mySource = source;
-		myMapper = mapper;
-	}
+    private final Iterator<I> mySource;
+    private final Mapper<I, O> myMapper;
 
-	@Override
-	public boolean hasNext() {
-		return mySource.hasNext();
-	}
+    public LazyMappingIterator(Iterator<I> source, Mapper<I, O> mapper) {
+        mySource = source;
+        myMapper = mapper;
+    }
 
-	@Override
-	public O next() {
-		return myMapper.map(mySource.next());
-	}
+    @Override
+    public boolean hasNext() {
+        return mySource.hasNext();
+    }
 
-	@Override
-	public void remove() {
-		mySource.remove();
-	}
+    @Override
+    public O next() {
+        return myMapper.map(mySource.next());
+    }
+
+    @Override
+    public void remove() {
+        mySource.remove();
+    }
 }

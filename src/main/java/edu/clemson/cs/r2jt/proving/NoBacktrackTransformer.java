@@ -32,9 +32,9 @@ public class NoBacktrackTransformer implements VCTransformer {
 
     @Override
     public Iterator<VC> transform(VC original) {
-        myLastTransformationIterator = new ZeroOrOneIterator<VC>(
-                new NonEquivalentIterator(myBaseTransformer.transform(original),
-                original));
+        myLastTransformationIterator =
+                new ZeroOrOneIterator<VC>(new NonEquivalentIterator(
+                        myBaseTransformer.transform(original), original));
 
         return myLastTransformationIterator;
     }
@@ -54,10 +54,10 @@ public class NoBacktrackTransformer implements VCTransformer {
     }
 
     @Override
-	public boolean introducesQuantifiedVariables() {
-		return myBaseTransformer.introducesQuantifiedVariables();
-	}
-    
+    public boolean introducesQuantifiedVariables() {
+        return myBaseTransformer.introducesQuantifiedVariables();
+    }
+
     /**
      * <p>This class wraps an <code>Iterator</code> over <code>VC</code>s and
      * returns only those not equivalent (via

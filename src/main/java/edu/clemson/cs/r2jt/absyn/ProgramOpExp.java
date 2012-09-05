@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * ProgramOpExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -113,12 +113,8 @@ public class ProgramOpExp extends ProgramExp {
 
     public ProgramOpExp() {};
 
-    public ProgramOpExp(
-            Location location,
-            int operator,
-            ProgramExp first,
-            ProgramExp second)
-    {
+    public ProgramOpExp(Location location, int operator, ProgramExp first,
+            ProgramExp second) {
         this.location = location;
         this.operator = operator;
         this.first = first;
@@ -126,11 +122,11 @@ public class ProgramOpExp extends ProgramExp {
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	return new ProgramOpExp(location, operator,
-    			(ProgramExp) substitute(first, substitutions),
-    			(ProgramExp) substitute(second, substitutions));
+        return new ProgramOpExp(location, operator, (ProgramExp) substitute(
+                first, substitutions), (ProgramExp) substitute(second,
+                substitutions));
     }
-    
+
     // ===========================================================
     // Accessor Methods
     // ===========================================================
@@ -140,32 +136,48 @@ public class ProgramOpExp extends ProgramExp {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the operator variable. */
-    public int getOperator() { return operator; }
+    public int getOperator() {
+        return operator;
+    }
 
     /** Returns the value of the first variable. */
-    public ProgramExp getFirst() { return first; }
+    public ProgramExp getFirst() {
+        return first;
+    }
 
     /** Returns the value of the second variable. */
-    public ProgramExp getSecond() { return second; }
+    public ProgramExp getSecond() {
+        return second;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the operator variable to the specified value. */
-    public void setOperator(int operator) { this.operator = operator; }
+    public void setOperator(int operator) {
+        this.operator = operator;
+    }
 
     /** Sets the first variable to the specified value. */
-    public void setFirst(ProgramExp first) { this.first = first; }
+    public void setFirst(ProgramExp first) {
+        this.first = first;
+    }
 
     /** Sets the second variable to the specified value. */
-    public void setSecond(ProgramExp second) { this.second = second; }
+    public void setSecond(ProgramExp second) {
+        this.second = second;
+    }
 
     // ===========================================================
     // Public Methods
@@ -177,8 +189,7 @@ public class ProgramOpExp extends ProgramExp {
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getProgramOpExpType(this);
     }
 
@@ -190,20 +201,20 @@ public class ProgramOpExp extends ProgramExp {
         printSpace(indent, sb);
         sb.append("ProgramOpExp\n");
 
-        printSpace(indent+increment, sb);
+        printSpace(indent + increment, sb);
         sb.append(printConstant(operator) + "\n");
 
         if (first != null) {
-            sb.append(first.asString(indent+increment,increment));
+            sb.append(first.asString(indent + increment, increment));
         }
 
         if (second != null) {
-            sb.append(second.asString(indent+increment,increment));
+            sb.append(second.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
-    
+
     /** Returns a formatted text string of this class. */
     public String toString(int indent) {
 
@@ -211,103 +222,173 @@ public class ProgramOpExp extends ProgramExp {
 
         printSpace(indent, sb);
 
-    	if (first != null) {
-    		sb.append(first.toString(0));
-    	}
-    	
-    	sb.append(" " + printPOEConstant(operator) + " ");
+        if (first != null) {
+            sb.append(first.toString(0));
+        }
 
-    	if (second != null) {
-    		sb.append(second.toString(0));
-    	}
+        sb.append(" " + printPOEConstant(operator) + " ");
 
+        if (second != null) {
+            sb.append(second.toString(0));
+        }
 
         return sb.toString();
     }
-    
-    
-    
 
     /** Returns true if the variable is found in any sub expression
         of this one. **/
     public boolean containsVar(String varName, boolean IsOldExp) {
-    	Boolean found = false;
-    	if(first != null) {
-    		found = first.containsVar(varName,IsOldExp);
-    	}
-    	if(!found && second != null) {
-    		found = second.containsVar(varName,IsOldExp);
-    	}
+        Boolean found = false;
+        if (first != null) {
+            found = first.containsVar(varName, IsOldExp);
+        }
+        if (!found && second != null) {
+            found = second.containsVar(varName, IsOldExp);
+        }
         return found;
     }
 
     private String printConstant(int k) {
         StringBuffer sb = new StringBuffer();
-        switch(k) {
-        case 1: sb.append("AND"); break;
-        case 2: sb.append("OR"); break;
-        case 3: sb.append("EQUAL"); break;
-        case 4: sb.append("NOT_EQUAL"); break;
-        case 5: sb.append("LT"); break;
-        case 6: sb.append("LT_EQL"); break;
-        case 7: sb.append("GT"); break;
-        case 8: sb.append("GT_EQL"); break;
-        case 9: sb.append("PLUS"); break;
-        case 10: sb.append("MINUS"); break;
-        case 11: sb.append("MULTIPLY"); break;
-        case 12: sb.append("DIVIDE"); break;
-        case 13: sb.append("REM"); break;
-        case 14: sb.append("MOD"); break;
-        case 15: sb.append("DIV"); break;
-        case 16: sb.append("EXP"); break;
-        case 17: sb.append("NOT"); break;
-        case 18: sb.append("UNARY_MINUS"); break;
-        default: sb.append(k);
+        switch (k) {
+        case 1:
+            sb.append("AND");
+            break;
+        case 2:
+            sb.append("OR");
+            break;
+        case 3:
+            sb.append("EQUAL");
+            break;
+        case 4:
+            sb.append("NOT_EQUAL");
+            break;
+        case 5:
+            sb.append("LT");
+            break;
+        case 6:
+            sb.append("LT_EQL");
+            break;
+        case 7:
+            sb.append("GT");
+            break;
+        case 8:
+            sb.append("GT_EQL");
+            break;
+        case 9:
+            sb.append("PLUS");
+            break;
+        case 10:
+            sb.append("MINUS");
+            break;
+        case 11:
+            sb.append("MULTIPLY");
+            break;
+        case 12:
+            sb.append("DIVIDE");
+            break;
+        case 13:
+            sb.append("REM");
+            break;
+        case 14:
+            sb.append("MOD");
+            break;
+        case 15:
+            sb.append("DIV");
+            break;
+        case 16:
+            sb.append("EXP");
+            break;
+        case 17:
+            sb.append("NOT");
+            break;
+        case 18:
+            sb.append("UNARY_MINUS");
+            break;
+        default:
+            sb.append(k);
         }
         return sb.toString();
     }
-    
+
     private String printPOEConstant(int k) {
         StringBuffer sb = new StringBuffer();
-        switch(k) {
-        case 1: sb.append("AND"); break;
-        case 2: sb.append("OR"); break;
-        case 3: sb.append("="); break;
-        case 4: sb.append("/="); break;
-        case 5: sb.append("<"); break;
-        case 6: sb.append("<="); break;
-        case 7: sb.append(">"); break;
-        case 8: sb.append(">="); break;
-        case 9: sb.append("+"); break;
-        case 10: sb.append("-"); break;
-        case 11: sb.append("*"); break;
-        case 12: sb.append("/"); break;
-        case 13: sb.append("REM"); break;
-        case 14: sb.append("%"); break;
-        case 15: sb.append("/"); break;
-        case 16: sb.append("^"); break;
-        case 17: sb.append("~"); break;
-        case 18: sb.append("-"); break;
-        default: sb.append(k);
+        switch (k) {
+        case 1:
+            sb.append("AND");
+            break;
+        case 2:
+            sb.append("OR");
+            break;
+        case 3:
+            sb.append("=");
+            break;
+        case 4:
+            sb.append("/=");
+            break;
+        case 5:
+            sb.append("<");
+            break;
+        case 6:
+            sb.append("<=");
+            break;
+        case 7:
+            sb.append(">");
+            break;
+        case 8:
+            sb.append(">=");
+            break;
+        case 9:
+            sb.append("+");
+            break;
+        case 10:
+            sb.append("-");
+            break;
+        case 11:
+            sb.append("*");
+            break;
+        case 12:
+            sb.append("/");
+            break;
+        case 13:
+            sb.append("REM");
+            break;
+        case 14:
+            sb.append("%");
+            break;
+        case 15:
+            sb.append("/");
+            break;
+        case 16:
+            sb.append("^");
+            break;
+        case 17:
+            sb.append("~");
+            break;
+        case 18:
+            sb.append("-");
+            break;
+        default:
+            sb.append(k);
         }
         return sb.toString();
     }
-    
+
     public List<Exp> getSubExpressions() {
-    	List<Exp> list = new List<Exp>();
-    	list.add((Exp)first);
-    	list.add((Exp)second);
-    	return list;
+        List<Exp> list = new List<Exp>();
+        list.add((Exp) first);
+        list.add((Exp) second);
+        return list;
     }
-    
+
     public void setSubExpression(int index, Exp e) {
-    	switch (index) {
-    	case 0:
-    		first = (ProgramExp) e;
-    		break;
-    	case 1:
-    		second = (ProgramExp) e;
-    		break;
-    	}
+        switch (index) {
+        case 0:
+            first = (ProgramExp) e;
+            break;
+        case 1:
+            second = (ProgramExp) e;
+            break;
+        }
     }
 }

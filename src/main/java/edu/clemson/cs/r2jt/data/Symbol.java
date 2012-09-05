@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,23 +34,23 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 
 /*
  * Symbol.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -98,7 +98,7 @@ public class Symbol implements Comparable<Symbol> {
     /** Returns the unique symbol associated with a string. */
     public static Symbol symbol(String str) {
         String inStr = str.intern();
-        Symbol sym = (Symbol)dict.get(inStr);
+        Symbol sym = (Symbol) dict.get(inStr);
         if (sym == null) {
             sym = new Symbol(inStr);
             dict.put(inStr, sym);
@@ -113,16 +113,18 @@ public class Symbol implements Comparable<Symbol> {
 
     public String asString(int indent, int increment) {
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < indent; i++) { sb.append(" "); }
-        sb.append(this.toString()+"\n");
+        for (int i = 0; i < indent; i++) {
+            sb.append(" ");
+        }
+        sb.append(this.toString() + "\n");
         return sb.toString();
     }
-    
+
     public String toString() {
         return name;
     }
 
-	public int compareTo(Symbol o) {
-		return name.compareTo(o.name);
-	}
+    public int compareTo(Symbol o) {
+        return name.compareTo(o.name);
+    }
 }

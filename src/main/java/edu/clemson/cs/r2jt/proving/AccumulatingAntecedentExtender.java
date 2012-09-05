@@ -13,41 +13,40 @@ import java.util.Iterator;
  */
 public class AccumulatingAntecedentExtender implements AntecedentDeveloper {
 
-	private final Transformer<Antecedent, Iterator<Antecedent>> 
-			mySubTransformer;
-	
-	public AccumulatingAntecedentExtender(AntecedentDeveloper t) {
-		mySubTransformer = t;
-	}
-	
-	@Override
-	public Iterator<Antecedent> transform(Antecedent original) {
-		Iterator<Antecedent> singleBindingExtensions =
-			mySubTransformer.transform(original);
-		
-		Antecedent singleBindingExtension;
-		Antecedent workingAntecedent = Antecedent.EMPTY;
-		while (singleBindingExtensions.hasNext()) {
-			
-			singleBindingExtension = singleBindingExtensions.next();
-			
-			workingAntecedent = 
-				workingAntecedent.appended(singleBindingExtension);
-		}
-		
-		Iterator<Antecedent> retval;
-		
-		if (workingAntecedent == Antecedent.EMPTY) {
-			retval = DummyIterator.getInstance((Iterator<Antecedent>) null);
-		}
-		else {
-			retval = new SingletonIterator<Antecedent>(workingAntecedent); 
-		}
-		
-		return retval;
-	}
-	
-	public String toString() {
-		return mySubTransformer.toString();
-	}
+    private final Transformer<Antecedent, Iterator<Antecedent>> mySubTransformer;
+
+    public AccumulatingAntecedentExtender(AntecedentDeveloper t) {
+        mySubTransformer = t;
+    }
+
+    @Override
+    public Iterator<Antecedent> transform(Antecedent original) {
+        Iterator<Antecedent> singleBindingExtensions =
+                mySubTransformer.transform(original);
+
+        Antecedent singleBindingExtension;
+        Antecedent workingAntecedent = Antecedent.EMPTY;
+        while (singleBindingExtensions.hasNext()) {
+
+            singleBindingExtension = singleBindingExtensions.next();
+
+            workingAntecedent =
+                    workingAntecedent.appended(singleBindingExtension);
+        }
+
+        Iterator<Antecedent> retval;
+
+        if (workingAntecedent == Antecedent.EMPTY) {
+            retval = DummyIterator.getInstance((Iterator<Antecedent>) null);
+        }
+        else {
+            retval = new SingletonIterator<Antecedent>(workingAntecedent);
+        }
+
+        return retval;
+    }
+
+    public String toString() {
+        return mySubTransformer.toString();
+    }
 }

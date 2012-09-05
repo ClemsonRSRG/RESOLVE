@@ -8,7 +8,10 @@ package edu.clemson.cs.r2jt.sanitycheck;
  * @author Hampton Smith
  */
 public class SanityCheckException extends Exception {
-    public SanityCheckException() { ; }
+
+    public SanityCheckException() {
+        ;
+    }
 
     public SanityCheckException(String msg) {
         super(msg);

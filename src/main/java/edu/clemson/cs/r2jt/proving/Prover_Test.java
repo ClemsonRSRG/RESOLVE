@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,17 +34,17 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
- *     Hampton Smith
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
+ * Hampton Smith
  */
 package edu.clemson.cs.r2jt.proving;
 
@@ -113,13 +113,13 @@ public final class Prover_Test {
             "An alias for -prove.";
     private static final String FLAG_DESC_DEBUG =
             "Prompt user to guide the prover step-by-step.  May be used with "
-            + "either the -prove or -altprove options.";
+                    + "either the -prove or -altprove options.";
     private static final String FLAG_DESC_VERBOSE =
             "Prints prover debugging information.  May be used with either the "
-            + "-prove or -altprove options.";
+                    + "-prove or -altprove options.";
     private static final String FLAG_DESC_NOGUI =
             "Supresses any graphical interfaces so that the compiler can be run "
-            + "headlessly.";
+                    + "headlessly.";
     /**
      * <p>The main prover flag.  Causes the integrated prover to attempt to
      * dispatch generated VCs.</p>
@@ -137,21 +137,21 @@ public final class Prover_Test {
      * <p>An alias for FLAG_LEGACY_PROVE.  Also for backward compatibility.</p>
      */
     private static final Flag FLAG_LEGACY_PROVE_ALIAS =
-            new Flag(FLAG_SECTION_NAME, "quickprove", FLAG_DESC_LEGACY_PROVE_ALIAS,
-            Flag.Type.HIDDEN);
+            new Flag(FLAG_SECTION_NAME, "quickprove",
+                    FLAG_DESC_LEGACY_PROVE_ALIAS, Flag.Type.HIDDEN);
     /**
      * <p>Causes the prover to prompt the user to choose a theorem at each step,
      * rather than choosing one on its own.</p>
      */
     public static final Flag FLAG_DEBUG =
             new Flag(FLAG_SECTION_NAME, "debugprove", FLAG_DESC_DEBUG,
-            Flag.Type.HIDDEN);
+                    Flag.Type.HIDDEN);
     /**
      * <p>Prints additional debugging information.</p>
      */
     public static final Flag FLAG_VERBOSE =
             new Flag(FLAG_SECTION_NAME, "verboseprove", FLAG_DESC_VERBOSE,
-            Flag.Type.HIDDEN);
+                    Flag.Type.HIDDEN);
     public static final Flag FLAG_NOGUI =
             new Flag(Main.FLAG_SECTION_GENERAL, "noGUI", FLAG_DESC_NOGUI);
 
@@ -191,7 +191,7 @@ public final class Prover_Test {
      * <p>INVARIANT: <code>myResolveEnvironment != null</code></p>
      */
     //private final Environment myResolveEnvironment =
-            //Environment.getInstance();
+    //Environment.getInstance();
     /**
      * <p>An object to help determine the types of expressions based on the
      * current symbol table.  Only necessary because the Analyzer is currently
@@ -300,9 +300,9 @@ public final class Prover_Test {
 
         File targetFileName = myInstanceEnvironment.getTargetFile();
         ModuleID targetFileID =
-        	myInstanceEnvironment.getModuleID(targetFileName);
+                myInstanceEnvironment.getModuleID(targetFileName);
         List<ModuleID> availableTheories =
-        	myInstanceEnvironment.getTheories(targetFileID);
+                myInstanceEnvironment.getTheories(targetFileID);
         Exp curTheorem;
 
         //Add local axioms to the library
@@ -361,17 +361,16 @@ public final class Prover_Test {
 
             if (quantifiersAppliedTheorem instanceof EqualsExp) {
                 myTheorems.add(quantifiersAppliedTheorem);
-                myPExpTheorems.add(
-                        PExp.buildPExp(quantifiersAppliedTheorem, myTyper));
+                myPExpTheorems.add(PExp.buildPExp(quantifiersAppliedTheorem,
+                        myTyper));
                 myTheoremNames.add(name);
             }
             else if (quantifiersAppliedTheorem instanceof InfixExp) {
                 InfixExp theoremAsInfixExp =
                         (InfixExp) quantifiersAppliedTheorem;
                 if (theoremAsInfixExp.getOpName().getName().equals("implies")) {
-                    myImplications.add(new Implication(
-                            theoremAsInfixExp.getLeft(),
-                            theoremAsInfixExp.getRight()));
+                    myImplications.add(new Implication(theoremAsInfixExp
+                            .getLeft(), theoremAsInfixExp.getRight()));
                 }
             }
 
@@ -425,14 +424,12 @@ public final class Prover_Test {
             }
         }
 
-
         if (proofFile != null) {
             try {
                 proofFile.flush();
                 proofFile.close();
             }
-            catch (Exception e) {
-            }
+            catch (Exception e) {}
         }
 
         System.out.println(output);
@@ -472,7 +469,6 @@ public final class Prover_Test {
         "performed.");
          */
 
-
         if (myInstanceEnvironment.flags.isFlagSet(FLAG_VERBOSE)) {
             output.append("PROOF:\n" + exitInformation);
         }
@@ -499,9 +495,7 @@ public final class Prover_Test {
      *                              <code>null</code>.
      */
     private void proveVC(final VerificationCondition vC, final Metrics metrics,
-            FileWriter proofFile)
-            throws VCInconsistentException {
-
+            FileWriter proofFile) throws VCInconsistentException {
 
         if (myInstanceEnvironment.flags.isFlagSet(FLAG_VERBOSE)) {
             System.out.println("\n\n############################# VC "
@@ -540,12 +534,12 @@ public final class Prover_Test {
                 p = setUpOldProver(vC);
             }
         }
-		if(myInstanceEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_WEB)){
-			output.append("<vcProve id=\"" + vC.getName() + "\">");
-		}
-		else{
-			output.append(vC.getName() + " ");
-		}
+        if (myInstanceEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_WEB)) {
+            output.append("<vcProve id=\"" + vC.getName() + "\">");
+        }
+        else {
+            output.append(vC.getName() + " ");
+        }
         //System.out.print(vC.getName() + " ");
 
         try {
@@ -561,8 +555,7 @@ public final class Prover_Test {
                 try {
                     proofFile.append(vC.getName() + " failed.\n\n");
                 }
-                catch (IOException ex) {
-                }
+                catch (IOException ex) {}
             }
         }
         catch (VCProvedException e) {
@@ -575,24 +568,24 @@ public final class Prover_Test {
                     proofFile.append(vC.getName() + " succeeded.\n\n");
                     proofFile.append(e.toString());
                 }
-                catch (IOException ex) {
-                }
+                catch (IOException ex) {}
             }
         }
 
         printExitReport(startTime, exitInformation);
-		if(myInstanceEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_WEB)){
-			output.append("</vcProve>");
-			myInstanceEnvironment.getCompileReport().setProveVCs(output.toString());
-		}
+        if (myInstanceEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_WEB)) {
+            output.append("</vcProve>");
+            myInstanceEnvironment.getCompileReport().setProveVCs(
+                    output.toString());
+        }
     }
 
     private VCProver setUpProverDebug(VerificationCondition vc) {
         ChainingIterable<VCTransformer> steps =
                 new ChainingIterable<VCTransformer>();
 
-        steps.add(new ChooserEncapsulationStep(
-                "Reduce", setUpReductionTransformer()));
+        steps.add(new ChooserEncapsulationStep("Reduce",
+                setUpReductionTransformer()));
 
         steps.add(new ExistentialInstantiationStep(myPExpTheorems));
 
@@ -610,39 +603,37 @@ public final class Prover_Test {
             consequent = new Consequent(i.getConsequent(), myTyper);
 
             steps.add(new ConsequentWeakeningStep(antecedent, consequent));
-            steps.add(new TheoryDevelopingStep(
-                    antecedent, consequent, myPExpTheorems));
+            steps.add(new TheoryDevelopingStep(antecedent, consequent,
+                    myPExpTheorems));
         }
 
         VCTransformer batchDeveloper = buildBatchTheoryDeveloper(5);
 
-        return new AlternativeProver(myInstanceEnvironment,
+        return new AlternativeProver(
+                myInstanceEnvironment,
                 new FirstStepGivenTransformationChooser(
-                new SimplifyingTransformationChooser(
-                new GuidedTransformationChooser(steps, myTyper), 0),
-                batchDeveloper), myTyper);
+                        new SimplifyingTransformationChooser(
+                                new GuidedTransformationChooser(steps, myTyper),
+                                0), batchDeveloper), myTyper);
     }
 
     private TransformationChooser buildConsequentSubstitutions(
             TransformerFitnessFunction f) {
 
-        return new UpfrontFitnessTransformationChooser(
-                f, AbstractEqualityRuleNormalizer.normalizeAll(
-                new ConsequentSubstitutionRuleNormalizer(
-                myTyper, false),
-                myPExpTheorems),
+        return new UpfrontFitnessTransformationChooser(f,
+                AbstractEqualityRuleNormalizer
+                        .normalizeAll(new ConsequentSubstitutionRuleNormalizer(
+                                myTyper, false), myPExpTheorems),
                 FITNESS_THRESHOLD, myTyper, myInstanceEnvironment);
     }
 
     private TransformationChooser buildEquivalentAntecedentDevelopments(
             TransformerFitnessFunction f) {
 
-        return new UpfrontFitnessTransformationChooser(
-                f, AbstractEqualityRuleNormalizer.normalizeAll(
-                new AntecedentExtenderRuleNormalizer(
-                myTyper, false),
-                myPExpTheorems),
-                0, myTyper, myInstanceEnvironment);
+        return new UpfrontFitnessTransformationChooser(f,
+                AbstractEqualityRuleNormalizer.normalizeAll(
+                        new AntecedentExtenderRuleNormalizer(myTyper, false),
+                        myPExpTheorems), 0, myTyper, myInstanceEnvironment);
     }
 
     private TransformationChooser buildImplicationAntecedentDevelopments(
@@ -650,8 +641,7 @@ public final class Prover_Test {
 
         Antecedent an;
         Consequent co;
-        java.util.List<VCTransformer> l =
-                new LinkedList<VCTransformer>();
+        java.util.List<VCTransformer> l = new LinkedList<VCTransformer>();
         for (Implication i : myImplications) {
 
             an = new Antecedent(i.getAntecedent(), myTyper);
@@ -669,8 +659,7 @@ public final class Prover_Test {
 
         Antecedent an;
         Consequent co;
-        java.util.List<VCTransformer> l =
-                new LinkedList<VCTransformer>();
+        java.util.List<VCTransformer> l = new LinkedList<VCTransformer>();
         for (Implication i : myImplications) {
 
             an = new Antecedent(i.getAntecedent(), myTyper);
@@ -709,9 +698,9 @@ public final class Prover_Test {
         TransformationChooser reductionStep = setUpReductionTransformer();
 
         //First reduce, then develop
-/*TransformationChooser preprocessingStep =
-        new FirstStepGivenTransformationChooser(
-        reductionStep, batchDeveloper);*/
+        /*TransformationChooser preprocessingStep =
+         new FirstStepGivenTransformationChooser(
+         reductionStep, batchDeveloper);*/
 
         //These are the different depth-first-searches of the proof
         //space we will try
@@ -730,14 +719,15 @@ public final class Prover_Test {
         for (TransformationChooser chooser : rounds) {
 
             //Right before we start proving, we need to develop theories
-            developAndProve = new FirstStepGivenTransformationChooser(
-                    chooser, batchDeveloper);
+            developAndProve =
+                    new FirstStepGivenTransformationChooser(chooser,
+                            batchDeveloper);
 
             //And before everything, reduce
-            curDepth = new AlternativeProver(myInstanceEnvironment,
-                    new FailoverChooser(reductionStep, developAndProve,
-                    failoverNote),
-                    myTyper);
+            curDepth =
+                    new AlternativeProver(myInstanceEnvironment,
+                            new FailoverChooser(reductionStep, developAndProve,
+                                    failoverNote), myTyper);
 
             retval.addStrategy(curDepth);
         }
@@ -757,8 +747,8 @@ public final class Prover_Test {
 
         return new NoBacktrackChooser(new ProductiveStepChooser(
                 new UpfrontFitnessTransformationChooser(
-                new NormalizingTransformerFitnessFunction(),
-                steps, 0, myTyper, myInstanceEnvironment)));
+                        new NormalizingTransformerFitnessFunction(), steps, 0,
+                        myTyper, myInstanceEnvironment)));
     }
 
     private TransformationChooser setUpMainProofStrategy() {
@@ -789,27 +779,29 @@ public final class Prover_Test {
         VCTransformer instantiateExistential =
                 new ExistentialInstantiationStep(myPExpTheorems);
 
-
         //###################### Now, the main proofsearch algorithm
         TransformationChooser workingChooser = consequentSubstitutions;
 
         //Include consequent strengthenings
-        workingChooser = new ConcatenatingTransformationChooser(
-                workingChooser, consequentStrengthenings);
+        workingChooser =
+                new ConcatenatingTransformationChooser(workingChooser,
+                        consequentStrengthenings);
 
         //An object for all kinds of antecedent development
         TransformationChooser antecedentDevelopment =
                 new ConcatenatingTransformationChooser(equivalentDevelopments,
-                implicationDevelopments);
+                        implicationDevelopments);
 
         //Only develop the antecedent at the beginning of proofs, and only after
         //we've tried everything else (i.e., only as a last resort)
         workingChooser =
-                new OnlyBeforeChooser(antecedentDevelopment, workingChooser, true);
+                new OnlyBeforeChooser(antecedentDevelopment, workingChooser,
+                        true);
 
         //Always try to instantiate first
-        workingChooser = new FirstChoiceGivenTransformationChooser(
-                workingChooser, instantiateExistential);
+        workingChooser =
+                new FirstChoiceGivenTransformationChooser(workingChooser,
+                        instantiateExistential);
 
         return workingChooser;
     }
@@ -819,17 +811,18 @@ public final class Prover_Test {
 
         GuidedRuleChooser chooser = new GuidedRuleChooser(myTyper);
         chooser.addRules(myTheoremNames, myTheorems);
-        SingleStrategyProver slaveProver = new SingleStrategyProver(chooser,
-                true, 0, myImplications, myTyper, myInstanceEnvironment);
+        SingleStrategyProver slaveProver =
+                new SingleStrategyProver(chooser, true, 0, myImplications,
+                        myTyper, myInstanceEnvironment);
 
         return slaveProver;
     }
 
     private VCProver setUpOldProver(VerificationCondition vc) {
         BlindIterativeRuleChooser baseChooser =
-                //new BlindIterativeRuleChooser(myTyper);
+        //new BlindIterativeRuleChooser(myTyper);
                 new UpfrontFitnessSortRuleChooser(myTyper,
-                new SimpleFitnessFunction(), 0);
+                        new SimpleFitnessFunction(), 0);
         baseChooser.addRules(myTheoremNames, myTheorems);
         baseChooser.lock(vc);
 
@@ -837,14 +830,16 @@ public final class Prover_Test {
 
         MultiStrategyProver p = new MultiStrategyProver();
 
-        SingleStrategyProver slaveProver = new SingleStrategyProver(
-                new LengthLimitedProvider(baseChooser, 2), true, 0,
-                myImplications, myTyper, myInstanceEnvironment);
+        SingleStrategyProver slaveProver =
+                new SingleStrategyProver(new LengthLimitedProvider(baseChooser,
+                        2), true, 0, myImplications, myTyper,
+                        myInstanceEnvironment);
         p.addStrategy(slaveProver);
 
-        slaveProver = new SingleStrategyProver(
-                new LengthLimitedProvider(baseChooser, 3), true, 3,
-                myImplications, myTyper, myInstanceEnvironment);
+        slaveProver =
+                new SingleStrategyProver(new LengthLimitedProvider(baseChooser,
+                        3), true, 3, myImplications, myTyper,
+                        myInstanceEnvironment);
         p.addStrategy(slaveProver);
 
         return p;
@@ -864,11 +859,10 @@ public final class Prover_Test {
         return mainFileName;
     }
 
-    public void createFlags(FlagManager m) {
-    }
+    public void createFlags(FlagManager m) {}
 
     public static void setUpFlags() {
-        Flag[] someProveFlag = {FLAG_LEGACY_PROVE, FLAG_PROVE};
+        Flag[] someProveFlag = { FLAG_LEGACY_PROVE, FLAG_PROVE };
         FlagDependencies.addRequires(FLAG_DEBUG, someProveFlag);
         FlagDependencies.addRequires(FLAG_VERBOSE, someProveFlag);
 
@@ -884,5 +878,3 @@ public final class Prover_Test {
         FlagDependencies.addImplies(FLAG_SOME_PROVER, Verifier.FLAG_VERIFY_VC);
     }
 }
-
-

@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * ConceptModuleDec.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -93,97 +93,107 @@ public class ConceptModuleDec extends ModuleDec {
     /** The decs member. */
     private List<Dec> decs;
 
-
-
     public ConceptModuleDec() {
-        // Empty
+    // Empty
     }
-
 
     public ConceptModuleDec(PosSymbol name, List<ModuleParameter> parameters,
-                            List<UsesItem> usesItems, Exp requirement,
-                            List<Exp> constraints, InitItem facilityInit,
-                            FinalItem facilityFinal, List<Dec> decs) {
-        this.name          = name;
-        this.parameters    = parameters;
-        this.usesItems     = usesItems;
-        this.requirement   = requirement;
-        this.constraints   = constraints;
-        this.facilityInit  = facilityInit;
+            List<UsesItem> usesItems, Exp requirement, List<Exp> constraints,
+            InitItem facilityInit, FinalItem facilityFinal, List<Dec> decs) {
+        this.name = name;
+        this.parameters = parameters;
+        this.usesItems = usesItems;
+        this.requirement = requirement;
+        this.constraints = constraints;
+        this.facilityInit = facilityInit;
         this.facilityFinal = facilityFinal;
-        this.decs          = decs;
+        this.decs = decs;
     }
 
-
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
-
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the parameters variable. */
-    public List<ModuleParameter> getParameters() { return parameters; }
-
+    public List<ModuleParameter> getParameters() {
+        return parameters;
+    }
 
     /** Returns the value of the usesItems variable. */
-    public List<UsesItem> getUsesItems() { return usesItems; }
-
+    public List<UsesItem> getUsesItems() {
+        return usesItems;
+    }
 
     /** Returns the value of the requirement variable. */
-    public Exp getRequirement() { return requirement; }
-
+    public Exp getRequirement() {
+        return requirement;
+    }
 
     /** Returns the value of the constraints variable. */
-    public List<Exp> getConstraints() { return constraints; }
-
+    public List<Exp> getConstraints() {
+        return constraints;
+    }
 
     /** Returns the value of the facilityInit variable. */
-    public InitItem getFacilityInit() { return facilityInit; }
-
+    public InitItem getFacilityInit() {
+        return facilityInit;
+    }
 
     /** Returns the value of the facilityFinal variable. */
-    public FinalItem getFacilityFinal() { return facilityFinal; }
-
+    public FinalItem getFacilityFinal() {
+        return facilityFinal;
+    }
 
     /** Returns the value of the decs variable. */
-    public List<Dec> getDecs() { return decs; }
-
+    public List<Dec> getDecs() {
+        return decs;
+    }
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
-
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the parameters variable to the specified value. */
-    public void setParameters(List<ModuleParameter> parameters) { this.parameters = parameters; }
-
+    public void setParameters(List<ModuleParameter> parameters) {
+        this.parameters = parameters;
+    }
 
     /** Sets the usesItems variable to the specified value. */
-    public void setUsesItems(List<UsesItem> usesItems) { this.usesItems = usesItems; }
-
+    public void setUsesItems(List<UsesItem> usesItems) {
+        this.usesItems = usesItems;
+    }
 
     /** Sets the requirement variable to the specified value. */
-    public void setRequirement(Exp requirement) { this.requirement = requirement; }
-
+    public void setRequirement(Exp requirement) {
+        this.requirement = requirement;
+    }
 
     /** Sets the constraints variable to the specified value. */
-    public void setConstraints(List<Exp> constraints) { this.constraints = constraints; }
-
+    public void setConstraints(List<Exp> constraints) {
+        this.constraints = constraints;
+    }
 
     /** Sets the facilityInit variable to the specified value. */
-    public void setFacilityInit(InitItem facilityInit) { this.facilityInit = facilityInit; }
-
+    public void setFacilityInit(InitItem facilityInit) {
+        this.facilityInit = facilityInit;
+    }
 
     /** Sets the facilityFinal variable to the specified value. */
-    public void setFacilityFinal(FinalItem facilityFinal) { this.facilityFinal = facilityFinal; }
-
+    public void setFacilityFinal(FinalItem facilityFinal) {
+        this.facilityFinal = facilityFinal;
+    }
 
     /** Sets the decs variable to the specified value. */
-    public void setDecs(List<Dec> decs) { this.decs = decs; }
-
+    public void setDecs(List<Dec> decs) {
+        this.decs = decs;
+    }
 
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitConceptModuleDec(this);
     }
-
 
     /** Returns a formatted text string of this class. */
     public String asString(int indent, int increment) {
@@ -227,8 +237,8 @@ public class ConceptModuleDec extends ModuleDec {
 
         return sb.toString();
     }
-    
-    public String toString(){
-    	return name.toString();
+
+    public String toString() {
+        return name.toString();
     }
 }

@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,23 +34,23 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 
 /*
  * Mode.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -59,7 +59,7 @@
 
 package edu.clemson.cs.r2jt.data;
 
-/** Provides access to type checkable variable modes. */ 
+/** Provides access to type checkable variable modes. */
 public class Mode {
 
     // ===========================================================
@@ -112,18 +112,21 @@ public class Mode {
         boolean result;
         if (a.modeName.equals(b.modeName)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
     }
-    
+
     public boolean isMathMode() {
-    	if(equals(this, MATH) || equals(this, DEFINITION) || equals(this, DEF_PARAM)
-    			|| equals(this, CONCEPTUAL) || equals(this, EXEMPLAR) || equals(this, MATH_FIELD)) {
+        if (equals(this, MATH) || equals(this, DEFINITION)
+                || equals(this, DEF_PARAM) || equals(this, CONCEPTUAL)
+                || equals(this, EXEMPLAR) || equals(this, MATH_FIELD)) {
             return true;
-    	}
-    	else return false;
+        }
+        else
+            return false;
     }
 
     /*
@@ -160,30 +163,38 @@ public class Mode {
      */
     public static boolean implementsCompatible(Mode actual, Mode formal) {
         boolean result;
-        
+
         if (formal.equals(REASSIGNS) || actual.equals(REASSIGNS)) {
-        	result = true;
+            result = true;
         }
         else {
-	        if (formal.equals(UPDATES)) {
-	            result = updatesImplementsCompatible(actual);
-	        } else if (formal.equals(ALTERS)) {
-	            result = altersImplementsCompatible(actual);
-	        } else if (formal.equals(REPLACES)) {
-	            result = replacesImplementsCompatible(actual);
-	        } else if (formal.equals(CLEARS)) {
-	            result = clearsImplementsCompatible(actual);
-	        } else if (formal.equals(RESTORES)) {
-	            result = restoresImplementsCompatible(actual);
-	        } else if (formal.equals(PRESERVES)) {
-	            result = preservesImplementsCompatible(actual);
-	        } else if (formal.equals(EVALUATES)) {
-	            result = evaluatesImplementsCompatible(actual);
-	        } else if (formal.equals(REASSIGNS)) {
-	            result = evaluatesImplementsCompatible(actual);
-	        } else {
-	            result = false;
-	        }
+            if (formal.equals(UPDATES)) {
+                result = updatesImplementsCompatible(actual);
+            }
+            else if (formal.equals(ALTERS)) {
+                result = altersImplementsCompatible(actual);
+            }
+            else if (formal.equals(REPLACES)) {
+                result = replacesImplementsCompatible(actual);
+            }
+            else if (formal.equals(CLEARS)) {
+                result = clearsImplementsCompatible(actual);
+            }
+            else if (formal.equals(RESTORES)) {
+                result = restoresImplementsCompatible(actual);
+            }
+            else if (formal.equals(PRESERVES)) {
+                result = preservesImplementsCompatible(actual);
+            }
+            else if (formal.equals(EVALUATES)) {
+                result = evaluatesImplementsCompatible(actual);
+            }
+            else if (formal.equals(REASSIGNS)) {
+                result = evaluatesImplementsCompatible(actual);
+            }
+            else {
+                result = false;
+            }
         }
         return result;
     }
@@ -222,21 +233,29 @@ public class Mode {
         boolean result;
         if (formal.equals(UPDATES)) {
             result = updatesCallCompatible(actual);
-        } else if (formal.equals(ALTERS)) {
+        }
+        else if (formal.equals(ALTERS)) {
             result = altersCallCompatible(actual);
-        } else if (formal.equals(REPLACES)) {
+        }
+        else if (formal.equals(REPLACES)) {
             result = replacesCallCompatible(actual);
-        } else if (formal.equals(CLEARS)) {
+        }
+        else if (formal.equals(CLEARS)) {
             result = clearsCallCompatible(actual);
-        } else if (formal.equals(RESTORES)) {
+        }
+        else if (formal.equals(RESTORES)) {
             result = restoresCallCompatible(actual);
-        } else if (formal.equals(PRESERVES)) {
+        }
+        else if (formal.equals(PRESERVES)) {
             result = preservesCallCompatible(actual);
-        } else if (formal.equals(EVALUATES)) {
+        }
+        else if (formal.equals(EVALUATES)) {
             result = evaluatesCallCompatible(actual);
-        } else if (formal.equals(REASSIGNS)) {
+        }
+        else if (formal.equals(REASSIGNS)) {
             result = evaluatesCallCompatible(actual);
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -256,12 +275,11 @@ public class Mode {
 
     private static boolean updatesImplementsCompatible(Mode actual) {
         boolean result;
-        if /**/ (actual.equals(UPDATES) ||
-                 actual.equals(CLEARS) ||
-                 actual.equals(RESTORES) ||
-                 actual.equals(PRESERVES)) {
+        if /**/(actual.equals(UPDATES) || actual.equals(CLEARS)
+                || actual.equals(RESTORES) || actual.equals(PRESERVES)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -269,13 +287,12 @@ public class Mode {
 
     private static boolean altersImplementsCompatible(Mode actual) {
         boolean result;
-        if /**/ (actual.equals(UPDATES) ||
-                 actual.equals(ALTERS) ||
-                 actual.equals(CLEARS) ||
-                 actual.equals(RESTORES) ||
-                 actual.equals(PRESERVES)) {
+        if /**/(actual.equals(UPDATES) || actual.equals(ALTERS)
+                || actual.equals(CLEARS) || actual.equals(RESTORES)
+                || actual.equals(PRESERVES)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -283,10 +300,10 @@ public class Mode {
 
     private static boolean replacesImplementsCompatible(Mode actual) {
         boolean result;
-        if /**/ (actual.equals(REPLACES) ||
-                 actual.equals(CLEARS)) {
+        if /**/(actual.equals(REPLACES) || actual.equals(CLEARS)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -296,7 +313,8 @@ public class Mode {
         boolean result;
         if (actual.equals(CLEARS)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -304,10 +322,10 @@ public class Mode {
 
     private static boolean restoresImplementsCompatible(Mode actual) {
         boolean result;
-        if /**/ (actual.equals(RESTORES) ||
-                 actual.equals(PRESERVES)) {
+        if /**/(actual.equals(RESTORES) || actual.equals(PRESERVES)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -317,7 +335,8 @@ public class Mode {
         boolean result;
         if (actual.equals(PRESERVES)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -327,7 +346,8 @@ public class Mode {
         boolean result;
         if (actual.equals(EVALUATES)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -339,14 +359,12 @@ public class Mode {
 
     private static boolean updatesCallCompatible(Mode actual) {
         boolean result;
-        if /**/ (actual.equals(UPDATES) ||
-                 actual.equals(ALTERS) ||
-                 actual.equals(REPLACES) ||
-                 actual.equals(CLEARS) ||
-                 actual.equals(RESTORES) ||
-                 actual.equals(LOCAL)) {
+        if /**/(actual.equals(UPDATES) || actual.equals(ALTERS)
+                || actual.equals(REPLACES) || actual.equals(CLEARS)
+                || actual.equals(RESTORES) || actual.equals(LOCAL)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -354,14 +372,12 @@ public class Mode {
 
     private static boolean altersCallCompatible(Mode actual) {
         boolean result;
-        if /**/ (actual.equals(UPDATES) ||
-                 actual.equals(ALTERS) ||
-                 actual.equals(REPLACES) ||
-                 actual.equals(CLEARS) ||
-                 actual.equals(RESTORES) ||
-                 actual.equals(LOCAL)) {
+        if /**/(actual.equals(UPDATES) || actual.equals(ALTERS)
+                || actual.equals(REPLACES) || actual.equals(CLEARS)
+                || actual.equals(RESTORES) || actual.equals(LOCAL)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -369,14 +385,12 @@ public class Mode {
 
     private static boolean replacesCallCompatible(Mode actual) {
         boolean result;
-        if /**/ (actual.equals(UPDATES) ||
-                 actual.equals(ALTERS) ||
-                 actual.equals(REPLACES) ||
-                 actual.equals(CLEARS) ||
-                 actual.equals(RESTORES) ||
-                 actual.equals(LOCAL)) {
+        if /**/(actual.equals(UPDATES) || actual.equals(ALTERS)
+                || actual.equals(REPLACES) || actual.equals(CLEARS)
+                || actual.equals(RESTORES) || actual.equals(LOCAL)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -384,14 +398,12 @@ public class Mode {
 
     private static boolean clearsCallCompatible(Mode actual) {
         boolean result;
-        if /**/ (actual.equals(UPDATES) ||
-                 actual.equals(ALTERS) ||
-                 actual.equals(REPLACES) ||
-                 actual.equals(CLEARS) ||
-                 actual.equals(RESTORES) ||
-                 actual.equals(LOCAL)) {
+        if /**/(actual.equals(UPDATES) || actual.equals(ALTERS)
+                || actual.equals(REPLACES) || actual.equals(CLEARS)
+                || actual.equals(RESTORES) || actual.equals(LOCAL)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -399,14 +411,12 @@ public class Mode {
 
     private static boolean restoresCallCompatible(Mode actual) {
         boolean result;
-        if /**/ (actual.equals(UPDATES) ||
-                 actual.equals(ALTERS) ||
-                 actual.equals(REPLACES) ||
-                 actual.equals(CLEARS) ||
-                 actual.equals(RESTORES) ||
-                 actual.equals(LOCAL)) {
+        if /**/(actual.equals(UPDATES) || actual.equals(ALTERS)
+                || actual.equals(REPLACES) || actual.equals(CLEARS)
+                || actual.equals(RESTORES) || actual.equals(LOCAL)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -414,10 +424,10 @@ public class Mode {
 
     private static boolean preservesCallCompatible(Mode actual) {
         boolean result;
-        if /**/ (actual.equals(PRESERVES) ||
-                 actual.equals(LOCAL)) {
+        if /**/(actual.equals(PRESERVES) || actual.equals(LOCAL)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;
@@ -427,7 +437,8 @@ public class Mode {
         boolean result;
         if (actual.equals(EVALUATES)) {
             result = true;
-        } else {
+        }
+        else {
             result = false;
         }
         return result;

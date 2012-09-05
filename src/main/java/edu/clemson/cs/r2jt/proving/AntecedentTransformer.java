@@ -8,6 +8,7 @@ import java.util.Iterator;
  * pre-defined rule.</p>
  */
 public interface AntecedentTransformer
-		extends Transformer<Antecedent, Iterator<Antecedent>> {
-	
+        extends
+            Transformer<Antecedent, Iterator<Antecedent>> {
+
 }

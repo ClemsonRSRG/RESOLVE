@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * DefinitionLocator.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -82,13 +82,13 @@ public class ProofLocator {
     //private Environment env = Environment.getInstance();
 
     private SymbolTable table;
-    
+
     private TypeMatcher tm;
 
     // ===========================================================
     // Constructors
     // ===========================================================
-    
+
     public ProofLocator(SymbolTable table, TypeMatcher tm, ErrorHandler err) {
         this.table = table;
         this.tm = tm;
@@ -99,54 +99,53 @@ public class ProofLocator {
     // Public Methods
     // ===========================================================
 
-    public ProofEntry locateProof(PosSymbol name)
-        throws SymbolSearchException {
-    	List<ProofEntry> proofs = locateProofsInStack(name);
-    	if(proofs.size() == 0) {
-		    proofs = locateProofsInImports(name);
-	    }
-	    if(proofs.size() > 1) {
+    public ProofEntry locateProof(PosSymbol name) throws SymbolSearchException {
+        List<ProofEntry> proofs = locateProofsInStack(name);
+        if (proofs.size() == 0) {
+            proofs = locateProofsInImports(name);
+        }
+        if (proofs.size() > 1) {
             List<Location> locs = getLocationList(proofs);
-            String msg = ambigProofRefMessage(name.toString(),
-                                                 locs.toString());
+            String msg = ambigProofRefMessage(name.toString(), locs.toString());
             err.error(name.getLocation(), msg);
             throw new SymbolSearchException();
-	    }
-	    else if(proofs.size() == 0) {
+        }
+        else if (proofs.size() == 0) {
             String msg = cantFindProofMessage(name.toString());
             err.error(name.getLocation(), msg);
             throw new SymbolSearchException();
-	    }
-	    else {
-        	return proofs.get(0);
-    	}
+        }
+        else {
+            return proofs.get(0);
+        }
     }
 
     public ProofEntry locateProof(PosSymbol qual, PosSymbol name)
-        throws SymbolSearchException
-    {
-        if (qual == null) { return locateProof(name); }
+            throws SymbolSearchException {
+        if (qual == null) {
+            return locateProof(name);
+        }
         QualifierLocator qlocator = new QualifierLocator(table, err);
         ModuleScope scope;
         scope = qlocator.locateMathModule(qual);
         if (scope.containsProof(name.getSymbol())) {
-        	ProofEntry p = scope.getProof(name.getSymbol());
+            ProofEntry p = scope.getProof(name.getSymbol());
             return p;
-        } else {
-            String msg = cantFindProofInModMessage(name.toString(),
-                                                  qual.toString());
+        }
+        else {
+            String msg =
+                    cantFindProofInModMessage(name.toString(), qual.toString());
             err.error(qual.getLocation(), msg);
             throw new SymbolSearchException();
         }
     }
-            
+
     // ===========================================================
     // Private Methods
     // ===========================================================
 
-	private List<ProofEntry> locateProofsInStack(PosSymbol name)
-        throws SymbolSearchException
-    {
+    private List<ProofEntry> locateProofsInStack(PosSymbol name)
+            throws SymbolSearchException {
         List<ProofEntry> proofs = new List<ProofEntry>();
         Stack<Scope> stack = table.getStack();
         Stack<Scope> hold = new Stack<Scope>();
@@ -155,28 +154,28 @@ public class ProofLocator {
                 Scope scope = stack.pop();
                 hold.push(scope);
                 if (scope instanceof ModuleScope) {
-                    ModuleScope mscope = (ModuleScope)scope;
+                    ModuleScope mscope = (ModuleScope) scope;
                     if (mscope.containsProof(name.getSymbol())) {
-                    	proofs.add(mscope.getProof(name.getSymbol()));
+                        proofs.add(mscope.getProof(name.getSymbol()));
                     }
                     // FIX: Check for recursive operation
                     // should be added here.
                 }
             }
             return proofs;
-        } finally {
+        }
+        finally {
             while (!hold.isEmpty()) {
                 stack.push(hold.pop());
             }
         }
     }
-	
+
     private List<ProofEntry> locateProofsInImports(PosSymbol name)
-        throws SymbolSearchException
-    {
+            throws SymbolSearchException {
         List<ProofEntry> proofs = new List<ProofEntry>();
-        Iterator<ModuleScope> i
-            = table.getModuleScope().getMathVisibleModules();
+        Iterator<ModuleScope> i =
+                table.getModuleScope().getMathVisibleModules();
         while (i.hasNext()) {
             ModuleScope iscope = i.next();
             if (iscope.containsProof(name.getSymbol())) {
@@ -201,17 +200,17 @@ public class ProofLocator {
     // -----------------------------------------------------------
 
     private String cantFindProofInModMessage(String name, String module) {
-        return "Cannot find a proof named " + name + " in module "
-            + module + ".";
+        return "Cannot find a proof named " + name + " in module " + module
+                + ".";
     }
 
     private String cantFindProofMessage(String name) {
         return "Cannot find a proof named " + name + ".";
     }
-    
+
     private String ambigProofRefMessage(String name, String mods) {
         return "The proof named " + name + " is found in more than one "
-            + "module visible from this scope: " + mods + ".";
+                + "module visible from this scope: " + mods + ".";
     }
 
 }

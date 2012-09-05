@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * CharExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -85,10 +85,7 @@ public class CharExp extends Exp {
 
     public CharExp() {};
 
-    public CharExp(
-            Location location,
-            Character c)
-    {
+    public CharExp(Location location, Character c) {
         this.location = location;
         this.c = c;
     }
@@ -102,37 +99,44 @@ public class CharExp extends Exp {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the c variable. */
-    public Character getValue() { return c; }
+    public Character getValue() {
+        return c;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the c variable to the specified value. */
-    public void setValue(Character c) { this.c = c; }
+    public void setValue(Character c) {
+        this.c = c;
+    }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
-    
+
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	return new CharExp(location, new Character(c));
+        return new CharExp(location, new Character(c));
     }
-    
+
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitCharExp(this);
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getCharExpType(this);
     }
 
@@ -151,14 +155,14 @@ public class CharExp extends Exp {
 
         return sb.toString();
     }
-    
-    public String toString(int indent){
-    	StringBuffer sb = new StringBuffer();
-    	printSpace(indent,sb);
-    	if (c != null){
-    		sb.append(c.toString());
-    	}
-    	return sb.toString();
+
+    public String toString(int indent) {
+        StringBuffer sb = new StringBuffer();
+        printSpace(indent, sb);
+        if (c != null) {
+            sb.append(c.toString());
+        }
+        return sb.toString();
     }
 
     /** Returns true if the variable is found in any sub expression   
@@ -166,31 +170,30 @@ public class CharExp extends Exp {
     public boolean containsVar(String varName, boolean IsOldExp) {
         return false;
     }
-    
+
     public List<Exp> getSubExpressions() {
-    	return new List<Exp>();
+        return new List<Exp>();
     }
-    
-    public void setSubExpression(int index, Exp e) {
-    }
-    
+
+    public void setSubExpression(int index, Exp e) {}
+
     public boolean shallowCompare(Exp e2) {
-    	if(!(e2 instanceof CharExp)) {
-    		return false;
-    	}
-    	if(c.charValue() != ((CharExp)e2).getValue().charValue()) {
-    		return false;
-    	}
-    	return true;
+        if (!(e2 instanceof CharExp)) {
+            return false;
+        }
+        if (c.charValue() != ((CharExp) e2).getValue().charValue()) {
+            return false;
+        }
+        return true;
     }
-    
+
     public void prettyPrint() {
-    	System.out.print(c.toString());
+        System.out.print(c.toString());
     }
-    
+
     public Exp copy() {
-    	Character newC = c.charValue();
-    	return new CharExp(null, newC);
+        Character newC = c.charValue();
+        return new CharExp(null, newC);
     }
 
 }

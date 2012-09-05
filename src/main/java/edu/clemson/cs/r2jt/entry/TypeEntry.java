@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,23 +34,23 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 
 /*
  * TypeEntry.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -82,11 +82,11 @@ public class TypeEntry extends Entry {
     private Type type = null;
 
     private PosSymbol exemplar = null;
-    
+
     private MathVarDec local = null;
-    
+
     private Exp where = null;
-    
+
     private Exp obligation = null;
 
     // ===========================================================
@@ -98,8 +98,9 @@ public class TypeEntry extends Entry {
         this.name = name;
         this.type = type;
     }
-    
-    public TypeEntry(Scope scope, PosSymbol name, Type type, MathVarDec local, Exp where, Exp obligation) {
+
+    public TypeEntry(Scope scope, PosSymbol name, Type type, MathVarDec local,
+            Exp where, Exp obligation) {
         this.scope = scope;
         this.name = name;
         this.type = type;
@@ -120,13 +121,13 @@ public class TypeEntry extends Entry {
         this.exemplar = exemplar;
     }
 
-/*
-    public TypeEntry(PosSymbol name, Type type, PosSymbol exemplar) {
-        this.name = name;
-        this.type = type;
-        this.exemplar = exemplar;
-    }
-*/
+    /*
+     public TypeEntry(PosSymbol name, Type type, PosSymbol exemplar) {
+     this.name = name;
+     this.type = type;
+     this.exemplar = exemplar;
+     }
+     */
 
     // ===========================================================
     // Accessors
@@ -159,17 +160,17 @@ public class TypeEntry extends Entry {
     public PosSymbol getExemplar() {
         return exemplar;
     }
-    
+
     public MathVarDec getLocal() {
-    	return local;
+        return local;
     }
-    
+
     public boolean hasObligation() {
-    	return (obligation != null);
+        return (obligation != null);
     }
-    
+
     public Exp getObligation() {
-    	return obligation;
+        return obligation;
     }
 
     // ===========================================================
@@ -177,7 +178,8 @@ public class TypeEntry extends Entry {
     // ===========================================================
 
     public TypeEntry instantiate(ScopeID sid, Binding binding) {
-        return new TypeEntry(binding.getScope(), name, type.instantiate(sid, binding));
+        return new TypeEntry(binding.getScope(), name, type.instantiate(sid,
+                binding));
     }
 
     public String toString() {

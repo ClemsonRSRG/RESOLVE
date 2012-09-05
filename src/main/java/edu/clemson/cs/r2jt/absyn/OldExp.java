@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * OldExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -83,21 +83,18 @@ public class OldExp extends Exp {
     // ===========================================================
     // Constructors
     // ===========================================================
-    
+
     public OldExp() {};
 
-    public OldExp(
-            Location location,
-            Exp exp)
-    {
+    public OldExp(Location location, Exp exp) {
         this.location = location;
         this.exp = exp;
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	return new OldExp(location, substitute(exp, substitutions));
+        return new OldExp(location, substitute(exp, substitutions));
     }
-    
+
     // ===========================================================
     // Accessor Methods
     // ===========================================================
@@ -107,33 +104,40 @@ public class OldExp extends Exp {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the exp variable. */
-    public Exp getExp() { return exp; }
+    public Exp getExp() {
+        return exp;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the exp variable to the specified value. */
-    public void setExp(Exp exp) { this.exp = exp; }
+    public void setExp(Exp exp) {
+        this.exp = exp;
+    }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
-    
+
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitOldExp(this);
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getOldExpType(this);
     }
 
@@ -146,12 +150,12 @@ public class OldExp extends Exp {
         sb.append("OldExp\n");
 
         if (exp != null) {
-            sb.append(exp.asString(indent+increment,increment));
+            sb.append(exp.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
-    
+
     /** Returns a formatted text string of this class. */
     public String toString(int indent) {
 
@@ -169,87 +173,98 @@ public class OldExp extends Exp {
     /** Returns true if the variable is found in any sub expression   
         of this one. **/
     public boolean containsVar(String varName, boolean IsOldExp) {
-    	if(exp != null) {
-            if(IsOldExp) {
+        if (exp != null) {
+            if (IsOldExp) {
                 return exp.containsVar(varName, false);
             }
             else {
                 return false;
             }
-    	}
-    	return false;
-    }
-    
-    public Object clone(){
-   	 	OldExp clone = new OldExp();
-   	 	clone.setExp((Exp)this.getExp().clone());
-   	 	clone.setLocation(this.getLocation());
-   	 	clone.setType(getType());
-   	 	return clone;
-   }
-    
-    public List<Exp> getSubExpressions() {
-    	List<Exp> list = new List<Exp>();
-    	list.add(exp);
-    	return list;
-    }
-    
-    public void setSubExpression(int index, Exp e) {
-    	exp = e;
-    }
-    
-    public boolean shallowCompare(Exp e2) {
-    	if(!(e2 instanceof OldExp)) {
-    		return false;
-    	}
-    	return true;
-    }
-    
-    public Exp replace(Exp old, Exp replacement){
-    	if(old instanceof OldExp){
-    		if(replacement instanceof OldExp){
-    			Exp tmp = exp.replace(((OldExp)old).getExp(), ((OldExp)replacement).getExp());
-    			if(tmp != null) {
-    				exp = tmp;		
-    				return this;
-    			}
-    		}
-    		else {
-    			Exp tmp = exp.replace(((OldExp)old).getExp(), replacement);
-    			if(tmp != null)
-    				return tmp;
-    		}
-    	}
-    	else {
-    		if(exp instanceof FunctionExp){
-    			if(old instanceof VarExp && 
-    					!((FunctionExp)exp).getName().equals(((VarExp)old).getName().toString())){
-					if(!(replacement instanceof VarExp && (((VarExp)replacement).getName().getName().startsWith("?") || ((VarExp)replacement).getName().getName().startsWith("_")))){
-    					exp = exp.replace(old, replacement);
-					}else{
-						List<FunctionArgList> paramList = ((FunctionExp)exp).replaceVariableInParamListWithExp(((FunctionExp)exp).getParamList(), old, replacement);
-						((FunctionExp)exp).setParamList(paramList);						
-					}
-    			}
-    			return this;
-    		}
-    	}
-    	return this;
+        }
+        return false;
     }
 
-    public Exp remember(){
-    	return (exp).remember();
+    public Object clone() {
+        OldExp clone = new OldExp();
+        clone.setExp((Exp) this.getExp().clone());
+        clone.setLocation(this.getLocation());
+        clone.setType(getType());
+        return clone;
     }
-    
+
+    public List<Exp> getSubExpressions() {
+        List<Exp> list = new List<Exp>();
+        list.add(exp);
+        return list;
+    }
+
+    public void setSubExpression(int index, Exp e) {
+        exp = e;
+    }
+
+    public boolean shallowCompare(Exp e2) {
+        if (!(e2 instanceof OldExp)) {
+            return false;
+        }
+        return true;
+    }
+
+    public Exp replace(Exp old, Exp replacement) {
+        if (old instanceof OldExp) {
+            if (replacement instanceof OldExp) {
+                Exp tmp =
+                        exp.replace(((OldExp) old).getExp(),
+                                ((OldExp) replacement).getExp());
+                if (tmp != null) {
+                    exp = tmp;
+                    return this;
+                }
+            }
+            else {
+                Exp tmp = exp.replace(((OldExp) old).getExp(), replacement);
+                if (tmp != null)
+                    return tmp;
+            }
+        }
+        else {
+            if (exp instanceof FunctionExp) {
+                if (old instanceof VarExp
+                        && !((FunctionExp) exp).getName().equals(
+                                ((VarExp) old).getName().toString())) {
+                    if (!(replacement instanceof VarExp && (((VarExp) replacement)
+                            .getName().getName().startsWith("?") || ((VarExp) replacement)
+                            .getName().getName().startsWith("_")))) {
+                        exp = exp.replace(old, replacement);
+                    }
+                    else {
+                        List<FunctionArgList> paramList =
+                                ((FunctionExp) exp)
+                                        .replaceVariableInParamListWithExp(
+                                                ((FunctionExp) exp)
+                                                        .getParamList(), old,
+                                                replacement);
+                        ((FunctionExp) exp).setParamList(paramList);
+                    }
+                }
+                return this;
+            }
+        }
+        return this;
+    }
+
+    public Exp remember() {
+        return (exp).remember();
+    }
+
     public void prettyPrint() {
-    	System.out.print("#");
-    	exp.prettyPrint();
+        System.out.print("#");
+        exp.prettyPrint();
     }
-    
+
     public Exp copy() {
-    	Exp newExp = exp.copy();
-    	newExp = new OldExp(getLocation(), newExp);
-    	newExp.setType(getType());
-    	return newExp;
+        Exp newExp = exp.copy();
+        newExp = new OldExp(getLocation(), newExp);
+        newExp.setType(getType());
+        return newExp;
     }
 }

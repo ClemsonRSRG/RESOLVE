@@ -10,26 +10,27 @@ public class ConsequentSubstitutor implements VCTransformer {
     private final Consequent myTheoremConsequent;
 
     private final boolean myIntroducesQuantifiedVariablesFlag;
-    
+
     public ConsequentSubstitutor(NewMatchReplace m) {
 
         myTheoremAntecedent = new Antecedent(m.getPattern());
         myTheoremConsequent = new Consequent(m.getExpansionTemplate());
-        
-        myIntroducesQuantifiedVariablesFlag = 
-        	myTheoremConsequent.containsQuantifiedVariableNotIn(
-        			myTheoremAntecedent);
 
-        myTransformer = new ConsequentTransformerAdapter(
-                new ApplicatorConjunctsTransformer(
-                    new InPlaceApplicatorFactory(m)));
+        myIntroducesQuantifiedVariablesFlag =
+                myTheoremConsequent
+                        .containsQuantifiedVariableNotIn(myTheoremAntecedent);
+
+        myTransformer =
+                new ConsequentTransformerAdapter(
+                        new ApplicatorConjunctsTransformer(
+                                new InPlaceApplicatorFactory(m)));
     }
 
     @Override
     public Iterator<VC> transform(VC original) {
-        return new StaticAntecedentIterator(original.getSourceName(),
-                original.getAntecedent(),
-                myTransformer.transform(original.getConsequent()));
+        return new StaticAntecedentIterator(original.getSourceName(), original
+                .getAntecedent(), myTransformer.transform(original
+                .getConsequent()));
     }
 
     @Override
@@ -47,8 +48,8 @@ public class ConsequentSubstitutor implements VCTransformer {
         return myTheoremConsequent;
     }
 
-	@Override
-	public boolean introducesQuantifiedVariables() {
-		return myIntroducesQuantifiedVariablesFlag;
-	}
+    @Override
+    public boolean introducesQuantifiedVariables() {
+        return myIntroducesQuantifiedVariablesFlag;
+    }
 }

@@ -9,7 +9,7 @@ public class MatchReplaceStep implements VCTransformer {
     private final ConsequentSubstitutor myConsequentSubstitutor;
     private final Antecedent myTheoremAntecedent;
     private final Consequent myTheoremConsequent;
-    
+
     private final boolean myIntroducesQuantifiedVariablesFlag;
 
     public MatchReplaceStep(NewMatchReplace r) {
@@ -19,17 +19,16 @@ public class MatchReplaceStep implements VCTransformer {
 
         myTheoremAntecedent = new Antecedent(r.getPattern());
         myTheoremConsequent = new Consequent(r.getExpansionTemplate());
-        
-        myIntroducesQuantifiedVariablesFlag = 
-        	myTheoremConsequent.containsQuantifiedVariableNotIn(
-        			myTheoremAntecedent);
+
+        myIntroducesQuantifiedVariablesFlag =
+                myTheoremConsequent
+                        .containsQuantifiedVariableNotIn(myTheoremAntecedent);
     }
 
     @Override
     public Iterator<VC> transform(VC original) {
-        return new ChainingIterator<VC>(
-                myConsequentSubstitutor.transform(original),
-                myAntecedentExtender.transform(original));
+        return new ChainingIterator<VC>(myConsequentSubstitutor
+                .transform(original), myAntecedentExtender.transform(original));
     }
 
     @Override
@@ -47,8 +46,8 @@ public class MatchReplaceStep implements VCTransformer {
         return myTheoremConsequent;
     }
 
-	@Override
-	public boolean introducesQuantifiedVariables() {
-		return myIntroducesQuantifiedVariablesFlag;
-	}
+    @Override
+    public boolean introducesQuantifiedVariables() {
+        return myIntroducesQuantifiedVariablesFlag;
+    }
 }

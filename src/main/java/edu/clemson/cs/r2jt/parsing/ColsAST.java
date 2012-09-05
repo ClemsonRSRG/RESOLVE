@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,23 +34,23 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 
 /*
  * ColsAST.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -63,18 +63,18 @@ import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
 
-//import antlr.*;
-//import antlr.collections.AST;
-//import antlr.ASTFactory;
-//import antlr.StringUtils;
-//import java.lang.Object;
+// import antlr.*;
+// import antlr.collections.AST;
+// import antlr.ASTFactory;
+// import antlr.StringUtils;
+// import java.lang.Object;
 /**
  * An extension to ANTLR's AST class to store column numbers with the
  * tree nodes.
  * 
  * @author Steven Atkinson
  */
-public class ColsAST extends CommonTree{
+public class ColsAST extends CommonTree {
 
     // ===========================================================
     // Variables
@@ -91,22 +91,22 @@ public class ColsAST extends CommonTree{
     //protected int line;
 
     //protected int column;
-    
-    public ColsAST(){
-    	super();
+
+    public ColsAST() {
+        super();
     }
-    
-    public ColsAST(Token tok){
-    	super(tok);
-    	//System.out.println(tok.toString());
+
+    public ColsAST(Token tok) {
+        super(tok);
+        //System.out.println(tok.toString());
     }
-    
-    public ColsAST(ColsAST tree){
-    	super(tree);
+
+    public ColsAST(ColsAST tree) {
+        super(tree);
     }
-    
-    public Tree dupNode(){
-    	return new ColsAST(this);
+
+    public Tree dupNode() {
+        return new ColsAST(this);
     }
 
     // ===========================================================
@@ -165,7 +165,7 @@ public class ColsAST extends CommonTree{
     /*public void setLine(int line_) {
         line = line_;
     }*/
-    
+
     /** Set the column for this node */
     /*public void setColumn(int column_) {
         column = column_;
@@ -248,7 +248,7 @@ public class ColsAST extends CommonTree{
         StringBuffer b = new StringBuffer();
         // if verbose and type name not same as text (keyword probably)
         if ( verboseStringConversion &&
-!getText().equalsIgnoreCase(tokenNames[getType()]) &&
+    !getText().equalsIgnoreCase(tokenNames[getType()]) &&
              !getText().equalsIgnoreCase(StringUtils.stripFrontBack(tokenNames[getType()],"\"","\"")) ) {
             b.append('[');
             b.append(getText());

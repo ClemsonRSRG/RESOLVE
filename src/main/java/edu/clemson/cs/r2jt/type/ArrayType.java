@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,23 +34,23 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 
 /*
  * ArrayType.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -89,8 +89,8 @@ public class ArrayType extends Type {
     // Constructors
     // ===========================================================
 
-    public ArrayType(ModuleID id, PosSymbol name, ProgramExp lo,
-                     ProgramExp hi, Type index, Type entry) {
+    public ArrayType(ModuleID id, PosSymbol name, ProgramExp lo, ProgramExp hi,
+            Type index, Type entry) {
         this.id = id;
         this.name = name;
         this.lo = lo;
@@ -102,29 +102,42 @@ public class ArrayType extends Type {
     // ===========================================================
     // Accessor Methods
     // ===========================================================
-    
-    public ModuleID getModuleID() { return id; }
-    
-    public PosSymbol getName() { return name; }
 
-    public void setName(PosSymbol name) { this.name = name; }
+    public ModuleID getModuleID() {
+        return id;
+    }
 
-    public ProgramExp getHi() { return hi; }
+    public PosSymbol getName() {
+        return name;
+    }
 
-    public ProgramExp getLo() { return lo; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
-    public Type getIndex() { return index; }
+    public ProgramExp getHi() {
+        return hi;
+    }
 
-    public Type getEntry() { return entry; }
+    public ProgramExp getLo() {
+        return lo;
+    }
+
+    public Type getIndex() {
+        return index;
+    }
+
+    public Type getEntry() {
+        return entry;
+    }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
 
     public Type instantiate(ScopeID sid, Binding binding) {
-        return new ArrayType(id, name, lo, hi,
-                             index.instantiate(sid, binding),
-                             entry.instantiate(sid, binding));
+        return new ArrayType(id, name, lo, hi, index.instantiate(sid, binding),
+                entry.instantiate(sid, binding));
     }
 
     public TypeName getProgramName() {
@@ -139,7 +152,8 @@ public class ArrayType extends Type {
             if (!(loc.getFilename().equals(id.getFilename()))) {
                 sb.append(" in " + id.toString());
             }
-        } else {
+        }
+        else {
             if (!(loc.getFilename().equals(id.getFilename()))) {
                 sb.append(id.toString() + ".");
             }
@@ -160,14 +174,16 @@ public class ArrayType extends Type {
         sb.append(index.toString());
         sb.append("[");
         if (lo instanceof ProgramIntegerExp) {
-            sb.append(((ProgramIntegerExp)lo).getValue());
-        } else {
+            sb.append(((ProgramIntegerExp) lo).getValue());
+        }
+        else {
             sb.append("exp");
         }
         sb.append("..");
         if (hi instanceof ProgramIntegerExp) {
-            sb.append(((ProgramIntegerExp)hi).getValue());
-        } else {
+            sb.append(((ProgramIntegerExp) hi).getValue());
+        }
+        else {
             sb.append("exp");
         }
         sb.append("]");
@@ -176,6 +192,7 @@ public class ArrayType extends Type {
         sb.append(")");
         return sb.toString();
     }
+
     public String asString() {
         StringBuffer sb = new StringBuffer();
         sb.append("[ARRAY]");
@@ -184,14 +201,16 @@ public class ArrayType extends Type {
         sb.append(index.toString());
         sb.append("[");
         if (lo instanceof ProgramIntegerExp) {
-            sb.append(((ProgramIntegerExp)lo).getValue());
-        } else {
+            sb.append(((ProgramIntegerExp) lo).getValue());
+        }
+        else {
             sb.append("exp");
         }
         sb.append("..");
         if (hi instanceof ProgramIntegerExp) {
-            sb.append(((ProgramIntegerExp)hi).getValue());
-        } else {
+            sb.append(((ProgramIntegerExp) hi).getValue());
+        }
+        else {
             sb.append("exp");
         }
         sb.append("]");

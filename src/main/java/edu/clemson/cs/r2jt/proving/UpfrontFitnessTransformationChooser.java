@@ -10,7 +10,8 @@ import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 
 public class UpfrontFitnessTransformationChooser
-        extends AbstractTransformationChooser {
+        extends
+            AbstractTransformationChooser {
 
     private final TransformerFitnessFunction myFitnessFunction;
     private final double myThreshold;
@@ -41,8 +42,7 @@ public class UpfrontFitnessTransformationChooser
             curFitness = myFitnessFunction.calculateFitness(curRule, vc);
 
             if (curFitness >= myThreshold) {
-                priorityList.add(
-                        new PriorityAugmentedObject<VCTransformer>(
+                priorityList.add(new PriorityAugmentedObject<VCTransformer>(
                         curRule, curFitness));
             }
         }
@@ -63,7 +63,6 @@ public class UpfrontFitnessTransformationChooser
             myPerVCOrdering.add(curRule.getObject());
         }
 
-
         RuleNormalizer n = new SubstitutionRuleNormalizer(myTyper, false);
         for (PExp e : vc.getAntecedent()) {
             for (VCTransformer t : n.normalize(e)) {
@@ -78,9 +77,10 @@ public class UpfrontFitnessTransformationChooser
 
         Iterator<ProofPathSuggestion> retval;
 
-        retval = new LazyMappingIterator<VCTransformer, ProofPathSuggestion>(
-                myPerVCOrdering.iterator(),
-                new StaticProofDataSuggestionMapper(d));
+        retval =
+                new LazyMappingIterator<VCTransformer, ProofPathSuggestion>(
+                        myPerVCOrdering.iterator(),
+                        new StaticProofDataSuggestionMapper(d));
 
         return retval;
     }

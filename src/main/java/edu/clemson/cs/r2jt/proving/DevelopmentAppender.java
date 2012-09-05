@@ -11,42 +11,42 @@ import java.util.Iterator;
  */
 public class DevelopmentAppender implements AntecedentTransformer {
 
-	private final AntecedentDeveloper myDeveloper;
-	
-	public DevelopmentAppender(AntecedentDeveloper d) {
-		myDeveloper = d;
-	}
-	
-	@Override
-	public Iterator<Antecedent> transform(Antecedent source) {
-		return new Extender(source, myDeveloper.transform(source));
-	}
-	
-	private class Extender implements Iterator<Antecedent> {
+    private final AntecedentDeveloper myDeveloper;
 
-		private final Antecedent myOriginal;
-		private final Iterator<Antecedent> myExtensions;
-		
-		public Extender(Antecedent original, Iterator<Antecedent> extensions) {
-			myOriginal = original;
-			myExtensions = extensions;
-		}
-		
-		@Override
-		public boolean hasNext() {
-			return myExtensions.hasNext();
-		}
+    public DevelopmentAppender(AntecedentDeveloper d) {
+        myDeveloper = d;
+    }
 
-		@Override
-		public Antecedent next() {
-			return myOriginal.appended(myExtensions.next());
-		}
+    @Override
+    public Iterator<Antecedent> transform(Antecedent source) {
+        return new Extender(source, myDeveloper.transform(source));
+    }
 
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-		
-	}
+    private class Extender implements Iterator<Antecedent> {
+
+        private final Antecedent myOriginal;
+        private final Iterator<Antecedent> myExtensions;
+
+        public Extender(Antecedent original, Iterator<Antecedent> extensions) {
+            myOriginal = original;
+            myExtensions = extensions;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return myExtensions.hasNext();
+        }
+
+        @Override
+        public Antecedent next() {
+            return myOriginal.appended(myExtensions.next());
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+    }
 
 }

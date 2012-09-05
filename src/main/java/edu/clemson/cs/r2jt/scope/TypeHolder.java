@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,23 +34,23 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 
 /*
  * TypeHolder.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -67,13 +67,13 @@ import edu.clemson.cs.r2jt.location.TypeLocator;
 import edu.clemson.cs.r2jt.location.SymbolSearchException;
 import edu.clemson.cs.r2jt.type.Type;
 
-//Changed Char to Character - literal string change 
+// Changed Char to Character - literal string change
 public class TypeHolder {
 
     // ==========================================================
     // Variables
     // ==========================================================
-	CompileEnvironment myInstanceEnvironment;
+    CompileEnvironment myInstanceEnvironment;
 
     private ModuleScope scope;
 
@@ -96,7 +96,7 @@ public class TypeHolder {
     private Type typeChar;
 
     private Type typeChar_Str;
-    
+
     private ErrorHandler err;
 
     // ===========================================================
@@ -104,7 +104,7 @@ public class TypeHolder {
     // ===========================================================
 
     public TypeHolder(ModuleScope scope, CompileEnvironment instanceEnvironment) {
-    	myInstanceEnvironment = instanceEnvironment;
+        myInstanceEnvironment = instanceEnvironment;
         this.scope = scope;
         this.err = instanceEnvironment.getErrorHandler();
     }
@@ -232,16 +232,36 @@ public class TypeHolder {
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Visible Built-in Types: ( ");
-        if (typeB != null) { sb.append("B "); }
-        if (typeN != null) { sb.append("N "); }
-        if (typeZ != null) { sb.append("Z "); }
-        if (typeR != null) { sb.append("R "); }
-        if (typeStr != null) { sb.append("Str "); }
-        if (typeBoolean != null) { sb.append("Boolean "); }
-        if (typeInteger != null) { sb.append("Integer "); }
-        if (typeReal != null) { sb.append("Real "); }
-        if (typeChar != null) { sb.append("Character "); } //Changed this from Char to Character
-        if (typeChar_Str != null) { sb.append("Char_Str "); }
+        if (typeB != null) {
+            sb.append("B ");
+        }
+        if (typeN != null) {
+            sb.append("N ");
+        }
+        if (typeZ != null) {
+            sb.append("Z ");
+        }
+        if (typeR != null) {
+            sb.append("R ");
+        }
+        if (typeStr != null) {
+            sb.append("Str ");
+        }
+        if (typeBoolean != null) {
+            sb.append("Boolean ");
+        }
+        if (typeInteger != null) {
+            sb.append("Integer ");
+        }
+        if (typeReal != null) {
+            sb.append("Real ");
+        }
+        if (typeChar != null) {
+            sb.append("Character ");
+        } //Changed this from Char to Character
+        if (typeChar_Str != null) {
+            sb.append("Char_Str ");
+        }
         sb.append(")");
         return sb.toString();
     }
@@ -261,10 +281,12 @@ public class TypeHolder {
             if (scope.containsType(tid.getName())) {
                 return scope.getType(tid.getName()).getType();
             }
-        } else {
+        }
+        else {
             try {
                 return tlocator.locateMathType(tid).getType();
-            } catch (SymbolSearchException ex) {
+            }
+            catch (SymbolSearchException ex) {
                 return null;
             }
         }

@@ -9,6 +9,13 @@
 
     <name>RESOLVE</name>
     <url>http://maven.apache.org</url>
+    
+    <scm>
+        <connection>scm:svn:http://somerepository.com/svn_repo/trunk</connection>
+        <developerConnection>scm:git:[fetch=]git://github.com/ClemsonRSRG/RESOLVE.git[push=]${privateFork}</developerConnection>
+        <url>http://somerepository.com/view.cvs</url>
+    </scm>
+    
     <build>
         <plugins>
             <plugin>
@@ -18,6 +25,32 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>developer.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+                <version>1.7</version>
+                <configuration>
+                    <connectionType>developerConnection</connectionType>
                 </configuration>
             </plugin>
             <plugin>
@@ -33,20 +66,23 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugins>
-                <plugin>
-                   <groupId>org.codehaus.mojo</groupId>
-                   <artifactId>jalopy-maven-plugin</artifactId>
-                   <version>1.0-SNAPSHOT</version>
-                   <configuration>
-                       <convention>rsrg.xml</convention>
-                       <history>FILE</history>
-                       <srcIncludesPattern>
-                            src/main/java/**/*.java
-                       </srcIncludesPattern>
-                   </configuration>
-                </plugin>
-            </plugins>
+            <plugin>
+                <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+                <artifactId>maven-java-formatter-plugin</artifactId>
+                <version>0.3.1</version>
+                <configuration>
+                    <configFile>
+                        ${project.basedir}/rsrg-format.xml
+                    </configFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <properties>

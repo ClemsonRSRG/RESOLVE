@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * ProofDefinitionExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2006
  * Reusable Software Research Group
  * Department of Computer Science
@@ -70,11 +70,10 @@ public class ProofDefinitionExp extends LineNumberedExp {
     // ===========================================================
     // Variables
     // ===========================================================
-    
+
     /** The location member. */
     private Location location;
 
-    
     /** The exp member. */
     private DefinitionDec exp;
 
@@ -83,24 +82,20 @@ public class ProofDefinitionExp extends LineNumberedExp {
     // ===========================================================
 
     public ProofDefinitionExp() {
-    	super(null);
+        super(null);
     }
 
-    public ProofDefinitionExp(
-            Location location,
-            PosSymbol lineNum,
-            DefinitionDec exp)
-    {
-    	super(lineNum);
+    public ProofDefinitionExp(Location location, PosSymbol lineNum,
+            DefinitionDec exp) {
+        super(lineNum);
         this.location = location;
         this.exp = exp;
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	return new ProofDefinitionExp(location, this.getLineNum(), 
-    			exp);
+        return new ProofDefinitionExp(location, this.getLineNum(), exp);
     }
-    
+
     // ===========================================================
     // Accessor Methods
     // ===========================================================
@@ -110,20 +105,28 @@ public class ProofDefinitionExp extends LineNumberedExp {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the exp variable. */
-    public DefinitionDec getExp() { return exp; }
+    public DefinitionDec getExp() {
+        return exp;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the value of the location variable. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the value of the exp variable. */
-    public void setExp(DefinitionDec exp) { this.exp = exp; }
+    public void setExp(DefinitionDec exp) {
+        this.exp = exp;
+    }
 
     // ===========================================================
     // Public Methods
@@ -135,8 +138,7 @@ public class ProofDefinitionExp extends LineNumberedExp {
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getProofDefinitionExpType(this);
     }
 
@@ -149,48 +151,48 @@ public class ProofDefinitionExp extends LineNumberedExp {
         sb.append("ProofDefinitionExp\n");
 
         if (myLineNumber != null) {
-        	printSpace(indent+increment, sb);
-        	sb.append("Line: " + myLineNumber.asString(0, increment));
+            printSpace(indent + increment, sb);
+            sb.append("Line: " + myLineNumber.asString(0, increment));
         }
-        
+
         if (exp != null) {
-            sb.append(exp.asString(indent+increment,increment));
+            sb.append(exp.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
-    
+
     public boolean containsVar(String varName, boolean IsOldExp) {
-	    return false;
+        return false;
     }
-    
+
     public List<Exp> getSubExpressions() {
-    	List<Exp> list = new List<Exp>();
-    	list.add(exp.getBase());
-    	list.add(exp.getHypothesis());
-    	list.add(exp.getDefinition());
-    	return list;
+        List<Exp> list = new List<Exp>();
+        list.add(exp.getBase());
+        list.add(exp.getHypothesis());
+        list.add(exp.getDefinition());
+        return list;
     }
-    
+
     public void setSubExpression(int index, Exp e) {
-    	switch (index) {
-    	case 0:
-    		exp.setBase(e);
-    		break;
-    	case 1:
-    		exp.setHypothesis(e);
-    		break;
-    	case 2:
-    		exp.setDefinition(e);
-    		break;
-    	}
+        switch (index) {
+        case 0:
+            exp.setBase(e);
+            break;
+        case 1:
+            exp.setHypothesis(e);
+            break;
+        case 2:
+            exp.setDefinition(e);
+            break;
+        }
     }
-    
+
     public boolean shallowCompare(Exp e2) {
-    	if(!(e2 instanceof ProofDefinitionExp)) {
-    		return false;
-    	}
-    	return true;
+        if (!(e2 instanceof ProofDefinitionExp)) {
+            return false;
+        }
+        return true;
     }
-    
+
 }

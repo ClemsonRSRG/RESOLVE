@@ -15,69 +15,71 @@ import java.util.Iterator;
  */
 public class SimplifyingTransformationChooser implements TransformationChooser {
 
-	private final static VCTransformer SIMPLIFY = new Simplifier();
-	
-	private final TransformationChooser mySourceChooser;
-	private int myMinimumDepth;
-	
-	/**
-	 * <p>Creates a new <code>SimplifyingTransformationChooser</code> that will
-	 * suggest its first <Code>Simplifier</code> transformation at depth
-	 * <code>minimumDepth</code> and then alternate applications of 
-	 * <code>original</code> with simplifications after that.</p>
-	 * 
-	 * @param original The <code>TransformationChooser</code> to compose with.
-	 * @param minimumDepth The first depth at which simplification should be
-	 *                     suggested and after which simplification should be
-	 *                     woven in.
-	 */
-	public SimplifyingTransformationChooser(TransformationChooser original,
-			int minimumDepth) {
-		
-		mySourceChooser = original;
-		myMinimumDepth = minimumDepth;
-	}
-	
-	@Override
-	public void preoptimizeForVC(VC vc) {
-		mySourceChooser.preoptimizeForVC(vc);
-	}
+    private final static VCTransformer SIMPLIFY = new Simplifier();
 
-	@Override
-	public Iterator<ProofPathSuggestion> suggestTransformations(VC vc, 
-			int curLength, Metrics metrics, ProofData d) {
-		
-		Iterator<ProofPathSuggestion> retval;
-		
-		int distanceFromMin = curLength - myMinimumDepth;
-		
-		if (distanceFromMin < 0 || distanceFromMin % 2 == 1) {
-			
-			//This is the number of steps that have been contributed by our base
-			//prover so far
-			int childContributionCount;
-			if (distanceFromMin < 0) {
-				 childContributionCount = curLength;
-			}
-			else {
-				childContributionCount =
-					((curLength - myMinimumDepth + 1) / 2 + myMinimumDepth) - 1;
-			}
-			
-			retval = mySourceChooser.suggestTransformations(vc, 
-					childContributionCount, metrics, d);
-		}
-		else {
-			retval = new SingletonIterator<ProofPathSuggestion>(
-					new ProofPathSuggestion(SIMPLIFY, d));
-		}
-		
-		return retval;
-	}
-	
-	@Override
-	public String toString() {
-		return "Simplifying(" + mySourceChooser + ", starting at depth " + 
-				myMinimumDepth + ")";
-	}
+    private final TransformationChooser mySourceChooser;
+    private int myMinimumDepth;
+
+    /**
+     * <p>Creates a new <code>SimplifyingTransformationChooser</code> that will
+     * suggest its first <Code>Simplifier</code> transformation at depth
+     * <code>minimumDepth</code> and then alternate applications of 
+     * <code>original</code> with simplifications after that.</p>
+     * 
+     * @param original The <code>TransformationChooser</code> to compose with.
+     * @param minimumDepth The first depth at which simplification should be
+     *                     suggested and after which simplification should be
+     *                     woven in.
+     */
+    public SimplifyingTransformationChooser(TransformationChooser original,
+            int minimumDepth) {
+
+        mySourceChooser = original;
+        myMinimumDepth = minimumDepth;
+    }
+
+    @Override
+    public void preoptimizeForVC(VC vc) {
+        mySourceChooser.preoptimizeForVC(vc);
+    }
+
+    @Override
+    public Iterator<ProofPathSuggestion> suggestTransformations(VC vc,
+            int curLength, Metrics metrics, ProofData d) {
+
+        Iterator<ProofPathSuggestion> retval;
+
+        int distanceFromMin = curLength - myMinimumDepth;
+
+        if (distanceFromMin < 0 || distanceFromMin % 2 == 1) {
+
+            //This is the number of steps that have been contributed by our base
+            //prover so far
+            int childContributionCount;
+            if (distanceFromMin < 0) {
+                childContributionCount = curLength;
+            }
+            else {
+                childContributionCount =
+                        ((curLength - myMinimumDepth + 1) / 2 + myMinimumDepth) - 1;
+            }
+
+            retval =
+                    mySourceChooser.suggestTransformations(vc,
+                            childContributionCount, metrics, d);
+        }
+        else {
+            retval =
+                    new SingletonIterator<ProofPathSuggestion>(
+                            new ProofPathSuggestion(SIMPLIFY, d));
+        }
+
+        return retval;
+    }
+
+    @Override
+    public String toString() {
+        return "Simplifying(" + mySourceChooser + ", starting at depth "
+                + myMinimumDepth + ")";
+    }
 }

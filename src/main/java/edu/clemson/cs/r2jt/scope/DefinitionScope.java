@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * DefinitionScope.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -78,9 +78,9 @@ public class DefinitionScope extends Scope {
     private ErrorHandler err;
 
     private Map<Symbol, VarEntry> variables = new Map<Symbol, VarEntry>();
-    
+
     private Binding binding;
-    
+
     private Map<Symbol, TypeEntry> types = new Map<Symbol, TypeEntry>();
 
     // ===========================================================
@@ -96,11 +96,15 @@ public class DefinitionScope extends Scope {
     // ===========================================================
     // Public Methods
     // ===========================================================
-    
-    public Binding getBinding() { return binding; }
 
-    public ScopeID getScopeID() { return sid; }
-    
+    public Binding getBinding() {
+        return binding;
+    }
+
+    public ScopeID getScopeID() {
+        return sid;
+    }
+
     // -----------------------------------------------------------
     // Population Methods
     // -----------------------------------------------------------
@@ -112,7 +116,8 @@ public class DefinitionScope extends Scope {
     public Entry getAddObstructor(Symbol sym) {
         if (variables.containsKey(sym)) {
             return variables.get(sym);
-        } else {
+        }
+        else {
             assert false : "getAddObstructor failed";
             return null;
         }
@@ -129,27 +134,25 @@ public class DefinitionScope extends Scope {
     public VarEntry getVariable(Symbol sym) {
         return variables.get(sym);
     }
-    
-    public Map<Symbol, TypeEntry> getTypes() { 
-    	return types; 
+
+    public Map<Symbol, TypeEntry> getTypes() {
+        return types;
     }
-    
+
     public void addType(TypeEntry entry) {
         types.put(entry.getSymbol(), entry);
     }
-    
+
     public boolean containsLocalType(Symbol sym) {
         return (types.containsKey(sym));
     }
 
     public boolean containsLocalConcType(Symbol sym) {
-        return (types.containsKey(sym) &&
-                types.get(sym).getType() instanceof ConcType);
+        return (types.containsKey(sym) && types.get(sym).getType() instanceof ConcType);
     }
 
     public boolean containsLocalNonConcType(Symbol sym) {
-        return (types.containsKey(sym) &&
-                !(types.get(sym).getType() instanceof ConcType));
+        return (types.containsKey(sym) && !(types.get(sym).getType() instanceof ConcType));
     }
 
     public TypeEntry getLocalType(Symbol sym) {

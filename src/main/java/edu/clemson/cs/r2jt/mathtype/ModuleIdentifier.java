@@ -15,40 +15,40 @@ import edu.clemson.cs.r2jt.absyn.UsesItem;
  */
 public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
-	private final String myName;
-	
-	public ModuleIdentifier(ModuleDec m) {
-		myName = m.getName().getName();
-	}
-	
-	public ModuleIdentifier(UsesItem i) {
-		myName = i.getName().getName();
-	}
-	
-	ModuleIdentifier(String s) {
-		myName = s;
-	}
-	
-	public boolean equals(Object o) {
-		boolean result = (o instanceof ModuleIdentifier);
-		
-		if (result) {
-			result = ((ModuleIdentifier) o).myName.equals(myName);
-		}
-		
-		return result;
-	}
-	
-	public int hashCode() {
-		return myName.hashCode();
-	}
+    private final String myName;
 
-	@Override
-	public int compareTo(ModuleIdentifier o) {
-		return myName.compareTo(o.myName);
-	}
-	
-	public String toString() {
-		return myName;
-	}
+    public ModuleIdentifier(ModuleDec m) {
+        myName = m.getName().getName();
+    }
+
+    public ModuleIdentifier(UsesItem i) {
+        myName = i.getName().getName();
+    }
+
+    ModuleIdentifier(String s) {
+        myName = s;
+    }
+
+    public boolean equals(Object o) {
+        boolean result = (o instanceof ModuleIdentifier);
+
+        if (result) {
+            result = ((ModuleIdentifier) o).myName.equals(myName);
+        }
+
+        return result;
+    }
+
+    public int hashCode() {
+        return myName.hashCode();
+    }
+
+    @Override
+    public int compareTo(ModuleIdentifier o) {
+        return myName.compareTo(o.myName);
+    }
+
+    public String toString() {
+        return myName;
+    }
 }

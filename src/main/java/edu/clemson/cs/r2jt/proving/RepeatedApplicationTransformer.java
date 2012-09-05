@@ -14,38 +14,39 @@ import java.util.Iterator;
  * TODO : Maybe construct some type safety so that ONLY singleton transforms can
  *        be used?
  */
-public class RepeatedApplicationTransformer<T extends ImmutableConjuncts> 
-			implements Transformer<T, Iterator<T>> {
+public class RepeatedApplicationTransformer<T extends ImmutableConjuncts>
+        implements
+            Transformer<T, Iterator<T>> {
 
-	private final Transformer<T, Iterator<T>> mySubTransformer;
-	private final int myIterationCount;
-	
-	public RepeatedApplicationTransformer(
-			Transformer<T, Iterator<T>> t, int iterations) {
-		
-		mySubTransformer = t;
-		myIterationCount = iterations;
-	}
+    private final Transformer<T, Iterator<T>> mySubTransformer;
+    private final int myIterationCount;
 
-	@Override
-	public Iterator<T> transform(T original) {
-		
-		Iterator<T> singletonIterator;
-		T soFar = original;
-		for (int iteration = 0; iteration < myIterationCount; iteration++) {
-			singletonIterator = mySubTransformer.transform(soFar);
-			
-			if (singletonIterator.hasNext()) {
-				soFar = singletonIterator.next();
-			}
-			
-			if (singletonIterator.hasNext()) {
-				throw new RuntimeException("Non-singleton transform used in " +
-						this.getClass());
-			}
-		}
-		
-		return new SingletonIterator<T>(soFar);
-	}
-	
+    public RepeatedApplicationTransformer(Transformer<T, Iterator<T>> t,
+            int iterations) {
+
+        mySubTransformer = t;
+        myIterationCount = iterations;
+    }
+
+    @Override
+    public Iterator<T> transform(T original) {
+
+        Iterator<T> singletonIterator;
+        T soFar = original;
+        for (int iteration = 0; iteration < myIterationCount; iteration++) {
+            singletonIterator = mySubTransformer.transform(soFar);
+
+            if (singletonIterator.hasNext()) {
+                soFar = singletonIterator.next();
+            }
+
+            if (singletonIterator.hasNext()) {
+                throw new RuntimeException("Non-singleton transform used in "
+                        + this.getClass());
+            }
+        }
+
+        return new SingletonIterator<T>(soFar);
+    }
+
 }

@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * EnhancementBodyModuleDec.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -116,21 +116,12 @@ public class EnhancementBodyModuleDec extends ModuleDec {
 
     public EnhancementBodyModuleDec() {};
 
-    public EnhancementBodyModuleDec(
-            PosSymbol name,
-            PosSymbol profileName,
-            List<ModuleParameter> parameters,
-            PosSymbol enhancementName,
-            PosSymbol conceptName,
-            List<EnhancementBodyItem> enhancementBodies,
-            List<UsesItem> usesItems,
-            Exp requires,
-            List<Exp> conventions,
-            List<Exp> corrs,
-            InitItem facilityInit,
-            FinalItem facilityFinal,
-            List<Dec> decs)
-    {
+    public EnhancementBodyModuleDec(PosSymbol name, PosSymbol profileName,
+            List<ModuleParameter> parameters, PosSymbol enhancementName,
+            PosSymbol conceptName, List<EnhancementBodyItem> enhancementBodies,
+            List<UsesItem> usesItems, Exp requires, List<Exp> conventions,
+            List<Exp> corrs, InitItem facilityInit, FinalItem facilityFinal,
+            List<Dec> decs) {
         this.name = name;
         this.profileName = profileName;
         this.parameters = parameters;
@@ -155,55 +146,81 @@ public class EnhancementBodyModuleDec extends ModuleDec {
     // -----------------------------------------------------------
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the profileName variable. */
-    public PosSymbol getProfileName() { return profileName; }
+    public PosSymbol getProfileName() {
+        return profileName;
+    }
 
     /** Returns the value of the parameters variable. */
-    public List<ModuleParameter> getParameters() { return parameters; }
+    public List<ModuleParameter> getParameters() {
+        return parameters;
+    }
 
     /** Returns the value of the enhancementName variable. */
-    public PosSymbol getEnhancementName() { return enhancementName; }
+    public PosSymbol getEnhancementName() {
+        return enhancementName;
+    }
 
     /** Returns the value of the conceptName variable. */
-    public PosSymbol getConceptName() { return conceptName; }
+    public PosSymbol getConceptName() {
+        return conceptName;
+    }
 
     /** Returns the value of the enhancementBodies variable. */
-    public List<EnhancementBodyItem> getEnhancementBodies() { return enhancementBodies; }
+    public List<EnhancementBodyItem> getEnhancementBodies() {
+        return enhancementBodies;
+    }
 
     /** Returns the value of the usesItems variable. */
-    public List<UsesItem> getUsesItems() { return usesItems; }
+    public List<UsesItem> getUsesItems() {
+        return usesItems;
+    }
 
     /** Returns the value of the requires variable. */
-    public Exp getRequires() { return requires; }
+    public Exp getRequires() {
+        return requires;
+    }
 
     /** Returns the value of the conventions variable. */
-    public List<Exp> getConventions() { return conventions; }
+    public List<Exp> getConventions() {
+        return conventions;
+    }
 
     /** Returns the value of the corrs variable. */
-    public List<Exp> getCorrs() { return corrs; }
+    public List<Exp> getCorrs() {
+        return corrs;
+    }
 
     /** Returns the value of the facilityInit variable. */
-    public InitItem getFacilityInit() { return facilityInit; }
+    public InitItem getFacilityInit() {
+        return facilityInit;
+    }
 
     /** Returns the value of the facilityFinal variable. */
-    public FinalItem getFacilityFinal() { return facilityFinal; }
+    public FinalItem getFacilityFinal() {
+        return facilityFinal;
+    }
 
     /** Returns the value of the decs variable. */
-    public List<Dec> getDecs() { return decs; }
-    
+    public List<Dec> getDecs() {
+        return decs;
+    }
+
     /** Returns a list of procedures in this realization. */
     public List<Symbol> getLocalProcedureNames() {
-    	List<Symbol> retval = new List<Symbol>();
-    	Iterator<Dec> it = decs.iterator();
-    	while(it.hasNext()){
-    		Dec d = it.next();
-    		if(d instanceof ProcedureDec){
-    			retval.add(d.getName().getSymbol());
-    		}
-    	}    	
-    	return retval;
+        List<Symbol> retval = new List<Symbol>();
+        Iterator<Dec> it = decs.iterator();
+        while (it.hasNext()) {
+            Dec d = it.next();
+            if (d instanceof ProcedureDec) {
+                retval.add(d.getName().getSymbol());
+            }
+        }
+        return retval;
     }
 
     // -----------------------------------------------------------
@@ -211,43 +228,69 @@ public class EnhancementBodyModuleDec extends ModuleDec {
     // -----------------------------------------------------------
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the profileName variable to the specified value. */
-    public void setProfileName(PosSymbol name) { this.profileName = name; }
+    public void setProfileName(PosSymbol name) {
+        this.profileName = name;
+    }
 
     /** Sets the parameters variable to the specified value. */
-    public void setParameters(List<ModuleParameter> parameters) { this.parameters = parameters; }
+    public void setParameters(List<ModuleParameter> parameters) {
+        this.parameters = parameters;
+    }
 
     /** Sets the enhancementName variable to the specified value. */
-    public void setEnhancementName(PosSymbol enhancementName) { this.enhancementName = enhancementName; }
+    public void setEnhancementName(PosSymbol enhancementName) {
+        this.enhancementName = enhancementName;
+    }
 
     /** Sets the conceptName variable to the specified value. */
-    public void setConceptName(PosSymbol conceptName) { this.conceptName = conceptName; }
+    public void setConceptName(PosSymbol conceptName) {
+        this.conceptName = conceptName;
+    }
 
     /** Sets the enhancementBodies variable to the specified value. */
-    public void setEnhancementBodies(List<EnhancementBodyItem> enhancementBodies) { this.enhancementBodies = enhancementBodies; }
+    public void setEnhancementBodies(List<EnhancementBodyItem> enhancementBodies) {
+        this.enhancementBodies = enhancementBodies;
+    }
 
     /** Sets the usesItems variable to the specified value. */
-    public void setUsesItems(List<UsesItem> usesItems) { this.usesItems = usesItems; }
+    public void setUsesItems(List<UsesItem> usesItems) {
+        this.usesItems = usesItems;
+    }
 
     /** Sets the requires variable to the specified value. */
-    public void setRequires(Exp requires) { this.requires = requires; }
+    public void setRequires(Exp requires) {
+        this.requires = requires;
+    }
 
     /** Sets the conventions variable to the specified value. */
-    public void setConventions(List<Exp> conventions) { this.conventions = conventions; }
+    public void setConventions(List<Exp> conventions) {
+        this.conventions = conventions;
+    }
 
     /** Sets the corrs variable to the specified value. */
-    public void setCorrs(List<Exp> corrs) { this.corrs = corrs; }
+    public void setCorrs(List<Exp> corrs) {
+        this.corrs = corrs;
+    }
 
     /** Sets the facilityInit variable to the specified value. */
-    public void setFacilityInit(InitItem facilityInit) { this.facilityInit = facilityInit; }
+    public void setFacilityInit(InitItem facilityInit) {
+        this.facilityInit = facilityInit;
+    }
 
     /** Sets the facilityFinal variable to the specified value. */
-    public void setFacilityFinal(FinalItem facilityFinal) { this.facilityFinal = facilityFinal; }
+    public void setFacilityFinal(FinalItem facilityFinal) {
+        this.facilityFinal = facilityFinal;
+    }
 
     /** Sets the decs variable to the specified value. */
-    public void setDecs(List<Dec> decs) { this.decs = decs; }
+    public void setDecs(List<Dec> decs) {
+        this.decs = decs;
+    }
 
     // ===========================================================
     // Public Methods
@@ -267,51 +310,53 @@ public class EnhancementBodyModuleDec extends ModuleDec {
         sb.append("EnhancementBodyModuleDec\n");
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         if (parameters != null) {
-            sb.append(parameters.asString(indent+increment,increment));
+            sb.append(parameters.asString(indent + increment, increment));
         }
 
         if (enhancementName != null) {
-            sb.append(enhancementName.asString(indent+increment,increment));
+            sb.append(enhancementName.asString(indent + increment, increment));
         }
 
         if (conceptName != null) {
-            sb.append(conceptName.asString(indent+increment,increment));
+            sb.append(conceptName.asString(indent + increment, increment));
         }
 
         if (enhancementBodies != null) {
-            sb.append(enhancementBodies.asString(indent+increment,increment));
+            sb
+                    .append(enhancementBodies.asString(indent + increment,
+                            increment));
         }
 
         if (usesItems != null) {
-            sb.append(usesItems.asString(indent+increment,increment));
+            sb.append(usesItems.asString(indent + increment, increment));
         }
 
         if (requires != null) {
-            sb.append(requires.asString(indent+increment,increment));
+            sb.append(requires.asString(indent + increment, increment));
         }
 
         if (conventions != null) {
-            sb.append(conventions.asString(indent+increment,increment));
+            sb.append(conventions.asString(indent + increment, increment));
         }
 
         if (corrs != null) {
-            sb.append(corrs.asString(indent+increment,increment));
+            sb.append(corrs.asString(indent + increment, increment));
         }
 
         if (facilityInit != null) {
-            sb.append(facilityInit.asString(indent+increment,increment));
+            sb.append(facilityInit.asString(indent + increment, increment));
         }
 
         if (facilityFinal != null) {
-            sb.append(facilityFinal.asString(indent+increment,increment));
+            sb.append(facilityFinal.asString(indent + increment, increment));
         }
 
         if (decs != null) {
-            sb.append(decs.asString(indent+increment,increment));
+            sb.append(decs.asString(indent + increment, increment));
         }
 
         return sb.toString();

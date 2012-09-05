@@ -10,25 +10,25 @@ import java.util.Iterator;
  */
 public class ImmutableIterator<T> implements Iterator<T> {
 
-	private final Iterator<T> myInnerIterator;
-	
-	public ImmutableIterator(Iterator<T> inner) {
-		myInnerIterator = inner;
-	}
-	
-	@Override
-	public boolean hasNext() {
-		return myInnerIterator.hasNext();
-	}
+    private final Iterator<T> myInnerIterator;
 
-	@Override
-	public T next() {
-		return myInnerIterator.next();
-	}
+    public ImmutableIterator(Iterator<T> inner) {
+        myInnerIterator = inner;
+    }
 
-	@Override
-	public void remove() {
-		throw new UnsupportedOperationException("Iterator is immutable.");
-	}
+    @Override
+    public boolean hasNext() {
+        return myInnerIterator.hasNext();
+    }
+
+    @Override
+    public T next() {
+        return myInnerIterator.next();
+    }
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException("Iterator is immutable.");
+    }
 
 }

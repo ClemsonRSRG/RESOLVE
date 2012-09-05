@@ -15,53 +15,52 @@ import edu.clemson.cs.r2jt.utilities.Mapping;
  * introduces nothing new and so is discarded.</p>
  */
 public class NewTermsOnlyDeveloper implements AntecedentDeveloper {
-	
-	private final AntecedentDeveloper myBaseDeveloper;
-	
-	public NewTermsOnlyDeveloper(AntecedentDeveloper base) {
-		myBaseDeveloper = base;
-	}
-	
-	@Override
-	public Iterator<Antecedent> transform(Antecedent source) {
 
-		GoodVCPredicate p = new GoodVCPredicate(source);
-		
-		return new PredicateIterator<Antecedent>(
-				myBaseDeveloper.transform(source), p);
-	}
-	
-	/**
-	 * <p>A predicate that selects only those VCs that introduce new terms.</p>
-	 */
-	private class GoodVCPredicate implements Mapping<Antecedent, Boolean> {
+    private final AntecedentDeveloper myBaseDeveloper;
 
-		private Set<String> myOriginalVCSymbols;
-		private int myOriginalApplicationCount;
-		
-		public GoodVCPredicate(Antecedent original) {
-			myOriginalVCSymbols = original.getSymbolNames();
-			myOriginalApplicationCount = 
-				original.getFunctionApplications().size();
-		}
-		
-		@Override
-		public Boolean map(Antecedent input) {
-			
-			boolean retval = false; /*(input.getFunctionApplications().size() <= 
-				myOriginalApplicationCount);*/
-			
-			if (!retval) {
-				Set<String> inputSymbols = input.getSymbolNames();
-				
-				inputSymbols.removeAll(myOriginalVCSymbols);
-				
-				retval = (inputSymbols.size() != 0);
-			}
-			
-			return retval;
-		}
-	}
+    public NewTermsOnlyDeveloper(AntecedentDeveloper base) {
+        myBaseDeveloper = base;
+    }
 
+    @Override
+    public Iterator<Antecedent> transform(Antecedent source) {
+
+        GoodVCPredicate p = new GoodVCPredicate(source);
+
+        return new PredicateIterator<Antecedent>(myBaseDeveloper
+                .transform(source), p);
+    }
+
+    /**
+     * <p>A predicate that selects only those VCs that introduce new terms.</p>
+     */
+    private class GoodVCPredicate implements Mapping<Antecedent, Boolean> {
+
+        private Set<String> myOriginalVCSymbols;
+        private int myOriginalApplicationCount;
+
+        public GoodVCPredicate(Antecedent original) {
+            myOriginalVCSymbols = original.getSymbolNames();
+            myOriginalApplicationCount =
+                    original.getFunctionApplications().size();
+        }
+
+        @Override
+        public Boolean map(Antecedent input) {
+
+            boolean retval = false; /*(input.getFunctionApplications().size() <= 
+                                    myOriginalApplicationCount);*/
+
+            if (!retval) {
+                Set<String> inputSymbols = input.getSymbolNames();
+
+                inputSymbols.removeAll(myOriginalVCSymbols);
+
+                retval = (inputSymbols.size() != 0);
+            }
+
+            return retval;
+        }
+    }
 
 }

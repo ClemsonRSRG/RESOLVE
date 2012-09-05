@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * QuantExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -76,8 +76,8 @@ public class QuantExp extends Exp {
     // Constants
     // ===========================================================
 
-	public static final int NONE = 0;
-	public static final int FORALL = 1;
+    public static final int NONE = 0;
+    public static final int FORALL = 1;
     public static final int EXISTS = 2;
     public static final int UNIQUE = 3;
 
@@ -106,13 +106,8 @@ public class QuantExp extends Exp {
 
     public QuantExp() {};
 
-    public QuantExp(
-            Location location,
-            int operator,
-            List<MathVarDec> vars,
-            Exp where,
-            Exp body)
-    {
+    public QuantExp(Location location, int operator, List<MathVarDec> vars,
+            Exp where, Exp body) {
         this.location = location;
         this.operator = operator;
         this.vars = vars;
@@ -121,10 +116,10 @@ public class QuantExp extends Exp {
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	return new QuantExp(location, operator, vars,
-    			substitute(where, substitutions),
-    			substitute(body, substitutions));
+        return new QuantExp(location, operator, vars, substitute(where,
+                substitutions), substitute(body, substitutions));
     }
+
     // ===========================================================
     // Accessor Methods
     // ===========================================================
@@ -134,51 +129,70 @@ public class QuantExp extends Exp {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the operator variable. */
-    public int getOperator() { return operator; }
+    public int getOperator() {
+        return operator;
+    }
 
     /** Returns the value of the vars variable. */
-    public List<MathVarDec> getVars() { return vars; }
+    public List<MathVarDec> getVars() {
+        return vars;
+    }
 
     /** Returns the value of the where variable. */
-    public Exp getWhere() { return where; }
+    public Exp getWhere() {
+        return where;
+    }
 
     /** Returns the value of the body variable. */
-    public Exp getBody() { return body; }
+    public Exp getBody() {
+        return body;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the operator variable to the specified value. */
-    public void setOperator(int operator) { this.operator = operator; }
+    public void setOperator(int operator) {
+        this.operator = operator;
+    }
 
     /** Sets the vars variable to the specified value. */
-    public void setVars(List<MathVarDec> vars) { this.vars = vars; }
+    public void setVars(List<MathVarDec> vars) {
+        this.vars = vars;
+    }
 
     /** Sets the where variable to the specified value. */
-    public void setWhere(Exp where) { this.where = where; }
+    public void setWhere(Exp where) {
+        this.where = where;
+    }
 
     /** Sets the body variable to the specified value. */
-    public void setBody(Exp body) { this.body = body; }
+    public void setBody(Exp body) {
+        this.body = body;
+    }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
-    
+
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitQuantExp(this);
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getQuantExpType(this);
     }
 
@@ -190,262 +204,278 @@ public class QuantExp extends Exp {
         printSpace(indent, sb);
         sb.append("QuantExp\n");
 
-        printSpace(indent+increment, sb);
+        printSpace(indent + increment, sb);
         sb.append(printConstant(operator) + "\n");
 
         if (vars != null) {
-            sb.append(vars.asString(indent+increment,increment));
+            sb.append(vars.asString(indent + increment, increment));
         }
 
         if (where != null) {
-            sb.append(where.asString(indent+increment,increment));
+            sb.append(where.asString(indent + increment, increment));
         }
 
         if (body != null) {
-            sb.append(body.asString(indent+increment,increment));
+            sb.append(body.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
-    
-    public String toString(int indent){
-    	//Environment   env	= Environment.getInstance();
-    	//if(env.isabelle()){return toIsabelleString(indent);};
-    	
-    	StringBuffer sb = new StringBuffer();
+
+    public String toString(int indent) {
+        //Environment   env	= Environment.getInstance();
+        //if(env.isabelle()){return toIsabelleString(indent);};
+
+        StringBuffer sb = new StringBuffer();
         printSpace(indent, sb);
-    	if(where != null)
-    		sb.append(where.toString(1));
-    	sb.append(printConstant(operator));
+        if (where != null)
+            sb.append(where.toString(1));
+        sb.append(printConstant(operator));
 
-    	List<MathVarDec> list = vars;
-    	Iterator<MathVarDec> i = list.iterator();
+        List<MathVarDec> list = vars;
+        Iterator<MathVarDec> i = list.iterator();
 
-    	while(i.hasNext()) {
-    		MathVarDec tmp = i.next();
-    		sb.append(" ");
-    		sb.append(tmp.toString(0));
-    		if(i.hasNext()){
-    	    	sb.append(", ");
-    		}
-    	}
-    	sb.append(" such that ");
-    	if(body != null)
-    		sb.append(body.toString(0));
-    	return sb.toString();
+        while (i.hasNext()) {
+            MathVarDec tmp = i.next();
+            sb.append(" ");
+            sb.append(tmp.toString(0));
+            if (i.hasNext()) {
+                sb.append(", ");
+            }
+        }
+        sb.append(" such that ");
+        if (body != null)
+            sb.append(body.toString(0));
+        return sb.toString();
     }
-    
-    public String toIsabelleString(int indent){
-    	StringBuffer sb = new StringBuffer();
+
+    public String toIsabelleString(int indent) {
+        StringBuffer sb = new StringBuffer();
         printSpace(indent, sb);
-    	if(where != null)
-    		sb.append(where.toString(1));
-    	sb.append(printIsabelleConstant(operator));
+        if (where != null)
+            sb.append(where.toString(1));
+        sb.append(printIsabelleConstant(operator));
 
-    	List<MathVarDec> list = vars;
-    	Iterator<MathVarDec> i = list.iterator();
+        List<MathVarDec> list = vars;
+        Iterator<MathVarDec> i = list.iterator();
 
-    	while(i.hasNext()) {
-    		MathVarDec tmp = i.next();
-    		sb.append(" ");
-    		sb.append(tmp.toString(0));    
-    	}
-    	sb.append(", ");
-    	if(body != null)
-    		sb.append(body.toString(0));
-    	return sb.toString();
+        while (i.hasNext()) {
+            MathVarDec tmp = i.next();
+            sb.append(" ");
+            sb.append(tmp.toString(0));
+        }
+        sb.append(", ");
+        if (body != null)
+            sb.append(body.toString(0));
+        return sb.toString();
     }
-    
-    
-    public String split(int indent){
-    	StringBuffer sb = new StringBuffer();
+
+    public String split(int indent) {
+        StringBuffer sb = new StringBuffer();
         printSpace(indent, sb);
-    	if(where != null)
-    		sb.append(where.toString(1));
-    	sb.append(printConstant(operator));
+        if (where != null)
+            sb.append(where.toString(1));
+        sb.append(printConstant(operator));
 
-    	List<MathVarDec> list = vars;
-    	Iterator<MathVarDec> i = list.iterator();
+        List<MathVarDec> list = vars;
+        Iterator<MathVarDec> i = list.iterator();
 
-    	while(i.hasNext()) {
-    		MathVarDec tmp = i.next();
-    		sb.append(" ");
-    		sb.append(tmp.toString(0));    
-    	}
-    	sb.append(", ");
-    	if(body != null)
-    		sb.append(body.toString(0));
-    	return sb.toString();
+        while (i.hasNext()) {
+            MathVarDec tmp = i.next();
+            sb.append(" ");
+            sb.append(tmp.toString(0));
+        }
+        sb.append(", ");
+        if (body != null)
+            sb.append(body.toString(0));
+        return sb.toString();
     }
-    
 
     /** Returns true if the variable is found in any sub expression   
         of this one. **/
     public boolean containsVar(String varName, boolean IsOldExp) {
-    	if(where != null && where.containsVar(varName,IsOldExp)) {
-    		return true;
-    	}
-    	if(body.containsVar(varName,IsOldExp)) {
-        	return true;
-    	}
+        if (where != null && where.containsVar(varName, IsOldExp)) {
+            return true;
+        }
+        if (body.containsVar(varName, IsOldExp)) {
+            return true;
+        }
         return false;
     }
-    
-    public Object clone(){
-   	 	QuantExp clone = new QuantExp();
 
-   	 	clone.setOperator(this.operator);
-   	 	
-   	 	List<MathVarDec> newVars = new List<MathVarDec>();
-   	 	Iterator<MathVarDec> i = vars.iterator();
-   	 	while(i.hasNext()){
-   	 		newVars.add((MathVarDec)i.next().clone());
-   	 	}
-   	 clone.setVars(newVars);
-   	 	if(where != null)
-   	 		clone.setWhere((Exp)this.getWhere().clone());
-   	 	if(body != null)
-   	 		clone.setBody((Exp)this.getBody().clone());	
-   	 	clone.setLocation(this.getLocation()); 
-   	 	clone.setType(getType());
-   	 	return clone;
-   }
-    
-    public Exp replace(Exp old, Exp replacement){
-    	if(!(old instanceof QuantExp)){
-    		if(where != null){
-    			Exp whr = where.replace(old, replacement);
-        		if(whr != null)
-        			this.setWhere(whr); 
-    		}
-    		if(body != null){
-    			Exp bdy = body.replace(old, replacement);
-    			if (bdy != null)
-    				this.setBody(bdy);
-    			String str = bdy.toString(0, 0);
-    		}
-    		if(vars != null && old instanceof VarExp && replacement instanceof VarExp){
-    			//What if Replacement isn't VarExp?
-    			List<MathVarDec> newVars = new List<MathVarDec>();
-    			Iterator<MathVarDec> i = vars.iterator();
-    			while(i.hasNext()){
-    				MathVarDec tmp = i.next();
-    				if(tmp.getName().toString().equals(((VarExp)old).getName().toString())){
-    					tmp.setName(((VarExp)replacement).getName());
-    				}
+    public Object clone() {
+        QuantExp clone = new QuantExp();
 
-    				newVars.add(tmp);
-    			}
-    		}
-    		return this;
-    	}
-    	else 
-    		return this;
+        clone.setOperator(this.operator);
+
+        List<MathVarDec> newVars = new List<MathVarDec>();
+        Iterator<MathVarDec> i = vars.iterator();
+        while (i.hasNext()) {
+            newVars.add((MathVarDec) i.next().clone());
+        }
+        clone.setVars(newVars);
+        if (where != null)
+            clone.setWhere((Exp) this.getWhere().clone());
+        if (body != null)
+            clone.setBody((Exp) this.getBody().clone());
+        clone.setLocation(this.getLocation());
+        clone.setType(getType());
+        return clone;
+    }
+
+    public Exp replace(Exp old, Exp replacement) {
+        if (!(old instanceof QuantExp)) {
+            if (where != null) {
+                Exp whr = where.replace(old, replacement);
+                if (whr != null)
+                    this.setWhere(whr);
+            }
+            if (body != null) {
+                Exp bdy = body.replace(old, replacement);
+                if (bdy != null)
+                    this.setBody(bdy);
+                String str = bdy.toString(0, 0);
+            }
+            if (vars != null && old instanceof VarExp
+                    && replacement instanceof VarExp) {
+                //What if Replacement isn't VarExp?
+                List<MathVarDec> newVars = new List<MathVarDec>();
+                Iterator<MathVarDec> i = vars.iterator();
+                while (i.hasNext()) {
+                    MathVarDec tmp = i.next();
+                    if (tmp.getName().toString().equals(
+                            ((VarExp) old).getName().toString())) {
+                        tmp.setName(((VarExp) replacement).getName());
+                    }
+
+                    newVars.add(tmp);
+                }
+            }
+            return this;
+        }
+        else
+            return this;
     }
 
     private String printConstant(int k) {
         StringBuffer sb = new StringBuffer();
-        switch(k) {
-        case 1: sb.append("for all"); break;
-        case 2: sb.append("there exists"); break;
-        case 3: sb.append("UNIQUE"); break;
-        default: sb.append(k);
+        switch (k) {
+        case 1:
+            sb.append("for all");
+            break;
+        case 2:
+            sb.append("there exists");
+            break;
+        case 3:
+            sb.append("UNIQUE");
+            break;
+        default:
+            sb.append(k);
         }
         return sb.toString();
     }
-    
+
     private String printIsabelleConstant(int k) {
         StringBuffer sb = new StringBuffer();
-        switch(k) {
-        case 1: sb.append("ALL"); break;
-        case 2: sb.append("there exists"); break;
-        case 3: sb.append("UNIQUE"); break;
-        default: sb.append(k);
+        switch (k) {
+        case 1:
+            sb.append("ALL");
+            break;
+        case 2:
+            sb.append("there exists");
+            break;
+        case 3:
+            sb.append("UNIQUE");
+            break;
+        default:
+            sb.append(k);
         }
         return sb.toString();
     }
 
     public List<Exp> getSubExpressions() {
-    	List<Exp> list = new List<Exp>();
-    	list.add(where);
-    	list.add(body);
-    	return list;
+        List<Exp> list = new List<Exp>();
+        list.add(where);
+        list.add(body);
+        return list;
     }
-    
-    public void setSubExpression(int index, Exp e) {
-    	switch (index) {
-    	case 0:
-    		where = e;
-    		break;
-    	case 1:
-    		body = e;
-    		break;
-    	}
-    }
-    
-    public boolean shallowCompare(Exp e2) {
-    	if(!(e2 instanceof QuantExp)) {
-    		return false;
-    	}
-    	if(operator != ((QuantExp)e2).getOperator()) {
-    		return false;
-    	}
-    	return true;
-    }
-    
-    public Exp remember() {
-        if(where instanceof OldExp) 
-        	this.setWhere(((OldExp)(where)).getExp());
-        if(body instanceof OldExp) 
-        	this.setBody(((OldExp)(body)).getExp());
 
-        	if(where != null)
-        		where = where.remember();
-        	if(body != null)
-        		body = body.remember();
+    public void setSubExpression(int index, Exp e) {
+        switch (index) {
+        case 0:
+            where = e;
+            break;
+        case 1:
+            body = e;
+            break;
+        }
+    }
+
+    public boolean shallowCompare(Exp e2) {
+        if (!(e2 instanceof QuantExp)) {
+            return false;
+        }
+        if (operator != ((QuantExp) e2).getOperator()) {
+            return false;
+        }
+        return true;
+    }
+
+    public Exp remember() {
+        if (where instanceof OldExp)
+            this.setWhere(((OldExp) (where)).getExp());
+        if (body instanceof OldExp)
+            this.setBody(((OldExp) (body)).getExp());
+
+        if (where != null)
+            where = where.remember();
+        if (body != null)
+            body = body.remember();
 
         return this;
     }
-    
+
     public void prettyPrint() {
-    	if(operator == FORALL) System.out.print("For all ");
-    	else if(operator == EXISTS) System.out.print("There exists ");
-    	else if(operator == UNIQUE) System.out.print("There exists unique ");
-    	Iterator<MathVarDec> it = vars.iterator();
-    	if(it.hasNext()) {
-    		it.next().prettyPrint();
-    	}
-    	while(it.hasNext()) {
-    		System.out.print(", ");
-    		it.next().prettyPrint();
-    	}
-    	if(where != null) {
-        	System.out.print(", ");
-        	where.prettyPrint();
-    	}
-    	System.out.print(", ");
-    	body.prettyPrint();
+        if (operator == FORALL)
+            System.out.print("For all ");
+        else if (operator == EXISTS)
+            System.out.print("There exists ");
+        else if (operator == UNIQUE)
+            System.out.print("There exists unique ");
+        Iterator<MathVarDec> it = vars.iterator();
+        if (it.hasNext()) {
+            it.next().prettyPrint();
+        }
+        while (it.hasNext()) {
+            System.out.print(", ");
+            it.next().prettyPrint();
+        }
+        if (where != null) {
+            System.out.print(", ");
+            where.prettyPrint();
+        }
+        System.out.print(", ");
+        body.prettyPrint();
     }
-    
+
     public Exp copy() {
-    	int newOperator = operator;
-    	Iterator<MathVarDec> it = vars.iterator();
-    	List<MathVarDec> newVars = new List<MathVarDec>();
-    	while(it.hasNext()) {
-    		newVars.add(it.next().copy());
-    	}
-    	Exp newWhere = null;
-    	if(where != null) {
-    		newWhere = where.copy();
-    	}
-    	Exp newBody = body.copy();
-    	Exp retval =  
-    		new QuantExp(null, newOperator, newVars, newWhere, newBody);
-    	
-    	retval.setType(type);
-    	
-    	return retval;
+        int newOperator = operator;
+        Iterator<MathVarDec> it = vars.iterator();
+        List<MathVarDec> newVars = new List<MathVarDec>();
+        while (it.hasNext()) {
+            newVars.add(it.next().copy());
+        }
+        Exp newWhere = null;
+        if (where != null) {
+            newWhere = where.copy();
+        }
+        Exp newBody = body.copy();
+        Exp retval =
+                new QuantExp(null, newOperator, newVars, newWhere, newBody);
+
+        retval.setType(type);
+
+        return retval;
     }
 
 }
-

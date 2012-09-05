@@ -64,36 +64,37 @@ public class PSymbol extends PExp {
 
                 return s.name + argumentsAsString;
             }
-            
+
             protected void beginAccept(PExpVisitor v, PSymbol s) {
-            	v.beginPrefixPSymbol(s);
+                v.beginPrefixPSymbol(s);
             }
-            
+
             protected void fencepostAccept(PExpVisitor v, PSymbol s) {
-            	v.fencepostPrefixPSymbol(s);
+                v.fencepostPrefixPSymbol(s);
             }
-            
+
             protected void endAccept(PExpVisitor v, PSymbol s) {
-            	v.endPrefixPSymbol(s);
+                v.endPrefixPSymbol(s);
             }
         },
         INFIX {
 
             protected String toString(PSymbol s) {
-                return "(" + delimit(s.arguments.iterator(),
-                        " " + s.name + " ") + ")";
+                return "("
+                        + delimit(s.arguments.iterator(), " " + s.name + " ")
+                        + ")";
             }
-            
+
             protected void beginAccept(PExpVisitor v, PSymbol s) {
-            	v.beginInfixPSymbol(s);
+                v.beginInfixPSymbol(s);
             }
-            
+
             protected void fencepostAccept(PExpVisitor v, PSymbol s) {
-            	v.fencepostInfixPSymbol(s);
+                v.fencepostInfixPSymbol(s);
             }
-            
+
             protected void endAccept(PExpVisitor v, PSymbol s) {
-            	v.endInfixPSymbol(s);
+                v.endInfixPSymbol(s);
             }
         },
         POSTFIX {
@@ -107,17 +108,17 @@ public class PSymbol extends PExp {
 
                 return retval + s.name;
             }
-            
+
             protected void beginAccept(PExpVisitor v, PSymbol s) {
-            	v.beginPostfixPSymbol(s);
+                v.beginPostfixPSymbol(s);
             }
-            
+
             protected void fencepostAccept(PExpVisitor v, PSymbol s) {
-            	v.fencepostPostfixPSymbol(s);
+                v.fencepostPostfixPSymbol(s);
             }
-            
+
             protected void endAccept(PExpVisitor v, PSymbol s) {
-            	v.endPostfixPSymbol(s);
+                v.endPostfixPSymbol(s);
             }
         },
         OUTFIX {
@@ -126,32 +127,36 @@ public class PSymbol extends PExp {
                 return s.leftPrint + delimit(s.arguments.iterator(), ", ")
                         + s.rightPrint;
             }
-            
+
             protected void beginAccept(PExpVisitor v, PSymbol s) {
-            	v.beginOutfixPSymbol(s);
+                v.beginOutfixPSymbol(s);
             }
-            
+
             protected void fencepostAccept(PExpVisitor v, PSymbol s) {
-            	v.fencepostOutfixPSymbol(s);
+                v.fencepostOutfixPSymbol(s);
             }
-            
+
             protected void endAccept(PExpVisitor v, PSymbol s) {
-            	v.endOutfixPSymbol(s);
+                v.endOutfixPSymbol(s);
             }
         };
 
         protected abstract String toString(PSymbol s);
+
         protected abstract void beginAccept(PExpVisitor v, PSymbol s);
+
         protected abstract void fencepostAccept(PExpVisitor v, PSymbol s);
+
         protected abstract void endAccept(PExpVisitor v, PSymbol s);
     }
+
     public final String name;
     public final SimpleImmutableList<PExp> arguments;
     public final Quantification quantification;
-    
+
     final DisplayType displayType;
     final String leftPrint, rightPrint;
-    
+
     private int myArgumentsSize;
     private final PExp[] myScratchSpace;
 
@@ -230,14 +235,14 @@ public class PSymbol extends PExp {
     }
 
     private static PExp.HashDuple calculateHashes(String left, String right,
-    		Iterator<PExp> args) {
-    	
-    	int structureHash;
-    	
-    	int leftHashCode = left.hashCode();
-    	int valueHash = leftHashCode;
+            Iterator<PExp> args) {
 
-    	valueHash *= 59;
+        int structureHash;
+
+        int leftHashCode = left.hashCode();
+        int valueHash = leftHashCode;
+
+        valueHash *= 59;
         if (right == null) {
             valueHash += leftHashCode;
         }
@@ -246,13 +251,13 @@ public class PSymbol extends PExp {
         }
 
         if (args.hasNext()) {
-        	structureHash = 17;
-        	
+            structureHash = 17;
+
             int argMod = 2;
             PExp arg;
             while (args.hasNext()) {
                 arg = args.next();
-            	structureHash += arg.structureHash * argMod;
+                structureHash += arg.structureHash * argMod;
                 valueHash += arg.valueHash * argMod;
                 argMod++;
             }
@@ -265,26 +270,26 @@ public class PSymbol extends PExp {
     }
 
     public void accept(PExpVisitor v) {
-    	v.beginPExp(this);
-    	v.beginPSymbol(this);
-    	displayType.beginAccept(v, this);
-    	
-    	boolean first = true;
-    	for (PExp arg : arguments) {
-    		if (!first) {
-    			displayType.fencepostAccept(v, this);
-    			v.fencepostPSymbol(this);
-    		}
-    		first = false;
-    		
-    		arg.accept(v);
-    	}
-    	
-    	displayType.endAccept(v, this);
-    	v.endPSymbol(this);
-    	v.endPExp(this);
+        v.beginPExp(this);
+        v.beginPSymbol(this);
+        displayType.beginAccept(v, this);
+
+        boolean first = true;
+        for (PExp arg : arguments) {
+            if (!first) {
+                displayType.fencepostAccept(v, this);
+                v.fencepostPSymbol(this);
+            }
+            first = false;
+
+            arg.accept(v);
+        }
+
+        displayType.endAccept(v, this);
+        v.endPSymbol(this);
+        v.endPExp(this);
     }
-    
+
     public boolean isFunction() {
         return myArgumentsSize > 0;
     }
@@ -304,8 +309,9 @@ public class PSymbol extends PExp {
         if (retval) {
             PSymbol oAsPSymbol = (PSymbol) o;
 
-            retval = (oAsPSymbol.valueHash == valueHash)
-                    && name.equals(oAsPSymbol.name);
+            retval =
+                    (oAsPSymbol.valueHash == valueHash)
+                            && name.equals(oAsPSymbol.name);
 
             if (retval) {
                 Iterator<PExp> localArgs = arguments.iterator();
@@ -345,8 +351,8 @@ public class PSymbol extends PExp {
     @Override
     public boolean isObviouslyTrue() {
         return (myArgumentsSize == 0 && name.equalsIgnoreCase("true"))
-                || (myArgumentsSize == 2 && name.equals("=")
-                && arguments.get(0).equals(arguments.get(1)));
+                || (myArgumentsSize == 2 && name.equals("=") && arguments
+                        .get(0).equals(arguments.get(1)));
     }
 
     @Override
@@ -369,9 +375,10 @@ public class PSymbol extends PExp {
             }
 
             if (argumentChanged) {
-                retval = new PSymbol(myType, leftPrint, rightPrint,
-                        new ImmutableList<PExp>(myScratchSpace), quantification,
-                        displayType, myTyper);
+                retval =
+                        new PSymbol(myType, leftPrint, rightPrint,
+                                new ImmutableList<PExp>(myScratchSpace),
+                                quantification, displayType, myTyper);
             }
             else {
                 retval = this;
@@ -429,9 +436,10 @@ public class PSymbol extends PExp {
         }
 
         if (argumentChanged) {
-            retval = new PSymbol(myType, leftPrint, rightPrint,
-                    Arrays.asList(myScratchSpace), quantification.flipped(),
-                    displayType, myTyper);
+            retval =
+                    new PSymbol(myType, leftPrint, rightPrint, Arrays
+                            .asList(myScratchSpace), quantification.flipped(),
+                            displayType, myTyper);
         }
         else {
             Quantification flipped = quantification.flipped();
@@ -440,8 +448,9 @@ public class PSymbol extends PExp {
                 retval = this;
             }
             else {
-                retval = new PSymbol(myType, leftPrint, rightPrint, arguments,
-                        flipped, displayType, myTyper);
+                retval =
+                        new PSymbol(myType, leftPrint, rightPrint, arguments,
+                                flipped, displayType, myTyper);
             }
         }
 
@@ -455,7 +464,8 @@ public class PSymbol extends PExp {
         PSymbol sTarget;
         try {
             sTarget = (PSymbol) target;
-        } catch (ClassCastException e) {
+        }
+        catch (ClassCastException e) {
             //We can only bind against other instances of PSymbol
             throw BINDING_EXCEPTION;
         }
@@ -501,8 +511,7 @@ public class PSymbol extends PExp {
             }
 
             Iterator<PExp> thisArgumentsIter = arguments.iterator();
-            Iterator<PExp> targetArgumentsIter =
-                    sTarget.arguments.iterator();
+            Iterator<PExp> targetArgumentsIter = sTarget.arguments.iterator();
             while (thisArgumentsIter.hasNext()) {
                 thisArgumentsIter.next().substitute(accumulator).bindTo(
                         targetArgumentsIter.next(), accumulator);
@@ -515,8 +524,11 @@ public class PSymbol extends PExp {
 
         try {
             retval =
-                    myTyper.matchTypes(null, myType, target.myType, true, false);
-        } catch (TypeResolutionException trex) {
+                    myTyper
+                            .matchTypes(null, myType, target.myType, true,
+                                    false);
+        }
+        catch (TypeResolutionException trex) {
             throw new RuntimeException("Couldn't match types.");
         }
 
@@ -542,8 +554,8 @@ public class PSymbol extends PExp {
 
     @Override
     public Set<PSymbol> getQuantifiedVariablesNoCache() {
-    	Set<PSymbol> result = new HashSet<PSymbol>();
-    	
+        Set<PSymbol> result = new HashSet<PSymbol>();
+
         if (myArgumentsSize == 0 && quantification != Quantification.NONE) {
             result.add(this);
         }
@@ -554,7 +566,7 @@ public class PSymbol extends PExp {
             argumentVariables = argumentIter.next().getQuantifiedVariables();
             result.addAll(argumentVariables);
         }
-        
+
         return result;
     }
 
@@ -572,8 +584,8 @@ public class PSymbol extends PExp {
 
     @Override
     public List<PExp> getFunctionApplicationsNoCache() {
-    	List<PExp> result = new LinkedList<PExp>();
-    	
+        List<PExp> result = new LinkedList<PExp>();
+
         if (myArgumentsSize > 0) {
             result.add(this);
         }
@@ -584,15 +596,15 @@ public class PSymbol extends PExp {
             argumentFunctions = argumentIter.next().getFunctionApplications();
             result.addAll(argumentFunctions);
         }
-        
+
         return result;
     }
 
     @Override
     public Set<String> getSymbolNamesNoCache() {
 
-    	Set<String> result = new HashSet<String>();
-    	
+        Set<String> result = new HashSet<String>();
+
         if (quantification == Quantification.NONE) {
             result.add(name);
         }
@@ -600,10 +612,10 @@ public class PSymbol extends PExp {
         Iterator<PExp> argumentIter = arguments.iterator();
         Set<String> argumentSymbols;
         while (argumentIter.hasNext()) {
-        	argumentSymbols = argumentIter.next().getSymbolNames();
-        	result.addAll(argumentSymbols);
+            argumentSymbols = argumentIter.next().getSymbolNames();
+            result.addAll(argumentSymbols);
         }
-        
+
         return result;
     }
 

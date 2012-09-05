@@ -4,32 +4,32 @@ import java.util.Iterator;
 
 public class SizedIterator<T> implements KnownSizeIterator<T> {
 
-	private Iterator<T> myInternalIterator;
-	private final int mySize;
-	
-	public SizedIterator(Iterator<T> i, int size) {
-		myInternalIterator = i;
-		mySize = size; 
-	}
+    private Iterator<T> myInternalIterator;
+    private final int mySize;
 
-	public Iterator<T> getInternalIterator() {
-		return myInternalIterator;
-	}
-	
-	public int size() {
-		return mySize;
-	}
+    public SizedIterator(Iterator<T> i, int size) {
+        myInternalIterator = i;
+        mySize = size;
+    }
 
-	public boolean hasNext() {
-		return myInternalIterator.hasNext();
-	}
+    public Iterator<T> getInternalIterator() {
+        return myInternalIterator;
+    }
 
-	public T next() {
-		return myInternalIterator.next();
-	}
+    public int size() {
+        return mySize;
+    }
 
-	public void remove() {
-		myInternalIterator.remove();
-	}
+    public boolean hasNext() {
+        return myInternalIterator.hasNext();
+    }
+
+    public T next() {
+        return myInternalIterator.next();
+    }
+
+    public void remove() {
+        myInternalIterator.remove();
+    }
 
 }

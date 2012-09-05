@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,23 +34,23 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 
 /*
  * NameType.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -83,8 +83,7 @@ public class NameType extends Type {
     // Constructors
     // ===========================================================
 
-    public NameType(ModuleID id, PosSymbol facility, PosSymbol name,
-                    Type type) {
+    public NameType(ModuleID id, PosSymbol facility, PosSymbol name, Type type) {
         this.id = id;
         this.facility = facility;
         this.name = name;
@@ -102,21 +101,28 @@ public class NameType extends Type {
     // Accessors
     // ===========================================================
 
-    public ModuleID getModuleID() { return id; }
+    public ModuleID getModuleID() {
+        return id;
+    }
 
-    public PosSymbol getFacility() { return facility; }
+    public PosSymbol getFacility() {
+        return facility;
+    }
 
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
-    public Type getType() { return type; }
+    public Type getType() {
+        return type;
+    }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
 
     public Type instantiate(ScopeID sid, Binding binding) {
-        return new NameType(id, facility, name,
-                            type.instantiate(sid, binding));
+        return new NameType(id, facility, name, type.instantiate(sid, binding));
     }
 
     public TypeName getProgramName() {
@@ -146,7 +152,7 @@ public class NameType extends Type {
         sb.append("{" + type.toString() + "}");
         return sb.toString();
     }
-    
+
     public String asString() {
         StringBuffer sb = new StringBuffer();
         sb.append(type.asString());

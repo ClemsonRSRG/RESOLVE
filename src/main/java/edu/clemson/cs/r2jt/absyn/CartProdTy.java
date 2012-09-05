@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * CartProdTy.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -84,10 +84,7 @@ public class CartProdTy extends Ty {
 
     public CartProdTy() {};
 
-    public CartProdTy(
-            Location location,
-            List<MathVarDec> fields)
-    {
+    public CartProdTy(Location location, List<MathVarDec> fields) {
         this.location = location;
         this.fields = fields;
     }
@@ -101,20 +98,28 @@ public class CartProdTy extends Ty {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the fields variable. */
-    public List<MathVarDec> getFields() { return fields; }
+    public List<MathVarDec> getFields() {
+        return fields;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the fields variable to the specified value. */
-    public void setFields(List<MathVarDec> fields) { this.fields = fields; }
+    public void setFields(List<MathVarDec> fields) {
+        this.fields = fields;
+    }
 
     // ===========================================================
     // Public Methods
@@ -126,8 +131,7 @@ public class CartProdTy extends Ty {
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getCartProdTyType(this);
     }
 
@@ -145,39 +149,38 @@ public class CartProdTy extends Ty {
 
         return sb.toString();
     }
-    
+
     public void prettyPrint() {
-    	Iterator<MathVarDec> it = fields.iterator();
-    	if(it.hasNext()) {
-    		it.next().prettyPrint();
-    	}
-    	while(it.hasNext()) {
-    		System.out.print(" x ");
-    		it.next().prettyPrint();
-    	}
+        Iterator<MathVarDec> it = fields.iterator();
+        if (it.hasNext()) {
+            it.next().prettyPrint();
+        }
+        while (it.hasNext()) {
+            System.out.print(" x ");
+            it.next().prettyPrint();
+        }
     }
 
     public String toString(int indent) {
-    	Iterator<MathVarDec> it = fields.iterator();
-    	StringBuffer sb = new StringBuffer();
-    	if(it.hasNext()) {
-    		sb.append((it.next()).toString(0));
-    	}
-    	while(it.hasNext()) {
-    		sb.append(" x ");
-    		sb.append((it.next()).toString(0));
-    	}
-    	return sb.toString();
+        Iterator<MathVarDec> it = fields.iterator();
+        StringBuffer sb = new StringBuffer();
+        if (it.hasNext()) {
+            sb.append((it.next()).toString(0));
+        }
+        while (it.hasNext()) {
+            sb.append(" x ");
+            sb.append((it.next()).toString(0));
+        }
+        return sb.toString();
     }
-    
-    public Ty copy() {
-    	Iterator<MathVarDec> it = fields.iterator();
-    	List<MathVarDec> newFields = new List<MathVarDec>();
-    	while(it.hasNext()) {
-    		newFields.add(it.next().copy());
-    	}
-    	return new CartProdTy(null, newFields);
-    }
-    
-}
 
+    public Ty copy() {
+        Iterator<MathVarDec> it = fields.iterator();
+        List<MathVarDec> newFields = new List<MathVarDec>();
+        while (it.hasNext()) {
+            newFields.add(it.next().copy());
+        }
+        return new CartProdTy(null, newFields);
+    }
+
+}

@@ -54,7 +54,7 @@ public interface VCTransformer {
      *      not applicable.
      */
     public Consequent getReplacementTemplate();
-    
+
     /**
      * <p>Returns <code>false</code> <strong>iff</strong> no application of
      * this transformation to any VC could result in a new, unbound quantified

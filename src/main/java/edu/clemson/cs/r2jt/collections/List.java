@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
- * List.java 
- *
+ * List.java
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -62,7 +62,9 @@ import edu.clemson.cs.r2jt.data.Copyable;
 import edu.clemson.cs.r2jt.data.AsStringCapability;
 
 public class List<A> extends java.util.ArrayList<A>
-    implements AsStringCapability, Copyable {
+        implements
+            AsStringCapability,
+            Copyable {
 
     // ===========================================================
     // Variables
@@ -83,10 +85,10 @@ public class List<A> extends java.util.ArrayList<A>
         super();
         this.s = s;
     }
-    
+
     public List(java.util.List<A> source) {
-    	super(source);
-    	this.s = "Unspecified_Type";
+        super(source);
+        this.s = "Unspecified_Type";
     }
 
     // ===========================================================
@@ -105,15 +107,19 @@ public class List<A> extends java.util.ArrayList<A>
     // -----------------------------------------------------------
     // Methods that Extend
     // -----------------------------------------------------------
-    
+
     public boolean add(A a) {
-    	if(a != null) { super.add(a); }
-    	return true;
+        if (a != null) {
+            super.add(a);
+        }
+        return true;
     }
 
     /** Adds an element to the list if it's not already there. */
     public void addUnique(A a) {
-        if (!this.contains(a)) { this.add(a); }
+        if (!this.contains(a)) {
+            this.add(a);
+        }
     }
 
     /** Adds all elements to the list that are not already there. */
@@ -129,14 +135,16 @@ public class List<A> extends java.util.ArrayList<A>
      * all others, preserving the order.
      */
     public void removeDuplicates() {
-        
+
         List<A> tmp = new List<A>();
         tmp.addAll(this);
         this.clear();
         Iterator<A> i = tmp.iterator();
         while (i.hasNext()) {
             A item = i.next();
-            if (!this.contains(item)) { this.add(item); }
+            if (!this.contains(item)) {
+                this.add(item);
+            }
         }
     }
 
@@ -145,25 +153,27 @@ public class List<A> extends java.util.ArrayList<A>
      * indentation and increment.
      */
     public String asString(int indent, int increment) {
-        
+
         StringBuffer sb = new StringBuffer();
 
         sb.append(printSpace(indent));
-        sb.append("List<"+s+">\n");
+        sb.append("List<" + s + ">\n");
 
         Iterator<A> i = this.iterator();
         while (i.hasNext()) {
             A x = i.next();
             if (x == null) {
-                sb.append(printSpace(indent+increment));
+                sb.append(printSpace(indent + increment));
                 sb.append("Null Element\n");
-            } else if (x instanceof AsStringCapability) {
-                sb.append(((AsStringCapability)x).asString(
-                        indent+increment,increment));
-            } else {
-                sb.append(printSpace(indent+increment));
+            }
+            else if (x instanceof AsStringCapability) {
+                sb.append(((AsStringCapability) x).asString(indent + increment,
+                        increment));
+            }
+            else {
+                sb.append(printSpace(indent + increment));
                 sb.append("Does not implement AsStringCapability\n");
-            } 
+            }
         }
         return sb.toString();
     }
@@ -200,6 +210,7 @@ public class List<A> extends java.util.ArrayList<A>
         }
         return result;
     }
+
     //JMH - this line was changed to be compatible with Java 1.4.2 with the
     //adding_generics-2_0.ea package
     //this may not be compatible with Java 1.5 generics when the become 
@@ -212,7 +223,7 @@ public class List<A> extends java.util.ArrayList<A>
             this.add(array[i]);
         }
     }
-    */
+     */
 
     // ===========================================================
     // Private Methods

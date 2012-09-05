@@ -6,9 +6,10 @@ package edu.clemson.cs.r2jt.utilities;
  * exception is provided in the exception's message.</p>
  */
 public class FlagDependencyException extends Exception {
-	private static final long serialVersionUID = 8233299508253914859L;
 
-	public FlagDependencyException(String msg) {
-		super(msg);
-	}
+    private static final long serialVersionUID = 8233299508253914859L;
+
+    public FlagDependencyException(String msg) {
+        super(msg);
+    }
 }

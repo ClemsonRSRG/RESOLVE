@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * LambdaExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -89,18 +89,13 @@ public class LambdaExp extends Exp {
 
     public LambdaExp() {};
 
-    public LambdaExp(
-            Location location,
-            PosSymbol name,
-            Ty ty,
-            Exp body)
-    {
+    public LambdaExp(Location location, PosSymbol name, Ty ty, Exp body) {
         this.location = location;
         this.name = name;
         this.ty = ty;
         this.body = body;
     }
-    
+
     // ===========================================================
     // Accessor Methods
     // ===========================================================
@@ -108,52 +103,67 @@ public class LambdaExp extends Exp {
     // -----------------------------------------------------------
     // Get Methods
     // -----------------------------------------------------------
-    
+
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the ty variable. */
-    public Ty getTy() { return ty; }
+    public Ty getTy() {
+        return ty;
+    }
 
     /** Returns the value of the body variable. */
-    public Exp getBody() { return body; }
+    public Exp getBody() {
+        return body;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the ty variable to the specified value. */
-    public void setTy(Ty ty) { this.ty = ty; }
+    public void setTy(Ty ty) {
+        this.ty = ty;
+    }
 
     /** Sets the body variable to the specified value. */
-    public void setBody(Exp body) { this.body = body; }
+    public void setBody(Exp body) {
+        this.body = body;
+    }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
-    
+
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	return new LambdaExp(location, name, ty, 
-    			substitute(body, substitutions));
+        return new LambdaExp(location, name, ty,
+                substitute(body, substitutions));
     }
-    
+
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitLambdaExp(this);
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getLambdaExpType(this);
     }
 
@@ -166,132 +176,129 @@ public class LambdaExp extends Exp {
         sb.append("LambdaExp\n");
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         if (ty != null) {
-            sb.append(ty.asString(indent+increment,increment));
+            sb.append(ty.asString(indent + increment, increment));
         }
 
         if (body != null) {
-            sb.append(body.asString(indent+increment,increment));
+            sb.append(body.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
 
     public boolean equivalent(Exp e) {
-    	boolean result = e instanceof LambdaExp;
-    	
-    	if (result) {
-    		LambdaExp eAsLambdaExp = (LambdaExp) e;
-    		
-    		result = eAsLambdaExp.getName().equals(name);
-    		result &= eAsLambdaExp.getBody().equivalent(body);
-    	}
-    	
-    	return result;
+        boolean result = e instanceof LambdaExp;
+
+        if (result) {
+            LambdaExp eAsLambdaExp = (LambdaExp) e;
+
+            result = eAsLambdaExp.getName().equals(name);
+            result &= eAsLambdaExp.getBody().equivalent(body);
+        }
+
+        return result;
     }
-    
+
     /** Returns true if the variable is found in any sub expression   
         of this one. **/
     public boolean containsVar(String varName, boolean IsOldExp) {
-       	if(name.toString().equals(varName)){
-    		return true;
-    	}
-       	
-       	if(body != null) {
+        if (name.toString().equals(varName)) {
+            return true;
+        }
+
+        if (body != null) {
             return body.containsVar(varName, IsOldExp);
-    	}
+        }
 
-    	return false;
+        return false;
     }
-    
+
     public List<Exp> getSubExpressions() {
-    	List<Exp> list = new List<Exp>();
-    	list.add(body);
-    	return list;
+        List<Exp> list = new List<Exp>();
+        list.add(body);
+        return list;
     }
-    
+
     public void setSubExpression(int index, Exp e) {
-    	body = e;
+        body = e;
     }
-    
+
     public boolean shallowCompare(Exp e2) {
-    	if(!(e2 instanceof LambdaExp)) {
-    		return false;
-    	}
-    	if(!(name.equals(((LambdaExp)e2).getName().getName()))) {
-    		return false;
-    	}
-    	return true;
+        if (!(e2 instanceof LambdaExp)) {
+            return false;
+        }
+        if (!(name.equals(((LambdaExp) e2).getName().getName()))) {
+            return false;
+        }
+        return true;
     }
-    
+
     public Exp replace(Exp old, Exp replace) {
-    	if(!(old instanceof LambdaExp)){
-	    	LambdaExp result = (LambdaExp) this.copy();
-	    	result.body = result.body.replace(old, replace);
-        	if(name != null){
-        		if(old instanceof VarExp && replace instanceof VarExp){
-        			if(((VarExp)old).getName().toString().equals(name.toString())){
-        				this.name = ((VarExp)replace).getName();
-        				return this;
-        			}
-        		}
-        	}
-	    	return result;
-    	}
-    	return this;
+        if (!(old instanceof LambdaExp)) {
+            LambdaExp result = (LambdaExp) this.copy();
+            result.body = result.body.replace(old, replace);
+            if (name != null) {
+                if (old instanceof VarExp && replace instanceof VarExp) {
+                    if (((VarExp) old).getName().toString().equals(
+                            name.toString())) {
+                        this.name = ((VarExp) replace).getName();
+                        return this;
+                    }
+                }
+            }
+            return result;
+        }
+        return this;
     }
-    
+
     public void prettyPrint() {
-    	System.out.print("lambda " + name.getName() + ": ");
-    	ty.prettyPrint();
-    	System.out.print(" (");
-    	body.prettyPrint();
-    	System.out.print(")");
+        System.out.print("lambda " + name.getName() + ": ");
+        ty.prettyPrint();
+        System.out.print(" (");
+        body.prettyPrint();
+        System.out.print(")");
     }
-    
 
-
-    
     public String toString(int indent) {
-    	StringBuffer sb = new StringBuffer();
-    	sb.append("lambda " + name.getName() + ": ");
-    	if(ty != null ) sb.append(ty.toString(0));
-    	sb.append(" (");
-    	sb.append(body.toString(0));
-    	sb.append(")");
-    	return sb.toString();
+        StringBuffer sb = new StringBuffer();
+        sb.append("lambda " + name.getName() + ": ");
+        if (ty != null)
+            sb.append(ty.toString(0));
+        sb.append(" (");
+        sb.append(body.toString(0));
+        sb.append(")");
+        return sb.toString();
     }
-    
+
     public Exp copy() {
-    	PosSymbol newName = name.copy();
-    	Exp newBody = body.copy();
-    	Exp result = new LambdaExp(null, newName, ty, newBody);
-    	result.setType(type);
-    	
-    	
-    	return result;
+        PosSymbol newName = name.copy();
+        Exp newBody = body.copy();
+        Exp result = new LambdaExp(null, newName, ty, newBody);
+        result.setType(type);
+
+        return result;
     }
-    
+
     public Object clone() {
-    	PosSymbol newName = name.copy();
-    	Exp newBody = (Exp)body.clone();
-    	Exp result = new LambdaExp(null, newName, ty, newBody);
-    	result.setType(type);
-    	
-    	
-    	return result;
+        PosSymbol newName = name.copy();
+        Exp newBody = (Exp) body.clone();
+        Exp result = new LambdaExp(null, newName, ty, newBody);
+        result.setType(type);
+
+        return result;
     }
-    
+
     public Exp remember() {
 
-        if(body instanceof OldExp) 
-        	this.setBody(((OldExp)(body)).getExp());
+        if (body instanceof OldExp)
+            this.setBody(((OldExp) (body)).getExp());
 
-        if(body != null)
-        	body = body.remember();
+        if (body != null)
+            body = body.remember();
 
         return this;
     }

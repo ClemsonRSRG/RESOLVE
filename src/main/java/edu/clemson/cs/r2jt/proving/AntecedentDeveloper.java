@@ -11,7 +11,8 @@ import java.util.Iterator;
  * <code>Antecedent</code> should be extended, and none of the original 
  * conjuncts.</p>
  */
-public interface AntecedentDeveloper 
-	extends Transformer<Antecedent, Iterator<Antecedent>> {
+public interface AntecedentDeveloper
+        extends
+            Transformer<Antecedent, Iterator<Antecedent>> {
 
 }

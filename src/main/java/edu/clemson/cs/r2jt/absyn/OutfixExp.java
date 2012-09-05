@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * OutfixExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -80,12 +80,11 @@ public class OutfixExp extends Exp {
     public static final int DBL_SQUARE = 4;
     public static final int BAR = 5;
     public static final int DBL_BAR = 6;
-    
-    private static final String[] myLeftDelimiters = 
-    	{"", "<", "<<", "[", "[[", "|", "||"};
-    private static final String[] myRightDelimiters = 
-	{"", ">", ">>", "]", "]]", "|", "||"};
-    
+
+    private static final String[] myLeftDelimiters =
+            { "", "<", "<<", "[", "[[", "|", "||" };
+    private static final String[] myRightDelimiters =
+            { "", ">", ">>", "]", "]]", "|", "||" };
 
     // ===========================================================
     // Variables
@@ -106,35 +105,33 @@ public class OutfixExp extends Exp {
 
     public OutfixExp() {};
 
-    public OutfixExp(
-            Location location,
-            int operator,
-            Exp argument)
-    {
+    public OutfixExp(Location location, int operator, Exp argument) {
         this.location = location;
         this.operator = operator;
         this.argument = argument;
     }
 
     public boolean equivalent(Exp e) {
-    	boolean retval = e instanceof OutfixExp;
-    	
-    	if (retval) {
-    		OutfixExp eAsOutfix = (OutfixExp) e;
-    		retval = (operator == eAsOutfix.operator) &&
-    			equivalent(argument, eAsOutfix.argument);
-    	}
-    	
-    	return retval;
+        boolean retval = e instanceof OutfixExp;
+
+        if (retval) {
+            OutfixExp eAsOutfix = (OutfixExp) e;
+            retval =
+                    (operator == eAsOutfix.operator)
+                            && equivalent(argument, eAsOutfix.argument);
+        }
+
+        return retval;
     }
-    
+
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	Exp retval = new OutfixExp(location, operator, 
-    			substitute(argument, substitutions));
-    	retval.setType(type);
-    	return retval;
+        Exp retval =
+                new OutfixExp(location, operator, substitute(argument,
+                        substitutions));
+        retval.setType(type);
+        return retval;
     }
-    
+
     // ===========================================================
     // Accessor Methods
     // ===========================================================
@@ -144,39 +141,50 @@ public class OutfixExp extends Exp {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the operator variable. */
-    public int getOperator() { return operator; }
+    public int getOperator() {
+        return operator;
+    }
 
     /** Returns the value of the argument variable. */
-    public Exp getArgument() { return argument; }
+    public Exp getArgument() {
+        return argument;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the operator variable to the specified value. */
-    public void setOperator(int operator) { this.operator = operator; }
+    public void setOperator(int operator) {
+        this.operator = operator;
+    }
 
     /** Sets the argument variable to the specified value. */
-    public void setArgument(Exp argument) { this.argument = argument; }
+    public void setArgument(Exp argument) {
+        this.argument = argument;
+    }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
-    
+
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitOutfixExp(this);
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getOutfixExpType(this);
     }
 
@@ -188,11 +196,11 @@ public class OutfixExp extends Exp {
         printSpace(indent, sb);
         sb.append("OutfixExp\n");
 
-        printSpace(indent+increment, sb);
+        printSpace(indent + increment, sb);
         sb.append(printConstant(operator) + "\n");
 
         if (argument != null) {
-            sb.append(argument.asString(indent+increment,increment));
+            sb.append(argument.asString(indent + increment, increment));
         }
 
         return sb.toString();
@@ -203,196 +211,234 @@ public class OutfixExp extends Exp {
 
         StringBuffer sb = new StringBuffer();
 
-        switch(operator) {
-        case 1: sb.append("<");
-        	sb.append(argument.toString( indent));
-        	sb.append(">"); break;
-        case 2: sb.append("DBL_ANGLE"); break;
-        case 3: sb.append("SQUARE"); break;
-        case 4: sb.append("DBL_SQUARE"); break;
-        case 5: sb.append("|");
-        	sb.append(argument.toString(0));
-        	sb.append("|"); break;
-        case 6: sb.append("DBL_BAR"); break;
-        default: sb.append(operator);
+        switch (operator) {
+        case 1:
+            sb.append("<");
+            sb.append(argument.toString(indent));
+            sb.append(">");
+            break;
+        case 2:
+            sb.append("DBL_ANGLE");
+            break;
+        case 3:
+            sb.append("SQUARE");
+            break;
+        case 4:
+            sb.append("DBL_SQUARE");
+            break;
+        case 5:
+            sb.append("|");
+            sb.append(argument.toString(0));
+            sb.append("|");
+            break;
+        case 6:
+            sb.append("DBL_BAR");
+            break;
+        default:
+            sb.append(operator);
         }
-        
-       	return sb.toString();
+
+        return sb.toString();
     }
-    
+
     /** Returns a formatted text string of this class. */
     public String toIsabelleString(int indent) {
 
         StringBuffer sb = new StringBuffer();
 
-        switch(operator) {
-        case 1: sb.append("<");
-    	sb.append(argument.toString( indent));
-    	sb.append(">"); break;
-        case 2: sb.append("DBL_ANGLE"); break;
-        case 3: sb.append("SQUARE"); break;
-        case 4: sb.append("DBL_SQUARE"); break;
-        case 5: sb.append("length(");
-        	sb.append(argument.toString(0));
-        	sb.append(") "); break;
-        case 6: sb.append("DBL_BAR"); break;
-        default: sb.append(operator);
+        switch (operator) {
+        case 1:
+            sb.append("<");
+            sb.append(argument.toString(indent));
+            sb.append(">");
+            break;
+        case 2:
+            sb.append("DBL_ANGLE");
+            break;
+        case 3:
+            sb.append("SQUARE");
+            break;
+        case 4:
+            sb.append("DBL_SQUARE");
+            break;
+        case 5:
+            sb.append("length(");
+            sb.append(argument.toString(0));
+            sb.append(") ");
+            break;
+        case 6:
+            sb.append("DBL_BAR");
+            break;
+        default:
+            sb.append(operator);
         }
-        
-       	return sb.toString();
+
+        return sb.toString();
     }
 
-
-    
     /** Returns true if the variable is found in any sub expression   
         of this one. **/
     public boolean containsVar(String varName, boolean IsOldExp) {
-    	if(argument != null) {
-            return argument.containsVar(varName,IsOldExp);
-    	}
-    	return false;
+        if (argument != null) {
+            return argument.containsVar(varName, IsOldExp);
+        }
+        return false;
     }
 
     private String printConstant(int k) {
         StringBuffer sb = new StringBuffer();
-        switch(k) {
-        case 1: sb.append("ANGLE"); break;
-        case 2: sb.append("DBL_ANGLE"); break;
-        case 3: sb.append("SQUARE"); break;
-        case 4: sb.append("DBL_SQUARE"); break;
-        case 5: sb.append("BAR"); break;
-        case 6: sb.append("DBL_BAR"); break;
-        default: sb.append(k);
+        switch (k) {
+        case 1:
+            sb.append("ANGLE");
+            break;
+        case 2:
+            sb.append("DBL_ANGLE");
+            break;
+        case 3:
+            sb.append("SQUARE");
+            break;
+        case 4:
+            sb.append("DBL_SQUARE");
+            break;
+        case 5:
+            sb.append("BAR");
+            break;
+        case 6:
+            sb.append("DBL_BAR");
+            break;
+        default:
+            sb.append(k);
         }
         return sb.toString();
     }
-    
-    public Object clone(){
-   	 	OutfixExp clone = new OutfixExp();
-   	 	clone.setOperator(this.operator);
-   	 	clone.setLocation(this.getLocation());
-   	 	clone.setArgument((Exp)this.getArgument().clone());
-   	 	clone.setType(type);
-   	 	return clone;
-   }
-    
+
+    public Object clone() {
+        OutfixExp clone = new OutfixExp();
+        clone.setOperator(this.operator);
+        clone.setLocation(this.getLocation());
+        clone.setArgument((Exp) this.getArgument().clone());
+        clone.setType(type);
+        return clone;
+    }
+
     public List<Exp> getSubExpressions() {
-    	List<Exp> list = new List<Exp>();
-    	list.add(argument);
-    	return list;
+        List<Exp> list = new List<Exp>();
+        list.add(argument);
+        return list;
     }
-    
+
     public void setSubExpression(int index, Exp e) {
-    	argument = e;
+        argument = e;
     }
-    
+
     public boolean shallowCompare(Exp e2) {
-    	if(!(e2 instanceof OutfixExp)) {
-    		return false;
-    	}
-    	if(operator != ((OutfixExp)e2).getOperator()) {
-    		return false;
-    	}
-    	return true;
+        if (!(e2 instanceof OutfixExp)) {
+            return false;
+        }
+        if (operator != ((OutfixExp) e2).getOperator()) {
+            return false;
+        }
+        return true;
     }
-    
-    public Exp replace(Exp old, Exp replacement){
-    	if(!(old instanceof OutfixExp)){
-    		Exp tmp = (argument.replace(old, replacement));
-    		if(tmp != null)
-    			argument = tmp;
-    		return this;
-    	}
-    	else 
-    		return this;
+
+    public Exp replace(Exp old, Exp replacement) {
+        if (!(old instanceof OutfixExp)) {
+            Exp tmp = (argument.replace(old, replacement));
+            if (tmp != null)
+                argument = tmp;
+            return this;
+        }
+        else
+            return this;
     }
-    
-    public Exp remember(){
-    	 if(argument instanceof OldExp) 
-         	this.setArgument(((OldExp)(argument)).getExp());
-         else {
-             argument = argument.remember();;
-         }
-    	 return this;
+
+    public Exp remember() {
+        if (argument instanceof OldExp)
+            this.setArgument(((OldExp) (argument)).getExp());
+        else {
+            argument = argument.remember();
+            ;
+        }
+        return this;
     }
-    
+
     public String getLeftDelimiter() {
-    	return myLeftDelimiters[operator];
+        return myLeftDelimiters[operator];
     }
-    
+
     public String getRightDelimiter() {
-    	return myRightDelimiters[operator];
+        return myRightDelimiters[operator];
     }
-    
+
     public String getOperatorAsString() {
-    	String retval;
-    	
-    	switch (operator) {
-    	case ANGLE:
-    		retval = "<outfix>";
-    		break;
-    	case DBL_ANGLE:
-    		retval = "<<outfix>>";
-    		break;
-    	case SQUARE:
-    		retval = "[outfix]";
-    		break;
-    	case DBL_SQUARE:
-    		retval = "[[outfix]]";
-    		break;
-    	case BAR:
-    		retval = "|outfix|";
-    		break;
-    	case DBL_BAR:
-    		retval = "||outfix||";
-    		break;
-		default:
-			throw new RuntimeException("Invalid operator code");
-    	}
-    	
-    	return retval;
+        String retval;
+
+        switch (operator) {
+        case ANGLE:
+            retval = "<outfix>";
+            break;
+        case DBL_ANGLE:
+            retval = "<<outfix>>";
+            break;
+        case SQUARE:
+            retval = "[outfix]";
+            break;
+        case DBL_SQUARE:
+            retval = "[[outfix]]";
+            break;
+        case BAR:
+            retval = "|outfix|";
+            break;
+        case DBL_BAR:
+            retval = "||outfix||";
+            break;
+        default:
+            throw new RuntimeException("Invalid operator code");
+        }
+
+        return retval;
     }
-    
+
     public void prettyPrint() {
-    	if(operator == ANGLE) {
-    		System.out.print("<");
-    		argument.prettyPrint();
-    		System.out.print(">");
-    	}
-    	else if(operator == DBL_ANGLE) {
-    		System.out.print("<<");
-    		argument.prettyPrint();
-    		System.out.print(">>");
-    	}
-    	else if(operator == SQUARE) {
-    		System.out.print("[");
-    		argument.prettyPrint();
-    		System.out.print("]");
-    	}
-    	else if(operator == DBL_SQUARE) {
-    		System.out.print("[[");
-    		argument.prettyPrint();
-    		System.out.print("]]");
-    	}
-    	else if(operator == BAR) {
-    		System.out.print("|");
-    		argument.prettyPrint();
-    		System.out.print("|");
-    	}
-    	else {
-       		System.out.print("||");
-       		argument.prettyPrint();
-       		System.out.print("||");
-    	}
+        if (operator == ANGLE) {
+            System.out.print("<");
+            argument.prettyPrint();
+            System.out.print(">");
+        }
+        else if (operator == DBL_ANGLE) {
+            System.out.print("<<");
+            argument.prettyPrint();
+            System.out.print(">>");
+        }
+        else if (operator == SQUARE) {
+            System.out.print("[");
+            argument.prettyPrint();
+            System.out.print("]");
+        }
+        else if (operator == DBL_SQUARE) {
+            System.out.print("[[");
+            argument.prettyPrint();
+            System.out.print("]]");
+        }
+        else if (operator == BAR) {
+            System.out.print("|");
+            argument.prettyPrint();
+            System.out.print("|");
+        }
+        else {
+            System.out.print("||");
+            argument.prettyPrint();
+            System.out.print("||");
+        }
     }
-    
+
     public Exp copy() {
-    	Exp retval;
-    	int newOperator = operator;
-    	Exp newArgument = argument.copy();
-    	retval = new OutfixExp(null, newOperator, newArgument);
-    	retval.setType(type);
-    	return retval;
+        Exp retval;
+        int newOperator = operator;
+        Exp newArgument = argument.copy();
+        retval = new OutfixExp(null, newOperator, newArgument);
+        retval.setType(type);
+        return retval;
     }
-    
+
 }

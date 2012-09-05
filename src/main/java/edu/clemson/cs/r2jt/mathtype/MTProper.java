@@ -5,7 +5,8 @@ package edu.clemson.cs.r2jt.mathtype;
  * is atomic.</p>
  */
 public class MTProper extends MTType {
-	public boolean isOfKindType() {
-		return false;
-	}
+
+    public boolean isOfKindType() {
+        return false;
+    }
 }

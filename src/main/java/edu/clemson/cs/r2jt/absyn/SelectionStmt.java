@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * SelectionStmt.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -84,11 +84,8 @@ public class SelectionStmt extends Statement {
 
     public SelectionStmt() {};
 
-    public SelectionStmt(
-            ProgramExp var,
-            List<ChoiceItem> whenpairs,
-            List<Statement> defaultclause)
-    {
+    public SelectionStmt(ProgramExp var, List<ChoiceItem> whenpairs,
+            List<Statement> defaultclause) {
         this.var = var;
         this.whenpairs = whenpairs;
         this.defaultclause = defaultclause;
@@ -103,26 +100,38 @@ public class SelectionStmt extends Statement {
     // -----------------------------------------------------------
 
     /** Returns the value of the var variable. */
-    public ProgramExp getVar() { return var; }
+    public ProgramExp getVar() {
+        return var;
+    }
 
     /** Returns the value of the whenpairs variable. */
-    public List<ChoiceItem> getWhenpairs() { return whenpairs; }
+    public List<ChoiceItem> getWhenpairs() {
+        return whenpairs;
+    }
 
     /** Returns the value of the defaultclause variable. */
-    public List<Statement> getDefaultclause() { return defaultclause; }
+    public List<Statement> getDefaultclause() {
+        return defaultclause;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the var variable to the specified value. */
-    public void setVar(ProgramExp var) { this.var = var; }
+    public void setVar(ProgramExp var) {
+        this.var = var;
+    }
 
     /** Sets the whenpairs variable to the specified value. */
-    public void setWhenpairs(List<ChoiceItem> whenpairs) { this.whenpairs = whenpairs; }
+    public void setWhenpairs(List<ChoiceItem> whenpairs) {
+        this.whenpairs = whenpairs;
+    }
 
     /** Sets the defaultclause variable to the specified value. */
-    public void setDefaultclause(List<Statement> defaultclause) { this.defaultclause = defaultclause; }
+    public void setDefaultclause(List<Statement> defaultclause) {
+        this.defaultclause = defaultclause;
+    }
 
     // ===========================================================
     // Public Methods
@@ -142,15 +151,15 @@ public class SelectionStmt extends Statement {
         sb.append("SelectionStmt\n");
 
         if (var != null) {
-            sb.append(var.asString(indent+increment,increment));
+            sb.append(var.asString(indent + increment, increment));
         }
 
         if (whenpairs != null) {
-            sb.append(whenpairs.asString(indent+increment,increment));
+            sb.append(whenpairs.asString(indent + increment, increment));
         }
 
         if (defaultclause != null) {
-            sb.append(defaultclause.asString(indent+increment,increment));
+            sb.append(defaultclause.asString(indent + increment, increment));
         }
 
         return sb.toString();

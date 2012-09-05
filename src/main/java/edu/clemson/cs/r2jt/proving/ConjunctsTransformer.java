@@ -7,7 +7,8 @@ import java.util.Iterator;
  * <code>ImmutableConjuncts</code> into one or more new sets of conjuncts based
  * on some predefined rule.</p>
  */
-public interface ConjunctsTransformer 
-		extends Transformer<ImmutableConjuncts, Iterator<ImmutableConjuncts>> {
+public interface ConjunctsTransformer
+        extends
+            Transformer<ImmutableConjuncts, Iterator<ImmutableConjuncts>> {
 
 }

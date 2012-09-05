@@ -10,25 +10,25 @@ import java.util.Iterator;
  */
 public class ImmutableIteratorWrapper<T> implements Iterator<T> {
 
-	private final Iterator<T> myBaseIterator;
-	
-	public ImmutableIteratorWrapper(Iterator<T> baseIterator) {
-		myBaseIterator = baseIterator;
-	}
-	
-	@Override
-	public boolean hasNext() {
-		return myBaseIterator.hasNext();
-	}
+    private final Iterator<T> myBaseIterator;
 
-	@Override
-	public T next() {
-		return myBaseIterator.next();
-	}
+    public ImmutableIteratorWrapper(Iterator<T> baseIterator) {
+        myBaseIterator = baseIterator;
+    }
 
-	@Override
-	public void remove() {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public boolean hasNext() {
+        return myBaseIterator.hasNext();
+    }
+
+    @Override
+    public T next() {
+        return myBaseIterator.next();
+    }
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException();
+    }
 
 }

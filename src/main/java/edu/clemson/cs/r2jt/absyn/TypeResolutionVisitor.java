@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * TypeResolutionVisitor.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -62,11 +62,9 @@ import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.data.Location;
 
-
 public class TypeResolutionVisitor {
 
-    public Type getDoubleExpType(DoubleExp data)
-            throws TypeResolutionException {
+    public Type getDoubleExpType(DoubleExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
@@ -89,26 +87,22 @@ public class TypeResolutionVisitor {
         return null;
     }
 
-    public Type getCharExpType(CharExp data)
-            throws TypeResolutionException {
+    public Type getCharExpType(CharExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
 
-    public Type getTupleTyType(TupleTy data)
-            throws TypeResolutionException {
+    public Type getTupleTyType(TupleTy data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
 
-    public Type getDotExpType(DotExp data)
-            throws TypeResolutionException {
+    public Type getDotExpType(DotExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
 
-    public Type getPrefixExpType(PrefixExp data)
-            throws TypeResolutionException {
+    public Type getPrefixExpType(PrefixExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
@@ -119,8 +113,7 @@ public class TypeResolutionVisitor {
         return null;
     }
 
-    public Type getOldExpType(OldExp data)
-            throws TypeResolutionException {
+    public Type getOldExpType(OldExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
@@ -149,8 +142,7 @@ public class TypeResolutionVisitor {
         return null;
     }
 
-    public Type getEqualsExpType(EqualsExp data)
-            throws TypeResolutionException {
+    public Type getEqualsExpType(EqualsExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
@@ -173,26 +165,22 @@ public class TypeResolutionVisitor {
         return null;
     }
 
-    public Type getQuantExpType(QuantExp data)
-            throws TypeResolutionException {
+    public Type getQuantExpType(QuantExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
 
-    public Type getStringExpType(StringExp data)
-            throws TypeResolutionException {
+    public Type getStringExpType(StringExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
 
-    public Type getLambdaExpType(LambdaExp data)
-            throws TypeResolutionException {
+    public Type getLambdaExpType(LambdaExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
 
-    public Type getArrayTyType(ArrayTy data)
-            throws TypeResolutionException {
+    public Type getArrayTyType(ArrayTy data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
@@ -203,8 +191,7 @@ public class TypeResolutionVisitor {
         return null;
     }
 
-    public Type getSetExpType(SetExp data)
-            throws TypeResolutionException {
+    public Type getSetExpType(SetExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
@@ -215,8 +202,7 @@ public class TypeResolutionVisitor {
         return null;
     }
 
-    public Type getVarExpType(VarExp data)
-            throws TypeResolutionException {
+    public Type getVarExpType(VarExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
@@ -251,14 +237,12 @@ public class TypeResolutionVisitor {
         return null;
     }
 
-    public Type getFieldExpType(FieldExp data)
-            throws TypeResolutionException {
+    public Type getFieldExpType(FieldExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
 
-    public Type getNameTyType(NameTy data)
-            throws TypeResolutionException {
+    public Type getNameTyType(NameTy data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
@@ -275,14 +259,12 @@ public class TypeResolutionVisitor {
         return null;
     }
 
-    public Type getTupleExpType(TupleExp data)
-            throws TypeResolutionException {
+    public Type getTupleExpType(TupleExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
 
-    public Type getOutfixExpType(OutfixExp data)
-            throws TypeResolutionException {
+    public Type getOutfixExpType(OutfixExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
@@ -305,39 +287,35 @@ public class TypeResolutionVisitor {
         return null;
     }
 
-    public Type getInfixExpType(InfixExp data)
-            throws TypeResolutionException {
+    public Type getInfixExpType(InfixExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
 
-    public Type getIfExpType(IfExp data)
-            throws TypeResolutionException {
+    public Type getIfExpType(IfExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
 
-    public Type getRecordTyType(RecordTy data)
-            throws TypeResolutionException {
+    public Type getRecordTyType(RecordTy data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
-    
-    public Type getGoalExpType(GoalExp data)
-    	    throws TypeResolutionException {
-    	return null;
+
+    public Type getGoalExpType(GoalExp data) throws TypeResolutionException {
+        return null;
     }
-    
+
     public Type getSuppositionExpType(SuppositionExp data)
-        throws TypeResolutionException {
+            throws TypeResolutionException {
         return null;
     }
-    
+
     public Type getDeductionExpType(DeductionExp data)
-        throws TypeResolutionException {
+            throws TypeResolutionException {
         return null;
     }
-    
+
     public Type getSuppositionDeductionExpType(SuppositionDeductionExp data)
             throws TypeResolutionException {
         return null;
@@ -347,41 +325,38 @@ public class TypeResolutionVisitor {
             throws TypeResolutionException {
         return null;
     }
-    
+
     public Type getJustifiedExpType(JustifiedExp data)
             throws TypeResolutionException {
         return null;
     }
-    
+
     public Type getJustificationExpType(JustificationExp data)
             throws TypeResolutionException {
         return null;
     }
-    
+
     public Type getHypDesigExpType(HypDesigExp data)
             throws TypeResolutionException {
         return null;
     }
-    
+
     public Type getMathRefExpType(MathRefExp data)
             throws TypeResolutionException {
-    	return null;
+        return null;
     }
 
     /*
      * The methods below have been added to facilitate built-in expressions
      * and their associated typechecking
      */
-    public Type getMathExpType(Exp data)
-            throws TypeResolutionException {
+    public Type getMathExpType(Exp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }
 
-
-    public boolean matchTypes(Location loc, Type t1, Type t2, 
-    						boolean b1, boolean b2)
-            throws TypeResolutionException {
+    public boolean matchTypes(Location loc, Type t1, Type t2, boolean b1,
+            boolean b2) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return false;
     }

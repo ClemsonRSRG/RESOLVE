@@ -11,43 +11,44 @@ import java.util.Iterator;
  */
 public class ProductiveStepChooser implements TransformationChooser {
 
-	private static final ProductiveFilterMapper PRODUCTIVE_FILTER = 
-		new ProductiveFilterMapper();
-	
-	private final TransformationChooser myBaseChooser;
-	
-	public ProductiveStepChooser(TransformationChooser c) {
-		
-		myBaseChooser = c;
-	}
-	
-	@Override
-	public void preoptimizeForVC(VC vc) {
-		myBaseChooser.preoptimizeForVC(vc);
-	}
+    private static final ProductiveFilterMapper PRODUCTIVE_FILTER =
+            new ProductiveFilterMapper();
 
-	@Override
-	public Iterator<ProofPathSuggestion> suggestTransformations(VC vc,
-			int curLength, Metrics metrics, ProofData d) {
-		
-		return new LazyMappingIterator<ProofPathSuggestion, ProofPathSuggestion>
-				(myBaseChooser.suggestTransformations(
-						vc, curLength, metrics, d), PRODUCTIVE_FILTER);
-	}
-	
-	@Override
-	public String toString() {
-		return "ProductiveStep(Steps from " + myBaseChooser + ")";
-	}
-	
-	private static class ProductiveFilterMapper 
-			implements Mapper<ProofPathSuggestion, ProofPathSuggestion> {
+    private final TransformationChooser myBaseChooser;
 
-		@Override
-		public ProofPathSuggestion map(ProofPathSuggestion i) {
-			
-			return new ProofPathSuggestion(new ProductiveStepsOnlyStep(i.step),
-					i.data, i.pathNote, i.debugNote);
-		}
-	}
+    public ProductiveStepChooser(TransformationChooser c) {
+
+        myBaseChooser = c;
+    }
+
+    @Override
+    public void preoptimizeForVC(VC vc) {
+        myBaseChooser.preoptimizeForVC(vc);
+    }
+
+    @Override
+    public Iterator<ProofPathSuggestion> suggestTransformations(VC vc,
+            int curLength, Metrics metrics, ProofData d) {
+
+        return new LazyMappingIterator<ProofPathSuggestion, ProofPathSuggestion>(
+                myBaseChooser.suggestTransformations(vc, curLength, metrics, d),
+                PRODUCTIVE_FILTER);
+    }
+
+    @Override
+    public String toString() {
+        return "ProductiveStep(Steps from " + myBaseChooser + ")";
+    }
+
+    private static class ProductiveFilterMapper
+            implements
+                Mapper<ProofPathSuggestion, ProofPathSuggestion> {
+
+        @Override
+        public ProofPathSuggestion map(ProofPathSuggestion i) {
+
+            return new ProofPathSuggestion(new ProductiveStepsOnlyStep(i.step),
+                    i.data, i.pathNote, i.debugNote);
+        }
+    }
 }

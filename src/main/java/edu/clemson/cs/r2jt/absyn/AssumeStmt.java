@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * SwapStmt.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -75,25 +75,18 @@ public class AssumeStmt extends Statement {
     /** The left member. */
     private Exp assertion;
 
-
     // ===========================================================
     // Constructors
     // ===========================================================
 
     public AssumeStmt() {};
 
-    public AssumeStmt(
-            Location location,
-            Exp assertion)
-    {
+    public AssumeStmt(Location location, Exp assertion) {
         this.location = location;
         this.assertion = assertion;
     }
-    
 
-    public AssumeStmt(
-            Exp assertion)
-    {
+    public AssumeStmt(Exp assertion) {
         this.assertion = assertion;
     }
 
@@ -106,22 +99,28 @@ public class AssumeStmt extends Statement {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the Expression */
-    public Exp getAssertion() { return assertion; }
-
+    public Exp getAssertion() {
+        return assertion;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
-
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the right variable to the specified value. */
-    public void setAssertion(Exp assertion) { this.assertion = assertion; }
+    public void setAssertion(Exp assertion) {
+        this.assertion = assertion;
+    }
 
     // ===========================================================
     // Public Methods
@@ -141,20 +140,18 @@ public class AssumeStmt extends Statement {
         sb.append("AssumeStmt\n");
 
         if (assertion != null) {
-            sb.append(assertion.asString(indent+increment,increment));
+            sb.append(assertion.asString(indent + increment, increment));
         }
-
 
         return sb.toString();
     }
-    
+
     /** Returns a formatted text string of this class. */
     public String toString(int indent) {
 
         StringBuffer sb = new StringBuffer();
 
         printSpace(indent, sb);
-
 
         if (assertion != null) {
             sb.append("Assume " + assertion.toString(0));
@@ -165,8 +162,8 @@ public class AssumeStmt extends Statement {
 
         return sb.toString();
     }
-    
+
     public AssumeStmt clone() {
-    	return new AssumeStmt(location, (Exp)assertion.clone());
+        return new AssumeStmt(location, (Exp) assertion.clone());
     }
 }

@@ -18,28 +18,29 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
  * this class can be put into <em>noisy mode</em>, in which it will print
  * a warning when it filters out a rule.</p>
  */
-public class ConsequentSubstitutionRuleNormalizer 
-		extends AbstractEqualityRuleNormalizer {
-	
-	public ConsequentSubstitutionRuleNormalizer(MathExpTypeResolver r, 
-			boolean noisy) {
-		super(r, noisy);
-	}
-	
-	public ConsequentSubstitutionRuleNormalizer(MathExpTypeResolver r) {
-		this(r, true);
-	}
+public class ConsequentSubstitutionRuleNormalizer
+        extends
+            AbstractEqualityRuleNormalizer {
 
-	@Override
-	protected List<VCTransformer> doNormalize(PExp left, PExp right) {
-		List<VCTransformer> retval = new ArrayList<VCTransformer>(2);
-		
-		//Substitute left expression for right
-		retval.add(new ConsequentSubstitutor(new NewBindReplace(left, right)));
-		
-		//Substitute right expression for left
-		retval.add(new ConsequentSubstitutor(new NewBindReplace(right, left)));
-		
-		return retval;
-	}
+    public ConsequentSubstitutionRuleNormalizer(MathExpTypeResolver r,
+            boolean noisy) {
+        super(r, noisy);
+    }
+
+    public ConsequentSubstitutionRuleNormalizer(MathExpTypeResolver r) {
+        this(r, true);
+    }
+
+    @Override
+    protected List<VCTransformer> doNormalize(PExp left, PExp right) {
+        List<VCTransformer> retval = new ArrayList<VCTransformer>(2);
+
+        //Substitute left expression for right
+        retval.add(new ConsequentSubstitutor(new NewBindReplace(left, right)));
+
+        //Substitute right expression for left
+        retval.add(new ConsequentSubstitutor(new NewBindReplace(right, left)));
+
+        return retval;
+    }
 }

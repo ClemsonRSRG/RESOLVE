@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * MathModuleDec.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -87,12 +87,8 @@ public class MathModuleDec extends ModuleDec {
 
     public MathModuleDec() {};
 
-    public MathModuleDec(
-            PosSymbol name,
-            List<ModuleParameter> parameters,
-            List<UsesItem> usesItems,
-            List<Dec> decs)
-    {
+    public MathModuleDec(PosSymbol name, List<ModuleParameter> parameters,
+            List<UsesItem> usesItems, List<Dec> decs) {
         this.name = name;
         this.parameters = parameters;
         this.usesItems = usesItems;
@@ -108,32 +104,48 @@ public class MathModuleDec extends ModuleDec {
     // -----------------------------------------------------------
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the parameters variable. */
-    public List<ModuleParameter> getParameters() { return parameters; }
+    public List<ModuleParameter> getParameters() {
+        return parameters;
+    }
 
     /** Returns the value of the usesItems variable. */
-    public List<UsesItem> getUsesItems() { return usesItems; }
+    public List<UsesItem> getUsesItems() {
+        return usesItems;
+    }
 
     /** Returns the value of the decs variable. */
-    public List<Dec> getDecs() { return decs; }
+    public List<Dec> getDecs() {
+        return decs;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the parameters variable to the specified value. */
-    public void setParameters(List<ModuleParameter> parameters) { this.parameters = parameters; }
+    public void setParameters(List<ModuleParameter> parameters) {
+        this.parameters = parameters;
+    }
 
     /** Sets the usesItems variable to the specified value. */
-    public void setUsesItems(List<UsesItem> usesItems) { this.usesItems = usesItems; }
+    public void setUsesItems(List<UsesItem> usesItems) {
+        this.usesItems = usesItems;
+    }
 
     /** Sets the decs variable to the specified value. */
-    public void setDecs(List<Dec> decs) { this.decs = decs; }
+    public void setDecs(List<Dec> decs) {
+        this.decs = decs;
+    }
 
     // ===========================================================
     // Public Methods
@@ -153,19 +165,19 @@ public class MathModuleDec extends ModuleDec {
         sb.append("MathModuleDec\n");
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         if (parameters != null) {
-            sb.append(parameters.asString(indent+increment,increment));
+            sb.append(parameters.asString(indent + increment, increment));
         }
 
         if (usesItems != null) {
-            sb.append(usesItems.asString(indent+increment,increment));
+            sb.append(usesItems.asString(indent + increment, increment));
         }
 
         if (decs != null) {
-            sb.append(decs.asString(indent+increment,increment));
+            sb.append(decs.asString(indent + increment, increment));
         }
 
         return sb.toString();

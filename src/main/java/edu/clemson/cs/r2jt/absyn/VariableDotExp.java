@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * VariableDotExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -91,26 +91,23 @@ public class VariableDotExp extends VariableExp {
 
     public VariableDotExp() {};
 
-    public VariableDotExp(
-            Location location,
-            List<VariableExp> segments,
-            VariableExp semanticExp)
-    {
+    public VariableDotExp(Location location, List<VariableExp> segments,
+            VariableExp semanticExp) {
         this.location = location;
         this.segments = segments;
         this.semanticExp = semanticExp;
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	List<VariableExp> newSegments = new List<VariableExp>();
-    	for (VariableExp v : segments) {
-    		newSegments.add((VariableExp) substitute(v, substitutions));
-    	}
-    	
-    	return new VariableDotExp(location, newSegments, 
-    			(VariableExp) substitute(semanticExp, substitutions));
+        List<VariableExp> newSegments = new List<VariableExp>();
+        for (VariableExp v : segments) {
+            newSegments.add((VariableExp) substitute(v, substitutions));
+        }
+
+        return new VariableDotExp(location, newSegments,
+                (VariableExp) substitute(semanticExp, substitutions));
     }
-    
+
     // ===========================================================
     // Accessor Methods
     // ===========================================================
@@ -120,27 +117,37 @@ public class VariableDotExp extends VariableExp {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the segments variable. */
-    public List<VariableExp> getSegments() { return segments; }
+    public List<VariableExp> getSegments() {
+        return segments;
+    }
 
     /** Returns the value of the semanticExp variable. */
-    public VariableExp getSemanticExp() { return semanticExp; }
+    public VariableExp getSemanticExp() {
+        return semanticExp;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the segments variable to the specified value. */
-    public void setSegments(List<VariableExp> segments) { this.segments = segments; }
+    public void setSegments(List<VariableExp> segments) {
+        this.segments = segments;
+    }
 
     /** Sets the semanticExp variable to the specified value. */
-    public void setSemanticExp(VariableExp semanticExp) { 
-    	this.semanticExp = semanticExp; 
+    public void setSemanticExp(VariableExp semanticExp) {
+        this.semanticExp = semanticExp;
     }
 
     // ===========================================================
@@ -153,8 +160,7 @@ public class VariableDotExp extends VariableExp {
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getVariableDotExpType(this);
     }
 
@@ -167,26 +173,25 @@ public class VariableDotExp extends VariableExp {
         sb.append("VariableDotExp\n");
 
         if (segments != null) {
-            sb.append(segments.asString(indent+increment,increment));
+            sb.append(segments.asString(indent + increment, increment));
         }
 
         if (semanticExp != null) {
-            sb.append(semanticExp.asString(indent+increment,increment));
+            sb.append(semanticExp.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
-    
+
     public String toString(int indent) {
 
         StringBuffer sb = new StringBuffer();
 
         printSpace(indent, sb);
 
-    	printSpace(indent, sb);
+        printSpace(indent, sb);
 
         sb.append(segmentsToString(this.segments));
-
 
         if (semanticExp != null) {
             sb.append(semanticExp.toString(0));
@@ -199,107 +204,108 @@ public class VariableDotExp extends VariableExp {
         of this one. **/
     public boolean containsVar(String varName, boolean IsOldExp) {
         Iterator<VariableExp> i = segments.iterator();
-        while(i.hasNext()) {
+        while (i.hasNext()) {
             VariableExp temp = i.next();
-            if(temp != null) {
-                if(temp.containsVar(varName,IsOldExp)) {
+            if (temp != null) {
+                if (temp.containsVar(varName, IsOldExp)) {
                     return true;
                 }
             }
         }
-        if(semanticExp != null) {
-           if(semanticExp.containsVar(varName,IsOldExp)) {
-               return true;
-           }
+        if (semanticExp != null) {
+            if (semanticExp.containsVar(varName, IsOldExp)) {
+                return true;
+            }
         }
         return false;
     }
 
     public List<Exp> getSubExpressions() {
-    	List<Exp> list = new List<Exp>();
-    	Iterator<VariableExp> segmentsIt = segments.iterator();
-    	while(segmentsIt.hasNext()) {
-    		list.add((Exp)(segmentsIt.next()));
-    	}
-    	return list;
+        List<Exp> list = new List<Exp>();
+        Iterator<VariableExp> segmentsIt = segments.iterator();
+        while (segmentsIt.hasNext()) {
+            list.add((Exp) (segmentsIt.next()));
+        }
+        return list;
     }
-    
+
     public void setSubExpression(int index, Exp e) {
-    	segments.set(index, (VariableExp) e);
+        segments.set(index, (VariableExp) e);
     }
-    
-    
-    private String segmentsToString(List<VariableExp> segments){
-    	StringBuffer sb = new StringBuffer();
-    	//Environment env = Environment.getInstance();
-    	if(segments != null){
-    		Iterator<VariableExp> i = segments.iterator();
-    	
-    		while(i.hasNext()){
-    			sb.append(i.next().toString(0));
-    			if(i.hasNext())// && !env.isabelle())
-    				sb.append(".");
-    		}
-    	}
-    	return sb.toString();
+
+    private String segmentsToString(List<VariableExp> segments) {
+        StringBuffer sb = new StringBuffer();
+        //Environment env = Environment.getInstance();
+        if (segments != null) {
+            Iterator<VariableExp> i = segments.iterator();
+
+            while (i.hasNext()) {
+                sb.append(i.next().toString(0));
+                if (i.hasNext())// && !env.isabelle())
+                    sb.append(".");
+            }
+        }
+        return sb.toString();
     }
-    
+
     public Exp copy() {
-    	Exp copy = new VariableDotExp(location, new List<VariableExp>(segments),
-    			semanticExp);
-    	
-    	copy.setType(type);
-    	
-    	return copy;
+        Exp copy =
+                new VariableDotExp(location, new List<VariableExp>(segments),
+                        semanticExp);
+
+        copy.setType(type);
+
+        return copy;
     }
-    
+
     public Object clone() {
-    	return copy();
+        return copy();
     }
-    
-    public Exp replace(Exp old, Exp replacement){
-    	if(old instanceof DotExp){
-    		if(old.equals(this)){
-    			return replacement;
-    		}
-    	}
-    	
-    	if((old instanceof VarExp || old instanceof OldExp)){
-    		Iterator<VariableExp> it = segments.iterator();
-    		
-        	if(it.hasNext()){
-        		Exp name = it.next();
-        		if(old instanceof VarExp && name instanceof VarExp){
-        			if(((VarExp)old).getName().toString().equals(((VarExp)name).getName().toString())){
-        				segments.remove(0);
-        				segments.add(0, (VariableExp)(replacement.clone()));
-        				
-        				return this;
-        			}
-        		}
-        		else if(old instanceof OldExp && name instanceof OldExp){
-        			name = name.replace(old, replacement);
-        			if(name != null){
-        				segments.remove(0);
-        				segments.add(0, (VariableExp)(name.clone()));
-        				return this;
-        			}
-        		}
-        	}
-        	
-        	if(it.hasNext()){
-        		Exp name = it.next();
-        		name = name.replace(old, replacement);
-        		if(name != null && name instanceof VariableExp){
-        			segments.remove(1);
-        			
-        			segments.add(1, (VariableExp)(name.clone()));
-        			return this;
-        		}
-        	}
-    	}
-    
-    	return this;
+
+    public Exp replace(Exp old, Exp replacement) {
+        if (old instanceof DotExp) {
+            if (old.equals(this)) {
+                return replacement;
+            }
+        }
+
+        if ((old instanceof VarExp || old instanceof OldExp)) {
+            Iterator<VariableExp> it = segments.iterator();
+
+            if (it.hasNext()) {
+                Exp name = it.next();
+                if (old instanceof VarExp && name instanceof VarExp) {
+                    if (((VarExp) old).getName().toString().equals(
+                            ((VarExp) name).getName().toString())) {
+                        segments.remove(0);
+                        segments.add(0, (VariableExp) (replacement.clone()));
+
+                        return this;
+                    }
+                }
+                else if (old instanceof OldExp && name instanceof OldExp) {
+                    name = name.replace(old, replacement);
+                    if (name != null) {
+                        segments.remove(0);
+                        segments.add(0, (VariableExp) (name.clone()));
+                        return this;
+                    }
+                }
+            }
+
+            if (it.hasNext()) {
+                Exp name = it.next();
+                name = name.replace(old, replacement);
+                if (name != null && name instanceof VariableExp) {
+                    segments.remove(1);
+
+                    segments.add(1, (VariableExp) (name.clone()));
+                    return this;
+                }
+            }
+        }
+
+        return this;
     }
-    
+
 }

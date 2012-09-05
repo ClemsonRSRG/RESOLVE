@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * OperationLocator.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -82,7 +82,7 @@ public class OperationLocator {
     //private Environment env = Environment.getInstance();
 
     private SymbolTable table;
-    
+
     private boolean showErrors;
 
     // ===========================================================
@@ -93,7 +93,7 @@ public class OperationLocator {
         this.table = table;
         this.err = eh;
     }
-    
+
     public OperationLocator(SymbolTable table, boolean err, ErrorHandler eh) {
         this.table = table;
         showErrors = err;
@@ -105,8 +105,7 @@ public class OperationLocator {
     // ===========================================================
 
     public OperationEntry locateOperation(PosSymbol name, List<Type> argtypes)
-        throws SymbolSearchException
-    {
+            throws SymbolSearchException {
         List<OperationEntry> opers = locateOperationsInStack(name);
         if (opers.size() == 0) {
             opers = locateOperationsInImports(name);
@@ -115,33 +114,34 @@ public class OperationLocator {
     }
 
     public OperationEntry locateOperation(PosSymbol qual, PosSymbol name,
-                                    List<Type> argtypes)
-        throws SymbolSearchException
-    {
-        if (qual == null) { return locateOperation(name, argtypes); }
+            List<Type> argtypes) throws SymbolSearchException {
+        if (qual == null) {
+            return locateOperation(name, argtypes);
+        }
         QualifierLocator qlocator = new QualifierLocator(table, err);
         ModuleScope scope = qlocator.locateProgramModule(qual);
         if (scope.containsOperation(name.getSymbol())) {
             OperationEntry oper = scope.getOperation(name.getSymbol());
             checkOperationArguments(name, argtypes, oper);
             return oper;
-        } else {
-        	if(showErrors) {
-                String msg = cantFindOperInModMessage(name.toString(),
-                                                      qual.toString());
+        }
+        else {
+            if (showErrors) {
+                String msg =
+                        cantFindOperInModMessage(name.toString(), qual
+                                .toString());
                 err.error(qual.getLocation(), msg);
-        	}
+            }
             throw new SymbolSearchException();
         }
     }
-            
+
     // ===========================================================
     // Private Methods
     // ===========================================================
 
     private List<OperationEntry> locateOperationsInStack(PosSymbol name)
-        throws SymbolSearchException
-    {
+            throws SymbolSearchException {
         List<OperationEntry> opers = new List<OperationEntry>();
         Stack<Scope> stack = table.getStack();
         Stack<Scope> hold = new Stack<Scope>();
@@ -151,31 +151,34 @@ public class OperationLocator {
                 hold.push(scope);
                 if (scope instanceof ProcedureScope) {
                     opers.addAll(locateOperationsInProc(name,
-                                     (ProcedureScope)scope));
-                    if (opers.size() > 0) { break; }
-                } else if (scope instanceof ModuleScope) {
-                    ModuleScope mscope = (ModuleScope)scope;
+                            (ProcedureScope) scope));
+                    if (opers.size() > 0) {
+                        break;
+                    }
+                }
+                else if (scope instanceof ModuleScope) {
+                    ModuleScope mscope = (ModuleScope) scope;
                     if (mscope.containsOperation(name.getSymbol())) {
                         opers.add(mscope.getOperation(name.getSymbol()));
                     }
                     // FIX: Check for recursive operation
                     // should be added here.
-                } else {
+                }
+                else {
                     // continue
                 }
             }
             return opers;
-        } finally {
+        }
+        finally {
             while (!hold.isEmpty()) {
                 stack.push(hold.pop());
             }
         }
     }
-        
+
     private List<OperationEntry> locateOperationsInProc(PosSymbol name,
-                                                        ProcedureScope scope)
-        throws SymbolSearchException
-    {
+            ProcedureScope scope) throws SymbolSearchException {
         List<OperationEntry> opers = new List<OperationEntry>();
         Iterator<ModuleScope> i = scope.getVisibleModules();
         while (i.hasNext()) {
@@ -188,11 +191,10 @@ public class OperationLocator {
     }
 
     private List<OperationEntry> locateOperationsInImports(PosSymbol name)
-        throws SymbolSearchException
-    {
+            throws SymbolSearchException {
         List<OperationEntry> opers = new List<OperationEntry>();
-        Iterator<ModuleScope> i
-            = table.getModuleScope().getProgramVisibleModules();
+        Iterator<ModuleScope> i =
+                table.getModuleScope().getProgramVisibleModules();
         while (i.hasNext()) {
             ModuleScope iscope = i.next();
             if (iscope.containsOperation(name.getSymbol())) {
@@ -203,29 +205,27 @@ public class OperationLocator {
     }
 
     private OperationEntry getUniqueOperation(PosSymbol name,
-                                              List<Type> argtypes,
-                                              List<OperationEntry> opers)
-        throws SymbolSearchException
-    {
+            List<Type> argtypes, List<OperationEntry> opers)
+            throws SymbolSearchException {
         if (opers.size() == 0) {
-        	if(showErrors) {
+            if (showErrors) {
                 String msg = cantFindOperMessage(name.toString());
                 err.error(name.getLocation(), msg);
-        	}
+            }
             throw new SymbolSearchException();
-        } else if (opers.size() == 1) {
+        }
+        else if (opers.size() == 1) {
             checkOperationArguments(name, argtypes, opers.get(0));
             return opers.get(0);
-        } else { // opers.size() > 1
+        }
+        else { // opers.size() > 1
             return disambiguateOperations(name, argtypes, opers);
         }
     }
 
     private OperationEntry disambiguateOperations(PosSymbol name,
-                                                  List<Type> argtypes,
-                                                  List<OperationEntry> opers)
-        throws SymbolSearchException
-    {
+            List<Type> argtypes, List<OperationEntry> opers)
+            throws SymbolSearchException {
         List<OperationEntry> newopers = new List<OperationEntry>();
         Iterator<OperationEntry> i = opers.iterator();
         while (i.hasNext()) {
@@ -236,19 +236,22 @@ public class OperationLocator {
         }
         if (newopers.size() == 0) {
             List<Location> locs = getLocationList(opers);
-            if(showErrors) {
-                String sig = getSignatureString(opers.get(0).getName(), argtypes);
+            if (showErrors) {
+                String sig =
+                        getSignatureString(opers.get(0).getName(), argtypes);
                 String msg = cantFindOperMessage(sig, locs.toString());
                 err.error(name.getLocation(), msg);
             }
             throw new SymbolSearchException();
-        } else if (newopers.size() == 1) {
+        }
+        else if (newopers.size() == 1) {
             return newopers.get(0);
-        } else { // newopers.size() > 1
+        }
+        else { // newopers.size() > 1
             List<Location> locs = getLocationList(opers);
-            if(showErrors) {
-                String msg = ambigOperRefMessage(name.toString(),
-                                                 locs.toString());
+            if (showErrors) {
+                String msg =
+                        ambigOperRefMessage(name.toString(), locs.toString());
                 err.error(name.getLocation(), msg);
             }
             throw new SymbolSearchException();
@@ -256,22 +259,19 @@ public class OperationLocator {
     }
 
     private void checkOperationArguments(PosSymbol name, List<Type> argtypes,
-                                         OperationEntry oper)
-        throws SymbolSearchException
-    {
+            OperationEntry oper) throws SymbolSearchException {
         if (!argumentTypesMatch(oper, argtypes)) {
-        	if(showErrors) {
+            if (showErrors) {
                 String opersig = getSignatureString(oper);
                 String targsig = getSignatureString(oper.getName(), argtypes);
                 String msg = argTypeMismatchMessage(opersig, targsig);
                 err.error(name.getLocation(), msg);
-        	}
+            }
             throw new SymbolSearchException();
         }
     }
 
-    private boolean argumentTypesMatch(OperationEntry oper,
-                                       List<Type> argtypes) {
+    private boolean argumentTypesMatch(OperationEntry oper, List<Type> argtypes) {
         TypeMatcher matcher = new TypeMatcher();
         List<Type> partypes = new List<Type>();
         Iterator<VarEntry> i = oper.getParameters();
@@ -302,12 +302,14 @@ public class OperationLocator {
         while (i.hasNext()) {
             VarEntry entry = i.next();
             sb.append(entry.getType().getProgramName().toString());
-            if (i.hasNext()) { sb.append(","); }
+            if (i.hasNext()) {
+                sb.append(",");
+            }
         }
         sb.append(")");
         return sb.toString();
     }
-         
+
     private String getSignatureString(PosSymbol name, List<Type> argtypes) {
         StringBuffer sb = new StringBuffer();
         sb.append(name.toString());
@@ -316,7 +318,9 @@ public class OperationLocator {
         while (i.hasNext()) {
             Type type = i.next();
             sb.append(type.getProgramName().toString());
-            if (i.hasNext()) { sb.append(","); }
+            if (i.hasNext()) {
+                sb.append(",");
+            }
         }
         sb.append(")");
         return sb.toString();
@@ -338,26 +342,26 @@ public class OperationLocator {
 
     private String cantFindOperInModMessage(String name, String module) {
         return "Cannot find an operation named " + name + " in module "
-            + module + ".";
+                + module + ".";
     }
 
     private String ambigOperRefMessage(String name, String mods) {
         return "The operation named " + name + " is found in more than one "
-            + "module visible from this scope: " + mods + ".";
+                + "module visible from this scope: " + mods + ".";
     }
 
     private String cantFindOperMessage(String name) {
         return "Cannot find an operation named " + name + ".";
     }
-        
+
     private String cantFindOperMessage(String sig, String mods) {
         return "Cannot find the operation with signature " + sig
-            + ", but found operations: " + mods + ".";
+                + ", but found operations: " + mods + ".";
     }
 
     private String argTypeMismatchMessage(String opersig, String targsig) {
         return "Expected an operation with the signature " + targsig
-            + " but found one with the signature " + opersig + ".";
+                + " but found one with the signature " + opersig + ".";
     }
 
 }

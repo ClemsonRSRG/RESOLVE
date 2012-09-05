@@ -9,5 +9,5 @@ package edu.clemson.cs.r2jt.proving;
  */
 public interface Mapper<I, O> {
 
-	public O map(I i);
+    public O map(I i);
 }

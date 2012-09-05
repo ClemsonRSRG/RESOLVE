@@ -41,12 +41,11 @@ public class BatchTheoryDevelopmentStep implements VCTransformer {
 
         RepeatedApplicationTransformer<Antecedent> repeater =
                 new RepeatedApplicationTransformer<Antecedent>(
-                new AntecedentSimplifier(
-                new DevelopmentAppender(accumulator)),
-                myIterationCount);
+                        new AntecedentSimplifier(new DevelopmentAppender(
+                                accumulator)), myIterationCount);
 
-        return new StaticConsequentIterator(vc.getSourceName(),
-                repeater.transform(vc.getAntecedent()), vc.getConsequent());
+        return new StaticConsequentIterator(vc.getSourceName(), repeater
+                .transform(vc.getAntecedent()), vc.getConsequent());
     }
 
     @Override
@@ -64,8 +63,8 @@ public class BatchTheoryDevelopmentStep implements VCTransformer {
         throw new UnsupportedOperationException("Not applicable.");
     }
 
-	@Override
-	public boolean introducesQuantifiedVariables() {
-		return true;
-	}
+    @Override
+    public boolean introducesQuantifiedVariables() {
+        return true;
+    }
 }

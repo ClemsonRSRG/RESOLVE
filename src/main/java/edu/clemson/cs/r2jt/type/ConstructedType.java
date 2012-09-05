@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,23 +34,23 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 
 /*
  * ConstructedType.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -86,7 +86,7 @@ public class ConstructedType extends Type {
     // ===========================================================
 
     public ConstructedType(PosSymbol qualifier, PosSymbol name,
-                           List<Type> args, Binding binding) {
+            List<Type> args, Binding binding) {
         this.qualifier = qualifier;
         this.name = name;
         this.args.addAll(args);
@@ -108,14 +108,14 @@ public class ConstructedType extends Type {
     public List<Type> getArgs() {
         return args;
     }
-    
+
     public void setArgs(List<Type> newArgs) {
         args = newArgs;
     }
 
     public void setQualifier(PosSymbol newQualifier) {
-        qualifier =newQualifier;
-    }    
+        qualifier = newQualifier;
+    }
 
     // ===========================================================
     // Public Methods
@@ -130,13 +130,14 @@ public class ConstructedType extends Type {
         }
         if (binding.getScopeID().equals(sid)) {
             return new ConstructedType(qualifier, name, args2, replBind);
-        } else {
+        }
+        else {
             return new ConstructedType(qualifier, name, args2, binding);
         }
     }
 
     public TypeName getProgramName() {
-    	return binding.getProgramName(qualifier, name);
+        return binding.getProgramName(qualifier, name);
     }
 
     public String getRelativeName(Location loc) {
@@ -145,10 +146,11 @@ public class ConstructedType extends Type {
 
     public ConstructedType toMath() {
         if (qualifier == null) {
-        	if(binding.getQualifier(name, args.size()) != null) {
-                qualifier = new PosSymbol(name.getLocation(),
-                                          binding.getQualifier(name, args.size()));
-        	}
+            if (binding.getQualifier(name, args.size()) != null) {
+                qualifier =
+                        new PosSymbol(name.getLocation(), binding.getQualifier(
+                                name, args.size()));
+            }
         }
         List<Type> args2 = new List<Type>();
         Iterator<Type> i = args.iterator();
@@ -172,14 +174,17 @@ public class ConstructedType extends Type {
         while (i.hasNext()) {
             Type type = i.next();
             sb.append(type.toString());
-            if (i.hasNext()) { sb.append(", "); }
+            if (i.hasNext()) {
+                sb.append(", ");
+            }
         }
         sb.append(")");
         return sb.toString();
     }
+
     public String asString() {
         StringBuffer sb = new StringBuffer();
-     //   sb.append("*");
+        //   sb.append("*");
         if (qualifier != null) {
             sb.append(qualifier.toString());
             sb.append(".");
@@ -190,7 +195,9 @@ public class ConstructedType extends Type {
         while (i.hasNext()) {
             Type type = i.next();
             sb.append(type.asString());
-            if (i.hasNext()) { sb.append(", "); }
+            if (i.hasNext()) {
+                sb.append(", ");
+            }
         }
         sb.append(")");
         return sb.toString();

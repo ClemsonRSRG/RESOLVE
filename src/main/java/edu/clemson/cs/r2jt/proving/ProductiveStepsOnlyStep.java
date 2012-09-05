@@ -13,28 +13,28 @@ import edu.clemson.cs.r2jt.utilities.Mapping;
  */
 public class ProductiveStepsOnlyStep implements VCTransformer {
 
-	private final VCTransformer myBaseTransformer;
-	
-	public ProductiveStepsOnlyStep(VCTransformer base) {
-		myBaseTransformer = base;
-	}
-	
-	@Override
-	public Iterator<VC> transform(VC original) {
-		
-		GoodVCPredicate p = new GoodVCPredicate(original);
-		
-		return new PredicateIterator<VC>(
-				myBaseTransformer.transform(original), p);
-		
-		//return new ProductiveIterator(myBaseTransformer.transform(original),
-		//		original);
-	}
-	
+    private final VCTransformer myBaseTransformer;
+
+    public ProductiveStepsOnlyStep(VCTransformer base) {
+        myBaseTransformer = base;
+    }
+
     @Override
-	public String toString() {
-		return myBaseTransformer.toString();
-	}
+    public Iterator<VC> transform(VC original) {
+
+        GoodVCPredicate p = new GoodVCPredicate(original);
+
+        return new PredicateIterator<VC>(myBaseTransformer.transform(original),
+                p);
+
+        //return new ProductiveIterator(myBaseTransformer.transform(original),
+        //		original);
+    }
+
+    @Override
+    public String toString() {
+        return myBaseTransformer.toString();
+    }
 
     @Override
     public Antecedent getPattern() {
@@ -45,23 +45,23 @@ public class ProductiveStepsOnlyStep implements VCTransformer {
     public Consequent getReplacementTemplate() {
         return myBaseTransformer.getReplacementTemplate();
     }
-	
-	private class GoodVCPredicate implements Mapping<VC, Boolean> {
 
-		private final VC myOriginalVC;
-		
-		public GoodVCPredicate(VC original) {
-			myOriginalVC = original;
-		}
-		
-		@Override
-		public Boolean map(VC input) {
-			return !input.simplify().equivalent(myOriginalVC);
-		}
-	}
+    private class GoodVCPredicate implements Mapping<VC, Boolean> {
 
-	@Override
-	public boolean introducesQuantifiedVariables() {
-		return myBaseTransformer.introducesQuantifiedVariables();
-	}
+        private final VC myOriginalVC;
+
+        public GoodVCPredicate(VC original) {
+            myOriginalVC = original;
+        }
+
+        @Override
+        public Boolean map(VC input) {
+            return !input.simplify().equivalent(myOriginalVC);
+        }
+    }
+
+    @Override
+    public boolean introducesQuantifiedVariables() {
+        return myBaseTransformer.introducesQuantifiedVariables();
+    }
 }

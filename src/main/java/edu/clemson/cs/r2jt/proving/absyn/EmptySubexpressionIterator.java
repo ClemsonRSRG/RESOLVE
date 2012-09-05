@@ -4,26 +4,26 @@ import java.util.NoSuchElementException;
 
 public class EmptySubexpressionIterator implements PExpSubexpressionIterator {
 
-	public static final EmptySubexpressionIterator INSTANCE = 
-		new EmptySubexpressionIterator();
-	
-	private EmptySubexpressionIterator() {
-		
-	}
-	
-	@Override
-	public boolean hasNext() {
-		return false;
-	}
+    public static final EmptySubexpressionIterator INSTANCE =
+            new EmptySubexpressionIterator();
 
-	@Override
-	public PExp next() {
-		throw new NoSuchElementException();
-	}
+    private EmptySubexpressionIterator() {
 
-	@Override
-	public PExp replaceLast(PExp newExpression) {
-		throw new IllegalStateException("Must call next() first.");
-	}
+    }
+
+    @Override
+    public boolean hasNext() {
+        return false;
+    }
+
+    @Override
+    public PExp next() {
+        throw new NoSuchElementException();
+    }
+
+    @Override
+    public PExp replaceLast(PExp newExpression) {
+        throw new IllegalStateException("Must call next() first.");
+    }
 
 }

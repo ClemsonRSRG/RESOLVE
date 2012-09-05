@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * EnhancementBodyItem.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -90,13 +90,9 @@ public class EnhancementBodyItem extends ResolveConceptualElement {
 
     public EnhancementBodyItem() {};
 
-    public EnhancementBodyItem(
-            PosSymbol name,
-            List<ModuleArgumentItem> params,
-            PosSymbol bodyName,
-            PosSymbol profileName,
-            List<ModuleArgumentItem> bodyParams)
-    {
+    public EnhancementBodyItem(PosSymbol name, List<ModuleArgumentItem> params,
+            PosSymbol bodyName, PosSymbol profileName,
+            List<ModuleArgumentItem> bodyParams) {
         this.name = name;
         this.params = params;
         this.bodyName = bodyName;
@@ -113,38 +109,58 @@ public class EnhancementBodyItem extends ResolveConceptualElement {
     // -----------------------------------------------------------
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the profileName variable. */
-    public PosSymbol getProfileName() { return profileName; }
+    public PosSymbol getProfileName() {
+        return profileName;
+    }
 
     /** Returns the value of the params variable. */
-    public List<ModuleArgumentItem> getParams() { return params; }
+    public List<ModuleArgumentItem> getParams() {
+        return params;
+    }
 
     /** Returns the value of the bodyName variable. */
-    public PosSymbol getBodyName() { return bodyName; }
+    public PosSymbol getBodyName() {
+        return bodyName;
+    }
 
     /** Returns the value of the bodyParams variable. */
-    public List<ModuleArgumentItem> getBodyParams() { return bodyParams; }
+    public List<ModuleArgumentItem> getBodyParams() {
+        return bodyParams;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the profileName variable to the specified value. */
-    public void setProfileName(PosSymbol name) { this.profileName = name; }
+    public void setProfileName(PosSymbol name) {
+        this.profileName = name;
+    }
 
     /** Sets the params variable to the specified value. */
-    public void setParams(List<ModuleArgumentItem> params) { this.params = params; }
+    public void setParams(List<ModuleArgumentItem> params) {
+        this.params = params;
+    }
 
     /** Sets the bodyName variable to the specified value. */
-    public void setBodyName(PosSymbol bodyName) { this.bodyName = bodyName; }
+    public void setBodyName(PosSymbol bodyName) {
+        this.bodyName = bodyName;
+    }
 
     /** Sets the bodyParams variable to the specified value. */
-    public void setBodyParams(List<ModuleArgumentItem> bodyParams) { this.bodyParams = bodyParams; }
+    public void setBodyParams(List<ModuleArgumentItem> bodyParams) {
+        this.bodyParams = bodyParams;
+    }
 
     // ===========================================================
     // Public Methods
@@ -164,19 +180,19 @@ public class EnhancementBodyItem extends ResolveConceptualElement {
         sb.append("EnhancementBodyItem\n");
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         if (params != null) {
-            sb.append(params.asString(indent+increment,increment));
+            sb.append(params.asString(indent + increment, increment));
         }
 
         if (bodyName != null) {
-            sb.append(bodyName.asString(indent+increment,increment));
+            sb.append(bodyName.asString(indent + increment, increment));
         }
 
         if (bodyParams != null) {
-            sb.append(bodyParams.asString(indent+increment,increment));
+            sb.append(bodyParams.asString(indent + increment, increment));
         }
 
         return sb.toString();

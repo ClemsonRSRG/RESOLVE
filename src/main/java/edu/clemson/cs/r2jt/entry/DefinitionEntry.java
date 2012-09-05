@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,23 +34,23 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 
 /*
  * DefinitionEntry.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -83,11 +83,11 @@ public class DefinitionEntry extends Entry {
     private List<VarEntry> params = new List<VarEntry>();
 
     private Type type = null;
-    
+
     private Exp value = null;
-    
+
     private Exp baseDefinition = null;
-    
+
     /* Evil evil hack.  Used only when LOOKING UP a definition to indicate
      * to a later method that it should take baseDefinition and not value from
      * this entry.  -HwS
@@ -99,7 +99,7 @@ public class DefinitionEntry extends Entry {
     // ===========================================================
 
     public DefinitionEntry(Scope scope, PosSymbol name, List<VarEntry> params,
-                          Type type) {
+            Type type) {
         this.scope = scope;
         this.name = name;
         this.params.addAll(params);
@@ -111,9 +111,9 @@ public class DefinitionEntry extends Entry {
     // ===========================================================
 
     public PosSymbol getIndex() {
-    	return index;
+        return index;
     }
-    
+
     public Scope getScope() {
         return scope;
     }
@@ -137,31 +137,31 @@ public class DefinitionEntry extends Entry {
     public Type getType() {
         return type;
     }
-    
+
     public Exp getValue() {
-    	return value;
+        return value;
     }
 
     public Exp getBaseDefinition() {
-    	return baseDefinition;
+        return baseDefinition;
     }
-    
+
     // ===========================================================
     // Public Methods
     // ===========================================================
 
     public void setIndex(PosSymbol index) {
-    	this.index = index;
+        this.index = index;
     }
-    
+
     public void setValue(Exp value) {
-    	this.value = value;
+        this.value = value;
     }
-    
+
     public void setBaseDefinition(Exp value) {
-    	this.baseDefinition = value;
+        this.baseDefinition = value;
     }
-    
+
     public DefinitionEntry instantiate(ScopeID sid, Binding binding) {
         List<VarEntry> params2 = new List<VarEntry>();
         Iterator<VarEntry> i = params.iterator();
@@ -169,8 +169,8 @@ public class DefinitionEntry extends Entry {
             VarEntry entry = i.next();
             params2.add(entry.instantiate(sid, binding));
         }
-        return new DefinitionEntry(binding.getScope(), name, params2,
-                                  type.instantiate(sid, binding));
+        return new DefinitionEntry(binding.getScope(), name, params2, type
+                .instantiate(sid, binding));
     }
 
     public String toString() {
@@ -184,13 +184,14 @@ public class DefinitionEntry extends Entry {
             sb.append(entry.getName().toString());
             sb.append(": ");
             sb.append(entry.getType().toString());
-            if (i.hasNext()) { sb.append("; "); }
+            if (i.hasNext()) {
+                sb.append("; ");
+            }
         }
         sb.append(" ): ");
         sb.append(type.toString());
         sb.append(")");
         return sb.toString();
     }
-        
 
 }

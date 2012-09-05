@@ -5,31 +5,31 @@ import java.util.NoSuchElementException;
 
 public class DummyIterator<T> implements Iterator<T> {
 
-	private final static DummyIterator<Object> INSTANCE = 
-		new DummyIterator<Object>();
-	
-	private DummyIterator() {
-		
-	}
+    private final static DummyIterator<Object> INSTANCE =
+            new DummyIterator<Object>();
 
-	@SuppressWarnings("unchecked")
-	public static <T> Iterator<T> getInstance(Iterator<T> i) {
-		return (Iterator<T>) INSTANCE;
-	}
-	
-	@Override
-	public boolean hasNext() {
-		return false;
-	}
+    private DummyIterator() {
 
-	@Override
-	public T next() {
-		throw new NoSuchElementException();
-	}
+    }
 
-	@Override
-	public void remove() {
-		
-	}
+    @SuppressWarnings("unchecked")
+    public static <T> Iterator<T> getInstance(Iterator<T> i) {
+        return (Iterator<T>) INSTANCE;
+    }
+
+    @Override
+    public boolean hasNext() {
+        return false;
+    }
+
+    @Override
+    public T next() {
+        throw new NoSuchElementException();
+    }
+
+    @Override
+    public void remove() {
+
+    }
 
 }

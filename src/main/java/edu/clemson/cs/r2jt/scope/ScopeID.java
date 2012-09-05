@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * ScopeID.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -96,8 +96,8 @@ public class ScopeID {
     // Constructors
     // ===========================================================
 
-    private ScopeID(ModuleID mid, PosSymbol facility,
-                    PosSymbol operation, int kind, int index) {
+    private ScopeID(ModuleID mid, PosSymbol facility, PosSymbol operation,
+            int kind, int index) {
         this.mid = mid;
         this.facility = facility;
         if (facility != null) {
@@ -119,18 +119,20 @@ public class ScopeID {
         return new ScopeID(id, facility, null, FACILITY, 0);
     }
 
-    public static ScopeID createOperationScopeID(PosSymbol operation, ModuleID id) {
+    public static ScopeID createOperationScopeID(PosSymbol operation,
+            ModuleID id) {
         return new ScopeID(id, null, operation, OPERATION, 0);
     }
 
-    public static ScopeID createProcedureScopeID(PosSymbol operation, ModuleID id) {
+    public static ScopeID createProcedureScopeID(PosSymbol operation,
+            ModuleID id) {
         return new ScopeID(id, null, operation, PROCEDURE, 0);
     }
 
     public static ScopeID createProofScopeID(PosSymbol proof) {
-    	return new ScopeID(null, null, proof, PROOF, 0);
+        return new ScopeID(null, null, proof, PROOF, 0);
     }
-    
+
     public static ScopeID createDefinitionScopeID(PosSymbol def) {
         return new ScopeID(null, null, def, DEFINITION, 0);
     }
@@ -155,7 +157,9 @@ public class ScopeID {
     // Public Methods
     // ===========================================================
 
-    public ModuleID getModuleID() { return mid; }
+    public ModuleID getModuleID() {
+        return mid;
+    }
 
     public boolean isModule() {
         return (kind == MODULE);
@@ -168,20 +172,21 @@ public class ScopeID {
     public boolean isProcedure() {
         return (kind == PROCEDURE);
     }
-    
+
     public boolean isOperation() {
-    	return (kind == OPERATION);
+        return (kind == OPERATION);
     }
-    
+
     public Symbol getOperation() {
-    	return operation;
+        return operation;
     }
 
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append(mid.toString());
         switch (kind) {
-        case MODULE: break;
+        case MODULE:
+            break;
         case FACILITY:
             sb.append("." + facility.toString());
             sb.append(facility.getPos().toString());
@@ -215,25 +220,32 @@ public class ScopeID {
 
     public int hashCode() {
         return toString().hashCode();
-    } 
+    }
 
     public boolean equals(Object obj) {
         if (obj instanceof ScopeID) {
-            ScopeID sid = (ScopeID)obj;
-            if (!mid.equals(sid.mid)) { return false; }
-            if (kind != sid.kind) { return false; }
-            if (index != sid.index) { return false; }
+            ScopeID sid = (ScopeID) obj;
+            if (!mid.equals(sid.mid)) {
+                return false;
+            }
+            if (kind != sid.kind) {
+                return false;
+            }
+            if (index != sid.index) {
+                return false;
+            }
             switch (kind) {
             case FACILITY:
-                return (facility.getSymbol() == sid.facility.getSymbol() &&
-                        facility.getPos().equals(sid.facility.getPos()));
+                return (facility.getSymbol() == sid.facility.getSymbol() && facility
+                        .getPos().equals(sid.facility.getPos()));
             case OPERATION:
             case PROCEDURE:
                 return (operation == sid.operation);
             default:
                 return true;
             }
-        } else {
+        }
+        else {
             return false;
         }
     }

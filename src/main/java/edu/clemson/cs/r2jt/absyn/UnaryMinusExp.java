@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * UnaryMinusExp.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -85,18 +85,15 @@ public class UnaryMinusExp extends Exp {
 
     public UnaryMinusExp() {};
 
-    public UnaryMinusExp(
-            Location location,
-            Exp argument)
-    {
+    public UnaryMinusExp(Location location, Exp argument) {
         this.location = location;
         this.argument = argument;
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-    	return new UnaryMinusExp(location, substitute(argument, substitutions));
+        return new UnaryMinusExp(location, substitute(argument, substitutions));
     }
-    
+
     // ===========================================================
     // Accessor Methods
     // ===========================================================
@@ -106,20 +103,28 @@ public class UnaryMinusExp extends Exp {
     // -----------------------------------------------------------
 
     /** Returns the value of the location variable. */
-    public Location getLocation() { return location; }
+    public Location getLocation() {
+        return location;
+    }
 
     /** Returns the value of the argument variable. */
-    public Exp getArgument() { return argument; }
+    public Exp getArgument() {
+        return argument;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the location variable to the specified value. */
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /** Sets the argument variable to the specified value. */
-    public void setArgument(Exp argument) { this.argument = argument; }
+    public void setArgument(Exp argument) {
+        this.argument = argument;
+    }
 
     // ===========================================================
     // Public Methods
@@ -131,8 +136,7 @@ public class UnaryMinusExp extends Exp {
     }
 
     /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v)
-        throws TypeResolutionException {
+    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getUnaryMinusExpType(this);
     }
 
@@ -145,7 +149,7 @@ public class UnaryMinusExp extends Exp {
         sb.append("UnaryMinusExp\n");
 
         if (argument != null) {
-            sb.append(argument.asString(indent+increment,increment));
+            sb.append(argument.asString(indent + increment, increment));
         }
 
         return sb.toString();
@@ -154,38 +158,38 @@ public class UnaryMinusExp extends Exp {
     /** Returns true if the variable is found in any sub expression
         of this one. **/
     public boolean containsVar(String varName, boolean IsOldExp) {
-    	if(argument != null) {
-            return argument.containsVar(varName,IsOldExp);
-    	}
-    	return false;
+        if (argument != null) {
+            return argument.containsVar(varName, IsOldExp);
+        }
+        return false;
     }
-    
+
     public List<Exp> getSubExpressions() {
-    	List<Exp> list = new List<Exp>();
-    	list.add(argument);
-    	return list;
+        List<Exp> list = new List<Exp>();
+        list.add(argument);
+        return list;
     }
-    
+
     public void setSubExpression(int index, Exp e) {
-    	argument = e;
+        argument = e;
     }
-    
+
     public boolean shallowCompare(Exp e2) {
-    	if(!(e2 instanceof UnaryMinusExp)) {
-    		return false;
-    	}
-    	return true;
+        if (!(e2 instanceof UnaryMinusExp)) {
+            return false;
+        }
+        return true;
     }
-    
+
     public void prettyPrint() {
-    	System.out.print("-(");
-    	argument.prettyPrint();
-    	System.out.print(")");
+        System.out.print("-(");
+        argument.prettyPrint();
+        System.out.print(")");
     }
-    
+
     public Exp copy() {
-    	Exp newArgument = argument.copy();
-    	return new UnaryMinusExp(null, newArgument);
+        Exp newArgument = argument.copy();
+        return new UnaryMinusExp(null, newArgument);
     }
 
 }

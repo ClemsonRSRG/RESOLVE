@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * DefinitionDec.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -98,15 +98,9 @@ public class DefinitionDec extends Dec implements ModuleParameter {
 
     public DefinitionDec() {};
 
-    public DefinitionDec(
-            boolean implicit,
-            PosSymbol name,
-            List<MathVarDec> parameters,
-            Ty returnTy,
-            Exp base,
-            Exp hypothesis,
-            Exp definition)
-    {
+    public DefinitionDec(boolean implicit, PosSymbol name,
+            List<MathVarDec> parameters, Ty returnTy, Exp base, Exp hypothesis,
+            Exp definition) {
         this.implicit = implicit;
         this.name = name;
         this.parameters = parameters;
@@ -125,50 +119,78 @@ public class DefinitionDec extends Dec implements ModuleParameter {
     // -----------------------------------------------------------
 
     /** Returns the value of the implicit variable. */
-    public boolean isImplicit() { return implicit; }
+    public boolean isImplicit() {
+        return implicit;
+    }
 
     /** Returns the value of the name variable. */
-    public PosSymbol getName() { return name; }
+    public PosSymbol getName() {
+        return name;
+    }
 
     /** Returns the value of the parameters variable. */
-    public List<MathVarDec> getParameters() { return parameters; }
+    public List<MathVarDec> getParameters() {
+        return parameters;
+    }
 
     /** Returns the value of the returnTy variable. */
-    public Ty getReturnTy() { return returnTy; }
+    public Ty getReturnTy() {
+        return returnTy;
+    }
 
     /** Returns the value of the base variable. */
-    public Exp getBase() { return base; }
+    public Exp getBase() {
+        return base;
+    }
 
     /** Returns the value of the hypothesis variable. */
-    public Exp getHypothesis() { return hypothesis; }
+    public Exp getHypothesis() {
+        return hypothesis;
+    }
 
     /** Returns the value of the definition variable. */
-    public Exp getDefinition() { return definition; }
+    public Exp getDefinition() {
+        return definition;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the implicit variable to the specified value. */
-    public void setImplicit(boolean implicit) { this.implicit = implicit; }
+    public void setImplicit(boolean implicit) {
+        this.implicit = implicit;
+    }
 
     /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) { this.name = name; }
+    public void setName(PosSymbol name) {
+        this.name = name;
+    }
 
     /** Sets the parameters variable to the specified value. */
-    public void setParameters(List<MathVarDec> parameters) { this.parameters = parameters; }
+    public void setParameters(List<MathVarDec> parameters) {
+        this.parameters = parameters;
+    }
 
     /** Sets the returnTy variable to the specified value. */
-    public void setReturnTy(Ty returnTy) { this.returnTy = returnTy; }
+    public void setReturnTy(Ty returnTy) {
+        this.returnTy = returnTy;
+    }
 
     /** Sets the base variable to the specified value. */
-    public void setBase(Exp base) { this.base = base; }
+    public void setBase(Exp base) {
+        this.base = base;
+    }
 
     /** Sets the hypothesis variable to the specified value. */
-    public void setHypothesis(Exp hypothesis) { this.hypothesis = hypothesis; }
+    public void setHypothesis(Exp hypothesis) {
+        this.hypothesis = hypothesis;
+    }
 
     /** Sets the definition variable to the specified value. */
-    public void setDefinition(Exp definition) { this.definition = definition; }
+    public void setDefinition(Exp definition) {
+        this.definition = definition;
+    }
 
     // ===========================================================
     // Public Methods
@@ -188,57 +210,59 @@ public class DefinitionDec extends Dec implements ModuleParameter {
         sb.append("DefinitionDec\n");
 
         printSpace(indent + increment, sb);
-        sb.append(implicit+"\n");
+        sb.append(implicit + "\n");
 
         if (name != null) {
-            sb.append(name.asString(indent+increment,increment));
+            sb.append(name.asString(indent + increment, increment));
         }
 
         if (parameters != null) {
-            sb.append(parameters.asString(indent+increment,increment));
+            sb.append(parameters.asString(indent + increment, increment));
         }
 
         if (returnTy != null) {
-            sb.append(returnTy.asString(indent+increment,increment));
+            sb.append(returnTy.asString(indent + increment, increment));
         }
 
         if (base != null) {
-            sb.append(base.asString(indent+increment,increment));
+            sb.append(base.asString(indent + increment, increment));
         }
 
         if (hypothesis != null) {
-            sb.append(hypothesis.asString(indent+increment,increment));
+            sb.append(hypothesis.asString(indent + increment, increment));
         }
 
         if (definition != null) {
-            sb.append(definition.asString(indent+increment,increment));
+            sb.append(definition.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
-    
+
     public void prettyPrint() {
-    	if(implicit) {
-    		System.out.print("Implicit ");
-    	}
-    	System.out.print("Definition " + name.getName());
-    	System.out.print("(");
-    	Iterator<MathVarDec> it = parameters.iterator();
-    	if(it.hasNext()) {
-    		it.next().prettyPrint();
-    	}
-    	System.out.print(") : ");
-    	returnTy.prettyPrint();
-    	if(implicit) System.out.print(" is ");
-    	else System.out.print(" = ");
-    	if(base != null) {
-    		base.prettyPrint();
-    		System.out.println();
-    		hypothesis.prettyPrint();
-    	}
-    	else {
-    		definition.prettyPrint();
-    	}
+        if (implicit) {
+            System.out.print("Implicit ");
+        }
+        System.out.print("Definition " + name.getName());
+        System.out.print("(");
+        Iterator<MathVarDec> it = parameters.iterator();
+        if (it.hasNext()) {
+            it.next().prettyPrint();
+        }
+        System.out.print(") : ");
+        returnTy.prettyPrint();
+        if (implicit)
+            System.out.print(" is ");
+        else
+            System.out.print(" = ");
+        if (base != null) {
+            base.prettyPrint();
+            System.out.println();
+            hypothesis.prettyPrint();
+        }
+        else {
+            definition.prettyPrint();
+        }
     }
-    
+
 }

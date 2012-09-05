@@ -25,173 +25,176 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
  * "extensions" should themselves be listed as global theorems.</p>
  */
 public class ConditionalAntecedentExtender implements AntecedentDeveloper {
-	
-	private final Antecedent myTheoremAntecedent;
-	private final int myTheoremAntecedentSize;
-	private final Consequent myTheoremConsequent;
-	private final Iterable<PExp> myTheorems;
-	
-	public ConditionalAntecedentExtender(Antecedent theoremAntecedent, 
-			Consequent theoremConsequent, Iterable<PExp> globalTheorems) {
-		
-		myTheorems = globalTheorems;
-		myTheoremAntecedent = theoremAntecedent;
-		myTheoremAntecedentSize = myTheoremAntecedent.size();
-		
-		myTheoremConsequent = theoremConsequent;
-	}
-	
-	@Override
-	public Iterator<Antecedent> transform(Antecedent original) {
-		return new ExtendedAntecedentsIterator(original);
-	}
-	
-	public String toString() {
-		return (myTheoremAntecedent + " ==> " + 
-				myTheoremConsequent).replace('\n', ' ');
-	}
-	
-	/**
-	 * <p>An <code>ExtendedAntecedentsIterator</code> iterates over variations
-	 * of the application of the conditional theorem embedded in this
-	 * <code>ConditionalAntecedentExtender</code> to a given VC antecedent,
-	 * given a set of global facts.</p>
-	 * 
-	 * <p>See the note on the random quirk in the parent class comments.</p>
-	 */
-	private class ExtendedAntecedentsIterator implements Iterator<Antecedent> {
-		
-		private final Antecedent myVCAntecedent;
-		
-		private int myLocalConditionIndex;
-		
-		private Iterator<Antecedent> myLocalConditionApplications;
-		private Antecedent myNextAntecedent;
-		
-		public ExtendedAntecedentsIterator(Antecedent vcAntecedent) {
-			
-			myVCAntecedent = vcAntecedent;
-			myLocalConditionIndex = 0;
-			
-			myLocalConditionApplications = 
-				DummyIterator.getInstance(myLocalConditionApplications); 
-			
-			setUpNext();
-		}
 
-		private void setUpNext() {
-			while (!myLocalConditionApplications.hasNext() &&
-					myLocalConditionIndex < myTheoremAntecedentSize) {
-				
-				myLocalConditionApplications = new QuirkyBindingIterator(
-						myTheoremAntecedent.get(myLocalConditionIndex),
-						myTheoremAntecedent.removed(myLocalConditionIndex),
-						myVCAntecedent);
-				myLocalConditionIndex++;
-			}
-			
-			if (myLocalConditionApplications.hasNext()) {
-				myNextAntecedent = myLocalConditionApplications.next();				
-			}
-			else {
-				myNextAntecedent = null;
-			}
-		}
-		
-		@Override
-		public boolean hasNext() {
-			return myNextAntecedent != null;
-		}
+    private final Antecedent myTheoremAntecedent;
+    private final int myTheoremAntecedentSize;
+    private final Consequent myTheoremConsequent;
+    private final Iterable<PExp> myTheorems;
 
-		@Override
-		public Antecedent next() {
-			Antecedent retval = myNextAntecedent;
-			
-			setUpNext();
-			
-			return retval.eliminateRedundantConjuncts();
-		}
+    public ConditionalAntecedentExtender(Antecedent theoremAntecedent,
+            Consequent theoremConsequent, Iterable<PExp> globalTheorems) {
 
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-	}
-	
-	/**
-	 * <p>A <code>QuirkyBindingIterator</code> enforces the random quirk listed
-	 * in <code>ConditionalAntecedentExtender</code>'s class comments.  It
-	 * accepts a pattern expression to match against conjuncts in the VC 
-	 * antecedent and then a pattern antecedent to match against conjuncts in
-	 * the VC antecedent or global theorems, then iterates over all possible
-	 * bindings.</p>
-	 */
-	private class QuirkyBindingIterator implements Iterator<Antecedent> {
+        myTheorems = globalTheorems;
+        myTheoremAntecedent = theoremAntecedent;
+        myTheoremAntecedentSize = myTheoremAntecedent.size();
 
-		private final Antecedent myVCAntecedent;
-		private final ChainingIterable<PExp> myFacts;
-		
-		private final IncrementalBindingIterator myFirstBinding;
-		private Iterator<Map<PExp, PExp>> myOtherBindings;
-		
-		private final Antecedent myOtherPatterns;
-		
-		private Antecedent myNextAntecedent;
-		
-		public QuirkyBindingIterator(PExp firstPattern, Antecedent otherPatterns,
-				Antecedent vcAntecedent) {
-			
-			myOtherPatterns = otherPatterns;
-			myVCAntecedent = vcAntecedent;
-			
-			myFacts = new ChainingIterable<PExp>();
-			myFacts.add(vcAntecedent);
-			myFacts.add(myTheorems);
-			
-			myFirstBinding = new IncrementalBindingIterator(firstPattern,
-					myVCAntecedent);
-			
-			myOtherBindings = DummyIterator.getInstance(myOtherBindings);
-			
-			setUpNext();
-		}
-		
-		private void setUpNext() {
-			
-			Map<PExp, PExp> firstBindings;
-			while (!myOtherBindings.hasNext() && myFirstBinding.hasNext()) {
-				firstBindings = myFirstBinding.next();
-				myOtherBindings = new TotalBindingIterator(myOtherPatterns, 
-						myFacts, firstBindings);
-			}
-			
-			if (myOtherBindings.hasNext()) {
-				Map<PExp, PExp> bindings = myOtherBindings.next();
-				myNextAntecedent = 
-					myTheoremConsequent.substitute(bindings).assumed();
-			}
-			else {
-				myNextAntecedent = null;
-			}
-		}
-		
-		@Override
-		public boolean hasNext() {
-			return myNextAntecedent != null;
-		}
+        myTheoremConsequent = theoremConsequent;
+    }
 
-		@Override
-		public Antecedent next() {
-			Antecedent retval = myNextAntecedent;
-			
-			setUpNext();
-			
-			return retval;
-		}
+    @Override
+    public Iterator<Antecedent> transform(Antecedent original) {
+        return new ExtendedAntecedentsIterator(original);
+    }
 
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-	}
+    public String toString() {
+        return (myTheoremAntecedent + " ==> " + myTheoremConsequent).replace(
+                '\n', ' ');
+    }
+
+    /**
+     * <p>An <code>ExtendedAntecedentsIterator</code> iterates over variations
+     * of the application of the conditional theorem embedded in this
+     * <code>ConditionalAntecedentExtender</code> to a given VC antecedent,
+     * given a set of global facts.</p>
+     * 
+     * <p>See the note on the random quirk in the parent class comments.</p>
+     */
+    private class ExtendedAntecedentsIterator implements Iterator<Antecedent> {
+
+        private final Antecedent myVCAntecedent;
+
+        private int myLocalConditionIndex;
+
+        private Iterator<Antecedent> myLocalConditionApplications;
+        private Antecedent myNextAntecedent;
+
+        public ExtendedAntecedentsIterator(Antecedent vcAntecedent) {
+
+            myVCAntecedent = vcAntecedent;
+            myLocalConditionIndex = 0;
+
+            myLocalConditionApplications =
+                    DummyIterator.getInstance(myLocalConditionApplications);
+
+            setUpNext();
+        }
+
+        private void setUpNext() {
+            while (!myLocalConditionApplications.hasNext()
+                    && myLocalConditionIndex < myTheoremAntecedentSize) {
+
+                myLocalConditionApplications =
+                        new QuirkyBindingIterator(myTheoremAntecedent
+                                .get(myLocalConditionIndex),
+                                myTheoremAntecedent
+                                        .removed(myLocalConditionIndex),
+                                myVCAntecedent);
+                myLocalConditionIndex++;
+            }
+
+            if (myLocalConditionApplications.hasNext()) {
+                myNextAntecedent = myLocalConditionApplications.next();
+            }
+            else {
+                myNextAntecedent = null;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return myNextAntecedent != null;
+        }
+
+        @Override
+        public Antecedent next() {
+            Antecedent retval = myNextAntecedent;
+
+            setUpNext();
+
+            return retval.eliminateRedundantConjuncts();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * <p>A <code>QuirkyBindingIterator</code> enforces the random quirk listed
+     * in <code>ConditionalAntecedentExtender</code>'s class comments.  It
+     * accepts a pattern expression to match against conjuncts in the VC 
+     * antecedent and then a pattern antecedent to match against conjuncts in
+     * the VC antecedent or global theorems, then iterates over all possible
+     * bindings.</p>
+     */
+    private class QuirkyBindingIterator implements Iterator<Antecedent> {
+
+        private final Antecedent myVCAntecedent;
+        private final ChainingIterable<PExp> myFacts;
+
+        private final IncrementalBindingIterator myFirstBinding;
+        private Iterator<Map<PExp, PExp>> myOtherBindings;
+
+        private final Antecedent myOtherPatterns;
+
+        private Antecedent myNextAntecedent;
+
+        public QuirkyBindingIterator(PExp firstPattern,
+                Antecedent otherPatterns, Antecedent vcAntecedent) {
+
+            myOtherPatterns = otherPatterns;
+            myVCAntecedent = vcAntecedent;
+
+            myFacts = new ChainingIterable<PExp>();
+            myFacts.add(vcAntecedent);
+            myFacts.add(myTheorems);
+
+            myFirstBinding =
+                    new IncrementalBindingIterator(firstPattern, myVCAntecedent);
+
+            myOtherBindings = DummyIterator.getInstance(myOtherBindings);
+
+            setUpNext();
+        }
+
+        private void setUpNext() {
+
+            Map<PExp, PExp> firstBindings;
+            while (!myOtherBindings.hasNext() && myFirstBinding.hasNext()) {
+                firstBindings = myFirstBinding.next();
+                myOtherBindings =
+                        new TotalBindingIterator(myOtherPatterns, myFacts,
+                                firstBindings);
+            }
+
+            if (myOtherBindings.hasNext()) {
+                Map<PExp, PExp> bindings = myOtherBindings.next();
+                myNextAntecedent =
+                        myTheoremConsequent.substitute(bindings).assumed();
+            }
+            else {
+                myNextAntecedent = null;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return myNextAntecedent != null;
+        }
+
+        @Override
+        public Antecedent next() {
+            Antecedent retval = myNextAntecedent;
+
+            setUpNext();
+
+            return retval;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
 }

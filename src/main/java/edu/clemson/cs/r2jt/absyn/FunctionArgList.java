@@ -11,14 +11,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
+ * * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Clemson University nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,22 +34,22 @@
  * 
  * This sofware has been developed by past and present members of the
  * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
+ * Clemson University. Contributors to the initial version are:
  * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
+ * Steven Atkinson
+ * Greg Kulczycki
+ * Kunal Chopra
+ * John Hunt
+ * Heather Keown
+ * Ben Markle
+ * Kim Roche
+ * Murali Sitaraman
  */
 /*
  * FunctionArgList.java
- *
+ * 
  * The Resolve Software Composition Workbench Project
- *
+ * 
  * Copyright (c) 1999-2005
  * Reusable Software Research Group
  * Department of Computer Science
@@ -79,9 +79,7 @@ public class FunctionArgList extends ResolveConceptualElement {
 
     public FunctionArgList() {};
 
-    public FunctionArgList(
-            List<Exp> arguments)
-    {
+    public FunctionArgList(List<Exp> arguments) {
         this.arguments = arguments;
     }
 
@@ -94,14 +92,18 @@ public class FunctionArgList extends ResolveConceptualElement {
     // -----------------------------------------------------------
 
     /** Returns the value of the arguments variable. */
-    public List<Exp> getArguments() { return arguments; }
+    public List<Exp> getArguments() {
+        return arguments;
+    }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
     /** Sets the arguments variable to the specified value. */
-    public void setArguments(List<Exp> arguments) { this.arguments = arguments; }
+    public void setArguments(List<Exp> arguments) {
+        this.arguments = arguments;
+    }
 
     // ===========================================================
     // Public Methods
@@ -121,43 +123,43 @@ public class FunctionArgList extends ResolveConceptualElement {
         sb.append("FunctionArgList\n");
 
         if (arguments != null) {
-            sb.append(arguments.asString(indent+increment,increment));
+            sb.append(arguments.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
-    
-    public Object clone(){
-   	 	FunctionArgList clone = new FunctionArgList();	
-   	 	Iterator<Exp> i = arguments.iterator();
-   	 	List<Exp> arg = new List<Exp>();
-   	 	while(i.hasNext()){
-   	 		Exp tmp = i.next();
-   	 		if(tmp != null)
-   	 			arg.add((Exp)tmp.clone());
-   	 	}
-   	 	clone.setArguments(arg);
-   	 	return clone;
+
+    public Object clone() {
+        FunctionArgList clone = new FunctionArgList();
+        Iterator<Exp> i = arguments.iterator();
+        List<Exp> arg = new List<Exp>();
+        while (i.hasNext()) {
+            Exp tmp = i.next();
+            if (tmp != null)
+                arg.add((Exp) tmp.clone());
+        }
+        clone.setArguments(arg);
+        return clone;
     }
-    
+
     public void prettyPrint() {
-    	Iterator<Exp> it = arguments.iterator();
-    	if(it.hasNext()) {
-    		it.next().prettyPrint();
-    	}
-    	while(it.hasNext()) {
-    		System.out.print(", ");
-    		it.next().prettyPrint();
-    	}
+        Iterator<Exp> it = arguments.iterator();
+        if (it.hasNext()) {
+            it.next().prettyPrint();
+        }
+        while (it.hasNext()) {
+            System.out.print(", ");
+            it.next().prettyPrint();
+        }
     }
-    
+
     public FunctionArgList copy() {
-    	Iterator<Exp> it = arguments.iterator();
-    	List<Exp> newArguments = new List<Exp>();
-    	while(it.hasNext()) {
-    		newArguments.add(it.next().copy());
-    	}
-    	return new FunctionArgList(newArguments);
+        Iterator<Exp> it = arguments.iterator();
+        List<Exp> newArguments = new List<Exp>();
+        while (it.hasNext()) {
+            newArguments.add(it.next().copy());
+        }
+        return new FunctionArgList(newArguments);
     }
-    
+
 }

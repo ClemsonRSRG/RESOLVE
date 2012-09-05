@@ -6,36 +6,36 @@ import edu.clemson.cs.r2jt.scope.ScopeID;
 
 public class TypeType extends Type {
 
-	public static final TypeType INSTANCE = new TypeType();
-	
-	@Override
-	public Type instantiate(ScopeID sid, Binding binding) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public static final TypeType INSTANCE = new TypeType();
 
-	@Override
-	public TypeName getProgramName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Type instantiate(ScopeID sid, Binding binding) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public String getRelativeName(Location loc) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public TypeName getProgramName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public Type toMath() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public String getRelativeName(Location loc) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public String asString() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Type toMath() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String asString() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

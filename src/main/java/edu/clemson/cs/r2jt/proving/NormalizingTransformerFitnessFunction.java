@@ -9,7 +9,8 @@ package edu.clemson.cs.r2jt.proving;
  * negative weight.)</p>
  */
 public class NormalizingTransformerFitnessFunction
-        extends TransformerFitnessFunction {
+        extends
+            TransformerFitnessFunction {
 
     @Override
     public String toString() {
@@ -30,10 +31,10 @@ public class NormalizingTransformerFitnessFunction
             }
             else {
 
-                double findFunctionCount = 
+                double findFunctionCount =
                         pattern.getFunctionApplications().size();
-                double replaceFunctionCount = template.getFunctionApplications()
-                        .size();
+                double replaceFunctionCount =
+                        template.getFunctionApplications().size();
                 double difference = findFunctionCount - replaceFunctionCount;
 
                 double simplificationFactor = Math.pow(0.5, difference);

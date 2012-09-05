@@ -30,10 +30,11 @@ public class AlternativeProver implements VCProver {
 
     @Override
     public void prove(VerificationCondition originalVC,
-            ProverListener progressListener,
-            ActionCanceller actionCanceller, long timeoutAt)
-            throws VCInconsistentException, VCProvedException,
-            UnableToProveException {
+            ProverListener progressListener, ActionCanceller actionCanceller,
+            long timeoutAt)
+            throws VCInconsistentException,
+                VCProvedException,
+                UnableToProveException {
 
         VC vc = convertToImmutableVC(originalVC);
 
@@ -50,7 +51,8 @@ public class AlternativeProver implements VCProver {
 
         try {
             continueProofFrom(vc, 0, metrics, new ProofData());
-        } catch (VCProvedException e) {
+        }
+        catch (VCProvedException e) {
             e.setOriginal(vc);
             throw e;
         }
@@ -60,8 +62,9 @@ public class AlternativeProver implements VCProver {
 
     private void continueProofFrom(final VC vc, final int curLength,
             final Metrics metrics, final ProofData proofData)
-            throws UnableToProveException, VCProvedException,
-            VCInconsistentException {
+            throws UnableToProveException,
+                VCProvedException,
+                VCInconsistentException {
 
         if (curLength > 100) {
             //Very deep recursion.  Probably an infinite loop.
@@ -80,18 +83,18 @@ public class AlternativeProver implements VCProver {
             throw new UnableToProveException(metrics);
         }
 
-
         attemptStep(vc, curLength, metrics, proofData);
     }
 
     public void attemptStep(VC vc, int curLength, Metrics metrics,
             ProofData proofData)
-            throws UnableToProveException, VCProvedException,
-            VCInconsistentException {
+            throws UnableToProveException,
+                VCProvedException,
+                VCInconsistentException {
 
         Iterator<ProofPathSuggestion> suggestions =
                 myChooser.suggestTransformations(vc, curLength, metrics,
-                proofData);
+                        proofData);
 
         Iterator<VC> substitutions;
         ProofPathSuggestion suggestion;
@@ -103,8 +106,8 @@ public class AlternativeProver implements VCProver {
             while (substitutions.hasNext()) {
                 VC newVC = substitutions.next();
 
-                if (myInstanceEnvironment.flags.isFlagSet(
-                        Prover.FLAG_VERBOSE) && suggestion.debugNote != null) {
+                if (myInstanceEnvironment.flags.isFlagSet(Prover.FLAG_VERBOSE)
+                        && suggestion.debugNote != null) {
 
                     VC vcToPrint;
 
@@ -115,14 +118,15 @@ public class AlternativeProver implements VCProver {
                         vcToPrint = newVC;
                     }
 
-                    System.out.println(
-                            suggestion.debugNote + "\n\n" + vcToPrint);
+                    System.out.println(suggestion.debugNote + "\n\n"
+                            + vcToPrint);
                 }
 
                 try {
                     continueProofFrom(newVC, curLength + 1, metrics,
                             suggestion.data.addStep(vc));
-                } catch (VCProvedException e) {
+                }
+                catch (VCProvedException e) {
                     e.addStep(new AlternativeProofStep(suggestion, newVC));
                     throw e;
                 }
@@ -131,12 +135,12 @@ public class AlternativeProver implements VCProver {
     }
 
     private VC convertToImmutableVC(VerificationCondition vc) {
-    	return convertToImmutableVC(vc, myTyper);
+        return convertToImmutableVC(vc, myTyper);
     }
-    
-    public static VC convertToImmutableVC(VerificationCondition vc, 
-    		MathExpTypeResolver typer) {
-    	
+
+    public static VC convertToImmutableVC(VerificationCondition vc,
+            MathExpTypeResolver typer) {
+
         List<PExp> newAntecedents = new LinkedList<PExp>();
 
         Conjuncts oldAntecedents = vc.getAntecedents();
@@ -151,8 +155,9 @@ public class AlternativeProver implements VCProver {
             newConsequents.add(PExp.buildPExp(c, typer));
         }
 
-        VC retval = new VC(vc.getName(), new Antecedent(newAntecedents),
-                new Consequent(newConsequents));
+        VC retval =
+                new VC(vc.getName(), new Antecedent(newAntecedents),
+                        new Consequent(newConsequents));
 
         return retval;
     }
