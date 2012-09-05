@@ -10,12 +10,6 @@
     <name>RESOLVE</name>
     <url>http://maven.apache.org</url>
     
-    <scm>
-        <connection>scm:svn:http://somerepository.com/svn_repo/trunk</connection>
-        <developerConnection>scm:git:[fetch=]git://github.com/ClemsonRSRG/RESOLVE.git[push=]${privateFork}</developerConnection>
-        <url>http://somerepository.com/view.cvs</url>
-    </scm>
-    
     <build>
         <plugins>
             <plugin>
@@ -88,6 +82,12 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <scm>
+        <connection>scm:svn:http://somerepository.com/svn_repo/trunk</connection>
+        <developerConnection>scm:git:[fetch=]git://github.com/ClemsonRSRG/RESOLVE.git[push=]https://github.com/ClemsonRSRG/RESOLVE.git</developerConnection>
+        <url>http://somerepository.com/view.cvs</url>
+    </scm>
 
     <dependencies>
         <dependency>
