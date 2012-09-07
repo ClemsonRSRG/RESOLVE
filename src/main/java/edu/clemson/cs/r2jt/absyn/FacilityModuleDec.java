@@ -75,6 +75,9 @@ public class FacilityModuleDec extends ModuleDec {
     /** The usesItems member. */
     private List<UsesItem> usesItems;
 
+    /** The requirement member. */
+    private Exp requirement;
+
     /** The facilityInit member. */
     private InitItem facilityInit;
 
@@ -91,9 +94,11 @@ public class FacilityModuleDec extends ModuleDec {
     public FacilityModuleDec() {};
 
     public FacilityModuleDec(PosSymbol name, List<UsesItem> usesItems,
-            InitItem facilityInit, FinalItem facilityFinal, List<Dec> decs) {
+            Exp requirement, InitItem facilityInit, FinalItem facilityFinal,
+            List<Dec> decs) {
         this.name = name;
         this.usesItems = usesItems;
+        this.requirement = requirement;
         this.facilityInit = facilityInit;
         this.facilityFinal = facilityFinal;
         this.decs = decs;
@@ -115,6 +120,11 @@ public class FacilityModuleDec extends ModuleDec {
     /** Returns the value of the usesItems variable. */
     public List<UsesItem> getUsesItems() {
         return usesItems;
+    }
+
+    /** Returns the value of the requirement variable. */
+    public Exp getRequirement() {
+        return requirement;
     }
 
     /** Returns the value of the facilityInit variable. */
@@ -144,6 +154,11 @@ public class FacilityModuleDec extends ModuleDec {
     /** Sets the usesItems variable to the specified value. */
     public void setUsesItems(List<UsesItem> usesItems) {
         this.usesItems = usesItems;
+    }
+
+    /** Sets the requirement variable to the specified value. */
+    public void setRequirement(Exp requirement) {
+        this.requirement = requirement;
     }
 
     /** Sets the facilityInit variable to the specified value. */
