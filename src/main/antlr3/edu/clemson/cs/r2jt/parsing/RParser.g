@@ -570,6 +570,7 @@ facility_module
     :   FACILITY^ id1=ident //{ facilityModule = true; }
         (   short_facility_section (uses_list)?
         |   SEMICOLON! (uses_list)?
+            (requires_clause)?
             (facility_item_sequence)?
             END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
             SEMICOLON!
