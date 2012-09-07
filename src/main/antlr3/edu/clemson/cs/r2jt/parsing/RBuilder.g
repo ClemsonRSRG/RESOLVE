@@ -738,7 +738,7 @@ facility_module returns [ModuleDec dec = null]
 }
     :   ^(  FACILITY ps=ident
             (   dec2=short_facility_section (uses=uses_list)?
-            |   (uses=uses_list)? (dec3=facility_item_sequence)?
+            |   (uses=uses_list)? (req=requires_clause)? (dec3=facility_item_sequence)?
             )
         )
         {   if ($dec2.dec != null) {
@@ -756,7 +756,7 @@ facility_module returns [ModuleDec dec = null]
                 fin = $dec3.dec.getFacilityFinal();
                 decs = $dec3.dec.getDecs();
                 $dec = new FacilityModuleDec($ps.ps,
-                    $uses.uses, init, fin, decs);
+                    $uses.uses, $req.exp, init, fin, decs);
             } else {
                 assert false;
             }
@@ -801,7 +801,7 @@ facility_item_sequence returns [FacilityModuleDec dec = null]
         |   dec4=definition_declaration { decs.add($dec4.dec); }
         |   dec5=facility_declaration { decs.add($dec5.dec); }
         )+
-        { $dec = new FacilityModuleDec(ps, uses, $init.item, $fin.item, decs); }
+        { $dec = new FacilityModuleDec(ps, uses, null, $init.item, $fin.item, decs); }
     ;
 
 // ===============================================================

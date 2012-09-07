@@ -478,6 +478,7 @@ public class PrintAssertions extends ResolveConceptualVisitor {
                     }
                 }
                 else if (exp.getLeft() instanceof InfixExp) {
+                    sb.append("(");
                     getInfixAltString(((InfixExp) exp.getLeft()), 0, mycount);
                 }
                 else {
