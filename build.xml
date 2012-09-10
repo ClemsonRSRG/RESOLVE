@@ -1,0 +1,27 @@
+<project name="RESOLVE" basedir=".">
+    <description>
+        RESOLVE git tasks.
+    </description>
+
+  <target name="git-rebase">
+	<exec executable = "git" dir = ".">
+            <arg value="rebase" />
+            <arg value="master" />
+        </exec>
+  </target>
+
+  <target name="git-rebase-continue">
+	<exec executable = "git" dir = ".">
+            <arg value="rebase" />
+            <arg value="--continue" />
+        </exec>
+  </target>
+
+  <target name="git-rebase-abort">
+	<exec executable = "git" dir = ".">
+            <arg value="rebase" />
+            <arg value="--abort" />
+        </exec>
+  </target>
+
+</project>
