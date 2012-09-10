@@ -1,27 +1,62 @@
 <project name="RESOLVE" basedir=".">
-    <description>
-        RESOLVE git tasks.
-    </description>
+	<description>
+		RESOLVE git tasks.
+	</description>
 
-  <target name="git-rebase">
-	<exec executable = "git" dir = ".">
-            <arg value="rebase" />
-            <arg value="master" />
-        </exec>
-  </target>
+	<property name="possibleGitLocation1" 
+			value="C:\Program Files (x86)\Git\bin" />
+	<property name="possibleGitLocation2" 
+			value="C:\Program Files\Git\bin" />
+	<property name="possibleGitLocation3" 
+			value="/usr/bin" />
 
-  <target name="git-rebase-continue">
-	<exec executable = "git" dir = ".">
-            <arg value="rebase" />
-            <arg value="--continue" />
-        </exec>
-  </target>
+	<task name="find-git">
+		<!-- check for Windows locations -->
+		<available filepath="${possibleGitLocation1}" file="git.exe"
+				property="gitDir"
+				value="${possibleGitLocation1}/git.exe" />
+		<available filepath="${possibleGitLocation2}" file="git.exe"
+				property="gitDir"
+				value="${possibleGitLocation2}/git.exe" />
 
-  <target name="git-rebase-abort">
-	<exec executable = "git" dir = ".">
-            <arg value="rebase" />
-            <arg value="--abort" />
-        </exec>
-  </target>
+		<!-- check for Linux locations -->
+		<available filepath="${possibleGitLocation3}" file="git"
+				property="gitDir"
+				value="${possibleGitLocation3}/git" />
 
+		<!-- if all else fails, hope it's on the PATH -->
+		<property name="gitDir" value="git" />
+
+		<property name="git" location="${gitDir}" />
+	</task>
+
+	<target name="git-rebase">
+		<git command="rebase">
+			<arg value="master"/>
+		</git>
+	</target>
+
+	<target name="git-rebase-continue">
+		<git command="rebase">
+			<arg value="--continue"/>
+		</git>
+	</target>
+
+	<target name="git-rebase-abort">
+		<git command="rebase">
+			<arg value="--abort"/>
+		</git>
+	</target>
+
+	<!-- Helper stuff -->
+
+	<macrodef name = "git">
+		<attribute name = "command" />
+		<attribute name = "dir" default = "" />
+		<element name = "args" optional = "true" />
+		<exec executable = "${git}" dir = "@{dir}">
+			<arg value = "@{command}" />
+			<args/>
+		</exec>
+	</macrodef>
 </project>
