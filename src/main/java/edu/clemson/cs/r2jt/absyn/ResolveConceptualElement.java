@@ -84,7 +84,7 @@ public abstract class ResolveConceptualElement implements AsStringCapability {
     public List<ResolveConceptualElement> getChildren() {
         List<ResolveConceptualElement> children =
                 new List<ResolveConceptualElement>();
-        // get a list of all the declared and inherited members of that class
+        // get a list of all the declared and inherited members of this object
         ArrayList<Field> fields = new ArrayList<Field>();
         Class<?> curClass = this.getClass();
         while (curClass != ResolveConceptualElement.class) {
@@ -119,12 +119,12 @@ public abstract class ResolveConceptualElement implements AsStringCapability {
                             && ResolveConceptualElement.class
                                     .isAssignableFrom(fieldList.get(0)
                                             .getClass())) {
-                        Iterator<?> fieldListIter = fieldList.iterator();
-                        while (fieldListIter.hasNext()) {
-                            children.add(ResolveConceptualElement.class
-                                    .cast(fieldListIter.next()));
-                        }
+                        children.add(new VirtualListNode(
+                                this,
+                                curField.getName(),
+                                (List<ResolveConceptualElement>) fieldList));
                     }
+
                 }
             }
             catch (Exception ex) {

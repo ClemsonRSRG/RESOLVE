@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
+import edu.clemson.cs.r2jt.absyn.VirtualListNode;
+import edu.clemson.cs.r2jt.collections.List;
+import java.lang.reflect.Field;
+import java.util.StringTokenizer;
 
 public class VisitorCodeGeneration {
 
@@ -23,7 +27,7 @@ public class VisitorCodeGeneration {
      * @param String array
      */
     public static void main(String[] args) {
-        String walkerName = "TreeWalker";
+        String walkerName = "TreeWalkerVisitor";
         String outputPackage = "treewalk";
         if (args.length > 0) {
             walkerName = args[0];
@@ -93,6 +97,19 @@ public class VisitorCodeGeneration {
                                     + " node, ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) { }");
                     System.out.println("\tpublic void post" + className + "("
                             + className + " node) { }");
+
+                    Field[] curFields = absynClasses[i].getDeclaredFields();
+                    for (int fieldIndex = 0; fieldIndex < curFields.length; ++i) {
+                        if (List.class.isAssignableFrom(curFields[fieldIndex]
+                                .getClass())) {
+                            System.out.println("\tpublic void pre" + className
+                                    + curFields[fieldIndex].getName() + " ("
+                                    + className + " node) { }");
+                            System.out.println("\tpublic void post" + className
+                                    + curFields[fieldIndex].getName() + " ("
+                                    + className + " node) { }");
+                        }
+                    }
                 }
             }
         }
@@ -108,18 +125,28 @@ public class VisitorCodeGeneration {
     public static StringBuilder generateVisitorClass(String walkerName) {
         final StringBuilder buffer = new StringBuilder();
         buffer.append("import " + myPackagePath + "absyn.*;\n\n");
-        buffer.append("public class " + walkerName
-                + " extends TreeWalkerStackVisitor {\n");
+        buffer.append("public abstract class ");
+        buffer.append(walkerName);
+        buffer.append(" {\n");
         buffer
-                .append("\tpublic void preAnyStack(ResolveConceptualElement data) { }\n");
+                .append("\tpublic void preAny(ResolveConceptualElement data) { }\n");
         buffer
-                .append("\tpublic void postAnyStack(ResolveConceptualElement data) { }\n");
+                .append("\tpublic void postAny(ResolveConceptualElement data) { }\n\n");
         try {
             Class<?>[] absynClasses = getClasses(myPackagePath + "absyn");
             for (int i = 0; i < absynClasses.length; ++i) {
                 if (ResolveConceptualElement.class
                         .isAssignableFrom(absynClasses[i])) {
+                    if (VirtualListNode.class.isAssignableFrom(absynClasses[i])) {
+                        continue;
+                    }
+
                     String className = absynClasses[i].getSimpleName();
+
+                    buffer.append("// ");
+                    buffer.append(className);
+                    buffer.append("\n");
+
                     buffer.append("\tpublic void pre" + className + "("
                             + className + " data) { }\n");
                     buffer
@@ -130,6 +157,33 @@ public class VisitorCodeGeneration {
                                     + " node, ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) { }\n");
                     buffer.append("\tpublic void post" + className + "("
                             + className + " data) { }\n");
+
+                    Field[] curFields = absynClasses[i].getDeclaredFields();
+                    for (int fieldIndex = 0; fieldIndex < curFields.length; ++fieldIndex) {
+                        //buffer.append(curFields[fieldIndex].getName());
+                        //buffer.append(" : ");
+                        //buffer.append(curFields[fieldIndex].getType().getSimpleName());
+                        //buffer.append("\n");
+                        if (List.class.isAssignableFrom(curFields[fieldIndex]
+                                .getType())) {
+                            String listName =
+                                    toUppercaseNotation(curFields[fieldIndex]
+                                            .getName());
+                            buffer.append("\tpublic void pre");
+                            buffer.append(className);
+                            buffer.append(listName);
+                            buffer.append("(");
+                            buffer.append(className);
+                            buffer.append(" node) { }\n");
+                            buffer.append("\tpublic void post");
+                            buffer.append(className);
+                            buffer.append(listName);
+                            buffer.append("(");
+                            buffer.append(className);
+                            buffer.append(" node) { }\n");
+                        }
+                    }
+                    buffer.append("\n");
                 }
             }
         }
@@ -204,5 +258,16 @@ public class VisitorCodeGeneration {
             }
         }
         return classes;
+    }
+
+    private static String toUppercaseNotation(String s) {
+        StringBuilder buffer = new StringBuilder();
+        StringTokenizer tokens = new StringTokenizer(s, "_");
+        while (tokens.hasMoreTokens()) {
+            String token = tokens.nextToken();
+            buffer.append(Character.toUpperCase(token.charAt(0)));
+            buffer.append(token.substring(1));
+        }
+        return buffer.toString();
     }
 }
