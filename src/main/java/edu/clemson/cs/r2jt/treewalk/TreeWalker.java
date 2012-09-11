@@ -121,11 +121,13 @@ public class TreeWalker {
 
     private void invokeVisitorMethods(String prefix,
             ResolveConceptualElement... e) {
-        boolean pre = prefix.equals("pre"), post = prefix.equals("post"),
-                mid = prefix.equals("mid"), list =
-                (e[0] instanceof VirtualListNode);
-        
-        if (mid && list) { return; };
+        boolean pre = prefix.equals("pre"), post = prefix.equals("post"), mid =
+                prefix.equals("mid"), list = (e[0] instanceof VirtualListNode);
+
+        if (mid && list) {
+            return;
+        }
+        ;
 
         // call a generic visitor method
         if (pre) {
@@ -139,7 +141,7 @@ public class TreeWalker {
         ArrayList<Class<?>> classHierarchy = new ArrayList<Class<?>>();
 
         if (list) {
-            classHierarchy.add(((VirtualListNode)e[0]).getParent().getClass());
+            classHierarchy.add(((VirtualListNode) e[0]).getParent().getClass());
         }
         else if (pre || post) {
             while (elementClass != ResolveConceptualElement.class) {
@@ -172,8 +174,8 @@ public class TreeWalker {
 
             /* System.out.println(
              * "Calling: " + methodName + "(" + className + ")");
-            */
-            
+             */
+
             try {
                 Method visitorMethod;
                 if (pre || post || list) {

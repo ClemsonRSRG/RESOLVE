@@ -11,30 +11,31 @@ public class VisitorPrintStructure extends TreeWalkerVisitor {
     public void preAny(ResolveConceptualElement data) {
         String className;
         if (data instanceof VirtualListNode) {
-            className = ((VirtualListNode)data).getNodeName() + 
-                    " [List]";
-        } else {
+            className = ((VirtualListNode) data).getNodeName() + " [List]";
+        }
+        else {
             className = data.getClass().getSimpleName();
         }
         for (int i = 0; i < indent; ++i) {
             System.out.print("  ");
         }
         System.out.print(className);
-        
+
         if (showIdentifiers) {
             if (data instanceof VarExp) {
-                System.out.print(" (" + ((VarExp) data).getName().toString() + ")");
+                System.out.print(" (" + ((VarExp) data).getName().toString()
+                        + ")");
             }
             else if (data instanceof InfixExp) {
-                System.out.print(" (" + ((InfixExp) data).getOpName().toString()
-                        + ")");
+                System.out.print(" ("
+                        + ((InfixExp) data).getOpName().toString() + ")");
             }
             else if (data instanceof OutfixExp) {
-                System.out.print(" (" + ((OutfixExp) data).getOperatorAsString()
-                        + ")");
+                System.out.print(" ("
+                        + ((OutfixExp) data).getOperatorAsString() + ")");
             }
         }
-        
+
         System.out.println();
         ++indent;
     }

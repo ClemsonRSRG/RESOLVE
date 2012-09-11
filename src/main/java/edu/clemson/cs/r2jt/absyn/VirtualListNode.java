@@ -14,15 +14,15 @@ public class VirtualListNode extends ResolveConceptualElement {
     String myName;
     List<ResolveConceptualElement> myList;
 
-    public VirtualListNode(ResolveConceptualElement parent,
-            String listName,
+    public VirtualListNode(ResolveConceptualElement parent, String listName,
             List<ResolveConceptualElement> list) {
         this.myParent = parent;
-        this.myName = parent.getClass().getSimpleName() + 
-                toUppercaseNotation(listName);
+        this.myName =
+                parent.getClass().getSimpleName()
+                        + toUppercaseNotation(listName);
         this.myList = list;
     }
-    
+
     public ResolveConceptualElement getParent() {
         return myParent;
     }

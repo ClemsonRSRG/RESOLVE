@@ -119,9 +119,8 @@ public abstract class ResolveConceptualElement implements AsStringCapability {
                             && ResolveConceptualElement.class
                                     .isAssignableFrom(fieldList.get(0)
                                             .getClass())) {
-                        children.add(new VirtualListNode(
-                                this,
-                                curField.getName(),
+                        children.add(new VirtualListNode(this, curField
+                                .getName(),
                                 (List<ResolveConceptualElement>) fieldList));
                     }
 
