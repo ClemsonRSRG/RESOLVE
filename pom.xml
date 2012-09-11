@@ -69,6 +69,7 @@
                     <configFile>
                         ${project.basedir}/rsrg-format.xml
                     </configFile>
+                    <lineEnding>LF</lineEnding>
                 </configuration>
                 <executions>
                     <execution>
