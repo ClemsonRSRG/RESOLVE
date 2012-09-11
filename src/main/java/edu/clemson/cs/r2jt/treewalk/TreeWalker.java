@@ -121,7 +121,11 @@ public class TreeWalker {
 
     private void invokeVisitorMethods(String prefix,
             ResolveConceptualElement... e) {
-        boolean pre = prefix.equals("pre"), post = prefix.equals("post");
+        boolean pre = prefix.equals("pre"), post = prefix.equals("post"),
+                mid = prefix.equals("mid"), list =
+                (e[0] instanceof VirtualListNode);
+        
+        if (mid && list) { return; };
 
         // call a generic visitor method
         if (pre) {
@@ -134,7 +138,10 @@ public class TreeWalker {
         Class<?> elementClass = e[0].getClass();
         ArrayList<Class<?>> classHierarchy = new ArrayList<Class<?>>();
 
-        if (pre || post) {
+        if (list) {
+            classHierarchy.add(((VirtualListNode)e[0]).getParent().getClass());
+        }
+        else if (pre || post) {
             while (elementClass != ResolveConceptualElement.class) {
                 if (post) {
                     classHierarchy.add(elementClass);
@@ -153,12 +160,23 @@ public class TreeWalker {
         while (iter.hasNext()) {
             Class<?> currentClass = iter.next();
             String className = currentClass.getSimpleName();
-            String methodName = prefix + className;
 
-            //System.out.println("Calling: " + methodName + "(" + className + ")");
+            String methodName;
+            if (!list) {
+                methodName = prefix + className;
+            }
+            else {
+                methodName = prefix + ((VirtualListNode) e[0]).getNodeName();
+                e[0] = ((VirtualListNode) e[0]).getParent();
+            }
+
+            /* System.out.println(
+             * "Calling: " + methodName + "(" + className + ")");
+            */
+            
             try {
                 Method visitorMethod;
-                if (pre || post) {
+                if (pre || post || list) {
                     visitorMethod =
                             this.myVisitor.getClass().getMethod(methodName,
                                     currentClass);

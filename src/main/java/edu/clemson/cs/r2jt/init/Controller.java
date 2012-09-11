@@ -1272,8 +1272,8 @@ public class Controller {
 
         // change twv to whatever visitor logic you want to use
         //VisitorPrintStructure twv = new VisitorPrintStructure();
-        //TreeWalker tw = new TreeWalker(twv);
-        //tw.visit(dec);
+        //TreeWalker twps = new TreeWalker(twv);
+        //twps.visit(dec);
 
         //SanityCheck Walker -JCK
         VisitorSanityCheck sctwv =
