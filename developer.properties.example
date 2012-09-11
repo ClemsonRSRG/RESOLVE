@@ -1,9 +1,0 @@
-# This file contains developer-specific information
-# Rename it to developer.properties to have it take effect
-
-# The location of your private fork of the RESOLVE codebase.
-# This is where your pushes (in git terminology)/checkins (in maven terminology)
-# will go.
-privateFork=https://github.com/ClemsonRSRG/RESOLVE.git
-
-
