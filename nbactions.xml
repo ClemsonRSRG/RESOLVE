@@ -11,21 +11,21 @@
             <actionName>CUSTOM-rebase</actionName>
             <displayName>rebase</displayName>
             <goals>
-                <goal>edu.clemson.cs.rsrg:git-plugin:rebase</goal>
+                <goal>edu.clemson.cs.resolve:git-plugin:rebase</goal>
             </goals>
         </action>
         <action>
             <actionName>CUSTOM-rebase --continue</actionName>
             <displayName>rebase --continue</displayName>
             <goals>
-                <goal>edu.clemson.cs.rsrg:git-plugin:rebase-continue</goal>
+                <goal>edu.clemson.cs.resolve:git-plugin:rebase-continue</goal>
             </goals>
         </action>
         <action>
             <actionName>CUSTOM-rebase --abort</actionName>
             <displayName>rebase --abort</displayName>
             <goals>
-                <goal>edu.clemson.cs.rsrg:git-plugin:rebase-abort</goal>
+                <goal>edu.clemson.cs.resolve:git-plugin:rebase-abort</goal>
             </goals>
         </action>
         <action>
