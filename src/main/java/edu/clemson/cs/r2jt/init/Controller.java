@@ -418,6 +418,15 @@ public class Controller {
             myInstanceEnvironment.completeRecord(id, table);
             //env.setSuccess();
             if (myInstanceEnvironment.flags
+                    .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
+                PrettyCTranslation prettyT =
+                        new PrettyCTranslation(myInstanceEnvironment, table,
+                                dec, err);
+                tw = new TreeWalker(prettyT);
+                tw.visit(dec);
+                System.out.println("");
+            }
+            if (myInstanceEnvironment.flags
                     .isFlagSet(Translator.FLAG_TRANSLATE)) {
                 translateModuleDec(file, table, dec);
                 //System.out.println("Translated: " + file.toString());
