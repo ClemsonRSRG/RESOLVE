@@ -18,12 +18,15 @@ public class PrettyCTranslationInfo {
 
     int lineCount;
     ArrayList<Function> funcList;
+    ArrayList<String> globalVarsList;
     Function currentFunc;
     String name;
 
     public PrettyCTranslationInfo(String name) {
-        lineCount = 0;
+        lineCount = 1;
         this.name = name;
+        funcList = new ArrayList<Function>();
+        globalVarsList = new ArrayList<String>();
     }
 
     class Function {
@@ -38,8 +41,7 @@ public class PrettyCTranslationInfo {
         private String getFunctionString() {
             StringBuffer retBuf = new StringBuffer();
 
-            retBuf.append(returnType).append(" ").append(functionName).append(
-                    "(");
+            retBuf.append(functionName).append("(");
             int size = params.size() - 1;
             for (int i = 0; i <= size; i++) {
                 retBuf.append(params.get(i));
@@ -48,15 +50,17 @@ public class PrettyCTranslationInfo {
                 }
             }
             retBuf.append("){");
-            if (!returnType.equals("void"))
-                ;//TODO: Handle returns
             for (String a : varInit) {
                 retBuf.append(a).append(";");
+            }
+            for (String a : stmts) {
+                retBuf.append(a).append(";");
+
             }
             if (!returnType.equals("void")) {
                 retBuf.append("return ").append(functionName).append(";");
             }
-            retBuf.append("}");
+            retBuf.append(" }");
 
             return retBuf.toString();
 
@@ -72,7 +76,7 @@ public class PrettyCTranslationInfo {
 
     public void addFunction(PosSymbol newFuncName) {
         Function newFunc = new Function();
-        newFunc.functionName = stringFromSym(newFuncName); //obvious 'void' problem
+        newFunc.functionName = stringFromSym(newFuncName, "void ");
         funcList.add(newFunc);
         newFunc.params = new ArrayList<String>();
         newFunc.returnType = "void";
@@ -117,9 +121,32 @@ public class PrettyCTranslationInfo {
 
     /* End of Function methods */
 
-    public String stringFromSym(PosSymbol pos) {
+    public String toString() {
+        StringBuffer ret = new StringBuffer();
+        //ret.append(buildHeaderComment());
+        int temp;
+        //temp = fileName.indexOf(".");
+        //name = fileName.substring(0, temp);
+        //global variables
+        for (int j = 0; j < globalVarsList.size(); j++) {
+            ret.append(globalVarsList.get(j));
+        }
+        //functions
+        for (int j = 0; j < funcList.size(); j++) {
+            Function tFunc = funcList.get(j);
+            ret.append(tFunc.getFunctionString());
+        }
+
+        return ret.toString();
+    }
+
+    public String stringFromSym(PosSymbol pos, String prepend) {
         int n = pos.getLocation().getPos().getLine() - lineCount;
-        String retString = pos.getName();
+        String retString;
+        if (prepend != null)
+            retString = prepend + pos.getName();
+        else
+            retString = pos.getName();
         while (n > 0) {
             retString = "\n" + retString;
             n--;

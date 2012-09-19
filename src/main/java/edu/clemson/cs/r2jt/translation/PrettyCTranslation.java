@@ -4,11 +4,8 @@
  */
 package edu.clemson.cs.r2jt.translation;
 
-import edu.clemson.cs.r2jt.absyn.FacilityModuleDec;
-import edu.clemson.cs.r2jt.absyn.FacilityOperationDec;
-import edu.clemson.cs.r2jt.absyn.ModuleDec;
-import edu.clemson.cs.r2jt.absyn.NameTy;
-import edu.clemson.cs.r2jt.absyn.ParameterVarDec;
+import edu.clemson.cs.r2jt.absyn.*;
+import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.scope.SymbolTable;
@@ -92,19 +89,108 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
     public void preParameterVarDec(ParameterVarDec dec) {
         StringBuilder parmSet = new StringBuilder();
         if (dec.getTy() instanceof NameTy) {
-            parmSet.append(cInfo
-                    .stringFromSym(((NameTy) dec.getTy()).getName()));
+            parmSet.append(cInfo.stringFromSym(
+                    ((NameTy) dec.getTy()).getName(), null));
         }
         else {
             System.out.println("How did you reach here?");
         }
-        parmSet.append(cInfo.stringFromSym(dec.getName()));
+        parmSet.append(cInfo.stringFromSym(dec.getName(), null));
         cInfo.addParamToFunc(parmSet.toString());
+    }
+
+    //Function Call
+    public void preCallStmt(CallStmt stmt) {
+        String a = cInfo.stringFromSym(stmt.getName(), null);
+        cInfo.addToStmts(a + "()");
+    }
+
+    public void preVarDec(VarDec dec) {
+        PosSymbol name = dec.getName();
+        if (!name.getName().startsWith("_")) {
+            NameTy ty = (NameTy) dec.getTy();
+            String stTy = ty.getName().getName();
+            String newTy, init;
+            init = " ";
+            if (stTy.equals("Integer")) {
+                newTy = "int";
+                init = " = 0";
+            }
+            else if (stTy.equals("Char_Str")) {
+                newTy = "char*";
+                init = "";
+            }
+            else if (stTy.equals("Boolean")) {
+                newTy = "int";
+                init = " = 0";
+            }
+            else
+                newTy = "<empty>";
+            cInfo.appendToFuncVarInit(cInfo.stringFromSym(dec.getName(), newTy
+                    + " ")
+                    + init);
+        }
+    }
+
+    public void preFuncAssignStmt(FuncAssignStmt stmt) {
+        stmtBuf = new StringBuffer();
+    }
+
+    public void midFuncAssignStmt(FuncAssignStmt stmt,
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+        if (prevChild != null && nextChild != null)
+            stmtBuf.append(" = ");
+    }
+
+    public void postFuncAssignStmt(FuncAssignStmt stmt) {
+        cInfo.addToStmts(stmtBuf.toString());
+    }
+
+    public void preVariableNameExp(VariableNameExp var) {
+        String name = cInfo.stringFromSym(var.getName(), null);
+        stmtBuf.append(name);
+    }
+
+    public void preProgramIntegerExp(ProgramIntegerExp exp) {
+        stmtBuf.append(exp.getValue());
     }
 
     /*
      * End of Visitor Methods
      */
+
+    public void midProgramOpExp(ProgramOpExp exp,
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+        if (prevChild != null && nextChild != null) {
+            switch (exp.getOperator()) {
+            case ProgramOpExp.AND:
+                stmtBuf.append(" && ");
+                break;
+            case ProgramOpExp.OR:
+                stmtBuf.append(" || ");
+                break;
+            case ProgramOpExp.EQUAL:
+                stmtBuf.append(" == ");
+                break;
+            case ProgramOpExp.NOT_EQUAL:
+                stmtBuf.append(" != ");
+                break;
+            case ProgramOpExp.LT:
+                stmtBuf.append(" < ");
+                break;
+            case ProgramOpExp.LT_EQL:
+                stmtBuf.append(" <= ");
+                break;
+            case ProgramOpExp.PLUS:
+                stmtBuf.append(" + ");
+                break;
+            default:
+                break;
+            }
+        }
+    }
 
     public static final void setUpFlags() {
 
