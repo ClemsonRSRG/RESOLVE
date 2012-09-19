@@ -81,6 +81,7 @@ import edu.clemson.cs.r2jt.verification.Verifier;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
 import edu.clemson.cs.r2jt.scope.SymbolTable;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
+import edu.clemson.cs.r2jt.translation.PrettyCTranslation;
 import edu.clemson.cs.r2jt.translation.Translator;
 import edu.clemson.cs.r2jt.treewalk.VisitorCodeGeneration;
 import edu.clemson.cs.r2jt.utilities.Flag;
@@ -552,6 +553,7 @@ public class Main {
             Analyzer.setUpFlags();
 
             //Your module here!
+            PrettyCTranslation.setUpFlags();
             Translator.setUpFlags();
             Archiver.setUpFlags();
             ResolveCompiler.setUpFlags();

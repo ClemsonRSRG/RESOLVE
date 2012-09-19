@@ -97,6 +97,7 @@ import edu.clemson.cs.r2jt.sanitycheck.VisitorSanityCheck;
 import edu.clemson.cs.r2jt.scope.SymbolTable;
 import edu.clemson.cs.r2jt.parsing.RSimpleTrans;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
+import edu.clemson.cs.r2jt.translation.PrettyCTranslation;
 import edu.clemson.cs.r2jt.translation.Translator;
 import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.verification.AssertiveCode;
@@ -546,6 +547,15 @@ public class Controller {
                     //arc.printArchiveList();
                 }
                 myInstanceEnvironment.printModules();
+            }
+            if (myInstanceEnvironment.flags
+                    .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
+
+                PrettyCTranslation prettyT =
+                        new PrettyCTranslation(myInstanceEnvironment, table,
+                                dec, err);
+                tw = new TreeWalker(prettyT);
+                tw.visit(dec);
             }
             if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_VERIFY_VC)) {
                 verifyModuleDec(context, dec);
@@ -1452,8 +1462,8 @@ public class Controller {
 
         // change twv to whatever visitor logic you want to use
         //VisitorPrintStructure twv = new VisitorPrintStructure();
-        //TreeWalker twps = new TreeWalker(twv);
-        //twps.visit(dec);
+        //TreeWalker tw = new TreeWalker(twv);
+        //tw.visit(dec);
 
         //SanityCheck Walker -JCK
         VisitorSanityCheck sctwv =
