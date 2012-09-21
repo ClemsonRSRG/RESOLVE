@@ -951,15 +951,6 @@ public class Analyzer extends ResolveConceptualVisitor {
                     throw new TypeResolutionException();
                 }
 
-                // Making sure that we do not have something of VariableExp on the right hand side
-                // in a function assignment. - YS
-                if (petr.isVariable(stmt.getAssign())) {
-                    String msg =
-                            "Right handside of the function assignment cannot be a variable expression! ";
-                    err.error(stmt.getAssign().getLocation(), msg);
-                    throw new TypeResolutionException();
-                }
-
                 // Making sure that for any entry replica call for arrays, we have a replica function
                 // defined for that type. - YS
                 if (stmt.getAssign() instanceof ProgramParamExp) {
