@@ -61,19 +61,14 @@ package edu.clemson.cs.r2jt.absyn;
 import java.util.ListIterator;
 
 import edu.clemson.cs.r2jt.collections.List;
-import edu.clemson.cs.r2jt.collections.Map;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.data.Mode;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 
 import edu.clemson.cs.r2jt.proving.ChainingIterator;
 import edu.clemson.cs.r2jt.proving.DummyIterator;
 
-import edu.clemson.cs.r2jt.init.Environment;
-
 import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
 
@@ -101,7 +96,7 @@ public class FunctionExp extends Exp {
     /** If the type can be determined in the builder we set it here.  */
     private Type bType = null;
 
-    private boolean isab;
+    //private boolean isab;
 
     private int quantification = VarExp.NONE;
 
@@ -118,7 +113,7 @@ public class FunctionExp extends Exp {
         this.name = name;
         this.natural = natural;
         this.paramList = paramList;
-        this.isab = false;
+        //this.isab = false;
     }
 
     public FunctionExp(Location location, PosSymbol qualifier, PosSymbol name,
@@ -129,7 +124,7 @@ public class FunctionExp extends Exp {
         this.natural = natural;
         this.paramList = paramList;
         this.bType = b;
-        this.isab = false;
+        //this.isab = false;
     }
 
     public FunctionExp(Location location, PosSymbol qualifier, PosSymbol name,
@@ -139,7 +134,7 @@ public class FunctionExp extends Exp {
         this.name = name;
         this.natural = natural;
         this.paramList = paramList;
-        this.isab = false;
+        //this.isab = false;
         this.quantification = quantification;
     }
 
@@ -395,22 +390,23 @@ public class FunctionExp extends Exp {
         return sb.toString();
     }
 
-    public String toIsabelleString(int indent) {
-        isab = true;
-        StringBuffer sb = new StringBuffer();
-        printSpace(indent, sb);
+    /*
+    public String toIsabelleString(int indent){
+    	isab = true;
+    	StringBuffer sb = new StringBuffer();
+    	printSpace(indent, sb);
         sb.append("(");
-        sb.append(name.toString() + " ");
+        sb.append(name.toString()+ " ");    
 
         sb.append(isabParamListToString(paramList));
         sb.append(")");
-        return sb.toString();
-    }
+        return sb.toString(); 
+    }*/
 
     String paramListToString(List<FunctionArgList> paramList) {
         if (paramList != null) {
             String str = new String();
-            Iterator i = paramList.iterator();
+            Iterator<FunctionArgList> i = paramList.iterator();
             while (i.hasNext()) {
                 str = functionArgListToString((FunctionArgList) i.next());
             }
@@ -427,7 +423,7 @@ public class FunctionExp extends Exp {
 
     String expListToString(List<Exp> list) {
         StringBuffer str = new StringBuffer();
-        Iterator i = list.iterator();
+        Iterator<Exp> i = list.iterator();
         if (i.hasNext()) {
             Exp exp = (Exp) i.next();
             if (exp != null)
@@ -444,7 +440,7 @@ public class FunctionExp extends Exp {
     String isabParamListToString(List<FunctionArgList> paramList) {
         if (paramList != null) {
             String str = new String();
-            Iterator i = paramList.iterator();
+            Iterator<FunctionArgList> i = paramList.iterator();
             while (i.hasNext()) {
                 str = isabFunctionArgListToString((FunctionArgList) i.next());
             }
@@ -461,7 +457,7 @@ public class FunctionExp extends Exp {
 
     String isabExpListToString(List<Exp> list) {
         StringBuffer str = new StringBuffer();
-        Iterator i = list.iterator();
+        Iterator<Exp> i = list.iterator();
         if (i.hasNext()) {
             Exp exp = (Exp) i.next();
             if (exp != null)
@@ -672,7 +668,7 @@ public class FunctionExp extends Exp {
     }
 
     private void rememberVariablesInParamList(List<FunctionArgList> paramList) {
-        Iterator i = paramList.iterator();
+        Iterator<FunctionArgList> i = paramList.iterator();
         while (i.hasNext()) {
             rememberVariablesInFunctionArgList((FunctionArgList) i.next());
         }

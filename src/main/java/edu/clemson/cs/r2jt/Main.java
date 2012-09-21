@@ -80,11 +80,13 @@ import edu.clemson.cs.r2jt.proving.Prover;
 import edu.clemson.cs.r2jt.verification.Verifier;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
 import edu.clemson.cs.r2jt.scope.SymbolTable;
+import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
 import edu.clemson.cs.r2jt.translation.Translator;
 import edu.clemson.cs.r2jt.treewalk.VisitorCodeGeneration;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
+import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 
 /**
  * The main class for the Resolve compiler.
@@ -553,7 +555,9 @@ public class Main {
             Translator.setUpFlags();
             Archiver.setUpFlags();
             ResolveCompiler.setUpFlags();
+            PrettyJavaTranslator.setUpFlags();
             RSimpleTrans.setUpFlags();
+            VCGenerator.setUpFlags();
 
             FlagDependencies.seal();
         }

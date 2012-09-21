@@ -186,7 +186,7 @@ public class VisitorSanityCheck extends TreeWalkerStackVisitor {
         myCurrentConceptBodyModuleDec = dec;
 
         // Check to make sure realization implements the necessary procedures
-        sanityCheckImplementedProcedures(dec.getName().getName(), dec
+        sanityCheckImplementedProcedures(dec.getName(), dec
                 .getLocalProcedureNames(), myAssociatedConceptSymbolTable);
     }
 
@@ -194,6 +194,11 @@ public class VisitorSanityCheck extends TreeWalkerStackVisitor {
     public void postConceptBodyModuleDec(ConceptBodyModuleDec dec) {
         myCurrentConceptBodyModuleDec = null;
     }
+
+    /*@Override
+    public void preEnhancementBodyItem(EnhancementBodyItem node) {
+    	System.out.println(node.getName().getName());
+    }*/
 
     @Override
     public void preEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
@@ -204,7 +209,7 @@ public class VisitorSanityCheck extends TreeWalkerStackVisitor {
                 myCompileEnvironment.getSymbolTable(id);
 
         // Check to make sure realization implements the necessary procedures
-        sanityCheckImplementedProcedures(dec.getName().getName(), dec
+        sanityCheckImplementedProcedures(dec.getName(), dec
                 .getLocalProcedureNames(), myAssociatedConceptSymbolTable);
     }
 
@@ -721,7 +726,7 @@ public class VisitorSanityCheck extends TreeWalkerStackVisitor {
      *            retrieve the list of operations required to be implemented)
      * @throw SanityCheckException Thrown if the missingList List is not empty
      */
-    private void sanityCheckImplementedProcedures(String name,
+    private void sanityCheckImplementedProcedures(PosSymbol sym,
             List<Symbol> procedureList, SymbolTable st) {
         boolean isMatch = false;
         List<OperationEntry> missingList = new List<OperationEntry>();
@@ -751,8 +756,10 @@ public class VisitorSanityCheck extends TreeWalkerStackVisitor {
                 isMatch = false;
             }
             if (missingList.size() != 0) {
+                err.error(sym.getLocation(), foundMissingProceduresMessage(sym
+                        .getName(), iName, missingList));
                 throw new SanityCheckException(foundMissingProceduresMessage(
-                        name, iName, missingList));
+                        sym.getName(), iName, missingList));
             }
             /*
              * while(it.hasNext()){ Symbol operation = it.next();

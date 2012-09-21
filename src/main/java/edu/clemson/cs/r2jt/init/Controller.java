@@ -96,11 +96,13 @@ import edu.clemson.cs.r2jt.proving.VerificationCondition;
 import edu.clemson.cs.r2jt.sanitycheck.VisitorSanityCheck;
 import edu.clemson.cs.r2jt.scope.SymbolTable;
 import edu.clemson.cs.r2jt.parsing.RSimpleTrans;
+import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
 import edu.clemson.cs.r2jt.translation.Translator;
 import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.verification.AssertiveCode;
 import edu.clemson.cs.r2jt.verification.Verifier;
 import edu.clemson.cs.r2jt.treewalk.*;
+import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 
 /**
  * A manager for the target file of a compilation.
@@ -186,8 +188,11 @@ public class Controller {
             else {
                 myArchive = null;
             }
+            //if(myInstanceEnvironment.flags.isFlagSet(RSimpleTrans.FLAG_SIMPLE_TRANSLATE)){
+            //simpleTranslateNewTargetFile(file);
+            //}
             if (myInstanceEnvironment.flags
-                    .isFlagSet(RSimpleTrans.FLAG_SIMPLE_TRANSLATE)) {
+                    .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)) {
                 simpleTranslateNewTargetFile(file);
             }
             else {
@@ -209,9 +214,10 @@ public class Controller {
     public void compileTargetSource(MetaFile inputFile) {
         err.resetCounts();
         err.setIgnore(false);
+        //if(myInstanceEnvironment.flags.isFlagSet(RSimpleTrans.FLAG_SIMPLE_TRANSLATE)){
         if (myInstanceEnvironment.flags
-                .isFlagSet(RSimpleTrans.FLAG_SIMPLE_TRANSLATE)) {
-            simpleTranslateNewTargetSource();
+                .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)) {
+            simpleTranslateNewTargetSource(inputFile);
         }
         else {
             //myInstanceEnvironment.setTargetFileName("Std_Unbounded_List_Realiz.rb");
@@ -429,6 +435,12 @@ public class Controller {
             if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_VERIFY_VC)) {
                 verifyModuleDec(context, dec);
             }
+
+            if (myInstanceEnvironment.flags
+                    .isFlagSet(VCGenerator.FLAG_ALTVERIFY_VC)) {
+                generateVCs(context, dec);
+            }
+
             String currFileName = dec.getName().getFile().toString();
             if (myInstanceEnvironment.flags
                     .isFlagSet(ResolveCompiler.FLAG_EXPORT_AST)) {
@@ -562,14 +574,91 @@ public class Controller {
         return new File(fileName + ext);
     }
 
+    /*private void simpleTranslateNewTargetFile(File file) {
+    	//long start = System.currentTimeMillis();
+    	CharStream cs = null;
+    	try {
+    		String fileName = file.getAbsolutePath();
+    		CommonTokenStream tokens = getFileTokenStream(file);
+    		CommonTree ast = getParseTree(file.toString(), tokens);
+    		simpleTranslateTree(ast, tokens);
+    	} catch (Exception ex) {
+    		BugReport.abortProgram(ex, myInstanceEnvironment);
+    		myCompileReport.setError();
+    	}
+    	//long end = System.currentTimeMillis();
+    	//System.out.println("Execution time: " + (end - start) + " ms");
+    }*/
+
     private void simpleTranslateNewTargetFile(File file) {
         //long start = System.currentTimeMillis();
-        CharStream cs = null;
+        //File file = null;
         try {
-            String fileName = file.getAbsolutePath();
-            CommonTokenStream tokens = getFileTokenStream(file);
-            CommonTree ast = getParseTree(file.toString(), tokens);
-            simpleTranslateTree(ast, tokens);
+            // AST debugging file output
+            /*astDumpFile = new File(myInstanceEnvironment.getTargetFile()+".ast");
+            try{
+            	FileWriter fstream = new FileWriter(astDumpFile, true);
+            	BufferedWriter out = new BufferedWriter(fstream);
+            	out.write("\nAST for: "+myInstanceEnvironment.getTargetFile()+"\n");
+            	out.close();
+            }catch(Exception ex){
+            	
+            }*/
+            myInstanceEnvironment.getErrorHandler().setFile(file);
+            myInstanceEnvironment.setTargetFile(file);
+            //myInstanceEnvironment.setCurrentTargetFileName(file.getName());
+            ModuleDec dec = buildModuleDec(file);
+            ModuleID id = ModuleID.createID(dec);
+
+            checkNameCompatibility(dec.getName().getLocation(), id, file);
+            //checkDirectoryCompatibility(dec, id, file);
+            //file = createFileFromSource(id, fileName);
+            //myInstanceEnvironment.getErrorHandler().setFile(file);
+            //myInstanceEnvironment.setTargetFile(file);
+            myInstanceEnvironment.constructRecord(id, file, dec);
+            compileImportedModules(dec);
+
+            // Invoke PreProcessor 
+            //PreProcessor preProc = new PreProcessor(myInstanceEnvironment);
+            //TreeWalker tw = new TreeWalker(preProc);
+            //tw.visit(dec);
+
+            // Have compile imported modules bring in extra stuff that 
+            // the PreProcessor may have added manually.
+
+            compileImportedModules(dec);
+
+            if (myInstanceEnvironment.showEnv()) { // DEBUG
+                SymbolTable table = new SymbolTable(id, myInstanceEnvironment);
+                myInstanceEnvironment.completeRecord(id, table);
+                return;
+            }
+            myInstanceEnvironment.setCurrentTargetFileName(file.getName());
+            MathExpTypeResolver context = analyzeModuleDec(dec);
+            SymbolTable table = context.getSymbolTable();
+
+            // checkModeCompatibility(dec);
+            myInstanceEnvironment.completeRecord(id, table);
+            //env.setSuccess();
+            if (myInstanceEnvironment.flags
+                    .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)) {
+                translatePrettyModuleDec(file, table, dec);
+                //System.out.println("Translated: " + file.toString());
+                /*if(myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)){
+                	myArchive.addFileToArchive(file);
+                	if(!myCompileReport.hasError()){
+                		if(myArchive.createJar()){
+                			myCompileReport.setJarSuccess();
+                		}
+                	}
+                }*/
+                myInstanceEnvironment.printModules();
+            }
+
+        }
+        catch (CompilerException cex) {
+            myInstanceEnvironment.abortCompile(file);
+            myCompileReport.setError();
         }
         catch (Exception ex) {
             BugReport.abortProgram(ex, myInstanceEnvironment);
@@ -579,16 +668,107 @@ public class Controller {
         //System.out.println("Execution time: " + (end - start) + " ms");
     }
 
-    private void simpleTranslateNewTargetSource() {
+    private void simpleTranslateNewTargetSource(MetaFile inputFile) {
         //long start = System.currentTimeMillis();
-        CharStream cs = null;
+        /*CharStream cs = null;
         try {
-            String fileName = myInstanceEnvironment.getTargetFileName();
-            String fileSource = myInstanceEnvironment.getTargetSource();
+        	String fileName = myInstanceEnvironment.getTargetFileName();
+        	String fileSource = myInstanceEnvironment.getTargetSource();
+        	CommonTokenStream tokens = getSourceTokenStream(fileName, fileSource);
+        	CommonTree ast = getParseTree(fileName, tokens);
+        	simpleTranslateTree(ast, tokens);
+        } catch (Exception ex) {
+        	BugReport.abortProgram(ex, myInstanceEnvironment);
+        	myCompileReport.setError();
+        }*/
+        File file = null;
+        try {
+            // AST debugging file output
+            /*astDumpFile = new File(myInstanceEnvironment.getTargetFile()+".ast");
+            try{
+            	FileWriter fstream = new FileWriter(astDumpFile, true);
+            	BufferedWriter out = new BufferedWriter(fstream);
+            	out.write("\nAST for: "+myInstanceEnvironment.getTargetFile()+"\n");
+            	out.close();
+            }catch(Exception ex){
+            	
+            }*/
+            String fileName = inputFile.getMyFileName();
+            //String fileConcept = inputFile.getMyAssocConcept();
+            //String filePkg = inputFile.getMyPkg();
+            String fileSource = inputFile.getMyFileSource();
+            //ModuleKind fileKind = inputFile.getMyKind();
+            /*String filePath = myInstanceEnvironment.getMainDir().getAbsolutePath();
+            if(fileKind.equals(ModuleKind.FACILITY)){
+            	filePath += File.separator + "Facilities" + File.separator;
+            }
+            else{
+            	filePath += File.separator + "Concepts" + File.separator;
+            }
+            filePath += filePkg + File.separator + fileName + fileKind.getExtension();
+            file = new File(filePath);*/
+            file = inputFile.getMyFile(myInstanceEnvironment.getMainDir());
+            myInstanceEnvironment.getErrorHandler().setFile(file);
+            myInstanceEnvironment.setTargetFile(file);
             CommonTokenStream tokens =
                     getSourceTokenStream(fileName, fileSource);
             CommonTree ast = getParseTree(fileName, tokens);
-            simpleTranslateTree(ast, tokens);
+            //myInstanceEnvironment.setCurrentTargetFileName(file.getName());
+            ModuleDec dec = getModuleDec(ast);
+            ModuleID id = ModuleID.createID(dec);
+
+            checkNameCompatibility(dec.getName().getLocation(), id, file);
+            //checkDirectoryCompatibility(dec, id, file);
+            //file = createFileFromSource(id, fileName);
+            //myInstanceEnvironment.getErrorHandler().setFile(file);
+            //myInstanceEnvironment.setTargetFile(file);
+            myInstanceEnvironment.constructRecord(id, file, dec);
+            compileImportedModules(dec);
+
+            // Invoke PreProcessor 
+            //PreProcessor preProc = new PreProcessor(myInstanceEnvironment);
+            //TreeWalker tw = new TreeWalker(preProc);
+            //tw.visit(dec);
+
+            // Have compile imported modules bring in extra stuff that 
+            // the PreProcessor may have added manually.
+
+            //compileImportedModules(dec);
+
+            if (myInstanceEnvironment.showEnv()) { // DEBUG
+                SymbolTable table = new SymbolTable(id, myInstanceEnvironment);
+                myInstanceEnvironment.completeRecord(id, table);
+                return;
+            }
+            myInstanceEnvironment.setCurrentTargetFileName(file.getName());
+            MathExpTypeResolver context = analyzeModuleDec(dec);
+            SymbolTable table = context.getSymbolTable();
+
+            // checkModeCompatibility(dec);
+            myInstanceEnvironment.completeRecord(id, table);
+            //env.setSuccess();
+            if (myInstanceEnvironment.flags
+                    .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)) {
+                if (inputFile.getIsCustomLoc()) {
+                    file = inputFile.getMyCustomFile();
+                }
+                translatePrettyModuleDec(file, table, dec);
+                //System.out.println("Translated: " + file.toString());
+                /*if(myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)){
+                	myArchive.addFileToArchive(file);
+                	if(!myCompileReport.hasError()){
+                		if(myArchive.createJar()){
+                			myCompileReport.setJarSuccess();
+                		}
+                	}
+                }*/
+                myInstanceEnvironment.printModules();
+            }
+
+        }
+        catch (CompilerException cex) {
+            myInstanceEnvironment.abortCompile(file);
+            myCompileReport.setError();
         }
         catch (Exception ex) {
             BugReport.abortProgram(ex, myInstanceEnvironment);
@@ -1317,6 +1497,19 @@ public class Controller {
     // Verification Related Methods
     // ------------------------------------------------------------
 
+    // Invoke the new VC Generator 
+    // -YS
+    private void generateVCs(MathExpTypeResolver context, ModuleDec dec) {
+        // Retrieve the current symbol table
+        SymbolTable table = context.getSymbolTable();
+
+        // Create a new instance of the VC Generator and invoke the
+        // tree walker on it.
+        VCGenerator vcgen = new VCGenerator(table, myInstanceEnvironment);
+        TreeWalker tw = new TreeWalker(vcgen);
+        tw.visit(dec);
+    }
+
     private void verifyModuleDec(MathExpTypeResolver context, ModuleDec dec) {
         SymbolTable table = context.getSymbolTable();
         Verifier verifier = new Verifier(table, myInstanceEnvironment);
@@ -1396,6 +1589,21 @@ public class Controller {
         if (myArchive != null && !translator.onNoCompileList(file)) {
             myArchive.addFileToArchive(file);
         }
+        String targetFile = myInstanceEnvironment.getTargetFile().toString();
+        String thisFile = dec.getName().getFile().toString();
+        // We only translate if this is the target file or if file is stale
+        if ((thisFile.equals(targetFile)) || translator.needToTranslate(file)) {
+            //System.out.println("Starting Translation: "+dec.getName().getName());
+            translator.visitModuleDec(dec);
+            //System.out.println("Translated: "+dec.getName().getName());
+            translator.outputJavaCode(file);
+        }
+    }
+
+    private void translatePrettyModuleDec(File file, SymbolTable table,
+            ModuleDec dec) {
+        PrettyJavaTranslator translator =
+                new PrettyJavaTranslator(myInstanceEnvironment, table, dec, err);
         String targetFile = myInstanceEnvironment.getTargetFile().toString();
         String thisFile = dec.getName().getFile().toString();
         // We only translate if this is the target file or if file is stale

@@ -59,17 +59,10 @@
 package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
-import edu.clemson.cs.r2jt.collections.Map;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.data.Mode;
-import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.data.Symbol;
-import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.type.BooleanType;
 import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
-import edu.clemson.cs.r2jt.init.Environment;
 
 public class EqualsExp extends Exp {
 
@@ -420,11 +413,14 @@ public class EqualsExp extends Exp {
         return simplified;
     }
 
-    private PosSymbol createPosSymbol(String name) {
-        PosSymbol posSym = new PosSymbol();
-        posSym.setSymbol(Symbol.symbol(name));
-        return posSym;
+    /* Commented out because it is not used locally.
+     * - YS
+    private PosSymbol createPosSymbol(String name){
+    	PosSymbol posSym = new PosSymbol();
+    	posSym.setSymbol(Symbol.symbol(name));
+    	return posSym; 	
     }
+     */
 
     public boolean equals(Exp exp) {
         if (exp instanceof EqualsExp)

@@ -60,8 +60,6 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
-import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.data.Mode;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 
 public class FacilityOperationDec extends Dec {
@@ -129,7 +127,7 @@ public class FacilityOperationDec extends Dec {
         this.variables = variables;
         this.aux_variables = aux_variables;
         this.statements = statements;
-        this.recursive = recursive;
+        this.recursive = false;
     }
 
     public FacilityOperationDec(PosSymbol name,
