@@ -589,9 +589,17 @@ public class MathExpTypeResolver extends TypeResolutionVisitor {
                 Type t2 = getType("Boolean_Theory", "B", exp, false);
                 matchTypes(exp.getLocation(), t1, t2, false, false);
             }
-            Type t1 = getMathType(exp.getVar().getTy());
+            Type t1 = null;
             List<Type> list = new List<Type>();
-            list.add(t1);
+            if (exp.getVar() != null) {
+                t1 = getMathType(exp.getVar().getTy());
+                list.add(t1);
+            }
+            else if (!exp.getVars().isEmpty()) {
+                List<VarExp> vars = exp.getVars();
+                t1 = getVarExpType(vars.get(0));
+                list.add(t1);
+            }
             PosSymbol name = new PosSymbol(null, Symbol.symbol("Set"));
             // Binding will be null on this new type
             ConstructedType retType =

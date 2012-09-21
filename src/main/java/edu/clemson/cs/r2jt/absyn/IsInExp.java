@@ -1,12 +1,8 @@
 package edu.clemson.cs.r2jt.absyn;
 
-import java.util.Map;
-
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.errors.ErrorHandler;
-import edu.clemson.cs.r2jt.init.Environment;
 import edu.clemson.cs.r2jt.type.BooleanType;
 import edu.clemson.cs.r2jt.type.ConstructedType;
 import edu.clemson.cs.r2jt.type.IndirectType;

@@ -66,7 +66,6 @@ import java.util.StringTokenizer;
 
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.scope.*;
 import edu.clemson.cs.r2jt.entry.*;
 import edu.clemson.cs.r2jt.type.*;
@@ -94,6 +93,10 @@ public class Verifier extends ResolveConceptualVisitor {
 
     private List<String> typeParms;
     private List<String> concParms;
+
+    // YS - Part of the cheap fix to getCurrentModuleDec not returning what
+    //      we need. NEEDS TO GO!
+    private FacilityModuleDec myFacilityModuleDec;
 
     private String name;
 
@@ -1815,6 +1818,9 @@ public class Verifier extends ResolveConceptualVisitor {
                     }
 
                 }
+                /*else if(!matchesStandard(argType, convParamType, PETR)){
+                    return false;
+                }*/
                 else if (argType != null && paramType != null
                         && !argType.toString().equals(paramType.toString())) {
                     return false;
@@ -1827,6 +1833,41 @@ public class Verifier extends ResolveConceptualVisitor {
             return false;
         }
         return true;
+    }
+
+    private boolean matchesStandard(Type t1, Type t2,
+            ProgramExpTypeResolver PETR) {
+        List<ModuleID> stdUses = new List<ModuleID>();
+        for (String std : myInstanceEnvironment.getStdUses()) {
+            String stdName = "Std_" + std + "_Fac";
+            stdUses.add(ModuleID.createFacilityID(Symbol.symbol(stdName)));
+        }
+        TypeName tn1 = t1.getProgramName();
+        TypeName tn2 = t2.getProgramName();
+        if (tn1 == null) {
+            for (ModuleID module : stdUses) {
+                Scope ms = myInstanceEnvironment.getModuleScope(module);
+                if (ms.containsVariable(Symbol.symbol(t2.asString()))) {
+                    t1 = ms.getVariable(Symbol.symbol(t2.asString())).getType();
+                }
+            }
+        }
+        if (tn2 == null) {
+            for (ModuleID module : stdUses) {
+                Scope ms = myInstanceEnvironment.getModuleScope(module);
+
+                if (ms.containsVariable(Symbol.symbol(t2.asString()))) {
+                    t2 = ms.getVariable(Symbol.symbol(t2.asString())).getType();
+                }
+            }
+        }
+        tn1 = t1.getProgramName();
+        tn2 = t2.getProgramName();
+
+        if (tn1 == null || tn2 == null) {
+            return false;
+        }
+        return (tn1.equals(tn2));
     }
 
     private boolean compareParameters(List<ParameterVarDec> paramsA,
@@ -6999,7 +7040,6 @@ public class Verifier extends ResolveConceptualVisitor {
         VCBuffer.append("Concept Name: ");
         VCBuffer.append(dec.getName().toString());
         VCBuffer.append("\n");
-
         visitProcedures(dec.getDecs());
 
         table.endModuleScope();
@@ -7329,10 +7369,11 @@ public class Verifier extends ResolveConceptualVisitor {
     public void visitFacilityModuleDec(FacilityModuleDec dec) {
         table.beginModuleScope();
         //      System.out.println("Facility Module Dec:" + dec.getName());
-
+        myFacilityModuleDec = dec;
         buildListAvailableSpecs(dec);
 
         visitProcedures(dec.getDecs());
+        myFacilityModuleDec = null;
         table.endModuleScope();
     }
 
@@ -7450,8 +7491,29 @@ public class Verifier extends ResolveConceptualVisitor {
 
         }
 
+        /* YS - Cheap fix for when getCurrentBodyModuleDec doesn't return what we
+         *      need. TODO: Use Hampton's new symbol table to fix it.
+         */
+        if (moduleDec == null && myFacilityModuleDec != null) {
+            FacilityModuleDec fDec = myFacilityModuleDec;
+            if (fDec instanceof FacilityModuleDec) {
+                /* YS - Get the global requires clause and add it to our list
+                   of assumes */
+                Exp gRequires = fDec.getRequirement();
+                if (gRequires != null) {
+                    if (gRequires.getLocation() != null) {
+                        Location myLoc = gRequires.getLocation();
+                        myLoc.setDetails("Requires Clause for "
+                                + fDec.getName());
+                        setLocation(gRequires, myLoc);
+                    }
+                    assertion.addAssume(gRequires);
+                }
+            }
+        }
+
         OperationDec curOperation = formOpDec(dec);
-        ;
+
         /* OperationDec curOperation  = new OperationDec(
         			((FacilityOperationDec)dec).getName(),
         				((FacilityOperationDec)dec).getParameters(),
@@ -7677,6 +7739,36 @@ public class Verifier extends ResolveConceptualVisitor {
             }
         }
 
+        if (moduleDec instanceof EnhancementBodyModuleDec) {
+            /* YS - Get the global requires clause and add it to our list
+               of assumes */
+            Exp gRequires =
+                    ((EnhancementBodyModuleDec) moduleDec).getRequires();
+            if (gRequires != null) {
+                if (gRequires.getLocation() != null) {
+                    Location myLoc = gRequires.getLocation();
+                    myLoc.setDetails("Requires Clause for "
+                            + ((EnhancementBodyModuleDec) moduleDec).getName());
+                    setLocation(gRequires, myLoc);
+                }
+                assertion.addAssume(gRequires);
+            }
+        }
+        else if (moduleDec instanceof ConceptBodyModuleDec) {
+            /* YS - Get the global requires clause and add it to our list
+               of assumes */
+            Exp gRequires = ((ConceptBodyModuleDec) moduleDec).getRequires();
+            if (gRequires != null) {
+                if (gRequires.getLocation() != null) {
+                    Location myLoc = gRequires.getLocation();
+                    myLoc.setDetails("Requires Clause for "
+                            + ((ConceptBodyModuleDec) moduleDec).getName());
+                    setLocation(gRequires, myLoc);
+                }
+                assertion.addAssume(gRequires);
+            }
+        }
+
         Exp requires = new VarExp();
         Exp ensures = Exp.getTrueVarExp(); //new VarExp();  
         boolean thisConcept = false;
@@ -7729,11 +7821,13 @@ public class Verifier extends ResolveConceptualVisitor {
                 convention = getTrueVarExp();
             }
             else {
-
-                Location newloc = getLocationOfLastLine(dec.getStatements());
-                convention.setLocation(newloc);
-                convention.getLocation().setDetails(
-                        "Convention for " + moduleDec.getName());
+                if (dec.getStateVars().size() > 0) {
+                    Location newloc =
+                            getLocationOfLastLine(dec.getStatements());
+                    convention.setLocation(newloc);
+                    convention.getLocation().setDetails(
+                            "Convention for " + moduleDec.getName());
+                }
             }
             ConceptModuleDec cmDec = (ConceptModuleDec) getCurrentModuleDec();
             moduleLevelRequires = cmDec.getRequirement();
