@@ -59,7 +59,6 @@
 package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
-import edu.clemson.cs.r2jt.collections.Map;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;

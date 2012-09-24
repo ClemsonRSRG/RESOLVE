@@ -61,15 +61,11 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.collections.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import edu.clemson.cs.r2jt.collections.Iterator;
-import edu.clemson.cs.r2jt.collections.Map;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.data.Mode;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
-import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.type.BooleanType;
 import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.verification.*;
 
@@ -237,7 +233,8 @@ public class InfixExp extends Exp {
         if (opName != null) {
 
             if (!AssertiveCode.isProvePart() && opName.toString().equals("and")) {
-                sb.append(opName.toString() + "\n");
+                //sb.append(opName.toString() + "\n");
+                sb.append(opName.toString() + " ");
             }
             else if (AssertiveCode.isProvePart()
                     && opName.toString().equals("and")) {
@@ -254,7 +251,8 @@ public class InfixExp extends Exp {
                         && !((InfixExp) right).getOpName().toString().equals(
                                 "implies")) {
                     /* And the right Exp is NOT an implication */
-                    sb.append("\n");
+                    //sb.append("\n");
+                    sb.append(" ");
                     printSpace(indent + 4, sb);
                     sb.append(right.toString(indent + 4) + ")");
                 }
@@ -262,11 +260,13 @@ public class InfixExp extends Exp {
                     /* And the right is an Implication, but could 
                      * contain an implication or is an and/or statement
                      */
-                    sb.append("\n");
+                    //sb.append("\n");
+                    sb.append(" ");
                     sb.append(right.toString(indent) + ")");
                 }
                 else
-                    sb.append("\n" + right.toString(indent + 4) + ")");
+                    //sb.append("\n" + right.toString(indent + 4) + ")");
+                    sb.append(" " + right.toString(indent + 4) + ")");
             }
             else /* This is Not an Implication */
             if (right instanceof InfixExp
@@ -280,7 +280,8 @@ public class InfixExp extends Exp {
                 /* And the right is an Implication, but could 
                  * contain an implication or is an and/or statement
                  */
-                sb.append("\n" + right.toString(indent) + ")");
+                //sb.append("\n" + right.toString(indent) + ")");
+                sb.append(" " + right.toString(indent) + ")");
             }
             else
                 sb.append(right.toString(0) + ")");

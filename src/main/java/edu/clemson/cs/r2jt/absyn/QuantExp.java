@@ -60,15 +60,9 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
-import edu.clemson.cs.r2jt.collections.Map;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.data.Mode;
-import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.init.Environment;
 import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
-import edu.clemson.cs.r2jt.verification.AssertiveCode;
 
 public class QuantExp extends Exp {
 
@@ -334,7 +328,8 @@ public class QuantExp extends Exp {
                 Exp bdy = body.replace(old, replacement);
                 if (bdy != null)
                     this.setBody(bdy);
-                String str = bdy.toString(0, 0);
+                // Not used anywhere below. - YS 
+                //String str = bdy.toString(0, 0);
             }
             if (vars != null && old instanceof VarExp
                     && replacement instanceof VarExp) {

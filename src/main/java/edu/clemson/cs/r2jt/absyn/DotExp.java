@@ -61,15 +61,10 @@ package edu.clemson.cs.r2jt.absyn;
 import java.util.ListIterator;
 
 import edu.clemson.cs.r2jt.collections.List;
-import edu.clemson.cs.r2jt.collections.Map;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.data.Mode;
-import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
-import edu.clemson.cs.r2jt.init.Environment;
 
 public class DotExp extends Exp {
 
@@ -343,8 +338,12 @@ public class DotExp extends Exp {
                     Exp newName = name.replace(old, replacement);
 
                     if (!newName.equals(name)) {
-                        segments.remove(it.nextIndex() - 1);
-                        segments.add(it.nextIndex() - 1, newName);
+                        /* Weird way of doing it. Replaced it with the following. - YS
+                        segments.remove(it.nextIndex()-1);
+                        segments.add(it.nextIndex()-1, newName);
+                         */
+                        segments.remove(index - 1);
+                        segments.add(index - 1, newName);
                         it = segments.iterator(); // Start Over. Inefficient, but works for now
                     }
 
@@ -358,8 +357,12 @@ public class DotExp extends Exp {
                      */
 
                     if (!newName.equals(name)) {
-                        segments.remove(it.nextIndex() - 1);
-                        segments.add(it.nextIndex() - 1, newName);
+                        /* Weird way of doing it. Replaced it with the following. - YS
+                        segments.remove(it.nextIndex()-1);
+                        segments.add(it.nextIndex()-1, newName);
+                         */
+                        segments.remove(index - 1);
+                        segments.add(index - 1, newName);
                         it = segments.iterator(); // Start Over. Inefficient, but works for now
                     }
                 }
@@ -475,14 +478,15 @@ public class DotExp extends Exp {
         }
 
         if (old.getSegments().size() <= current.getSegments().size()) {
-            List<Exp> newSegments = new List();
+            List<Exp> newSegments = new List<Exp>();
             if (newExp instanceof DotExp) {
 
                 newSegments.addAll(0, ((DotExp) newExp).getSegments());
             }
-            else {
-                newSegments = newSegments;
-            }
+            /* Weird? Probably not needed. - YS
+            else{
+            	newSegments = newSegments;
+            }*/
             for (int count = 0; count < old.getSegments().size(); count++) {
 
                 Exp oldExp = old.getSegments().get(count);

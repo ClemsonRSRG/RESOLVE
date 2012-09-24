@@ -81,6 +81,7 @@ import edu.clemson.cs.r2jt.proofchecking.ProofChecker;
 import edu.clemson.cs.r2jt.proving.Prover;
 import edu.clemson.cs.r2jt.sanitycheck.SanityCheckException;
 import edu.clemson.cs.r2jt.scope.*;
+import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
 import edu.clemson.cs.r2jt.type.*;
 import edu.clemson.cs.r2jt.utilities.Flag;
 
@@ -146,7 +147,7 @@ public class Analyzer extends ResolveConceptualVisitor {
     //table of the concept associated with a realization that is currently
     //being parsed.  The name associated with the concept is also stored so
     //that the table can be retrieved lazily.
-    private PosSymbol myCurrentConceptName = null;
+    private PosSymbol myCurrentModuleName = null;
     private SymbolTable myAssociatedConceptSymbolTable = null;
 
     // Stack of WhileStmts used for building the changing list
@@ -257,7 +258,7 @@ public class Analyzer extends ResolveConceptualVisitor {
     }
 
     public void visitConceptModuleDec(ConceptModuleDec dec) {
-        myCurrentConceptName = dec.getName();
+        myCurrentModuleName = dec.getName();
         table.beginModuleScope();
         visitModuleParameterList(dec.getParameters());
         visitAssertion(dec.getRequirement());
@@ -272,7 +273,7 @@ public class Analyzer extends ResolveConceptualVisitor {
         visitDecList(dec.getDecs());
 
         table.endModuleScope();
-        myCurrentConceptName = null;
+        myCurrentModuleName = null;
     }
 
     public void visitEnhancementModuleDec(EnhancementModuleDec dec) {
@@ -286,6 +287,7 @@ public class Analyzer extends ResolveConceptualVisitor {
     }
 
     public void visitConceptBodyModuleDec(ConceptBodyModuleDec dec) {
+        myCurrentModuleName = dec.getName();
         //We're going to need this deeper in the tree, so save it to a global
         //variable.  Would like to do this functionally, but I don't want to
         //break things by changing public method type signatures.  -HwS
@@ -308,10 +310,12 @@ public class Analyzer extends ResolveConceptualVisitor {
         visitDecList(dec.getDecs());
 
         table.endModuleScope();
+        myCurrentModuleName = null;
     }
 
     public void visitEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
 
+        myCurrentModuleName = dec.getName();
         //We're going to need this deeper in the tree, so save it to a global
         //variable.  Would like to do this functionally, but I don't want to
         //break things by changing public method type signatures.  -HwS
@@ -338,10 +342,12 @@ public class Analyzer extends ResolveConceptualVisitor {
         visitDecList(dec.getDecs());
 
         table.endModuleScope();
+        myCurrentModuleName = null;
 
     }
 
     public void visitFacilityModuleDec(FacilityModuleDec dec) {
+        myCurrentModuleName = dec.getName();
         table.beginModuleScope();
         if (dec.getFacilityInit() != null) {
             visitInitItem(dec.getFacilityInit());
@@ -353,6 +359,7 @@ public class Analyzer extends ResolveConceptualVisitor {
         visitDecList(dec.getDecs());
 
         table.endModuleScope();
+        myCurrentModuleName = null;
     }
 
     public void visitShortFacilityModuleDec(ShortFacilityModuleDec dec) {
@@ -680,7 +687,8 @@ public class Analyzer extends ResolveConceptualVisitor {
     public void visitProcedureDec(ProcedureDec dec) {
 
         //Perform procedure parameter sanity checking.
-        sanityCheckProcedure(dec);
+        // remove: these same checks are perfomed in the SanityCheck
+        //	sanityCheckProcedure(dec);
 
         table.beginOperationScope();
         table.beginProcedureScope();
@@ -769,30 +777,30 @@ public class Analyzer extends ResolveConceptualVisitor {
 
     public void visitFacilityDec(FacilityDec dec) {
 
-    //sanityCheckFacilityDeclarationParameters(dec);
+        sanityCheckFacilityDeclarationParameters(dec);
 
-    // check instantiation AND arguments that are
-    // program expressions.
-    /*  	ConceptModuleDec cDec = null;
-      	ConceptBodyModuleDec bDec = null;
-          ModuleID cid = ModuleID.createConceptID(dec.getConceptName());
-          if (env.contains(cid))
-              cDec = (ConceptModuleDec)env.getModuleDec(cid);
-          else {
-              String msg = facDecErrorMessage(dec.getName().getName());
-              err.error(dec.getName().getLocation(), msg);
-              return;
-          };
-          ModuleID bid = ModuleID.createConceptBodyID(dec.getBodyName(),
-                  dec.getConceptName());
-          if (env.contains(bid))
-              bDec = (ConceptBodyModuleDec)env.getModuleDec(cid);
-          else {
-              String msg = facDecErrorMessage(dec.getName().getName());
-              err.error(dec.getName().getLocation(), msg);
-              return;
-          }
-     */
+        // check instantiation AND arguments that are
+        // program expressions.
+        /*ConceptModuleDec cDec = null;
+        ConceptBodyModuleDec bDec = null;
+        ModuleID cid = ModuleID.createConceptID(dec.getConceptName());
+        if (myInstanceEnvironment.contains(cid))
+            cDec = (ConceptModuleDec)myInstanceEnvironment.getModuleDec(cid);
+        else {
+            String msg = facDecErrorMessage(dec.getName().getName());
+            err.error(dec.getName().getLocation(), msg);
+            return;
+        };
+        ModuleID bid = ModuleID.createConceptBodyID(dec.getBodyName(),
+                dec.getConceptName());
+        if (myInstanceEnvironment.contains(bid))
+            bDec = (ConceptBodyModuleDec)myInstanceEnvironment.getModuleDec(cid);
+        else {
+            String msg = facDecErrorMessage(dec.getName().getName());
+            err.error(dec.getName().getLocation(), msg);
+            return;
+        }*/
+
     }
 
     // -----------------------------------------------------------
@@ -932,20 +940,22 @@ public class Analyzer extends ResolveConceptualVisitor {
                     return;
                 }
             }
+            if (!myInstanceEnvironment.flags
+                    .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)) {
+                // Making sure that we do not have something of VariableExp on the right hand side
+                // in a function assignment. - YS
+                if (petr.isVariable(stmt.getAssign())) {
+                    String msg =
+                            "Right hand side of the function assignment cannot be a variable expression! ";
+                    err.error(stmt.getAssign().getLocation(), msg);
+                    throw new TypeResolutionException();
+                }
 
-            // Making sure that we do not have something of VariableExp on the right hand side
-            // in a function assignment. - YS
-            if (petr.isVariable(stmt.getAssign())) {
-                String msg =
-                        "Right handside of the function assignment cannot be a variable expression! ";
-                err.error(stmt.getAssign().getLocation(), msg);
-                throw new TypeResolutionException();
-            }
-
-            // Making sure that for any entry replica call for arrays, we have a replica function
-            // defined for that type. - YS
-            if (stmt.getAssign() instanceof ProgramParamExp) {
-                stmt.getAssign().accept(this);
+                // Making sure that for any entry replica call for arrays, we have a replica function
+                // defined for that type. - YS
+                if (stmt.getAssign() instanceof ProgramParamExp) {
+                    stmt.getAssign().accept(this);
+                }
             }
         }
         catch (TypeResolutionException trex) {
@@ -1471,7 +1481,7 @@ public class Analyzer extends ResolveConceptualVisitor {
     private String incompatibleParameterModes(Mode operationMode,
             Mode procedureMode) {
 
-        return "Corresponding parameter in " + myCurrentConceptName
+        return "Corresponding parameter in " + myCurrentModuleName
                 + " is in mode '" + operationMode + "'.  Here, this parameter "
                 + "is implemented with mode '" + procedureMode + "'.  This is "
                 + "not allowed.";
@@ -1526,7 +1536,7 @@ public class Analyzer extends ResolveConceptualVisitor {
      */
     private String noMatchingOperation(Symbol name) {
         return "No operation named " + name + " to match this procedure in "
-                + "concept " + myCurrentConceptName + ".";
+                + "concept " + myCurrentModuleName + ".";
     }
 
     /**
@@ -1962,23 +1972,26 @@ public class Analyzer extends ResolveConceptualVisitor {
         if (myInstanceEnvironment.contains(bodyId)) {
             SymbolTable bodyTable =
                     myInstanceEnvironment.getSymbolTable(bodyId);
-            List<Entry> bodyParameters =
-                    bodyTable.getModuleScope().getModuleParameters();
+            if (bodyTable != null) {
+                List<Entry> bodyParameters =
+                        bodyTable.getModuleScope().getModuleParameters();
 
-            List<ModuleArgumentItem> declarationArguments = dec.getBodyParams();
+                List<ModuleArgumentItem> declarationArguments =
+                        dec.getBodyParams();
 
-            try {
-                sanityCheckProvidedArguments(bodyParameters,
-                        declarationArguments);
-            }
-            catch (Exception e) {
-                err.error(dec.getBodyName().getLocation(), e.getMessage());
+                try {
+                    sanityCheckProvidedArguments(bodyParameters,
+                            declarationArguments);
+                }
+                catch (Exception e) {
+                    err.error(dec.getBodyName().getLocation(), e.getMessage());
+                }
             }
         }
         else {
-            System.err.println("Sanity Check skipping realization arguments "
-                    + "for " + dec.getName() + " because no code for "
-                    + dec.getBodyName() + " is available.");
+            //System.err.println("Sanity Check skipping realization arguments " + 
+            //"for " + dec.getName() + " because no code for " +
+            //dec.getBodyName() + " is available.");
         }
     }
 
@@ -2400,8 +2413,10 @@ public class Analyzer extends ResolveConceptualVisitor {
         }
 
         //Make sure the mode is compatible.
-        if (!Mode.implementsCompatible(parameterOperationParameter.getMode(),
-                argumentOperationParameter.getMode())) {
+        //if (!Mode.implementsCompatible(parameterOperationParameter.getMode(), 
+        //argumentOperationParameter.getMode())) {
+        if (!Mode.implementsCompatible(argumentOperationParameter.getMode(),
+                parameterOperationParameter.getMode())) {
             throw new SanityCheckException(problemWithProvidedOperationMessage(
                     parameterIndex, incompatibleParameterModes(
                             parameterOperationParameter.getMode(),
@@ -2409,13 +2424,27 @@ public class Analyzer extends ResolveConceptualVisitor {
         }
 
         //Make sure the type is right.
-        if (!parameterOperationParameter.getType().getProgramName().equals(
-                argumentOperationParameter.getType().getProgramName())) {
+        //if (!parameterOperationParameter.getType().getProgramName().equals(
+        //argumentOperationParameter.getType().getProgramName())) {
+        if (!sanityCheckOperationParameterTypesMatch(
+                parameterOperationParameter.getType(),
+                argumentOperationParameter.getType())) {
             throw new SanityCheckException(problemWithProvidedOperationMessage(
                     parameterIndex, expectedDiffTypeMessage(
                             parameterOperationParameter.getType().asString(),
                             argumentOperationParameter.getType().asString())));
         }
+    }
+
+    private boolean sanityCheckOperationParameterTypesMatch(Type p1, Type p2) {
+        boolean isMatch = false;
+        if (p1.getProgramName().equals(p2.getProgramName())) {
+            isMatch = true;
+        }
+        else if (p1.getProgramName().getName().getName().equals("Entry")) {
+            isMatch = true;
+        }
+        return isMatch;
     }
 
     /** Sanity checks an operation named as an argument.  Evokes errors on
@@ -2477,6 +2506,16 @@ public class Analyzer extends ResolveConceptualVisitor {
         }
         else {
             ModuleScope curModuleScope = table.getModuleScope();
+            if (argument.getQualifier() != null) {
+                ModuleID qualID =
+                        ModuleID.createFacilityID(argument.getQualifier());
+                if (myInstanceEnvironment.contains(qualID)) {
+                    ModuleScope qualModuleScope =
+                            myInstanceEnvironment.getSymbolTable(qualID)
+                                    .getModuleScope();
+                    curModuleScope = qualModuleScope;
+                }
+            }
             if (curModuleScope
                     .containsOperation(argument.getName().getSymbol())) {
 
@@ -2489,6 +2528,11 @@ public class Analyzer extends ResolveConceptualVisitor {
                 catch (SanityCheckException e) {
                     err.error(argumentName.getLocation(), e.getMessage());
                 }
+            }
+            else {
+                String msg =
+                        "Unknown argument: \"" + argumentName.getName() + "\"";
+                err.error(argumentName.getLocation(), msg);
             }
         }
     }
@@ -2533,7 +2577,8 @@ public class Analyzer extends ResolveConceptualVisitor {
             Mode parameterMode = parameterAsVarEntry.getMode();
 
             if (parameterMode == Mode.DEFINITION) {
-                sanityCheckDefinitionArgument(parameterAsVarEntry, argument);
+                // This fails while checking with generic entries, so commented it out for now (Chuck)
+                //sanityCheckDefinitionArgument(parameterAsVarEntry, argument);
             }
             else {
                 //XXX : For the moment we assume if we've gotten here then the
