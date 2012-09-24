@@ -4,12 +4,21 @@
 target/
 *.class
 
+
 ###################
 # Temporary Files #
 ###################
 
 #gedit
 *~
+
+
+###########################
+# Per-developer IDE Files #
+###########################
+nbactions*.xml
+!nbactions-RSRG-Global.xml
+
 
 #######################
 # Per-Developer Files #

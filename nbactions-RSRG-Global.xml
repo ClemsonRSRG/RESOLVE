@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-format</actionName>
+            <displayName>format</displayName>
+            <goals>
+                <goal>java-formatter:format</goal>
+            </goals>
+        </action>
+        <action>
+            <actionName>CUSTOM-rebase</actionName>
+            <displayName>rebase</displayName>
+            <goals>
+                <goal>edu.clemson.cs.resolve:git-plugin:rebase</goal>
+            </goals>
+            <properties>
+                <repoLocation>git://github.com/ClemsonRSRG/RESOLVE.git</repoLocation>
+                <branch>master</branch>
+            </properties>
+        </action>
+        <action>
+            <actionName>CUSTOM-rebase --continue</actionName>
+            <displayName>rebase --continue</displayName>
+            <goals>
+                <goal>edu.clemson.cs.resolve:git-plugin:rebase-continue</goal>
+            </goals>
+            <properties>
+                <repoLocation>git://github.com/ClemsonRSRG/RESOLVE.git</repoLocation>
+                <branch>master</branch>
+            </properties>
+        </action>
+        <action>
+            <actionName>CUSTOM-rebase --abort</actionName>
+            <displayName>rebase --abort</displayName>
+            <goals>
+                <goal>edu.clemson.cs.resolve:git-plugin:rebase-abort</goal>
+            </goals>
+            <properties>
+                <repoLocation>git://github.com/ClemsonRSRG/RESOLVE.git</repoLocation>
+                <branch>master</branch>
+            </properties>
+        </action>
+    </actions>
