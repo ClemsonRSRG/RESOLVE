@@ -7158,6 +7158,52 @@ public class Verifier extends ResolveConceptualVisitor {
             // We didn't find where this facility declaration exist
             return;
         }
+        else {
+            if (curMDec instanceof FacilityModuleDec) {
+                /* YS - Get the global requires clause and add it to our list
+                   of assumes */
+                Exp gRequires = ((FacilityModuleDec) curMDec).getRequirement();
+                if (gRequires != null) {
+                    if (gRequires.getLocation() != null) {
+                        Location myLoc = gRequires.getLocation();
+                        myLoc.setDetails("Requires Clause for "
+                                + ((FacilityModuleDec) curMDec).getName());
+                        setLocation(gRequires, myLoc);
+                    }
+                    assertion.addAssume(gRequires);
+                }
+            }
+            else if (curMDec instanceof ConceptBodyModuleDec) {
+                /* YS - Get the global requires clause and add it to our list
+                   of assumes */
+                Exp gRequires = ((ConceptBodyModuleDec) curMDec).getRequires();
+                if (gRequires != null) {
+                    if (gRequires.getLocation() != null) {
+                        Location myLoc = gRequires.getLocation();
+                        myLoc.setDetails("Requires Clause for "
+                                + ((ConceptBodyModuleDec) curMDec).getName());
+                        setLocation(gRequires, myLoc);
+                    }
+                    assertion.addAssume(gRequires);
+                }
+            }
+            else if (curMDec instanceof EnhancementBodyModuleDec) {
+                /* YS - Get the global requires clause and add it to our list
+                   of assumes */
+                Exp gRequires =
+                        ((EnhancementBodyModuleDec) curMDec).getRequires();
+                if (gRequires != null) {
+                    if (gRequires.getLocation() != null) {
+                        Location myLoc = gRequires.getLocation();
+                        myLoc.setDetails("Requires Clause for "
+                                + ((EnhancementBodyModuleDec) curMDec)
+                                        .getName());
+                        setLocation(gRequires, myLoc);
+                    }
+                    assertion.addAssume(gRequires);
+                }
+            }
+        }
 
         // Not sure if this actually does much?
         if (myInstanceEnvironment.flags.isFlagSet(FLAG_REPARG_VC)) {
@@ -7324,6 +7370,28 @@ public class Verifier extends ResolveConceptualVisitor {
 
                 req.getLocation().setDetails("Facility Declaration Rule");
                 assertion.setFinalConfirm(req);
+            }
+
+            /* Check for Concept Realization Requires Clause */
+            if (dec.getBodyName() != null) {
+                ModuleID bid =
+                        ModuleID.createConceptBodyID(dec.getBodyName(), dec
+                                .getConceptName());
+                ConceptBodyModuleDec bodyDec =
+                        (ConceptBodyModuleDec) myInstanceEnvironment
+                                .getModuleDec(bid);
+
+                if (bodyDec != null) {
+                    Exp breq = bodyDec.getRequires();
+                    if (breq != null) {
+                        Location loc = (Location) breq.getLocation().clone();
+                        loc
+                                .setDetails("Requirement for Facility Declaration Rule for "
+                                        + dec.getName());
+                        setLocation(breq, loc);
+                        assertion.addConfirm(breq);
+                    }
+                }
             }
 
             /* What can we assume? */
