@@ -39,7 +39,7 @@ public class PrettyCTranslationInfo {
         List<String> stmts;
 
         private String getFunctionString() {
-            StringBuffer retBuf = new StringBuffer();
+            StringBuilder retBuf = new StringBuilder();
 
             retBuf.append(functionName).append("(");
             int size = params.size() - 1;
@@ -50,6 +50,8 @@ public class PrettyCTranslationInfo {
                 }
             }
             retBuf.append("){");
+            if(!returnType.equals("void"))
+                retBuf.append(returnType).append(functionName);
             for (String a : varInit) {
                 retBuf.append(a).append(";");
             }
@@ -76,7 +78,8 @@ public class PrettyCTranslationInfo {
 
     public void addFunction(PosSymbol newFuncName) {
         Function newFunc = new Function();
-        newFunc.functionName = stringFromSym(newFuncName, "void ");
+        newFunc.functionName = stringFromSym(newFuncName, null);
+        String te = newFunc.functionName.trim();
         funcList.add(newFunc);
         newFunc.params = new ArrayList<String>();
         newFunc.returnType = "void";
@@ -85,6 +88,10 @@ public class PrettyCTranslationInfo {
         currentFunc = newFunc;
     }
 
+    public void setReturnType(PosSymbol tyName){
+        
+        currentFunc.returnType = stringFromSym(tyName, null);
+    }
     /**
      * <p>Adds variable to current function's list </p>
      * @param varName
