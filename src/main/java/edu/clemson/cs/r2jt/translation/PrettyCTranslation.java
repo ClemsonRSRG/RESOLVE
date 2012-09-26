@@ -71,7 +71,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
 
     @Override
     public void preFacilityModuleDec(FacilityModuleDec dec) {
-        int a = 0;
+    //int a = 0;
     }
 
     @Override
@@ -80,9 +80,15 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
     }
 
     @Override
+    /**
+     * 
+     */
     public void preFacilityOperationDec(FacilityOperationDec dec) {
-        cInfo.addFunction(dec.getName());
-
+        NameTy retTy = null;
+        if (dec.getReturnTy() != null) {
+            retTy = (NameTy) dec.getReturnTy();
+        }
+        cInfo.addFunction(dec.getName(), retTy.getName());
     }
 
     @Override
@@ -107,6 +113,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
 
     public void preVarDec(VarDec dec) {
         PosSymbol name = dec.getName();
+
         if (!name.getName().startsWith("_")) {
             NameTy ty = (NameTy) dec.getTy();
             String stTy = ty.getName().getName();
@@ -154,6 +161,10 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
 
     public void preProgramIntegerExp(ProgramIntegerExp exp) {
         stmtBuf.append(exp.getValue());
+    }
+
+    public void preProgramParamExp(ProgramParamExp exp) {
+    //function with return
     }
 
     /*
