@@ -1,4 +1,6 @@
 /*
+ * This change on the main branch conflicts.
+ * 
  * This software is released under the new BSD 2006 license.
  * 
  * Note the new BSD license is equivalent to the MIT License, except for the
