@@ -24,10 +24,6 @@
             <goals>
                 <goal>edu.clemson.cs.resolve:git-plugin:rebase-continue</goal>
             </goals>
-            <properties>
-                <repoLocation>git://github.com/ClemsonRSRG/RESOLVE.git</repoLocation>
-                <branch>master</branch>
-            </properties>
         </action>
         <action>
             <actionName>CUSTOM-rebase --abort</actionName>
@@ -35,9 +31,12 @@
             <goals>
                 <goal>edu.clemson.cs.resolve:git-plugin:rebase-abort</goal>
             </goals>
-            <properties>
-                <repoLocation>git://github.com/ClemsonRSRG/RESOLVE.git</repoLocation>
-                <branch>master</branch>
-            </properties>
+        </action>
+        <action>
+            <actionName>CUSTOM-rebase --skip</actionName>
+            <displayName>rebase --skip</displayName>
+            <goals>
+                <goal>edu.clemson.cs.resolve:git-plugin:rebase-skip</goal>
+            </goals>
         </action>
     </actions>

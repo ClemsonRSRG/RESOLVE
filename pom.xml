@@ -162,7 +162,7 @@
         <dependency>
             <groupId>edu.clemson.cs.resolve</groupId>
             <artifactId>git-plugin</artifactId>
-            <version>0.0.1-alpha1</version>
+            <version>0.0.1-alpha3</version>
         </dependency>
     </dependencies>
 </project>
