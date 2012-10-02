@@ -76,7 +76,7 @@ public class PrettyCTranslationInfo {
      * @param newFuncName
      */
 
-    public void addFunction(PosSymbol newFuncName) {
+    public void addFunction(PosSymbol newFuncName, PosSymbol newReturnTy) {
         Function newFunc = new Function();
         newFunc.functionName = stringFromSym(newFuncName, null);
         String te = newFunc.functionName.trim();
