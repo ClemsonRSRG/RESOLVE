@@ -9,6 +9,7 @@ import java.util.List;
 
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.translation.PrettyCTranslationInfo.Function;
+import java.io.StringReader;
 
 /**
  *
@@ -31,12 +32,14 @@ public class PrettyCTranslationInfo {
 
     class Function {
 
-        String returnType;
+        String[] returnType;
         String functionName;
+        String returnName;
         List<String> params;
 
         List<String> varInit;
         List<String> stmts;
+        StringBuffer allStmt;
 
         private String getFunctionString() {
             StringBuilder retBuf = new StringBuilder();
@@ -50,17 +53,25 @@ public class PrettyCTranslationInfo {
                 }
             }
             retBuf.append("){");
-            if(!returnType.equals("void"))
-                retBuf.append(returnType).append(functionName);
+            if(!returnType.equals("void")){
+                retBuf.append(returnType[0]).append(returnName)
+                        .append(returnType[1]).append(";");
+            }
+            else{
+                retBuf.append("void ");
+            }
             for (String a : varInit) {
                 retBuf.append(a).append(";");
             }
             for (String a : stmts) {
-                retBuf.append(a).append(";");
-
+                //retBuf.append(a).append(";");
+                
+            }
+            if(allStmt != null){
+                retBuf.append(allStmt);
             }
             if (!returnType.equals("void")) {
-                retBuf.append("return ").append(functionName).append(";");
+                retBuf.append("return ").append(returnName).append(";");
             }
             retBuf.append(" }");
 
@@ -78,19 +89,26 @@ public class PrettyCTranslationInfo {
 
     public void addFunction(PosSymbol newFuncName, PosSymbol newReturnTy) {
         Function newFunc = new Function();
+        
+        newFunc.returnType = new String[2];
+        newFunc.returnType[0] = "void ";
+        if(newReturnTy != null){
+            newFunc.returnType = getCVarType(newReturnTy.getName());
+        }
+        newFunc.returnName = newFuncName.getName();
         newFunc.functionName = stringFromSym(newFuncName, null);
         String te = newFunc.functionName.trim();
         funcList.add(newFunc);
         newFunc.params = new ArrayList<String>();
-        newFunc.returnType = "void";
         newFunc.stmts = new ArrayList<String>();
         newFunc.varInit = new ArrayList<String>();
+        newFunc.allStmt = new StringBuffer();
         currentFunc = newFunc;
     }
 
-    public void setReturnType(PosSymbol tyName){
-        
-        currentFunc.returnType = stringFromSym(tyName, null);
+    
+    public void appendToStmt(String append){
+        currentFunc.allStmt.append(append);
     }
     /**
      * <p>Adds variable to current function's list </p>
@@ -116,6 +134,9 @@ public class PrettyCTranslationInfo {
     public void appendToFuncVarInit(String data) {
         if (!(currentFunc == null)) {
             currentFunc.varInit.add(data);
+        }
+        else{
+            globalVarsList.add(data);
         }
     }
 
@@ -150,15 +171,56 @@ public class PrettyCTranslationInfo {
     public String stringFromSym(PosSymbol pos, String prepend) {
         int n = pos.getLocation().getPos().getLine() - lineCount;
         String retString;
-        if (prepend != null)
+        if (prepend != null){
             retString = prepend + pos.getName();
-        else
+        }
+        else{
             retString = pos.getName();
-        while (n > 0) {
-            retString = "\n" + retString;
-            n--;
+        }
+        return stringWithLines(retString, n);
+    }
+    
+    public String getCVarsWithLines(PosSymbol pos, String prepend){
+        String[] typeString = getCVarType(pos.getName());
+        if (prepend != null){
+            typeString[0] = prepend + typeString[0];
+        }
+        int n = pos.getLocation().getPos().getLine() - lineCount;
+        return stringWithLines(typeString[0], n);
+    }
+    
+    public String[] getCVarType(String ty){
+        String[] typeString = {null,null};
+        if(ty.equals("Integer")){
+            typeString[0] = "int ";
+            typeString[1] = "= 0";
+        }
+        else if(ty.equals("Boolean")){
+            typeString[0] = "int ";
+            typeString[1] = "= 0";
+        }
+        else if(ty.equals("Character")){
+            typeString[0] = "char ";
+            typeString[1] = "= /0";
+        }
+        else{
+            typeString[0] = ty;
+            typeString[1] = "= /0";
+        }
+        
+        return typeString;
+    }
+    
+    public String stringWithLines(String toAdd, int lines){
+        StringBuffer retString;
+        retString = new StringBuffer("");
+        int count = 0;
+        while(count < lines){
+            retString.append("\n");
+            count++;
             lineCount++;
         }
-        return retString;
+        retString.append(toAdd);
+        return retString.toString();
     }
 }
