@@ -95,13 +95,13 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
     public void preParameterVarDec(ParameterVarDec dec) {
         StringBuilder parmSet = new StringBuilder();
         if (dec.getTy() instanceof NameTy) {
-            parmSet.append(cInfo.stringFromSym(
+            parmSet.append(cInfo.getCVarsWithLines(
                     ((NameTy) dec.getTy()).getName(), null));
         }
         else {
             System.out.println("How did you reach here?");
         }
-        parmSet.append(cInfo.stringFromSym(dec.getName(), null));
+        parmSet.append(" ").append(cInfo.stringFromSym(dec.getName(), null));
         cInfo.addParamToFunc(parmSet.toString());
     }
 
@@ -109,6 +109,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
     public void preCallStmt(CallStmt stmt) {
         String a = cInfo.stringFromSym(stmt.getName(), null);
         cInfo.addToStmts(a + "()");
+        cInfo.appendToStmt(a + "();");
     }
 
     public void preVarDec(VarDec dec) {
@@ -118,10 +119,9 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
             NameTy ty = (NameTy) dec.getTy();
             String stTy = ty.getName().getName();
             String newTy, init;
-            init = " ";
             if (stTy.equals("Integer")) {
                 newTy = "int";
-                init = " = 0";
+                init = "= 0";
             }
             else if (stTy.equals("Char_Str")) {
                 newTy = "char*";
@@ -129,78 +129,161 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
             }
             else if (stTy.equals("Boolean")) {
                 newTy = "int";
-                init = " = 0";
+                init = "= 0";
             }
-            else
+            else if (stTy.equals("Character")) {
+                newTy = "char";
+                init = "= /0";
+            }
+            else{
                 newTy = "<empty>";
-            cInfo.appendToFuncVarInit(cInfo.stringFromSym(dec.getName(), newTy
-                    + " ")
-                    + init);
+                init = " = NULL";
+            }
+            String[] retTy = cInfo.getCVarType(stTy);
+            cInfo.appendToFuncVarInit(cInfo.stringFromSym(dec.getName(), retTy[0])
+                    + retTy[1]);
         }
     }
 
+    @Override
     public void preFuncAssignStmt(FuncAssignStmt stmt) {
         stmtBuf = new StringBuffer();
     }
 
+    @Override
     public void midFuncAssignStmt(FuncAssignStmt stmt,
             ResolveConceptualElement prevChild,
             ResolveConceptualElement nextChild) {
-        if (prevChild != null && nextChild != null)
+        if (prevChild != null && nextChild != null){
             stmtBuf.append(" = ");
+            cInfo.appendToStmt(" = ");
+        }
     }
 
+    @Override
     public void postFuncAssignStmt(FuncAssignStmt stmt) {
-        cInfo.addToStmts(stmtBuf.toString());
+        //cInfo.addToStmts(stmtBuf.toString());
+        cInfo.appendToStmt(";");
     }
 
+    @Override
     public void preVariableNameExp(VariableNameExp var) {
         String name = cInfo.stringFromSym(var.getName(), null);
         stmtBuf.append(name);
+        cInfo.appendToStmt(name);
     }
 
+    @Override
     public void preProgramIntegerExp(ProgramIntegerExp exp) {
         stmtBuf.append(exp.getValue());
+        cInfo.appendToStmt(Integer.toString(exp.getValue()));
     }
 
+    @Override
     public void preProgramParamExp(ProgramParamExp exp) {
     //function with return
+        System.out.println("out here");
     }
 
+    
+    @Override
+    public void preIfStmt(IfStmt stmt){
+        stmtBuf = new StringBuffer();
+        stmtBuf.append("if(");
+        cInfo.appendToStmt("if(");
+    }
+    
+    @Override
+    public void midIfStmt(IfStmt stmt, ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild){
+        
+    }
+    
+    @Override
+    public void preIfStmtThenclause(IfStmt node){
+        stmtBuf.append("){");
+        cInfo.appendToStmt("){");
+    }
+    
+    @Override
+    public void postIfStmtThenclause(IfStmt node){
+        stmtBuf.append("}");
+        cInfo.appendToStmt("}");
+    }
+    
+    @Override
+    public void postIfStmt(IfStmt stmt){
+        cInfo.addToStmts(stmtBuf.toString());
+    }
     /*
      * End of Visitor Methods
      */
 
+    @Override
     public void midProgramOpExp(ProgramOpExp exp,
             ResolveConceptualElement prevChild,
             ResolveConceptualElement nextChild) {
         if (prevChild != null && nextChild != null) {
             switch (exp.getOperator()) {
             case ProgramOpExp.AND:
-                stmtBuf.append(" && ");
+                cInfo.appendToStmt(" && ");
                 break;
             case ProgramOpExp.OR:
-                stmtBuf.append(" || ");
+                cInfo.appendToStmt(" || ");
                 break;
             case ProgramOpExp.EQUAL:
-                stmtBuf.append(" == ");
+                cInfo.appendToStmt(" == ");
                 break;
             case ProgramOpExp.NOT_EQUAL:
-                stmtBuf.append(" != ");
+                cInfo.appendToStmt(" != ");
                 break;
             case ProgramOpExp.LT:
-                stmtBuf.append(" < ");
+                cInfo.appendToStmt(" < ");
                 break;
             case ProgramOpExp.LT_EQL:
-                stmtBuf.append(" <= ");
+                cInfo.appendToStmt(" <= ");
+                break;
+            case ProgramOpExp.GT:
+                cInfo.appendToStmt(" > ");
+                break;
+            case ProgramOpExp.GT_EQL:
+                cInfo.appendToStmt(" >= ");
                 break;
             case ProgramOpExp.PLUS:
-                stmtBuf.append(" + ");
+                cInfo.appendToStmt(" + ");
+                break;
+            case ProgramOpExp.MINUS:
+                cInfo.appendToStmt(" - ");
+                break;
+            case ProgramOpExp.MULTIPLY:
+                cInfo.appendToStmt(" * ");
+                break;
+            case ProgramOpExp.DIVIDE:
+                cInfo.appendToStmt(" / ");
+                break;
+            case ProgramOpExp.REM:
+                cInfo.appendToStmt(" % ");
+                break;
+            case ProgramOpExp.MOD:
+                cInfo.appendToStmt(" % ");
+                break;
+            case ProgramOpExp.DIV:
+                cInfo.appendToStmt(" / ");
+                break;
+            case ProgramOpExp.NOT:
+                cInfo.appendToStmt(" == 0");
+                break;
+            case ProgramOpExp.UNARY_MINUS:
+                cInfo.appendToStmt(" * -1 ");
                 break;
             default:
                 break;
             }
         }
+    }
+    
+    public String outputCode(){
+        return cInfo.toString();
     }
 
     public static final void setUpFlags() {
