@@ -6,7 +6,7 @@
     <artifactId>RESOLVE</artifactId>
     <version>12.09.01a</version>
     <packaging>jar</packaging>
-
+<!-- this is a comment -->
     <name>RESOLVE</name>
     <url>http://maven.apache.org</url>
     
