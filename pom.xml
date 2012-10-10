@@ -130,6 +130,23 @@
         								<execute/>
         							</action>
         						</pluginExecution>
+        						<pluginExecution>
+        							<pluginExecutionFilter>
+        								<groupId>org.antlr</groupId>
+        								<artifactId>
+        									antlr3-maven-plugin
+        								</artifactId>
+        								<versionRange>
+        									[3.3,)
+        								</versionRange>
+        								<goals>
+        									<goal>antlr</goal>
+        								</goals>
+        							</pluginExecutionFilter>
+        							<action>
+        								<ignore></ignore>
+        							</action>
+        						</pluginExecution>
         					</pluginExecutions>
         				</lifecycleMappingMetadata>
         			</configuration>
