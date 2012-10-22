@@ -1621,7 +1621,7 @@ public class Controller {
 
     private void translatePrettyModuleDec(File file, SymbolTable table,
             ModuleDec dec) {
-        PrettyJavaTranslator translator =
+        /*PrettyJavaTranslator translator =
                 new PrettyJavaTranslator(myInstanceEnvironment, table, dec, err);
         String targetFile = myInstanceEnvironment.getTargetFile().toString();
         String thisFile = dec.getName().getFile().toString();
@@ -1631,7 +1631,14 @@ public class Controller {
             translator.visitModuleDec(dec);
             //System.out.println("Translated: "+dec.getName().getName());
             translator.outputJavaCode(file);
-        }
+        }*/
+
+        PrettyCTranslation prettyT =
+                new PrettyCTranslation(myInstanceEnvironment, table, dec, err);
+        TreeWalker tw = new TreeWalker(prettyT);
+        tw.visit(dec);
+
+        prettyT.outputCCode(file);
     }
 
     /*
