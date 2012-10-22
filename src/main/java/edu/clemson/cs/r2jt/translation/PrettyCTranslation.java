@@ -4,13 +4,17 @@
  */
 package edu.clemson.cs.r2jt.translation;
 
+import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
+import edu.clemson.cs.r2jt.archiving.Archiver;
+import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.scope.SymbolTable;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.r2jt.utilities.Flag;
+import java.io.File;
 
 /**
  *
@@ -27,6 +31,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
     private ErrorHandler err;
     private String targetFileName;
     private SymbolTable table;
+    private boolean isMath;
 
     //Flags
     private static final String FLAG_SECTION_NAME = "Pretty C Translation";
@@ -53,6 +58,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
         targetFileName = dec.getName().getFile().getName();
         cInfo = new PrettyCTranslationInfo(dec.getName().getFile().getName());
         stmtBuf = new StringBuffer();
+        isMath = false;
     }
 
     /*
@@ -75,9 +81,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
     }
 
     @Override
-    public void postFacilityModuleDec(FacilityModuleDec dec) {
-        System.out.println("Debug");
-    }
+    public void postFacilityModuleDec(FacilityModuleDec dec) {}
 
     @Override
     /**
@@ -87,16 +91,61 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
         NameTy retTy = null;
         if (dec.getReturnTy() != null) {
             retTy = (NameTy) dec.getReturnTy();
+            cInfo.addFunction(dec.getName(), retTy.getName());
         }
-        cInfo.addFunction(dec.getName(), retTy.getName());
+        else {
+            cInfo.addFunction(dec.getName(), null);
+        }
+    }
+
+    // TODO : Fix this. Requires pre-post procedures for 'resolve verify' tests. 
+    @Override
+    public void midFacilityOperationDec(FacilityOperationDec node,
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+        if (prevChild != null && nextChild != null) {
+            if (!(prevChild.equals(node.getEnsures()) || prevChild.equals(node
+                    .getRequires()))) {
+                if (nextChild.equals(node.getRequires())) {
+                    Exp req = (Exp) nextChild;
+                    cInfo.increaseLineStatementBuffer(req.getLocation()
+                            .getPos().getLine());
+                    cInfo.appendToStmt("/*requires");
+                }
+                else if (nextChild.equals(node.getEnsures())) {
+                    Exp en = (Exp) nextChild;
+                    cInfo.increaseLineStatementBuffer(en.getLocation().getPos()
+                            .getLine());
+                    cInfo.appendToStmt("/*ensures");
+                }
+            }
+            else {
+                if (nextChild.equals(node.getRequires())) {
+                    Exp req = (Exp) nextChild;
+                    cInfo.increaseLineStatementBuffer(req.getLocation()
+                            .getPos().getLine());
+                    cInfo.appendToStmt("requires");
+                }
+                else if (nextChild.equals(node.getEnsures())) {
+                    Exp en = (Exp) nextChild;
+                    cInfo.increaseLineStatementBuffer(en.getLocation().getPos()
+                            .getLine());
+                    cInfo.appendToStmt("ensures");
+                }
+                else {
+                    cInfo.appendToStmt("*/");
+                }
+            }
+        }
+
     }
 
     @Override
     public void preParameterVarDec(ParameterVarDec dec) {
         StringBuilder parmSet = new StringBuilder();
         if (dec.getTy() instanceof NameTy) {
-            parmSet.append(cInfo.getCVarsWithLines(
-                    ((NameTy) dec.getTy()).getName(), null));
+            parmSet.append(cInfo.getCVarsWithLines(((NameTy) dec.getTy())
+                    .getName(), null));
         }
         else {
             System.out.println("How did you reach here?");
@@ -135,12 +184,13 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
                 newTy = "char";
                 init = "= /0";
             }
-            else{
+            else {
                 newTy = "<empty>";
                 init = " = NULL";
             }
             String[] retTy = cInfo.getCVarType(stTy);
-            cInfo.appendToFuncVarInit(cInfo.stringFromSym(dec.getName(), retTy[0])
+            cInfo.appendToFuncVarInit(cInfo.stringFromSym(dec.getName(),
+                    retTy[0])
                     + retTy[1]);
         }
     }
@@ -154,8 +204,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
     public void midFuncAssignStmt(FuncAssignStmt stmt,
             ResolveConceptualElement prevChild,
             ResolveConceptualElement nextChild) {
-        if (prevChild != null && nextChild != null){
-            stmtBuf.append(" = ");
+        if (prevChild != null && nextChild != null) {
             cInfo.appendToStmt(" = ");
         }
     }
@@ -167,57 +216,172 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
     }
 
     @Override
+    public void preVarExp(VarExp exp) {
+        cInfo.appendToStmt(cInfo.stringFromSym(exp.getName(), null));
+    }
+
+    @Override
     public void preVariableNameExp(VariableNameExp var) {
         String name = cInfo.stringFromSym(var.getName(), null);
-        stmtBuf.append(name);
         cInfo.appendToStmt(name);
     }
 
     @Override
     public void preProgramIntegerExp(ProgramIntegerExp exp) {
-        stmtBuf.append(exp.getValue());
+        int lin = exp.getLocation().getPos().getLine();
+        cInfo.increaseLineStatementBuffer(lin);
         cInfo.appendToStmt(Integer.toString(exp.getValue()));
     }
 
     @Override
     public void preProgramParamExp(ProgramParamExp exp) {
-    //function with return
-        System.out.println("out here");
+        //function with return
+        cInfo.appendToStmt(cInfo.stringFromSym(exp.getName(), null));
+        cInfo.appendToStmt("(");
     }
 
-    
     @Override
-    public void preIfStmt(IfStmt stmt){
-        stmtBuf = new StringBuffer();
-        stmtBuf.append("if(");
+    public void postProgramParamExp(ProgramParamExp exp) {
+        cInfo.appendToStmt(")");
+    }
+
+    @Override
+    public void midProgramParamExp(ProgramParamExp exp,
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+        System.out.println();
+    }
+
+    @Override
+    public void preProgramParamExpArguments(ProgramParamExp node) {
+        System.out.println();
+    }
+
+    /*
+     * https://www.pivotaltracker.com/story/show/37258073
+     */
+    @Override
+    public void preProgramFunctionExp(ProgramFunctionExp exp) {
+        cInfo.appendToStmt("/*");
+    }
+
+    @Override
+    public void postProgramFunctionExp(ProgramFunctionExp exp) {
+        cInfo.appendToStmt("*/");
+    }
+
+    /*
+     * Statement walks
+     */
+    @Override
+    public void preIfStmt(IfStmt stmt) {
+        int lin = stmt.getTest().getLocation().getPos().getLine();
+        cInfo.appendToStmt(getNewLines(lin));
         cInfo.appendToStmt("if(");
     }
-    
+
     @Override
     public void midIfStmt(IfStmt stmt, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild){
-        
+            ResolveConceptualElement nextChild) {
+
     }
-    
+
     @Override
-    public void preIfStmtThenclause(IfStmt node){
-        stmtBuf.append("){");
+    public void preIfStmtThenclause(IfStmt node) {
         cInfo.appendToStmt("){");
     }
-    
+
     @Override
-    public void postIfStmtThenclause(IfStmt node){
-        stmtBuf.append("}");
+    public void postIfStmtThenclause(IfStmt node) {
         cInfo.appendToStmt("}");
     }
-    
+
     @Override
-    public void postIfStmt(IfStmt stmt){
-        cInfo.addToStmts(stmtBuf.toString());
+    public void postIfStmt(IfStmt stmt) {}
+
+    @Override
+    public void preIfStmtElseclause(IfStmt stmt) {
+        cInfo.appendToStmt(" else{ ");
     }
+
+    @Override
+    public void postIfStmtElseclause(IfStmt stmt) {
+        cInfo.appendToStmt("} ");
+    }
+
+    @Override
+    public void preWhileStmt(WhileStmt stmt) {
+        int lin = stmt.getTest().getLocation().getPos().getLine();
+        cInfo.appendToStmt(getNewLines(lin));
+        cInfo.appendToStmt("while(");
+    }
+
+    @Override
+    public void preWhileStmtStatements(WhileStmt stmt) {
+        if (stmt.getChanging().size() < 1) {
+            cInfo.appendToStmt("){");
+        }
+        else
+            cInfo.appendToStmt(" */");
+    }
+
+    public void preWhileStmtChanging(WhileStmt stmt) {
+        cInfo.appendToStmt("){");
+        int lin = stmt.getChanging().get(0).getLocation().getPos().getLine();
+        cInfo.appendToStmt(getNewLines(lin));
+        cInfo.appendToStmt("/* changing ");
+    }
+
+    public void postWhileStmtChanging(WhileStmt stmt) {}
+
+    public void midWhileStmt(WhileStmt node,
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+        if (node.getMaintaining().equals(nextChild)) {
+            Exp main = (Exp) nextChild;
+            int lin = main.getLocation().getPos().getLine();
+            cInfo.appendToStmt(getNewLines(lin));
+            cInfo.appendToStmt("maintaining ");
+        }
+        else if (node.getDecreasing().equals(nextChild)) {
+            Exp dec = (Exp) nextChild;
+            int lin = dec.getLocation().getPos().getLine();
+            cInfo.appendToStmt(getNewLines(lin));
+            cInfo.appendToStmt("decreasing ");
+        }
+    }
+
+    public void postWhileStmt(WhileStmt stmt) {
+        cInfo.appendToStmt(" }");
+    }
+
     /*
      * End of Visitor Methods
      */
+
+    public String output() {
+        return cInfo.toString();
+    }
+
+    public void outputCCode(File outputFile) {
+        //Assume files have already been translated
+        if (!env.flags.isFlagSet(ResolveCompiler.FLAG_WEB)
+                || env.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
+            //outputAsFile(targetFileName, getMainBuffer());
+            //outputAsFile(outputFile.getAbsolutePath(), getMainBuffer());
+            System.out.println(output());
+        }
+        else {
+            outputToReport(output());
+        }
+        //outputAsFile(getMainFileName(), getMainBuffer());
+    }
+
+    private void outputToReport(String fileContents) {
+        CompileReport report = env.getCompileReport();
+        report.setTranslateSuccess();
+        report.setOutput(fileContents);
+    }
 
     @Override
     public void midProgramOpExp(ProgramOpExp exp,
@@ -281,8 +445,20 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
             }
         }
     }
-    
-    public String outputCode(){
+
+    private String getNewLines(int position) {
+        StringBuilder retString = new StringBuilder();
+        int n = position - cInfo.lineCount;
+        int count = 0;
+        while (count < n) {
+            retString.append("\n");
+            count++;
+            cInfo.lineCount++;
+        }
+        return retString.toString();
+    }
+
+    public String outputCode() {
         return cInfo.toString();
     }
 
