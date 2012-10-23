@@ -64,6 +64,7 @@ import java.util.Iterator;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.AsStringCapability;
+import java.lang.reflect.ParameterizedType;
 
 public abstract class ResolveConceptualElement implements AsStringCapability {
 
@@ -119,10 +120,10 @@ public abstract class ResolveConceptualElement implements AsStringCapability {
                             && ResolveConceptualElement.class
                                     .isAssignableFrom(fieldList.get(0)
                                             .getClass())) {
-                        children.add(new VirtualListNode(
-                                this,
-                                curField.getName(),
-                                (List<ResolveConceptualElement>) fieldList));
+                        children.add(new VirtualListNode(this, curField
+                                .getName(),
+                                (List<ResolveConceptualElement>) fieldList,
+								(Class<?>)((ParameterizedType)curField.getGenericType()).getActualTypeArguments()[0]));
                     }
 
                 }

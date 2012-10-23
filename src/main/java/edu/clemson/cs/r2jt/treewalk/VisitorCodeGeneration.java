@@ -13,7 +13,7 @@ import java.util.Enumeration;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.absyn.VirtualListNode;
 import edu.clemson.cs.r2jt.collections.List;
-import java.lang.reflect.Field;
+import java.lang.reflect.*;
 import java.util.StringTokenizer;
 
 public class VisitorCodeGeneration {
@@ -74,57 +74,12 @@ public class VisitorCodeGeneration {
 
     }
 
-    public static void generateVisitorClass() {
-        System.out.println("public abstract class TreeWalkerVisitor {");
-        System.out
-                .println("\tpublic void preAny(ResolveConceptualElement node) { }");
-        System.out
-                .println("\tpublic void postAny(ResolveConceptualElement node) { }");
-        try {
-            Class<?>[] absynClasses = getClasses("edu.clemson.cs.r2jt.absyn");
-            for (int i = 0; i < absynClasses.length; ++i) {
-                if (ResolveConceptualElement.class
-                        .isAssignableFrom(absynClasses[i])) {
-                    String className = absynClasses[i].getSimpleName();
-                    System.out.flush();
-                    System.out.println("\tpublic void pre" + className + "("
-                            + className + " node) { }");
-                    System.out
-                            .println("\tpublic void mid"
-                                    + className
-                                    + "("
-                                    + className
-                                    + " node, ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) { }");
-                    System.out.println("\tpublic void post" + className + "("
-                            + className + " node) { }");
-
-                    Field[] curFields = absynClasses[i].getDeclaredFields();
-                    for (int fieldIndex = 0; fieldIndex < curFields.length; ++i) {
-                        if (List.class.isAssignableFrom(curFields[fieldIndex]
-                                .getClass())) {
-                            System.out.println("\tpublic void pre" + className
-                                    + curFields[fieldIndex].getName() + " ("
-                                    + className + " node) { }");
-                            System.out.println("\tpublic void post" + className
-                                    + curFields[fieldIndex].getName() + " ("
-                                    + className + " node) { }");
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        System.out.println("}");
-        System.out.flush();
-    }
-
     public static StringBuilder generateVisitorClass(String walkerName) {
         final StringBuilder buffer = new StringBuilder();
-        buffer.append("import " + myPackagePath + "absyn.*;\n\n");
+        buffer.append("import ");
+        buffer.append(myPackagePath);
+        buffer.append("absyn.*;\n");
+        buffer.append("import edu.clemson.cs.r2jt.data.PosSymbol;\n\n");
         buffer.append("public abstract class ");
         buffer.append(walkerName);
         buffer.append(" {\n");
@@ -134,53 +89,28 @@ public class VisitorCodeGeneration {
                 .append("\tpublic void postAny(ResolveConceptualElement data) { }\n\n");
         try {
             Class<?>[] absynClasses = getClasses(myPackagePath + "absyn");
-            for (int i = 0; i < absynClasses.length; ++i) {
-                if (ResolveConceptualElement.class
-                        .isAssignableFrom(absynClasses[i])) {
-                    if (VirtualListNode.class.isAssignableFrom(absynClasses[i])) {
+            for (Class<?> absynClass : absynClasses) {
+                if (ResolveConceptualElement.class.isAssignableFrom(absynClass)) {
+                    if (VirtualListNode.class.isAssignableFrom(absynClass)) {
                         continue;
                     }
 
-                    String className = absynClasses[i].getSimpleName();
+                    String className = absynClass.getSimpleName();
 
-                    buffer.append("// ");
-                    buffer.append(className);
-                    buffer.append("\n");
+                    addMethods(buffer, className, className,
+                            "ResolveConceptualElement");
 
-                    buffer.append("\tpublic void pre" + className + "("
-                            + className + " data) { }\n");
-                    buffer
-                            .append("\tpublic void mid"
-                                    + className
-                                    + "("
-                                    + className
-                                    + " node, ResolveConceptualElement prevChild, ResolveConceptualElement nextChild) { }\n");
-                    buffer.append("\tpublic void post" + className + "("
-                            + className + " data) { }\n");
-
-                    Field[] curFields = absynClasses[i].getDeclaredFields();
-                    for (int fieldIndex = 0; fieldIndex < curFields.length; ++fieldIndex) {
-                        //buffer.append(curFields[fieldIndex].getName());
-                        //buffer.append(" : ");
-                        //buffer.append(curFields[fieldIndex].getType().getSimpleName());
-                        //buffer.append("\n");
-                        if (List.class.isAssignableFrom(curFields[fieldIndex]
-                                .getType())) {
-                            String listName =
-                                    toUppercaseNotation(curFields[fieldIndex]
-                                            .getName());
-                            buffer.append("\tpublic void pre");
-                            buffer.append(className);
-                            buffer.append(listName);
-                            buffer.append("(");
-                            buffer.append(className);
-                            buffer.append(" node) { }\n");
-                            buffer.append("\tpublic void post");
-                            buffer.append(className);
-                            buffer.append(listName);
-                            buffer.append("(");
-                            buffer.append(className);
-                            buffer.append(" node) { }\n");
+                    Field[] curFields = absynClass.getDeclaredFields();
+                    for (Field curField : curFields) {
+                        if (List.class.isAssignableFrom(curField.getType())) {
+                            String typeParam =
+                                    ((Class<?>)((ParameterizedType) curField
+                                            .getGenericType())
+                                            .getActualTypeArguments()[0]).getSimpleName();
+                            String listName = toCamelCase(curField.getName());
+                            buffer.append("\n");
+                            addMethods(buffer, className + listName, className,
+                                    typeParam);
                         }
                     }
                     buffer.append("\n");
@@ -188,14 +118,53 @@ public class VisitorCodeGeneration {
             }
         }
         catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
         buffer.append("}\n");
         return buffer;
-        //System.out.println(myOutputBuffer.toString());
-        //System.out.flush();
+    }
+
+    public static String extractSimpleName(String qualifiedName) {
+        StringTokenizer tokens = new StringTokenizer(qualifiedName, " .");
+        String token = "";
+        while (tokens.hasMoreTokens()) {
+            token = tokens.nextToken();
+        }
+        return token;
+    }
+
+    public static void addMethods(StringBuilder buffer, String methodName,
+            String className, String midTypeParameter) {
+        // Class name comment
+        buffer.append("// ");
+        buffer.append(methodName);
+        buffer.append("\n");
+
+        // Pre method
+        buffer.append("\tpublic void pre");
+        buffer.append(methodName);
+        buffer.append("(");
+        buffer.append(className);
+        buffer.append(" data) { }\n");
+
+        // Mid method
+        buffer.append("\tpublic void mid");
+        buffer.append(methodName);
+        buffer.append("(");
+        buffer.append(className);
+        buffer.append(" node, ");
+        buffer.append(midTypeParameter);
+        buffer.append(" previous, ");
+        buffer.append(midTypeParameter);
+        buffer.append(" next) { }\n");
+
+        // Post method
+        buffer.append("\tpublic void post");
+        buffer.append(methodName);
+        buffer.append("(");
+        buffer.append(className);
+        buffer.append(" data) { }\n");
     }
 
     /**
@@ -260,7 +229,7 @@ public class VisitorCodeGeneration {
         return classes;
     }
 
-    private static String toUppercaseNotation(String s) {
+    private static String toCamelCase(String s) {
         StringBuilder buffer = new StringBuilder();
         StringTokenizer tokens = new StringTokenizer(s, "_");
         while (tokens.hasMoreTokens()) {
