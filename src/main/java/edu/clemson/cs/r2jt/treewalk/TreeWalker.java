@@ -83,9 +83,6 @@ public class TreeWalker {
     public void visit(ResolveConceptualElement e) {
         if (e != null) {
             try {
-                // get the class of the current tree element (MathModuleDec, DefinitionDec, etc.)
-                Class<?> elementClass = e.getClass();
-
                 // invoke the "pre" visitor method(s)
                 invokeVisitorMethods("pre", e);
 
@@ -93,6 +90,7 @@ public class TreeWalker {
                 if (!walkOverride(e)) {
                     List<ResolveConceptualElement> children = e.getChildren();
 
+                    // if we have children, iterate over them
                     if (children.size() > 0) {
                         Iterator<ResolveConceptualElement> iter =
                                 children.iterator();
@@ -100,9 +98,12 @@ public class TreeWalker {
                         ResolveConceptualElement prevChild = null, nextChild =
                                 null;
                         while (iter.hasNext()) {
+                            // invoke the "mid" visitor method
                             prevChild = nextChild;
                             nextChild = iter.next();
                             invokeVisitorMethods("mid", e, prevChild, nextChild);
+
+                            // recursively visit the child
                             visit(nextChild);
                         }
                         invokeVisitorMethods("mid", e, nextChild, null);
@@ -113,7 +114,7 @@ public class TreeWalker {
                 invokeVisitorMethods("post", e);
             }
             catch (Exception ex) {
-                // TODO Auto-generated catch block
+                // if there is any exception, it is a bug
                 ex.printStackTrace();
             }
         }
@@ -124,12 +125,7 @@ public class TreeWalker {
         boolean pre = prefix.equals("pre"), post = prefix.equals("post"), mid =
                 prefix.equals("mid"), list = (e[0] instanceof VirtualListNode);
 
-        if (mid && list) {
-            return;
-        }
-        ;
-
-        // call a generic visitor method
+        // Invoke generic visitor methods (preAny, postAny)
         if (pre) {
             myVisitor.preAny(e[0]);
         }
@@ -137,6 +133,8 @@ public class TreeWalker {
             myVisitor.postAny(e[0]);
         }
 
+        // Get the heirarchy of classes from which this node inherits
+        // e.g., [ConceptModuleDec, ModuleDec, Dec, ResolveConceptualElement]
         Class<?> elementClass = e[0].getClass();
         ArrayList<Class<?>> classHierarchy = new ArrayList<Class<?>>();
 
@@ -158,46 +156,62 @@ public class TreeWalker {
             classHierarchy.add(elementClass);
         }
 
+        // Iterate over the class hierarchy
         Iterator<Class<?>> iter = classHierarchy.iterator();
         while (iter.hasNext()) {
             Class<?> currentClass = iter.next();
-            String className = currentClass.getSimpleName();
 
-            String methodName;
+            // Construct name of method
+            String className, methodName;
             if (!list) {
-                methodName = prefix + className;
+                className = currentClass.getSimpleName();
             }
             else {
-                methodName = prefix + ((VirtualListNode) e[0]).getNodeName();
+                className = ((VirtualListNode) e[0]).getNodeName();
+            }
+            methodName = prefix + className;
+
+            // Get parent and child types if this is a list node
+            Class<?> paramType = ResolveConceptualElement.class;
+            if (list) {
+                paramType = ((VirtualListNode) e[0]).getListType();
                 e[0] = ((VirtualListNode) e[0]).getParent();
             }
 
-            /* System.out.println(
-             * "Calling: " + methodName + "(" + className + ")");
-             */
-
+            // Now try to obtain the proper visitor method
             try {
                 Method visitorMethod;
-                if (pre || post || list) {
+                if (pre || post) { // pre and post methods
                     visitorMethod =
                             this.myVisitor.getClass().getMethod(methodName,
                                     currentClass);
                 }
-                else {
+                else { // mid methods
                     visitorMethod =
                             this.myVisitor.getClass().getMethod(methodName,
-                                    currentClass,
-                                    ResolveConceptualElement.class,
-                                    ResolveConceptualElement.class);
+                                    currentClass, paramType, paramType);
                 }
+
+                // Invoking the visitor method now!!!
                 visitorMethod.invoke(this.myVisitor, (Object[]) e);
             }
             catch (InvocationTargetException ex1) {
+                // unpack  and display the exception which
+                // occurred inside the invoked method
                 ex1.getCause().printStackTrace();
                 throw new RuntimeException();
             }
-            catch (Exception ex2) {
-                ex2.printStackTrace();
+            catch (NoSuchMethodException ex2) {
+                System.err.println("Tree Walker error: method not found.");
+                System.err
+                        .println("The most likely cause of this error is that the TreeWalkerVisitor class"
+                                + "is out of date and needs to be regenerated.");
+            }
+            catch (Exception exn) {
+                // this is probably a "method not found" or invocation
+                // exception, which either indicates a bug or that the
+                // TreeWalkerVisitor class needs to be regenerated
+                exn.printStackTrace();
             }
         }
     }
