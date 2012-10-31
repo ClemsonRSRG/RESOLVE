@@ -44,4 +44,30 @@ public class VisitorPrintStructure extends TreeWalkerVisitor {
     public void postAny(ResolveConceptualElement data) {
         --indent;
     }
+
+    @Override
+    public void midFacilityOperationDecStatements(FacilityOperationDec node,
+            Statement previous, Statement next) {
+        if (previous == null) {
+            System.out.println("Next statement: " + next.toString(0));
+        }
+        else if (next == null) {
+            System.out.println("Previous statement: " + previous.toString(0));
+        }
+        else {
+            System.out.println("Previous statement: " + previous.toString(0)
+                    + "\nNext statement: " + next.toString(0));
+        }
+    }
+
+    @Override
+    public void preFacilityOperationDecStatements(FacilityOperationDec data) {
+        System.out.println("Beginning of statements.");
+    }
+
+    @Override
+    public void postFacilityOperationDecStatements(FacilityOperationDec data) {
+        System.out.println("End of statements.");
+    }
+
 }

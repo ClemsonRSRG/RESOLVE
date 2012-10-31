@@ -1,6 +1,7 @@
 package edu.clemson.cs.r2jt.treewalk;
 
 import edu.clemson.cs.r2jt.absyn.*;
+import edu.clemson.cs.r2jt.data.PosSymbol;
 
 public abstract class TreeWalkerVisitor {
 
@@ -12,8 +13,7 @@ public abstract class TreeWalkerVisitor {
     public void preAffectsItem(AffectsItem data) {}
 
     public void midAffectsItem(AffectsItem node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postAffectsItem(AffectsItem data) {}
 
@@ -21,29 +21,31 @@ public abstract class TreeWalkerVisitor {
     public void preAlternativeExp(AlternativeExp data) {}
 
     public void midAlternativeExp(AlternativeExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postAlternativeExp(AlternativeExp data) {}
 
-    public void preAlternativeExpAlternatives(AlternativeExp node) {}
+    // AlternativeExpAlternatives
+    public void preAlternativeExpAlternatives(AlternativeExp data) {}
 
-    public void postAlternativeExpAlternatives(AlternativeExp node) {}
+    public void midAlternativeExpAlternatives(AlternativeExp node,
+            AltItemExp previous, AltItemExp next) {}
+
+    public void postAlternativeExpAlternatives(AlternativeExp data) {}
 
     // AltItemExp
     public void preAltItemExp(AltItemExp data) {}
 
     public void midAltItemExp(AltItemExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postAltItemExp(AltItemExp data) {}
 
     // ArrayTy
     public void preArrayTy(ArrayTy data) {}
 
-    public void midArrayTy(ArrayTy node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midArrayTy(ArrayTy node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postArrayTy(ArrayTy data) {}
 
@@ -51,8 +53,7 @@ public abstract class TreeWalkerVisitor {
     public void preAssumeStmt(AssumeStmt data) {}
 
     public void midAssumeStmt(AssumeStmt node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postAssumeStmt(AssumeStmt data) {}
 
@@ -60,21 +61,23 @@ public abstract class TreeWalkerVisitor {
     public void preAuxCodeStmt(AuxCodeStmt data) {}
 
     public void midAuxCodeStmt(AuxCodeStmt node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postAuxCodeStmt(AuxCodeStmt data) {}
 
-    public void preAuxCodeStmtStatements(AuxCodeStmt node) {}
+    // AuxCodeStmtStatements
+    public void preAuxCodeStmtStatements(AuxCodeStmt data) {}
 
-    public void postAuxCodeStmtStatements(AuxCodeStmt node) {}
+    public void midAuxCodeStmtStatements(AuxCodeStmt node, Statement previous,
+            Statement next) {}
+
+    public void postAuxCodeStmtStatements(AuxCodeStmt data) {}
 
     // AuxVarDec
     public void preAuxVarDec(AuxVarDec data) {}
 
-    public void midAuxVarDec(AuxVarDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midAuxVarDec(AuxVarDec node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postAuxVarDec(AuxVarDec data) {}
 
@@ -82,63 +85,70 @@ public abstract class TreeWalkerVisitor {
     public void preBetweenExp(BetweenExp data) {}
 
     public void midBetweenExp(BetweenExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postBetweenExp(BetweenExp data) {}
 
-    public void preBetweenExpLessExps(BetweenExp node) {}
+    // BetweenExpLessExps
+    public void preBetweenExpLessExps(BetweenExp data) {}
 
-    public void postBetweenExpLessExps(BetweenExp node) {}
+    public void midBetweenExpLessExps(BetweenExp node, Exp previous, Exp next) {}
+
+    public void postBetweenExpLessExps(BetweenExp data) {}
 
     // BooleanTy
     public void preBooleanTy(BooleanTy data) {}
 
-    public void midBooleanTy(BooleanTy node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midBooleanTy(BooleanTy node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postBooleanTy(BooleanTy data) {}
 
     // CallStmt
     public void preCallStmt(CallStmt data) {}
 
-    public void midCallStmt(CallStmt node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midCallStmt(CallStmt node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postCallStmt(CallStmt data) {}
 
-    public void preCallStmtArguments(CallStmt node) {}
+    // CallStmtArguments
+    public void preCallStmtArguments(CallStmt data) {}
 
-    public void postCallStmtArguments(CallStmt node) {}
+    public void midCallStmtArguments(CallStmt node, ProgramExp previous,
+            ProgramExp next) {}
+
+    public void postCallStmtArguments(CallStmt data) {}
 
     // CartProdTy
     public void preCartProdTy(CartProdTy data) {}
 
     public void midCartProdTy(CartProdTy node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postCartProdTy(CartProdTy data) {}
 
-    public void preCartProdTyFields(CartProdTy node) {}
+    // CartProdTyFields
+    public void preCartProdTyFields(CartProdTy data) {}
 
-    public void postCartProdTyFields(CartProdTy node) {}
+    public void midCartProdTyFields(CartProdTy node, MathVarDec previous,
+            MathVarDec next) {}
+
+    public void postCartProdTyFields(CartProdTy data) {}
 
     // CategoricalDefinitionDec
     public void preCategoricalDefinitionDec(CategoricalDefinitionDec data) {}
 
     public void midCategoricalDefinitionDec(CategoricalDefinitionDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postCategoricalDefinitionDec(CategoricalDefinitionDec data) {}
 
     // CharExp
     public void preCharExp(CharExp data) {}
 
-    public void midCharExp(CharExp node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midCharExp(CharExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postCharExp(CharExp data) {}
 
@@ -146,85 +156,129 @@ public abstract class TreeWalkerVisitor {
     public void preChoiceItem(ChoiceItem data) {}
 
     public void midChoiceItem(ChoiceItem node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postChoiceItem(ChoiceItem data) {}
 
-    public void preChoiceItemTest(ChoiceItem node) {}
+    // ChoiceItemTest
+    public void preChoiceItemTest(ChoiceItem data) {}
 
-    public void postChoiceItemTest(ChoiceItem node) {}
+    public void midChoiceItemTest(ChoiceItem node, ProgramExp previous,
+            ProgramExp next) {}
 
-    public void preChoiceItemThenclause(ChoiceItem node) {}
+    public void postChoiceItemTest(ChoiceItem data) {}
 
-    public void postChoiceItemThenclause(ChoiceItem node) {}
+    // ChoiceItemThenclause
+    public void preChoiceItemThenclause(ChoiceItem data) {}
+
+    public void midChoiceItemThenclause(ChoiceItem node, Statement previous,
+            Statement next) {}
+
+    public void postChoiceItemThenclause(ChoiceItem data) {}
 
     // ConceptBodyModuleDec
     public void preConceptBodyModuleDec(ConceptBodyModuleDec data) {}
 
     public void midConceptBodyModuleDec(ConceptBodyModuleDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postConceptBodyModuleDec(ConceptBodyModuleDec data) {}
 
-    public void preConceptBodyModuleDecParameters(ConceptBodyModuleDec node) {}
+    // ConceptBodyModuleDecParameters
+    public void preConceptBodyModuleDecParameters(ConceptBodyModuleDec data) {}
 
-    public void postConceptBodyModuleDecParameters(ConceptBodyModuleDec node) {}
+    public void midConceptBodyModuleDecParameters(ConceptBodyModuleDec node,
+            ModuleParameter previous, ModuleParameter next) {}
 
+    public void postConceptBodyModuleDecParameters(ConceptBodyModuleDec data) {}
+
+    // ConceptBodyModuleDecEnhancementNames
     public void preConceptBodyModuleDecEnhancementNames(
-            ConceptBodyModuleDec node) {}
+            ConceptBodyModuleDec data) {}
+
+    public void midConceptBodyModuleDecEnhancementNames(
+            ConceptBodyModuleDec node, PosSymbol previous, PosSymbol next) {}
 
     public void postConceptBodyModuleDecEnhancementNames(
-            ConceptBodyModuleDec node) {}
+            ConceptBodyModuleDec data) {}
 
-    public void preConceptBodyModuleDecUsesItems(ConceptBodyModuleDec node) {}
+    // ConceptBodyModuleDecUsesItems
+    public void preConceptBodyModuleDecUsesItems(ConceptBodyModuleDec data) {}
 
-    public void postConceptBodyModuleDecUsesItems(ConceptBodyModuleDec node) {}
+    public void midConceptBodyModuleDecUsesItems(ConceptBodyModuleDec node,
+            UsesItem previous, UsesItem next) {}
 
-    public void preConceptBodyModuleDecConventions(ConceptBodyModuleDec node) {}
+    public void postConceptBodyModuleDecUsesItems(ConceptBodyModuleDec data) {}
 
-    public void postConceptBodyModuleDecConventions(ConceptBodyModuleDec node) {}
+    // ConceptBodyModuleDecConventions
+    public void preConceptBodyModuleDecConventions(ConceptBodyModuleDec data) {}
 
-    public void preConceptBodyModuleDecCorrs(ConceptBodyModuleDec node) {}
+    public void midConceptBodyModuleDecConventions(ConceptBodyModuleDec node,
+            Exp previous, Exp next) {}
 
-    public void postConceptBodyModuleDecCorrs(ConceptBodyModuleDec node) {}
+    public void postConceptBodyModuleDecConventions(ConceptBodyModuleDec data) {}
 
-    public void preConceptBodyModuleDecDecs(ConceptBodyModuleDec node) {}
+    // ConceptBodyModuleDecCorrs
+    public void preConceptBodyModuleDecCorrs(ConceptBodyModuleDec data) {}
 
-    public void postConceptBodyModuleDecDecs(ConceptBodyModuleDec node) {}
+    public void midConceptBodyModuleDecCorrs(ConceptBodyModuleDec node,
+            Exp previous, Exp next) {}
+
+    public void postConceptBodyModuleDecCorrs(ConceptBodyModuleDec data) {}
+
+    // ConceptBodyModuleDecDecs
+    public void preConceptBodyModuleDecDecs(ConceptBodyModuleDec data) {}
+
+    public void midConceptBodyModuleDecDecs(ConceptBodyModuleDec node,
+            Dec previous, Dec next) {}
+
+    public void postConceptBodyModuleDecDecs(ConceptBodyModuleDec data) {}
 
     // ConceptModuleDec
     public void preConceptModuleDec(ConceptModuleDec data) {}
 
     public void midConceptModuleDec(ConceptModuleDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postConceptModuleDec(ConceptModuleDec data) {}
 
-    public void preConceptModuleDecParameters(ConceptModuleDec node) {}
+    // ConceptModuleDecParameters
+    public void preConceptModuleDecParameters(ConceptModuleDec data) {}
 
-    public void postConceptModuleDecParameters(ConceptModuleDec node) {}
+    public void midConceptModuleDecParameters(ConceptModuleDec node,
+            ModuleParameter previous, ModuleParameter next) {}
 
-    public void preConceptModuleDecUsesItems(ConceptModuleDec node) {}
+    public void postConceptModuleDecParameters(ConceptModuleDec data) {}
 
-    public void postConceptModuleDecUsesItems(ConceptModuleDec node) {}
+    // ConceptModuleDecUsesItems
+    public void preConceptModuleDecUsesItems(ConceptModuleDec data) {}
 
-    public void preConceptModuleDecConstraints(ConceptModuleDec node) {}
+    public void midConceptModuleDecUsesItems(ConceptModuleDec node,
+            UsesItem previous, UsesItem next) {}
 
-    public void postConceptModuleDecConstraints(ConceptModuleDec node) {}
+    public void postConceptModuleDecUsesItems(ConceptModuleDec data) {}
 
-    public void preConceptModuleDecDecs(ConceptModuleDec node) {}
+    // ConceptModuleDecConstraints
+    public void preConceptModuleDecConstraints(ConceptModuleDec data) {}
 
-    public void postConceptModuleDecDecs(ConceptModuleDec node) {}
+    public void midConceptModuleDecConstraints(ConceptModuleDec node,
+            Exp previous, Exp next) {}
+
+    public void postConceptModuleDecConstraints(ConceptModuleDec data) {}
+
+    // ConceptModuleDecDecs
+    public void preConceptModuleDecDecs(ConceptModuleDec data) {}
+
+    public void midConceptModuleDecDecs(ConceptModuleDec node, Dec previous,
+            Dec next) {}
+
+    public void postConceptModuleDecDecs(ConceptModuleDec data) {}
 
     // ConceptTypeParamDec
     public void preConceptTypeParamDec(ConceptTypeParamDec data) {}
 
     public void midConceptTypeParamDec(ConceptTypeParamDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postConceptTypeParamDec(ConceptTypeParamDec data) {}
 
@@ -232,21 +286,23 @@ public abstract class TreeWalkerVisitor {
     public void preConditionItem(ConditionItem data) {}
 
     public void midConditionItem(ConditionItem node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postConditionItem(ConditionItem data) {}
 
-    public void preConditionItemThenclause(ConditionItem node) {}
+    // ConditionItemThenclause
+    public void preConditionItemThenclause(ConditionItem data) {}
 
-    public void postConditionItemThenclause(ConditionItem node) {}
+    public void midConditionItemThenclause(ConditionItem node,
+            Statement previous, Statement next) {}
+
+    public void postConditionItemThenclause(ConditionItem data) {}
 
     // ConfirmStmt
     public void preConfirmStmt(ConfirmStmt data) {}
 
     public void midConfirmStmt(ConfirmStmt node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postConfirmStmt(ConfirmStmt data) {}
 
@@ -254,8 +310,7 @@ public abstract class TreeWalkerVisitor {
     public void preConstantParamDec(ConstantParamDec data) {}
 
     public void midConstantParamDec(ConstantParamDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postConstantParamDec(ConstantParamDec data) {}
 
@@ -263,20 +318,22 @@ public abstract class TreeWalkerVisitor {
     public void preConstructedTy(ConstructedTy data) {}
 
     public void midConstructedTy(ConstructedTy node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postConstructedTy(ConstructedTy data) {}
 
-    public void preConstructedTyArgs(ConstructedTy node) {}
+    // ConstructedTyArgs
+    public void preConstructedTyArgs(ConstructedTy data) {}
 
-    public void postConstructedTyArgs(ConstructedTy node) {}
+    public void midConstructedTyArgs(ConstructedTy node, Ty previous, Ty next) {}
+
+    public void postConstructedTyArgs(ConstructedTy data) {}
 
     // Dec
     public void preDec(Dec data) {}
 
-    public void midDec(Dec node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midDec(Dec node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postDec(Dec data) {}
 
@@ -284,8 +341,7 @@ public abstract class TreeWalkerVisitor {
     public void preDeductionExp(DeductionExp data) {}
 
     public void midDeductionExp(DeductionExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postDeductionExp(DeductionExp data) {}
 
@@ -293,33 +349,38 @@ public abstract class TreeWalkerVisitor {
     public void preDefinitionDec(DefinitionDec data) {}
 
     public void midDefinitionDec(DefinitionDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postDefinitionDec(DefinitionDec data) {}
 
-    public void preDefinitionDecParameters(DefinitionDec node) {}
+    // DefinitionDecParameters
+    public void preDefinitionDecParameters(DefinitionDec data) {}
 
-    public void postDefinitionDecParameters(DefinitionDec node) {}
+    public void midDefinitionDecParameters(DefinitionDec node,
+            MathVarDec previous, MathVarDec next) {}
+
+    public void postDefinitionDecParameters(DefinitionDec data) {}
 
     // DotExp
     public void preDotExp(DotExp data) {}
 
-    public void midDotExp(DotExp node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midDotExp(DotExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postDotExp(DotExp data) {}
 
-    public void preDotExpSegments(DotExp node) {}
+    // DotExpSegments
+    public void preDotExpSegments(DotExp data) {}
 
-    public void postDotExpSegments(DotExp node) {}
+    public void midDotExpSegments(DotExp node, Exp previous, Exp next) {}
+
+    public void postDotExpSegments(DotExp data) {}
 
     // DoubleExp
     public void preDoubleExp(DoubleExp data) {}
 
-    public void midDoubleExp(DoubleExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midDoubleExp(DoubleExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postDoubleExp(DoubleExp data) {}
 
@@ -327,108 +388,153 @@ public abstract class TreeWalkerVisitor {
     public void preEnhancementBodyItem(EnhancementBodyItem data) {}
 
     public void midEnhancementBodyItem(EnhancementBodyItem node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postEnhancementBodyItem(EnhancementBodyItem data) {}
 
-    public void preEnhancementBodyItemParams(EnhancementBodyItem node) {}
+    // EnhancementBodyItemParams
+    public void preEnhancementBodyItemParams(EnhancementBodyItem data) {}
 
-    public void postEnhancementBodyItemParams(EnhancementBodyItem node) {}
+    public void midEnhancementBodyItemParams(EnhancementBodyItem node,
+            ModuleArgumentItem previous, ModuleArgumentItem next) {}
 
-    public void preEnhancementBodyItemBodyParams(EnhancementBodyItem node) {}
+    public void postEnhancementBodyItemParams(EnhancementBodyItem data) {}
 
-    public void postEnhancementBodyItemBodyParams(EnhancementBodyItem node) {}
+    // EnhancementBodyItemBodyParams
+    public void preEnhancementBodyItemBodyParams(EnhancementBodyItem data) {}
+
+    public void midEnhancementBodyItemBodyParams(EnhancementBodyItem node,
+            ModuleArgumentItem previous, ModuleArgumentItem next) {}
+
+    public void postEnhancementBodyItemBodyParams(EnhancementBodyItem data) {}
 
     // EnhancementBodyModuleDec
     public void preEnhancementBodyModuleDec(EnhancementBodyModuleDec data) {}
 
     public void midEnhancementBodyModuleDec(EnhancementBodyModuleDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec data) {}
 
+    // EnhancementBodyModuleDecParameters
     public void preEnhancementBodyModuleDecParameters(
-            EnhancementBodyModuleDec node) {}
+            EnhancementBodyModuleDec data) {}
+
+    public void midEnhancementBodyModuleDecParameters(
+            EnhancementBodyModuleDec node, ModuleParameter previous,
+            ModuleParameter next) {}
 
     public void postEnhancementBodyModuleDecParameters(
-            EnhancementBodyModuleDec node) {}
+            EnhancementBodyModuleDec data) {}
 
+    // EnhancementBodyModuleDecEnhancementBodies
     public void preEnhancementBodyModuleDecEnhancementBodies(
-            EnhancementBodyModuleDec node) {}
+            EnhancementBodyModuleDec data) {}
+
+    public void midEnhancementBodyModuleDecEnhancementBodies(
+            EnhancementBodyModuleDec node, EnhancementBodyItem previous,
+            EnhancementBodyItem next) {}
 
     public void postEnhancementBodyModuleDecEnhancementBodies(
-            EnhancementBodyModuleDec node) {}
+            EnhancementBodyModuleDec data) {}
 
+    // EnhancementBodyModuleDecUsesItems
     public void preEnhancementBodyModuleDecUsesItems(
-            EnhancementBodyModuleDec node) {}
+            EnhancementBodyModuleDec data) {}
+
+    public void midEnhancementBodyModuleDecUsesItems(
+            EnhancementBodyModuleDec node, UsesItem previous, UsesItem next) {}
 
     public void postEnhancementBodyModuleDecUsesItems(
-            EnhancementBodyModuleDec node) {}
+            EnhancementBodyModuleDec data) {}
 
+    // EnhancementBodyModuleDecConventions
     public void preEnhancementBodyModuleDecConventions(
-            EnhancementBodyModuleDec node) {}
+            EnhancementBodyModuleDec data) {}
+
+    public void midEnhancementBodyModuleDecConventions(
+            EnhancementBodyModuleDec node, Exp previous, Exp next) {}
 
     public void postEnhancementBodyModuleDecConventions(
-            EnhancementBodyModuleDec node) {}
+            EnhancementBodyModuleDec data) {}
 
-    public void preEnhancementBodyModuleDecCorrs(EnhancementBodyModuleDec node) {}
+    // EnhancementBodyModuleDecCorrs
+    public void preEnhancementBodyModuleDecCorrs(EnhancementBodyModuleDec data) {}
 
-    public void postEnhancementBodyModuleDecCorrs(EnhancementBodyModuleDec node) {}
+    public void midEnhancementBodyModuleDecCorrs(EnhancementBodyModuleDec node,
+            Exp previous, Exp next) {}
 
-    public void preEnhancementBodyModuleDecDecs(EnhancementBodyModuleDec node) {}
+    public void postEnhancementBodyModuleDecCorrs(EnhancementBodyModuleDec data) {}
 
-    public void postEnhancementBodyModuleDecDecs(EnhancementBodyModuleDec node) {}
+    // EnhancementBodyModuleDecDecs
+    public void preEnhancementBodyModuleDecDecs(EnhancementBodyModuleDec data) {}
+
+    public void midEnhancementBodyModuleDecDecs(EnhancementBodyModuleDec node,
+            Dec previous, Dec next) {}
+
+    public void postEnhancementBodyModuleDecDecs(EnhancementBodyModuleDec data) {}
 
     // EnhancementItem
     public void preEnhancementItem(EnhancementItem data) {}
 
     public void midEnhancementItem(EnhancementItem node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postEnhancementItem(EnhancementItem data) {}
 
-    public void preEnhancementItemParams(EnhancementItem node) {}
+    // EnhancementItemParams
+    public void preEnhancementItemParams(EnhancementItem data) {}
 
-    public void postEnhancementItemParams(EnhancementItem node) {}
+    public void midEnhancementItemParams(EnhancementItem node,
+            ModuleArgumentItem previous, ModuleArgumentItem next) {}
+
+    public void postEnhancementItemParams(EnhancementItem data) {}
 
     // EnhancementModuleDec
     public void preEnhancementModuleDec(EnhancementModuleDec data) {}
 
     public void midEnhancementModuleDec(EnhancementModuleDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postEnhancementModuleDec(EnhancementModuleDec data) {}
 
-    public void preEnhancementModuleDecParameters(EnhancementModuleDec node) {}
+    // EnhancementModuleDecParameters
+    public void preEnhancementModuleDecParameters(EnhancementModuleDec data) {}
 
-    public void postEnhancementModuleDecParameters(EnhancementModuleDec node) {}
+    public void midEnhancementModuleDecParameters(EnhancementModuleDec node,
+            ModuleParameter previous, ModuleParameter next) {}
 
-    public void preEnhancementModuleDecUsesItems(EnhancementModuleDec node) {}
+    public void postEnhancementModuleDecParameters(EnhancementModuleDec data) {}
 
-    public void postEnhancementModuleDecUsesItems(EnhancementModuleDec node) {}
+    // EnhancementModuleDecUsesItems
+    public void preEnhancementModuleDecUsesItems(EnhancementModuleDec data) {}
 
-    public void preEnhancementModuleDecDecs(EnhancementModuleDec node) {}
+    public void midEnhancementModuleDecUsesItems(EnhancementModuleDec node,
+            UsesItem previous, UsesItem next) {}
 
-    public void postEnhancementModuleDecDecs(EnhancementModuleDec node) {}
+    public void postEnhancementModuleDecUsesItems(EnhancementModuleDec data) {}
+
+    // EnhancementModuleDecDecs
+    public void preEnhancementModuleDecDecs(EnhancementModuleDec data) {}
+
+    public void midEnhancementModuleDecDecs(EnhancementModuleDec node,
+            Dec previous, Dec next) {}
+
+    public void postEnhancementModuleDecDecs(EnhancementModuleDec data) {}
 
     // EqualsExp
     public void preEqualsExp(EqualsExp data) {}
 
-    public void midEqualsExp(EqualsExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midEqualsExp(EqualsExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postEqualsExp(EqualsExp data) {}
 
     // Exp
     public void preExp(Exp data) {}
 
-    public void midExp(Exp node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midExp(Exp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postExp(Exp data) {}
 
@@ -436,129 +542,191 @@ public abstract class TreeWalkerVisitor {
     public void preFacilityDec(FacilityDec data) {}
 
     public void midFacilityDec(FacilityDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postFacilityDec(FacilityDec data) {}
 
-    public void preFacilityDecConceptParams(FacilityDec node) {}
+    // FacilityDecConceptParams
+    public void preFacilityDecConceptParams(FacilityDec data) {}
 
-    public void postFacilityDecConceptParams(FacilityDec node) {}
+    public void midFacilityDecConceptParams(FacilityDec node,
+            ModuleArgumentItem previous, ModuleArgumentItem next) {}
 
-    public void preFacilityDecEnhancements(FacilityDec node) {}
+    public void postFacilityDecConceptParams(FacilityDec data) {}
 
-    public void postFacilityDecEnhancements(FacilityDec node) {}
+    // FacilityDecEnhancements
+    public void preFacilityDecEnhancements(FacilityDec data) {}
 
-    public void preFacilityDecBodyParams(FacilityDec node) {}
+    public void midFacilityDecEnhancements(FacilityDec node,
+            EnhancementItem previous, EnhancementItem next) {}
 
-    public void postFacilityDecBodyParams(FacilityDec node) {}
+    public void postFacilityDecEnhancements(FacilityDec data) {}
 
-    public void preFacilityDecEnhancementBodies(FacilityDec node) {}
+    // FacilityDecBodyParams
+    public void preFacilityDecBodyParams(FacilityDec data) {}
 
-    public void postFacilityDecEnhancementBodies(FacilityDec node) {}
+    public void midFacilityDecBodyParams(FacilityDec node,
+            ModuleArgumentItem previous, ModuleArgumentItem next) {}
+
+    public void postFacilityDecBodyParams(FacilityDec data) {}
+
+    // FacilityDecEnhancementBodies
+    public void preFacilityDecEnhancementBodies(FacilityDec data) {}
+
+    public void midFacilityDecEnhancementBodies(FacilityDec node,
+            EnhancementBodyItem previous, EnhancementBodyItem next) {}
+
+    public void postFacilityDecEnhancementBodies(FacilityDec data) {}
 
     // FacilityModuleDec
     public void preFacilityModuleDec(FacilityModuleDec data) {}
 
     public void midFacilityModuleDec(FacilityModuleDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postFacilityModuleDec(FacilityModuleDec data) {}
 
-    public void preFacilityModuleDecUsesItems(FacilityModuleDec node) {}
+    // FacilityModuleDecUsesItems
+    public void preFacilityModuleDecUsesItems(FacilityModuleDec data) {}
 
-    public void postFacilityModuleDecUsesItems(FacilityModuleDec node) {}
+    public void midFacilityModuleDecUsesItems(FacilityModuleDec node,
+            UsesItem previous, UsesItem next) {}
 
-    public void preFacilityModuleDecDecs(FacilityModuleDec node) {}
+    public void postFacilityModuleDecUsesItems(FacilityModuleDec data) {}
 
-    public void postFacilityModuleDecDecs(FacilityModuleDec node) {}
+    // FacilityModuleDecDecs
+    public void preFacilityModuleDecDecs(FacilityModuleDec data) {}
+
+    public void midFacilityModuleDecDecs(FacilityModuleDec node, Dec previous,
+            Dec next) {}
+
+    public void postFacilityModuleDecDecs(FacilityModuleDec data) {}
 
     // FacilityOperationDec
     public void preFacilityOperationDec(FacilityOperationDec data) {}
 
     public void midFacilityOperationDec(FacilityOperationDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postFacilityOperationDec(FacilityOperationDec data) {}
 
-    public void preFacilityOperationDecParameters(FacilityOperationDec node) {}
+    // FacilityOperationDecParameters
+    public void preFacilityOperationDecParameters(FacilityOperationDec data) {}
 
-    public void postFacilityOperationDecParameters(FacilityOperationDec node) {}
+    public void midFacilityOperationDecParameters(FacilityOperationDec node,
+            ParameterVarDec previous, ParameterVarDec next) {}
 
-    public void preFacilityOperationDecStateVars(FacilityOperationDec node) {}
+    public void postFacilityOperationDecParameters(FacilityOperationDec data) {}
 
-    public void postFacilityOperationDecStateVars(FacilityOperationDec node) {}
+    // FacilityOperationDecStateVars
+    public void preFacilityOperationDecStateVars(FacilityOperationDec data) {}
 
-    public void preFacilityOperationDecFacilities(FacilityOperationDec node) {}
+    public void midFacilityOperationDecStateVars(FacilityOperationDec node,
+            AffectsItem previous, AffectsItem next) {}
 
-    public void postFacilityOperationDecFacilities(FacilityOperationDec node) {}
+    public void postFacilityOperationDecStateVars(FacilityOperationDec data) {}
 
-    public void preFacilityOperationDecVariables(FacilityOperationDec node) {}
+    // FacilityOperationDecFacilities
+    public void preFacilityOperationDecFacilities(FacilityOperationDec data) {}
 
-    public void postFacilityOperationDecVariables(FacilityOperationDec node) {}
+    public void midFacilityOperationDecFacilities(FacilityOperationDec node,
+            FacilityDec previous, FacilityDec next) {}
 
-    public void preFacilityOperationDecAuxVariables(FacilityOperationDec node) {}
+    public void postFacilityOperationDecFacilities(FacilityOperationDec data) {}
 
-    public void postFacilityOperationDecAuxVariables(FacilityOperationDec node) {}
+    // FacilityOperationDecVariables
+    public void preFacilityOperationDecVariables(FacilityOperationDec data) {}
 
-    public void preFacilityOperationDecStatements(FacilityOperationDec node) {}
+    public void midFacilityOperationDecVariables(FacilityOperationDec node,
+            VarDec previous, VarDec next) {}
 
-    public void postFacilityOperationDecStatements(FacilityOperationDec node) {}
+    public void postFacilityOperationDecVariables(FacilityOperationDec data) {}
+
+    // FacilityOperationDecAuxVariables
+    public void preFacilityOperationDecAuxVariables(FacilityOperationDec data) {}
+
+    public void midFacilityOperationDecAuxVariables(FacilityOperationDec node,
+            AuxVarDec previous, AuxVarDec next) {}
+
+    public void postFacilityOperationDecAuxVariables(FacilityOperationDec data) {}
+
+    // FacilityOperationDecStatements
+    public void preFacilityOperationDecStatements(FacilityOperationDec data) {}
+
+    public void midFacilityOperationDecStatements(FacilityOperationDec node,
+            Statement previous, Statement next) {}
+
+    public void postFacilityOperationDecStatements(FacilityOperationDec data) {}
 
     // FacilityTypeDec
     public void preFacilityTypeDec(FacilityTypeDec data) {}
 
     public void midFacilityTypeDec(FacilityTypeDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postFacilityTypeDec(FacilityTypeDec data) {}
 
     // FieldExp
     public void preFieldExp(FieldExp data) {}
 
-    public void midFieldExp(FieldExp node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midFieldExp(FieldExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postFieldExp(FieldExp data) {}
 
     // FinalItem
     public void preFinalItem(FinalItem data) {}
 
-    public void midFinalItem(FinalItem node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midFinalItem(FinalItem node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postFinalItem(FinalItem data) {}
 
-    public void preFinalItemStateVars(FinalItem node) {}
+    // FinalItemStateVars
+    public void preFinalItemStateVars(FinalItem data) {}
 
-    public void postFinalItemStateVars(FinalItem node) {}
+    public void midFinalItemStateVars(FinalItem node, AffectsItem previous,
+            AffectsItem next) {}
 
-    public void preFinalItemFacilities(FinalItem node) {}
+    public void postFinalItemStateVars(FinalItem data) {}
 
-    public void postFinalItemFacilities(FinalItem node) {}
+    // FinalItemFacilities
+    public void preFinalItemFacilities(FinalItem data) {}
 
-    public void preFinalItemVariables(FinalItem node) {}
+    public void midFinalItemFacilities(FinalItem node, FacilityDec previous,
+            FacilityDec next) {}
 
-    public void postFinalItemVariables(FinalItem node) {}
+    public void postFinalItemFacilities(FinalItem data) {}
 
-    public void preFinalItemAuxVariables(FinalItem node) {}
+    // FinalItemVariables
+    public void preFinalItemVariables(FinalItem data) {}
 
-    public void postFinalItemAuxVariables(FinalItem node) {}
+    public void midFinalItemVariables(FinalItem node, VarDec previous,
+            VarDec next) {}
 
-    public void preFinalItemStatements(FinalItem node) {}
+    public void postFinalItemVariables(FinalItem data) {}
 
-    public void postFinalItemStatements(FinalItem node) {}
+    // FinalItemAuxVariables
+    public void preFinalItemAuxVariables(FinalItem data) {}
+
+    public void midFinalItemAuxVariables(FinalItem node, AuxVarDec previous,
+            AuxVarDec next) {}
+
+    public void postFinalItemAuxVariables(FinalItem data) {}
+
+    // FinalItemStatements
+    public void preFinalItemStatements(FinalItem data) {}
+
+    public void midFinalItemStatements(FinalItem node, Statement previous,
+            Statement next) {}
+
+    public void postFinalItemStatements(FinalItem data) {}
 
     // FuncAssignStmt
     public void preFuncAssignStmt(FuncAssignStmt data) {}
 
     public void midFuncAssignStmt(FuncAssignStmt node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postFuncAssignStmt(FuncAssignStmt data) {}
 
@@ -566,42 +734,47 @@ public abstract class TreeWalkerVisitor {
     public void preFunctionArgList(FunctionArgList data) {}
 
     public void midFunctionArgList(FunctionArgList node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postFunctionArgList(FunctionArgList data) {}
 
-    public void preFunctionArgListArguments(FunctionArgList node) {}
+    // FunctionArgListArguments
+    public void preFunctionArgListArguments(FunctionArgList data) {}
 
-    public void postFunctionArgListArguments(FunctionArgList node) {}
+    public void midFunctionArgListArguments(FunctionArgList node, Exp previous,
+            Exp next) {}
+
+    public void postFunctionArgListArguments(FunctionArgList data) {}
 
     // FunctionExp
     public void preFunctionExp(FunctionExp data) {}
 
     public void midFunctionExp(FunctionExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postFunctionExp(FunctionExp data) {}
 
-    public void preFunctionExpParamList(FunctionExp node) {}
+    // FunctionExpParamList
+    public void preFunctionExpParamList(FunctionExp data) {}
 
-    public void postFunctionExpParamList(FunctionExp node) {}
+    public void midFunctionExpParamList(FunctionExp node,
+            FunctionArgList previous, FunctionArgList next) {}
+
+    public void postFunctionExpParamList(FunctionExp data) {}
 
     // FunctionTy
     public void preFunctionTy(FunctionTy data) {}
 
     public void midFunctionTy(FunctionTy node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postFunctionTy(FunctionTy data) {}
 
     // GoalExp
     public void preGoalExp(GoalExp data) {}
 
-    public void midGoalExp(GoalExp node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midGoalExp(GoalExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postGoalExp(GoalExp data) {}
 
@@ -609,89 +782,118 @@ public abstract class TreeWalkerVisitor {
     public void preHypDesigExp(HypDesigExp data) {}
 
     public void midHypDesigExp(HypDesigExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postHypDesigExp(HypDesigExp data) {}
 
     // IfExp
     public void preIfExp(IfExp data) {}
 
-    public void midIfExp(IfExp node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midIfExp(IfExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postIfExp(IfExp data) {}
 
     // IfStmt
     public void preIfStmt(IfStmt data) {}
 
-    public void midIfStmt(IfStmt node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midIfStmt(IfStmt node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postIfStmt(IfStmt data) {}
 
-    public void preIfStmtThenclause(IfStmt node) {}
+    // IfStmtThenclause
+    public void preIfStmtThenclause(IfStmt data) {}
 
-    public void postIfStmtThenclause(IfStmt node) {}
+    public void midIfStmtThenclause(IfStmt node, Statement previous,
+            Statement next) {}
 
-    public void preIfStmtElseifpairs(IfStmt node) {}
+    public void postIfStmtThenclause(IfStmt data) {}
 
-    public void postIfStmtElseifpairs(IfStmt node) {}
+    // IfStmtElseifpairs
+    public void preIfStmtElseifpairs(IfStmt data) {}
 
-    public void preIfStmtElseclause(IfStmt node) {}
+    public void midIfStmtElseifpairs(IfStmt node, ConditionItem previous,
+            ConditionItem next) {}
 
-    public void postIfStmtElseclause(IfStmt node) {}
+    public void postIfStmtElseifpairs(IfStmt data) {}
+
+    // IfStmtElseclause
+    public void preIfStmtElseclause(IfStmt data) {}
+
+    public void midIfStmtElseclause(IfStmt node, Statement previous,
+            Statement next) {}
+
+    public void postIfStmtElseclause(IfStmt data) {}
 
     // InfixExp
     public void preInfixExp(InfixExp data) {}
 
-    public void midInfixExp(InfixExp node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midInfixExp(InfixExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postInfixExp(InfixExp data) {}
 
     // InitItem
     public void preInitItem(InitItem data) {}
 
-    public void midInitItem(InitItem node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midInitItem(InitItem node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postInitItem(InitItem data) {}
 
-    public void preInitItemStateVars(InitItem node) {}
+    // InitItemStateVars
+    public void preInitItemStateVars(InitItem data) {}
 
-    public void postInitItemStateVars(InitItem node) {}
+    public void midInitItemStateVars(InitItem node, AffectsItem previous,
+            AffectsItem next) {}
 
-    public void preInitItemFacilities(InitItem node) {}
+    public void postInitItemStateVars(InitItem data) {}
 
-    public void postInitItemFacilities(InitItem node) {}
+    // InitItemFacilities
+    public void preInitItemFacilities(InitItem data) {}
 
-    public void preInitItemVariables(InitItem node) {}
+    public void midInitItemFacilities(InitItem node, FacilityDec previous,
+            FacilityDec next) {}
 
-    public void postInitItemVariables(InitItem node) {}
+    public void postInitItemFacilities(InitItem data) {}
 
-    public void preInitItemAuxVariables(InitItem node) {}
+    // InitItemVariables
+    public void preInitItemVariables(InitItem data) {}
 
-    public void postInitItemAuxVariables(InitItem node) {}
+    public void midInitItemVariables(InitItem node, VarDec previous, VarDec next) {}
 
-    public void preInitItemStatements(InitItem node) {}
+    public void postInitItemVariables(InitItem data) {}
 
-    public void postInitItemStatements(InitItem node) {}
+    // InitItemAuxVariables
+    public void preInitItemAuxVariables(InitItem data) {}
+
+    public void midInitItemAuxVariables(InitItem node, AuxVarDec previous,
+            AuxVarDec next) {}
+
+    public void postInitItemAuxVariables(InitItem data) {}
+
+    // InitItemStatements
+    public void preInitItemStatements(InitItem data) {}
+
+    public void midInitItemStatements(InitItem node, Statement previous,
+            Statement next) {}
+
+    public void postInitItemStatements(InitItem data) {}
 
     // IntegerExp
     public void preIntegerExp(IntegerExp data) {}
 
     public void midIntegerExp(IntegerExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postIntegerExp(IntegerExp data) {}
 
     // IsInExp
     public void preIsInExp(IsInExp data) {}
 
-    public void midIsInExp(IsInExp node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midIsInExp(IsInExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postIsInExp(IsInExp data) {}
 
@@ -699,38 +901,47 @@ public abstract class TreeWalkerVisitor {
     public void preIterateExitStmt(IterateExitStmt data) {}
 
     public void midIterateExitStmt(IterateExitStmt node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postIterateExitStmt(IterateExitStmt data) {}
 
-    public void preIterateExitStmtStatements(IterateExitStmt node) {}
+    // IterateExitStmtStatements
+    public void preIterateExitStmtStatements(IterateExitStmt data) {}
 
-    public void postIterateExitStmtStatements(IterateExitStmt node) {}
+    public void midIterateExitStmtStatements(IterateExitStmt node,
+            Statement previous, Statement next) {}
+
+    public void postIterateExitStmtStatements(IterateExitStmt data) {}
 
     // IterateStmt
     public void preIterateStmt(IterateStmt data) {}
 
     public void midIterateStmt(IterateStmt node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postIterateStmt(IterateStmt data) {}
 
-    public void preIterateStmtChanging(IterateStmt node) {}
+    // IterateStmtChanging
+    public void preIterateStmtChanging(IterateStmt data) {}
 
-    public void postIterateStmtChanging(IterateStmt node) {}
+    public void midIterateStmtChanging(IterateStmt node, VariableExp previous,
+            VariableExp next) {}
 
-    public void preIterateStmtStatements(IterateStmt node) {}
+    public void postIterateStmtChanging(IterateStmt data) {}
 
-    public void postIterateStmtStatements(IterateStmt node) {}
+    // IterateStmtStatements
+    public void preIterateStmtStatements(IterateStmt data) {}
+
+    public void midIterateStmtStatements(IterateStmt node, Statement previous,
+            Statement next) {}
+
+    public void postIterateStmtStatements(IterateStmt data) {}
 
     // IterativeExp
     public void preIterativeExp(IterativeExp data) {}
 
     public void midIterativeExp(IterativeExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postIterativeExp(IterativeExp data) {}
 
@@ -738,8 +949,7 @@ public abstract class TreeWalkerVisitor {
     public void preJustificationExp(JustificationExp data) {}
 
     public void midJustificationExp(JustificationExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postJustificationExp(JustificationExp data) {}
 
@@ -747,17 +957,15 @@ public abstract class TreeWalkerVisitor {
     public void preJustifiedExp(JustifiedExp data) {}
 
     public void midJustifiedExp(JustifiedExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postJustifiedExp(JustifiedExp data) {}
 
     // LambdaExp
     public void preLambdaExp(LambdaExp data) {}
 
-    public void midLambdaExp(LambdaExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midLambdaExp(LambdaExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postLambdaExp(LambdaExp data) {}
 
@@ -765,8 +973,7 @@ public abstract class TreeWalkerVisitor {
     public void preLineNumberedExp(LineNumberedExp data) {}
 
     public void midLineNumberedExp(LineNumberedExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postLineNumberedExp(LineNumberedExp data) {}
 
@@ -774,8 +981,7 @@ public abstract class TreeWalkerVisitor {
     public void preMathAssertionDec(MathAssertionDec data) {}
 
     public void midMathAssertionDec(MathAssertionDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postMathAssertionDec(MathAssertionDec data) {}
 
@@ -783,42 +989,54 @@ public abstract class TreeWalkerVisitor {
     public void preMathModuleDec(MathModuleDec data) {}
 
     public void midMathModuleDec(MathModuleDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postMathModuleDec(MathModuleDec data) {}
 
-    public void preMathModuleDecParameters(MathModuleDec node) {}
+    // MathModuleDecParameters
+    public void preMathModuleDecParameters(MathModuleDec data) {}
 
-    public void postMathModuleDecParameters(MathModuleDec node) {}
+    public void midMathModuleDecParameters(MathModuleDec node,
+            ModuleParameter previous, ModuleParameter next) {}
 
-    public void preMathModuleDecUsesItems(MathModuleDec node) {}
+    public void postMathModuleDecParameters(MathModuleDec data) {}
 
-    public void postMathModuleDecUsesItems(MathModuleDec node) {}
+    // MathModuleDecUsesItems
+    public void preMathModuleDecUsesItems(MathModuleDec data) {}
 
-    public void preMathModuleDecDecs(MathModuleDec node) {}
+    public void midMathModuleDecUsesItems(MathModuleDec node,
+            UsesItem previous, UsesItem next) {}
 
-    public void postMathModuleDecDecs(MathModuleDec node) {}
+    public void postMathModuleDecUsesItems(MathModuleDec data) {}
+
+    // MathModuleDecDecs
+    public void preMathModuleDecDecs(MathModuleDec data) {}
+
+    public void midMathModuleDecDecs(MathModuleDec node, Dec previous, Dec next) {}
+
+    public void postMathModuleDecDecs(MathModuleDec data) {}
 
     // MathRefExp
     public void preMathRefExp(MathRefExp data) {}
 
     public void midMathRefExp(MathRefExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postMathRefExp(MathRefExp data) {}
 
-    public void preMathRefExpParams(MathRefExp node) {}
+    // MathRefExpParams
+    public void preMathRefExpParams(MathRefExp data) {}
 
-    public void postMathRefExpParams(MathRefExp node) {}
+    public void midMathRefExpParams(MathRefExp node, VarExp previous,
+            VarExp next) {}
+
+    public void postMathRefExpParams(MathRefExp data) {}
 
     // MathTypeDec
     public void preMathTypeDec(MathTypeDec data) {}
 
     public void midMathTypeDec(MathTypeDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postMathTypeDec(MathTypeDec data) {}
 
@@ -826,8 +1044,7 @@ public abstract class TreeWalkerVisitor {
     public void preMathTypeFormalDec(MathTypeFormalDec data) {}
 
     public void midMathTypeFormalDec(MathTypeFormalDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postMathTypeFormalDec(MathTypeFormalDec data) {}
 
@@ -835,8 +1052,7 @@ public abstract class TreeWalkerVisitor {
     public void preMathVarDec(MathVarDec data) {}
 
     public void midMathVarDec(MathVarDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postMathVarDec(MathVarDec data) {}
 
@@ -844,8 +1060,7 @@ public abstract class TreeWalkerVisitor {
     public void preMemoryStmt(MemoryStmt data) {}
 
     public void midMemoryStmt(MemoryStmt node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postMemoryStmt(MemoryStmt data) {}
 
@@ -853,33 +1068,31 @@ public abstract class TreeWalkerVisitor {
     public void preModuleArgumentItem(ModuleArgumentItem data) {}
 
     public void midModuleArgumentItem(ModuleArgumentItem node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postModuleArgumentItem(ModuleArgumentItem data) {}
 
     // ModuleDec
     public void preModuleDec(ModuleDec data) {}
 
-    public void midModuleDec(ModuleDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midModuleDec(ModuleDec node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postModuleDec(ModuleDec data) {}
 
     // NameTy
     public void preNameTy(NameTy data) {}
 
-    public void midNameTy(NameTy node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midNameTy(NameTy node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postNameTy(NameTy data) {}
 
     // OldExp
     public void preOldExp(OldExp data) {}
 
-    public void midOldExp(OldExp node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midOldExp(OldExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postOldExp(OldExp data) {}
 
@@ -887,25 +1100,31 @@ public abstract class TreeWalkerVisitor {
     public void preOperationDec(OperationDec data) {}
 
     public void midOperationDec(OperationDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postOperationDec(OperationDec data) {}
 
-    public void preOperationDecParameters(OperationDec node) {}
+    // OperationDecParameters
+    public void preOperationDecParameters(OperationDec data) {}
 
-    public void postOperationDecParameters(OperationDec node) {}
+    public void midOperationDecParameters(OperationDec node,
+            ParameterVarDec previous, ParameterVarDec next) {}
 
-    public void preOperationDecStateVars(OperationDec node) {}
+    public void postOperationDecParameters(OperationDec data) {}
 
-    public void postOperationDecStateVars(OperationDec node) {}
+    // OperationDecStateVars
+    public void preOperationDecStateVars(OperationDec data) {}
+
+    public void midOperationDecStateVars(OperationDec node,
+            AffectsItem previous, AffectsItem next) {}
+
+    public void postOperationDecStateVars(OperationDec data) {}
 
     // OutfixExp
     public void preOutfixExp(OutfixExp data) {}
 
-    public void midOutfixExp(OutfixExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midOutfixExp(OutfixExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postOutfixExp(OutfixExp data) {}
 
@@ -913,8 +1132,7 @@ public abstract class TreeWalkerVisitor {
     public void preParameterVarDec(ParameterVarDec data) {}
 
     public void midParameterVarDec(ParameterVarDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postParameterVarDec(ParameterVarDec data) {}
 
@@ -922,120 +1140,179 @@ public abstract class TreeWalkerVisitor {
     public void prePerformanceFinalItem(PerformanceFinalItem data) {}
 
     public void midPerformanceFinalItem(PerformanceFinalItem node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postPerformanceFinalItem(PerformanceFinalItem data) {}
 
-    public void prePerformanceFinalItemStateVars(PerformanceFinalItem node) {}
+    // PerformanceFinalItemStateVars
+    public void prePerformanceFinalItemStateVars(PerformanceFinalItem data) {}
 
-    public void postPerformanceFinalItemStateVars(PerformanceFinalItem node) {}
+    public void midPerformanceFinalItemStateVars(PerformanceFinalItem node,
+            AffectsItem previous, AffectsItem next) {}
 
-    public void prePerformanceFinalItemFacilities(PerformanceFinalItem node) {}
+    public void postPerformanceFinalItemStateVars(PerformanceFinalItem data) {}
 
-    public void postPerformanceFinalItemFacilities(PerformanceFinalItem node) {}
+    // PerformanceFinalItemFacilities
+    public void prePerformanceFinalItemFacilities(PerformanceFinalItem data) {}
 
-    public void prePerformanceFinalItemVariables(PerformanceFinalItem node) {}
+    public void midPerformanceFinalItemFacilities(PerformanceFinalItem node,
+            FacilityDec previous, FacilityDec next) {}
 
-    public void postPerformanceFinalItemVariables(PerformanceFinalItem node) {}
+    public void postPerformanceFinalItemFacilities(PerformanceFinalItem data) {}
 
-    public void prePerformanceFinalItemAuxVariables(PerformanceFinalItem node) {}
+    // PerformanceFinalItemVariables
+    public void prePerformanceFinalItemVariables(PerformanceFinalItem data) {}
 
-    public void postPerformanceFinalItemAuxVariables(PerformanceFinalItem node) {}
+    public void midPerformanceFinalItemVariables(PerformanceFinalItem node,
+            VarDec previous, VarDec next) {}
 
-    public void prePerformanceFinalItemStatements(PerformanceFinalItem node) {}
+    public void postPerformanceFinalItemVariables(PerformanceFinalItem data) {}
 
-    public void postPerformanceFinalItemStatements(PerformanceFinalItem node) {}
+    // PerformanceFinalItemAuxVariables
+    public void prePerformanceFinalItemAuxVariables(PerformanceFinalItem data) {}
+
+    public void midPerformanceFinalItemAuxVariables(PerformanceFinalItem node,
+            AuxVarDec previous, AuxVarDec next) {}
+
+    public void postPerformanceFinalItemAuxVariables(PerformanceFinalItem data) {}
+
+    // PerformanceFinalItemStatements
+    public void prePerformanceFinalItemStatements(PerformanceFinalItem data) {}
+
+    public void midPerformanceFinalItemStatements(PerformanceFinalItem node,
+            Statement previous, Statement next) {}
+
+    public void postPerformanceFinalItemStatements(PerformanceFinalItem data) {}
 
     // PerformanceInitItem
     public void prePerformanceInitItem(PerformanceInitItem data) {}
 
     public void midPerformanceInitItem(PerformanceInitItem node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postPerformanceInitItem(PerformanceInitItem data) {}
 
-    public void prePerformanceInitItemStateVars(PerformanceInitItem node) {}
+    // PerformanceInitItemStateVars
+    public void prePerformanceInitItemStateVars(PerformanceInitItem data) {}
 
-    public void postPerformanceInitItemStateVars(PerformanceInitItem node) {}
+    public void midPerformanceInitItemStateVars(PerformanceInitItem node,
+            AffectsItem previous, AffectsItem next) {}
 
-    public void prePerformanceInitItemFacilities(PerformanceInitItem node) {}
+    public void postPerformanceInitItemStateVars(PerformanceInitItem data) {}
 
-    public void postPerformanceInitItemFacilities(PerformanceInitItem node) {}
+    // PerformanceInitItemFacilities
+    public void prePerformanceInitItemFacilities(PerformanceInitItem data) {}
 
-    public void prePerformanceInitItemVariables(PerformanceInitItem node) {}
+    public void midPerformanceInitItemFacilities(PerformanceInitItem node,
+            FacilityDec previous, FacilityDec next) {}
 
-    public void postPerformanceInitItemVariables(PerformanceInitItem node) {}
+    public void postPerformanceInitItemFacilities(PerformanceInitItem data) {}
 
-    public void prePerformanceInitItemAuxVariables(PerformanceInitItem node) {}
+    // PerformanceInitItemVariables
+    public void prePerformanceInitItemVariables(PerformanceInitItem data) {}
 
-    public void postPerformanceInitItemAuxVariables(PerformanceInitItem node) {}
+    public void midPerformanceInitItemVariables(PerformanceInitItem node,
+            VarDec previous, VarDec next) {}
 
-    public void prePerformanceInitItemStatements(PerformanceInitItem node) {}
+    public void postPerformanceInitItemVariables(PerformanceInitItem data) {}
 
-    public void postPerformanceInitItemStatements(PerformanceInitItem node) {}
+    // PerformanceInitItemAuxVariables
+    public void prePerformanceInitItemAuxVariables(PerformanceInitItem data) {}
+
+    public void midPerformanceInitItemAuxVariables(PerformanceInitItem node,
+            AuxVarDec previous, AuxVarDec next) {}
+
+    public void postPerformanceInitItemAuxVariables(PerformanceInitItem data) {}
+
+    // PerformanceInitItemStatements
+    public void prePerformanceInitItemStatements(PerformanceInitItem data) {}
+
+    public void midPerformanceInitItemStatements(PerformanceInitItem node,
+            Statement previous, Statement next) {}
+
+    public void postPerformanceInitItemStatements(PerformanceInitItem data) {}
 
     // PerformanceModuleDec
     public void prePerformanceModuleDec(PerformanceModuleDec data) {}
 
     public void midPerformanceModuleDec(PerformanceModuleDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postPerformanceModuleDec(PerformanceModuleDec data) {}
 
-    public void prePerformanceModuleDecParameters(PerformanceModuleDec node) {}
+    // PerformanceModuleDecParameters
+    public void prePerformanceModuleDecParameters(PerformanceModuleDec data) {}
 
-    public void postPerformanceModuleDecParameters(PerformanceModuleDec node) {}
+    public void midPerformanceModuleDecParameters(PerformanceModuleDec node,
+            ModuleParameter previous, ModuleParameter next) {}
 
-    public void prePerformanceModuleDecUsesItems(PerformanceModuleDec node) {}
+    public void postPerformanceModuleDecParameters(PerformanceModuleDec data) {}
 
-    public void postPerformanceModuleDecUsesItems(PerformanceModuleDec node) {}
+    // PerformanceModuleDecUsesItems
+    public void prePerformanceModuleDecUsesItems(PerformanceModuleDec data) {}
 
-    public void prePerformanceModuleDecConstraints(PerformanceModuleDec node) {}
+    public void midPerformanceModuleDecUsesItems(PerformanceModuleDec node,
+            UsesItem previous, UsesItem next) {}
 
-    public void postPerformanceModuleDecConstraints(PerformanceModuleDec node) {}
+    public void postPerformanceModuleDecUsesItems(PerformanceModuleDec data) {}
 
-    public void prePerformanceModuleDecDecs(PerformanceModuleDec node) {}
+    // PerformanceModuleDecConstraints
+    public void prePerformanceModuleDecConstraints(PerformanceModuleDec data) {}
 
-    public void postPerformanceModuleDecDecs(PerformanceModuleDec node) {}
+    public void midPerformanceModuleDecConstraints(PerformanceModuleDec node,
+            Exp previous, Exp next) {}
+
+    public void postPerformanceModuleDecConstraints(PerformanceModuleDec data) {}
+
+    // PerformanceModuleDecDecs
+    public void prePerformanceModuleDecDecs(PerformanceModuleDec data) {}
+
+    public void midPerformanceModuleDecDecs(PerformanceModuleDec node,
+            Dec previous, Dec next) {}
+
+    public void postPerformanceModuleDecDecs(PerformanceModuleDec data) {}
 
     // PerformanceOperationDec
     public void prePerformanceOperationDec(PerformanceOperationDec data) {}
 
     public void midPerformanceOperationDec(PerformanceOperationDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postPerformanceOperationDec(PerformanceOperationDec data) {}
 
+    // PerformanceOperationDecParameters
     public void prePerformanceOperationDecParameters(
-            PerformanceOperationDec node) {}
+            PerformanceOperationDec data) {}
+
+    public void midPerformanceOperationDecParameters(
+            PerformanceOperationDec node, ParameterVarDec previous,
+            ParameterVarDec next) {}
 
     public void postPerformanceOperationDecParameters(
-            PerformanceOperationDec node) {}
+            PerformanceOperationDec data) {}
 
-    public void prePerformanceOperationDecStateVars(PerformanceOperationDec node) {}
+    // PerformanceOperationDecStateVars
+    public void prePerformanceOperationDecStateVars(PerformanceOperationDec data) {}
+
+    public void midPerformanceOperationDecStateVars(
+            PerformanceOperationDec node, AffectsItem previous, AffectsItem next) {}
 
     public void postPerformanceOperationDecStateVars(
-            PerformanceOperationDec node) {}
+            PerformanceOperationDec data) {}
 
     // PerformanceTypeDec
     public void prePerformanceTypeDec(PerformanceTypeDec data) {}
 
     public void midPerformanceTypeDec(PerformanceTypeDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postPerformanceTypeDec(PerformanceTypeDec data) {}
 
     // PrefixExp
     public void prePrefixExp(PrefixExp data) {}
 
-    public void midPrefixExp(PrefixExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midPrefixExp(PrefixExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postPrefixExp(PrefixExp data) {}
 
@@ -1043,41 +1320,63 @@ public abstract class TreeWalkerVisitor {
     public void preProcedureDec(ProcedureDec data) {}
 
     public void midProcedureDec(ProcedureDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postProcedureDec(ProcedureDec data) {}
 
-    public void preProcedureDecParameters(ProcedureDec node) {}
+    // ProcedureDecParameters
+    public void preProcedureDecParameters(ProcedureDec data) {}
 
-    public void postProcedureDecParameters(ProcedureDec node) {}
+    public void midProcedureDecParameters(ProcedureDec node,
+            ParameterVarDec previous, ParameterVarDec next) {}
 
-    public void preProcedureDecStateVars(ProcedureDec node) {}
+    public void postProcedureDecParameters(ProcedureDec data) {}
 
-    public void postProcedureDecStateVars(ProcedureDec node) {}
+    // ProcedureDecStateVars
+    public void preProcedureDecStateVars(ProcedureDec data) {}
 
-    public void preProcedureDecFacilities(ProcedureDec node) {}
+    public void midProcedureDecStateVars(ProcedureDec node,
+            AffectsItem previous, AffectsItem next) {}
 
-    public void postProcedureDecFacilities(ProcedureDec node) {}
+    public void postProcedureDecStateVars(ProcedureDec data) {}
 
-    public void preProcedureDecVariables(ProcedureDec node) {}
+    // ProcedureDecFacilities
+    public void preProcedureDecFacilities(ProcedureDec data) {}
 
-    public void postProcedureDecVariables(ProcedureDec node) {}
+    public void midProcedureDecFacilities(ProcedureDec node,
+            FacilityDec previous, FacilityDec next) {}
 
-    public void preProcedureDecAuxVariables(ProcedureDec node) {}
+    public void postProcedureDecFacilities(ProcedureDec data) {}
 
-    public void postProcedureDecAuxVariables(ProcedureDec node) {}
+    // ProcedureDecVariables
+    public void preProcedureDecVariables(ProcedureDec data) {}
 
-    public void preProcedureDecStatements(ProcedureDec node) {}
+    public void midProcedureDecVariables(ProcedureDec node, VarDec previous,
+            VarDec next) {}
 
-    public void postProcedureDecStatements(ProcedureDec node) {}
+    public void postProcedureDecVariables(ProcedureDec data) {}
+
+    // ProcedureDecAuxVariables
+    public void preProcedureDecAuxVariables(ProcedureDec data) {}
+
+    public void midProcedureDecAuxVariables(ProcedureDec node,
+            AuxVarDec previous, AuxVarDec next) {}
+
+    public void postProcedureDecAuxVariables(ProcedureDec data) {}
+
+    // ProcedureDecStatements
+    public void preProcedureDecStatements(ProcedureDec data) {}
+
+    public void midProcedureDecStatements(ProcedureDec node,
+            Statement previous, Statement next) {}
+
+    public void postProcedureDecStatements(ProcedureDec data) {}
 
     // ProgramCharExp
     public void preProgramCharExp(ProgramCharExp data) {}
 
     public void midProgramCharExp(ProgramCharExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postProgramCharExp(ProgramCharExp data) {}
 
@@ -1085,21 +1384,23 @@ public abstract class TreeWalkerVisitor {
     public void preProgramDotExp(ProgramDotExp data) {}
 
     public void midProgramDotExp(ProgramDotExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postProgramDotExp(ProgramDotExp data) {}
 
-    public void preProgramDotExpSegments(ProgramDotExp node) {}
+    // ProgramDotExpSegments
+    public void preProgramDotExpSegments(ProgramDotExp data) {}
 
-    public void postProgramDotExpSegments(ProgramDotExp node) {}
+    public void midProgramDotExpSegments(ProgramDotExp node,
+            ProgramExp previous, ProgramExp next) {}
+
+    public void postProgramDotExpSegments(ProgramDotExp data) {}
 
     // ProgramDoubleExp
     public void preProgramDoubleExp(ProgramDoubleExp data) {}
 
     public void midProgramDoubleExp(ProgramDoubleExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postProgramDoubleExp(ProgramDoubleExp data) {}
 
@@ -1107,8 +1408,7 @@ public abstract class TreeWalkerVisitor {
     public void preProgramExp(ProgramExp data) {}
 
     public void midProgramExp(ProgramExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postProgramExp(ProgramExp data) {}
 
@@ -1116,21 +1416,23 @@ public abstract class TreeWalkerVisitor {
     public void preProgramFunctionExp(ProgramFunctionExp data) {}
 
     public void midProgramFunctionExp(ProgramFunctionExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postProgramFunctionExp(ProgramFunctionExp data) {}
 
-    public void preProgramFunctionExpArguments(ProgramFunctionExp node) {}
+    // ProgramFunctionExpArguments
+    public void preProgramFunctionExpArguments(ProgramFunctionExp data) {}
 
-    public void postProgramFunctionExpArguments(ProgramFunctionExp node) {}
+    public void midProgramFunctionExpArguments(ProgramFunctionExp node,
+            ProgramExp previous, ProgramExp next) {}
+
+    public void postProgramFunctionExpArguments(ProgramFunctionExp data) {}
 
     // ProgramIntegerExp
     public void preProgramIntegerExp(ProgramIntegerExp data) {}
 
     public void midProgramIntegerExp(ProgramIntegerExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postProgramIntegerExp(ProgramIntegerExp data) {}
 
@@ -1138,8 +1440,7 @@ public abstract class TreeWalkerVisitor {
     public void preProgramOpExp(ProgramOpExp data) {}
 
     public void midProgramOpExp(ProgramOpExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postProgramOpExp(ProgramOpExp data) {}
 
@@ -1147,50 +1448,60 @@ public abstract class TreeWalkerVisitor {
     public void preProgramParamExp(ProgramParamExp data) {}
 
     public void midProgramParamExp(ProgramParamExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postProgramParamExp(ProgramParamExp data) {}
 
-    public void preProgramParamExpArguments(ProgramParamExp node) {}
+    // ProgramParamExpArguments
+    public void preProgramParamExpArguments(ProgramParamExp data) {}
 
-    public void postProgramParamExpArguments(ProgramParamExp node) {}
+    public void midProgramParamExpArguments(ProgramParamExp node,
+            ProgramExp previous, ProgramExp next) {}
+
+    public void postProgramParamExpArguments(ProgramParamExp data) {}
 
     // ProgramStringExp
     public void preProgramStringExp(ProgramStringExp data) {}
 
     public void midProgramStringExp(ProgramStringExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postProgramStringExp(ProgramStringExp data) {}
 
     // ProofDec
     public void preProofDec(ProofDec data) {}
 
-    public void midProofDec(ProofDec node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midProofDec(ProofDec node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postProofDec(ProofDec data) {}
 
-    public void preProofDecStatements(ProofDec node) {}
+    // ProofDecStatements
+    public void preProofDecStatements(ProofDec data) {}
 
-    public void postProofDecStatements(ProofDec node) {}
+    public void midProofDecStatements(ProofDec node, Exp previous, Exp next) {}
 
-    public void preProofDecBaseCase(ProofDec node) {}
+    public void postProofDecStatements(ProofDec data) {}
 
-    public void postProofDecBaseCase(ProofDec node) {}
+    // ProofDecBaseCase
+    public void preProofDecBaseCase(ProofDec data) {}
 
-    public void preProofDecInductiveCase(ProofDec node) {}
+    public void midProofDecBaseCase(ProofDec node, Exp previous, Exp next) {}
 
-    public void postProofDecInductiveCase(ProofDec node) {}
+    public void postProofDecBaseCase(ProofDec data) {}
+
+    // ProofDecInductiveCase
+    public void preProofDecInductiveCase(ProofDec data) {}
+
+    public void midProofDecInductiveCase(ProofDec node, Exp previous, Exp next) {}
+
+    public void postProofDecInductiveCase(ProofDec data) {}
 
     // ProofDefinitionExp
     public void preProofDefinitionExp(ProofDefinitionExp data) {}
 
     public void midProofDefinitionExp(ProofDefinitionExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postProofDefinitionExp(ProofDefinitionExp data) {}
 
@@ -1198,62 +1509,78 @@ public abstract class TreeWalkerVisitor {
     public void preProofModuleDec(ProofModuleDec data) {}
 
     public void midProofModuleDec(ProofModuleDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postProofModuleDec(ProofModuleDec data) {}
 
-    public void preProofModuleDecModuleParams(ProofModuleDec node) {}
+    // ProofModuleDecModuleParams
+    public void preProofModuleDecModuleParams(ProofModuleDec data) {}
 
-    public void postProofModuleDecModuleParams(ProofModuleDec node) {}
+    public void midProofModuleDecModuleParams(ProofModuleDec node,
+            ModuleParameter previous, ModuleParameter next) {}
 
-    public void preProofModuleDecUsesItems(ProofModuleDec node) {}
+    public void postProofModuleDecModuleParams(ProofModuleDec data) {}
 
-    public void postProofModuleDecUsesItems(ProofModuleDec node) {}
+    // ProofModuleDecUsesItems
+    public void preProofModuleDecUsesItems(ProofModuleDec data) {}
 
-    public void preProofModuleDecDecs(ProofModuleDec node) {}
+    public void midProofModuleDecUsesItems(ProofModuleDec node,
+            UsesItem previous, UsesItem next) {}
 
-    public void postProofModuleDecDecs(ProofModuleDec node) {}
+    public void postProofModuleDecUsesItems(ProofModuleDec data) {}
+
+    // ProofModuleDecDecs
+    public void preProofModuleDecDecs(ProofModuleDec data) {}
+
+    public void midProofModuleDecDecs(ProofModuleDec node, Dec previous,
+            Dec next) {}
+
+    public void postProofModuleDecDecs(ProofModuleDec data) {}
 
     // QuantExp
     public void preQuantExp(QuantExp data) {}
 
-    public void midQuantExp(QuantExp node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midQuantExp(QuantExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postQuantExp(QuantExp data) {}
 
-    public void preQuantExpVars(QuantExp node) {}
+    // QuantExpVars
+    public void preQuantExpVars(QuantExp data) {}
 
-    public void postQuantExpVars(QuantExp node) {}
+    public void midQuantExpVars(QuantExp node, MathVarDec previous,
+            MathVarDec next) {}
+
+    public void postQuantExpVars(QuantExp data) {}
 
     // RealizationParamDec
     public void preRealizationParamDec(RealizationParamDec data) {}
 
     public void midRealizationParamDec(RealizationParamDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postRealizationParamDec(RealizationParamDec data) {}
 
     // RecordTy
     public void preRecordTy(RecordTy data) {}
 
-    public void midRecordTy(RecordTy node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midRecordTy(RecordTy node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postRecordTy(RecordTy data) {}
 
-    public void preRecordTyFields(RecordTy node) {}
+    // RecordTyFields
+    public void preRecordTyFields(RecordTy data) {}
 
-    public void postRecordTyFields(RecordTy node) {}
+    public void midRecordTyFields(RecordTy node, VarDec previous, VarDec next) {}
+
+    public void postRecordTyFields(RecordTy data) {}
 
     // RenamingItem
     public void preRenamingItem(RenamingItem data) {}
 
     public void midRenamingItem(RenamingItem node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postRenamingItem(RenamingItem data) {}
 
@@ -1261,8 +1588,7 @@ public abstract class TreeWalkerVisitor {
     public void preRepresentationDec(RepresentationDec data) {}
 
     public void midRepresentationDec(RepresentationDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postRepresentationDec(RepresentationDec data) {}
 
@@ -1270,8 +1596,7 @@ public abstract class TreeWalkerVisitor {
     public void preResolveConceptualElement(ResolveConceptualElement data) {}
 
     public void midResolveConceptualElement(ResolveConceptualElement node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postResolveConceptualElement(ResolveConceptualElement data) {}
 
@@ -1279,59 +1604,70 @@ public abstract class TreeWalkerVisitor {
     public void preSelectionStmt(SelectionStmt data) {}
 
     public void midSelectionStmt(SelectionStmt node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postSelectionStmt(SelectionStmt data) {}
 
-    public void preSelectionStmtWhenpairs(SelectionStmt node) {}
+    // SelectionStmtWhenpairs
+    public void preSelectionStmtWhenpairs(SelectionStmt data) {}
 
-    public void postSelectionStmtWhenpairs(SelectionStmt node) {}
+    public void midSelectionStmtWhenpairs(SelectionStmt node,
+            ChoiceItem previous, ChoiceItem next) {}
 
-    public void preSelectionStmtDefaultclause(SelectionStmt node) {}
+    public void postSelectionStmtWhenpairs(SelectionStmt data) {}
 
-    public void postSelectionStmtDefaultclause(SelectionStmt node) {}
+    // SelectionStmtDefaultclause
+    public void preSelectionStmtDefaultclause(SelectionStmt data) {}
+
+    public void midSelectionStmtDefaultclause(SelectionStmt node,
+            Statement previous, Statement next) {}
+
+    public void postSelectionStmtDefaultclause(SelectionStmt data) {}
 
     // SetExp
     public void preSetExp(SetExp data) {}
 
-    public void midSetExp(SetExp node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midSetExp(SetExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postSetExp(SetExp data) {}
 
-    public void preSetExpVars(SetExp node) {}
+    // SetExpVars
+    public void preSetExpVars(SetExp data) {}
 
-    public void postSetExpVars(SetExp node) {}
+    public void midSetExpVars(SetExp node, VarExp previous, VarExp next) {}
+
+    public void postSetExpVars(SetExp data) {}
 
     // ShortFacilityModuleDec
     public void preShortFacilityModuleDec(ShortFacilityModuleDec data) {}
 
     public void midShortFacilityModuleDec(ShortFacilityModuleDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postShortFacilityModuleDec(ShortFacilityModuleDec data) {}
 
-    public void preShortFacilityModuleDecUsesItems(ShortFacilityModuleDec node) {}
+    // ShortFacilityModuleDecUsesItems
+    public void preShortFacilityModuleDecUsesItems(ShortFacilityModuleDec data) {}
 
-    public void postShortFacilityModuleDecUsesItems(ShortFacilityModuleDec node) {}
+    public void midShortFacilityModuleDecUsesItems(ShortFacilityModuleDec node,
+            UsesItem previous, UsesItem next) {}
+
+    public void postShortFacilityModuleDecUsesItems(ShortFacilityModuleDec data) {}
 
     // Statement
     public void preStatement(Statement data) {}
 
-    public void midStatement(Statement node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midStatement(Statement node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postStatement(Statement data) {}
 
     // StringExp
     public void preStringExp(StringExp data) {}
 
-    public void midStringExp(StringExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midStringExp(StringExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postStringExp(StringExp data) {}
 
@@ -1339,8 +1675,7 @@ public abstract class TreeWalkerVisitor {
     public void preSubtypeDec(SubtypeDec data) {}
 
     public void midSubtypeDec(SubtypeDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postSubtypeDec(SubtypeDec data) {}
 
@@ -1348,73 +1683,85 @@ public abstract class TreeWalkerVisitor {
     public void preSuppositionDeductionExp(SuppositionDeductionExp data) {}
 
     public void midSuppositionDeductionExp(SuppositionDeductionExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postSuppositionDeductionExp(SuppositionDeductionExp data) {}
 
-    public void preSuppositionDeductionExpBody(SuppositionDeductionExp node) {}
+    // SuppositionDeductionExpBody
+    public void preSuppositionDeductionExpBody(SuppositionDeductionExp data) {}
 
-    public void postSuppositionDeductionExpBody(SuppositionDeductionExp node) {}
+    public void midSuppositionDeductionExpBody(SuppositionDeductionExp node,
+            Exp previous, Exp next) {}
+
+    public void postSuppositionDeductionExpBody(SuppositionDeductionExp data) {}
 
     // SuppositionExp
     public void preSuppositionExp(SuppositionExp data) {}
 
     public void midSuppositionExp(SuppositionExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postSuppositionExp(SuppositionExp data) {}
 
-    public void preSuppositionExpVars(SuppositionExp node) {}
+    // SuppositionExpVars
+    public void preSuppositionExpVars(SuppositionExp data) {}
 
-    public void postSuppositionExpVars(SuppositionExp node) {}
+    public void midSuppositionExpVars(SuppositionExp node, MathVarDec previous,
+            MathVarDec next) {}
+
+    public void postSuppositionExpVars(SuppositionExp data) {}
 
     // SwapStmt
     public void preSwapStmt(SwapStmt data) {}
 
-    public void midSwapStmt(SwapStmt node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midSwapStmt(SwapStmt node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postSwapStmt(SwapStmt data) {}
 
     // TupleExp
     public void preTupleExp(TupleExp data) {}
 
-    public void midTupleExp(TupleExp node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midTupleExp(TupleExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postTupleExp(TupleExp data) {}
 
-    public void preTupleExpFields(TupleExp node) {}
+    // TupleExpFields
+    public void preTupleExpFields(TupleExp data) {}
 
-    public void postTupleExpFields(TupleExp node) {}
+    public void midTupleExpFields(TupleExp node, Exp previous, Exp next) {}
+
+    public void postTupleExpFields(TupleExp data) {}
 
     // TupleTy
     public void preTupleTy(TupleTy data) {}
 
-    public void midTupleTy(TupleTy node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midTupleTy(TupleTy node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postTupleTy(TupleTy data) {}
 
-    public void preTupleTyFields(TupleTy node) {}
+    // TupleTyFields
+    public void preTupleTyFields(TupleTy data) {}
 
-    public void postTupleTyFields(TupleTy node) {}
+    public void midTupleTyFields(TupleTy node, Ty previous, Ty next) {}
+
+    public void postTupleTyFields(TupleTy data) {}
 
     // Ty
     public void preTy(Ty data) {}
 
-    public void midTy(Ty node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midTy(Ty node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postTy(Ty data) {}
 
     // TypeDec
     public void preTypeDec(TypeDec data) {}
 
-    public void midTypeDec(TypeDec node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midTypeDec(TypeDec node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postTypeDec(TypeDec data) {}
 
@@ -1422,45 +1769,47 @@ public abstract class TreeWalkerVisitor {
     public void preTypeFunctionExp(TypeFunctionExp data) {}
 
     public void midTypeFunctionExp(TypeFunctionExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postTypeFunctionExp(TypeFunctionExp data) {}
 
-    public void preTypeFunctionExpParams(TypeFunctionExp node) {}
+    // TypeFunctionExpParams
+    public void preTypeFunctionExpParams(TypeFunctionExp data) {}
 
-    public void postTypeFunctionExpParams(TypeFunctionExp node) {}
+    public void midTypeFunctionExpParams(TypeFunctionExp node, Exp previous,
+            Exp next) {}
+
+    public void postTypeFunctionExpParams(TypeFunctionExp data) {}
 
     // UnaryMinusExp
     public void preUnaryMinusExp(UnaryMinusExp data) {}
 
     public void midUnaryMinusExp(UnaryMinusExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postUnaryMinusExp(UnaryMinusExp data) {}
 
     // UsesItem
     public void preUsesItem(UsesItem data) {}
 
-    public void midUsesItem(UsesItem node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midUsesItem(UsesItem node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postUsesItem(UsesItem data) {}
 
     // VarDec
     public void preVarDec(VarDec data) {}
 
-    public void midVarDec(VarDec node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midVarDec(VarDec node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postVarDec(VarDec data) {}
 
     // VarExp
     public void preVarExp(VarExp data) {}
 
-    public void midVarExp(VarExp node, ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midVarExp(VarExp node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postVarExp(VarExp data) {}
 
@@ -1468,8 +1817,7 @@ public abstract class TreeWalkerVisitor {
     public void preVariableArrayExp(VariableArrayExp data) {}
 
     public void midVariableArrayExp(VariableArrayExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postVariableArrayExp(VariableArrayExp data) {}
 
@@ -1477,21 +1825,23 @@ public abstract class TreeWalkerVisitor {
     public void preVariableDotExp(VariableDotExp data) {}
 
     public void midVariableDotExp(VariableDotExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postVariableDotExp(VariableDotExp data) {}
 
-    public void preVariableDotExpSegments(VariableDotExp node) {}
+    // VariableDotExpSegments
+    public void preVariableDotExpSegments(VariableDotExp data) {}
 
-    public void postVariableDotExpSegments(VariableDotExp node) {}
+    public void midVariableDotExpSegments(VariableDotExp node,
+            VariableExp previous, VariableExp next) {}
+
+    public void postVariableDotExpSegments(VariableDotExp data) {}
 
     // VariableExp
     public void preVariableExp(VariableExp data) {}
 
     public void midVariableExp(VariableExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postVariableExp(VariableExp data) {}
 
@@ -1499,8 +1849,7 @@ public abstract class TreeWalkerVisitor {
     public void preVariableNameExp(VariableNameExp data) {}
 
     public void midVariableNameExp(VariableNameExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postVariableNameExp(VariableNameExp data) {}
 
@@ -1508,30 +1857,40 @@ public abstract class TreeWalkerVisitor {
     public void preVariableRecordExp(VariableRecordExp data) {}
 
     public void midVariableRecordExp(VariableRecordExp node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postVariableRecordExp(VariableRecordExp data) {}
 
-    public void preVariableRecordExpFields(VariableRecordExp node) {}
+    // VariableRecordExpFields
+    public void preVariableRecordExpFields(VariableRecordExp data) {}
 
-    public void postVariableRecordExpFields(VariableRecordExp node) {}
+    public void midVariableRecordExpFields(VariableRecordExp node,
+            VariableExp previous, VariableExp next) {}
+
+    public void postVariableRecordExpFields(VariableRecordExp data) {}
 
     // WhileStmt
     public void preWhileStmt(WhileStmt data) {}
 
-    public void midWhileStmt(WhileStmt node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {}
+    public void midWhileStmt(WhileStmt node, ResolveConceptualElement previous,
+            ResolveConceptualElement next) {}
 
     public void postWhileStmt(WhileStmt data) {}
 
-    public void preWhileStmtChanging(WhileStmt node) {}
+    // WhileStmtChanging
+    public void preWhileStmtChanging(WhileStmt data) {}
 
-    public void postWhileStmtChanging(WhileStmt node) {}
+    public void midWhileStmtChanging(WhileStmt node, VariableExp previous,
+            VariableExp next) {}
 
-    public void preWhileStmtStatements(WhileStmt node) {}
+    public void postWhileStmtChanging(WhileStmt data) {}
 
-    public void postWhileStmtStatements(WhileStmt node) {}
+    // WhileStmtStatements
+    public void preWhileStmtStatements(WhileStmt data) {}
+
+    public void midWhileStmtStatements(WhileStmt node, Statement previous,
+            Statement next) {}
+
+    public void postWhileStmtStatements(WhileStmt data) {}
 
 }
