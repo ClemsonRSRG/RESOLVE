@@ -34,14 +34,15 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
     private boolean isMath;
 
     //Flags
-    private static final String FLAG_SECTION_NAME = "Pretty C Translation";
+    private static final String FLAG_SECTION_NAME = "Pretty Java Translation";
 
     private static final String FLAG_DESC_TRANSLATE =
             "Translates into "
-                    + "a \"Pretty\" C version following the line numbers of the "
+                    + "a \"Pretty\" Java version following the line numbers of the "
                     + "RESOLVE Facility.";
-    public static final Flag FLAG_PRETTY_C_TRANSLATE =
-            new Flag(FLAG_SECTION_NAME, "prettyctranslate", FLAG_DESC_TRANSLATE);
+    public static final Flag FLAG_PRETTY_JAVA_TRANSLATE =
+            new Flag(FLAG_SECTION_NAME, "prettyjavatranslate",
+                    FLAG_DESC_TRANSLATE);
 
     //Global stmt buf
     StringBuffer stmtBuf;
@@ -172,16 +173,16 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
             String stTy = ty.getName().getName();
             String newTy, init;
             if (stTy.equals("Integer")) {
-                newTy = "int";
-                init = "= 0";
+                newTy = "Integer";
+                init = "= new Integer()";
             }
             else if (stTy.equals("Char_Str")) {
-                newTy = "char*";
-                init = "";
+                newTy = "String";
+                init = "= new String()";
             }
             else if (stTy.equals("Boolean")) {
-                newTy = "int";
-                init = "= 0";
+                newTy = "boolean";
+                init = "= false";
             }
             else if (stTy.equals("Character")) {
                 newTy = "char";
@@ -371,7 +372,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
         return cInfo.toString();
     }
 
-    public void outputCCode(File outputFile) {
+    public void outputCode(File outputFile) {
         //Assume files have already been translated
         if (!env.flags.isFlagSet(ResolveCompiler.FLAG_WEB)
                 || env.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
@@ -466,9 +467,9 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
         return retString.toString();
     }
 
-    public String outputCode() {
+    /*public String outputCode() {
         return cInfo.toString();
-    }
+    }*/
 
     public static final void setUpFlags() {
 

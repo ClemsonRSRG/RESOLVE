@@ -363,7 +363,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
         return cInfo.toString();
     }
 
-    public void outputCCode(File outputFile) {
+    public void outputCode(File outputFile) {
         //Assume files have already been translated
         if (!env.flags.isFlagSet(ResolveCompiler.FLAG_WEB)
                 || env.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
@@ -458,7 +458,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
         return retString.toString();
     }
 
-    public String outputCode() {
+    public String outputCodeOld() {
         return cInfo.toString();
     }
 

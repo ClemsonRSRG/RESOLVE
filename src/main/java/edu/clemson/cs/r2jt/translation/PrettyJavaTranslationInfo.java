@@ -54,7 +54,7 @@ public class PrettyJavaTranslationInfo {
             }
             retBuf.append("){");
             if (!returnType[0].equals("void ")) {
-                retBuf.append("public static ").append(returnType[0]).append(
+                retBuf.append(returnType[0]).append(
                         returnName).append(returnType[1]).append(";");
             }
             for (String a : varInit) {
@@ -93,8 +93,9 @@ public class PrettyJavaTranslationInfo {
             newFunc.returnType = getCVarType(newReturnTy.getName());
         }
         newFunc.returnName = newFuncName.getName();
+        String temp = "public static " + newFunc.returnType[0];
         newFunc.functionName =
-                stringFromSym(newFuncName, newFunc.returnType[0]);
+                stringFromSym(newFuncName, temp);
         String te = newFunc.functionName.trim();
         funcList.add(newFunc);
         newFunc.params = new ArrayList<String>();
