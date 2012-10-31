@@ -13,14 +13,14 @@ public class VirtualListNode extends ResolveConceptualElement {
     ResolveConceptualElement myParent;
     String myName;
     List<ResolveConceptualElement> myList;
+    Class<?> myListType;
 
     public VirtualListNode(ResolveConceptualElement parent, String listName,
-            List<ResolveConceptualElement> list) {
+            List<ResolveConceptualElement> list, Class<?> listType) {
         this.myParent = parent;
-        this.myName =
-                parent.getClass().getSimpleName()
-                        + toUppercaseNotation(listName);
+        this.myName = parent.getClass().getSimpleName() + toCamelCase(listName);
         this.myList = list;
+        this.myListType = listType;
     }
 
     public ResolveConceptualElement getParent() {
@@ -29,6 +29,10 @@ public class VirtualListNode extends ResolveConceptualElement {
 
     public String getNodeName() {
         return myName;
+    }
+
+    public Class<?> getListType() {
+        return myListType;
     }
 
     @Override
@@ -52,7 +56,7 @@ public class VirtualListNode extends ResolveConceptualElement {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private String toUppercaseNotation(String s) {
+    private String toCamelCase(String s) {
         StringBuilder buffer = new StringBuilder();
         StringTokenizer tokens = new StringTokenizer(s, "_");
         while (tokens.hasMoreTokens()) {
