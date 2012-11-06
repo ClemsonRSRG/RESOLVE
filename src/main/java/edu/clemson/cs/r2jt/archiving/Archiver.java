@@ -17,7 +17,6 @@ import javax.tools.JavaCompiler.CompilationTask;
 
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.collections.List;
-import edu.clemson.cs.r2jt.data.MetaFile;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.translation.Translator;
 import edu.clemson.cs.r2jt.utilities.Flag;
@@ -79,11 +78,7 @@ public class Archiver {
     // String to hold the filename of the output jar
     private String targetJarName;
 
-    private File outputJarFile = null;
-
     private String workspaceDir;
-
-    private MetaFile inputFile;
 
     private String[] stdResolve =
             { "RESOLVE_BASE.java", "RESOLVE_BASE_EXT.java",
@@ -93,11 +88,10 @@ public class Archiver {
     private String[] stdImports;
     public static int BUFFER_SIZE = 10240;
 
-    public Archiver(CompileEnvironment e, File file, MetaFile inputFile) {
+    public Archiver(CompileEnvironment e, File file) {
         myInstanceEnvironment = e;
         webOutput =
                 myInstanceEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_WEB);
-        this.inputFile = inputFile;
         String fileName = file.getAbsolutePath();
         int dot = fileName.lastIndexOf(".");
         targetJarName = fileName.substring(0, dot) + ".jar";
@@ -231,11 +225,6 @@ public class Archiver {
         }
     }
 
-    public void setOutputJar(String jarFileString) {
-        int dot = jarFileString.lastIndexOf(".");
-        outputJarFile = new File(jarFileString.substring(0, dot) + ".jar");
-    }
-
     /**
      * <p>Method to invoke the jar utility and create the jar file.</p>
      * 
@@ -257,13 +246,7 @@ public class Archiver {
                         Attributes.Name.MANIFEST_VERSION, "1.0");
                 manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS,
                         entryClass);
-                if (outputJarFile != null) {
-                    stream = new FileOutputStream(outputJarFile);
-                }
-                else {
-                    stream = new FileOutputStream(targetJarName);
-                }
-
+                stream = new FileOutputStream(targetJarName);
                 out = new JarOutputStream(stream, manifest);
             }
 
@@ -356,7 +339,6 @@ public class Archiver {
         while (it.hasNext()) {
             file = it.next();
             if (file.exists()) {
-                //System.out.println(file.getAbsolutePath());
                 file.delete();
             }
         }
@@ -472,11 +454,6 @@ public class Archiver {
         GuiWrapper gui =
                 new GuiWrapper("gui", file.getPath(), workspaceDir,
                         myInstanceEnvironment);
-        if (inputFile != null) {
-            gui.setJavaLocation(inputFile.getMyCustomFile().getAbsolutePath(),
-                    inputFile.getMyFileName()
-                            + inputFile.getMyKind().getExtension());
-        }
         if (gui.generateCode() && gui.createJavaFile()) {
             sourceFiles.add(gui.getJavaPath());
             createdFiles.add(new File(gui.getJavaPath()));

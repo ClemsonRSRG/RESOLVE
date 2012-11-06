@@ -20,7 +20,6 @@ public class MetaFile {
     private ModuleKind myKind;
     private boolean myCustom;
     private String myCustomPath;
-    private String jarTempDir;
 
     public MetaFile(String fileName, String assocConcept, String pkg,
             String fileSource, ModuleKind kind) {
@@ -84,14 +83,6 @@ public class MetaFile {
         return myCustom;
     }
 
-    public void setJarTempDir(String dir) {
-        jarTempDir = dir;
-    }
-
-    public String getJarTempDir() {
-        return jarTempDir;
-    }
-
     public File getMyCustomFile() {
         String filePath = myCustomPath;
         if (myKind.equals(ModuleKind.FACILITY)) {
@@ -105,38 +96,20 @@ public class MetaFile {
     }
 
     public File getMyFile(File mainDir) {
-        if (false) {
-            String filePath = myCustomPath;
-            if (myKind.equals(ModuleKind.FACILITY)) {
-                filePath += File.separator + "Facilities" + File.separator;
-            }
-            else {
-                filePath += File.separator + "Concepts" + File.separator;
-            }
-            filePath +=
-                    myPkg + File.separator + myFileName + myKind.getExtension();
-            return new File(filePath);
+        String filePath = mainDir.getAbsolutePath();
+        if (myKind.equals(ModuleKind.FACILITY)) {
+            filePath += File.separator + "Facilities" + File.separator;
         }
         else {
-            String filePath = mainDir.getAbsolutePath();
-            if (myKind.equals(ModuleKind.FACILITY)) {
-                filePath += File.separator + "Facilities" + File.separator;
-            }
-            else {
-                filePath += File.separator + "Concepts" + File.separator;
-            }
-            if (myPkg.equals("Static_Array_Template")) {
-                myPkg = "Standard" + File.separator + "Static_Array_Template";
-            }
-            else if (myPkg.equals("Location_Linking_Template_1")) {
-                myPkg =
-                        "Standard" + File.separator
-                                + "Location_Linking_Template_1";
-            }
-            filePath +=
-                    myPkg + File.separator + myFileName + myKind.getExtension();
-            return new File(filePath);
+            filePath += File.separator + "Concepts" + File.separator;
         }
-
+        if (myPkg.equals("Static_Array_Template")) {
+            myPkg = "Standard" + File.separator + "Static_Array_Template";
+        }
+        else if (myPkg.equals("Location_Linking_Template_1")) {
+            myPkg = "Standard" + File.separator + "Location_Linking_Template_1";
+        }
+        filePath += myPkg + File.separator + myFileName + myKind.getExtension();
+        return new File(filePath);
     }
 }

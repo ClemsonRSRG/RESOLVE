@@ -16,7 +16,7 @@ import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 public class ResolveCompiler {
 
     private static final String FLAG_SECTION_NAME = "Output";
-
+    
     private static final String FLAG_DESC_WEB =
             "Change the output to be more web-friendly for the Web Interface.";
 

@@ -41,10 +41,6 @@ public class GuiWrapper {
         //System.out.println(facilityName);
     }
 
-    public void setJavaLocation(String java, String name) {
-        javaLocation = java.replaceAll(name, guiName + ".java");
-    }
-
     public boolean generateCode() {
         if (type.equals("gui")) {
             generateSwing();
@@ -75,10 +71,6 @@ public class GuiWrapper {
 
     public String getEntryClass() {
         return entryClass;
-    }
-
-    public String getGuiName() {
-        return guiName;
     }
 
     public boolean createJavaFile() {
