@@ -183,7 +183,7 @@ public class Controller {
         }
         else {
             if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-                myArchive = new Archiver(myInstanceEnvironment, file);
+                myArchive = new Archiver(myInstanceEnvironment, file, null);
             }
             else {
                 myArchive = null;
@@ -224,9 +224,24 @@ public class Controller {
             //myInstanceEnvironment.setTargetSource(myInstanceEnvironment.getUserFileFromMap("Unbounded_List_Template.Std_Unbounded_List_Realiz"));
             if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
                 //System.out.println(inputFile.getMyFile(myInstanceEnvironment.getMainDir()));
-                myArchive =
-                        new Archiver(myInstanceEnvironment, inputFile
-                                .getMyFile(myInstanceEnvironment.getMainDir()));
+                if (inputFile.getMyKind().equals(ModuleKind.FACILITY)) {
+                    String jarTempLoc =
+                            inputFile.getJarTempDir()
+                                    + inputFile.getMyFileName();
+                    myArchive =
+                            new Archiver(myInstanceEnvironment, inputFile
+                                    .getMyFile(myInstanceEnvironment
+                                            .getMainDir()), inputFile);
+                    myArchive.setOutputJar(jarTempLoc
+                            + inputFile.getMyKind().getExtension());
+                }
+                else {
+                    myArchive =
+                            new Archiver(myInstanceEnvironment, inputFile
+                                    .getMyFile(myInstanceEnvironment
+                                            .getMainDir()), inputFile);
+                }
+
             }
             else {
                 myArchive = null;
