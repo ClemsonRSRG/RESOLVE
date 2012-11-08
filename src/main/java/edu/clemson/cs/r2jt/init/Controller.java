@@ -581,7 +581,6 @@ public class Controller {
                 }
                 myInstanceEnvironment.printModules();
             }
-
             if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_VERIFY_VC)) {
                 verifyModuleDec(context, dec);
             }
