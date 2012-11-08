@@ -94,11 +94,8 @@ public abstract class TreeWalkerVisitor {
 
     public void midBetweenExpLessExps(BetweenExp node, Exp previous, Exp next) {}
 
-<<<<<<< HEAD
     public void postBetweenExpLessExps(BetweenExp data) {}
 
-=======
->>>>>>> bccfdf2611d50e588674d91bacaba687f1517121
     // BooleanTy 
     public void preBooleanTy(BooleanTy data) {}
 
