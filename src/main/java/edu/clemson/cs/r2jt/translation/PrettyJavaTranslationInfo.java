@@ -4,18 +4,16 @@
  */
 package edu.clemson.cs.r2jt.translation;
 
+import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.translation.PrettyJavaTranslationInfo.Function;
 import java.util.ArrayList;
 import java.util.List;
-
-import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.translation.PrettyCTranslationInfo.Function;
-import java.io.StringReader;
 
 /**
  *
  * @author Mark T
  */
-public class PrettyCTranslationInfo {
+public class PrettyJavaTranslationInfo {
 
     int lineCount;
     ArrayList<Function> funcList;
@@ -23,7 +21,7 @@ public class PrettyCTranslationInfo {
     Function currentFunc;
     String name;
 
-    public PrettyCTranslationInfo(String name) {
+    public PrettyJavaTranslationInfo(String name) {
         lineCount = 1;
         this.name = name;
         funcList = new ArrayList<Function>();
@@ -57,9 +55,9 @@ public class PrettyCTranslationInfo {
                 retBuf.append(returnType[0]).append(returnName).append(
                         returnType[1]).append(";");
             }
-            for (String a : varInit) {
+            /*for (String a : varInit) {
                 retBuf.append(a).append(";");
-            }
+            }*/
             for (String a : stmts) {
                 //retBuf.append(a).append(";");
 
@@ -93,8 +91,8 @@ public class PrettyCTranslationInfo {
             newFunc.returnType = getCVarType(newReturnTy.getName());
         }
         newFunc.returnName = newFuncName.getName();
-        newFunc.functionName =
-                stringFromSym(newFuncName, newFunc.returnType[0]);
+        String temp = "public static " + newFunc.returnType[0];
+        newFunc.functionName = stringFromSym(newFuncName, temp);
         String te = newFunc.functionName.trim();
         funcList.add(newFunc);
         newFunc.params = new ArrayList<String>();
@@ -131,6 +129,7 @@ public class PrettyCTranslationInfo {
 
     public void appendToFuncVarInit(String data) {
         if (!(currentFunc == null)) {
+            currentFunc.allStmt.append(data);
             currentFunc.varInit.add(data);
         }
         else {
@@ -147,13 +146,17 @@ public class PrettyCTranslationInfo {
 
     /* End of Function methods */
 
+    @Override
     public String toString() {
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         //ret.append(buildHeaderComment());
         int temp;
         //temp = fileName.indexOf(".");
         //name = fileName.substring(0, temp);
         //global variables
+        String nameNoExt = name.substring(0, name.lastIndexOf('.'));
+
+        ret.append("public static class ").append(nameNoExt).append("{  ");
         for (int j = 0; j < globalVarsList.size(); j++) {
             ret.append(globalVarsList.get(j));
         }
@@ -162,7 +165,7 @@ public class PrettyCTranslationInfo {
             Function tFunc = funcList.get(j);
             ret.append(tFunc.getFunctionString());
         }
-
+        ret.append(" }");
         return ret.toString();
     }
 

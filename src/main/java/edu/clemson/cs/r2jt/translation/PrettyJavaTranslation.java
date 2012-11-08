@@ -20,13 +20,13 @@ import java.io.File;
  *
  * @author Mark T
  */
-public class PrettyCTranslation extends TreeWalkerStackVisitor {
+public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
 
     /*
      * Variable Declaration
      */
 
-    PrettyCTranslationInfo cInfo;
+    PrettyJavaTranslationInfo cInfo;
     private final CompileEnvironment env;
     private ErrorHandler err;
     private String targetFileName;
@@ -34,14 +34,15 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
     private boolean isMath;
 
     //Flags
-    private static final String FLAG_SECTION_NAME = "Pretty C Translation";
+    private static final String FLAG_SECTION_NAME = "Pretty Java Translation";
 
     private static final String FLAG_DESC_TRANSLATE =
             "Translates into "
-                    + "a \"Pretty\" C version following the line numbers of the "
+                    + "a \"Pretty\" Java version following the line numbers of the "
                     + "RESOLVE Facility.";
-    public static final Flag FLAG_PRETTY_C_TRANSLATE =
-            new Flag(FLAG_SECTION_NAME, "prettyCTranslate", FLAG_DESC_TRANSLATE);
+    public static final Flag FLAG_PRETTY_JAVA_TRANSLATE =
+            new Flag(FLAG_SECTION_NAME, "prettyJavaTranslate",
+                    FLAG_DESC_TRANSLATE);
 
     //Global stmt buf
     StringBuffer stmtBuf;
@@ -50,13 +51,14 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
      * End of Variable Declaration
      */
 
-    public PrettyCTranslation(CompileEnvironment env, SymbolTable table,
+    public PrettyJavaTranslation(CompileEnvironment env, SymbolTable table,
             ModuleDec dec, ErrorHandler err) {
         this.err = err;
         this.env = env;
         this.table = table;
         targetFileName = dec.getName().getFile().getName();
-        cInfo = new PrettyCTranslationInfo(dec.getName().getFile().getName());
+        cInfo =
+                new PrettyJavaTranslationInfo(dec.getName().getFile().getName());
         stmtBuf = new StringBuffer();
         isMath = false;
     }
@@ -140,6 +142,10 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
 
     }
 
+    public void walkInfixExp(InfixExp exp) {
+        cInfo.appendToStmt(exp.toString());
+    }
+
     @Override
     public void preParameterVarDec(ParameterVarDec dec) {
         StringBuilder parmSet = new StringBuilder();
@@ -155,11 +161,10 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
     }
 
     //Function Call
-
     @Override
     public void preCallStmt(CallStmt stmt) {
         if (stmt.getName().getName().contains("Write")) {
-            String out = "printf(";
+            String out = "System.out.println(";
             cInfo.increaseLineStatementBuffer(stmt.getName().getLocation()
                     .getPos().getLine());
             cInfo.appendToStmt(out);
@@ -184,6 +189,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
         cInfo.appendToStmt(");");
     }
 
+    @Override
     public void preVarDec(VarDec dec) {
         PosSymbol name = dec.getName();
 
@@ -192,16 +198,16 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
             String stTy = ty.getName().getName();
             String newTy, init;
             if (stTy.equals("Integer")) {
-                newTy = "int";
-                init = "= 0";
+                newTy = "Integer";
+                init = "= new Integer()";
             }
             else if (stTy.equals("Char_Str")) {
-                newTy = "char*";
-                init = "";
+                newTy = "String";
+                init = "= new String()";
             }
             else if (stTy.equals("Boolean")) {
-                newTy = "int";
-                init = "= 0";
+                newTy = "boolean";
+                init = "= false";
             }
             else if (stTy.equals("Character")) {
                 newTy = "char";
@@ -289,15 +295,21 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
 
     /*
      * https://www.pivotaltracker.com/story/show/37258073
+     * This will skip over all children of ProgramFunctionExp
      */
+    public void walkProgramFunctionExp(ProgramFunctionExp exp) {
+
+    }
+
     @Override
     public void preProgramFunctionExp(ProgramFunctionExp exp) {
-        cInfo.appendToStmt("/*");
+    //walkOverride(exp);
+    //cInfo.appendToStmt("/*");
     }
 
     @Override
     public void postProgramFunctionExp(ProgramFunctionExp exp) {
-        cInfo.appendToStmt("*/");
+    //cInfo.appendToStmt("*/");
     }
 
     /*
@@ -351,10 +363,12 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
         if (stmt.getChanging().size() < 1) {
             cInfo.appendToStmt("){");
         }
-        else
+        else {
             cInfo.appendToStmt(" */");
+        }
     }
 
+    @Override
     public void preWhileStmtChanging(WhileStmt stmt) {
         cInfo.appendToStmt("){");
         int lin = stmt.getChanging().get(0).getLocation().getPos().getLine();
@@ -362,8 +376,14 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
         cInfo.appendToStmt("/* changing ");
     }
 
+    public void walkWhileStmtChanging(WhileStmt stmt) {
+
+    }
+
+    @Override
     public void postWhileStmtChanging(WhileStmt stmt) {}
 
+    @Override
     public void midWhileStmt(WhileStmt node,
             ResolveConceptualElement prevChild,
             ResolveConceptualElement nextChild) {
@@ -381,6 +401,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
         }
     }
 
+    @Override
     public void postWhileStmt(WhileStmt stmt) {
         cInfo.appendToStmt(" }");
     }
@@ -488,9 +509,9 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
         return retString.toString();
     }
 
-    public String outputCodeOld() {
+    /*public String outputCode() {
         return cInfo.toString();
-    }
+    }*/
 
     public static final void setUpFlags() {
 
