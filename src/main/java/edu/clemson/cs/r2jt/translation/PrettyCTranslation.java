@@ -41,7 +41,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
                     + "a \"Pretty\" C version following the line numbers of the "
                     + "RESOLVE Facility.";
     public static final Flag FLAG_PRETTY_C_TRANSLATE =
-            new Flag(FLAG_SECTION_NAME, "prettyctranslate", FLAG_DESC_TRANSLATE);
+            new Flag(FLAG_SECTION_NAME, "prettyCTranslate", FLAG_DESC_TRANSLATE);
 
     //Global stmt buf
     StringBuffer stmtBuf;
@@ -155,10 +155,32 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
     }
 
     //Function Call
+    @Override
     public void preCallStmt(CallStmt stmt) {
-        String a = cInfo.stringFromSym(stmt.getName(), null);
-        cInfo.addToStmts(a + "()");
-        cInfo.appendToStmt(a + "();");
+        if (stmt.getName().getName().contains("Write")) {
+            String out = "printf(";
+            cInfo.increaseLineStatementBuffer(stmt.getName().getLocation()
+                    .getPos().getLine());
+            cInfo.appendToStmt(out);
+        }
+        else {
+            String a = cInfo.stringFromSym(stmt.getName(), null);
+            //cInfo.addToStmts(a + "()");
+            cInfo.appendToStmt(a + "(");
+        }
+    }
+
+    @Override
+    public void midCallStmtArguments(CallStmt node, ProgramExp previous,
+            ProgramExp next) {
+        if (next != null && previous != null) {
+            cInfo.appendToStmt(", ");
+        }
+    }
+
+    @Override
+    public void postCallStmt(CallStmt stmt) {
+        cInfo.appendToStmt(");");
     }
 
     public void preVarDec(VarDec dec) {
@@ -238,6 +260,13 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
         //function with return
         cInfo.appendToStmt(cInfo.stringFromSym(exp.getName(), null));
         cInfo.appendToStmt("(");
+    }
+
+    @Override
+    public void midProgramParamExpArguments(ProgramParamExp node,
+            ProgramExp previous, ProgramExp next) {
+        if (next != null && previous != null)
+            cInfo.appendToStmt(", ");
     }
 
     @Override

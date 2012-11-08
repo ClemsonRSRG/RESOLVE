@@ -232,5 +232,6 @@ public class PrettyCTranslationInfo {
             lineCount++;
         }
         addToStmts(retString.toString());
+        currentFunc.allStmt.append(retString.toString());
     }
 }

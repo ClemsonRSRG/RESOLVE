@@ -41,7 +41,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
                     + "a \"Pretty\" Java version following the line numbers of the "
                     + "RESOLVE Facility.";
     public static final Flag FLAG_PRETTY_JAVA_TRANSLATE =
-            new Flag(FLAG_SECTION_NAME, "prettyjavatranslate",
+            new Flag(FLAG_SECTION_NAME, "prettyJavaTranslate",
                     FLAG_DESC_TRANSLATE);
 
     //Global stmt buf
@@ -142,6 +142,10 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
 
     }
 
+    public void walkInfixExp(InfixExp exp) {
+        cInfo.appendToStmt(exp.toString());
+    }
+
     @Override
     public void preParameterVarDec(ParameterVarDec dec) {
         StringBuilder parmSet = new StringBuilder();
@@ -159,9 +163,30 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
     //Function Call
     @Override
     public void preCallStmt(CallStmt stmt) {
-        String a = cInfo.stringFromSym(stmt.getName(), null);
-        cInfo.addToStmts(a + "()");
-        cInfo.appendToStmt(a + "();");
+        if (stmt.getName().getName().contains("Write")) {
+            String out = "System.out.println(";
+            cInfo.increaseLineStatementBuffer(stmt.getName().getLocation()
+                    .getPos().getLine());
+            cInfo.appendToStmt(out);
+        }
+        else {
+            String a = cInfo.stringFromSym(stmt.getName(), null);
+            //cInfo.addToStmts(a + "()");
+            cInfo.appendToStmt(a + "(");
+        }
+    }
+
+    @Override
+    public void midCallStmtArguments(CallStmt node, ProgramExp previous,
+            ProgramExp next) {
+        if (next != null && previous != null) {
+            cInfo.appendToStmt(", ");
+        }
+    }
+
+    @Override
+    public void postCallStmt(CallStmt stmt) {
+        cInfo.appendToStmt(");");
     }
 
     @Override
@@ -245,6 +270,13 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
     }
 
     @Override
+    public void midProgramParamExpArguments(ProgramParamExp node,
+            ProgramExp previous, ProgramExp next) {
+        if (next != null && previous != null)
+            cInfo.appendToStmt(", ");
+    }
+
+    @Override
     public void postProgramParamExp(ProgramParamExp exp) {
         cInfo.appendToStmt(")");
     }
@@ -263,15 +295,21 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
 
     /*
      * https://www.pivotaltracker.com/story/show/37258073
+     * This will skip over all children of ProgramFunctionExp
      */
+    public void walkProgramFunctionExp(ProgramFunctionExp exp) {
+
+    }
+
     @Override
     public void preProgramFunctionExp(ProgramFunctionExp exp) {
-        cInfo.appendToStmt("/*");
+    //walkOverride(exp);
+    //cInfo.appendToStmt("/*");
     }
 
     @Override
     public void postProgramFunctionExp(ProgramFunctionExp exp) {
-        cInfo.appendToStmt("*/");
+    //cInfo.appendToStmt("*/");
     }
 
     /*
@@ -336,6 +374,10 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
         int lin = stmt.getChanging().get(0).getLocation().getPos().getLine();
         cInfo.appendToStmt(getNewLines(lin));
         cInfo.appendToStmt("/* changing ");
+    }
+
+    public void walkWhileStmtChanging(WhileStmt stmt) {
+
     }
 
     @Override

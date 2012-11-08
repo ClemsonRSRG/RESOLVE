@@ -4,12 +4,10 @@
  */
 package edu.clemson.cs.r2jt.translation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslationInfo.Function;
-import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -54,12 +52,12 @@ public class PrettyJavaTranslationInfo {
             }
             retBuf.append("){");
             if (!returnType[0].equals("void ")) {
-                retBuf.append(returnType[0]).append(
-                        returnName).append(returnType[1]).append(";");
+                retBuf.append(returnType[0]).append(returnName).append(
+                        returnType[1]).append(";");
             }
-            for (String a : varInit) {
+            /*for (String a : varInit) {
                 retBuf.append(a).append(";");
-            }
+            }*/
             for (String a : stmts) {
                 //retBuf.append(a).append(";");
 
@@ -94,8 +92,7 @@ public class PrettyJavaTranslationInfo {
         }
         newFunc.returnName = newFuncName.getName();
         String temp = "public static " + newFunc.returnType[0];
-        newFunc.functionName =
-                stringFromSym(newFuncName, temp);
+        newFunc.functionName = stringFromSym(newFuncName, temp);
         String te = newFunc.functionName.trim();
         funcList.add(newFunc);
         newFunc.params = new ArrayList<String>();
@@ -132,6 +129,7 @@ public class PrettyJavaTranslationInfo {
 
     public void appendToFuncVarInit(String data) {
         if (!(currentFunc == null)) {
+            currentFunc.allStmt.append(data);
             currentFunc.varInit.add(data);
         }
         else {
@@ -148,13 +146,17 @@ public class PrettyJavaTranslationInfo {
 
     /* End of Function methods */
 
+    @Override
     public String toString() {
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         //ret.append(buildHeaderComment());
         int temp;
         //temp = fileName.indexOf(".");
         //name = fileName.substring(0, temp);
         //global variables
+        String nameNoExt = name.substring(0, name.lastIndexOf('.'));
+
+        ret.append("public static class ").append(nameNoExt).append("{  ");
         for (int j = 0; j < globalVarsList.size(); j++) {
             ret.append(globalVarsList.get(j));
         }
@@ -163,7 +165,7 @@ public class PrettyJavaTranslationInfo {
             Function tFunc = funcList.get(j);
             ret.append(tFunc.getFunctionString());
         }
-
+        ret.append(" }");
         return ret.toString();
     }
 
@@ -233,5 +235,6 @@ public class PrettyJavaTranslationInfo {
             lineCount++;
         }
         addToStmts(retString.toString());
+        currentFunc.allStmt.append(retString.toString());
     }
 }
