@@ -2,7 +2,7 @@ package edu.clemson.cs.r2jt.proving2;
 
 import edu.clemson.cs.r2jt.verification.AssertiveCode;
 
-//A non-conflicting change
+// A non-conflicting change
 
 public abstract class ProverException extends Exception {
 

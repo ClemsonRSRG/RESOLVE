@@ -68,6 +68,18 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
      */
 
     @Override
+    public void preExp(Exp exp) {
+        //ResolveConceptualElement par = getParent();
+        ResolveConceptualElement par = getAncestor(1);
+        if (par instanceof FacilityOperationDec) {
+            FacilityOperationDec parFac = (FacilityOperationDec) par;
+            if (exp.equals(parFac.getRequires()) || exp.equals(parFac.getEnsures())) {
+                System.out.println("HERE");
+            }
+        }
+    }
+
+    @Override
     public void preModuleDec(ModuleDec dec) {
     //Stuff done before start of dec trees
     }
@@ -299,17 +311,6 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
      */
     public void walkProgramFunctionExp(ProgramFunctionExp exp) {
 
-    }
-
-    @Override
-    public void preProgramFunctionExp(ProgramFunctionExp exp) {
-    //walkOverride(exp);
-    //cInfo.appendToStmt("/*");
-    }
-
-    @Override
-    public void postProgramFunctionExp(ProgramFunctionExp exp) {
-    //cInfo.appendToStmt("*/");
     }
 
     /*
