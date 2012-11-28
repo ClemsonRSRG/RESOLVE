@@ -2,46 +2,56 @@ package edu.clemson.cs.r2jt.treewalk;
 
 import edu.clemson.cs.r2jt.absyn.*;
 
-public class VisitorPrintStructure extends TreeWalkerVisitor {
+public class VisitorPrintStructure extends TreeWalkerStackVisitor {
 
     private int indent = 0;
     private final boolean showIdentifiers = false;
 
     @Override
-    public void preAny(ResolveConceptualElement data) {
-        String className;
-        if (data instanceof VirtualListNode) {
-            className = ((VirtualListNode) data).getNodeName() + " [List]";
+    public void preAnyStack(ResolveConceptualElement data) {
+        System.out.print(ConvertNodeToString(data, false));
+        
+        if (this.getParent() != null) {
+            System.out.append(" (Parent: " + ConvertNodeToString(this.getParent(), true) + ")");
         }
-        else {
-            className = data.getClass().getSimpleName();
-        }
-        for (int i = 0; i < indent; ++i) {
-            System.out.print("  ");
-        }
-        System.out.print(className);
-
-        if (showIdentifiers) {
-            if (data instanceof VarExp) {
-                System.out.print(" (" + ((VarExp) data).getName().toString()
-                        + ")");
-            }
-            else if (data instanceof InfixExp) {
-                System.out.print(" ("
-                        + ((InfixExp) data).getOpName().toString() + ")");
-            }
-            else if (data instanceof OutfixExp) {
-                System.out.print(" ("
-                        + ((OutfixExp) data).getOperatorAsString() + ")");
-            }
-        }
-
         System.out.println();
         ++indent;
     }
+    
+    private String ConvertNodeToString(ResolveConceptualElement data, boolean disableIndent) {
+        String nodeString = "";
+        
+        for (int i = 0; !disableIndent && i < indent; ++i) {
+            nodeString += "  ";
+        }
+        
+        if (data instanceof VirtualListNode) {
+            nodeString += ((VirtualListNode) data).getNodeName() + " [List]";
+        }
+        else {
+            nodeString += data.getClass().getSimpleName();
+        }
+
+        if (showIdentifiers) {
+            if (data instanceof VarExp) {
+                nodeString += " (" + ((VarExp) data).getName().toString()
+                        + ")";
+            }
+            else if (data instanceof InfixExp) {
+                nodeString += " ("
+                        + ((InfixExp) data).getOpName().toString() + ")";
+            }
+            else if (data instanceof OutfixExp) {
+                nodeString += " ("
+                        + ((OutfixExp) data).getOperatorAsString() + ")";
+            }
+        }
+        
+        return nodeString;
+    }
 
     @Override
-    public void postAny(ResolveConceptualElement data) {
+    public void postAnyStack(ResolveConceptualElement data) {
         --indent;
     }
 
@@ -59,15 +69,4 @@ public class VisitorPrintStructure extends TreeWalkerVisitor {
                     + "\nNext statement: " + next.toString(0));
         }
     }
-
-    @Override
-    public void preFacilityOperationDecStatements(FacilityOperationDec data) {
-        System.out.println("Beginning of statements.");
-    }
-
-    @Override
-    public void postFacilityOperationDecStatements(FacilityOperationDec data) {
-        System.out.println("End of statements.");
-    }
-
 }
