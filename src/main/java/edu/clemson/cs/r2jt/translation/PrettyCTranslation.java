@@ -385,6 +385,15 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
         cInfo.appendToStmt(" }");
     }
 
+    
+    /*
+     * https://www.pivotaltracker.com/story/show/37258073
+     * This will skip over all children of ProgramFunctionExp
+     */
+    public void walkProgramFunctionExp(ProgramFunctionExp exp) {
+
+    }
+    
     /*
      * End of Visitor Methods
      */
