@@ -8,11 +8,8 @@ Without this configuration present, some functionality in the IDE may be limited
 -->
     <config-data xmlns="http://www.netbeans.org/ns/maven-config-data/1">
         <configurations>
-<<<<<<< HEAD
             <configuration id="RSRG-Global" profiles=""/>
-=======
             <configuration id="Max_Int" profiles=""/>
->>>>>>> adding meaningless xmls
         </configurations>
     </config-data>
 </project-shared-configuration>
