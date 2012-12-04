@@ -73,7 +73,8 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
         ResolveConceptualElement par = getAncestor(1);
         if (par instanceof FacilityOperationDec) {
             FacilityOperationDec parFac = (FacilityOperationDec) par;
-            if (exp.equals(parFac.getRequires()) || exp.equals(parFac.getEnsures())) {
+            if (exp.equals(parFac.getRequires())
+                    || exp.equals(parFac.getEnsures())) {
                 System.out.println("HERE");
             }
         }
