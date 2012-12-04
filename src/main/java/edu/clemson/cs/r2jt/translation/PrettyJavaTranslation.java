@@ -44,8 +44,6 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
             new Flag(FLAG_SECTION_NAME, "prettyJavaTranslate",
                     FLAG_DESC_TRANSLATE);
 
-    //Global stmt buf
-    StringBuffer stmtBuf;
 
     /*
      * End of Variable Declaration
@@ -59,7 +57,6 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
         targetFileName = dec.getName().getFile().getName();
         cInfo =
                 new PrettyJavaTranslationInfo(dec.getName().getFile().getName());
-        stmtBuf = new StringBuffer();
         isMath = false;
     }
 
@@ -79,6 +76,11 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
             }
         }
     }
+    
+    /*@Override
+    public boolean walkExp(Exp exp) {
+        
+    }*/
 
     @Override
     public void preModuleDec(ModuleDec dec) {
@@ -92,7 +94,6 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
 
     @Override
     public void preFacilityModuleDec(FacilityModuleDec dec) {
-    //int a = 0;
     }
 
     @Override
@@ -103,14 +104,11 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
      * 
      */
     public void preFacilityOperationDec(FacilityOperationDec dec) {
-        NameTy retTy = null;
+        PosSymbol retTy = null;
         if (dec.getReturnTy() != null) {
-            retTy = (NameTy) dec.getReturnTy();
-            cInfo.addFunction(dec.getName(), retTy.getName());
+            retTy = ((NameTy)dec.getReturnTy()).getName();
         }
-        else {
-            cInfo.addFunction(dec.getName(), null);
-        }
+        cInfo.addFunction(dec.getName(), retTy);
     }
 
     // TODO : Fix this. Requires pre-post procedures for 'resolve verify' tests. 
@@ -119,8 +117,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
             ResolveConceptualElement prevChild,
             ResolveConceptualElement nextChild) {
         if (prevChild != null && nextChild != null) {
-            if (!(prevChild.equals(node.getEnsures()) || prevChild.equals(node
-                    .getRequires()))) {
+            if (!(prevChild.equals(node.getRequires()))) {
                 if (nextChild.equals(node.getRequires())) {
                     Exp req = (Exp) nextChild;
                     cInfo.increaseLineStatementBuffer(req.getLocation()
@@ -135,13 +132,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
                 }
             }
             else {
-                if (nextChild.equals(node.getRequires())) {
-                    Exp req = (Exp) nextChild;
-                    cInfo.increaseLineStatementBuffer(req.getLocation()
-                            .getPos().getLine());
-                    cInfo.appendToStmt("requires");
-                }
-                else if (nextChild.equals(node.getEnsures())) {
+                if (nextChild.equals(node.getEnsures())) {
                     Exp en = (Exp) nextChild;
                     cInfo.increaseLineStatementBuffer(en.getLocation().getPos()
                             .getLine());
@@ -152,7 +143,6 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
                 }
             }
         }
-
     }
 
     public void walkInfixExp(InfixExp exp) {
@@ -184,7 +174,6 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
         }
         else {
             String a = cInfo.stringFromSym(stmt.getName(), null);
-            //cInfo.addToStmts(a + "()");
             cInfo.appendToStmt(a + "(");
         }
     }
@@ -204,33 +193,11 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
 
     @Override
     public void preVarDec(VarDec dec) {
-        PosSymbol name = dec.getName();
-
-        if (!name.getName().startsWith("_")) {
+        /* Prevents preprocessor variables from entering final translation */
+        if (!dec.getName().getName().startsWith("_")) {
             NameTy ty = (NameTy) dec.getTy();
             String stTy = ty.getName().getName();
-            String newTy, init;
-            if (stTy.equals("Integer")) {
-                newTy = "Integer";
-                init = "= new Integer()";
-            }
-            else if (stTy.equals("Char_Str")) {
-                newTy = "String";
-                init = "= new String()";
-            }
-            else if (stTy.equals("Boolean")) {
-                newTy = "boolean";
-                init = "= false";
-            }
-            else if (stTy.equals("Character")) {
-                newTy = "char";
-                init = "= /0";
-            }
-            else {
-                newTy = "<empty>";
-                init = " = NULL";
-            }
-            String[] retTy = cInfo.getCVarType(stTy);
+            String[] retTy = cInfo.getVarType(stTy);
             cInfo.appendToFuncVarInit(cInfo.stringFromSym(dec.getName(),
                     retTy[0])
                     + retTy[1]);
@@ -239,7 +206,6 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
 
     @Override
     public void preFuncAssignStmt(FuncAssignStmt stmt) {
-        stmtBuf = new StringBuffer();
     }
 
     @Override
@@ -253,7 +219,6 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
 
     @Override
     public void postFuncAssignStmt(FuncAssignStmt stmt) {
-        //cInfo.addToStmts(stmtBuf.toString());
         cInfo.appendToStmt(";");
     }
 
@@ -285,8 +250,9 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
     @Override
     public void midProgramParamExpArguments(ProgramParamExp node,
             ProgramExp previous, ProgramExp next) {
-        if (next != null && previous != null)
+        if (next != null && previous != null) {
             cInfo.appendToStmt(", ");
+        }
     }
 
     @Override
@@ -298,11 +264,13 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
     public void midProgramParamExp(ProgramParamExp exp,
             ResolveConceptualElement prevChild,
             ResolveConceptualElement nextChild) {
+        //Used for debug breakpoints
         System.out.println();
     }
 
     @Override
     public void preProgramParamExpArguments(ProgramParamExp node) {
+        //Used for debug breakpoints
         System.out.println();
     }
 
@@ -315,7 +283,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
     }
 
     /*
-     * Statement walks
+     * Statement visits, uses a single (global) buffer in cInfo.currentFunc.
      */
     @Override
     public void preIfStmt(IfStmt stmt) {
@@ -362,7 +330,9 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
 
     @Override
     public void preWhileStmtStatements(WhileStmt stmt) {
-        if (stmt.getChanging().size() < 1) {
+        if ((stmt.getChanging().size() < 1) || 
+                stmt.getDecreasing() != null ||
+                stmt.getMaintaining() != null) {
             cInfo.appendToStmt("){");
         }
         else {
@@ -376,14 +346,12 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
         int lin = stmt.getChanging().get(0).getLocation().getPos().getLine();
         cInfo.appendToStmt(getNewLines(lin));
         cInfo.appendToStmt("/* changing ");
+        cInfo.appendToStmt(stmt.getChanging().toString());
     }
 
     public void walkWhileStmtChanging(WhileStmt stmt) {
 
     }
-
-    @Override
-    public void postWhileStmtChanging(WhileStmt stmt) {}
 
     @Override
     public void midWhileStmt(WhileStmt node,
