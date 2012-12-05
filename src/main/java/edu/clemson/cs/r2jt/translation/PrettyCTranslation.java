@@ -389,8 +389,8 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
      * https://www.pivotaltracker.com/story/show/37258073
      * This will skip over all children of ProgramFunctionExp
      */
-    public void walkProgramFunctionExp(ProgramFunctionExp exp) {
-
+    public boolean walkProgramFunctionExp(ProgramFunctionExp exp) {
+            return true;
     }
 
     /*
