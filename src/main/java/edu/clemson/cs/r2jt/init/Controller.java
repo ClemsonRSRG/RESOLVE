@@ -97,6 +97,8 @@ import edu.clemson.cs.r2jt.sanitycheck.VisitorSanityCheck;
 import edu.clemson.cs.r2jt.scope.SymbolTable;
 import edu.clemson.cs.r2jt.parsing.RSimpleTrans;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
+import edu.clemson.cs.r2jt.translation.PrettyJavaTranslation;
+import edu.clemson.cs.r2jt.translation.PrettyCTranslation;
 import edu.clemson.cs.r2jt.translation.Translator;
 import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.verification.AssertiveCode;
@@ -183,7 +185,7 @@ public class Controller {
         }
         else {
             if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-                myArchive = new Archiver(myInstanceEnvironment, file);
+                myArchive = new Archiver(myInstanceEnvironment, file, null);
             }
             else {
                 myArchive = null;
@@ -192,7 +194,11 @@ public class Controller {
             //simpleTranslateNewTargetFile(file);
             //}
             if (myInstanceEnvironment.flags
-                    .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)) {
+                    .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)
+                    || myInstanceEnvironment.flags
+                            .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
+                    || myInstanceEnvironment.flags
+                            .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
                 simpleTranslateNewTargetFile(file);
             }
             else {
@@ -216,7 +222,11 @@ public class Controller {
         err.setIgnore(false);
         //if(myInstanceEnvironment.flags.isFlagSet(RSimpleTrans.FLAG_SIMPLE_TRANSLATE)){
         if (myInstanceEnvironment.flags
-                .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)) {
+                .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)
+                || myInstanceEnvironment.flags
+                        .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
+                || myInstanceEnvironment.flags
+                        .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
             simpleTranslateNewTargetSource(inputFile);
         }
         else {
@@ -224,9 +234,24 @@ public class Controller {
             //myInstanceEnvironment.setTargetSource(myInstanceEnvironment.getUserFileFromMap("Unbounded_List_Template.Std_Unbounded_List_Realiz"));
             if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
                 //System.out.println(inputFile.getMyFile(myInstanceEnvironment.getMainDir()));
-                myArchive =
-                        new Archiver(myInstanceEnvironment, inputFile
-                                .getMyFile(myInstanceEnvironment.getMainDir()));
+                if (inputFile.getMyKind().equals(ModuleKind.FACILITY)) {
+                    String jarTempLoc =
+                            inputFile.getJarTempDir()
+                                    + inputFile.getMyFileName();
+                    myArchive =
+                            new Archiver(myInstanceEnvironment, inputFile
+                                    .getMyFile(myInstanceEnvironment
+                                            .getMainDir()), inputFile);
+                    myArchive.setOutputJar(jarTempLoc
+                            + inputFile.getMyKind().getExtension());
+                }
+                else {
+                    myArchive =
+                            new Archiver(myInstanceEnvironment, inputFile
+                                    .getMyFile(myInstanceEnvironment
+                                            .getMainDir()), inputFile);
+                }
+
             }
             else {
                 myArchive = null;
@@ -416,6 +441,15 @@ public class Controller {
             // checkModeCompatibility(dec);
             myInstanceEnvironment.completeRecord(id, table);
             //env.setSuccess();
+            if (myInstanceEnvironment.flags
+                    .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
+                PrettyCTranslation prettyT =
+                        new PrettyCTranslation(myInstanceEnvironment, table,
+                                dec, err);
+                tw = new TreeWalker(prettyT);
+                tw.visit(dec);
+                System.out.println("");
+            }
             if (myInstanceEnvironment.flags
                     .isFlagSet(Translator.FLAG_TRANSLATE)) {
                 translateModuleDec(file, table, dec);
@@ -641,7 +675,11 @@ public class Controller {
             myInstanceEnvironment.completeRecord(id, table);
             //env.setSuccess();
             if (myInstanceEnvironment.flags
-                    .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)) {
+                    .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)
+                    || myInstanceEnvironment.flags
+                            .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
+                    || myInstanceEnvironment.flags
+                            .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
                 translatePrettyModuleDec(file, table, dec);
                 //System.out.println("Translated: " + file.toString());
                 /*if(myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)){
@@ -748,7 +786,11 @@ public class Controller {
             myInstanceEnvironment.completeRecord(id, table);
             //env.setSuccess();
             if (myInstanceEnvironment.flags
-                    .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)) {
+                    .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)
+                    || myInstanceEnvironment.flags
+                            .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
+                    || myInstanceEnvironment.flags
+                            .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
                 if (inputFile.getIsCustomLoc()) {
                     file = inputFile.getMyCustomFile();
                 }
@@ -1452,8 +1494,8 @@ public class Controller {
 
         // change twv to whatever visitor logic you want to use
         //VisitorPrintStructure twv = new VisitorPrintStructure();
-        //TreeWalker twps = new TreeWalker(twv);
-        //twps.visit(dec);
+        //TreeWalker tw = new TreeWalker(twv);
+        //tw.visit(dec);
 
         //SanityCheck Walker -JCK
         VisitorSanityCheck sctwv =
@@ -1602,7 +1644,7 @@ public class Controller {
 
     private void translatePrettyModuleDec(File file, SymbolTable table,
             ModuleDec dec) {
-        PrettyJavaTranslator translator =
+        /*PrettyJavaTranslator translator =
                 new PrettyJavaTranslator(myInstanceEnvironment, table, dec, err);
         String targetFile = myInstanceEnvironment.getTargetFile().toString();
         String thisFile = dec.getName().getFile().toString();
@@ -1612,7 +1654,28 @@ public class Controller {
             translator.visitModuleDec(dec);
             //System.out.println("Translated: "+dec.getName().getName());
             translator.outputJavaCode(file);
+        }*/
+
+        if (myInstanceEnvironment.flags
+                .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)) {
+            PrettyJavaTranslation prettyT =
+                    new PrettyJavaTranslation(myInstanceEnvironment, table,
+                            dec, err);
+            TreeWalker tw = new TreeWalker(prettyT);
+            tw.visit(dec);
+
+            prettyT.outputCode(file);
         }
+        else {
+            PrettyCTranslation prettyT =
+                    new PrettyCTranslation(myInstanceEnvironment, table, dec,
+                            err);
+            TreeWalker tw = new TreeWalker(prettyT);
+            tw.visit(dec);
+
+            prettyT.outputCode(file);
+        }
+
     }
 
     /*
