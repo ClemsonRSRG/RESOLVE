@@ -83,11 +83,11 @@ public class TreeWalker {
     public void visit(ResolveConceptualElement e) {
         if (e != null) {
             try {
-                // invoke the "pre" visitor method(s)
-                invokeVisitorMethods("pre", e);
-
                 // are we overriding the walking for this element?
                 if (!walkOverride(e)) {
+                    // invoke the "pre" visitor method(s)
+                invokeVisitorMethods("pre", e);
+                    
                     List<ResolveConceptualElement> children = e.getChildren();
 
                     // if we have children, iterate over them
@@ -108,10 +108,9 @@ public class TreeWalker {
                         }
                         invokeVisitorMethods("mid", e, nextChild, null);
                     }
+                    // invoke the "post" visitor method(s)
+                    invokeVisitorMethods("post", e);
                 }
-
-                // invoke the "post" visitor method(s)
-                invokeVisitorMethods("post", e);
             }
             catch (Exception ex) {
                 // if there is any exception, it is a bug
@@ -216,7 +215,7 @@ public class TreeWalker {
         }
     }
 
-    private Boolean walkOverride(ResolveConceptualElement e) {
+    private boolean walkOverride(ResolveConceptualElement e) {
         Class<?> elementClass = e.getClass();
         ArrayList<Class<?>> classHierarchy = new ArrayList<Class<?>>();
         while (elementClass != ResolveConceptualElement.class) {
@@ -231,8 +230,7 @@ public class TreeWalker {
             try {
                 Method walkMethod =
                         this.myVisitor.getClass().getMethod(walkMethodName, c);
-                walkMethod.invoke(this.myVisitor, e);
-                return true;
+                return ((Boolean) walkMethod.invoke(this.myVisitor, e));
             }
             catch (Exception ex) { /* do nothing */
             }
