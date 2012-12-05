@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.clemson.cs.r2jt.translation;
 
 import edu.clemson.cs.r2jt.data.PosSymbol;
@@ -11,7 +7,7 @@ import java.util.List;
 
 /**
  *
- * @author Mark T
+ * 
  */
 public class PrettyJavaTranslationInfo {
 
@@ -21,9 +17,9 @@ public class PrettyJavaTranslationInfo {
     Function currentFunc;
     String name;
 
-    public PrettyJavaTranslationInfo(String name) {
+    public PrettyJavaTranslationInfo(String newName) {
         lineCount = 1;
-        this.name = name;
+        name = newName;
         funcList = new ArrayList<Function>();
         globalVarsList = new ArrayList<String>();
     }
@@ -78,8 +74,10 @@ public class PrettyJavaTranslationInfo {
     /* Function methods */
 
     /**
-     * <p>Creates a new function and adds to list. Sets it to current function.</p>
-     * @param newFuncName
+     * <p>Creates a new function and adds to funcList. Sets it to 
+     * currentFunc.</p>
+     * @param newFuncName name of function
+     * @param newReturnTy type of return value from function
      */
 
     public void addFunction(PosSymbol newFuncName, PosSymbol newReturnTy) {
@@ -88,7 +86,7 @@ public class PrettyJavaTranslationInfo {
         newFunc.returnType = new String[2];
         newFunc.returnType[0] = "void ";
         if (newReturnTy != null) {
-            newFunc.returnType = getCVarType(newReturnTy.getName());
+            newFunc.returnType = getVarType(newReturnTy.getName());
         }
         newFunc.returnName = newFuncName.getName();
         String temp = "public static " + newFunc.returnType[0];
@@ -182,7 +180,7 @@ public class PrettyJavaTranslationInfo {
     }
 
     public String getCVarsWithLines(PosSymbol pos, String prepend) {
-        String[] typeString = getCVarType(pos.getName());
+        String[] typeString = getVarType(pos.getName());
         if (prepend != null) {
             typeString[0] = prepend + typeString[0];
         }
@@ -190,7 +188,7 @@ public class PrettyJavaTranslationInfo {
         return stringWithLines(typeString[0], n);
     }
 
-    public String[] getCVarType(String ty) {
+    public String[] getVarType(String ty) {
         String[] typeString = { null, null };
         if (ty.equals("Integer")) {
             typeString[0] = "int ";

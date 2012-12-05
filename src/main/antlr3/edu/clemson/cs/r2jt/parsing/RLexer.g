@@ -2,6 +2,7 @@ lexer grammar RLexer;
 
 options {
     language=Java;
+	superClass=RLexerSuper;
 }
 
 @header {
