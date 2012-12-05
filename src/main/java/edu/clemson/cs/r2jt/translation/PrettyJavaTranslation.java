@@ -145,8 +145,9 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
         }
     }
 
-    public void walkInfixExp(InfixExp exp) {
+    public boolean walkInfixExp(InfixExp exp) {
         cInfo.appendToStmt(exp.toString());
+        return true;
     }
 
     @Override
@@ -278,8 +279,8 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
      * https://www.pivotaltracker.com/story/show/37258073
      * This will skip over all children of ProgramFunctionExp
      */
-    public void walkProgramFunctionExp(ProgramFunctionExp exp) {
-
+    public boolean walkProgramFunctionExp(ProgramFunctionExp exp) {
+        return true;
     }
 
     /*
@@ -349,8 +350,8 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
         cInfo.appendToStmt(stmt.getChanging().toString());
     }
 
-    public void walkWhileStmtChanging(WhileStmt stmt) {
-
+    public boolean walkWhileStmtChanging(WhileStmt stmt) {
+        return true;
     }
 
     @Override
