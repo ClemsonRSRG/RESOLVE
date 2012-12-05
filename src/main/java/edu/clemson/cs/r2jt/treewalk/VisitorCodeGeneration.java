@@ -142,6 +142,13 @@ public class VisitorCodeGeneration {
         buffer.append(methodName);
         buffer.append("\n");
 
+        // Walk method
+        buffer.append("\tpublic boolean walk");
+        buffer.append(methodName);
+        buffer.append("(");
+        buffer.append(className);
+        buffer.append(" data) { return false; }\n");
+
         // Pre method
         buffer.append("\tpublic void pre");
         buffer.append(methodName);
