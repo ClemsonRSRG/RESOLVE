@@ -42,7 +42,7 @@ public abstract class TreeWalkerStackVisitor extends TreeWalkerVisitor {
         preAnyStack(data);
         myParent = data;
         pushParent();
-        
+
     }
 
     public final void postAny(ResolveConceptualElement data) {

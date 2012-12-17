@@ -51,7 +51,6 @@ package edu.clemson.cs.r2jt.proving;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import edu.clemson.cs.r2jt.Main;
@@ -63,17 +62,15 @@ import edu.clemson.cs.r2jt.absyn.InfixExp;
 import edu.clemson.cs.r2jt.absyn.MathAssertionDec;
 import edu.clemson.cs.r2jt.absyn.MathModuleDec;
 import edu.clemson.cs.r2jt.absyn.ModuleDec;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.init.Environment;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
-import edu.clemson.cs.r2jt.scope.SymbolTable;
+import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.FlagManager;
@@ -227,32 +224,7 @@ public final class Prover {
      * </p>
      */
     private ProofProgressWindow myProgressWindow;
-    /**
-     * <p>
-     * The current RESOLVE environment, from which we can get information on the
-     * file structure and available modules. This is particularly useful in this
-     * class for tracking down mathematical theories associated with various
-     * types.
-     * </p>
-     * 
-     * <p>
-     * INVARIANT: <code>myResolveEnvironment != null</code>
-     * </p>
-     */
-    //private final Environment myResolveEnvironment = Environment.getInstance();
-    /**
-     * <p>
-     * An object to help determine the types of expressions based on the current
-     * symbol table. Only necessary because the Analyzer is currently
-     * incomplete. Eventually, each expression should contain its own type,
-     * retrievable with the getType() method.
-     * </p>
-     * 
-     * <p>
-     * INVARIANT: <code>myTyper != null</code>.
-     * </p>
-     */
-    private final MathExpTypeResolver myTyper;
+
     /**
      * <p>
      * A list of theorems available in the current scope. This will be built up
@@ -298,8 +270,7 @@ public final class Prover {
      * @throes NullPointerException If <code>symbolTable</code> or
      *         <code>vC</code> is <code>null</code>.
      */
-    public Prover(final MathExpTypeResolver typer,
-            final Iterable<VerificationCondition> vCs,
+    public Prover(final Iterable<VerificationCondition> vCs,
             final CompileEnvironment instanceEnvironment)
             throws ProverException {
 
@@ -320,7 +291,6 @@ public final class Prover {
             myProgressWindow = new ProofProgressWindow("VC", null);
         }
 
-        myTyper = typer;
         buildTheories();
 
         try {
@@ -384,7 +354,7 @@ public final class Prover {
         addLocalAxioms(targetDec);
 
         // Add any kind of mathematical assertions from any included library
-        SymbolTable curSymbolTable;
+        OldSymbolTable curSymbolTable;
         ModuleScope bindingsInScope;
         List<Symbol> symbolsInScope;
         for (ModuleID curModule : availableTheories) {
@@ -435,8 +405,7 @@ public final class Prover {
 
             if (quantifiersAppliedTheorem instanceof EqualsExp) {
                 myTheorems.add(quantifiersAppliedTheorem);
-                myPExpTheorems.add(PExp.buildPExp(quantifiersAppliedTheorem,
-                        myTyper));
+                myPExpTheorems.add(PExp.buildPExp(quantifiersAppliedTheorem));
                 myTheoremNames.add(name);
             }
             else if (quantifiersAppliedTheorem instanceof InfixExp) {
@@ -690,7 +659,7 @@ public final class Prover {
         steps.add(new ExistentialInstantiationStep(myPExpTheorems));
 
         SubstitutionRuleNormalizer normalizer =
-                new SubstitutionRuleNormalizer(myTyper, false);
+                new SubstitutionRuleNormalizer(false);
         for (PExp e : myPExpTheorems) {
             steps.add(normalizer.normalize(e));
         }
@@ -699,8 +668,8 @@ public final class Prover {
         Consequent consequent;
         for (Implication i : myImplications) {
 
-            antecedent = new Antecedent(i.getAntecedent(), myTyper);
-            consequent = new Consequent(i.getConsequent(), myTyper);
+            antecedent = new Antecedent(i.getAntecedent());
+            consequent = new Consequent(i.getConsequent());
 
             steps.add(new ConsequentWeakeningStep(antecedent, consequent));
             steps.add(new TheoryDevelopingStep(antecedent, consequent,
@@ -709,22 +678,21 @@ public final class Prover {
 
         VCTransformer batchDeveloper = buildBatchTheoryDeveloper(5);
 
-        return new AlternativeProver(
-                myInstanceEnvironment,
+        return new AlternativeProver(myInstanceEnvironment,
                 new FirstStepGivenTransformationChooser(
                         new SimplifyingTransformationChooser(
-                                new GuidedTransformationChooser(steps, myTyper),
-                                0), batchDeveloper), myTyper);
+                                new GuidedTransformationChooser(steps), 0),
+                        batchDeveloper));
     }
 
     private TransformationChooser buildConsequentSubstitutions(
             TransformerFitnessFunction f) {
 
         return new UpfrontFitnessTransformationChooser(f,
-                AbstractEqualityRuleNormalizer
-                        .normalizeAll(new ConsequentSubstitutionRuleNormalizer(
-                                myTyper, false), myPExpTheorems),
-                FITNESS_THRESHOLD, myTyper, myInstanceEnvironment);
+                AbstractEqualityRuleNormalizer.normalizeAll(
+                        new ConsequentSubstitutionRuleNormalizer(false),
+                        myPExpTheorems), FITNESS_THRESHOLD,
+                myInstanceEnvironment);
     }
 
     private TransformationChooser buildEquivalentAntecedentDevelopments(
@@ -732,8 +700,8 @@ public final class Prover {
 
         return new UpfrontFitnessTransformationChooser(f,
                 AbstractEqualityRuleNormalizer.normalizeAll(
-                        new AntecedentExtenderRuleNormalizer(myTyper, false),
-                        myPExpTheorems), 0, myTyper, myInstanceEnvironment);
+                        new AntecedentExtenderRuleNormalizer(false),
+                        myPExpTheorems), 0, myInstanceEnvironment);
     }
 
     private TransformationChooser buildImplicationAntecedentDevelopments(
@@ -744,13 +712,13 @@ public final class Prover {
         java.util.List<VCTransformer> l = new LinkedList<VCTransformer>();
         for (Implication i : myImplications) {
 
-            an = new Antecedent(i.getAntecedent(), myTyper);
-            co = new Consequent(i.getConsequent(), myTyper);
+            an = new Antecedent(i.getAntecedent());
+            co = new Consequent(i.getConsequent());
 
             l.add(new TheoryDevelopingStep(an, co, myPExpTheorems));
         }
 
-        return new UpfrontFitnessTransformationChooser(f, l, 0, myTyper,
+        return new UpfrontFitnessTransformationChooser(f, l, 0,
                 myInstanceEnvironment);
     }
 
@@ -762,13 +730,13 @@ public final class Prover {
         java.util.List<VCTransformer> l = new LinkedList<VCTransformer>();
         for (Implication i : myImplications) {
 
-            an = new Antecedent(i.getAntecedent(), myTyper);
-            co = new Consequent(i.getConsequent(), myTyper);
+            an = new Antecedent(i.getAntecedent());
+            co = new Consequent(i.getConsequent());
 
             l.add(new ConsequentWeakeningStep(an, co));
         }
 
-        return new UpfrontFitnessTransformationChooser(f, l, 0, myTyper,
+        return new UpfrontFitnessTransformationChooser(f, l, 0,
                 myInstanceEnvironment);
     }
 
@@ -779,9 +747,8 @@ public final class Prover {
         Antecedent an;
         Consequent co;
         for (Implication i : myImplications) {
-
-            an = new Antecedent(i.getAntecedent(), myTyper);
-            co = new Consequent(i.getConsequent(), myTyper);
+            an = new Antecedent(i.getAntecedent());
+            co = new Consequent(i.getConsequent());
 
             if (!co.containsQuantifiedVariableNotIn(an)) {
                 developer.addImplicationTheorem(an, co);
@@ -828,7 +795,7 @@ public final class Prover {
             curDepth =
                     new AlternativeProver(myInstanceEnvironment,
                             new FailoverChooser(reductionStep, developAndProve,
-                                    failoverNote), myTyper);
+                                    failoverNote));
 
             retval.addStrategy(curDepth);
         }
@@ -841,7 +808,7 @@ public final class Prover {
                 new ChainingIterable<VCTransformer>();
 
         SubstitutionRuleNormalizer normalizer =
-                new SubstitutionRuleNormalizer(myTyper, false);
+                new SubstitutionRuleNormalizer(false);
         for (PExp e : myPExpTheorems) {
             steps.add(normalizer.normalize(e));
         }
@@ -849,7 +816,7 @@ public final class Prover {
         return new NoBacktrackChooser(new ProductiveStepChooser(
                 new UpfrontFitnessTransformationChooser(
                         new NormalizingTransformerFitnessFunction(), steps, 0,
-                        myTyper, myInstanceEnvironment)));
+                        myInstanceEnvironment)));
     }
 
     private TransformationChooser setUpMainProofStrategy() {
@@ -911,20 +878,19 @@ public final class Prover {
     private VCProver setUpOldProverDebug(VerificationCondition vc) {
         vc.simplify();
 
-        GuidedRuleChooser chooser = new GuidedRuleChooser(myTyper);
+        GuidedRuleChooser chooser = new GuidedRuleChooser();
         chooser.addRules(myTheoremNames, myTheorems);
         SingleStrategyProver slaveProver =
                 new SingleStrategyProver(chooser, false, 0, myImplications,
-                        myTyper, myInstanceEnvironment);
+                        myInstanceEnvironment);
 
         return slaveProver;
     }
 
     private VCProver setUpOldProver(VerificationCondition vc) {
         BlindIterativeRuleChooser baseChooser =
-        // new BlindIterativeRuleChooser(myTyper);
-                new UpfrontFitnessSortRuleChooser(myTyper,
-                        new SimpleFitnessFunction(), 0);
+                new UpfrontFitnessSortRuleChooser(new SimpleFitnessFunction(),
+                        0);
         baseChooser.addRules(myTheoremNames, myTheorems);
         baseChooser.lock(vc);
 
@@ -934,14 +900,12 @@ public final class Prover {
 
         SingleStrategyProver slaveProver =
                 new SingleStrategyProver(new LengthLimitedProvider(baseChooser,
-                        2), false, 0, myImplications, myTyper,
-                        myInstanceEnvironment);
+                        2), false, 0, myImplications, myInstanceEnvironment);
         p.addStrategy(slaveProver);
 
         slaveProver =
                 new SingleStrategyProver(new LengthLimitedProvider(baseChooser,
-                        3), false, 3, myImplications, myTyper,
-                        myInstanceEnvironment);
+                        3), false, 3, myImplications, myInstanceEnvironment);
         p.addStrategy(slaveProver);
 
         return p;

@@ -133,7 +133,7 @@ public class Translator extends ResolveConceptualVisitor {
 
     //private Environment         env                = Environment.getInstance();
     private ErrorHandler err;
-    private SymbolTable table;
+    private OldSymbolTable table;
     private String targetFileName = new String();
     private StringBuffer facilityConstructorBuf = new StringBuffer();
     private StringBuffer operBuf = new StringBuffer();
@@ -191,8 +191,8 @@ public class Translator extends ResolveConceptualVisitor {
     /**
      * Construct a Translator.
      */
-    public Translator(CompileEnvironment e, SymbolTable table, ModuleDec dec,
-            ErrorHandler err) {
+    public Translator(CompileEnvironment e, OldSymbolTable table,
+            ModuleDec dec, ErrorHandler err) {
         myInstanceEnvironment = e;
         targetFileName = dec.getName().getFile().toString();
         this.table = table;
@@ -849,10 +849,10 @@ public class Translator extends ResolveConceptualVisitor {
                 ConceptBodyModuleDec md =
                         (ConceptBodyModuleDec) myInstanceEnvironment
                                 .getModuleDec(fmid);
-                Iterator<ModuleParameter> params =
+                Iterator<ModuleParameterDec> params =
                         md.getParameters().iterator();
                 while (!found && params.hasNext()) {
-                    ModuleParameter mp = params.next();
+                    Dec mp = params.next().getWrappedDec();
                     if (mp instanceof OperationDec) {
                         OperationDec paramOpDec = (OperationDec) mp;
                         if (passedProcedure.equals(paramOpDec.getName()
@@ -1087,8 +1087,8 @@ public class Translator extends ResolveConceptualVisitor {
 
     // changed this handle realization parameters other than operation parameters
     // changed this to directly change stmtBuf, because that's how visitProgramExp is written
-    private void visitBodyParm(ModuleArgumentItem modArgItem,
-            ModuleParameter mp, String decName) {
+    private void visitBodyParm(ModuleArgumentItem modArgItem, Dec mp,
+            String decName) {
 
         /*if (!env.compileBodies() && !myInstanceEnvironment.flags.isFlagSet(FLAG_BODIES)) {
             System.out.println("Can not compile.  Try +bodies compile option.");
@@ -1179,11 +1179,11 @@ public class Translator extends ResolveConceptualVisitor {
     // factored out this code for reuse in realization and enhancement bodies
     private void handleFacParameters(List<ModuleArgumentItem> concArgs,
             List<ModuleArgumentItem> bodyArgs,
-            List<ModuleParameter> bodyFormals, String decName) {
+            List<ModuleParameterDec> bodyFormals, String decName) {
         boolean hasConcParams = handleFacConcParameters(concArgs);
         Iterator<ModuleArgumentItem> parmIter = bodyArgs.iterator();
         if (parmIter.hasNext()) {
-            Iterator<ModuleParameter> mpIt = bodyFormals.iterator();
+            Iterator<ModuleParameterDec> mpIt = bodyFormals.iterator();
             ModuleArgumentItem arg;
             //mpIt and parmIter are of the same length if it's syntactically correct
             while (parmIter.hasNext()) {
@@ -1193,7 +1193,7 @@ public class Translator extends ResolveConceptualVisitor {
                         hasConcParams = true;
                     else
                         stmtBuf.append(", ");
-                    visitBodyParm(arg, mpIt.next(), decName); // side effects stmtBuf
+                    visitBodyParm(arg, mpIt.next().getWrappedDec(), decName); // side effects stmtBuf
                 }
             }
         }
@@ -1503,7 +1503,6 @@ public class Translator extends ResolveConceptualVisitor {
                                     castLookUpMap.put(name.toString(), castExp
                                             .toString());
                                 }
-
                                 strBuf.append(fDec.getConceptName().getName());
                                 strBuf.append(".");
                                 strBuf.append(((IndirectType) retType)
@@ -3234,9 +3233,7 @@ public class Translator extends ResolveConceptualVisitor {
         table.endOperationScope();
     }
 
-    // ===========================================================
     // Public Methods - Non-declarative Constructs
-    // ===========================================================
 
     public void visitFinalItem(FinalItem item) {
         table.beginOperationScope();
@@ -3437,12 +3434,12 @@ public class Translator extends ResolveConceptualVisitor {
             wrappersBuf.append("\t}\n");
         }
 
-        List<ModuleParameter> parms = cDec.getParameters();
+        List<ModuleParameterDec> parms = cDec.getParameters();
         if (parms != null) {
-            Iterator<ModuleParameter> mpIt = parms.iterator();
-            ModuleParameter mp = null;
+            Iterator<ModuleParameterDec> mpIt = parms.iterator();
+            Dec mp = null;
             while (mpIt.hasNext()) {
-                mp = mpIt.next();
+                mp = mpIt.next().getWrappedDec();
                 if (mp instanceof ConstantParamDec) {
                     ConstantParamDec cp = (ConstantParamDec) mp;
                     NameTy nameTy = (NameTy) cp.getTy();
@@ -3524,17 +3521,17 @@ public class Translator extends ResolveConceptualVisitor {
         pBuf.append("(");
 
         // added this loop to print out parameters for the concept that corresponds to the enhancement
-        Iterator<ModuleParameter> cpIt = cDec.getParameters().iterator();
-        ModuleParameter modParm;
+        Iterator<ModuleParameterDec> cpIt = cDec.getParameters().iterator();
+        Dec modParm;
         while (cpIt.hasNext()) {
-            modParm = cpIt.next();
+            modParm = cpIt.next().getWrappedDec();
             pBuf.append(((Dec) modParm).getName().toString());
             pBuf.append(", ");
         }
 
-        Iterator<ModuleParameter> bpIt = ebDec.getParameters().iterator();
+        Iterator<ModuleParameterDec> bpIt = ebDec.getParameters().iterator();
         while (bpIt.hasNext()) {
-            modParm = bpIt.next();
+            modParm = bpIt.next().getWrappedDec();
             if (modParm instanceof OperationDec) {
                 OperationDec opDec = (OperationDec) modParm;
                 pBuf.append(opDec.getName().toString());
@@ -3696,9 +3693,10 @@ public class Translator extends ResolveConceptualVisitor {
 
     //formJavaConstructorsParms operation is no longer used and has been removed.
 
-    private String formJavaConstructorsAssign(List<ModuleParameter> parameters) {
+    private String formJavaConstructorsAssign(
+            List<ModuleParameterDec> parameters) {
         StringBuffer caBuf = new StringBuffer();
-        Iterator<ModuleParameter> parmIt = parameters.iterator();
+        Iterator<ModuleParameterDec> parmIt = parameters.iterator();
 
         while (parmIt.hasNext()) {
             Dec dec = (Dec) parmIt.next();
@@ -3761,8 +3759,8 @@ public class Translator extends ResolveConceptualVisitor {
     //removed parmOpList as an argument
     //reuses visitModuleParameterList eliminating the need for formJavaConstructorsParms
     private String formJavaConstructors(String cbName,
-            List<ModuleParameter> conceptParameters,
-            List<ModuleParameter> cBodyParameters, List<Dec> decList) {
+            List<ModuleParameterDec> conceptParameters,
+            List<ModuleParameterDec> cBodyParameters, List<Dec> decList) {
 
         StringBuffer consBuf = new StringBuffer();
 
@@ -3787,8 +3785,8 @@ public class Translator extends ResolveConceptualVisitor {
     // factored this out for reuse in realization and enhancement body constructors
     // uses, but does not change global consInitBuf
     private String formJavaConstructorBody(
-            List<ModuleParameter> conceptParameters,
-            List<ModuleParameter> cBodyParameters, List<Dec> decList) {
+            List<ModuleParameterDec> conceptParameters,
+            List<ModuleParameterDec> cBodyParameters, List<Dec> decList) {
         StringBuffer consBodyBuf = new StringBuffer();
 
         consBodyBuf.append(formJavaConstructorsAssign(conceptParameters));
@@ -3817,8 +3815,8 @@ public class Translator extends ResolveConceptualVisitor {
     //this is similar, but unfortunately not identical to the ones for realization bodies
     //unified with realization body as far as possible, but there's some duplication
     private String formJavaEnhancementConstructors(String enhancementName,
-            String conceptName, List<ModuleParameter> conceptParameters,
-            List<ModuleParameter> cBodyParameters, List<Dec> decList) {
+            String conceptName, List<ModuleParameterDec> conceptParameters,
+            List<ModuleParameterDec> cBodyParameters, List<Dec> decList) {
         StringBuffer consBuf = new StringBuffer();
         consBuf.append("\n");
 
@@ -3900,9 +3898,10 @@ public class Translator extends ResolveConceptualVisitor {
     }
 
     // modified to return the generated string instead of directly adding it to global headerBuf
-    private String visitModuleParameterList(List<ModuleParameter> parameters,
-            String separator, String lastSeparator) {
-        Iterator<ModuleParameter> i = parameters.iterator();
+    private String visitModuleParameterList(
+            List<ModuleParameterDec> parameters, String separator,
+            String lastSeparator) {
+        Iterator<ModuleParameterDec> i = parameters.iterator();
         StringBuffer thisBuf = new StringBuffer();
         boolean isFirstParam = true;
         Dec dec;
@@ -3923,8 +3922,8 @@ public class Translator extends ResolveConceptualVisitor {
     }
 
     // unfortunately this side effects paramOpBuf through a call to visitModuleParameterOpDec
-    private String generateOPParamInterfaces(List<ModuleParameter> parameters) {
-        Iterator<ModuleParameter> i = parameters.iterator();
+    private String generateOPParamInterfaces(List<ModuleParameterDec> parameters) {
+        Iterator<ModuleParameterDec> i = parameters.iterator();
         StringBuffer thisBuf = new StringBuffer();
         Dec dec;
 
@@ -4018,11 +4017,11 @@ public class Translator extends ResolveConceptualVisitor {
         List<String> typeParms = new List<String>();
         ConceptModuleDec cDec =
                 (ConceptModuleDec) myInstanceEnvironment.getModuleDec(cid);
-        List<ModuleParameter> mpList = cDec.getParameters();
-        Iterator<ModuleParameter> mpIt = mpList.iterator();
-        ModuleParameter mp = null;
+        List<ModuleParameterDec> mpList = cDec.getParameters();
+        Iterator<ModuleParameterDec> mpIt = mpList.iterator();
+        Dec mp = null;
         while (mpIt.hasNext()) {
-            mp = mpIt.next();
+            mp = mpIt.next().getWrappedDec();
             if (mp instanceof ConceptTypeParamDec) {
                 typeParms.addUnique(((ConceptTypeParamDec) mp).getName()
                         .toString());
@@ -4035,11 +4034,11 @@ public class Translator extends ResolveConceptualVisitor {
         List<String> concParms = new List<String>();
         ConceptModuleDec cDec =
                 (ConceptModuleDec) myInstanceEnvironment.getModuleDec(cid);
-        List<ModuleParameter> mpList = cDec.getParameters();
-        Iterator<ModuleParameter> mpIt = mpList.iterator();
-        ModuleParameter mp = null;
+        List<ModuleParameterDec> mpList = cDec.getParameters();
+        Iterator<ModuleParameterDec> mpIt = mpList.iterator();
+        Dec mp = null;
         while (mpIt.hasNext()) {
-            mp = mpIt.next();
+            mp = mpIt.next().getWrappedDec();
             if (mp instanceof ConstantParamDec) {
                 concParms.addUnique(((ConstantParamDec) mp).getName()
                         .toString());
@@ -4219,11 +4218,11 @@ public class Translator extends ResolveConceptualVisitor {
         return typeEntry;
     }
 
-    private void formGetModuleParmInterface(List<ModuleParameter> parms) {
-        Iterator<ModuleParameter> mpIt = parms.iterator();
-        ModuleParameter mp = null;
+    private void formGetModuleParmInterface(List<ModuleParameterDec> parms) {
+        Iterator<ModuleParameterDec> mpIt = parms.iterator();
+        Dec mp = null;
         while (mpIt.hasNext()) {
-            mp = mpIt.next();
+            mp = mpIt.next().getWrappedDec();
             if (mp instanceof ConstantParamDec) {
                 ConstantParamDec cp = (ConstantParamDec) mp;
                 NameTy nameTy = (NameTy) cp.getTy();
@@ -4241,13 +4240,13 @@ public class Translator extends ResolveConceptualVisitor {
     }
 
     // removed the use of global operBuf
-    private String formGetModuleParm(List<ModuleParameter> parms) {
-        Iterator<ModuleParameter> mpIt = parms.iterator();
-        ModuleParameter mp = null;
+    private String formGetModuleParm(List<ModuleParameterDec> parms) {
+        Iterator<ModuleParameterDec> mpIt = parms.iterator();
+        Dec mp = null;
         StringBuffer thisBuf = new StringBuffer();
 
         while (mpIt.hasNext()) {
-            mp = mpIt.next();
+            mp = mpIt.next().getWrappedDec();
             if (mp instanceof ConstantParamDec) {
                 ConstantParamDec cp = (ConstantParamDec) mp;
                 NameTy nameTy = (NameTy) cp.getTy();

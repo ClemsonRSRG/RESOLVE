@@ -1,0 +1,139 @@
+END
+SymbolQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/SymbolQuery.java
+END
+MathFunctionNamedQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/MathFunctionNamedQuery.java
+END
+ProgramParameterEntry.java
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svnroot/resolve/!svn/ver/301/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/ProgramParameterEntry.java
+END
+MathSymbolQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/MathSymbolQuery.java
+END
+UnqualifiedPath.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svnroot/resolve/!svn/ver/301/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/UnqualifiedPath.java
+END
+ScopeBuilder.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/resolve/!svn/ver/301/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/ScopeBuilder.java
+END
+ResultProcessingSearcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/ResultProcessingSearcher.java
+END
+MultimatchSymbolQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/MultimatchSymbolQuery.java
+END
+TableSearcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/TableSearcher.java
+END
+OperationQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/OperationQuery.java
+END
+UniversalVariableQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svnroot/resolve/!svn/ver/301/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/UniversalVariableQuery.java
+END
+NameSearcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/NameSearcher.java
+END
+BaseSymbolQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/BaseSymbolQuery.java
+END
+NameQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/NameQuery.java
+END
+SyntacticSubtypeChecker.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svnroot/resolve/!svn/ver/301/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/SyntacticSubtypeChecker.java
+END
+UnqualifiedNameQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/UnqualifiedNameQuery.java
+END
+InstantiatedScope.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svnroot/resolve/!svn/ver/301/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/InstantiatedScope.java
+END
+ResultProcessingQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/ResultProcessingQuery.java
+END
+PTElement.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svnroot/resolve/!svn/ver/301/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/PTElement.java
+END
+Scope.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/Scope.java
+END
+SyntacticScope.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svnroot/resolve/!svn/ver/301/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/SyntacticScope.java
+END
+BaseMultimatchSymbolQuery.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/BaseMultimatchSymbolQuery.java
+END
+MathSymbolEntry.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svnroot/resolve/!svn/ver/301/branches/dev-hampton/src/edu/clemson/cs/r2jt/mathtype/MathSymbolEntry.java
+END

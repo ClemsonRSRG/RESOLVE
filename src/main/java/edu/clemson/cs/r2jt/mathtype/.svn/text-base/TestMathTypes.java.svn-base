@@ -1,0 +1,163 @@
+package edu.clemson.cs.r2jt.mathtype;
+
+import static org.junit.Assert.*;
+
+import java.io.File;
+
+import org.junit.Test;
+
+import edu.clemson.cs.r2jt.absyn.MathModuleDec;
+import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
+import edu.clemson.cs.r2jt.absyn.VariableNameExp;
+import edu.clemson.cs.r2jt.data.Location;
+import edu.clemson.cs.r2jt.data.Pos;
+import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.data.Symbol;
+
+public class TestMathTypes {
+/*
+	private ResolveConceptualElement myConceptualElement1 = 
+		new VariableNameExp();
+	
+	@Test
+	public void testBasicMTypeProperties() {
+		assertTrue(MTProper.MTYPE.isKnownToContainOnlyMTypes());
+		assertFalse(MTProper.MTYPE.membersKnownToContainOnlyMTypes());
+	}
+	
+	@Test
+	public void testBasicArbitraryProperProperties() {
+		MTProper pFalse = new MTProper(false);
+		assertFalse(pFalse.isKnownToContainOnlyMTypes());
+		assertFalse(pFalse.membersKnownToContainOnlyMTypes());
+		
+		MTProper pTrue = new MTProper(true);
+		assertTrue(pTrue.isKnownToContainOnlyMTypes());
+		assertFalse(pTrue.membersKnownToContainOnlyMTypes());
+	}
+	
+	@Test
+	public void testBasicArbitraryFunctionApplicationPropertyInheritence() {
+		MTFunction f = new MTFunction(MTProper.MTYPE, MTProper.MTYPE);
+		MTProper t = new MTProper(false);
+		MTFunctionApplication fOfT = new MTFunctionApplication(f, "test", t);
+		
+		assertFalse(fOfT.isKnownToContainOnlyMTypes());
+		assertFalse(fOfT.membersKnownToContainOnlyMTypes());
+		
+		t = new MTProper(true);
+		fOfT = new MTFunctionApplication(f, "test", t);
+		
+		assertFalse(fOfT.isKnownToContainOnlyMTypes());
+		assertFalse(fOfT.membersKnownToContainOnlyMTypes());
+	}
+	
+	@Test
+	public void testBasicPowertypeApplicationPropertyInheritence() {
+		MTProper t = new MTProper(false);
+		MTPowertypeApplication pOfT = new MTPowertypeApplication(t);
+		
+		assertTrue(pOfT.isKnownToContainOnlyMTypes());
+		assertFalse(pOfT.membersKnownToContainOnlyMTypes());
+		
+		t = new MTProper(true);
+		pOfT = new MTPowertypeApplication(t);
+		
+		assertTrue(pOfT.isKnownToContainOnlyMTypes());
+		assertTrue(pOfT.membersKnownToContainOnlyMTypes());
+	}
+	
+	@Test
+	public void testIntegerHierarchy() 
+			throws DuplicateSymbolException, SymbolNotOfKindTypeException {
+		MathSymbolTableBuilder b = buildBasicBuilder();
+		
+		ScopeBuilder s = b.getInnermostActiveScope();
+		
+		MathSymbolTableEntry e = 
+			s.addBinding("Z", myConceptualElement1, MTProper.MTYPE);
+		
+		MTType t = e.getTypeValue();
+		
+		e = s.addBinding("x", myConceptualElement1, t);
+		
+		boolean exceptionThrown = false;
+		try {
+			e.getTypeValue();
+		}
+		catch (SymbolNotOfKindTypeException snokte) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+	}
+	
+	@Test
+	public void testSetHierarchy() 
+			throws DuplicateSymbolException, SymbolNotOfKindTypeException {
+		MathSymbolTableBuilder b = buildBasicBuilder();
+		
+		ScopeBuilder s = b.getInnermostActiveScope();
+		
+		MathSymbolTableEntry e = 
+			s.addBinding("Set", myConceptualElement1, 
+					new MTPowertypeApplication(MTProper.MTYPE));
+		
+		MTType t = e.getTypeValue();
+		
+		e = s.addBinding("S", myConceptualElement1, t);
+		
+		t = e.getTypeValue();
+		
+		e = s.addBinding("x", myConceptualElement1, t);
+		
+		boolean exceptionThrown = false;
+		try {
+			e.getTypeValue();
+		}
+		catch (SymbolNotOfKindTypeException snokte) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+	}
+	
+	@Test
+	public void testNaturalNumberHierarchy() 
+			throws DuplicateSymbolException, SymbolNotOfKindTypeException {
+		MathSymbolTableBuilder b = buildBasicBuilder();
+		
+		ScopeBuilder s = b.getInnermostActiveScope();
+		
+		MathSymbolTableEntry e = 
+			s.addBinding("Z", myConceptualElement1, MTProper.MTYPE);
+		
+		MTType t = e.getTypeValue();
+		
+		e = s.addBinding("N", myConceptualElement1, 
+				new MTPowertypeApplication(t));
+		
+		t = e.getTypeValue();
+		
+		e = s.addBinding("m", myConceptualElement1, t);
+		
+		boolean exceptionThrown = false;
+		try {
+			e.getTypeValue();
+		}
+		catch (SymbolNotOfKindTypeException snokte) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+	}
+	
+	private MathSymbolTableBuilder buildBasicBuilder() {
+		MathSymbolTableBuilder b = new MathSymbolTableBuilder();
+		
+		PosSymbol p = new PosSymbol(new Location(
+				new File("/some/file"), new Pos(1, 1)), Symbol.symbol("x"));
+		
+		MathModuleDec m = new MathModuleDec(p, null, null, null);
+		b.startModuleScope(m);
+		
+		return b;
+	}*/
+}

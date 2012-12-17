@@ -6,16 +6,16 @@ import edu.clemson.cs.r2jt.proving.ChainingIterator;
 
 public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
 
-    private final SimpleImmutableList<E> myFirstList;
+    private final ImmutableList<E> myFirstList;
     private final int myFirstListSize;
 
-    private final SimpleImmutableList<E> mySecondList;
+    private final ImmutableList<E> mySecondList;
     private final int mySecondListSize;
 
     private final int myTotalSize;
 
-    public ImmutableListConcatenation(SimpleImmutableList<E> firstList,
-            SimpleImmutableList<E> secondList) {
+    public ImmutableListConcatenation(ImmutableList<E> firstList,
+            ImmutableList<E> secondList) {
 
         myFirstList = firstList;
         myFirstListSize = myFirstList.size();
@@ -41,8 +41,8 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
     }
 
     @Override
-    public SimpleImmutableList<E> head(int length) {
-        SimpleImmutableList<E> retval;
+    public ImmutableList<E> head(int length) {
+        ImmutableList<E> retval;
 
         if (length <= myFirstListSize) {
             retval = myFirstList.head(length);
@@ -68,13 +68,13 @@ public class ImmutableListConcatenation<E> extends AbstractImmutableList<E> {
     }
 
     @Override
-    public SimpleImmutableList<E> subList(int startIndex, int length) {
+    public ImmutableList<E> subList(int startIndex, int length) {
         return tail(startIndex).head(length);
     }
 
     @Override
-    public SimpleImmutableList<E> tail(int startIndex) {
-        SimpleImmutableList<E> retval;
+    public ImmutableList<E> tail(int startIndex) {
+        ImmutableList<E> retval;
 
         if (startIndex < myFirstListSize) {
             retval =

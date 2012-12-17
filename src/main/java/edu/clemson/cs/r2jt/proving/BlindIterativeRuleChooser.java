@@ -7,7 +7,6 @@ import java.util.List;
 
 import edu.clemson.cs.r2jt.absyn.EqualsExp;
 import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 
 /**
  * XXX : This class should be modified so that it and FitnessPriorityRuleChooser
@@ -22,15 +21,13 @@ public class BlindIterativeRuleChooser extends RuleProvider {
             new LinkedList<EqualsExp>();
 
     protected List<EqualsExp> myExpCorrespondance = new LinkedList<EqualsExp>();
-    protected MathExpTypeResolver myTyper;
 
     protected boolean myLockedFlag;
 
     protected DirectReplaceWrapper myAntecedentWrapper =
             new DirectReplaceWrapper();
 
-    public BlindIterativeRuleChooser(MathExpTypeResolver typer) {
-        myTyper = typer;
+    public BlindIterativeRuleChooser() {
         myLockedFlag = false;
     }
 
@@ -80,8 +77,6 @@ public class BlindIterativeRuleChooser extends RuleProvider {
 
             if (equivalency.getOperator() == EqualsExp.EQUAL) {
                 //Substitute left expression for right
-                /*MatchReplace matcher = new BindReplace(equivalency.getLeft(),
-                		equivalency.getRight(), myTyper);*/
                 myOriginalGlobalRules.add(equivalency);
                 myExpCorrespondance.add(equivalency);
 
@@ -92,8 +87,6 @@ public class BlindIterativeRuleChooser extends RuleProvider {
                 //EqualsExp inverseEquivalency = (EqualsExp) equivalency.copy();
                 inverseEquivalency.setLeft(equivalency.getRight());
                 inverseEquivalency.setRight(equivalency.getLeft());
-                /*matcher = new BindReplace(equivalency.getRight(),
-                		equivalency.getLeft(), myTyper);*/
                 myOriginalGlobalRules.add(inverseEquivalency);
                 myExpCorrespondance.add(equivalency);
             }
@@ -203,7 +196,7 @@ public class BlindIterativeRuleChooser extends RuleProvider {
         myFinalGlobalRules = new LinkedList<MatchReplace>();
         MatchReplace matcher;
         for (EqualsExp e : myOriginalGlobalRules) {
-            matcher = new BindReplace(e.getLeft(), e.getRight(), myTyper);
+            matcher = new BindReplace(e.getLeft(), e.getRight());
             myFinalGlobalRules.add(matcher);
         }
     }

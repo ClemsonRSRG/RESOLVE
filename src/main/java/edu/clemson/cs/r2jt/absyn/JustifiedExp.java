@@ -213,9 +213,9 @@ public class JustifiedExp extends LineNumberedExp {
         PosSymbol newLineNum = null;
         if (myLineNumber != null)
             newLineNum = myLineNumber.copy();
-        Exp newExp = exp.copy();
+        Exp newExp = Exp.copy(exp);
         JustificationExp newJustification =
-                (JustificationExp) (justification.copy());
+                (JustificationExp) (Exp.copy(justification));
         return new JustifiedExp(null, newLineNum, newExp, newJustification);
     }
 

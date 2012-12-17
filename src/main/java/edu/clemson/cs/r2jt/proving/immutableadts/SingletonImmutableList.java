@@ -24,8 +24,8 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     @Override
-    public SimpleImmutableList<E> head(int length) {
-        SimpleImmutableList<E> retval;
+    public ImmutableList<E> head(int length) {
+        ImmutableList<E> retval;
 
         switch (length) {
         case 0:
@@ -52,9 +52,9 @@ public class SingletonImmutableList<E> extends AbstractImmutableList<E> {
     }
 
     @Override
-    public SimpleImmutableList<E> tail(int startIndex) {
+    public ImmutableList<E> tail(int startIndex) {
 
-        SimpleImmutableList<E> retval;
+        ImmutableList<E> retval;
 
         switch (startIndex) {
         case 0:

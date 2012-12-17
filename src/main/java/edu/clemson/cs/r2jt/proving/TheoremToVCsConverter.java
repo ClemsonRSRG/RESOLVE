@@ -61,7 +61,7 @@ public class TheoremToVCsConverter implements Iterable<VerificationCondition> {
     }
 
     private static Exp eliminateUniversalQuantifiers(Exp e) {
-        Exp copy = e.copy();
+        Exp copy = Exp.copy(e);
 
         eliminateUniversalQuantifiersInPlace(copy);
 

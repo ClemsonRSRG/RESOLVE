@@ -184,7 +184,7 @@ public class UnaryMinusExp extends Exp {
     }
 
     public Exp copy() {
-        Exp newArgument = argument.copy();
+        Exp newArgument = Exp.copy(argument);
         return new UnaryMinusExp(null, newArgument);
     }
 

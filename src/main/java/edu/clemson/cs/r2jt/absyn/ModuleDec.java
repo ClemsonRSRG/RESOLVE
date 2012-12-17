@@ -62,14 +62,21 @@ import edu.clemson.cs.r2jt.collections.List;
 
 public abstract class ModuleDec extends Dec {
 
+    /** The usesItems member. */
+    protected List<UsesItem> usesItems;
+
     public abstract void accept(ResolveConceptualVisitor v);
 
     public abstract String asString(int indent, int increment);
 
     /** Returns the value of the usesItems variable. */
-    public abstract List<UsesItem> getUsesItems();
+    public List<UsesItem> getUsesItems() {
+        return usesItems;
+    }
 
     /** Sets the usesItems variable to the specified value. */
-    public abstract void setUsesItems(List<UsesItem> usesItems);
+    public void setUsesItems(List<UsesItem> usesItems) {
+        this.usesItems = usesItems;
+    }
 
 }

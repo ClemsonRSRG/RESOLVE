@@ -11,7 +11,7 @@ import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.scope.SymbolTable;
+import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import java.io.File;
@@ -30,7 +30,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
     private final CompileEnvironment env;
     private ErrorHandler err;
     private String targetFileName;
-    private SymbolTable table;
+    private OldSymbolTable table;
     private boolean isMath;
 
     //Flags
@@ -50,7 +50,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
      * End of Variable Declaration
      */
 
-    public PrettyCTranslation(CompileEnvironment env, SymbolTable table,
+    public PrettyCTranslation(CompileEnvironment env, OldSymbolTable table,
             ModuleDec dec, ErrorHandler err) {
         this.err = err;
         this.env = env;
@@ -390,7 +390,7 @@ public class PrettyCTranslation extends TreeWalkerStackVisitor {
      * This will skip over all children of ProgramFunctionExp
      */
     public boolean walkProgramFunctionExp(ProgramFunctionExp exp) {
-            return true;
+        return true;
     }
 
     /*

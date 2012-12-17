@@ -18,7 +18,6 @@ import edu.clemson.cs.r2jt.absyn.OutfixExp;
 import edu.clemson.cs.r2jt.absyn.PrefixExp;
 import edu.clemson.cs.r2jt.absyn.QuantExp;
 import edu.clemson.cs.r2jt.absyn.VarExp;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
@@ -116,8 +115,7 @@ public class Utilities {
      */
     public static void satisfy(Iterable<Exp> assumptions,
             List<Exp> antecedents, int curAntecedentIndex,
-            Map<Exp, Exp> bindings, MathExpTypeResolver typer,
-            List<Exp> consequent, List<Exp> accumulator) {
+            Map<Exp, Exp> bindings, List<Exp> consequent, List<Exp> accumulator) {
 
         if (curAntecedentIndex >= antecedents.size()) {
             for (Exp c : consequent) {
@@ -149,13 +147,13 @@ public class Utilities {
             while (assumptionsIter.hasNext()) {
                 assumption = assumptionsIter.next();
 
-                subBinding = bind(antecedent, assumption, typer);
+                subBinding = bind(antecedent, assumption);
 
                 if (subBinding != null) {
                     Map<Exp, Exp> workingBindings = shallowCopyMap(bindings);
                     buildExpMapFromPosSymbolMap(subBinding, workingBindings);
                     satisfy(assumptions, antecedents, curAntecedentIndex + 1,
-                            workingBindings, typer, consequent, accumulator);
+                            workingBindings, consequent, accumulator);
                 }
             }
         }
@@ -299,12 +297,7 @@ public class Utilities {
      * @throws NullPointerException If <code>pattern</code> or <code>e</code> is
      *                              null.
      */
-    public static Map<PosSymbol, Exp> bind(Exp pattern, Exp e,
-            MathExpTypeResolver typer) {
-
-        if (pattern.toString().equals("u") && e.toString().equals("?New_Queue")) {
-            System.out.println("Utilities.bind.problem!");
-        }
+    public static Map<PosSymbol, Exp> bind(Exp pattern, Exp e) {
 
         //We need typing information to do our job, however the Analyzer doesn't
         //work consistently.  Fail well if we can't do our job.
@@ -327,70 +320,53 @@ public class Utilities {
             VarExp patternVar = (VarExp) pattern;
 
             if (patternVar.getQuantification() == QuantExp.FORALL) {
-                try {
-                    if (pattern.getType() != null
-                            && e.getType() != null
-                            && (typer.matchTypes(null, pattern.getType(), e
-                                    .getType(), true, false))) {
+                if (pattern.getType() != null && e.getType() != null
+                        && e.getMathType().isSubtypeOf(pattern.getMathType())) {
 
-                        retval = new HashMap<PosSymbol, Exp>();
-                        retval.put(patternVar.getName(), e);
-                    }
-
-                    if (retval == null && myBindDebugFlag) {
-                        System.out.println("Prover.Utilities.bind() reports: "
-                                + "Cannot bind " + patternVar + " with " + e
-                                + " because:");
-
-                        if (pattern.getType() == null || e.getType() == null) {
-                            if (pattern.getType() == null) {
-                                System.out.println("\t" + patternVar
-                                        + "'s type is null.");
-                            }
-                            if (e.getType() == null) {
-                                System.out.println("\t" + e
-                                        + "'s type is null.");
-                            }
-                        }
-                        else if (!typer.matchTypes(null, pattern.getType(), e
-                                .getType(), true, false)) {
-                            System.out.println("\tType " + pattern.getType()
-                                    + " does not match type " + e.getType()
-                                    + ".");
-                        }
-                    }
+                    retval = new HashMap<PosSymbol, Exp>();
+                    retval.put(patternVar.getName(), e);
                 }
-                catch (TypeResolutionException ex) {
-                    //If we can't get a type on something, just ignore it
+
+                if (retval == null && myBindDebugFlag) {
+                    System.out.println("Prover.Utilities.bind() reports: "
+                            + "Cannot bind " + patternVar + " with " + e
+                            + " because:");
+
+                    if (pattern.getType() == null || e.getType() == null) {
+                        if (pattern.getType() == null) {
+                            System.out.println("\t" + patternVar
+                                    + "'s type is null.");
+                        }
+                        if (e.getType() == null) {
+                            System.out.println("\t" + e + "'s type is null.");
+                        }
+                    }
+                    else if (!e.getMathType()
+                            .isSubtypeOf(pattern.getMathType())) {
+                        System.out.println("\tType " + pattern.getType()
+                                + " does not match type " + e.getType() + ".");
+                    }
                 }
             }
             else if (patternVar.getQuantification() == QuantExp.EXISTS) {
-                try {
+                if (e instanceof VarExp) {
+                    System.out.println("Utilities.bind");
+                }
+
+                if (pattern.getType() != null && e.getType() != null
+                        && e.getMathType().isSubtypeOf(pattern.getMathType())) {
 
                     if (e instanceof VarExp) {
-                        System.out.println("Utilities.bind");
-                    }
-
-                    if (pattern.getType() != null
-                            && e.getType() != null
-                            && (typer.matchTypes(null, pattern.getType(), e
-                                    .getType(), true, false))) {
-
-                        if (e instanceof VarExp) {
-                            VarExp eAsVarExp = (VarExp) e;
-                            if (eAsVarExp.getQuantification() == QuantExp.NONE) {
-                                retval = new HashMap<PosSymbol, Exp>();
-                                retval.put(patternVar.getName(), e);
-                            }
-                        }
-                        else {
+                        VarExp eAsVarExp = (VarExp) e;
+                        if (eAsVarExp.getQuantification() == QuantExp.NONE) {
                             retval = new HashMap<PosSymbol, Exp>();
                             retval.put(patternVar.getName(), e);
                         }
                     }
-                }
-                catch (TypeResolutionException ex) {
-
+                    else {
+                        retval = new HashMap<PosSymbol, Exp>();
+                        retval.put(patternVar.getName(), e);
+                    }
                 }
             }
             else {
@@ -406,36 +382,30 @@ public class Utilities {
                 FunctionExp eFunction = (FunctionExp) e;
 
                 if (patternFunction.getQuantification() == QuantExp.FORALL) {
-                    try {
-                        if (pattern.getType() != null
-                                && e.getType() != null
-                                && typer.matchTypes(null, pattern.getType(), e
-                                        .getType(), true, false)) {
+                    if (pattern.getType() != null
+                            && e.getType() != null
+                            && e.getMathType().isSubtypeOf(
+                                    pattern.getMathType())) {
 
-                            retval = bindSubExpressions(pattern, e, typer);
+                        retval = bindSubExpressions(pattern, e);
 
-                            if (retval != null) {
+                        if (retval != null) {
 
-                                VarExp functionName =
-                                        new VarExp(eFunction.getLocation(),
-                                                eFunction.getQualifier(),
-                                                eFunction.getName());
-                                functionName.setType(eFunction.getType());
+                            VarExp functionName =
+                                    new VarExp(eFunction.getLocation(),
+                                            eFunction.getQualifier(), eFunction
+                                                    .getName());
+                            functionName.setType(eFunction.getType());
 
-                                retval.put(patternFunction.getName(),
-                                        functionName);
-                            }
+                            retval.put(patternFunction.getName(), functionName);
                         }
-                    }
-                    catch (TypeResolutionException ex) {
-                        //If we can't get a type on something, just ignore it
                     }
                 }
                 else {
                     if (Exp.posSymbolEquivalent(patternFunction.getName(),
                             eFunction.getName())) {
 
-                        retval = bindSubExpressions(pattern, e, typer);
+                        retval = bindSubExpressions(pattern, e);
                     }
                 }
             }
@@ -450,7 +420,7 @@ public class Utilities {
                 if (Exp.posSymbolEquivalent(patternInfix.getOpName(), eInfix
                         .getOpName())) {
 
-                    retval = bindSubExpressions(pattern, e, typer);
+                    retval = bindSubExpressions(pattern, e);
                 }
             }
         }
@@ -461,7 +431,7 @@ public class Utilities {
                 OutfixExp eOutfix = (OutfixExp) e;
 
                 if (patternOutfix.getOperator() == eOutfix.getOperator()) {
-                    retval = bindSubExpressions(pattern, e, typer);
+                    retval = bindSubExpressions(pattern, e);
                 }
             }
         }
@@ -474,7 +444,7 @@ public class Utilities {
                 if (Exp.posSymbolEquivalent(patternPrefix.getSymbol(), ePrefix
                         .getSymbol())) {
 
-                    retval = bindSubExpressions(pattern, e, typer);
+                    retval = bindSubExpressions(pattern, e);
                 }
             }
         }
@@ -487,7 +457,7 @@ public class Utilities {
                 if (eAsEqualsExp.getOperator() == patternAsEqualsExp
                         .getOperator()) {
 
-                    retval = bindSubExpressions(pattern, e, typer);
+                    retval = bindSubExpressions(pattern, e);
                 }
             }
         }
@@ -498,12 +468,12 @@ public class Utilities {
                 IntegerExp eAsInteger = (IntegerExp) e;
 
                 if (patternAsInteger.getValue() == eAsInteger.getValue()) {
-                    retval = bindSubExpressions(pattern, e, typer);
+                    retval = bindSubExpressions(pattern, e);
                 }
             }
         }
         else if (pattern instanceof DotExp) {
-            retval = bindSubExpressions(pattern, e, typer);
+            retval = bindSubExpressions(pattern, e);
         }
         else {
 
@@ -515,7 +485,7 @@ public class Utilities {
             }
 
             if (pattern.getClass().equals(e.getClass())) {
-                retval = bindSubExpressions(pattern, e, typer);
+                retval = bindSubExpressions(pattern, e);
             }
         }
 
@@ -554,8 +524,7 @@ public class Utilities {
      * @throws NullPointerException If <code>pattern</code> or <code>e</code> is
      *                              null.
      */
-    public static Map<Exp, Exp> newBind(Exp pattern, Exp e,
-            MathExpTypeResolver typer) {
+    public static Map<Exp, Exp> newBind(Exp pattern, Exp e) {
 
         //We need typing information to do our job, however the Analyzer doesn't
         //work consistently.  Fail well if we can't do our job.
@@ -578,70 +547,53 @@ public class Utilities {
             VarExp patternVar = (VarExp) pattern;
 
             if (patternVar.getQuantification() == QuantExp.FORALL) {
-                try {
-                    if (pattern.getType() != null
-                            && e.getType() != null
-                            && (typer.matchTypes(null, pattern.getType(), e
-                                    .getType(), true, false))) {
+                if (pattern.getType() != null && e.getType() != null
+                        && e.getMathType().isSubtypeOf(pattern.getMathType())) {
 
-                        retval = new HashMap<Exp, Exp>();
-                        retval.put(patternVar, e);
-                    }
-
-                    if (retval == null && myBindDebugFlag) {
-                        System.out.println("Prover.Utilities.bind() reports: "
-                                + "Cannot bind " + patternVar + " with " + e
-                                + " because:");
-
-                        if (pattern.getType() == null || e.getType() == null) {
-                            if (pattern.getType() == null) {
-                                System.out.println("\t" + patternVar
-                                        + "'s type is null.");
-                            }
-                            if (e.getType() == null) {
-                                System.out.println("\t" + e
-                                        + "'s type is null.");
-                            }
-                        }
-                        else if (!typer.matchTypes(null, pattern.getType(), e
-                                .getType(), true, false)) {
-                            System.out.println("\tType " + pattern.getType()
-                                    + " does not match type " + e.getType()
-                                    + ".");
-                        }
-                    }
+                    retval = new HashMap<Exp, Exp>();
+                    retval.put(patternVar, e);
                 }
-                catch (TypeResolutionException ex) {
-                    //If we can't get a type on something, just ignore it
+
+                if (retval == null && myBindDebugFlag) {
+                    System.out.println("Prover.Utilities.bind() reports: "
+                            + "Cannot bind " + patternVar + " with " + e
+                            + " because:");
+
+                    if (pattern.getType() == null || e.getType() == null) {
+                        if (pattern.getType() == null) {
+                            System.out.println("\t" + patternVar
+                                    + "'s type is null.");
+                        }
+                        if (e.getType() == null) {
+                            System.out.println("\t" + e + "'s type is null.");
+                        }
+                    }
+                    else if (!e.getMathType()
+                            .isSubtypeOf(pattern.getMathType())) {
+                        System.out.println("\tType " + pattern.getType()
+                                + " does not match type " + e.getType() + ".");
+                    }
                 }
             }
             else if (patternVar.getQuantification() == QuantExp.EXISTS) {
-                try {
+                if (e instanceof VarExp) {
+                    System.out.println("Utilities.bind");
+                }
+
+                if (pattern.getType() != null && e.getType() != null
+                        && e.getMathType().isSubtypeOf(pattern.getMathType())) {
 
                     if (e instanceof VarExp) {
-                        System.out.println("Utilities.bind");
-                    }
-
-                    if (pattern.getType() != null
-                            && e.getType() != null
-                            && (typer.matchTypes(null, pattern.getType(), e
-                                    .getType(), true, false))) {
-
-                        if (e instanceof VarExp) {
-                            VarExp eAsVarExp = (VarExp) e;
-                            if (eAsVarExp.getQuantification() == QuantExp.NONE) {
-                                retval = new HashMap<Exp, Exp>();
-                                retval.put(patternVar, e);
-                            }
-                        }
-                        else {
+                        VarExp eAsVarExp = (VarExp) e;
+                        if (eAsVarExp.getQuantification() == QuantExp.NONE) {
                             retval = new HashMap<Exp, Exp>();
                             retval.put(patternVar, e);
                         }
                     }
-                }
-                catch (TypeResolutionException ex) {
-
+                    else {
+                        retval = new HashMap<Exp, Exp>();
+                        retval.put(patternVar, e);
+                    }
                 }
             }
             else {
@@ -657,35 +609,30 @@ public class Utilities {
                 FunctionExp eFunction = (FunctionExp) e;
 
                 if (patternFunction.getQuantification() == QuantExp.FORALL) {
-                    try {
-                        if (pattern.getType() != null
-                                && e.getType() != null
-                                && typer.matchTypes(null, pattern.getType(), e
-                                        .getType(), true, false)) {
+                    if (pattern.getType() != null
+                            && e.getType() != null
+                            && e.getMathType().isSubtypeOf(
+                                    pattern.getMathType())) {
 
-                            retval = newBindSubExpressions(pattern, e, typer);
+                        retval = newBindSubExpressions(pattern, e);
 
-                            if (retval != null) {
+                        if (retval != null) {
 
-                                VarExp functionName =
-                                        new VarExp(eFunction.getLocation(),
-                                                eFunction.getQualifier(),
-                                                eFunction.getName());
-                                functionName.setType(eFunction.getType());
+                            VarExp functionName =
+                                    new VarExp(eFunction.getLocation(),
+                                            eFunction.getQualifier(), eFunction
+                                                    .getName());
+                            functionName.setType(eFunction.getType());
 
-                                retval.put(patternFunction, functionName);
-                            }
+                            retval.put(patternFunction, functionName);
                         }
-                    }
-                    catch (TypeResolutionException ex) {
-                        //If we can't get a type on something, just ignore it
                     }
                 }
                 else {
                     if (Exp.posSymbolEquivalent(patternFunction.getName(),
                             eFunction.getName())) {
 
-                        retval = newBindSubExpressions(pattern, e, typer);
+                        retval = newBindSubExpressions(pattern, e);
                     }
                 }
             }
@@ -700,7 +647,7 @@ public class Utilities {
                 if (Exp.posSymbolEquivalent(patternInfix.getOpName(), eInfix
                         .getOpName())) {
 
-                    retval = newBindSubExpressions(pattern, e, typer);
+                    retval = newBindSubExpressions(pattern, e);
                 }
             }
         }
@@ -711,7 +658,8 @@ public class Utilities {
                 OutfixExp eOutfix = (OutfixExp) e;
 
                 if (patternOutfix.getOperator() == eOutfix.getOperator()) {
-                    retval = newBindSubExpressions(pattern, e, typer);
+
+                    retval = newBindSubExpressions(pattern, e);
                 }
             }
         }
@@ -724,7 +672,7 @@ public class Utilities {
                 if (Exp.posSymbolEquivalent(patternPrefix.getSymbol(), ePrefix
                         .getSymbol())) {
 
-                    retval = newBindSubExpressions(pattern, e, typer);
+                    retval = newBindSubExpressions(pattern, e);
                 }
             }
         }
@@ -737,7 +685,7 @@ public class Utilities {
                 if (eAsEqualsExp.getOperator() == patternAsEqualsExp
                         .getOperator()) {
 
-                    retval = newBindSubExpressions(pattern, e, typer);
+                    retval = newBindSubExpressions(pattern, e);
                 }
             }
         }
@@ -748,12 +696,14 @@ public class Utilities {
                 IntegerExp eAsInteger = (IntegerExp) e;
 
                 if (patternAsInteger.getValue() == eAsInteger.getValue()) {
-                    retval = newBindSubExpressions(pattern, e, typer);
+
+                    retval = newBindSubExpressions(pattern, e);
                 }
             }
         }
         else if (pattern instanceof DotExp) {
-            retval = newBindSubExpressions(pattern, e, typer);
+
+            retval = newBindSubExpressions(pattern, e);
         }
         else {
 
@@ -765,15 +715,15 @@ public class Utilities {
             }
 
             if (pattern.getClass().equals(e.getClass())) {
-                retval = newBindSubExpressions(pattern, e, typer);
+
+                retval = newBindSubExpressions(pattern, e);
             }
         }
 
         return retval;
     }
 
-    private static Map<PosSymbol, Exp> bindSubExpressions(Exp pattern, Exp e,
-            MathExpTypeResolver typer) {
+    private static Map<PosSymbol, Exp> bindSubExpressions(Exp pattern, Exp e) {
         Map<PosSymbol, Exp> retval = new HashMap<PosSymbol, Exp>();
 
         Iterator<Exp> patternSubExpressions =
@@ -783,8 +733,7 @@ public class Utilities {
         while (retval != null && eSubExpressions.hasNext()
                 && patternSubExpressions.hasNext()) {
             subBinding =
-                    bind(patternSubExpressions.next(), eSubExpressions.next(),
-                            typer);
+                    bind(patternSubExpressions.next(), eSubExpressions.next());
 
             if (subBinding == null) {
                 retval = null;
@@ -808,8 +757,7 @@ public class Utilities {
      * @param typer
      * @return
      */
-    private static Map<Exp, Exp> newBindSubExpressions(Exp pattern, Exp e,
-            MathExpTypeResolver typer) {
+    private static Map<Exp, Exp> newBindSubExpressions(Exp pattern, Exp e) {
         Map<Exp, Exp> retval = new HashMap<Exp, Exp>();
 
         Iterator<Exp> patternSubExpressions =
@@ -820,7 +768,7 @@ public class Utilities {
                 && patternSubExpressions.hasNext()) {
             subBinding =
                     newBind(patternSubExpressions.next(), eSubExpressions
-                            .next(), typer);
+                            .next());
 
             if (subBinding == null) {
                 retval = null;

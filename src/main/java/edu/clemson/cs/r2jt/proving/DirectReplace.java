@@ -29,7 +29,7 @@ public class DirectReplace implements MatchReplace {
     }
 
     public Exp getReplacement() {
-        return (Exp) myReplace.clone();
+        return Exp.copy(myReplace);
     }
 
     public String toString() {
@@ -38,11 +38,11 @@ public class DirectReplace implements MatchReplace {
 
     @Override
     public Exp getExpansionTemplate() {
-        return myFind.copy();
+        return Exp.copy(myFind);
     }
 
     @Override
     public Exp getPattern() {
-        return myReplace.copy();
+        return Exp.copy(myReplace);
     }
 }

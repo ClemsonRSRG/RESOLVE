@@ -1,0 +1,32 @@
+package edu.clemson.cs.r2jt.mathtype;
+
+import java.util.Map;
+
+public class ParameterGenericApplyingVisitor
+        extends
+            SymmetricBoundVariableVisitor {
+
+    private Map<String, MTType> myBindings;
+
+    private boolean myErrorFlag = false;
+
+    public ParameterGenericApplyingVisitor(Map<String, MTType> bindings) {
+        myBindings = bindings;
+    }
+
+    public boolean encounteredError() {
+        return myErrorFlag;
+    }
+
+    @Override
+    public boolean mismatch(MTType t1, MTType t2) {
+        if (t1 instanceof MTGeneric) {
+            myBindings.put(((MTGeneric) t1).getName(), t2);
+        }
+        else {
+            myErrorFlag = true;
+        }
+
+        return true;
+    }
+}

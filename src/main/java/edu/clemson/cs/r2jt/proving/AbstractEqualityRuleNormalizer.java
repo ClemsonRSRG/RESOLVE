@@ -3,7 +3,6 @@ package edu.clemson.cs.r2jt.proving;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 
@@ -20,12 +19,9 @@ public abstract class AbstractEqualityRuleNormalizer implements RuleNormalizer {
     private static final List<VCTransformer> DUMMY_SET =
             new LinkedList<VCTransformer>();
 
-    protected final MathExpTypeResolver myTyper;
     private final boolean myNoisyFlag;
 
-    public AbstractEqualityRuleNormalizer(MathExpTypeResolver r, boolean noisy) {
-
-        myTyper = r;
+    public AbstractEqualityRuleNormalizer(boolean noisy) {
         myNoisyFlag = noisy;
     }
 

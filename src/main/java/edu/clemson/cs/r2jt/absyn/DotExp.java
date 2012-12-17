@@ -68,9 +68,7 @@ import edu.clemson.cs.r2jt.collections.Iterator;
 
 public class DotExp extends Exp {
 
-    // ===========================================================
     // Variables
-    // ===========================================================
 
     /** The location member. */
     private Location location;
@@ -81,9 +79,7 @@ public class DotExp extends Exp {
     /** The semanticExp member. */
     private Exp semanticExp;
 
-    // ===========================================================
     // Constructors
-    // ===========================================================
 
     public DotExp() {};
 
@@ -93,9 +89,7 @@ public class DotExp extends Exp {
         this.semanticExp = semanticExp;
     }
 
-    // ===========================================================
     // Accessor Methods
-    // ===========================================================
 
     // -----------------------------------------------------------
     // Get Methods
@@ -135,9 +129,7 @@ public class DotExp extends Exp {
         this.semanticExp = semanticExp;
     }
 
-    // ===========================================================
     // Public Methods
-    // ===========================================================
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
         Exp retval;
@@ -207,7 +199,7 @@ public class DotExp extends Exp {
         Exp clonedSegment;
         while (i.hasNext()) {
             curSegment = i.next();
-            clonedSegment = (Exp) curSegment.clone();
+            clonedSegment = (Exp) Exp.clone(curSegment);
             clonedSegment.setType(curSegment.getType());
             newSegments.add(clonedSegment);
         }
@@ -272,13 +264,13 @@ public class DotExp extends Exp {
         Iterator<Exp> it = segments.iterator();
         List<Exp> newSegments = new List<Exp>();
         while (it.hasNext()) {
-            newSegments.add(it.next().copy());
+            newSegments.add(Exp.copy(it.next()));
         }
 
         Exp newSemanticExp = null;
 
         if (semanticExp != null) {
-            newSemanticExp = semanticExp.copy();
+            newSemanticExp = Exp.copy(semanticExp);
         }
 
         retval = new DotExp(null, newSegments, newSemanticExp);
@@ -321,7 +313,7 @@ public class DotExp extends Exp {
         for (int count = 0; count < this.getSegments().size(); count++) {
             Exp oldExp = this.getSegments().get(count);
             if (oldExp instanceof FunctionExp) {
-                Exp newExp = oldExp.replace(old, replacement);
+                Exp newExp = Exp.replace(oldExp, old, replacement);
                 if (newExp != null) {
                     segments.remove(count);
                     segments.add(count, newExp);
@@ -335,7 +327,7 @@ public class DotExp extends Exp {
                 Exp name = it.next();
                 if (name instanceof FunctionExp) {
                     int index = it.nextIndex();
-                    Exp newName = name.replace(old, replacement);
+                    Exp newName = Exp.replace(name, old, replacement);
 
                     if (!newName.equals(name)) {
                         /* Weird way of doing it. Replaced it with the following. - YS
@@ -350,7 +342,7 @@ public class DotExp extends Exp {
                 }
                 else if (name instanceof VariableNameExp) {
                     int index = it.nextIndex();
-                    VariableExp newName = (VariableExp) name.clone();
+                    VariableExp newName = (VariableExp) Exp.clone(name);
                     /* Was:
                      * new VarExp(null, null, 
                     		((VariableNameExp)name).getName());
@@ -384,14 +376,14 @@ public class DotExp extends Exp {
                     else if (((VarExp) old).getName().toString().equals(
                             ((VarExp) name).getName().toString()) /*&& (replacement instanceof VarExp)*/) {
                         segments.remove(0);
-                        segments.add(0, (Exp) (replacement.clone()));
+                        segments.add(0, (Exp) (Exp.clone(replacement)));
 
                         return this;
                     }
                 }
                 else if (old instanceof OldExp && name instanceof OldExp/* && replacement instanceof VarExp*/) {
                     if (replacement instanceof DotExp) {
-                        name = name.replace(old, replacement);
+                        name = Exp.replace(name, old, replacement);
                         if (name != null) {
                             segments.remove(0);
                             segments.addAll(0, ((DotExp) replacement)
@@ -400,10 +392,10 @@ public class DotExp extends Exp {
                         }
                     }
                     else {
-                        name = name.replace(old, replacement);
+                        name = Exp.replace(name, old, replacement);
                         if (name != null) {
                             segments.remove(0);
-                            segments.add(0, (Exp) (name.clone()));
+                            segments.add(0, (Exp) (Exp.clone(name)));
                             return this;
                         }
                     }
@@ -483,10 +475,7 @@ public class DotExp extends Exp {
 
                 newSegments.addAll(0, ((DotExp) newExp).getSegments());
             }
-            /* Weird? Probably not needed. - YS
-            else{
-            	newSegments = newSegments;
-            }*/
+
             for (int count = 0; count < old.getSegments().size(); count++) {
 
                 Exp oldExp = old.getSegments().get(count);

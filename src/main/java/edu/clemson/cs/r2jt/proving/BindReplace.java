@@ -3,7 +3,6 @@ package edu.clemson.cs.r2jt.proving;
 import java.util.Map;
 
 import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 
 /**
  * <p>Uses a provided search pattern to match expressions that will bind (via 
@@ -15,7 +14,6 @@ import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
  */
 public class BindReplace implements MatchReplace {
 
-    private MathExpTypeResolver myTyper;
     private Exp myFindPattern, myReplacePattern;
     private Map<Exp, Exp> myBindings;
 
@@ -27,19 +25,16 @@ public class BindReplace implements MatchReplace {
      * 
      * @param findPattern The pattern to bind with.
      * @param replacePattern The pattern to expand as a replacement.
-     * @param typer Something to help figure out types.
      */
-    public BindReplace(Exp findPattern, Exp replacePattern,
-            MathExpTypeResolver typer) {
+    public BindReplace(Exp findPattern, Exp replacePattern) {
 
         myFindPattern = findPattern;
         myReplacePattern = replacePattern;
-        myTyper = typer;
     }
 
     public boolean couldReplace(Exp e) {
 
-        myBindings = Utilities.newBind(myFindPattern, e, myTyper);
+        myBindings = Utilities.newBind(myFindPattern, e);
 
         return (myBindings != null);
     }
@@ -55,11 +50,11 @@ public class BindReplace implements MatchReplace {
 
     @Override
     public Exp getExpansionTemplate() {
-        return myReplacePattern.copy();
+        return Exp.copy(myReplacePattern);
     }
 
     @Override
     public Exp getPattern() {
-        return myFindPattern.copy();
+        return Exp.copy(myFindPattern);
     }
 }

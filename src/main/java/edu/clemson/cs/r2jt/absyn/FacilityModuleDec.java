@@ -70,9 +70,6 @@ public class FacilityModuleDec extends ModuleDec {
     /** The name member. */
     private PosSymbol name;
 
-    /** The usesItems member. */
-    private List<UsesItem> usesItems;
-
     /** The requirement member. */
     private Exp requirement;
 
@@ -150,6 +147,7 @@ public class FacilityModuleDec extends ModuleDec {
     }
 
     /** Sets the usesItems variable to the specified value. */
+    @Override
     public void setUsesItems(List<UsesItem> usesItems) {
         this.usesItems = usesItems;
     }

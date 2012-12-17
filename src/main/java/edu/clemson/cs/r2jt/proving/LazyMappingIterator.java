@@ -2,6 +2,8 @@ package edu.clemson.cs.r2jt.proving;
 
 import java.util.Iterator;
 
+import edu.clemson.cs.r2jt.utilities.Mapping;
+
 /**
  * <p>A <code>LazyMappingIterator</code> wraps an <code>Iterator</code> that
  * iterates over objects of type <code>I</code> and presents an interface for
@@ -15,9 +17,9 @@ import java.util.Iterator;
 public final class LazyMappingIterator<I, O> implements Iterator<O> {
 
     private final Iterator<I> mySource;
-    private final Mapper<I, O> myMapper;
+    private final Mapping<I, O> myMapper;
 
-    public LazyMappingIterator(Iterator<I> source, Mapper<I, O> mapper) {
+    public LazyMappingIterator(Iterator<I> source, Mapping<I, O> mapper) {
         mySource = source;
         myMapper = mapper;
     }

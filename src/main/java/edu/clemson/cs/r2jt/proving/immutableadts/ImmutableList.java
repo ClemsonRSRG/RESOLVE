@@ -1,66 +1,50 @@
 package edu.clemson.cs.r2jt.proving.immutableadts;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
-import edu.clemson.cs.r2jt.proving.ArrayIterator;
+public interface ImmutableList<E> extends Iterable<E> {
 
-public class ImmutableList<E> extends AbstractImmutableList<E> {
+    /*
+     * "Mutator" methods that return a new, changed version of this list
+     */
 
-    private final E[] myElements;
-    private final int myElementsLength;
+    public ImmutableList<E> appended(E e);
 
-    @SuppressWarnings("unchecked")
-    public ImmutableList(Iterable<E> i) {
-        List<E> tempList = new ArrayList<E>();
+    public ImmutableList<E> appended(ImmutableList<E> l);
 
-        for (E e : i) {
-            tempList.add(e);
-        }
+    public ImmutableList<E> appended(Iterable<E> i);
 
-        myElements = (E[]) tempList.toArray();
-        myElementsLength = myElements.length;
-    }
+    public ImmutableList<E> removed(int index);
 
-    public ImmutableList(E[] i) {
-        myElementsLength = i.length;
-        myElements = Arrays.copyOf(i, myElementsLength);
-    }
+    public ImmutableList<E> set(int index, E e);
 
-    public ImmutableList(E[] i, int length) {
-        myElementsLength = length;
-        myElements = Arrays.copyOf(i, length);
-    }
+    public ImmutableList<E> insert(int index, E e);
 
-    @Override
-    public E get(int index) {
-        return myElements[index];
-    }
+    public ImmutableList<E> insert(int index, ImmutableList<E> e);
 
-    @Override
-    public SimpleImmutableList<E> head(int length) {
-        return new ImmutableListSubview<E>(this, 0, length);
-    }
+    /*
+     * Methods that return a view of this list
+     */
 
-    @Override
-    public Iterator<E> iterator() {
-        return new ArrayIterator<E>(myElements);
-    }
+    public ImmutableList<E> subList(int startIndex, int length);
 
-    public Iterator<E> subsequenceIterator(int start, int length) {
-        return new ArrayIterator<E>(myElements, start, length);
-    }
+    public ImmutableList<E> tail(int startIndex);
 
-    @Override
-    public int size() {
-        return myElementsLength;
-    }
+    public ImmutableList<E> head(int length);
 
-    @Override
-    public SimpleImmutableList<E> tail(int startIndex) {
-        return new ImmutableListSubview<E>(this, startIndex, myElementsLength
-                - startIndex);
-    }
+    /*
+     * Methods for getting out elements
+     */
+
+    public E first();
+
+    public E get(int index);
+
+    public Iterator<E> iterator();
+
+    /*
+     * Utility methods.
+     */
+
+    public int size();
 }

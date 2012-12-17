@@ -1,0 +1,49 @@
+END
+EqualsExp.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/absyn/EqualsExp.java
+END
+IsInExp.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/absyn/IsInExp.java
+END
+InfixExp.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/absyn/InfixExp.java
+END
+Exp.java
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svnroot/resolve/!svn/ver/301/branches/dev-hampton/src/edu/clemson/cs/r2jt/absyn/Exp.java
+END
+PrefixExp.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/absyn/PrefixExp.java
+END
+ResolveConceptualElement.java
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svnroot/resolve/!svn/ver/301/branches/dev-hampton/src/edu/clemson/cs/r2jt/absyn/ResolveConceptualElement.java
+END
+OutfixExp.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/absyn/OutfixExp.java
+END
+AbstractFunctionExp.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/resolve/!svn/ver/289/branches/dev-hampton/src/edu/clemson/cs/r2jt/absyn/AbstractFunctionExp.java
+END

@@ -161,6 +161,6 @@ public class AssumeStmt extends Statement {
     }
 
     public AssumeStmt clone() {
-        return new AssumeStmt(location, (Exp) assertion.clone());
+        return new AssumeStmt(location, (Exp) Exp.clone(assertion));
     }
 }

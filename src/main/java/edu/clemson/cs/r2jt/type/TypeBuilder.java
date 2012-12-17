@@ -32,7 +32,7 @@ import edu.clemson.cs.r2jt.scope.ModuleScope;
 import edu.clemson.cs.r2jt.scope.OperationScope;
 import edu.clemson.cs.r2jt.scope.Scope;
 import edu.clemson.cs.r2jt.scope.ScopeID;
-import edu.clemson.cs.r2jt.scope.SymbolTable;
+import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.scope.TypeHolder;
 import edu.clemson.cs.r2jt.scope.TypeID;
 
@@ -47,7 +47,7 @@ public class TypeBuilder {
 
     private ErrorHandler err;
 
-    private SymbolTable table = null;
+    private OldSymbolTable table = null;
 
     private Type B = null;
 
@@ -65,7 +65,8 @@ public class TypeBuilder {
     // Constructors
     // ===========================================================
 
-    public TypeBuilder(SymbolTable table, CompileEnvironment instanceEnvironment) {
+    public TypeBuilder(OldSymbolTable table,
+            CompileEnvironment instanceEnvironment) {
         myInstanceEnvironment = instanceEnvironment;
         this.table = table;
         this.err = instanceEnvironment.getErrorHandler();
@@ -110,7 +111,7 @@ public class TypeBuilder {
         if (myInstanceEnvironment.contains(tid)) {
             // Make sure XXX_Theory has math type "X"
             PosSymbol ps = new PosSymbol(null, Symbol.symbol(var));
-            SymbolTable st = myInstanceEnvironment.getSymbolTable(tid);
+            OldSymbolTable st = myInstanceEnvironment.getSymbolTable(tid);
             ModuleScope scope = null;
             if (st != null) {
                 // XXX_Theory has already been successfully compiled

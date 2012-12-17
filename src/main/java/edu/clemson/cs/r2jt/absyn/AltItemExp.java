@@ -65,9 +65,7 @@ import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public class AltItemExp extends Exp {
 
-    // ===========================================================
     // Variables
-    // ===========================================================
 
     /** The location member. */
     private Location location;
@@ -78,9 +76,7 @@ public class AltItemExp extends Exp {
     /** The assignment member. */
     private Exp assignment;
 
-    // ===========================================================
     // Constructors
-    // ===========================================================
 
     public AltItemExp() {
     // Empty
@@ -96,9 +92,7 @@ public class AltItemExp extends Exp {
         this.assignment = assignment;
     }
 
-    // ===========================================================
     // Accessor Methods
-    // ===========================================================
 
     // -----------------------------------------------------------
     // Get Methods
@@ -143,9 +137,7 @@ public class AltItemExp extends Exp {
         this.assignment = assignment;
     }
 
-    // ===========================================================
     // Public Methods
-    // ===========================================================
 
     public boolean equivalent(Exp e) {
         boolean result = e instanceof AltItemExp;
@@ -262,10 +254,10 @@ public class AltItemExp extends Exp {
     }
 
     public Exp replace(Exp old, Exp replacement) {
-        AltItemExp result = (AltItemExp) copy();
+        AltItemExp result = (AltItemExp) Exp.copy(this);
 
         if (test != null) {
-            result.test = test.replace(old, replacement);
+            result.test = Exp.replace(test, old, replacement);
         }
 
         if (assignment != null) {
@@ -275,8 +267,7 @@ public class AltItemExp extends Exp {
             }
 
             Exp oldAssignment = assignment;
-
-            result.assignment = assignment.replace(old, replacement);
+            result.assignment = Exp.replace(assignment, old, replacement);
 
             if (result.assignment == null) {
                 result.assignment = oldAssignment;
@@ -287,14 +278,14 @@ public class AltItemExp extends Exp {
     }
 
     public Exp copy() {
-        Exp newTest = test;
+        Exp newTest = Exp.copy(test);
         if (newTest != null) {
-            newTest = newTest.copy();
+            newTest = Exp.copy(newTest);
         }
 
         Exp newAssignment = assignment;
         if (newAssignment != null) {
-            newAssignment = newAssignment.copy();
+            newAssignment = Exp.copy(newAssignment);
         }
 
         Exp result = new AltItemExp(null, newTest, newAssignment);
@@ -306,12 +297,12 @@ public class AltItemExp extends Exp {
     public Object clone() {
         Exp newTest = test;
         if (newTest != null) {
-            newTest = (Exp) newTest.clone();
+            newTest = (Exp) Exp.clone(newTest);
         }
 
         Exp newAssignment = assignment;
         if (newAssignment != null) {
-            newAssignment = (Exp) newAssignment.clone();
+            newAssignment = (Exp) Exp.clone(newAssignment);
         }
 
         Exp result = new AltItemExp(null, newTest, newAssignment);

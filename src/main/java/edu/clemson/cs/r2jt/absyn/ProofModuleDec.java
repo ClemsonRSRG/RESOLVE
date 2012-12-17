@@ -61,7 +61,7 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 
-public class ProofModuleDec extends ModuleDec {
+public class ProofModuleDec extends AbstractParameterizedModuleDec {
 
     // ===========================================================
     // Variables
@@ -71,10 +71,7 @@ public class ProofModuleDec extends ModuleDec {
     private PosSymbol name;
 
     /** The moduleParams member. */
-    private List<ModuleParameter> moduleParams;
-
-    /** The usesItems member. */
-    private List<UsesItem> usesItems;
+    private List<ModuleParameterDec> moduleParams;
 
     /** The decs member. */
     private List<Dec> decs;
@@ -83,8 +80,9 @@ public class ProofModuleDec extends ModuleDec {
     // Empty
     }
 
-    public ProofModuleDec(PosSymbol name, List<ModuleParameter> moduleParams,
-            List<UsesItem> usesItems, List<Dec> decs) {
+    public ProofModuleDec(PosSymbol name,
+            List<ModuleParameterDec> moduleParams, List<UsesItem> usesItems,
+            List<Dec> decs) {
         this.name = name;
         this.moduleParams = moduleParams;
         this.usesItems = usesItems;
@@ -97,7 +95,7 @@ public class ProofModuleDec extends ModuleDec {
     }
 
     /** Returns the value of the moduleParams variable. */
-    public List<ModuleParameter> getModuleParams() {
+    public List<ModuleParameterDec> getModuleParams() {
         return moduleParams;
     }
 
@@ -117,7 +115,7 @@ public class ProofModuleDec extends ModuleDec {
     }
 
     /** Sets the moduleParams variable to the specified value. */
-    public void setModuleParams(List<ModuleParameter> moduleParams) {
+    public void setModuleParams(List<ModuleParameterDec> moduleParams) {
         this.moduleParams = moduleParams;
     }
 

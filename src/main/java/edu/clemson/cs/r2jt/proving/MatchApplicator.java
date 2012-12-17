@@ -77,7 +77,7 @@ public class MatchApplicator {
         List<Exp> retval = new List<Exp>();
 
         for (Exp e : conjuncts) {
-            retval.add(e.copy());
+            retval.add(Exp.copy(e));
         }
 
         applyAllInPlace(retval, matcher);
@@ -151,7 +151,7 @@ public class MatchApplicator {
         boolean foundMatch;
         List<Exp> retval = new List<Exp>();
         for (Exp e : myConjuncts) {
-            retval.add((Exp) e.clone());
+            retval.add(Exp.copy(e));
         }
 
         foundMatch = applyMatcher(retval);

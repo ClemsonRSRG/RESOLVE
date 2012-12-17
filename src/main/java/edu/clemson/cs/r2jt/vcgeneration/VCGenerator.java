@@ -9,7 +9,7 @@ import edu.clemson.cs.r2jt.absyn.EnhancementModuleDec;
 import edu.clemson.cs.r2jt.absyn.ProcedureDec;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.scope.SymbolTable;
+import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
@@ -24,7 +24,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
 
     // Symbol Table
-    private SymbolTable mySymbolTable;
+    private OldSymbolTable mySymbolTable;
 
     // Compile Environment
     private CompileEnvironment myInstanceEnvironment;
@@ -59,7 +59,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     // Constructors
     // ===========================================================
 
-    public VCGenerator(SymbolTable table, final CompileEnvironment env) {
+    public VCGenerator(OldSymbolTable table, final CompileEnvironment env) {
         mySymbolTable = table;
         myInstanceEnvironment = env;
         myUtilities = new Utilities(myInstanceEnvironment);

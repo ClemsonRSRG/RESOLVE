@@ -162,9 +162,10 @@ public class Utilities {
                 (ConceptModuleDec) myInstanceEnvironment.getModuleDec(cid);
 
         // Iterate through and add all ConceptTypeParamDec
-        Iterator<ModuleParameter> mpIt = cDec.getParameters().iterator();
+        Iterator<ModuleParameterDec> mpIt = cDec.getParameters().iterator();
         while (mpIt.hasNext()) {
-            ModuleParameter mp = mpIt.next();
+            ModuleParameterDec md = mpIt.next();
+            Dec mp = md.getWrappedDec();
             if (mp instanceof ConceptTypeParamDec) {
                 // Add all unique instances
                 typeParms.addUnique(((ConceptTypeParamDec) mp).getName()
@@ -184,9 +185,10 @@ public class Utilities {
                 (ConceptModuleDec) myInstanceEnvironment.getModuleDec(cid);
 
         // Iterate through and add all ConceptParamDec
-        Iterator<ModuleParameter> mpIt = cDec.getParameters().iterator();
+        Iterator<ModuleParameterDec> mpIt = cDec.getParameters().iterator();
         while (mpIt.hasNext()) {
-            ModuleParameter mp = mpIt.next();
+            ModuleParameterDec md = mpIt.next();
+            Dec mp = md.getWrappedDec();
             if (mp instanceof ConstantParamDec) {
                 // Add all unique instances
                 concParms.addUnique(((ConstantParamDec) mp).getName()

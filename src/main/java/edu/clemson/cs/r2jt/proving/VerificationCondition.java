@@ -47,11 +47,11 @@ public class VerificationCondition {
         List<Exp> newConsequents = new List<Exp>();
 
         for (Exp a : myAntecedents) {
-            newAntecedents.add(a.copy());
+            newAntecedents.add(Exp.copy(a));
         }
 
         for (Exp c : myConsequents) {
-            newConsequents.add(c.copy());
+            newConsequents.add(Exp.copy(c));
         }
 
         return new VerificationCondition(newAntecedents, newConsequents, myName);
@@ -167,7 +167,7 @@ public class VerificationCondition {
                     }
                     else if (expAsEquals.getRight() instanceof VarExp
                             || expAsEquals.getRight() instanceof DotExp) {
-                        retval = (EqualsExp) expAsEquals.clone();
+                        retval = (EqualsExp) Exp.clone(expAsEquals);
                         Exp swapSpace = retval.getRight();
                         retval.setRight(retval.getLeft());
                         retval.setLeft(swapSpace);

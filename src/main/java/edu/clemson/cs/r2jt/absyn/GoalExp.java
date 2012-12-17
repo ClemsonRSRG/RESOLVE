@@ -194,7 +194,7 @@ public class GoalExp extends LineNumberedExp {
         PosSymbol newLineNum = null;
         if (myLineNumber != null)
             newLineNum = myLineNumber.copy();
-        Exp newExp = exp.copy();
+        Exp newExp = Exp.copy(exp);
         return new GoalExp(null, newLineNum, newExp);
     }
 

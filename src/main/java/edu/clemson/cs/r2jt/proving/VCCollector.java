@@ -54,9 +54,8 @@ public class VCCollector implements Iterable<VerificationCondition> {
 
     /**
      * <p>Each <code>AssertiveCode</code> contains a set of VCs that refer to
-     * the same set of free variables.  This method first propogates the types
-     * of those free variables down to the expressions themselves, then adds
-     * each VC to the final list.</p>
+     * the same set of free variables.  This method adds each VC to the final 
+     * list.</p>
      * 
      * @param batch The set of VCs in context.
      * @param sectionNumber The batch number so that we can mirror the numbering
@@ -68,7 +67,6 @@ public class VCCollector implements Iterable<VerificationCondition> {
             final int sectionNumber) {
 
         List<InfixExp> vCs = batch.getFinalConfirm().split();
-        propogateTypes(vCs, batch.getFreeVars2());
 
         int vcIndex = 1;
 
@@ -82,50 +80,6 @@ public class VCCollector implements Iterable<VerificationCondition> {
             myFinalVCs.add(curVC);
 
             vcIndex++;
-        }
-    }
-
-    /**
-     * <p>Takes a list of VCs and a list of types and propogates the types down
-     * into the VCs.  That is, looks for instances of the named variables that
-     * are free in each VC and assigns them the proper type.</p>
-     * 
-     * @param vCs The VCs into which to propogate the types.
-     * @param types The list of types with names.
-     */
-    private void propogateTypes(List<InfixExp> vCs, List<ConcType> types) {
-        HashMap<String, Type> typeTable = new HashMap<String, Type>();
-
-        for (ConcType c : types) {
-            typeTable.put(c.getName().getName(), c.getType());
-        }
-
-        for (InfixExp vC : vCs) {
-            propogateTypes(vC, typeTable);
-        }
-    }
-
-    /**
-     * <p>Takes a mapping of free variable names to their types and an 
-     * expression and assigns any instance of those named variables within
-     * <code>e</code> to the proper type.</p>
-     * 
-     * @param e The expression into which to assign types.
-     * @param types The mapping of names to types.
-     */
-    private void propogateTypes(Exp e, HashMap<String, Type> types) {
-        if (e instanceof VarExp) {
-            VarExp eAsVarExp = (VarExp) e;
-            Type newType = types.get(eAsVarExp.getName().getName());
-            if (newType != null) { //eAsVarExp.getType() == null) {
-                eAsVarExp.setType(newType);
-            }
-        }
-        else {
-            List<Exp> subexpressions = e.getSubExpressions();
-            for (Exp subexpression : subexpressions) {
-                propogateTypes(subexpression, types);
-            }
         }
     }
 

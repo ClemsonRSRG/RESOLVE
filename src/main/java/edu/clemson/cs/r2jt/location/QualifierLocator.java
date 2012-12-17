@@ -81,13 +81,13 @@ public class QualifierLocator {
 
     //private Environment env = Environment.getInstance();
 
-    private SymbolTable table;
+    private OldSymbolTable table;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
-    public QualifierLocator(SymbolTable table, ErrorHandler err) {
+    public QualifierLocator(OldSymbolTable table, ErrorHandler err) {
         this.table = table;
         this.err = err;
     }

@@ -87,8 +87,8 @@ public class VerificationStatement implements Cloneable {
             if ((type == ASSUME) || (type == CONFIRM)) {
                 if (assertion instanceof Exp)
                     clone =
-                            new VerificationStatement(type, ((Exp) assertion)
-                                    .clone());
+                            new VerificationStatement(type, Exp
+                                    .clone(((Exp) assertion)));
                 return clone;
             }
             else if (type == CODE) {
@@ -114,7 +114,7 @@ public class VerificationStatement implements Cloneable {
                     clone =
                             new VerificationStatement(type,
                                     ((List<?>) assertion).clone());
-                    return clone();
+                    return this.clone();
                 }
                 else
                     return super.clone();
@@ -167,6 +167,17 @@ public class VerificationStatement implements Cloneable {
 
     public Object getAssertion() {
         return assertion;
+    }
+
+    /**
+     * <p>I need a convenient way of printing out a full piece of assertive
+     * code, but I'm hesitant to change toString() since, knowing this code
+     * base, something depends on it.</p>
+     */
+    public String allInfo() {
+        String result = toString();
+        result += assertion;
+        return result;
     }
 
     public String toString() {

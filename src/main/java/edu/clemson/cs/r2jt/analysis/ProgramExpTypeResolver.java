@@ -71,7 +71,7 @@ import edu.clemson.cs.r2jt.location.VariableLocator;
 import edu.clemson.cs.r2jt.location.SymbolSearchException;
 import edu.clemson.cs.r2jt.scope.Binding;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
-import edu.clemson.cs.r2jt.scope.SymbolTable;
+import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.scope.TypeHolder;
 import edu.clemson.cs.r2jt.type.*;
 
@@ -83,7 +83,7 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     // Variables 
     // ===========================================================
 
-    private SymbolTable table;
+    private OldSymbolTable table;
 
     //private Environment env;
     //private CompileEnvironment myInstanceEnvironment;
@@ -94,7 +94,7 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     // Constructors
     // ===========================================================
 
-    public ProgramExpTypeResolver(SymbolTable table,
+    public ProgramExpTypeResolver(OldSymbolTable table,
             CompileEnvironment instanceEnvironment) {
         //this.env = new Environment(instanceEnvironment);
         //myInstanceEnvironment = instanceEnvironment;
@@ -561,8 +561,13 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
                     exp.getArguments().get(0));
         }
         else {
-            return new ProgramFunctionExp(exp.getLocation(), qual, exp
-                    .getName(), exp.getArguments());
+            ProgramFunctionExp result =
+                    new ProgramFunctionExp(exp.getLocation(), qual, exp
+                            .getName(), exp.getArguments());
+            result.setMathType(exp.getMathType());
+            result.setMathTypeValue(exp.getMathTypeValue());
+            result.setProgramType(exp.getProgramType());
+            return result;
         }
         //          } catch (SymbolSearchException ex) {
         //              throw new TypeResolutionException();
