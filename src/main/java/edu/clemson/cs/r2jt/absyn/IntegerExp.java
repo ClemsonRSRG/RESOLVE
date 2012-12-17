@@ -93,6 +93,8 @@ public class IntegerExp extends Exp {
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
         Exp retval = new IntegerExp(location, qualifier, value);
         retval.setType(type);
+        retval.setMathType(getMathType());
+        retval.setMathTypeValue(getMathTypeValue());
         return retval;
     }
 
@@ -195,6 +197,8 @@ public class IntegerExp extends Exp {
         clone.setValue(this.value);
         clone.setLocation(this.getLocation());
         clone.setType(type);
+        clone.setMathType(getMathType());
+        clone.setMathTypeValue(getMathTypeValue());
         return clone;
     }
 
@@ -241,6 +245,8 @@ public class IntegerExp extends Exp {
     public Exp copy() {
         Exp retval = new IntegerExp(null, qualifier, value);
         retval.setType(type);
+        retval.setMathType(getMathType());
+        retval.setMathTypeValue(getMathTypeValue());
         return retval;
     }
 

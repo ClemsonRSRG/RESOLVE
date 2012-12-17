@@ -10,21 +10,23 @@ public class VisitorPrintStructure extends TreeWalkerStackVisitor {
     @Override
     public void preAnyStack(ResolveConceptualElement data) {
         System.out.print(ConvertNodeToString(data, false));
-        
+
         if (this.getParent() != null) {
-            System.out.append(" (Parent: " + ConvertNodeToString(this.getParent(), true) + ")");
+            System.out.append(" (Parent: "
+                    + ConvertNodeToString(this.getParent(), true) + ")");
         }
         System.out.println();
         ++indent;
     }
-    
-    private String ConvertNodeToString(ResolveConceptualElement data, boolean disableIndent) {
+
+    private String ConvertNodeToString(ResolveConceptualElement data,
+            boolean disableIndent) {
         String nodeString = "";
-        
+
         for (int i = 0; !disableIndent && i < indent; ++i) {
             nodeString += "  ";
         }
-        
+
         if (data instanceof VirtualListNode) {
             nodeString += ((VirtualListNode) data).getNodeName() + " [List]";
         }
@@ -34,19 +36,18 @@ public class VisitorPrintStructure extends TreeWalkerStackVisitor {
 
         if (showIdentifiers) {
             if (data instanceof VarExp) {
-                nodeString += " (" + ((VarExp) data).getName().toString()
-                        + ")";
+                nodeString += " (" + ((VarExp) data).getName().toString() + ")";
             }
             else if (data instanceof InfixExp) {
-                nodeString += " ("
-                        + ((InfixExp) data).getOpName().toString() + ")";
+                nodeString +=
+                        " (" + ((InfixExp) data).getOpName().toString() + ")";
             }
             else if (data instanceof OutfixExp) {
-                nodeString += " ("
-                        + ((OutfixExp) data).getOperatorAsString() + ")";
+                nodeString +=
+                        " (" + ((OutfixExp) data).getOperatorAsString() + ")";
             }
         }
-        
+
         return nodeString;
     }
 

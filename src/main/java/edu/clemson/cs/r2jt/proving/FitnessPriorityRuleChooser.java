@@ -8,7 +8,6 @@ import java.util.List;
 
 import edu.clemson.cs.r2jt.absyn.EqualsExp;
 import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 
 public class FitnessPriorityRuleChooser /* XXX : implements RuleProvider */{
 
@@ -16,8 +15,6 @@ public class FitnessPriorityRuleChooser /* XXX : implements RuleProvider */{
             new LinkedList<MatchReplaceWithOriginalExp>();
 
     protected List<EqualsExp> myExpCorrespondance = new LinkedList<EqualsExp>();
-
-    protected MathExpTypeResolver myTyper;
 
     protected boolean myLockedFlag;
 
@@ -27,9 +24,8 @@ public class FitnessPriorityRuleChooser /* XXX : implements RuleProvider */{
     protected DirectReplaceWrapper myAntecedentWrapper =
             new DirectReplaceWrapper();
 
-    public FitnessPriorityRuleChooser(MathExpTypeResolver typer,
-            FitnessFunction<EqualsExp> fitness, double threshold) {
-        myTyper = typer;
+    public FitnessPriorityRuleChooser(FitnessFunction<EqualsExp> fitness,
+            double threshold) {
         myFitnessFunction = fitness;
         myThreshold = threshold;
     }
@@ -84,20 +80,21 @@ public class FitnessPriorityRuleChooser /* XXX : implements RuleProvider */{
                 record = new MatchReplaceWithOriginalExp();
                 record.matchReplace =
                         new BindReplace(equivalency.getLeft(), equivalency
-                                .getRight(), myTyper);
+                                .getRight());
                 record.originalExp = equivalency;
                 myGlobalRules.add(record);
                 myExpCorrespondance.add(equivalency);
 
                 //Substitute right expression for left
-                EqualsExp inverseEquivalency = (EqualsExp) equivalency.copy();
+                EqualsExp inverseEquivalency =
+                        (EqualsExp) Exp.copy(equivalency);
                 inverseEquivalency.setLeft(equivalency.getRight());
                 inverseEquivalency.setRight(equivalency.getLeft());
 
                 record = new MatchReplaceWithOriginalExp();
                 record.matchReplace =
                         new BindReplace(equivalency.getRight(), equivalency
-                                .getLeft(), myTyper);
+                                .getLeft());
                 record.originalExp = inverseEquivalency;
                 myGlobalRules.add(record);
                 myExpCorrespondance.add(equivalency);

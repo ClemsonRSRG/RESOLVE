@@ -67,7 +67,7 @@ import edu.clemson.cs.r2jt.absyn.ModuleDec;
 import edu.clemson.cs.r2jt.collections.*;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
-import edu.clemson.cs.r2jt.scope.SymbolTable;
+import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
 
 /**
@@ -659,7 +659,7 @@ public class Environment {
      * Returns the symbol table associated with the specified module.
      */
     @Deprecated
-    public SymbolTable getSymbolTable(ModuleID id) {
+    public OldSymbolTable getSymbolTable(ModuleID id) {
         return myOldEnvironment.getSymbolTable(id);
         //return map.get(id).getSymbolTable();
     }
@@ -732,7 +732,7 @@ public class Environment {
      * indicating that compilation has been completed for this module.
      */
     @Deprecated
-    public void completeRecord(ModuleID id, SymbolTable table) {
+    public void completeRecord(ModuleID id, OldSymbolTable table) {
         myOldEnvironment.completeRecord(id, table);
         /*ModuleRecord record = map.get(id);
         record.setSymbolTable(table);

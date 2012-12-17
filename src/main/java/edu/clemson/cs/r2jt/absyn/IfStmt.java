@@ -60,6 +60,7 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
+import edu.clemson.cs.r2jt.data.Location;
 
 public class IfStmt extends Statement {
 
@@ -100,6 +101,10 @@ public class IfStmt extends Statement {
     // -----------------------------------------------------------
     // Get Methods
     // -----------------------------------------------------------
+
+    public Location getLocation() {
+        return test.getLocation();
+    }
 
     /** Returns the value of the test variable. */
     public ProgramExp getTest() {

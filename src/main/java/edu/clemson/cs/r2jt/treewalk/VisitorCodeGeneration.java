@@ -22,7 +22,7 @@ public class VisitorCodeGeneration {
 
     /**
      * Generates a treewalker. Two optional argument sin the array:
-     * 1: the desired name of the walker (default: TreeWalker)
+     * 1: the desired name of the walker (default: TreeWalkerVisitor)
      * 2: the output package directory (default: treewalk)
      * @param String array
      */

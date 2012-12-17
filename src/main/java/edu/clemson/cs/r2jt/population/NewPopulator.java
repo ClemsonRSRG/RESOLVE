@@ -68,7 +68,7 @@ import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.location.TypeLocator;
 import edu.clemson.cs.r2jt.scope.Binding;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
-import edu.clemson.cs.r2jt.scope.SymbolTable;
+import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.scope.TypeID;
 import edu.clemson.cs.r2jt.type.*;
 import edu.clemson.cs.r2jt.treewalk.*;
@@ -79,7 +79,7 @@ public class NewPopulator extends TreeWalkerVisitor {
     // Variables 
     // ===========================================================
 
-    private SymbolTable table;
+    private OldSymbolTable table;
 
     //private Environment env = Environment.getInstance();
     private CompileEnvironment myInstanceEnvironment;
@@ -91,8 +91,7 @@ public class NewPopulator extends TreeWalkerVisitor {
     // ===========================================================
     // Constructors
     // ===========================================================
-
-    public NewPopulator(SymbolTable table,
+    public NewPopulator(OldSymbolTable table,
             CompileEnvironment instanceEnvironment) {
         myInstanceEnvironment = instanceEnvironment;
         this.table = table;

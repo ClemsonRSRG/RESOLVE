@@ -62,6 +62,13 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
+import edu.clemson.cs.r2jt.mathtype.PTBoolean;
+import edu.clemson.cs.r2jt.mathtype.PTInteger;
+import edu.clemson.cs.r2jt.mathtype.PTPrimitive;
+import edu.clemson.cs.r2jt.mathtype.PTPrimitive.PrimitiveTypeName;
+import edu.clemson.cs.r2jt.mathtype.PTType;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import java.util.HashMap;
 
 public class ProgramOpExp extends ProgramExp {
 
@@ -87,6 +94,33 @@ public class ProgramOpExp extends ProgramExp {
     public static final int EXP = 16;
     public static final int NOT = 17;
     public static final int UNARY_MINUS = 18;
+
+    private static final java.util.Map<Integer, PrimitiveTypeName> TYPES =
+            new HashMap<Integer, PrimitiveTypeName>();
+
+    static {
+        TYPES.put(AND, PrimitiveTypeName.BOOLEAN);
+        TYPES.put(OR, PrimitiveTypeName.BOOLEAN);
+        TYPES.put(EQUAL, PrimitiveTypeName.BOOLEAN);
+        TYPES.put(NOT_EQUAL, PrimitiveTypeName.BOOLEAN);
+        TYPES.put(LT, PrimitiveTypeName.BOOLEAN);
+        TYPES.put(LT_EQL, PrimitiveTypeName.BOOLEAN);
+        TYPES.put(GT, PrimitiveTypeName.BOOLEAN);
+        TYPES.put(GT_EQL, PrimitiveTypeName.BOOLEAN);
+
+        TYPES.put(PLUS, PrimitiveTypeName.INTEGER);
+        TYPES.put(MINUS, PrimitiveTypeName.INTEGER);
+        TYPES.put(MULTIPLY, PrimitiveTypeName.INTEGER);
+        TYPES.put(DIVIDE, PrimitiveTypeName.INTEGER);
+        TYPES.put(REM, PrimitiveTypeName.INTEGER);
+        TYPES.put(MOD, PrimitiveTypeName.INTEGER);
+        TYPES.put(DIV, PrimitiveTypeName.INTEGER);
+        TYPES.put(EXP, PrimitiveTypeName.INTEGER);
+
+        TYPES.put(NOT, PrimitiveTypeName.BOOLEAN);
+
+        TYPES.put(UNARY_MINUS, PrimitiveTypeName.INTEGER);
+    }
 
     // ===========================================================
     // Variables
@@ -387,5 +421,22 @@ public class ProgramOpExp extends ProgramExp {
             second = (ProgramExp) e;
             break;
         }
+    }
+
+    public PTType getProgramType(TypeGraph g) {
+        PTType result;
+
+        switch (TYPES.get(operator)) {
+        case INTEGER:
+            result = PTInteger.getInstance(g);
+            break;
+        case BOOLEAN:
+            result = PTBoolean.getInstance(g);
+            break;
+        default:
+            throw new RuntimeException();
+        }
+
+        return result;
     }
 }

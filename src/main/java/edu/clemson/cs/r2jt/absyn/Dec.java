@@ -58,9 +58,15 @@
 
 package edu.clemson.cs.r2jt.absyn;
 
+import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.mathtype.MTType;
 
 public abstract class Dec extends ResolveConceptualElement implements Cloneable {
+
+    protected MTType myMathType = null;
+
+    //protected MTType myMathTypeValue = null;
 
     public abstract void accept(ResolveConceptualVisitor v);
 
@@ -72,6 +78,10 @@ public abstract class Dec extends ResolveConceptualElement implements Cloneable 
         return new String();
     }
 
+    public Location getLocation() {
+        return getName().getLocation();
+    }
+
     public Object clone() {
         try {
             return super.clone();
@@ -79,7 +89,19 @@ public abstract class Dec extends ResolveConceptualElement implements Cloneable 
         catch (CloneNotSupportedException e) {
             throw new InternalError("But we are Cloneable!!!");
         }
-
     }
 
+    public MTType getMathType() {
+        return myMathType;
+    }
+
+    public void setMathType(MTType mt) {
+        this.myMathType = mt;
+    }
+    //	public MTType getMathTypeValue() {
+    //		return myMathTypeValue;
+    //	}
+    //	public void setMathTypeValue(MTType mathTypeValue) {
+    //		this.myMathTypeValue = mathTypeValue;
+    //	}
 }

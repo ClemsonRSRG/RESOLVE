@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PExpVisitor;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
@@ -183,9 +182,9 @@ public class VC {
                 finalConsequents), true);
     }
 
-    public VC applyToAntecedent(VC implication, MathExpTypeResolver typer) {
+    public VC applyToAntecedent(VC implication) {
         return new VC(myName, myAntecedent.apply(implication.getAntecedent(),
-                implication.getConsequent(), typer), myConsequent, true);
+                implication.getConsequent()), myConsequent, true);
     }
 
     /**

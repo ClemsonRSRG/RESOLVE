@@ -7,6 +7,8 @@ import java.util.Map;
 
 import edu.clemson.cs.r2jt.absyn.ModuleDec;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import edu.clemson.cs.r2jt.utilities.HardCoded;
 
 /**
  * <p>A <code>MathSymbolTableBuilder</code> is a factory for producing immutable
@@ -19,10 +21,9 @@ import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
  * the working symbol table represented by this 
  * <code>MathSymbolTableBuilder</code>.</p>
  */
-public class MathSymbolTableBuilder implements ImportRepository {
+public class MathSymbolTableBuilder extends ScopeRepository {
 
-    private static final IdentifierResolver DUMMY_RESOLVER =
-            new DummyIdentifierResolver();
+    private static final Scope DUMMY_RESOLVER = new DummyIdentifierResolver();
 
     private final Deque<ScopeBuilder> myLexicalScopeStack =
             new LinkedList<ScopeBuilder>();
@@ -35,17 +36,36 @@ public class MathSymbolTableBuilder implements ImportRepository {
 
     private ModuleScopeBuilder myCurModuleScope = null;
 
+    private final TypeGraph myTypeGraph;
+
     /**
      * <p>Creates a new, empty <code>MathSymbolTableBuilder</code> with no
      * open scopes.</p>
      */
     public MathSymbolTableBuilder() {
 
-        //Though RESOLVE doesn't really have a global scope, this will represent
-        //one (to which we will never add anything).  This just simplifies some
-        //logic later by meaning there's a single ScopeBuilder that's the root
-        //of all ScopeBuilders
-        myLexicalScopeStack.push(new ScopeBuilder(null, DUMMY_RESOLVER));
+        myTypeGraph = new TypeGraph();
+
+        //The only things in global scope are built-in things
+        ScopeBuilder globalScope =
+                new ScopeBuilder(this, myTypeGraph, null, DUMMY_RESOLVER,
+                        ModuleIdentifier.GLOBAL);
+
+        HardCoded.addBuiltInSymbols(myTypeGraph, globalScope);
+
+        myLexicalScopeStack.push(globalScope);
+
+        //Some IDEs (rightly) complain about leaking a "this" pointer inside the
+        //constructor, but we know what we're doing--this is the last thing in
+        //the constructor and thus the object is fully initialized.  The weird 
+        //intermediate variable suppresses the warning
+        MathSymbolTableBuilder thisObject = this;
+        HardCoded.addBuiltInRelationships(myTypeGraph, thisObject);
+    }
+
+    @Override
+    public TypeGraph getTypeGraph() {
+        return myTypeGraph;
     }
 
     /**
@@ -75,7 +95,8 @@ public class MathSymbolTableBuilder implements ImportRepository {
         ScopeBuilder parent = myLexicalScopeStack.peek();
 
         ModuleScopeBuilder s =
-                new ModuleScopeBuilder(definingElement, parent, this);
+                new ModuleScopeBuilder(myTypeGraph, definingElement, parent,
+                        this);
 
         myCurModuleScope = s;
 
@@ -109,6 +130,7 @@ public class MathSymbolTableBuilder implements ImportRepository {
      * @throws NoSuchSymbolException If no working scope has been opened for
      *             the named module.
      */
+    @Override
     public ModuleScopeBuilder getModuleScope(ModuleIdentifier module)
             throws NoSuchSymbolException {
 
@@ -117,6 +139,14 @@ public class MathSymbolTableBuilder implements ImportRepository {
         }
 
         return myModuleScopes.get(module);
+    }
+
+    public ScopeBuilder getScope(ResolveConceptualElement e) {
+        if (!myScopes.containsKey(e)) {
+            throw new NoSuchScopeException(e);
+        }
+
+        return myScopes.get(e);
     }
 
     /**
@@ -144,7 +174,9 @@ public class MathSymbolTableBuilder implements ImportRepository {
 
         ScopeBuilder parent = myLexicalScopeStack.peek();
 
-        ScopeBuilder s = new ScopeBuilder(definingElement, parent);
+        ScopeBuilder s =
+                new ScopeBuilder(this, myTypeGraph, definingElement, parent,
+                        myCurModuleScope.getModuleIdentifier());
 
         addScope(s, parent);
 
@@ -211,7 +243,8 @@ public class MathSymbolTableBuilder implements ImportRepository {
             throw new IllegalStateException("There are open scopes.");
         }
 
-        return new MathSymbolTable(myScopes, myLexicalScopeStack.peek());
+        return new MathSymbolTable(myTypeGraph, myScopes, myLexicalScopeStack
+                .peek());
     }
 
     private void checkModuleScopeOpen() {

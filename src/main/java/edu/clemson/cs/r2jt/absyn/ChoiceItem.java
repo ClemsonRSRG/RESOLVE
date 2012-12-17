@@ -59,6 +59,7 @@
 package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
+import edu.clemson.cs.r2jt.data.Location;
 
 public class ChoiceItem extends ResolveConceptualElement {
 
@@ -90,6 +91,10 @@ public class ChoiceItem extends ResolveConceptualElement {
     // -----------------------------------------------------------
     // Get Methods
     // -----------------------------------------------------------
+
+    public Location getLocation() {
+        return test.get(0).getLocation();
+    }
 
     /** Returns the value of the test variable. */
     public List<ProgramExp> getTest() {

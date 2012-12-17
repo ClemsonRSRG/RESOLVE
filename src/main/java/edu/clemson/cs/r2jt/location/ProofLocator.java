@@ -81,7 +81,7 @@ public class ProofLocator {
 
     //private Environment env = Environment.getInstance();
 
-    private SymbolTable table;
+    private OldSymbolTable table;
 
     private TypeMatcher tm;
 
@@ -89,7 +89,7 @@ public class ProofLocator {
     // Constructors
     // ===========================================================
 
-    public ProofLocator(SymbolTable table, TypeMatcher tm, ErrorHandler err) {
+    public ProofLocator(OldSymbolTable table, TypeMatcher tm, ErrorHandler err) {
         this.table = table;
         this.tm = tm;
         this.err = err;

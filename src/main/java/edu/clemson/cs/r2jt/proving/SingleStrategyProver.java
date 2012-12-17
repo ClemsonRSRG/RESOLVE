@@ -7,10 +7,8 @@ import java.util.Iterator;
 import java.util.concurrent.TimeoutException;
 
 import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.init.Environment;
 
 /**
  * <p>A <code>SingleStrategyProver</code> provides a facility through which to
@@ -53,14 +51,12 @@ class SingleStrategyProver implements VCProver {
     private final RuleProvider myRuleProvider;
 
     private final List<Implication> IMPLICATIONS;
-    private final MathExpTypeResolver TYPER;
 
     private final CompileEnvironment myInstanceEnvironment;
 
     public SingleStrategyProver(RuleProvider ruleChooser,
             boolean backtrackOnCycle, int minProofLength,
-            List<Implication> implications, MathExpTypeResolver typer,
-            CompileEnvironment e) {
+            List<Implication> implications, CompileEnvironment e) {
 
         OPTION_BACKTRACK_ON_CYCLE = backtrackOnCycle;
         MIN_PROOF_LENGTH = minProofLength;
@@ -69,7 +65,6 @@ class SingleStrategyProver implements VCProver {
                 BigInteger.valueOf(ruleChooser.getApproximateRuleSetSize());
 
         IMPLICATIONS = implications;
-        TYPER = typer;
 
         myInstanceEnvironment = e;
     }
@@ -112,20 +107,17 @@ class SingleStrategyProver implements VCProver {
     private void propagateTheorems(final VerificationCondition vC, Metrics m,
             long timeoutAt) throws UnableToProveException, TimeoutException {
 
-        if (vC.getName().equals("0_4")) {
-            int i = 0;
-        }
-
         for (int j = 0; j < 5; j++) {
             for (Implication i : IMPLICATIONS) {
                 if (System.currentTimeMillis() >= timeoutAt) {
                     throw new UnableToProveException(m);
                 }
 
-                vC.setAntecedents(new Conjuncts(Utilities
-                        .applyImplicationToAssumptions(vC.getAntecedents(), i
-                                .getAntecedent(), i.getConsequent(), TYPER,
-                                timeoutAt)));
+                vC
+                        .setAntecedents(new Conjuncts(Utilities
+                                .applyImplicationToAssumptions(vC
+                                        .getAntecedents(), i.getAntecedent(), i
+                                        .getConsequent(), timeoutAt)));
             }
 
             vC.propagateExpansionsInPlace();

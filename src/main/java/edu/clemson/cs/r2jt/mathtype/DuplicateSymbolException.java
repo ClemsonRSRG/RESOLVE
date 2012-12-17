@@ -3,26 +3,31 @@ package edu.clemson.cs.r2jt.mathtype;
 @SuppressWarnings("serial")
 public class DuplicateSymbolException extends SymbolTableException {
 
-    private final MathSymbolTableEntry myExistingEntry;
+    private final SymbolTableEntry myExistingEntry;
+
+    public DuplicateSymbolException() {
+        super();
+        myExistingEntry = null;
+    }
 
     public DuplicateSymbolException(String s) {
         super(s);
         myExistingEntry = null;
     }
 
-    public DuplicateSymbolException(MathSymbolTableEntry existing) {
+    public DuplicateSymbolException(SymbolTableEntry existing) {
         super();
 
         myExistingEntry = existing;
     }
 
-    public DuplicateSymbolException(MathSymbolTableEntry existing, String msg) {
+    public DuplicateSymbolException(SymbolTableEntry existing, String msg) {
         super(msg);
 
         myExistingEntry = existing;
     }
 
-    public MathSymbolTableEntry getExistingEntry() {
+    public SymbolTableEntry getExistingEntry() {
         return myExistingEntry;
     }
 }

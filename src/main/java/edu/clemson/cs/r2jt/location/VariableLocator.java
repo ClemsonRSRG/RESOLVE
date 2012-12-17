@@ -87,18 +87,18 @@ public class VariableLocator {
 
     private boolean local = false;
 
-    private SymbolTable table;
+    private OldSymbolTable table;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
-    public VariableLocator(SymbolTable table, ErrorHandler eh) {
+    public VariableLocator(OldSymbolTable table, ErrorHandler eh) {
         this.table = table;
         this.err = eh;
     }
 
-    public VariableLocator(SymbolTable table, boolean err, ErrorHandler eh) {
+    public VariableLocator(OldSymbolTable table, boolean err, ErrorHandler eh) {
         this.table = table;
         showErrors = err;
         this.err = eh;

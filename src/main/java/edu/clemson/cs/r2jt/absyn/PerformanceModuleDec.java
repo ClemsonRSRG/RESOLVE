@@ -61,10 +61,12 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
+import edu.clemson.cs.r2jt.data.Location;
+import edu.clemson.cs.r2jt.data.Mode;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 
-public class PerformanceModuleDec extends ModuleDec {
+public class PerformanceModuleDec extends AbstractParameterizedModuleDec {
 
     // ===========================================================
     // Variables
@@ -72,9 +74,6 @@ public class PerformanceModuleDec extends ModuleDec {
 
     /** The ProfileNames member. */
     private PosSymbol profileNames1;
-
-    /** The parameters member. */
-    private List<ModuleParameter> parameters;
 
     //   /** The conceptName member. */
     //   private PosSymbol conceptName;
@@ -84,9 +83,6 @@ public class PerformanceModuleDec extends ModuleDec {
 
     /** The name member. */
     private PosSymbol name;
-
-    /** The usesItems member. */
-    private List<UsesItem> usesItems;
 
     /** The requires member. */
     private Exp requires;
@@ -123,7 +119,7 @@ public class PerformanceModuleDec extends ModuleDec {
 
     public PerformanceModuleDec(
             PosSymbol profileNames1,
-            List<ModuleParameter> parameters,
+            List<ModuleParameterDec> parameters,
             //            PosSymbol conceptName,
             PosSymbol profileNames2, PosSymbol name, List<UsesItem> usesItems,
             Exp requires,
@@ -161,11 +157,6 @@ public class PerformanceModuleDec extends ModuleDec {
     /** Returns the value of the name variable. */
     public PosSymbol getName() {
         return name;
-    }
-
-    /** Returns the value of the parameters variable. */
-    public List<ModuleParameter> getParameters() {
-        return parameters;
     }
 
     /** Returns the value of the conceptName variable. */
@@ -247,11 +238,6 @@ public class PerformanceModuleDec extends ModuleDec {
     /** Sets the name variable to the specified value. */
     public void setName(PosSymbol name) {
         this.name = name;
-    }
-
-    /** Sets the parameters variable to the specified value. */
-    public void setParameters(List<ModuleParameter> parameters) {
-        this.parameters = parameters;
     }
 
     /** Sets the conceptName variable to the specified value. */

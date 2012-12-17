@@ -1,6 +1,4 @@
 /*
- * This change on the main branch conflicts.
- * 
  * This software is released under the new BSD 2006 license.
  * 
  * Note the new BSD license is equivalent to the MIT License, except for the
@@ -61,13 +59,12 @@ import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.absyn.MathAssertionDec;
 import edu.clemson.cs.r2jt.absyn.MathModuleDec;
 import edu.clemson.cs.r2jt.absyn.ModuleDec;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
-import edu.clemson.cs.r2jt.scope.SymbolTable;
+import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.verification.Verifier;
@@ -165,12 +162,12 @@ public final class Prover2 {
             new Flag(Main.FLAG_SECTION_GENERAL, "someprover", "aux",
                     Flag.Type.AUXILIARY);
 
-    public static ProverResult prove(MathExpTypeResolver typer,
-            Iterable<VC> vcs, CompileEnvironment instanceEnvironment) {
+    public static ProverResult prove(Iterable<VC> vcs,
+            CompileEnvironment instanceEnvironment) {
 
-        Map<String, PExp> theorems = buildTheories(typer, instanceEnvironment);
+        Map<String, PExp> theorems = buildTheories(instanceEnvironment);
 
-        return proveVCs(vcs, theorems, typer, instanceEnvironment);
+        return proveVCs(vcs, theorems, instanceEnvironment);
     }
 
     /**
@@ -181,7 +178,7 @@ public final class Prover2 {
      * 
      * @return The list of Theorems.
      */
-    private static Map<String, PExp> buildTheories(MathExpTypeResolver typer,
+    private static Map<String, PExp> buildTheories(
             CompileEnvironment environment) {
         Map<String, PExp> result = new HashMap<String, PExp>();
 
@@ -194,10 +191,10 @@ public final class Prover2 {
 
         // Add local axioms to the library
         ModuleDec targetDec = environment.getModuleDec(targetFileID);
-        addLocalAxioms(targetDec, result, typer);
+        addLocalAxioms(targetDec, result);
 
         // Add any kind of mathematical assertions from any included library
-        SymbolTable curSymbolTable;
+        OldSymbolTable curSymbolTable;
         ModuleScope bindingsInScope;
         List<Symbol> symbolsInScope;
         for (ModuleID curModule : availableTheories) {
@@ -208,7 +205,7 @@ public final class Prover2 {
             for (Symbol s : symbolsInScope) {
 
                 curTheorem = bindingsInScope.getLocalTheorem(s).getValue();
-                addTheoremToLibrary(s.getName(), curTheorem, result, typer);
+                addTheoremToLibrary(s.getName(), curTheorem, result);
             }
         }
 
@@ -216,19 +213,19 @@ public final class Prover2 {
     }
 
     private static void addLocalAxioms(ModuleDec module,
-            Map<String, PExp> theorems, MathExpTypeResolver typer) {
+            Map<String, PExp> theorems) {
 
         // TODO : Eventually axioms in any type of module should be supported
 
         if (module instanceof MathModuleDec) {
             MathModuleDec moduleAsMathModuleDec = (MathModuleDec) module;
             List<Dec> decs = moduleAsMathModuleDec.getDecs();
-            addLocalAxioms(decs, theorems, typer);
+            addLocalAxioms(decs, theorems);
         }
     }
 
     private static void addLocalAxioms(List<Dec> decs,
-            Map<String, PExp> theorems, MathExpTypeResolver typer) {
+            Map<String, PExp> theorems) {
 
         for (Dec d : decs) {
             if (d instanceof MathAssertionDec) {
@@ -238,18 +235,18 @@ public final class Prover2 {
                     Exp theorem = dAsMathAssertionDec.getAssertion();
 
                     addTheoremToLibrary(d.getName().getName(), theorem,
-                            theorems, typer);
+                            theorems);
                 }
             }
         }
     }
 
     private static void addTheoremToLibrary(String name, Exp theorem,
-            Map<String, PExp> theorems, MathExpTypeResolver typer) {
+            Map<String, PExp> theorems) {
 
         Exp quantifiersAppliedTheorem = Utilities.applyQuantification(theorem);
 
-        theorems.put(name, PExp.buildPExp(quantifiersAppliedTheorem, typer));
+        theorems.put(name, PExp.buildPExp(quantifiersAppliedTheorem));
     }
 
     /**
@@ -278,8 +275,7 @@ public final class Prover2 {
      *             <code>null</code>.
      */
     private static ProverResult proveVCs(Iterable<VC> vcs,
-            Map<String, PExp> theorems, MathExpTypeResolver typer,
-            CompileEnvironment environment) {
+            Map<String, PExp> theorems, CompileEnvironment environment) {
 
         ProverResult result = new ProverResult();
 

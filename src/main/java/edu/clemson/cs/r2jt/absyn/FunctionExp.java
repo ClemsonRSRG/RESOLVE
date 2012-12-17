@@ -65,6 +65,7 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 
+import edu.clemson.cs.r2jt.mathtype.SymbolTableEntry;
 import edu.clemson.cs.r2jt.proving.ChainingIterator;
 import edu.clemson.cs.r2jt.proving.DummyIterator;
 
@@ -72,7 +73,7 @@ import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
 
-public class FunctionExp extends Exp {
+public class FunctionExp extends AbstractFunctionExp {
 
     // ===========================================================
     // Variables
@@ -198,6 +199,7 @@ public class FunctionExp extends Exp {
     }
 
     /** Returns the value of the location variable. */
+    @Override
     public Location getLocation() {
         return location;
     }
@@ -254,6 +256,11 @@ public class FunctionExp extends Exp {
         this.quantification = quantification;
     }
 
+    @Override
+    public void setQuantification(SymbolTableEntry.Quantification quantification) {
+        this.quantification = quantification.toVarExpQuantificationCode();
+    }
+
     /** Sets the location variable to the specified value. */
     public void setLocation(Location location) {
         this.location = location;
@@ -305,14 +312,15 @@ public class FunctionExp extends Exp {
 
         VarExp newName = new VarExp(location, qualifier, name, quantification);
 
-        try {
-            newName = (VarExp) newName.substitute(substitutions);
-        }
-        catch (ClassCastException e) {
-            //There really is no good reason that this shouldn't be able to 
-            //happen--we're just completely unable to deal with it if it does
-            //under this architecture.  So we'll fail fast.
-            throw new RuntimeException(e);
+        if (substitutions.containsKey(newName)) {
+            //Note that there's no particular mathematical justification why
+            //we can only replace a function with a different function NAME (as
+            //opposed to a function-valued expression), but we have no way of
+            //representing such a thing.  It doesn't tend to come up, but if it
+            //ever did, this would throw a ClassCastException.
+            newName =
+                    new VarExp(location, qualifier, ((VarExp) substitutions
+                            .get(newName)).getName(), quantification);
         }
 
         retval =
@@ -321,6 +329,7 @@ public class FunctionExp extends Exp {
                         quantification);
 
         retval.setType(type);
+        retval.setMathType(myMathType);
 
         return retval;
     }
@@ -508,7 +517,7 @@ public class FunctionExp extends Exp {
         clone.setName(createPosSymbol(this.getName().toString()));
         clone.setQualifier(this.getQualifier());
         if (this.getNatural() != null)
-            clone.setNatural((Exp) this.getNatural().clone());
+            clone.setNatural((Exp) Exp.clone(this.getNatural()));
         if (paramList != null) {
             Iterator<FunctionArgList> i = paramList.iterator();
             List<FunctionArgList> newFAL = new List<FunctionArgList>();
@@ -518,6 +527,7 @@ public class FunctionExp extends Exp {
             clone.setParamList(newFAL);
         }
         clone.setType(type);
+        clone.setMathType(myMathType);
         return clone;
     }
 
@@ -591,11 +601,11 @@ public class FunctionExp extends Exp {
                             return this;
                         }
                         else if (replacement instanceof DotExp) {
-                            DotExp exp = (DotExp) replacement.clone();
+                            DotExp exp = (DotExp) Exp.clone(replacement);
                             List<Exp> segments = exp.getSegments();
                             Exp result =
-                                    this.replace(old, segments.get(segments
-                                            .size() - 1));
+                                    Exp.replace(this, old, segments
+                                            .get(segments.size() - 1));
                             segments.remove(segments.size() - 1);
                             segments.add(result);
                             exp.setSegments(segments);
@@ -649,7 +659,7 @@ public class FunctionExp extends Exp {
             Exp exp = (Exp) i.next();
             Exp tmp = null;
             if (exp != null)
-                tmp = exp.replace(old, replacement);
+                tmp = Exp.replace(exp, old, replacement);
             i.previous();
             i.remove();
             if (tmp != null)
@@ -716,7 +726,7 @@ public class FunctionExp extends Exp {
         PosSymbol newName = name.copy();
         Exp newNatural = null;
         if (natural != null)
-            newNatural = natural.copy();
+            newNatural = Exp.copy(natural);
         FunctionArgList newFAL = paramList.get(0).copy();
         List<FunctionArgList> newParamList = new List<FunctionArgList>();
         newParamList.add(newFAL);
@@ -725,7 +735,18 @@ public class FunctionExp extends Exp {
                 new FunctionExp(null, newQualifier, newName, newNatural,
                         newParamList, quantification);
         retval.setType(type);
+        retval.setMathType(myMathType);
         return retval;
+    }
+
+    @Override
+    public String getOperatorAsString() {
+        return this.name.getName();
+    }
+
+    @Override
+    public PosSymbol getOperatorAsPosSymbol() {
+        return getName();
     }
 
 }

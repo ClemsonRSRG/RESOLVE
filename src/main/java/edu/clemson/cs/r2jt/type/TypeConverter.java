@@ -58,6 +58,7 @@
 
 package edu.clemson.cs.r2jt.type;
 
+import edu.clemson.cs.r2jt.absyn.ArbitraryExpTy;
 import edu.clemson.cs.r2jt.absyn.ArrayTy;
 import edu.clemson.cs.r2jt.absyn.CartProdTy;
 import edu.clemson.cs.r2jt.absyn.ConstructedTy;
@@ -76,8 +77,9 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.entry.TypeEntry;
+import edu.clemson.cs.r2jt.mathtype.MTType;
 import edu.clemson.cs.r2jt.scope.Binding;
-import edu.clemson.cs.r2jt.scope.SymbolTable;
+import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.scope.TypeID;
 
 public class TypeConverter {
@@ -86,13 +88,13 @@ public class TypeConverter {
     // Constructors
     // ===========================================================
 
-    SymbolTable table = null;
+    OldSymbolTable table = null;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
-    public TypeConverter(SymbolTable table) {
+    public TypeConverter(OldSymbolTable table) {
         this.table = table;
     }
 
@@ -139,8 +141,19 @@ public class TypeConverter {
         else if (ty instanceof TupleTy) {
             t = getTupleType((TupleTy) ty);
         }
+        else if (ty instanceof ArbitraryExpTy) {
+            MTType newType = ty.getMathType();
+
+            if (newType == null) {
+                throw new RuntimeException("" + ty + " does not have an "
+                        + "embedded mathematical type.");
+            }
+
+            t = new NewType(newType);
+        }
         else {
-            assert false : "ty is invalid";
+            throw new RuntimeException("Invalid type: " + ty + "("
+                    + ty.getClass() + ")");
         }
         //System.out.println("New type introduced: " + t.asString());
         //System.out.flush();

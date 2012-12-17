@@ -76,8 +76,6 @@ public class ResolveCompiler {
     private CompileReport myCompileReport;
     private MetaFile myInputFile;
 
-    //private WebSocketWriter myWsWriter = null;
-
     public ResolveCompiler(String[] args, MetaFile inputFile,
             String customFacilityName, HashMap<String, MetaFile> userFileMap) {
         myCompileReport = new CompileReport();
@@ -146,7 +144,6 @@ public class ResolveCompiler {
     }
 
     public void compile(String[] args) {
-        //System.out.println("using testing compiler");
         Main.runMain(args, myCompileReport, myInputFile, myUserFileMap);
     }
 

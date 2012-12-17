@@ -80,14 +80,7 @@ public class DefinitionDec extends Dec implements ModuleParameter {
     /** The returnTy member. */
     private Ty returnTy;
 
-    /** The base member. */
-    private Exp base;
-
-    /** The hypothesis member. */
-    private Exp hypothesis;
-
-    /** The definition member. */
-    private Exp definition;
+    private DefinitionBody body;
 
     // ===========================================================
     // Constructors
@@ -102,9 +95,9 @@ public class DefinitionDec extends Dec implements ModuleParameter {
         this.name = name;
         this.parameters = parameters;
         this.returnTy = returnTy;
-        this.base = base;
-        this.hypothesis = hypothesis;
-        this.definition = definition;
+        if (!(base == null && hypothesis == null && definition == null)) {
+            this.body = new DefinitionBody(base, hypothesis, definition);
+        }
     }
 
     // ===========================================================
@@ -118,6 +111,10 @@ public class DefinitionDec extends Dec implements ModuleParameter {
     /** Returns the value of the implicit variable. */
     public boolean isImplicit() {
         return implicit;
+    }
+
+    public boolean isInductive() {
+        return body == null ? false : body.isInductive();
     }
 
     /** Returns the value of the name variable. */
@@ -137,17 +134,17 @@ public class DefinitionDec extends Dec implements ModuleParameter {
 
     /** Returns the value of the base variable. */
     public Exp getBase() {
-        return base;
+        return body == null ? null : body.getBase();
     }
 
     /** Returns the value of the hypothesis variable. */
     public Exp getHypothesis() {
-        return hypothesis;
+        return body == null ? null : body.getHypothesis();
     }
 
     /** Returns the value of the definition variable. */
     public Exp getDefinition() {
-        return definition;
+        return body == null ? null : body.getDefinition();
     }
 
     // -----------------------------------------------------------
@@ -176,17 +173,17 @@ public class DefinitionDec extends Dec implements ModuleParameter {
 
     /** Sets the base variable to the specified value. */
     public void setBase(Exp base) {
-        this.base = base;
+        body.setBase(base);
     }
 
     /** Sets the hypothesis variable to the specified value. */
     public void setHypothesis(Exp hypothesis) {
-        this.hypothesis = hypothesis;
+        body.setHypothesis(hypothesis);
     }
 
     /** Sets the definition variable to the specified value. */
     public void setDefinition(Exp definition) {
-        this.definition = definition;
+        body.setDefinition(definition);
     }
 
     // ===========================================================
@@ -221,16 +218,8 @@ public class DefinitionDec extends Dec implements ModuleParameter {
             sb.append(returnTy.asString(indent + increment, increment));
         }
 
-        if (base != null) {
-            sb.append(base.asString(indent + increment, increment));
-        }
-
-        if (hypothesis != null) {
-            sb.append(hypothesis.asString(indent + increment, increment));
-        }
-
-        if (definition != null) {
-            sb.append(definition.asString(indent + increment, increment));
+        if (body != null) {
+            sb.append(body.toString());
         }
 
         return sb.toString();
@@ -252,13 +241,14 @@ public class DefinitionDec extends Dec implements ModuleParameter {
             System.out.print(" is ");
         else
             System.out.print(" = ");
-        if (base != null) {
-            base.prettyPrint();
+
+        if (getBase() != null) {
+            getBase().prettyPrint();
             System.out.println();
-            hypothesis.prettyPrint();
+            getHypothesis().prettyPrint();
         }
         else {
-            definition.prettyPrint();
+            getDefinition().prettyPrint();
         }
     }
 

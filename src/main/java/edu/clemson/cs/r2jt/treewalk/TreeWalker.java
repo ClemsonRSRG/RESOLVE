@@ -82,39 +82,28 @@ public class TreeWalker {
      */
     public void visit(ResolveConceptualElement e) {
         if (e != null) {
-            try {
-                // are we overriding the walking for this element?
-                if (!walkOverride(e)) {
-                    // invoke the "pre" visitor method(s)
+            // are we overriding the walking for this element?
+            if (!walkOverride(e)) {
+                // invoke the "pre" visitor method(s)
                 invokeVisitorMethods("pre", e);
-                    
-                    List<ResolveConceptualElement> children = e.getChildren();
 
-                    // if we have children, iterate over them
-                    if (children.size() > 0) {
-                        Iterator<ResolveConceptualElement> iter =
-                                children.iterator();
+                List<ResolveConceptualElement> children = e.getChildren();
 
-                        ResolveConceptualElement prevChild = null, nextChild =
-                                null;
-                        while (iter.hasNext()) {
-                            // invoke the "mid" visitor method
-                            prevChild = nextChild;
-                            nextChild = iter.next();
-                            invokeVisitorMethods("mid", e, prevChild, nextChild);
+                if (children.size() > 0) {
+                    Iterator<ResolveConceptualElement> iter =
+                            children.iterator();
 
-                            // recursively visit the child
-                            visit(nextChild);
-                        }
-                        invokeVisitorMethods("mid", e, nextChild, null);
+                    ResolveConceptualElement prevChild = null, nextChild = null;
+                    while (iter.hasNext()) {
+                        prevChild = nextChild;
+                        nextChild = iter.next();
+                        invokeVisitorMethods("mid", e, prevChild, nextChild);
+                        visit(nextChild);
                     }
-                    // invoke the "post" visitor method(s)
-                    invokeVisitorMethods("post", e);
+                    invokeVisitorMethods("mid", e, nextChild, null);
                 }
-            }
-            catch (Exception ex) {
-                // if there is any exception, it is a bug
-                ex.printStackTrace();
+                // invoke the "post" visitor method(s)
+                invokeVisitorMethods("post", e);
             }
         }
     }
@@ -194,23 +183,20 @@ public class TreeWalker {
                 // Invoking the visitor method now!!!
                 visitorMethod.invoke(this.myVisitor, (Object[]) e);
             }
-            catch (InvocationTargetException ex1) {
-                // unpack  and display the exception which
-                // occurred inside the invoked method
-                ex1.getCause().printStackTrace();
-                throw new RuntimeException();
+            catch (NoSuchMethodException nsme) {
+                throw new RuntimeException(nsme);
             }
-            catch (NoSuchMethodException ex2) {
-                System.err.println("Tree Walker error: method not found.");
-                System.err
-                        .println("The most likely cause of this error is that the TreeWalkerVisitor class"
-                                + "is out of date and needs to be regenerated.");
+            catch (IllegalAccessException iae) {
+                throw new RuntimeException(iae);
             }
-            catch (Exception exn) {
-                // this is probably a "method not found" or invocation
-                // exception, which either indicates a bug or that the
-                // TreeWalkerVisitor class needs to be regenerated
-                exn.printStackTrace();
+            catch (InvocationTargetException ite) {
+                Throwable iteCause = ite.getCause();
+
+                if (iteCause instanceof RuntimeException) {
+                    throw (RuntimeException) iteCause;
+                }
+
+                throw new RuntimeException(iteCause);
             }
         }
     }
@@ -232,8 +218,20 @@ public class TreeWalker {
                         this.myVisitor.getClass().getMethod(walkMethodName, c);
                 return ((Boolean) walkMethod.invoke(this.myVisitor, e));
             }
-            catch (Exception ex) { /* do nothing */
+            catch (NoSuchMethodException nsme) { /* do nothing */}
+            catch (IllegalAccessException iae) {
+                throw new RuntimeException(iae);
             }
+            catch (InvocationTargetException ite) {
+                Throwable iteCause = ite.getCause();
+
+                if (iteCause instanceof RuntimeException) {
+                    throw (RuntimeException) iteCause;
+                }
+
+                throw new RuntimeException(iteCause);
+            }
+
         }
         return false;
     }

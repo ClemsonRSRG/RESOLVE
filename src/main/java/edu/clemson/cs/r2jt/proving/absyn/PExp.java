@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.clemson.cs.r2jt.absyn.AlternativeExp;
-import edu.clemson.cs.r2jt.absyn.BetweenExp;
 import edu.clemson.cs.r2jt.absyn.DotExp;
 import edu.clemson.cs.r2jt.absyn.EqualsExp;
 import edu.clemson.cs.r2jt.absyn.Exp;
@@ -23,11 +22,9 @@ import edu.clemson.cs.r2jt.absyn.OutfixExp;
 import edu.clemson.cs.r2jt.absyn.PrefixExp;
 import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.absyn.VariableDotExp;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.proving.immutableadts.SimpleImmutableList;
-import edu.clemson.cs.r2jt.type.BooleanType;
-import edu.clemson.cs.r2jt.type.Type;
+import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 
 /**
  * <p><code>PExp</code> is the root of the prover abstract syntax tree 
@@ -44,37 +41,62 @@ public abstract class PExp {
     public final int structureHash;
     public final int valueHash;
 
-    protected final Type myType;
-    protected final MathExpTypeResolver myTyper;
+    protected final MTType myType;
+    protected final MTType myTypeValue;
 
     private Set<String> myCachedSymbolNames = null;
     private List<PExp> myCachedFunctionApplications = null;
     private Set<PSymbol> myCachedQuantifiedVariables = null;
 
-    public PExp(HashDuple hashes, Type type, MathExpTypeResolver typer) {
-        this(hashes.structureHash, hashes.valueHash, type, typer);
+    public PExp(HashDuple hashes, MTType type, MTType typeValue) {
+        this(hashes.structureHash, hashes.valueHash, type, typeValue);
     }
 
-    public PExp(int structureHash, int valueHash, Type type,
-            MathExpTypeResolver typer) {
-
-        if (typer == null) {
-            throw new IllegalArgumentException("Null typer.");
-        }
-
+    public PExp(int structureHash, int valueHash, MTType type, MTType typeValue) {
         myType = type;
-        myTyper = typer;
+        myTypeValue = typeValue;
         this.structureHash = structureHash;
         this.valueHash = valueHash;
     }
 
     public abstract void accept(PExpVisitor v);
 
-    public final Type getType() {
+    public final MTType getType() {
         return myType;
     }
 
-    public abstract SimpleImmutableList<PExp> getSubExpressions();
+    public final MTType getTypeValue() {
+        return myTypeValue;
+    }
+
+    @SuppressWarnings("unchecked")
+    public PExp withTypesSubstituted(Map<MTType, MTType> substitutions) {
+
+        TypeModifyingVisitor v = new TypeModifyingVisitor(substitutions);
+        this.accept(v);
+
+        return v.getFinalPExp();
+    }
+
+    public abstract PExp withTypeReplaced(MTType t);
+
+    public abstract PExp withTypeValueReplaced(MTType t);
+
+    public abstract PExp withSubExpressionReplaced(int index, PExp e);
+
+    public PExp withSubExpressionsReplaced(Map<Integer, PExp> e) {
+        PExp working = this;
+
+        for (Map.Entry<Integer, PExp> entry : e.entrySet()) {
+            working =
+                    working.withSubExpressionReplaced(entry.getKey(), entry
+                            .getValue());
+        }
+
+        return working;
+    }
+
+    public abstract ImmutableList<PExp> getSubExpressions();
 
     public abstract PExpSubexpressionIterator getSubExpressionIterator();
 
@@ -102,7 +124,7 @@ public abstract class PExp {
      */
     public static final <E extends Exp> E sanityCheckExp(E e) {
 
-        if (e.getType() == null) {
+        if (e.getMathType() == null) {
 
             String varExpAdditional = "";
             if (e instanceof VarExp) {
@@ -123,7 +145,7 @@ public abstract class PExp {
         return e;
     }
 
-    public static final PExp buildPExp(Exp e, MathExpTypeResolver typer) {
+    public static final PExp buildPExp(Exp e) {
         PExp retval;
 
         if (e == null) {
@@ -137,78 +159,79 @@ public abstract class PExp {
             List<PExp> arguments = new LinkedList<PExp>();
             Iterator<Exp> eArgs = eAsFunctionExp.argumentIterator();
             while (eArgs.hasNext()) {
-                arguments.add(PExp.buildPExp(eArgs.next(), typer));
+                arguments.add(PExp.buildPExp(eArgs.next()));
             }
 
             retval =
-                    new PSymbol(e.getType(),
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
                             fullName(eAsFunctionExp.getQualifier(),
                                     eAsFunctionExp.getName().getName()),
                             arguments, convertExpQuantification(eAsFunctionExp
-                                    .getQuantification()), typer);
+                                    .getQuantification()));
         }
         else if (e instanceof PrefixExp) {
             PrefixExp eAsPrefixExp = (PrefixExp) e;
 
             List<PExp> arguments = new LinkedList<PExp>();
-            arguments.add(PExp.buildPExp(eAsPrefixExp.getArgument(), typer));
+            arguments.add(PExp.buildPExp(eAsPrefixExp.getArgument()));
 
             retval =
-                    new PSymbol(e.getType(),
-                            eAsPrefixExp.getSymbol().getName(), arguments,
-                            typer);
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                            eAsPrefixExp.getSymbol().getName(), arguments);
         }
         else if (e instanceof InfixExp) {
             InfixExp eAsInfixExp = (InfixExp) e;
 
             List<PExp> arguments = new LinkedList<PExp>();
-            arguments.add(PExp.buildPExp(eAsInfixExp.getLeft(), typer));
-            arguments.add(PExp.buildPExp(eAsInfixExp.getRight(), typer));
+            arguments.add(PExp.buildPExp(eAsInfixExp.getLeft()));
+            arguments.add(PExp.buildPExp(eAsInfixExp.getRight()));
 
             retval =
-                    new PSymbol(e.getType(), eAsInfixExp.getOpName().getName(),
-                            arguments, PSymbol.DisplayType.INFIX, typer);
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                            eAsInfixExp.getOpName().getName(), arguments,
+                            PSymbol.DisplayType.INFIX);
         }
         else if (e instanceof IsInExp) {
             IsInExp eAsIsInExp = (IsInExp) e;
 
             List<PExp> arguments = new LinkedList<PExp>();
-            arguments.add(PExp.buildPExp(eAsIsInExp.getLeft(), typer));
-            arguments.add(PExp.buildPExp(eAsIsInExp.getRight(), typer));
+            arguments.add(PExp.buildPExp(eAsIsInExp.getLeft()));
+            arguments.add(PExp.buildPExp(eAsIsInExp.getRight()));
 
             retval =
-                    new PSymbol(e.getType(), "is_in", arguments,
-                            PSymbol.DisplayType.INFIX, typer);
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(), "is_in",
+                            arguments, PSymbol.DisplayType.INFIX);
         }
         else if (e instanceof OutfixExp) {
             OutfixExp eAsOutfixExp = (OutfixExp) e;
 
             List<PExp> arguments = new LinkedList<PExp>();
-            arguments.add(PExp.buildPExp(eAsOutfixExp.getArgument(), typer));
+            arguments.add(PExp.buildPExp(eAsOutfixExp.getArgument()));
 
             retval =
-                    new PSymbol(e.getType(), eAsOutfixExp.getLeftDelimiter(),
-                            eAsOutfixExp.getRightDelimiter(), arguments,
-                            PSymbol.DisplayType.OUTFIX, typer);
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                            eAsOutfixExp.getLeftDelimiter(), eAsOutfixExp
+                                    .getRightDelimiter(), arguments,
+                            PSymbol.DisplayType.OUTFIX);
         }
         else if (e instanceof EqualsExp) {
             EqualsExp eAsEqualsExp = (EqualsExp) e;
 
             List<PExp> arguments = new LinkedList<PExp>();
-            arguments.add(PExp.buildPExp(eAsEqualsExp.getLeft(), typer));
-            arguments.add(PExp.buildPExp(eAsEqualsExp.getRight(), typer));
+            arguments.add(PExp.buildPExp(eAsEqualsExp.getLeft()));
+            arguments.add(PExp.buildPExp(eAsEqualsExp.getRight()));
 
             retval =
-                    new PSymbol(e.getType(),
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
                             eAsEqualsExp.getOperatorAsString(), arguments,
-                            PSymbol.DisplayType.INFIX, typer);
+                            PSymbol.DisplayType.INFIX);
         }
         else if (e instanceof IntegerExp) {
             IntegerExp eAsIntegerExp = (IntegerExp) e;
 
             String symbol = "" + eAsIntegerExp.getValue();
 
-            retval = new PSymbol(e.getType(), symbol, typer);
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol);
         }
         else if (e instanceof DotExp) {
             DotExp eAsDotExp = (DotExp) e;
@@ -228,53 +251,20 @@ public abstract class PExp {
             }
 
             if (eAsDotExp.getSemanticExp() != null) {
-                symbol += PExp.buildPExp(eAsDotExp.getSemanticExp(), typer);
+                symbol += PExp.buildPExp(eAsDotExp.getSemanticExp());
             }
 
-            retval = new PSymbol(e.getType(), symbol, typer);
-        }
-        else if (e instanceof BetweenExp) {
-            BetweenExp eAsBetweenExp = (BetweenExp) e;
-
-            Iterator<Exp> exps = eAsBetweenExp.getLessExps().iterator();
-
-            if (!exps.hasNext()) {
-                throw new RuntimeException("BetweenExp with 0 size.");
-            }
-
-            retval = PExp.buildPExp(exps.next(), typer);
-
-            List<PExp> arguments;
-            while (exps.hasNext()) {
-                arguments = new LinkedList<PExp>();
-                arguments.add(retval);
-                arguments.add(PExp.buildPExp(exps.next(), typer));
-
-                retval =
-                        new PSymbol(BooleanType.INSTANCE, "and", arguments,
-                                PSymbol.DisplayType.INFIX, typer);
-            }
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol);
         }
         else if (e instanceof VarExp) {
             VarExp eAsVarExp = (VarExp) e;
 
             retval =
-                    new PSymbol(eAsVarExp.getType(), fullName(eAsVarExp
+                    new PSymbol(eAsVarExp.getMathType(), eAsVarExp
+                            .getMathTypeValue(), fullName(eAsVarExp
                             .getQualifier(), eAsVarExp.getName().getName()),
                             convertExpQuantification(eAsVarExp
-                                    .getQuantification()), typer);
-        }
-        else if (e instanceof DotExp) {
-            DotExp eAsDotExp = (DotExp) e;
-
-            String finalName = "";
-            for (Exp s : eAsDotExp.getSegments()) {
-                finalName += "." + s.toString(0);
-            }
-
-            finalName += eAsDotExp.getSemanticExp().toString(0);
-
-            retval = new PSymbol(eAsDotExp.getType(), finalName, typer);
+                                    .getQuantification()));
         }
         else if (e instanceof VariableDotExp) {
             VariableDotExp eAsDotExp = (VariableDotExp) e;
@@ -287,21 +277,50 @@ public abstract class PExp {
             finalName += eAsDotExp.getSemanticExp().toString(0);
 
             retval =
-                    new PSymbol(eAsDotExp.getSemanticExp().getType(),
-                            finalName, typer);
+                    new PSymbol(eAsDotExp.getSemanticExp().getMathType(),
+                            eAsDotExp.getSemanticExp().getMathTypeValue(),
+                            finalName);
         }
         else if (e instanceof LambdaExp) {
             LambdaExp eAsLambdaExp = (LambdaExp) e;
 
             retval =
-                    new PLambda(eAsLambdaExp.getName().getName(), typer
-                            .getMathType(eAsLambdaExp.getTy()), PExp.buildPExp(
-                            eAsLambdaExp.getBody(), typer), typer);
+                    new PLambda(eAsLambdaExp.getName().getName(), eAsLambdaExp
+                            .getMathType(), PExp.buildPExp(eAsLambdaExp
+                            .getBody()));
         }
         else if (e instanceof AlternativeExp) {
             AlternativeExp eAsAlternativeExp = (AlternativeExp) e;
 
-            retval = new PAlternatives(eAsAlternativeExp, typer);
+            retval = new PAlternatives(eAsAlternativeExp);
+        }
+        else if (e instanceof VariableDotExp) {
+            VariableDotExp eAsDotExp = (VariableDotExp) e;
+
+            String finalName = "";
+            for (Exp s : eAsDotExp.getSegments()) {
+                finalName += "." + s.toString(0);
+            }
+
+            finalName += eAsDotExp.getSemanticExp().toString(0);
+
+            retval =
+                    new PSymbol(eAsDotExp.getSemanticExp().getMathType(),
+                            eAsDotExp.getSemanticExp().getMathTypeValue(),
+                            finalName);
+        }
+        else if (e instanceof LambdaExp) {
+            LambdaExp eAsLambdaExp = (LambdaExp) e;
+
+            retval =
+                    new PLambda(eAsLambdaExp.getName().getName(), eAsLambdaExp
+                            .getMathType(), PExp.buildPExp(eAsLambdaExp
+                            .getBody()));
+        }
+        else if (e instanceof AlternativeExp) {
+            AlternativeExp eAsAlternativeExp = (AlternativeExp) e;
+
+            retval = new PAlternatives(eAsAlternativeExp);
         }
         else {
             throw new RuntimeException("Expressions of type " + e.getClass()
@@ -424,28 +443,22 @@ public abstract class PExp {
         return retval + name;
     }
 
-    public abstract boolean isVariable();
-
-    public boolean typeMatches(Type other) {
-
-        //boolean result;
-
-        return myTyper.getTypeMatcher().mathMatches(myType, other);
-
-        /*try {
-        	myTyper.matchTypes(null, myType, other, true, false);
-        	result = true;
-        }
-        catch (TypeResolutionException e) {
-        	result = false;
-        }
-        
-        return result;*/
+    public boolean typeMatches(MTType other) {
+        return myType.isSubtypeOf(other);
     }
 
     public boolean typeMatches(PExp other) {
         return typeMatches(other.getType());
     }
+
+    public void processStringRepresentation(PExpVisitor visitor, Appendable a) {
+        PExpTextRenderingVisitor renderer = new PExpTextRenderingVisitor(a);
+        PExpVisitor finalVisitor = new NestedPExpVisitors(visitor, renderer);
+
+        this.accept(finalVisitor);
+    }
+
+    public abstract boolean isVariable();
 
     public static class HashDuple {
 
@@ -466,12 +479,5 @@ public abstract class PExp {
         this.accept(renderer);
 
         return output.toString();
-    }
-
-    public void processStringRepresentation(PExpVisitor visitor, Appendable a) {
-        PExpTextRenderingVisitor renderer = new PExpTextRenderingVisitor(a);
-        PExpVisitor finalVisitor = new NestedPExpVisitors(visitor, renderer);
-
-        this.accept(finalVisitor);
     }
 }

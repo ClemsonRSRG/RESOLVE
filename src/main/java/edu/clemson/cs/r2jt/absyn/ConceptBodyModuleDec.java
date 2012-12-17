@@ -63,7 +63,7 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 
-public class ConceptBodyModuleDec extends ModuleDec {
+public class ConceptBodyModuleDec extends AbstractParameterizedModuleDec {
 
     // ===========================================================
     // Variables
@@ -75,17 +75,11 @@ public class ConceptBodyModuleDec extends ModuleDec {
     /** The performance profile name member. */
     private PosSymbol profileName;
 
-    /** The parameters member. */
-    private List<ModuleParameter> parameters;
-
     /** The conceptName member. */
     private PosSymbol conceptName;
 
     /** The enhancementNames member. */
     private List<PosSymbol> enhancementNames;
-
-    /** The usesItems member. */
-    private List<UsesItem> usesItems;
 
     /** The requires member. */
     private Exp requires;
@@ -112,7 +106,7 @@ public class ConceptBodyModuleDec extends ModuleDec {
     public ConceptBodyModuleDec() {};
 
     public ConceptBodyModuleDec(PosSymbol name, PosSymbol profileName,
-            List<ModuleParameter> parameters, PosSymbol conceptName,
+            List<ModuleParameterDec> parameters, PosSymbol conceptName,
             List<PosSymbol> enhancementNames, List<UsesItem> usesItems,
             Exp requires, List<Exp> conventions, List<Exp> corrs,
             InitItem facilityInit, FinalItem facilityFinal, List<Dec> decs) {
@@ -148,11 +142,6 @@ public class ConceptBodyModuleDec extends ModuleDec {
         return profileName;
     }
 
-    /** Returns the value of the parameters variable. */
-    public List<ModuleParameter> getParameters() {
-        return parameters;
-    }
-
     /** Returns the value of the conceptName variable. */
     public PosSymbol getConceptName() {
         return conceptName;
@@ -161,11 +150,6 @@ public class ConceptBodyModuleDec extends ModuleDec {
     /** Returns the value of the enhancementNames variable. */
     public List<PosSymbol> getEnhancementNames() {
         return enhancementNames;
-    }
-
-    /** Returns the value of the usesItems variable. */
-    public List<UsesItem> getUsesItems() {
-        return usesItems;
     }
 
     /** Returns the value of the requires variable. */
@@ -225,11 +209,6 @@ public class ConceptBodyModuleDec extends ModuleDec {
         this.profileName = name;
     }
 
-    /** Sets the parameters variable to the specified value. */
-    public void setParameters(List<ModuleParameter> parameters) {
-        this.parameters = parameters;
-    }
-
     /** Sets the conceptName variable to the specified value. */
     public void setConceptName(PosSymbol conceptName) {
         this.conceptName = conceptName;
@@ -238,11 +217,6 @@ public class ConceptBodyModuleDec extends ModuleDec {
     /** Sets the enhancementNames variable to the specified value. */
     public void setEnhancementNames(List<PosSymbol> enhancementNames) {
         this.enhancementNames = enhancementNames;
-    }
-
-    /** Sets the usesItems variable to the specified value. */
-    public void setUsesItems(List<UsesItem> usesItems) {
-        this.usesItems = usesItems;
     }
 
     /** Sets the requires variable to the specified value. */

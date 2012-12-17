@@ -226,13 +226,13 @@ public class ProgramDotExp extends ProgramExp {
 
     public Object clone() {
         ProgramDotExp clone = new ProgramDotExp();
-        clone.setSemanticExp((ProgramExp) this.getSemanticExp().clone());
+        clone.setSemanticExp((ProgramExp) Exp.clone(this.getSemanticExp()));
         clone.setLocation(this.getLocation());
         if (segments != null) {
             Iterator<ProgramExp> i = segments.iterator();
             List<ProgramExp> newSegments = new List<ProgramExp>();
             while (i.hasNext()) {
-                newSegments.add((ProgramExp) i.next().clone());
+                newSegments.add((ProgramExp) Exp.clone(i.next()));
             }
             clone.setSegments(newSegments);
         }
@@ -268,16 +268,16 @@ public class ProgramDotExp extends ProgramExp {
                     if (((VarExp) old).getName().toString().equals(
                             ((VarExp) name).getName().toString())) {
                         segments.remove(0);
-                        segments.add(0, (ProgramExp) (replacement.clone()));
+                        segments.add(0, (ProgramExp) (Exp.clone(replacement)));
 
                         return this;
                     }
                 }
                 else if (old instanceof OldExp && name instanceof OldExp) {
-                    name = name.replace(old, replacement);
+                    name = Exp.replace(name, old, replacement);
                     if (name != null) {
                         segments.remove(0);
-                        segments.add(0, (ProgramExp) (name.clone()));
+                        segments.add(0, (ProgramExp) (Exp.clone(name)));
                         return this;
                     }
                 }
@@ -285,10 +285,10 @@ public class ProgramDotExp extends ProgramExp {
 
             if (it.hasNext()) {
                 Exp name = it.next();
-                name = name.replace(old, replacement);
+                name = Exp.replace(name, old, replacement);
                 if (name != null) {
                     segments.remove(1);
-                    segments.add(1, (ProgramExp) (name.clone()));
+                    segments.add(1, (ProgramExp) (Exp.clone(name)));
                     return this;
                 }
             }

@@ -82,7 +82,7 @@ public class DefinitionLocator {
 
     //private Environment env = Environment.getInstance();
 
-    private SymbolTable table;
+    private OldSymbolTable table;
 
     private boolean showErrors = true;
 
@@ -94,7 +94,7 @@ public class DefinitionLocator {
     // Constructors
     // ===========================================================
 
-    public DefinitionLocator(SymbolTable table, boolean err, TypeMatcher tm,
+    public DefinitionLocator(OldSymbolTable table, boolean err, TypeMatcher tm,
             ErrorHandler eh) {
         this.table = table;
         showErrors = err;

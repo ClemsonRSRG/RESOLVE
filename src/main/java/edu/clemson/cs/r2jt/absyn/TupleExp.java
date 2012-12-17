@@ -60,10 +60,22 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
+import edu.clemson.cs.r2jt.data.Mode;
+import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.mathtype.MTCartesian;
+import edu.clemson.cs.r2jt.mathtype.MTCartesian.Element;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
 
+/**
+ * <p>Making TupleExp extend from AbstractFunctionExp was considered and
+ * explicitly decided against during the great math-type-overhaul of 2012.
+ * If we chose to admit the presence of some function that builds tuples for us,
+ * how would we pass it its parameters if not via a tuple?  Thus, TupleExp is
+ * a built-in notion, and not imagined as the result of the application of a
+ * function.</p>
+ */
 public class TupleExp extends Exp {
 
     // ===========================================================
@@ -76,15 +88,62 @@ public class TupleExp extends Exp {
     /** The fields member. */
     private List<Exp> fields;
 
+    private int mySize;
+
     // ===========================================================
     // Constructors
     // ===========================================================
 
-    public TupleExp() {};
+    public TupleExp() {
+        fields = new List<Exp>();
+    }
 
     public TupleExp(Location location, List<Exp> fields) {
-        this.location = location;
-        this.fields = fields;
+        this(location, fields.toArray(new Exp[0]), fields.size());
+    }
+
+    public TupleExp(Location l, Exp[] fields) {
+        this(l, fields, fields.length);
+    }
+
+    public TupleExp(Location l, java.util.List<Exp> fields) {
+        this(l, fields.toArray(new Exp[0]), fields.size());
+    }
+
+    private TupleExp(Location l, Exp[] fields, int elementCount) {
+        if (elementCount < 2) {
+            //We assert this isn't possible, but who knows?
+            throw new IllegalArgumentException(
+                    "Unexpected cartesian product size.");
+        }
+
+        location = l;
+        this.fields = new List<Exp>();
+
+        int workingSize = 0;
+
+        Exp first;
+        if (elementCount == 2) {
+            first = fields[0];
+        }
+        else {
+            first = new TupleExp(l, fields, elementCount - 1);
+        }
+
+        if (first instanceof TupleExp) {
+            workingSize += ((TupleExp) first).getSize();
+        }
+        else {
+            workingSize += 1;
+        }
+
+        Exp second = fields[elementCount - 1];
+        workingSize += 1;
+
+        this.fields.add(first);
+        this.fields.add(second);
+
+        mySize = workingSize;
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
@@ -93,7 +152,11 @@ public class TupleExp extends Exp {
             newFields.add(substitute(f, substitutions));
         }
 
-        return new TupleExp(location, newFields);
+        Exp result = new TupleExp(location, newFields);
+        result.setMathType(getMathType());
+        result.setMathTypeValue(getMathTypeValue());
+
+        return result;
     }
 
     // ===========================================================
@@ -104,9 +167,41 @@ public class TupleExp extends Exp {
     // Get Methods
     // -----------------------------------------------------------
 
+    public int getSize() {
+        return mySize;
+    }
+
     /** Returns the value of the location variable. */
     public Location getLocation() {
         return location;
+    }
+
+    public Exp getField(int index) {
+        Exp result;
+
+        if (index < 0 || index >= mySize) {
+            throw new IndexOutOfBoundsException("" + index);
+        }
+
+        if (index == (mySize - 1)) {
+            result = fields.get(1);
+        }
+        else {
+            if (mySize == 2) {
+                //ASSERT: !(myElements.get(0) instanceof MTCartesian)
+                if (index != 0) {
+                    throw new IndexOutOfBoundsException("" + index);
+                }
+
+                result = fields.get(0);
+            }
+            else {
+                //ASSERT: myElements.get(0) instanceof MTCartesian
+                result = ((TupleExp) fields.get(0)).getField(index);
+            }
+        }
+
+        return result;
     }
 
     /** Returns the value of the fields variable. */
@@ -131,6 +226,24 @@ public class TupleExp extends Exp {
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    public boolean isUniversallyQuantified() {
+        boolean soFar = true;
+
+        for (Exp field : fields) {
+            soFar =
+                    soFar
+                            && ((field instanceof VarExp && ((VarExp) field)
+                                    .getQuantification() == VarExp.FORALL) || (field instanceof TupleExp && ((TupleExp) field)
+                                    .isUniversallyQuantified()));
+        }
+
+        return soFar;
+    }
+
+    /*public void addField(Exp field) {
+    	fields.add(field);
+    }*/
 
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
@@ -204,9 +317,32 @@ public class TupleExp extends Exp {
         Iterator<Exp> it = fields.iterator();
         List<Exp> newFields = new List<Exp>();
         while (it.hasNext()) {
-            newFields.add(it.next().copy());
+            newFields.add(Exp.copy(it.next()));
         }
-        return new TupleExp(null, newFields);
+
+        Exp result = new TupleExp(location, newFields);
+        result.setMathType(getMathType());
+        result.setMathTypeValue(getMathTypeValue());
+
+        return result;
     }
 
+    @Override
+    public String toString() {
+        String result = "(";
+
+        boolean first = true;
+        for (Exp member : fields) {
+            if (!first) {
+                result += ", ";
+            }
+            else {
+                first = false;
+            }
+
+            result += member;
+        }
+
+        return result + ")";
+    }
 }

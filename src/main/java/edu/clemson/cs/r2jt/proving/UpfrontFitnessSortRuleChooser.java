@@ -5,16 +5,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import edu.clemson.cs.r2jt.absyn.EqualsExp;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 
 public class UpfrontFitnessSortRuleChooser extends BlindIterativeRuleChooser {
 
     private final FitnessFunction<EqualsExp> myFitnessFunction;
     private final double myThreshold;
 
-    public UpfrontFitnessSortRuleChooser(MathExpTypeResolver typer,
-            FitnessFunction<EqualsExp> fitness, double threshold) {
-        super(typer);
+    public UpfrontFitnessSortRuleChooser(FitnessFunction<EqualsExp> fitness,
+            double threshold) {
+        super();
         myFitnessFunction = fitness;
         myThreshold = threshold;
     }
@@ -39,8 +38,7 @@ public class UpfrontFitnessSortRuleChooser extends BlindIterativeRuleChooser {
 
             if (curFitness >= myThreshold) {
                 curMatchReplace =
-                        new BindReplace(curRule.getLeft(), curRule.getRight(),
-                                myTyper);
+                        new BindReplace(curRule.getLeft(), curRule.getRight());
 
                 priorityList.add(new PriorityAugmentedObject<MatchReplace>(
                         curMatchReplace, curFitness));

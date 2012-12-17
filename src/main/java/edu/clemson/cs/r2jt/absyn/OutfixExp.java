@@ -60,10 +60,12 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
+import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
-public class OutfixExp extends Exp {
+public class OutfixExp extends AbstractFunctionExp {
 
     // ===========================================================
     // Constants
@@ -135,7 +137,13 @@ public class OutfixExp extends Exp {
     // Get Methods
     // -----------------------------------------------------------
 
+    @Override
+    public int getQuantification() {
+        return VarExp.NONE;
+    }
+
     /** Returns the value of the location variable. */
+    @Override
     public Location getLocation() {
         return location;
     }
@@ -311,7 +319,7 @@ public class OutfixExp extends Exp {
         OutfixExp clone = new OutfixExp();
         clone.setOperator(this.operator);
         clone.setLocation(this.getLocation());
-        clone.setArgument((Exp) this.getArgument().clone());
+        clone.setArgument((Exp) Exp.clone(this.getArgument()));
         clone.setType(type);
         return clone;
     }
@@ -336,9 +344,9 @@ public class OutfixExp extends Exp {
         return true;
     }
 
-    public Exp replace(Exp old, Exp replacement) {
+    protected Exp replace(Exp old, Exp replacement) {
         if (!(old instanceof OutfixExp)) {
-            Exp tmp = (argument.replace(old, replacement));
+            Exp tmp = (Exp.replace(argument, old, replacement));
             if (tmp != null)
                 argument = tmp;
             return this;
@@ -365,33 +373,39 @@ public class OutfixExp extends Exp {
         return myRightDelimiters[operator];
     }
 
+    @Override
     public String getOperatorAsString() {
         String retval;
 
         switch (operator) {
         case ANGLE:
-            retval = "<outfix>";
+            retval = "<_>";
             break;
         case DBL_ANGLE:
-            retval = "<<outfix>>";
+            retval = "<<_>>";
             break;
         case SQUARE:
-            retval = "[outfix]";
+            retval = "[_]";
             break;
         case DBL_SQUARE:
-            retval = "[[outfix]]";
+            retval = "[[_]]";
             break;
         case BAR:
-            retval = "|outfix|";
+            retval = "|_|";
             break;
         case DBL_BAR:
-            retval = "||outfix||";
+            retval = "||_||";
             break;
         default:
             throw new RuntimeException("Invalid operator code");
         }
 
         return retval;
+    }
+
+    @Override
+    public PosSymbol getOperatorAsPosSymbol() {
+        return new PosSymbol(location, Symbol.symbol(getOperatorAsString()));
     }
 
     public void prettyPrint() {
@@ -430,10 +444,14 @@ public class OutfixExp extends Exp {
     public Exp copy() {
         Exp retval;
         int newOperator = operator;
-        Exp newArgument = argument.copy();
+        Exp newArgument = Exp.copy(argument);
         retval = new OutfixExp(null, newOperator, newArgument);
         retval.setType(type);
         return retval;
     }
 
+    @Override
+    public PosSymbol getQualifier() {
+        return null;
+    }
 }

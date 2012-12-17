@@ -77,6 +77,8 @@ import edu.clemson.cs.r2jt.location.ProofLocator;
 import edu.clemson.cs.r2jt.location.SymbolSearchException;
 import edu.clemson.cs.r2jt.location.TheoremLocator;
 import edu.clemson.cs.r2jt.location.VariableLocator;
+import edu.clemson.cs.r2jt.mathtype.ScopeRepository;
+import edu.clemson.cs.r2jt.mathtype.MathSymbolTable;
 import edu.clemson.cs.r2jt.proofchecking.ProofChecker;
 import edu.clemson.cs.r2jt.proving.Prover;
 import edu.clemson.cs.r2jt.sanitycheck.SanityCheckException;
@@ -130,11 +132,10 @@ public class Analyzer extends ResolveConceptualVisitor {
     //private Environment env;
     private final CompileEnvironment myInstanceEnvironment;
 
-    private SymbolTable table;
+    private OldSymbolTable table;
 
     private TypeMatcher tm = new TypeMatcher();
 
-    private MathExpTypeResolver metr;
     private ProgramExpTypeResolver petr;
 
     private ProofChecker pc;
@@ -148,41 +149,40 @@ public class Analyzer extends ResolveConceptualVisitor {
     //being parsed.  The name associated with the concept is also stored so
     //that the table can be retrieved lazily.
     private PosSymbol myCurrentModuleName = null;
-    private SymbolTable myAssociatedConceptSymbolTable = null;
+    private OldSymbolTable myAssociatedConceptSymbolTable = null;
 
     // Stack of WhileStmts used for building the changing list
     private Stack<WhileStmt> whileStmts = new Stack<WhileStmt>();
+
+    private ScopeRepository myManlySymbolTable;
 
     // Constructors
 
     /**
      * Constructs an analyzer.
      */
-    public Analyzer(SymbolTable table, CompileEnvironment instanceEnvironment) {
+    public Analyzer(ScopeRepository aRealSymbolTable, OldSymbolTable table,
+            CompileEnvironment instanceEnvironment) {
         myInstanceEnvironment = instanceEnvironment;
-        //env = new Environment(instanceEnvironment);
+
         this.table = table;
         this.err = instanceEnvironment.getErrorHandler();
-        this.metr = new MathExpTypeResolver(table, tm, instanceEnvironment);
         this.petr = new ProgramExpTypeResolver(table, instanceEnvironment);
 
         if (myInstanceEnvironment.flags.isFlagSet(ProofChecker.FLAG_PROOFCHECK)) {
 
-            pc = new ProofChecker(table, tm, metr, myInstanceEnvironment);
-            this.metr.setPC(pc);
+            pc = new ProofChecker(table, tm, myInstanceEnvironment);
         }
         origErrorCount = err.getErrorCount();
 
         myEncounteredProcedures = new List<String>();
         err = instanceEnvironment.getErrorHandler();
+
+        myManlySymbolTable = aRealSymbolTable;
     }
 
     public static void setUpFlags() {
 
-    }
-
-    public MathExpTypeResolver getMathExpTypeResolver() {
-        return metr;
     }
 
     public TypeMatcher getTypeMatcher() {
@@ -225,7 +225,7 @@ public class Analyzer extends ResolveConceptualVisitor {
     //          exp.accept(this);
     //      }
 
-    public void visitModuleParameter(ModuleParameter par) {
+    public void visitModuleParameter(ModuleParameterDec par) {
         par.accept(this);
     }
 
@@ -398,17 +398,6 @@ public class Analyzer extends ResolveConceptualVisitor {
     //    	return params;
     //    }
 
-    private void matchExpressions(Exp exp1, Type returnType, boolean equalCase,
-            boolean strict) throws TypeResolutionException {
-
-        if (equalCase)
-            metr.setEqlCase();
-        Type t = metr.getMathExpType(exp1);
-        if (equalCase)
-            metr.unsetEqlCase();
-        matchTypes(exp1.getLocation(), t, returnType, strict);
-    }
-
     public void visitDefinitionDec(DefinitionDec dec) {
 
         /*if (dec.getName().getName().equals("N") && !env.debugOff()) {
@@ -425,13 +414,7 @@ public class Analyzer extends ResolveConceptualVisitor {
 
         if (dec.getDefinition() != null) {
             // If the defn. is null, don't typecheck
-            try {
-                matchExpressions(dec.getDefinition(), returnType, false, true);
-                storeValue(dec, dec.getDefinition());
-            }
-            catch (TypeResolutionException trex) {
-                // Error already reported; do nothing
-            }
+            storeValue(dec, dec.getDefinition());
         }
         table.endDefinitionScope();
     }
@@ -575,38 +558,10 @@ public class Analyzer extends ResolveConceptualVisitor {
         }
     }
 
-    public void matchTypes(Location loc, Type t1, Type t2, boolean strict) {
-        if (t1 == null || t2 == null)
-            return;
-        try {
-            if (!(metr.matchTypes(loc, t1, t2, true, strict))) {
-                String msg =
-                        expectedDiffTypeMessage(t2.toString(), t1.toString());
-                err.error(loc, msg);
-            }
-        }
-        catch (TypeResolutionException e) {
-            String msg = expectedDiffTypeMessage(t2.toString(), t1.toString());
-            err.error(loc, msg);
-        }
-    }
-
     public void visitMathAssertionDec(MathAssertionDec dec) {
         table.beginExpressionScope();
-        MathExpTypeResolver metr =
-                new MathExpTypeResolver(table, tm, myInstanceEnvironment);
-        try {
-            Type t1 = metr.getMathExpType(dec.getAssertion());
-            Type t2 = BooleanType.INSTANCE;
-            matchTypes(dec.getAssertion().getLocation(), t1, t2, true);
-            storeValue(dec, dec.getAssertion());
-        }
-        catch (TypeResolutionException trex) {
-
-        }
-        finally {
-            table.endExpressionScope();
-        }
+        storeValue(dec, dec.getAssertion());
+        table.endExpressionScope();
     }
 
     public void visitMathTypeDec(MathTypeDec dec) {
@@ -685,10 +640,6 @@ public class Analyzer extends ResolveConceptualVisitor {
     }
 
     public void visitProcedureDec(ProcedureDec dec) {
-
-        //Perform procedure parameter sanity checking.
-        // remove: these same checks are perfomed in the SanityCheck
-        //	sanityCheckProcedure(dec);
 
         table.beginOperationScope();
         table.beginProcedureScope();
@@ -776,30 +727,6 @@ public class Analyzer extends ResolveConceptualVisitor {
     // -----------------------------------------------------------
 
     public void visitFacilityDec(FacilityDec dec) {
-
-        sanityCheckFacilityDeclarationParameters(dec);
-
-        // check instantiation AND arguments that are
-        // program expressions.
-        /*ConceptModuleDec cDec = null;
-        ConceptBodyModuleDec bDec = null;
-        ModuleID cid = ModuleID.createConceptID(dec.getConceptName());
-        if (myInstanceEnvironment.contains(cid))
-            cDec = (ConceptModuleDec)myInstanceEnvironment.getModuleDec(cid);
-        else {
-            String msg = facDecErrorMessage(dec.getName().getName());
-            err.error(dec.getName().getLocation(), msg);
-            return;
-        };
-        ModuleID bid = ModuleID.createConceptBodyID(dec.getBodyName(),
-                dec.getConceptName());
-        if (myInstanceEnvironment.contains(bid))
-            bDec = (ConceptBodyModuleDec)myInstanceEnvironment.getModuleDec(cid);
-        else {
-            String msg = facDecErrorMessage(dec.getName().getName());
-            err.error(dec.getName().getLocation(), msg);
-            return;
-        }*/
 
     }
 
@@ -960,7 +887,6 @@ public class Analyzer extends ResolveConceptualVisitor {
         }
         catch (TypeResolutionException trex) {
             // do nothing - the error was already reported
-            // err.error(stmt.getLocation(), "TypeResolutionException");            
         }
     }
 
@@ -1061,25 +987,16 @@ public class Analyzer extends ResolveConceptualVisitor {
      */
     private void doBaseStuff(DefinitionDec dec, Type definitionReturnType) {
         if (dec.getBase() != null) {
-            try {
-                matchExpressions(dec.getBase(), BooleanType.INSTANCE, true,
-                        true);
-
-                if (!checkSelfReference(dec.getName().getName(), dec.getBase())) {
-                    String msg = noSelfReference();
-                    err.error(dec.getBase().getLocation(), msg);
-                }
-
-                DefinitionEntry definition = getDefinitionEntry(dec);
-
-                if (definition != null) {
-                    definition.setBaseDefinition(dec.getBase());
-                    //storeValue(dec, dec.getBase());
-                }
+            if (!checkSelfReference(dec.getName().getName(), dec.getBase())) {
+                String msg = noSelfReference();
+                err.error(dec.getBase().getLocation(), msg);
             }
-            catch (TypeResolutionException trex) {
-                metr.unsetEqlCase();
-                // Error already reported; do nothing
+
+            DefinitionEntry definition = getDefinitionEntry(dec);
+
+            if (definition != null) {
+                definition.setBaseDefinition(dec.getBase());
+                //storeValue(dec, dec.getBase());
             }
         }
     }
@@ -1090,61 +1007,26 @@ public class Analyzer extends ResolveConceptualVisitor {
      */
     private void doHypothesisStuff(DefinitionDec dec, Type definitionReturnType) {
         if (dec.getHypothesis() != null) {
-            try {
-                matchExpressions(dec.getHypothesis(), BooleanType.INSTANCE,
-                        true, true);
+            if (!checkSelfReference(dec.getName().getName(), dec
+                    .getHypothesis())) {
 
-                if (!checkSelfReference(dec.getName().getName(), dec
-                        .getHypothesis())) {
-
-                    String msg = noSelfReference();
-                    err.error(dec.getHypothesis().getLocation(), msg);
-                }
-                storeValue(dec, dec.getHypothesis());
+                String msg = noSelfReference();
+                err.error(dec.getHypothesis().getLocation(), msg);
             }
-            catch (TypeResolutionException trex) {
-                metr.unsetEqlCase();
-                // Error already reported; do nothing
-            }
+            storeValue(dec, dec.getHypothesis());
         }
     }
 
     /**
      * A helper function for visitDefinitionDec.
      * 
-     * Takes a DefinitionDec and returns the math type of the returned by that
-     * definition.  
-     * 
-     * XXX : I don't really understand this one, just separating it
-     * out from visitDefinitionDec for clarity.  -HwS
+     * Takes a DefinitionDec and returns the math type returned by that
+     * definition.
      */
     private Type getDefinitionReturnType(DefinitionDec dec) {
-        Type returnType = null;
-        //List<Type> params = convertMathVarDecsToTypes(dec.getParameters());
 
-        // Set the return type of the definition (must be matched with contents
-        //     of the def.
-        if (isDecAVar(dec)) {
-            // If the definition has no params, look it up as a VarEntry
-            try {
-                VariableLocator vlocator = new VariableLocator(table, err);
-                VarEntry vEntry = vlocator.locateMathVariable(dec.getName());
-                returnType = vEntry.getType();
-            }
-            catch (SymbolSearchException ssex) {
-                // Error already reported by VariableLocator; do nothing
-            }
-        }
-        else if (getMathType(dec.getReturnTy()) instanceof FunctionType) {
-            FunctionType ftype =
-                    (FunctionType) (getMathType(dec.getReturnTy()));
-            returnType = ftype.getRange();
-        }
-        else {
-            returnType = getMathType(dec.getReturnTy());
-        }
-
-        return returnType;
+        //All hail the new type system!  Hail!  Hail!
+        return new NewType(dec.getReturnTy().getMathTypeValue());
     }
 
     // -----------------------------------------------------------
@@ -1232,8 +1114,8 @@ public class Analyzer extends ResolveConceptualVisitor {
         }
     }
 
-    private void visitModuleParameterList(List<ModuleParameter> pars) {
-        Iterator<ModuleParameter> i = pars.iterator();
+    private void visitModuleParameterList(List<ModuleParameterDec> pars) {
+        Iterator<ModuleParameterDec> i = pars.iterator();
         while (i.hasNext()) {
             visitModuleParameter(i.next());
         }
@@ -1297,53 +1179,11 @@ public class Analyzer extends ResolveConceptualVisitor {
     }
 
     private void visitAssertion(Exp exp) {
-        if (exp != null) {
-            //For the moment, determine types on a best-effort basis
-            boolean errorState = err.getIgnore();
-            err.setIgnore(true);
 
-            try {
-                Type t1 = metr.getMathExpType(exp);
-                exp.setType(t1);
-
-                if (myInstanceEnvironment.flags.isFlagSet(FLAG_TYPECHECK)) {
-                    //Make sure the assertion is a boolean expression
-                    Type B = BooleanType.INSTANCE;
-                    matchTypes(exp.getLocation(), B, t1, false);
-                }
-            }
-            catch (TypeResolutionException trex) {
-                //System.out.println("Couldn't determine a type inside this assertion:");
-                // The code below was added to aid in troubleshooting
-                // TypeResolutionExceptions. It can be safely uncommented
-                // for troubleshooting purposes.
-                /*try {
-                	Type t1 = metr.getMathExpType(exp);
-                }
-                catch (TypeResolutionException trex2) {
-                	int i = 1;
-                }*/
-                throw new RuntimeException(trex);
-            }
-
-            err.setIgnore(errorState);
-        }
     }
 
     private void visitProgressMetric(Exp exp) {
-        if (exp != null) {
-            //For the moment, determine types on a best-effort basis
-            boolean errorState = err.getIgnore();
-            err.setIgnore(true);
 
-            try {
-                Type t1 = metr.getMathExpType(exp);
-                exp.setType(t1);
-            }
-            catch (TypeResolutionException trex) {}
-
-            err.setIgnore(errorState);
-        }
     }
 
     private void visitProgramExpOfType(ProgramExp exp, Type type) {
@@ -1726,8 +1566,7 @@ public class Analyzer extends ResolveConceptualVisitor {
         Type wrkType = null;
 
         for (ParameterVarDec p : parameters) {
-            wrkType = metr.getMathType(p.getTy());
-            parameterTypes.add(wrkType);
+            parameterTypes.add(new NewType(p.getMathType()));
         }
 
         return parameterTypes;
@@ -1841,792 +1680,4 @@ public class Analyzer extends ResolveConceptualVisitor {
 
         return operation;
     }
-
-    /*
-     * Error (Sanity) checking methods
-     */
-
-    /**
-     * General sanity-check method to make sure that the arguments provided
-     * for a given operation or module match the formal modes and types of the 
-     * parameters.  Assumes that the length of the given parameters and the
-     * length of the given arguments is the same.  Raises a SanityCheckException
-     * if the number of arguments is inconsistent.  Evokes any other errors 
-     * through <code>err</code>.
-     * 
-     * @param parameters A <code>List</code> of <code>Entry</code>s representing
-     *                   the formal parameters of the operation or module.
-     * @param arguments A <code>List</code> of <code>ModuleArgumentItem</code>s
-     *                  representing the arguments provided, in the same order
-     *                  as <code>parameters</code>.
-     *                  
-     * @throw SanityCheckException Thrown if the number of arguments is
-     *                             inconsistent with the number of parameters.
-     */
-    private void sanityCheckProvidedArguments(List<Entry> parameters,
-            List<ModuleArgumentItem> arguments) throws SanityCheckException {
-        //This eventually checks the param types so it is not being moved to VisitorSanityCheck
-
-        //Check to make sure we have the right number of arguments
-        if (parameters.size() != arguments.size()) {
-            throw new SanityCheckException(wrongNumberOfArgumentsMessage());
-        }
-
-        Entry curParameter;
-        ModuleArgumentItem curArgument;
-
-        int parametersSize = parameters.size();
-        for (int curParameterIndex = 0; curParameterIndex < parametersSize; curParameterIndex++) {
-
-            curArgument = arguments.get(curParameterIndex);
-            curParameter = parameters.get(curParameterIndex);
-
-            sanityCheckArgumentType(curParameter, curArgument);
-        }
-    }
-
-    /**
-     * The top-level sanity check method for the enhancement clause of a
-     * facility declaration.  Simply evokes any errors using <code>err</code>.
-     * 
-     * @param enhancement The name of the enhancement as found in the facility
-     *                    declaration.
-     * @param realization The name of the realization of 
-     *                    <code>enhancement</code> as found in the facility
-     *                    declaration.
-     * @param conceptName The name of the concept to which the enhancement is
-     *                    being applied.
-     */
-    private void sanityCheckEnhancementClause(PosSymbol enhancementName,
-            EnhancementBodyItem realization, PosSymbol conceptName) {
-        //This eventually checks the param types so it is not being moved to VisitorSanityCheck
-
-        ModuleID enhancementID =
-                ModuleID.createEnhancementID(enhancementName, conceptName);
-
-        ModuleID enhancementBodyID =
-                ModuleID.createEnhancementBodyID(realization.getBodyName(),
-                        enhancementName, conceptName);
-
-        if (myInstanceEnvironment.contains(enhancementID)) {
-            SymbolTable enhancementTable =
-                    myInstanceEnvironment.getSymbolTable(enhancementID);
-
-            List<Entry> enhancementParameters =
-                    enhancementTable.getModuleScope().getModuleParameters();
-
-            try {
-                sanityCheckProvidedArguments(enhancementParameters, realization
-                        .getParams());
-            }
-            catch (Exception e) {
-                err.error(realization.getName().getLocation(), e.getMessage());
-            }
-
-            if (myInstanceEnvironment.contains(enhancementBodyID)) {
-                SymbolTable enhancementBodyTable =
-                        myInstanceEnvironment.getSymbolTable(enhancementBodyID);
-
-                List<Entry> enhancementBodyParameters =
-                        enhancementBodyTable.getModuleScope()
-                                .getModuleParameters();
-
-                try {
-                    sanityCheckProvidedArguments(enhancementBodyParameters,
-                            realization.getBodyParams());
-                }
-                catch (Exception e) {
-                    err.error(realization.getBodyName().getLocation(), e
-                            .getMessage());
-                }
-            }
-            else {
-                //We didn't find a realization with the given name
-                err.error(realization.getName().getLocation(),
-                        noSuchEnhancementRealization(
-                                "" + realization.getName(), ""
-                                        + enhancementName.getName(), ""
-                                        + conceptName.getName()));
-            }
-        }
-        else {
-            //We didn't find an enhancement concept with the given name
-            err.error(enhancementName.getLocation(), noSuchEnhancementConcept(
-                    "" + enhancementName, "" + conceptName.getName()));
-        }
-    }
-
-    /**
-     * Sanity checks the parameters provided for the realization of a concept
-     * as part of a facility declaration.  Simply evokes any errors using
-     * <code>err</code>.
-     * 
-     * @param dec The facility declaration. 
-     */
-    private void sanityCheckBodyParameters(FacilityDec dec) {
-        //This eventually checks the param types so it is not being moved to VisitorSanityCheck
-        ModuleID bodyId =
-                ModuleID.createConceptBodyID(dec.getBodyName(), dec
-                        .getConceptName());
-
-        if (myInstanceEnvironment.contains(bodyId)) {
-            SymbolTable bodyTable =
-                    myInstanceEnvironment.getSymbolTable(bodyId);
-            if (bodyTable != null) {
-                List<Entry> bodyParameters =
-                        bodyTable.getModuleScope().getModuleParameters();
-
-                List<ModuleArgumentItem> declarationArguments =
-                        dec.getBodyParams();
-
-                try {
-                    sanityCheckProvidedArguments(bodyParameters,
-                            declarationArguments);
-                }
-                catch (Exception e) {
-                    err.error(dec.getBodyName().getLocation(), e.getMessage());
-                }
-            }
-        }
-        else {
-            //System.err.println("Sanity Check skipping realization arguments " + 
-            //"for " + dec.getName() + " because no code for " +
-            //dec.getBodyName() + " is available.");
-        }
-    }
-
-    /**
-     * Sanity checks the parameters provided for the concept used as part of
-     * a facility declaration.  Simply evokes any errors using <code>err</code>.
-     * 
-     * @param dec The facility declaration.
-     */
-    private void sanityCheckConceptParameters(FacilityDec dec) {
-        //This eventually checks the param types so it is not being moved to VisitorSanityCheck
-        ModuleID conceptId = ModuleID.createConceptID(dec.getConceptName());
-
-        SymbolTable conceptTable =
-                myInstanceEnvironment.getSymbolTable(conceptId);
-        List<Entry> conceptParameters =
-                conceptTable.getModuleScope().getModuleParameters();
-
-        List<ModuleArgumentItem> declarationArguments = dec.getConceptParams();
-
-        try {
-            sanityCheckProvidedArguments(conceptParameters,
-                    declarationArguments);
-        }
-        catch (Exception e) {
-            err.error(dec.getName().getLocation(), e.getMessage());
-        }
-    }
-
-    /**
-     * The top-level sanity check method for checking a facility declaration's
-     * arguments for consistency with their associated concept, realization,
-     * or extension parameters.  Simply invokes any errors using 
-     * <code>err</code>.
-     * 
-     * @param dec The <code>FacilityDec</code> containing the facility 
-     *            declaration to be sanity checked.
-     */
-    private void sanityCheckFacilityDeclarationParameters(FacilityDec dec) {
-        //This eventually checks the concept, body, and enhancement parameter types so it is not being removed to VisitorSanityCheck
-
-        sanityCheckConceptParameters(dec);
-        sanityCheckBodyParameters(dec);
-
-        List<EnhancementItem> enhancements = dec.getEnhancements();
-        List<EnhancementBodyItem> enhancementBodies =
-                dec.getEnhancementBodies();
-
-        //Check each enhancement/realization pair individually
-        //EnhancementItem curEnhancement;
-        EnhancementBodyItem curEnhancementBody, curEnhancement;
-        PosSymbol curEnhancementName;
-        for (int curEnhancementIndex = 0; curEnhancementIndex < enhancementBodies
-                .size(); curEnhancementIndex++) {
-
-            //curEnhancement = enhancements.get(curEnhancementIndex);
-            curEnhancementBody = enhancementBodies.get(curEnhancementIndex);
-            curEnhancementName = curEnhancementBody.getName();
-
-            sanityCheckEnhancementClause(curEnhancementName,
-                    curEnhancementBody, dec.getConceptName());
-        }
-    }
-
-    /** The top level sanity check method for checking the parameters of a
-     * procedure against the parameters of its corresponding operation.  Simply
-     * invokes any errors using <code>err</code>.
-     * 
-     * @param dec The <code>ProcedureDec</code> containing the procedure
-     *            declaration to be sanity checked.
-     */
-    private void sanityCheckProcedure(ProcedureDec dec) {
-
-        //Get the name of the procedure as a Symbol
-        Symbol procedureSymbol = dec.getName().getSymbol();
-
-        myEncounteredProcedures.add(procedureSymbol.getName());
-
-        try {
-
-            //Get the operation of the same name from the concept
-            OperationEntry operation = getConceptOperation(procedureSymbol);
-
-            //Make sure they have the same number and types of arguments
-            if (operation != null) {
-                sanityCheckProcedureParameters(operation, dec);
-            }
-        }
-        catch (SanityCheckException e) {
-            //We couldn't find an operation corresponding to the procedure
-            //under consideration
-            err.error(dec.getName().getLocation(), e.getMessage());
-        }
-    }
-
-    /**
-     * This method simply invokes an error through the global variable 
-     * <code>err</code> if the parameters of the provided operation and the
-     * provided procedure do not match in number or type signature.  Returns
-     * true iff the number of parameters was correct (even if some of the types
-     * were wrong).
-     * <br><br>
-     * ASSUMES: That the number of parameters in the operation and procedure
-     * 			are the same or already reported as an error in 
-     * 			<code>VisitorSanityCheck.preProcedureDec()</code>
-     * 
-     * @param operation The operation whose parameter types and number should
-     *                  be checked.
-     * @param procedure The procedure whose parameter types and number should
-     *                  be checked.
-     *                  
-     * @return True iff the number of parameters was correct.
-     */
-    private void sanityCheckProcedureParameters(OperationEntry operation,
-            ProcedureDec procedure) {
-
-        //Now that we have the operation, get its parameter types
-        List<Type> operationParameterTypes =
-                getParameterVarEntryTypes(operation.getParameters());
-
-        //Get the mathematical type of each procedure parameter.
-        List<Type> procedureParameterTypes =
-                getParameterVarDecTypes(procedure.getParameters());
-
-        sanityCheckProcedureParameterTypes(operationParameterTypes,
-                procedureParameterTypes, operation, procedure);
-    }
-
-    /**
-     * This method simply invokes and error with <code>err</code> for each 
-     * parameter of a procedure declaration whose type does not match the
-     * corresponding parameter of the corresponding operation.
-     * 
-     * Assumes that the same number of parameters is in each list.
-     * 
-     * @param operationParameterTypes A <code>List</code> of <code>Type</code>s
-     *                                representing the parameters of the
-     *                                corresponding operation in order.
-     * @param procedureParameterTypes A <code>List</code> of <code>Type</code>s
-     *                                representing the parameters of the
-     *                                procedure in order.
-     * @param procedure The procedure declaration itself.
-     */
-    private void sanityCheckProcedureParameterTypes(
-            List<Type> operationParameterTypes,
-            List<Type> procedureParameterTypes, OperationEntry operation,
-            ProcedureDec procedure) {
-
-        //Check each parameter against its sister, report any errors
-        Type curOperationType, curProcedureType;
-        for (int curArgumentIndex = 0; curArgumentIndex < operationParameterTypes
-                .size(); curArgumentIndex++) {
-
-            curOperationType = operationParameterTypes.get(curArgumentIndex);
-            curProcedureType = procedureParameterTypes.get(curArgumentIndex);
-
-            try {
-                sanityCheckParameterType(curOperationType, curProcedureType,
-                        procedure);
-            }
-            catch (SanityCheckException e) {
-                //If we got here, the types did not match up correctly
-                String iName =
-                        myAssociatedConceptSymbolTable.getModuleID().getName()
-                                .toString();
-                Location l1 =
-                        procedure.getParameters().get(curArgumentIndex)
-                                .getName().getLocation();
-                Iterator<VarEntry> it = operation.getParameters();
-                for (int i = 0; i < curArgumentIndex; i++)
-                    it.next();
-                Location l2 = it.next().getName().getLocation();
-
-                err.error(l1, l2, incompatibleParameterTypes(iName,
-                        curOperationType, curProcedureType));
-            }
-        }
-    }
-
-    /**
-     * This method simply throws a <code>SanityCheckException</code> if the 
-     * provided types do not match.  "Matching" is currently defined as 
-     * having the same TypeName.getName().
-     * 
-     * XXX : This definition of matching may need to be examined.
-     * 
-     * @param operationType The type of the parameter to the operation.
-     * @param procedureType The type of the parameter to the procedure.
-     * @param procedure The <code>Dec</code> of the declaration under
-     *                  consideration.
-     *                  
-     * @throws SanityCheckException If the <code>procedureType</code> and the
-     *                              <code>operationType</code> are not
-     *                              equivalent.
-     */
-    private void sanityCheckParameterType(Type operationType,
-            Type procedureType, Dec procedure) throws SanityCheckException {
-
-        if (!(operationType.toString().equals(procedureType.toString()))) {
-            String iName =
-                    myAssociatedConceptSymbolTable.getModuleID().getName()
-                            .toString();
-            throw new SanityCheckException(incompatibleParameterTypes(iName,
-                    operationType, procedureType));
-        }
-    }
-
-    /*private void sanityCheckParameterMode
-    		(Mode operationMode, Mode procedureMode, Dec procedure)
-    		throws SanityCheckException {
-    	
-    	String operationModeName = operationMode.getModeName();
-    	String procedureModename = procedureMode.getModeName();
-    	
-    	if(!(operationModeName.equals(procedureModename))){
-    		String iName = myAssociatedConceptSymbolTable.getModuleID().getName().toString();
-    		throw new SanityCheckException(
-    				incompatibleParameterModes(iName, operationMode, procedureMode));
-    	}
-    }*/
-
-    /**
-     * This method simply invokes an error using <code>err</code> for each
-     * parameter of <code>procedure</code> whose mode is not appropriate for
-     * implementing the corresponding parameter mode in the corresponding 
-     * <code>operation</code>.  Assumes that <code>operation</code> and
-     * <code>procedure</code> have the same number of parameters, so this
-     * should be checked ahead of time with 
-     * <code>sanityCheckProcedureArgumentsNumberAndTypes</code>.
-     * 
-     * @param operation The operation corresponding to the procedure in 
-     *                  <code>procedure</code>.
-     * @param procedure The procedure corresponding to the operation in
-     *                  <code>operation</code>.
-     */
-    /*private void sanityCheckProcedureParameterModes
-    		(OperationEntry operation, ProcedureDec procedure) {
-    	
-    	//Get the operation's parameter modes
-    	List<Mode> operationParameterModes =
-    		getParameterVarEntryModes(operation.getParameters());
-    	
-    	//Get the procedure's parameter modes
-    	List<Mode> procedureParameterModes =
-    		getParameterVarDecModes(procedure.getParameters());
-    	
-    	//Test each parameter against its sister and make sure the modes are ok
-    	Mode curOperationMode, curProcedureMode;
-    	for (int curArgumentIndex = 0; 
-    	     curArgumentIndex < operationParameterModes.size();
-    	     curArgumentIndex++) {
-    		
-    		curOperationMode = operationParameterModes.get(curArgumentIndex);
-    		curProcedureMode = procedureParameterModes.get(curArgumentIndex);
-    		
-    		try {
-    			sanityCheckParameterModeStrength
-    				(curOperationMode, curProcedureMode);
-    		}
-    		catch (SanityCheckException e) {
-    			//If we got here, the modes did not match up correctly
-    			PosSymbol p =
-    				procedure.getParameters().get(curArgumentIndex).getName();
-    			err.error(p.getLocation(), e.getMessage());
-    		}
-    	}
-    }*/
-
-    /** Takes a <code>DefinitionEntry</code> and builds a <code>Type</code>
-     * corresponding to the type of that entry that is appropriate for comparing
-     * with the type of a definition parameter provided in a VarEntry.
-     */
-    private Type buildDefinitionEntryType(DefinitionEntry definition) {
-        Type retval;
-
-        if (definition.getParameters().hasNext()) {
-            List<FieldItem> parameterTuple = new List<FieldItem>();
-
-            Iterator<VarEntry> varEntries = definition.getParameters();
-            VarEntry curVarEntry;
-            while (varEntries.hasNext()) {
-                curVarEntry = varEntries.next();
-                parameterTuple.add(new FieldItem(curVarEntry.getName(),
-                        curVarEntry.getType()));
-            }
-
-            TupleType domain = new TupleType(parameterTuple);
-            retval = new FunctionType(domain, definition.getType());
-        }
-        else {
-            retval = null;
-        }
-
-        return retval;
-    }
-
-    /** Sanity checks the signature of a definition provided as the argument to
-     * a parameter that expects a definition.
-     */
-    private void sanityCheckProvidedDefinition(VarEntry parameter,
-            DefinitionEntry argument) {
-        Type argumentType = buildDefinitionEntryType(argument);
-
-        try {
-            Location errorLocation = argument.getName().getLocation();
-            if (!metr.matchTypes(errorLocation, parameter.getType(),
-                    argumentType, true, false)) {
-
-                err.error(errorLocation, incompatibleDefinitionTypesMessage(
-                        parameter.getType(), argumentType));
-            }
-        }
-        catch (Exception e) {}
-    }
-
-    /** Sanity checks the argument provided for a parameter that is meant to be
-     * an Definition.  Evokes any errors using <code>err</code>.
-     */
-    private void sanityCheckDefinitionArgument(VarEntry parameter,
-            ModuleArgumentItem argument) {
-
-        //Since, to my knowledge, you cannot define Definitions in-place, the
-        //argument BETTER be a variable with a name, rather than an expression.
-        PosSymbol argumentName = argument.getName();
-        if (argumentName == null) {
-            err.error(argument.getEvalExp().getLocation(),
-                    expressionGivenWhereDefinitionExpected());
-        }
-        else {
-            try {
-                DefinitionEntry definition =
-                        getDefinitionByName(argumentName.getSymbol());
-
-                sanityCheckProvidedDefinition(parameter, definition);
-            }
-            catch (NotFoundException e) {
-                err.error(argumentName.getLocation(),
-                        noSuchDefinition(argumentName.getSymbol()));
-            }
-        }
-    }
-
-    /** Sanity checks the argument provided for a parameter that is a mundane
-     * value.  Evokes any errors using <code>err</code>.
-     */
-    private void sanityCheckVariableArgument(VarEntry parameter,
-            ModuleArgumentItem argument) {
-
-        Location errorLocation;
-
-        //ProgramExpTypeResolver petr = new ProgramExpTypeResolver(table);
-
-        //This is the type to match against
-        Type parameterType = parameter.getType();
-
-        //This big if just determines the type of whatever has been provided,
-        //or evokes an error if the type cannot be determined
-        Type argumentType = null;
-        PosSymbol argumentName = argument.getName();
-        if (argumentName == null) {
-            errorLocation = argument.getEvalExp().getLocation();
-            try {
-                argumentType = petr.getProgramExpType(argument.getEvalExp());
-            }
-            catch (TypeResolutionException e) {
-                err.error(errorLocation,
-                        "Could not resolve the type of this expression.");
-            }
-        }
-        else {
-            errorLocation = argumentName.getLocation();
-            try {
-                VarEntry variable = getVariableByName(argumentName.getSymbol());
-                argumentType = variable.getType();
-            }
-            catch (NotFoundException e) {
-                err.error(errorLocation, noSuchVariableName(argumentName
-                        .getSymbol()));
-            }
-        }
-
-        //Check that the types match
-        if (argumentType != null) {
-            if (!parameterType.getProgramName().equals(
-                    argumentType.getProgramName())) {
-
-                err.error(errorLocation, expectedDiffTypeMessage(""
-                        + parameterType.getProgramName(), ""
-                        + argumentType.getProgramName()));
-            }
-        }
-    }
-
-    /** Sanity checks the individual parameter of an operation that was itself
-     * provided as an argument.
-     * 
-     * @param parameterOperationParameter The a parameter of the operation
-     *                                    parameter.
-     * @param argumentOperationParameter The corresponding parameter for the
-     *                                   operation provided as an argument.
-     */
-    private void sanityCheckOperationsParameterMatch(
-            VarEntry parameterOperationParameter,
-            VarEntry argumentOperationParameter, int parameterIndex)
-            throws SanityCheckException {
-
-        //Make sure we were given a definition if we wanted one.
-        if (parameterOperationParameter.getMode() == Mode.DEFINITION
-                && argumentOperationParameter.getMode() != Mode.DEFINITION) {
-            throw new SanityCheckException(problemWithProvidedOperationMessage(
-                    parameterIndex, expectedDefinitionMessage()));
-        }
-
-        //Make sure we WERE'NT given a definition if we DIDN'T want one.
-        if (parameterOperationParameter.getMode() != Mode.DEFINITION
-                && argumentOperationParameter.getMode() == Mode.DEFINITION) {
-            throw new SanityCheckException(problemWithProvidedOperationMessage(
-                    parameterIndex, noDefinitionExpectedMessage()));
-        }
-
-        //Make sure the mode is compatible.
-        //if (!Mode.implementsCompatible(parameterOperationParameter.getMode(), 
-        //argumentOperationParameter.getMode())) {
-        if (!Mode.implementsCompatible(argumentOperationParameter.getMode(),
-                parameterOperationParameter.getMode())) {
-            throw new SanityCheckException(problemWithProvidedOperationMessage(
-                    parameterIndex, incompatibleParameterModes(
-                            parameterOperationParameter.getMode(),
-                            argumentOperationParameter.getMode())));
-        }
-
-        //Make sure the type is right.
-        //if (!parameterOperationParameter.getType().getProgramName().equals(
-        //argumentOperationParameter.getType().getProgramName())) {
-        if (!sanityCheckOperationParameterTypesMatch(
-                parameterOperationParameter.getType(),
-                argumentOperationParameter.getType())) {
-            throw new SanityCheckException(problemWithProvidedOperationMessage(
-                    parameterIndex, expectedDiffTypeMessage(
-                            parameterOperationParameter.getType().asString(),
-                            argumentOperationParameter.getType().asString())));
-        }
-    }
-
-    private boolean sanityCheckOperationParameterTypesMatch(Type p1, Type p2) {
-        boolean isMatch = false;
-        if (p1.getProgramName().equals(p2.getProgramName())) {
-            isMatch = true;
-        }
-        else if (p1.getProgramName().getName().getName().equals("Entry")) {
-            isMatch = true;
-        }
-        return isMatch;
-    }
-
-    /** Sanity checks an operation named as an argument.  Evokes errors on
-     * <code>err</code> if the operation does not match the type signature of 
-     * the operation as required by the formal parameter.
-     * 
-     * @param parameter The formal operation parameter.
-     * @param argument The operation provided.
-     */
-    private void sanityCheckOperationsMatch(OperationEntry parameter,
-            OperationEntry argument) throws SanityCheckException {
-
-        Iterator<VarEntry> parameterOperationParameters =
-                parameter.getParameters();
-
-        Iterator<VarEntry> argumentOperationParameters =
-                argument.getParameters();
-
-        //Check each argument individually against its corresponding parameter
-        int curIndex = 1;
-        boolean errors = false;
-        VarEntry curParameterOperationParameter, curArgumentOperationParameter;
-        while (parameterOperationParameters.hasNext() && !errors) {
-            curParameterOperationParameter =
-                    parameterOperationParameters.next();
-
-            if (argumentOperationParameters.hasNext()) {
-                curArgumentOperationParameter =
-                        argumentOperationParameters.next();
-
-                sanityCheckOperationsParameterMatch(
-                        curParameterOperationParameter,
-                        curArgumentOperationParameter, curIndex);
-            }
-            else {
-                throw new SanityCheckException(
-                        operationHasTooFewArgumentsMessage());
-            }
-
-            curIndex++;
-        }
-
-        if (argumentOperationParameters.hasNext()) {
-            throw new SanityCheckException(
-                    operationHasTooManyArgumentsMessage());
-        }
-    }
-
-    /** Sanity checks the argument provided for a parameter that is meant to be
-     * an Operation.  Evokes any errors using <code>err</code>.
-     */
-    private void sanityCheckOperationArgument(OperationEntry parameter,
-            ModuleArgumentItem argument) {
-
-        PosSymbol argumentName = argument.getName();
-        if (argument.getName() == null) {
-            err.error(argument.getEvalExp().getLocation(),
-                    expressionFoundWhereOperationExpectedMessage());
-        }
-        else {
-            ModuleScope curModuleScope = table.getModuleScope();
-            if (argument.getQualifier() != null) {
-                ModuleID qualID =
-                        ModuleID.createFacilityID(argument.getQualifier());
-                if (myInstanceEnvironment.contains(qualID)) {
-                    ModuleScope qualModuleScope =
-                            myInstanceEnvironment.getSymbolTable(qualID)
-                                    .getModuleScope();
-                    curModuleScope = qualModuleScope;
-                }
-            }
-            if (curModuleScope
-                    .containsOperation(argument.getName().getSymbol())) {
-
-                OperationEntry argumentEntry =
-                        curModuleScope.getOperation(argumentName.getSymbol());
-
-                try {
-                    sanityCheckOperationsMatch(parameter, argumentEntry);
-                }
-                catch (SanityCheckException e) {
-                    err.error(argumentName.getLocation(), e.getMessage());
-                }
-            }
-            else {
-                String msg =
-                        "Unknown argument: \"" + argumentName.getName() + "\"";
-                err.error(argumentName.getLocation(), msg);
-            }
-        }
-    }
-
-    /** Sanity checks the argument provided for a parameter that is meant to be
-     * a Type.  Evokes any errors using <code>err</code>.
-     * 
-     * XXX : Currently does not check to make sure that the provided identifier
-     *       does, in fact, name a valid type.
-     */
-    private void sanityCheckTypeArgument(TypeEntry parameter,
-            ModuleArgumentItem argument) {
-
-        PosSymbol argumentName = argument.getName();
-
-        if (argumentName == null) {
-            err.error(argument.getEvalExp().getLocation(),
-                    expressionGivenWhereTypeExpected());
-        }
-        else {
-            /*Symbol argumentNameSymbol = argumentName.getSymbol();
-            ModuleScope curModuleScope = table.getModuleScope();
-            if (!curModuleScope.containsType(argumentNameSymbol)) {
-            	err.error(argumentName.getLocation(),
-            			cantFindType(argumentNameSymbol.toString()));
-            }*/
-        }
-    }
-
-    /** Checks a given argument against its corresponding parameter.  Evokes an
-     * error using <code>err</code> if the argument type or mode is
-     * inconsistent.
-     * 
-     * @param parameter The parameter.
-     * @param argument The argument.
-     * */
-    private void sanityCheckArgumentType(Entry parameter,
-            ModuleArgumentItem argument) {
-
-        if (parameter instanceof VarEntry) {
-            VarEntry parameterAsVarEntry = (VarEntry) parameter;
-            Mode parameterMode = parameterAsVarEntry.getMode();
-
-            if (parameterMode == Mode.DEFINITION) {
-                // This fails while checking with generic entries, so commented it out for now (Chuck)
-                //sanityCheckDefinitionArgument(parameterAsVarEntry, argument);
-            }
-            else {
-                //XXX : For the moment we assume if we've gotten here then the
-                //parameter in question is an ordinary variable parameter
-                sanityCheckVariableArgument(parameterAsVarEntry, argument);
-            }
-        }
-        else if (parameter instanceof OperationEntry) {
-            OperationEntry parameterAsOperationEntry =
-                    (OperationEntry) parameter;
-
-            sanityCheckOperationArgument(parameterAsOperationEntry, argument);
-        }
-        else if (parameter instanceof TypeEntry) {
-            TypeEntry parameterAsTypeEntry = (TypeEntry) parameter;
-            sanityCheckTypeArgument(parameterAsTypeEntry, argument);
-        }
-        else {
-            System.err.println("sanityCheckArgumentType - "
-                    + parameter.getClass().toString());
-            //Not sure what would get you here for the moment.
-        }
-    }
-
-    /*
-    private void sanityCheckFinalEnhancementBody(EnhancementBodyModuleDec dec) {
-    	PosSymbol enhancementName = dec.getEnhancementName();
-    	PosSymbol conceptName = dec.getConceptName();
-    	ModuleID enhancementID = ModuleID.createEnhancementID(enhancementName,
-    			conceptName);
-    	
-    	SymbolTable enhancementSymbolTable = env.getSymbolTable(enhancementID);
-    	
-    	ModuleScope enhancementScope = enhancementSymbolTable.getModuleScope();
-    	
-    	List<Symbol> requiredOperations = 
-    		enhancementScope.getLocalOperationNames();
-    	
-    	String operationName;
-    	OperationEntry operationEntry;
-    	for (Symbol s : requiredOperations) {
-    		operationName = s.getName();
-    		if (!myEncounteredProcedures.contains(operationName)) {
-    			operationEntry = enhancementScope.getOperation(s);
-    			
-    			err.error(operationEntry.getLocation(), 
-    					operationNotFoundMessage(dec.getName().getName()));
-    		}
-    	}
-    }*/
 }

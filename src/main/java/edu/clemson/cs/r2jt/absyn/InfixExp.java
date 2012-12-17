@@ -64,21 +64,13 @@ import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
+import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.type.BooleanType;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.verification.*;
 
-public class InfixExp extends Exp {
-
-    // ===========================================================
-    // Constants
-    // ===========================================================
-
-    public static final int AND = 1;
-    public static final int OR = 2;
-    public static final int IMPLIES = 3;
-    public static final int IFF = 4;
+public class InfixExp extends AbstractFunctionExp {
 
     /** The location member. */
     private Location location;
@@ -94,6 +86,11 @@ public class InfixExp extends Exp {
 
     public InfixExp() {
     // Empty
+    }
+
+    @Override
+    public int getQuantification() {
+        return VarExp.NONE;
     }
 
     public InfixExp(Location location, Exp left, PosSymbol opName, Exp right) {
@@ -136,11 +133,14 @@ public class InfixExp extends Exp {
                         substitute(right, substitutions));
 
         retval.setType(type);
+        retval.setMathType(getMathType());
+        retval.setMathTypeValue(getMathTypeValue());
 
         return retval;
     }
 
     /** Returns the value of the location variable. */
+    @Override
     public Location getLocation() {
         return location;
     }
@@ -637,7 +637,7 @@ public class InfixExp extends Exp {
             else
                 tmpRight = right;
 
-            return formAndStmt(tmpLeft, tmpRight);
+            return getMathType().getTypeGraph().formConjunct(tmpLeft, tmpRight);
         }
         else if (!(opName.toString().equals("implies"))) {
             return this;
@@ -664,7 +664,9 @@ public class InfixExp extends Exp {
                 tmpLeft = left;
 
             if (assumpts != null)
-                tmpLeft = formAndStmt(assumpts, tmpLeft);
+                tmpLeft =
+                        getMathType().getTypeGraph().formConjunct(assumpts,
+                                tmpLeft);
 
             if (right instanceof InfixExp) {
                 tmpRight = ((InfixExp) right).getAssertions();
@@ -702,8 +704,8 @@ public class InfixExp extends Exp {
     InfixExp formAndExp(Exp A, Exp B) {
         InfixExp AndStmt = new InfixExp();
         AndStmt.setOpName(createPosSymbol("and"));
-        AndStmt.setLeft((Exp) A.clone());
-        AndStmt.setRight((Exp) B.clone());
+        AndStmt.setLeft((Exp) Exp.clone(A));
+        AndStmt.setRight((Exp) Exp.clone(B));
         return AndStmt;
     }
 
@@ -724,12 +726,14 @@ public class InfixExp extends Exp {
         InfixExp clone = new InfixExp();
         if (left == null || right == null)
             return this;
-        clone.setLeft((Exp) left.clone());
-        clone.setRight((Exp) right.clone());
+        clone.setLeft((Exp) Exp.clone(left));
+        clone.setRight((Exp) Exp.clone(right));
         if (this.location != null)
             clone.setLocation((Location) location.clone());
         clone.setOpName(opName);
         clone.setType(type);
+        clone.setMathType(getMathType());
+        clone.setMathTypeValue(getMathTypeValue());
         return clone;
     }
 
@@ -774,16 +778,18 @@ public class InfixExp extends Exp {
             InfixExp newExp = new InfixExp();
             newExp.setLocation(this.location);
             newExp.setType(this.type);
+            newExp.setMathType(getMathType());
+            newExp.setMathTypeValue(getMathTypeValue());
 
             newExp.setOpName(this.opName);
             if (left == null || right == null)
                 return this;
 
-            newExp.setLeft((Exp) this.getLeft().clone());
-            newExp.setRight((Exp) this.getRight().clone());
+            newExp.setLeft((Exp) Exp.clone(this.getLeft()));
+            newExp.setRight((Exp) Exp.clone(this.getRight()));
 
-            Exp lft = newExp.getLeft().replace(old, replacement);
-            Exp rgt = newExp.getRight().replace(old, replacement);
+            Exp lft = Exp.replace(newExp.getLeft(), old, replacement);
+            Exp rgt = Exp.replace(newExp.getRight(), old, replacement);
             if (lft != null) {
                 //String lf = lft.toString(1);
                 newExp.setLeft(lft);
@@ -813,14 +819,14 @@ public class InfixExp extends Exp {
     }
 
     public InfixExp simplifyComponents() {
-        InfixExp simplified = ((InfixExp) this.clone());
+        InfixExp simplified = ((InfixExp) Exp.clone(this));
         simplified.setLeft(simplified.getLeft().simplify());
         simplified.setRight(simplified.getRight().simplify());
         return simplified;
     }
 
     public Exp simplify() {
-        Exp simplified = ((Exp) this.simplifyComponents().clone());
+        Exp simplified = ((Exp) Exp.clone(this.simplifyComponents()));
 
         if (((InfixExp) simplified).getLeft() != null)
             ((InfixExp) simplified).setLeft(((InfixExp) simplified).left
@@ -845,10 +851,11 @@ public class InfixExp extends Exp {
             // Simplify A -> B -> C to (A ^ B) -> C
             if (((InfixExp) ((InfixExp) simplified).getRight()).getOpName()
                     .toString().equals("implies")) {
-                ((InfixExp) simplified).setLeft(formAndStmt(
-                        ((InfixExp) simplified).getLeft(),
-                        ((InfixExp) ((InfixExp) simplified).getRight())
-                                .getLeft()));
+                ((InfixExp) simplified).setLeft(getMathType().getTypeGraph()
+                        .formConjunct(
+                                ((InfixExp) simplified).getLeft(),
+                                ((InfixExp) ((InfixExp) simplified).getRight())
+                                        .getLeft()));
                 ((InfixExp) simplified)
                         .setRight(((InfixExp) ((InfixExp) simplified)
                                 .getRight()).getRight());
@@ -999,30 +1006,6 @@ public class InfixExp extends Exp {
         return posSym;
     }
 
-    public static InfixExp formAndStmt(Exp A, Exp B) {
-        InfixExp AndStmt = new InfixExp();
-        AndStmt.setOpName(createPosSymbol("and"));
-        if (A != null) {
-            AndStmt.setLeft((Exp) A.clone());
-        }
-        if (B != null)
-            AndStmt.setRight((Exp) B.clone());
-
-        AndStmt.setType(BooleanType.INSTANCE);
-        return AndStmt;
-    }
-
-    public static InfixExp formImplication(Exp A, Exp B) {
-        InfixExp ImpStmt = new InfixExp();
-        ImpStmt.setOpName(createPosSymbol("implies"));
-        ImpStmt.setLeft((Exp) A.clone());
-        ImpStmt.setRight((Exp) B.clone());
-
-        ImpStmt.setType(BooleanType.INSTANCE);
-
-        return ImpStmt;
-    }
-
     private boolean isTrueExp(Exp exp) {
         if (exp instanceof VarExp) {
             if (((VarExp) exp).getName().toString().equals(
@@ -1038,10 +1021,12 @@ public class InfixExp extends Exp {
         Exp retval;
 
         PosSymbol newOpName = opName.copy();
-        Exp newLeft = left.copy();
-        Exp newRight = right.copy();
+        Exp newLeft = Exp.copy(left);
+        Exp newRight = Exp.copy(right);
         retval = new InfixExp(null, newLeft, newOpName, newRight);
         retval.setType(type);
+        retval.setMathType(getMathType());
+        retval.setMathTypeValue(getMathTypeValue());
 
         return retval;
     }
@@ -1063,4 +1048,18 @@ public class InfixExp extends Exp {
         }
     }
 
+    @Override
+    public String getOperatorAsString() {
+        return this.opName.getName();
+    }
+
+    @Override
+    public PosSymbol getOperatorAsPosSymbol() {
+        return opName;
+    }
+
+    @Override
+    public PosSymbol getQualifier() {
+        return null;
+    }
 }

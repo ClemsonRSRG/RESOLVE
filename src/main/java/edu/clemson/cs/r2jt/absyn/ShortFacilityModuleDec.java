@@ -73,9 +73,6 @@ public class ShortFacilityModuleDec extends ModuleDec {
     /** The dec member. */
     private FacilityDec dec;
 
-    /** The usesItems member. */
-    private List<UsesItem> usesItems;
-
     // ===========================================================
     // Constructors
     // ===========================================================

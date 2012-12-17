@@ -167,7 +167,7 @@ public class ParameterVarDec extends Dec {
     public Object clone() {
         ParameterVarDec clone = new ParameterVarDec();
         clone.setName(createPosSymbol(this.getName().toString()));
-        clone.setTy((Ty) this.getTy().clone());
+        clone.setTy(getTy().copy());
         clone.setMode((Mode) this.getMode());
         return clone;
     }

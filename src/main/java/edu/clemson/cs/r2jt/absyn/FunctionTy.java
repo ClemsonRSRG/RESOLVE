@@ -60,6 +60,7 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
+import edu.clemson.cs.r2jt.data.Location;
 
 public class FunctionTy extends Ty {
 
@@ -91,6 +92,10 @@ public class FunctionTy extends Ty {
     // -----------------------------------------------------------
     // Get Methods
     // -----------------------------------------------------------
+
+    public Location getLocation() {
+        return domain.getLocation();
+    }
 
     /** Returns the value of the domain variable. */
     public Ty getDomain() {

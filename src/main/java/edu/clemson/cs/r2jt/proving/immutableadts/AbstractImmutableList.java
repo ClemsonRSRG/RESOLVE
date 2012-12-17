@@ -2,23 +2,21 @@ package edu.clemson.cs.r2jt.proving.immutableadts;
 
 import java.util.Iterator;
 
-public abstract class AbstractImmutableList<E>
-        implements
-            SimpleImmutableList<E> {
+public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
 
     @Override
-    public SimpleImmutableList<E> appended(E e) {
+    public ImmutableList<E> appended(E e) {
         return appended(new SingletonImmutableList<E>(e));
     }
 
     @Override
-    public SimpleImmutableList<E> appended(SimpleImmutableList<E> l) {
+    public ImmutableList<E> appended(ImmutableList<E> l) {
         return new ImmutableListConcatenation<E>(this, l);
     }
 
     @Override
-    public SimpleImmutableList<E> appended(Iterable<E> i) {
-        return appended(new ImmutableList<E>(i));
+    public ImmutableList<E> appended(Iterable<E> i) {
+        return appended(new ArrayBackedImmutableList<E>(i));
     }
 
     @Override
@@ -27,8 +25,8 @@ public abstract class AbstractImmutableList<E>
     }
 
     @Override
-    public SimpleImmutableList<E> removed(int index) {
-        SimpleImmutableList<E> retval;
+    public ImmutableList<E> removed(int index) {
+        ImmutableList<E> retval;
 
         if (index == 0) {
             retval = tail(1);
@@ -46,10 +44,10 @@ public abstract class AbstractImmutableList<E>
     }
 
     @Override
-    public SimpleImmutableList<E> set(int index, E e) {
-        SimpleImmutableList<E> first, second;
+    public ImmutableList<E> set(int index, E e) {
+        ImmutableList<E> first, second;
 
-        SimpleImmutableList<E> insertedList = new SingletonImmutableList<E>(e);
+        ImmutableList<E> insertedList = new SingletonImmutableList<E>(e);
 
         if (index == 0) {
             first = insertedList;
@@ -69,13 +67,13 @@ public abstract class AbstractImmutableList<E>
     }
 
     @Override
-    public SimpleImmutableList<E> insert(int index, E e) {
+    public ImmutableList<E> insert(int index, E e) {
         return insert(index, new SingletonImmutableList<E>(e));
     }
 
     @Override
-    public SimpleImmutableList<E> insert(int index, SimpleImmutableList<E> l) {
-        SimpleImmutableList<E> first, second;
+    public ImmutableList<E> insert(int index, ImmutableList<E> l) {
+        ImmutableList<E> first, second;
 
         if (index == 0) {
             first = l;
@@ -94,10 +92,11 @@ public abstract class AbstractImmutableList<E>
     }
 
     @Override
-    public SimpleImmutableList<E> subList(int startIndex, int length) {
+    public ImmutableList<E> subList(int startIndex, int length) {
         return tail(startIndex).head(length);
     }
 
+    @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer("[");
 

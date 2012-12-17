@@ -64,6 +64,24 @@ import edu.clemson.cs.r2jt.data.Location;
 
 public class TypeResolutionVisitor {
 
+    public Type getCrossTypeExpType(CrossTypeExpression data)
+            throws TypeResolutionException {
+        assert false : "This method should not be called.";
+        return null;
+    }
+
+    public Type getArbitraryExpType(ArbitraryExpTy data)
+            throws TypeResolutionException {
+        assert false : "This method should not be called.";
+        return null;
+    }
+
+    public Type getImplicitTypeParameterExp(TypeAssertionExp data)
+            throws TypeResolutionException {
+        assert false : "This method should not be called.";
+        return null;
+    }
+
     public Type getDoubleExpType(DoubleExp data) throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;

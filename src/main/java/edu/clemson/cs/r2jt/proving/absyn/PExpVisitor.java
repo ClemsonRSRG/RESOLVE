@@ -18,6 +18,8 @@ public abstract class PExpVisitor {
 
     public void beginPLambda(PLambda p) {}
 
+    public void beginChildren(PExp p) {}
+
     public void fencepostPSymbol(PSymbol p) {}
 
     public void fencepostPrefixPSymbol(PSymbol p) {}
@@ -29,6 +31,8 @@ public abstract class PExpVisitor {
     public void fencepostPostfixPSymbol(PSymbol p) {}
 
     public void fencepostPAlternatives(PAlternatives p) {}
+
+    public void endChildren(PExp p) {}
 
     public void endPExp(PExp p) {}
 

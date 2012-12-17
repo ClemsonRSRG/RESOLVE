@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
+import edu.clemson.cs.r2jt.utilities.Mapping;
+
 /**
  * <p>A <code>FailoverChooser</code> is a <code>TransformationChooser</code>
  * that chains two existing <code>TransformationChooser</code>s together in
@@ -25,7 +27,7 @@ public class FailoverChooser implements TransformationChooser {
 
     //A key for use with ProofData
     private static final Object FAILED_AT_STEP = new Object();
-    private final Mapper<ProofPathSuggestion, ProofPathSuggestion> myNoteAdder;
+    private final Mapping<ProofPathSuggestion, ProofPathSuggestion> myNoteAdder;
     private final TransformationChooser myFirstChooser, mySecondChooser;
 
     public FailoverChooser(TransformationChooser first,
@@ -33,7 +35,7 @@ public class FailoverChooser implements TransformationChooser {
 
         myFirstChooser = first;
         mySecondChooser = second;
-        myNoteAdder = new NoteAddingMapper(failoverNote);
+        myNoteAdder = new NoteAddingMapping(failoverNote);
     }
 
     public FailoverChooser(TransformationChooser first,
@@ -41,7 +43,7 @@ public class FailoverChooser implements TransformationChooser {
 
         myFirstChooser = first;
         mySecondChooser = second;
-        myNoteAdder = new DummyMapper();
+        myNoteAdder = new DummyMapping();
     }
 
     @Override
@@ -307,13 +309,13 @@ public class FailoverChooser implements TransformationChooser {
         }
     }
 
-    private class NoteAddingMapper
+    private class NoteAddingMapping
             implements
-                Mapper<ProofPathSuggestion, ProofPathSuggestion> {
+                Mapping<ProofPathSuggestion, ProofPathSuggestion> {
 
         private final String myNote;
 
-        public NoteAddingMapper(String note) {
+        public NoteAddingMapping(String note) {
             myNote = note;
         }
 
@@ -325,9 +327,9 @@ public class FailoverChooser implements TransformationChooser {
         }
     }
 
-    private class DummyMapper
+    private class DummyMapping
             implements
-                Mapper<ProofPathSuggestion, ProofPathSuggestion> {
+                Mapping<ProofPathSuggestion, ProofPathSuggestion> {
 
         @Override
         public ProofPathSuggestion map(ProofPathSuggestion i) {

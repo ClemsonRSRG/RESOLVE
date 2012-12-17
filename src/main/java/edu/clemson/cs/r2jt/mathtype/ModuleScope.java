@@ -1,89 +1,44 @@
 package edu.clemson.cs.r2jt.mathtype;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
+import edu.clemson.cs.r2jt.absyn.ModuleDec;
 
 /**
- * <p>A <code>ModuleScope</code> refines {@link Scope Scope} with additional
- * information specific to modules, such as a list of imports.</p>
+ * <p>A <code>ModuleScope</code> refines {@link Scope Scope} to provide methods
+ * specific to those scopes introduced by a RESOLVE module.</p>
+ * 
+ * <p>As with <code>Scope</code>, <code>ModuleScope</code> defines no mutator
+ * methods, but specific concrete subclasses may be mutable.</p>
  */
-public class ModuleScope extends Scope implements ModuleScopeInterface {
+public interface ModuleScope extends Scope {
 
-    private final ModuleIdentifier myModuleName;
-    private final List<ModuleIdentifier> myImportedModules;
-    private final MathSymbolTable mySymbolTable;
+    public ModuleDec getDefiningElement();
 
-    ModuleScope(ModuleIdentifier module,
-            ResolveConceptualElement definingElement,
-            IdentifierResolver parent,
-            Map<String, MathSymbolTableEntry> bindings,
-            List<ModuleIdentifier> importedModules, MathSymbolTable symbolTable) {
+    /**
+     * <p>Returns a <code>ModuleIdentifier</code> that can be used to refer
+     * to the module who's scope is represented by this 
+     * <code>ModuleScope</code>.</p>
+     * 
+     * @return The <code>ModuleIdentifier</code>.
+     */
+    public ModuleIdentifier getModuleIdentifier();
 
-        super(definingElement, parent, bindings);
+    /**
+     * <p>Returns <code>true</code> <strong>iff</code> the module who's scope
+     * is represented by this <code>ModuleScope</code> imports the given
+     * module.  Note that, by definition, all modules import themselves.</p>
+     */
+    public boolean imports(ModuleIdentifier i);
 
-        myModuleName = module;
-        myImportedModules = new LinkedList<ModuleIdentifier>(importedModules);
-        mySymbolTable = symbolTable;
-    }
-
-    @Override
-    public ModuleIdentifier getModuleIdentifier() {
-        return myModuleName;
-    }
-
-    @Override
-    public boolean imports(ModuleIdentifier i) {
-        return i.equals(myModuleName) || myImportedModules.contains(i);
-    }
-
-    @Override
-    public List<ModuleIdentifier> getImports() {
-        return new LinkedList<ModuleIdentifier>(myImportedModules);
-    }
-
-    @Override
-    public MathSymbolTableEntry getInnermostBinding(String name,
-            MathSymbolTable.ImportStrategy importStrategy)
-            throws NoSuchSymbolException,
-                DuplicateSymbolException {
-
-        MathSymbolTableEntry binding;
-
-        try {
-            binding = super.getInnermostBinding(name, importStrategy);
-        }
-        catch (NoSuchSymbolException e) {
-            binding =
-                    ModuleScopeBuilder.getBindingInImports(name,
-                            importStrategy, myImportedModules, mySymbolTable,
-                            myModuleName);
-        }
-
-        return binding;
-    }
-
-    @Override
-    public List<MathSymbolTableEntry> getAllBindings(String name,
-            MathSymbolTable.ImportStrategy importStrategy) {
-
-        List<MathSymbolTableEntry> result =
-                super.getAllBindings(name, importStrategy);
-        ModuleScopeBuilder.buildAllBindingsFromImports(name, result,
-                importStrategy, myImportedModules, mySymbolTable, myModuleName);
-
-        return result;
-    }
-
-    @Override
-    public void buildAllBindingsList(String symbol,
-            List<MathSymbolTableEntry> accumulator,
-            MathSymbolTable.ImportStrategy importStrategy) {
-
-        super.buildAllBindingsList(symbol, accumulator, importStrategy);
-        ModuleScopeBuilder.buildAllBindingsFromImports(symbol, accumulator,
-                importStrategy, myImportedModules, mySymbolTable, myModuleName);
-    }
+    /**
+     * <p>Returns a <code>List</code> of modules that the module who's scope
+     * is represented by this <code>ModuleScope</code> imports, not including
+     * itself (which all modules are defined to import).  This <code>List</code>
+     * is a copy and modifying it will not impact the behavior of this
+     * <code>ModuleScope</code>.</p>
+     * 
+     * @returns A <code>List</code> of imported modules.
+     */
+    public List<ModuleIdentifier> getImports();
 }

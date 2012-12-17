@@ -60,6 +60,7 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
+import edu.clemson.cs.r2jt.data.Location;
 
 public class FunctionArgList extends ResolveConceptualElement {
 
@@ -106,6 +107,10 @@ public class FunctionArgList extends ResolveConceptualElement {
     // Public Methods
     // ===========================================================
 
+    public Location getLocation() {
+        return arguments.get(0).getLocation();
+    }
+
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitFunctionArgList(this);
@@ -133,7 +138,7 @@ public class FunctionArgList extends ResolveConceptualElement {
         while (i.hasNext()) {
             Exp tmp = i.next();
             if (tmp != null)
-                arg.add((Exp) tmp.clone());
+                arg.add((Exp) Exp.clone(tmp));
         }
         clone.setArguments(arg);
         return clone;
@@ -154,7 +159,7 @@ public class FunctionArgList extends ResolveConceptualElement {
         Iterator<Exp> it = arguments.iterator();
         List<Exp> newArguments = new List<Exp>();
         while (it.hasNext()) {
-            newArguments.add(it.next().copy());
+            newArguments.add(Exp.copy(it.next()));
         }
         return new FunctionArgList(newArguments);
     }
