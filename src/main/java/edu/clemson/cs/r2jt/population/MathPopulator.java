@@ -614,7 +614,7 @@ public class MathPopulator extends TreeWalkerVisitor {
         catch (DuplicateSymbolException dse) {
             //This should be caught earlier, when the duplicate operation is
             //created
-            throw new RuntimeException();
+            throw new RuntimeException(dse);
         }
     }
 
@@ -623,9 +623,12 @@ public class MathPopulator extends TreeWalkerVisitor {
         exp.setMathType(exp.getExp().getMathType());
         exp.setMathTypeValue(exp.getExp().getMathTypeValue());
     }
-
+    
+    @Override
     public boolean walkTypeAssertionExp(TypeAssertionExp node) {
 
+        preTypeAssertionExp(node);
+        
         //If we exist as an implicit type parameter, there's no way our 
         //expression can know its own type (that's defined by the asserted Ty),
         //so we skip walking it and let postTypeAssertionExp() set its type for
@@ -636,6 +639,8 @@ public class MathPopulator extends TreeWalkerVisitor {
 
         myWalker.visit(node.getAssertedTy());
 
+        postTypeAssertionExp(node);
+        
         return true;
     }
 
@@ -646,8 +651,8 @@ public class MathPopulator extends TreeWalkerVisitor {
             throw new SourceErrorException("This construct only permitted in "
                     + "type declarations or in expressions matching: \n\n"
                     + "   Type Theorem <name>: <quantifiers>, \n"
-                    + "       [<condition> implies] : <assertedType>", node
-                    .getLocation());
+                    + "       [<condition> implies] <expression> : "
+                    + "<assertedType>", node.getLocation());
         }
         //Note that postTypeTheoremDec() checks the "form" of a type theorem at
         //the top two levels.  So all we're checking for here is that the type
@@ -771,6 +776,8 @@ public class MathPopulator extends TreeWalkerVisitor {
 
     @Override
     public boolean walkQuantExp(QuantExp node) {
+        preQuantExp(node);
+
         MathPopulator.emitDebug("Entering walkQuantExp...");
         List<MathVarDec> vars = node.getVars();
 
@@ -798,6 +805,8 @@ public class MathPopulator extends TreeWalkerVisitor {
         myActiveQuantifications.pop();
 
         MathPopulator.emitDebug("Exiting walkQuantExp.");
+
+        postQuantExp(node);
 
         //This indicates that we've overrided the default
         return true;
@@ -888,8 +897,10 @@ public class MathPopulator extends TreeWalkerVisitor {
 
     @Override
     public void postProgramIntegerExp(ProgramIntegerExp e) {
-        e.setProgramType(PTPrimitive.getInstance(myTypeGraph,
-                PrimitiveTypeName.INTEGER));
+        e.setProgramType(getIntegerProgramType());
+        
+        /*e.setProgramType(PTPrimitive.getInstance(myTypeGraph,
+                PrimitiveTypeName.INTEGER));*/
 
         //Do math type stuff
         postSymbolExp(null, "" + e.getValue(), e);
@@ -1030,15 +1041,12 @@ public class MathPopulator extends TreeWalkerVisitor {
     @Override
     public void preTypeTheoremDec(TypeTheoremDec node) {
         myBuilder.startScope(node);
+        myInTypeTheoremBindingExpFlag = false;
     }
 
     @Override
-    public void midTypeTheoremDec(TypeTheoremDec node,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {
-
-        myInTypeTheoremBindingExpFlag =
-                (prevChild instanceof Dec && nextChild instanceof Exp);
+    public void postTypeTheoremDecMyUniversalVars(TypeTheoremDec node) {
+        myInTypeTheoremBindingExpFlag = true;
     }
 
     @Override
@@ -1178,6 +1186,30 @@ public class MathPopulator extends TreeWalkerVisitor {
     //   Helper functions
     //-------------------------------------------------------------------
 
+    private PTType getIntegerProgramType() {
+        PTType result;
+        
+        try {
+            ProgramTypeEntry type =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameQuery(null, "Integer",
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false)).toProgramTypeEntry(null);
+
+            result = type.getProgramType();
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException("No program Integer type in scope???");
+        }
+        catch (DuplicateSymbolException dse) {
+            //Shouldn't be possible--NameQuery can't throw this
+            throw new RuntimeException(dse);
+        }
+        
+        return result;
+    }
+    
     private SymbolTableEntry addBinding(String name, Location l,
             SymbolTableEntry.Quantification q,
             ResolveConceptualElement definingElement, MTType type,

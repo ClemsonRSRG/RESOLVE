@@ -90,7 +90,7 @@ public class TypeAssertionExp extends Exp {
 
     @Override
     public Location getLocation() {
-        return myExp.getLocation();
+        return myLocation;
     }
 
     @Override

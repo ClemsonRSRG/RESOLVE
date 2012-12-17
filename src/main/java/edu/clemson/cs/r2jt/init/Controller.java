@@ -228,7 +228,14 @@ public class Controller {
                 cause = cause.getCause();
             }
 
-            if (cause != null) {
+            if (cause == null) {
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                }
+                
+                throw new RuntimeException(e);
+            }
+            else {
                 SourceErrorException see = (SourceErrorException) cause;
                 err.error(see.getErrorLocation(), see.getMessage());
             }

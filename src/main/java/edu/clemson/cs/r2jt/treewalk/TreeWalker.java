@@ -184,7 +184,11 @@ public class TreeWalker {
                 visitorMethod.invoke(this.myVisitor, (Object[]) e);
             }
             catch (NoSuchMethodException nsme) {
-                throw new RuntimeException(nsme);
+                //This is fine if we're dealing with a virtual node, otherwise
+                //it shouldn't be possible
+                if (!list) {
+                    throw new RuntimeException(nsme);
+                }
             }
             catch (IllegalAccessException iae) {
                 throw new RuntimeException(iae);
@@ -209,30 +213,40 @@ public class TreeWalker {
             elementClass = elementClass.getSuperclass();
         }
 
+        boolean foundOverride = false;
         Iterator<Class<?>> iter = classHierarchy.iterator();
-        while (iter.hasNext()) {
+        while (iter.hasNext() && !foundOverride) {
             Class<?> c = iter.next();
-            String walkMethodName = "walk" + c.getSimpleName();
-            try {
-                Method walkMethod =
-                        this.myVisitor.getClass().getMethod(walkMethodName, c);
-                return ((Boolean) walkMethod.invoke(this.myVisitor, e));
-            }
-            catch (NoSuchMethodException nsme) { /* do nothing */}
-            catch (IllegalAccessException iae) {
-                throw new RuntimeException(iae);
-            }
-            catch (InvocationTargetException ite) {
-                Throwable iteCause = ite.getCause();
-
-                if (iteCause instanceof RuntimeException) {
-                    throw (RuntimeException) iteCause;
+            
+            if (!c.equals(VirtualListNode.class)) {
+                String walkMethodName = "walk" + c.getSimpleName();
+                try {
+                    Method walkMethod =
+                            this.myVisitor.getClass().getMethod(walkMethodName, c);
+                    foundOverride =
+                            ((Boolean) walkMethod.invoke(this.myVisitor, e));
                 }
+                catch (NoSuchMethodException nsme) {
+                    //Shouldn't be possible
+                    throw new RuntimeException(nsme);
+                }
+                catch (IllegalAccessException iae) {
+                    //Shouldn't be possible
+                    throw new RuntimeException(iae);
+                }
+                catch (InvocationTargetException ite) {
+                    //An exception was thrown inside the corresponding walk method
+                    Throwable iteCause = ite.getCause();
 
-                throw new RuntimeException(iteCause);
+                    if (iteCause instanceof RuntimeException) {
+                        throw (RuntimeException) iteCause;
+                    }
+
+                    throw new RuntimeException(iteCause);
+                }
             }
-
         }
-        return false;
+
+        return foundOverride;
     }
 }

@@ -258,4 +258,23 @@ public class MathSymbolTableBuilder extends ScopeRepository {
             throw new IllegalStateException("No open scope.");
         }
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        
+        boolean first = true;
+        for (ScopeBuilder b : myLexicalScopeStack) {
+            if (first) {
+                first = false;
+            }
+            else {
+                result.append(",\n");
+            }
+            
+            result.append(b.toString());
+        }
+        
+        return result.toString();
+    }
 }

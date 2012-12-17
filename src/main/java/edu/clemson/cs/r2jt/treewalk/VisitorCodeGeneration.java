@@ -53,6 +53,8 @@ public class VisitorCodeGeneration {
             for (File directory : dirs) {
                 String targetDir =
                         directory.getAbsolutePath().replace("bin", "src");
+                targetDir =
+                        targetDir.replace("target/classes", "src/main/java");
                 String outputFile =
                         targetDir + File.separator + walkerName + ".java";
                 FileWriter fstream = new FileWriter(outputFile);
