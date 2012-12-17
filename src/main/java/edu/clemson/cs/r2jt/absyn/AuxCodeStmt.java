@@ -60,19 +60,16 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
+import edu.clemson.cs.r2jt.data.Location;
 
 public class AuxCodeStmt extends Statement {
 
-    // ===========================================================
     // Variables
-    // ===========================================================
 
     /** The statements member. */
     private List<Statement> statements;
 
-    // ===========================================================
     // Constructors
-    // ===========================================================
 
     public AuxCodeStmt() {};
 
@@ -80,13 +77,15 @@ public class AuxCodeStmt extends Statement {
         this.statements = statements;
     }
 
-    // ===========================================================
     // Accessor Methods
-    // ===========================================================
 
     // -----------------------------------------------------------
     // Get Methods
     // -----------------------------------------------------------
+
+    public Location getLocation() {
+        return statements.get(0).getLocation();
+    }
 
     /** Returns the value of the elseclause variable. */
     public List<Statement> getStatements() {
@@ -102,9 +101,7 @@ public class AuxCodeStmt extends Statement {
         this.statements = statements;
     }
 
-    // ===========================================================
     // Public Methods
-    // ===========================================================
 
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {

@@ -101,6 +101,8 @@ public class GuidedListSelectIterator<T> extends JDialog implements Iterator<T> 
             throw new NoSuchElementException();
         }
 
+        myNextReturnedFlag = true;
+
         return mySelection;
     }
 

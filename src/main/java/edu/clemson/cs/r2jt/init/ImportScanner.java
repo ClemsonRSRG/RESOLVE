@@ -353,10 +353,10 @@ public class ImportScanner extends ResolveConceptualVisitor {
     // Private Methods
     // ===========================================================
 
-    private void visitModuleParameterList(List<ModuleParameter> pars) {
-        Iterator<ModuleParameter> i = pars.iterator();
+    private void visitModuleParameterList(List<ModuleParameterDec> pars) {
+        Iterator<ModuleParameterDec> i = pars.iterator();
         while (i.hasNext()) {
-            ModuleParameter par = i.next();
+            Dec par = i.next().getWrappedDec();
             if (par instanceof RealizationParamDec) {
                 visitRealizationParamDec((RealizationParamDec) par);
             }

@@ -2,6 +2,8 @@ package edu.clemson.cs.r2jt.proving;
 
 import java.util.Iterator;
 
+import edu.clemson.cs.r2jt.utilities.Mapping;
+
 /**
  * <p>A <code>ProductiveStepChooser</code> wraps an existing 
  * <code>TransformationChooser</code> and transparently returns only its
@@ -11,8 +13,8 @@ import java.util.Iterator;
  */
 public class ProductiveStepChooser implements TransformationChooser {
 
-    private static final ProductiveFilterMapper PRODUCTIVE_FILTER =
-            new ProductiveFilterMapper();
+    private static final ProductiveFilterMapping PRODUCTIVE_FILTER =
+            new ProductiveFilterMapping();
 
     private final TransformationChooser myBaseChooser;
 
@@ -40,9 +42,9 @@ public class ProductiveStepChooser implements TransformationChooser {
         return "ProductiveStep(Steps from " + myBaseChooser + ")";
     }
 
-    private static class ProductiveFilterMapper
+    private static class ProductiveFilterMapping
             implements
-                Mapper<ProofPathSuggestion, ProofPathSuggestion> {
+                Mapping<ProofPathSuggestion, ProofPathSuggestion> {
 
         @Override
         public ProofPathSuggestion map(ProofPathSuggestion i) {

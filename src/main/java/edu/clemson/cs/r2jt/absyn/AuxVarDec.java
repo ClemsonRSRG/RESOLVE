@@ -147,7 +147,7 @@ public class AuxVarDec extends Dec {
     public Object clone() {
         AuxVarDec clone = new AuxVarDec();
         clone.setName(createPosSymbol(this.getName().toString()));
-        clone.setTy((Ty) this.getTy().clone());
+        clone.setTy(this.getTy().copy());
         return clone;
     }
 

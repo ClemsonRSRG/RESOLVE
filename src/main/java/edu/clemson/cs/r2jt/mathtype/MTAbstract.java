@@ -1,17 +1,10 @@
 package edu.clemson.cs.r2jt.mathtype;
 
-public abstract class MTAbstract<T> extends MTType {
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
-    @SuppressWarnings("unchecked")
-    public final boolean equals(Object o) {
-        boolean result = this.getClass().isAssignableFrom(o.getClass());
+public abstract class MTAbstract<T extends MTType> extends MTType {
 
-        if (result) {
-            result = valueEqual((T) o);
-        }
-
-        return result;
+    public MTAbstract(TypeGraph typeGraph) {
+        super(typeGraph);
     }
-
-    public abstract boolean valueEqual(T t);
 }

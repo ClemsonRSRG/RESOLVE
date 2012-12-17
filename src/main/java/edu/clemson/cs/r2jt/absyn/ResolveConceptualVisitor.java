@@ -60,6 +60,12 @@ package edu.clemson.cs.r2jt.absyn;
 
 public class ResolveConceptualVisitor {
 
+    public void visitCrossTypeExpression(CrossTypeExpression data) {}
+
+    public void visitArbitraryExpTy(ArbitraryExpTy data) {}
+
+    public void visitImplicitTypeParameterExp(TypeAssertionExp data) {}
+
     public void visitAssumeStmt(AssumeStmt data) {}
 
     public void visitAuxCodeStmt(AuxCodeStmt data) {}

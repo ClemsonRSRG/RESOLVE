@@ -68,7 +68,7 @@ import edu.clemson.cs.r2jt.init.Environment;
 import edu.clemson.cs.r2jt.location.TypeLocator;
 import edu.clemson.cs.r2jt.scope.Binding;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
-import edu.clemson.cs.r2jt.scope.SymbolTable;
+import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.scope.TypeID;
 import edu.clemson.cs.r2jt.type.*;
 
@@ -85,7 +85,7 @@ public class Populator extends ResolveConceptualVisitor {
     // Variables
     // ===========================================================
 
-    private SymbolTable table;
+    private OldSymbolTable table;
 
     //private Environment env = Environment.getInstance();
 
@@ -97,7 +97,8 @@ public class Populator extends ResolveConceptualVisitor {
     // Constructors
     // ===========================================================
 
-    public Populator(SymbolTable table, CompileEnvironment myInstanceEnvironment) {
+    public Populator(OldSymbolTable table,
+            CompileEnvironment myInstanceEnvironment) {
         this.table = table;
         this.myInstanceEnvironment = myInstanceEnvironment;
         this.err = myInstanceEnvironment.getErrorHandler();
@@ -1169,11 +1170,11 @@ public class Populator extends ResolveConceptualVisitor {
     // Module Param Processing
     // -----------------------------------------------------------
 
-    private void visitModuleParameterList(List<ModuleParameter> pars) {
+    private void visitModuleParameterList(List<ModuleParameterDec> pars) {
         if (pars == null) {
             return;
         }
-        Iterator<ModuleParameter> i = pars.iterator();
+        Iterator<ModuleParameterDec> i = pars.iterator();
         while (i.hasNext()) {
             Dec dec = castToDec(i.next());
             if (dec instanceof DefinitionDec) {
@@ -1769,7 +1770,7 @@ public class Populator extends ResolveConceptualVisitor {
     // Cast Methods
     // -----------------------------------------------------------
 
-    private Dec castToDec(ModuleParameter par) {
+    private Dec castToDec(ModuleParameterDec par) {
         assert par instanceof Dec;
         return (Dec) par;
     }

@@ -342,7 +342,7 @@ public class MathRefExp extends Exp {
         List<VarExp> newParams = new List<VarExp>();
         Iterator<VarExp> paramsIt = params.iterator();
         while (paramsIt.hasNext()) {
-            newParams.add((VarExp) (paramsIt.next().copy()));
+            newParams.add((VarExp) (Exp.copy(paramsIt.next())));
         }
         return new MathRefExp(null, newKind, newId, newIndex, newSourceModule,
                 newParams);

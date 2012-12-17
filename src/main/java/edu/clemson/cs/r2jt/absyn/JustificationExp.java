@@ -306,8 +306,8 @@ public class JustificationExp extends Exp {
     }
 
     public Exp copy() {
-        HypDesigExp newHypDesig1 = (HypDesigExp) (hypDesig1.copy());
-        HypDesigExp newHypDesig2 = (HypDesigExp) (hypDesig2.copy());
+        HypDesigExp newHypDesig1 = (HypDesigExp) (Exp.copy(hypDesig1));
+        HypDesigExp newHypDesig2 = (HypDesigExp) (Exp.copy(hypDesig2));
         PosSymbol newRule = null;
         if (rule != null) {
             newRule = rule.copy();

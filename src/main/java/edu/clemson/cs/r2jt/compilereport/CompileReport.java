@@ -152,8 +152,4 @@ public class CompileReport {
     public void setOutput(String op) {
         myOutput = op;
     }
-
-    /*public WebSocketWriter getWsWriter(){
-        return myWsWriter;
-    }*/
 }

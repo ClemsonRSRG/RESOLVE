@@ -3,14 +3,16 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
+import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.data.Symbol;
+import edu.clemson.cs.r2jt.errors.ErrorHandler;
+import edu.clemson.cs.r2jt.init.Environment;
 import edu.clemson.cs.r2jt.type.BooleanType;
 import edu.clemson.cs.r2jt.type.ConstructedType;
 import edu.clemson.cs.r2jt.type.IndirectType;
 import edu.clemson.cs.r2jt.type.Type;
 
-public class IsInExp extends Exp {
-
-    //private ErrorHandler err = ErrorHandler.getInstance();
+public class IsInExp extends AbstractFunctionExp {
 
     // ===========================================================
     // Constants
@@ -58,7 +60,13 @@ public class IsInExp extends Exp {
     // Get Methods
     // -----------------------------------------------------------
 
+    @Override
+    public int getQuantification() {
+        return VarExp.NONE;
+    }
+
     /** Returns the value of the location variable. */
+    @Override
     public Location getLocation() {
         return location;
     }
@@ -106,6 +114,7 @@ public class IsInExp extends Exp {
     // Public Methods
     // ===========================================================
 
+    @Override
     public String getOperatorAsString() {
         String retval;
 
@@ -121,6 +130,11 @@ public class IsInExp extends Exp {
         }
 
         return retval;
+    }
+
+    @Override
+    public PosSymbol getOperatorAsPosSymbol() {
+        return new PosSymbol(location, Symbol.symbol(getOperatorAsString()));
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
@@ -253,13 +267,13 @@ public class IsInExp extends Exp {
     public Exp replace(Exp old, Exp replacement) {
         if (!(old instanceof EqualsExp)) {
             IsInExp newExp = new IsInExp();
-            newExp.setLeft((Exp) left.clone());
-            newExp.setRight((Exp) right.clone());
+            newExp.setLeft((Exp) Exp.clone(left));
+            newExp.setRight((Exp) Exp.clone(right));
             newExp.setOperator(this.operator);
             newExp.setType(type);
             newExp.setLocation(this.location);
-            Exp lft = left.replace(old, replacement);
-            Exp rgt = right.replace(old, replacement);
+            Exp lft = Exp.replace(left, old, replacement);
+            Exp rgt = Exp.replace(right, old, replacement);
             if (lft != null)
                 newExp.setLeft(lft);
             if (rgt != null)
@@ -301,8 +315,8 @@ public class IsInExp extends Exp {
 
     public Object clone() {
         IsInExp clone = new IsInExp();
-        clone.setLeft((Exp) this.getLeft().clone());
-        clone.setRight((Exp) this.getRight().clone());
+        clone.setLeft((Exp) Exp.clone(this.getLeft()));
+        clone.setRight((Exp) Exp.clone(this.getRight()));
         if (this.location != null)
             clone.setLocation((Location) this.getLocation().clone());
         clone.setOperator(this.getOperator());
@@ -335,5 +349,10 @@ public class IsInExp extends Exp {
             right = e;
             break;
         }
+    }
+
+    @Override
+    public PosSymbol getQualifier() {
+        return null;
     }
 }

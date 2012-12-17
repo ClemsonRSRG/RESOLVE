@@ -58,13 +58,21 @@
 
 package edu.clemson.cs.r2jt.absyn;
 
+import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.mathtype.PTType;
 
 public class ModuleArgumentItem extends ResolveConceptualElement {
 
     // ===========================================================
     // Variables
     // ===========================================================
+
+    /**
+     * <p>If this argument names a program type, this will be set by the 
+     * populator to point to the correct type.</p>
+     */
+    private PTType myTypeValue;
 
     /** The qualifier member. */
     private PosSymbol qualifier;
@@ -96,6 +104,14 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     // Get Methods
     // -----------------------------------------------------------
 
+    public PTType getProgramTypeValue() {
+        return myTypeValue;
+    }
+
+    public Location getLocation() {
+        return name.getLocation();
+    }
+
     /** Returns the value of the qualifier variable. */
     public PosSymbol getQualifier() {
         return qualifier;
@@ -114,6 +130,10 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
+
+    public void setProgramTypeValue(PTType t) {
+        myTypeValue = t;
+    }
 
     /** Sets the qualifier variable to the specified value. */
     public void setQualifier(PosSymbol qualifier) {

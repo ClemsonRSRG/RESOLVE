@@ -63,20 +63,15 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 
-public class EnhancementBodyModuleDec extends ModuleDec {
+public class EnhancementBodyModuleDec extends AbstractParameterizedModuleDec {
 
-    // ===========================================================
     // Variables
-    // ===========================================================
 
     /** The name member. */
     private PosSymbol name;
 
     /** The performance profile name member. */
     private PosSymbol profileName;
-
-    /** The parameters member. */
-    private List<ModuleParameter> parameters;
 
     /** The enhancementName member. */
     private PosSymbol enhancementName;
@@ -86,9 +81,6 @@ public class EnhancementBodyModuleDec extends ModuleDec {
 
     /** The enhancementBodies member. */
     private List<EnhancementBodyItem> enhancementBodies;
-
-    /** The usesItems member. */
-    private List<UsesItem> usesItems;
 
     /** The requires member. */
     private Exp requires;
@@ -108,14 +100,12 @@ public class EnhancementBodyModuleDec extends ModuleDec {
     /** The decs member. */
     private List<Dec> decs;
 
-    // ===========================================================
     // Constructors
-    // ===========================================================
 
     public EnhancementBodyModuleDec() {};
 
     public EnhancementBodyModuleDec(PosSymbol name, PosSymbol profileName,
-            List<ModuleParameter> parameters, PosSymbol enhancementName,
+            List<ModuleParameterDec> parameters, PosSymbol enhancementName,
             PosSymbol conceptName, List<EnhancementBodyItem> enhancementBodies,
             List<UsesItem> usesItems, Exp requires, List<Exp> conventions,
             List<Exp> corrs, InitItem facilityInit, FinalItem facilityFinal,
@@ -135,9 +125,7 @@ public class EnhancementBodyModuleDec extends ModuleDec {
         this.decs = decs;
     }
 
-    // ===========================================================
     // Accessor Methods
-    // ===========================================================
 
     // -----------------------------------------------------------
     // Get Methods
@@ -151,11 +139,6 @@ public class EnhancementBodyModuleDec extends ModuleDec {
     /** Returns the value of the profileName variable. */
     public PosSymbol getProfileName() {
         return profileName;
-    }
-
-    /** Returns the value of the parameters variable. */
-    public List<ModuleParameter> getParameters() {
-        return parameters;
     }
 
     /** Returns the value of the enhancementName variable. */
@@ -235,11 +218,6 @@ public class EnhancementBodyModuleDec extends ModuleDec {
         this.profileName = name;
     }
 
-    /** Sets the parameters variable to the specified value. */
-    public void setParameters(List<ModuleParameter> parameters) {
-        this.parameters = parameters;
-    }
-
     /** Sets the enhancementName variable to the specified value. */
     public void setEnhancementName(PosSymbol enhancementName) {
         this.enhancementName = enhancementName;
@@ -290,9 +268,7 @@ public class EnhancementBodyModuleDec extends ModuleDec {
         this.decs = decs;
     }
 
-    // ===========================================================
     // Public Methods
-    // ===========================================================
 
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {

@@ -137,6 +137,5 @@ public class MetaFile {
                     myPkg + File.separator + myFileName + myKind.getExtension();
             return new File(filePath);
         }
-
     }
 }

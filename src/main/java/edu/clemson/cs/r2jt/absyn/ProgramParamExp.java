@@ -275,4 +275,13 @@ public class ProgramParamExp extends ProgramExp {
         arguments.set(index, (ProgramExp) e);
     }
 
+    public ProgramParamExp copy() {
+        ProgramParamExp result =
+                new ProgramParamExp(location, name, arguments, semanticExp);
+
+        result.setType(getType());
+
+        return result;
+    }
+
 }

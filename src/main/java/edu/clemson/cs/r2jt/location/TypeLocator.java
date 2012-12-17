@@ -99,7 +99,8 @@ public class TypeLocator {
     // Constructors
     // ===========================================================
 
-    public TypeLocator(SymbolTable table, CompileEnvironment instanceEnvironment) {
+    public TypeLocator(OldSymbolTable table,
+            CompileEnvironment instanceEnvironment) {
         myInstanceEnvironment = instanceEnvironment;
         Scope curScope = table.getCurrentScope();
         if (curScope instanceof ProcedureScope) {
@@ -132,7 +133,7 @@ public class TypeLocator {
         this.err = instanceEnvironment.getErrorHandler();
     }
 
-    public TypeLocator(SymbolTable table, boolean err,
+    public TypeLocator(OldSymbolTable table, boolean err,
             CompileEnvironment instanceEnvironment) {
         myInstanceEnvironment = instanceEnvironment;
         Scope curScope = table.getCurrentScope();

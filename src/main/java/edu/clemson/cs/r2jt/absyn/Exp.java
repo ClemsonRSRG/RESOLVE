@@ -58,6 +58,7 @@
 
 package edu.clemson.cs.r2jt.absyn;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -66,7 +67,10 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.type.BooleanType;
+import edu.clemson.cs.r2jt.mathtype.MTType;
 import edu.clemson.cs.r2jt.type.Type;
+import edu.clemson.cs.r2jt.type.TypeMatcher;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public abstract class Exp extends ResolveConceptualElement implements Cloneable {
@@ -78,6 +82,8 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
      *  set if you turn on -prove as well!
      */
     protected Type type = null;
+    protected MTType myMathType = null;
+    protected MTType myMathTypeValue = null;
 
     /** If the type can be determined in the builder we set it here.  */
     protected Type bType = null;
@@ -114,7 +120,7 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
         return exp;
     }
 
-    public Exp replace(Exp old, Exp replacement) {
+    protected Exp replace(Exp old, Exp replacement) {
 
         throw new UnsupportedOperationException("Replace not implemented for "
                 + this.getClass() + ".");
@@ -173,14 +179,49 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
                 retval = curEntry.getValue();
             }
             else {
-                retval = substituteChildren(substitutions);
+                retval = Exp.substituteChildren(this, substitutions);
             }
         }
         else {
-            retval = this.copy();
+            retval = Exp.copy(this);
         }
 
         return retval;
+    }
+
+    //XXX : For the benefit of making the old prover work with the new type
+    //      system, we make the assumption that performing substitutions does
+    //      not change the type of the expression.  In general, this is a 
+    //      terrible assumption, but it shouldn't cause any unsoundness in the
+    //      examples we're looking at.  When the new prover is ready, this
+    //      method will become unnecessary, because substitutions will occur
+    //      on PExps rather than Exps.
+    public static final Exp substituteChildren(Exp target,
+            java.util.Map<Exp, Exp> substitutions) {
+
+        MTType originalType = target.getMathType();
+        MTType originalTypeValue = target.getMathTypeValue();
+
+        Exp result = target.substituteChildren(substitutions);
+
+        result.setMathType(originalType);
+        result.setMathTypeValue(originalTypeValue);
+
+        return result;
+    }
+
+    public final Exp substituteNames(java.util.Map<String, Exp> substitutions) {
+        java.util.Map<Exp, Exp> finalSubstitutions = new HashMap<Exp, Exp>();
+
+        for (java.util.Map.Entry<String, Exp> substitution : substitutions
+                .entrySet()) {
+
+            finalSubstitutions.put(new VarExp(null, null, new PosSymbol(null,
+                    Symbol.symbol(substitution.getKey()))), substitution
+                    .getValue());
+        }
+
+        return substitute(finalSubstitutions);
     }
 
     protected static Exp substitute(Exp e, java.util.Map<Exp, Exp> substitutions) {
@@ -261,6 +302,10 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
         }
     }
 
+    /**
+     * @deprecated Use {@link copy copy()} instead.
+     */
+    @Deprecated
     public Object clone() {
         try {
             return super.clone();
@@ -270,7 +315,7 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
         }
     }
 
-    public Exp copy() {
+    protected Exp copy() {
         System.out.println("Shouldn't be calling Exp.copy() from type "
                 + this.getClass() + ".");
         throw new RuntimeException();
@@ -287,6 +332,26 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
 
     public void setType(Type t) {
         type = t;
+    }
+
+    public MTType getMathType() {
+        return myMathType;
+    }
+
+    public void setMathType(MTType mathType) {
+        if (mathType == null) {
+            throw new RuntimeException("Null Math Type on: " + this.getClass());
+        }
+
+        myMathType = mathType;
+    }
+
+    public MTType getMathTypeValue() {
+        return myMathTypeValue;
+    }
+
+    public void setMathTypeValue(MTType mathTypeValue) {
+        myMathTypeValue = mathTypeValue;
     }
 
     //    public boolean isLocal() { return isLocal; }
@@ -445,6 +510,76 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
         trueExp.setType(BooleanType.INSTANCE);
 
         return trueExp;
+    }
+
+    public static Exp replace(Exp exp, Exp old, Exp replacement) {
+        MTType originalType = exp.getMathType();
+        MTType originalTypeValue = exp.getMathTypeValue();
+
+        Exp result = exp.replace(old, replacement);
+
+        if (result != null) {
+            //If the subclass has set the internal types, we don't overwrite 
+            //them--it's theoretically possible that the replacement changed the
+            //type, but in most cases we just want to set the type to be the 
+            //same
+            if (originalType != null && result.getMathType() == null) {
+                result.setMathType(originalType);
+            }
+
+            if (originalTypeValue != null && result.getMathTypeValue() == null) {
+
+                result.setMathTypeValue(originalTypeValue);
+            }
+        }
+
+        return result;
+    }
+
+    public static Exp copy(Exp exp) {
+        MTType originalType = exp.getMathType();
+        MTType originalTypeValue = exp.getMathTypeValue();
+        Location originalLocation = exp.getLocation();
+
+        Exp result = exp.copy();
+
+        result.setMathType(originalType);
+        result.setMathTypeValue(originalTypeValue);
+        result.setLocation(originalLocation);
+
+        return result;
+    }
+
+    /**
+     * @deprecated Use {@link Exp#copy() Exp.copy()} instead.
+     */
+    @Deprecated
+    public static Object clone(Exp object) {
+        return Exp.copy(object);
+    }
+
+    public boolean isLiteralTrue() {
+        boolean result = (this instanceof VarExp);
+
+        result =
+                result
+                        && ((VarExp) this).getName().getName().equals("true")
+                        && this.getMathType().equals(
+                                this.getMathType().getTypeGraph().BOOLEAN);
+
+        return result;
+    }
+
+    public boolean isLiteralFalse() {
+        boolean result = (this instanceof VarExp);
+
+        result =
+                result
+                        && ((VarExp) this).getName().getName().equals("false")
+                        && this.getMathType().equals(
+                                this.getMathType().getTypeGraph().BOOLEAN);
+
+        return result;
     }
 
     public void setLocation(Location locatoin) {

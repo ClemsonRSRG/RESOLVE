@@ -58,6 +58,8 @@
 
 package edu.clemson.cs.r2jt.absyn;
 
+import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.mathtype.PTType;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
@@ -71,12 +73,40 @@ import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
  */
 public abstract class Ty extends ResolveConceptualElement implements Cloneable {
 
+    protected MTType myMathType = null;
+    protected MTType myMathTypeValue = null;
+    protected PTType myProgramTypeValue = null;
+
     public abstract void accept(ResolveConceptualVisitor v);
 
     public abstract Type accept(TypeResolutionVisitor v)
             throws TypeResolutionException;
 
     public abstract String asString(int indent, int increment);
+
+    public MTType getMathType() {
+        return myMathType;
+    }
+
+    public void setMathType(MTType t) {
+        this.myMathType = t;
+    }
+
+    public MTType getMathTypeValue() {
+        return myMathTypeValue;
+    }
+
+    public void setMathTypeValue(MTType mathTypeValue) {
+        this.myMathTypeValue = mathTypeValue;
+    }
+
+    public PTType getProgramTypeValue() {
+        return myProgramTypeValue;
+    }
+
+    public void setProgramTypeValue(PTType programTypeValue) {
+        myProgramTypeValue = programTypeValue;
+    }
 
     public Ty copy() {
         System.out.println("Shouldn't be calling Ty.copy()!");

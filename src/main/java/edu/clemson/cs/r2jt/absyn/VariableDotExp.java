@@ -253,7 +253,7 @@ public class VariableDotExp extends VariableExp {
     }
 
     public Object clone() {
-        return copy();
+        return Exp.copy(this);
     }
 
     public Exp replace(Exp old, Exp replacement) {
@@ -272,16 +272,16 @@ public class VariableDotExp extends VariableExp {
                     if (((VarExp) old).getName().toString().equals(
                             ((VarExp) name).getName().toString())) {
                         segments.remove(0);
-                        segments.add(0, (VariableExp) (replacement.clone()));
+                        segments.add(0, (VariableExp) (Exp.clone(replacement)));
 
                         return this;
                     }
                 }
                 else if (old instanceof OldExp && name instanceof OldExp) {
-                    name = name.replace(old, replacement);
+                    name = Exp.replace(name, old, replacement);
                     if (name != null) {
                         segments.remove(0);
-                        segments.add(0, (VariableExp) (name.clone()));
+                        segments.add(0, (VariableExp) (Exp.clone(name)));
                         return this;
                     }
                 }
@@ -289,11 +289,10 @@ public class VariableDotExp extends VariableExp {
 
             if (it.hasNext()) {
                 Exp name = it.next();
-                name = name.replace(old, replacement);
+                name = Exp.replace(name, old, replacement);
                 if (name != null && name instanceof VariableExp) {
                     segments.remove(1);
-
-                    segments.add(1, (VariableExp) (name.clone()));
+                    segments.add(1, (VariableExp) (Exp.clone(name)));
                     return this;
                 }
             }

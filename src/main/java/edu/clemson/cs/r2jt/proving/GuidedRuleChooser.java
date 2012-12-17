@@ -5,25 +5,20 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.JDialog;
-
 import edu.clemson.cs.r2jt.absyn.EqualsExp;
 import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 
 public class GuidedRuleChooser extends RuleProvider {
 
     private List<MatchReplace> myGlobalRules = new LinkedList<MatchReplace>();
     private List<Exp> myExpCorrespondance = new LinkedList<Exp>();
-    private MathExpTypeResolver myTyper;
 
     private boolean myLockedFlag;
 
     private DirectReplaceWrapper myAntecedentWrapper =
             new DirectReplaceWrapper();
 
-    public GuidedRuleChooser(MathExpTypeResolver typer) {
-        myTyper = typer;
+    public GuidedRuleChooser() {
         myLockedFlag = false;
     }
 
@@ -48,14 +43,14 @@ public class GuidedRuleChooser extends RuleProvider {
                 //Substitute right expression for left
                 MatchReplace matcher =
                         new BindReplace(equivalency.getLeft(), equivalency
-                                .getRight(), myTyper);
+                                .getRight());
                 myGlobalRules.add(matcher);
                 myExpCorrespondance.add(rule);
 
                 //Substitute left expression for left
                 matcher =
                         new BindReplace(equivalency.getRight(), equivalency
-                                .getLeft(), myTyper);
+                                .getLeft());
                 myGlobalRules.add(matcher);
                 myExpCorrespondance.add(rule);
             }
@@ -171,45 +166,4 @@ public class GuidedRuleChooser extends RuleProvider {
     public int getApproximateRuleSetSize() {
         return -1;
     }
-
-    /*
-     * The GuidedRuleChooser was created to help debug the 
-     * BlindIterativeRuleChooser (and it's descendants, like 
-     * UpfrontFitnessSortRuleChooser.)  However, there are cases where
-     * GuidedRuleChooser is able to prove things that BlindIterativeRuleChooser
-     * cannot.  What follows are backups of the old methods that "do more".  In
-     * fact, the GuidedRuleChooser must do EXACTLY what 
-     * BlindIterativeRuleChooser does so it can be useful as a debuging tool.
-     * The new versions "do the same". 
-     */
-    /*
-    public void addRule(String friendlyName, Exp rule) {
-    	if (myLockedFlag) {
-    		throw new IllegalStateException();
-    	}
-    	
-    	if (rule instanceof EqualsExp) {
-    		EqualsExp equivalency = (EqualsExp) rule;
-    		
-    		if (equivalency.getOperator() == EqualsExp.EQUAL) {
-    			//Substitute right expression for left
-    			MatchReplace matcher = new BindReplace(equivalency.getLeft(),
-    					equivalency.getRight(), myTyper);
-    			myGlobalRules.add(matcher);
-    			myExpCorrespondance.add(rule);
-    			
-    			//Substitute left expression for left
-    			matcher = new BindReplace(equivalency.getRight(),
-    					equivalency.getLeft(), myTyper);
-    			myGlobalRules.add(matcher);
-    			myExpCorrespondance.add(rule);
-    		}
-    	}
-    	else {
-    		System.out.println("BlindIterativeRule.addRule --- " +
-    				"Non equals Theorem.");
-    		System.out.println(rule.toString(0));
-    	}
-    }
-     */
 }

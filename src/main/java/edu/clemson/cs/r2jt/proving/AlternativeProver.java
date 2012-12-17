@@ -6,20 +6,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 
 public class AlternativeProver implements VCProver {
 
     private final TransformationChooser myChooser;
-    private final MathExpTypeResolver myTyper;
     private final CompileEnvironment myInstanceEnvironment;
 
-    public AlternativeProver(CompileEnvironment e,
-            TransformationChooser chooser, MathExpTypeResolver typer) {
+    public AlternativeProver(CompileEnvironment e, TransformationChooser chooser) {
         myChooser = chooser;
-        myTyper = typer;
         myInstanceEnvironment = e;
     }
 
@@ -134,25 +130,20 @@ public class AlternativeProver implements VCProver {
         }
     }
 
-    private VC convertToImmutableVC(VerificationCondition vc) {
-        return convertToImmutableVC(vc, myTyper);
-    }
-
-    public static VC convertToImmutableVC(VerificationCondition vc,
-            MathExpTypeResolver typer) {
+    public static VC convertToImmutableVC(VerificationCondition vc) {
 
         List<PExp> newAntecedents = new LinkedList<PExp>();
 
         Conjuncts oldAntecedents = vc.getAntecedents();
         for (Exp a : oldAntecedents) {
-            newAntecedents.add(PExp.buildPExp(a, typer));
+            newAntecedents.add(PExp.buildPExp(a));
         }
 
         List<PExp> newConsequents = new LinkedList<PExp>();
 
         Conjuncts oldConsequents = vc.getConsequents();
         for (Exp c : oldConsequents) {
-            newConsequents.add(PExp.buildPExp(c, typer));
+            newConsequents.add(PExp.buildPExp(c));
         }
 
         VC retval =

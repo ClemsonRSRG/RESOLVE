@@ -60,8 +60,11 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
+import edu.clemson.cs.r2jt.mathtype.PTType;
 
 public abstract class ProgramExp extends Exp {
+
+    private PTType myProgramType;
 
     public abstract void accept(ResolveConceptualVisitor v);
 
@@ -77,4 +80,16 @@ public abstract class ProgramExp extends Exp {
         return false;
     }
 
+    public void setProgramType(PTType type) {
+        if (type == null) {
+            throw new IllegalArgumentException(
+                    "Attempt to set program type to null.");
+        }
+
+        myProgramType = type;
+    }
+
+    public PTType getProgramType() {
+        return myProgramType;
+    }
 }

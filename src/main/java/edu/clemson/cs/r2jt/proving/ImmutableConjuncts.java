@@ -9,12 +9,11 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
+import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.SimpleImmutableList;
 
 public class ImmutableConjuncts implements Iterable<PExp> {
 
@@ -27,7 +26,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * <code>copy()</code> directly when taking things <em>out</em> of this
      * list, just not when putting things <em>into</em> this list.</p>
      */
-    private final SimpleImmutableList<PExp> myConjuncts;
+    private final ImmutableList<PExp> myConjuncts;
 
     private final int myConjunctsSize;
 
@@ -41,8 +40,8 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * 
      * @param e The <code>Exp</code> to break into top-level conjuncts.
      */
-    public ImmutableConjuncts(Exp e, MathExpTypeResolver typer) {
-        this(PExp.buildPExp(e, typer).splitIntoConjuncts());
+    public ImmutableConjuncts(Exp e) {
+        this(PExp.buildPExp(e).splitIntoConjuncts());
     }
 
     /**
@@ -87,7 +86,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
                 newExps.add(e);
             }
 
-            myConjuncts = new ImmutableList<PExp>(newExps);
+            myConjuncts = new ArrayBackedImmutableList<PExp>(newExps);
         }
 
         myConjunctsSize = myConjuncts.size();
@@ -101,7 +100,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
 
         List<PExp> empty = Collections.emptyList();
 
-        myConjuncts = new ImmutableList<PExp>(empty);
+        myConjuncts = new ArrayBackedImmutableList<PExp>(empty);
         myConjunctsSize = 0;
     }
 
@@ -111,7 +110,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * immutable list must be considered immutable and have been run through
      * defensiveCopy!  Just a little performance hack.</p>
      */
-    protected ImmutableConjuncts(SimpleImmutableList<PExp> l) {
+    protected ImmutableConjuncts(ImmutableList<PExp> l) {
         myConjuncts = l;
         myConjunctsSize = myConjuncts.size();
     }
@@ -123,7 +122,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * defensiveCopy!  Just a little performance hack.</p>
      */
     protected ImmutableConjuncts(PExp[] exps, int length) {
-        myConjuncts = new ImmutableList<PExp>(exps, length);
+        myConjuncts = new ArrayBackedImmutableList<PExp>(exps, length);
         myConjunctsSize = length;
     }
 
@@ -162,7 +161,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
 
         int runStart = 0, runLength = 0;
 
-        SimpleImmutableList<PExp> newConjuncts = new EmptyImmutableList<PExp>();
+        ImmutableList<PExp> newConjuncts = new EmptyImmutableList<PExp>();
 
         HashSet<PExp> hashedConjuncts = new HashSet<PExp>();
         Iterator<PExp> conjunctsIter = myConjuncts.iterator();
@@ -191,10 +190,10 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         return new ImmutableConjuncts(newConjuncts);
     }
 
-    private SimpleImmutableList<PExp> appendConjuncts(
-            SimpleImmutableList<PExp> original, int startIndex, int length) {
+    private ImmutableList<PExp> appendConjuncts(ImmutableList<PExp> original,
+            int startIndex, int length) {
 
-        SimpleImmutableList<PExp> retval;
+        ImmutableList<PExp> retval;
 
         switch (length) {
         case 0:
@@ -431,7 +430,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         //       ImmutableConjuncts to a list of lists
 
         if (i instanceof ImmutableConjuncts) {
-            SimpleImmutableList<PExp> iConjuncts =
+            ImmutableList<PExp> iConjuncts =
                     ((ImmutableConjuncts) i).myConjuncts;
 
             if (iConjuncts.size() == 0) {
@@ -441,8 +440,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
                 //Performance hack: if i is an ImmutableConjuncts, we can safely
                 //just steal it's internal list of conjuncts--after all, that 
                 //list is immutable.
-                SimpleImmutableList<PExp> newExps =
-                        myConjuncts.appended(iConjuncts);
+                ImmutableList<PExp> newExps = myConjuncts.appended(iConjuncts);
 
                 retval = new ImmutableConjuncts(newExps);
             }

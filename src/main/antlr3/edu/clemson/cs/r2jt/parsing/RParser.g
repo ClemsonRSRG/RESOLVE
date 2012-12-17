@@ -111,7 +111,6 @@ tokens {
     REDUCTIO_AD_ABSURDUM;
     RELATED_BY;
     PROGDOT;
-    SET;
     SET_EXPR;
     STATEMENT;
     STATEMENT_SEQUENCE;
@@ -196,12 +195,9 @@ math_item_sequence
     ;
 
 math_item
-    :   formal_type_declaration
-    |   math_type_declaration
-    |   definition_declaration
-    |   categorical_definition_declaration
+    :   definition_declaration
     |   math_assertion_declaration
-    |   subtype_declaration
+    |   type_theorem_declaration
     ;
 
 // ---------------------------------------------------------------
@@ -480,47 +476,10 @@ uses_clause
 // Math Type Declarations
 // ---------------------------------------------------------------
 
-formal_type_declaration
-    :   LOCAL MATH TYPE ident SEMICOLON ->
-    ^(LOCAL_MATH_TYPE ident)
-    ;
-    
-subtype_declaration // this is broken, but commented out in dev
-    :   MATH_SUBTYPE^ ((ident DOT) => qualified_type | ident) COLON!
-        ((ident DOT) => qualified_type | ident) SEMICOLON!
-    ;
-    
-qualified_type
-    :   ident DOT^ ident
-    ;
-
-math_type_declaration
-    :   MATH TYPE ident
-        COLON math_type_expression SEMICOLON ->
-        ^(MATH_TYPE ident
-        math_type_expression)
-    ;
 //primitive_type_expression
 confirm_math_type_declaration
     :   CONFIRM MATH TYPE math_variable_declaration SEMICOLON
         -> ^(CONFIRM_TYPE math_variable_declaration)
-    ;
-
-sset_type_expression
-    :   sset_function_type_expression  -> ^(TYPEX sset_function_type_expression)
-    ;
-
-sset_function_type_expression
-    :   (sset_domain_expression FUNCARROW^) =>
-        sset_domain_expression FUNCARROW^ SSET
-    |   SSET
-    ;
-
-sset_domain_expression
-    :   (SSET (IDENTIFIER|TIMES)) =>
-        (SSET ((id=IDENTIFIER|id=TIMES){checkTimesIdent(id);} SSET)*)
-         -> ^(TIMES SSET+)
-    |   SSET
     ;
 
 // ---------------------------------------------------------------
@@ -550,6 +509,18 @@ correspondence_clause
 convention_clause
     :   CONVENTION^ math_expression SEMICOLON!
     ;
+    
+// ---------------------------------------------------------------
+// Type Theorem Declarations
+// ---------------------------------------------------------------
+
+type_theorem_declaration
+    :   TYPE^ THEOREM! (math_theorem_ident)? COLON
+        (FOR ALL! math_variable_declaration_group COMMA!)+
+        implies_expression SEMICOLON!
+    ;
+    
+
 
 // ---------------------------------------------------------------
 // State Variable Declarations
@@ -630,7 +601,7 @@ definition_declaration
     :   implicit_definition_declaration
     |   inductive_definition_declaration
     |   standard_definition_declaration
-    //|   categorical_definition_declaration
+    |   categorical_definition_declaration
     ;
 
 implicit_definition_declaration
@@ -1348,58 +1319,7 @@ variable_id_list
 // ===============================================================
 
 math_type_expression
-    :   function_type_expression? -> ^(TYPEX function_type_expression?)
-    //|   BOOLEAN
-    ;
-    
-function_type_expression
-    :   structural_math_type_expression
-        (FUNCARROW^ structural_math_type_expression)*
-    ;
-    
-structural_math_type_expression
-    :   CARTPROD^
-        (cartprod_variable_declaration_group SEMICOLON!)+
-        END!
-    |   product_type_expression
-    ;
-
-product_type_expression
-    :   (primitive_type_expression (IDENTIFIER|TIMES)) =>
-        (   primitive_type_expression
-            ((id=IDENTIFIER { checkTimesIdent(id); } | id=TIMES)
-            primitive_type_expression
-            )*
-        ) -> ^(TIMES[$id] primitive_type_expression primitive_type_expression*)
-    |   primitive_type_expression
-    ;
-
-primitive_type_expression
-    :   (SSET) => SSET
-    |   (BOOLEAN) => BOOLEAN
-    |   (POWERSET) => powerset_expression
-    |   nested_type_expression
-    |   (qualified_ident type_expression_argument_list)=> qualified_ident type_expression_argument_list
-        -> ^(FUNCTION qualified_ident type_expression_argument_list)
-    |   qualified_ident
-    /*|   (qualified_ident -> ^(qualified_ident))
-        (   type_expression_argument_list
-        -> ^(FUNCTION qualified_ident type_expression_argument_list))?*/
-    ;
-    
-powerset_expression
-    :   POWERSET^ LPAREN! math_type_expression RPAREN!
-    ;
-
-nested_type_expression
-    :   LPAREN! type_expression RPAREN!
-    //| math_type_expression // Introduces Mutual left recursion errors
-    ;
-    
-type_expression
-    //:   (math_type_expression) => implicit_type_parameter_group
-    :   math_type_expression
-    ;
+    :   infix_expression;
 
 type_expression_argument_list
     :   LPAREN math_type_expression
@@ -1411,19 +1331,19 @@ cartprod_variable_declaration_group
     ;
 
 structural_math_variable_declaration_group
-    :   variable_id_list COLON! structural_math_type_expression
+    :   variable_id_list COLON math_type_expression
     ;
 
 math_variable_declaration_group
-    :   variable_id_list COLON! math_type_expression
+    :   variable_id_list COLON math_type_expression
     ; 
 
 math_variable_declaration
-    :   ident COLON! math_type_expression
+    :   ident COLON math_type_expression
     ;
     
 implicit_type_parameter_group
-    :   variable_id_list COLON! math_expression
+    :   variable_id_list COLON math_expression
     ;
 
 // ===============================================================
@@ -1523,17 +1443,18 @@ between_expression
     ;
 
 infix_expression returns [ColsAST ast = null]
-    :   //(math_variable_declarations AND) =>
-        //(math_variable_declarations AND math_expression)
-           // -> ^(LOCALVAREXP math_variable_declarations math_expression) |
-        (adding_expression
+    :   (type_assertion_expression
         (   (   RANGE^
             |   FREE_OPERATOR^
             )
-            adding_expression
-        )?)
-        | BOOLEAN
-    ;
+            type_assertion_expression
+        )?);
+
+type_assertion_expression
+    : function_type_expression (COLON math_type_expression)?;
+    
+function_type_expression
+    :  adding_expression (FUNCARROW^ adding_expression)*;
 
 adding_expression
     :   multiplying_expression
@@ -1580,6 +1501,7 @@ unary_expression
 
 primitive_expression
     :   alternative_expression
+    |   (ident ident COLON) => iterated_construct
     |   (ident DOT NUMERIC_LITERAL) => qualified_numeric_literal
     |   dot_expression
     |   lambda_expression
@@ -1587,8 +1509,14 @@ primitive_expression
     |   outfix_expression
     |   set_constructor
     |   (LPAREN math_expression COMMA) => tuple_expression
+    |   tagged_cartesian_product_type_expression
     |   nested_expression
     ;
+    
+tagged_cartesian_product_type_expression
+    :   CARTPROD^
+        (cartprod_variable_declaration_group SEMICOLON!)+
+        END!;
 
 // ---------------------------------------------------------------
 // Articulated expression rules (expression with '.')
@@ -1653,7 +1581,7 @@ iterated_construct
         ident
         COLON math_type_expression 
         (where_clause)?
-        (COMMA | OF) math_expression
+        (COMMA | OF) LBRACE math_expression RBRACE
         -> ^(ITERATION ident ident math_type_expression (where_clause)? math_expression)
     ;
 
@@ -1668,7 +1596,8 @@ lambda_expression
 
 literal_expression
     //:   (ident DOT) => qualified_numeric_literal
-    :   NUMERIC_LITERAL
+    :   BOOLEAN
+    |   NUMERIC_LITERAL
     |   CHARACTER_LITERAL
     |   STRING_LITERAL
     ;
@@ -1699,11 +1628,10 @@ parenthesized_expression
     ;
 
 set_constructor
-    :   (LBRACE ident COLON) =>
-        LBRACE^ ident COLON! math_type_expression
-        (where_clause)? COMMA!
+    :   LBRACE^ ident
+        COLON! math_type_expression
+        (where_clause)? BAR!
         math_expression RBRACE!
-    |   LBRACE (ident (COMMA ident)*)? RBRACE -> ^(SET ident*)
     ;
 
 tuple_expression

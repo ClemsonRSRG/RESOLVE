@@ -11,7 +11,7 @@ import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.scope.SymbolTable;
+import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import java.io.File;
@@ -30,7 +30,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
     private final CompileEnvironment env;
     private ErrorHandler err;
     private String targetFileName;
-    private SymbolTable table;
+    private OldSymbolTable table;
     private boolean isMath;
 
     //Flags
@@ -44,12 +44,11 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
             new Flag(FLAG_SECTION_NAME, "prettyJavaTranslate",
                     FLAG_DESC_TRANSLATE);
 
-
     /*
      * End of Variable Declaration
      */
 
-    public PrettyJavaTranslation(CompileEnvironment env, SymbolTable table,
+    public PrettyJavaTranslation(CompileEnvironment env, OldSymbolTable table,
             ModuleDec dec, ErrorHandler err) {
         this.err = err;
         this.env = env;
@@ -76,7 +75,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
             }
         }
     }
-    
+
     /*@Override
     public boolean walkExp(Exp exp) {
         
@@ -93,8 +92,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
     }
 
     @Override
-    public void preFacilityModuleDec(FacilityModuleDec dec) {
-    }
+    public void preFacilityModuleDec(FacilityModuleDec dec) {}
 
     @Override
     public void postFacilityModuleDec(FacilityModuleDec dec) {}
@@ -106,7 +104,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
     public void preFacilityOperationDec(FacilityOperationDec dec) {
         PosSymbol retTy = null;
         if (dec.getReturnTy() != null) {
-            retTy = ((NameTy)dec.getReturnTy()).getName();
+            retTy = ((NameTy) dec.getReturnTy()).getName();
         }
         cInfo.addFunction(dec.getName(), retTy);
     }
@@ -206,8 +204,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
     }
 
     @Override
-    public void preFuncAssignStmt(FuncAssignStmt stmt) {
-    }
+    public void preFuncAssignStmt(FuncAssignStmt stmt) {}
 
     @Override
     public void midFuncAssignStmt(FuncAssignStmt stmt,
@@ -331,9 +328,8 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
 
     @Override
     public void preWhileStmtStatements(WhileStmt stmt) {
-        if ((stmt.getChanging().size() < 1) || 
-                stmt.getDecreasing() != null ||
-                stmt.getMaintaining() != null) {
+        if ((stmt.getChanging().size() < 1) || stmt.getDecreasing() != null
+                || stmt.getMaintaining() != null) {
             cInfo.appendToStmt("){");
         }
         else {

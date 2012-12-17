@@ -3,13 +3,12 @@ package edu.clemson.cs.r2jt.proving2;
 import java.util.Map;
 
 import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 
 public class Consequent extends ImmutableConjuncts {
 
-    public Consequent(Exp e, MathExpTypeResolver typer) {
-        super(e, typer);
+    public Consequent(Exp e) {
+        super(e);
     }
 
     public Consequent(PExp e) {

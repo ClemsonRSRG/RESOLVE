@@ -165,7 +165,7 @@ public class ProgramIntegerExp extends ProgramExp {
 
         if (old instanceof ProgramIntegerExp) {
             if (((ProgramIntegerExp) old).getValue() == value) {
-                return (Exp) replacement.clone();
+                return (Exp) Exp.clone(replacement);
             }
         }
 
@@ -184,5 +184,10 @@ public class ProgramIntegerExp extends ProgramExp {
 
     public void setSubExpression(int index, Exp e) {
 
+    }
+
+    public ProgramIntegerExp copy() {
+        ProgramIntegerExp result = new ProgramIntegerExp(location, value);
+        return result;
     }
 }

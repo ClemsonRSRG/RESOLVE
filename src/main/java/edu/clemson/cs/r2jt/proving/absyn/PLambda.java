@@ -2,27 +2,22 @@ package edu.clemson.cs.r2jt.proving.absyn;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
-import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.SimpleImmutableList;
-import edu.clemson.cs.r2jt.type.FunctionType;
-import edu.clemson.cs.r2jt.type.Type;
+import edu.clemson.cs.r2jt.mathtype.MTFunction;
+import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving.immutableadts.SingletonImmutableList;
 
 public class PLambda extends PExp {
-
-    private static final SimpleImmutableList<PExp> EMPTY_LIST =
-            new EmptyImmutableList<PExp>();
 
     public final String variableName;
     private final PExp myBody;
 
-    public PLambda(String variableName, Type variableType, PExp body,
-            MathExpTypeResolver metr) {
+    public PLambda(String variableName, MTType type, PExp body) {
         super(body.structureHash * 34, body.valueHash * 31
-                + variableName.hashCode(), new FunctionType(variableType, body
-                .getType()), metr);
+                + variableName.hashCode(), type, null);
 
         this.variableName = variableName;
         myBody = body;
@@ -31,18 +26,47 @@ public class PLambda extends PExp {
     public void accept(PExpVisitor v) {
         v.beginPExp(this);
         v.beginPLambda(this);
+
+        v.beginChildren(this);
+        v.endChildren(this);
+
         v.endPLambda(this);
         v.endPExp(this);
     }
 
     @Override
-    public SimpleImmutableList<PExp> getSubExpressions() {
-        return EMPTY_LIST;
+    public PLambda withTypeReplaced(MTType t) {
+        return new PLambda(variableName, t, myBody);
+    }
+
+    @Override
+    public PLambda withTypeValueReplaced(MTType t) {
+
+        if (t != null) {
+            throw new UnsupportedOperationException("Cannot set the type "
+                    + "value on a " + this.getClass() + ".");
+        }
+
+        return this;
+    }
+
+    @Override
+    public PLambda withSubExpressionReplaced(int i, PExp e) {
+        if (i != 0) {
+            throw new IndexOutOfBoundsException("" + i);
+        }
+
+        return new PLambda(variableName, myType, e);
+    }
+
+    @Override
+    public ImmutableList<PExp> getSubExpressions() {
+        return new SingletonImmutableList<PExp>(myBody);
     }
 
     @Override
     public PExpSubexpressionIterator getSubExpressionIterator() {
-        return EmptySubexpressionIterator.INSTANCE;
+        return new PLambdaBodyIterator();
     }
 
     @Override
@@ -124,5 +148,30 @@ public class PLambda extends PExp {
     @Override
     public boolean isVariable() {
         return false;
+    }
+
+    private class PLambdaBodyIterator implements PExpSubexpressionIterator {
+
+        private boolean myReturnedBodyFlag = false;
+
+        @Override
+        public boolean hasNext() {
+            return !myReturnedBodyFlag;
+        }
+
+        @Override
+        public PExp next() {
+            if (myReturnedBodyFlag) {
+                throw new NoSuchElementException();
+            }
+
+            return myBody;
+        }
+
+        @Override
+        public PExp replaceLast(PExp newExpression) {
+            return new PLambda(variableName, myType, myBody);
+        }
+
     }
 }

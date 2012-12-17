@@ -2,6 +2,8 @@ package edu.clemson.cs.r2jt.proving;
 
 import java.util.Iterator;
 
+import edu.clemson.cs.r2jt.utilities.Mapping;
+
 /**
  * <p>An <code>OnlyBeforeChooser</code> merges two existing 
  * <code>TransformationChooser</code>s, <code>A</code> and <code>B</code>, such
@@ -96,7 +98,7 @@ public class OnlyBeforeChooser implements TransformationChooser {
 
     private static class ProofDataAugmenter
             implements
-                Mapper<ProofPathSuggestion, ProofPathSuggestion> {
+                Mapping<ProofPathSuggestion, ProofPathSuggestion> {
 
         private static final Object DUMMY = new Object();
         private final TransformationChooser myParent;

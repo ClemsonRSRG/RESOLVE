@@ -86,7 +86,7 @@ public class PrettyJavaTranslator extends ResolveConceptualVisitor {
 
     //private Environment         env                = Environment.getInstance();
     private ErrorHandler err;
-    private SymbolTable table;
+    private OldSymbolTable table;
     private String targetFileName = new String();
     private StringBuffer facilityConstructorBuf = new StringBuffer();
     private StringBuffer operBuf = new StringBuffer();
@@ -144,7 +144,7 @@ public class PrettyJavaTranslator extends ResolveConceptualVisitor {
     /**
      * Construct a Translator.
      */
-    public PrettyJavaTranslator(CompileEnvironment e, SymbolTable table,
+    public PrettyJavaTranslator(CompileEnvironment e, OldSymbolTable table,
             ModuleDec dec, ErrorHandler err) {
         myInstanceEnvironment = e;
         targetFileName = dec.getName().getFile().toString();
@@ -4037,11 +4037,13 @@ public class PrettyJavaTranslator extends ResolveConceptualVisitor {
         List<String> typeParms = new List<String>();
         ConceptModuleDec cDec =
                 (ConceptModuleDec) myInstanceEnvironment.getModuleDec(cid);
-        List<ModuleParameter> mpList = cDec.getParameters();
-        Iterator<ModuleParameter> mpIt = mpList.iterator();
-        ModuleParameter mp = null;
+        List<ModuleParameterDec> mpList = cDec.getParameters();
+        Iterator<ModuleParameterDec> mpIt = mpList.iterator();
+        ModuleParameterDec md = null;
+        Dec mp = null;
         while (mpIt.hasNext()) {
-            mp = mpIt.next();
+            md = mpIt.next();
+            mp = md.getWrappedDec();
             if (mp instanceof ConceptTypeParamDec) {
                 typeParms.addUnique(((ConceptTypeParamDec) mp).getName()
                         .toString());
@@ -4054,11 +4056,13 @@ public class PrettyJavaTranslator extends ResolveConceptualVisitor {
         List<String> concParms = new List<String>();
         ConceptModuleDec cDec =
                 (ConceptModuleDec) myInstanceEnvironment.getModuleDec(cid);
-        List<ModuleParameter> mpList = cDec.getParameters();
-        Iterator<ModuleParameter> mpIt = mpList.iterator();
-        ModuleParameter mp = null;
+        List<ModuleParameterDec> mpList = cDec.getParameters();
+        Iterator<ModuleParameterDec> mpIt = mpList.iterator();
+        ModuleParameterDec md = null;
+        Dec mp = null;
         while (mpIt.hasNext()) {
-            mp = mpIt.next();
+            md = mpIt.next();
+            mp = md.getWrappedDec();
             if (mp instanceof ConstantParamDec) {
                 concParms.addUnique(((ConstantParamDec) mp).getName()
                         .toString());

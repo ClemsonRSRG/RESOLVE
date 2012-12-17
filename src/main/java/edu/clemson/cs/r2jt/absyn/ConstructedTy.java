@@ -63,6 +63,7 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
+import edu.clemson.cs.r2jt.data.Location;
 
 public class ConstructedTy extends Ty {
 
@@ -98,6 +99,10 @@ public class ConstructedTy extends Ty {
     // -----------------------------------------------------------
     // Get Methods
     // -----------------------------------------------------------
+
+    public Location getLocation() {
+        return name.getLocation();
+    }
 
     /** Returns the value of the qualifier variable. */
     public PosSymbol getQualifier() {

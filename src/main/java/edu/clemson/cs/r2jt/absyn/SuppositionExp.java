@@ -231,7 +231,7 @@ public class SuppositionExp extends LineNumberedExp {
         PosSymbol newLineNum = null;
         if (myLineNumber != null)
             newLineNum = myLineNumber.copy();
-        Exp newExp = exp.copy();
+        Exp newExp = Exp.copy(exp);
         Iterator<MathVarDec> it = vars.iterator();
         List<MathVarDec> newVars = new List<MathVarDec>();
         while (it.hasNext()) {

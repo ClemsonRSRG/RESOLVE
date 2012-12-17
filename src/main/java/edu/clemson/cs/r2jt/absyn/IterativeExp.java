@@ -329,30 +329,30 @@ public class IterativeExp extends Exp {
         MathVarDec newVar = var.copy();
         Exp newWhere = null;
         if (where != null)
-            newWhere = where.copy();
-        Exp newBody = body.copy();
+            newWhere = Exp.copy(where);
+        Exp newBody = Exp.copy(body);
         return new IterativeExp(null, newOperator, newVar, newWhere, newBody);
     }
 
     public Exp clone() {
         int newOperator = operator;
-        MathVarDec newVar = (MathVarDec) var.clone();
+        MathVarDec newVar = (MathVarDec) var.copy();
         Exp newWhere = null;
         if (where != null)
-            newWhere = (Exp) where.clone();
-        Exp newBody = (Exp) body.clone();
+            newWhere = Exp.copy(where);
+        Exp newBody = Exp.copy(body);
         return new IterativeExp(null, newOperator, newVar, newWhere, newBody);
     }
 
     public Exp replace(Exp old, Exp replacement) {
         if (!(old instanceof QuantExp)) {
             if (where != null) {
-                Exp whr = where.replace(old, replacement);
+                Exp whr = Exp.replace(where, old, replacement);
                 if (whr != null)
                     this.setWhere(whr);
             }
             if (body != null) {
-                Exp bdy = body.replace(old, replacement);
+                Exp bdy = Exp.replace(body, old, replacement);
                 if (bdy != null)
                     this.setBody(bdy);
                 // Not used anywhere below. - YS 

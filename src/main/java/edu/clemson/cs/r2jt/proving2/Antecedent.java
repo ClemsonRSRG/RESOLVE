@@ -5,7 +5,6 @@ import java.util.Map;
 
 import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.absyn.VarExp;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.proving.absyn.BindingException;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 
@@ -13,8 +12,8 @@ public class Antecedent extends ImmutableConjuncts {
 
     public static final Antecedent EMPTY = new Antecedent();
 
-    public Antecedent(Exp e, MathExpTypeResolver typer) {
-        super(e, typer);
+    public Antecedent(Exp e) {
+        super(e);
     }
 
     public Antecedent(PExp e) {
@@ -94,9 +93,9 @@ public class Antecedent extends ImmutableConjuncts {
         }
     }
 
-    public Antecedent apply(Antecedent a, Consequent c, MathExpTypeResolver r) {
+    public Antecedent apply(Antecedent a, Consequent c) {
 
-        return satisfy(this, a, new HashMap<PExp, PExp>(), r, c);
+        return satisfy(this, a, new HashMap<PExp, PExp>(), c);
     }
 
     /**
@@ -158,7 +157,7 @@ public class Antecedent extends ImmutableConjuncts {
      */
     public static Antecedent satisfy(ImmutableConjuncts assumptions,
             ImmutableConjuncts antecedents, Map<PExp, PExp> bindings,
-            MathExpTypeResolver typer, Consequent consequent) {
+            Consequent consequent) {
 
         Antecedent retval;
 
@@ -186,7 +185,7 @@ public class Antecedent extends ImmutableConjuncts {
 
                     Antecedent subAntecedent =
                             satisfy(assumptions, subAntecedentList, subBinding,
-                                    typer, consequent);
+                                    consequent);
 
                     retval = retval.appended(subAntecedent);
                 }

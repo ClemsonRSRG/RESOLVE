@@ -61,7 +61,7 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 
-public class EnhancementModuleDec extends ModuleDec {
+public class EnhancementModuleDec extends AbstractParameterizedModuleDec {
 
     // ===========================================================
     // Variables
@@ -70,14 +70,8 @@ public class EnhancementModuleDec extends ModuleDec {
     /** The name member. */
     private PosSymbol name;
 
-    /** The parameters member. */
-    private List<ModuleParameter> parameters;
-
     /** The conceptName member. */
     private PosSymbol conceptName;
-
-    /** The usesItems member. */
-    private List<UsesItem> usesItems;
 
     /** The requirement member. */
     private Exp requirement;
@@ -92,7 +86,7 @@ public class EnhancementModuleDec extends ModuleDec {
     public EnhancementModuleDec() {};
 
     public EnhancementModuleDec(PosSymbol name,
-            List<ModuleParameter> parameters, PosSymbol conceptName,
+            List<ModuleParameterDec> parameters, PosSymbol conceptName,
             List<UsesItem> usesItems, Exp requirement, List<Dec> decs) {
         this.name = name;
         this.parameters = parameters;
@@ -113,11 +107,6 @@ public class EnhancementModuleDec extends ModuleDec {
     /** Returns the value of the name variable. */
     public PosSymbol getName() {
         return name;
-    }
-
-    /** Returns the value of the parameters variable. */
-    public List<ModuleParameter> getParameters() {
-        return parameters;
     }
 
     /** Returns the value of the conceptName variable. */
@@ -147,11 +136,6 @@ public class EnhancementModuleDec extends ModuleDec {
     /** Sets the name variable to the specified value. */
     public void setName(PosSymbol name) {
         this.name = name;
-    }
-
-    /** Sets the parameters variable to the specified value. */
-    public void setParameters(List<ModuleParameter> parameters) {
-        this.parameters = parameters;
     }
 
     /** Sets the conceptName variable to the specified value. */
