@@ -144,7 +144,7 @@ public abstract class SyntacticScope extends AbstractScope {
 
         return result;
     }
-    
+
     @Override
     public String toString() {
         return myDefiningElement + " {" + myBindings.toString() + "}";

@@ -232,7 +232,7 @@ public class Controller {
                 if (e instanceof RuntimeException) {
                     throw (RuntimeException) e;
                 }
-                
+
                 throw new RuntimeException(e);
             }
             else {
@@ -1517,7 +1517,7 @@ public class Controller {
         OldSymbolTable table =
                 new OldSymbolTable(ModuleID.createID(dec),
                         myInstanceEnvironment);
-        Populator populator = new Populator(table, myInstanceEnvironment);
+        OldPopulator populator = new OldPopulator(table, myInstanceEnvironment);
         populator.visitModuleDec(dec);
 
         // *** This next section is for testing the new tree walker ***
@@ -1570,7 +1570,7 @@ public class Controller {
         System.err.flush();
         System.out.flush();
 
-        MathPopulator populator = new MathPopulator(symbolTable);
+        Populator populator = new Populator(symbolTable);
         TreeWalker tw = new TreeWalker(populator);
         populator.setTreeWalker(tw);
         tw.visit(dec);
@@ -1582,7 +1582,7 @@ public class Controller {
         tw = new TreeWalker(analyzer);
         tw.visit(dec);*/
 
-        MathPopulator.emitDebug("Type Graph:\n\n"
+        Populator.emitDebug("Type Graph:\n\n"
                 + symbolTable.getTypeGraph().toString());
 
         return null;

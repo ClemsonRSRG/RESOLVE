@@ -97,11 +97,11 @@ class BaseSymbolTable implements SymbolTable {
 
         return Collections.unmodifiableList(result).iterator();
     }
-    
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        
+
         boolean first = true;
         for (Map.Entry<String, SymbolTableEntry> entry : myEntries.entrySet()) {
             if (first) {
@@ -110,10 +110,10 @@ class BaseSymbolTable implements SymbolTable {
             else {
                 result.append(", ");
             }
-            
+
             result.append(entry.getKey());
         }
-        
+
         return result.toString();
     }
 }
