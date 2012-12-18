@@ -141,8 +141,8 @@ public class UnqualifiedPath implements ScopeSearchPath {
             facilityConcept = facility.getFacility().getSpecification();
 
             facilityScope =
-                    facilityConcept
-                            .getScope(myFacilityStrategy.equals(FacilityStrategy.FACILITY_INSTANTIATE));
+                    facilityConcept.getScope(myFacilityStrategy
+                            .equals(FacilityStrategy.FACILITY_INSTANTIATE));
 
             finished =
                     facilityScope.addMatches(searcher, result, searchedScopes,

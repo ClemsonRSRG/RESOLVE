@@ -217,12 +217,13 @@ public class TreeWalker {
         Iterator<Class<?>> iter = classHierarchy.iterator();
         while (iter.hasNext() && !foundOverride) {
             Class<?> c = iter.next();
-            
+
             if (!c.equals(VirtualListNode.class)) {
                 String walkMethodName = "walk" + c.getSimpleName();
                 try {
                     Method walkMethod =
-                            this.myVisitor.getClass().getMethod(walkMethodName, c);
+                            this.myVisitor.getClass().getMethod(walkMethodName,
+                                    c);
                     foundOverride =
                             ((Boolean) walkMethod.invoke(this.myVisitor, e));
                 }
