@@ -4567,7 +4567,8 @@ public class Verifier extends ResolveConceptualVisitor {
                             old.setName(((TypeDec) tmp).getExemplar());
                             old.setType(getTypeFromTy(((TypeDec) tmp)
                                     .getModel()));
-                            old.setMathType(((TypeDec) tmp).getModel().getMathType());
+                            old.setMathType(((TypeDec) tmp).getModel()
+                                    .getMathType());
 
                             Exp initEns = ((Exp) Exp.clone(item.getEnsures()));
 

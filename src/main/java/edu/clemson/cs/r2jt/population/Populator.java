@@ -1,1800 +1,1616 @@
-/*
- * This software is released under the new BSD 2006 license.
- * 
- * Note the new BSD license is equivalent to the MIT License, except for the
- * no-endorsement final clause.
- * 
- * Copyright (c) 2007, Clemson University
- * 
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * * Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
- * * Neither the name of the Clemson University nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
- * This sofware has been developed by past and present members of the
- * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University. Contributors to the initial version are:
- * 
- * Steven Atkinson
- * Greg Kulczycki
- * Kunal Chopra
- * John Hunt
- * Heather Keown
- * Ben Markle
- * Kim Roche
- * Murali Sitaraman
- */
-/*
- * Populator.java
- * 
- * The Resolve Software Composition Workbench Project
- * 
- * Copyright (c) 1999-2005
- * Reusable Software Research Group
- * Department of Computer Science
- * Clemson University
- */
-
 package edu.clemson.cs.r2jt.population;
 
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.collections.*;
-import edu.clemson.cs.r2jt.data.*;
-import edu.clemson.cs.r2jt.entry.*;
-import edu.clemson.cs.r2jt.errors.*;
-import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.init.Environment;
-import edu.clemson.cs.r2jt.location.TypeLocator;
-import edu.clemson.cs.r2jt.scope.Binding;
-import edu.clemson.cs.r2jt.scope.ModuleScope;
-import edu.clemson.cs.r2jt.scope.OldSymbolTable;
-import edu.clemson.cs.r2jt.scope.TypeID;
-import edu.clemson.cs.r2jt.type.*;
+import edu.clemson.cs.r2jt.data.Location;
+import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.mathtype.*;
+import edu.clemson.cs.r2jt.mathtype.MathSymbolTable.FacilityStrategy;
+import edu.clemson.cs.r2jt.mathtype.MathSymbolTable.ImportStrategy;
+import edu.clemson.cs.r2jt.mathtype.PTPrimitive.PrimitiveTypeName;
+import edu.clemson.cs.r2jt.mathtype.ProgramParameterEntry.ParameterMode;
+import edu.clemson.cs.r2jt.treewalk.*;
+import edu.clemson.cs.r2jt.typereasoning.*;
+import edu.clemson.cs.r2jt.utilities.SourceErrorException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * <p>
- * The purpose of the <code>Populator</code> is to take a
- * <code>SymbolTable</code> and traverse the abstract syntax tree, filling in
- * the <code>SymbolTable</code> with information about variables and their
- * types.</code>
- */
-public class Populator extends ResolveConceptualVisitor {
+public class Populator extends TreeWalkerVisitor {
 
-    // ===========================================================
-    // Variables
-    // ===========================================================
+    private static final boolean PRINT_DEBUG = false;
 
-    private OldSymbolTable table;
+    private static final TypeComparison<AbstractFunctionExp, MTFunction> EXACT_DOMAIN_MATCH =
+            new ExactDomainMatch();
 
-    //private Environment env = Environment.getInstance();
+    private static final Comparator<MTType> EXACT_PARAMETER_MATCH =
+            new ExactParameterMatch();
 
-    private ErrorHandler err;
+    private final TypeComparison<AbstractFunctionExp, MTFunction> INEXACT_DOMAIN_MATCH =
+            new InexactDomainMatch();
 
-    private CompileEnvironment myInstanceEnvironment;
+    private final TypeComparison<Exp, MTType> INEXACT_PARAMETER_MATCH =
+            new InexactParameterMatch();
 
-    // =======================s====================================
-    // Constructors
-    // ===========================================================
+    private MathSymbolTableBuilder myBuilder;
+    private ModuleScopeBuilder myCurModuleScope;
 
-    public Populator(OldSymbolTable table,
-            CompileEnvironment myInstanceEnvironment) {
-        this.table = table;
-        this.myInstanceEnvironment = myInstanceEnvironment;
-        this.err = myInstanceEnvironment.getErrorHandler();
-    }
+    private int myTypeValueDepth = 0;
+    private int myExpressionDepth = 0;
 
-    // ===========================================================
-    // Public Methods - Abstract Visit Methods
-    // ===========================================================
+    private boolean myInTypeTheoremBindingExpFlag = false;
 
-    public void visitModuleDec(ModuleDec dec) {
-
-        // TODO : All of the visitXModuleDec methods end with
-        // table.completeModuleScope except one. Can this be changed so
-        // that completeModuleScope can be factored out as well? -HwS
-        table.createModuleScope();
-
-        // This procedure determines whether the dec is a Std_Fac or one of its
-        // dependencies and if not adds the Std_Fac to the table's scope
-        // NOTE: If you are adding more Std_Facs they should be added to the stdUses array in CompileEnvironment
-        // TODO: This mechanism is a duplicate of that in the
-        // ImportScanner.visitModuleDec(), perhaps combine these somehow? -JCK
-        String[] stdUses = myInstanceEnvironment.getStdUses();
-        String decName = dec.getName().getName();
-        List<List<UsesItem>> listOfDependLists =
-                myInstanceEnvironment.getStdUsesDepends();
-
-        for (int i = 0; i < stdUses.length; i++) {
-            if (decName.equals("Std_" + stdUses[i] + "_Fac")
-                    || decName.equals(stdUses[i] + "_Template")
-                    || decName.equals(stdUses[i] + "_Theory")) {
-                // Don't need to do anything for these
-                dec.accept(this);
-                return;
-            }
-            else {
-                // Check if this Dec is a dependency
-                if (!listOfDependLists.isEmpty()) {
-                    List<UsesItem> dependencies = listOfDependLists.get(i);
-                    if (dependencies != null) {
-                        Iterator<UsesItem> it = dependencies.iterator();
-                        while (it.hasNext()) {
-                            if (it.next().getName().getName().equals(decName)) {
-                                // This is a dependency do NOT add
-                                dec.accept(this);
-                                return;
-                            }
-                        }
-                    }
-                }
-                // Not a Std_Fac or dependency; Add the Fac to the table scope
-                Symbol stdFac;
-                stdFac = Symbol.symbol("Std_" + stdUses[i] + "_Fac");
-
-                PosSymbol stdFacPosSymbol = new PosSymbol(null, stdFac);
-                ModuleID stdBooleanFacModuleID =
-                        ModuleID.createFacilityID(stdFac);
-                ModuleEntry entry =
-                        new ModuleEntry(stdFacPosSymbol, myInstanceEnvironment
-                                .getSymbolTable(stdBooleanFacModuleID)
-                                .getModuleScope());
-                table.addFacilityToScope(entry);
-            }
-        }
-
-        dec.accept(this);
-    }
-
-    public void visitDec(Dec dec) {
-        dec.accept(this);
-    }
-
-    public void visitStatement(Statement stmt) {
-        stmt.accept(this);
-    }
-
-    /*
-     * Note: For the time being, we are not analyzing math expressions. This
-     * means that we cannot populate math expression either, since the scope
-     * handling depends upon the populator and the analyzer being synchronized
-     * in the way they recurse through the module dec (and therefore in the
-     * scopes they visit). In short, if a scope is created in the populator but
-     * not visited in the analyzer, everything get screwed up.
+    /**
+     * <p>Any quantification-introducing syntactic node (like, e.g., a 
+     * QuantExp), introduces a level to this stack to reflect the quantification 
+     * that should be applied to named variables as they are encountered.  Note 
+     * that this may change as the children of the node are processed--for 
+     * example, MathVarDecs found in the declaration portion of a QuantExp 
+     * should have quantification (universal or existential) applied, while 
+     * those found in the body of the QuantExp should have no quantification 
+     * (unless there is an embedded QuantExp).  In this case, QuantExp should 
+     * <em>not</em> remove its layer, but rather change it to 
+     * MathSymbolTableEntry.None.</p>
+     * 
+     * <p>This stack is never empty, but rather the bottom layer is always
+     * MathSymbolTableEntry.None.</p>
      */
-    public void visitExp(Exp exp) {
-        // DEBUG
-        // return;
-        if (exp == null) {
-            return;
-        }
-        exp.accept(this);
+    private Deque<SymbolTableEntry.Quantification> myActiveQuantifications =
+            new LinkedList<SymbolTableEntry.Quantification>();
+
+    private final TypeGraph myTypeGraph;
+    private TreeWalker myWalker;
+
+    /**
+     * <p>While we walk the children of a direct definition, this will be set
+     * with a pointer to the definition declaration we are walking, otherwise
+     * it will be null.  Note that definitions cannot be nested, so there's
+     * no need for a stack.</p>
+     */
+    private DefinitionDec myCurrentDirectDefinition;
+
+    private Map<String, MTType> myDefinitionSchematicTypes =
+            new HashMap<String, MTType>();
+
+    /**
+     * <p>This simply enables an error check--as a definition uses named types,
+     * we keep track of them, and when an implicit type is introduced, we make
+     * sure that it hasn't been "used" yet, thus leading to a confusing scenario
+     * where some instances of the name should refer to a type already in scope
+     * as the definition is declared and other instance refer to the implicit
+     * type parameter.</p>
+     */
+    private Set<String> myDefinitionNamedTypes = new HashSet<String>();
+
+    /**
+     * <p>While walking a procedure, this is set to the entry for the operation 
+     * or FacilityOperation that the procedure is attempting to implement.</p>
+     * 
+     * <p><strong>INVARIANT:</strong> 
+     * <code>myCorrespondingOperation != null</code> <em>implies</em> 
+     * <code>myCurrentParameters != null</code>.</p>
+     */
+    private OperationEntry myCorrespondingOperation;
+
+    /**
+     * <p>While we walk the children of an operation, FacilityOperation, or
+     * procedure, this list will contain all formal parameters encountered so 
+     * far, otherwise it will be null.  Since none of these structures can be
+     * be nested, there's no need for a stack.</p>
+     * 
+     * <p>If you need to distinguish if you're in the middle of an 
+     * operation/FacilityOperation or a procedure, check 
+     * myCorrespondingOperation.</p>
+     */
+    private List<ProgramParameterEntry> myCurrentParameters;
+
+    /**
+     * <p>A mapping from generic types that appear in the module to the math
+     * types that bound their possible values.</p>
+     */
+    private Map<String, MTType> myGenericTypes = new HashMap<String, MTType>();
+
+    public Populator(MathSymbolTableBuilder builder) {
+        myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
+
+        myTypeGraph = builder.getTypeGraph();
+        myBuilder = builder;
     }
 
-    // ===========================================================
-    // Public Methods - Declarations
-    // ===========================================================
-
-    // -----------------------------------------------------------
-    // Module Declarations
-    // -----------------------------------------------------------
-
-    public void visitMathModuleDec(MathModuleDec dec) {
-        visitUsesItemList(dec.getUsesItems());
-        visitModuleParameterList(dec.getParameters());
-        visitDecList(dec.getDecs());
-        table.completeModuleScope();
+    public void setTreeWalker(TreeWalker w) {
+        //TODO : This is required by an annoying circular dependency.  Ideally,
+        //       the methods of TreeWalker should just be static so that an
+        //       instance is not required
+        myWalker = w;
     }
 
-    public void visitProofModuleDec(ProofModuleDec dec) {
-        visitUsesItemList(dec.getUsesItems());
-        visitModuleParameterList(dec.getModuleParams());
-        visitDecList(dec.getDecs());
-        table.completeModuleScope();
+    //-------------------------------------------------------------------
+    //   Visitor methods
+    //-------------------------------------------------------------------
+
+    @Override
+    public void preModuleDec(ModuleDec node) {
+        Populator.emitDebug("----------------------\nBEGIN MATH POPULATOR");
+
+        myCurModuleScope = myBuilder.startModuleScope(node);
     }
 
-    public void visitConceptModuleDec(ConceptModuleDec dec) {
-        visitUsesItemList(dec.getUsesItems());
-        visitModuleParameterList(dec.getParameters());
-        visitExp(dec.getRequirement());
-        visitExpList(dec.getConstraints());
-        if (dec.getFacilityInit() != null) {
-            visitInitItem(dec.getFacilityInit());
-        }
-        if (dec.getFacilityFinal() != null) {
-            visitFinalItem(dec.getFacilityFinal());
-        }
-        visitDecList(dec.getDecs());
-        table.completeModuleScope();
+    @Override
+    public void preEnhancementModuleDec(EnhancementModuleDec enhancement) {
+
+        //Enhancements implicitly import the concepts they enhance
+        myCurModuleScope.addImport(new ModuleIdentifier(enhancement
+                .getConceptName().getName()));
     }
 
-    public void visitEnhancementModuleDec(EnhancementModuleDec dec) {
-        visitUsesItemList(dec.getUsesItems());
-        table.addAssocConcept(dec.getConceptName());
-        table.addAssocVisibleModules();
-        visitModuleParameterList(dec.getParameters());
-        visitExp(dec.getRequirement());
-        visitDecList(dec.getDecs());
-        table.completeModuleScope();
+    @Override
+    public void preEnhancementBodyModuleDec(
+            EnhancementBodyModuleDec enhancementRealization) {
+
+        //Enhancement realizations implicitly import the concepts they enhance
+        //and the enhancements they realize
+        myCurModuleScope.addImport(new ModuleIdentifier(enhancementRealization
+                .getConceptName().getName()));
+        myCurModuleScope.addImport(new ModuleIdentifier(enhancementRealization
+                .getEnhancementName().getName()));
     }
 
-    public void visitConceptBodyModuleDec(ConceptBodyModuleDec dec) {
-        visitUsesItemList(dec.getUsesItems());
-        table.addConceptSpec(dec.getConceptName());
-        Iterator<PosSymbol> i = dec.getEnhancementNames().iterator();
-        while (i.hasNext()) {
-            table.addEnhancementSpec(i.next(), dec.getConceptName());
-        }
-        table.addAssocVisibleModules();
-        visitModuleParameterList(dec.getParameters());
-        visitExp(dec.getRequires());
-        visitExpList(dec.getConventions());
-        visitExpList(dec.getCorrs());
-        if (dec.getFacilityInit() != null) {
-            visitInitItem(dec.getFacilityInit());
-        }
-        if (dec.getFacilityFinal() != null) {
-            visitFinalItem(dec.getFacilityFinal());
-        }
-        visitDecList(dec.getDecs());
-        table.completeModuleScope();
+    @Override
+    public void postUsesItem(UsesItem uses) {
+        myCurModuleScope.addImport(new ModuleIdentifier(uses));
     }
 
-    public void visitEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
-        visitUsesItemList(dec.getUsesItems());
-        table
-                .addEnhancementSpec(dec.getEnhancementName(), dec
-                        .getConceptName());
-        table.addAssocConcept(dec.getConceptName());
-        addAssocEnhancementsToTable(dec.getEnhancementBodies(), dec
-                .getConceptName());
-        table.addAssocVisibleModules();
-        visitModuleParameterList(dec.getParameters());
-        visitExp(dec.getRequires());
-        visitExpList(dec.getConventions());
-        visitExpList(dec.getCorrs());
-        if (dec.getFacilityInit() != null) {
-            visitInitItem(dec.getFacilityInit());
+    @Override
+    public void postConstantParamDec(ConstantParamDec param) {
+        try {
+            String paramName = param.getName().getName();
+
+            myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
+                    param, ParameterMode.EVALUATES,
+                    param.getTy().getProgramTypeValue());
         }
-        if (dec.getFacilityFinal() != null) {
-            visitFinalItem(dec.getFacilityFinal());
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(param.getName().getName(), param.getName()
+                    .getLocation());
         }
-        visitDecList(dec.getDecs());
-        table.completeModuleScope();
     }
 
-    public void visitFacilityModuleDec(FacilityModuleDec dec) {
-        visitUsesItemList(dec.getUsesItems());
-        if (dec.getFacilityInit() != null) {
-            visitInitItem(dec.getFacilityInit());
+    @Override
+    public void postConceptTypeParamDec(ConceptTypeParamDec param) {
+        try {
+            String paramName = param.getName().getName();
+
+            myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
+                    param, ParameterMode.TYPE, new PTElement(myTypeGraph));
+
+            myGenericTypes.put(paramName, myTypeGraph.MTYPE);
         }
-        if (dec.getFacilityFinal() != null) {
-            visitFinalItem(dec.getFacilityFinal());
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(param.getName().getName(), param.getName()
+                    .getLocation());
         }
-        visitDecList(dec.getDecs());
-        table.completeModuleScope();
     }
 
-    public void visitShortFacilityModuleDec(ShortFacilityModuleDec dec) {
-        visitUsesItemList(dec.getUsesItems());
-        visitFacilityDec(dec.getDec());
-        table.completeModuleScope();
-        table.createShortFacility(dec.getName());
+    @Override
+    public void postStructureExp(StructureExp structure) {
+        //TODO: Remove the StructureExps from where they appear--they're no 
+        //      longer used
+
+        //Type it so we don't get an error
+        structure.setMathType(myTypeGraph.ENTITY);
     }
 
-    // -----------------------------------------------------------
-    // Variable Declarations
-    // -----------------------------------------------------------
-
-    /* Operation parameters */
-    public void visitParameterVarDec(ParameterVarDec dec) {
-        VarEntry var =
-                new VarEntry(table.getCurrentScope(), dec.getMode(), dec
-                        .getName(), getProgramType(dec.getTy()));
-        table.addVariableToScope(var);
+    @Override
+    public void preFacilityOperationDec(FacilityOperationDec dec) {
+        myBuilder.startScope(dec);
     }
 
-    // -----------------------------------------------------------
-    // Math Declarations
-    // -----------------------------------------------------------
+    @Override
+    public void preProcedureDec(ProcedureDec dec) {
 
-    private boolean isDecAVar(DefinitionDec dec) {
-        List<MathVarDec> params1 = dec.getParameters();
-        if (params1 == null)
-            return false;
-        Iterator<MathVarDec> i = params1.iterator();
-        if (!i.hasNext()
-                && !(getMathType(dec.getReturnTy()) instanceof FunctionType)) {
-            if (dec.getDefinition() == null && dec.getBase() == null
-                    && dec.getHypothesis() == null) {
-                return true;
+        try {
+            //Figure out what Operation we correspond to (we don't use 
+            //OperationQuery because we want to check parameter types 
+            //separately in postProcedureDec)
+            myCorrespondingOperation =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameAndEntryTypeQuery(null, dec.getName(),
+                                    OperationEntry.class,
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_IGNORE, false))
+                            .toOperationEntry(dec.getLocation());
+
+            myBuilder.startScope(dec);
+
+            myCurrentParameters = new LinkedList<ProgramParameterEntry>();
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new SourceErrorException("Procedure "
+                    + dec.getName().getName()
+                    + " does not implement any known " + "Operation.", dec
+                    .getName().getLocation());
+        }
+        catch (DuplicateSymbolException dse) {
+            //We should have caught this before now, like when we defined the
+            //duplicate Operation
+            throw new RuntimeException("Duplicate Operations for "
+                    + dec.getName().getName() + "?");
+        }
+    }
+
+    @Override
+    public void postProcedureDec(ProcedureDec dec) {
+        myBuilder.endScope();
+
+        //We're about to throw away all information about procedure parameters,
+        //since they're redundant anyway.  So we sanity-check them first.
+        Ty returnTy = dec.getReturnTy();
+        PTType returnType;
+        if (returnTy == null) {
+            returnType = PTVoid.getInstance(myTypeGraph);
+        }
+        else {
+            returnType = returnTy.getProgramTypeValue();
+        }
+
+        if (!returnType.equals(myCorrespondingOperation.getReturnType())) {
+            throw new SourceErrorException("Procedure return type does "
+                    + "not correspond to the return type of the operation "
+                    + "it implements.  \n\nExpected type: "
+                    + myCorrespondingOperation.getReturnType() + " ("
+                    + myCorrespondingOperation.getSourceModuleIdentifier()
+                    + "." + myCorrespondingOperation.getName() + ")\n\n"
+                    + "Found type: " + returnType, dec.getLocation());
+        }
+
+        if (myCorrespondingOperation.getParameters().size() != myCurrentParameters
+                .size()) {
+            throw new SourceErrorException("Procedure parameter count "
+                    + "does not correspond to the parameter count of the "
+                    + "operation it implements. \n\nExpected count: "
+                    + myCorrespondingOperation.getParameters().size() + " ("
+                    + myCorrespondingOperation.getSourceModuleIdentifier()
+                    + "." + myCorrespondingOperation.getName() + ")\n\n"
+                    + "Found count: " + myCurrentParameters.size(), dec
+                    .getLocation());
+        }
+
+        Iterator<ProgramParameterEntry> opParams =
+                myCorrespondingOperation.getParameters().iterator();
+        Iterator<ProgramParameterEntry> procParams =
+                myCurrentParameters.iterator();
+        ProgramParameterEntry curOpParam, curProcParam;
+        while (opParams.hasNext()) {
+            curOpParam = opParams.next();
+            curProcParam = procParams.next();
+
+            if (!curOpParam.getParameterMode().canBeImplementedWith(
+                    curProcParam.getParameterMode())) {
+                throw new SourceErrorException(curOpParam.getParameterMode()
+                        + "-mode parameter "
+                        + "cannot be implemented with "
+                        + curProcParam.getParameterMode()
+                        + " mode.  "
+                        + "Select one of these valid modes instead: "
+                        + Arrays.toString(curOpParam.getParameterMode()
+                                .getValidImplementationModes()), curProcParam
+                        .getDefiningElement().getLocation());
+            }
+
+            if (!curOpParam.getDeclaredType().equals(
+                    curProcParam.getDeclaredType())) {
+                throw new SourceErrorException("Parameter type does not "
+                        + "match corresponding operation parameter type."
+                        + "\n\nExpected: " + curOpParam.getDeclaredType()
+                        + " (" + curOpParam.getSourceModuleIdentifier() + "."
+                        + myCorrespondingOperation.getName() + ")\n\n"
+                        + "Found: " + curProcParam.getDeclaredType(),
+                        curProcParam.getDefiningElement().getLocation());
+            }
+
+            if (!curOpParam.getName().equals(curProcParam.getName())) {
+                throw new SourceErrorException("Parmeter name does not "
+                        + "match corresponding operation parameter name."
+                        + "\n\nExpected name: " + curOpParam.getName() + " ("
+                        + curOpParam.getSourceModuleIdentifier() + "."
+                        + myCorrespondingOperation.getName() + ")\n\n"
+                        + "Found name: " + curProcParam.getName(), curProcParam
+                        .getDefiningElement().getLocation());
             }
         }
-        return false;
+
+        try {
+            myBuilder.getInnermostActiveScope().addProcedure(
+                    dec.getName().getName(), dec, myCorrespondingOperation);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(dec.getName().getName(), dec.getName()
+                    .getLocation());
+        }
+
+        myCurrentParameters = null;
     }
 
-    public void visitDefinitionDec(DefinitionDec dec) {
-        // System.out.println("visitDefinitionDec: " + dec.asString(0, 5));
+    @Override
+    public void preOperationDec(OperationDec dec) {
+        myBuilder.startScope(dec);
 
-        // If the defn. has no params, treat it as a VarEntry
-        if (isDecAVar(dec)) {
-            VarEntry vEntry =
-                    new VarEntry(table.getCurrentScope(), Mode.MATH, dec
-                            .getName(), getMathType(dec.getReturnTy()));
-            table.addVariableToScope(vEntry);
+        myCurrentParameters = new LinkedList<ProgramParameterEntry>();
+    }
+
+    @Override
+    public void midOperationDec(OperationDec node,
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+
+        if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
+            try {
+                //Inside the operation's assertions, the name of the operation
+                //refers to its return value
+                myBuilder.getInnermostActiveScope().addBinding(
+                        node.getName().getName(), node,
+                        node.getReturnTy().getMathTypeValue());
+            }
+            catch (DuplicateSymbolException dse) {
+                //This shouldn't be possible--the operation declaration has a 
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                throw new RuntimeException(dse);
+            }
         }
-        // "Definition suc: N -> N;", etc.
-        else if (dec.getReturnTy() instanceof FunctionTy) {
-            // Add as a definition
-            DefinitionEntry defEntry = null;
-            FunctionType ftype =
-                    (FunctionType) (getMathType(dec.getReturnTy()));
-            Type newParam = ftype.getDomain();
-            Type retValue = ftype.getRange();
-            PosSymbol ps = new PosSymbol(null, Symbol.symbol(""));
-            // "Definition conj: B x B -> B;"
-            if (newParam instanceof TupleType) {
-                List<FieldItem> oldParams = ((TupleType) newParam).getFields();
-                Iterator<FieldItem> i = oldParams.iterator();
-                List<VarEntry> newParamList = new List<VarEntry>();
-                while (i.hasNext()) {
-                    VarEntry ve =
-                            new VarEntry(table.getCurrentScope(), Mode.MATH,
-                                    ps, i.next().getType());
-                    newParamList.add(ve);
-                }
-                defEntry =
-                        new DefinitionEntry(table.getCurrentScope(), dec
-                                .getName(), newParamList, retValue);
-                table.addDefinitionToScope(defEntry);
+    }
+
+    @Override
+    public void postOperationDec(OperationDec dec) {
+        myBuilder.endScope();
+
+        try {
+            Ty returnTy = dec.getReturnTy();
+            PTType returnType;
+            if (returnTy == null) {
+                returnType = PTVoid.getInstance(myTypeGraph);
             }
             else {
-                VarEntry vEntry =
-                        new VarEntry(table.getCurrentScope(), Mode.MATH, ps,
-                                newParam);
-                List<VarEntry> params = new List<VarEntry>();
-                params.add(vEntry);
-                defEntry =
-                        new DefinitionEntry(table.getCurrentScope(), dec
-                                .getName(), params, retValue);
-                table.addDefinitionToScope(defEntry);
-            }
-        }
-        // "Definition suc(x: N): N = ...;"
-        else {
-            DefinitionEntry defEntry = null;
-            List<VarEntry> params = new List<VarEntry>();
-            if (dec.getParameters() != null) {
-                Iterator<MathVarDec> paramsIt = dec.getParameters().iterator();
-                while (paramsIt.hasNext()) {
-                    MathVarDec mvDec = paramsIt.next();
-                    VarEntry vEntry =
-                            new VarEntry(table.getCurrentScope(), Mode.MATH,
-                                    mvDec.getName(), getMathType(mvDec.getTy()));
-                    params.add(vEntry);
-                }
+                returnType = returnTy.getProgramTypeValue();
             }
 
-            defEntry =
-                    new DefinitionEntry(table.getCurrentScope(), dec.getName(),
-                            params, getMathType(dec.getReturnTy()));
-            table.addDefinitionToScope(defEntry);
+            myBuilder.getInnermostActiveScope().addOperation(
+                    dec.getName().getName(), dec, myCurrentParameters,
+                    returnType);
         }
-        addDefinitionAsType(dec);
-        table.createDefinitionScope(dec.getName());
-        visitDefinitionParameters(dec.getParameters());
-        visitExp(dec.getBase());
-        visitExp(dec.getHypothesis());
-        visitExp(dec.getDefinition());
-        table.completeDefinitionScope();
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(dec.getName().getName(), dec.getName()
+                    .getLocation());
+        }
+
+        myCurrentParameters = null;
     }
 
-    private Type getTypeOfSetType(Type t) {
-        if (t instanceof ConstructedType) {
-            ConstructedType c = (ConstructedType) t;
-            if (c.getName().getName().equalsIgnoreCase("set")) {
-                List<Type> args = c.getArgs();
-                if (args.size() == 1) {
-                    return args.get(0);
+    @Override
+    public void postFacilityOperationDec(FacilityOperationDec dec) {
+        myBuilder.endScope();
+    }
+
+    @Override
+    public void postParameterVarDec(ParameterVarDec dec) {
+
+        ParameterMode mode =
+                ProgramParameterEntry.OLD_TO_NEW_MODE.get(dec.getMode());
+
+        if (mode == null) {
+            throw new RuntimeException("Unexpected parameter mode: "
+                    + dec.getMode());
+        }
+
+        try {
+            ProgramParameterEntry paramEntry =
+                    myBuilder.getInnermostActiveScope().addFormalParameter(
+                            dec.getName().getName(), dec, mode,
+                            dec.getTy().getProgramTypeValue());
+            myCurrentParameters.add(paramEntry);
+        }
+        catch (DuplicateSymbolException e) {
+            duplicateSymbol(dec.getName().getName(), dec.getName()
+                    .getLocation());
+        }
+    }
+
+    @Override
+    public void preTypeDec(TypeDec dec) {
+        myBuilder.startScope(dec);
+    }
+
+    @Override
+    public void midTypeDec(TypeDec dec, ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+
+        if (prevChild == dec.getModel()) {
+            //We've parsed the model, but nothing else, so we can add our 
+            //exemplar to scope if we've got one
+            PosSymbol exemplar = dec.getExemplar();
+
+            if (exemplar != null) {
+                try {
+                    myBuilder.getInnermostActiveScope().addBinding(
+                            exemplar.getName(), dec,
+                            dec.getModel().getMathTypeValue());
                 }
+                catch (DuplicateSymbolException dse) {
+                    //This shouldn't be possible--the type declaration has a 
+                    //scope all its own and we're the first ones to get to
+                    //introduce anything
+                    throw new RuntimeException(dse);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void postTypeDec(TypeDec dec) {
+        myBuilder.endScope();
+
+        try {
+            myBuilder.getInnermostActiveScope().addProgramType(
+                    dec.getName().getName(), dec,
+                    dec.getModel().getMathTypeValue());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(dec.getName().getName(), dec.getName()
+                    .getLocation());
+        }
+    }
+
+    @Override
+    public void postNameTy(NameTy ty) {
+        //Note that all mathematical types are ArbitraryExpTys, so this must
+        //be in a program-type syntactic slot.
+
+        PosSymbol tySymbol = ty.getName();
+        PosSymbol tyQualifier = ty.getQualifier();
+        Location tyLocation = tySymbol.getLocation();
+        String tyName = tySymbol.getName();
+
+        try {
+            ProgramTypeEntry type =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameQuery(tyQualifier, tySymbol,
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false)).toProgramTypeEntry(tyLocation);
+
+            ty.setProgramTypeValue(type.getProgramType());
+            ty.setMathType(myTypeGraph.MTYPE);
+            ty.setMathTypeValue(type.getModelType());
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(tyQualifier, tyName, tyLocation);
+        }
+        catch (DuplicateSymbolException dse) {
+            //Shouldn't be possible--NameQuery can't throw this
+            throw new RuntimeException(dse);
+        }
+    }
+
+    @Override
+    public void postFacilityDec(FacilityDec facility) {
+        try {
+            myBuilder.getInnermostActiveScope().addFacility(facility);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(facility.getName().getName(), facility.getName()
+                    .getLocation());
+        }
+    }
+
+    @Override
+    public void postMathAssertionDec(MathAssertionDec node) {
+        if (node.getAssertion() != null) {
+            expectType(node.getAssertion(), myTypeGraph.BOOLEAN);
+        }
+
+        String name = node.getName().getName();
+        addBinding(name, node.getName().getLocation(), node,
+                myTypeGraph.BOOLEAN, null);
+
+        Populator.emitDebug("New theorem: " + name);
+    }
+
+    @Override
+    public void postMathVarDec(MathVarDec node) {
+
+        MTType mathTypeValue = node.getTy().getMathTypeValue();
+        String varName = node.getName().getName();
+
+        if (myCurrentDirectDefinition != null
+                && mathTypeValue.isKnownToContainOnlyMTypes()
+                && myDefinitionNamedTypes.contains(varName)) {
+            throw new SourceErrorException("Introduction of type parameter "
+                    + "must precede any use of that variable name.", node
+                    .getLocation());
+        }
+
+        node.setMathType(mathTypeValue);
+
+        SymbolTableEntry.Quantification q =
+                SymbolTableEntry.Quantification.UNIVERSAL;
+        //TODO : the for-alls in a type theorem should be normal QuantExps and
+        //       the quantification here should depend on the innermost QuantExp
+        addBinding(varName, node.getName().getLocation(), q, node,
+                mathTypeValue, null);
+
+        Populator.emitDebug("  New variable: " + varName + " of type "
+                + mathTypeValue.toString() + " with quantification " + q);
+    }
+
+    @Override
+    public void postVarDec(VarDec programVar) {
+
+        MTType mathTypeValue = programVar.getTy().getMathTypeValue();
+        String varName = programVar.getName().getName();
+
+        programVar.setMathType(mathTypeValue);
+
+        try {
+            myBuilder.getInnermostActiveScope().addProgramVariable(varName,
+                    programVar, programVar.getTy().getProgramTypeValue());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(varName, programVar.getLocation());
+        }
+
+        Populator.emitDebug("  New program variable: " + varName
+                + " of type " + mathTypeValue.toString()
+                + " with quantification NONE");
+    }
+
+    @Override
+    public void postVariableNameExp(VariableNameExp node) {
+        try {
+            ProgramVariableEntry entry =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new ProgramVariableQuery(node.getQualifier(), node
+                                    .getName()));
+
+            node.setProgramType(entry.getProgramType());
+
+            //Handle math typing stuff
+            postSymbolExp(node.getQualifier(), node.getName().getName(), node);
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(node.getQualifier(), node.getName().getName(), node
+                    .getLocation());
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException("ToDo"); //TODO
+        }
+    }
+
+    @Override
+    public void postProgramParamExp(ProgramParamExp node) {
+        List<ProgramExp> args = node.getArguments();
+
+        List<PTType> argTypes = new LinkedList<PTType>();
+        for (ProgramExp arg : args) {
+            argTypes.add(arg.getProgramType());
+        }
+
+        try {
+            OperationEntry op =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new OperationQuery(null, node.getName(), argTypes));
+
+            node.setProgramType(op.getReturnType());
+            node.setMathType(op.getReturnType().toMath());
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, node.getName().getName(), node.getLocation());
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate operation is
+            //created
+            throw new RuntimeException(dse);
+        }
+    }
+
+    @Override
+    public void postOldExp(OldExp exp) {
+        exp.setMathType(exp.getExp().getMathType());
+        exp.setMathTypeValue(exp.getExp().getMathTypeValue());
+    }
+
+    @Override
+    public boolean walkTypeAssertionExp(TypeAssertionExp node) {
+
+        preTypeAssertionExp(node);
+
+        //If we exist as an implicit type parameter, there's no way our 
+        //expression can know its own type (that's defined by the asserted Ty),
+        //so we skip walking it and let postTypeAssertionExp() set its type for
+        //it
+        if (myTypeValueDepth == 0) {
+            myWalker.visit(node.getExp());
+        }
+
+        myWalker.visit(node.getAssertedTy());
+
+        postTypeAssertionExp(node);
+
+        return true;
+    }
+
+    @Override
+    public void postTypeAssertionExp(TypeAssertionExp node) {
+        if (myTypeValueDepth == 0
+                && (myExpressionDepth > 2 || !myInTypeTheoremBindingExpFlag)) {
+            throw new SourceErrorException("This construct only permitted in "
+                    + "type declarations or in expressions matching: \n\n"
+                    + "   Type Theorem <name>: <quantifiers>, \n"
+                    + "       [<condition> implies] <expression> : "
+                    + "<assertedType>", node.getLocation());
+        }
+        //Note that postTypeTheoremDec() checks the "form" of a type theorem at
+        //the top two levels.  So all we're checking for here is that the type
+        //assertion didn't happen deeper than that (where it shouldn't appear).
+
+        //If we're the assertion of a type theorem, then postTypeTheoremDec()
+        //will take care of any logic.  If we're part of a type declaration,
+        //on the other hand, we've got some bookkeeping to do...
+        if (myTypeValueDepth > 0) {
+            try {
+                VarExp nodeExp = (VarExp) node.getExp();
+                try {
+                    myBuilder.getInnermostActiveScope().addBinding(
+                            nodeExp.getName().getName(),
+                            SymbolTableEntry.Quantification.UNIVERSAL, node,
+                            node.getAssertedTy().getMathType());
+                    node.setMathType(node.getAssertedTy().getMathType());
+                    node.setMathTypeValue(new MTNamed(myTypeGraph, nodeExp
+                            .getName().getName()));
+
+                    //See walkTypeAssertionExp(): we are responsible for 
+                    //setting the VarExp's type.
+                    nodeExp.setMathType(node.getAssertedTy().getMathType());
+                    node.setMathTypeValue(new MTNamed(myTypeGraph, nodeExp
+                            .getName().getName()));
+
+                    if (myDefinitionNamedTypes.contains(nodeExp.getName()
+                            .getName())) {
+                        //Regardless of where in the expression it appears, an
+                        //implicit type parameter exists at the top level of a
+                        //definition, and thus a definition that contains, e.g.,
+                        //an implicit type parameter T cannot make reference
+                        //to some existing type with that name (except via full
+                        //qualification), thus the introduction of an implicit
+                        //type parameter must precede any use of that 
+                        //parameter's name, even if the name exists in-scope
+                        //before the parameter is declared
+                        throw new SourceErrorException("Introduction of "
+                                + "implicit type parameter must precede any "
+                                + "use of that variable name.", nodeExp
+                                .getLocation());
+                    }
+
+                    //Note that a redudantly named type parameter would be 
+                    //caught when we add a symbol to the symbol table, so no
+                    //need to check here
+                    myDefinitionSchematicTypes.put(nodeExp.getName().getName(),
+                            node.getAssertedTy().getMathType());
+                }
+                catch (DuplicateSymbolException dse) {
+                    duplicateSymbol(nodeExp.getName().getName(), nodeExp
+                            .getLocation());
+                }
+            }
+            catch (ClassCastException cce) {
+                throw new SourceErrorException("Must be a variable name.", node
+                        .getExp().getLocation());
+            }
+        }
+        else {
+            node.setMathType(myTypeGraph.BOOLEAN);
+        }
+    }
+
+    @Override
+    public void preDefinitionDec(DefinitionDec node) {
+        myBuilder.startScope(node);
+
+        if (!node.isInductive()) {
+            myCurrentDirectDefinition = node;
+        }
+
+        myDefinitionSchematicTypes.clear();
+        myDefinitionNamedTypes.clear();
+    }
+
+    @Override
+    public void postDefinitionDec(DefinitionDec node) {
+        myBuilder.endScope();
+
+        MTType declaredType = node.getReturnTy().getMathTypeValue();
+
+        if (node.getDefinition() != null) {
+            expectType(node.getDefinition(), declaredType);
+        }
+        else if (node.isInductive()) {
+            expectType(node.getBase(), myTypeGraph.BOOLEAN);
+            expectType(node.getHypothesis(), myTypeGraph.BOOLEAN);
+        }
+
+        List<MathVarDec> listVarDec = node.getParameters();
+        if (listVarDec != null) {
+            declaredType = new MTFunction(myTypeGraph, node);
+        }
+
+        String definitionSymbol = node.getName().getName();
+
+        MTType typeValue = null;
+        if (node.getDefinition() != null) {
+            typeValue = node.getDefinition().getMathTypeValue();
+        }
+
+        //Note that, even if typeValue is null at this point, if declaredType
+        //returns true from knownToContainOnlyMTypes(), a new type value will
+        //still be created by the symbol table
+        addBinding(definitionSymbol, node.getName().getLocation(), node,
+                declaredType, typeValue, myDefinitionSchematicTypes);
+
+        Populator.emitDebug("New definition: " + definitionSymbol
+                + " of type " + declaredType
+                + ((typeValue != null) ? " with type value " + typeValue : ""));
+
+        myCurrentDirectDefinition = null;
+    }
+
+    @Override
+    public void preQuantExp(QuantExp node) {
+        Populator.emitDebug("Entering preQuantExp...");
+        myBuilder.startScope(node);
+    }
+
+    @Override
+    public boolean walkQuantExp(QuantExp node) {
+        preQuantExp(node);
+
+        Populator.emitDebug("Entering walkQuantExp...");
+        List<MathVarDec> vars = node.getVars();
+
+        SymbolTableEntry.Quantification quantification;
+        switch (node.getOperator()) {
+        case QuantExp.EXISTS:
+            quantification = SymbolTableEntry.Quantification.EXISTENTIAL;
+            break;
+        case QuantExp.FORALL:
+            quantification = SymbolTableEntry.Quantification.UNIVERSAL;
+            break;
+        default:
+            throw new RuntimeException("Unrecognized quantification type: "
+                    + node.getOperator());
+        }
+
+        myActiveQuantifications.push(quantification);
+        for (MathVarDec v : vars) {
+            myWalker.visit(v);
+        }
+        myActiveQuantifications.pop();
+
+        myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
+        myWalker.visit(node.getBody());
+        myActiveQuantifications.pop();
+
+        Populator.emitDebug("Exiting walkQuantExp.");
+
+        postQuantExp(node);
+
+        //This indicates that we've overrided the default
+        return true;
+    }
+
+    @Override
+    public void postQuantExp(QuantExp node) {
+        myBuilder.endScope();
+
+        expectType(node.getBody(), myTypeGraph.BOOLEAN);
+        node.setMathType(myTypeGraph.BOOLEAN);
+    }
+
+    @Override
+    public void postIfExp(IfExp exp) {
+        //An "if expression" is a functional condition, as in the following 
+        //example:
+        //   x = (if (y > 0) then y else -y)
+        //Its condition had better be a boolean.  Its type resolves to the 
+        //shared type of its branches.
+
+        //TODO : Currently, the parser permits the else clause to be optional.
+        //       That is nonsense in a functional context and should be fixed.
+        if (exp.getElseclause() == null) {
+            throw new RuntimeException("IfExp has no else clause.  The "
+                    + "parser should be changed to disallow this and this "
+                    + "error should be removed.");
+        }
+
+        expectType(exp.getTest(), myTypeGraph.BOOLEAN);
+
+        Exp ifClause = exp.getThenclause();
+        Exp elseClause = exp.getElseclause();
+
+        MTType ifType = ifClause.getMathType();
+        MTType elseType = elseClause.getMathType();
+
+        boolean ifIsSuperType = myTypeGraph.isSubtype(elseType, ifType);
+
+        //One of these had better be a (non-strict) subtype of the other
+        if (!ifIsSuperType && !myTypeGraph.isSubtype(ifType, elseType)) {
+            throw new SourceErrorException("Branches must share a type.\n"
+                    + "If branch:   " + ifType + "\n" + "Else branch: "
+                    + elseType, exp.getLocation());
+        }
+
+        MTType finalType, finalTypeValue;
+        if (ifIsSuperType) {
+            finalType = ifType;
+            finalTypeValue = ifClause.getMathTypeValue();
+        }
+        else {
+            finalType = elseType;
+            finalTypeValue = elseClause.getMathTypeValue();
+        }
+
+        exp.setMathType(finalType);
+        exp.setMathTypeValue(finalTypeValue);
+    }
+
+    @Override
+    public void preArbitraryExpTy(ArbitraryExpTy node) {
+        enteringTypeValueNode();
+    }
+
+    @Override
+    public void postSetExp(SetExp e) {
+        MathVarDec varDec = e.getVar();
+        MTType varType = varDec.getMathType();
+
+        Exp body = e.getBody();
+
+        expectType(body, myTypeGraph.BOOLEAN);
+
+        if (e.getWhere() != null) {
+            body = myTypeGraph.formConjunct(e.getWhere(), body);
+        }
+
+        e.setMathType(new MTSetRestriction(myTypeGraph, varType, varDec
+                .getName().getName(), body));
+        e.setMathTypeValue(new MTPowertypeApplication(myTypeGraph, varType));
+    }
+
+    @Override
+    public void postIntegerExp(IntegerExp e) {
+        postSymbolExp(e.getQualifier(), "" + e.getValue(), e);
+    }
+
+    @Override
+    public void postProgramIntegerExp(ProgramIntegerExp e) {
+        e.setProgramType(getIntegerProgramType());
+
+        /*e.setProgramType(PTPrimitive.getInstance(myTypeGraph,
+                PrimitiveTypeName.INTEGER));*/
+
+        //Do math type stuff
+        postSymbolExp(null, "" + e.getValue(), e);
+    }
+
+    @Override
+    public void postProgramOpExp(ProgramOpExp e) {
+        e.setProgramType(e.getProgramType(myTypeGraph));
+        e.setMathType(e.getProgramType().toMath());
+    }
+
+    @Override
+    public void postVarExp(VarExp e) {
+        MathSymbolEntry intendedEntry =
+                postSymbolExp(e.getQualifier(), e.getName().getName(), e);
+
+        if (myTypeValueDepth > 0 && e.getQualifier() == null) {
+            try {
+                intendedEntry.getTypeValue();
+                myDefinitionNamedTypes.add(intendedEntry.getName());
+            }
+            catch (SymbolNotOfKindTypeException snokte) {
+                //No problem, just don't need to add it
+            }
+        }
+
+        e.setQuantification(intendedEntry.getQuantification()
+                .toVarExpQuantificationCode());
+    }
+
+    @Override
+    public void postAbstractFunctionExp(AbstractFunctionExp foundExp) {
+
+        MTFunction foundExpType;
+        foundExpType = foundExp.getConservativePreApplicationType(myTypeGraph);
+
+        Populator.emitDebug("Expression: " + foundExp.toString() + "("
+                + foundExp.getLocation() + ") " + " of type "
+                + foundExpType.toString());
+
+        MathSymbolEntry intendedEntry = getIntendedFunction(foundExp);
+        MTFunction expectedType = (MTFunction) intendedEntry.getType();
+
+        //We know we match expectedType--otherwise the above would have thrown
+        //an exception.
+
+        //TODO : The range of our type could be some function of the concrete
+        //       binding of the domain.  E.g., foo(x : (X : MType)) : X.  Right
+        //       now we ignore this complexity.
+
+        foundExp.setMathType(expectedType.getRange());
+        foundExp.setQuantification(intendedEntry.getQuantification());
+
+        if (myTypeValueDepth > 0) {
+            //I had better identify a type
+            MTFunction entryType = (MTFunction) intendedEntry.getType();
+
+            List<MTType> arguments = new LinkedList<MTType>();
+            MTType argTypeValue;
+            for (Exp arg : foundExp.getParameters()) {
+                argTypeValue = arg.getMathTypeValue();
+
+                if (argTypeValue == null) {
+                    notAType(arg);
+                }
+
+                arguments.add(argTypeValue);
+            }
+
+            foundExp.setMathTypeValue(entryType.getApplicationType(
+                    intendedEntry.getName(), arguments));
+        }
+    }
+
+    @Override
+    public void postTupleExp(TupleExp node) {
+        //See the note in TupleExp on why TupleExp isn't an AbstractFunctionExp
+
+        //This looks weird, but we're converting from the ridiculous 
+        //RESOLVE-internal List into an ordinary java.util.List because we don't
+        //live in bizarro-world
+        List<Exp> fields = new LinkedList<Exp>(node.getFields());
+
+        if (fields.size() < 2) {
+            //We assert that this can't happen, but who knows?
+            throw new RuntimeException("Unanticipated tuple size.");
+        }
+
+        List<MTCartesian.Element> fieldTypes =
+                new LinkedList<MTCartesian.Element>();
+        for (Exp field : fields) {
+            fieldTypes.add(new MTCartesian.Element(field.getMathType()));
+        }
+
+        node.setMathType(new MTCartesian(myTypeGraph, fieldTypes));
+    }
+
+    @Override
+    public void postArbitraryExpTy(ArbitraryExpTy node) {
+        leavingTypeValueNode();
+
+        Exp typeExp = node.getArbitraryExp();
+        MTType mathType = typeExp.getMathType();
+        MTType mathTypeValue = typeExp.getMathTypeValue();
+        if (!mathType.isKnownToContainOnlyMTypes()) {
+            notAType(typeExp);
+        }
+
+        node.setMathType(mathType);
+        node.setMathTypeValue(mathTypeValue);
+    }
+
+    @Override
+    public void preExp(Exp node) {
+        myExpressionDepth++;
+    }
+
+    @Override
+    public void postExp(Exp node) {
+
+        //myMathModeFlag && 
+        if (node.getMathType() == null) {
+            throw new RuntimeException("Exp " + node + " (" + node.getClass()
+                    + ", " + node.getLocation()
+                    + ") got through the populator " + "with no math type.");
+        }
+
+        if (node instanceof ProgramExp
+                && ((ProgramExp) node).getProgramType() == null) {
+            throw new RuntimeException("Exp " + node + " (" + node.getClass()
+                    + ", " + node.getLocation()
+                    + ") got through the populator " + "with no program type.");
+        }
+
+        myExpressionDepth--;
+    }
+
+    @Override
+    public void preTypeTheoremDec(TypeTheoremDec node) {
+        myBuilder.startScope(node);
+        myInTypeTheoremBindingExpFlag = false;
+    }
+
+    @Override
+    public void postTypeTheoremDecMyUniversalVars(TypeTheoremDec node) {
+        myInTypeTheoremBindingExpFlag = true;
+    }
+
+    @Override
+    public void postTypeTheoremDec(TypeTheoremDec node) {
+        node.setMathType(myTypeGraph.BOOLEAN);
+
+        Exp assertion = node.getAssertion();
+
+        Exp condition;
+        Exp bindingExpression;
+        ArbitraryExpTy typeExp;
+
+        try {
+            if (assertion instanceof InfixExp) {
+                InfixExp assertionsAsInfixExp = (InfixExp) assertion;
+                String operator = assertionsAsInfixExp.getOperatorAsString();
+
+                if (operator.equals("implies")) {
+                    condition = assertionsAsInfixExp.getLeft();
+                    assertion = assertionsAsInfixExp.getRight();
+                }
+                else {
+                    throw new ClassCastException();
+                }
+            }
+            else {
+                condition = myTypeGraph.getTrueVarExp();
+            }
+
+            TypeAssertionExp assertionAsTAE = (TypeAssertionExp) assertion;
+
+            bindingExpression = assertionAsTAE.getExp();
+            typeExp = assertionAsTAE.getAssertedTy();
+
+            try {
+                myTypeGraph.addRelationship(bindingExpression, typeExp
+                        .getMathTypeValue(), condition, myBuilder
+                        .getInnermostActiveScope());
+            }
+            catch (IllegalArgumentException iae) {
+                throw new SourceErrorException(iae.getMessage(), node
+                        .getLocation());
+            }
+        }
+        catch (ClassCastException cse) {
+            throw new SourceErrorException("Top level of type theorem "
+                    + "assertion must be 'implies' or ':'.", assertion
+                    .getLocation());
+        }
+
+        myBuilder.endScope();
+    }
+
+    @Override
+    public void postModuleDec(ModuleDec node) {
+        myBuilder.endScope();
+
+        Populator.emitDebug("END MATH POPULATOR\n----------------------\n");
+    }
+
+    //-------------------------------------------------------------------
+    //   Error handling
+    //-------------------------------------------------------------------
+
+    public void noSuchModule(PosSymbol qualifier) {
+        throw new SourceErrorException(
+                "Module does not exist or is not in scope.", qualifier);
+    }
+
+    public void noSuchSymbol(PosSymbol qualifier, String symbolName, Location l) {
+
+        String message;
+
+        if (qualifier == null) {
+            message = "No such symbol: " + symbolName;
+        }
+        else {
+            message =
+                    "No such symbol in module: " + qualifier.getName() + "."
+                            + symbolName;
+        }
+
+        throw new SourceErrorException(message, l);
+    }
+
+    public <T extends SymbolTableEntry> void ambiguousSymbol(String symbolName,
+            Location l, List<T> candidates) {
+
+        String message = "Ambiguous symbol.  Candidates: ";
+
+        boolean first = true;
+        for (SymbolTableEntry candidate : candidates) {
+            if (first) {
+                first = false;
+            }
+            else {
+                message += ", ";
+            }
+
+            message +=
+                    candidate.getSourceModuleIdentifier()
+                            .fullyQualifiedRepresentation(symbolName);
+        }
+
+        message += ".  Consider qualifying.";
+
+        throw new SourceErrorException(message, l);
+    }
+
+    public void notAType(SymbolTableEntry entry, Location l) {
+        throw new SourceErrorException(entry.getSourceModuleIdentifier()
+                .fullyQualifiedRepresentation(entry.getName())
+                + " is not known to be a type.", l);
+    }
+
+    public void notAType(Exp e) {
+        throw new SourceErrorException("Not known to be a type.", e
+                .getLocation());
+    }
+
+    public void expected(Exp e, MTType expectedType) {
+        throw new SourceErrorException("Expected: " + expectedType
+                + "\nFound: " + e.getMathType(), e.getLocation());
+    }
+
+    public void duplicateSymbol(String symbol, Location l) {
+        throw new SourceErrorException("Duplicate symbol: " + symbol, l);
+    }
+
+    public void expectType(Exp e, MTType expectedType) {
+        if (!myTypeGraph.isKnownToBeIn(e, expectedType)) {
+            expected(e, expectedType);
+        }
+    }
+
+    //-------------------------------------------------------------------
+    //   Helper functions
+    //-------------------------------------------------------------------
+
+    private PTType getIntegerProgramType() {
+        PTType result;
+
+        try {
+            ProgramTypeEntry type =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameQuery(null, "Integer",
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false)).toProgramTypeEntry(null);
+
+            result = type.getProgramType();
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException("No program Integer type in scope???");
+        }
+        catch (DuplicateSymbolException dse) {
+            //Shouldn't be possible--NameQuery can't throw this
+            throw new RuntimeException(dse);
+        }
+
+        return result;
+    }
+
+    private SymbolTableEntry addBinding(String name, Location l,
+            SymbolTableEntry.Quantification q,
+            ResolveConceptualElement definingElement, MTType type,
+            MTType typeValue, Map<String, MTType> schematicTypes) {
+        if (type != null) {
+            try {
+                return myBuilder.getInnermostActiveScope().addBinding(name, q,
+                        definingElement, type, typeValue, schematicTypes,
+                        myGenericTypes);
+            }
+            catch (DuplicateSymbolException dse) {
+                duplicateSymbol(name, l);
             }
         }
         return null;
     }
 
-    private void addDefinitionAsType(DefinitionDec dec) {
-        TypeConverter tc = new TypeConverter(table);
-        Type t = tc.getMathType(dec.getReturnTy());
-        Type typeOfSet = getTypeOfSetType(t);
-        if (typeOfSet != null) {
-            MathVarDec vd = null;
-            Exp w = null;
-            Exp o = null;
-            if (dec.getDefinition() instanceof SetExp) {
-                SetExp se = (SetExp) (dec.getDefinition());
-                vd = se.getVar();
-                w = se.getWhere();
-                o = se.getBody();
-            }
-            TypeEntry te =
-                    new TypeEntry(table.getCurrentScope(), dec.getName(),
-                            typeOfSet, vd, w, o);
-            table.addDefinitionTypeToScope(te);
-        }
+    private SymbolTableEntry addBinding(String name, Location l,
+            ResolveConceptualElement definingElement, MTType type,
+            MTType typeValue, Map<String, MTType> schematicTypes) {
+        return addBinding(name, l, SymbolTableEntry.Quantification.NONE,
+                definingElement, type, typeValue, schematicTypes);
     }
 
-    public void visitMathAssertionDec(MathAssertionDec dec) {
-        TheoremEntry entry = new TheoremEntry(dec.getName(), dec.getKind());
-        entry.setValue(dec.getAssertion());
-        table.addTheoremToScope(entry);
-        assert dec.getAssertion() != null : "Assertion is null";
-        table.createExpressionScope();
-        visitExp(dec.getAssertion());
-        table.completeExpressionScope();
+    private SymbolTableEntry addBinding(String name, Location l,
+            SymbolTableEntry.Quantification q,
+            ResolveConceptualElement definingElement, MTType type,
+            Map<String, MTType> schematicTypes) {
+        return addBinding(name, l, q, definingElement, type, null,
+                schematicTypes);
     }
 
-    public void visitMathTypeDec(MathTypeDec dec) {
-        Type decType;
+    private SymbolTableEntry addBinding(String name, Location l,
+            ResolveConceptualElement definingElement, MTType type,
+            Map<String, MTType> schematicTypes) {
+        return addBinding(name, l, SymbolTableEntry.Quantification.NONE,
+                definingElement, type, null, schematicTypes);
+    }
 
-        if (dec.getTy() instanceof FunctionTy) {
-            int paramCount = 0;
-            FunctionTy ty = (FunctionTy) dec.getTy();
-            if (ty.getDomain() instanceof TupleTy) {
-                paramCount = ((TupleTy) ty.getDomain()).getFields().size();
-            }
-            else {
-                paramCount = 1;
-            }
+    private void enteringTypeValueNode() {
+        myTypeValueDepth++;
+    }
 
-            decType =
-                    new PrimitiveType(table.getModuleID(), dec.getName(),
-                            paramCount);
+    private void leavingTypeValueNode() {
+        myTypeValueDepth--;
+    }
+
+    private static MTFunction deschematize(MTFunction original,
+            Exp soleParameter) {
+
+        Map<String, MTType> bindings = new HashMap<String, MTType>();
+
+        MTType domain = original.getDomain();
+        if (domain instanceof MTCartesian) {
+            if (!(soleParameter instanceof TupleExp)) {
+                deschematize((MTCartesian) domain, (TupleExp) soleParameter,
+                        bindings);
+            }
         }
         else {
-            decType = new PrimitiveType(table.getModuleID(), dec.getName(), 0);
+            MTType parameterTypeValue = soleParameter.getMathTypeValue();
+            if (parameterTypeValue != null) {
+                String tag = original.getSingleParameterName();
+
+                if (tag != null) {
+                    bindings.put(tag, parameterTypeValue);
+                }
+            }
+
+            deschematize(original, soleParameter.getMathType(), bindings);
         }
 
-        TypeEntry entry =
-                new TypeEntry(table.getCurrentScope(), dec.getName(), decType);
-        table.addTypeToScope(entry);
+        VariableReplacingVisitor replacer =
+                new VariableReplacingVisitor(bindings);
+
+        original.accept(replacer);
+
+        return (MTFunction) replacer.getFinalExpression();
     }
 
-    public void visitMathTypeFormalDec(MathTypeFormalDec dec) {
-        Type type = new MathFormalType(table.getModuleID(), dec.getName());
-        TypeEntry entry =
-                new TypeEntry(table.getCurrentScope(), dec.getName(), type);
-        table.addTypeToScope(entry);
+    private static void deschematize(MTCartesian original, TupleExp value,
+            Map<String, MTType> bindings) {
+
+        int originalSize = original.size();
+        if (originalSize != value.getSize()) {
+            throw new IllegalArgumentException();
+        }
+
+        String tag;
+        Exp field;
+        MTType fieldTypeValue, factor;
+        for (int i = 0; i < originalSize; i++) {
+            factor = original.getFactor(i);
+            field = value.getField(i);
+            fieldTypeValue = field.getMathTypeValue();
+
+            if (fieldTypeValue != null) {
+                tag = original.getTag(i);
+
+                if (tag != null) {
+                    bindings.put(tag, fieldTypeValue);
+                }
+            }
+
+            deschematize(factor, field.getMathType(), bindings);
+        }
     }
 
-    public void visitSubtypeDec(SubtypeDec dec) {
-        TypeID tid1 = new TypeID(dec.getQualifier1(), dec.getName1(), 0);
-        TypeID tid2 = new TypeID(dec.getQualifier2(), dec.getName2(), 0);
-        makeTypeCorrespondence(tid1, tid2);
+    private static void deschematize(MTType original, MTType value,
+            Map<String, MTType> bindings) {
+
+        ParameterGenericApplyingVisitor genericApplier =
+                new ParameterGenericApplyingVisitor(bindings);
+
+        genericApplier.visit(original, value);
+
+        if (genericApplier.encounteredError()) {
+            throw new IllegalArgumentException();
+        }
     }
 
-    private void makeTypeCorrespondence(TypeID base, TypeID subtype) {
-        TypeLocator tl = new TypeLocator(table, myInstanceEnvironment);
+    public static void emitDebug(String msg) {
+        if (PRINT_DEBUG) {
+            System.out.println(msg);
+        }
+    }
+
+    private MathSymbolEntry getIntendedEntry(PosSymbol qualifier,
+            String symbolName, Exp node) {
+
+        MathSymbolEntry result;
 
         try {
-            TypeEntry baseEntry = tl.locateMathType(base);
-            TypeEntry subtypeEntry = tl.locateMathType(subtype);
-            table.addTypeCorrespondence(baseEntry.getType(), subtypeEntry
-                    .getType());
+            result =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new MathSymbolQuery(qualifier, symbolName, node
+                                    .getLocation()));
         }
-        catch (Exception e) {
-            ;
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(symbolName, node.getLocation());
+            throw new RuntimeException(); //This will never fire
         }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(qualifier, symbolName, node.getLocation());
+            throw new RuntimeException(); //This will never fire
+        }
+
+        return result;
     }
 
-    // -----------------------------------------------------------
-    // Type Declarations
-    // -----------------------------------------------------------
+    private MathSymbolEntry postSymbolExp(PosSymbol qualifier,
+            String symbolName, Exp node) {
 
-    public void visitFacilityTypeDec(FacilityTypeDec dec) {
-        Type type = getProgramType(dec.getRepresentation(), dec.getName());
-        TypeEntry entry =
-                new TypeEntry(table.getCurrentScope(), dec.getName(), type);
-        table.addTypeToScope(entry);
-        table.createTypeScope();
-        visitExp(dec.getConvention());
-        if (dec.getInitialization() != null) {
-            visitInitItem(dec.getInitialization());
-        }
-        if (dec.getFinalization() != null) {
-            visitFinalItem(dec.getFinalization());
-        }
-        table.completeTypeScope();
-    }
+        MathSymbolEntry intendedEntry =
+                getIntendedEntry(qualifier, symbolName, node);
+        node.setMathType(intendedEntry.getType());
 
-    public void visitTypeDec(TypeDec dec) {
-        Type type = getConceptualType(dec.getModel(), dec.getName());
-        TypeEntry entry =
-                new TypeEntry(table.getCurrentScope(), dec.getName(), type, dec
-                        .getExemplar());
-        table.addTypeToScope(entry);
-        table.createTypeScope();
-        VarEntry ex =
-                new VarEntry(table.getCurrentScope(), Mode.EXEMPLAR, dec
-                        .getExemplar(), type);
-        table.addVariableToScope(ex);
-        visitExp(dec.getConstraint());
-        if (dec.getInitialization() != null) {
-            visitInitItem(dec.getInitialization());
-        }
-        if (dec.getFinalization() != null) {
-            visitFinalItem(dec.getFinalization());
-        }
-        table.completeTypeScope();
-    }
-
-    // changed this to handle local type declarations
-    public void visitRepresentationDec(RepresentationDec dec) {
-        Type type = getProgramType(dec.getRepresentation(), dec.getName());
-        TypeEntry entry =
-                new TypeEntry(table.getCurrentScope(), dec.getName(), type);
-        table.addTypeToScope(entry);
-        table.createTypeScope();
-        // re-do;
-        // essentially copied and added the following code from
-        // addTypeFamilyVariablesToScope
-        boolean isLocalType = true;
-        TypeEntry specentry = null;
-        Symbol tsym = entry.getName().getSymbol();
-        Iterator<ModuleID> i = table.getModuleScope().getSpecIterator();
-        while (i.hasNext()) {
-            ModuleScope scope = myInstanceEnvironment.getModuleScope(i.next());
-            if (scope.containsLocalConcType(tsym)) {
-                specentry = scope.getLocalType(tsym);
-                isLocalType = false;
-            }
-        }
-        if (!isLocalType) {
-            addTypeFamilyVariablesToScope(entry);
-            visitExp(dec.getConvention());
-            visitExp(dec.getCorrespondence());
-            if (dec.getInitialization() != null) {
-                visitInitItem(dec.getInitialization());
-            }
-            if (dec.getFinalization() != null) {
-                visitFinalItem(dec.getFinalization());
-            }
-        }
-        table.completeTypeScope();
-    }
-
-    // -----------------------------------------------------------
-    // Operation Declarations
-    // -----------------------------------------------------------
-
-    public void visitFacilityOperationDec(FacilityOperationDec dec) {
-        List<VarEntry> vars = getVariables(dec.getParameters());
-        OperationEntry oper =
-                new OperationEntry(table.getCurrentScope(), dec.getName(),
-                        vars, getProgramType(dec.getReturnTy()));
-        table.addOperationToScope(oper);
-        table.createOperationScope(dec.getName());
-        addVariablesToScope(vars);
-        visitExp(dec.getRequires());
-        visitExp(dec.getEnsures());
-        table.createProcedureScope(dec.getName());
-        addVariablesToScope(vars);
-        if (dec.getReturnTy() != null) {
-            VarEntry var =
-                    new VarEntry(table.getCurrentScope(), Mode.OPER_NAME, dec
-                            .getName(), getProgramType(dec.getReturnTy()));
-            table.addVariableToScope(var);
-        }
-        visitExp(dec.getDecreasing());
-        visitFacilityDecList(dec.getFacilities());
-        visitLocalVariables(dec.getVariables());
-        visitStatementList(dec.getStatements());
-        table.completeProcedureScope();
-        table.completeOperationScope();
-    }
-
-    public void visitOperationDec(OperationDec dec) {
-        List<VarEntry> vars = getVariables(dec.getParameters());
-        OperationEntry oper =
-                new OperationEntry(table.getCurrentScope(), dec.getName(),
-                        vars, getProgramType(dec.getReturnTy()));
-        table.addOperationToScope(oper);
-        table.createOperationScope(dec.getName());
-        addVariablesToScope(vars);
-        visitExp(dec.getRequires());
-        visitExp(dec.getEnsures());
-        table.completeOperationScope();
-    }
-
-    public void visitProofDec(ProofDec dec) {
-        Symbol s = Symbol.symbol("PROOF_" + dec.getName().getName());
-        PosSymbol ps = new PosSymbol(dec.getName().getLocation(), s);
-        ProofEntry pentry = new ProofEntry(ps);
-        table.addProofToScope(pentry);
-        table.createProofScope(ps);
-        if (dec.getStatements().size() != 0) {
-            Iterator<Exp> it = dec.getStatements().iterator();
-            while (it.hasNext()) {
-                visitExp(it.next());
-            }
-        }
-        if (dec.getBaseCase().size() != 0) {
-            Iterator<Exp> it = dec.getBaseCase().iterator();
-            while (it.hasNext()) {
-                visitExp(it.next());
-            }
-        }
-        if (dec.getInductiveCase().size() != 0) {
-            Iterator<Exp> it = dec.getInductiveCase().iterator();
-            while (it.hasNext()) {
-                visitExp(it.next());
-            }
-        }
-        table.completeProofScope();
-    }
-
-    public void visitProcedureDec(ProcedureDec dec) {
-        List<VarEntry> vars = getVariables(dec.getParameters());
-        OperationEntry oper =
-                new OperationEntry(table.getCurrentScope(), dec.getName(),
-                        vars, getProgramType(dec.getReturnTy()));
-        table.addOperationToScope(oper);
-        table.createOperationScope(dec.getName());
-        addVariablesToScope(vars);
-        table.createProcedureScope(dec.getName());
-        addVariablesToScope(vars);
-
-        if (dec.getReturnTy() != null) {
-            VarEntry var =
-                    new VarEntry(table.getCurrentScope(), Mode.OPER_NAME, dec
-                            .getName(), getProgramType(dec.getReturnTy()));
-            table.addVariableToScope(var);
-        }
-        visitFacilityDecList(dec.getFacilities());
-        visitLocalVariables(dec.getAllVariables());
-        visitStatementList(dec.getStatements());
-        table.completeProcedureScope();
-        table.completeOperationScope();
-    }
-
-    // -----------------------------------------------------------
-    // Facility Declarations
-    // -----------------------------------------------------------
-
-    public void visitFacilityDec(FacilityDec dec) {
-        int initErrorCount = err.getErrorCount();
-        List<ModuleScope> scopes = getConceptualModules(dec);
-        List<ModuleScope> iscopes = new List<ModuleScope>();
-        ModuleScope newscope = new ModuleScope(dec, myInstanceEnvironment);
-        Binding newbind = newscope.getBinding();
-        Map<Symbol, Type> typeMap = getTypeMappings(dec);
-        if (err.countExceeds(initErrorCount)) {
-            // The number of arguments is not the same as number of
-            // parameters in one or more module argument lists.
-            return;
-        }
-        Iterator<ModuleScope> i = scopes.iterator();
-        while (i.hasNext()) {
-            ModuleScope scope = i.next();
-            ModuleScope iscope = scope.instantiate(dec, typeMap, newbind);
-            iscopes.add(iscope);
-        }
         try {
-            newscope.merge(iscopes);
-            ModuleEntry module = new ModuleEntry(dec.getName(), newscope);
-            table.addFacilityToScope(module);
-        }
-        catch (InstantiationException ex) {
-            err.error(dec.getName().getLocation(), ex.getMessage());
-        }
-    }
+            if (intendedEntry.getQuantification() == SymbolTableEntry.Quantification.NONE) {
 
-    // -----------------------------------------------------------
-    // Module Parameter Declarations
-    // -----------------------------------------------------------
-
-    public void visitConceptTypeParamDec(ConceptTypeParamDec dec) {
-        Type type = new FormalType(table.getModuleID(), dec.getName());
-        TypeEntry entry =
-                new TypeEntry(table.getCurrentScope(), dec.getName(), type);
-        table.addTypeToScope(entry);
-        table.addModuleParameter(entry);
-    }
-
-    public void visitConstantParamDec(ConstantParamDec dec) {
-        VarEntry var =
-                new VarEntry(table.getCurrentScope(), Mode.EVALUATES, dec
-                        .getName(), getProgramType(dec.getTy()));
-        table.addVariableToScope(var);
-        table.addModuleParameter(var);
-    }
-
-    public void visitRealizationParamDec(RealizationParamDec dec) {
-    // FIX: Postpone this till later, since it doesn't even
-    // work like we want it to.
-    }
-
-    // ===========================================================
-    // Public Methods - Non-declarative Constructs
-    // ===========================================================
-
-    public void visitAffectsItem(AffectsItem item) {
-        ;
-    }
-
-    public void visitChoiceItem(ChoiceItem item) {
-        visitStatementList(item.getThenclause());
-    }
-
-    public void visitConditionItem(ConditionItem item) {
-        visitStatementList(item.getThenclause());
-    }
-
-    public void visitEnhancementBodyItem(EnhancementBodyItem item) {
-    //
-    }
-
-    public void visitEnhancementItem(EnhancementItem item) {
-    //
-    }
-
-    public void visitFinalItem(FinalItem item) {
-        PosSymbol name = createFinalName(item.getLocation());
-        table.createOperationScope(name); // for eventual adding of defs
-        visitExp(item.getRequires());
-        visitExp(item.getEnsures());
-        table.createProcedureScope(name);
-        visitFacilityDecList(item.getFacilities());
-        visitLocalVariables(item.getVariables());
-        visitStatementList(item.getStatements());
-        table.completeProcedureScope();
-        table.completeOperationScope();
-    }
-
-    public void visitFunctionArgList(FunctionArgList list) {
-        visitExpList(list.getArguments());
-    }
-
-    public void visitInitItem(InitItem item) {
-        PosSymbol name = createInitName(item.getLocation());
-        table.createOperationScope(name); // for eventual adding of defs
-        visitExp(item.getRequires());
-        visitExp(item.getEnsures());
-        table.createProcedureScope(name);
-        visitFacilityDecList(item.getFacilities());
-        visitLocalVariables(item.getVariables());
-        visitStatementList(item.getStatements());
-        table.completeProcedureScope();
-        table.completeOperationScope();
-    }
-
-    public void visitModuleArgumentItem(ModuleArgumentItem item) {
-    //
-    }
-
-    public void visitRenamingItem(RenamingItem item) {
-    //
-    }
-
-    public void visitUsesItem(UsesItem item) {
-        ModuleID fid = ModuleID.createFacilityID(item.getName());
-        if (myInstanceEnvironment.contains(fid)) {
-            // A simple check to ensure that the Standard Facilities are not
-            // added a second time because they are implicitly included in the
-            // VisitModuleDec()
-            // Similar check found in ImportScanner.visitUsesItem()
-            String[] stdUses = myInstanceEnvironment.getStdUses();
-            String itemName = item.getName().getName();
-            boolean doAnnex = true;
-            for (int i = 0; i < stdUses.length; i++) {
-                if (itemName.equals("Std_" + stdUses[i] + "_Fac"))
-                    doAnnex = false;
+                node.setMathTypeValue(intendedEntry.getTypeValue());
             }
-            if (doAnnex) {
-                ModuleEntry entry =
-                        new ModuleEntry(item.getName(), myInstanceEnvironment
-                                .getSymbolTable(fid).getModuleScope());
-                table.addFacilityToScope(entry);
+            else {
+                if (intendedEntry.getType().isKnownToContainOnlyMTypes()) {
+                    node.setMathTypeValue(new MTNamed(myTypeGraph, symbolName));
+                }
             }
         }
-    }
-
-    // ===========================================================
-    // Statements
-    // ===========================================================
-
-    public void visitCallStmt(CallStmt stmt) {
-        ;
-    }
-
-    public void visitFuncAssignStmt(FuncAssignStmt stmt) {
-        ;
-    }
-
-    public void visitIfStmt(IfStmt stmt) {
-        visitStatementList(stmt.getThenclause());
-        visitConditionItemList(stmt.getElseifpairs());
-        visitStatementList(stmt.getElseclause());
-    }
-
-    public void visitIterateStmt(IterateStmt stmt) {
-        table.createStatementScope();
-        visitExp(stmt.getMaintaining());
-        visitExp(stmt.getDecreasing());
-        visitStatementList(stmt.getStatements());
-        table.completeStatementScope();
-    }
-
-    public void visitIterateExitStmt(IterateExitStmt stmt) {
-        visitStatementList(stmt.getStatements());
-    }
-
-    public void visitMemoryStmt(MemoryStmt stmt) {
-        ;
-    }
-
-    public void visitSelectionStmt(SelectionStmt stmt) {
-        visitChoiceItemList(stmt.getWhenpairs());
-        visitStatementList(stmt.getDefaultclause());
-    }
-
-    public void visitSwapStmt(SwapStmt stmt) {
-        ;
-    }
-
-    public void visitWhileStmt(WhileStmt stmt) {
-        table.createStatementScope();
-        visitExp(stmt.getMaintaining());
-        visitExp(stmt.getDecreasing());
-        visitStatementList(stmt.getStatements());
-        table.completeStatementScope();
-    }
-
-    // ===========================================================
-    // Public Methods - Expressions
-    // ===========================================================
-
-    // -----------------------------------------------------------
-    // Literal Expressions
-    // -----------------------------------------------------------
-
-    public void visitCharExp(CharExp exp) {
-        ;
-    }
-
-    public void visitDoubleExp(DoubleExp exp) {
-        ;
-    }
-
-    public void visitIntegerExp(IntegerExp exp) {
-        ;
-    }
-
-    public void visitStringExp(StringExp exp) {
-        ;
-    }
-
-    // -----------------------------------------------------------
-    // Operational Expressions
-    // -----------------------------------------------------------
-
-    public void visitAlternativeExp(AlternativeExp exp) {
-        Iterator<AltItemExp> i = exp.getAlternatives().iterator();
-        while (i.hasNext()) {
-            visitExp(i.next());
+        catch (SymbolNotOfKindTypeException snokte) {
+            if (myTypeValueDepth > 0) {
+                //I had better identify a type
+                notAType(intendedEntry, node.getLocation());
+            }
         }
+
+        Populator.emitDebug("Processed symbol " + symbolName
+                + " with type " + node.getMathType()
+                + ", referencing math type " + node.getMathTypeValue());
+
+        return intendedEntry;
     }
 
-    public void visitAltItemExp(AltItemExp exp) {
-        visitExp(exp.getTest());
-        visitExp(exp.getAssignment());
-    }
-
-    public void visitBetweenExp(BetweenExp exp) {
-        Iterator<Exp> i = exp.getLessExps().iterator();
-        while (i.hasNext()) {
-            visitExp(i.next());
-        }
-    }
-
-    public void visitEqualsExp(EqualsExp exp) {
-        visitExp(exp.getLeft());
-        visitExp(exp.getRight());
-    }
-
-    public void visitIfExp(IfExp exp) {
-        visitExp(exp.getTest());
-        visitExp(exp.getThenclause());
-        visitExp(exp.getElseclause());
-    }
-
-    public void visitInfixExp(InfixExp exp) {
-        visitExp(exp.getLeft());
-        visitExp(exp.getRight());
-    }
-
-    public void visitIterativeExp(IterativeExp exp) {
-        table.createExpressionScope();
-        MathVarDec var = exp.getVar();
-        VarEntry ventry =
-                new VarEntry(table.getCurrentScope(), Mode.MATH, var.getName(),
-                        getMathType(var.getTy()));
-        table.addVariableToScope(ventry);
-        visitExp(exp.getWhere());
-        visitExp(exp.getBody());
-        table.endExpressionScope();
-    }
-
-    public void visitLambdaExp(LambdaExp exp) {
-        table.createExpressionScope();
-        VarEntry ve =
-                new VarEntry(table.getCurrentScope(), Mode.MATH, exp.getName(),
-                        getMathType(exp.getTy()));
-        table.addVariableToScope(ve);
-        table.completeExpressionScope();
-    }
-
-    public void visitOutfixExp(OutfixExp exp) {
-        visitExp(exp.getArgument());
-    }
-
-    public void visitPrefixExp(PrefixExp exp) {
-        visitExp(exp.getArgument());
-    }
-
-    public void visitQuantExp(QuantExp exp) {
-        table.createExpressionScope();
-        visitQuantifiedVariables(exp.getVars());
-        visitExp(exp.getWhere());
-        visitExp(exp.getBody());
-        table.completeExpressionScope();
-    }
-
-    public void visitSetExp(SetExp exp) {
-        table.createExpressionScope();
-        List<MathVarDec> list = new List<MathVarDec>();
-        list.add(exp.getVar());
-        visitQuantifiedVariables(list);
-        visitExp(exp.getWhere());
-        visitExp(exp.getBody());
-        table.completeExpressionScope();
-    }
-
-    public void visitTupleExp(TupleExp exp) {
-        Iterator<Exp> i = exp.getFields().iterator();
-        while (i.hasNext()) {
-            visitExp(i.next());
-        }
-    }
-
-    public void visitUnaryMinusExp(UnaryMinusExp exp) {
-        visitExp(exp.getArgument());
-    }
-
-    // -----------------------------------------------------------
-    // Dot Expressions
-    // -----------------------------------------------------------
-
-    public void visitDotExp(DotExp exp) {
-        Iterator<Exp> i = exp.getSegments().iterator();
-        while (i.hasNext()) {
-            visitExp(i.next());
-        }
-    }
-
-    public void visitFieldExp(FieldExp exp) {
-        assert false : "This expression is only constructed during analysis";
-    }
-
-    public void visitOldExp(OldExp exp) {
-        visitExp(exp.getExp());
-    }
-
-    public void visitFunctionExp(FunctionExp exp) {
-        visitExp(exp.getNatural());
-        Iterator<FunctionArgList> i = exp.getParamList().iterator();
-        while (i.hasNext()) {
-            visitFunctionArgList(i.next());
-        }
-    }
-
-    public void visitVarExp(VarExp exp) {
-        ;
-    }
-
-    public void visitTypeFunctionExp(TypeFunctionExp exp) {
-        Iterator<Exp> i = exp.getParams().iterator();
-        while (i.hasNext()) {
-            visitExp(i.next());
-        }
-    }
-
-    // -----------------------------------------------------------
-    // Program Expressions
-    // -----------------------------------------------------------
-
-    /*
-     * Because program expressions can never contain declarations (as opposed to
-     * math expressions), we do not need to visit them to populate the symbol
-     * table.
+    /**
+     * <p>For a given <code>AbstractFunctionExp</code>, finds the entry in the
+     * symbol table to which it refers.  For a complete discussion of the
+     * algorithm used, see <a href="http://sourceforge.net/apps/mediawiki/resolve/index.php?title=Package_Search_Algorithm">
+     * Package Search Algorithm</a>.</p>
      */
+    private MathSymbolEntry getIntendedFunction(AbstractFunctionExp e) {
 
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
+        //TODO : All this logic should be encapsulated into a SymbolQuery called
+        //       MathFunctionQuery.
 
-    private void addTypeFamilyVariablesToScope(TypeEntry entry) {
-        TypeEntry specentry = null;
-        Symbol tsym = entry.getName().getSymbol();
-        Iterator<ModuleID> i = table.getModuleScope().getSpecIterator();
-        while (i.hasNext()) {
-            ModuleScope scope = myInstanceEnvironment.getModuleScope(i.next());
-            if (scope.containsLocalConcType(tsym)) {
-                specentry = scope.getLocalType(tsym);
+        MTFunction eType = e.getConservativePreApplicationType(myTypeGraph);
+
+        PosSymbol eOperator =
+                ((AbstractFunctionExp) e).getOperatorAsPosSymbol();
+        String eOperatorString = eOperator.getSymbol().getName();
+
+        List<MathSymbolEntry> sameNameFunctions =
+                myBuilder.getInnermostActiveScope().query(
+                        new MathFunctionNamedQuery(e.getQualifier(), e
+                                .getOperatorAsPosSymbol()));
+
+        if (sameNameFunctions.isEmpty()) {
+            throw new SourceErrorException("No such function.", e.getLocation());
+        }
+
+        MathSymbolEntry intendedEntry;
+        try {
+            intendedEntry = getExactDomainTypeMatch(e, sameNameFunctions);
+        }
+        catch (NoSolutionException nse) {
+            try {
+                intendedEntry = getInexactDomainTypeMatch(e, sameNameFunctions);
             }
-        }
-        if (entry == null) {
-            String msg = cantFindFamilyMessage(tsym.toString());
-            err.error(entry.getName().getLocation(), msg);
-            return;
-        }
-        else {
-            VarEntry progexemp =
-                    new VarEntry(table.getCurrentScope(), Mode.EXEMPLAR,
-                            specentry.getExemplar(), entry.getType());
-            table.addVariableToScope(progexemp);
-            VarEntry concexemp =
-                    new VarEntry(table.getCurrentScope(), Mode.EXEMPLAR,
-                            createConcName(specentry.getExemplar()), specentry
-                                    .getType().toMath());
-            table.addVariableToScope(concexemp);
-        }
-    }
+            catch (NoSolutionException nsee2) {
+                boolean foundOne = false;
+                String errorMessage =
+                        "No function applicable for " + "domain: "
+                                + eType.getDomain() + "\n\nCandidates:\n";
 
-    private PosSymbol createConcName(PosSymbol name) {
-        return new PosSymbol(name.getLocation(), Symbol.symbol("%Conc."
-                + name.getSymbol().toString()));
-    }
+                for (SymbolTableEntry entry : sameNameFunctions) {
 
-    // -----------------------------------------------------------
-    // Iterative Visit Methods
-    // -----------------------------------------------------------
+                    if (entry instanceof MathSymbolEntry
+                            && ((MathSymbolEntry) entry).getType() instanceof MTFunction) {
+                        errorMessage +=
+                                "\t" + entry.getName() + " : "
+                                        + ((MathSymbolEntry) entry).getType()
+                                        + "\n";
 
-    private void visitChoiceItemList(List<ChoiceItem> items) {
-        Iterator<ChoiceItem> i = items.iterator();
-        while (i.hasNext()) {
-            visitChoiceItem(i.next());
-        }
-    }
-
-    private void visitConditionItemList(List<ConditionItem> items) {
-        Iterator<ConditionItem> i = items.iterator();
-        while (i.hasNext()) {
-            visitConditionItem(i.next());
-        }
-    }
-
-    private void visitExpList(List<Exp> exps) {
-        Iterator<Exp> i = exps.iterator();
-        while (i.hasNext()) {
-            visitExp(i.next());
-        }
-    }
-
-    private void visitFacilityDecList(List<FacilityDec> decs) {
-        Iterator<FacilityDec> i = decs.iterator();
-        while (i.hasNext()) {
-            visitFacilityDec(i.next());
-        }
-    }
-
-    private void visitStatementList(List<Statement> stmts) {
-        if (stmts != null) {
-            Iterator<Statement> i = stmts.iterator();
-            while (i.hasNext()) {
-                visitStatement(i.next());
-            }
-        }
-    }
-
-    private void visitUsesItemList(List<UsesItem> items) {
-        if (items == null)
-            return;
-        Iterator<UsesItem> i = items.iterator();
-        while (i.hasNext()) {
-            visitUsesItem(i.next());
-        }
-    }
-
-    // -----------------------------------------------------------
-    // Module Level Declaration Processing
-    // -----------------------------------------------------------
-
-    private void visitDecList(List<Dec> decs) {
-        Iterator<Dec> i = decs.iterator();
-        while (i.hasNext()) {
-            Dec dec = i.next();
-            if (dec instanceof MathVarDec) {
-                visitConceptualVariable((MathVarDec) dec);
-            }
-            else if (dec instanceof VarDec) {
-                visitStateVariable((VarDec) dec);
-            }
-            else {
-                visitDec(dec);
-            }
-        }
-    }
-
-    private void visitConceptualVariable(MathVarDec dec) {
-        if (dec.getConfirm() == true) {
-            TypeConverter tc = new TypeConverter(table);
-            Type t = tc.getMathType(dec.getTy());
-            table.addAlternateVarType(dec);
-        }
-        else {
-            VarEntry var =
-                    new VarEntry(table.getCurrentScope(), Mode.CONCEPTUAL, dec
-                            .getName(), getMathType(dec.getTy()));
-            table.addVariableToScope(var);
-        }
-    }
-
-    private void visitStateVariable(VarDec dec) {
-        VarEntry var =
-                new VarEntry(table.getCurrentScope(), Mode.STATE,
-                        dec.getName(), getProgramType(dec.getTy()));
-        table.addVariableToScope(var);
-    }
-
-    // -----------------------------------------------------------
-    // Module Param Processing
-    // -----------------------------------------------------------
-
-    private void visitModuleParameterList(List<ModuleParameterDec> pars) {
-        if (pars == null) {
-            return;
-        }
-        Iterator<ModuleParameterDec> i = pars.iterator();
-        while (i.hasNext()) {
-            Dec dec = castToDec(i.next());
-            if (dec instanceof DefinitionDec) {
-                visitModParamDefDec((DefinitionDec) dec);
-            }
-            else if (dec instanceof OperationDec) {
-                visitModParamOperDec((OperationDec) dec);
-            }
-            else {
-                visitDec(dec);
-            }
-        }
-    }
-
-    private void visitModParamDefDec(DefinitionDec dec) {
-        VarEntry var = null;
-        if (dec.getParameters() == null) {
-            var =
-                    new VarEntry(table.getCurrentScope(), Mode.DEFINITION, dec
-                            .getName(), getMathType(dec.getReturnTy()));
-        }
-        else {
-            var =
-                    new VarEntry(table.getCurrentScope(), Mode.DEFINITION, dec
-                            .getName(), getFunctionType(dec));
-        }
-        table.addVariableToScope(var);
-        // FIX: We should not need to add scopes here, we should avoid
-        // beginning and ending scopes in analysis.
-        table.createDefinitionScope(dec.getName());
-        table.completeDefinitionScope();
-        table.addModuleParameter(var);
-    }
-
-    private void visitModParamOperDec(OperationDec dec) {
-        List<VarEntry> vars = getVariables(dec.getParameters());
-        OperationEntry oper =
-                new OperationEntry(table.getCurrentScope(), dec.getName(),
-                        vars, getProgramType(dec.getReturnTy()));
-        table.addOperationToScope(oper);
-        table.addModuleParameter(oper);
-        table.createOperationScope(dec.getName());
-        addVariablesToScope(vars);
-        visitExp(dec.getRequires());
-        visitExp(dec.getEnsures());
-        table.completeOperationScope();
-    }
-
-    // -----------------------------------------------------------
-    // Other Expression Types
-    // -----------------------------------------------------------
-
-    public void visitGoalExp(GoalExp exp) {
-        visitExp(exp.getExp());
-    }
-
-    public void visitSuppositionExp(SuppositionExp exp) {
-        visitExp(exp.getExp());
-    }
-
-    public void visitDeductionExp(DeductionExp exp) {
-        visitExp(exp.getExp());
-    }
-
-    public void visitJustifiedExp(JustifiedExp exp) {
-        visitExp(exp.getExp());
-    }
-
-    public void visitProofDefinitionExp(ProofDefinitionExp exp) {
-        visitDefinitionDec((DefinitionDec) (exp.getExp()));
-    }
-
-    public void visitSuppositionDeductionExp(SuppositionDeductionExp exp) {
-        table.createExpressionScope();
-        if (exp.getSupposition().getVars() != null) {
-            visitQuantifiedVariables(exp.getSupposition().getVars());
-        }
-        if (exp.getSupposition().getExp() != null) {
-            visitExp(exp.getSupposition());
-        }
-        visitSupDeducBody(exp);
-        table.completeExpressionScope();
-    }
-
-    private void visitSupDeducBody(SuppositionDeductionExp exp) {
-        Iterator<Exp> i = exp.getBody().iterator();
-        while (i.hasNext()) {
-            visitExp(i.next());
-        }
-        visitExp(exp.getDeduction());
-    }
-
-    // -----------------------------------------------------------
-    // Type Translation
-    // -----------------------------------------------------------
-
-    private List<Type> getProgramTypes(List<Ty> tys) {
-        List<Type> retval = new List<Type>();
-        for (Ty t : tys) {
-            retval.add(getProgramType(t));
-        }
-        return retval;
-    }
-
-    private Type getProgramType(Ty ty) {
-        TypeConverter tc = new TypeConverter(table);
-        return tc.getProgramType(ty);
-    }
-
-    private Type getMathType(Ty ty) {
-        TypeConverter tc = new TypeConverter(table);
-        return tc.getMathType(ty);
-    }
-
-    // private Type getProgramType(Ty ty) {
-    // if (ty == null) {
-    // return new VoidType();
-    // } else if (ty instanceof ArrayTy) {
-    // return getArrayType((ArrayTy)ty);
-    // } else if (ty instanceof NameTy) {
-    // return getProgramIndirectType((NameTy)ty);
-    // } else if (ty instanceof RecordTy) {
-    // return getRecordType((RecordTy)ty);
-    // } else {
-    // assert false : "ty is invalid";
-    // return null;
-    // }
-    // }
-    //
-    // public Type getMathType(Ty ty) {
-    // if (ty instanceof CartProdTy) {
-    // return getTupleType((CartProdTy)ty);
-    // } else if (ty instanceof ConstructedTy) {
-    // return getConstructedType((ConstructedTy)ty);
-    // } else if (ty instanceof FunctionTy) {
-    // return getFunctionType((FunctionTy)ty);
-    // } else if (ty instanceof NameTy) {
-    // return getMathIndirectType((NameTy)ty);
-    // } else if (ty instanceof TupleTy) {
-    // return getTupleType((TupleTy)ty);
-    // } else {
-    // assert false : "ty is invalid";
-    // return null;
-    // }
-    // }
-    //
-    // private Type getArrayType(ArrayTy ty) {
-    // PosSymbol intqual = new PosSymbol(ty.getLocation(),
-    // Symbol.symbol("Std_Integer_Fac"));
-    // PosSymbol intname = new PosSymbol(ty.getLocation(),
-    // Symbol.symbol("Integer"));
-    // NameTy index = new NameTy(intqual, intname);
-    // return new ArrayType(table.getModuleID(),
-    // createArrayName(ty.getLocation()),
-    // ty.getLo(), ty.getHi(), getProgramType(index),
-    // getProgramType(ty.getEntryType()));
-    // }
-    //
-    // private Type getProgramIndirectType(NameTy ty) {
-    // Binding binding = table.getCurrentBinding();
-    // binding.addProgramIndirectName(ty.getQualifier(), ty.getName());
-    // return new IndirectType(ty.getQualifier(), ty.getName(), binding);
-    // }
-    //
-    // private Type getRecordType(RecordTy ty) {
-    // List<FieldItem> fields = new List<FieldItem>();
-    // Iterator<VarDec> i = ty.getFields().iterator();
-    // while (i.hasNext()) {
-    // VarDec var = i.next();
-    // FieldItem item = new FieldItem(var.getName(),
-    // getProgramType(var.getTy()));
-    // fields.add(item);
-    // }
-    // return new RecordType(table.getModuleID(),
-    // createRecordName(ty.getLocation()), fields);
-    // }
-    //
-    // private Type getTupleType(CartProdTy ty) {
-    // List<FieldItem> fields = new List<FieldItem>();
-    // Iterator<MathVarDec> i = ty.getFields().iterator();
-    // while (i.hasNext()) {
-    // MathVarDec var = i.next();
-    // FieldItem item = new FieldItem(var.getName(),
-    // getMathType(var.getTy()));
-    // fields.add(item);
-    // }
-    // return new TupleType(fields);
-    // }
-    //
-    // private Type getConstructedType(ConstructedTy ty) {
-    // Binding binding = table.getCurrentBinding();
-    // binding.addConstructedName(ty.getQualifier(), ty.getName(),
-    // ty.getArgs().size());
-    // List<Type> args = new List<Type>();
-    // Iterator<Ty> i = ty.getArgs().iterator();
-    // while (i.hasNext()) {
-    // Ty ty2 = i.next();
-    // Type type = getMathType(ty2);
-    // args.add(type);
-    // }
-    // return new ConstructedType(ty.getQualifier(), ty.getName(), args,
-    // table.getCurrentBinding());
-    // }
-    //
-
-    private Type getFunctionType(FunctionTy ty) {
-        TypeConverter tc = new TypeConverter(table);
-        return new FunctionType(tc.getMathType(ty.getDomain()), tc
-                .getMathType(ty.getRange()));
-    }
-
-    // private Type getFunctionType(FunctionTy ty) {
-    // return new FunctionType(getMathType(ty.getDomain()),
-    // getMathType(ty.getRange()));
-    // }
-    //
-    // private Type getMathIndirectType(NameTy ty) {
-    // Binding binding = table.getCurrentBinding();
-    // binding.addMathIndirectName(ty.getQualifier(), ty.getName());
-    // return new IndirectType(ty.getQualifier(), ty.getName(), binding);
-    // }
-    //
-    // private Type getTupleType(TupleTy ty) {
-    // List<FieldItem> fields = new List<FieldItem>();
-    // Iterator<Ty> i = ty.getFields().iterator();
-    // while (i.hasNext()) {
-    // Ty ty2 = i.next();
-    // PosSymbol name = new PosSymbol(ty.getLocation(),
-    // Symbol.symbol(""));
-    // FieldItem item = new FieldItem(name, getMathType(ty2));
-    // fields.add(item);
-    // }
-    // return new TupleType(fields);
-    // }
-    //
-
-    private Type getProgramType(Ty ty, PosSymbol name) {
-        TypeConverter tc = new TypeConverter(table);
-        return tc.getProgramType(ty, name);
-    }
-
-    // private Type getProgramType(Ty ty, PosSymbol name) {
-    // Type type = getProgramType(ty);
-    // if (type instanceof ArrayType) {
-    // ((ArrayType)type).setName(name);
-    // }
-    // if (type instanceof RecordType) {
-    // ((RecordType)type).setName(name);
-    // }
-    // // if (type instanceof IndirectType) {
-    // // type = new NameType(table.getModuleID(), name, type);
-    // // }
-    // return type;
-    // }
-    //
-    private Type getConceptualType(Ty ty, PosSymbol name) {
-        TypeConverter tc = new TypeConverter(table);
-        return tc.getConceptualType(ty, name);
-    }
-
-    // private Type getConceptualType(Ty ty, PosSymbol name) {
-    // return new ConcType(table.getModuleID(), name, getMathType(ty));
-    // }
-    //
-    // // -----------------------------------------------------------
-    // // Type Translation for Definitions
-    // // -----------------------------------------------------------
-    //
-
-    private Type getFunctionType(DefinitionDec dec) {
-        assert dec.getParameters().size() > 0 : "function takes no parameters";
-        TypeConverter tc = new TypeConverter(table);
-        return new FunctionType(tc.getTupleType(dec.getParameters()), tc
-                .getMathType(dec.getReturnTy()));
-    }
-
-    // private Type getFunctionType(DefinitionDec dec) {
-    // assert dec.getParameters().size() > 0 :
-    // "function takes not parameters";
-    // return new FunctionType(getTupleType(dec.getParameters()),
-    // getMathType(dec.getReturnTy()));
-    // }
-    //
-    // private Type getTupleType(List<MathVarDec> decs) {
-    // List<FieldItem> fields = new List<FieldItem>();
-    // Iterator<MathVarDec> i = decs.iterator();
-    // while (i.hasNext()) {
-    // MathVarDec dec = i.next();
-    // FieldItem item = new FieldItem(dec.getName(),
-    // getMathType(dec.getTy()));
-    // fields.add(item);
-    // }
-    // return new TupleType(fields);
-    // }
-
-    // -----------------------------------------------------------
-    // Visit Variables (and add to scope)
-    // -----------------------------------------------------------
-
-    private void visitDefinitionParameters(List<MathVarDec> decs) {
-        if (decs != null) {
-            Iterator<MathVarDec> i = decs.iterator();
-            while (i.hasNext()) {
-                MathVarDec dec = i.next();
-                VarEntry var =
-                        new VarEntry(table.getCurrentScope(), Mode.DEF_PARAM,
-                                dec.getName(), getMathType(dec.getTy()));
-                table.addVariableToScope(var);
-
-                if (dec.getTy() instanceof NameTy) {
-                    NameTy decAsNameTy = (NameTy) dec.getTy();
-                    if (decAsNameTy.getName().getName().equals("SSet")) {
-                        Type type = new FormalType(null, dec.getName());
-                        TypeEntry entry =
-                                new TypeEntry(table.getCurrentScope(), dec
-                                        .getName(), type);
-                        table.addTypeToScope(entry);
+                        foundOne = true;
                     }
                 }
-                /*
-                 * Type type = new FormalType(table.getModuleID(),
-                 * dec.getName()); TypeEntry entry = new
-                 * TypeEntry(table.getCurrentScope(), dec.getName(), type);
-                 * table.addTypeToScope(entry);
-                 */
+
+                if (!foundOne) {
+                    throw new SourceErrorException("No such function.", e
+                            .getLocation());
+                }
+
+                throw new SourceErrorException(errorMessage, e.getLocation());
             }
         }
-    }
 
-    private void visitQuantifiedVariables(List<MathVarDec> decs) {
-        Iterator<MathVarDec> i = decs.iterator();
-        while (i.hasNext()) {
-            MathVarDec dec = i.next();
-            VarEntry var =
-                    new VarEntry(table.getCurrentScope(), Mode.MATH, dec
-                            .getName(), getMathType(dec.getTy()));
-            table.addVariableToScope(var);
+        if (intendedEntry.getDefiningElement() == myCurrentDirectDefinition) {
+            throw new SourceErrorException("Direct definition cannot "
+                    + "contain recursive call.", e.getLocation());
         }
+
+        MTFunction intendedEntryType = (MTFunction) intendedEntry.getType();
+
+        Populator.emitDebug("Matching " + eOperatorString + " : " + eType
+                + " to " + intendedEntry.getName() + " : " + intendedEntryType
+                + ".");
+
+        return intendedEntry;
     }
 
-    private void visitLocalVariables(List<VarDec> decs) {
-        Iterator<VarDec> i = decs.iterator();
-        while (i.hasNext()) {
-            VarDec dec = i.next();
-            VarEntry var =
-                    new VarEntry(table.getCurrentScope(), Mode.LOCAL, dec
-                            .getName(), getProgramType(dec.getTy()));
-            table.addVariableToScope(var);
-        }
+    private MathSymbolEntry getExactDomainTypeMatch(AbstractFunctionExp e,
+            List<MathSymbolEntry> candidates) throws NoSolutionException {
+
+        return getDomainTypeMatch(e, candidates, EXACT_DOMAIN_MATCH);
     }
 
-    // -----------------------------------------------------------
-    // Getting Variables (without adding to scope)
-    // -----------------------------------------------------------
+    private MathSymbolEntry getInexactDomainTypeMatch(AbstractFunctionExp e,
+            List<MathSymbolEntry> candidates) throws NoSolutionException {
 
-    private List<VarEntry> getVariables(List<ParameterVarDec> decs) {
-        List<VarEntry> vars = new List<VarEntry>();
-        Iterator<ParameterVarDec> i = decs.iterator();
-        while (i.hasNext()) {
-            ParameterVarDec dec = i.next();
-            VarEntry var =
-                    new VarEntry(table.getCurrentScope(), dec.getMode(), dec
-                            .getName(), getProgramType(dec.getTy()));
-            vars.add(var);
-        }
-        return vars;
+        return getDomainTypeMatch(e, candidates, INEXACT_DOMAIN_MATCH);
     }
 
-    // -----------------------------------------------------------
-    // Add Var Entry List to Scope
-    // -----------------------------------------------------------
+    //TODO : This is a mess, clean it up!
+    private MathSymbolEntry getDomainTypeMatch(AbstractFunctionExp e,
+            List<MathSymbolEntry> candidates,
+            TypeComparison<AbstractFunctionExp, MTFunction> comparison)
+            throws NoSolutionException {
 
-    private void addVariablesToScope(List<VarEntry> vars) {
-        Iterator<VarEntry> i = vars.iterator();
-        while (i.hasNext()) {
-            table.addVariableToScope(i.next());
-        }
-    }
+        //Exp soleParameter = e.getSoleParameter(myTypeGraph);
 
-    // -----------------------------------------------------------
-    // Symbol Table Add Methods
-    // -----------------------------------------------------------
+        MTFunction eType = e.getConservativePreApplicationType(myTypeGraph);
 
-    private void addAssocEnhancementsToTable(List<EnhancementBodyItem> items,
-            PosSymbol cName) {
-        Iterator<EnhancementBodyItem> i = items.iterator();
-        while (i.hasNext()) {
-            table.addAssocEnhancement(i.next().getName(), cName);
-        }
-    }
+        /*
+        eType =
+                (MTFunction) eType
+                        .getCopyWithVariablesSubstituted(myGenericTypes);
+        e = TypeGraph.getCopyWithVariablesSubstituted(e, myGenericTypes);
+         */
 
-    // -----------------------------------------------------------
-    // Facility Instantiation Methods
-    // -----------------------------------------------------------
+        MathSymbolEntry match = null;
 
-    private List<ModuleScope> getConceptualModules(FacilityDec dec) {
-        List<ModuleScope> scopes = new List<ModuleScope>();
-        ModuleID cid = ModuleID.createConceptID(dec.getConceptName());
-        scopes.add(myInstanceEnvironment.getSymbolTable(cid).getModuleScope());
-        scopes.addAll(getEnhConceptualModules(dec.getEnhancements(), dec
-                .getConceptName()));
-        scopes.addAll(getEnhBodConceptualModules(dec.getEnhancementBodies(),
-                dec.getConceptName()));
-        return scopes;
-    }
+        MTFunction candidateType;
+        for (MathSymbolEntry candidate : candidates) {
+            if (candidate.getType() instanceof MTFunction) {
 
-    private List<ModuleScope> getEnhConceptualModules(
-            List<EnhancementItem> items, PosSymbol cname) {
-        List<ModuleScope> scopes = new List<ModuleScope>();
-        Iterator<EnhancementItem> i = items.iterator();
-        while (i.hasNext()) {
-            EnhancementItem item = i.next();
-            ModuleID eid = ModuleID.createEnhancementID(item.getName(), cname);
-            scopes.add(myInstanceEnvironment.getSymbolTable(eid)
-                    .getModuleScope());
-        }
-        return scopes;
-    }
+                try {
+                    candidate =
+                            candidate.deschematize(e.getParameters(), myBuilder
+                                    .getInnermostActiveScope());
+                    candidateType = (MTFunction) candidate.getType();
+                    emitDebug(candidate.getType() + " deschematizes to "
+                            + candidateType);
 
-    private List<ModuleScope> getEnhBodConceptualModules(
-            List<EnhancementBodyItem> items, PosSymbol cname) {
-        List<ModuleScope> scopes = new List<ModuleScope>();
-        Iterator<EnhancementBodyItem> i = items.iterator();
-        while (i.hasNext()) {
-            EnhancementBodyItem item = i.next();
-            ModuleID eid = ModuleID.createEnhancementID(item.getName(), cname);
-            scopes.add(myInstanceEnvironment.getSymbolTable(eid)
-                    .getModuleScope());
-        }
-        return scopes;
-    }
+                    if (comparison.compare(e, eType, candidateType)) {
 
-    private List<Binding> getBindings(List<ModuleScope> scopes) {
-        List<Binding> bindings = new List<Binding>();
-        Iterator<ModuleScope> i = scopes.iterator();
-        while (i.hasNext()) {
-            ModuleScope scope = i.next();
-            bindings.add(scope.getBinding());
-        }
-        return bindings;
-    }
+                        if (match != null) {
+                            throw new SourceErrorException("Multiple "
+                                    + comparison.description() + " domain "
+                                    + "matches.  For example, "
+                                    + match.getName() + " : " + match.getType()
+                                    + " and " + candidate.getName() + " : "
+                                    + candidate.getType()
+                                    + ".  Consider explicitly qualifying.", e
+                                    .getLocation());
+                        }
 
-    private Map<Symbol, Type> getTypeMappings(FacilityDec dec) {
-        Map<Symbol, Type> typeMap = new Map<Symbol, Type>();
-        ModuleID cid = ModuleID.createConceptID(dec.getConceptName());
-        ModuleScope scope =
-                myInstanceEnvironment.getSymbolTable(cid).getModuleScope();
-        List<Entry> pars = scope.getModuleParameters();
-        if (dec.getConceptParams().size() < pars.size()) {
-            String msg = moreParsThanArgsMessage();
-            err.error(dec.getConceptName().getLocation(), msg);
-            return typeMap;
-        }
-        if (dec.getConceptParams().size() > pars.size()) {
-            String msg = moreArgsThanParsMessage();
-            err.error(dec.getConceptName().getLocation(), msg);
-            return typeMap;
-        }
-        typeMap.putAll(getParamTypeMappings(pars, dec.getConceptParams()));
-        typeMap.putAll(getEnhTypeMappings(dec.getEnhancements(), dec
-                .getConceptName()));
-        typeMap.putAll(getEnhBodTypeMappings(dec.getEnhancementBodies(), dec
-                .getConceptName()));
-        return typeMap;
-    }
-
-    private Map<Symbol, Type> getEnhTypeMappings(List<EnhancementItem> items,
-            PosSymbol cname) {
-        Map<Symbol, Type> typeMap = new Map<Symbol, Type>();
-        Iterator<EnhancementItem> i = items.iterator();
-        while (i.hasNext()) {
-            EnhancementItem item = i.next();
-            ModuleID eid = ModuleID.createEnhancementID(item.getName(), cname);
-            ModuleScope scope =
-                    myInstanceEnvironment.getSymbolTable(eid).getModuleScope();
-            List<Entry> pars = scope.getModuleParameters();
-            if (item.getParams().size() < pars.size()) {
-                String msg = moreParsThanArgsMessage();
-                err.error(item.getName().getLocation(), msg);
-                break;
-            }
-            if (item.getParams().size() > pars.size()) {
-                String msg = moreArgsThanParsMessage();
-                err.error(item.getName().getLocation(), msg);
-                break;
-            }
-            typeMap.putAll(getParamTypeMappings(pars, item.getParams()));
-        }
-        return typeMap;
-    }
-
-    private Map<Symbol, Type> getEnhBodTypeMappings(
-            List<EnhancementBodyItem> items, PosSymbol cname) {
-        Map<Symbol, Type> typeMap = new Map<Symbol, Type>();
-        Iterator<EnhancementBodyItem> i = items.iterator();
-        while (i.hasNext()) {
-            EnhancementBodyItem item = i.next();
-            ModuleID eid = ModuleID.createEnhancementID(item.getName(), cname);
-            ModuleScope scope =
-                    myInstanceEnvironment.getSymbolTable(eid).getModuleScope();
-            List<Entry> pars = scope.getModuleParameters();
-            if (item.getParams().size() < pars.size()) {
-                String msg = moreParsThanArgsMessage();
-                err.error(item.getName().getLocation(), msg);
-                break;
-            }
-            if (item.getParams().size() > pars.size()) {
-                String msg = moreArgsThanParsMessage();
-                err.error(item.getName().getLocation(), msg);
-                break;
-            }
-            typeMap.putAll(getParamTypeMappings(pars, item.getParams()));
-        }
-        return typeMap;
-    }
-
-    private Map<Symbol, Type> getParamTypeMappings(List<Entry> parameters,
-            List<ModuleArgumentItem> arguments) {
-
-        Map<Symbol, Type> typeMap = new Map<Symbol, Type>();
-
-        Iterator<Entry> iterParameters = parameters.iterator();
-        Iterator<ModuleArgumentItem> iterArguments = arguments.iterator();
-
-        while (iterParameters.hasNext()) {
-            Entry curParameter = iterParameters.next();
-            ModuleArgumentItem curArgument = iterArguments.next();
-
-            if (curParameter instanceof TypeEntry) {
-                Symbol sym = curParameter.getSymbol();
-                if (curArgument.getName() == null) {
-                    String msg = expForTypeMessage();
-                    err.error(curArgument.getEvalExp().getLocation(), msg);
-                    break;
-                } /*
-                   * else { // code to make sure that the actual is a type Binding
-                   * bind = table.getCurrentBinding(); if
-                   * (!bind.contains(item.getName())) { String msg =
-                   * expForTypeMessage(); err.error(item.getName().getLocation(),
-                   * msg); break; } else { String typeName =
-                   * item.getName().toString(); Binding binding =
-                   * table.getModuleScope().getBinding(); Type type =
-                   * binding.getType(item.getQualifier(),item.getName()); if
-                   * (!(type instanceof NameType) && !(type instanceof
-                   * FormalType)) { String msg = expForTypeMessage();
-                   * err.error(item.getName().getLocation(), msg); break; } } }
-                   */
-                Binding bind = table.getCurrentBinding();
-                Type type =
-                        new IndirectType(curArgument.getQualifier(),
-                                curArgument.getName(), bind);
-                bind.addProgramIndirectName(curArgument.getQualifier(),
-                        curArgument.getName());
-                typeMap.put(sym, type);
+                        match = candidate;
+                    }
+                }
+                catch (NoSolutionException nse) {
+                    //couldn't deschematize--try the next one
+                    emitDebug(candidate.getType() + " doesn't deschematize "
+                            + "against " + e.getParameters());
+                }
             }
         }
-        return typeMap;
+
+        if (match == null) {
+            throw new NoSolutionException();
+        }
+
+        return match;
     }
 
-    // -----------------------------------------------------------
-    // Name creation
-    // -----------------------------------------------------------
+    //-------------------------------------------------------------------
+    //   Helper classes
+    //-------------------------------------------------------------------
 
-    private PosSymbol createInitName(Location loc) {
-        Symbol sym =
-                Symbol.symbol("%Init(" + loc.getPos().getLine() + ","
-                        + loc.getPos().getColumn() + ")");
-        return new PosSymbol(loc, sym);
+    private static class ExactDomainMatch
+            implements
+                TypeComparison<AbstractFunctionExp, MTFunction> {
+
+        @Override
+        public boolean compare(AbstractFunctionExp foundValue,
+                MTFunction foundType, MTFunction expectedType) {
+
+            return foundType.parameterTypesMatch(expectedType,
+                    EXACT_PARAMETER_MATCH);
+        }
+
+        @Override
+        public String description() {
+            return "exact";
+        }
     }
 
-    private PosSymbol createFinalName(Location loc) {
-        Symbol sym =
-                Symbol.symbol("%Final(" + loc.getPos().getLine() + ","
-                        + loc.getPos().getColumn() + ")");
-        return new PosSymbol(loc, sym);
+    private class InexactDomainMatch
+            implements
+                TypeComparison<AbstractFunctionExp, MTFunction> {
+
+        @Override
+        public boolean compare(AbstractFunctionExp foundValue,
+                MTFunction foundType, MTFunction expectedType) {
+
+            return myTypeGraph.isSubtype(foundType, expectedType);
+        }
+
+        @Override
+        public String description() {
+            return "inexact";
+        }
     }
 
-    private PosSymbol createArrayName(Location loc) {
-        Symbol sym =
-                Symbol.symbol("%Array(" + loc.getPos().getLine() + ","
-                        + loc.getPos().getColumn() + ")");
-        return new PosSymbol(loc, sym);
+    private static class ExactParameterMatch implements Comparator<MTType> {
+
+        @Override
+        public int compare(MTType o1, MTType o2) {
+            int result;
+
+            if (o1.equals(o2)) {
+                result = 0;
+            }
+            else {
+                result = 1;
+            }
+
+            return result;
+        }
+
     }
 
-    private PosSymbol createRecordName(Location loc) {
-        Symbol sym =
-                Symbol.symbol("%Record(" + loc.getPos().getLine() + ","
-                        + loc.getPos().getColumn() + ")");
-        return new PosSymbol(loc, sym);
-    }
+    private class InexactParameterMatch implements TypeComparison<Exp, MTType> {
 
-    // -----------------------------------------------------------
-    // Cast Methods
-    // -----------------------------------------------------------
+        @Override
+        public boolean compare(Exp foundValue, MTType foundType,
+                MTType expectedType) {
 
-    private Dec castToDec(ModuleParameterDec par) {
-        assert par instanceof Dec;
-        return (Dec) par;
-    }
+            return myTypeGraph.isKnownToBeIn(foundValue, expectedType);
+        }
 
-    // -----------------------------------------------------------
-    // Error Related Methods
-    // -----------------------------------------------------------
-
-    private String expForTypeMessage() {
-        return "Cannot pass an expression to a module where a "
-                + "type is required.";
-    }
-
-    private String moreParsThanArgsMessage() {
-        return "The number of arguments is less than the number "
-                + "of parameters.";
-    }
-
-    private String moreArgsThanParsMessage() {
-        return "The number of arguments exceeds the number of parameters.";
-    }
-
-    private String cantFindFamilyMessage(String type) {
-        return "Cant find the type family " + type + " in any of "
-                + "the corresponding specification modules.";
+        @Override
+        public String description() {
+            return "inexact";
+        }
     }
 }

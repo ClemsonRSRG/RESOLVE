@@ -7,7 +7,7 @@ import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.mathtype.*;
-import edu.clemson.cs.r2jt.population.MathPopulator;
+import edu.clemson.cs.r2jt.population.Populator;
 import edu.clemson.cs.r2jt.utilities.HardCoded;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
@@ -650,7 +650,7 @@ public class TypeGraph {
         //We'd like to force the presence of the destination node
         getTypeNode(destinationCanonicalResult.canonicalType);
 
-        MathPopulator.emitDebug("Added relationship to type node ["
+        Populator.emitDebug("Added relationship to type node ["
                 + sourceCanonicalResult.canonicalType + "]: " + relationship);
     }
 
