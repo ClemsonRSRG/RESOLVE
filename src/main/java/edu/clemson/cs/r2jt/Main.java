@@ -57,6 +57,8 @@
  * Clemson University
  */
 
+//Testing visual rebase on Eclipse
+
 package edu.clemson.cs.r2jt;
 
 import java.io.File;
