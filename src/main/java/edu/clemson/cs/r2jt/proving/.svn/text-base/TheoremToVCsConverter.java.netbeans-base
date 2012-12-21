@@ -1,0 +1,88 @@
+package edu.clemson.cs.r2jt.proving;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import edu.clemson.cs.r2jt.absyn.Dec;
+import edu.clemson.cs.r2jt.absyn.Exp;
+import edu.clemson.cs.r2jt.absyn.InfixExp;
+import edu.clemson.cs.r2jt.absyn.MathAssertionDec;
+import edu.clemson.cs.r2jt.absyn.MathModuleDec;
+import edu.clemson.cs.r2jt.absyn.VarExp;
+
+public class TheoremToVCsConverter implements Iterable<VerificationCondition> {
+	
+	private List<VerificationCondition> myVCs = 
+		new LinkedList<VerificationCondition>();
+	
+	public TheoremToVCsConverter(MathModuleDec m) {
+		List<Dec> declarations= m.getDecs();
+		
+		for (Dec d : declarations) {
+			if (d instanceof MathAssertionDec) {
+				MathAssertionDec dAsMathAssertionDec = (MathAssertionDec) d;
+				
+				if (dAsMathAssertionDec.getKind() != MathAssertionDec.AXIOM) {
+					Exp assertion = dAsMathAssertionDec.getAssertion();
+					assertion = Utilities.applyQuantification(assertion);
+					
+					VerificationCondition finalVC = asVerificationCondition(
+							dAsMathAssertionDec.getName().getName(), assertion);
+					
+					myVCs.add(finalVC);
+				}
+			}
+		}
+	}
+	
+	private static VerificationCondition asVerificationCondition(String name, 
+			Exp e) {
+		
+		Exp antecedent, consequent;
+		
+		if (e instanceof InfixExp && 
+				((InfixExp) e).getOpName().getName().equals("implies")) {
+			
+			InfixExp eAsInfixExp = (InfixExp) e;
+			antecedent = eAsInfixExp.getLeft(); 
+			consequent = eAsInfixExp.getRight();
+		}
+		else {
+			antecedent = VarExp.getTrueVarExp();
+			consequent = e;
+		}
+		
+		antecedent = eliminateUniversalQuantifiers(antecedent);
+		consequent = eliminateUniversalQuantifiers(consequent);
+		
+		return new VerificationCondition(antecedent, consequent, name);
+	}
+	
+	private static Exp eliminateUniversalQuantifiers(Exp e) {
+		Exp copy = Exp.copy(e);
+		
+		eliminateUniversalQuantifiersInPlace(copy);
+		
+		return copy;
+	}
+	
+	private static void eliminateUniversalQuantifiersInPlace(Exp e) {
+		if (e instanceof VarExp) {
+			VarExp eAsVarExp = (VarExp) e;
+			if (eAsVarExp.getQuantification() == VarExp.FORALL) {
+				eAsVarExp.setQuantification(VarExp.NONE);
+			}
+		} else {
+			for (Exp subexp : e.getSubExpressions()) {
+				eliminateUniversalQuantifiersInPlace(subexp);
+			}
+		}
+	}
+	
+	@Override
+	public Iterator<VerificationCondition> iterator() {
+		return myVCs.iterator();
+	}
+
+}

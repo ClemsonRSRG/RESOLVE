@@ -21,6 +21,9 @@ import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.proving.Conjuncts;
+import edu.clemson.cs.r2jt.proving.VerificationCondition;
+import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.type.Type;
 
 /**
@@ -35,6 +38,29 @@ public class Utilities {
 
     public static void setBindDebugFlag(boolean f) {
         myBindDebugFlag = f;
+    }
+
+    public static VC convertToImmutableVC(VerificationCondition vc) {
+
+        java.util.List<PExp> newAntecedents = new LinkedList<PExp>();
+
+        Conjuncts oldAntecedents = vc.getAntecedents();
+        for (Exp a : oldAntecedents) {
+            newAntecedents.add(PExp.buildPExp(a));
+        }
+
+        java.util.List<PExp> newConsequents = new LinkedList<PExp>();
+
+        Conjuncts oldConsequents = vc.getConsequents();
+        for (Exp c : oldConsequents) {
+            newConsequents.add(PExp.buildPExp(c));
+        }
+
+        VC retval =
+                new VC(vc.getName(), new Antecedent(newAntecedents),
+                        new Consequent(newConsequents));
+
+        return retval;
     }
 
     public static void buildExpMapFromPosSymbolMap(

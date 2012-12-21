@@ -25,6 +25,7 @@ import edu.clemson.cs.r2jt.absyn.VariableDotExp;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.mathtype.MTType;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.Utilities;
 
 /**
  * <p><code>PExp</code> is the root of the prover abstract syntax tree 
@@ -145,8 +146,10 @@ public abstract class PExp {
         return e;
     }
 
-    public static final PExp buildPExp(Exp e) {
+    public static PExp buildPExp(Exp e) {
         PExp retval;
+
+        e = Utilities.applyQuantification(e);
 
         if (e == null) {
             throw new IllegalArgumentException("Prover does not accept null "

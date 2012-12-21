@@ -91,6 +91,9 @@ import edu.clemson.cs.r2jt.errors.BugReport;
 import edu.clemson.cs.r2jt.mathtype.ScopeRepository;
 import edu.clemson.cs.r2jt.mathtype.MathSymbolTable;
 import edu.clemson.cs.r2jt.mathtype.MathSymbolTableBuilder;
+import edu.clemson.cs.r2jt.mathtype.ModuleIdentifier;
+import edu.clemson.cs.r2jt.mathtype.ModuleScope;
+import edu.clemson.cs.r2jt.mathtype.NoSuchSymbolException;
 import edu.clemson.cs.r2jt.parsing.*;
 import edu.clemson.cs.r2jt.population.*;
 import edu.clemson.cs.r2jt.processing.*;
@@ -103,6 +106,8 @@ import edu.clemson.cs.r2jt.proving.VerificationCondition;
 import edu.clemson.cs.r2jt.sanitycheck.VisitorSanityCheck;
 import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.parsing.RSimpleTrans;
+import edu.clemson.cs.r2jt.proving2.AlgebraicProver;
+import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslation;
 import edu.clemson.cs.r2jt.translation.PrettyCTranslation;
@@ -1642,6 +1647,25 @@ public class Controller {
             }
             catch (ProverException e) {
                 err.error(e.toString());
+            }
+        }
+        else if (myInstanceEnvironment.flags
+                .isFlagSet(AlgebraicProver.FLAG_PROVE)) {
+            try {
+                ModuleScope scope =
+                        realTable.getModuleScope(new ModuleIdentifier(dec));
+
+                java.util.List<VC> vcs = new LinkedList<VC>();
+                for (VerificationCondition originalVC : vcsToProve) {
+                    vcs.add(edu.clemson.cs.r2jt.proving2.Utilities
+                            .convertToImmutableVC(originalVC));
+                }
+
+                AlgebraicProver prover = new AlgebraicProver(vcs, scope);
+            }
+            catch (NoSuchSymbolException nsse) {
+                //Can't find the module we're in.  Shouldn't be possible.
+                throw new RuntimeException(nsse);
             }
         }
     }
