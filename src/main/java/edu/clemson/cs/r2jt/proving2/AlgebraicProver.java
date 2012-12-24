@@ -4,7 +4,8 @@
  */
 package edu.clemson.cs.r2jt.proving2;
 
-import edu.clemson.cs.r2jt.entry.TheoremEntry;
+import edu.clemson.cs.r2jt.proving2.justifications.Library;
+import edu.clemson.cs.r2jt.mathtype.TheoremEntry;
 import edu.clemson.cs.r2jt.mathtype.EntryTypeQuery;
 import edu.clemson.cs.r2jt.mathtype.MathSymbolTable;
 import edu.clemson.cs.r2jt.mathtype.MathSymbolTable.FacilityStrategy;
@@ -13,9 +14,13 @@ import edu.clemson.cs.r2jt.mathtype.ModuleScope;
 import edu.clemson.cs.r2jt.mathtype.ScopeRepository;
 import edu.clemson.cs.r2jt.mathtype.SymbolTable;
 import edu.clemson.cs.r2jt.proving.Prover;
+import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
+import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
+import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.verification.Verifier;
+import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JFrame;
 
@@ -46,12 +51,22 @@ public class AlgebraicProver {
 
     public AlgebraicProver(List<VC> vcs, ModuleScope scope) {
 
-        List<TheoremEntry> theorems = scope.query(new EntryTypeQuery(
-                TheoremEntry.class, ImportStrategy.IMPORT_RECURSIVE, 
-                FacilityStrategy.FACILITY_IGNORE));
-        
+        List<TheoremEntry> theoremEntries =
+                scope.query(new EntryTypeQuery(TheoremEntry.class,
+                        ImportStrategy.IMPORT_RECURSIVE,
+                        FacilityStrategy.FACILITY_IGNORE));
+
+        List<Theorem> theorems = new LinkedList<Theorem>();
+        for (TheoremEntry e : theoremEntries) {
+            theorems.add(new Theorem(e.getAssertion(), new Library(e)));
+        }
+
+        ImmutableList<Theorem> immutableTheorems =
+                new ArrayBackedImmutableList<Theorem>(theorems);
+
         JProverFrame proverPanel = new JProverFrame();
-        proverPanel.setVC(vcs.get(0));
+        proverPanel.setModel(new PerVCProverModel(vcs.get(0)));
+        proverPanel.setGlobalTheorems(immutableTheorems);
         proverPanel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         proverPanel.setVisible(true);
     }

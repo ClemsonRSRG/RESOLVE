@@ -5,16 +5,21 @@ import edu.clemson.cs.r2jt.mathtype.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.proving.absyn.NodeIdentifier;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
+import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
+import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving.immutableadts.SimpleImmutableList;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.LayoutManager;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -31,6 +36,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -42,16 +48,19 @@ public class JProverFrame extends JFrame {
 
     private final JProverFrame PARENT_THIS = this;
 
-    private final JVCDisplay myVCDisplay = new JVCDisplay();
+    private final JProverStateDisplay myProverStateDisplay;
 
     private final JCheckBox myDetailsCheckBox = new JCheckBox("Details");
-    private final JComponent myDetailsArea = buildDetailsArea();
+    private final JComponent myDetailsArea;
+    private JList myTheoremList;
 
     private final CardLayout myOptionalTransportLayout = new CardLayout();
     private final JPanel myOptionalTransportPanel =
             new JPanel(myOptionalTransportLayout);
 
     private final JComponent myBasicArea = buildBasicPanel();
+
+    private ImmutableList<Theorem> myGlobalTheorems;
 
     public static void main(String[] args) throws FlagDependencyException {
         JProverFrame p = new JProverFrame();
@@ -102,7 +111,7 @@ public class JProverFrame extends JFrame {
         Consequent c = new Consequent(conjuncts);
 
         VC vc = new VC("0_1", a, c);
-        p.setVC(vc);
+        p.setModel(new PerVCProverModel(vc));
 
         int[] path = { 1 };
         NodeIdentifier nid = new NodeIdentifier(cc, path);
@@ -111,6 +120,16 @@ public class JProverFrame extends JFrame {
     }
 
     public JProverFrame() {
+        this(new PerVCProverModel(new LinkedList<PExp>(),
+                new LinkedList<PExp>()), new EmptyImmutableList());
+    }
+
+    public JProverFrame(PerVCProverModel m,
+            ImmutableList<Theorem> globalTheorems) {
+        myGlobalTheorems = globalTheorems;
+        myProverStateDisplay = new JProverStateDisplay(m);
+        myDetailsArea = buildDetailsArea();
+
         setLayout(new BorderLayout());
 
         JPanel topLevel = new JPanel();
@@ -158,12 +177,26 @@ public class JProverFrame extends JFrame {
         pack();
     }
 
-    public void setVC(VC vc) {
-        myVCDisplay.setVC(vc);
+    public void setGlobalTheorems(ImmutableList<Theorem> globalTheorems) {
+        myGlobalTheorems = globalTheorems;
+
+        DefaultListModel m = new DefaultListModel();
+        for (Theorem t : globalTheorems) {
+            m.addElement("" + t.getAssertion());
+        }
+        myTheoremList.setModel(m);
+    }
+
+    public void setModel(PerVCProverModel model) {
+        myProverStateDisplay.setModel(model);
+    }
+
+    public PerVCProverModel getModel() {
+        return myProverStateDisplay.getModel();
     }
 
     public void highlightPExp(NodeIdentifier id, Color c) {
-        myVCDisplay.highlightPExp(id, c);
+        myProverStateDisplay.highlightPExp(id, c);
     }
 
     private JComponent buildDetailsArea() {
@@ -181,11 +214,11 @@ public class JProverFrame extends JFrame {
 
     private JComponent buildProofStatusArea() {
         return new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
-                buildVCDisplayArea(), buildProofArea());
+                buildProofStateDisplayArea(), buildProofArea());
     }
 
-    private JComponent buildVCDisplayArea() {
-        return myVCDisplay;
+    private JComponent buildProofStateDisplayArea() {
+        return myProverStateDisplay;
     }
 
     private JComponent buildProofArea() {
@@ -195,8 +228,9 @@ public class JProverFrame extends JFrame {
     private JPanel buildTheoremListPanel() {
         JPanel theoremListPanel = new JPanel(new BorderLayout());
 
-        JList theoremList = new JList();
-        JScrollPane theoremView = new JScrollPane(theoremList);
+        myTheoremList = new JList();
+        myTheoremList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane theoremView = new JScrollPane(myTheoremList);
         theoremView
                 .setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         theoremView

@@ -57,7 +57,7 @@
  * Clemson University
  */
 
-//Testing visual rebase on Eclipse
+// Testing visual rebase on Eclipse
 
 package edu.clemson.cs.r2jt;
 
@@ -576,7 +576,7 @@ public class Main {
             VCGenerator.setUpFlags();
             AlgebraicProver.setUpFlags();
             //Your module here!
-            
+
             FlagDependencies.seal();
         }
     }
