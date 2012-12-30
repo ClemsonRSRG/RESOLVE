@@ -4,6 +4,7 @@
  */
 package edu.clemson.cs.r2jt.proving2;
 
+import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.justifications.Library;
 import edu.clemson.cs.r2jt.mathtype.TheoremEntry;
 import edu.clemson.cs.r2jt.mathtype.EntryTypeQuery;
@@ -65,7 +66,7 @@ public class AlgebraicProver {
                 new ArrayBackedImmutableList<Theorem>(theorems);
 
         JProverFrame proverPanel = new JProverFrame();
-        proverPanel.setModel(new PerVCProverModel(vcs.get(0)));
+        proverPanel.setModel(new PerVCProverModel(vcs.get(0), immutableTheorems));
         proverPanel.setGlobalTheorems(immutableTheorems);
         proverPanel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         proverPanel.setVisible(true);

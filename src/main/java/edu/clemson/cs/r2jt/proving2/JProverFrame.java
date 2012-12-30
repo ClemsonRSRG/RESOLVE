@@ -1,5 +1,6 @@
 package edu.clemson.cs.r2jt.proving2;
 
+import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.mathtype.MTType;
 import edu.clemson.cs.r2jt.mathtype.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.proving.absyn.NodeIdentifier;
@@ -8,6 +9,9 @@ import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.SimpleImmutableList;
+import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
 import java.awt.BorderLayout;
@@ -15,8 +19,10 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.LayoutManager;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
@@ -39,6 +45,8 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 public class JProverFrame extends JFrame {
 
@@ -61,7 +69,8 @@ public class JProverFrame extends JFrame {
     private final JComponent myBasicArea = buildBasicPanel();
 
     private ImmutableList<Theorem> myGlobalTheorems;
-
+    private Set<PExp> myGlobalTheoremAssertions = new HashSet<PExp>();
+    
     public static void main(String[] args) throws FlagDependencyException {
         JProverFrame p = new JProverFrame();
         p.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -111,22 +120,22 @@ public class JProverFrame extends JFrame {
         Consequent c = new Consequent(conjuncts);
 
         VC vc = new VC("0_1", a, c);
-        p.setModel(new PerVCProverModel(vc));
+        p.setModel(new PerVCProverModel(vc, new EmptyImmutableList<Theorem>()));
 
         int[] path = { 1 };
-        NodeIdentifier nid = new NodeIdentifier(cc, path);
+        /*NodeIdentifier nid = new NodeIdentifier(cc, path);
 
-        p.highlightPExp(nid, new Color(200, 200, 200));
+        p.highlightPExp(nid, new Color(200, 200, 200));*/
     }
 
     public JProverFrame() {
         this(new PerVCProverModel(new LinkedList<PExp>(),
-                new LinkedList<PExp>()), new EmptyImmutableList());
+                new LinkedList<PExp>(), new EmptyImmutableList()));
     }
 
-    public JProverFrame(PerVCProverModel m,
-            ImmutableList<Theorem> globalTheorems) {
-        myGlobalTheorems = globalTheorems;
+    public JProverFrame(PerVCProverModel m) {
+        ImmutableList<Theorem> globalTheorems = m.getTheoremLibrary();
+        
         myProverStateDisplay = new JProverStateDisplay(m);
         myDetailsArea = buildDetailsArea();
 
@@ -174,15 +183,19 @@ public class JProverFrame extends JFrame {
             }
         });
 
+        setGlobalTheorems(globalTheorems);
+        
         pack();
     }
 
     public void setGlobalTheorems(ImmutableList<Theorem> globalTheorems) {
         myGlobalTheorems = globalTheorems;
-
+        myGlobalTheoremAssertions.clear();
+        
         DefaultListModel m = new DefaultListModel();
         for (Theorem t : globalTheorems) {
-            m.addElement("" + t.getAssertion());
+            myGlobalTheoremAssertions.add(t.getAssertion());
+            m.addElement(t);
         }
         myTheoremList.setModel(m);
     }
@@ -195,8 +208,8 @@ public class JProverFrame extends JFrame {
         return myProverStateDisplay.getModel();
     }
 
-    public void highlightPExp(NodeIdentifier id, Color c) {
-        myProverStateDisplay.highlightPExp(id, c);
+    public void highlightPExp(Site s, Color c) {
+        myProverStateDisplay.highlightPExp(s, c);
     }
 
     private JComponent buildDetailsArea() {
@@ -230,6 +243,9 @@ public class JProverFrame extends JFrame {
 
         myTheoremList = new JList();
         myTheoremList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        myTheoremList.getSelectionModel().addListSelectionListener(
+                new TheoremSelect());
+        
         JScrollPane theoremView = new JScrollPane(myTheoremList);
         theoremView
                 .setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -331,5 +347,33 @@ public class JProverFrame extends JFrame {
         transportControlPanel.add(new JButton("VC>"));
 
         return transportControlPanel;
+    }
+    
+    private class TheoremSelect implements ListSelectionListener {
+
+        @Override
+        public void valueChanged(ListSelectionEvent event) {
+            myProverStateDisplay.clearHighlights();
+            
+            List<Transformation> transformations =
+                    ((Theorem) myTheoremList.getSelectedValue())
+                        .getTransformations(myGlobalTheoremAssertions);
+            
+            PerVCProverModel model = myProverStateDisplay.getModel();
+            
+            Iterator<Application> applications;
+            Application application;
+            for (Transformation t : transformations) {
+                applications = t.getApplications(model);
+                
+                while (applications.hasNext()) {
+                    application = applications.next();
+                    
+                    for (Site nid : application.involvedSubExpressions()) {
+                        myProverStateDisplay.highlightPExp(nid, Color.GREEN);
+                    }
+                }
+            }
+        }
     }
 }

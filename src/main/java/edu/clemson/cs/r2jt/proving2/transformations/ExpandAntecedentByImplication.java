@@ -4,20 +4,25 @@
  */
 package edu.clemson.cs.r2jt.proving2.transformations;
 
-import edu.clemson.cs.r2jt.proving.Antecedent;
-import edu.clemson.cs.r2jt.proving.ChainingIterable;
-import edu.clemson.cs.r2jt.proving.ConditionalAntecedentExtender;
-import edu.clemson.cs.r2jt.proving.DummyIterator;
-import edu.clemson.cs.r2jt.proving.IncrementalBindingIterator;
+import edu.clemson.cs.r2jt.proving.ChainingIterator;
+import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
+import edu.clemson.cs.r2jt.proving.absyn.BindingException;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.proving2.BindingsIterator;
-import edu.clemson.cs.r2jt.proving2.TotalBindingIterator;
+import edu.clemson.cs.r2jt.proving2.LocalTheorem;
+import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.justifications.TheoremApplication;
+import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
+import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
+import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheorem;
+import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>A transformation that applies "A and B and C implies D" by first seeing
@@ -55,164 +60,117 @@ import java.util.Map;
  */
 public class ExpandAntecedentByImplication implements Transformation {
 
-    private final ImmutableList<PExp> myAntecedents;
-    private final ImmutableList<PExp> myGlobalTheorems;
-
+    private final BindResultToApplication BIND_RESULT_TO_APPLICATION =
+            new BindResultToApplication();
+    
+    private final List<PExp> myAntecedents;
     private final int myAntecedentsSize;
-
     private final PExp myConsequent;
 
-    public ExpandAntecedentByImplication(ImmutableList<PExp> antecedents,
-            PExp consequent, ImmutableList<PExp> globalTheorems) {
-        myAntecedents = antecedents;
-        myAntecedentsSize = antecedents.size();
+    public ExpandAntecedentByImplication(List<PExp> localTheorems,
+            PExp consequent) {
+        myAntecedents = localTheorems;
+        myAntecedentsSize = myAntecedents.size();
         myConsequent = consequent;
-        myGlobalTheorems = globalTheorems;
     }
-
-    /**
-     * <p>An <code>ExtendedAntecedentsIterator</code> iterates over variations
-     * of the application of the conditional theorem embedded in this
-     * <code>ConditionalAntecedentExtender</code> to a given VC antecedent,
-     * given a set of global facts.</p>
-     * 
-     * <p>See the note on the random quirk in the parent class comments.</p>
-     */
-    private class ExtendedAntecedentsIterator
-            implements
-                Iterator<Map<PExp, PExp>> {
-
-        private final ImmutableList<PExp> myPatterns;
-
-        private int myLocalConditionIndex;
-
-        private Iterator<Map<PExp, PExp>> myLocalConditionApplications;
-        private Map<PExp, PExp> myNextBinding;
-
-        public ExtendedAntecedentsIterator(ImmutableList<PExp> patterns) {
-
-            myPatterns = patterns;
-            myLocalConditionIndex = 0;
-
-            myLocalConditionApplications =
-                    DummyIterator.getInstance(myLocalConditionApplications);
-
-            setUpNext();
+    
+    @Override
+    public Iterator<Application> getApplications(PerVCProverModel m) {
+        Set<Binder> binders = new HashSet<Binder>();
+        for (PExp a : myAntecedents) {
+            binders.add(new QuirkyBinder(a, myAntecedentsSize));
         }
+        
+        return new LazyMappingIterator(m.bind(binders), 
+                BIND_RESULT_TO_APPLICATION);
+    }
+    
+    public class QuirkyBinder implements PerVCProverModel.Binder {
 
-        private void setUpNext() {
-            while (!myLocalConditionApplications.hasNext()
-                    && myLocalConditionIndex < myAntecedentsSize) {
-
-                myLocalConditionApplications =
-                        new QuirkyBindingIterator(myPatterns
-                                .get(myLocalConditionIndex), myPatterns
-                                .removed(myLocalConditionIndex), myPatterns);
-                myLocalConditionIndex++;
+        private int myTotalBindingCount;
+        private PExp myPattern;
+        
+        public QuirkyBinder(PExp pattern, int totalBindings) {
+            myTotalBindingCount = totalBindings;
+            myPattern = pattern;
+        }
+        
+        @Override
+        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m, 
+                List<Site> boundSitesSoFar) {
+            Iterator<Site> result = m.topLevelAntecedentSiteIterator();
+            
+            boolean includeGlobal = true;
+            if (boundSitesSoFar.size() == (myTotalBindingCount - 1)) {
+                //We are the last binding.  If all other bindings are to global
+                //theorems, then we must bind to something local
+                includeGlobal = false;
+                Iterator<Site> boundSitesSoFarIter = boundSitesSoFar.iterator();
+                while (!includeGlobal && boundSitesSoFarIter.hasNext()) {
+                    includeGlobal = (boundSitesSoFarIter.next().section.equals(
+                            Site.Section.ANTECEDENTS));
+                }
             }
-
-            if (myLocalConditionApplications.hasNext()) {
-                myNextBinding = myLocalConditionApplications.next();
+            
+            if (includeGlobal) {
+                result = new ChainingIterator<Site>(result, 
+                        m.topLevelGlobalTheoremsIterator());
             }
-            else {
-                myNextBinding = null;
-            }
+            
+            return result;
         }
 
         @Override
-        public boolean hasNext() {
-            return myNextBinding != null;
-        }
+        public Map<PExp, PExp> considerSite(Site s,Map<PExp, PExp> mappingSoFar,
+                PExp substitutedExp) throws BindingException {
+            return myPattern.bindTo(substitutedExp);
+        }   
+    }
+    
+    public class BindResultToApplication 
+            implements Mapping<BindResult, Application> {
 
         @Override
-        public Map<PExp, PExp> next() {
-            Map<PExp, PExp> retval = myNextBinding;
-
-            setUpNext();
-
-            return retval;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
+        public Application map(BindResult input) {
+            return new ExpandAntecedentByImplicationApplication(
+                    input.freeVariableBindings, input.bindSites.values());
         }
     }
+    
+    private class ExpandAntecedentByImplicationApplication 
+            implements Application {
 
-    /**
-     * <p>A <code>QuirkyBindingIterator</code> enforces the random quirk listed
-     * in <code>ConditionalAntecedentExtender</code>'s class comments.  It
-     * accepts a pattern expression to match against conjuncts in the VC 
-     * antecedent and then a pattern antecedent to match against conjuncts in
-     * the VC antecedent or global theorems, then iterates over all possible
-     * bindings.</p>
-     */
-    private class QuirkyBindingIterator implements Iterator<Map<PExp, PExp>> {
-
-        private final ImmutableList<PExp> myLocalTheorems;
-        private final ChainingIterable<PExp> myFacts;
-
-        private final IncrementalBindingIterator myFirstBinding;
-        private Iterator<Map<PExp, PExp>> myOtherBindings;
-
-        private final PExp[] myOtherPatterns;
-
-        private Map<PExp, PExp> myNextReturn;
-
-        public QuirkyBindingIterator(PExp firstPattern,
-                PExp[] otherPatterns,
-                ImmutableList<PExp> localTheorems) {
-
-            myOtherPatterns = otherPatterns;
-            myLocalTheorems = localTheorems;
-
-            myFacts = new ChainingIterable<PExp>();
-            myFacts.add(localTheorems);
-            myFacts.add(myGlobalTheorems);
-
-            myFirstBinding =
-                    new IncrementalBindingIterator(firstPattern, localTheorems);
-
-            myOtherBindings = DummyIterator.getInstance(myOtherBindings);
-
-            setUpNext();
+        private Map<PExp, PExp> myBindings;
+        private Collection<Site> myBindSites;
+        
+        public ExpandAntecedentByImplicationApplication(
+                    Map<PExp, PExp> bindings, Collection<Site> bindSites) {
+            myBindings = bindings;
+            myBindSites = bindSites;
         }
-
-        private void setUpNext() {
-
-            Map<PExp, PExp> firstBindings;
-            while (!myOtherBindings.hasNext() && myFirstBinding.hasNext()) {
-                firstBindings = myFirstBinding.next();
-                myOtherBindings =
-                        new BindingsIterator(myFacts, myOtherPatterns, 
-                                0, firstBindings);
-            }
-
-            if (myOtherBindings.hasNext()) {
-                myNextReturn = myOtherBindings.next();
-            }
-            else {
-                myNextReturn = null;
-            }
+        
+        @Override
+        public void apply(PerVCProverModel m) {
+            PExp newAntecedent = myConsequent.substitute(myBindings);
+            
+            LocalTheorem t = m.addLocalTheorem(newAntecedent, 
+                    new TheoremApplication(
+                        ExpandAntecedentByImplication.this), false);
+            m.addProofStep(new IntroduceLocalTheorem(t, 
+                    ExpandAntecedentByImplication.this));
         }
 
         @Override
-        public boolean hasNext() {
-            return myNextReturn != null;
-        }
-
-        @Override
-        public Map<PExp, PExp> next() {
-            Map<PExp, PExp> retval = myNextReturn;
-
-            setUpNext();
-
-            return retval;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
+        public Set<Site> involvedSubExpressions() {
+            Set<Site> result = new HashSet<Site>();
+            
+            for (Site s : myBindSites) {
+                if (s.section.equals(Site.Section.ANTECEDENTS)) {
+                    result.add(s);
+                }
+            }
+            
+            return result;
         }
     }
 }

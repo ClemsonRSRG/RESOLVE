@@ -6,7 +6,7 @@ package edu.clemson.cs.r2jt.proving2;
 
 import edu.clemson.cs.r2jt.proving.absyn.BindingException;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -50,18 +50,23 @@ public class BindingsIterator implements Iterator<Map<PExp, PExp>> {
             int startingPattern, Map<PExp, PExp> existingBindings) {
 
         myFacts = knownFacts;
-        
+
         myPatterns = patterns;
         myPatternsSize = myPatterns.size();
-        
-        myCurrentPatternIndex = startingPattern;
 
-        myFactsIterator = myFacts.iterator();
-        myPattern = patterns.get(myCurrentPatternIndex);
+        if (myPatternsSize == 0) {
+            myNextReturn = existingBindings;
+        }
+        else {
+            myCurrentPatternIndex = startingPattern;
 
-        myExistingBindings = existingBindings;
+            myFactsIterator = myFacts.iterator();
+            myPattern = patterns.get(myCurrentPatternIndex);
 
-        setUpNext();
+            myExistingBindings = existingBindings;
+
+            setUpNext();
+        }
     }
 
     public BindingsIterator(Iterable<PExp> knownFacts, List<PExp> patterns) {
@@ -136,7 +141,12 @@ public class BindingsIterator implements Iterator<Map<PExp, PExp>> {
 
         Map<PExp, PExp> result = myNextReturn;
 
-        setUpNext();
+        if (myPatternsSize == 0) {
+            myNextReturn = null;
+        }
+        else {
+            setUpNext();
+        }
 
         return result;
     }

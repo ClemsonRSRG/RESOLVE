@@ -50,8 +50,7 @@ public class BindingsIteratorTest {
                 .add(PExp.buildPExp("forall a Z forall b Z x Z ( bar 3 p B", g));
         patterns.add(PExp.buildPExp("forall b Z ( fizz 1 p B", g));
 
-        BindingsIterator i =
-                new BindingsIterator(facts, patterns.toArray(new PExp[0]));
+        BindingsIterator i = new BindingsIterator(facts, patterns);
 
         //No bindings
         assertFalse(i.hasNext());
@@ -82,8 +81,7 @@ public class BindingsIteratorTest {
         //for all a, bar(a, z)
         patterns.add(PExp.buildPExp("forall a Z z Z ( bar 2 p B", g));
 
-        BindingsIterator i =
-                new BindingsIterator(facts, patterns.toArray(new PExp[0]));
+        BindingsIterator i = new BindingsIterator(facts, patterns);
 
         assertTrue(i.hasNext());
         Map<PExp, PExp> result = i.next();
@@ -128,8 +126,7 @@ public class BindingsIteratorTest {
                 .add(PExp.buildPExp("forall a Z forall b Z x Z ( bar 3 p B", g));
         patterns.add(PExp.buildPExp("forall b Z ( fizz 1 p B", g));
 
-        BindingsIterator i =
-                new BindingsIterator(facts, patterns.toArray(new PExp[0]));
+        BindingsIterator i = new BindingsIterator(facts, patterns);
 
         //First binding should be a ~> x, b ~> z
         assertTrue(i.hasNext());

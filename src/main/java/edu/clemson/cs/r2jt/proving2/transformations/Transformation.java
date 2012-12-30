@@ -4,6 +4,14 @@
  */
 package edu.clemson.cs.r2jt.proving2.transformations;
 
+import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving2.LocalTheorem;
+import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.applications.Application;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 /**
  * <p>Whereas a {@link Theorem} represents a high-level mathematical statement
  * of truth, a <code>Transformation</code> represents a more fine-grained 
@@ -19,5 +27,5 @@ package edu.clemson.cs.r2jt.proving2.transformations;
  * is actually taken.</p>
  */
 public interface Transformation {
-
+    public Iterator<Application> getApplications(PerVCProverModel m);
 }

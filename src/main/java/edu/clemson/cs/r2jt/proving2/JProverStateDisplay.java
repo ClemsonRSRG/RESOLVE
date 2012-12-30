@@ -1,5 +1,6 @@
 package edu.clemson.cs.r2jt.proving2;
 
+import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -21,6 +22,10 @@ import edu.clemson.cs.r2jt.proving.absyn.IdentifiedNodesVisitor;
 import edu.clemson.cs.r2jt.proving.absyn.NodeIdentifier;
 import edu.clemson.cs.r2jt.proving.absyn.NodeIdentifyingVisitor;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.model.ProverModelVisitor;
+import edu.clemson.cs.r2jt.proving2.model.TaggedSiteVisitor;
+import edu.clemson.cs.r2jt.proving2.model.TaggedSites;
 
 public class JProverStateDisplay extends JTextPane {
 
@@ -28,7 +33,7 @@ public class JProverStateDisplay extends JTextPane {
 
     private static final Object PEXP_ID_KEY = new Object();
 
-    private final DisplayConstructingVisitor myDisplayer =
+    private DisplayConstructingVisitor myDisplayer =
             new DisplayConstructingVisitor();
 
     private final Highlighter myHighlighter = new Highlighter();
@@ -37,16 +42,18 @@ public class JProverStateDisplay extends JTextPane {
 
     private PerVCProverModel myProverState;
 
-    private final Map<NodeIdentifier, Integer> myNodeToStart =
-            new HashMap<NodeIdentifier, Integer>();
+    private final Map<Site, Integer> myNodeToStart =
+            new HashMap<Site, Integer>();
 
-    private final Map<NodeIdentifier, Integer> myNodeToEnd =
-            new HashMap<NodeIdentifier, Integer>();
+    private final Map<Site, Integer> myNodeToEnd = new HashMap<Site, Integer>();
 
     private int myHighlightStart, myHighlightEnd;
 
-    private final Map<PExp, IdentifiedNodes<Color>> myHighlightedNodes =
-            new HashMap<PExp, IdentifiedNodes<Color>>();
+    /**
+     * <p>A map from root sites to their TaggedSites</p>
+     */
+    private final Map<Site, TaggedSites<Color>> myHighlightedNodes =
+            new HashMap<Site, TaggedSites<Color>>();
 
     public JProverStateDisplay(PerVCProverModel model) {
         setEditable(false);
@@ -62,8 +69,7 @@ public class JProverStateDisplay extends JTextPane {
                 if (caretPosition != -1) {
                     Element c = myDocument.getCharacterElement(caretPosition);
                     AttributeSet attrs = c.getAttributes();
-                    NodeIdentifier id =
-                            (NodeIdentifier) attrs.getAttribute(PEXP_ID_KEY);
+                    Site id = (Site) attrs.getAttribute(PEXP_ID_KEY);
 
                     if (id == null) {
                         moveCaretPosition(getCaretPosition());
@@ -88,12 +94,16 @@ public class JProverStateDisplay extends JTextPane {
         });
     }
 
-    public void highlightPExp(NodeIdentifier id, Color c) {
-        PExp p = id.getRoot();
+    public void clearHighlights() {
+        myHighlightedNodes.clear();
+        resetHighlights();
+    }
+    
+    public void highlightPExp(Site id, Color c) {
+        Site p = id.root;
 
         if (!myHighlightedNodes.containsKey(p)) {
-            myHighlightedNodes.put(id.getRoot(), new IdentifiedNodes<Color>(id
-                    .getRoot()));
+            myHighlightedNodes.put(id.root, new TaggedSites<Color>(id.root));
         }
 
         myHighlightedNodes.get(p).put(id, c);
@@ -106,13 +116,14 @@ public class JProverStateDisplay extends JTextPane {
         myDocument.setCharacterAttributes(0, myDocument.getLength(), blank,
                 false);
 
-        for (IdentifiedNodes<Color> nodes : myHighlightedNodes.values()) {
+        for (TaggedSites<Color> nodes : myHighlightedNodes.values()) {
             nodes.traverse(myHighlighter);
         }
     }
 
     public void setModel(PerVCProverModel m) {
         myProverState = m;
+        myDisplayer = new DisplayConstructingVisitor();
 
         setText("");
 
@@ -123,10 +134,14 @@ public class JProverStateDisplay extends JTextPane {
         return myProverState;
     }
 
-    private class DisplayConstructingVisitor extends NodeIdentifyingVisitor
+    private class DisplayConstructingVisitor extends ProverModelVisitor
             implements
                 Appendable {
 
+        public DisplayConstructingVisitor() {
+            super(myProverState);
+        }
+        
         public void doBeginPExp(PExp p) {
             myNodeToStart.put(getID(), myDocument.getLength());
         }
@@ -141,7 +156,7 @@ public class JProverStateDisplay extends JTextPane {
 
             MutableAttributeSet pexpIDAttr = new SimpleAttributeSet();
 
-            NodeIdentifier id = getID();
+            Site id = getID();
             if (id != null) {
                 pexpIDAttr.addAttribute(PEXP_ID_KEY, id);
             }
@@ -170,17 +185,17 @@ public class JProverStateDisplay extends JTextPane {
         }
     }
 
-    private class Highlighter implements IdentifiedNodesVisitor<Color> {
+    private class Highlighter implements TaggedSiteVisitor<Color> {
 
         @Override
-        public void visit(NodeIdentifier id, Color data) {
+        public void visitSite(Site id, Color data) {
             MutableAttributeSet bgColor = new SimpleAttributeSet();
             bgColor.addAttribute(StyleConstants.Background, data);
 
             if (!myNodeToStart.containsKey(id)) {
-                System.out.println("poop");
+                throw new RuntimeException("Danger Will Robinson!");
             }
-
+            
             int start = myNodeToStart.get(id);
             int end = myNodeToEnd.get(id);
             myDocument.setCharacterAttributes(start, end - start, bgColor,

@@ -4,8 +4,9 @@
  */
 package edu.clemson.cs.r2jt.proving2;
 
-import edu.clemson.cs.r2jt.proving2.justifications.Justification;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving2.justifications.Justification;
+import edu.clemson.cs.r2jt.utilities.Mapping;
 
 /**
  *
@@ -13,6 +14,9 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
  */
 public class LocalTheorem extends Theorem {
 
+    public static final Mapping<LocalTheorem, PExp> UNWRAPPER = 
+            new LocalTheoremUnwrapper();
+    
     /**
      * <p>Mathematically speaking, once we successfully move all the consequents
      * "above the line", i.e., establish them as things we know, we're done,
@@ -32,5 +36,14 @@ public class LocalTheorem extends Theorem {
         super(assertion, justification);
 
         myThingWeWereTryingToProveFlag = tryingToProveThis;
+    }
+    
+    private static class LocalTheoremUnwrapper 
+            implements Mapping<LocalTheorem, PExp> {
+
+        @Override
+        public PExp map(LocalTheorem input) {
+            return input.getAssertion();
+        }
     }
 }

@@ -544,7 +544,7 @@ public abstract class PExp {
     public abstract boolean containsExistential();
 
     public abstract boolean isEquality();
-
+    
     public abstract boolean isLiteral();
 
     private final static PSymbol.Quantification convertExpQuantification(int q) {
@@ -587,7 +587,7 @@ public abstract class PExp {
     }
 
     public boolean typeMatches(MTType other) {
-        return myType.isSubtypeOf(other);
+        return other.isSubtypeOf(myType);
     }
 
     public boolean typeMatches(PExp other) {
