@@ -12,16 +12,22 @@ import edu.clemson.cs.r2jt.proving.immutableadts.SimpleImmutableList;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
+import edu.clemson.cs.r2jt.proving2.utilities.MapOfLists;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.LayoutManager;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -43,6 +49,7 @@ import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -53,6 +60,9 @@ public class JProverFrame extends JFrame {
     private static final long serialVersionUID = 1L;
     private static final String CONTROLS_HIDDEN = "hidden";
     private static final String CONTROLS_VISIBLE = "visible";
+    
+    private final ApplicationApplier APPLICATION_APPLIER = 
+            new ApplicationApplier();
 
     private final JProverFrame PARENT_THIS = this;
 
@@ -70,6 +80,12 @@ public class JProverFrame extends JFrame {
 
     private ImmutableList<Theorem> myGlobalTheorems;
     private Set<PExp> myGlobalTheoremAssertions = new HashSet<PExp>();
+    
+    private final MapOfLists<Site, Application> myLoadedApplications = 
+            new MapOfLists<Site, Application>();
+    
+    private final Map<Site, MouseListener> myTheoremAppliers = 
+            new HashMap<Site, MouseListener>();
     
     public static void main(String[] args) throws FlagDependencyException {
         JProverFrame p = new JProverFrame();
@@ -349,28 +365,73 @@ public class JProverFrame extends JFrame {
         return transportControlPanel;
     }
     
+    private class ApplicationApplier extends MouseAdapter {
+        
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            List<Application> applications =
+                    myLoadedApplications.getList((Site) e.getSource());
+            
+            if (applications.isEmpty()) {
+                throw new RuntimeException("This can't be!");
+            }
+            else if (applications.size() == 1) {
+                applications.get(0).apply(myProverStateDisplay.getModel());
+            }
+            
+            //Can't change the list of listeners in the listener
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    for (Map.Entry<Site, MouseListener> applier : 
+                            myTheoremAppliers.entrySet()) {
+
+                        myProverStateDisplay.removeMouseListener(applier.getKey(), 
+                                applier.getValue());
+                    }
+                    myLoadedApplications.clear();
+                    myProverStateDisplay.clearHighlights();
+                    myTheoremAppliers.clear();
+                    
+                    //Poor man's refresh
+                    myProverStateDisplay.setModel(myProverStateDisplay.getModel());
+                }
+            });
+        }
+    }
+    
     private class TheoremSelect implements ListSelectionListener {
 
         @Override
         public void valueChanged(ListSelectionEvent event) {
-            myProverStateDisplay.clearHighlights();
-            
-            List<Transformation> transformations =
-                    ((Theorem) myTheoremList.getSelectedValue())
-                        .getTransformations(myGlobalTheoremAssertions);
-            
-            PerVCProverModel model = myProverStateDisplay.getModel();
-            
-            Iterator<Application> applications;
-            Application application;
-            for (Transformation t : transformations) {
-                applications = t.getApplications(model);
-                
-                while (applications.hasNext()) {
-                    application = applications.next();
-                    
-                    for (Site nid : application.involvedSubExpressions()) {
-                        myProverStateDisplay.highlightPExp(nid, Color.GREEN);
+            if (!event.getValueIsAdjusting()) {
+                myProverStateDisplay.clearHighlights();
+                myLoadedApplications.clear();
+
+                List<Transformation> transformations =
+                        ((Theorem) myTheoremList.getSelectedValue())
+                            .getTransformations(myGlobalTheoremAssertions);
+
+                PerVCProverModel model = myProverStateDisplay.getModel();
+
+                Iterator<Application> applications;
+                Application application;
+                for (Transformation t : transformations) {
+                    applications = t.getApplications(model);
+                    System.out.println("TRANSFORMATION~~~");
+
+                    while (applications.hasNext()) {
+                        application = applications.next();
+                        System.out.println(" === Application === ");
+
+                        for (Site nid : application.involvedSubExpressions()) {
+                            myProverStateDisplay.highlightPExp(nid, Color.GREEN);
+                            myLoadedApplications.putElement(nid, application);
+                            myProverStateDisplay.addMouseListener(nid, 
+                                    APPLICATION_APPLIER);
+                            myTheoremAppliers.put(nid, APPLICATION_APPLIER);
+                            System.out.println("Option at " + nid);
+                        }
                     }
                 }
             }

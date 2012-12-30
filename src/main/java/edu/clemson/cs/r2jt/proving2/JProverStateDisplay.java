@@ -26,6 +26,11 @@ import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.model.ProverModelVisitor;
 import edu.clemson.cs.r2jt.proving2.model.TaggedSiteVisitor;
 import edu.clemson.cs.r2jt.proving2.model.TaggedSites;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseListener;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 public class JProverStateDisplay extends JTextPane {
 
@@ -48,20 +53,50 @@ public class JProverStateDisplay extends JTextPane {
     private final Map<Site, Integer> myNodeToEnd = new HashMap<Site, Integer>();
 
     private int myHighlightStart, myHighlightEnd;
-
-    /**
-     * <p>A map from root sites to their TaggedSites</p>
-     */
-    private final Map<Site, TaggedSites<Color>> myHighlightedNodes =
-            new HashMap<Site, TaggedSites<Color>>();
+    
+    private final SiteTagger<Color> myHighlightedNodes =
+            new SiteTagger<Color>();
+    
+    private final SiteTagger<List<MouseListener>> myMouseActiveNodes =
+            new SiteTagger<List<MouseListener>>();
 
     public JProverStateDisplay(PerVCProverModel model) {
         setEditable(false);
 
         setModel(model);
 
-        addMouseMotionListener(new MouseMotionAdapter() {
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int caretPosition = viewToModel(e.getPoint());
 
+                if (caretPosition != -1) {
+                    Element c = myDocument.getCharacterElement(caretPosition);
+                    AttributeSet attrs = c.getAttributes();
+                    Site id = (Site) attrs.getAttribute(PEXP_ID_KEY);
+                 
+                    if (id != null) {
+                        try {
+                            List<MouseListener> listeners = 
+                                    myMouseActiveNodes.getTag(
+                                        myMouseActiveNodes
+                                        .getNearestTaggedAncestor(id));
+                            
+                            e.setSource(id);
+                            for (MouseListener l : listeners) {
+                                l.mouseClicked(e);
+                            }
+                        }
+                        catch (NoSuchElementException nsee) {
+                            //Fine, nobody cares that we've been clicked
+                        }
+                    }
+                }
+            }
+        });
+        
+        addMouseMotionListener(new MouseMotionAdapter() {
+            
             @Override
             public void mouseMoved(MouseEvent e) {
                 int caretPosition = viewToModel(e.getPoint());
@@ -99,26 +134,42 @@ public class JProverStateDisplay extends JTextPane {
         resetHighlights();
     }
     
-    public void highlightPExp(Site id, Color c) {
-        Site p = id.root;
-
-        if (!myHighlightedNodes.containsKey(p)) {
-            myHighlightedNodes.put(id.root, new TaggedSites<Color>(id.root));
-        }
-
-        myHighlightedNodes.get(p).put(id, c);
+    public void highlightPExp(Site s, Color c) {
+        myHighlightedNodes.tagSite(s, c);
         resetHighlights();
     }
+    
+    public void addMouseListener(Site s, MouseListener l) {
+        List<MouseListener> mouseListeners;
+        
+        try {
+            mouseListeners = myMouseActiveNodes.getTag(s);
+        }
+        catch (NoSuchElementException nsee) {
+            mouseListeners = new LinkedList<MouseListener>();
+            myMouseActiveNodes.tagSite(s, mouseListeners);
+        }
+        
+        mouseListeners.add(l);
+    }
 
+    public void removeMouseListener(Site s, MouseListener l) {
+        try {
+            List<MouseListener> mouseListeners = myMouseActiveNodes.getTag(s);
+            mouseListeners.remove(l);
+        }
+        catch (NoSuchElementException nsee) {
+            //Nothing to remove
+        }
+    }
+    
     private void resetHighlights() {
         MutableAttributeSet blank = new SimpleAttributeSet();
         blank.addAttribute(StyleConstants.Background, getBackground());
         myDocument.setCharacterAttributes(0, myDocument.getLength(), blank,
                 false);
 
-        for (TaggedSites<Color> nodes : myHighlightedNodes.values()) {
-            nodes.traverse(myHighlighter);
-        }
+        myHighlightedNodes.visitTaggedSites(myHighlighter);
     }
 
     public void setModel(PerVCProverModel m) {
@@ -142,10 +193,12 @@ public class JProverStateDisplay extends JTextPane {
             super(myProverState);
         }
         
+        @Override
         public void doBeginPExp(PExp p) {
             myNodeToStart.put(getID(), myDocument.getLength());
         }
 
+        @Override
         public void doEndPExp(PExp p) {
             myNodeToEnd.put(getID(), myDocument.getLength());
         }
@@ -200,6 +253,72 @@ public class JProverStateDisplay extends JTextPane {
             int end = myNodeToEnd.get(id);
             myDocument.setCharacterAttributes(start, end - start, bgColor,
                     false);
+        }
+    }
+    
+    private class SiteTagger<T> {
+        
+        private Map<Site, TaggedSites<T>> myTopLevelConjunctsWithTags =
+                new HashMap<Site, TaggedSites<T>>();
+        
+        public void tagSite(Site s, T t) {
+            Site sRoot = s.root;
+
+            if (!myTopLevelConjunctsWithTags.containsKey(sRoot)) {
+                myTopLevelConjunctsWithTags.put(sRoot, 
+                        new TaggedSites<T>(sRoot));
+            }
+
+            myTopLevelConjunctsWithTags.get(sRoot).put(s, t);
+        }
+        
+        public boolean siteIsTagged(Site s) {
+            boolean result;
+            
+            try {
+                getTag(s);
+                result = true;
+            }
+            catch (NoSuchElementException nsee) {
+                result = false;
+            }
+            
+            return result;
+        }
+        
+        public T getTag(Site s) {
+            T result;
+            
+            if (!myTopLevelConjunctsWithTags.containsKey(s.root)) {
+                throw new NoSuchElementException();
+            }
+            else {
+                result = myTopLevelConjunctsWithTags.get(s.root).getData(s);
+            }
+            
+            return result;
+        }
+        
+        public void visitTaggedSites(TaggedSiteVisitor<T> v) {
+            for (TaggedSites<T> taggedSites : 
+                    myTopLevelConjunctsWithTags.values()) {
+                taggedSites.traverse(v);
+            }
+        }
+        
+        public Site getNearestTaggedAncestor(Site s) 
+                throws NoSuchElementException {
+            
+            if (!myTopLevelConjunctsWithTags.containsKey(s.root)) {
+                throw new NoSuchElementException();
+            }
+            
+            return myTopLevelConjunctsWithTags.get(
+                    s.root).getSmallestIdentifiedAncestor(s);
+        }
+        
+        public void clear() {
+            myTopLevelConjunctsWithTags.clear();
         }
     }
 }
