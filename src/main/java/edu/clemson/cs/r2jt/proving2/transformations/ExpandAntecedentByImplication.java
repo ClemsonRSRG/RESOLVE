@@ -9,6 +9,7 @@ import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.BindingException;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.LocalTheorem;
+import edu.clemson.cs.r2jt.proving2.Utilities;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.justifications.TheoremApplication;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
@@ -75,6 +76,12 @@ public class ExpandAntecedentByImplication implements Transformation {
     }
     
     @Override
+    public String toString() {
+        return Utilities.conjunctListToString(myAntecedents) + 
+                " implies " + myConsequent;
+    }
+    
+    @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
         Set<Binder> binders = new HashSet<Binder>();
         for (PExp a : myAntecedents) {
@@ -121,10 +128,10 @@ public class ExpandAntecedentByImplication implements Transformation {
         }
 
         @Override
-        public Map<PExp, PExp> considerSite(Site s,Map<PExp, PExp> mappingSoFar,
-                PExp substitutedExp) throws BindingException {
-            return myPattern.bindTo(substitutedExp);
-        }   
+        public Map<PExp, PExp> considerSite(Site s,
+                Map<PExp, PExp> assumedBindings) throws BindingException {
+            return myPattern.substitute(assumedBindings).bindTo(s.exp);
+        }
     }
     
     public class BindResultToApplication 

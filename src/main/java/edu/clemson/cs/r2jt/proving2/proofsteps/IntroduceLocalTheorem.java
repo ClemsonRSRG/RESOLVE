@@ -24,6 +24,11 @@ public class IntroduceLocalTheorem implements ProofStep {
     }
     
     @Override
+    public String toString() {
+        return "" + myTransformation;
+    }
+    
+    @Override
     public void undo(PerVCProverModel m) {
         m.removeLocalTheorem(myLocalTheorem);
     }

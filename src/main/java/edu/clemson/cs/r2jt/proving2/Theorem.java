@@ -9,6 +9,7 @@ import edu.clemson.cs.r2jt.proving2.justifications.Justification;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.transformations.ExpandAntecedentByImplication;
+import edu.clemson.cs.r2jt.proving2.transformations.ReplaceTheoremInConsequentWithTrue;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,9 +38,15 @@ public class Theorem {
     public PExp getAssertion() {
         return myAssertion;
     }
+    
+    public Justification getJustification() {
+        return myJustification;
+    }
 
     public List<Transformation> getTransformations(Iterable<PExp> globalTheorems) {
         List<Transformation> result = new LinkedList<Transformation>();
+        
+        result.add(new ReplaceTheoremInConsequentWithTrue(myAssertion));
         
         if (myAssertion instanceof PSymbol) {
             PSymbol assertionAsPS = (PSymbol) myAssertion;

@@ -46,4 +46,8 @@ public class LocalTheorem extends Theorem {
             return input.getAssertion();
         }
     }
+    
+    public boolean amTryingToProveThis() {
+        return myThingWeWereTryingToProveFlag;
+    }
 }

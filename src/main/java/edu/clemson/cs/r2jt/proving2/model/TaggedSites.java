@@ -116,7 +116,10 @@ public class TaggedSites<T> {
                    + this.getClass() + ".");
        }
 
-       if (!myDataMap.containsKey(s)) {
+       if (myDataMap.containsKey(s)) {
+           myDataMap.put(s, data);
+       }
+       else {
            Set<Site> nodeChildren = doTopLevelStuff(s, data);
            Set<Site> layer;
            try {

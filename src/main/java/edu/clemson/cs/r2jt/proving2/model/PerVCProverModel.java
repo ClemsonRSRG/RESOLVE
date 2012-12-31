@@ -8,22 +8,17 @@ import edu.clemson.cs.r2jt.proving.ChainingIterator;
 import edu.clemson.cs.r2jt.proving.DummyIterator;
 import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.BindingException;
-import edu.clemson.cs.r2jt.proving2.justifications.Given;
-import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving.absyn.PExpVisitor;
-import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.Theorem;
 import edu.clemson.cs.r2jt.proving2.VC;
+import edu.clemson.cs.r2jt.proving2.justifications.Given;
 import edu.clemson.cs.r2jt.proving2.justifications.Justification;
-import edu.clemson.cs.r2jt.proving2.utilities.Factory;
-import edu.clemson.cs.r2jt.proving2.utilities.TheoremUnwrapper;
-import edu.clemson.cs.r2jt.utilities.Mapping;
+import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
+import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,12 +28,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  *
  * @author hamptos
  */
 public final class PerVCProverModel {
+    
+    public static enum ChangeEventMode {
+        ALWAYS {
+            @Override
+            public boolean report(boolean important) {
+                return true;
+            }
+        }, 
+        INTERMITTENT {
+            private int eventCount;
+            
+            @Override
+            public boolean report(boolean important) {
+                eventCount++;
+                
+                return important || (eventCount % 1000 == 0);
+            }
+        };
+        
+        public abstract boolean report(boolean important);
+    };
     
     /**
      * <p>A hashmap of local theorems for quick searching.  Its keyset is always
@@ -89,6 +107,16 @@ public final class PerVCProverModel {
      */
     private final ImmutableList<Theorem> myTheoremLibrary;
 
+    /**
+     * <p>A list of listeners to be contacted when the model changes.  Note that
+     * the behavior of change listening is modified by 
+     * <code>myChangeEventMode</code>.</p>
+     */
+    private List<ChangeListener> myChangeListeners = 
+            new LinkedList<ChangeListener>();
+    
+    private ChangeEventMode myChangeEventMode = ChangeEventMode.INTERMITTENT;
+    
     public PerVCProverModel(List<PExp> antecedents, List<PExp> consequents, 
             ImmutableList<Theorem> theoremLibrary) {
 
@@ -107,6 +135,36 @@ public final class PerVCProverModel {
                 .getConsequent()), theoremLibrary);
     }
 
+    public void setChangeEventMode(ChangeEventMode m) {
+        myChangeEventMode = m;
+    }
+    
+    public void addChangeListener(ChangeListener l) {
+        myChangeListeners.add(l);
+    }
+    
+    public void removeChangeListener(ChangeListener l) {
+        myChangeListeners.remove(l);
+    }
+    
+    private void modelChanged(boolean important) {
+        if (myChangeEventMode.report(important)) {
+            ChangeEvent e = new ChangeEvent(this);
+            for (ChangeListener l : myChangeListeners) {
+                l.stateChanged(e);
+            }
+        }
+    }
+    
+    public List<ProofStep> getProofSteps() {
+        return myProofSoFar;
+    }
+    
+    public void undoLastProofStep() {
+        myProofSoFar.get(myProofSoFar.size() - 1).undo(this);
+        myProofSoFar.remove(myProofSoFar.size() - 1);
+    }
+    
     public ImmutableList<Theorem> getTheoremLibrary() {
         return myTheoremLibrary;
     }
@@ -140,6 +198,41 @@ public final class PerVCProverModel {
         return myLocalTheoremsSet.keySet().contains(t);
     }
     
+    public void alterSite(Site s, PExp newValue) {
+        if (s.getModel() != this) {
+            throw new IllegalArgumentException(
+                    "Site does not belong to this model.");
+        }
+        
+        if (newValue == null) {
+            throw new IllegalArgumentException(
+                    "Can't change value to a null PExp.");
+        }
+        
+        switch (s.section) {
+            case ANTECEDENTS:
+                LocalTheorem t = myLocalTheoremsList.get(s.index);
+                removeLocalTheorem(t);
+                
+                addLocalTheorem(t.getAssertion().withSiteAltered(
+                            s.pathIterator(), newValue),
+                        t.getJustification(), t.amTryingToProveThis(), s.index);
+                break;
+            case CONSEQUENTS:
+                myConsequents.set(s.index, 
+                        myConsequents.get(s.index).withSiteAltered(
+                            s.pathIterator(), newValue));
+                break;
+            case THEOREM_LIBRARY:
+                throw new IllegalArgumentException(
+                        "Can't modify a global theorem.");
+            default:
+                throw new RuntimeException("No way to get here.");
+        }
+        
+        modelChanged(false);
+    }
+    
     /**
      * <p>Adds a theorem to the list of local theorems (i.e., the antecedent of
      * the implication represented by the current proof state) with the given
@@ -157,11 +250,11 @@ public final class PerVCProverModel {
      * @return 
      */
     public LocalTheorem addLocalTheorem(PExp assertion, Justification j, 
-            boolean tryingToProveThis) {
+            boolean tryingToProveThis, int index) {
         LocalTheorem theorem = 
                 new LocalTheorem(assertion, j, tryingToProveThis);
         
-        myLocalTheoremsList.add(theorem);
+        myLocalTheoremsList.add(index, theorem);
         
         Integer count = myLocalTheoremsSet.get(assertion);
         
@@ -169,10 +262,19 @@ public final class PerVCProverModel {
             count = 0;
         }
         
-        myLocalTheoremsSet.put(assertion, count);
+        myLocalTheoremsSet.put(assertion, count + 1);
+        
+        modelChanged(false);
         
         return theorem;
     }
+    
+    public LocalTheorem addLocalTheorem(PExp assertion, Justification j, 
+            boolean tryingToProveThis) {
+        return addLocalTheorem(assertion, j, tryingToProveThis, 
+                myLocalTheoremsList.size());
+    }
+    
     
     public void removeLocalTheorem(LocalTheorem t) {
         PExp tAssertion = t.getAssertion();
@@ -187,10 +289,29 @@ public final class PerVCProverModel {
         else {
             myLocalTheoremsSet.remove(tAssertion);
         }
+        
+        modelChanged(false);
+    }
+    
+    public LocalTheorem getLocalTheoremAncestor(Site s) 
+            throws NoSuchElementException {
+        
+        if (s.getModel() != this) {
+            throw new IllegalArgumentException(
+                    "Site does not belong to this model.");
+        }
+        
+        if (!s.section.equals(Site.Section.ANTECEDENTS)) {
+            throw new NoSuchElementException();
+        }
+        
+        return myLocalTheoremsList.get(s.index);
     }
     
     public void addProofStep(ProofStep s) {
         myProofSoFar.add(s);
+        
+        modelChanged(false);
     }
     
     
@@ -351,19 +472,19 @@ public final class PerVCProverModel {
                     
                     try {
                         myCurFirstSiteBindings = myFirstBinder.considerSite(
-                                myCurFirstSite, Collections.EMPTY_MAP, 
-                                myCurFirstSite.exp);
+                                myCurFirstSite, myAssumedBindings);
                         
-                        myAssumedBindings.putAll(myCurFirstSiteBindings);
-                        myBoundSiteSoFar.add(myCurFirstSite);
+                        Map<PExp, PExp> inductiveBindings = 
+                                new HashMap<PExp, PExp>(myAssumedBindings);
+                        inductiveBindings.putAll(myCurFirstSiteBindings);
+                        
+                        List<Site> inductiveSites = 
+                                new LinkedList<Site>(myBoundSiteSoFar);
+                        inductiveSites.add(myCurFirstSite);
                         
                         myOtherBindings = new BinderSatisfyingIterator(
-                                myOtherBinders, myAssumedBindings, 
-                                myBoundSiteSoFar);
-                        
-                        myBoundSiteSoFar.remove(myBoundSiteSoFar.size() - 1);
-                        myAssumedBindings.keySet().removeAll(
-                                myCurFirstSiteBindings.keySet());
+                                myOtherBinders, inductiveBindings, 
+                                inductiveSites);
                     }
                     catch (BindingException be) {
                         //Can't bind the current site.  No worries--just keep
@@ -415,24 +536,21 @@ public final class PerVCProverModel {
          * <p>Attempts to bind to the given site, which was returned from an
          * iterator returned by 
          * {@link getInterestingSiteVisitor() getInterestingSiteVisitor()}.
-         * While <code>s</code> will contain the 
-         * {@link edu.clemson.cs.r2jt.proving.absyn.PExp PExp} associated with
-         * the site as it appears in the current proof state, 
-         * <code>substitutedExp</code> will be a copy of that <code>PExp</code>
-         * with <code>mappingSoFar</code> applied.</p>
+         * Before applying any pattern, the binder must take into account the
+         * <code>assumedBindings</code> which indicate bindings determined by
+         * previously applied binders and may "fill in" certain free variables.
+         * </p>
          * 
          * @param s A non-null site under consideration.
-         * @param mappingSoFar The mapping that's been proposed by 
+         * @param assumedBindings The mapping that's been proposed by 
          *              previously-bound <code>Binder</code>s.
-         * @param substitutedExp A version of <code>s.exp</code> with 
-         *              <code>mappingSoFar</code> applied.
          * 
          * @return A mapping of any newly-bound free variables.
          * 
          * @throws BindingException If the site is rejected.
          */
         public Map<PExp, PExp> considerSite(Site s, 
-                Map<PExp, PExp> mappingSoFar, PExp substitutedExp) 
+                Map<PExp, PExp> assumedBindings) 
                 throws BindingException;
     }
     
@@ -462,6 +580,20 @@ public final class PerVCProverModel {
         }
     }
     
+    public static class InductiveConsequentBinder extends AbstractBinder {
+        
+        public InductiveConsequentBinder(PExp pattern) {
+            super(pattern);
+        }
+        
+        @Override
+        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m, 
+                List<Site> boundSitesSoFar) {
+            return new InductiveSiteIteratorIterator(
+                    m.topLevelConsequentSiteIterator());
+        }
+    }
+    
     public static class TopLevelAntecedentAndConsequentBinder 
             extends AbstractBinder {
 
@@ -476,7 +608,7 @@ public final class PerVCProverModel {
         }
     }
     
-    private static abstract class AbstractBinder implements Binder {
+    public static abstract class AbstractBinder implements Binder {
 
         private PExp myPattern;
         
@@ -486,9 +618,9 @@ public final class PerVCProverModel {
 
         @Override
         public Map<PExp, PExp> considerSite(Site s, 
-                Map<PExp, PExp> mappingSoFar, PExp substitutedExp) 
+                Map<PExp, PExp> assumedBindings) 
                 throws BindingException {
-            return myPattern.bindTo(substitutedExp);
+            return myPattern.substitute(assumedBindings).bindTo(s.exp);
         }
     }
     

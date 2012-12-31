@@ -28,9 +28,12 @@ import edu.clemson.cs.r2jt.proving2.model.TaggedSiteVisitor;
 import edu.clemson.cs.r2jt.proving2.model.TaggedSites;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class JProverStateDisplay extends JTextPane {
 
@@ -38,6 +41,8 @@ public class JProverStateDisplay extends JTextPane {
 
     private static final Object PEXP_ID_KEY = new Object();
 
+    private final ModelChanged MODEL_CHANGED = new ModelChanged();
+    
     private DisplayConstructingVisitor myDisplayer =
             new DisplayConstructingVisitor();
 
@@ -59,74 +64,19 @@ public class JProverStateDisplay extends JTextPane {
     
     private final SiteTagger<List<MouseListener>> myMouseActiveNodes =
             new SiteTagger<List<MouseListener>>();
+    
+    /**
+     * <p>Tracks which site the mouse is moving over.</p>
+     */
+    private Site myCurMouseContainer = null;
 
     public JProverStateDisplay(PerVCProverModel model) {
         setEditable(false);
 
         setModel(model);
 
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int caretPosition = viewToModel(e.getPoint());
-
-                if (caretPosition != -1) {
-                    Element c = myDocument.getCharacterElement(caretPosition);
-                    AttributeSet attrs = c.getAttributes();
-                    Site id = (Site) attrs.getAttribute(PEXP_ID_KEY);
-                 
-                    if (id != null) {
-                        try {
-                            List<MouseListener> listeners = 
-                                    myMouseActiveNodes.getTag(
-                                        myMouseActiveNodes
-                                        .getNearestTaggedAncestor(id));
-                            
-                            e.setSource(id);
-                            for (MouseListener l : listeners) {
-                                l.mouseClicked(e);
-                            }
-                        }
-                        catch (NoSuchElementException nsee) {
-                            //Fine, nobody cares that we've been clicked
-                        }
-                    }
-                }
-            }
-        });
-        
-        addMouseMotionListener(new MouseMotionAdapter() {
-            
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                int caretPosition = viewToModel(e.getPoint());
-
-                if (caretPosition != -1) {
-                    Element c = myDocument.getCharacterElement(caretPosition);
-                    AttributeSet attrs = c.getAttributes();
-                    Site id = (Site) attrs.getAttribute(PEXP_ID_KEY);
-
-                    if (id == null) {
-                        moveCaretPosition(getCaretPosition());
-                    }
-                    else {
-                        resetHighlights();
-
-                        myHighlightStart = myNodeToStart.get(id);
-                        myHighlightEnd = myNodeToEnd.get(id);
-
-                        MutableAttributeSet highlight =
-                                new SimpleAttributeSet();
-                        highlight.addAttribute(StyleConstants.Background,
-                                new Color(150, 200, 200));
-
-                        myDocument.setCharacterAttributes(myHighlightStart,
-                                (myHighlightEnd - myHighlightStart), highlight,
-                                false);
-                    }
-                }
-            }
-        });
+        addMouseListener(new SiteMouseListener());
+        addMouseMotionListener(new SiteMouseMotionListener());
     }
 
     public void clearHighlights() {
@@ -173,12 +123,20 @@ public class JProverStateDisplay extends JTextPane {
     }
 
     public void setModel(PerVCProverModel m) {
+        if (myProverState != null) {
+            m.removeChangeListener(MODEL_CHANGED);
+        }
+        
         myProverState = m;
+        m.addChangeListener(MODEL_CHANGED);
+        
+        refreshModel();
+    }
+    
+    private void refreshModel() {
         myDisplayer = new DisplayConstructingVisitor();
-
         setText("");
-
-        m.processStringRepresentation(myDisplayer, myDisplayer);
+        myProverState.processStringRepresentation(myDisplayer, myDisplayer);
     }
 
     public PerVCProverModel getModel() {
@@ -319,6 +277,163 @@ public class JProverStateDisplay extends JTextPane {
         
         public void clear() {
             myTopLevelConjunctsWithTags.clear();
+        }
+    }
+
+    private Site getActiveSiteOfEvent(MouseEvent e) 
+            throws NoSuchElementException {
+
+        Site result;
+
+        int caretPosition = viewToModel(e.getPoint());
+
+        if (caretPosition == -1) {
+            throw new NoSuchElementException();
+        }
+        else {
+            Element c = myDocument.getCharacterElement(caretPosition);
+            AttributeSet attrs = c.getAttributes();
+            Site id = (Site) attrs.getAttribute(PEXP_ID_KEY);
+
+            if (id == null) {
+                throw new NoSuchElementException();
+            }
+            else {
+                result = myMouseActiveNodes.getNearestTaggedAncestor(id);
+            }
+        }
+
+        return result;
+    }
+    
+    private void mouseEnteredSite(Site s, MouseEvent e) {
+        if (myCurMouseContainer == null || !myCurMouseContainer.equals(s)) {
+            if (myCurMouseContainer != null) {
+                MouseEvent exited = new MouseEvent(this, 
+                        MouseEvent.MOUSE_EXITED, e.getWhen(), 
+                        e.getModifiers(), e.getX(), e.getY(), 
+                        e.getXOnScreen(), e.getYOnScreen(), 
+                        e.getClickCount(), e.isPopupTrigger(), 
+                        e.getButton());
+                exited.setSource(myCurMouseContainer);
+                List<MouseListener> listeners = 
+                        myMouseActiveNodes.getTag(myCurMouseContainer);
+                for (MouseListener l : listeners) {
+                    l.mouseExited(exited);
+                }
+            }
+
+            if (s != null) {
+                MouseEvent entered = new MouseEvent(this, 
+                        MouseEvent.MOUSE_ENTERED, e.getWhen(), 
+                        e.getModifiers(), e.getX(), e.getY(), 
+                        e.getXOnScreen(), e.getYOnScreen(), 
+                        e.getClickCount(), e.isPopupTrigger(), 
+                        e.getButton());
+                entered.setSource(s);
+                List<MouseListener> listeners = 
+                        myMouseActiveNodes.getTag(s);
+                for (MouseListener l : listeners) {
+                    l.mouseEntered(entered);
+                }
+            }
+
+            myCurMouseContainer = s;
+        }
+    }
+    
+    private class SiteMouseMotionListener implements MouseMotionListener {
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            try {
+                Site over = getActiveSiteOfEvent(e);
+                mouseEnteredSite(over, e);
+            }
+            catch (NoSuchElementException nsee) {
+                mouseEnteredSite(null, e);
+            }
+        }
+        
+    }
+    
+    private class SiteMouseListener implements MouseListener {
+        
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            try {
+                Site nearestAncestor = getActiveSiteOfEvent(e);
+
+                List<MouseListener> listeners = 
+                        myMouseActiveNodes.getTag(nearestAncestor);
+
+                e.setSource(nearestAncestor);
+                for (MouseListener l : listeners) {
+                    l.mouseClicked(e);
+                }
+            }
+            catch (NoSuchElementException nsse) {
+                //No one cares about this click
+            }
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            try {
+                Site nearestAncestor = getActiveSiteOfEvent(e);
+
+                List<MouseListener> listeners = 
+                        myMouseActiveNodes.getTag(nearestAncestor);
+
+                e.setSource(nearestAncestor);
+                for (MouseListener l : listeners) {
+                    l.mousePressed(e);
+                }
+            }
+            catch (NoSuchElementException nsse) {
+                //No one cares about this click
+            }
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            try {
+                Site nearestAncestor = getActiveSiteOfEvent(e);
+
+                List<MouseListener> listeners = 
+                        myMouseActiveNodes.getTag(nearestAncestor);
+
+                e.setSource(nearestAncestor);
+                for (MouseListener l : listeners) {
+                    l.mouseReleased(e);
+                }
+            }
+            catch (NoSuchElementException nsse) {
+                //No one cares about this click
+            }
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            //Mouse moved should take care of this?
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            mouseEnteredSite(null, e);
+        }
+    }
+    
+    private class ModelChanged implements ChangeListener {
+
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            refreshModel();
         }
     }
 }

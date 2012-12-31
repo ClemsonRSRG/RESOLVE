@@ -29,6 +29,7 @@ import edu.clemson.cs.r2jt.proving.absyn.PSymbol.DisplayType;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol.Quantification;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.Utilities;
+import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.Arrays;
 import java.util.Deque;
@@ -84,7 +85,32 @@ public abstract class PExp {
 
         return v.getFinalPExp();
     }
-
+    
+    public PExp withSiteAltered(Iterator<Integer> path, PExp newValue) {
+        
+        Deque<Integer> integerPath = new LinkedList<Integer>();
+        Deque<PExp> pexpPath = new LinkedList<PExp>();
+        
+        pexpPath.push(this);
+        while (path.hasNext()) {
+            integerPath.push(path.next());
+            
+            pexpPath.push(pexpPath.peek().getSubExpressions().get(
+                    integerPath.peek()));
+        }
+        
+        pexpPath.pop();
+        pexpPath.push(newValue);
+        
+        while (pexpPath.size() > 1) {
+            newValue = pexpPath.pop();
+            pexpPath.push(pexpPath.pop().withSubExpressionReplaced(
+                    integerPath.pop(), newValue));
+        }
+        
+        return pexpPath.peek();
+    }
+    
     public abstract PExp withTypeReplaced(MTType t);
 
     public abstract PExp withTypeValueReplaced(MTType t);
@@ -103,6 +129,10 @@ public abstract class PExp {
         return working;
     }
 
+    public static PExp trueExp(TypeGraph g) {
+        return new PSymbol(g.BOOLEAN, null, "true");
+    }
+    
     public abstract ImmutableList<PExp> getSubExpressions();
 
     public abstract PExpSubexpressionIterator getSubExpressionIterator();
