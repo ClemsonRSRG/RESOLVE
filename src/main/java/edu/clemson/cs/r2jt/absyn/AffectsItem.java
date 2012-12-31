@@ -58,14 +58,13 @@
 
 package edu.clemson.cs.r2jt.absyn;
 
+import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.Mode;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 
 public class AffectsItem extends ResolveConceptualElement {
 
-    // ===========================================================
     // Variables
-    // ===========================================================
 
     /** The mode member. */
     private Mode mode;
@@ -76,9 +75,7 @@ public class AffectsItem extends ResolveConceptualElement {
     /** The name member. */
     private PosSymbol name;
 
-    // ===========================================================
     // Constructors
-    // ===========================================================
 
     public AffectsItem() {};
 
@@ -88,13 +85,15 @@ public class AffectsItem extends ResolveConceptualElement {
         this.name = name;
     }
 
-    // ===========================================================
     // Accessor Methods
-    // ===========================================================
 
     // -----------------------------------------------------------
     // Get Methods
     // -----------------------------------------------------------
+
+    public Location getLocation() {
+        return name.getLocation();
+    }
 
     /** Returns the value of the mode variable. */
     public Mode getMode() {
@@ -130,9 +129,7 @@ public class AffectsItem extends ResolveConceptualElement {
         this.name = name;
     }
 
-    // ===========================================================
     // Public Methods
-    // ===========================================================
 
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {

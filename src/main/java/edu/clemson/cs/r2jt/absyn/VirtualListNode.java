@@ -6,6 +6,7 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
+import edu.clemson.cs.r2jt.data.Location;
 import java.util.StringTokenizer;
 
 public class VirtualListNode extends ResolveConceptualElement {
@@ -65,5 +66,11 @@ public class VirtualListNode extends ResolveConceptualElement {
             buffer.append(token.substring(1));
         }
         return buffer.toString();
+    }
+
+    @Override
+    public Location getLocation() {
+        throw new UnsupportedOperationException(this.getClass()
+                + " has no location by definition.");
     }
 }

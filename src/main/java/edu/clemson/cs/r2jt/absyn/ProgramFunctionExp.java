@@ -263,4 +263,9 @@ public class ProgramFunctionExp extends ProgramExp {
     public void setSubExpression(int index, Exp e) {
         arguments.set(index, (ProgramExp) e);
     }
+
+    @Override
+    public ProgramFunctionExp copy() {
+        return new ProgramFunctionExp(location, qualifier, name, arguments);
+    }
 }

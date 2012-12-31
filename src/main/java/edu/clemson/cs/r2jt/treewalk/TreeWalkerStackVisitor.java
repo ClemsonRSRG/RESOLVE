@@ -8,9 +8,10 @@ public abstract class TreeWalkerStackVisitor extends TreeWalkerVisitor {
 
     private LinkedList<ResolveConceptualElement> myVisitStack =
             new LinkedList<ResolveConceptualElement>();
+    private ResolveConceptualElement myParent;
 
-    private void pushParent(ResolveConceptualElement e) {
-        myVisitStack.push(e);
+    private void pushParent() {
+        myVisitStack.push(myParent);
     }
 
     private void popParent() {
@@ -39,7 +40,9 @@ public abstract class TreeWalkerStackVisitor extends TreeWalkerVisitor {
 
     public final void preAny(ResolveConceptualElement data) {
         preAnyStack(data);
-        pushParent(data);
+        myParent = data;
+        pushParent();
+
     }
 
     public final void postAny(ResolveConceptualElement data) {

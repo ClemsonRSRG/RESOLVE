@@ -157,6 +157,6 @@ public class ConfirmStmt extends Statement {
     }
 
     public ConfirmStmt clone() {
-        return new ConfirmStmt(location, (Exp) assertion.clone());
+        return new ConfirmStmt(location, (Exp) Exp.clone(assertion));
     }
 }

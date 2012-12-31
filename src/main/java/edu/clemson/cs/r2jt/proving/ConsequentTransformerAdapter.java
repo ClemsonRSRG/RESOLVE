@@ -2,10 +2,12 @@ package edu.clemson.cs.r2jt.proving;
 
 import java.util.Iterator;
 
+import edu.clemson.cs.r2jt.utilities.Mapping;
+
 public class ConsequentTransformerAdapter implements ConsequentTransformer {
 
-    private static final Mapper<ImmutableConjuncts, Consequent> MAP_TO_CONSEQUENTS =
-            new ConsequentCastMapper();
+    private static final Mapping<ImmutableConjuncts, Consequent> MAP_TO_CONSEQUENTS =
+            new ConsequentCastMapping();
 
     private final ConjunctsTransformer myTransformer;
 

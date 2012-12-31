@@ -152,7 +152,7 @@ public class BetweenExp extends Exp {
             Iterator<Exp> i = lessExps.iterator();
             List<Exp> newLessExps = new List<Exp>();
             while (i.hasNext()) {
-                newLessExps.add((Exp) i.next().clone());
+                newLessExps.add((Exp) Exp.clone(i.next()));
             }
             clone.setLessExps(newLessExps);
         }
@@ -300,7 +300,7 @@ public class BetweenExp extends Exp {
             Exp exp = (Exp) i.next();
             Exp tmp = null;
             if (exp != null)
-                tmp = exp.replace(old, replacement);
+                tmp = Exp.replace(exp, old, replacement);
             i.previous();
             i.remove();
             if (tmp != null)
@@ -327,7 +327,7 @@ public class BetweenExp extends Exp {
         Iterator<Exp> it = lessExps.iterator();
         List<Exp> newLessExps = new List<Exp>();
         while (it.hasNext()) {
-            newLessExps.add(it.next().copy());
+            newLessExps.add(Exp.copy(it.next()));
         }
         Exp result = new BetweenExp(null, newLessExps);
         result.setType(type);

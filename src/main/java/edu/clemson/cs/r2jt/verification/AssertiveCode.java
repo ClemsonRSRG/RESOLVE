@@ -49,6 +49,7 @@ package edu.clemson.cs.r2jt.verification;
 
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import edu.clemson.cs.r2jt.collections.*;
 import edu.clemson.cs.r2jt.data.Location;
@@ -127,30 +128,30 @@ public class AssertiveCode implements Cloneable {
 
     public Object clone() {
         AssertiveCode clone = new AssertiveCode(env);
-        clone.setFinalConfirm((Exp) confirm.clone());
+        clone.setFinalConfirm((Exp) Exp.clone(confirm));
         clone.setIter(iter);
 
         Iterator<ConcType> k = freeVars2.iterator();
         while (k.hasNext()) {
-            clone.addFreeVar((ConcType) (k.next()).clone());
+            clone.addFreeVar((ConcType) (k.next().clone()));
         }
 
         Iterator<VerificationStatement> j = assertive_code.iterator();
         while (j.hasNext()) {
             VerificationStatement tmp = j.next();
             if ((tmp.getType()) == VerificationStatement.ASSUME) {
-                clone.addAssume((Exp) (((Exp) tmp.getAssertion()).clone()));
+                clone.addAssume(Exp.copy(((Exp) tmp.getAssertion())));
             }
             else if (tmp.getType() == VerificationStatement.CONFIRM) {
-                clone.addConfirm((Exp) (((Exp) tmp.getAssertion()).clone()));
+                clone.addConfirm(Exp.copy(((Exp) tmp.getAssertion())));
             }
             else if (tmp.getType() == VerificationStatement.CODE) {
-                clone.addCode((Statement) (((Statement) tmp.getAssertion())
-                        .clone()));
+                clone.addCode((Statement) ((Statement) tmp.getAssertion())
+                        .clone());
             }
             else if (tmp.getType() == VerificationStatement.VARIABLE) {
-                clone.addVariableDec((VarDec) (((VarDec) tmp.getAssertion())
-                        .clone()));
+                clone.addVariableDec((VarDec) ((VarDec) tmp.getAssertion())
+                        .clone());
             }
             else if (tmp.getType() == VerificationStatement.REMEMBER) {
                 clone.addRemember();
@@ -290,7 +291,7 @@ public class AssertiveCode implements Cloneable {
     }
 
     public Exp getFinalConfirm() {
-        return (Exp) this.confirm.clone();
+        return (Exp) Exp.clone(this.confirm);
     }
 
     public void setFinalConfirm(Exp confirm) {
@@ -391,15 +392,9 @@ public class AssertiveCode implements Cloneable {
         }
 
         //	str = str.concat("Confirm \n" + expToString((Exp)(confirm.clone())) + ";");
-        String splEXP = splitExpToString((Exp) (confirm.clone()));
+        String splEXP = splitExpToString((Exp) (Exp.clone(confirm)));
         str = str.concat("\n\n" + splEXP);
-        if (XMLfile) {
-            //return splEXP;//str + splEXP;
-            return str;
-        }
-        else {
-            return str;
-        }
+        return str;
     }
 
     public String assertionToString(boolean finalAssert) {
@@ -769,4 +764,14 @@ public class AssertiveCode implements Cloneable {
         return provePart;
     }
 
+    @Override
+    public String toString() {
+        String result = "";
+
+        for (VerificationStatement s : assertive_code) {
+            result += s.allInfo() + "\n";
+        }
+
+        return result;
+    }
 }

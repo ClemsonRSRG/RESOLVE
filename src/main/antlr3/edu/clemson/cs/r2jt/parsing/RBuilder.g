@@ -2,10 +2,11 @@
 tree grammar RBuilder;
 
 options {
-    //k = 1;
+    k = 1;
     output = AST;      
     tokenVocab=RParser;             
     ASTLabelType = 'ColsAST';
+	superClass = RBuilderSuper;
     //importVocab=RESOLVE;
     }
 
@@ -27,300 +28,7 @@ options {
 // ===============================================================
 
 @members{
-    /**
-     * Variables to tell us what type of module we are
-     * parsing.  Used for semantic predicates of rules or productions
-     * which are only applicable to particular modules.
-     */
-    boolean proofModule = false;
-    boolean theoryModule = false;
-    boolean conceptModule = false;
-    boolean performanceModule = false;
-    boolean headerModule = false;
-    boolean bodyModule = false;
-    boolean enhancementModule = false;
-    boolean facilityModule = false;
-    boolean enhancementBody = false;
-
-    /* enhancementBody is a subclass of bodyModule.  It is only true
-     * in the body of an enhancement module.  It is NOT true in a
-     * "bundled implementation" module (a body that implements both a
-     * concept and one or more enhancements at once). (BM)
-     */
-
-    /**
-     * Reset the type of module we are parsing.
-     */
-    public void resetModuleType() {
-        this.theoryModule = false;
-        this.conceptModule = false;
-        this.performanceModule = false;
-        this.headerModule = false;
-        this.bodyModule = false;
-        this.enhancementModule = false;
-        this.facilityModule = false;
-        this.enhancementBody = false;
-    }
-
-    /** The error handler for this parser. */
-    private ErrorHandler err;
-    //private ErrorHandler err = ErrorHandler.getInstance();
-
-    /** Delegate the error handling to the error handler. */
-    public void reportError(RecognitionException ex) {
-        System.out.println(getErrorMessage(ex, null));
-        err.syntaxError(ex);
-    }
-
-    /** Delegate the warning handling to the error handler. */
-    public void reportWarning(String s) {
-        err.warning(s);
-    }
-
-//      private PosSymbol getQualifier(edu.clemson.cs.r2jt.collections.List<PosSymbol> psyms) {
-//          PosSymbol qual = null;
-//          switch (psyms.size()) {
-//          case 1: qual = null; break;
-//          case 2: qual = psyms.get(0); break;
-//          default: assert false : "qual is invalid";
-//          }
-//          return qual;
-//      }
-
-//      private PosSymbol getName(edu.clemson.cs.r2jt.collections.List<PosSymbol> psyms) {
-//          PosSymbol name = null;
-//          switch (psyms.size()) {
-//          case 1: name = psyms.get(0); break;
-//          case 2: name = psyms.get(1); break;
-//          default: assert false : "psyms is invalid";
-//          }
-//          return name;
-//      }
-
-    private Pos getPos(ColsAST ast) {
-        return new Pos(ast.getLine(), ast.getCharPositionInLine());
-    }
-
-    private Location getLocation(ColsAST ast) {
-        return new Location(err.getFile(), getPos(ast));
-    }
-
-    private Location getLocation(Pos pos) {
-        return new Location(err.getFile(), pos);
-    }
-
-    private Symbol getSymbol(ColsAST ast) {
-        return Symbol.symbol(ast.getText());
-    }
-
-    private Pos getASTPos(ColsAST ast) {
-        return new Pos(ast.getLine(), ast.getCharPositionInLine());
-    }
     
-    private Symbol getASTSymbol(ColsAST ast) {
-        return Symbol.symbol(ast.getText());
-    }
-
-    private PosSymbol getOutfixPosSymbol(ColsAST ast) {
-        Pos pos = new Pos(ast.getLine(), ast.getCharPositionInLine());
-        Location loc = new Location(err.getFile(), pos);
-        String str = ast.getText();
-        Symbol name = null;
-        if (str.equals("<")) {
-            name = Symbol.symbol("<_>");
-        } else if (str.equals("<<")) {
-            name = Symbol.symbol("<<_>>");
-        } else if (str.equals("|")) {
-            name = Symbol.symbol("|_|");
-        } else if (str.equals("||")) {
-            name = Symbol.symbol("||_||");
-        } else if (str.equals("[")) {
-          name = Symbol.symbol("[_]");
-        }
-        else if (str.equals("[[")) {
-          name = Symbol.symbol("[[_]]");
-        } else {
-            assert false : "invalid symbol: " + str;
-        }
-        return new PosSymbol(loc, name);
-    }
-
-    private PosSymbol getPosSymbol(ColsAST ast) {
-        Pos pos = new Pos(ast.getLine(), ast.getCharPositionInLine());
-        Location loc = new Location(err.getFile(), pos);
-        Symbol sym = Symbol.symbol(ast.getText());
-        return new PosSymbol(loc, sym);
-    }
-
-    private edu.clemson.cs.r2jt.collections.List<ParameterVarDec> getParamVarDecList(Mode mode,
-            edu.clemson.cs.r2jt.collections.List<VarDec> vars)
-    {
-        edu.clemson.cs.r2jt.collections.List<ParameterVarDec> pVars
-            = new edu.clemson.cs.r2jt.collections.List<ParameterVarDec>("ParameterVarDec");
-        Iterator<VarDec> i = vars.iterator();
-        while (i.hasNext()) {
-            VarDec var = i.next();
-            ParameterVarDec pVar = new ParameterVarDec(mode,
-                var.getName(), var.getTy());
-            pVars.add(pVar);
-        }
-        return pVars;
-    }
-
-    private InitItem getInitItem(Location loc, InitItem init) {
-        return new InitItem(
-            loc,
-            init.getStateVars(),
-            init.getRequires(),
-            init.getEnsures(),
-            init.getFacilities(),
-            init.getVariables(),
-            init.getAuxVariables(),
-            init.getStatements()
-        );
-    }
-
-    private FinalItem getFinalItem(Location loc, InitItem init) {
-        return new FinalItem(
-            loc,
-            init.getStateVars(),
-            init.getRequires(),
-            init.getEnsures(),
-            init.getFacilities(),
-            init.getVariables(),
-            init.getAuxVariables(),
-            init.getStatements()
-        );
-    }
-
-    private PerformanceInitItem getPerformanceInitItem(Location loc, PerformanceInitItem init) {
-        return new PerformanceInitItem(
-            loc,
-            init.getStateVars(),
-            init.getRequires(),
-            init.getEnsures(),
-            init.getDuration(),
-            init.getMainp_disp(),
-            init.getFacilities(),
-            init.getVariables(),
-            init.getAuxVariables(),
-            init.getStatements()
-        );
-    }
-
-    private PerformanceFinalItem getPerformanceFinalItem (Location loc, PerformanceFinalItem Final) {
-        return new PerformanceFinalItem (
-            loc,
-            Final.getStateVars(),
-            Final.getRequires(),
-            Final.getEnsures(),
-            Final.getDuration(),
-            Final.getMainp_disp(),
-            Final.getFacilities(),
-            Final.getVariables(),
-            Final.getAuxVariables(),
-            Final.getStatements()
-        );
-    }
-    
-    private edu.clemson.cs.r2jt.collections.List<VarDec> getVarDecList(edu.clemson.cs.r2jt.collections.List<PosSymbol> psyms, Ty ty) {
-        edu.clemson.cs.r2jt.collections.List<VarDec> vars = new edu.clemson.cs.r2jt.collections.List<VarDec>("VarDec");
-        Iterator<PosSymbol> i = psyms.iterator();
-        while (i.hasNext()) {
-            PosSymbol ps = i.next();
-            VarDec var = new VarDec(ps, ty);
-            vars.add(var);
-        }
-        return vars;
-    }
-    
-  private edu.clemson.cs.r2jt.collections.List<AuxVarDec> getAuxVarDecList(edu.clemson.cs.r2jt.collections.List<PosSymbol> psyms, Ty ty) {
-        edu.clemson.cs.r2jt.collections.List<AuxVarDec> vars = new edu.clemson.cs.r2jt.collections.List<AuxVarDec>("AuxVarDec");
-        Iterator<PosSymbol> i = psyms.iterator();
-        while (i.hasNext()) {
-            PosSymbol ps = i.next();
-            AuxVarDec var = new AuxVarDec(ps, ty);
-            vars.add(var);
-        }
-        return vars;
-    }
-
-    private edu.clemson.cs.r2jt.collections.List<MathVarDec> getMathVarDecList(edu.clemson.cs.r2jt.collections.List<PosSymbol> psyms, Ty ty) {
-        edu.clemson.cs.r2jt.collections.List<MathVarDec> vars = new edu.clemson.cs.r2jt.collections.List<MathVarDec>("MathVarDec");
-        Iterator<PosSymbol> i = psyms.iterator();
-        while (i.hasNext()) {
-            PosSymbol ps = i.next();
-            MathVarDec var = new MathVarDec(ps, ty);
-            vars.add(var);
-        }
-        return vars;
-    }
-
-    private int getIterativeOp (PosSymbol ps) {
-        Symbol sym = ps.getSymbol();
-        int op = 0;
-        if (sym == Symbol.symbol("Sum")) {
-            op = IterativeExp.SUM;
-        } else if (sym == Symbol.symbol("Product")) {
-            op = IterativeExp.PRODUCT;
-        } else if (sym == Symbol.symbol("Concatenation")) {
-            op = IterativeExp.CONCATENATION;
-        } else if (sym == Symbol.symbol("Intersection")) {
-            op = IterativeExp.INTERSECTION;
-        } else if (sym == Symbol.symbol("Union")) {
-            op = IterativeExp.UNION;
-        } else {
-            assert false : "Invalid symbol: " + sym;
-        }
-        return op;
-    }
-
-    private ProgramExp getProgramLiteral(Exp mlit) {
-        if (mlit instanceof IntegerExp) {
-            return new ProgramIntegerExp(
-                ((IntegerExp)mlit).getLocation(),
-                ((IntegerExp)mlit).getValue());
-        } else if (mlit instanceof DoubleExp) {
-            return new ProgramDoubleExp(
-                ((IntegerExp)mlit).getLocation(),
-                ((IntegerExp)mlit).getValue());
-        } else if (mlit instanceof CharExp) {
-            return new ProgramCharExp(
-                ((CharExp)mlit).getLocation(),
-                ((CharExp)mlit).getValue());
-        } else if (mlit instanceof StringExp) {
-            return new ProgramStringExp(
-                ((StringExp)mlit).getLocation(),
-                ((StringExp)mlit).getValue());
-        } else {
-            assert false : "Invalid expression type";
-            return null;
-        }
-    }
-    
-    public String getErrorMessage(RecognitionException e,
-        String[] tokenNames)
-    {
-        System.out.println("Builder Exception:");
-        List stack = (List)getRuleInvocationStack(e, this.getClass().getName());
-        String msg = null;
-        if ( e instanceof NoViableAltException ) {
-          NoViableAltException nvae = (NoViableAltException)e;
-          msg = " no viable alt; token="+e.token+
-          " (decision="+nvae.decisionNumber+
-          " state "+nvae.stateNumber+")"+
-          " decision=<<"+nvae.grammarDecisionDescription+">>";
-        }
-        else {
-          msg = super.getErrorMessage(e, RBuilder.tokenNames);
-        }
-        return stack+" "+msg+"\n"+e.token;
-        //return msg;
-    }
-    public String getTokenErrorDisplay(Token t) {
-        return t.toString();
-    }
-
 }
 
 // ===============================================================
@@ -354,7 +62,7 @@ this.err = err;
 
 theory_module returns [MathModuleDec dec = null]
 @init{
-    edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars = new edu.clemson.cs.r2jt.collections.List<ModuleParameter>("ModuleParameter");
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = new edu.clemson.cs.r2jt.collections.List<ModuleParameterDec>("ModuleParameterDec");
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new edu.clemson.cs.r2jt.collections.List<UsesItem>("UsesItem");
     edu.clemson.cs.r2jt.collections.List<Dec> decs = new edu.clemson.cs.r2jt.collections.List<Dec>("Dec");
 }
@@ -380,16 +88,14 @@ theory_module returns [MathModuleDec dec = null]
 math_item_sequence returns [MathModuleDec dec = null]
 @init{   
     PosSymbol ps = null; //dummy
-    edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars = null; //dummy
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = null; //dummy
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = null; //dummy
     edu.clemson.cs.r2jt.collections.List<Dec> decs = new edu.clemson.cs.r2jt.collections.List<Dec>("Dec");
 }
-    :   (   dec2=formal_type_declaration { decs.add($dec2.dec); }
-        |   dec3=math_type_declaration { decs.add($dec3.dec); }
-        |   dec4=definition_declaration { decs.add($dec4.dec); }
+    :   (   dec4=definition_declaration { decs.add($dec4.dec); }
         |   dec5=categorical_definition_declaration { decs.add($dec5.dec); }
         |   dec6=math_assertion_declaration { decs.add($dec6.dec); }
-        |   dec7=subtype_declaration { decs.add($dec7.dec); }
+        |   dec8=type_theorem_declaration { decs.add($dec8.dec); }
         )+
         { $dec = new MathModuleDec(ps, pars, uses, decs); }
     ;
@@ -404,7 +110,7 @@ conceptual_module returns [ConceptModuleDec dec = null]
     InitItem init = null;
     FinalItem fin = null;
     edu.clemson.cs.r2jt.collections.List<Dec> decs = new edu.clemson.cs.r2jt.collections.List<Dec>("Dec");
-    edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars = new edu.clemson.cs.r2jt.collections.List<ModuleParameter>("ModuleParameter");
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = new edu.clemson.cs.r2jt.collections.List<ModuleParameterDec>("ModuleParameterDec");
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new edu.clemson.cs.r2jt.collections.List<UsesItem>("UsesItem");
 }
     :   ^(  MODULE_CONCEPT ps=ident
@@ -434,7 +140,7 @@ conceptual_module returns [ConceptModuleDec dec = null]
 concept_item_sequence returns [ConceptModuleDec dec = null]
 @init{
     PosSymbol ps = null; //dummy
-    edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars = null; //dummy
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = null; //dummy
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = null; //dummy
     Exp req = null; //dummy
     edu.clemson.cs.r2jt.collections.List<Exp> cons = new edu.clemson.cs.r2jt.collections.List<Exp>("Exp");
@@ -467,7 +173,7 @@ performance_module returns [PerformanceModuleDec dec = null]
     PerformanceInitItem perfInit = null;
     PerformanceFinalItem perfFinal = null;
     edu.clemson.cs.r2jt.collections.List<Dec> decs = new edu.clemson.cs.r2jt.collections.List<Dec>("Dec");
-    edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars = new edu.clemson.cs.r2jt.collections.List<ModuleParameter>("ModuleParameter");
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = new edu.clemson.cs.r2jt.collections.List<ModuleParameterDec>("ModuleParameterDec");
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new edu.clemson.cs.r2jt.collections.List<UsesItem>("UsesItem");
 }
     :   ^(  MODULE_PROFILE pn1=ident
@@ -510,7 +216,7 @@ performance_item_sequence returns [PerformanceModuleDec  dec = null]
     PosSymbol ps3 = null; //dummy
     PosSymbol ps4 = null; //dummy
 
-    edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars = null; //dummy
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = null; //dummy
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = null; //dummy
     Exp req = null; //dummy
     edu.clemson.cs.r2jt.collections.List<Exp> cons = new edu.clemson.cs.r2jt.collections.List<Exp>("Exp");
@@ -540,7 +246,7 @@ performance_item_sequence returns [PerformanceModuleDec  dec = null]
 enhancement_module returns [EnhancementModuleDec dec = null]
 @init{   
     edu.clemson.cs.r2jt.collections.List<Dec> decs = new edu.clemson.cs.r2jt.collections.List<Dec>("Dec");
-    edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars = new edu.clemson.cs.r2jt.collections.List<ModuleParameter>("ModuleParameter");
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = new edu.clemson.cs.r2jt.collections.List<ModuleParameterDec>("ModuleParameterDec");
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new edu.clemson.cs.r2jt.collections.List<UsesItem>("UsesItem");
 }
     :   ^(  MODULE_ENHANCEMENT ps=ident
@@ -567,7 +273,7 @@ enhancement_module returns [EnhancementModuleDec dec = null]
 
 enhancement_item_sequence returns [EnhancementModuleDec dec = null]
 @init{   PosSymbol ps = null; //dummy
-    edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars = null; //dummy
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = null; //dummy
     PosSymbol cSym = null; //dummy
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = null; //dummy
     Exp req = null; //dummy
@@ -598,7 +304,7 @@ realization_body_module returns [ModuleDec dec = null]
     InitItem init = null;
     FinalItem fin = null;
     edu.clemson.cs.r2jt.collections.List<Dec> decs = new edu.clemson.cs.r2jt.collections.List<Dec>("Dec");
-    edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars = new edu.clemson.cs.r2jt.collections.List<ModuleParameter>("ModuleParameter");
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = new edu.clemson.cs.r2jt.collections.List<ModuleParameterDec>("ModuleParameterDec");
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new edu.clemson.cs.r2jt.collections.List<UsesItem>("UsesItem");
 }
     :   ^(  MODULE_REALIZATION ps=ident
@@ -639,7 +345,7 @@ realization_body_module returns [ModuleDec dec = null]
 
 body_concept_section returns [ConceptBodyModuleDec dec = null]
 @init{   PosSymbol ps = null; //dummy
-    edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars = null; //dummy
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = null; //dummy
     edu.clemson.cs.r2jt.collections.List<PosSymbol> eNames = new edu.clemson.cs.r2jt.collections.List<PosSymbol>("PosSymbol");
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new edu.clemson.cs.r2jt.collections.List<UsesItem>("UsesItem");
     Exp req = null; //dummy
@@ -658,7 +364,7 @@ body_concept_section returns [ConceptBodyModuleDec dec = null]
 
 body_enhancement_section returns [EnhancementBodyModuleDec dec = null]
 @init{   PosSymbol ps = null; //dummy
-    edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars = null; //dummy
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = null; //dummy
     edu.clemson.cs.r2jt.collections.List<EnhancementBodyItem> eItems
         = new edu.clemson.cs.r2jt.collections.List<EnhancementBodyItem>("EnhancementBodyItem");
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new edu.clemson.cs.r2jt.collections.List<UsesItem>("UsesItem");
@@ -697,7 +403,7 @@ added_enhancement_section returns [EnhancementBodyItem item = null]
 body_item_sequence returns [ConceptBodyModuleDec dec = null]
 @init{
     PosSymbol ps = null; //dummy
-    edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars = null; //dummy
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = null; //dummy
     PosSymbol cSym = null; //dummy
     edu.clemson.cs.r2jt.collections.List<PosSymbol> eNames = null; //dummy
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = null; //dummy
@@ -812,22 +518,22 @@ facility_item_sequence returns [FacilityModuleDec dec = null]
 // Module parameters
 // ---------------------------------------------------------------
 
-module_formal_param_section returns [edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars
-        = new edu.clemson.cs.r2jt.collections.List<ModuleParameter>("ModuleParameter")]
+module_formal_param_section returns [edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars
+        = new edu.clemson.cs.r2jt.collections.List<ModuleParameterDec>("ModuleParameterDec")]
 @init{
 }
     :   ^(PARAMS (pars2=module_parameter { $pars.addAll($pars2.pars); })+)
     ;
 
-module_parameter returns [edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars
-        = new edu.clemson.cs.r2jt.collections.List<ModuleParameter>("ModuleParameter")]
+module_parameter returns [edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars
+        = new edu.clemson.cs.r2jt.collections.List<ModuleParameterDec>("ModuleParameterDec")]
 @init{
 }
-    :   par1=definition_parameter { $pars.add($par1.dec); }
+    :   par1=definition_parameter { $pars.add(new ModuleParameterDec($par1.dec)); }
     |   pars2=constant_parameter { $pars.addAll($pars2.pars); }
-    |   par2=concept_type_parameter { $pars.add($par2.dec); }
-    |   par3=operation_parameter { $pars.add($par3.dec1); }
-    |   par4=concept_realization_parameter { $pars.add($par4.dec); }
+    |   par2=concept_type_parameter { $pars.add(new ModuleParameterDec($par2.dec)); }
+    |   par3=operation_parameter { $pars.add(new ModuleParameterDec($par3.dec1)); }
+    |   par4=concept_realization_parameter { $pars.add(new ModuleParameterDec($par4.dec)); }
     ;
 
 definition_parameter returns [DefinitionDec dec = null]
@@ -848,8 +554,8 @@ definition_parameter returns [DefinitionDec dec = null]
         }
     ;
 
-constant_parameter returns [edu.clemson.cs.r2jt.collections.List<ModuleParameter> pars
-        = new edu.clemson.cs.r2jt.collections.List<ModuleParameter>("ModuleParameter")]
+constant_parameter returns [edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars
+        = new edu.clemson.cs.r2jt.collections.List<ModuleParameterDec>("ModuleParameterDec")]
 @init{
 }
     :   ^(EVALUATES vars=variable_declaration_group)
@@ -859,7 +565,7 @@ constant_parameter returns [edu.clemson.cs.r2jt.collections.List<ModuleParameter
                 ConstantParamDec con = new ConstantParamDec(
                     var.getName(),
                     var.getTy());
-                $pars.add(con);
+                $pars.add(new ModuleParameterDec(con));
             }
         }
     ;
@@ -907,36 +613,9 @@ uses_clause returns [edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new e
 // ---------------------------------------------------------------
 // Math Type Declarations
 // ---------------------------------------------------------------
-
-formal_type_declaration returns [MathTypeFormalDec dec = null]
-@init{
-}
-    :   ^(LOCAL_MATH_TYPE ps=ident)
-        { $dec = new MathTypeFormalDec($ps.ps); }
-    ;
-    
-subtype_declaration returns [SubtypeDec dec = null]
-@init{
-}
-    :   ^(MATH_SUBTYPE
-        //((DOT) => (^(DOT q1=ident n1=ident)) | n1=ident)
-        //((DOT) => (^(DOT q2=ident n2=ident)) | n2=ident))
-        ((n1=ident DOT) => q1=qualified_type | n1=ident)
-        ((n2=ident DOT) => q2=qualified_type | n2=ident))
-        { $dec = new SubtypeDec($q1.ps, $n1.ps, $q2.ps, $n2.ps); }
-    ;  
       
 qualified_type returns [PosSymbol ps = null]
     :   ident DOT^ id=ident {$ps = $id.ps;}
-    ;
-
-math_type_declaration returns [MathTypeDec dec = null]
-@init{
-}
-    :   ^(  MATH_TYPE ps=ident
-            ty=math_type_expression
-        )
-        { $dec = new MathTypeDec($ps.ps, $ty.ty); }
     ;
     
 confirm_math_type_declaration returns [MathVarDec mvd1 = null]
@@ -946,20 +625,6 @@ confirm_math_type_declaration returns [MathVarDec mvd1 = null]
           $mvd1 = $mvd.var; }
     ;
 
-sset_type_expression
-    :   ^(TYPEX sset_function_type_expression)
-    ;
-
-sset_function_type_expression
-    :   (sset_domain_expression FUNCARROW^) =>
-        sset_domain_expression FUNCARROW^ SSET
-    |   SSET
-    ;
-
-sset_domain_expression
-    :   ^(TIMES SSET+)
-    |   SSET
-    ;
 // ---------------------------------------------------------------
 // Math Assertions
 // ---------------------------------------------------------------
@@ -1006,6 +671,17 @@ correspondence_clause returns [Exp exp = null]
 convention_clause returns [Exp exp = null]
     :   ^(CONVENTION exp1=math_expression)
         { $exp = $exp1.exp; }
+    ;
+    
+type_theorem_declaration returns [TypeTheoremDec dec = new TypeTheoremDec()]
+    :   ^(TYPE (ps=math_theorem_ident)? COLON
+         (FOR quant_vars=math_variable_declaration_group { $dec.addVarDecGroup($quant_vars.vars); })+
+         assertion=implies_expression
+         )
+        {
+          $dec.setName($ps.ps);
+          $dec.setAssertion($assertion.exp);
+        }
     ;
 
 // ---------------------------------------------------------------
@@ -1134,7 +810,6 @@ definition_declaration returns [DefinitionDec dec = null]
     :   dec1=implicit_definition_declaration { $dec = $dec1.dec; }
     |   dec2=inductive_definition_declaration { $dec = $dec2.dec; }
     |   dec3=standard_definition_declaration { $dec = $dec3.dec; }
-    //|   dec4=categorical_definition_declaration { $dec = $dec4.dec; }
         
     ;
 
@@ -1190,9 +865,11 @@ standard_definition_declaration returns [DefinitionDec dec = null]
         }   
     ;
     
-categorical_definition_declaration returns [DefinitionDec dec = null]
-    :   (CATEGORICAL_DEFINITION dec1=categorical_definition_construct RELATED_BY function_expression)
-        { $dec = $dec1.dec; }
+categorical_definition_declaration returns [CategoricalDefinitionDec dec = null]
+    :   ^(CATEGORICAL_DEFINITION dec1=categorical_definition_construct ^(RELATED_BY exp=math_expression))
+        {   
+            $dec = new CategoricalDefinitionDec($dec1.defs, $exp.exp); 
+        }
     ;
 
 definition_signature returns [DefinitionDec dec = null]
@@ -1283,9 +960,10 @@ standard_definition_construct returns [DefinitionDec dec = null]
         { $dec = new DefinitionDec(impl, ps, $pars.decs, ty, base, hyp, exp); }
     ;
 
-categorical_definition_construct returns [DefinitionDec dec = null]
-    :   DEFINITION dec1=definition_signature (DEFINITION definition_signature)*
-        { $dec = $dec1.dec; }
+categorical_definition_construct returns [edu.clemson.cs.r2jt.collections.List<DefinitionDec> defs
+        = new edu.clemson.cs.r2jt.collections.List<DefinitionDec>("DefinitionDec")]
+    :   (^(DEFINITION dec=definition_signature) { $defs.add($dec.dec); })+
+        //(DEFINITION dec1=definition_signature { $defs.add($dec1.dec); } )*
     ;
 
 indexed_expression returns [Exp exp = null]
@@ -1548,7 +1226,7 @@ mainp_disp_clause returns [Exp exp = null]
 
 type_declaration returns [TypeDec dec = null]
     :   ^(  TYPE_FAMILY ps=ident
-            ty=structural_math_type_expression
+            ty=math_type_expression
             exem=ident
             (cons=constraint_clause)?
             (init=type_concept_init_declaration)?
@@ -1559,7 +1237,7 @@ type_declaration returns [TypeDec dec = null]
 
 performance_type_declaration returns [PerformanceTypeDec dec = null]
     :   ^(  TYPE_FAMILY ps=ident
-            ty=structural_math_type_expression
+            ty=math_type_expression
             (cons=constraint_clause)?
             (perfInit=performance_type_init_declaration)?
             (perfFinal=performance_type_final_declaration)?
@@ -2066,76 +1744,8 @@ variable_id_list returns [edu.clemson.cs.r2jt.collections.List<PosSymbol> psyms
 // Math Type Expression Grammar
 // ===============================================================
 
-math_type_expression returns [Ty ty = null]
-    :   ^(TYPEX ty1=function_type_expression? { $ty = $ty1.ty; })
-    //|   ^(BOOLEAN { $ty = new BooleanTy(); })
-    ;
-
-function_type_expression returns [Ty ty = null]
-    :   ty1=structural_math_type_expression { $ty = $ty1.ty; }
-    |   ^(FUNCARROW ty2=structural_math_type_expression 
-        ty3=structural_math_type_expression*)
-        { $ty = new FunctionTy($ty2.ty, $ty3.ty); }
-    ;
-
-structural_math_type_expression returns [Ty ty = null]
-@init{
-   edu.clemson.cs.r2jt.collections.List<MathVarDec> vars = new edu.clemson.cs.r2jt.collections.List<MathVarDec>("MathVarDec");
-}
-    :   ^(  CARTPROD
-            (   vars2=cartprod_variable_declaration_group
-                { vars.addAll($vars2.vars); }
-            )+
-        )
-        { $ty = new CartProdTy(getLocation($CARTPROD), vars); }
-    |   ty1=product_type_expression { $ty = $ty1.ty; }
-    ;
-
-product_type_expression returns [Ty ty = null]
-@init{   edu.clemson.cs.r2jt.collections.List<Ty> tys = new edu.clemson.cs.r2jt.collections.List<Ty>("Ty");
-}
-    :   ty1=primitive_type_expression { $ty = $ty1.ty; }
-    |   ^(TIMES (ty2=primitive_type_expression { tys.add($ty2.ty); })+)
-        { $ty = new TupleTy(getLocation($TIMES), tys); }
-    ;
-
-// Slightly different from RParser.g
-primitive_type_expression returns [Ty ty = null]
-@init{
-    PosSymbol qual = null; //dummy
-}
-    :   SSET { $ty = new NameTy(qual, getPosSymbol($SSET)); }
-    |   BOOLEAN { $ty = new BooleanTy(qual, getPosSymbol($BOOLEAN)); }
-    |   ty1=powerset_expression { $ty = $ty1.ty; }
-    |   ty2=nested_type_expression { $ty = $ty2.ty; }
-    |   qid=qualified_ident
-        { $ty = new NameTy($qid.exp.getQualifier(), $qid.exp.getName()); }
-    |   ^(FUNCTION qid=qualified_ident tys=type_expression_argument_list?)
-        { $ty = new ConstructedTy($qid.exp.getQualifier(), $qid.exp.getName(), $tys.tys); }
-    ;
-    
-powerset_expression returns [ConstructedTy ty = null]
-@init{
-  PosSymbol qual = null;
-  PosSymbol name = null;
-  edu.clemson.cs.r2jt.collections.List<Ty> args = new edu.clemson.cs.r2jt.collections.List<Ty>();
-}
-    :   ^(POWERSET arg=math_type_expression)
-        { name=new PosSymbol(getLocation($POWERSET),Symbol.symbol("Powerset"));
-          args.add($arg.ty);
-          $ty=new ConstructedTy(qual, name, args); }
-    ;
-
-nested_type_expression returns [Ty ty = null]
-    //:   ty1=implicit_type_parameter_group { $ty = $ty1.ty; }
-    :   ty1=type_expression { $ty = $ty1.ty; }
-    ;
-    
-type_expression returns [Ty ty = null]
-    //:   (math_type_expression) => implicit_type_parameter_group
-    :   ty2=math_type_expression { $ty = $ty2.ty; }
-    ;
-    
+math_type_expression returns [ArbitraryExpTy ty = null]
+    :   i=infix_expression { $ty = new ArbitraryExpTy($i.exp); };
 
 type_expression_argument_list returns [edu.clemson.cs.r2jt.collections.List<Ty> tys = new edu.clemson.cs.r2jt.collections.List<Ty>("Ty")]
     :   ^(PARAMS (ty2=math_type_expression { $tys.add($ty2.ty); })+)
@@ -2147,17 +1757,17 @@ cartprod_variable_declaration_group returns [edu.clemson.cs.r2jt.collections.Lis
     ;
     
 structural_math_variable_declaration_group
-    :   variable_id_list structural_math_type_expression
+    :   variable_id_list COLON math_type_expression
     ;
 
 math_variable_declaration_group returns [edu.clemson.cs.r2jt.collections.List<MathVarDec> vars
         = new edu.clemson.cs.r2jt.collections.List<MathVarDec>("MathVarDec")]
-    :   psyms=variable_id_list ty=math_type_expression
+    :   psyms=variable_id_list COLON ty=math_type_expression
         { $vars = getMathVarDecList($psyms.psyms, $ty.ty); }
     ; 
 
 math_variable_declaration returns [MathVarDec var = null]
-    :   ps=ident ty=math_type_expression
+    :   ps=ident COLON ty=math_type_expression
         { $var = new MathVarDec($ps.ps, $ty.ty); }
     ;
     
@@ -2278,6 +1888,8 @@ between_expression returns [Exp exp = null]
 @init{
    edu.clemson.cs.r2jt.collections.List<Exp> lss = new edu.clemson.cs.r2jt.collections.List<Exp>("Exp");
    Exp lf_temp = null;
+   Exp conjuncts = null;
+   Exp conjunct;
 }
     :   
           ^(BETWEEN_EXPR (lf=infix_expression { lf_temp = $lf.exp; }
@@ -2285,11 +1897,23 @@ between_expression returns [Exp exp = null]
             (id=LT | id=LT_EQL)
             rt=infix_expression
             {
-              lss.add(new InfixExp(getLocation($id), lf_temp, getPosSymbol($id), $rt.exp));
+              conjunct = new InfixExp(getLocation($id), lf_temp, 
+                      getPosSymbol($id), $rt.exp);  
+              lss.add(conjunct);
               lf_temp = $rt.exp;
+              
+              if (conjuncts == null) {
+                  conjuncts = conjunct;
+              }
+              else {
+                  PosSymbol andPosSymbol = getPosSymbol($id);
+                  andPosSymbol.setSymbol(Symbol.symbol("and"));
+                  conjuncts = new InfixExp(getLocation($id), conjuncts,
+                      andPosSymbol, conjunct);
+              }
             } )+
             ))
-            { $exp = new BetweenExp(getLocation($BETWEEN_EXPR), lss); }
+            { $exp = conjuncts; }
     ;
         
     //:   (   ^(id=LT lf=infix_expression rt=infix_expression)
@@ -2299,16 +1923,28 @@ between_expression returns [Exp exp = null]
     //;
 
 infix_expression returns [Exp exp = null]
-    :   
-          ^(LOCALVAREXP locals=math_variable_declarations lf=math_expression { $exp = new QuantExp(getLocation($LOCALVAREXP), QuantExp.NONE, $locals.decs, null, $lf.exp); })
+    :   ^(LOCALVAREXP locals=math_variable_declarations lf=math_expression { $exp = new QuantExp(getLocation($LOCALVAREXP), QuantExp.NONE, $locals.decs, null, $lf.exp); })
     |
-        (exp1=adding_expression { $exp = $exp1.exp; }
-    |   (   ^(id=RANGE lf1=adding_expression rt=adding_expression)
-        |   ^(id=FREE_OPERATOR lf1=adding_expression rt=adding_expression)
+        (exp1=type_assertion_expression { $exp = $exp1.exp; }
+    |   (   ^(id=RANGE lf1=type_assertion_expression rt=type_assertion_expression)
+        |   ^(id=FREE_OPERATOR lf1=type_assertion_expression rt=type_assertion_expression)
         )
         { $exp = new InfixExp(getLocation($id), $lf1.exp, getPosSymbol($id), $rt.exp); }
         )
-    |   id=BOOLEAN { $exp = new VarExp(getLocation($id), null, getPosSymbol($id), BooleanType.INSTANCE); }
+    ;
+
+type_assertion_expression returns [Exp exp = null]
+    :   left=function_type_expression { $exp = $left.exp; }
+            (c=COLON right=math_type_expression {
+                $exp = new TypeAssertionExp(getLocation($c), $left.exp, 
+                        $right.ty);
+            })?;
+
+function_type_expression returns [Exp exp]
+    :  left=adding_expression { $exp = $left.exp; }
+    |  ^(id=FUNCARROW left=adding_expression right=function_type_expression) //Right associate
+       { $exp = new InfixExp(getLocation($id), $left.exp, getPosSymbol($id), 
+                             $right.exp); } 
     ;
 
 adding_expression returns [Exp exp = null]
@@ -2341,10 +1977,7 @@ exponential_expression returns [Exp exp = null]
     ;
 
 prefix_expression returns [Exp exp = null]
-    :   exp1=unary_expression { $exp = $exp1.exp; }
-    |   ^(UNARY_FREE_OPERATOR arg=prefix_expression)
-        { $exp = new PrefixExp(getLocation($UNARY_FREE_OPERATOR), getPosSymbol($UNARY_FREE_OPERATOR), $arg.exp); }
-    ;
+    :   exp1=unary_expression { $exp = $exp1.exp; } ;
 
 unary_expression returns [Exp exp = null]
     :   exp1=primitive_expression { $exp = $exp1.exp; }
@@ -2371,8 +2004,23 @@ primitive_expression returns [Exp exp = null]
     |   exp6=set_constructor { $exp = $exp6.exp; }
     |   exp7=tuple_expression { $exp = $exp7.exp; }
     |   exp8=nested_expression { $exp = $exp8.exp; }
+    |   exp9=iterated_construct { $exp = $exp9.exp; }
+    |   exp10=tagged_cartesian_product_type_expression { $exp = $exp10.exp; }
     //|   name=ident { $exp=(ve=new VarExp(getLocation($name.ps),null,$name.ps)); }
     ;
+    
+tagged_cartesian_product_type_expression 
+returns [CrossTypeExpression exp = null]
+    :   id=CARTPROD^ { $exp = new CrossTypeExpression(getLocation($id)); } 
+        (varList=cartprod_variable_declaration_group SEMICOLON!
+            {
+              for (MathVarDec d : $varList.vars) {
+                $exp.addTaggedField(d.getName(), 
+                    ((ArbitraryExpTy) d.getTy()).getArbitraryExp());
+              }
+            }
+        )+
+        END!;
 
 // ---------------------------------------------------------------
 // Articulated expression rules (expression with '.')
@@ -2480,7 +2128,8 @@ literal_expression returns [Exp exp = null]
     Character ch = null;
     String str = null;
 }
-    :   exp1=qualified_numeric_literal
+    :   id=BOOLEAN { $exp = new VarExp(getLocation($id), null, getPosSymbol($id), BooleanType.INSTANCE); }
+    |   exp1=qualified_numeric_literal
     |   NUMERIC_LITERAL
         {   str = $NUMERIC_LITERAL.getText();
             if (str.indexOf('.') == -1) { // a dot does not appear
@@ -2564,7 +2213,6 @@ parenthesized_expression returns [Exp exp = null]
 set_constructor returns [SetExp exp = null]
 @init{
     MathVarDec var = null;
-    edu.clemson.cs.r2jt.collections.List<VarExp> vars = new edu.clemson.cs.r2jt.collections.List<VarExp>("VarExp");
 }
     :   ^(  LBRACE vnm=ident vty=math_type_expression
             (where=where_clause)? body=math_expression
@@ -2572,8 +2220,6 @@ set_constructor returns [SetExp exp = null]
         {   var = new MathVarDec($vnm.ps, $vty.ty);
             $exp = new SetExp(getLocation($LBRACE), var, $where.exp, $body.exp);
         }
-    |   ^(SET (id=ident { vars.add(new VarExp(getLocation($SET), null, $id.ps)); })*)
-        { $exp = new SetExp(getLocation($SET), null, null, null, vars); }
     ;
 
 tuple_expression returns [TupleExp exp = null]
@@ -3211,3 +2857,4 @@ fn_name returns [PosSymbol name = null]
   | id2=prefix_symbol { $name=getPosSymbol((ColsAST)id2.getTree()); }
   //| name=ident
 ;
+

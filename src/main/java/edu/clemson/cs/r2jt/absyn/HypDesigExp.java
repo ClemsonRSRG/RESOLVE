@@ -171,7 +171,7 @@ public class HypDesigExp extends Exp {
     }
 
     public Exp copy() {
-        MathRefExp newMathExp = (MathRefExp) (mathExp.copy());
+        MathRefExp newMathExp = (MathRefExp) (Exp.copy(mathExp));
         return new HypDesigExp(null, newMathExp);
     }
 

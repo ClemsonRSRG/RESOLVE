@@ -3,7 +3,6 @@ package edu.clemson.cs.r2jt.proving;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 
 /**
@@ -20,12 +19,12 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
  */
 public class SubstitutionRuleNormalizer extends AbstractEqualityRuleNormalizer {
 
-    public SubstitutionRuleNormalizer(MathExpTypeResolver r, boolean noisy) {
-        super(r, noisy);
+    public SubstitutionRuleNormalizer(boolean noisy) {
+        super(noisy);
     }
 
-    public SubstitutionRuleNormalizer(MathExpTypeResolver r) {
-        this(r, true);
+    public SubstitutionRuleNormalizer() {
+        this(true);
     }
 
     @Override

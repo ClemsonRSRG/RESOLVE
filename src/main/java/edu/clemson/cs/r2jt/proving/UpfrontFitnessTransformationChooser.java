@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 
@@ -20,9 +19,9 @@ public class UpfrontFitnessTransformationChooser
 
     public UpfrontFitnessTransformationChooser(TransformerFitnessFunction f,
             Iterable<VCTransformer> library, double threshold,
-            MathExpTypeResolver r, CompileEnvironment e) {
+            CompileEnvironment e) {
 
-        super(library, r);
+        super(library);
         myFitnessFunction = f;
         myThreshold = threshold;
 
@@ -63,7 +62,7 @@ public class UpfrontFitnessTransformationChooser
             myPerVCOrdering.add(curRule.getObject());
         }
 
-        RuleNormalizer n = new SubstitutionRuleNormalizer(myTyper, false);
+        RuleNormalizer n = new SubstitutionRuleNormalizer(false);
         for (PExp e : vc.getAntecedent()) {
             for (VCTransformer t : n.normalize(e)) {
                 myPerVCOrdering.add(t);
@@ -80,7 +79,7 @@ public class UpfrontFitnessTransformationChooser
         retval =
                 new LazyMappingIterator<VCTransformer, ProofPathSuggestion>(
                         myPerVCOrdering.iterator(),
-                        new StaticProofDataSuggestionMapper(d));
+                        new StaticProofDataSuggestionMapping(d));
 
         return retval;
     }

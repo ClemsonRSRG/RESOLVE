@@ -197,7 +197,7 @@ public class DeductionExp extends LineNumberedExp {
         if (myLineNumber != null) {
             newLineNum = myLineNumber.copy();
         }
-        Exp newExp = exp.copy();
+        Exp newExp = Exp.copy(exp);
         return new DeductionExp(null, newLineNum, newExp);
     }
 

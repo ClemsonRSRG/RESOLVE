@@ -5,31 +5,33 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import edu.clemson.cs.r2jt.absyn.AltItemExp;
 import edu.clemson.cs.r2jt.absyn.AlternativeExp;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
-import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.SimpleImmutableList;
-import edu.clemson.cs.r2jt.type.Type;
+import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
+import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.utilities.Mapping;
+import edu.clemson.cs.r2jt.utilities.RCollections;
 
 public class PAlternatives extends PExp {
 
-    private final List<Alternative> myAlternatives =
-            new LinkedList<Alternative>();
+    private final List<Alternative> myAlternatives;
 
     private final PExp myOtherwiseClauseResult;
 
     public PAlternatives(List<PExp> conditions, List<PExp> results,
-            PExp otherwiseClauseResult, MathExpTypeResolver typer) {
+            PExp otherwiseClauseResult, MTType type, MTType typeValue) {
 
         super(
                 calculateStructureHash(conditions, results,
                         otherwiseClauseResult), calculateStructureHash(
-                        conditions, results, otherwiseClauseResult),
-                getResultType(results, otherwiseClauseResult), typer);
+                        conditions, results, otherwiseClauseResult), type,
+                typeValue);
+
+        myAlternatives = new LinkedList<Alternative>();
 
         sanityCheckConditions(conditions);
 
@@ -49,16 +51,18 @@ public class PAlternatives extends PExp {
         myOtherwiseClauseResult = otherwiseClauseResult;
     }
 
-    public PAlternatives(AlternativeExp alternativeExp,
-            MathExpTypeResolver typer) {
+    public PAlternatives(AlternativeExp alternativeExp) {
 
-        this(getConditions(alternativeExp, typer), getResults(alternativeExp,
-                typer), getOtherwiseClauseResult(alternativeExp, typer), typer);
+        this(getConditions(alternativeExp), getResults(alternativeExp),
+                getOtherwiseClauseResult(alternativeExp), alternativeExp
+                        .getMathType(), alternativeExp.getMathTypeValue());
     }
 
     public void accept(PExpVisitor v) {
         v.beginPExp(this);
         v.beginPAlternatives(this);
+
+        v.beginChildren(this);
 
         boolean first = true;
         for (Alternative alt : myAlternatives) {
@@ -69,41 +73,41 @@ public class PAlternatives extends PExp {
             alt.result.accept(v);
             alt.condition.accept(v);
         }
+        v.fencepostPAlternatives(this);
 
         myOtherwiseClauseResult.accept(v);
+
+        v.endChildren(this);
 
         v.endPAlternatives(this);
         v.endPExp(this);
     }
 
-    private static List<PExp> getConditions(AlternativeExp alternativeExp,
-            MathExpTypeResolver typer) {
+    private static List<PExp> getConditions(AlternativeExp alternativeExp) {
 
         List<PExp> result = new LinkedList<PExp>();
         for (AltItemExp aie : alternativeExp.getAlternatives()) {
             if (aie.getTest() != null) {
-                result.add(PExp.buildPExp(aie.getTest(), typer));
+                result.add(PExp.buildPExp(aie.getTest()));
             }
         }
 
         return result;
     }
 
-    private static List<PExp> getResults(AlternativeExp alternativeExp,
-            MathExpTypeResolver typer) {
+    private static List<PExp> getResults(AlternativeExp alternativeExp) {
 
         List<PExp> result = new LinkedList<PExp>();
         for (AltItemExp aie : alternativeExp.getAlternatives()) {
             if (aie.getTest() != null) {
-                result.add(PExp.buildPExp(aie.getAssignment(), typer));
+                result.add(PExp.buildPExp(aie.getAssignment()));
             }
         }
 
         return result;
     }
 
-    private static PExp getOtherwiseClauseResult(AlternativeExp alternativeExp,
-            MathExpTypeResolver typer) {
+    private static PExp getOtherwiseClauseResult(AlternativeExp alternativeExp) {
 
         PExp workingOtherwiseClauseResult = null;
 
@@ -117,7 +121,7 @@ public class PAlternatives extends PExp {
 
             if (aie.getTest() == null) {
                 workingOtherwiseClauseResult =
-                        PExp.buildPExp(aie.getAssignment(), typer);
+                        PExp.buildPExp(aie.getAssignment());
             }
         }
 
@@ -125,20 +129,14 @@ public class PAlternatives extends PExp {
     }
 
     private void sanityCheckConditions(List<PExp> conditions) {
-        try {
-            Type b = myTyper.getType("Boolean_Theory", "B", null, true);
-            for (PExp condition : conditions) {
-                if (!condition.typeMatches(b)) {
-                    throw new IllegalArgumentException("AlternativeExps with "
-                            + "non-boolean-typed conditions are not accepted "
-                            + "by the prover. \n\t" + condition + " has type "
-                            + condition.getType());
-                }
+        for (PExp condition : conditions) {
+            if (!condition
+                    .typeMatches(condition.getType().getTypeGraph().BOOLEAN)) {
+                throw new IllegalArgumentException("AlternativeExps with "
+                        + "non-boolean-typed conditions are not accepted "
+                        + "by the prover. \n\t" + condition + " has type "
+                        + condition.getType());
             }
-        }
-        catch (TypeResolutionException e) {
-            throw new RuntimeException("Prover couldn't get a handle on type "
-                    + "B.");
         }
     }
 
@@ -160,9 +158,12 @@ public class PAlternatives extends PExp {
         return hash;
     }
 
-    private static Type getResultType(List<PExp> results,
+    private static MTType getResultType(List<PExp> results,
             PExp otherwiseClauseResult) {
 
+        //TODO : This could be made more flexible--if the first alternative
+        //       is an N and the second a Z, that shouldn't be an error--the
+        //       result type is Z
         PExp prototypeResult = null;
 
         for (PExp curResult : results) {
@@ -194,13 +195,69 @@ public class PAlternatives extends PExp {
     }
 
     @Override
-    public SimpleImmutableList<PExp> getSubExpressions() {
-        return new EmptyImmutableList<PExp>();
+    public PAlternatives withTypeReplaced(MTType t) {
+
+        return new PAlternatives(RCollections.map(myAlternatives,
+                UnboxCondition.INSTANCE), RCollections.map(myAlternatives,
+                UnboxResult.INSTANCE), myOtherwiseClauseResult, t, myTypeValue);
+    }
+
+    @Override
+    public PAlternatives withTypeValueReplaced(MTType t) {
+
+        return new PAlternatives(RCollections.map(myAlternatives,
+                UnboxCondition.INSTANCE), RCollections.map(myAlternatives,
+                UnboxResult.INSTANCE), myOtherwiseClauseResult, myType, t);
+    }
+
+    @Override
+    public PAlternatives withSubExpressionReplaced(int index, PExp e) {
+        List<PExp> newResults =
+                RCollections.map(myAlternatives, UnboxResult.INSTANCE);
+        List<PExp> newConditions =
+                RCollections.map(myAlternatives, UnboxCondition.INSTANCE);
+        PExp newOtherwise = myOtherwiseClauseResult;
+
+        if (index < 0 || index > (myAlternatives.size() * 2) + 1) {
+            throw new IndexOutOfBoundsException("" + index);
+        }
+        else {
+            index /= 2;
+
+            if (index % 2 == 0) {
+                if (index < myAlternatives.size()) {
+                    newResults.set(index, e);
+                }
+                else {
+                    newOtherwise = e;
+                }
+            }
+            else {
+                newConditions.set(index, e);
+            }
+        }
+
+        return new PAlternatives(newConditions, newResults, newOtherwise,
+                myType, myTypeValue);
+    }
+
+    @Override
+    public ImmutableList<PExp> getSubExpressions() {
+        List<PExp> exps = new LinkedList<PExp>();
+
+        for (Alternative a : myAlternatives) {
+            exps.add(a.result);
+            exps.add(a.condition);
+        }
+
+        exps.add(myOtherwiseClauseResult);
+
+        return new ArrayBackedImmutableList<PExp>(exps);
     }
 
     @Override
     public PExpSubexpressionIterator getSubExpressionIterator() {
-        return EmptySubexpressionIterator.INSTANCE;
+        return new PAlternativesIterator();
     }
 
     @Override
@@ -332,6 +389,24 @@ public class PAlternatives extends PExp {
         return false;
     }
 
+    private static class UnboxResult implements Mapping<Alternative, PExp> {
+
+        public final static UnboxResult INSTANCE = new UnboxResult();
+
+        public PExp map(Alternative a) {
+            return a.result;
+        }
+    }
+
+    private static class UnboxCondition implements Mapping<Alternative, PExp> {
+
+        public final static UnboxCondition INSTANCE = new UnboxCondition();
+
+        public PExp map(Alternative a) {
+            return a.condition;
+        }
+    }
+
     private static class Alternative {
 
         public final PExp condition;
@@ -340,6 +415,83 @@ public class PAlternatives extends PExp {
         public Alternative(PExp condition, PExp result) {
             this.condition = condition;
             this.result = result;
+        }
+    }
+
+    private class PAlternativesIterator implements PExpSubexpressionIterator {
+
+        private int myCurAlternativeNum;
+
+        //These variables combine to tell you what the last thing returned was:
+        //if myReturnedOtherwiseFlag == true, the last thing returned was the
+        //otherwise clause and there's nothing left to return.  Otherwise, if
+        //myCurAlternative == null, the last thing returned was the condition
+        //of the (myCurAlternativeNum)th element.  Otherwise (if 
+        //myCurAlternative != null), the last thing returned was the result of
+        //the (myCurAlternativeNum)th element.
+        private final Iterator<Alternative> myAlternativesIter;
+        private Alternative myCurAlternative;
+        private boolean myReturnedOtherwiseFlag = false;
+
+        public PAlternativesIterator() {
+            myAlternativesIter = myAlternatives.iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return (myCurAlternative != null) || (myAlternativesIter.hasNext())
+                    || !myReturnedOtherwiseFlag;
+        }
+
+        @Override
+        public PExp next() {
+            PExp result;
+
+            if (myCurAlternative == null) {
+                if (myAlternativesIter.hasNext()) {
+                    myCurAlternativeNum++;
+
+                    myCurAlternative = myAlternativesIter.next();
+                    result = myCurAlternative.result;
+                }
+                else if (!myReturnedOtherwiseFlag) {
+                    myReturnedOtherwiseFlag = true;
+                    result = myOtherwiseClauseResult;
+                }
+                else {
+                    throw new NoSuchElementException();
+                }
+            }
+            else {
+                result = myCurAlternative.condition;
+                myCurAlternative = null;
+            }
+
+            return result;
+        }
+
+        @Override
+        public PAlternatives replaceLast(PExp newExpression) {
+            List<PExp> newConditions =
+                    RCollections.map(myAlternatives, UnboxCondition.INSTANCE);
+            List<PExp> newResults =
+                    RCollections.map(myAlternatives, UnboxResult.INSTANCE);
+            PExp newOtherwise = myOtherwiseClauseResult;
+
+            if (myReturnedOtherwiseFlag) {
+                newOtherwise = newExpression;
+            }
+            else {
+                if (myCurAlternative == null) {
+                    newConditions.set(myCurAlternativeNum, newExpression);
+                }
+                else {
+                    newResults.set(myCurAlternativeNum, newExpression);
+                }
+            }
+
+            return new PAlternatives(newConditions, newResults, newOtherwise,
+                    myType, myTypeValue);
         }
     }
 }

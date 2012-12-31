@@ -141,6 +141,8 @@ public class VarExp extends Exp {
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
         Exp retval = new VarExp(location, qualifier, name, quantification);
         retval.setType(type);
+        retval.setMathType(getMathType());
+        retval.setMathTypeValue(getMathTypeValue());
 
         return retval;
     }
@@ -352,6 +354,8 @@ public class VarExp extends Exp {
         VarExp clone = new VarExp(location, qualifier, newName);
         clone.setQuantification(this.quantification);
         clone.setType(this.type);
+        clone.setMathType(getMathType());
+        clone.setMathTypeValue(getMathTypeValue());
         return clone;
     }
 
@@ -386,7 +390,7 @@ public class VarExp extends Exp {
         if (name != null) {
             if (old instanceof VarExp) {
                 if (((VarExp) old).getName().toString().equals(name.toString())) {
-                    return (Exp) replacement.clone();
+                    return Exp.copy(replacement);
                 }
                 /*else {
                 	return this;

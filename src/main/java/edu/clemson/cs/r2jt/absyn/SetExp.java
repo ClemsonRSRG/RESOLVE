@@ -257,11 +257,16 @@ public class SetExp extends Exp {
 
     public Exp copy() {
         MathVarDec newVar = var.copy();
-        List<VarExp> newVars = vars.copy();
+        List<VarExp> newVars = new List<VarExp>();
+
+        for (VarExp v : vars) {
+            newVars.add((VarExp) Exp.copy(v));
+        }
+
         Exp newWhere = null;
         if (where != null)
-            newWhere = where.copy();
-        Exp newBody = body.copy();
+            newWhere = Exp.copy(where);
+        Exp newBody = Exp.copy(body);
         return new SetExp(null, newVar, newWhere, newBody, newVars);
     }
 

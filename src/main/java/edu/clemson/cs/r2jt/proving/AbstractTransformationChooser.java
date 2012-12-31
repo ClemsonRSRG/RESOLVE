@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 
 /**
@@ -17,14 +16,9 @@ public abstract class AbstractTransformationChooser
 
     private final Iterable<VCTransformer> myTransformerLibrary;
 
-    protected final MathExpTypeResolver myTyper;
-
     private ChainingIterable<VCTransformer> myPerVCSubstitutions;
 
-    public AbstractTransformationChooser(Iterable<VCTransformer> library,
-            MathExpTypeResolver r) {
-
-        myTyper = r;
+    public AbstractTransformationChooser(Iterable<VCTransformer> library) {
         myTransformerLibrary = library;
     }
 
@@ -63,7 +57,7 @@ public abstract class AbstractTransformationChooser
 
         List<VCTransformer> localTheorems = new LinkedList<VCTransformer>();
 
-        RuleNormalizer n = new SubstitutionRuleNormalizer(myTyper, false);
+        RuleNormalizer n = new SubstitutionRuleNormalizer(false);
 
         for (PExp e : vc.getAntecedent()) {
             for (VCTransformer t : n.normalize(e)) {
@@ -74,7 +68,7 @@ public abstract class AbstractTransformationChooser
         return new ChainingIterator<ProofPathSuggestion>(
                 new LazyMappingIterator<VCTransformer, ProofPathSuggestion>(
                         localTheorems.iterator(),
-                        new StaticProofDataSuggestionMapper(d)),
+                        new StaticProofDataSuggestionMapping(d)),
                 doSuggestTransformations(vc, curLength, metrics, d,
                         localTheorems));
     }

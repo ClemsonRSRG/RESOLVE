@@ -3,6 +3,8 @@ package edu.clemson.cs.r2jt.proving;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import edu.clemson.cs.r2jt.utilities.Mapping;
+
 /**
  * <p>A <code>NoBacktrackChooser</code> wraps an existing 
  * <code>TransformationChooser</code> such that calls to 
@@ -17,8 +19,8 @@ import java.util.NoSuchElementException;
  */
 public class NoBacktrackChooser implements TransformationChooser {
 
-    private static final NoBacktrackWrappingMapper NO_BACKTRACK_MAP =
-            new NoBacktrackWrappingMapper();
+    private static final NoBacktrackWrappingMapping NO_BACKTRACK_MAP =
+            new NoBacktrackWrappingMapping();
 
     private final TransformationChooser myBaseChooser;
 
@@ -91,9 +93,9 @@ public class NoBacktrackChooser implements TransformationChooser {
         }
     }
 
-    private static class NoBacktrackWrappingMapper
+    private static class NoBacktrackWrappingMapping
             implements
-                Mapper<ProofPathSuggestion, ProofPathSuggestion> {
+                Mapping<ProofPathSuggestion, ProofPathSuggestion> {
 
         @Override
         public ProofPathSuggestion map(ProofPathSuggestion i) {

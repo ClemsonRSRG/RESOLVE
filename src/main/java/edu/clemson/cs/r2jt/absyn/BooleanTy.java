@@ -1,6 +1,7 @@
 package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
+import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.type.BooleanType;
 import edu.clemson.cs.r2jt.type.Type;
@@ -37,6 +38,10 @@ public class BooleanTy extends Ty {
     // -----------------------------------------------------------
     // Get Methods
     // -----------------------------------------------------------
+
+    public Location getLocation() {
+        return name.getLocation();
+    }
 
     /** Returns the value of the qualifier variable. */
     public PosSymbol getQualifier() {

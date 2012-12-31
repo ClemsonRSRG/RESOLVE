@@ -30,7 +30,6 @@ public class NewBindReplace implements NewMatchReplace {
      * 
      * @param findPattern The pattern to bind with.
      * @param replacePattern The pattern to expand as a replacement.
-     * @param typer Something to help figure out types.
      */
     public NewBindReplace(PExp findPattern, PExp replacePattern) {
 

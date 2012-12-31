@@ -81,7 +81,7 @@ public class OperationLocator {
 
     //private Environment env = Environment.getInstance();
 
-    private SymbolTable table;
+    private OldSymbolTable table;
 
     private boolean showErrors;
 
@@ -89,12 +89,12 @@ public class OperationLocator {
     // Constructors
     // ===========================================================
 
-    public OperationLocator(SymbolTable table, ErrorHandler eh) {
+    public OperationLocator(OldSymbolTable table, ErrorHandler eh) {
         this.table = table;
         this.err = eh;
     }
 
-    public OperationLocator(SymbolTable table, boolean err, ErrorHandler eh) {
+    public OperationLocator(OldSymbolTable table, boolean err, ErrorHandler eh) {
         this.table = table;
         showErrors = err;
         this.err = eh;

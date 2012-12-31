@@ -1,57 +1,46 @@
 package edu.clemson.cs.r2jt.mathtype;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
+import edu.clemson.cs.r2jt.absyn.Exp;
+import edu.clemson.cs.r2jt.absyn.FacilityDec;
+import edu.clemson.cs.r2jt.absyn.FinalItem;
+import edu.clemson.cs.r2jt.absyn.InitItem;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
+import edu.clemson.cs.r2jt.absyn.TypeDec;
+import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.mathtype.ProgramParameterEntry.ParameterMode;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * <p>A <code>ScopeBuilder</code> represents a working mapping from unqualified 
- * symbol names represented as <code>String</code>s to information about those
- * symbols including their {@link MTType MTType} and the AST nodes that defined
- * them, when considered within the scope of a particular scope-introducing
- * AST node.  Each <code>ScopeBuilder</code> has a parent 
- * <code>{@link IdentifierResolver IdentifierResolve}</code> whose symbols are 
- * accessible to it, rooted in a <code>ModuleScopeBuilder</code>.</p>
+ * <p>A <code>ScopeBuilder</code> is a working, mutable realization of 
+ * <code>Scope</code>.</p>
  * 
  * <p>Note that <code>ScopeBuilder</code> has no public constructor.  
  * <code>ScopeBuilders</code>s are acquired through calls to some of the methods
  * of {@link MathSymbolTableBuilder MathSymbolTableBuilder}.</p>
  */
-public class ScopeBuilder extends IdentifierResolver {
+public class ScopeBuilder extends SyntacticScope {
 
-    protected final ResolveConceptualElement myDefiningElement;
-    protected IdentifierResolver myParent;
     protected final List<ScopeBuilder> myChildren =
             new LinkedList<ScopeBuilder>();
 
-    protected final Map<String, MathSymbolTableEntry> myBindings =
-            new HashMap<String, MathSymbolTableEntry>();
+    private final TypeGraph myTypeGraph;
 
-    ScopeBuilder(ResolveConceptualElement definingElement,
-            IdentifierResolver parent) {
+    ScopeBuilder(MathSymbolTableBuilder b, TypeGraph g,
+            ResolveConceptualElement definingElement, Scope parent,
+            ModuleIdentifier enclosingModule) {
 
-        myDefiningElement = definingElement;
-        myParent = parent;
+        super(b, definingElement, parent, enclosingModule,
+                new BaseSymbolTable());
+
+        myTypeGraph = g;
     }
 
-    /**
-     * <p>Returns the AST node that introduced this <code>ScopeBuilder</code>.
-     * </p>
-     * 
-     * @return The AST node that introduced this <code>ScopeBuilder</code>.
-     */
-    public ResolveConceptualElement getDefiningElement() {
-        return myDefiningElement;
-    }
-
-    IdentifierResolver getParent() {
-        return myParent;
-    }
-
-    void setParent(IdentifierResolver parent) {
+    void setParent(Scope parent) {
         myParent = parent;
     }
 
@@ -63,8 +52,126 @@ public class ScopeBuilder extends IdentifierResolver {
         return new LinkedList<ScopeBuilder>(myChildren);
     }
 
-    Scope seal(MathSymbolTable finalTable) {
-        return new Scope(myDefiningElement, myParent, myBindings);
+    FinalizedScope seal(MathSymbolTable finalTable) {
+        return new FinalizedScope(finalTable, myDefiningElement, myRootModule,
+                myParent, myBindings);
+    }
+
+    public ProgramVariableEntry addProgramVariable(String name,
+            ResolveConceptualElement definingElement, PTType type)
+            throws DuplicateSymbolException {
+
+        sanityCheckBindArguments(name, definingElement, type);
+
+        ProgramVariableEntry entry =
+                new ProgramVariableEntry(name, definingElement, myRootModule,
+                        type);
+
+        myBindings.put(name, entry);
+
+        return entry;
+    }
+
+    public FacilityEntry addFacility(FacilityDec facility)
+            throws DuplicateSymbolException {
+
+        SymbolTableEntry curLocalEntry =
+                myBindings.get(facility.getName().getName());
+        if (curLocalEntry != null) {
+            throw new DuplicateSymbolException(curLocalEntry);
+        }
+
+        FacilityEntry entry =
+                new FacilityEntry(facility, myRootModule, getSourceRepository());
+
+        myBindings.put(facility.getName().getName(), entry);
+
+        return entry;
+    }
+
+    public OperationEntry addOperation(String name,
+            ResolveConceptualElement definingElement,
+            List<ProgramParameterEntry> params, PTType returnType)
+            throws DuplicateSymbolException {
+
+        sanityCheckBindArguments(name, definingElement, returnType);
+
+        OperationEntry entry =
+                new OperationEntry(name, definingElement, myRootModule,
+                        returnType, params);
+
+        myBindings.put(name, entry);
+
+        return entry;
+    }
+
+    public ProcedureEntry addProcedure(String name,
+            ResolveConceptualElement definingElement,
+            OperationEntry correspondingOperation)
+            throws DuplicateSymbolException {
+
+        sanityCheckBindArguments(name, definingElement, "");
+
+        ProcedureEntry entry =
+                new ProcedureEntry(name, definingElement, myRootModule,
+                        correspondingOperation);
+
+        myBindings.put(name, entry);
+
+        return entry;
+    }
+
+    public ProgramTypeEntry addProgramType(String name,
+            TypeDec definingElement, MTType model)
+            throws DuplicateSymbolException {
+
+        sanityCheckBindArguments(name, definingElement, model);
+
+        PosSymbol exemplarSymbol = definingElement.getExemplar();
+        String exemplarName;
+
+        if (exemplarSymbol == null) {
+            exemplarName = "X";
+        }
+        else {
+            exemplarName = exemplarSymbol.getName();
+        }
+
+        InitItem init = definingElement.getInitialization();
+        FinalItem finalization = definingElement.getFinalization();
+
+        Exp initRequires = (init == null) ? null : init.getRequires();
+        Exp initEnsures = (init == null) ? null : init.getEnsures();
+        Exp finalizationRequires =
+                (finalization == null) ? null : finalization.getRequires();
+        Exp finalizationEnsures =
+                (finalization == null) ? null : finalization.getEnsures();
+
+        ProgramTypeEntry entry =
+                new ProgramTypeEntry(myTypeGraph, name, definingElement,
+                        myRootModule, model, new PTFamily(model, name,
+                                exemplarName, definingElement.getConstraint(),
+                                initRequires, initEnsures,
+                                finalizationRequires, finalizationEnsures));
+
+        myBindings.put(name, entry);
+
+        return entry;
+    }
+
+    public ProgramParameterEntry addFormalParameter(String name,
+            ResolveConceptualElement definingElement, ParameterMode mode,
+            PTType type) throws DuplicateSymbolException {
+
+        sanityCheckBindArguments(name, definingElement, type);
+
+        ProgramParameterEntry entry =
+                new ProgramParameterEntry(myTypeGraph, name, definingElement,
+                        myRootModule, type, mode);
+
+        myBindings.put(name, entry);
+
+        return entry;
     }
 
     /**
@@ -75,6 +182,11 @@ public class ScopeBuilder extends IdentifierResolver {
      * @param name The unqualified name of the symbol.
      * @param definingElement The AST Node that introduced the symbol.
      * @param type The declared type of the symbol.
+     * @param typeValue The type assigned to the symbol (can be null).
+     * @param schematictypes A map from the names of any implicit type 
+     *             parameters to their bounding types.  May be 
+     *             <code>null</code>, which will be interpreted as the empty
+     *             map.
      * 
      * @throws DuplicateSymbolException If such a symbol is already defined 
      *             directly in the scope represented by this 
@@ -82,21 +194,53 @@ public class ScopeBuilder extends IdentifierResolver {
      *             thrown if the symbol is defined in a parent scope or an
      *             imported module.
      */
-    public void addBinding(String name,
-            ResolveConceptualElement definingElement, MTType type)
+    public MathSymbolEntry addBinding(String name,
+            SymbolTableEntry.Quantification q,
+            ResolveConceptualElement definingElement, MTType type,
+            MTType typeValue, Map<String, MTType> schematicTypes,
+            Map<String, MTType> genericsInDefiningContext)
             throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, type);
 
-        myBindings.put(name, new MathSymbolTableEntry(name, definingElement,
-                type));
+        MathSymbolEntry entry =
+                new MathSymbolEntry(myTypeGraph, name, q, definingElement,
+                        type, typeValue, schematicTypes,
+                        genericsInDefiningContext, myRootModule);
+
+        myBindings.put(name, entry);
+
+        return entry;
     }
 
-    private void sanityCheckBindArguments(String name,
+    public MathSymbolEntry addBinding(String name,
+            SymbolTableEntry.Quantification q,
+            ResolveConceptualElement definingElement, MTType type)
+            throws DuplicateSymbolException {
+        return addBinding(name, q, definingElement, type, null, null, null);
+    }
+
+    public MathSymbolEntry addBinding(String name,
+            ResolveConceptualElement definingElement, MTType type,
+            MTType typeValue) throws DuplicateSymbolException {
+
+        return addBinding(name, SymbolTableEntry.Quantification.NONE,
+                definingElement, type, typeValue, null, null);
+    }
+
+    public MathSymbolEntry addBinding(String name,
             ResolveConceptualElement definingElement, MTType type)
             throws DuplicateSymbolException {
 
-        MathSymbolTableEntry curLocalEntry = myBindings.get(name);
+        return addBinding(name, SymbolTableEntry.Quantification.NONE,
+                definingElement, type);
+    }
+
+    private void sanityCheckBindArguments(String name,
+            ResolveConceptualElement definingElement, Object type)
+            throws DuplicateSymbolException {
+
+        SymbolTableEntry curLocalEntry = myBindings.get(name);
         if (curLocalEntry != null) {
             throw new DuplicateSymbolException(curLocalEntry);
         }
@@ -110,76 +254,5 @@ public class ScopeBuilder extends IdentifierResolver {
             throw new IllegalArgumentException("Symbol table entry type must "
                     + "be non-null.");
         }
-    }
-
-    @Override
-    public MathSymbolTableEntry getInnermostBinding(String name,
-            MathSymbolTable.ImportStrategy importStrategy)
-            throws NoSuchSymbolException,
-                DuplicateSymbolException {
-
-        return getInnermostBinding(name, myBindings, myParent, importStrategy);
-    }
-
-    @Override
-    public List<MathSymbolTableEntry> getAllBindings(String name,
-            MathSymbolTable.ImportStrategy importStrategy) {
-        return getAllBindings(name, myBindings, myParent, importStrategy);
-    }
-
-    @Override
-    public void buildAllBindingsList(String symbol,
-            List<MathSymbolTableEntry> accumulator,
-            MathSymbolTable.ImportStrategy importStrategy) {
-
-        buildAllBindingsList(symbol, myBindings, myParent, accumulator,
-                importStrategy);
-    }
-
-    /*
-     * The following helper methods factor out code shared between ScopeBuilder
-     * and Scope. 
-     */
-
-    static MathSymbolTableEntry getInnermostBinding(String name,
-            Map<String, MathSymbolTableEntry> bindings,
-            IdentifierResolver parent,
-            MathSymbolTable.ImportStrategy importStrategy)
-            throws NoSuchSymbolException,
-                DuplicateSymbolException {
-
-        MathSymbolTableEntry result = bindings.get(name);
-
-        if (result == null) {
-            result = parent.getInnermostBinding(name, importStrategy);
-        }
-
-        return result;
-    }
-
-    static List<MathSymbolTableEntry> getAllBindings(String name,
-            Map<String, MathSymbolTableEntry> bindings,
-            IdentifierResolver parent,
-            MathSymbolTable.ImportStrategy importStrategy) {
-
-        List<MathSymbolTableEntry> bindingList =
-                new LinkedList<MathSymbolTableEntry>();
-
-        buildAllBindingsList(name, bindings, parent, bindingList,
-                importStrategy);
-
-        return bindingList;
-    }
-
-    static void buildAllBindingsList(String symbol,
-            Map<String, MathSymbolTableEntry> bindings,
-            IdentifierResolver parent, List<MathSymbolTableEntry> accumulator,
-            MathSymbolTable.ImportStrategy importStrategy) {
-
-        if (bindings.containsKey(symbol)) {
-            accumulator.add(bindings.get(symbol));
-        }
-
-        parent.buildAllBindingsList(symbol, accumulator, importStrategy);
     }
 }

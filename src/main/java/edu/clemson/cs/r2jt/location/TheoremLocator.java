@@ -81,7 +81,7 @@ public class TheoremLocator {
 
     //private Environment env = Environment.getInstance();
 
-    private SymbolTable table;
+    private OldSymbolTable table;
 
     private TypeMatcher tm;
 
@@ -89,7 +89,7 @@ public class TheoremLocator {
     // Constructors
     // ===========================================================
 
-    public TheoremLocator(SymbolTable table, TypeMatcher tm, ErrorHandler err) {
+    public TheoremLocator(OldSymbolTable table, TypeMatcher tm, ErrorHandler err) {
         this.table = table;
         this.tm = tm;
         this.err = err;

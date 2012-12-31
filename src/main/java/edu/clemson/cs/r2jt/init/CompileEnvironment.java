@@ -3,6 +3,7 @@ package edu.clemson.cs.r2jt.init;
 import java.io.File;
 import java.util.HashMap;
 
+import edu.clemson.cs.r2jt.Main;
 import edu.clemson.cs.r2jt.absyn.ModuleDec;
 import edu.clemson.cs.r2jt.absyn.ProcedureDec;
 import edu.clemson.cs.r2jt.absyn.UsesItem;
@@ -14,8 +15,10 @@ import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.MetaFile;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
+import edu.clemson.cs.r2jt.mathtype.ScopeRepository;
+import edu.clemson.cs.r2jt.mathtype.MathSymbolTable;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
-import edu.clemson.cs.r2jt.scope.SymbolTable;
+import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
 import edu.clemson.cs.r2jt.utilities.FlagManager;
 
@@ -95,6 +98,8 @@ public class CompileEnvironment {
 
     public List<ProcedureDec> encounteredProcedures;
 
+    private ScopeRepository mySymbolTable = null;
+
     public CompileEnvironment(String[] args) throws FlagDependencyException {
 
         flags = new FlagManager(args);
@@ -107,6 +112,24 @@ public class CompileEnvironment {
 
     public ErrorHandler getErrorHandler() {
         return err;
+    }
+
+    public void setSymbolTable(ScopeRepository table) {
+        if (table == null) {
+            throw new IllegalArgumentException(
+                    "Symbol table may not be set to null!");
+        }
+
+        if (mySymbolTable != null) {
+            throw new IllegalStateException(
+                    "Symbol table may only be set once!");
+        }
+
+        mySymbolTable = table;
+    }
+
+    public ScopeRepository getSymbolTable() {
+        return mySymbolTable;
     }
 
     public void setCompileReport(CompileReport rep) {
@@ -171,7 +194,12 @@ public class CompileEnvironment {
      * Returns the array of Std_Fac names
      */
     public String[] getStdUses() {
-        return stdUses;
+        if (flags.isFlagSet(Main.FLAG_NO_STANDARD_IMPORT)) {
+            return new String[0];
+        }
+        else {
+            return stdUses;
+        }
     }
 
     /**
@@ -201,8 +229,8 @@ public class CompileEnvironment {
      * Sets the <code>stdUsesDepends</code> lists to the provided updated list
      * @param list The <code>List</code> of <code>List</code> of <code>UsesItem</code> which will be assigned to the global <code>stdUsesDepends</code>
      */
-    public List<SymbolTable> getSymbolTables() {
-        List<SymbolTable> stList = new List<SymbolTable>();
+    public List<OldSymbolTable> getSymbolTables() {
+        List<OldSymbolTable> stList = new List<OldSymbolTable>();
         //Map<ModuleID, ModuleRecord> map = myOldEnvironment.getMap();
         for (java.util.Map.Entry<ModuleID, ModuleRecord> st : map.entrySet()) {
             stList.add(st.getValue().getSymbolTable());
@@ -496,7 +524,7 @@ public class CompileEnvironment {
     /**
      * Returns the symbol table associated with the specified module.
      */
-    public SymbolTable getSymbolTable(ModuleID id) {
+    public OldSymbolTable getSymbolTable(ModuleID id) {
         return map.get(id).getSymbolTable();
     }
 
@@ -550,7 +578,7 @@ public class CompileEnvironment {
      * pops the module from the compilation stack, indicating that compilation
      * has been completed for this module.
      */
-    public void completeRecord(ModuleID id, SymbolTable table) {
+    public void completeRecord(ModuleID id, OldSymbolTable table) {
         ModuleRecord record = map.get(id);
         record.setSymbolTable(table);
         ModuleID id2 = stack.pop();

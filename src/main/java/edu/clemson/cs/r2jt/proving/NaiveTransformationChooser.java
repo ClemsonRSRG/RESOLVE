@@ -2,8 +2,6 @@ package edu.clemson.cs.r2jt.proving;
 
 import java.util.Iterator;
 
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
-
 /**
  * <p>A <code>NaiveTransformationChooser</code> simply delivers its library of
  * transformations in order, completely ignoring any data about the VC or the
@@ -11,9 +9,8 @@ import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
  */
 public class NaiveTransformationChooser extends AbstractTransformationChooser {
 
-    public NaiveTransformationChooser(Iterable<VCTransformer> library,
-            MathExpTypeResolver r) {
-        super(library, r);
+    public NaiveTransformationChooser(Iterable<VCTransformer> library) {
+        super(library);
     }
 
     @Override
@@ -23,7 +20,7 @@ public class NaiveTransformationChooser extends AbstractTransformationChooser {
 
         return new LazyMappingIterator<VCTransformer, ProofPathSuggestion>(
                 getTransformerLibrary().iterator(),
-                new StaticProofDataSuggestionMapper(d));
+                new StaticProofDataSuggestionMapping(d));
     }
 
 }

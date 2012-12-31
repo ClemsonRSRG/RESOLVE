@@ -2,6 +2,7 @@ lexer grammar RLexer;
 
 options {
     language=Java;
+	superClass=RLexerSuper;
 }
 
 @header {
@@ -310,7 +311,7 @@ INSTANTIATION
   ;
   
 INTERSECT
-  : 'intersection'
+  : 'intersect'
   ;
   
 INTRODUCES
@@ -433,10 +434,6 @@ PONENS
   : 'ponens'
   ;
   
-POWERSET
-  : 'Powerset' | 'powerset'
-  ;
-  
 PRESERVES
   : 'preserves' | 'pres'
   ;
@@ -543,10 +540,6 @@ SELF
   
 SHORT_FOR
   : 'short_for'
-  ;
-  
-SSET
-  : 'SSet'
   ;
   
 STATIC

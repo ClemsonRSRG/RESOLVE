@@ -84,7 +84,9 @@ public class VariableNameExp extends VariableExp {
     // Constructors
     // ===========================================================
 
-    public VariableNameExp() {};
+    public VariableNameExp() {
+        this(null, null, null);
+    }
 
     public VariableNameExp(Location location, PosSymbol qualifier,
             PosSymbol name) {
@@ -219,7 +221,7 @@ public class VariableNameExp extends VariableExp {
         if (name != null) {
             if (old instanceof VarExp) {
                 if (((VarExp) old).getName().toString().equals(name.toString())) {
-                    return (Exp) replacement.clone();
+                    return (Exp) Exp.clone(replacement);
                 }
             }
         }

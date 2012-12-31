@@ -61,7 +61,7 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 
-public class ConceptModuleDec extends ModuleDec {
+public class ConceptModuleDec extends AbstractParameterizedModuleDec {
 
     // ===========================================================
     // Variables
@@ -70,17 +70,8 @@ public class ConceptModuleDec extends ModuleDec {
     /** The name member. */
     private PosSymbol name;
 
-    /** The parameters member. */
-    private List<ModuleParameter> parameters;
-
-    /** The usesItems member. */
-    private List<UsesItem> usesItems;
-
     /** The requirement member. */
     private Exp requirement;
-
-    /** The constraints member. */
-    private List<Exp> constraints;
 
     /** The facilityInit member. */
     private InitItem facilityInit;
@@ -91,13 +82,20 @@ public class ConceptModuleDec extends ModuleDec {
     /** The decs member. */
     private List<Dec> decs;
 
+    /** The constraints member. 
+     * Note that placing this down here means it is processed last by the 
+     * treewalker, and so we will have access to any definitions in the
+     * body of the concept. */
+    private List<Exp> constraints;
+
     public ConceptModuleDec() {
     // Empty
     }
 
-    public ConceptModuleDec(PosSymbol name, List<ModuleParameter> parameters,
-            List<UsesItem> usesItems, Exp requirement, List<Exp> constraints,
-            InitItem facilityInit, FinalItem facilityFinal, List<Dec> decs) {
+    public ConceptModuleDec(PosSymbol name,
+            List<ModuleParameterDec> parameters, List<UsesItem> usesItems,
+            Exp requirement, List<Exp> constraints, InitItem facilityInit,
+            FinalItem facilityFinal, List<Dec> decs) {
         this.name = name;
         this.parameters = parameters;
         this.usesItems = usesItems;
@@ -111,16 +109,6 @@ public class ConceptModuleDec extends ModuleDec {
     /** Returns the value of the name variable. */
     public PosSymbol getName() {
         return name;
-    }
-
-    /** Returns the value of the parameters variable. */
-    public List<ModuleParameter> getParameters() {
-        return parameters;
-    }
-
-    /** Returns the value of the usesItems variable. */
-    public List<UsesItem> getUsesItems() {
-        return usesItems;
     }
 
     /** Returns the value of the requirement variable. */
@@ -151,16 +139,6 @@ public class ConceptModuleDec extends ModuleDec {
     /** Sets the name variable to the specified value. */
     public void setName(PosSymbol name) {
         this.name = name;
-    }
-
-    /** Sets the parameters variable to the specified value. */
-    public void setParameters(List<ModuleParameter> parameters) {
-        this.parameters = parameters;
-    }
-
-    /** Sets the usesItems variable to the specified value. */
-    public void setUsesItems(List<UsesItem> usesItems) {
-        this.usesItems = usesItems;
     }
 
     /** Sets the requirement variable to the specified value. */

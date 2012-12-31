@@ -49,7 +49,6 @@ package edu.clemson.cs.r2jt.proofchecking;
 
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.analysis.Analyzer;
-import edu.clemson.cs.r2jt.analysis.MathExpTypeResolver;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
@@ -63,7 +62,6 @@ import edu.clemson.cs.r2jt.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.entry.TypeEntry;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.init.Environment;
 import edu.clemson.cs.r2jt.location.DefinitionLocator;
 import edu.clemson.cs.r2jt.location.SymbolSearchException;
 import edu.clemson.cs.r2jt.location.TheoremLocator;
@@ -93,11 +91,9 @@ public class ProofChecker {
     //private Environment env = Environment.getInstance();
     CompileEnvironment myInstanceEnvironment;
 
-    private SymbolTable table;
+    private OldSymbolTable table;
 
     private TypeMatcher tm;
-
-    private MathExpTypeResolver metr;
 
     private Stack<Exp> previousLines;
 
@@ -107,12 +103,11 @@ public class ProofChecker {
     // Constructors
     // ==========================================================
 
-    public ProofChecker(SymbolTable table, TypeMatcher tm,
-            MathExpTypeResolver metr, CompileEnvironment instanceEnvironment) {
+    public ProofChecker(OldSymbolTable table, TypeMatcher tm,
+            CompileEnvironment instanceEnvironment) {
         myInstanceEnvironment = instanceEnvironment;
         this.table = table;
         this.tm = tm;
-        this.metr = metr;
         previousLines = new Stack<Exp>();
 
         idPredicate = new IdPredicate();
@@ -2481,22 +2476,7 @@ public class ProofChecker {
      * @return True iff <code>e</code> has the RESOLVE type "B".
      */
     private boolean hasBooleanReturnType(Exp e) {
-        boolean retval;
-
-        try {
-            Type booleanType = metr.getType("Boolean_Theory", "B", e, false);
-
-            retval =
-                    (booleanType != null && tm.mathMatches(booleanType, e
-                            .getType()));
-        }
-        catch (TypeResolutionException trex) {
-            //getType failed -- boolean theory hasn't been loaded, so this can't
-            //be a boolean
-            retval = false;
-        }
-
-        return retval;
+        return e.getMathType().isBoolean();
     }
 
     private boolean isNot(Exp e) {
@@ -2507,13 +2487,9 @@ public class ProofChecker {
             if (((PrefixExp) e).getSymbol().equals(s1)
                     || ((PrefixExp) e).getSymbol().equals(s2)
                     || ((PrefixExp) e).getSymbol().equals(s3)) {
-                try {
-                    Type b = metr.getType("Boolean_Theory", "B", e, false);
-                    if (b != null && tm.mathMatches(b, e.getType())) {
-                        return true;
-                    }
+                if (e.getMathType().isBoolean()) {
+                    return true;
                 }
-                catch (TypeResolutionException trex) {}
             }
         }
         return false;
@@ -2540,13 +2516,9 @@ public class ProofChecker {
     private boolean isIn(Exp e) {
         if (e instanceof InfixExp) {
             if (((InfixExp) e).getOpName().equals("is_in")) {
-                try {
-                    Type b = metr.getType("Boolean_Theory", "B", e, false);
-                    if (b != null && tm.mathMatches(b, e.getType())) {
-                        return true;
-                    }
+                if (e.getMathType().isBoolean()) {
+                    return true;
                 }
-                catch (TypeResolutionException trex) {}
             }
         }
         return false;

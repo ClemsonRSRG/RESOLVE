@@ -22,7 +22,7 @@ public class VisitorCodeGeneration {
 
     /**
      * Generates a treewalker. Two optional argument sin the array:
-     * 1: the desired name of the walker (default: TreeWalker)
+     * 1: the desired name of the walker (default: TreeWalkerVisitor)
      * 2: the output package directory (default: treewalk)
      * @param String array
      */
@@ -53,6 +53,8 @@ public class VisitorCodeGeneration {
             for (File directory : dirs) {
                 String targetDir =
                         directory.getAbsolutePath().replace("bin", "src");
+                targetDir =
+                        targetDir.replace("target/classes", "src/main/java");
                 String outputFile =
                         targetDir + File.separator + walkerName + ".java";
                 FileWriter fstream = new FileWriter(outputFile);
@@ -141,6 +143,13 @@ public class VisitorCodeGeneration {
         buffer.append("// ");
         buffer.append(methodName);
         buffer.append("\n");
+
+        // Walk method
+        buffer.append("\tpublic boolean walk");
+        buffer.append(methodName);
+        buffer.append("(");
+        buffer.append(className);
+        buffer.append(" data) { return false; }\n");
 
         // Pre method
         buffer.append("\tpublic void pre");

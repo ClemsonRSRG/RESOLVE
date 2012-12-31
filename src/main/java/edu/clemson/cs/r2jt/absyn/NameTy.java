@@ -61,6 +61,7 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
+import edu.clemson.cs.r2jt.data.Location;
 
 public class NameTy extends Ty {
 
@@ -92,6 +93,10 @@ public class NameTy extends Ty {
     // -----------------------------------------------------------
     // Get Methods
     // -----------------------------------------------------------
+
+    public Location getLocation() {
+        return name.getLocation();
+    }
 
     /** Returns the value of the qualifier variable. */
     public PosSymbol getQualifier() {
@@ -168,7 +173,11 @@ public class NameTy extends Ty {
         if (qualifier != null)
             newQualifier = qualifier.copy();
         PosSymbol newName = name.copy();
-        return new NameTy(newQualifier, newName);
+        Ty result = new NameTy(newQualifier, newName);
+        result.setMathType(getMathType());
+        result.setMathTypeValue(getMathTypeValue());
+
+        return result;
     }
 
 }
