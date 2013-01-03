@@ -16,21 +16,21 @@ public class IntroduceLocalTheorem implements ProofStep {
 
     private final LocalTheorem myLocalTheorem;
     private final Transformation myTransformation;
-    
-    public IntroduceLocalTheorem(LocalTheorem theorem, 
+
+    public IntroduceLocalTheorem(LocalTheorem theorem,
             Transformation transformation) {
         myLocalTheorem = theorem;
         myTransformation = transformation;
     }
-    
+
     @Override
     public String toString() {
         return "" + myTransformation;
     }
-    
+
     @Override
     public void undo(PerVCProverModel m) {
         m.removeLocalTheorem(myLocalTheorem);
     }
-    
+
 }

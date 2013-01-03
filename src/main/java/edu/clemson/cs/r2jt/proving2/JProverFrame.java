@@ -11,17 +11,21 @@ import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.SimpleImmutableList;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.transformations.EliminateTrueConjunctInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.proving2.utilities.MapOfLists;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.LayoutManager;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,6 +47,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -60,12 +65,26 @@ public class JProverFrame extends JFrame {
     private static final long serialVersionUID = 1L;
     private static final String CONTROLS_HIDDEN = "hidden";
     private static final String CONTROLS_VISIBLE = "visible";
-    
-    private final ApplicationApplier APPLICATION_APPLIER = 
+
+    private static final Color POSSIBLE_THEOREM = new Color(200, 255, 200);
+    private static final Color POSSIBLE_THEOREM_HOVER = new Color(0, 255, 0);
+
+    private static final Color POSSIBLE_APPLICATION = new Color(200, 200, 200);
+
+    private static final Color POSSIBLE_APPLICATION_HOVER =
+            new Color(0, 255, 255);
+
+    private final ApplicationCanceller APPLICATION_CANCELLER =
+            new ApplicationCanceller();
+
+    private final ApplicationApplier APPLICATION_APPLIER =
             new ApplicationApplier();
-    
+
     private final LocalTheoremSelect LOCAL_THEOREM_SELECT =
             new LocalTheoremSelect();
+
+    private final EnterTheoremSelectionOnModelChange TO_THEOREM_SELECTION =
+            new EnterTheoremSelectionOnModelChange();
 
     private final JProverFrame PARENT_THIS = this;
 
@@ -75,6 +94,9 @@ public class JProverFrame extends JFrame {
     private final JComponent myDetailsArea;
     private JList myTheoremList;
     private JProofDisplay myProofDisplay;
+    private JLabel myProvingLabel = new JLabel();
+    private JButton myNextVCButton = new JButton("VC>");
+    private JButton myLastVCButton = new JButton("<VC");
 
     private final CardLayout myOptionalTransportLayout = new CardLayout();
     private final JPanel myOptionalTransportPanel =
@@ -84,24 +106,20 @@ public class JProverFrame extends JFrame {
 
     private ImmutableList<Theorem> myGlobalTheorems;
     private Set<PExp> myGlobalTheoremAssertions = new HashSet<PExp>();
-    
-    private final MapOfLists<Site, Application> myLoadedApplications = 
+
+    private final MapOfLists<Site, Application> myLoadedApplications =
             new MapOfLists<Site, Application>();
-    
-    private final Map<Site, MouseListener> myTheoremAppliers = 
+
+    private final Map<Site, MouseListener> myTheoremAppliers =
             new HashMap<Site, MouseListener>();
-    
+
     private final Map<Site, MouseListener> myLocalTheoremSelectors =
             new HashMap<Site, MouseListener>();
-    
+
     public static void main(String[] args) throws FlagDependencyException {
-        JProverFrame p = new JProverFrame();
-        p.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        p.setVisible(true);
+        MathSymbolTableBuilder bldr = new MathSymbolTableBuilder();
 
         FlagDependencies.seal();
-
-        MathSymbolTableBuilder bldr = new MathSymbolTableBuilder();
 
         List<PExp> conjuncts = new LinkedList<PExp>();
 
@@ -143,7 +161,11 @@ public class JProverFrame extends JFrame {
         Consequent c = new Consequent(conjuncts);
 
         VC vc = new VC("0_1", a, c);
-        p.setModel(new PerVCProverModel(vc, new EmptyImmutableList<Theorem>()));
+        JProverFrame p =
+                new JProverFrame(new PerVCProverModel(bldr.getTypeGraph(),
+                        "0_1", vc, new EmptyImmutableList<Theorem>()));
+        p.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        p.setVisible(true);
 
         int[] path = { 1 };
         /*NodeIdentifier nid = new NodeIdentifier(cc, path);
@@ -151,16 +173,13 @@ public class JProverFrame extends JFrame {
         p.highlightPExp(nid, new Color(200, 200, 200));*/
     }
 
-    public JProverFrame() {
-        this(new PerVCProverModel(new LinkedList<PExp>(),
-                new LinkedList<PExp>(), new EmptyImmutableList()));
-    }
-
     public JProverFrame(PerVCProverModel m) {
         ImmutableList<Theorem> globalTheorems = m.getTheoremLibrary();
-        
+
         myProofDisplay = new JProofDisplay(m);
         myProverStateDisplay = new JProverStateDisplay(m);
+        myProverStateDisplay.addMouseListener(APPLICATION_CANCELLER);
+
         m.setChangeEventMode(PerVCProverModel.ChangeEventMode.ALWAYS);
         myDetailsArea = buildDetailsArea();
 
@@ -208,48 +227,89 @@ public class JProverFrame extends JFrame {
             }
         });
 
+        myProverStateDisplay.getModel().addChangeListener(TO_THEOREM_SELECTION);
+
         setGlobalTheorems(globalTheorems);
-        
+
         pack();
     }
 
     public void setGlobalTheorems(ImmutableList<Theorem> globalTheorems) {
         myGlobalTheorems = globalTheorems;
         myGlobalTheoremAssertions.clear();
-        
+
         DefaultListModel m = new DefaultListModel();
         for (Theorem t : globalTheorems) {
             myGlobalTheoremAssertions.add(t.getAssertion());
             m.addElement(t);
         }
         myTheoremList.setModel(m);
+
+        System.out.println("setGlobalTheorems");
+        prepForTheoremSelection();
+    }
+
+    private void removeClickTargetsFromModel() {
+        for (Map.Entry<Site, MouseListener> selector : myLocalTheoremSelectors
+                .entrySet()) {
+
+            myProverStateDisplay.removeMouseListener(selector.getKey(),
+                    selector.getValue());
+        }
+        for (Map.Entry<Site, MouseListener> applier : myTheoremAppliers
+                .entrySet()) {
+
+            myProverStateDisplay.removeMouseListener(applier.getKey(), applier
+                    .getValue());
+        }
+    }
+
+    public void addNextVCButtonActionListener(ActionListener l) {
+        myNextVCButton.addActionListener(l);
+    }
+
+    public void addLastVCButtonActionListeenr(ActionListener l) {
+        myLastVCButton.addActionListener(l);
     }
 
     public void setModel(PerVCProverModel model) {
+        //Clean up the old model
+        removeClickTargetsFromModel();
+        myProverStateDisplay.getModel().removeChangeListener(
+                TO_THEOREM_SELECTION);
+
+        //Reflect the new model in all subcomponents
         myProverStateDisplay.setModel(model);
         myProofDisplay.setModel(model);
         model.setChangeEventMode(PerVCProverModel.ChangeEventMode.ALWAYS);
+        myProvingLabel.setText("Proving " + model.getTheoremName() + "...");
+
+        //Set up the new model
+        model.addChangeListener(TO_THEOREM_SELECTION);
+
+        //Put us into theorem selection state
+        prepForTheoremSelection();
     }
 
     public PerVCProverModel getModel() {
         return myProverStateDisplay.getModel();
     }
-    
-    private void prepForTheoremApplication(Theorem theorem) {
-        for (Map.Entry<Site, MouseListener> selector : 
-                myLocalTheoremSelectors.entrySet()) {
 
-            myProverStateDisplay.removeMouseListener(selector.getKey(), 
-                    selector.getValue());
-        }
-        
+    private void prepForTheoremApplication(Theorem theorem) {
+        System.out.println("prepForTheoremApplication()");
+        removeClickTargetsFromModel();
+
         myLoadedApplications.clear();
         myProverStateDisplay.clearHighlights();
         myTheoremAppliers.clear();
-        
-        List<Transformation> transformations = 
-                theorem.getTransformations(myGlobalTheoremAssertions);
 
+        myProverStateDisplay.addMouseListener(APPLICATION_CANCELLER);
+
+        activateTransformations(theorem
+                .getTransformations(myGlobalTheoremAssertions));
+    }
+
+    private void activateTransformations(List<Transformation> transformations) {
         PerVCProverModel model = myProverStateDisplay.getModel();
 
         Iterator<Application> applications;
@@ -261,39 +321,46 @@ public class JProverFrame extends JFrame {
                 application = applications.next();
 
                 for (Site nid : application.involvedSubExpressions()) {
-                    myProverStateDisplay.highlightPExp(nid, Color.LIGHT_GRAY);
+                    myProverStateDisplay.highlightPExp(nid,
+                            POSSIBLE_APPLICATION);
                     myLoadedApplications.putElement(nid, application);
-                    myProverStateDisplay.addMouseListener(nid, 
+                    myProverStateDisplay.addMouseListener(nid,
                             APPLICATION_APPLIER);
                     myTheoremAppliers.put(nid, APPLICATION_APPLIER);
                 }
             }
         }
     }
-    
-    private void prepForTheoremSelection() {
-        for (Map.Entry<Site, MouseListener> applier : 
-                myTheoremAppliers.entrySet()) {
 
-            myProverStateDisplay.removeMouseListener(applier.getKey(), 
-                    applier.getValue());
-        }
+    private void prepForTheoremSelection() {
+        System.out.println("prepForTheoremSelection()");
+
+        removeClickTargetsFromModel();
+
         myLoadedApplications.clear();
         myProverStateDisplay.clearHighlights();
         myTheoremAppliers.clear();
         myTheoremList.getSelectionModel().clearSelection();
-        
-        Iterator<Site> antecedents = myProverStateDisplay.getModel()
-                .topLevelAntecedentSiteIterator();
+
+        myProverStateDisplay.removeMouseListener(APPLICATION_CANCELLER);
+
+        Iterator<Site> antecedents =
+                myProverStateDisplay.getModel()
+                        .topLevelAntecedentSiteIterator();
         Site antecedent;
         while (antecedents.hasNext()) {
             antecedent = antecedents.next();
-            myProverStateDisplay.addMouseListener(antecedent, 
+
+            myProverStateDisplay.addMouseListener(antecedent,
                     LOCAL_THEOREM_SELECT);
+            myProverStateDisplay.highlightPExp(antecedent, POSSIBLE_THEOREM);
             myLocalTheoremSelectors.put(antecedent, LOCAL_THEOREM_SELECT);
         }
+
+        activateTransformations(Collections
+                .singletonList((Transformation) EliminateTrueConjunctInConsequent.INSTANCE));
     }
-    
+
     public void highlightPExp(Site s, Color c) {
         myProverStateDisplay.highlightPExp(s, c);
     }
@@ -318,7 +385,7 @@ public class JProverFrame extends JFrame {
 
     private JComponent buildProofStateDisplayArea() {
         JScrollPane scroll = new JScrollPane(myProverStateDisplay);
-        
+
         return scroll;
     }
 
@@ -333,7 +400,7 @@ public class JProverFrame extends JFrame {
         myTheoremList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         myTheoremList.getSelectionModel().addListSelectionListener(
                 new GlobalTheoremSelect());
-        
+
         JScrollPane theoremView = new JScrollPane(myTheoremList);
         theoremView
                 .setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -362,7 +429,7 @@ public class JProverFrame extends JFrame {
 
     private JPanel buildBasicPanel() {
         JPanel basicPanel = new JPanel(new BorderLayout());
-        basicPanel.add(new JLabel("Proving VC 0_1..."), BorderLayout.NORTH);
+        basicPanel.add(myProvingLabel, BorderLayout.NORTH);
         basicPanel.add(buildProgressPanel(), BorderLayout.CENTER);
         basicPanel.add(buildButtonPanel(), BorderLayout.SOUTH);
 
@@ -431,93 +498,125 @@ public class JProverFrame extends JFrame {
         transportControlPanel.add(new JButton("||"));
         transportControlPanel.add(new JButton("@"));
         transportControlPanel.add(Box.createHorizontalStrut(4));
-        transportControlPanel.add(new JButton("<VC"));
-        transportControlPanel.add(new JButton("VC>"));
+        transportControlPanel.add(myLastVCButton);
+        transportControlPanel.add(myNextVCButton);
 
         return transportControlPanel;
     }
-    
-    private class ApplicationApplier extends MouseAdapter {
-        
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            myProverStateDisplay.highlightPExp((Site) e.getSource(), 
-                    Color.CYAN.brighter().brighter());
-        }
-        
-        @Override
-        public void mouseExited(MouseEvent e) {
-            myProverStateDisplay.highlightPExp((Site) e.getSource(), 
-                    Color.LIGHT_GRAY);
-        }
-        
+
+    private class ApplicationCanceller extends MouseAdapter {
+
         @Override
         public void mouseClicked(MouseEvent e) {
-            List<Application> applications =
-                    myLoadedApplications.getList((Site) e.getSource());
-            
-            if (applications.isEmpty()) {
-                throw new RuntimeException("This can't be!");
+            if (e.getButton() == MouseEvent.BUTTON3) {
+                System.out.println("ApplicationCanceller");
+                prepForTheoremSelection();
             }
-            else if (applications.size() == 1) {
-                applications.get(0).apply(myProverStateDisplay.getModel());
+        }
+    }
+
+    private class ApplicationApplier extends MouseAdapter {
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            myProverStateDisplay.highlightPExp((Site) e.getSource(),
+                    POSSIBLE_APPLICATION_HOVER);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            myProverStateDisplay.highlightPExp((Site) e.getSource(),
+                    POSSIBLE_APPLICATION);
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if (e.getButton() == MouseEvent.BUTTON1) {
+                List<Application> applications =
+                        myLoadedApplications.getList((Site) e.getSource());
+
+                if (applications.isEmpty()) {
+                    throw new RuntimeException("This can't be!");
+                }
+                else if (applications.size() == 1) {
+                    applications.get(0).apply(myProverStateDisplay.getModel());
+                }
+                else {
+                    
+                    
+                    throw new RuntimeException(
+                            "MUUUULLLLTIIIIIBAAAAALLLL!!!  BLEERN!!!!  BLEEEEEEERN!!");
+                }
+
+                //Note that the change in the underlying model will kick us back
+                //into theorem selection mode
             }
-            else {
-                throw new RuntimeException("MUUUULLLLTIIIIIBAAAAALLLL!!!  BLEERN!!!!  BLEEEEEEERN!!");
-            }
-            
-            //Can't change the list of listeners in the listener
+        }
+    }
+
+    private class LocalTheoremSelect extends MouseAdapter {
+
+        @Override
+        public void mouseClicked(final MouseEvent e) {
             SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    System.out.println("LocalTheoremSelect");
+                    prepForTheoremApplication(myProverStateDisplay.getModel()
+                            .getLocalTheoremAncestor((Site) e.getSource()));
+                }
+            });
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            myProverStateDisplay.highlightPExp((Site) e.getSource(),
+                    POSSIBLE_THEOREM_HOVER);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            myProverStateDisplay.highlightPExp((Site) e.getSource(),
+                    POSSIBLE_THEOREM);
+        }
+    }
+
+    private class GlobalTheoremSelect implements ListSelectionListener {
+
+        @Override
+        public void valueChanged(ListSelectionEvent event) {
+            if (!event.getValueIsAdjusting()
+                    && myTheoremList.getSelectedValue() != null) {
+                myProverStateDisplay.clearHighlights();
+                myLoadedApplications.clear();
+                for (Map.Entry<Site, MouseListener> applier : myTheoremAppliers
+                        .entrySet()) {
+
+                    myProverStateDisplay.removeMouseListener(applier.getKey(),
+                            applier.getValue());
+                }
+                myTheoremAppliers.clear();
+
+                System.out.println("GlobalTheoremSelect");
+                prepForTheoremApplication((Theorem) myTheoremList
+                        .getSelectedValue());
+
+            }
+        }
+    }
+
+    private class EnterTheoremSelectionOnModelChange implements ChangeListener {
+
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            SwingUtilities.invokeLater(new Runnable() {
+
                 @Override
                 public void run() {
                     prepForTheoremSelection();
                 }
             });
-        }
-    }
-    
-    private class LocalTheoremSelect extends MouseAdapter {
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            prepForTheoremApplication(
-                    myProverStateDisplay.getModel().getLocalTheoremAncestor(
-                        (Site) e.getSource()));
-        }
-        
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            myProverStateDisplay.highlightPExp((Site) e.getSource(), 
-                    Color.CYAN.brighter().brighter());
-        }
-        
-        @Override
-        public void mouseExited(MouseEvent e) {
-            myProverStateDisplay.highlightPExp((Site) e.getSource(), 
-                    Color.LIGHT_GRAY);
-        }
-    }
-    
-    private class GlobalTheoremSelect implements ListSelectionListener {
-
-        @Override
-        public void valueChanged(ListSelectionEvent event) {
-            if (!event.getValueIsAdjusting() && 
-                    myTheoremList.getSelectedValue() != null) {
-                myProverStateDisplay.clearHighlights();
-                myLoadedApplications.clear();
-                for (Map.Entry<Site, MouseListener> applier : 
-                            myTheoremAppliers.entrySet()) {
-
-                    myProverStateDisplay.removeMouseListener(applier.getKey(), 
-                            applier.getValue());
-                }
-                myTheoremAppliers.clear();
-
-                prepForTheoremApplication(
-                        (Theorem) myTheoremList.getSelectedValue());
-                
-                
-            }
         }
     }
 }

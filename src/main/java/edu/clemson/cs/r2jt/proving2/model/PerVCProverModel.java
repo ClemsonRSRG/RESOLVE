@@ -18,6 +18,7 @@ import edu.clemson.cs.r2jt.proving2.justifications.Given;
 import edu.clemson.cs.r2jt.proving2.justifications.Justification;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,28 +37,38 @@ import javax.swing.event.ChangeListener;
  * @author hamptos
  */
 public final class PerVCProverModel {
-    
+
     public static enum ChangeEventMode {
         ALWAYS {
+
             @Override
             public boolean report(boolean important) {
                 return true;
             }
-        }, 
+        },
         INTERMITTENT {
+
             private int eventCount;
-            
+
             @Override
             public boolean report(boolean important) {
                 eventCount++;
-                
+
                 return important || (eventCount % 1000 == 0);
             }
         };
-        
+
         public abstract boolean report(boolean important);
     };
-    
+
+    private final TypeGraph myTypeGraph;
+
+    /**
+     * <p>A friendly name of what we're trying to prove.  Should go well with
+     * "Proving XXX" and "Proof for XXX".</p>
+     */
+    private final String myTheoremName;
+
     /**
      * <p>A hashmap of local theorems for quick searching.  Its keyset is always
      * the same as the set of <code>PExp</code>s embedded in the 
@@ -101,7 +112,7 @@ public final class PerVCProverModel {
      * same state that this one is currently in.</p>
      */
     private final List<ProofStep> myProofSoFar = new LinkedList<ProofStep>();
-    
+
     /**
      * <p>A link to the global theorem library.</p>
      */
@@ -112,13 +123,16 @@ public final class PerVCProverModel {
      * the behavior of change listening is modified by 
      * <code>myChangeEventMode</code>.</p>
      */
-    private List<ChangeListener> myChangeListeners = 
+    private List<ChangeListener> myChangeListeners =
             new LinkedList<ChangeListener>();
-    
+
     private ChangeEventMode myChangeEventMode = ChangeEventMode.INTERMITTENT;
-    
-    public PerVCProverModel(List<PExp> antecedents, List<PExp> consequents, 
+
+    public PerVCProverModel(TypeGraph g, String proofFor,
+            List<PExp> antecedents, List<PExp> consequents,
             ImmutableList<Theorem> theoremLibrary) {
+
+        myTheoremName = proofFor;
 
         for (PExp assumption : antecedents) {
             addLocalTheorem(assumption, new Given(), false);
@@ -126,27 +140,37 @@ public final class PerVCProverModel {
 
         myConsequents.addAll(consequents);
         myLocalTheoremSetForReturning = myLocalTheoremsSet.keySet();
-        
+
         myTheoremLibrary = theoremLibrary;
+        myTypeGraph = g;
     }
 
-    public PerVCProverModel(VC vc, ImmutableList<Theorem> theoremLibrary) {
-        this(listFromIterable(vc.getAntecedent()), listFromIterable(vc
-                .getConsequent()), theoremLibrary);
+    public PerVCProverModel(TypeGraph g, String proofFor, VC vc,
+            ImmutableList<Theorem> theoremLibrary) {
+        this(g, proofFor, listFromIterable(vc.getAntecedent()),
+                listFromIterable(vc.getConsequent()), theoremLibrary);
+    }
+
+    public String getTheoremName() {
+        return myTheoremName;
     }
 
     public void setChangeEventMode(ChangeEventMode m) {
         myChangeEventMode = m;
     }
-    
+
     public void addChangeListener(ChangeListener l) {
         myChangeListeners.add(l);
     }
-    
+
     public void removeChangeListener(ChangeListener l) {
         myChangeListeners.remove(l);
     }
-    
+
+    public PExp getTrue() {
+        return PExp.trueExp(myTypeGraph);
+    }
+
     private void modelChanged(boolean important) {
         if (myChangeEventMode.report(important)) {
             ChangeEvent e = new ChangeEvent(this);
@@ -155,36 +179,41 @@ public final class PerVCProverModel {
             }
         }
     }
-    
+
     public List<ProofStep> getProofSteps() {
         return myProofSoFar;
     }
-    
+
     public void undoLastProofStep() {
         myProofSoFar.get(myProofSoFar.size() - 1).undo(this);
         myProofSoFar.remove(myProofSoFar.size() - 1);
     }
-    
+
     public ImmutableList<Theorem> getTheoremLibrary() {
         return myTheoremLibrary;
     }
-    
+
     public PExp getConsequent(int index) {
         return myConsequents.get(index);
     }
-    
+
+    public void setConsequent(int index, PExp newConsequent) {
+        myConsequents.set(index, newConsequent);
+        modelChanged(false);
+    }
+
     public LocalTheorem getLocalTheorem(int index) {
         return myLocalTheoremsList.get(index);
     }
-    
+
     public List<LocalTheorem> getLocalTheoremList() {
         return myLocalTheoremsList;
     }
-    
+
     public Set<PExp> getLocalTheoremSet() {
         return myLocalTheoremSetForReturning;
     }
-    
+
     private static List<PExp> listFromIterable(Iterable<PExp> i) {
         List<PExp> result = new LinkedList<PExp>();
         for (PExp e : i) {
@@ -197,42 +226,73 @@ public final class PerVCProverModel {
     public boolean containsLocalTheorem(PExp t) {
         return myLocalTheoremsSet.keySet().contains(t);
     }
-    
-    public void alterSite(Site s, PExp newValue) {
+
+    public void addConsequent(PExp c, int index) {
+        myConsequents.add(index, c);
+
+        //This is an important change if it took us away from a proved state
+        modelChanged(myConsequents.size() == 1);
+    }
+
+    public PExp removeConsequent(int index) {
+        PExp result = myConsequents.remove(index);
+
+        //This change is important if it eleminates the last conjunct--because
+        //then we've proved it!
+        modelChanged(myConsequents.isEmpty());
+
+        return result;
+    }
+
+    /**
+     * <p>Alters the value atthe given site, assuming it indicates either an
+     * antecedent or consequent (indicating a global theorem will trigger an
+     * <code>IllegalArgumentException</code>.  Returns the original value of the
+     * root site.</p>
+     * 
+     * @param s
+     * @param newValue
+     * @return 
+     */
+    public PExp alterSite(Site s, PExp newValue) {
+        PExp result;
+
         if (s.getModel() != this) {
             throw new IllegalArgumentException(
                     "Site does not belong to this model.");
         }
-        
+
         if (newValue == null) {
             throw new IllegalArgumentException(
                     "Can't change value to a null PExp.");
         }
-        
+
         switch (s.section) {
-            case ANTECEDENTS:
-                LocalTheorem t = myLocalTheoremsList.get(s.index);
-                removeLocalTheorem(t);
-                
-                addLocalTheorem(t.getAssertion().withSiteAltered(
-                            s.pathIterator(), newValue),
-                        t.getJustification(), t.amTryingToProveThis(), s.index);
-                break;
-            case CONSEQUENTS:
-                myConsequents.set(s.index, 
-                        myConsequents.get(s.index).withSiteAltered(
-                            s.pathIterator(), newValue));
-                break;
-            case THEOREM_LIBRARY:
-                throw new IllegalArgumentException(
-                        "Can't modify a global theorem.");
-            default:
-                throw new RuntimeException("No way to get here.");
+        case ANTECEDENTS:
+            LocalTheorem t = myLocalTheoremsList.get(s.index);
+            result = t.getAssertion();
+            removeLocalTheorem(t);
+
+            addLocalTheorem(t.getAssertion().withSiteAltered(s.pathIterator(),
+                    newValue), t.getJustification(), t.amTryingToProveThis(),
+                    s.index);
+            break;
+        case CONSEQUENTS:
+            result = myConsequents.get(s.index);
+            myConsequents.set(s.index, result.withSiteAltered(s.pathIterator(),
+                    newValue));
+            break;
+        case THEOREM_LIBRARY:
+            throw new IllegalArgumentException("Can't modify a global theorem.");
+        default:
+            throw new RuntimeException("No way to get here.");
         }
-        
+
         modelChanged(false);
+
+        return result;
     }
-    
+
     /**
      * <p>Adds a theorem to the list of local theorems (i.e., the antecedent of
      * the implication represented by the current proof state) with the given
@@ -249,85 +309,82 @@ public final class PerVCProverModel {
      * @param tryingToProveThis
      * @return 
      */
-    public LocalTheorem addLocalTheorem(PExp assertion, Justification j, 
+    public LocalTheorem addLocalTheorem(PExp assertion, Justification j,
             boolean tryingToProveThis, int index) {
-        LocalTheorem theorem = 
+        LocalTheorem theorem =
                 new LocalTheorem(assertion, j, tryingToProveThis);
-        
+
         myLocalTheoremsList.add(index, theorem);
-        
+
         Integer count = myLocalTheoremsSet.get(assertion);
-        
+
         if (count == null) {
             count = 0;
         }
-        
+
         myLocalTheoremsSet.put(assertion, count + 1);
-        
+
         modelChanged(false);
-        
+
         return theorem;
     }
-    
-    public LocalTheorem addLocalTheorem(PExp assertion, Justification j, 
+
+    public LocalTheorem addLocalTheorem(PExp assertion, Justification j,
             boolean tryingToProveThis) {
-        return addLocalTheorem(assertion, j, tryingToProveThis, 
+        return addLocalTheorem(assertion, j, tryingToProveThis,
                 myLocalTheoremsList.size());
     }
-    
-    
+
     public void removeLocalTheorem(LocalTheorem t) {
         PExp tAssertion = t.getAssertion();
-        
+
         myLocalTheoremsList.remove(t);
-        
+
         Integer count = myLocalTheoremsSet.get(tAssertion);
-        
+
         if (count > 1) {
             myLocalTheoremsSet.put(tAssertion, count - 1);
         }
         else {
             myLocalTheoremsSet.remove(tAssertion);
         }
-        
+
         modelChanged(false);
     }
-    
-    public LocalTheorem getLocalTheoremAncestor(Site s) 
+
+    public LocalTheorem getLocalTheoremAncestor(Site s)
             throws NoSuchElementException {
-        
+
         if (s.getModel() != this) {
             throw new IllegalArgumentException(
                     "Site does not belong to this model.");
         }
-        
+
         if (!s.section.equals(Site.Section.ANTECEDENTS)) {
             throw new NoSuchElementException();
         }
-        
+
         return myLocalTheoremsList.get(s.index);
     }
-    
+
     public void addProofStep(ProofStep s) {
         myProofSoFar.add(s);
-        
+
         modelChanged(false);
     }
-    
-    
-    
-    public void processStringRepresentation(ProverModelVisitor visitor, 
+
+    public void processStringRepresentation(ProverModelVisitor visitor,
             Appendable a) {
 
         try {
             boolean first = true;
-            
+
             int i = 0;
             visitor.setSection(Site.Section.ANTECEDENTS);
             for (LocalTheorem t : myLocalTheoremsList) {
                 visitor.setIndex(i);
                 i++;
-                
+
                 if (first) {
                     first = false;
                 }
@@ -346,7 +403,7 @@ public final class PerVCProverModel {
             for (PExp c : myConsequents) {
                 visitor.setIndex(i);
                 i++;
-                
+
                 if (first) {
                     first = false;
                 }
@@ -361,83 +418,82 @@ public final class PerVCProverModel {
             throw new RuntimeException(e);
         }
     }
-    
+
     public Iterator<Site> topLevelAntecedentSiteIterator() {
         return new IndexIncrementingSiteIterator(
-                new LazyMappingIterator<LocalTheorem, PExp>(
-                    myLocalTheoremsList.iterator(), 
-                    LocalTheorem.UNWRAPPER),
+                new LazyMappingIterator<LocalTheorem, PExp>(myLocalTheoremsList
+                        .iterator(), LocalTheorem.UNWRAPPER),
                 Site.Section.ANTECEDENTS, 0);
     }
-    
+
     public Iterator<Site> topLevelConsequentSiteIterator() {
-        return new IndexIncrementingSiteIterator(
-                myConsequents.iterator(), Site.Section.CONSEQUENTS, 0);
+        return new IndexIncrementingSiteIterator(myConsequents.iterator(),
+                Site.Section.CONSEQUENTS, 0);
     }
-    
+
     public Iterator<Site> topLevelAntecedentAndConsequentSiteIterator() {
         return new ChainingIterator<Site>(topLevelAntecedentSiteIterator(),
                 topLevelConsequentSiteIterator());
     }
-    
+
     public Iterator<Site> topLevelGlobalTheoremsIterator() {
         return new IndexIncrementingSiteIterator(
-                new LazyMappingIterator<Theorem, PExp>(
-                    myTheoremLibrary.iterator(),
-                    Theorem.UNWRAPPER),
+                new LazyMappingIterator<Theorem, PExp>(myTheoremLibrary
+                        .iterator(), Theorem.UNWRAPPER),
                 Site.Section.THEOREM_LIBRARY, 0);
     }
-    
+
     public Iterator<Site> topLevelAntecedentAndGlobalTheoremSiteIterator() {
         return new ChainingIterator<Site>(topLevelAntecedentSiteIterator(),
                 topLevelGlobalTheoremsIterator());
     }
-    
+
     public Iterator<BindResult> bind(Set<Binder> binders) {
-        return new BinderSatisfyingIterator(binders, new HashMap<PExp, PExp>(), 
+        return new BinderSatisfyingIterator(binders, new HashMap<PExp, PExp>(),
                 new LinkedList<Site>());
     }
-    
-    private class BinderSatisfyingIterator 
-            implements Iterator<BindResult> {
+
+    private class BinderSatisfyingIterator implements Iterator<BindResult> {
 
         private final Binder myFirstBinder;
         private final Iterator<Site> myFirstBinderSites;
-        
+
         private Site myCurFirstSite;
         private Map<PExp, PExp> myCurFirstSiteBindings;
-        
+
         private final Set<Binder> myOtherBinders = new HashSet<Binder>();
         private Iterator<BindResult> myOtherBindings;
-        
+
         private BindResult myNextReturn;
-        
+
         private final Map<PExp, PExp> myAssumedBindings;
         private final List<Site> myBoundSiteSoFar;
-        
-        public BinderSatisfyingIterator(Set<Binder> binders, 
+
+        public BinderSatisfyingIterator(Set<Binder> binders,
                 Map<PExp, PExp> assumedBindings, List<Site> boundSitesSoFar) {
             myAssumedBindings = assumedBindings;
             myBoundSiteSoFar = boundSitesSoFar;
-            
+
             if (!binders.isEmpty()) {
                 myFirstBinder = binders.iterator().next();
-                myFirstBinderSites = myFirstBinder.getInterestingSiteVisitor(
-                        PerVCProverModel.this, Collections.EMPTY_LIST);
+                myFirstBinderSites =
+                        myFirstBinder.getInterestingSiteVisitor(
+                                PerVCProverModel.this, Collections.EMPTY_LIST);
                 myOtherBinders.addAll(binders);
                 myOtherBinders.remove(myFirstBinder);
                 myOtherBindings = DummyIterator.getInstance(myOtherBindings);
-                
+
                 setUpNext();
             }
             else {
                 myFirstBinder = null;
                 myFirstBinderSites = null;
-                myNextReturn = new BindResult(new HashMap<Binder, Site>(), 
-                        new HashMap<PExp, PExp>());
+                myNextReturn =
+                        new BindResult(new HashMap<Binder, Site>(),
+                                new HashMap<PExp, PExp>());
             }
         }
-        
+
         @Override
         public boolean hasNext() {
             return (myNextReturn != null);
@@ -448,10 +504,10 @@ public final class PerVCProverModel {
             if (myNextReturn == null) {
                 throw new NoSuchElementException();
             }
-            
+
             BindResult result = myNextReturn;
             setUpNext();
-            
+
             return result;
         }
 
@@ -459,66 +515,69 @@ public final class PerVCProverModel {
         public void remove() {
             throw new UnsupportedOperationException();
         }
-        
+
         private void setUpNext() {
             if (myFirstBinder == null) {
                 myNextReturn = null;
             }
             else {
-                while (myFirstBinderSites.hasNext() && 
-                        !myOtherBindings.hasNext()) {
-                    
+                while (myFirstBinderSites.hasNext()
+                        && !myOtherBindings.hasNext()) {
+
                     myCurFirstSite = myFirstBinderSites.next();
-                    
+
                     try {
-                        myCurFirstSiteBindings = myFirstBinder.considerSite(
-                                myCurFirstSite, myAssumedBindings);
-                        
-                        Map<PExp, PExp> inductiveBindings = 
+                        myCurFirstSiteBindings =
+                                myFirstBinder.considerSite(myCurFirstSite,
+                                        myAssumedBindings);
+
+                        Map<PExp, PExp> inductiveBindings =
                                 new HashMap<PExp, PExp>(myAssumedBindings);
                         inductiveBindings.putAll(myCurFirstSiteBindings);
-                        
-                        List<Site> inductiveSites = 
+
+                        List<Site> inductiveSites =
                                 new LinkedList<Site>(myBoundSiteSoFar);
                         inductiveSites.add(myCurFirstSite);
-                        
-                        myOtherBindings = new BinderSatisfyingIterator(
-                                myOtherBinders, inductiveBindings, 
-                                inductiveSites);
+
+                        myOtherBindings =
+                                new BinderSatisfyingIterator(myOtherBinders,
+                                        inductiveBindings, inductiveSites);
                     }
                     catch (BindingException be) {
                         //Can't bind the current site.  No worries--just keep
                         //searching.
                     }
                 }
-                
+
                 //Either !myFirstBinderSites.hasNext(), or 
                 //myOtherBindings.hasNext(), or both
                 if (myOtherBindings.hasNext()) {
                     myNextReturn = myOtherBindings.next();
                     myNextReturn.bindSites.put(myFirstBinder, myCurFirstSite);
-                    myNextReturn.freeVariableBindings.putAll(
-                            myCurFirstSiteBindings);
-                } else {
+                    myNextReturn.freeVariableBindings
+                            .putAll(myCurFirstSiteBindings);
+                }
+                else {
                     myNextReturn = null;
                 }
             }
         }
     }
-    
+
     public static class BindResult {
+
         public Map<Binder, Site> bindSites;
         public Map<PExp, PExp> freeVariableBindings;
-        
-        public BindResult(Map<Binder, Site> bindSites, 
+
+        public BindResult(Map<Binder, Site> bindSites,
                 Map<PExp, PExp> freeVariableBindings) {
             this.bindSites = bindSites;
             this.freeVariableBindings = freeVariableBindings;
         }
     }
-    
+
     public static interface Binder {
-        
+
         /**
          * <p>Returns an iterator over binding sites that should be considered,
          * in the order they should be considered, based on any other sites that
@@ -531,7 +590,7 @@ public final class PerVCProverModel {
          */
         public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m,
                 List<Site> boundSitesSoFar);
-        
+
         /**
          * <p>Attempts to bind to the given site, which was returned from an
          * iterator returned by 
@@ -549,98 +608,111 @@ public final class PerVCProverModel {
          * 
          * @throws BindingException If the site is rejected.
          */
-        public Map<PExp, PExp> considerSite(Site s, 
-                Map<PExp, PExp> assumedBindings) 
-                throws BindingException;
+        public Map<PExp, PExp> considerSite(Site s,
+                Map<PExp, PExp> assumedBindings) throws BindingException;
     }
-    
+
     public static class TopLevelAntecedentBinder extends AbstractBinder {
 
         public TopLevelAntecedentBinder(PExp pattern) {
             super(pattern);
         }
-        
+
         @Override
-        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m, 
+        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m,
                 List<Site> boundSitesSoFar) {
             return m.topLevelAntecedentSiteIterator();
         }
     }
-    
+
     public static class TopLevelConsequentBinder extends AbstractBinder {
 
         public TopLevelConsequentBinder(PExp pattern) {
             super(pattern);
         }
-        
+
         @Override
-        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m, 
+        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m,
                 List<Site> boundSitesSoFar) {
             return m.topLevelConsequentSiteIterator();
         }
     }
-    
+
+    public static class InductiveAntecedentBinder extends AbstractBinder {
+
+        public InductiveAntecedentBinder(PExp pattern) {
+            super(pattern);
+        }
+
+        @Override
+        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m,
+                List<Site> boundSitesSoFar) {
+            return new InductiveSiteIteratorIterator(m
+                    .topLevelConsequentSiteIterator());
+        }
+    }
+
     public static class InductiveConsequentBinder extends AbstractBinder {
-        
+
         public InductiveConsequentBinder(PExp pattern) {
             super(pattern);
         }
-        
+
         @Override
-        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m, 
+        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m,
                 List<Site> boundSitesSoFar) {
-            return new InductiveSiteIteratorIterator(
-                    m.topLevelConsequentSiteIterator());
+            return new InductiveSiteIteratorIterator(m
+                    .topLevelConsequentSiteIterator());
         }
     }
-    
-    public static class TopLevelAntecedentAndConsequentBinder 
-            extends AbstractBinder {
+
+    public static class TopLevelAntecedentAndConsequentBinder
+            extends
+                AbstractBinder {
 
         public TopLevelAntecedentAndConsequentBinder(PExp pattern) {
             super(pattern);
         }
-        
+
         @Override
-        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m, 
+        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m,
                 List<Site> boundSitesSoFar) {
             return m.topLevelAntecedentAndConsequentSiteIterator();
         }
     }
-    
+
     public static abstract class AbstractBinder implements Binder {
 
         private PExp myPattern;
-        
+
         public AbstractBinder(PExp pattern) {
             myPattern = pattern;
         }
 
         @Override
-        public Map<PExp, PExp> considerSite(Site s, 
-                Map<PExp, PExp> assumedBindings) 
-                throws BindingException {
+        public Map<PExp, PExp> considerSite(Site s,
+                Map<PExp, PExp> assumedBindings) throws BindingException {
             return myPattern.substitute(assumedBindings).bindTo(s.exp);
         }
     }
-    
+
     private class IndexIncrementingSiteIterator implements Iterator<Site> {
 
         private final Site.Section mySection;
-        private final ImmutableList<Integer> myPath = 
+        private final ImmutableList<Integer> myPath =
                 new EmptyImmutableList<Integer>();
         private int myCurIndex;
-        
+
         private final Iterator<PExp> myExpressions;
-        
-        public IndexIncrementingSiteIterator(Iterator<PExp> expressions, 
+
+        public IndexIncrementingSiteIterator(Iterator<PExp> expressions,
                 Site.Section section, int startIndex) {
-            
+
             myExpressions = expressions;
             mySection = section;
             myCurIndex = startIndex;
         }
-        
+
         @Override
         public boolean hasNext() {
             return myExpressions.hasNext();
@@ -648,11 +720,12 @@ public final class PerVCProverModel {
 
         @Override
         public Site next() {
-            Site result = new Site(PerVCProverModel.this, mySection, myCurIndex,
-                    myPath, myExpressions.next());
-            
+            Site result =
+                    new Site(PerVCProverModel.this, mySection, myCurIndex,
+                            myPath, myExpressions.next());
+
             myCurIndex++;
-            
+
             return result;
         }
 

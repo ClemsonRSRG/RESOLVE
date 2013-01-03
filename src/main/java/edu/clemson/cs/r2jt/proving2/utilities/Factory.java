@@ -9,5 +9,6 @@ package edu.clemson.cs.r2jt.proving2.utilities;
  * @author hamptos
  */
 public interface Factory<T> {
+
     public T fabricate();
 }

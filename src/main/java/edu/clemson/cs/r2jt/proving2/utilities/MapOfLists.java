@@ -18,28 +18,28 @@ import java.util.Map;
 public class MapOfLists<K, E> {
 
     private final Map<K, List<E>> myBaseMap;
-    
+
     public MapOfLists() {
         myBaseMap = new HashMap<K, List<E>>();
     }
-    
+
     public void clear() {
         myBaseMap.clear();
     }
-    
+
     public void putElement(K key, E element) {
         getList(key).add(element);
     }
-    
+
     public List<E> getList(K key) {
         List<E> result = myBaseMap.get(key);
-        
+
         if (result == null) {
             result = new LinkedList<E>();
             myBaseMap.put(key, result);
         }
-        
+
         return result;
     }
-    
+
 }

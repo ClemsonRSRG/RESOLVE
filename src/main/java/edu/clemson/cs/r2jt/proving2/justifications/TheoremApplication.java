@@ -11,9 +11,9 @@ import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
  * @author hamptos
  */
 public class TheoremApplication implements Justification {
-    
+
     private final Transformation myTransformation;
-    
+
     public TheoremApplication(Transformation t) {
         myTransformation = t;
     }

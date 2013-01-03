@@ -20,30 +20,33 @@ import java.util.List;
  * in a theorem or consequent.</p>
  */
 public class Site {
-    
+
     public enum Section {
         ANTECEDENTS {
+
             @Override
             public PExp getPExp(PerVCProverModel m, int index) {
                 return m.getLocalTheorem(index).getAssertion();
             }
-        }, 
+        },
         CONSEQUENTS {
+
             @Override
             public PExp getPExp(PerVCProverModel m, int index) {
                 return m.getConsequent(index);
             }
-        }, 
+        },
         THEOREM_LIBRARY {
+
             @Override
             public PExp getPExp(PerVCProverModel m, int index) {
                 return m.getTheoremLibrary().get(index).getAssertion();
             }
         };
-    
+
         public abstract PExp getPExp(PerVCProverModel m, int index);
     };
-    
+
     public final Section section;
     public final int index;
     public final ImmutableList path;
@@ -53,27 +56,28 @@ public class Site {
     private final int myHashCode;
 
     private final PerVCProverModel mySource;
-    
-    public Site(PerVCProverModel source, Section section, int index, 
+
+    public Site(PerVCProverModel source, Section section, int index,
             Iterable<Integer> path, PExp exp) {
-        this(source, section, index, path, exp, new Site(
-                source, section, index, section.getPExp(source, index)));
+        this(source, section, index, path, exp, new Site(source, section,
+                index, section.getPExp(source, index)));
     }
-    
+
     public Site(PerVCProverModel source, Section section, int index, PExp exp) {
         this(source, section, index, Collections.EMPTY_LIST, exp, null);
     }
-    
-    private Site(PerVCProverModel source, Section section, int index, 
+
+    private Site(PerVCProverModel source, Section section, int index,
             Iterable<Integer> path, PExp exp, Site root) {
         this.section = section;
         this.index = index;
         this.path = new ArrayBackedImmutableList(path);
         this.exp = exp;
-        
-        myHashCode = section.hashCode() + 
-                (41 * (index + (57 * this.path.hashCode())));
-        
+
+        myHashCode =
+                section.hashCode()
+                        + (41 * (index + (57 * this.path.hashCode())));
+
         if (root == null) {
             //This looks weird but suppresses a "leaked this" warning
             Site r = this;
@@ -82,7 +86,7 @@ public class Site {
         else {
             this.root = root;
         }
-        
+
         mySource = source;
     }
 
@@ -97,8 +101,9 @@ public class Site {
 
         if (result) {
             Site oAsSite = (Site) o;
-            result = section.equals(oAsSite.section) && 
-                    index == oAsSite.index && path.equals(oAsSite.path);
+            result =
+                    section.equals(oAsSite.section) && index == oAsSite.index
+                            && path.equals(oAsSite.path);
         }
 
         return result;
@@ -113,9 +118,11 @@ public class Site {
     }
 
     public boolean inside(Site s) {
-        boolean result = (getModel() == s.getModel()) && 
-                (section.equals(s.section)) &&
-                (index == s.index);
+        if (getModel() != s.getModel()) {
+            throw new RuntimeException("Incomparable sites--different models.");
+        }
+
+        boolean result = (section.equals(s.section)) && (index == s.index);
 
         if (result) {
             Iterator<Integer> myIter = pathIterator();
@@ -131,9 +138,10 @@ public class Site {
 
         return result;
     }
-    
+
     @Override
     public String toString() {
-        return section + ":" + section.getPExp(mySource, index) + "(" + index + "):" + exp;
+        return section + ":" + section.getPExp(mySource, index) + "(" + index
+                + "):" + exp;
     }
 }

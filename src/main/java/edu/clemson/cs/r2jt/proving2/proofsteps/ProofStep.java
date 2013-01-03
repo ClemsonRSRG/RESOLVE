@@ -11,5 +11,6 @@ import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
  * @author hamptos
  */
 public interface ProofStep {
+
     public void undo(PerVCProverModel m);
 }

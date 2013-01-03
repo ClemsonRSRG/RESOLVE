@@ -15,6 +15,8 @@ import java.util.Set;
  * @author hamptos
  */
 public interface Application {
+
     public void apply(PerVCProverModel m);
+
     public Set<Site> involvedSubExpressions();
 }

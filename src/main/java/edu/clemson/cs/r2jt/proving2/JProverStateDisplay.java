@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.DefaultStyledDocument;
 
 public class JProverStateDisplay extends JTextPane {
 
@@ -42,7 +43,7 @@ public class JProverStateDisplay extends JTextPane {
     private static final Object PEXP_ID_KEY = new Object();
 
     private final ModelChanged MODEL_CHANGED = new ModelChanged();
-    
+
     private DisplayConstructingVisitor myDisplayer =
             new DisplayConstructingVisitor();
 
@@ -57,14 +58,12 @@ public class JProverStateDisplay extends JTextPane {
 
     private final Map<Site, Integer> myNodeToEnd = new HashMap<Site, Integer>();
 
-    private int myHighlightStart, myHighlightEnd;
-    
     private final SiteTagger<Color> myHighlightedNodes =
             new SiteTagger<Color>();
-    
+
     private final SiteTagger<List<MouseListener>> myMouseActiveNodes =
             new SiteTagger<List<MouseListener>>();
-    
+
     /**
      * <p>Tracks which site the mouse is moving over.</p>
      */
@@ -83,15 +82,15 @@ public class JProverStateDisplay extends JTextPane {
         myHighlightedNodes.clear();
         resetHighlights();
     }
-    
+
     public void highlightPExp(Site s, Color c) {
         myHighlightedNodes.tagSite(s, c);
         resetHighlights();
     }
-    
+
     public void addMouseListener(Site s, MouseListener l) {
         List<MouseListener> mouseListeners;
-        
+
         try {
             mouseListeners = myMouseActiveNodes.getTag(s);
         }
@@ -99,7 +98,7 @@ public class JProverStateDisplay extends JTextPane {
             mouseListeners = new LinkedList<MouseListener>();
             myMouseActiveNodes.tagSite(s, mouseListeners);
         }
-        
+
         mouseListeners.add(l);
     }
 
@@ -112,7 +111,7 @@ public class JProverStateDisplay extends JTextPane {
             //Nothing to remove
         }
     }
-    
+
     private void resetHighlights() {
         MutableAttributeSet blank = new SimpleAttributeSet();
         blank.addAttribute(StyleConstants.Background, getBackground());
@@ -126,16 +125,25 @@ public class JProverStateDisplay extends JTextPane {
         if (myProverState != null) {
             m.removeChangeListener(MODEL_CHANGED);
         }
-        
+
         myProverState = m;
         m.addChangeListener(MODEL_CHANGED);
-        
+
         refreshModel();
     }
-    
+
     private void refreshModel() {
+        myNodeToStart.clear();
+        myNodeToEnd.clear();
+        myHighlightedNodes.clear();
+        myMouseActiveNodes.clear();
+        myCurMouseContainer = null;
+
         myDisplayer = new DisplayConstructingVisitor();
-        setText("");
+
+        setDocument(new DefaultStyledDocument());
+        myDocument = (StyledDocument) getDocument();
+
         myProverState.processStringRepresentation(myDisplayer, myDisplayer);
     }
 
@@ -150,7 +158,7 @@ public class JProverStateDisplay extends JTextPane {
         public DisplayConstructingVisitor() {
             super(myProverState);
         }
-        
+
         @Override
         public void doBeginPExp(PExp p) {
             myNodeToStart.put(getID(), myDocument.getLength());
@@ -206,33 +214,33 @@ public class JProverStateDisplay extends JTextPane {
             if (!myNodeToStart.containsKey(id)) {
                 throw new RuntimeException("Danger Will Robinson!");
             }
-            
+
             int start = myNodeToStart.get(id);
             int end = myNodeToEnd.get(id);
             myDocument.setCharacterAttributes(start, end - start, bgColor,
                     false);
         }
     }
-    
-    private class SiteTagger<T> {
-        
+
+    private static class SiteTagger<T> {
+
         private Map<Site, TaggedSites<T>> myTopLevelConjunctsWithTags =
                 new HashMap<Site, TaggedSites<T>>();
-        
+
         public void tagSite(Site s, T t) {
             Site sRoot = s.root;
 
             if (!myTopLevelConjunctsWithTags.containsKey(sRoot)) {
-                myTopLevelConjunctsWithTags.put(sRoot, 
+                myTopLevelConjunctsWithTags.put(sRoot,
                         new TaggedSites<T>(sRoot));
             }
 
             myTopLevelConjunctsWithTags.get(sRoot).put(s, t);
         }
-        
+
         public boolean siteIsTagged(Site s) {
             boolean result;
-            
+
             try {
                 getTag(s);
                 result = true;
@@ -240,47 +248,47 @@ public class JProverStateDisplay extends JTextPane {
             catch (NoSuchElementException nsee) {
                 result = false;
             }
-            
+
             return result;
         }
-        
+
         public T getTag(Site s) {
             T result;
-            
+
             if (!myTopLevelConjunctsWithTags.containsKey(s.root)) {
                 throw new NoSuchElementException();
             }
             else {
                 result = myTopLevelConjunctsWithTags.get(s.root).getData(s);
             }
-            
+
             return result;
         }
-        
+
         public void visitTaggedSites(TaggedSiteVisitor<T> v) {
-            for (TaggedSites<T> taggedSites : 
-                    myTopLevelConjunctsWithTags.values()) {
+            for (TaggedSites<T> taggedSites : myTopLevelConjunctsWithTags
+                    .values()) {
                 taggedSites.traverse(v);
             }
         }
-        
-        public Site getNearestTaggedAncestor(Site s) 
+
+        public Site getNearestTaggedAncestor(Site s)
                 throws NoSuchElementException {
-            
+
             if (!myTopLevelConjunctsWithTags.containsKey(s.root)) {
                 throw new NoSuchElementException();
             }
-            
-            return myTopLevelConjunctsWithTags.get(
-                    s.root).getSmallestIdentifiedAncestor(s);
+
+            return myTopLevelConjunctsWithTags.get(s.root)
+                    .getSmallestIdentifiedAncestor(s);
         }
-        
+
         public void clear() {
             myTopLevelConjunctsWithTags.clear();
         }
     }
 
-    private Site getActiveSiteOfEvent(MouseEvent e) 
+    private Site getActiveSiteOfEvent(MouseEvent e)
             throws NoSuchElementException {
 
         Site result;
@@ -305,18 +313,18 @@ public class JProverStateDisplay extends JTextPane {
 
         return result;
     }
-    
+
     private void mouseEnteredSite(Site s, MouseEvent e) {
         if (myCurMouseContainer == null || !myCurMouseContainer.equals(s)) {
             if (myCurMouseContainer != null) {
-                MouseEvent exited = new MouseEvent(this, 
-                        MouseEvent.MOUSE_EXITED, e.getWhen(), 
-                        e.getModifiers(), e.getX(), e.getY(), 
-                        e.getXOnScreen(), e.getYOnScreen(), 
-                        e.getClickCount(), e.isPopupTrigger(), 
-                        e.getButton());
+                MouseEvent exited =
+                        new MouseEvent(this, MouseEvent.MOUSE_EXITED, e
+                                .getWhen(), e.getModifiers(), e.getX(), e
+                                .getY(), e.getXOnScreen(), e.getYOnScreen(), e
+                                .getClickCount(), e.isPopupTrigger(), e
+                                .getButton());
                 exited.setSource(myCurMouseContainer);
-                List<MouseListener> listeners = 
+                List<MouseListener> listeners =
                         myMouseActiveNodes.getTag(myCurMouseContainer);
                 for (MouseListener l : listeners) {
                     l.mouseExited(exited);
@@ -324,15 +332,14 @@ public class JProverStateDisplay extends JTextPane {
             }
 
             if (s != null) {
-                MouseEvent entered = new MouseEvent(this, 
-                        MouseEvent.MOUSE_ENTERED, e.getWhen(), 
-                        e.getModifiers(), e.getX(), e.getY(), 
-                        e.getXOnScreen(), e.getYOnScreen(), 
-                        e.getClickCount(), e.isPopupTrigger(), 
-                        e.getButton());
+                MouseEvent entered =
+                        new MouseEvent(this, MouseEvent.MOUSE_ENTERED, e
+                                .getWhen(), e.getModifiers(), e.getX(), e
+                                .getY(), e.getXOnScreen(), e.getYOnScreen(), e
+                                .getClickCount(), e.isPopupTrigger(), e
+                                .getButton());
                 entered.setSource(s);
-                List<MouseListener> listeners = 
-                        myMouseActiveNodes.getTag(s);
+                List<MouseListener> listeners = myMouseActiveNodes.getTag(s);
                 for (MouseListener l : listeners) {
                     l.mouseEntered(entered);
                 }
@@ -341,12 +348,12 @@ public class JProverStateDisplay extends JTextPane {
             myCurMouseContainer = s;
         }
     }
-    
+
     private class SiteMouseMotionListener implements MouseMotionListener {
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            
+
         }
 
         @Override
@@ -359,17 +366,17 @@ public class JProverStateDisplay extends JTextPane {
                 mouseEnteredSite(null, e);
             }
         }
-        
+
     }
-    
+
     private class SiteMouseListener implements MouseListener {
-        
+
         @Override
         public void mouseClicked(MouseEvent e) {
             try {
                 Site nearestAncestor = getActiveSiteOfEvent(e);
 
-                List<MouseListener> listeners = 
+                List<MouseListener> listeners =
                         myMouseActiveNodes.getTag(nearestAncestor);
 
                 e.setSource(nearestAncestor);
@@ -387,7 +394,7 @@ public class JProverStateDisplay extends JTextPane {
             try {
                 Site nearestAncestor = getActiveSiteOfEvent(e);
 
-                List<MouseListener> listeners = 
+                List<MouseListener> listeners =
                         myMouseActiveNodes.getTag(nearestAncestor);
 
                 e.setSource(nearestAncestor);
@@ -405,7 +412,7 @@ public class JProverStateDisplay extends JTextPane {
             try {
                 Site nearestAncestor = getActiveSiteOfEvent(e);
 
-                List<MouseListener> listeners = 
+                List<MouseListener> listeners =
                         myMouseActiveNodes.getTag(nearestAncestor);
 
                 e.setSource(nearestAncestor);
@@ -420,7 +427,7 @@ public class JProverStateDisplay extends JTextPane {
 
         @Override
         public void mouseEntered(MouseEvent e) {
-            //Mouse moved should take care of this?
+        //Mouse moved should take care of this?
         }
 
         @Override
@@ -428,7 +435,7 @@ public class JProverStateDisplay extends JTextPane {
             mouseEnteredSite(null, e);
         }
     }
-    
+
     private class ModelChanged implements ChangeListener {
 
         @Override

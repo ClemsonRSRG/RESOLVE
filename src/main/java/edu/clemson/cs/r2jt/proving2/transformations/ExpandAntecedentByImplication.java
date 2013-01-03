@@ -63,7 +63,7 @@ public class ExpandAntecedentByImplication implements Transformation {
 
     private final BindResultToApplication BIND_RESULT_TO_APPLICATION =
             new BindResultToApplication();
-    
+
     private final List<PExp> myAntecedents;
     private final int myAntecedentsSize;
     private final PExp myConsequent;
@@ -74,39 +74,39 @@ public class ExpandAntecedentByImplication implements Transformation {
         myAntecedentsSize = myAntecedents.size();
         myConsequent = consequent;
     }
-    
+
     @Override
     public String toString() {
-        return Utilities.conjunctListToString(myAntecedents) + 
-                " implies " + myConsequent;
+        return Utilities.conjunctListToString(myAntecedents) + " implies "
+                + myConsequent;
     }
-    
+
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
         Set<Binder> binders = new HashSet<Binder>();
         for (PExp a : myAntecedents) {
             binders.add(new QuirkyBinder(a, myAntecedentsSize));
         }
-        
-        return new LazyMappingIterator(m.bind(binders), 
+
+        return new LazyMappingIterator(m.bind(binders),
                 BIND_RESULT_TO_APPLICATION);
     }
-    
+
     public class QuirkyBinder implements PerVCProverModel.Binder {
 
         private int myTotalBindingCount;
         private PExp myPattern;
-        
+
         public QuirkyBinder(PExp pattern, int totalBindings) {
             myTotalBindingCount = totalBindings;
             myPattern = pattern;
         }
-        
+
         @Override
-        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m, 
+        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m,
                 List<Site> boundSitesSoFar) {
             Iterator<Site> result = m.topLevelAntecedentSiteIterator();
-            
+
             boolean includeGlobal = true;
             if (boundSitesSoFar.size() == (myTotalBindingCount - 1)) {
                 //We are the last binding.  If all other bindings are to global
@@ -114,16 +114,18 @@ public class ExpandAntecedentByImplication implements Transformation {
                 includeGlobal = false;
                 Iterator<Site> boundSitesSoFarIter = boundSitesSoFar.iterator();
                 while (!includeGlobal && boundSitesSoFarIter.hasNext()) {
-                    includeGlobal = (boundSitesSoFarIter.next().section.equals(
-                            Site.Section.ANTECEDENTS));
+                    includeGlobal =
+                            (boundSitesSoFarIter.next().section
+                                    .equals(Site.Section.ANTECEDENTS));
                 }
             }
-            
+
             if (includeGlobal) {
-                result = new ChainingIterator<Site>(result, 
-                        m.topLevelGlobalTheoremsIterator());
+                result =
+                        new ChainingIterator<Site>(result, m
+                                .topLevelGlobalTheoremsIterator());
             }
-            
+
             return result;
         }
 
@@ -133,9 +135,10 @@ public class ExpandAntecedentByImplication implements Transformation {
             return myPattern.substitute(assumedBindings).bindTo(s.exp);
         }
     }
-    
-    public class BindResultToApplication 
-            implements Mapping<BindResult, Application> {
+
+    public class BindResultToApplication
+            implements
+                Mapping<BindResult, Application> {
 
         @Override
         public Application map(BindResult input) {
@@ -143,40 +146,41 @@ public class ExpandAntecedentByImplication implements Transformation {
                     input.freeVariableBindings, input.bindSites.values());
         }
     }
-    
-    private class ExpandAntecedentByImplicationApplication 
-            implements Application {
+
+    private class ExpandAntecedentByImplicationApplication
+            implements
+                Application {
 
         private Map<PExp, PExp> myBindings;
         private Collection<Site> myBindSites;
-        
+
         public ExpandAntecedentByImplicationApplication(
-                    Map<PExp, PExp> bindings, Collection<Site> bindSites) {
+                Map<PExp, PExp> bindings, Collection<Site> bindSites) {
             myBindings = bindings;
             myBindSites = bindSites;
         }
-        
+
         @Override
         public void apply(PerVCProverModel m) {
             PExp newAntecedent = myConsequent.substitute(myBindings);
-            
-            LocalTheorem t = m.addLocalTheorem(newAntecedent, 
-                    new TheoremApplication(
-                        ExpandAntecedentByImplication.this), false);
-            m.addProofStep(new IntroduceLocalTheorem(t, 
+
+            LocalTheorem t =
+                    m.addLocalTheorem(newAntecedent, new TheoremApplication(
+                            ExpandAntecedentByImplication.this), false);
+            m.addProofStep(new IntroduceLocalTheorem(t,
                     ExpandAntecedentByImplication.this));
         }
 
         @Override
         public Set<Site> involvedSubExpressions() {
             Set<Site> result = new HashSet<Site>();
-            
+
             for (Site s : myBindSites) {
                 if (s.section.equals(Site.Section.ANTECEDENTS)) {
                     result.add(s);
                 }
             }
-            
+
             return result;
         }
     }

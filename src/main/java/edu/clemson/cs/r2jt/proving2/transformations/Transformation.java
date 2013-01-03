@@ -27,5 +27,6 @@ import java.util.Set;
  * is actually taken.</p>
  */
 public interface Transformation {
+
     public Iterator<Application> getApplications(PerVCProverModel m);
 }

@@ -15,13 +15,12 @@ import edu.clemson.cs.r2jt.utilities.Mapping;
  */
 public class TheoremUnwrapper implements Mapping<Theorem, PExp> {
 
-    public static final TheoremUnwrapper INSTANCE = 
-            new TheoremUnwrapper();
-    
+    public static final TheoremUnwrapper INSTANCE = new TheoremUnwrapper();
+
     private TheoremUnwrapper() {
-        
+
     }
-    
+
     @Override
     public PExp map(Theorem input) {
         return input.getAssertion();

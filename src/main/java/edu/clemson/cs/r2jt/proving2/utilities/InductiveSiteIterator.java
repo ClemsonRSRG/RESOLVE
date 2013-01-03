@@ -19,31 +19,32 @@ public class InductiveSiteIterator implements Iterator<Site> {
     private final Site myRootSite;
     private final Iterator<Site> myRootSubExpressions;
     private Site myCurrentSubExpression;
-    
+
     private Iterator<Site> myCurrentInductiveSubExpressionIterator;
-    
+
     private Site myNextReturn;
-    
+
     private boolean myNoMoreFlag = false;
-    
+
     public InductiveSiteIterator(Site s) {
         myRootSite = s;
-        myRootSubExpressions = 
+        myRootSubExpressions =
                 new SiteConstructor(s, s.exp.getSubExpressions().iterator());
-        
+
         if (myRootSubExpressions.hasNext()) {
             myCurrentSubExpression = myRootSubExpressions.next();
-            myCurrentInductiveSubExpressionIterator = 
+            myCurrentInductiveSubExpressionIterator =
                     new InductiveSiteIterator(myCurrentSubExpression);
         }
         else {
-            myCurrentInductiveSubExpressionIterator = DummyIterator.getInstance(
-                    myCurrentInductiveSubExpressionIterator);
+            myCurrentInductiveSubExpressionIterator =
+                    DummyIterator
+                            .getInstance(myCurrentInductiveSubExpressionIterator);
         }
-        
+
         setUpNext();
     }
-    
+
     private void setUpNext() {
         if (myNoMoreFlag) {
             myNextReturn = null;
@@ -54,7 +55,7 @@ public class InductiveSiteIterator implements Iterator<Site> {
         else {
             if (myRootSubExpressions.hasNext()) {
                 myCurrentSubExpression = myRootSubExpressions.next();
-                myCurrentInductiveSubExpressionIterator = 
+                myCurrentInductiveSubExpressionIterator =
                         new InductiveSiteIterator(myCurrentSubExpression);
                 myNextReturn = myCurrentInductiveSubExpressionIterator.next();
             }
@@ -64,7 +65,7 @@ public class InductiveSiteIterator implements Iterator<Site> {
             }
         }
     }
-    
+
     @Override
     public boolean hasNext() {
         return (myNextReturn != null);
@@ -75,11 +76,11 @@ public class InductiveSiteIterator implements Iterator<Site> {
         if (myNextReturn == null) {
             throw new NoSuchElementException();
         }
-        
+
         Site result = myNextReturn;
-        
+
         setUpNext();
-        
+
         return result;
     }
 
@@ -93,13 +94,13 @@ public class InductiveSiteIterator implements Iterator<Site> {
         private final Site myBasis;
         private final Iterator<PExp> myPExps;
         private int mySiblingIndex;
-        
+
         public SiteConstructor(Site basis, Iterator<PExp> p) {
             myBasis = basis;
             myPExps = p;
             mySiblingIndex = 0;
         }
-        
+
         @Override
         public boolean hasNext() {
             return myPExps.hasNext();
@@ -107,12 +108,13 @@ public class InductiveSiteIterator implements Iterator<Site> {
 
         @Override
         public Site next() {
-            Site result = new Site(myBasis.getModel(), myBasis.section, 
-                    myBasis.index, myBasis.path.appended(mySiblingIndex), 
-                    myPExps.next());
-            
+            Site result =
+                    new Site(myBasis.getModel(), myBasis.section,
+                            myBasis.index, myBasis.path
+                                    .appended(mySiblingIndex), myPExps.next());
+
             mySiblingIndex++;
-            
+
             return result;
         }
 

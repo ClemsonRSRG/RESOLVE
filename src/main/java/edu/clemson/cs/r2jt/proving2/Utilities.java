@@ -42,7 +42,7 @@ public class Utilities {
 
     public static String conjunctListToString(java.util.List<PExp> l) {
         StringBuilder b = new StringBuilder();
-        
+
         boolean first = true;
         for (PExp p : l) {
             if (first) {
@@ -51,13 +51,13 @@ public class Utilities {
             else {
                 b.append(" and ");
             }
-            
+
             b.append(p);
         }
-        
+
         return "" + b;
     }
-    
+
     public static VC convertToImmutableVC(VerificationCondition vc) {
 
         java.util.List<PExp> newAntecedents = new LinkedList<PExp>();

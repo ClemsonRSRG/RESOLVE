@@ -18,24 +18,24 @@ public class InductiveSiteIteratorIterator implements Iterator<Site> {
 
     private final Iterator<Site> myTopLevelSites;
     private Iterator<Site> myCurInductiveIterator;
-    
+
     private Site myNextReturn;
-    
+
     public InductiveSiteIteratorIterator(Iterator<Site> topLevelSites) {
         myTopLevelSites = topLevelSites;
-        myCurInductiveIterator = 
+        myCurInductiveIterator =
                 DummyIterator.getInstance(myCurInductiveIterator);
-        
+
         setUpNext();
     }
-    
+
     public void setUpNext() {
         if (myCurInductiveIterator.hasNext()) {
             myNextReturn = myCurInductiveIterator.next();
         }
         else {
             if (myTopLevelSites.hasNext()) {
-                myCurInductiveIterator = 
+                myCurInductiveIterator =
                         new InductiveSiteIterator(myTopLevelSites.next());
                 myNextReturn = myCurInductiveIterator.next();
             }
@@ -44,7 +44,7 @@ public class InductiveSiteIteratorIterator implements Iterator<Site> {
             }
         }
     }
-    
+
     @Override
     public boolean hasNext() {
         return (myNextReturn != null);
@@ -55,11 +55,11 @@ public class InductiveSiteIteratorIterator implements Iterator<Site> {
         if (myNextReturn == null) {
             throw new NoSuchElementException();
         }
-        
+
         Site result = myNextReturn;
-        
+
         setUpNext();
-        
+
         return result;
     }
 
@@ -67,5 +67,5 @@ public class InductiveSiteIteratorIterator implements Iterator<Site> {
     public void remove() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+
 }

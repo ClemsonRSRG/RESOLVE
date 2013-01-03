@@ -11,7 +11,7 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
 
     private final E[] myElements;
     private final int myElementsLength;
-    
+
     private final int myHashCode;
 
     @SuppressWarnings("unchecked")
@@ -46,7 +46,7 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
         }
         return result;
     }
-    
+
     @Override
     public E get(int index) {
         return myElements[index];
@@ -76,21 +76,21 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
         return new ImmutableListSubview<E>(this, startIndex, myElementsLength
                 - startIndex);
     }
-    
+
     @Override
     public int hashCode() {
         return myHashCode;
     }
-    
+
     @Override
     public boolean equals(Object o) {
         boolean result = (o instanceof ArrayBackedImmutableList);
-        
+
         if (result) {
             ArrayBackedImmutableList oAsABIL = (ArrayBackedImmutableList) o;
-            
+
             result = (myElementsLength == oAsABIL.size());
-            
+
             if (result) {
                 int i = 0;
                 while (i < myElementsLength && result) {
@@ -99,7 +99,7 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
                 }
             }
         }
-        
+
         return result;
     }
 }

@@ -1661,7 +1661,9 @@ public class Controller {
                             .convertToImmutableVC(originalVC));
                 }
 
-                AlgebraicProver prover = new AlgebraicProver(vcs, scope);
+                AlgebraicProver prover =
+                        new AlgebraicProver(realTable.getTypeGraph(), vcs,
+                                scope);
             }
             catch (NoSuchSymbolException nsse) {
                 //Can't find the module we're in.  Shouldn't be possible.

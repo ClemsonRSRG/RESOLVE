@@ -17,24 +17,25 @@ import java.util.List;
  * @author hamptos
  */
 public class ProverModelVisitor extends PExpVisitor {
+
     private Deque<Integer> myIndices = new LinkedList<Integer>();
     private LinkedList<Site> myIDs = new LinkedList<Site>();
     private Site myRoot;
-    
+
     private final PerVCProverModel myModel;
     private Site.Section mySection;
     private int myIndex;
-    
+
     public ProverModelVisitor(PerVCProverModel model) {
         myModel = model;
         mySection = Site.Section.ANTECEDENTS;
         myIndex = 0;
     }
-    
+
     public void setSection(Site.Section section) {
         mySection = section;
     }
-    
+
     public void setIndex(int index) {
         myIndex = index;
     }
