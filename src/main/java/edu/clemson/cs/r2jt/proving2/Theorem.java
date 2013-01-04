@@ -67,7 +67,7 @@ public class Theorem {
                         myAssertion));
                 result.add(new ExpandAntecedentBySubstitution(right, left,
                         myAssertion));
-                
+
                 result.add(new SubstituteInPlaceInConsequent(left, right));
                 result.add(new SubstituteInPlaceInConsequent(right, left));
             }

@@ -12,6 +12,7 @@ import edu.clemson.cs.r2jt.proving.immutableadts.SimpleImmutableList;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.EliminateTrueConjunctInConsequent;
+import edu.clemson.cs.r2jt.proving2.transformations.ReplaceSymmetricEqualityWithTrueInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.proving2.utilities.MapOfLists;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
@@ -21,6 +22,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.LayoutManager;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -357,8 +359,13 @@ public class JProverFrame extends JFrame {
             myLocalTheoremSelectors.put(antecedent, LOCAL_THEOREM_SELECT);
         }
 
-        activateTransformations(Collections
-                .singletonList((Transformation) EliminateTrueConjunctInConsequent.INSTANCE));
+        List<Transformation> defaultTransforms =
+                new LinkedList<Transformation>();
+        defaultTransforms.add(EliminateTrueConjunctInConsequent.INSTANCE);
+        defaultTransforms
+                .add(ReplaceSymmetricEqualityWithTrueInConsequent.INSTANCE);
+
+        activateTransformations(defaultTransforms);
     }
 
     public void highlightPExp(Site s, Color c) {
@@ -542,15 +549,35 @@ public class JProverFrame extends JFrame {
                     applications.get(0).apply(myProverStateDisplay.getModel());
                 }
                 else {
-                    
-                    
-                    throw new RuntimeException(
-                            "MUUUULLLLTIIIIIBAAAAALLLL!!!  BLEERN!!!!  BLEEEEEEERN!!");
+                    JPopupMenu popup = new JPopupMenu();
+                    JMenuItem menuItem;
+
+                    for (Application a : applications) {
+                        menuItem = new JMenuItem(a.description());
+                        menuItem.addActionListener(new ApplicationSelect(a));
+                        popup.add(menuItem);
+                    }
+
+                    popup.show(myProverStateDisplay, e.getX(), e.getY());
                 }
 
                 //Note that the change in the underlying model will kick us back
                 //into theorem selection mode
             }
+        }
+    }
+
+    private class ApplicationSelect implements ActionListener {
+
+        private final Application myApplication;
+
+        public ApplicationSelect(Application a) {
+            myApplication = a;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            myApplication.apply(myProverStateDisplay.getModel());
         }
     }
 

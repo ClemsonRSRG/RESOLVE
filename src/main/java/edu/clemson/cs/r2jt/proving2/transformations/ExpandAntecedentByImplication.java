@@ -161,14 +161,22 @@ public class ExpandAntecedentByImplication implements Transformation {
         }
 
         @Override
-        public void apply(PerVCProverModel m) {
-            PExp newAntecedent = myConsequent.substitute(myBindings);
+        public String description() {
+            return "Add " + myConsequent.substitute(myBindings);
+        }
 
-            LocalTheorem t =
-                    m.addLocalTheorem(newAntecedent, new TheoremApplication(
-                            ExpandAntecedentByImplication.this), false);
-            m.addProofStep(new IntroduceLocalTheorem(t,
-                    ExpandAntecedentByImplication.this));
+        @Override
+        public void apply(PerVCProverModel m) {
+            List<PExp> newAntecedents =
+                    myConsequent.substitute(myBindings).splitIntoConjuncts();
+
+            for (PExp a : newAntecedents) {
+                LocalTheorem t =
+                        m.addLocalTheorem(a, new TheoremApplication(
+                                ExpandAntecedentByImplication.this), false);
+                m.addProofStep(new IntroduceLocalTheorem(t,
+                        ExpandAntecedentByImplication.this));
+            }
         }
 
         @Override

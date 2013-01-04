@@ -178,7 +178,9 @@ public class TypeGraph {
         //If the type of the given value is a subtype of the expected type, then
         //its value must necessarily be in the expected type.  Note we can't
         //reason about the type of MTYPE, so we exclude it
-        result = (value != MTYPE) && isSubtype(value.getType(), expected);
+        result =
+                (value != MTYPE) && (value != ENTITY)
+                        && isSubtype(value.getType(), expected);
 
         if (!result) {
             try {

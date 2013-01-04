@@ -66,6 +66,11 @@ public class EliminateTrueConjunctInConsequent implements Transformation {
         }
 
         @Override
+        public String description() {
+            return "Eliminate true.";
+        }
+
+        @Override
         public void apply(PerVCProverModel m) {
             m.removeConsequent(mySite.index);
 

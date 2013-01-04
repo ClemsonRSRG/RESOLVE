@@ -27,42 +27,44 @@ public class SubstituteInPlaceInConsequent implements Transformation {
 
     private final BindResultToApplication BIND_RESULT_TO_APPLICATION =
             new BindResultToApplication();
-    
+
     private PExp myMatchPattern;
     private PExp myTransformationTemplate;
-    
-    public SubstituteInPlaceInConsequent(PExp matchPattern, 
+
+    public SubstituteInPlaceInConsequent(PExp matchPattern,
             PExp transformationTemplate) {
-        
+
         myMatchPattern = matchPattern;
         myTransformationTemplate = transformationTemplate;
     }
-    
+
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
-        Iterator<PerVCProverModel.BindResult> bindResults = m.bind(
-                Collections.singleton(
-                    (Binder) new InductiveAntecedentBinder(myMatchPattern)));
+        Iterator<PerVCProverModel.BindResult> bindResults =
+                m.bind(Collections
+                        .singleton((Binder) new InductiveAntecedentBinder(
+                                myMatchPattern)));
 
         return new LazyMappingIterator<BindResult, Application>(bindResults,
                 BIND_RESULT_TO_APPLICATION);
     }
-    
-    private class BindResultToApplication 
-            implements Mapping<BindResult, Application> {
+
+    private class BindResultToApplication
+            implements
+                Mapping<BindResult, Application> {
 
         @Override
         public Application map(BindResult input) {
-            return new SubstituteInPlaceInConsequentApplication(
-                    input.bindSites.values().iterator().next(),
-                    input.freeVariableBindings);
+            return new SubstituteInPlaceInConsequentApplication(input.bindSites
+                    .values().iterator().next(), input.freeVariableBindings);
         }
-        
+
     }
-    
-    private class SubstituteInPlaceInConsequentApplication 
-            implements Application {
-        
+
+    private class SubstituteInPlaceInConsequentApplication
+            implements
+                Application {
+
         private final Site myBindSite;
         private final Map<PExp, PExp> myBindings;
 
@@ -73,10 +75,15 @@ public class SubstituteInPlaceInConsequent implements Transformation {
         }
 
         @Override
+        public String description() {
+            return "To " + myTransformationTemplate.substitute(myBindings);
+        }
+
+        @Override
         public void apply(PerVCProverModel m) {
             PExp transformed = myTransformationTemplate.substitute(myBindings);
             m.alterSite(myBindSite, transformed);
-            
+
             m.addProofStep(new ModifyConsequent(myBindSite,
                     SubstituteInPlaceInConsequent.this));
         }
@@ -86,7 +93,7 @@ public class SubstituteInPlaceInConsequent implements Transformation {
             return Collections.singleton(myBindSite);
         }
     }
-    
+
     @Override
     public String toString() {
         return "" + myMatchPattern + " = " + myTransformationTemplate;

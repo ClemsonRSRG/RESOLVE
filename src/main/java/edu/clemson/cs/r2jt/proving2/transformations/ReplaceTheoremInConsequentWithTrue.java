@@ -67,6 +67,11 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
         }
 
         @Override
+        public String description() {
+            return "To true.";
+        }
+
+        @Override
         public void apply(PerVCProverModel m) {
             m.alterSite(myBindSite, PExp.trueExp(myTheorem.getType()
                     .getTypeGraph()));

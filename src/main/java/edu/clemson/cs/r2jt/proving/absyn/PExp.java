@@ -653,4 +653,23 @@ public abstract class PExp {
 
         return output.toString();
     }
+
+    public final String toDebugString(int indent, int offset) {
+        StringBuilder b = new StringBuilder();
+        if (this instanceof PSymbol) {
+            b.append(((PSymbol) this).quantification + " ");
+        }
+
+        b.append(toString() + " : " + myType);
+
+        if (myTypeValue != null) {
+            b.append("(Defines: " + myTypeValue + ")");
+        }
+
+        for (PExp e : getSubExpressions()) {
+            b.append("\n" + e.toDebugString(indent + offset, offset));
+        }
+
+        return b.toString();
+    }
 }

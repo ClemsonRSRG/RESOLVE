@@ -19,4 +19,6 @@ public interface Application {
     public void apply(PerVCProverModel m);
 
     public Set<Site> involvedSubExpressions();
+
+    public String description();
 }

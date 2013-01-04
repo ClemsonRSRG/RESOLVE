@@ -32,6 +32,7 @@ import java.awt.event.MouseMotionListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultStyledDocument;
@@ -76,6 +77,8 @@ public class JProverStateDisplay extends JTextPane {
 
         addMouseListener(new SiteMouseListener());
         addMouseMotionListener(new SiteMouseMotionListener());
+
+        ToolTipManager.sharedInstance().registerComponent(this);
     }
 
     public void clearHighlights() {
@@ -288,28 +291,30 @@ public class JProverStateDisplay extends JTextPane {
         }
     }
 
-    private Site getActiveSiteOfEvent(MouseEvent e)
-            throws NoSuchElementException {
-
-        Site result;
-
+    private Site getSiteOfEvent(MouseEvent e) {
         int caretPosition = viewToModel(e.getPoint());
 
         if (caretPosition == -1) {
             throw new NoSuchElementException();
         }
-        else {
-            Element c = myDocument.getCharacterElement(caretPosition);
-            AttributeSet attrs = c.getAttributes();
-            Site id = (Site) attrs.getAttribute(PEXP_ID_KEY);
 
-            if (id == null) {
-                throw new NoSuchElementException();
-            }
-            else {
-                result = myMouseActiveNodes.getNearestTaggedAncestor(id);
-            }
+        Element c = myDocument.getCharacterElement(caretPosition);
+        AttributeSet attrs = c.getAttributes();
+        Site result = (Site) attrs.getAttribute(PEXP_ID_KEY);
+
+        if (result == null) {
+            throw new NoSuchElementException();
         }
+
+        return result;
+    }
+
+    private Site getActiveSiteOfEvent(MouseEvent e)
+            throws NoSuchElementException {
+
+        Site result;
+        Site id = getSiteOfEvent(e);
+        result = myMouseActiveNodes.getNearestTaggedAncestor(id);
 
         return result;
     }
@@ -347,6 +352,20 @@ public class JProverStateDisplay extends JTextPane {
 
             myCurMouseContainer = s;
         }
+    }
+
+    @Override
+    public String getToolTipText(MouseEvent e) {
+        String result;
+
+        try {
+            result = getSiteOfEvent(e).exp.toDebugString(4, 0);
+        }
+        catch (NoSuchElementException nsee) {
+            result = null;
+        }
+
+        return result;
     }
 
     private class SiteMouseMotionListener implements MouseMotionListener {

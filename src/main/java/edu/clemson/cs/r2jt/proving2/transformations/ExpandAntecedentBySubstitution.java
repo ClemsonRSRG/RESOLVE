@@ -149,6 +149,14 @@ public class ExpandAntecedentBySubstitution implements Transformation {
         }
 
         @Override
+        public String description() {
+            return "Add "
+                    + myBindSite.root.exp.withSiteAltered(myBindSite
+                            .pathIterator(), myTransformationTemplate
+                            .substitute(myBindings));
+        }
+
+        @Override
         public void apply(PerVCProverModel m) {
             PExp transformed = myTransformationTemplate.substitute(myBindings);
             PExp topLevelTransformed =
