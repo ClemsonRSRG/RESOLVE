@@ -45,7 +45,7 @@ public class TypeNode {
             throws TypeMismatchException {
 
         if (!myRelationships.containsKey(dst)) {
-            throw new TypeMismatchException(dst, myType);
+            throw TypeMismatchException.INSTANCE;
         }
 
         Exp finalConditions = myTypeGraph.getFalseVarExp();

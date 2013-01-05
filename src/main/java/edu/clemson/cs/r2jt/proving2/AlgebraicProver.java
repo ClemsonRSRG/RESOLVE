@@ -4,6 +4,7 @@
  */
 package edu.clemson.cs.r2jt.proving2;
 
+import edu.clemson.cs.r2jt.proving2.gui.JProverFrame;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.justifications.Library;
 import edu.clemson.cs.r2jt.mathtype.TheoremEntry;

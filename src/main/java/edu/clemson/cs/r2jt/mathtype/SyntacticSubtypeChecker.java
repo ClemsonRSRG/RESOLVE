@@ -158,7 +158,7 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
                     //We have no information on these named types, but they don't
                     //share a name, so...
                     throw new IllegalArgumentException(
-                            new TypeMismatchException(t1, t2));
+                            TypeMismatchException.INSTANCE);
                 }
 
                 if (!haveAxiomaticSubtypeRelationship(t1DeclaredType,
@@ -189,14 +189,13 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
         //TODO:
         //For the moment, there's no obvious way to do this.  We'll just say no
         //set restriction can be a syntactic subtype of any other.
-        throw new IllegalArgumentException(new TypeMismatchException(t1, t2));
+        throw new IllegalArgumentException(TypeMismatchException.INSTANCE);
     }
 
     @Override
     public boolean beginMTProper(MTProper t1, MTProper t2) {
         if (!(t1 == t2 || haveAxiomaticSubtypeRelationship(t1, t2))) {
-            throw new IllegalArgumentException(
-                    new TypeMismatchException(t1, t2));
+            throw new IllegalArgumentException(TypeMismatchException.INSTANCE);
         }
 
         return true;
@@ -238,8 +237,7 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
         }
         else {
             //Otherwise, there's no way to continue, so we bomb
-            throw new IllegalArgumentException(
-                    new TypeMismatchException(t1, t2));
+            throw new IllegalArgumentException(TypeMismatchException.INSTANCE);
         }
 
         return true; //Keep searching siblings

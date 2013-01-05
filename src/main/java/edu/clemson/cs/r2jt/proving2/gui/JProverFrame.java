@@ -1,4 +1,4 @@
-package edu.clemson.cs.r2jt.proving2;
+package edu.clemson.cs.r2jt.proving2.gui;
 
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.mathtype.MTType;
@@ -9,6 +9,10 @@ import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.SimpleImmutableList;
+import edu.clemson.cs.r2jt.proving2.Antecedent;
+import edu.clemson.cs.r2jt.proving2.Consequent;
+import edu.clemson.cs.r2jt.proving2.Theorem;
+import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.EliminateTrueConjunctInConsequent;

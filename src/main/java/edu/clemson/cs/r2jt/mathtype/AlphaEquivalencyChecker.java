@@ -4,6 +4,9 @@ import java.util.NoSuchElementException;
 
 public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
 
+    private static final IllegalArgumentException MISMATCH =
+            new IllegalArgumentException(TypeMismatchException.INSTANCE);
+    
     @Override
     public boolean beginMTNamed(MTNamed t1, MTNamed t2) {
         //TODO: This doesn't deal correctly with multiple appearances of a
@@ -19,8 +22,7 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
             catch (NoSuchElementException nsee) {
                 //We have no information about the named types--but we know they
                 //aren't named the same, so...
-                throw new IllegalArgumentException(new TypeMismatchException(
-                        t1, t2));
+                throw MISMATCH;
             }
 
             SymmetricVisitor alphaEq = new AlphaEquivalencyChecker();
@@ -34,8 +36,7 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     @Override
     public boolean beginMTProper(MTProper t1, MTProper t2) {
         if (t1 != t2) {
-            throw new IllegalArgumentException(
-                    new TypeMismatchException(t1, t2));
+            throw MISMATCH;
         }
 
         return true;
@@ -55,6 +56,6 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
 
     @Override
     public boolean mismatch(MTType t1, MTType t2) {
-        throw new IllegalArgumentException(new TypeMismatchException(t1, t2));
+        throw MISMATCH;
     }
 }

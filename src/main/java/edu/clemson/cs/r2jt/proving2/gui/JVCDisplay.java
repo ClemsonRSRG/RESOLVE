@@ -1,4 +1,4 @@
-package edu.clemson.cs.r2jt.proving2;
+package edu.clemson.cs.r2jt.proving2.gui;
 
 import java.awt.Color;
 import java.awt.event.MouseEvent;
@@ -21,6 +21,7 @@ import edu.clemson.cs.r2jt.proving.absyn.IdentifiedNodesVisitor;
 import edu.clemson.cs.r2jt.proving.absyn.NodeIdentifier;
 import edu.clemson.cs.r2jt.proving.absyn.NodeIdentifyingVisitor;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving2.VC;
 
 public class JVCDisplay extends JTextPane {
 

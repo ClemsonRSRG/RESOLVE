@@ -8,9 +8,6 @@ import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.mathtype.*;
 import edu.clemson.cs.r2jt.population.Populator;
-import edu.clemson.cs.r2jt.utilities.HardCoded;
-import edu.clemson.cs.r2jt.utilities.SourceErrorException;
-
 import java.util.*;
 
 /**
@@ -19,9 +16,9 @@ import java.util.*;
  */
 public class TypeGraph {
 
-    public final ExpValuePathStrategy EXP_VALUE_PATH =
+    private final ExpValuePathStrategy EXP_VALUE_PATH =
             new ExpValuePathStrategy();
-    public final MTTypeValuePathStrategy MTTYPE_VALUE_PATH =
+    private final MTTypeValuePathStrategy MTTYPE_VALUE_PATH =
             new MTTypeValuePathStrategy();
 
     public final MTType ELEMENT = new MTProper(this, "Element");
@@ -66,6 +63,12 @@ public class TypeGraph {
 
     private final HashMap<MTType, TypeNode> myTypeNodes;
 
+    private final Set<EstablishedRelationship> myEstablishedSubtypes =
+            new HashSet<EstablishedRelationship>();
+
+    private final Set<EstablishedRelationship> myEstablishedElements =
+            new HashSet<EstablishedRelationship>();
+
     public TypeGraph() {
         this.myTypeNodes = new HashMap<MTType, TypeNode>();
     }
@@ -103,9 +106,13 @@ public class TypeGraph {
     public boolean isSubtype(MTType subtype, MTType supertype) {
         boolean result;
 
+        EstablishedRelationship r =
+                new EstablishedRelationship(subtype, supertype);
+
         try {
             result =
-                    supertype.equals(ENTITY) || supertype.equals(MTYPE)
+                    supertype == ENTITY || supertype == MTYPE
+                            || myEstablishedSubtypes.contains(r)
                             || subtype.equals(supertype)
                             || subtype.isSyntacticSubtypeOf(supertype);
         }
@@ -120,6 +127,10 @@ public class TypeGraph {
             result =
                     isKnownToBeIn(subtype, new MTPowertypeApplication(this,
                             supertype));
+        }
+
+        if (result) {
+            myEstablishedSubtypes.add(r);
         }
 
         return result;
@@ -175,11 +186,15 @@ public class TypeGraph {
     public boolean isKnownToBeIn(MTType value, MTType expected) {
         boolean result;
 
+        EstablishedRelationship r =
+                new EstablishedRelationship(value, expected);
+
         //If the type of the given value is a subtype of the expected type, then
         //its value must necessarily be in the expected type.  Note we can't
         //reason about the type of MTYPE, so we exclude it
         result =
-                (value != MTYPE) && (value != ENTITY)
+                myEstablishedElements.contains(r) || (value != MTYPE)
+                        && (value != ENTITY)
                         && isSubtype(value.getType(), expected);
 
         if (!result) {
@@ -190,6 +205,10 @@ public class TypeGraph {
             catch (TypeMismatchException e) {
                 result = false;
             }
+        }
+
+        if (result) {
+            myEstablishedElements.add(r);
         }
 
         return result;
@@ -263,7 +282,7 @@ public class TypeGraph {
             //At this stage, we've done everything safe and sensible that we can 
             //do if the value we're looking at exists outside Entity
             if (value == MTYPE || value == ENTITY) {
-                throw new TypeMismatchException(null, expected);
+                throw TypeMismatchException.INSTANCE;
             }
 
             try {
@@ -330,7 +349,7 @@ public class TypeGraph {
         }
         else if (valueTypeValue == MTYPE || valueTypeValue == ENTITY) {
             //MType and Entity aren't in anything
-            throw new TypeMismatchException(null, expected);
+            throw TypeMismatchException.INSTANCE;
         }
         else if (valueTypeValue == null) {
 
@@ -492,7 +511,7 @@ public class TypeGraph {
             result = getTrueVarExp();
         }
         else if (!foundPath) {
-            throw new TypeMismatchException(expected, foundType);
+            throw TypeMismatchException.INSTANCE;
         }
 
         return result;
@@ -1119,6 +1138,35 @@ public class TypeGraph {
             return new MTCartesian(g,
                     new MTCartesian.Element(arguments.get(0)),
                     new MTCartesian.Element(arguments.get(1)));
+        }
+    }
+
+    private static class EstablishedRelationship {
+
+        private final MTType myType1, myType2;
+
+        public EstablishedRelationship(MTType t1, MTType t2) {
+            myType1 = t1;
+            myType2 = t2;
+        }
+
+        @Override
+        public int hashCode() {
+            return myType1.hashCode() * 31 + myType2.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            boolean result = o instanceof EstablishedRelationship;
+
+            if (result) {
+                EstablishedRelationship oAsER = (EstablishedRelationship) o;
+                result =
+                        myType1.equals(oAsER.myType1)
+                                && myType2.equals(oAsER.myType2);
+            }
+
+            return result;
         }
     }
 }
