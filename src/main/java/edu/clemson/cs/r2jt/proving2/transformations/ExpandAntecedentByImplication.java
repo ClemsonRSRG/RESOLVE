@@ -8,6 +8,7 @@ import edu.clemson.cs.r2jt.proving.ChainingIterator;
 import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.BindingException;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.Utilities;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
@@ -16,7 +17,7 @@ import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
-import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheorem;
+import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheoremStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collection;
 import java.util.HashSet;
@@ -92,6 +93,65 @@ public class ExpandAntecedentByImplication implements Transformation {
                 BIND_RESULT_TO_APPLICATION);
     }
 
+    @Override
+    public boolean couldAffectAntecedent() {
+        return true;
+    }
+
+    @Override
+    public boolean couldAffectConsequent() {
+        return false;
+    }
+
+    @Override
+    public int functionApplicationCountDelta() {
+        int antecedentFunctionCount = 0;
+        for (PExp a : myAntecedents) {
+            antecedentFunctionCount += a.getFunctionApplications().size();
+        }
+
+        int consequentFunctionCount =
+                myConsequent.getFunctionApplications().size();
+
+        return consequentFunctionCount - antecedentFunctionCount;
+    }
+
+    @Override
+    public boolean introducesQuantifiedVariables() {
+        Set<PSymbol> antecedentQuantifiedVariables = new HashSet<PSymbol>();
+        for (PExp a : myAntecedents) {
+            antecedentQuantifiedVariables.addAll(a.getQuantifiedVariables());
+        }
+
+        Set<PSymbol> consequentQuantifiedVariables =
+                myConsequent.getQuantifiedVariables();
+
+        consequentQuantifiedVariables.removeAll(antecedentQuantifiedVariables);
+
+        return !consequentQuantifiedVariables.isEmpty();
+    }
+
+    @Override
+    public Set<String> getPatternSymbolNames() {
+        Set<String> antecedentSymbolNames = new HashSet<String>();
+
+        for (PExp a : myAntecedents) {
+            antecedentSymbolNames.addAll(a.getSymbolNames());
+        }
+
+        return antecedentSymbolNames;
+    }
+
+    @Override
+    public Set<String> getReplacementSymbolNames() {
+        return myConsequent.getSymbolNames();
+    }
+
+    @Override
+    public Equivalence getEquivalence() {
+        return Equivalence.WEAKER;
+    }
+
     public class QuirkyBinder implements PerVCProverModel.Binder {
 
         private int myTotalBindingCount;
@@ -134,6 +194,11 @@ public class ExpandAntecedentByImplication implements Transformation {
                 Map<PExp, PExp> assumedBindings) throws BindingException {
             return myPattern.substitute(assumedBindings).bindTo(s.exp);
         }
+
+        @Override
+        public String toString() {
+            return "" + myPattern;
+        }
     }
 
     public class BindResultToApplication
@@ -174,7 +239,7 @@ public class ExpandAntecedentByImplication implements Transformation {
                 LocalTheorem t =
                         m.addLocalTheorem(a, new TheoremApplication(
                                 ExpandAntecedentByImplication.this), false);
-                m.addProofStep(new IntroduceLocalTheorem(t,
+                m.addProofStep(new IntroduceLocalTheoremStep(t,
                         ExpandAntecedentByImplication.this));
             }
         }

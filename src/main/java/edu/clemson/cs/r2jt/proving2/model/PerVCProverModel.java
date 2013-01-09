@@ -11,6 +11,7 @@ import edu.clemson.cs.r2jt.proving.absyn.BindingException;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.AutomatedProver;
 import edu.clemson.cs.r2jt.proving2.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.Theorem;
 import edu.clemson.cs.r2jt.proving2.VC;
@@ -18,6 +19,7 @@ import edu.clemson.cs.r2jt.proving2.justifications.Given;
 import edu.clemson.cs.r2jt.proving2.justifications.Justification;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
+import edu.clemson.cs.r2jt.proving2.utilities.UnsafeIteratorLinkedList;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.io.IOException;
 import java.util.Collections;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -54,7 +57,7 @@ public final class PerVCProverModel {
             public boolean report(boolean important) {
                 eventCount++;
 
-                return important || (eventCount % 1000 == 0);
+                return important || (eventCount % 20 == 0);
             }
         };
 
@@ -94,7 +97,7 @@ public final class PerVCProverModel {
      * unique object.</p>
      */
     private final List<LocalTheorem> myLocalTheoremsList =
-            new LinkedList<LocalTheorem>();
+            new UnsafeIteratorLinkedList<LocalTheorem>();
 
     /**
      * <p>A list of expressions remaining to be established as true.  Each of 
@@ -102,7 +105,8 @@ public final class PerVCProverModel {
      * the conjuncts would have been broken up into separate entries in this 
      * list.) Once we empty this list, the proof is complete.</p>
      */
-    private final List<PExp> myConsequents = new LinkedList<PExp>();
+    private final List<PExp> myConsequents =
+            new UnsafeIteratorLinkedList<PExp>();
 
     /**
      * <p>A list of the current proof under consideration.  Starting with a 
@@ -125,6 +129,22 @@ public final class PerVCProverModel {
      */
     private List<ChangeListener> myChangeListeners =
             new LinkedList<ChangeListener>();
+
+    /**
+     * <p>In order to not slow down the proving process by synchronizing this
+     * whole class, we let an automated prover have special status to the model.
+     * Whenever the model would like to alert its change-listeners, it first
+     * checks to see if it has an associate automated prover.  If it does not,
+     * or if the automated prover is not running, it alerts its listeners
+     * normally.  If there is an associated automated prover and it's running,
+     * the model simply alerts the automated prover that the model would like
+     * to alert its listeners, at which case the ball is in the automated 
+     * prover's court to clean up, pause any further modifications to the model,
+     * then alert the model that it's ready.  At that point, the model alerts
+     * sends out its change alerts, then calls alerts the automated prover that
+     * it is done, whereupon the automated prover continues its work.</p>
+     */
+    private AutomatedProver myAutomatedProver;
 
     private ChangeEventMode myChangeEventMode = ChangeEventMode.INTERMITTENT;
 
@@ -163,6 +183,27 @@ public final class PerVCProverModel {
         myChangeListeners.add(l);
     }
 
+    /**
+     * <p>Sets the automated prover that is working on this model.  The prover
+     * will be alerted before change events go out so that it can stop modifying
+     * the model.</p>
+     * 
+     * @param l 
+     */
+    public void setAutomatedProver(AutomatedProver p) {
+        myAutomatedProver = p;
+    }
+
+    public void triggerUIUpdates() {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                alertChangeListeners();
+            }
+        });
+    }
+
     public void removeChangeListener(ChangeListener l) {
         myChangeListeners.remove(l);
     }
@@ -171,17 +212,48 @@ public final class PerVCProverModel {
         return PExp.trueExp(myTypeGraph);
     }
 
+    /**
+     * <p>Must be called on the event dispatching thread.</p>
+     */
+    private void alertChangeListeners() {
+        ChangeEvent e = new ChangeEvent(PerVCProverModel.this);
+        for (ChangeListener l : myChangeListeners) {
+            l.stateChanged(e);
+        }
+
+        if (myAutomatedProver != null) {
+            myAutomatedProver.uiUpdateFinished();
+        }
+    }
+
+    public void touch() {
+        modelChanged(true);
+    }
+    
     private void modelChanged(boolean important) {
         if (myChangeEventMode.report(important)) {
-            ChangeEvent e = new ChangeEvent(this);
-            for (ChangeListener l : myChangeListeners) {
-                l.stateChanged(e);
+
+            if (myAutomatedProver == null) {
+                SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        alertChangeListeners();
+                    }
+                });
+            }
+            else {
+                myAutomatedProver.prepForUIUpdate();
             }
         }
     }
 
     public List<ProofStep> getProofSteps() {
         return myProofSoFar;
+    }
+
+    public ProofStep getLastProofStep() {
+        return myProofSoFar.get(myProofSoFar.size() - 1);
     }
 
     public void undoLastProofStep() {
@@ -200,6 +272,10 @@ public final class PerVCProverModel {
     public void setConsequent(int index, PExp newConsequent) {
         myConsequents.set(index, newConsequent);
         modelChanged(false);
+    }
+
+    public boolean noConsequents() {
+        return myConsequents.isEmpty();
     }
 
     public LocalTheorem getLocalTheorem(int index) {
@@ -333,6 +409,14 @@ public final class PerVCProverModel {
             boolean tryingToProveThis) {
         return addLocalTheorem(assertion, j, tryingToProveThis,
                 myLocalTheoremsList.size());
+    }
+
+    public LocalTheorem removeLocalTheorem(int index) {
+        LocalTheorem t = getLocalTheorem(index);
+
+        removeLocalTheorem(t);
+
+        return t;
     }
 
     public void removeLocalTheorem(LocalTheorem t) {
@@ -531,6 +615,11 @@ public final class PerVCProverModel {
                                 myFirstBinder.considerSite(myCurFirstSite,
                                         myAssumedBindings);
 
+                        if (!myCurFirstSite.exp.getQuantifiedVariables()
+                                .isEmpty()) {
+                            throw new BindingException();
+                        }
+
                         Map<PExp, PExp> inductiveBindings =
                                 new HashMap<PExp, PExp>(myAssumedBindings);
                         inductiveBindings.putAll(myCurFirstSiteBindings);
@@ -648,7 +737,7 @@ public final class PerVCProverModel {
         public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m,
                 List<Site> boundSitesSoFar) {
             return new InductiveSiteIteratorIterator(m
-                    .topLevelConsequentSiteIterator());
+                    .topLevelAntecedentSiteIterator());
         }
     }
 

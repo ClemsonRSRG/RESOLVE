@@ -12,7 +12,7 @@ import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.InductiveConsequentBinder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
-import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequent;
+import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,6 +42,41 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
 
         return new LazyMappingIterator<BindResult, Application>(
                 m.bind(binders), BIND_RESULT_TO_APPLICATION);
+    }
+
+    @Override
+    public boolean couldAffectAntecedent() {
+        return false;
+    }
+
+    @Override
+    public boolean couldAffectConsequent() {
+        return true;
+    }
+
+    @Override
+    public int functionApplicationCountDelta() {
+        return myTheorem.getFunctionApplications().size() * -1;
+    }
+
+    @Override
+    public boolean introducesQuantifiedVariables() {
+        return false;
+    }
+
+    @Override
+    public Set<String> getPatternSymbolNames() {
+        return myTheorem.getSymbolNames();
+    }
+
+    @Override
+    public Set<String> getReplacementSymbolNames() {
+        return Collections.singleton("true");
+    }
+
+    @Override
+    public Equivalence getEquivalence() {
+        return Equivalence.EQUIVALENT;
     }
 
     private class BindResultToApplication
@@ -76,7 +111,7 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
             m.alterSite(myBindSite, PExp.trueExp(myTheorem.getType()
                     .getTypeGraph()));
 
-            m.addProofStep(new ModifyConsequent(myBindSite,
+            m.addProofStep(new ModifyConsequentStep(myBindSite,
                     ReplaceTheoremInConsequentWithTrue.this));
         }
 

@@ -12,13 +12,13 @@ import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
  *
  * @author hamptos
  */
-public class RemoveConsequent implements ProofStep {
+public class RemoveConsequentStep implements ProofStep {
 
     private final PExp myConsequent;
     private final int myIndex;
     private final Transformation myTransformation;
 
-    public RemoveConsequent(PExp consequent, int index, Transformation t) {
+    public RemoveConsequentStep(PExp consequent, int index, Transformation t) {
         myConsequent = consequent;
         myIndex = index;
         myTransformation = t;

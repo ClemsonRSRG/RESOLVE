@@ -12,7 +12,7 @@ import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
-import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequent;
+import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collections;
 import java.util.Iterator;
@@ -47,6 +47,41 @@ public class ReplaceSymmetricEqualityWithTrueInConsequent
         return "Symmetric equality is true";
     }
 
+    @Override
+    public boolean couldAffectAntecedent() {
+        return false;
+    }
+
+    @Override
+    public boolean couldAffectConsequent() {
+        return true;
+    }
+
+    @Override
+    public int functionApplicationCountDelta() {
+        return -2;
+    }
+
+    @Override
+    public boolean introducesQuantifiedVariables() {
+        return false;
+    }
+
+    @Override
+    public Set<String> getPatternSymbolNames() {
+        return Collections.EMPTY_SET;
+    }
+
+    @Override
+    public Set<String> getReplacementSymbolNames() {
+        return Collections.singleton("true");
+    }
+
+    @Override
+    public Equivalence getEquivalence() {
+        return Equivalence.EQUIVALENT;
+    }
+
     private class SiteToApplication implements Mapping<Site, Application> {
 
         @Override
@@ -70,7 +105,7 @@ public class ReplaceSymmetricEqualityWithTrueInConsequent
         public void apply(PerVCProverModel m) {
             m.alterSite(mySite, m.getTrue());
 
-            m.addProofStep(new ModifyConsequent(mySite,
+            m.addProofStep(new ModifyConsequentStep(mySite,
                     ReplaceSymmetricEqualityWithTrueInConsequent.this));
         }
 

@@ -45,7 +45,7 @@ public class Theorem {
         return myJustification;
     }
 
-    public List<Transformation> getTransformations(Iterable<PExp> globalTheorems) {
+    public List<Transformation> getTransformations() {
         List<Transformation> result = new LinkedList<Transformation>();
 
         result.add(new ReplaceTheoremInConsequentWithTrue(myAssertion));

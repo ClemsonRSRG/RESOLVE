@@ -103,6 +103,10 @@ public class JProverFrame extends JFrame {
     private JLabel myProvingLabel = new JLabel();
     private JButton myNextVCButton = new JButton("VC>");
     private JButton myLastVCButton = new JButton("<VC");
+    private JButton myPlayButton = new JButton(">");
+    private JButton myPauseButton = new JButton("||");
+    private JButton myStopButton = new JButton("@");
+    private JButton myStepButton = new JButton("step");
 
     private final CardLayout myOptionalTransportLayout = new CardLayout();
     private final JPanel myOptionalTransportPanel =
@@ -121,6 +125,8 @@ public class JProverFrame extends JFrame {
 
     private final Map<Site, MouseListener> myLocalTheoremSelectors =
             new HashMap<Site, MouseListener>();
+
+    private boolean myInteractiveModeFlag = true;
 
     public static void main(String[] args) throws FlagDependencyException {
         MathSymbolTableBuilder bldr = new MathSymbolTableBuilder();
@@ -234,6 +240,8 @@ public class JProverFrame extends JFrame {
         });
 
         myProverStateDisplay.getModel().addChangeListener(TO_THEOREM_SELECTION);
+        myProverStateDisplay.getModel().setChangeEventMode(
+                PerVCProverModel.ChangeEventMode.INTERMITTENT);
 
         setGlobalTheorems(globalTheorems);
 
@@ -255,6 +263,33 @@ public class JProverFrame extends JFrame {
         prepForTheoremSelection();
     }
 
+    public void setInteractiveMode(final boolean interactive) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                myInteractiveModeFlag = interactive;
+
+                if (interactive) {
+                    myProverStateDisplay.getModel().setChangeEventMode(
+                            PerVCProverModel.ChangeEventMode.ALWAYS);
+                    myProverStateDisplay.getModel().removeChangeListener(
+                            TO_THEOREM_SELECTION);
+                    myProverStateDisplay.getModel().touch();
+                    prepForTheoremSelection();
+                }
+                else {
+                    myProverStateDisplay.getModel().setChangeEventMode(
+                            PerVCProverModel.ChangeEventMode.INTERMITTENT);
+                    removeClickTargetsFromModel();
+                    myProverStateDisplay.getModel().removeChangeListener(
+                            TO_THEOREM_SELECTION);
+                }
+            }
+            
+        });
+    }
+
     private void removeClickTargetsFromModel() {
         for (Map.Entry<Site, MouseListener> selector : myLocalTheoremSelectors
                 .entrySet()) {
@@ -274,8 +309,24 @@ public class JProverFrame extends JFrame {
         myNextVCButton.addActionListener(l);
     }
 
-    public void addLastVCButtonActionListeenr(ActionListener l) {
+    public void addLastVCButtonActionListener(ActionListener l) {
         myLastVCButton.addActionListener(l);
+    }
+
+    public void addPlayButtonActionListener(ActionListener l) {
+        myPlayButton.addActionListener(l);
+    }
+
+    public void addPauseButtonActionListener(ActionListener l) {
+        myPauseButton.addActionListener(l);
+    }
+
+    public void addStopButtonActionListener(ActionListener l) {
+        myStopButton.addActionListener(l);
+    }
+
+    public void addStepButtonActionListener(ActionListener l) {
+        myStepButton.addActionListener(l);
     }
 
     public void setModel(PerVCProverModel model) {
@@ -287,14 +338,20 @@ public class JProverFrame extends JFrame {
         //Reflect the new model in all subcomponents
         myProverStateDisplay.setModel(model);
         myProofDisplay.setModel(model);
-        model.setChangeEventMode(PerVCProverModel.ChangeEventMode.ALWAYS);
         myProvingLabel.setText("Proving " + model.getTheoremName() + "...");
 
-        //Set up the new model
-        model.addChangeListener(TO_THEOREM_SELECTION);
+        if (myInteractiveModeFlag) {
+            //Set up the new model
+            model.setChangeEventMode(PerVCProverModel.ChangeEventMode.ALWAYS);
+            model.addChangeListener(TO_THEOREM_SELECTION);
 
-        //Put us into theorem selection state
-        prepForTheoremSelection();
+            //Put us into theorem selection state
+            prepForTheoremSelection();
+        }
+        else {
+            model
+                    .setChangeEventMode(PerVCProverModel.ChangeEventMode.INTERMITTENT);
+        }
     }
 
     public PerVCProverModel getModel() {
@@ -311,8 +368,7 @@ public class JProverFrame extends JFrame {
 
         myProverStateDisplay.addMouseListener(APPLICATION_CANCELLER);
 
-        activateTransformations(theorem
-                .getTransformations(myGlobalTheoremAssertions));
+        activateTransformations(theorem.getTransformations());
     }
 
     private void activateTransformations(List<Transformation> transformations) {
@@ -505,9 +561,10 @@ public class JProverFrame extends JFrame {
         BoxLayout transportControlPanelLayout =
                 new BoxLayout(transportControlPanel, BoxLayout.X_AXIS);
         transportControlPanel.setLayout(transportControlPanelLayout);
-        transportControlPanel.add(new JButton(">"));
-        transportControlPanel.add(new JButton("||"));
-        transportControlPanel.add(new JButton("@"));
+        transportControlPanel.add(myPlayButton);
+        transportControlPanel.add(myStepButton);
+        transportControlPanel.add(myPauseButton);
+        transportControlPanel.add(myStopButton);
         transportControlPanel.add(Box.createHorizontalStrut(4));
         transportControlPanel.add(myLastVCButton);
         transportControlPanel.add(myNextVCButton);

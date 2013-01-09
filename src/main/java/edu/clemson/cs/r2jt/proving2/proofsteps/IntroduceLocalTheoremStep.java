@@ -12,15 +12,23 @@ import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
  *
  * @author hamptos
  */
-public class IntroduceLocalTheorem implements ProofStep {
+public class IntroduceLocalTheoremStep implements ProofStep {
 
     private final LocalTheorem myLocalTheorem;
     private final Transformation myTransformation;
 
-    public IntroduceLocalTheorem(LocalTheorem theorem,
+    public IntroduceLocalTheoremStep(LocalTheorem theorem,
             Transformation transformation) {
         myLocalTheorem = theorem;
         myTransformation = transformation;
+    }
+
+    public LocalTheorem getIntroducedTheorem() {
+        return myLocalTheorem;
+    }
+
+    public Transformation getTransformation() {
+        return myTransformation;
     }
 
     @Override

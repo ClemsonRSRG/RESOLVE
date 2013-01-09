@@ -11,7 +11,7 @@ import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.TopLevelConsequentBinder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
-import edu.clemson.cs.r2jt.proving2.proofsteps.RemoveConsequent;
+import edu.clemson.cs.r2jt.proving2.proofsteps.RemoveConsequentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collections;
 import java.util.Iterator;
@@ -44,6 +44,41 @@ public class EliminateTrueConjunctInConsequent implements Transformation {
                 BIND_RESULT_TO_APPLICATION);
     }
 
+    @Override
+    public boolean couldAffectAntecedent() {
+        return false;
+    }
+
+    @Override
+    public boolean couldAffectConsequent() {
+        return true;
+    }
+
+    @Override
+    public int functionApplicationCountDelta() {
+        return 0;
+    }
+
+    @Override
+    public boolean introducesQuantifiedVariables() {
+        return false;
+    }
+
+    @Override
+    public Set<String> getPatternSymbolNames() {
+        return Collections.singleton("true");
+    }
+
+    @Override
+    public Set<String> getReplacementSymbolNames() {
+        return Collections.EMPTY_SET;
+    }
+
+    @Override
+    public Equivalence getEquivalence() {
+        return Equivalence.EQUIVALENT;
+    }
+
     private class BindResultToApplication
             implements
                 Mapping<BindResult, Application> {
@@ -74,7 +109,7 @@ public class EliminateTrueConjunctInConsequent implements Transformation {
         public void apply(PerVCProverModel m) {
             m.removeConsequent(mySite.index);
 
-            m.addProofStep(new RemoveConsequent(mySite.exp, mySite.index,
+            m.addProofStep(new RemoveConsequentStep(mySite.exp, mySite.index,
                     EliminateTrueConjunctInConsequent.this));
         }
 

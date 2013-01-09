@@ -28,5 +28,23 @@ import java.util.Set;
  */
 public interface Transformation {
 
+    public enum Equivalence {
+        WEAKER, EQUIVALENT, STRONGER
+    }
+
     public Iterator<Application> getApplications(PerVCProverModel m);
+
+    public boolean couldAffectAntecedent();
+
+    public boolean couldAffectConsequent();
+
+    public int functionApplicationCountDelta();
+
+    public boolean introducesQuantifiedVariables();
+
+    public Set<String> getPatternSymbolNames();
+
+    public Set<String> getReplacementSymbolNames();
+
+    public Equivalence getEquivalence();
 }

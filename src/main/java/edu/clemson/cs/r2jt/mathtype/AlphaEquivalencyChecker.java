@@ -6,7 +6,7 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
 
     private static final IllegalArgumentException MISMATCH =
             new IllegalArgumentException(TypeMismatchException.INSTANCE);
-    
+
     @Override
     public boolean beginMTNamed(MTNamed t1, MTNamed t2) {
         //TODO: This doesn't deal correctly with multiple appearances of a

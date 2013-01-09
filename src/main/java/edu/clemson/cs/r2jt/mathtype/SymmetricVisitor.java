@@ -9,9 +9,9 @@ import java.util.List;
 
 public class SymmetricVisitor {
 
-    private static final NonSymmetricalNodeException NON_SYMMETRICAL_NODE = 
+    private static final NonSymmetricalNodeException NON_SYMMETRICAL_NODE =
             new NonSymmetricalNodeException();
-    
+
     private final static Class<?> SYMMETRIC_VISITOR = SymmetricVisitor.class;
 
     private final static Procedure DO_NOTHING = new Procedure() {

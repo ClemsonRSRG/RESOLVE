@@ -6,6 +6,7 @@ package edu.clemson.cs.r2jt.proving2.transformations;
 
 import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
@@ -13,7 +14,7 @@ import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.AbstractBinder;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
-import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheorem;
+import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheoremStep;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collections;
@@ -52,6 +53,46 @@ public class ExpandAntecedentBySubstitution implements Transformation {
 
         return new LazyMappingIterator<BindResult, Application>(bindResults,
                 BIND_RESULT_TO_APPLICATION);
+    }
+
+    @Override
+    public boolean couldAffectAntecedent() {
+        return true;
+    }
+
+    @Override
+    public boolean couldAffectConsequent() {
+        return false;
+    }
+
+    @Override
+    public int functionApplicationCountDelta() {
+        return myTransformationTemplate.getFunctionApplications().size()
+                - myMatchPattern.getFunctionApplications().size();
+    }
+
+    @Override
+    public boolean introducesQuantifiedVariables() {
+        Set<PSymbol> introduced =
+                myTransformationTemplate.getQuantifiedVariables();
+        introduced.removeAll(myMatchPattern.getQuantifiedVariables());
+
+        return !introduced.isEmpty();
+    }
+
+    @Override
+    public Set<String> getPatternSymbolNames() {
+        return myMatchPattern.getSymbolNames();
+    }
+
+    @Override
+    public Set<String> getReplacementSymbolNames() {
+        return myTransformationTemplate.getSymbolNames();
+    }
+
+    @Override
+    public Equivalence getEquivalence() {
+        return Equivalence.EQUIVALENT;
     }
 
     private class BindResultToApplication
@@ -166,7 +207,7 @@ public class ExpandAntecedentBySubstitution implements Transformation {
             LocalTheorem newTheorem =
                     m.addLocalTheorem(topLevelTransformed, null, false);
 
-            m.addProofStep(new IntroduceLocalTheorem(newTheorem,
+            m.addProofStep(new IntroduceLocalTheoremStep(newTheorem,
                     ExpandAntecedentBySubstitution.this));
         }
 

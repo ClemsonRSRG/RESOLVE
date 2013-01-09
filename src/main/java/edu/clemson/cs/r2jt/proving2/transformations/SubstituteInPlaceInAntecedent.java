@@ -9,11 +9,9 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
-import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
-import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.InductiveAntecedentBinder;
-import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.InductiveConsequentBinder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyAntecedentStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collections;
@@ -25,7 +23,7 @@ import java.util.Set;
  *
  * @author hamptos
  */
-public class SubstituteInPlaceInConsequent implements Transformation {
+public class SubstituteInPlaceInAntecedent implements Transformation {
 
     private final BindResultToApplication BIND_RESULT_TO_APPLICATION =
             new BindResultToApplication();
@@ -33,7 +31,7 @@ public class SubstituteInPlaceInConsequent implements Transformation {
     private PExp myMatchPattern;
     private PExp myTransformationTemplate;
 
-    public SubstituteInPlaceInConsequent(PExp matchPattern,
+    public SubstituteInPlaceInAntecedent(PExp matchPattern,
             PExp transformationTemplate) {
 
         myMatchPattern = matchPattern;
@@ -43,12 +41,13 @@ public class SubstituteInPlaceInConsequent implements Transformation {
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
         Iterator<PerVCProverModel.BindResult> bindResults =
-                m.bind(Collections
-                        .singleton((Binder) new InductiveConsequentBinder(
-                                myMatchPattern)));
+                m
+                        .bind(Collections
+                                .singleton((PerVCProverModel.Binder) new InductiveAntecedentBinder(
+                                        myMatchPattern)));
 
-        return new LazyMappingIterator<BindResult, Application>(bindResults,
-                BIND_RESULT_TO_APPLICATION);
+        return new LazyMappingIterator<PerVCProverModel.BindResult, Application>(
+                bindResults, BIND_RESULT_TO_APPLICATION);
     }
 
     @Override
@@ -88,30 +87,30 @@ public class SubstituteInPlaceInConsequent implements Transformation {
     }
 
     @Override
-    public Equivalence getEquivalence() {
-        return Equivalence.EQUIVALENT;
+    public Transformation.Equivalence getEquivalence() {
+        return Transformation.Equivalence.EQUIVALENT;
     }
 
     private class BindResultToApplication
             implements
-                Mapping<BindResult, Application> {
+                Mapping<PerVCProverModel.BindResult, Application> {
 
         @Override
-        public Application map(BindResult input) {
-            return new SubstituteInPlaceInConsequentApplication(input.bindSites
+        public Application map(PerVCProverModel.BindResult input) {
+            return new SubstituteInPlaceInAntecedentApplication(input.bindSites
                     .values().iterator().next(), input.freeVariableBindings);
         }
 
     }
 
-    private class SubstituteInPlaceInConsequentApplication
+    private class SubstituteInPlaceInAntecedentApplication
             implements
                 Application {
 
         private final Site myBindSite;
         private final Map<PExp, PExp> myBindings;
 
-        public SubstituteInPlaceInConsequentApplication(Site bindSite,
+        public SubstituteInPlaceInAntecedentApplication(Site bindSite,
                 Map<PExp, PExp> bindings) {
             myBindSite = bindSite;
             myBindings = bindings;
@@ -127,8 +126,8 @@ public class SubstituteInPlaceInConsequent implements Transformation {
             PExp transformed = myTransformationTemplate.substitute(myBindings);
             m.alterSite(myBindSite, transformed);
 
-            m.addProofStep(new ModifyConsequentStep(myBindSite,
-                    SubstituteInPlaceInConsequent.this));
+            m.addProofStep(new ModifyAntecedentStep(myBindSite,
+                    SubstituteInPlaceInAntecedent.this));
         }
 
         @Override

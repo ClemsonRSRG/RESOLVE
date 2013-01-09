@@ -1662,8 +1662,13 @@ public class Controller {
                 }
 
                 AlgebraicProver prover =
-                        new AlgebraicProver(realTable.getTypeGraph(), vcs,
-                                scope);
+                        new AlgebraicProver(
+                                realTable.getTypeGraph(),
+                                vcs,
+                                scope,
+                                myInstanceEnvironment.flags
+                                        .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE));
+                prover.start();
             }
             catch (NoSuchSymbolException nsse) {
                 //Can't find the module we're in.  Shouldn't be possible.
