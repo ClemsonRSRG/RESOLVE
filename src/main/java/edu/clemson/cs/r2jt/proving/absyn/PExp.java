@@ -666,6 +666,8 @@ public abstract class PExp {
             b.append("(Defines: " + myTypeValue + ")");
         }
 
+        b.append(" " + valueHash);
+
         for (PExp e : getSubExpressions()) {
             b.append("\n" + e.toDebugString(indent + offset, offset));
         }

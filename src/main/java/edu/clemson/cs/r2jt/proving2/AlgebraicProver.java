@@ -139,7 +139,8 @@ public class AlgebraicProver {
             if (!myInteractiveModeFlag) {
                 myAutomatedProvers[myVCIndex].start();
             }
-            System.out.println("Out");
+            System.out.println("Out -- Interactive: " + myInteractiveModeFlag);
+            myModels[myVCIndex].touch();
             if (myModels[myVCIndex].noConsequents()) {
                 //Proved.
 

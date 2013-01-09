@@ -23,6 +23,7 @@ import edu.clemson.cs.r2jt.proving2.utilities.UnsafeIteratorLinkedList;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -108,6 +109,9 @@ public final class PerVCProverModel {
     private final List<PExp> myConsequents =
             new UnsafeIteratorLinkedList<PExp>();
 
+    private int myLocalTheoremsHash;
+    private int myConsequentsHash;
+
     /**
      * <p>A list of the current proof under consideration.  Starting with a 
      * fresh <code>PerVCProverModel</code> initialized with the consequents, 
@@ -158,7 +162,11 @@ public final class PerVCProverModel {
             addLocalTheorem(assumption, new Given(), false);
         }
 
-        myConsequents.addAll(consequents);
+        for (PExp consequent : consequents) {
+            myConsequentsHash += consequents.hashCode();
+            myConsequents.add(consequent);
+        }
+
         myLocalTheoremSetForReturning = myLocalTheoremsSet.keySet();
 
         myTheoremLibrary = theoremLibrary;
@@ -229,7 +237,7 @@ public final class PerVCProverModel {
     public void touch() {
         modelChanged(true);
     }
-    
+
     private void modelChanged(boolean important) {
         if (myChangeEventMode.report(important)) {
 
@@ -270,6 +278,10 @@ public final class PerVCProverModel {
     }
 
     public void setConsequent(int index, PExp newConsequent) {
+
+        myConsequentsHash -= myConsequents.get(index).hashCode();
+        myConsequentsHash += newConsequent.hashCode();
+
         myConsequents.set(index, newConsequent);
         modelChanged(false);
     }
@@ -284,6 +296,10 @@ public final class PerVCProverModel {
 
     public List<LocalTheorem> getLocalTheoremList() {
         return myLocalTheoremsList;
+    }
+
+    public List<PExp> getConsequentList() {
+        return myConsequents;
     }
 
     public Set<PExp> getLocalTheoremSet() {
@@ -312,6 +328,7 @@ public final class PerVCProverModel {
 
     public PExp removeConsequent(int index) {
         PExp result = myConsequents.remove(index);
+        myConsequentsHash -= result.hashCode();
 
         //This change is important if it eleminates the last conjunct--because
         //then we've proved it!
@@ -355,8 +372,13 @@ public final class PerVCProverModel {
             break;
         case CONSEQUENTS:
             result = myConsequents.get(s.index);
-            myConsequents.set(s.index, result.withSiteAltered(s.pathIterator(),
-                    newValue));
+            myConsequentsHash -= result.hashCode();
+
+            PExp altered = result.withSiteAltered(s.pathIterator(), newValue);
+
+            myConsequentsHash += altered.hashCode();
+
+            myConsequents.set(s.index, altered);
             break;
         case THEOREM_LIBRARY:
             throw new IllegalArgumentException("Can't modify a global theorem.");
@@ -387,6 +409,9 @@ public final class PerVCProverModel {
      */
     public LocalTheorem addLocalTheorem(PExp assertion, Justification j,
             boolean tryingToProveThis, int index) {
+
+        myLocalTheoremsHash += assertion.hashCode();
+
         LocalTheorem theorem =
                 new LocalTheorem(assertion, j, tryingToProveThis);
 
@@ -414,6 +439,8 @@ public final class PerVCProverModel {
     public LocalTheorem removeLocalTheorem(int index) {
         LocalTheorem t = getLocalTheorem(index);
 
+        myLocalTheoremsHash -= t.hashCode();
+
         removeLocalTheorem(t);
 
         return t;
@@ -422,7 +449,13 @@ public final class PerVCProverModel {
     public void removeLocalTheorem(LocalTheorem t) {
         PExp tAssertion = t.getAssertion();
 
-        myLocalTheoremsList.remove(t);
+        boolean removed = myLocalTheoremsList.remove(t);
+        if (removed) {
+            myLocalTheoremsHash -= t.getAssertion().hashCode();
+        }
+        else {
+            throw new RuntimeException("No such theorem.");
+        }
 
         Integer count = myLocalTheoremsSet.get(tAssertion);
 
@@ -535,6 +568,10 @@ public final class PerVCProverModel {
     public Iterator<BindResult> bind(Set<Binder> binders) {
         return new BinderSatisfyingIterator(binders, new HashMap<PExp, PExp>(),
                 new LinkedList<Site>());
+    }
+
+    public int implicationHashCode() {
+        return myLocalTheoremsHash + (51 * myConsequentsHash);
     }
 
     private class BinderSatisfyingIterator implements Iterator<BindResult> {

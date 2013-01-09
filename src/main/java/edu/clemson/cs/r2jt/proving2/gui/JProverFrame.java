@@ -286,7 +286,7 @@ public class JProverFrame extends JFrame {
                             TO_THEOREM_SELECTION);
                 }
             }
-            
+
         });
     }
 

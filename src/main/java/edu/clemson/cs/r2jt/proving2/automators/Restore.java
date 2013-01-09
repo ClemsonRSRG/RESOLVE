@@ -15,13 +15,17 @@ import java.util.Deque;
 public class Restore implements Automator {
 
     private final int myOriginalProofStepCount;
+    private final MainProofLevel myMainProofLevel;
 
-    public Restore(PerVCProverModel m) {
+    public Restore(PerVCProverModel m, MainProofLevel main) {
         myOriginalProofStepCount = m.getProofSteps().size();
+        myMainProofLevel = main;
     }
 
     @Override
     public void step(Deque<Automator> stack, PerVCProverModel model) {
+
+        myMainProofLevel.prepForRestore();
 
         int currentProofStepCount = model.getProofSteps().size();
         int additionProofStepCount =

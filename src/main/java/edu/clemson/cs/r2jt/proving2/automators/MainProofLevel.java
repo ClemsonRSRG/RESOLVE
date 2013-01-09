@@ -12,9 +12,11 @@ import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p><code>MainProofLevel</code> is an @{link Automator Automator} that 
@@ -47,19 +49,26 @@ public class MainProofLevel implements Automator {
 
     private int myStep;
 
-    private final Restore myRestore;
+    private Restore myRestore;
+
+    private final Set<Integer> myPreviousProofStates;
 
     public MainProofLevel(PerVCProverModel model, int tetherLength,
             Iterable<Transformation> transformations) {
+        this(model, tetherLength, transformations, new HashSet<Integer>());
+    }
+
+    public MainProofLevel(PerVCProverModel model, int tetherLength,
+            Iterable<Transformation> transformations,
+            Set<Integer> previousProofStates) {
 
         myModel = model;
         myTetherLength = tetherLength;
         myTransformations = transformations;
+        myPreviousProofStates = previousProofStates;
 
         myCurrentApplications =
                 DummyIterator.getInstance(myCurrentApplications);
-
-        myRestore = new Restore(model);
     }
 
     private void prepTransformationIterator() {
@@ -80,13 +89,22 @@ public class MainProofLevel implements Automator {
                 new ChainingIterator<Transformation>(localTransformations
                         .iterator(), myTransformations.iterator());
     }
-    
+
+    /**
+     * <p>Performs bookkeeping before a restore happens.</p>
+     */
+    public void prepForRestore() {
+        myPreviousProofStates.remove(myModel.implicationHashCode());
+    }
+
     @Override
     public void step(Deque<Automator> stack, PerVCProverModel model) {
         if (myTransformationsIterator == null) {
             prepTransformationIterator();
+            myPreviousProofStates.add(model.implicationHashCode());
+            myRestore = new Restore(model, this);
         }
-        
+
         switch (myStep) {
         case 0:
             //Apply some application
@@ -112,9 +130,12 @@ public class MainProofLevel implements Automator {
         case 2:
             //Next level
             stack.push(myRestore);
-            if (myTetherLength > 0) {
+            if (myTetherLength > 0
+                    && !myPreviousProofStates.contains(myModel
+                            .implicationHashCode())) {
+
                 stack.push(new MainProofLevel(myModel, myTetherLength - 1,
-                        myTransformations));
+                        myTransformations, myPreviousProofStates));
             }
             break;
         default:

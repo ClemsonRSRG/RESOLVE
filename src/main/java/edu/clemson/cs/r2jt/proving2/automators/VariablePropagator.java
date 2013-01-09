@@ -64,7 +64,7 @@ public class VariablePropagator implements Automator {
             List<Automator> steps = new LinkedList<Automator>();
             steps.add(new ApplyAll(new SubstituteInPlaceInAntecedent(variable,
                     expansion)));
-            steps.add(new ApplyAll(new SubstituteInPlaceInConsequent(variable, 
+            steps.add(new ApplyAll(new SubstituteInPlaceInConsequent(variable,
                     expansion)));
             steps.add(new ApplyN(new RemoveAntecedent(model, antecedentIndex),
                     1));
@@ -86,7 +86,8 @@ public class VariablePropagator implements Automator {
 
             if (eAsPSymbol.arguments.size() == 0
                     && eAsPSymbol.quantification
-                            .equals(PSymbol.Quantification.NONE)) {
+                            .equals(PSymbol.Quantification.NONE)
+                    && !eAsPSymbol.isLiteral()) {
                 result = eAsPSymbol;
             }
         }

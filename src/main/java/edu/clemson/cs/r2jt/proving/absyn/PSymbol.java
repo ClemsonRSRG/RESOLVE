@@ -648,6 +648,7 @@ public class PSymbol extends PExp {
         //      "S'' = empty_string", the left and right sides of the equality
         //      are indistinguishable except for their names.  Until this
         //      situation is resolved, literals should be hard coded here.
-        return (name.equals("empty_string"));
+        return (name.equalsIgnoreCase("empty_string"))
+                || (name.equals("0") || name.equals("1"));
     }
 }

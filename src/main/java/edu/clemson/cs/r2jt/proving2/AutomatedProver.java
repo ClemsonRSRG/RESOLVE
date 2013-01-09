@@ -18,9 +18,13 @@ import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import java.util.ArrayDeque;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.swing.SwingUtilities;
 
 /**
@@ -42,9 +46,13 @@ public class AutomatedProver {
 
     private Thread myWorkerThread;
 
+    private MainProofFitnessFunction myFitnessFunction;
+
     public AutomatedProver(PerVCProverModel m,
             ImmutableList<Theorem> theoremLibrary) {
         myModel = m;
+        myFitnessFunction = new MainProofFitnessFunction(m);
+
         m.setAutomatedProver(this);
 
         myTheoremLibrary = theoremLibrary;
@@ -54,23 +62,36 @@ public class AutomatedProver {
             truths.add(t.getAssertion());
         }
 
-        List<Transformation> transformations = new LinkedList<Transformation>();
+        PriorityQueue<Transformation> transformationHeap =
+                new PriorityQueue<Transformation>(11,
+                        new TransformationComparator());
         List<Transformation> theoremTransformations;
         for (Theorem t : theoremLibrary) {
             theoremTransformations = t.getTransformations();
 
             for (Transformation transformation : theoremTransformations) {
                 if (!transformation.couldAffectAntecedent()) {
-                    transformations.add(transformation);
+                    transformationHeap.add(transformation);
                 }
             }
+        }
+        List<Transformation> transformations = new LinkedList<Transformation>();
+        Transformation top;
+        while (!transformationHeap.isEmpty()) {
+            top = transformationHeap.poll();
+            transformations.add(top);
+            System.out.println(top + " (" + top.getClass() + ") -- "
+                    + myFitnessFunction.calculateFitness(top));
         }
 
         List<Automator> steps = new LinkedList<Automator>();
         steps.add(new VariablePropagator());
-        steps.add(new ApplyN(
-                new NoOpLabel("--- Done Propagating Variables ---"), 1));
-        steps.add(new AntecedentDeveloper(myModel, myTheoremLibrary, 3));
+        steps.add(new AntecedentDeveloper(myModel, myTheoremLibrary, 1));
+        steps.add(new VariablePropagator());
+        steps.add(new AntecedentDeveloper(myModel, myTheoremLibrary, 1));
+        steps.add(new VariablePropagator());
+        steps.add(new AntecedentDeveloper(myModel, myTheoremLibrary, 1));
+        steps.add(new VariablePropagator());
         steps.add(new ApplyN(
                 new NoOpLabel("--- Done Developing Antecedent ---"), 1));
         steps.add(new MainProofLevel(m, 3, transformations));
@@ -156,9 +177,40 @@ public class AutomatedProver {
         }
 
         if (myAutomatorStack.isEmpty() || myModel.noConsequents()) {
+            if (myAutomatorStack.isEmpty()) {
+                System.out.println("Proof space exhausted.");
+            }
+            if (myModel.noConsequents()) {
+                System.out.println("Proved.");
+            }
             myRunningFlag = false;
         }
 
         myTakingStepFlag = false;
+    }
+
+    private class TransformationComparator
+            implements
+                Comparator<Transformation> {
+
+        @Override
+        public int compare(Transformation o1, Transformation o2) {
+            int result;
+
+            double fitness1 = myFitnessFunction.calculateFitness(o1);
+            double fitness2 = myFitnessFunction.calculateFitness(o2);
+
+            if (fitness1 > fitness2) {
+                result = -1;
+            }
+            else if (fitness2 > fitness1) {
+                result = 1;
+            }
+            else {
+                result = 0;
+            }
+
+            return result;
+        }
     }
 }
