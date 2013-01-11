@@ -65,7 +65,7 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 
-import edu.clemson.cs.r2jt.mathtype.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.proving.ChainingIterator;
 import edu.clemson.cs.r2jt.proving.DummyIterator;
 

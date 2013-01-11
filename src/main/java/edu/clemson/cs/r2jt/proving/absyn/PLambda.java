@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import edu.clemson.cs.r2jt.mathtype.MTFunction;
-import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.SingletonImmutableList;
 

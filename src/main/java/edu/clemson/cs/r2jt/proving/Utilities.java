@@ -21,7 +21,7 @@ import edu.clemson.cs.r2jt.absyn.QuantExp;
 import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.type.Type;
 
 /**

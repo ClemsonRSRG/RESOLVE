@@ -60,7 +60,7 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 public abstract class Dec extends ResolveConceptualElement implements Cloneable {
 

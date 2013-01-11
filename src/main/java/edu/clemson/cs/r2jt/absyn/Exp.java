@@ -67,7 +67,7 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.type.BooleanType;
-import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;

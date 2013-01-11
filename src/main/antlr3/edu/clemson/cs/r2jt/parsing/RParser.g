@@ -1587,10 +1587,7 @@ iterated_construct
 
 //NOTE: Allows only very rudimentary lambda expressions.
 lambda_expression
-    :   LAMBDA^ ident COLON!
-        (   (ident DOT ident DOT) => certain_qualified_ident
-        |   ident
-        )
+    :   LAMBDA^ LPAREN! math_variable_declaration RPAREN!
         DOT! LPAREN! math_expression RPAREN!
     ;
 

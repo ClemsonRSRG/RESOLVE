@@ -74,11 +74,7 @@ public class LambdaExp extends Exp {
     /** The location member. */
     private Location location;
 
-    /** The name member. */
-    private PosSymbol name;
-
-    /** The ty member. */
-    private Ty ty;
+    private MathVarDec variable;
 
     /** The body member. */
     private Exp body;
@@ -90,9 +86,12 @@ public class LambdaExp extends Exp {
     public LambdaExp() {};
 
     public LambdaExp(Location location, PosSymbol name, Ty ty, Exp body) {
+        this(location, new MathVarDec(name, ty), body);
+    }
+
+    public LambdaExp(Location location, MathVarDec variable, Exp body) {
         this.location = location;
-        this.name = name;
-        this.ty = ty;
+        this.variable = variable;
         this.body = body;
     }
 
@@ -111,12 +110,12 @@ public class LambdaExp extends Exp {
 
     /** Returns the value of the name variable. */
     public PosSymbol getName() {
-        return name;
+        return variable.getName();
     }
 
     /** Returns the value of the ty variable. */
     public Ty getTy() {
-        return ty;
+        return variable.getTy();
     }
 
     /** Returns the value of the body variable. */
@@ -135,12 +134,12 @@ public class LambdaExp extends Exp {
 
     /** Sets the name variable to the specified value. */
     public void setName(PosSymbol name) {
-        this.name = name;
+        variable.setName(name);
     }
 
     /** Sets the ty variable to the specified value. */
     public void setTy(Ty ty) {
-        this.ty = ty;
+        variable.setTy(ty);
     }
 
     /** Sets the body variable to the specified value. */
@@ -153,7 +152,7 @@ public class LambdaExp extends Exp {
     // ===========================================================
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        return new LambdaExp(location, name, ty,
+        return new LambdaExp(location, variable,
                 substitute(body, substitutions));
     }
 
@@ -175,12 +174,8 @@ public class LambdaExp extends Exp {
         printSpace(indent, sb);
         sb.append("LambdaExp\n");
 
-        if (name != null) {
-            sb.append(name.asString(indent + increment, increment));
-        }
-
-        if (ty != null) {
-            sb.append(ty.asString(indent + increment, increment));
+        if (variable != null) {
+            sb.append(variable);
         }
 
         if (body != null) {
@@ -196,8 +191,7 @@ public class LambdaExp extends Exp {
         if (result) {
             LambdaExp eAsLambdaExp = (LambdaExp) e;
 
-            result = eAsLambdaExp.getName().equals(name);
-            result &= eAsLambdaExp.getBody().equivalent(body);
+            result = eAsLambdaExp.variable.equals(variable);
         }
 
         return result;
@@ -206,7 +200,7 @@ public class LambdaExp extends Exp {
     /** Returns true if the variable is found in any sub expression   
         of this one. **/
     public boolean containsVar(String varName, boolean IsOldExp) {
-        if (name.toString().equals(varName)) {
+        if (variable.getName().toString().equals(varName)) {
             return true;
         }
 
@@ -231,7 +225,7 @@ public class LambdaExp extends Exp {
         if (!(e2 instanceof LambdaExp)) {
             return false;
         }
-        if (!(name.equals(((LambdaExp) e2).getName().getName()))) {
+        if (!(variable.getName().equals(((LambdaExp) e2).getName().getName()))) {
             return false;
         }
         return true;
@@ -241,11 +235,11 @@ public class LambdaExp extends Exp {
         if (!(old instanceof LambdaExp)) {
             LambdaExp result = (LambdaExp) Exp.copy(this);
             result.body = Exp.replace(result.body, old, replace);
-            if (name != null) {
+            if (variable.getName() != null) {
                 if (old instanceof VarExp && replace instanceof VarExp) {
                     if (((VarExp) old).getName().toString().equals(
-                            name.toString())) {
-                        this.name = ((VarExp) replace).getName();
+                            variable.getName().toString())) {
+                        this.variable.setName(((VarExp) replace).getName());
                         return this;
                     }
                 }
@@ -256,8 +250,7 @@ public class LambdaExp extends Exp {
     }
 
     public void prettyPrint() {
-        System.out.print("lambda " + name.getName() + ": ");
-        ty.prettyPrint();
+        System.out.print("lambda " + variable);
         System.out.print(" (");
         body.prettyPrint();
         System.out.print(")");
@@ -265,9 +258,7 @@ public class LambdaExp extends Exp {
 
     public String toString(int indent) {
         StringBuffer sb = new StringBuffer();
-        sb.append("lambda " + name.getName() + ": ");
-        if (ty != null)
-            sb.append(ty.toString(0));
+        sb.append("lambda " + variable);
         sb.append(" (");
         sb.append(body.toString(0));
         sb.append(")");
@@ -275,18 +266,18 @@ public class LambdaExp extends Exp {
     }
 
     public Exp copy() {
-        PosSymbol newName = name.copy();
+        MathVarDec newVariable = variable.copy();
         Exp newBody = Exp.copy(body);
-        Exp result = new LambdaExp(null, newName, ty, newBody);
+        Exp result = new LambdaExp(null, newVariable, newBody);
         result.setType(type);
 
         return result;
     }
 
     public Object clone() {
-        PosSymbol newName = name.copy();
+        MathVarDec newVariable = variable.copy();
         Exp newBody = (Exp) Exp.clone(body);
-        Exp result = new LambdaExp(null, newName, ty, newBody);
+        Exp result = new LambdaExp(null, newVariable, newBody);
         result.setType(type);
 
         return result;

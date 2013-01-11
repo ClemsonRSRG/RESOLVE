@@ -8,6 +8,11 @@ import edu.clemson.cs.r2jt.absyn.MathAssertionDec;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.r2jt.typeandpopulate.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.Map;
 

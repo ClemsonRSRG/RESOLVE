@@ -5,13 +5,13 @@ import edu.clemson.cs.r2jt.absyn.ModuleDec;
 import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
-import edu.clemson.cs.r2jt.mathtype.DuplicateSymbolException;
-import edu.clemson.cs.r2jt.mathtype.MTFunction;
-import edu.clemson.cs.r2jt.mathtype.MTNamed;
-import edu.clemson.cs.r2jt.mathtype.MTPowertypeApplication;
-import edu.clemson.cs.r2jt.mathtype.MathSymbolTableBuilder;
-import edu.clemson.cs.r2jt.mathtype.ScopeBuilder;
-import edu.clemson.cs.r2jt.mathtype.SymbolTableEntry.Quantification;
+import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
+import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
+import edu.clemson.cs.r2jt.typeandpopulate.MTPowertypeApplication;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate.ScopeBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry.Quantification;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 public class HardCoded {

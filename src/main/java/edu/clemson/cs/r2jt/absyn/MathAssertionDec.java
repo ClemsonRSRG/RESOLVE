@@ -221,4 +221,9 @@ public class MathAssertionDec extends Dec {
         }
         return sb.toString();
     }
+
+    @Override
+    public String toString() {
+        return assertion.asString(0, 4);
+    }
 }
