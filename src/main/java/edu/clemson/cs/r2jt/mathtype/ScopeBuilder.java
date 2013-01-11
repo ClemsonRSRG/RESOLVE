@@ -7,6 +7,7 @@ import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.absyn.FacilityDec;
 import edu.clemson.cs.r2jt.absyn.FinalItem;
 import edu.clemson.cs.r2jt.absyn.InitItem;
+import edu.clemson.cs.r2jt.absyn.MathAssertionDec;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.absyn.TypeDec;
 import edu.clemson.cs.r2jt.data.PosSymbol;
@@ -153,6 +154,19 @@ public class ScopeBuilder extends SyntacticScope {
                                 exemplarName, definingElement.getConstraint(),
                                 initRequires, initEnsures,
                                 finalizationRequires, finalizationEnsures));
+
+        myBindings.put(name, entry);
+
+        return entry;
+    }
+
+    public TheoremEntry addTheorem(String name, MathAssertionDec definingElement)
+            throws DuplicateSymbolException {
+        sanityCheckBindArguments(name, definingElement, "");
+
+        TheoremEntry entry =
+                new TheoremEntry(myTypeGraph, name, definingElement,
+                        myRootModule);
 
         myBindings.put(name, entry);
 

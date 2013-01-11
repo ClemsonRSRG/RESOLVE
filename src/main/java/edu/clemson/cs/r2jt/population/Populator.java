@@ -6,7 +6,6 @@ import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.mathtype.*;
 import edu.clemson.cs.r2jt.mathtype.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.mathtype.MathSymbolTable.ImportStrategy;
-import edu.clemson.cs.r2jt.mathtype.PTPrimitive.PrimitiveTypeName;
 import edu.clemson.cs.r2jt.mathtype.ProgramParameterEntry.ParameterMode;
 import edu.clemson.cs.r2jt.treewalk.*;
 import edu.clemson.cs.r2jt.typereasoning.*;
@@ -510,13 +509,18 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postMathAssertionDec(MathAssertionDec node) {
-        if (node.getAssertion() != null) {
-            expectType(node.getAssertion(), myTypeGraph.BOOLEAN);
-        }
+        //if (node.getAssertion() != null) {
+        expectType(node.getAssertion(), myTypeGraph.BOOLEAN);
+        //}
 
         String name = node.getName().getName();
-        addBinding(name, node.getName().getLocation(), node,
-                myTypeGraph.BOOLEAN, null);
+        try {
+
+            myBuilder.getInnermostActiveScope().addTheorem(name, node);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(name, node.getName().getLocation());
+        }
 
         Populator.emitDebug("New theorem: " + name);
     }
@@ -564,9 +568,8 @@ public class Populator extends TreeWalkerVisitor {
             duplicateSymbol(varName, programVar.getLocation());
         }
 
-        Populator.emitDebug("  New program variable: " + varName
-                + " of type " + mathTypeValue.toString()
-                + " with quantification NONE");
+        Populator.emitDebug("  New program variable: " + varName + " of type "
+                + mathTypeValue.toString() + " with quantification NONE");
     }
 
     @Override
@@ -761,8 +764,8 @@ public class Populator extends TreeWalkerVisitor {
         addBinding(definitionSymbol, node.getName().getLocation(), node,
                 declaredType, typeValue, myDefinitionSchematicTypes);
 
-        Populator.emitDebug("New definition: " + definitionSymbol
-                + " of type " + declaredType
+        Populator.emitDebug("New definition: " + definitionSymbol + " of type "
+                + declaredType
                 + ((typeValue != null) ? " with type value " + typeValue : ""));
 
         myCurrentDirectDefinition = null;
@@ -1385,9 +1388,9 @@ public class Populator extends TreeWalkerVisitor {
             }
         }
 
-        Populator.emitDebug("Processed symbol " + symbolName
-                + " with type " + node.getMathType()
-                + ", referencing math type " + node.getMathTypeValue());
+        Populator.emitDebug("Processed symbol " + symbolName + " with type "
+                + node.getMathType() + ", referencing math type "
+                + node.getMathTypeValue());
 
         return intendedEntry;
     }

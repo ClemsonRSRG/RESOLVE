@@ -62,8 +62,7 @@ public class BindingExpression {
                 getTypeUnderBinding(expr2.getMathType(), typeBindings);
 
         if (!myTypeGraph.isSubtype(expr2Type, expr1Type)) {
-            throw new TypeMismatchException(expr1.getMathType(), expr2
-                    .getMathType());
+            throw TypeMismatchException.INSTANCE;
         }
 
         if (expr1 instanceof VarExp) {
