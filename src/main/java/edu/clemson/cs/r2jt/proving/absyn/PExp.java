@@ -23,8 +23,16 @@ import edu.clemson.cs.r2jt.absyn.PrefixExp;
 import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.absyn.VariableDotExp;
 import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.mathtype.MTFunction;
 import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.proving.absyn.PSymbol.DisplayType;
+import edu.clemson.cs.r2jt.proving.absyn.PSymbol.Quantification;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.Utilities;
+import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import java.util.Arrays;
+import java.util.Deque;
 
 /**
  * <p><code>PExp</code> is the root of the prover abstract syntax tree 
@@ -78,6 +86,31 @@ public abstract class PExp {
         return v.getFinalPExp();
     }
 
+    public PExp withSiteAltered(Iterator<Integer> path, PExp newValue) {
+
+        Deque<Integer> integerPath = new LinkedList<Integer>();
+        Deque<PExp> pexpPath = new LinkedList<PExp>();
+
+        pexpPath.push(this);
+        while (path.hasNext()) {
+            integerPath.push(path.next());
+
+            pexpPath.push(pexpPath.peek().getSubExpressions().get(
+                    integerPath.peek()));
+        }
+
+        pexpPath.pop();
+        pexpPath.push(newValue);
+
+        while (pexpPath.size() > 1) {
+            newValue = pexpPath.pop();
+            pexpPath.push(pexpPath.pop().withSubExpressionReplaced(
+                    integerPath.pop(), newValue));
+        }
+
+        return pexpPath.peek();
+    }
+
     public abstract PExp withTypeReplaced(MTType t);
 
     public abstract PExp withTypeValueReplaced(MTType t);
@@ -94,6 +127,10 @@ public abstract class PExp {
         }
 
         return working;
+    }
+
+    public static PExp trueExp(TypeGraph g) {
+        return new PSymbol(g.BOOLEAN, null, "true");
     }
 
     public abstract ImmutableList<PExp> getSubExpressions();
@@ -115,6 +152,140 @@ public abstract class PExp {
     public abstract PExp flipQuantifiers();
 
     /**
+     * <p>For testing purposes, building a PExp is a pain in the ass.  This 
+     * method presents a relatively easy way of 'describing' the PExp you'd like
+     * as a string, rather than resorting to building complex types and object
+     * trees manually.  The string is interpreted using a stack-based, postfix
+     * style language, as follows:</p>
+     * 
+     * <p>All tokens are separated by whitespace.  A {@link PSymbol PSymbol} can
+     * be pushed on the stack using two tokens: a name, which is any sequence of
+     * characters except "(" or "forall", and then a reference to one of the 
+     * following built-in types:</p>
+     * 
+     * <ul>
+     *      <li>Z</li>
+     *      <li>B</li>
+     *      <li>SSet</li>
+     * </ul>
+     * 
+     * <p>So, the string "0 Z x B" would push two PSymbols on the stack: "0", of
+     * type Z, and "x", of type B.</p>
+     * 
+     * <p>Function applications are introduced by an open paren token, followed 
+     * by a name, followed by a number of parameters to be taken from the stack, 
+     * a single character indicating if it is infix ("i"), outfix ("o"), or 
+     * prefix ("p"), and finally the return type.  Parameters will be applied in
+     * the reverse order they are taken off the stack.</p>
+     * 
+     * <p>So, the string "0 Z x B ( foo 2 p B" would form "foo(0, x)", where foo
+     * is of type (Z * B) -> B.</p>
+     * 
+     * <p>Either a symbol or function can be preceded by the token "forall" to
+     * flag its quantification as "for all".  So 
+     * "0 Z forall x B ( foo 2 p B" would form "foo(0, x)", where "x" is a 
+     * universally quantified variable.</p>
+     * 
+     * <p>Following parsing, there must be exactly one PExp left on the stack,
+     * which will be returned.  If there are more or less, an 
+     * <code>IllegalArgumentException</code> will be thrown.</p>
+     * 
+     * @param description
+     * @return 
+     */
+    public static PExp buildPExp(String description, TypeGraph g) {
+        Deque<PExp> stack = new LinkedList<PExp>();
+
+        Quantification quant = Quantification.NONE;
+        Iterator<String> tokens =
+                Arrays.asList(description.split(" ")).iterator();
+        String token;
+        while (tokens.hasNext()) {
+            token = tokens.next();
+
+            if (token.equals("forall")) {
+                quant = Quantification.FOR_ALL;
+            }
+            else if (token.equals("(")) {
+                String functionName = tokens.next();
+                int parameterCount = Integer.parseInt(tokens.next());
+                String displayTypeDesc = tokens.next();
+                String typeDesc = tokens.next();
+
+                DisplayType displayType;
+                if (displayTypeDesc.equals("i")) {
+                    displayType = DisplayType.INFIX;
+                }
+                else if (displayTypeDesc.equals("o")) {
+                    displayType = DisplayType.OUTFIX;
+                }
+                else if (displayTypeDesc.equals("p")) {
+                    displayType = DisplayType.PREFIX;
+                }
+                else {
+                    throw new IllegalArgumentException("Unknown display type: "
+                            + displayTypeDesc);
+                }
+
+                MTType type = typeFromDesc(typeDesc, g);
+
+                List<PExp> parameters = new LinkedList<PExp>();
+                List<MTType> parameterTypes = new LinkedList<MTType>();
+                for (int i = 0; i < parameterCount; i++) {
+                    if (stack.isEmpty()) {
+                        throw new IllegalArgumentException(
+                                "Not enough parameters on stack: "
+                                        + parameterCount);
+                    }
+
+                    parameters.add(0, stack.pop());
+                    parameterTypes.add(0, parameters.get(0).getType());
+                }
+
+                MTType functionType = new MTFunction(g, type, parameterTypes);
+
+                stack.push(new PSymbol(functionType, null, functionName,
+                        parameters, quant, displayType));
+                quant = Quantification.NONE;
+            }
+            else {
+                String name = token;
+                MTType type = typeFromDesc(tokens.next(), g);
+
+                stack.push(new PSymbol(type, null, name, quant));
+                quant = Quantification.NONE;
+            }
+        }
+
+        if (stack.size() != 1) {
+            throw new IllegalArgumentException(
+                    "Must set up stack with exactly one PExp on it.  "
+                            + "Left with: " + stack.size());
+        }
+
+        return stack.pop();
+    }
+
+    private static MTType typeFromDesc(String desc, TypeGraph g) {
+        MTType result;
+
+        if (desc.equals("B")) {
+            result = g.BOOLEAN;
+        }
+        else if (desc.equals("Z")) {
+            result = g.Z;
+        }
+        else if (desc.equals("SSet")) {
+            result = g.SET;
+        }
+        else {
+            throw new IllegalArgumentException("Unknown type: " + desc);
+        }
+
+        return result;
+    }
+
+    /**
      * <p>Simply walks the tree represented by the given <code>Exp</code> and
      * sounds the alarm if it or any sub-expression does not have a type.  As
      * a convenience, returns the same expression it is given so that it can
@@ -122,7 +293,7 @@ public abstract class PExp {
      * 
      * @param e
      */
-    public static final <E extends Exp> E sanityCheckExp(E e) {
+    public static <E extends Exp> E sanityCheckExp(E e) {
 
         if (e.getMathType() == null) {
 
@@ -145,8 +316,10 @@ public abstract class PExp {
         return e;
     }
 
-    public static final PExp buildPExp(Exp e) {
+    public static PExp buildPExp(Exp e) {
         PExp retval;
+
+        e = Utilities.applyQuantification(e);
 
         if (e == null) {
             throw new IllegalArgumentException("Prover does not accept null "
@@ -444,7 +617,7 @@ public abstract class PExp {
     }
 
     public boolean typeMatches(MTType other) {
-        return myType.isSubtypeOf(other);
+        return other.isSubtypeOf(myType);
     }
 
     public boolean typeMatches(PExp other) {
@@ -479,5 +652,26 @@ public abstract class PExp {
         this.accept(renderer);
 
         return output.toString();
+    }
+
+    public final String toDebugString(int indent, int offset) {
+        StringBuilder b = new StringBuilder();
+        if (this instanceof PSymbol) {
+            b.append(((PSymbol) this).quantification + " ");
+        }
+
+        b.append(toString() + " : " + myType);
+
+        if (myTypeValue != null) {
+            b.append("(Defines: " + myTypeValue + ")");
+        }
+
+        b.append(" " + valueHash);
+
+        for (PExp e : getSubExpressions()) {
+            b.append("\n" + e.toDebugString(indent + offset, offset));
+        }
+
+        return b.toString();
     }
 }

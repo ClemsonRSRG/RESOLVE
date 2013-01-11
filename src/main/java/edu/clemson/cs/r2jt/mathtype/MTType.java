@@ -85,29 +85,35 @@ public abstract class MTType {
      */
     @Override
     public final boolean equals(Object o) {
+        boolean result;
 
-        //All 'equals' logic should be put into AlphaEquivalencyChecker!  Don't
-        //override equals!
-        AlphaEquivalencyChecker alphaEq = new AlphaEquivalencyChecker();
+        if (this == o) {
+            result = true;
+        }
+        else {
+            //All 'equals' logic should be put into AlphaEquivalencyChecker! 
+            //Don't override equals!
+            AlphaEquivalencyChecker alphaEq = new AlphaEquivalencyChecker();
 
-        boolean result = (o instanceof MTType);
+            result = (o instanceof MTType);
 
-        if (result) {
-            try {
-                alphaEq.visit(this, (MTType) o);
-            }
-            catch (RuntimeException e) {
-                Throwable cause = e.getCause();
-                while (cause != null
-                        && !(cause instanceof TypeMismatchException)) {
-                    cause = cause.getCause();
+            if (result) {
+                try {
+                    alphaEq.visit(this, (MTType) o);
                 }
+                catch (RuntimeException e) {
+                    Throwable cause = e.getCause();
+                    while (cause != null
+                            && !(cause instanceof TypeMismatchException)) {
+                        cause = cause.getCause();
+                    }
 
-                if (cause == null) {
-                    throw e;
+                    if (cause == null) {
+                        throw e;
+                    }
+
+                    result = false;
                 }
-
-                result = false;
             }
         }
 

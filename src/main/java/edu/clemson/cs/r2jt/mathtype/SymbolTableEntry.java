@@ -15,6 +15,9 @@ import edu.clemson.cs.r2jt.utilities.SourceErrorException;
  * 		<li>Create subclass.</li>
  * 		<li>Add "toXXX()" method in this parent class.</li>
  * 		<li>Override it in subclass.</li>
+ *              <li>Consider if entry can be coerced to other kinds of entries,
+ *                  and override those toXXXs as well. (See ProgramVariableEntry
+ *                  as an example.</li>
  * </ul>
  */
 public abstract class SymbolTableEntry {
@@ -123,6 +126,11 @@ public abstract class SymbolTableEntry {
     public ShortFacilityEntry toShortFacilityEntry(Location l) {
         throw new SourceErrorException("Expecting a short facility module.  "
                 + "Found " + getEntryTypeDescription(), l);
+    }
+
+    public TheoremEntry toTheoremEntry(Location l) {
+        throw new SourceErrorException("Expecting a theorem.  " + "Found "
+                + getEntryTypeDescription(), l);
     }
 
     public abstract String getEntryTypeDescription();

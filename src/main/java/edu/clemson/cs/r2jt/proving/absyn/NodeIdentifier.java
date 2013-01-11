@@ -110,7 +110,7 @@ public class NodeIdentifier implements Iterable<Integer> {
         if (result) {
             NodeIdentifier oAsNID = (NodeIdentifier) o;
 
-            result = ((oAsNID.getRoot()) == myPExp);
+            result = ((oAsNID.getRoot()).equals(myPExp));
 
             if (result) {
                 Iterator<Integer> myIter = iterator();
