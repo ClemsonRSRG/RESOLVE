@@ -1,12 +1,29 @@
 package edu.clemson.cs.r2jt.typereasoning;
 
+import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
+import edu.clemson.cs.r2jt.typeandpopulate.MTProper;
+import edu.clemson.cs.r2jt.typeandpopulate.TypeMismatchException;
+import edu.clemson.cs.r2jt.typeandpopulate.CanonicalizingVisitor;
+import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
+import edu.clemson.cs.r2jt.typeandpopulate.UnboundTypeAccumulator;
+import edu.clemson.cs.r2jt.typeandpopulate.Scope;
+import edu.clemson.cs.r2jt.typeandpopulate.MTUnion;
+import edu.clemson.cs.r2jt.typeandpopulate.VariableReplacingVisitor;
+import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
+import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian;
+import edu.clemson.cs.r2jt.typeandpopulate.FunctionApplicationFactory;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.MTPowertypeApplication;
+import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
 import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.absyn.InfixExp;
 import edu.clemson.cs.r2jt.absyn.TupleExp;
 import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
-import edu.clemson.cs.r2jt.mathtype.*;
 import edu.clemson.cs.r2jt.population.Populator;
 import java.util.*;
 

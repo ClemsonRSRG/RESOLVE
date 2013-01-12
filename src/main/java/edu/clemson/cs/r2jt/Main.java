@@ -76,7 +76,7 @@ import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.init.Controller;
 import edu.clemson.cs.r2jt.init.Environment;
-import edu.clemson.cs.r2jt.mathtype.MathSymbolTableBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.parsing.RSimpleTrans;
 import edu.clemson.cs.r2jt.proofchecking.ProofChecker;
 import edu.clemson.cs.r2jt.proving.Prover;

@@ -38,6 +38,11 @@ public class ArbitraryExpTy extends Ty {
         return myArbitraryExp.toString();
     }
 
+    @Override
+    public String toString() {
+        return myArbitraryExp.toString();
+    }
+
     public Location getLocation() {
         return myArbitraryExp.getLocation();
     }

@@ -5,9 +5,9 @@ import java.util.Map;
 
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.collections.Iterator;
-import edu.clemson.cs.r2jt.mathtype.BindingException;
-import edu.clemson.cs.r2jt.mathtype.MTType;
-import edu.clemson.cs.r2jt.mathtype.TypeMismatchException;
+import edu.clemson.cs.r2jt.typeandpopulate.BindingException;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.TypeMismatchException;
 
 public class BindingExpression {
 

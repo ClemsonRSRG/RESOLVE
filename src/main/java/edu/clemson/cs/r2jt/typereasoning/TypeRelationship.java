@@ -1,9 +1,12 @@
 package edu.clemson.cs.r2jt.typereasoning;
 
+import edu.clemson.cs.r2jt.typeandpopulate.TypeMismatchException;
+import edu.clemson.cs.r2jt.typeandpopulate.BindingException;
+import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import java.util.*;
 
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.mathtype.*;
 
 /**
  * Indicates how one type relates to another, including a

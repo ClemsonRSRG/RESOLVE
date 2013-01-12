@@ -59,8 +59,8 @@
 package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.mathtype.DuplicateSymbolException;
-import edu.clemson.cs.r2jt.mathtype.MathSymbolTableBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 
 public class ConstantParamDec extends Dec implements ModuleParameter {
 

@@ -1,8 +1,8 @@
 package edu.clemson.cs.r2jt.proving2.gui;
 
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
-import edu.clemson.cs.r2jt.mathtype.MTType;
-import edu.clemson.cs.r2jt.mathtype.MathSymbolTableBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.proving.absyn.NodeIdentifier;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;

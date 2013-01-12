@@ -1,9 +1,11 @@
 package edu.clemson.cs.r2jt.typereasoning;
 
+import edu.clemson.cs.r2jt.typeandpopulate.TypeMismatchException;
+import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import java.util.*;
 
 import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.mathtype.*;
 
 public class TypeNode {
 
