@@ -4,7 +4,7 @@
  */
 package edu.clemson.cs.r2jt.proving2.justifications;
 
-import edu.clemson.cs.r2jt.mathtype.TheoremEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 
 /**
  *

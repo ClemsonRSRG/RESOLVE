@@ -5,8 +5,8 @@
 package edu.clemson.cs.r2jt.proving.absyn;
 
 import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.mathtype.MTFunction;
-import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol.Quantification;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;

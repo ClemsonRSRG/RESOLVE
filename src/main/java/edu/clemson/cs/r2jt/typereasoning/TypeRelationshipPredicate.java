@@ -3,7 +3,7 @@ package edu.clemson.cs.r2jt.typereasoning;
 import java.util.Map;
 
 import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 public interface TypeRelationshipPredicate {
 

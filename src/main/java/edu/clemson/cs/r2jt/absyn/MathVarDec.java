@@ -134,6 +134,10 @@ public class MathVarDec extends Dec {
         v.visitMathVarDec(this);
     }
 
+    public String toString() {
+        return name.getName() + " : " + ty.toString();
+    }
+
     /** Returns a formatted text string of this class. */
     public String asString(int indent, int increment) {
 

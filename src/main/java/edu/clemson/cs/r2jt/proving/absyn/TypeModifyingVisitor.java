@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import edu.clemson.cs.r2jt.mathtype.MTNamed;
-import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 public class TypeModifyingVisitor extends MutatingVisitor {
 

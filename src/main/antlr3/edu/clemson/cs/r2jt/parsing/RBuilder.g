@@ -2109,15 +2109,11 @@ lambda_expression returns [LambdaExp exp = null]
     PosSymbol tql = null;
     PosSymbol tnm = null;
 }
-    :   ^(  LAMBDA ps=ident
-            (   qid=certain_qualified_ident
-                { tql = $qid.exp.getQualifier(); tnm = $qid.exp.getName(); }
-            |   tnm1=ident { tnm = $tnm1.ps; }
-            )
+    :   ^(  LAMBDA dec=math_variable_declaration
             body=math_expression
         )
-        {   ty = new NameTy(tql, tnm);
-            $exp = new LambdaExp(getLocation($LAMBDA), $ps.ps, ty, $body.exp);
+        {   
+            $exp = new LambdaExp(getLocation($LAMBDA), $dec.var.getName(), $dec.var.getTy(), $body.exp);
         }
     ;
 

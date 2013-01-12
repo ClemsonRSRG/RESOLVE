@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import edu.clemson.cs.r2jt.mathtype.MTBigUnion;
-import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MTBigUnion;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 public class BoundVariableVisitor extends PExpVisitor {
 
