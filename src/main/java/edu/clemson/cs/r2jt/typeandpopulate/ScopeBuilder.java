@@ -19,8 +19,9 @@ import edu.clemson.cs.r2jt.absyn.MathAssertionDec;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.absyn.TypeDec;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.mathtype.TheoremEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.Map;
 import java.util.Set;
@@ -131,7 +132,7 @@ public class ScopeBuilder extends SyntacticScope {
         return entry;
     }
 
-    public ProgramTypeEntry addProgramType(String name,
+    public ProgramTypeEntry addProgramTypeDefinition(String name,
             TypeDec definingElement, MTType model)
             throws DuplicateSymbolException {
 
@@ -141,7 +142,7 @@ public class ScopeBuilder extends SyntacticScope {
         String exemplarName;
 
         if (exemplarSymbol == null) {
-            exemplarName = "X";
+            exemplarName = name.substring(0, 1).toUpperCase();
         }
         else {
             exemplarName = exemplarSymbol.getName();
@@ -158,11 +159,12 @@ public class ScopeBuilder extends SyntacticScope {
                 (finalization == null) ? null : finalization.getEnsures();
 
         ProgramTypeEntry entry =
-                new ProgramTypeEntry(myTypeGraph, name, definingElement,
-                        myRootModule, model, new PTFamily(model, name,
-                                exemplarName, definingElement.getConstraint(),
-                                initRequires, initEnsures,
-                                finalizationRequires, finalizationEnsures));
+                new ProgramTypeDefinitionEntry(myTypeGraph, name,
+                        definingElement, myRootModule, model, new PTFamily(
+                                model, name, exemplarName, definingElement
+                                        .getConstraint(), initRequires,
+                                initEnsures, finalizationRequires,
+                                finalizationEnsures));
 
         myBindings.put(name, entry);
 

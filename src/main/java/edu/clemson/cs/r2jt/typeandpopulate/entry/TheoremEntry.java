@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.clemson.cs.r2jt.mathtype;
+package edu.clemson.cs.r2jt.typeandpopulate.entry;
 
 import edu.clemson.cs.r2jt.absyn.MathAssertionDec;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;

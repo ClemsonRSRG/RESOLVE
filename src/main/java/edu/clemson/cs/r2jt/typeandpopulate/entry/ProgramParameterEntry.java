@@ -201,7 +201,7 @@ public class ProgramParameterEntry extends SymbolTableEntry {
                 myDeclaredType.instantiateGenerics(genericInstantiations,
                         instantiatingFacility), myPassingMode);
     }
-    
+
     @Override
     public String toString() {
         return "" + myPassingMode + myDeclaredType;

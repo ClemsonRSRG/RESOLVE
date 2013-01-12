@@ -130,7 +130,7 @@ public abstract class SymbolTableEntry {
         throw new SourceErrorException("Expecting a short facility module.  "
                 + "Found " + getEntryTypeDescription(), l);
     }
-    
+
     public ProgramTypeDefinitionEntry toProgramTypeDefinitionEntry(Location l) {
         throw new SourceErrorException("Expecting a program type definition.  "
                 + "Found " + getEntryTypeDescription(), l);

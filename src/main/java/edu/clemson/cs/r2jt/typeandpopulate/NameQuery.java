@@ -14,8 +14,9 @@ import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
  * search is performed using the provided <code>ImportStrategy</code> and
  * <code>FacilityStrategy</code>.</p>
  */
-public class NameQuery extends BaseMultimatchSymbolQuery<SymbolTableEntry> 
-        implements MultimatchSymbolQuery<SymbolTableEntry> {
+public class NameQuery extends BaseMultimatchSymbolQuery<SymbolTableEntry>
+        implements
+            MultimatchSymbolQuery<SymbolTableEntry> {
 
     public NameQuery(PosSymbol qualifier, String name,
             ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
