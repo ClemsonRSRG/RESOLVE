@@ -1,14 +1,44 @@
 package edu.clemson.cs.r2jt.population;
 
+import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.MTPowertypeApplication;
+import edu.clemson.cs.r2jt.typeandpopulate.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.VariableReplacingVisitor;
+import edu.clemson.cs.r2jt.typeandpopulate.query.MathFunctionNamedQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate.SymbolNotOfKindTypeException;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleScopeBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.NameAndEntryTypeQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.ParameterGenericApplyingVisitor;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.MTSetRestriction;
+import edu.clemson.cs.r2jt.typeandpopulate.PTVoid;
+import edu.clemson.cs.r2jt.typeandpopulate.query.ProgramVariableQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.query.MathSymbolQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
+import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.NameQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
+import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.PTElement;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.mathtype.*;
-import edu.clemson.cs.r2jt.mathtype.MathSymbolTable.FacilityStrategy;
-import edu.clemson.cs.r2jt.mathtype.MathSymbolTable.ImportStrategy;
-import edu.clemson.cs.r2jt.mathtype.PTPrimitive.PrimitiveTypeName;
-import edu.clemson.cs.r2jt.mathtype.ProgramParameterEntry.ParameterMode;
+import edu.clemson.cs.r2jt.typeandpopulate.*;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
 import edu.clemson.cs.r2jt.treewalk.*;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
 import edu.clemson.cs.r2jt.typereasoning.*;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 import java.util.Arrays;
@@ -137,7 +167,6 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void preModuleDec(ModuleDec node) {
         Populator.emitDebug("----------------------\nBEGIN MATH POPULATOR");
-
         myCurModuleScope = myBuilder.startModuleScope(node);
     }
 
@@ -146,6 +175,14 @@ public class Populator extends TreeWalkerVisitor {
 
         //Enhancements implicitly import the concepts they enhance
         myCurModuleScope.addImport(new ModuleIdentifier(enhancement
+                .getConceptName().getName()));
+    }
+
+    @Override
+    public void preConceptBodyModuleDec(ConceptBodyModuleDec conceptBody) {
+
+        //Concept realizations implicitly import the concepts they realize
+        myCurModuleScope.addImport(new ModuleIdentifier(conceptBody
                 .getConceptName().getName()));
     }
 
@@ -164,6 +201,48 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postUsesItem(UsesItem uses) {
         myCurModuleScope.addImport(new ModuleIdentifier(uses));
+    }
+
+    @Override
+    public void preLambdaExp(LambdaExp l) {
+        myBuilder.startScope(l);
+    }
+
+    @Override
+    public void postLambdaExp(LambdaExp l) {
+        myBuilder.endScope();
+
+        l.setMathType(new MTFunction(myTypeGraph, l.getBody().getMathType(), l
+                .getTy().getMathType()));
+    }
+
+    @Override
+    public void postAltItemExp(AltItemExp e) {
+        if (e.getTest() != null) {
+            expectType(e.getTest(), myTypeGraph.BOOLEAN);
+        }
+
+        e.setMathType(e.getAssignment().getMathType());
+        e.setMathTypeValue(e.getAssignment().getMathTypeValue());
+    }
+
+    @Override
+    public void postAlternativeExp(AlternativeExp e) {
+
+        MTType establishedType = null;
+        MTType establishedTypeValue = null;
+        for (AltItemExp alt : e.getAlternatives()) {
+            if (establishedType == null) {
+                establishedType = alt.getAssignment().getMathType();
+                establishedTypeValue = alt.getAssignment().getMathTypeValue();
+            }
+            else {
+                expectType(alt, establishedType);
+            }
+        }
+
+        e.setMathType(establishedType);
+        e.setMathTypeValue(establishedTypeValue);
     }
 
     @Override
@@ -422,6 +501,49 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
+    public void preRepresentationDec(RepresentationDec r) {
+        myBuilder.startScope(r);
+    }
+    
+    @Override
+    public void midRepresentationDec(RepresentationDec r, 
+            ResolveConceptualElement prevChild, 
+            ResolveConceptualElement nextChild) {
+        
+        if (prevChild instanceof Ty) {
+            //We've finished the representation and are about to parse 
+            //conventions, etc.  We introduce the exemplar with the appropriate
+            //type
+            PosSymbol type = r.getName();
+
+            List<SymbolTableEntry> es =
+                    myBuilder.getInnermostActiveScope().query(
+                            new NameQuery(null, type, ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_IGNORE, false));
+
+            if (es.isEmpty()) {
+                noSuchSymbol(null, type);
+            }
+            else if (es.size() > 1) {
+                ambiguousSymbol(type, es);
+            }
+            else {
+                ProgramTypeDefinitionEntry e =
+                        es.get(0).toProgramTypeDefinitionEntry(r.getLocation());
+
+                addBinding(e.getProgramType().getExemplarName(), r.getName()
+                        .getLocation(), r, r.getRepresentation().getMathTypeValue(),
+                        myGenericTypes);
+            }
+        }
+    }
+
+    @Override
+    public void postRepresentationDec(RepresentationDec r) {
+        myBuilder.endScope();
+    }
+
+    @Override
     public void preTypeDec(TypeDec dec) {
         myBuilder.startScope(dec);
     }
@@ -456,7 +578,7 @@ public class Populator extends TreeWalkerVisitor {
         myBuilder.endScope();
 
         try {
-            myBuilder.getInnermostActiveScope().addProgramType(
+            myBuilder.getInnermostActiveScope().addProgramTypeDefinition(
                     dec.getName().getName(), dec,
                     dec.getModel().getMathTypeValue());
         }
@@ -466,6 +588,11 @@ public class Populator extends TreeWalkerVisitor {
         }
     }
 
+    @Override
+    public void postRecordTy(RecordTy ty) {
+        
+    }
+    
     @Override
     public void postNameTy(NameTy ty) {
         //Note that all mathematical types are ArbitraryExpTys, so this must
@@ -510,13 +637,18 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postMathAssertionDec(MathAssertionDec node) {
-        if (node.getAssertion() != null) {
-            expectType(node.getAssertion(), myTypeGraph.BOOLEAN);
-        }
+        //if (node.getAssertion() != null) {
+        expectType(node.getAssertion(), myTypeGraph.BOOLEAN);
+        //}
 
         String name = node.getName().getName();
-        addBinding(name, node.getName().getLocation(), node,
-                myTypeGraph.BOOLEAN, null);
+        try {
+
+            myBuilder.getInnermostActiveScope().addTheorem(name, node);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(name, node.getName().getLocation());
+        }
 
         Populator.emitDebug("New theorem: " + name);
     }
@@ -564,9 +696,8 @@ public class Populator extends TreeWalkerVisitor {
             duplicateSymbol(varName, programVar.getLocation());
         }
 
-        Populator.emitDebug("  New program variable: " + varName
-                + " of type " + mathTypeValue.toString()
-                + " with quantification NONE");
+        Populator.emitDebug("  New program variable: " + varName + " of type "
+                + mathTypeValue.toString() + " with quantification NONE");
     }
 
     @Override
@@ -761,8 +892,8 @@ public class Populator extends TreeWalkerVisitor {
         addBinding(definitionSymbol, node.getName().getLocation(), node,
                 declaredType, typeValue, myDefinitionSchematicTypes);
 
-        Populator.emitDebug("New definition: " + definitionSymbol
-                + " of type " + declaredType
+        Populator.emitDebug("New definition: " + definitionSymbol + " of type "
+                + declaredType
                 + ((typeValue != null) ? " with type value " + typeValue : ""));
 
         myCurrentDirectDefinition = null;
@@ -1019,6 +1150,18 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
+    public void postAny(ResolveConceptualElement e) {
+        if (e instanceof Ty) {
+            Ty eTy = (Ty) e;
+            if (eTy.getMathTypeValue() == null) {
+                throw new RuntimeException("Ty " + e + " (" + e.getClass()
+                    + ", " + e.getLocation()
+                    + ") got through the populator with no math type value.");
+            }
+        }
+    }
+    
+    @Override
     public void postExp(Exp node) {
 
         //myMathModeFlag && 
@@ -1101,10 +1244,46 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
+    public void postModuleArgumentItem(ModuleArgumentItem i) {
+
+        if (i.getName() != null) {
+            List<SymbolTableEntry> es =
+                    myBuilder.getInnermostActiveScope().query(
+                            new NameQuery(i.getQualifier(), i.getName(),
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false));
+
+            if (es.isEmpty()) {
+                noSuchSymbol(i.getQualifier(), i.getName());
+            }
+            else if (es.size() > 1) {
+                ambiguousSymbol(i.getName(), es);
+            }
+            else {
+                ProgramTypeEntry e =
+                        es.get(0).toProgramTypeEntry(i.getLocation());
+
+                i.setProgramTypeValue(e.getProgramType());
+            }
+        }
+    }
+
+    @Override
     public void postModuleDec(ModuleDec node) {
         myBuilder.endScope();
 
         Populator.emitDebug("END MATH POPULATOR\n----------------------\n");
+    }
+
+    @Override
+    public void postDotExp(DotExp e) {
+        edu.clemson.cs.r2jt.collections.List<Exp> segments = e.getSegments();
+
+        Exp lastSeg = segments.get(segments.size() - 1);
+
+        e.setMathType(lastSeg.getMathType());
+        e.setMathTypeValue(lastSeg.getMathTypeValue());
     }
 
     //-------------------------------------------------------------------
@@ -1114,6 +1293,10 @@ public class Populator extends TreeWalkerVisitor {
     public void noSuchModule(PosSymbol qualifier) {
         throw new SourceErrorException(
                 "Module does not exist or is not in scope.", qualifier);
+    }
+
+    public void noSuchSymbol(PosSymbol qualifier, PosSymbol symbol) {
+        noSuchSymbol(qualifier, symbol.getName(), symbol.getLocation());
     }
 
     public void noSuchSymbol(PosSymbol qualifier, String symbolName, Location l) {
@@ -1130,6 +1313,11 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         throw new SourceErrorException(message, l);
+    }
+
+    public <T extends SymbolTableEntry> void ambiguousSymbol(PosSymbol symbol,
+            List<T> candidates) {
+        ambiguousSymbol(symbol.getName(), symbol.getLocation(), candidates);
     }
 
     public <T extends SymbolTableEntry> void ambiguousSymbol(String symbolName,
@@ -1214,7 +1402,10 @@ public class Populator extends TreeWalkerVisitor {
             SymbolTableEntry.Quantification q,
             ResolveConceptualElement definingElement, MTType type,
             MTType typeValue, Map<String, MTType> schematicTypes) {
-        if (type != null) {
+        if (type == null) {
+            throw new NullPointerException();
+        }
+        else {
             try {
                 return myBuilder.getInnermostActiveScope().addBinding(name, q,
                         definingElement, type, typeValue, schematicTypes,
@@ -1222,9 +1413,9 @@ public class Populator extends TreeWalkerVisitor {
             }
             catch (DuplicateSymbolException dse) {
                 duplicateSymbol(name, l);
+                throw new RuntimeException();  //This will never fire
             }
         }
-        return null;
     }
 
     private SymbolTableEntry addBinding(String name, Location l,
@@ -1385,9 +1576,9 @@ public class Populator extends TreeWalkerVisitor {
             }
         }
 
-        Populator.emitDebug("Processed symbol " + symbolName
-                + " with type " + node.getMathType()
-                + ", referencing math type " + node.getMathTypeValue());
+        Populator.emitDebug("Processed symbol " + symbolName + " with type "
+                + node.getMathType() + ", referencing math type "
+                + node.getMathTypeValue());
 
         return intendedEntry;
     }

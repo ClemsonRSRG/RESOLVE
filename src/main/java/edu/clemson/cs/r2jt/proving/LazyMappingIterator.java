@@ -3,6 +3,7 @@ package edu.clemson.cs.r2jt.proving;
 import java.util.Iterator;
 
 import edu.clemson.cs.r2jt.utilities.Mapping;
+import java.util.ConcurrentModificationException;
 
 /**
  * <p>A <code>LazyMappingIterator</code> wraps an <code>Iterator</code> that
@@ -31,7 +32,13 @@ public final class LazyMappingIterator<I, O> implements Iterator<O> {
 
     @Override
     public O next() {
-        return myMapper.map(mySource.next());
+        try {
+            return myMapper.map(mySource.next());
+        }
+        catch (ConcurrentModificationException cme) {
+            int i = 5;
+            throw new RuntimeException(cme);
+        }
     }
 
     @Override

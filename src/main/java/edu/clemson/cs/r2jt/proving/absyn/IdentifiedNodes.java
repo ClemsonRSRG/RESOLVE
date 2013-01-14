@@ -9,16 +9,38 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+/**
+ * <p><code>IdentifiedNodes</code> provides a way of associating data of type
+ * <code>T</code> with sub-expressions of a root <code>PExp</code> and providing
+ * facilities to search those sub-expressions with associated data via which
+ * sub-expressions they contain.</p>
+ * 
+ * @param <T> The type of the associated data. 
+ */
 public class IdentifiedNodes<T> {
 
     private final PExp myRoot;
 
+    /**
+     * <p>The set of all those <code>PExp</code>s with associated data that are 
+     * not contained inside another such <code>PExp</code>.  Note that, since
+     * <code>PExp</code>s nest, the elements in this set are therefore disjoint.
+     * </p>
+     */
     private Set<NodeIdentifier> myTopLevelIdentifiedNodes =
             new HashSet<NodeIdentifier>();
 
+    /**
+     * <p>A mapping from <code>PExp</code>s with associated data, to the set of
+     * <code>PExp</code>s with associated data contained inside.</p>
+     */
     private Map<NodeIdentifier, Set<NodeIdentifier>> myIdentifiedNodes =
             new HashMap<NodeIdentifier, Set<NodeIdentifier>>();
 
+    /**
+     * <p>A map from individual sub-expressions to the data associated with 
+     * them.</p>
+     */
     private Map<NodeIdentifier, T> myDataMap = new HashMap<NodeIdentifier, T>();
 
     public IdentifiedNodes(PExp root) {

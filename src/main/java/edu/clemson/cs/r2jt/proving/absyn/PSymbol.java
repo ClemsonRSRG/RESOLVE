@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 
@@ -493,14 +493,14 @@ public class PSymbol extends PExp {
             throw BINDING_EXCEPTION;
         }
 
-        if (!typeMatches(target)) {
-            //We can only bind against things with the same type
-            throw BINDING_EXCEPTION;
-        }
-
         //Note that at this point we're guaranteed that target is of the same
         //type as us
         if (quantification == Quantification.FOR_ALL) {
+            if (!typeMatches(target)) {
+                //We can only bind against something in a subset of us
+                throw BINDING_EXCEPTION;
+            }
+
             if (myArgumentsSize == 0) {
                 accumulator.put(this, target);
             }
@@ -525,6 +525,15 @@ public class PSymbol extends PExp {
             }
         }
         else {
+            //TODO : This isn't right.  The real logic should be "is the 
+            //       expression I reresent is in the type of target", but right
+            //       now "isKnownToBeIn" in TypeGraph doesn't operate on PExps
+            if (!(myType.isSubtypeOf(target.myType) || target.myType
+                    .isSubtypeOf(myType))) {
+                //We can only match something we're a subset of
+                throw BINDING_EXCEPTION;
+            }
+
             if (!name.equals(sTarget.name)) {
                 throw BINDING_EXCEPTION;
             }
@@ -639,6 +648,7 @@ public class PSymbol extends PExp {
         //      "S'' = empty_string", the left and right sides of the equality
         //      are indistinguishable except for their names.  Until this
         //      situation is resolved, literals should be hard coded here.
-        return (name.equals("empty_string"));
+        return (name.equalsIgnoreCase("empty_string"))
+                || (name.equals("0") || name.equals("1"));
     }
 }

@@ -117,9 +117,6 @@ public class TreeWalker {
         if (pre) {
             myVisitor.preAny(e[0]);
         }
-        else if (post) {
-            myVisitor.postAny(e[0]);
-        }
 
         // Get the heirarchy of classes from which this node inherits
         // e.g., [ConceptModuleDec, ModuleDec, Dec, ResolveConceptualElement]
@@ -202,6 +199,10 @@ public class TreeWalker {
 
                 throw new RuntimeException(iteCause);
             }
+        }
+        
+        if (post) {
+            myVisitor.postAny(e[0]);
         }
     }
 

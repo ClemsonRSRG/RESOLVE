@@ -1,7 +1,7 @@
 package edu.clemson.cs.r2jt.type;
 
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.mathtype.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.scope.Binding;
 import edu.clemson.cs.r2jt.scope.ScopeID;
 

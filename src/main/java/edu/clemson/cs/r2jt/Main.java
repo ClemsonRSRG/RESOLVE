@@ -57,7 +57,7 @@
  * Clemson University
  */
 
-//Testing visual rebase on Eclipse
+// Testing visual rebase on Eclipse
 
 package edu.clemson.cs.r2jt;
 
@@ -76,10 +76,11 @@ import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.init.Controller;
 import edu.clemson.cs.r2jt.init.Environment;
-import edu.clemson.cs.r2jt.mathtype.MathSymbolTableBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.parsing.RSimpleTrans;
 import edu.clemson.cs.r2jt.proofchecking.ProofChecker;
 import edu.clemson.cs.r2jt.proving.Prover;
+import edu.clemson.cs.r2jt.proving2.AlgebraicProver;
 import edu.clemson.cs.r2jt.verification.Verifier;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
@@ -565,8 +566,6 @@ public class Main {
             Verifier.setUpFlags();
             ProofChecker.setUpFlags();
             Analyzer.setUpFlags();
-
-            //Your module here!
             PrettyCTranslation.setUpFlags();
             PrettyJavaTranslation.setUpFlags();
             Translator.setUpFlags();
@@ -575,6 +574,9 @@ public class Main {
             PrettyJavaTranslator.setUpFlags();
             RSimpleTrans.setUpFlags();
             VCGenerator.setUpFlags();
+            AlgebraicProver.setUpFlags();
+            //Your module here!
+
             FlagDependencies.seal();
         }
     }

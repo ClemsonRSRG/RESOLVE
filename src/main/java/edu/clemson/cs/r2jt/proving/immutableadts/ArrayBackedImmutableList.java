@@ -12,6 +12,8 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     private final E[] myElements;
     private final int myElementsLength;
 
+    private final int myHashCode;
+
     @SuppressWarnings("unchecked")
     public ArrayBackedImmutableList(Iterable<E> i) {
         List<E> tempList = new ArrayList<E>();
@@ -22,16 +24,27 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
 
         myElements = (E[]) tempList.toArray();
         myElementsLength = myElements.length;
+        myHashCode = calculateHashCode();
     }
 
     public ArrayBackedImmutableList(E[] i) {
         myElementsLength = i.length;
         myElements = Arrays.copyOf(i, myElementsLength);
+        myHashCode = calculateHashCode();
     }
 
     public ArrayBackedImmutableList(E[] i, int length) {
         myElementsLength = length;
         myElements = Arrays.copyOf(i, length);
+        myHashCode = calculateHashCode();
+    }
+
+    private int calculateHashCode() {
+        int result = 0;
+        for (E e : myElements) {
+            result += e.hashCode() * 74;
+        }
+        return result;
     }
 
     @Override
@@ -62,5 +75,31 @@ public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
     public ImmutableList<E> tail(int startIndex) {
         return new ImmutableListSubview<E>(this, startIndex, myElementsLength
                 - startIndex);
+    }
+
+    @Override
+    public int hashCode() {
+        return myHashCode;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        boolean result = (o instanceof ArrayBackedImmutableList);
+
+        if (result) {
+            ArrayBackedImmutableList oAsABIL = (ArrayBackedImmutableList) o;
+
+            result = (myElementsLength == oAsABIL.size());
+
+            if (result) {
+                int i = 0;
+                while (i < myElementsLength && result) {
+                    result = (myElements[i].equals(oAsABIL.get(i)));
+                    i++;
+                }
+            }
+        }
+
+        return result;
     }
 }

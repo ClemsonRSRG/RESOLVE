@@ -103,7 +103,7 @@ import edu.clemson.cs.r2jt.verification.Verifier;
 public final class Prover {
 
     private static final double FITNESS_THRESHOLD = 0.8;
-    private static final String FLAG_SECTION_NAME = "Proving";
+    public static final String FLAG_SECTION_NAME = "Proving";
     private static final String FLAG_DESC_PROVE =
             "Verify program with RESOLVE's integrated prover.";
     private static final String FLAG_DESC_LEGACY_PROVE =

@@ -6,9 +6,9 @@ import java.util.LinkedList;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.mathtype.MTFunction;
-import edu.clemson.cs.r2jt.mathtype.MTType;
-import edu.clemson.cs.r2jt.mathtype.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 public abstract class AbstractFunctionExp extends Exp {
