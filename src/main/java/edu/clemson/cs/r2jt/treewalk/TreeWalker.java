@@ -200,7 +200,7 @@ public class TreeWalker {
                 throw new RuntimeException(iteCause);
             }
         }
-        
+
         if (post) {
             myVisitor.postAny(e[0]);
         }
