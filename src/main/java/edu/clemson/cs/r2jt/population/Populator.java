@@ -21,7 +21,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.query.MathSymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate.NameQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;

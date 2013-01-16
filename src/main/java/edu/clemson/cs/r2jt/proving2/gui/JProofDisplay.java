@@ -25,7 +25,7 @@ public class JProofDisplay extends JPanel {
 
     private final ModelChanged MODEL_CHANGED = new ModelChanged();
 
-    private JList<ProofStep> myStepList = new JList<ProofStep>();
+    private JList myStepList = new JList();
     private PerVCProverModel myModel;
 
     public JProofDisplay(PerVCProverModel m) {
