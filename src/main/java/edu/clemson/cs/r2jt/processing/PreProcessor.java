@@ -95,7 +95,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         // Variables
         Location location = ty.getLocation();
         NameTy oldTy = (NameTy) ty.getEntryType();
-        ResolveConceptualElement parent = this.getParent();
+        ResolveConceptualElement parent = this.getAncestor(1);
         String arrayName = null;
 
         // Check if we have a FacilityTypeDec, RepresentationDec or VarDec

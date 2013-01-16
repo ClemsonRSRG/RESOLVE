@@ -504,12 +504,12 @@ public class Populator extends TreeWalkerVisitor {
     public void preRepresentationDec(RepresentationDec r) {
         myBuilder.startScope(r);
     }
-    
+
     @Override
-    public void midRepresentationDec(RepresentationDec r, 
-            ResolveConceptualElement prevChild, 
+    public void midRepresentationDec(RepresentationDec r,
+            ResolveConceptualElement prevChild,
             ResolveConceptualElement nextChild) {
-        
+
         if (prevChild instanceof Ty) {
             //We've finished the representation and are about to parse 
             //conventions, etc.  We introduce the exemplar with the appropriate
@@ -518,7 +518,8 @@ public class Populator extends TreeWalkerVisitor {
 
             List<SymbolTableEntry> es =
                     myBuilder.getInnermostActiveScope().query(
-                            new NameQuery(null, type, ImportStrategy.IMPORT_NAMED,
+                            new NameQuery(null, type,
+                                    ImportStrategy.IMPORT_NAMED,
                                     FacilityStrategy.FACILITY_IGNORE, false));
 
             if (es.isEmpty()) {
@@ -532,8 +533,8 @@ public class Populator extends TreeWalkerVisitor {
                         es.get(0).toProgramTypeDefinitionEntry(r.getLocation());
 
                 addBinding(e.getProgramType().getExemplarName(), r.getName()
-                        .getLocation(), r, r.getRepresentation().getMathTypeValue(),
-                        myGenericTypes);
+                        .getLocation(), r, r.getRepresentation()
+                        .getMathTypeValue(), myGenericTypes);
             }
         }
     }
@@ -590,9 +591,9 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postRecordTy(RecordTy ty) {
-        
+
     }
-    
+
     @Override
     public void postNameTy(NameTy ty) {
         //Note that all mathematical types are ArbitraryExpTys, so this must
@@ -1154,13 +1155,18 @@ public class Populator extends TreeWalkerVisitor {
         if (e instanceof Ty) {
             Ty eTy = (Ty) e;
             if (eTy.getMathTypeValue() == null) {
-                throw new RuntimeException("Ty " + e + " (" + e.getClass()
-                    + ", " + e.getLocation()
-                    + ") got through the populator with no math type value.");
+                throw new RuntimeException(
+                        "Ty "
+                                + e
+                                + " ("
+                                + e.getClass()
+                                + ", "
+                                + e.getLocation()
+                                + ") got through the populator with no math type value.");
             }
         }
     }
-    
+
     @Override
     public void postExp(Exp node) {
 
@@ -1413,7 +1419,7 @@ public class Populator extends TreeWalkerVisitor {
             }
             catch (DuplicateSymbolException dse) {
                 duplicateSymbol(name, l);
-                throw new RuntimeException();  //This will never fire
+                throw new RuntimeException(); //This will never fire
             }
         }
     }
