@@ -1,4 +1,4 @@
-package edu.clemson.cs.r2jt.typeandpopulate;
+package edu.clemson.cs.r2jt.typeandpopulate.query;
 
 import edu.clemson.cs.r2jt.typeandpopulate.query.BaseMultimatchSymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.MultimatchSymbolQuery;
@@ -6,6 +6,8 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.NameSearcher;
+import edu.clemson.cs.r2jt.typeandpopulate.PossiblyQualifiedPath;
 
 /**
  * <p>A <code>NameQuery</code> takes a (possibly-null) qualifier and a name
