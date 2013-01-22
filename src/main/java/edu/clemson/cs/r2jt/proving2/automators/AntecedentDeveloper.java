@@ -79,12 +79,30 @@ public class AntecedentDeveloper implements Automator {
             //that we're going to apply them all, we slurp them all up now 
             //to be applied later one at a time.
             Iterator<Application> tApplications;
+            for (Theorem t : model.getLocalTheoremList()) {
+                for (Transformation transformation : t.getTransformations()) {
+                    if (transformation instanceof ExpandAntecedentByImplication
+                            || transformation instanceof 
+                                ExpandAntecedentBySubstitution) {
+
+                        if (!transformation.introducesQuantifiedVariables()) {
+                            tApplications = 
+                                    transformation.getApplications(model);
+                            while (tApplications.hasNext()) {
+                                applications.add(tApplications.next());
+                            }
+                        }
+                    }
+                }
+            }
+            
             for (Transformation t : myTheoremTransformations) {
                 tApplications = t.getApplications(model);
                 while (tApplications.hasNext()) {
                     applications.add(tApplications.next());
                 }
             }
+            
             myApplications = applications.iterator();
         }
 
