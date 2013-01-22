@@ -1,7 +1,7 @@
 package edu.clemson.cs.r2jt.typeandpopulate.query;
 
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate.MultimatchTableSearcher;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.MultimatchTableSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.Scope;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeSearchPath;
@@ -30,6 +30,7 @@ public class BaseMultimatchSymbolQuery<E extends SymbolTableEntry>
      * throw a {@link DuplicateSymbolException DuplicateSymbolException}.
      * Otherwise, behaves identically.</p>
      */
+    @Override
     public List<E> searchFromContext(Scope source, ScopeRepository repo) {
 
         List<E> result;

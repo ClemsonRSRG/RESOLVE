@@ -1,5 +1,6 @@
-package edu.clemson.cs.r2jt.typeandpopulate;
+package edu.clemson.cs.r2jt.typeandpopulate.searchers;
 
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import java.util.Iterator;
@@ -9,6 +10,9 @@ import java.util.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.SymbolTable;
 
 public class OperationSearcher implements TableSearcher<OperationEntry> {
 
@@ -23,7 +27,8 @@ public class OperationSearcher implements TableSearcher<OperationEntry> {
     }
 
     @Override
-    public boolean addMatches(SymbolTable entries, List<OperationEntry> matches)
+    public boolean addMatches(SymbolTable entries,
+            List<OperationEntry> matches, SearchContext l)
             throws DuplicateSymbolException {
 
         if (entries.containsKey(myQueryName)) {

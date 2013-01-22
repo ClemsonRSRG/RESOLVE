@@ -1,5 +1,7 @@
-package edu.clemson.cs.r2jt.typeandpopulate;
+package edu.clemson.cs.r2jt.typeandpopulate.searchers;
 
+import edu.clemson.cs.r2jt.typeandpopulate.SymbolTable;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import java.util.List;
 
@@ -23,12 +25,19 @@ public class NameSearcher implements MultimatchTableSearcher<SymbolTableEntry> {
 
     @Override
     public boolean addMatches(SymbolTable entries,
-            List<SymbolTableEntry> matches) {
+            List<SymbolTableEntry> matches, SearchContext l) {
 
         boolean result = entries.containsKey(mySearchString);
 
         if (result) {
-            matches.add(entries.get(mySearchString));
+            SymbolTableEntry e = entries.get(mySearchString);
+            
+            //Parameters of imported modules or facility instantiations ar not
+            //exported and therefore should not be considered for results
+            if (l.equals(SearchContext.SOURCE_MODULE) || 
+                    !(e instanceof ProgramParameterEntry)) {
+                matches.add(entries.get(mySearchString));
+            }
         }
 
         return myStopAfterFirstFlag && result;

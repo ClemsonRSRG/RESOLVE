@@ -196,19 +196,23 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
         private MTType myElement;
 
         public Element(Element element) {
-            myTag = element.myTag;
-            myElement = element.myElement;
+            this(element.myTag, element.myElement);
         }
 
         public Element(MTType element) {
-            myElement = element;
+            this(null, element);
         }
 
         public Element(String tag, MTType element) {
-            this(element);
+            if (element == null) {
+                throw new IllegalArgumentException();
+            }
+
+            myElement = element;
             myTag = tag;
         }
 
+        @Override
         public String toString() {
             String result = myElement.toString();
 

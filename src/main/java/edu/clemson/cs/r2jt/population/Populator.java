@@ -1,44 +1,44 @@
 package edu.clemson.cs.r2jt.population;
 
-import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate.MTPowertypeApplication;
-import edu.clemson.cs.r2jt.typeandpopulate.PTType;
-import edu.clemson.cs.r2jt.typeandpopulate.VariableReplacingVisitor;
-import edu.clemson.cs.r2jt.typeandpopulate.query.MathFunctionNamedQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
-import edu.clemson.cs.r2jt.typeandpopulate.SymbolNotOfKindTypeException;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleScopeBuilder;
-import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.query.NameAndEntryTypeQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import edu.clemson.cs.r2jt.typeandpopulate.ParameterGenericApplyingVisitor;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.MTSetRestriction;
-import edu.clemson.cs.r2jt.typeandpopulate.PTVoid;
-import edu.clemson.cs.r2jt.typeandpopulate.query.ProgramVariableQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.query.MathSymbolQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
-import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
-import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.PTElement;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.typeandpopulate.*;
+import edu.clemson.cs.r2jt.treewalk.*;
+import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian;
+import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian.Element;
+import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
+import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
+import edu.clemson.cs.r2jt.typeandpopulate.MTPowertypeApplication;
+import edu.clemson.cs.r2jt.typeandpopulate.MTSetRestriction;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleScopeBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
+import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTElement;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTVoid;
+import edu.clemson.cs.r2jt.typeandpopulate.ParameterGenericApplyingVisitor;
+import edu.clemson.cs.r2jt.typeandpopulate.SymbolNotOfKindTypeException;
+import edu.clemson.cs.r2jt.typeandpopulate.VariableReplacingVisitor;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
-import edu.clemson.cs.r2jt.treewalk.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.query.MathFunctionNamedQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.MathSymbolQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.NameAndEntryTypeQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.ProgramVariableQuery;
 import edu.clemson.cs.r2jt.typereasoning.*;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 import java.util.Arrays;
@@ -145,6 +145,13 @@ public class Populator extends TreeWalkerVisitor {
      * types that bound their possible values.</p>
      */
     private Map<String, MTType> myGenericTypes = new HashMap<String, MTType>();
+
+    /**
+     * <p>When parsing a type realization declaration, this is set to the 
+     * entry corresponding to the conceptual declaration from the concept.  When
+     * not inside such a declaration, this will be null.</p>
+     */
+    private ProgramTypeDefinitionEntry myTypeDefinitionEntry;
 
     public Populator(MathSymbolTableBuilder builder) {
         myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
@@ -503,6 +510,24 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void preRepresentationDec(RepresentationDec r) {
         myBuilder.startScope(r);
+
+        PosSymbol type = r.getName();
+
+        List<SymbolTableEntry> es =
+                myBuilder.getInnermostActiveScope().query(
+                        new NameQuery(null, type, ImportStrategy.IMPORT_NAMED,
+                                FacilityStrategy.FACILITY_IGNORE, false));
+
+        if (es.isEmpty()) {
+            noSuchSymbol(null, type);
+        }
+        else if (es.size() > 1) {
+            ambiguousSymbol(type, es);
+        }
+        else {
+            myTypeDefinitionEntry =
+                    es.get(0).toProgramTypeDefinitionEntry(r.getLocation());
+        }
     }
 
     @Override
@@ -514,34 +539,20 @@ public class Populator extends TreeWalkerVisitor {
             //We've finished the representation and are about to parse 
             //conventions, etc.  We introduce the exemplar with the appropriate
             //type
-            PosSymbol type = r.getName();
-
-            List<SymbolTableEntry> es =
-                    myBuilder.getInnermostActiveScope().query(
-                            new NameQuery(null, type,
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_IGNORE, false));
-
-            if (es.isEmpty()) {
-                noSuchSymbol(null, type);
-            }
-            else if (es.size() > 1) {
-                ambiguousSymbol(type, es);
-            }
-            else {
-                ProgramTypeDefinitionEntry e =
-                        es.get(0).toProgramTypeDefinitionEntry(r.getLocation());
-
-                addBinding(e.getProgramType().getExemplarName(), r.getName()
-                        .getLocation(), r, r.getRepresentation()
-                        .getMathTypeValue(), myGenericTypes);
-            }
+            addBinding(
+                    myTypeDefinitionEntry.getProgramType().getExemplarName(), r
+                            .getName().getLocation(), r, r.getRepresentation()
+                            .getMathTypeValue(), myGenericTypes);
         }
     }
 
     @Override
     public void postRepresentationDec(RepresentationDec r) {
         myBuilder.endScope();
+        
+        myBuilder.getInnermostActiveScope().addRepresentationTypeEntry(r.getName().getName(), r, myTypeDefinitionEntry, null, null, null)
+        
+        myTypeDefinitionEntry = null;
     }
 
     @Override
@@ -591,7 +602,13 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postRecordTy(RecordTy ty) {
-
+        List<Element> elements = new LinkedList<Element>();
+        List<VarDec> fields = ty.getFields();
+        for (VarDec field : fields) {
+            elements.add(new Element(field.getMathType()));
+        }
+        ty.setMathType(myTypeGraph.MTYPE);
+        ty.setMathTypeValue(new MTCartesian(myTypeGraph, elements));
     }
 
     @Override
@@ -620,7 +637,7 @@ public class Populator extends TreeWalkerVisitor {
             noSuchSymbol(tyQualifier, tyName, tyLocation);
         }
         catch (DuplicateSymbolException dse) {
-            //Shouldn't be possible--NameQuery can't throw this
+            //TODO : Error gracefully
             throw new RuntimeException(dse);
         }
     }
@@ -1155,14 +1172,14 @@ public class Populator extends TreeWalkerVisitor {
         if (e instanceof Ty) {
             Ty eTy = (Ty) e;
             if (eTy.getMathTypeValue() == null) {
-                throw new RuntimeException(
+                /*throw new RuntimeException(
                         "Ty "
                                 + e
                                 + " ("
                                 + e.getClass()
                                 + ", "
                                 + e.getLocation()
-                                + ") got through the populator with no math type value.");
+                                + ") got through the populator with no math type value.");*/
             }
         }
     }
@@ -1283,13 +1300,97 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
+    public void preVariableDotExp(VariableDotExp e) {
+        //Dot expressions are handled ridiculously, even for this compiler, so
+        //this method just deals with the cases we've encountered so far and 
+        //lots of assumptions are made.  Expect it to break frequently when you
+        //encounter some new case
+        
+        PosSymbol firstNamePos = 
+                ((VariableNameExp) e.getSegments().get(0)).getName();
+        String firstName = firstNamePos.getName();
+        
+        try {
+            ProgramVariableEntry eEntry = 
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                        new NameQuery(null, firstName)).toProgramVariableEntry(
+                            firstNamePos.getLocation());
+            
+            asdfs
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, firstNamePos);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This flavor of name query shouldn't be able to throw this--we're
+            //only looking in the local module so there's no overloading
+            throw new RuntimeException(dse);
+        }
+    }
+    
+    @Override
+    public boolean walkVariableDotExp(VariableDotExp e) {
+        
+        preAny(e);
+        preExp(e);
+        preProgramExp(e);
+        preVariableExp(e);
+        preVariableDotExp(e);
+        
+        postVariableDotExp(e);
+        postVariableExp(e);
+        postProgramExp(e);
+        postExp(e);
+        postAny(e);
+        
+        return true;
+    }
+    
+    @Override
+    public void preDotExp(DotExp e) {
+        if (e.getSegments().get(0).toString().equals("Conc")) {
+            if (e.getSegments().size() != 2
+                    || !e.getSegments().get(1).toString().equals(
+                            myTypeDefinitionEntry.getProgramType()
+                                    .getExemplarName())) {
+                throw new RuntimeException("No idea what's going on here.");
+            }
+
+            e.setMathType(myTypeDefinitionEntry.getModelType());
+        }
+    }
+
+    @Override
+    public boolean walkDotExp(DotExp e) {
+        boolean result = e.getSegments().get(0).toString().equals("Conc");
+
+        if (result) {
+            //Still want to pre and post, even though we're not going to visit
+            //children
+            preAny(e);
+            preExp(e);
+            preDotExp(e);
+            postDotExp(e);
+            postExp(e);
+            postAny(e);
+        }
+
+        return result;
+    }
+
+    @Override
     public void postDotExp(DotExp e) {
-        edu.clemson.cs.r2jt.collections.List<Exp> segments = e.getSegments();
+        //Might already have been set in preDotExp(), in which case our children
+        //weren't visited
+        if (e.getMathType() == null) {
+            edu.clemson.cs.r2jt.collections.List<Exp> segments =
+                    e.getSegments();
 
-        Exp lastSeg = segments.get(segments.size() - 1);
+            Exp lastSeg = segments.get(segments.size() - 1);
 
-        e.setMathType(lastSeg.getMathType());
-        e.setMathTypeValue(lastSeg.getMathTypeValue());
+            e.setMathType(lastSeg.getMathType());
+            e.setMathTypeValue(lastSeg.getMathTypeValue());
+        }
     }
 
     //-------------------------------------------------------------------

@@ -1,5 +1,6 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import java.util.List;
 

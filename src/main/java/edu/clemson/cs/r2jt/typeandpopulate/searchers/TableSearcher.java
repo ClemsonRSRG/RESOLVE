@@ -1,5 +1,7 @@
-package edu.clemson.cs.r2jt.typeandpopulate;
+package edu.clemson.cs.r2jt.typeandpopulate.searchers;
 
+import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.SymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import java.util.List;
 
@@ -16,6 +18,10 @@ import java.util.List;
  *            a subtype of <code>E</code>.
  */
 public interface TableSearcher<E extends SymbolTableEntry> {
+
+    public static enum SearchContext {
+        GLOBAL, SOURCE_MODULE, IMPORT, FACILITY
+    };
 
     /**
      * <p>Adds any symbol table entries from <code>entries</code> that match
@@ -34,6 +40,7 @@ public interface TableSearcher<E extends SymbolTableEntry> {
      * 
      * @param entries The set of symbol table entries to consider.
      * @param matches A non-<code>null</code> accumulator of matches.
+     * @param l The context from which <code>entries</code> was drawn.
      * 
      * @return <code>true</code> if <code>matches</code> now represents a
      *         final list of search results&mdash;i.e., no further symbol table
@@ -44,6 +51,6 @@ public interface TableSearcher<E extends SymbolTableEntry> {
      * @throws DuplicateSymbolException If more than one match is found in
      *         <code>entries</code> where no more than one was expected.
      */
-    public boolean addMatches(SymbolTable entries, List<E> matches)
-            throws DuplicateSymbolException;
+    public boolean addMatches(SymbolTable entries, List<E> matches,
+            SearchContext l) throws DuplicateSymbolException;
 }

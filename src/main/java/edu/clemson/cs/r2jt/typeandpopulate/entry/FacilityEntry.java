@@ -12,7 +12,7 @@ import edu.clemson.cs.r2jt.absyn.FacilityDec;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleParameterization;
-import edu.clemson.cs.r2jt.typeandpopulate.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
 import edu.clemson.cs.r2jt.typeandpopulate.SpecRealizationPairing;
 

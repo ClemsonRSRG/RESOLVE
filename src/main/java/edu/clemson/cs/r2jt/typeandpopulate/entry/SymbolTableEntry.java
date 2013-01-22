@@ -8,7 +8,7 @@ import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
 /**
@@ -91,6 +91,12 @@ public abstract class SymbolTableEntry {
         return myDefiningElement;
     }
 
+    public RepresentationTypeEntry toRepresentationTypeEntry(Location l) {
+        throw new SourceErrorException("Expecting a program type "
+                + "representation.  Found " + getEntryTypeDescription() + ".", 
+                l);
+    }
+    
     public MathSymbolEntry toMathSymbolEntry(Location l) {
         throw new SourceErrorException("Expecting a math symbol.  Found "
                 + getEntryTypeDescription() + ".", l);

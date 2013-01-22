@@ -4,7 +4,7 @@
  */
 package edu.clemson.cs.r2jt.typeandpopulate;
 
-import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeSearcher;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.EntryTypeSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.UnqualifiedPath;

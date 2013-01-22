@@ -1,9 +1,9 @@
-package edu.clemson.cs.r2jt.typeandpopulate;
+package edu.clemson.cs.r2jt.typeandpopulate.programtypes;
 
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
-import java.util.Map;
-
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import java.util.Map;
 
 public abstract class PTType {
 

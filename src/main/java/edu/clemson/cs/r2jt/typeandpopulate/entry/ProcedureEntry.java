@@ -3,7 +3,7 @@ package edu.clemson.cs.r2jt.typeandpopulate.entry;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import java.util.Map;
 
 public class ProcedureEntry extends SymbolTableEntry {

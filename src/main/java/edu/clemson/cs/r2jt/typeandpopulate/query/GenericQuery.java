@@ -4,7 +4,7 @@
  */
 package edu.clemson.cs.r2jt.typeandpopulate.query;
 
-import edu.clemson.cs.r2jt.typeandpopulate.GenericSearcher;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.GenericSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;

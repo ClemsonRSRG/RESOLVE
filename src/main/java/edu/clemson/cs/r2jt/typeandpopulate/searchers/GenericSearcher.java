@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.clemson.cs.r2jt.typeandpopulate;
+package edu.clemson.cs.r2jt.typeandpopulate.searchers;
 
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.SymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 import java.util.Iterator;
 import java.util.List;
@@ -27,7 +27,7 @@ public class GenericSearcher
 
     @Override
     public boolean addMatches(SymbolTable entries,
-            List<ProgramTypeEntry> matches) {
+            List<ProgramTypeEntry> matches, SearchContext l) {
 
         Iterator<ProgramParameterEntry> parameters =
                 entries.iterateByType(ProgramParameterEntry.class);
