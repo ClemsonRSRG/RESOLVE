@@ -5707,7 +5707,12 @@ public class Verifier extends ResolveConceptualVisitor {
             if (tmpPVD.getMode() == Mode.EVALUATES) {
                 VarExp exp = new VarExp();
                 exp.setName(tmpPVD.getName());
-                ensures = replace(ensures, exp, new OldExp(null, exp));
+                exp.setMathType(tmpPVD.getTy().getMathTypeValue());
+
+                OldExp o = new OldExp(null, exp);
+                o.setMathType(tmpPVD.getTy().getMathTypeValue());
+
+                ensures = replace(ensures, exp, o);
             }
             else if (tmpPVD.getMode() == Mode.CLEARS) {
                 VarDec var = new VarDec();
@@ -6064,7 +6069,12 @@ public class Verifier extends ResolveConceptualVisitor {
                 if (tmpPVD.getMode() == Mode.EVALUATES) {
                     VarExp exp = new VarExp();
                     exp.setName(tmpPVD.getName());
-                    ensures = replace(ensures, exp, new OldExp(null, exp));
+                    exp.setMathType(tmpPVD.getTy().getMathTypeValue());
+
+                    OldExp o = new OldExp(null, exp);
+                    o.setMathType(tmpPVD.getTy().getMathTypeValue());
+
+                    ensures = replace(ensures, exp, o);
                 }
                 addFreeVar(tmpPVD, assertion);
             }
@@ -7168,6 +7178,7 @@ public class Verifier extends ResolveConceptualVisitor {
         }
         tmpVD.setName(tmpPS);
         tmpVD.setTy(tmpTy);
+        tmpVD.setMathType(tmpTy.getMathTypeValue());
         return tmpVD;
     }
 
