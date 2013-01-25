@@ -1,16 +1,17 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
-import edu.clemson.cs.r2jt.typeandpopulate.query.SymbolQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.query.MultimatchSymbolQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.query.MultimatchSymbolQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.SymbolQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher.SearchContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import edu.clemson.cs.r2jt.utilities.ChainedMaps;
 
 /**
  * <p>An <code>InstantiatedScope</code> decorates an existing 
@@ -51,7 +52,7 @@ public class InstantiatedScope implements Scope {
             TableSearcher<E> searcher, List<E> matches,
             Set<Scope> searchedScopes,
             Map<String, PTType> genericInstantiations,
-            FacilityEntry facilityInstantiation)
+            FacilityEntry facilityInstantiation, SearchContext l)
             throws DuplicateSymbolException {
 
         if (facilityInstantiation != null) {
@@ -62,13 +63,14 @@ public class InstantiatedScope implements Scope {
         }
 
         return myBaseScope.addMatches(searcher, matches, searchedScopes,
-                myAdditionalGenericInstantiations, myInstantiatingFacility);
+                myAdditionalGenericInstantiations, myInstantiatingFacility, l);
     }
 
     @Override
     public <E extends SymbolTableEntry> List<E> getMatches(
-            TableSearcher<E> searcher) throws DuplicateSymbolException {
-        return myBaseScope.getMatches(searcher);
+            TableSearcher<E> searcher, SearchContext l)
+            throws DuplicateSymbolException {
+        return myBaseScope.getMatches(searcher, l);
     }
 
     @Override

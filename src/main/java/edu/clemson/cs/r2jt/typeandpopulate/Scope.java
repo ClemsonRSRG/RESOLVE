@@ -1,10 +1,13 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.query.MultimatchSymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.SymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher.SearchContext;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -118,7 +121,7 @@ public interface Scope {
             TableSearcher<E> searcher, List<E> matches,
             Set<Scope> searchedScopes,
             Map<String, PTType> genericInstantiations,
-            FacilityEntry instantiatingFacility)
+            FacilityEntry instantiatingFacility, SearchContext l)
             throws DuplicateSymbolException;
 
     /**
@@ -130,7 +133,8 @@ public interface Scope {
      * @return
      */
     public <E extends SymbolTableEntry> List<E> getMatches(
-            TableSearcher<E> searcher) throws DuplicateSymbolException;
+            TableSearcher<E> searcher, SearchContext l)
+            throws DuplicateSymbolException;
 
     /**
      * <p>Returns a list of {@link ProgramParameterEntry ProgramParameterEntry}s

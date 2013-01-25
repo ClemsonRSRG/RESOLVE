@@ -59,7 +59,7 @@
 package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import edu.clemson.cs.r2jt.typeandpopulate.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
@@ -109,8 +109,8 @@ public abstract class Ty extends ResolveConceptualElement implements Cloneable {
     }
 
     public Ty copy() {
-        System.out.println("Shouldn't be calling Ty.copy()!");
-        return null;
+        throw new RuntimeException("Shouldn't be calling Ty.copy()!  Type: "
+                + this.getClass());
     }
 
     public void prettyPrint() {

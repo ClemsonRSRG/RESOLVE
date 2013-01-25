@@ -1,5 +1,6 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import java.util.Collections;

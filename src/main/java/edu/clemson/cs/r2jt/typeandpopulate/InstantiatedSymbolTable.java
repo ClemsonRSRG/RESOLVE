@@ -1,13 +1,13 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-
-import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
-import edu.clemson.cs.r2jt.utilities.Mapping;
 
 public class InstantiatedSymbolTable implements SymbolTable {
 

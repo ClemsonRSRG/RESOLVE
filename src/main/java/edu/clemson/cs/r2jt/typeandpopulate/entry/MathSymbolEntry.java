@@ -14,7 +14,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTProper;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
-import edu.clemson.cs.r2jt.typeandpopulate.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.Scope;
 import edu.clemson.cs.r2jt.typeandpopulate.SymbolNotOfKindTypeException;
 import edu.clemson.cs.r2jt.typeandpopulate.VariableReplacingVisitor;

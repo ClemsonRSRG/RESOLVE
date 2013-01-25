@@ -1,7 +1,13 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.EntryTypeSearcher;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher.SearchContext;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,9 +15,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 
 /**
  * <p>Defines the search path used when a symbol is referenced in an 
@@ -78,7 +81,8 @@ public class UnqualifiedPath implements ScopeSearchPath {
         //First we search locally
         boolean finished =
                 source.addMatches(searcher, results, searchedScopes,
-                        genericInstantiations, instantiatingFacility);
+                        genericInstantiations, instantiatingFacility,
+                        SearchContext.SOURCE_MODULE);
 
         //Next, if requested, we search any local facilities.
         if (!finished && myFacilityStrategy != FacilityStrategy.FACILITY_IGNORE) {
@@ -89,7 +93,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
         }
 
         //Finally, if requested, we search imports
-        if ((results.size() == 0 || !myLocalPriorityFlag)
+        if ((results.isEmpty() || !myLocalPriorityFlag)
                 && source instanceof SyntacticScope
                 && myImportStrategy != ImportStrategy.IMPORT_NONE) {
 
@@ -129,7 +133,8 @@ public class UnqualifiedPath implements ScopeSearchPath {
             throws DuplicateSymbolException {
 
         List<FacilityEntry> facilities =
-                source.getMatches(EntryTypeSearcher.FACILITY_SEARCHER);
+                source.getMatches(EntryTypeSearcher.FACILITY_SEARCHER,
+                        SearchContext.SOURCE_MODULE);
 
         Map<String, PTType> inductiveInstantiations = genericInstantiations;
         FacilityEntry facility;
@@ -148,7 +153,8 @@ public class UnqualifiedPath implements ScopeSearchPath {
 
             finished =
                     facilityScope.addMatches(searcher, result, searchedScopes,
-                            new HashMap<String, PTType>(), null);
+                            new HashMap<String, PTType>(), null,
+                            SearchContext.FACILITY);
         }
 
         return finished;

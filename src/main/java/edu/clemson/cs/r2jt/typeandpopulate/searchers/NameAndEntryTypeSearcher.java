@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.clemson.cs.r2jt.typeandpopulate;
+package edu.clemson.cs.r2jt.typeandpopulate.searchers;
 
+import edu.clemson.cs.r2jt.typeandpopulate.SymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -33,7 +33,8 @@ public class NameAndEntryTypeSearcher<E extends SymbolTableEntry>
     }
 
     @Override
-    public boolean addMatches(SymbolTable entries, List<E> matches) {
+    public boolean addMatches(SymbolTable entries, List<E> matches,
+            SearchContext l) {
         SymbolTableEntry match = entries.get(myTargetName);
 
         boolean foundOne =

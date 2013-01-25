@@ -62,11 +62,11 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
-import edu.clemson.cs.r2jt.typeandpopulate.PTBoolean;
-import edu.clemson.cs.r2jt.typeandpopulate.PTInteger;
-import edu.clemson.cs.r2jt.typeandpopulate.PTPrimitive;
-import edu.clemson.cs.r2jt.typeandpopulate.PTPrimitive.PrimitiveTypeName;
-import edu.clemson.cs.r2jt.typeandpopulate.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTBoolean;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTInteger;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTPrimitive;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTPrimitive.PrimitiveTypeName;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.HashMap;
 
