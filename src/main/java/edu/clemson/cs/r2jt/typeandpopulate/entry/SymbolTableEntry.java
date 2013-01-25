@@ -93,10 +93,10 @@ public abstract class SymbolTableEntry {
 
     public RepresentationTypeEntry toRepresentationTypeEntry(Location l) {
         throw new SourceErrorException("Expecting a program type "
-                + "representation.  Found " + getEntryTypeDescription() + ".", 
+                + "representation.  Found " + getEntryTypeDescription() + ".",
                 l);
     }
-    
+
     public MathSymbolEntry toMathSymbolEntry(Location l) {
         throw new SourceErrorException("Expecting a math symbol.  Found "
                 + getEntryTypeDescription() + ".", l);

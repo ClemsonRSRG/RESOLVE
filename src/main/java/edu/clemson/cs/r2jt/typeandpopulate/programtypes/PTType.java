@@ -22,4 +22,18 @@ public abstract class PTType {
     public abstract PTType instantiateGenerics(
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility);
+
+    /**
+     * <p>Returns <code>true</code> <strong>iff</strong> an value of this type
+     * would be acceptable where one of type <code>t</code> were required.</p>
+     * 
+     * @param t The required type.
+     * 
+     * @return <code>true</code> <strong>iff</strong> an value of this type
+     *         would be acceptable where one of type <code>t</code> were 
+     *         required.
+     */
+    public boolean acceptableFor(PTType t) {
+        return equals(t);
+    }
 }

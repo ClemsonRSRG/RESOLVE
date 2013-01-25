@@ -6,7 +6,6 @@ import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.treewalk.*;
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
 import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian;
-import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian.Element;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
 import edu.clemson.cs.r2jt.typeandpopulate.MTPowertypeApplication;
@@ -19,9 +18,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScopeBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTElement;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTVoid;
 import edu.clemson.cs.r2jt.typeandpopulate.ParameterGenericApplyingVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.SymbolNotOfKindTypeException;
 import edu.clemson.cs.r2jt.typeandpopulate.VariableReplacingVisitor;
@@ -33,6 +29,11 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTElement;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRecord;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTVoid;
 import edu.clemson.cs.r2jt.typeandpopulate.query.MathFunctionNamedQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.MathSymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameAndEntryTypeQuery;
@@ -96,6 +97,12 @@ public class Populator extends TreeWalkerVisitor {
 
     private final TypeGraph myTypeGraph;
     private TreeWalker myWalker;
+
+    /**
+     * <p>While we walk the children of a procedure definition, this will be set
+     * to the ProcedureDec.  Otherwise it will be null.</p>
+     */
+    private ProcedureDec myCurrentProcedure;
 
     /**
      * <p>While we walk the children of a direct definition, this will be set
@@ -260,6 +267,7 @@ public class Populator extends TreeWalkerVisitor {
             myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
                     param, ParameterMode.EVALUATES,
                     param.getTy().getProgramTypeValue());
+            param.setMathType(param.getTy().getMathTypeValue());
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(param.getName().getName(), param.getName()
@@ -276,6 +284,7 @@ public class Populator extends TreeWalkerVisitor {
                     param, ParameterMode.TYPE, new PTElement(myTypeGraph));
 
             myGenericTypes.put(paramName, myTypeGraph.MTYPE);
+            param.setMathType(myTypeGraph.MTYPE);
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(param.getName().getName(), param.getName()
@@ -298,7 +307,18 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
+    public void postModuleParameterDec(ModuleParameterDec d) {
+        if (d.getWrappedDec().getMathType() == null) {
+            throw new RuntimeException(d.getWrappedDec().getClass()
+                    + " has null type");
+        }
+
+        d.setMathType(d.getWrappedDec().getMathType());
+    }
+
+    @Override
     public void preProcedureDec(ProcedureDec dec) {
+        myCurrentProcedure = dec;
 
         try {
             //Figure out what Operation we correspond to (we don't use 
@@ -319,8 +339,8 @@ public class Populator extends TreeWalkerVisitor {
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException("Procedure "
                     + dec.getName().getName()
-                    + " does not implement any known " + "Operation.", dec
-                    .getName().getLocation());
+                    + " does not implement any known operation.", dec.getName()
+                    .getLocation());
         }
         catch (DuplicateSymbolException dse) {
             //We should have caught this before now, like when we defined the
@@ -328,6 +348,39 @@ public class Populator extends TreeWalkerVisitor {
             throw new RuntimeException("Duplicate Operations for "
                     + dec.getName().getName() + "?");
         }
+    }
+
+    @Override
+    public boolean walkFuncAssignStmt(FuncAssignStmt s) {
+        preAny(s);
+        preStatement(s);
+        preFuncAssignStmt(s);
+
+        boolean walkVar = true;
+        VariableExp v = s.getVar();
+        if (v instanceof VariableNameExp) {
+            VariableNameExp vAsNVE = (VariableNameExp) v;
+
+            walkVar =
+                    !vAsNVE.getName().getName().equals(
+                            myCurrentProcedure.getName().getName());
+        }
+
+        if (walkVar) {
+            myWalker.visit(v);
+        }
+        else {
+            v.setMathType(myCurrentProcedure.getReturnTy().getMathTypeValue());
+        }
+        myWalker.visit(s.getAssign());
+
+        System.out.println(s.getVar());
+
+        postFuncAssignStmt(s);
+        postStatement(s);
+        postAny(s);
+
+        return true;
     }
 
     @Override
@@ -389,8 +442,8 @@ public class Populator extends TreeWalkerVisitor {
                         .getDefiningElement().getLocation());
             }
 
-            if (!curOpParam.getDeclaredType().equals(
-                    curProcParam.getDeclaredType())) {
+            if (!curProcParam.getDeclaredType().acceptableFor(
+                    curOpParam.getDeclaredType())) {
                 throw new SourceErrorException("Parameter type does not "
                         + "match corresponding operation parameter type."
                         + "\n\nExpected: " + curOpParam.getDeclaredType()
@@ -421,6 +474,7 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         myCurrentParameters = null;
+        myCurrentProcedure = null;
     }
 
     @Override
@@ -549,9 +603,17 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postRepresentationDec(RepresentationDec r) {
         myBuilder.endScope();
-        
-        myBuilder.getInnermostActiveScope().addRepresentationTypeEntry(r.getName().getName(), r, myTypeDefinitionEntry, null, null, null)
-        
+
+        try {
+            myBuilder.getInnermostActiveScope().addRepresentationTypeEntry(
+                    r.getName().getName(), r, myTypeDefinitionEntry,
+                    r.getRepresentation().getProgramTypeValue(),
+                    r.getConvention(), r.getCorrespondence());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(r.getName());
+        }
+
         myTypeDefinitionEntry = null;
     }
 
@@ -602,13 +664,18 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postRecordTy(RecordTy ty) {
-        List<Element> elements = new LinkedList<Element>();
+        Map<String, PTType> fieldMap = new HashMap<String, PTType>();
         List<VarDec> fields = ty.getFields();
         for (VarDec field : fields) {
-            elements.add(new Element(field.getMathType()));
+            fieldMap.put(field.getName().getName(), field.getTy()
+                    .getProgramTypeValue());
         }
+
+        PTRecord record = new PTRecord(myTypeGraph, fieldMap);
+
+        ty.setProgramTypeValue(record);
         ty.setMathType(myTypeGraph.MTYPE);
-        ty.setMathTypeValue(new MTCartesian(myTypeGraph, elements));
+        ty.setMathTypeValue(record.toMath());
     }
 
     @Override
@@ -623,11 +690,16 @@ public class Populator extends TreeWalkerVisitor {
 
         try {
             ProgramTypeEntry type =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new NameQuery(tyQualifier, tySymbol,
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_INSTANTIATE,
-                                    false)).toProgramTypeEntry(tyLocation);
+                    myBuilder
+                            .getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery(
+                                            tyQualifier,
+                                            tySymbol,
+                                            ImportStrategy.IMPORT_NAMED,
+                                            FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true)).toProgramTypeEntry(
+                                    tyLocation);
 
             ty.setProgramTypeValue(type.getProgramType());
             ty.setMathType(myTypeGraph.MTYPE);
@@ -1048,9 +1120,6 @@ public class Populator extends TreeWalkerVisitor {
     public void postProgramIntegerExp(ProgramIntegerExp e) {
         e.setProgramType(getIntegerProgramType());
 
-        /*e.setProgramType(PTPrimitive.getInstance(myTypeGraph,
-                PrimitiveTypeName.INTEGER));*/
-
         //Do math type stuff
         postSymbolExp(null, "" + e.getValue(), e);
     }
@@ -1095,10 +1164,6 @@ public class Populator extends TreeWalkerVisitor {
 
         //We know we match expectedType--otherwise the above would have thrown
         //an exception.
-
-        //TODO : The range of our type could be some function of the concrete
-        //       binding of the domain.  E.g., foo(x : (X : MType)) : X.  Right
-        //       now we ignore this complexity.
 
         foundExp.setMathType(expectedType.getRange());
         foundExp.setQuantification(intendedEntry.getQuantification());
@@ -1172,14 +1237,20 @@ public class Populator extends TreeWalkerVisitor {
         if (e instanceof Ty) {
             Ty eTy = (Ty) e;
             if (eTy.getMathTypeValue() == null) {
-                /*throw new RuntimeException(
+                throw new RuntimeException(
                         "Ty "
                                 + e
                                 + " ("
                                 + e.getClass()
                                 + ", "
                                 + e.getLocation()
-                                + ") got through the populator with no math type value.");*/
+                                + ") got through the populator with no math type value.");
+            }
+            if (!(e instanceof ArbitraryExpTy)
+                    && eTy.getProgramTypeValue() == null) {
+                throw new RuntimeException("Ty " + e + " (" + e.getClass()
+                        + ", " + e.getLocation() + ") got through the "
+                        + "populator with no program type value.");
             }
         }
     }
@@ -1269,7 +1340,10 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postModuleArgumentItem(ModuleArgumentItem i) {
 
-        if (i.getName() != null) {
+        if (i.getEvalExp() != null) {
+            i.setProgramTypeValue(i.getEvalExp().getProgramType());
+        }
+        else if (i.getName() != null) {
             List<SymbolTableEntry> es =
                     myBuilder.getInnermostActiveScope().query(
                             new NameQuery(i.getQualifier(), i.getName(),
@@ -1305,18 +1379,38 @@ public class Populator extends TreeWalkerVisitor {
         //this method just deals with the cases we've encountered so far and 
         //lots of assumptions are made.  Expect it to break frequently when you
         //encounter some new case
-        
-        PosSymbol firstNamePos = 
+
+        PosSymbol firstNamePos =
                 ((VariableNameExp) e.getSegments().get(0)).getName();
         String firstName = firstNamePos.getName();
-        
+
         try {
-            ProgramVariableEntry eEntry = 
+            ProgramVariableEntry eEntry =
                     myBuilder.getInnermostActiveScope().queryForOne(
-                        new NameQuery(null, firstName)).toProgramVariableEntry(
-                            firstNamePos.getLocation());
-            
-            asdfs
+                            new NameQuery(null, firstName))
+                            .toProgramVariableEntry(firstNamePos.getLocation());
+            e.getSegments().get(0).setProgramType(eEntry.getProgramType());
+            e.getSegments().get(0)
+                    .setMathType(eEntry.getProgramType().toMath());
+
+            PTType eType = eEntry.getProgramType();
+
+            if (eType instanceof PTRepresentation) {
+                eType = ((PTRepresentation) eType).getBaseType();
+            }
+
+            PTRecord recordType = (PTRecord) eType;
+
+            String fieldName =
+                    ((VariableNameExp) e.getSegments().get(1)).getName()
+                            .getName();
+
+            PTType fieldType = recordType.getFieldType(fieldName);
+            e.getSegments().get(1).setProgramType(fieldType);
+            e.setProgramType(fieldType);
+
+            e.getSegments().get(1).setMathType(fieldType.toMath());
+            e.setMathType(fieldType.toMath());
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(null, firstNamePos);
@@ -1327,25 +1421,25 @@ public class Populator extends TreeWalkerVisitor {
             throw new RuntimeException(dse);
         }
     }
-    
+
     @Override
     public boolean walkVariableDotExp(VariableDotExp e) {
-        
+
         preAny(e);
         preExp(e);
         preProgramExp(e);
         preVariableExp(e);
         preVariableDotExp(e);
-        
+
         postVariableDotExp(e);
         postVariableExp(e);
         postProgramExp(e);
         postExp(e);
         postAny(e);
-        
+
         return true;
     }
-    
+
     @Override
     public void preDotExp(DotExp e) {
         if (e.getSegments().get(0).toString().equals("Conc")) {
@@ -1356,6 +1450,11 @@ public class Populator extends TreeWalkerVisitor {
                 throw new RuntimeException("No idea what's going on here.");
             }
 
+            //No idea.  Conc is a made up thing.
+            e.getSegments().get(0).setMathType(myTypeGraph.BOOLEAN);
+
+            e.getSegments().get(1).setMathType(
+                    myTypeDefinitionEntry.getModelType());
             e.setMathType(myTypeDefinitionEntry.getModelType());
         }
     }
@@ -1465,6 +1564,10 @@ public class Populator extends TreeWalkerVisitor {
     public void expected(Exp e, MTType expectedType) {
         throw new SourceErrorException("Expected: " + expectedType
                 + "\nFound: " + e.getMathType(), e.getLocation());
+    }
+
+    public void duplicateSymbol(PosSymbol symbol) {
+        duplicateSymbol(symbol.getName(), symbol.getLocation());
     }
 
     public void duplicateSymbol(String symbol, Location l) {

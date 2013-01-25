@@ -109,8 +109,8 @@ public abstract class Ty extends ResolveConceptualElement implements Cloneable {
     }
 
     public Ty copy() {
-        System.out.println("Shouldn't be calling Ty.copy()!");
-        return null;
+        throw new RuntimeException("Shouldn't be calling Ty.copy()!  Type: "
+                + this.getClass());
     }
 
     public void prettyPrint() {

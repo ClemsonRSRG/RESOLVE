@@ -161,4 +161,9 @@ public class PTFamily extends PTType {
 
         return result;
     }
+
+    @Override
+    public String toString() {
+        return myName;
+    }
 }

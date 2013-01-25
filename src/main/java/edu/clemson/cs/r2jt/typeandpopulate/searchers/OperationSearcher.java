@@ -13,6 +13,7 @@ import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.SymbolTable;
+import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
 public class OperationSearcher implements TableSearcher<OperationEntry> {
 
@@ -32,16 +33,22 @@ public class OperationSearcher implements TableSearcher<OperationEntry> {
             throws DuplicateSymbolException {
 
         if (entries.containsKey(myQueryName)) {
-            OperationEntry operation =
-                    entries.get(myQueryName).toOperationEntry(myQueryLocation);
+            try {
+                OperationEntry operation =
+                        entries.get(myQueryName).toOperationEntry(
+                                myQueryLocation);
 
-            if (argumentsMatch(operation.getParameters())) {
-                //We have a match at this point
-                if (!matches.isEmpty()) {
-                    throw new DuplicateSymbolException();
+                if (argumentsMatch(operation.getParameters())) {
+                    //We have a match at this point
+                    if (!matches.isEmpty()) {
+                        throw new DuplicateSymbolException();
+                    }
+
+                    matches.add(operation);
                 }
-
-                matches.add(operation);
+            }
+            catch (SourceErrorException see) {
+                //No problem, just don't include it in the result
             }
         }
 
@@ -66,7 +73,7 @@ public class OperationSearcher implements TableSearcher<OperationEntry> {
                 formalParameterType =
                         formalParametersIter.next().getDeclaredType();
 
-                result = actualArgumentType.equals(formalParameterType);
+                result = actualArgumentType.acceptableFor(formalParameterType);
             }
         }
 

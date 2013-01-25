@@ -31,11 +31,11 @@ public class NameSearcher implements MultimatchTableSearcher<SymbolTableEntry> {
 
         if (result) {
             SymbolTableEntry e = entries.get(mySearchString);
-            
+
             //Parameters of imported modules or facility instantiations ar not
             //exported and therefore should not be considered for results
-            if (l.equals(SearchContext.SOURCE_MODULE) || 
-                    !(e instanceof ProgramParameterEntry)) {
+            if (l.equals(SearchContext.SOURCE_MODULE)
+                    || !(e instanceof ProgramParameterEntry)) {
                 matches.add(entries.get(mySearchString));
             }
         }

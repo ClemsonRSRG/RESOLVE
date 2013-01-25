@@ -65,8 +65,7 @@ public class QualifiedPath implements ScopeSearchPath {
                             .getScope(
                                     myFacilityStrategy == FacilityStrategy.FACILITY_INSTANTIATE);
 
-            result =
-                    facilityScope.getMatches(searcher, SearchContext.FACILITY);
+            result = facilityScope.getMatches(searcher, SearchContext.FACILITY);
         }
         catch (NoSuchSymbolException nsse) {
             //There's nothing by that name in local scope, so it must be the
@@ -76,8 +75,7 @@ public class QualifiedPath implements ScopeSearchPath {
                         repo.getModuleScope(new ModuleIdentifier(myQualifier
                                 .getName()));
 
-                result =
-                        moduleScope.getMatches(searcher, SearchContext.IMPORT);
+                result = moduleScope.getMatches(searcher, SearchContext.IMPORT);
             }
             catch (NoSuchSymbolException nsse2) {
                 throw new SourceErrorException("No such facility or a module.",

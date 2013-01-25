@@ -26,6 +26,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.RepresentationTypeEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.Map;
 import java.util.Set;
@@ -137,22 +138,23 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public RepresentationTypeEntry addRepresentationTypeEntry(String name,
-            RepresentationDec definingElement, 
-            ProgramTypeDefinitionEntry definition, PTType representationType, 
-            Exp convention, Exp correspondence) 
-            throws DuplicateSymbolException {
-        
+            RepresentationDec definingElement,
+            ProgramTypeDefinitionEntry definition, PTType representationType,
+            Exp convention, Exp correspondence) throws DuplicateSymbolException {
+
         sanityCheckBindArguments(name, definingElement, "");
-        
-        RepresentationTypeEntry result = new RepresentationTypeEntry(name, 
-                definingElement, myRootModule, definition, representationType, 
-                convention, correspondence);
-        
+
+        RepresentationTypeEntry result =
+                new RepresentationTypeEntry(myTypeGraph, name, definingElement,
+                        myRootModule, definition, new PTRepresentation(
+                                myTypeGraph, representationType, definition),
+                        convention, correspondence);
+
         myBindings.put(name, result);
-        
+
         return result;
     }
-    
+
     public ProgramTypeEntry addProgramTypeDefinition(String name,
             TypeDec definingElement, MTType model)
             throws DuplicateSymbolException {

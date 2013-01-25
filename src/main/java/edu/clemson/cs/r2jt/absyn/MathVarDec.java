@@ -178,10 +178,13 @@ public class MathVarDec extends Dec {
         }
 
         str = str.concat(":");
-        if (ty instanceof NameTy)
-            str = str.concat(((NameTy) ty).getName().toString());
-        else
-            str = str.concat(ty.toString(0));
+
+        if (ty != null) {
+            if (ty instanceof NameTy)
+                str = str.concat(((NameTy) ty).getName().toString());
+            else
+                str = str.concat(ty.toString(0));
+        }
         return str;
     }
 
@@ -204,7 +207,11 @@ public class MathVarDec extends Dec {
 
     public MathVarDec copy() {
         PosSymbol newName = name.copy();
-        Ty newTy = ty.copy();
+
+        Ty newTy = null;
+        if (ty != null) {
+            newTy = ty.copy();
+        }
         return new MathVarDec(newName, newTy);
     }
 

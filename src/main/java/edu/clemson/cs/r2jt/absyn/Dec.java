@@ -96,6 +96,11 @@ public abstract class Dec extends ResolveConceptualElement implements Cloneable 
     }
 
     public void setMathType(MTType mt) {
+        if (mt == null) {
+            throw new RuntimeException("Trying to set null type on "
+                    + this.getClass());
+        }
+
         this.myMathType = mt;
     }
     //	public MTType getMathTypeValue() {

@@ -4386,61 +4386,6 @@ public class Verifier extends ResolveConceptualVisitor {
             Type vnType = typeHold.searchForType(typeID);
 
             if (vnType instanceof IndirectType) {
-                /*
-                FacilityDec facDec = null;
-                ConceptModuleDec modDec = null;
-
-                if(((IndirectType)vnType).getProgramName() != null){
-                	ModuleID mid = ((IndirectType)vnType).getProgramName().getModuleID();
-                
-                	ModuleDec dec = env.getModuleDec(mid);  
-                	
-                	if(dec instanceof ShortFacilityModuleDec){
-                		facDec = ((ShortFacilityModuleDec)dec).getDec();
-                	}
-                	else {
-                
-                    	
-                	}
-
-                	if(facDec != null){
-                		ModuleID modId = ModuleID.createConceptID(facDec.getConceptName());
-                	
-                		modDec = (ConceptModuleDec)env.getModuleDec(modId); 
-                	}
-                	if(dec instanceof ConceptBodyModuleDec){
-                		ModuleID cid = mid.getConceptID();
-                		modDec = (ConceptModuleDec)env.getModuleDec(cid);            		
-                	}
-                }
-                if(modDec != null){
-                	Iterator<Dec> i = modDec.getDecs().iterator();
-                	while(i.hasNext()){          	
-                		Dec tmp = i.next();
-                		if(tmp instanceof TypeDec){
-                  		
-                			InitItem item = ((TypeDec)tmp).getInitialization();
-
-                			VarExp par = new VarExp();
-                			par.setName(createPosSymbol(var.getName().toString()));
-                			par.setType(getTypeFromTy(varTy));
-                			
-                			VarExp old = new VarExp();
-                  			old.setName(((TypeDec)tmp).getExemplar());
-                  			old.setType(getTypeFromTy(((TypeDec)tmp).getModel()));
-                  			
-                      		Exp initEns = ((Exp)item.getEnsures().clone());
-                      		
-                      		Location myLoc = initEns.getLocation();
-                      		myLoc.setDetails("Initialization Ensures for " + tmp.getName());
-                      		setLocation(initEns, myLoc);
-                  			
-                      		Exp result = initEns.replace(old, par);
-                      		return result;
-                		}
-                	}
-                }else{           	
-                 */
                 vnType = ((IndirectType) vnType).getType();
                 //}
             }
@@ -6357,15 +6302,30 @@ public class Verifier extends ResolveConceptualVisitor {
                 VarExp expToReplace = new VarExp();
                 VarExp expToUse = new VarExp();
                 expToReplace.setName(facDec.getName());
+
+                if (facDec.getMathType() != null) {
+                    expToReplace.setMathType(facDec.getMathType());
+                }
+
                 expToUse.setName(concDec.getName());
+
+                if (concDec.getMathType() != null) {
+                    expToUse.setMathType(concDec.getMathType());
+                }
+
                 if (concDec instanceof ConstantParamDec) {
                     // Set Type
                 }
                 if (req != null) {
                     req = replace(req, expToReplace, expToUse);
-                    req =
-                            replace(req, new OldExp(null, expToReplace),
-                                    new OldExp(null, expToUse));
+
+                    OldExp r = new OldExp(null, expToReplace);
+                    r.setMathType(expToReplace.getMathType());
+
+                    OldExp u = new OldExp(null, expToUse);
+                    u.setMathType(expToUse.getMathType());
+
+                    req = replace(req, r, u);
                 }
             }
             else if (facParam.get(i) instanceof Dec
@@ -6376,7 +6336,12 @@ public class Verifier extends ResolveConceptualVisitor {
                         (ModuleArgumentItem) concParam.get(i);
                 VarExp expToReplace = new VarExp();
                 VarExp expToUse = new VarExp();
+
                 expToReplace.setName(facDec.getName());
+                if (facDec.getMathType() != null) {
+                    expToReplace.setMathType(facDec.getMathType());
+                }
+
                 if (concItem.getName() != null) {
                     expToUse.setName(concItem.getName());
                 }
@@ -6384,14 +6349,21 @@ public class Verifier extends ResolveConceptualVisitor {
                     expToUse.setName(createPosSymbol(concItem.getEvalExp()
                             .toString()));
                 }
+                expToUse.setMathType(concItem.getProgramTypeValue().toMath());
+
                 if (req == null) {
                     req = getTrueVarExp();
                     req.setLocation(facDec.getName().getLocation());
                 }
                 req = replace(req, expToReplace, expToUse);
-                req =
-                        replace(req, new OldExp(null, expToReplace),
-                                new OldExp(null, expToUse));
+
+                OldExp r = new OldExp(null, expToReplace);
+                r.setMathType(expToReplace.getMathType());
+
+                OldExp u = new OldExp(null, expToUse);
+                u.setMathType(expToUse.getMathType());
+
+                req = replace(req, r, u);
             }
 
         }
@@ -8444,6 +8416,8 @@ public class Verifier extends ResolveConceptualVisitor {
                     }
                     var.setName(((TypeDec) tmpDec).getExemplar());
                     var.setTy(new NameTy(null, ((TypeDec) tmpDec).getName()));
+                    var.setMathType(((TypeDec) tmpDec).getModel()
+                            .getMathTypeValue());
                     addFreeVar(var, assertion);
 
                     concVar.setName(createPosSymbol("Conc_"
@@ -8458,6 +8432,7 @@ public class Verifier extends ResolveConceptualVisitor {
 
         VarExp name = new VarExp();
         name.setName(var.getName());
+        name.setMathType(var.getMathType());
 
         VarExp concName = new VarExp();
         concName.setName(concVar.getName());
@@ -8468,6 +8443,7 @@ public class Verifier extends ResolveConceptualVisitor {
         if (corr != null) {
             DotExp concDotExp = new DotExp();
             VarExp cName = new VarExp();
+            cName.setMathType(myTypeGraph.BOOLEAN);
             cName.setName(createPosSymbol("Conc"));
 
             List<Exp> myList = new List<Exp>();
@@ -8475,6 +8451,7 @@ public class Verifier extends ResolveConceptualVisitor {
             myList.add(name);
 
             concDotExp.setSegments(myList);
+            concDotExp.setMathType(name.getMathType());
 
             corr = replace(corr, concDotExp, concName);
             corr.getLocation().setDetails(
@@ -8536,7 +8513,7 @@ public class Verifier extends ResolveConceptualVisitor {
             VarExp cName = new VarExp();
             cName.setName(createPosSymbol("Conc_" + name));
             cName.setType(getTypeFromTy(var.getTy()));
-            cName.setMathType(var.getTy().getMathTypeValue());
+            cName.setMathType(var.getMathType());
             //This doesn't need a type, since we're just using it as a search
             //pattern
 
@@ -8640,12 +8617,14 @@ public class Verifier extends ResolveConceptualVisitor {
             DotExp concDotExp = new DotExp();
             VarExp cName = new VarExp();
             cName.setName(createPosSymbol("Conc"));
+            cName.setMathType(myTypeGraph.BOOLEAN);
 
             List<Exp> myList = new List<Exp>();
             myList.add(cName);
             myList.add(name);
 
             concDotExp.setSegments(myList);
+            concDotExp.setMathType(name.getMathType());
 
             //List<MathVarDec> lst = new List<MathVarDec>();
             //lst.add(concVar);
