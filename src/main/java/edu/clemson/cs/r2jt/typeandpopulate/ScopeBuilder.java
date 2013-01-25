@@ -1,5 +1,7 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
@@ -16,12 +18,15 @@ import edu.clemson.cs.r2jt.absyn.FacilityDec;
 import edu.clemson.cs.r2jt.absyn.FinalItem;
 import edu.clemson.cs.r2jt.absyn.InitItem;
 import edu.clemson.cs.r2jt.absyn.MathAssertionDec;
+import edu.clemson.cs.r2jt.absyn.RepresentationDec;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.absyn.TypeDec;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.RepresentationTypeEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.Map;
 import java.util.Set;
@@ -130,6 +135,24 @@ public class ScopeBuilder extends SyntacticScope {
         myBindings.put(name, entry);
 
         return entry;
+    }
+
+    public RepresentationTypeEntry addRepresentationTypeEntry(String name,
+            RepresentationDec definingElement,
+            ProgramTypeDefinitionEntry definition, PTType representationType,
+            Exp convention, Exp correspondence) throws DuplicateSymbolException {
+
+        sanityCheckBindArguments(name, definingElement, "");
+
+        RepresentationTypeEntry result =
+                new RepresentationTypeEntry(myTypeGraph, name, definingElement,
+                        myRootModule, definition, new PTRepresentation(
+                                myTypeGraph, representationType, definition),
+                        convention, correspondence);
+
+        myBindings.put(name, result);
+
+        return result;
     }
 
     public ProgramTypeEntry addProgramTypeDefinition(String name,

@@ -1,5 +1,7 @@
-package edu.clemson.cs.r2jt.typeandpopulate;
+package edu.clemson.cs.r2jt.typeandpopulate.searchers;
 
+import edu.clemson.cs.r2jt.typeandpopulate.SymbolTable;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import java.util.List;
 
@@ -19,5 +21,6 @@ public interface MultimatchTableSearcher<E extends SymbolTableEntry>
      * behaves identically.</p>
      */
     @Override
-    public boolean addMatches(SymbolTable entries, List<E> matches);
+    public boolean addMatches(SymbolTable entries, List<E> matches,
+            SearchContext l);
 }

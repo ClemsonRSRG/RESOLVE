@@ -1,5 +1,7 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.query.MultimatchSymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.SymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher.SearchContext;
 
 /**
  * <p>A <code>SyntacticScope</code> corresponds to a RESOLVE scope that
@@ -107,7 +110,7 @@ public abstract class SyntacticScope extends AbstractScope {
             TableSearcher<E> searcher, List<E> matches,
             Set<Scope> searchedScopes,
             Map<String, PTType> genericInstantiations,
-            FacilityEntry instantiatingFacility)
+            FacilityEntry instantiatingFacility, SearchContext l)
             throws DuplicateSymbolException {
 
         boolean finished = false;
@@ -123,12 +126,14 @@ public abstract class SyntacticScope extends AbstractScope {
                                 genericInstantiations, instantiatingFacility);
             }
 
-            finished = searcher.addMatches(symbolTableView, matches);
+            finished = searcher.addMatches(symbolTableView, matches, l);
 
             if (!finished) {
                 finished =
-                        myParent.addMatches(searcher, matches, searchedScopes,
-                                genericInstantiations, instantiatingFacility);
+                        myParent
+                                .addMatches(searcher, matches, searchedScopes,
+                                        genericInstantiations,
+                                        instantiatingFacility, l);
             }
         }
 

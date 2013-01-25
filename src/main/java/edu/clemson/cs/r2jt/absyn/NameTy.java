@@ -180,4 +180,8 @@ public class NameTy extends Ty {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return asString(0, 4);
+    }
 }

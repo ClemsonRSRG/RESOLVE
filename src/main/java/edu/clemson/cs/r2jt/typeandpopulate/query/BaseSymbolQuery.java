@@ -4,7 +4,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
 import edu.clemson.cs.r2jt.typeandpopulate.Scope;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeSearchPath;
-import edu.clemson.cs.r2jt.typeandpopulate.TableSearcher;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import java.util.List;
 
@@ -26,6 +26,7 @@ public class BaseSymbolQuery<E extends SymbolTableEntry>
         mySearcher = searcher;
     }
 
+    @Override
     public List<E> searchFromContext(Scope source, ScopeRepository repo)
             throws DuplicateSymbolException {
 
