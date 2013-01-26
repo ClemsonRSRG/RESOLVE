@@ -374,8 +374,6 @@ public class Populator extends TreeWalkerVisitor {
         }
         myWalker.visit(s.getAssign());
 
-        System.out.println(s.getVar());
-
         postFuncAssignStmt(s);
         postStatement(s);
         postAny(s);
