@@ -206,17 +206,23 @@ public class AltItemExp extends Exp {
         return list;
     }
 
+    @Override
     public void setSubExpression(int index, Exp e) {
         switch (index) {
         case 0:
-            test = e;
+            //edu.clemson.cs.r2jt.data.List was written by crazed monkies and
+            //silently ignores adding null elements (in violation of 
+            //java.util.List's contract), so if test is null, index 0 is the
+            //assignment subexpression, otherwise it's the test subexpression.
+            if (test == null) {
+                setAssignment(e);
+            }
+            else {
+                setTest(e);
+            }
             break;
         case 1:
-            assignment = e;
-            if (assignment == null) {
-                throw new IllegalArgumentException(
-                        "Cannot have null assignment.");
-            }
+            setAssignment(e);
             break;
         }
     }
@@ -257,7 +263,7 @@ public class AltItemExp extends Exp {
         AltItemExp result = (AltItemExp) Exp.copy(this);
 
         if (test != null) {
-            result.test = Exp.replace(test, old, replacement);
+            result.setTest(Exp.replace(test, old, replacement));
         }
 
         if (assignment != null) {
@@ -278,9 +284,9 @@ public class AltItemExp extends Exp {
     }
 
     public Exp copy() {
-        Exp newTest = Exp.copy(test);
-        if (newTest != null) {
-            newTest = Exp.copy(newTest);
+        Exp newTest = null;
+        if (test != null) {
+            newTest = Exp.copy(test);
         }
 
         Exp newAssignment = assignment;
@@ -317,7 +323,7 @@ public class AltItemExp extends Exp {
             this.setTest(((OldExp) (test)).getExp());
 
         if (test != null)
-            test = test.remember();
+            setTest(test.remember());
 
         if (assignment instanceof OldExp)
             this.setAssignment(((OldExp) (assignment)).getExp());
