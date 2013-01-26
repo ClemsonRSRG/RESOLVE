@@ -3341,6 +3341,7 @@ public class Verifier extends ResolveConceptualVisitor {
 
                     VarExp exempVarExp = new VarExp();
                     exempVarExp.setName(createPosSymbol(exemplar));
+                    exempVarExp.setMathType(model.getMathTypeValue());
                     myConstraints = replace(myConstraints, exempVarExp, cName);
                 }
 
@@ -3636,7 +3637,9 @@ public class Verifier extends ResolveConceptualVisitor {
             return replacement;
         }
         else if (exp instanceof ProgramIntegerExp) {
-            return exp;
+            ProgramIntegerExp expAsPIE = (ProgramIntegerExp) exp;
+            return new IntegerExp(expAsPIE.getLocation(), null, 
+                    expAsPIE.getValue());
         }
         else if (exp instanceof ProgramOpExp) {
 
@@ -4447,7 +4450,7 @@ public class Verifier extends ResolveConceptualVisitor {
                                 old.setName(((TypeDec) tmp).getExemplar());
                                 old.setType(getTypeFromTy(((TypeDec) tmp)
                                         .getModel()));
-                                old.setMathType(((TypeDec) tmp).getMathType());
+                                old.setMathType(((TypeDec) tmp).getModel().getMathTypeValue());
 
                                 Exp initEns =
                                         ((Exp) Exp.clone(item.getEnsures()));
@@ -4861,16 +4864,20 @@ public class Verifier extends ResolveConceptualVisitor {
                     ((VariableDotExp) realRep).getSegments();
             List<Exp> newSegements = new List<Exp>();
             Iterator<VariableExp> it = segements.iterator();
+            MTType lastMathType = null, lastMathTypeValue = null;
             while (it.hasNext()) {
                 VarExp varExp = new VarExp();
                 VariableExp varName = (VariableExp) it.next();
                 if (varName instanceof VariableNameExp) {
                     varExp.setName(((VariableNameExp) varName).getName());
                     varExp.setType(((VariableNameExp) varName).getType());
-                    varExp.setMathType(((VariableNameExp) varName)
-                            .getMathType());
-                    varExp.setMathTypeValue(((VariableNameExp) varName)
-                            .getMathTypeValue());
+                    
+                    lastMathType = ((VariableNameExp) varName).getMathType();
+                    lastMathTypeValue = 
+                            ((VariableNameExp) varName).getMathTypeValue();
+                    
+                    varExp.setMathType(lastMathType);
+                    varExp.setMathTypeValue(lastMathTypeValue);
                     newSegements.add(varExp);
                 }
                 else {
@@ -4878,6 +4885,8 @@ public class Verifier extends ResolveConceptualVisitor {
                 }
             }
             exp.setSegments(newSegements);
+            exp.setMathType(lastMathType);
+            exp.setMathTypeValue(lastMathTypeValue);
             return exp;
         }
         else if (realRep instanceof ProgramExp) {
@@ -6672,6 +6681,7 @@ public class Verifier extends ResolveConceptualVisitor {
                         VariableNameExp undqNameRep = new VariableNameExp();
                         ((VariableNameExp) undqNameRep)
                                 .setName(createPosSymbol(undquesReplacement));
+                        undqNameRep.setMathType(pE.getMathType());
 
                         undqRep = (DotExp) Exp.clone(replace);
                         ((DotExp) undqRep).getSegments().remove(0);
@@ -6697,6 +6707,7 @@ public class Verifier extends ResolveConceptualVisitor {
                         VariableNameExp undqNameRep = new VariableNameExp();
                         ((VariableNameExp) undqNameRep)
                                 .setName(createPosSymbol(undquesReplacement));
+                        undqNameRep.setMathType(pE.getMathType());
 
                         undqRep = (VariableDotExp) Exp.clone(replace);
                         ((VariableDotExp) undqRep).getSegments().remove(0);
@@ -6749,6 +6760,7 @@ public class Verifier extends ResolveConceptualVisitor {
                         VariableNameExp undqNameRep = new VariableNameExp();
                         ((VariableNameExp) undqNameRep)
                                 .setName(createPosSymbol(undquesReplacement));
+                        undqNameRep.setMathType(pE.getMathType());
 
                         undqRep = (DotExp) Exp.clone(replace);
                         ((DotExp) undqRep).getSegments().remove(0);
@@ -6815,6 +6827,7 @@ public class Verifier extends ResolveConceptualVisitor {
 
                             VarExp tmpVar = new VarExp();
                             ((VarExp) tmpVar).setName(quesSV.getName());
+                            tmpVar.setMathType(myTypeGraph.BOOLEAN);
                             ((DotExp) quesVar).getSegments().remove(0);
                             ((DotExp) quesVar).getSegments().add(0, tmpVar);
 
@@ -6824,6 +6837,7 @@ public class Verifier extends ResolveConceptualVisitor {
 
                             VarExp tmpVar = new VarExp();
                             ((VarExp) tmpVar).setName(quesSV.getName());
+                            tmpVar.setMathType(myTypeGraph.BOOLEAN);
                             ((DotExp) quesVar).getSegments().remove(0);
                             ((DotExp) quesVar).getSegments().add(0, tmpVar);
 
@@ -8040,6 +8054,7 @@ public class Verifier extends ResolveConceptualVisitor {
 
                     cExem = new VarExp();
                     exemplar.setName(((TypeDec) tmpDec).getExemplar());
+                    exemplar.setMathType(((TypeDec) tmpDec).getModel().getMathTypeValue());
 
                     Type exemplarType =
                             getTypeFromTy(((TypeDec) tmpDec).getModel());
@@ -8047,7 +8062,7 @@ public class Verifier extends ResolveConceptualVisitor {
                     cExem.setName(createPosSymbol("Conc_"
                             + ((TypeDec) tmpDec).getExemplar().toString()));
                     cExem.setType(exemplarType);
-                    cExem.setMathType(((TypeDec) tmpDec).getMathType());
+                    cExem.setMathType(((TypeDec) tmpDec).getModel().getMathTypeValue());
 
                     VarDec concVar = new VarDec();
                     concVar.setName(createPosSymbol("Conc_"
@@ -8060,12 +8075,14 @@ public class Verifier extends ResolveConceptualVisitor {
             DotExp concDotExp = new DotExp();
             VarExp cName = new VarExp();
             cName.setName(createPosSymbol("Conc"));
+            cName.setMathType(myTypeGraph.BOOLEAN);
 
             List<Exp> myList = new List<Exp>();
             myList.add(cName);
             myList.add(exemplar);
 
             concDotExp.setSegments(myList);
+            concDotExp.setMathType(exemplar.getMathType());
 
             if (correspondence != null) {
                 correspondence = replace(correspondence, concDotExp, cExem);
@@ -8111,9 +8128,14 @@ public class Verifier extends ResolveConceptualVisitor {
         if (constraints != null) {
             if (thisConcept == true) {
                 // 		constraints = replace(constraints, exemplar, cExem);       		
+                OldExp oldExemplar = new OldExp(null, exemplar);
+                oldExemplar.setMathType(exemplar.getMathType());
+                
+                OldExp oldCExem = new OldExp(null, cExem);
+                oldCExem.setMathType(cExem.getMathType());
+                
                 constraints =
-                        replace(constraints, new OldExp(null, exemplar),
-                                new OldExp(null, cExem));
+                        replace(constraints, oldExemplar, oldCExem);
                 if (correspondence instanceof EqualsExp) {
                     constraints =
                             replace(constraints, cExem,
