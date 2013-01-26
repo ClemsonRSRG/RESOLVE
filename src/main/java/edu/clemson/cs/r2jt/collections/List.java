@@ -110,7 +110,7 @@ public class List<A> extends java.util.ArrayList<A>
 
     public boolean add(A a) {
         if (a != null) {
-            super.add(a);
+            return super.add(a);
         }
         return true;
     }

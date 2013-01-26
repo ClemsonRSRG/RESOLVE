@@ -84,6 +84,14 @@ public class OldExp extends Exp {
     public OldExp(Location location, Exp exp) {
         this.location = location;
         this.exp = exp;
+        
+        if (exp.getMathType() != null) {
+            setMathType(exp.getMathType());
+        }
+        
+        if (exp.getMathTypeValue() != null) {
+            setMathTypeValue(exp.getMathTypeValue());
+        }
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
