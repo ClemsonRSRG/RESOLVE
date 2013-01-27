@@ -158,10 +158,15 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
     }
 
     @Override
-    public void accept(TypeVisitor v) {
+    public void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
         v.beginMTAbstract(this);
         v.beginMTCartesian(this);
+    }
+
+    @Override
+    public void accept(TypeVisitor v) {
+        acceptOpen(v);
 
         v.beginChildren(this);
 
@@ -171,6 +176,11 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
 
         v.endChildren(this);
 
+        acceptClose(v);
+    }
+
+    @Override
+    public void acceptClose(TypeVisitor v) {
         v.endMTCartesian(this);
         v.endMTAbstract(this);
         v.endMTType(this);

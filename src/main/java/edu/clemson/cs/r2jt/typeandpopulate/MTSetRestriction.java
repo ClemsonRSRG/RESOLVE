@@ -39,10 +39,15 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
     }
 
     @Override
-    public void accept(TypeVisitor v) {
+    public void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
         v.beginMTAbstract(this);
         v.beginMTSetRestriction(this);
+    }
+
+    @Override
+    public void accept(TypeVisitor v) {
+        acceptOpen(v);
 
         v.beginChildren(this);
 
@@ -50,6 +55,11 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
 
         v.endChildren(this);
 
+        acceptClose(v);
+    }
+
+    @Override
+    public void acceptClose(TypeVisitor v) {
         v.endMTSetRestriction(this);
         v.endMTAbstract(this);
         v.endMTType(this);

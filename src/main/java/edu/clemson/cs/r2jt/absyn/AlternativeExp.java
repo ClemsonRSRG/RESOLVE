@@ -81,7 +81,7 @@ public class AlternativeExp extends Exp {
     public AlternativeExp(Location location, List<AltItemExp> alternatives) {
         this.location = location;
         this.alternatives = alternatives;
-        
+
         boolean foundOtherwise = false;
         for (AltItemExp e : alternatives) {
             foundOtherwise = foundOtherwise || (e.getTest() == null);

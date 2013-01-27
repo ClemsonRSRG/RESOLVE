@@ -25,7 +25,7 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
                 throw MISMATCH;
             }
 
-            SymmetricVisitor alphaEq = new AlphaEquivalencyChecker();
+            AlphaEquivalencyChecker alphaEq = new AlphaEquivalencyChecker();
 
             alphaEq.visit(t1Value, t2Value);
         }

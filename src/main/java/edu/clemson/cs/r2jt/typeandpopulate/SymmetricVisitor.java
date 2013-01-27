@@ -1,153 +1,283 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package edu.clemson.cs.r2jt.typeandpopulate;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Deque;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
+/**
+ *
+ * @author hamptos
+ */
 public class SymmetricVisitor {
 
-    private static final NonSymmetricalNodeException NON_SYMMETRICAL_NODE =
-            new NonSymmetricalNodeException();
-
-    private final static Class<?> SYMMETRIC_VISITOR = SymmetricVisitor.class;
-
-    private final static Procedure DO_NOTHING = new Procedure() {
-
-        public void execute() {}
-    };
-
-    private final static Procedure THROW_ILLEGAL_ARGUMENT_EXCEPTION =
-            new Procedure() {
-
-                public void execute() {
-                    throw NON_SYMMETRICAL_NODE;
-                }
-            };
-
-    private boolean callClassVisitMethods(String prefix, MTType t1,
-            Iterator<Class<?>> t1ClassIter, MTType t2,
-            Iterator<Class<?>> t2ClassIter, Procedure mismatchBehavior) {
-
-        boolean result = true;
-
-        Class<?> curT1SuperType, curT2SuperType;
-        while (t1ClassIter.hasNext() && t2ClassIter.hasNext()) {
-            curT1SuperType = t1ClassIter.next();
-            curT2SuperType = t2ClassIter.next();
-
-            if (curT1SuperType.equals(curT2SuperType)) {
-                String preMethodName = prefix + curT1SuperType.getSimpleName();
-                try {
-                    //System.out.println(SYMMETRIC_VISITOR + " calling " + preMethodName + "()...");
-                    Method preMethod =
-                            SYMMETRIC_VISITOR.getMethod(preMethodName,
-                                    curT1SuperType, curT1SuperType);
-                    result &= (Boolean) preMethod.invoke(this, t1, t2);
-                }
-                catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-                catch (InvocationTargetException e) {
-                    Throwable eCause = e.getCause();
-
-                    if (eCause instanceof RuntimeException) {
-                        throw (RuntimeException) eCause;
-                    }
-
-                    throw new RuntimeException(eCause);
-                }
-                catch (NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            else {
-                mismatchBehavior.execute();
-            }
-        }
-
-        if (t1ClassIter.hasNext() || t2ClassIter.hasNext()) {
-            mismatchBehavior.execute();
-        }
-
-        return result;
+    public final boolean visit(MTType t1, MTType t2) {
+        return visit(t1, t2, new Multiplexer(t2), new MidMultiplexer(t2));
     }
 
-    public final boolean visit(MTType t1, MTType t2) {
-        Deque<Class<?>> t1Classes = getClassHierarchy(t1.getClass());
-        Deque<Class<?>> t2Classes = getClassHierarchy(t2.getClass());
+    private boolean visit(MTType t1, MTType t2, Multiplexer m, MidMultiplexer mm) {
+        boolean visitSiblings = true;
 
-        boolean visitChildren, visitSiblings;
+        m.setOtherType(t2);
+        mm.setOtherType(t2);
         try {
-            //Call all the "begin" methods from least to most specific, throwing
-            //an illegal argument exception the moment you hit something that
-            //doesn't match
-            visitChildren =
-                    callClassVisitMethods("begin", t1, t1Classes.iterator(),
-                            t2, t2Classes.iterator(),
-                            THROW_ILLEGAL_ARGUMENT_EXCEPTION);
+            t1.acceptOpen(m);
 
-            if (visitChildren) {
-                //Inductively visit the next level
+            if (!t1.getClass().equals(t2.getClass())) {
+                throw new ClassCastException();
+            }
+
+            if (m.getReturn()) {
                 List<MTType> t1Components = t1.getComponentTypes();
                 List<MTType> t2Components = t2.getComponentTypes();
-
-                if (t1Components.size() == t2Components.size()) {
-                    Iterator<MTType> t1ComponentsIter = t1Components.iterator();
-                    Iterator<MTType> t2ComponentsIter = t2Components.iterator();
-
+                if (t1Components.size() != t2Components.size()) {
+                    mismatch(t1, t2);
+                }
+                else {
                     boolean first = true;
-                    while (visitChildren && t1ComponentsIter.hasNext()) {
 
+                    Iterator<MTType> t1ComponentIter = t1Components.iterator();
+                    Iterator<MTType> t2ComponentIter = t2Components.iterator();
+                    while (visitSiblings && t1ComponentIter.hasNext()) {
                         if (first) {
                             first = false;
                         }
                         else {
-                            //Note that we couldn't have gotten here if there
-                            //was going to be a mismatch
-                            visitChildren =
-                                    callClassVisitMethods("mid", t1, t1Classes
-                                            .iterator(), t2, t2Classes
-                                            .iterator(),
-                                            THROW_ILLEGAL_ARGUMENT_EXCEPTION);
+                            t1.acceptOpen(mm);
                         }
 
-                        visitChildren =
-                                visit(t1ComponentsIter.next(), t2ComponentsIter
-                                        .next());
+                        visitSiblings =
+                                visit(t1ComponentIter.next(), t2ComponentIter
+                                        .next(), m, mm);
+
+                        m.setOtherType(t2);
+                        mm.setOtherType(t2);
                     }
                 }
-                else {
-                    visitSiblings = mismatch(t1, t2); //Argument count mismatch
-                }
             }
-        }
-        catch (NonSymmetricalNodeException e) {
-            visitSiblings = mismatch(t1, t2); //Node type mismatch
-        }
 
-        //Call all the "end" methods from most to least specific, skipping any
-        //level that doesn't match
-        visitSiblings =
-                callClassVisitMethods("end", t1,
-                        t1Classes.descendingIterator(), t2, t2Classes
-                                .descendingIterator(), DO_NOTHING);
+            t1.acceptClose(m);
+            visitSiblings = m.getReturn();
+        }
+        catch (ClassCastException cce) {
+            visitSiblings = mismatch(t1, t2);
+        }
 
         return visitSiblings;
     }
 
-    private static Deque<Class<?>> getClassHierarchy(Class<?> c) {
-        LinkedList<Class<?>> result = new LinkedList<Class<?>>();
+    private class Multiplexer extends TypeVisitor {
 
-        do {
-            result.push(c);
-            c = c.getSuperclass();
-        } while (!c.equals(MTType.class));
-        result.push(MTType.class);
+        private MTType myOtherType;
+        private boolean myReturn;
 
-        return result;
+        public Multiplexer(MTType otherType) {
+            myOtherType = otherType;
+        }
+
+        public void setOtherType(MTType t) {
+            myOtherType = t;
+        }
+
+        public boolean getReturn() {
+            return myReturn;
+        }
+
+        public void setReturn(boolean returnVal) {
+            myReturn = returnVal;
+        }
+
+        public void beginMTType(MTType t) {
+            myReturn = beginMTType(t, myOtherType);
+        }
+
+        public void beginMTAbstract(MTAbstract<?> t) {
+            myReturn = beginMTAbstract(t, (MTAbstract) myOtherType);
+        }
+
+        public void beginMTBigUnion(MTBigUnion t) {
+            myReturn = beginMTBigUnion(t, (MTBigUnion) myOtherType);
+        }
+
+        public void beginMTCartesian(MTCartesian t) {
+            myReturn = beginMTCartesian(t, (MTCartesian) myOtherType);
+        }
+
+        public void beginMTFunction(MTFunction t) {
+            myReturn = beginMTFunction(t, (MTFunction) myOtherType);
+        }
+
+        public void beginMTFunctionApplication(MTFunctionApplication t) {
+            myReturn =
+                    beginMTFunctionApplication(t,
+                            (MTFunctionApplication) myOtherType);
+        }
+
+        public void beginMTIntersect(MTIntersect t) {
+            myReturn = beginMTIntersect(t, (MTIntersect) myOtherType);
+        }
+
+        public void beginMTPowertypeApplication(MTPowertypeApplication t) {
+            myReturn =
+                    beginMTPowertypeApplication(t,
+                            (MTPowertypeApplication) myOtherType);
+        }
+
+        public void beginMTProper(MTProper t) {
+            myReturn = beginMTProper(t, (MTProper) myOtherType);
+        }
+
+        public void beginMTSetRestriction(MTSetRestriction t) {
+            myReturn = beginMTSetRestriction(t, (MTSetRestriction) myOtherType);
+        }
+
+        public void beginMTUnion(MTUnion t) {
+            myReturn = beginMTUnion(t, (MTUnion) myOtherType);
+        }
+
+        public void beginMTNamed(MTNamed t) {
+            myReturn = beginMTNamed(t, (MTNamed) myOtherType);
+        }
+
+        public void beginMTGeneric(MTGeneric t) {
+            myReturn = beginMTGeneric(t, (MTGeneric) myOtherType);
+        }
+
+        public void endMTType(MTType t) {
+            myReturn = endMTType(t, (MTType) myOtherType);
+        }
+
+        public void endMTAbstract(MTAbstract<?> t) {
+            myReturn = endMTAbstract(t, (MTAbstract) myOtherType);
+        }
+
+        public void endMTBigUnion(MTBigUnion t) {
+            myReturn = endMTBigUnion(t, (MTBigUnion) myOtherType);
+        }
+
+        public void endMTCartesian(MTCartesian t) {
+            myReturn = endMTCartesian(t, (MTCartesian) myOtherType);
+        }
+
+        public void endMTFunction(MTFunction t) {
+            myReturn = endMTFunction(t, (MTFunction) myOtherType);
+        }
+
+        public void endMTFunctionApplication(MTFunctionApplication t) {
+            myReturn =
+                    endMTFunctionApplication(t,
+                            (MTFunctionApplication) myOtherType);
+        }
+
+        public void endMTIntersect(MTIntersect t) {
+            myReturn = endMTIntersect(t, (MTIntersect) myOtherType);
+        }
+
+        public void endMTPowertypeApplication(MTPowertypeApplication t) {
+            myReturn =
+                    endMTPowertypeApplication(t,
+                            (MTPowertypeApplication) myOtherType);
+        }
+
+        public void endMTProper(MTProper t) {
+            myReturn = endMTProper(t, (MTProper) myOtherType);
+        }
+
+        public void endMTSetRestriction(MTSetRestriction t) {
+            myReturn = endMTSetRestriction(t, (MTSetRestriction) myOtherType);
+        }
+
+        public void endMTUnion(MTUnion t) {
+            myReturn = endMTUnion(t, (MTUnion) myOtherType);
+        }
+
+        public void endMTNamed(MTNamed t) {
+            myReturn = endMTNamed(t, (MTNamed) myOtherType);
+        }
+
+        public void endMTGeneric(MTGeneric t) {
+            myReturn = endMTGeneric(t, (MTGeneric) myOtherType);
+        }
+    }
+
+    private class MidMultiplexer extends TypeVisitor {
+
+        private MTType myOtherType;
+        private boolean myReturn;
+
+        public MidMultiplexer(MTType otherType) {
+            myOtherType = otherType;
+        }
+
+        public void setOtherType(MTType t) {
+            myOtherType = t;
+        }
+
+        public boolean getReturn() {
+            return myReturn;
+        }
+
+        public void setReturn(boolean returnVal) {
+            myReturn = returnVal;
+        }
+
+        public void beginMTType(MTType t) {
+            myReturn = midMTType(t, myOtherType);
+        }
+
+        public void beginMTAbstract(MTAbstract<?> t) {
+            myReturn = midMTAbstract(t, (MTAbstract) myOtherType);
+        }
+
+        public void beginMTBigUnion(MTBigUnion t) {
+            myReturn = midMTBigUnion(t, (MTBigUnion) myOtherType);
+        }
+
+        public void beginMTCartesian(MTCartesian t) {
+            myReturn = midMTCartesian(t, (MTCartesian) myOtherType);
+        }
+
+        public void beginMTFunction(MTFunction t) {
+            myReturn = midMTFunction(t, (MTFunction) myOtherType);
+        }
+
+        public void beginMTFunctionApplication(MTFunctionApplication t) {
+            myReturn =
+                    midMTFunctionApplication(t,
+                            (MTFunctionApplication) myOtherType);
+        }
+
+        public void beginMTIntersect(MTIntersect t) {
+            myReturn = midMTIntersect(t, (MTIntersect) myOtherType);
+        }
+
+        public void beginMTPowertypeApplication(MTPowertypeApplication t) {
+            myReturn =
+                    midMTPowertypeApplication(t,
+                            (MTPowertypeApplication) myOtherType);
+        }
+
+        public void beginMTProper(MTProper t) {
+            myReturn = midMTProper(t, (MTProper) myOtherType);
+        }
+
+        public void beginMTSetRestriction(MTSetRestriction t) {
+            myReturn = midMTSetRestriction(t, (MTSetRestriction) myOtherType);
+        }
+
+        public void beginMTUnion(MTUnion t) {
+            myReturn = midMTUnion(t, (MTUnion) myOtherType);
+        }
+
+        public void beginMTNamed(MTNamed t) {
+            myReturn = midMTNamed(t, (MTNamed) myOtherType);
+        }
+
+        public void beginMTGeneric(MTGeneric t) {
+            myReturn = midMTGeneric(t, (MTGeneric) myOtherType);
+        }
     }
 
     public boolean beginMTType(MTType t1, MTType t2) {

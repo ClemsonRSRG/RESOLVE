@@ -3638,8 +3638,8 @@ public class Verifier extends ResolveConceptualVisitor {
         }
         else if (exp instanceof ProgramIntegerExp) {
             ProgramIntegerExp expAsPIE = (ProgramIntegerExp) exp;
-            return new IntegerExp(expAsPIE.getLocation(), null, 
-                    expAsPIE.getValue());
+            return new IntegerExp(expAsPIE.getLocation(), null, expAsPIE
+                    .getValue());
         }
         else if (exp instanceof ProgramOpExp) {
 
@@ -4450,7 +4450,8 @@ public class Verifier extends ResolveConceptualVisitor {
                                 old.setName(((TypeDec) tmp).getExemplar());
                                 old.setType(getTypeFromTy(((TypeDec) tmp)
                                         .getModel()));
-                                old.setMathType(((TypeDec) tmp).getModel().getMathTypeValue());
+                                old.setMathType(((TypeDec) tmp).getModel()
+                                        .getMathTypeValue());
 
                                 Exp initEns =
                                         ((Exp) Exp.clone(item.getEnsures()));
@@ -4871,11 +4872,11 @@ public class Verifier extends ResolveConceptualVisitor {
                 if (varName instanceof VariableNameExp) {
                     varExp.setName(((VariableNameExp) varName).getName());
                     varExp.setType(((VariableNameExp) varName).getType());
-                    
+
                     lastMathType = ((VariableNameExp) varName).getMathType();
-                    lastMathTypeValue = 
+                    lastMathTypeValue =
                             ((VariableNameExp) varName).getMathTypeValue();
-                    
+
                     varExp.setMathType(lastMathType);
                     varExp.setMathTypeValue(lastMathTypeValue);
                     newSegements.add(varExp);
@@ -8054,7 +8055,8 @@ public class Verifier extends ResolveConceptualVisitor {
 
                     cExem = new VarExp();
                     exemplar.setName(((TypeDec) tmpDec).getExemplar());
-                    exemplar.setMathType(((TypeDec) tmpDec).getModel().getMathTypeValue());
+                    exemplar.setMathType(((TypeDec) tmpDec).getModel()
+                            .getMathTypeValue());
 
                     Type exemplarType =
                             getTypeFromTy(((TypeDec) tmpDec).getModel());
@@ -8062,7 +8064,8 @@ public class Verifier extends ResolveConceptualVisitor {
                     cExem.setName(createPosSymbol("Conc_"
                             + ((TypeDec) tmpDec).getExemplar().toString()));
                     cExem.setType(exemplarType);
-                    cExem.setMathType(((TypeDec) tmpDec).getModel().getMathTypeValue());
+                    cExem.setMathType(((TypeDec) tmpDec).getModel()
+                            .getMathTypeValue());
 
                     VarDec concVar = new VarDec();
                     concVar.setName(createPosSymbol("Conc_"
@@ -8130,12 +8133,11 @@ public class Verifier extends ResolveConceptualVisitor {
                 // 		constraints = replace(constraints, exemplar, cExem);       		
                 OldExp oldExemplar = new OldExp(null, exemplar);
                 oldExemplar.setMathType(exemplar.getMathType());
-                
+
                 OldExp oldCExem = new OldExp(null, cExem);
                 oldCExem.setMathType(cExem.getMathType());
-                
-                constraints =
-                        replace(constraints, oldExemplar, oldCExem);
+
+                constraints = replace(constraints, oldExemplar, oldCExem);
                 if (correspondence instanceof EqualsExp) {
                     constraints =
                             replace(constraints, cExem,

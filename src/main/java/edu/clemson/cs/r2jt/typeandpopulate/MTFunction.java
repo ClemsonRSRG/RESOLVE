@@ -402,10 +402,15 @@ public class MTFunction extends MTAbstract<MTFunction> {
     }
 
     @Override
-    public void accept(TypeVisitor v) {
+    public void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
         v.beginMTAbstract(this);
         v.beginMTFunction(this);
+    }
+
+    @Override
+    public void accept(TypeVisitor v) {
+        acceptOpen(v);
 
         v.beginChildren(this);
 
@@ -414,6 +419,11 @@ public class MTFunction extends MTAbstract<MTFunction> {
 
         v.endChildren(this);
 
+        acceptClose(v);
+    }
+
+    @Override
+    public void acceptClose(TypeVisitor v) {
         v.endMTFunction(this);
         v.endMTAbstract(this);
         v.endMTType(this);

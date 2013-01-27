@@ -53,6 +53,10 @@ public abstract class MTType {
 
     public abstract void accept(TypeVisitor v);
 
+    public abstract void acceptOpen(TypeVisitor v);
+
+    public abstract void acceptClose(TypeVisitor v);
+
     public abstract List<MTType> getComponentTypes();
 
     public abstract MTType withComponentReplaced(int index, MTType newType);
