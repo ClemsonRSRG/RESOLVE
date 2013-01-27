@@ -1935,7 +1935,7 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         if (match == null) {
-            throw new NoSolutionException();
+            throw NoSolutionException.INSTANCE;
         }
 
         return match;

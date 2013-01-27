@@ -166,7 +166,7 @@ public class MTFunction extends MTAbstract<MTFunction> {
 
         if (myDomain.equals(myTypeGraph.VOID)) {
             if (!parameters.isEmpty()) {
-                throw new NoSolutionException();
+                throw NoSolutionException.INSTANCE;
             }
         }
         else {
@@ -179,7 +179,7 @@ public class MTFunction extends MTAbstract<MTFunction> {
                 int parametersSize = parameters.size();
 
                 if (domainSize != parametersSize) {
-                    throw new NoSolutionException();
+                    throw NoSolutionException.INSTANCE;
                 }
 
                 for (int i = 0; i < domainSize; i++) {
@@ -191,7 +191,7 @@ public class MTFunction extends MTAbstract<MTFunction> {
             else {
 
                 if (parameters.size() != 1) {
-                    throw new NoSolutionException();
+                    throw NoSolutionException.INSTANCE;
                 }
 
                 deschematizeParameter(mySingleParameterName, myDomain,
@@ -218,7 +218,7 @@ public class MTFunction extends MTAbstract<MTFunction> {
             if (actualParameterMathTypeValue == null
                     || !myTypeGraph.isKnownToBeIn(actualParameterMathTypeValue,
                             formalParameterType)) {
-                throw new NoSolutionException();
+                throw NoSolutionException.INSTANCE;
             }
 
             accumulatedConcreteValues.put(formalParameterName, actualParameter

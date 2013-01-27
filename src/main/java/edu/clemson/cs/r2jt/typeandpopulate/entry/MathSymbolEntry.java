@@ -143,14 +143,14 @@ public class MathSymbolEntry extends SymbolTableEntry {
             Scope callingContext) throws NoSolutionException {
 
         if (!(myType instanceof MTFunction)) {
-            throw new NoSolutionException();
+            throw NoSolutionException.INSTANCE;
         }
 
         List<MTType> formalParameterTypes =
                 getParameterTypes(((MTFunction) myType));
 
         if (formalParameterTypes.size() != arguments.size()) {
-            throw new NoSolutionException();
+            throw NoSolutionException.INSTANCE;
         }
 
         List<ProgramTypeEntry> callingContextProgramGenerics =
@@ -192,7 +192,7 @@ public class MathSymbolEntry extends SymbolTableEntry {
             }
         }
         catch (BindingException be) {
-            throw new NoSolutionException();
+            throw NoSolutionException.INSTANCE;
         }
 
         MTType newTypeValue = null;

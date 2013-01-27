@@ -91,10 +91,15 @@ import java.util.NoSuchElementException;
  */
 public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
 
+    private static final IllegalArgumentException MISMATCH = 
+            new IllegalArgumentException(TypeMismatchException.INSTANCE);
+    
     private Map<String, MTType> myBindings = new HashMap<String, MTType>();
 
     private final TypeGraph myTypeGraph;
 
+    private HashMap<String, MTType> myPromotedVariablesWorkingSpace;
+    
     public SyntacticSubtypeChecker(TypeGraph g) {
         myTypeGraph = g;
     }
@@ -118,6 +123,7 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
      * </p>
      */
     public void reset() {
+        super.reset();
         myBindings.clear();
     }
 
@@ -157,8 +163,7 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
                 if (t1DeclaredType == t1 && t2DeclaredType == t2) {
                     //We have no information on these named types, but they don't
                     //share a name, so...
-                    throw new IllegalArgumentException(
-                            TypeMismatchException.INSTANCE);
+                    throw MISMATCH;
                 }
 
                 if (!haveAxiomaticSubtypeRelationship(t1DeclaredType,
@@ -189,13 +194,13 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
         //TODO:
         //For the moment, there's no obvious way to do this.  We'll just say no
         //set restriction can be a syntactic subtype of any other.
-        throw new IllegalArgumentException(TypeMismatchException.INSTANCE);
+        throw MISMATCH;
     }
 
     @Override
     public boolean beginMTProper(MTProper t1, MTProper t2) {
         if (!(t1 == t2 || haveAxiomaticSubtypeRelationship(t1, t2))) {
-            throw new IllegalArgumentException(TypeMismatchException.INSTANCE);
+            throw MISMATCH;
         }
 
         return true;
@@ -217,12 +222,18 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
             //TODO : Find a more graceful solution to this
             //Note that since "*" cannot appear in a RESOLVE variable name, 
             //these names must be unique
-            Map<String, MTType> uniqueVars = new HashMap<String, MTType>();
+            if (myPromotedVariablesWorkingSpace == null) {
+                myPromotedVariablesWorkingSpace = new HashMap<String, MTType>();
+            }
+            else {
+                myPromotedVariablesWorkingSpace.clear();
+            }
             for (int i = 0; i < quantifiedVariableCount; i++) {
-                uniqueVars.put("*" + i, myTypeGraph.MTYPE);
+                myPromotedVariablesWorkingSpace.put("*" + i, myTypeGraph.MTYPE);
             }
 
-            t1 = new MTBigUnion(t1.getTypeGraph(), uniqueVars, t1);
+            t1 = new MTBigUnion(t1.getTypeGraph(), 
+                    myPromotedVariablesWorkingSpace, t1);
 
             visit(t1, t2);
         }
@@ -237,7 +248,7 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
         }
         else {
             //Otherwise, there's no way to continue, so we bomb
-            throw new IllegalArgumentException(TypeMismatchException.INSTANCE);
+            throw MISMATCH;
         }
 
         return true; //Keep searching siblings

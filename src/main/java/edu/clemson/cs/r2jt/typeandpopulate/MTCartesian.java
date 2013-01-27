@@ -68,6 +68,7 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
         second.addTo(myElements, myElementTypes, myTagsToElementsTable,
                 myElementsToTagsTable);
         mySize = workingSize;
+        myElementTypes = Collections.unmodifiableList(myElementTypes);
     }
 
     public int size() {
@@ -188,7 +189,7 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
 
     @Override
     public List<MTType> getComponentTypes() {
-        return Collections.unmodifiableList(myElementTypes);
+        return myElementTypes;
     }
 
     @Override

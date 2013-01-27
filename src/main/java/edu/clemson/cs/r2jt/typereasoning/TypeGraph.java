@@ -33,6 +33,16 @@ import java.util.*;
  */
 public class TypeGraph {
 
+    /**
+     * <p>A set of non-thread-safe resources to be used during general type
+     * reasoning.  This really doesn't belong here, but anything that's 
+     * reasoning about types should already have access to a type graph, and
+     * only one type graph is created per thread, so this is a convenient place
+     * to put it.</p>
+     */
+    public final PerThreadReasoningResources threadResources = 
+            new PerThreadReasoningResources();
+    
     private final ExpValuePathStrategy EXP_VALUE_PATH =
             new ExpValuePathStrategy();
     private final MTTypeValuePathStrategy MTTYPE_VALUE_PATH =
@@ -369,9 +379,6 @@ public class TypeGraph {
             throw TypeMismatchException.INSTANCE;
         }
         else if (valueTypeValue == null) {
-
-            //expected = bindGenericSlots(value, expected);
-
             result =
                     getValidTypeConditions(value, value.getMathType(),
                             expected, EXP_VALUE_PATH);
@@ -382,62 +389,6 @@ public class TypeGraph {
         }
 
         return result;
-    }
-
-    /*private static MTType bindGenericSlots(Exp value, MTType expected) {
-    	
-    	Map<String, MTType> bindings = new HashMap<String, MTType>();
-    	bindGenericSlots(value, expected, bindings);
-    	
-    	
-    }*/
-
-    private void bindGenericSlots(Exp value, MTType expected,
-            Map<String, MTType> bindings) {
-
-        if (expected instanceof MTCartesian) {
-            MTCartesian expectedAsMTCartesian = (MTCartesian) expected;
-
-            if (value instanceof TupleExp) {
-                TupleExp valueAsTupleExp = (TupleExp) value;
-
-                int expectedCount = expectedAsMTCartesian.size();
-                if (expectedCount != valueAsTupleExp.getSize()) {
-                    throw new IllegalArgumentException();
-                }
-
-                Exp subValue;
-                String tag;
-                MTType subType;
-                for (int i = 0; i < expectedCount; i++) {
-                    tag = expectedAsMTCartesian.getTag(i);
-                    subType = expectedAsMTCartesian.getFactor(i);
-                    subValue = valueAsTupleExp.getField(i);
-
-                    if (subType.isKnownToContainOnlyMTypes() && tag != null) {
-                        if (bindings.containsKey(tag)) {
-                            if (!this.isSubtype(subValue.getMathType(),
-                                    bindings.get(tag))) {
-                                throw new IllegalArgumentException();
-                            }
-                        }
-                        else {
-                            if (subValue.getMathTypeValue() == null) {
-                                throw new IllegalArgumentException();
-                            }
-
-                            bindings.put(tag, subValue.getMathTypeValue());
-                        }
-                    }
-                    else {
-                        bindGenericSlots(subValue, subType, bindings);
-                    }
-                }
-            }
-            else {
-                throw new IllegalArgumentException();
-            }
-        }
     }
 
     /**

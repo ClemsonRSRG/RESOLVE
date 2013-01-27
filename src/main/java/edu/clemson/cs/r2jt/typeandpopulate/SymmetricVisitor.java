@@ -8,28 +8,29 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- *
- * @author hamptos
+ * <p>Note that instances of SymmetricVisitor are not thread-safe.</p>
  */
 public class SymmetricVisitor {
 
-    public final boolean visit(MTType t1, MTType t2) {
-        return visit(t1, t2, new Multiplexer(t2), new MidMultiplexer(t2));
-    }
+    private static final ClassCastException CLASS_CAST_EXCEPTION =
+            new ClassCastException();
 
-    private boolean visit(MTType t1, MTType t2, Multiplexer m, MidMultiplexer mm) {
+    private final Multiplexer myMultiplexer = new Multiplexer();
+    private final MidMultiplexer myMidMultiplexer = new MidMultiplexer();
+    
+    public final boolean visit(MTType t1, MTType t2) {
         boolean visitSiblings = true;
 
-        m.setOtherType(t2);
-        mm.setOtherType(t2);
+        myMultiplexer.setOtherType(t2);
+        myMidMultiplexer.setOtherType(t2);
         try {
-            t1.acceptOpen(m);
+            t1.acceptOpen(myMultiplexer);
 
-            if (!t1.getClass().equals(t2.getClass())) {
-                throw new ClassCastException();
+            if (t1.getClass() != t2.getClass()) {
+                throw CLASS_CAST_EXCEPTION;
             }
 
-            if (m.getReturn()) {
+            if (myMultiplexer.getReturn()) {
                 List<MTType> t1Components = t1.getComponentTypes();
                 List<MTType> t2Components = t2.getComponentTypes();
                 if (t1Components.size() != t2Components.size()) {
@@ -45,21 +46,21 @@ public class SymmetricVisitor {
                             first = false;
                         }
                         else {
-                            t1.acceptOpen(mm);
+                            t1.acceptOpen(myMidMultiplexer);
                         }
 
                         visitSiblings =
                                 visit(t1ComponentIter.next(), t2ComponentIter
-                                        .next(), m, mm);
+                                        .next());
 
-                        m.setOtherType(t2);
-                        mm.setOtherType(t2);
+                        myMultiplexer.setOtherType(t2);
+                        myMidMultiplexer.setOtherType(t2);
                     }
                 }
             }
 
-            t1.acceptClose(m);
-            visitSiblings = m.getReturn();
+            t1.acceptClose(myMultiplexer);
+            visitSiblings = myMultiplexer.getReturn();
         }
         catch (ClassCastException cce) {
             visitSiblings = mismatch(t1, t2);
@@ -75,6 +76,10 @@ public class SymmetricVisitor {
 
         public Multiplexer(MTType otherType) {
             myOtherType = otherType;
+        }
+        
+        public Multiplexer() {
+            
         }
 
         public void setOtherType(MTType t) {
@@ -209,6 +214,10 @@ public class SymmetricVisitor {
 
         public MidMultiplexer(MTType otherType) {
             myOtherType = otherType;
+        }
+        
+        public MidMultiplexer() {
+            
         }
 
         public void setOtherType(MTType t) {

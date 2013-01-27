@@ -95,29 +95,18 @@ public abstract class MTType {
             result = true;
         }
         else {
-            //All 'equals' logic should be put into AlphaEquivalencyChecker! 
-            //Don't override equals!
-            AlphaEquivalencyChecker alphaEq = new AlphaEquivalencyChecker();
-
-            result = (o instanceof MTType);
-
-            if (result) {
-                try {
-                    alphaEq.visit(this, (MTType) o);
-                }
-                catch (RuntimeException e) {
-                    Throwable cause = e.getCause();
-                    while (cause != null
-                            && !(cause instanceof TypeMismatchException)) {
-                        cause = cause.getCause();
-                    }
-
-                    if (cause == null) {
-                        throw e;
-                    }
-
-                    result = false;
-                }
+            try {
+                //All 'equals' logic should be put into AlphaEquivalencyChecker! 
+                //Don't override equals!
+                AlphaEquivalencyChecker alphaEq = 
+                        myTypeGraph.threadResources.alphaChecker;
+                alphaEq.reset();
+                
+                alphaEq.visit(this, (MTType) o);
+                result = alphaEq.getResult();
+            }
+            catch (ClassCastException cce) {
+                result = false;
             }
         }
 
@@ -144,7 +133,7 @@ public abstract class MTType {
                 throw e;
             }
 
-            throw new NoSolutionException();
+            throw NoSolutionException.INSTANCE;
         }
 
         return checker.getBindings();

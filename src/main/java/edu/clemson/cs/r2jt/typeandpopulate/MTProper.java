@@ -88,7 +88,7 @@ public class MTProper extends MTType {
     @SuppressWarnings("unchecked")
     @Override
     public List<MTType> getComponentTypes() {
-        return (List<MTType>) Collections.EMPTY_LIST;
+        return Collections.EMPTY_LIST;
     }
 
     @Override
