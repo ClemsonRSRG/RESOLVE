@@ -7,41 +7,41 @@ import java.util.NoSuchElementException;
 public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
 
     private static final int POOL_SIZE = 3;
-    
+
     /**
      * <p>An object pool to cut down on the creation of 
      * AlphaEquivalencyCheckers.</p>
      */
     private final Deque<AlphaEquivalencyChecker> myCheckerPool;
-    
+
     private boolean myResult;
-    
+
     public AlphaEquivalencyChecker() {
         myCheckerPool = new ArrayDeque<AlphaEquivalencyChecker>(POOL_SIZE);
-        
+
         for (int i = 0; i < POOL_SIZE; i++) {
             myCheckerPool.push(new AlphaEquivalencyChecker(myCheckerPool));
         }
     }
-    
+
     private AlphaEquivalencyChecker(Deque<AlphaEquivalencyChecker> pool) {
         myCheckerPool = pool;
     }
-    
+
     private AlphaEquivalencyChecker(boolean dummy) {
         myCheckerPool = new ArrayDeque<AlphaEquivalencyChecker>();
     }
-    
+
     public boolean getResult() {
         return myResult;
     }
-    
+
     @Override
     public void reset() {
         super.reset();
         myResult = true;
     }
-    
+
     @Override
     public boolean beginMTNamed(MTNamed t1, MTNamed t2) {
         //TODO: This doesn't deal correctly with multiple appearances of a
@@ -53,7 +53,7 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
             try {
                 t1Value = getInnermostBinding1(t1.name);
                 t2Value = getInnermostBinding2(t2.name);
-                
+
                 AlphaEquivalencyChecker alphaEq = getChecker();
                 alphaEq.visit(t1Value, t2Value);
                 myResult = alphaEq.getResult();
@@ -95,20 +95,20 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
         myResult = false;
         return myResult;
     }
-    
+
     private AlphaEquivalencyChecker getChecker() {
         AlphaEquivalencyChecker result;
-        
+
         if (myCheckerPool.isEmpty()) {
             result = new AlphaEquivalencyChecker(false);
         }
         else {
             result = myCheckerPool.pop();
         }
-        
+
         return result;
     }
-    
+
     private void returnChecker(AlphaEquivalencyChecker c) {
         if (myCheckerPool.size() < POOL_SIZE) {
             myCheckerPool.push(c);

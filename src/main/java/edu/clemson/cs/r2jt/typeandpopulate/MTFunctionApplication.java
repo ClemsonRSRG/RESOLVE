@@ -14,7 +14,7 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
     private final MTFunction myFunction;
     private List<MTType> myArguments;
     private String myName;
-    
+
     private List<MTType> myComponents;
 
     public MTFunctionApplication(TypeGraph g, MTFunction f, String name,
@@ -39,7 +39,7 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
         myName = name;
         myArguments = new LinkedList<MTType>();
         myArguments.addAll(arguments);
-        
+
         setUpComponents();
     }
 
@@ -50,7 +50,7 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
         myFunction = f;
         myArguments = new LinkedList<MTType>(arguments);
         myName = "\\lambda";
-        
+
         setUpComponents();
     }
 
@@ -62,7 +62,7 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
 
         myComponents = Collections.unmodifiableList(result);
     }
-    
+
     public void addArgument(MTType argument) {
         myArguments.add(argument);
     }

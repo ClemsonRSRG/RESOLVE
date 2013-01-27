@@ -17,7 +17,7 @@ public class SymmetricVisitor {
 
     private final Multiplexer myMultiplexer = new Multiplexer();
     private final MidMultiplexer myMidMultiplexer = new MidMultiplexer();
-    
+
     public final boolean visit(MTType t1, MTType t2) {
         boolean visitSiblings = true;
 
@@ -77,9 +77,9 @@ public class SymmetricVisitor {
         public Multiplexer(MTType otherType) {
             myOtherType = otherType;
         }
-        
+
         public Multiplexer() {
-            
+
         }
 
         public void setOtherType(MTType t) {
@@ -215,9 +215,9 @@ public class SymmetricVisitor {
         public MidMultiplexer(MTType otherType) {
             myOtherType = otherType;
         }
-        
+
         public MidMultiplexer() {
-            
+
         }
 
         public void setOtherType(MTType t) {

@@ -40,9 +40,9 @@ public class TypeGraph {
      * only one type graph is created per thread, so this is a convenient place
      * to put it.</p>
      */
-    public final PerThreadReasoningResources threadResources = 
+    public final PerThreadReasoningResources threadResources =
             new PerThreadReasoningResources();
-    
+
     private final ExpValuePathStrategy EXP_VALUE_PATH =
             new ExpValuePathStrategy();
     private final MTTypeValuePathStrategy MTTYPE_VALUE_PATH =

@@ -91,15 +91,15 @@ import java.util.NoSuchElementException;
  */
 public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
 
-    private static final IllegalArgumentException MISMATCH = 
+    private static final IllegalArgumentException MISMATCH =
             new IllegalArgumentException(TypeMismatchException.INSTANCE);
-    
+
     private Map<String, MTType> myBindings = new HashMap<String, MTType>();
 
     private final TypeGraph myTypeGraph;
 
     private HashMap<String, MTType> myPromotedVariablesWorkingSpace;
-    
+
     public SyntacticSubtypeChecker(TypeGraph g) {
         myTypeGraph = g;
     }
@@ -232,8 +232,9 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
                 myPromotedVariablesWorkingSpace.put("*" + i, myTypeGraph.MTYPE);
             }
 
-            t1 = new MTBigUnion(t1.getTypeGraph(), 
-                    myPromotedVariablesWorkingSpace, t1);
+            t1 =
+                    new MTBigUnion(t1.getTypeGraph(),
+                            myPromotedVariablesWorkingSpace, t1);
 
             visit(t1, t2);
         }

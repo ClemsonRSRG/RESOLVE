@@ -2,9 +2,9 @@ package edu.clemson.cs.r2jt.typeandpopulate;
 
 public class NoSolutionException extends Exception {
 
-    public static final NoSolutionException INSTANCE = 
+    public static final NoSolutionException INSTANCE =
             new NoSolutionException();
-    
+
     private static final long serialVersionUID = 1L;
 
     private NoSolutionException() {

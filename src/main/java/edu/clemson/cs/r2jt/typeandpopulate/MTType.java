@@ -13,6 +13,8 @@ import edu.clemson.cs.r2jt.type.FormalType;
 import edu.clemson.cs.r2jt.type.NewType;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * <p>The parent class of all mathematical types.</p>
@@ -20,6 +22,8 @@ import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 public abstract class MTType {
 
     protected final TypeGraph myTypeGraph;
+
+    private final Set<Object> myKnownAlphaEquivalencies = new HashSet<Object>();
 
     public MTType(TypeGraph typeGraph) {
         myTypeGraph = typeGraph;
@@ -95,18 +99,26 @@ public abstract class MTType {
             result = true;
         }
         else {
-            try {
-                //All 'equals' logic should be put into AlphaEquivalencyChecker! 
-                //Don't override equals!
-                AlphaEquivalencyChecker alphaEq = 
-                        myTypeGraph.threadResources.alphaChecker;
-                alphaEq.reset();
-                
-                alphaEq.visit(this, (MTType) o);
-                result = alphaEq.getResult();
-            }
-            catch (ClassCastException cce) {
-                result = false;
+            result = myKnownAlphaEquivalencies.contains(o);
+
+            if (!result) {
+                try {
+                    //All 'equals' logic should be put into AlphaEquivalencyChecker! 
+                    //Don't override equals!
+                    AlphaEquivalencyChecker alphaEq =
+                            myTypeGraph.threadResources.alphaChecker;
+                    alphaEq.reset();
+
+                    alphaEq.visit(this, (MTType) o);
+                    result = alphaEq.getResult();
+                }
+                catch (ClassCastException cce) {
+                    result = false;
+                }
+
+                if (result) {
+                    myKnownAlphaEquivalencies.add(o);
+                }
             }
         }
 

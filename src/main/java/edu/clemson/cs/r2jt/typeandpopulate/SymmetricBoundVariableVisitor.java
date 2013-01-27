@@ -14,7 +14,7 @@ public class SymmetricBoundVariableVisitor extends SymmetricVisitor {
 
     private static final NoSuchElementException NO_SUCH_ELEMENT =
             new NoSuchElementException();
-    
+
     private Deque<Map<String, MTType>> myBoundVariables1 =
             new LinkedList<Map<String, MTType>>();
 
@@ -46,7 +46,7 @@ public class SymmetricBoundVariableVisitor extends SymmetricVisitor {
         this(context1);
         myBoundVariables2.push(new HashMap<String, MTType>(context2));
     }
-    
+
     public void reset() {
         myBoundVariables1.clear();
         myBoundVariables2.clear();
