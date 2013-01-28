@@ -77,7 +77,8 @@ public class HardCoded {
         try {
             b.addBinding("Entity", v, g.MTYPE, g.ENTITY);
             b.addBinding("MType", v, g.MTYPE, g.MTYPE);
-
+            b.addBinding("Is_Initial", v,
+                    new MTFunction(g, g.BOOLEAN, g.ENTITY));
             b.addBinding("SSet", v, g.MTYPE, g.SET);
             b.addBinding("B", v, g.MTYPE, g.BOOLEAN);
 
