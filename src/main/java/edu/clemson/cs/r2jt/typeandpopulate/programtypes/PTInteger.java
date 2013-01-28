@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.clemson.cs.r2jt.typeandpopulate;
+package edu.clemson.cs.r2jt.typeandpopulate.programtypes;
 
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.Map;
@@ -13,29 +14,29 @@ import java.util.WeakHashMap;
  *
  * @author hamptos
  */
-public class PTBoolean extends PTType {
+public class PTInteger extends PTType {
 
-    private static WeakHashMap<TypeGraph, PTBoolean> instances =
-            new WeakHashMap<TypeGraph, PTBoolean>();
+    private static WeakHashMap<TypeGraph, PTInteger> instances =
+            new WeakHashMap<TypeGraph, PTInteger>();
 
-    public static PTBoolean getInstance(TypeGraph g) {
-        PTBoolean result = instances.get(g);
+    public static PTInteger getInstance(TypeGraph g) {
+        PTInteger result = instances.get(g);
 
         if (result == null) {
-            result = new PTBoolean(g);
+            result = new PTInteger(g);
             instances.put(g, result);
         }
 
         return result;
     }
 
-    private PTBoolean(TypeGraph g) {
+    private PTInteger(TypeGraph g) {
         super(g);
     }
 
     @Override
     public MTType toMath() {
-        return getTypeGraph().BOOLEAN;
+        return getTypeGraph().Z;
     }
 
     @Override

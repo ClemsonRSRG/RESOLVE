@@ -24,13 +24,23 @@ public class MTNamed extends MTType {
     }
 
     @Override
-    public void accept(TypeVisitor v) {
+    public void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
         v.beginMTNamed(this);
+    }
+
+    @Override
+    public void accept(TypeVisitor v) {
+        acceptOpen(v);
 
         v.beginChildren(this);
         v.endChildren(this);
 
+        acceptClose(v);
+    }
+
+    @Override
+    public void acceptClose(TypeVisitor v) {
         v.endMTNamed(this);
         v.endMTType(this);
     }

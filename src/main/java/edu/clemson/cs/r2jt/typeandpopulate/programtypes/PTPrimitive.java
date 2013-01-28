@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.clemson.cs.r2jt.typeandpopulate;
+package edu.clemson.cs.r2jt.typeandpopulate.programtypes;
 
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.Map;

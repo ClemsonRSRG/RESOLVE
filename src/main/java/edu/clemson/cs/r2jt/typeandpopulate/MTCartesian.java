@@ -68,6 +68,7 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
         second.addTo(myElements, myElementTypes, myTagsToElementsTable,
                 myElementsToTagsTable);
         mySize = workingSize;
+        myElementTypes = Collections.unmodifiableList(myElementTypes);
     }
 
     public int size() {
@@ -158,10 +159,15 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
     }
 
     @Override
-    public void accept(TypeVisitor v) {
+    public void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
         v.beginMTAbstract(this);
         v.beginMTCartesian(this);
+    }
+
+    @Override
+    public void accept(TypeVisitor v) {
+        acceptOpen(v);
 
         v.beginChildren(this);
 
@@ -171,6 +177,11 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
 
         v.endChildren(this);
 
+        acceptClose(v);
+    }
+
+    @Override
+    public void acceptClose(TypeVisitor v) {
         v.endMTCartesian(this);
         v.endMTAbstract(this);
         v.endMTType(this);
@@ -178,7 +189,7 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
 
     @Override
     public List<MTType> getComponentTypes() {
-        return Collections.unmodifiableList(myElementTypes);
+        return myElementTypes;
     }
 
     @Override
@@ -196,19 +207,23 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
         private MTType myElement;
 
         public Element(Element element) {
-            myTag = element.myTag;
-            myElement = element.myElement;
+            this(element.myTag, element.myElement);
         }
 
         public Element(MTType element) {
-            myElement = element;
+            this(null, element);
         }
 
         public Element(String tag, MTType element) {
-            this(element);
+            if (element == null) {
+                throw new IllegalArgumentException();
+            }
+
+            myElement = element;
             myTag = tag;
         }
 
+        @Override
         public String toString() {
             String result = myElement.toString();
 

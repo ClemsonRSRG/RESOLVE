@@ -47,4 +47,8 @@ public class ArbitraryExpTy extends Ty {
         return myArbitraryExp.getLocation();
     }
 
+    @Override
+    public ArbitraryExpTy copy() {
+        return new ArbitraryExpTy(Exp.copy(myArbitraryExp));
+    }
 }

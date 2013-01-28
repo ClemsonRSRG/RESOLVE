@@ -64,13 +64,23 @@ public class MTProper extends MTType {
     }
 
     @Override
-    public void accept(TypeVisitor v) {
+    public void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
         v.beginMTProper(this);
+    }
+
+    @Override
+    public void accept(TypeVisitor v) {
+        acceptOpen(v);
 
         v.beginChildren(this);
         v.endChildren(this);
 
+        acceptClose(v);
+    }
+
+    @Override
+    public void acceptClose(TypeVisitor v) {
         v.endMTProper(this);
         v.endMTType(this);
     }
@@ -78,7 +88,7 @@ public class MTProper extends MTType {
     @SuppressWarnings("unchecked")
     @Override
     public List<MTType> getComponentTypes() {
-        return (List<MTType>) Collections.EMPTY_LIST;
+        return Collections.EMPTY_LIST;
     }
 
     @Override

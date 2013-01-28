@@ -156,11 +156,12 @@ public class TreeWalker {
             }
             methodName = prefix + className;
 
+            ResolveConceptualElement[] parent = Arrays.copyOf(e, e.length);
             // Get parent and child types if this is a list node
             Class<?> paramType = ResolveConceptualElement.class;
             if (list) {
                 paramType = ((VirtualListNode) e[0]).getListType();
-                e[0] = ((VirtualListNode) e[0]).getParent();
+                parent[0] = ((VirtualListNode) e[0]).getParent();
             }
 
             // Now try to obtain the proper visitor method
@@ -178,7 +179,7 @@ public class TreeWalker {
                 }
 
                 // Invoking the visitor method now!!!
-                visitorMethod.invoke(this.myVisitor, (Object[]) e);
+                visitorMethod.invoke(this.myVisitor, (Object[]) parent);
             }
             catch (NoSuchMethodException nsme) {
                 //This is fine if we're dealing with a virtual node, otherwise

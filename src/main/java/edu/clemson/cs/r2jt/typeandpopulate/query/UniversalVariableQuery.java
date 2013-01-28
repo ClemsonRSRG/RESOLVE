@@ -1,18 +1,17 @@
 package edu.clemson.cs.r2jt.typeandpopulate.query;
 
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
-import java.util.Iterator;
-import java.util.List;
-
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
-import edu.clemson.cs.r2jt.typeandpopulate.MultimatchTableSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.Scope;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
 import edu.clemson.cs.r2jt.typeandpopulate.SymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.UnqualifiedPath;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.searchers.MultimatchTableSearcher;
+import java.util.Iterator;
+import java.util.List;
 
 public class UniversalVariableQuery
         implements
@@ -53,7 +52,7 @@ public class UniversalVariableQuery
 
         @Override
         public boolean addMatches(SymbolTable entries,
-                List<MathSymbolEntry> matches) {
+                List<MathSymbolEntry> matches, SearchContext l) {
 
             Iterator<MathSymbolEntry> mathSymbols =
                     entries.iterateByType(MathSymbolEntry.class);

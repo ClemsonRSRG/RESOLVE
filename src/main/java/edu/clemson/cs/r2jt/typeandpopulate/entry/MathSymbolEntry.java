@@ -14,7 +14,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTProper;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
-import edu.clemson.cs.r2jt.typeandpopulate.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.Scope;
 import edu.clemson.cs.r2jt.typeandpopulate.SymbolNotOfKindTypeException;
 import edu.clemson.cs.r2jt.typeandpopulate.VariableReplacingVisitor;
@@ -143,14 +143,14 @@ public class MathSymbolEntry extends SymbolTableEntry {
             Scope callingContext) throws NoSolutionException {
 
         if (!(myType instanceof MTFunction)) {
-            throw new NoSolutionException();
+            throw NoSolutionException.INSTANCE;
         }
 
         List<MTType> formalParameterTypes =
                 getParameterTypes(((MTFunction) myType));
 
         if (formalParameterTypes.size() != arguments.size()) {
-            throw new NoSolutionException();
+            throw NoSolutionException.INSTANCE;
         }
 
         List<ProgramTypeEntry> callingContextProgramGenerics =
@@ -192,7 +192,7 @@ public class MathSymbolEntry extends SymbolTableEntry {
             }
         }
         catch (BindingException be) {
-            throw new NoSolutionException();
+            throw NoSolutionException.INSTANCE;
         }
 
         MTType newTypeValue = null;

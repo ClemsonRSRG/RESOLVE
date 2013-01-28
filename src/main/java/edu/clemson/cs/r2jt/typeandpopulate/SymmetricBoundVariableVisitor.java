@@ -12,6 +12,9 @@ import java.util.NoSuchElementException;
 
 public class SymmetricBoundVariableVisitor extends SymmetricVisitor {
 
+    private static final NoSuchElementException NO_SUCH_ELEMENT =
+            new NoSuchElementException();
+
     private Deque<Map<String, MTType>> myBoundVariables1 =
             new LinkedList<Map<String, MTType>>();
 
@@ -42,6 +45,11 @@ public class SymmetricBoundVariableVisitor extends SymmetricVisitor {
             Map<String, MTType> context2) {
         this(context1);
         myBoundVariables2.push(new HashMap<String, MTType>(context2));
+    }
+
+    public void reset() {
+        myBoundVariables1.clear();
+        myBoundVariables2.clear();
     }
 
     public final boolean beginMTBigUnion(MTBigUnion t1, MTBigUnion t2) {
@@ -85,7 +93,7 @@ public class SymmetricBoundVariableVisitor extends SymmetricVisitor {
         }
 
         if (result == null) {
-            throw new NoSuchElementException(name);
+            throw NO_SUCH_ELEMENT;
         }
 
         return result;

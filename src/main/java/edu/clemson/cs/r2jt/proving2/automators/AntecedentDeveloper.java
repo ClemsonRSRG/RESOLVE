@@ -82,11 +82,10 @@ public class AntecedentDeveloper implements Automator {
             for (Theorem t : model.getLocalTheoremList()) {
                 for (Transformation transformation : t.getTransformations()) {
                     if (transformation instanceof ExpandAntecedentByImplication
-                            || transformation instanceof 
-                                ExpandAntecedentBySubstitution) {
+                            || transformation instanceof ExpandAntecedentBySubstitution) {
 
                         if (!transformation.introducesQuantifiedVariables()) {
-                            tApplications = 
+                            tApplications =
                                     transformation.getApplications(model);
                             while (tApplications.hasNext()) {
                                 applications.add(tApplications.next());
@@ -95,14 +94,14 @@ public class AntecedentDeveloper implements Automator {
                     }
                 }
             }
-            
+
             for (Transformation t : myTheoremTransformations) {
                 tApplications = t.getApplications(model);
                 while (tApplications.hasNext()) {
                     applications.add(tApplications.next());
                 }
             }
-            
+
             myApplications = applications.iterator();
         }
 

@@ -13,6 +13,8 @@ import edu.clemson.cs.r2jt.type.FormalType;
 import edu.clemson.cs.r2jt.type.NewType;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * <p>The parent class of all mathematical types.</p>
@@ -20,6 +22,8 @@ import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 public abstract class MTType {
 
     protected final TypeGraph myTypeGraph;
+
+    private final Set<Object> myKnownAlphaEquivalencies = new HashSet<Object>();
 
     public MTType(TypeGraph typeGraph) {
         myTypeGraph = typeGraph;
@@ -52,6 +56,10 @@ public abstract class MTType {
     }
 
     public abstract void accept(TypeVisitor v);
+
+    public abstract void acceptOpen(TypeVisitor v);
+
+    public abstract void acceptClose(TypeVisitor v);
 
     public abstract List<MTType> getComponentTypes();
 
@@ -91,28 +99,25 @@ public abstract class MTType {
             result = true;
         }
         else {
-            //All 'equals' logic should be put into AlphaEquivalencyChecker! 
-            //Don't override equals!
-            AlphaEquivalencyChecker alphaEq = new AlphaEquivalencyChecker();
+            result = myKnownAlphaEquivalencies.contains(o);
 
-            result = (o instanceof MTType);
-
-            if (result) {
+            if (!result) {
                 try {
+                    //All 'equals' logic should be put into AlphaEquivalencyChecker! 
+                    //Don't override equals!
+                    AlphaEquivalencyChecker alphaEq =
+                            myTypeGraph.threadResources.alphaChecker;
+                    alphaEq.reset();
+
                     alphaEq.visit(this, (MTType) o);
+                    result = alphaEq.getResult();
                 }
-                catch (RuntimeException e) {
-                    Throwable cause = e.getCause();
-                    while (cause != null
-                            && !(cause instanceof TypeMismatchException)) {
-                        cause = cause.getCause();
-                    }
-
-                    if (cause == null) {
-                        throw e;
-                    }
-
+                catch (ClassCastException cce) {
                     result = false;
+                }
+
+                if (result) {
+                    myKnownAlphaEquivalencies.add(o);
                 }
             }
         }
@@ -140,7 +145,7 @@ public abstract class MTType {
                 throw e;
             }
 
-            throw new NoSolutionException();
+            throw NoSolutionException.INSTANCE;
         }
 
         return checker.getBindings();
