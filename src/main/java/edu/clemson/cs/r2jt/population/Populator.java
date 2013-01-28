@@ -304,6 +304,8 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void preFacilityOperationDec(FacilityOperationDec dec) {
         myBuilder.startScope(dec);
+        myCurrentParameters = new LinkedList<ProgramParameterEntry>();
+
     }
 
     @Override
@@ -533,6 +535,8 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postFacilityOperationDec(FacilityOperationDec dec) {
         myBuilder.endScope();
+        myCurrentParameters = null;
+
     }
 
     @Override
