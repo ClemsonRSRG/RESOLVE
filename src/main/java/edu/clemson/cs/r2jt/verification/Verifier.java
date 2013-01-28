@@ -85,6 +85,7 @@ import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.analysis.ProgramExpTypeResolver;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 
 public class Verifier extends ResolveConceptualVisitor {
 
@@ -194,7 +195,7 @@ public class Verifier extends ResolveConceptualVisitor {
 
     final static List<DotExp> myRememberedExp = new List<DotExp>();
 
-    private final ScopeRepository myRealSymbolTable;
+    private final MathSymbolTableBuilder myRealSymbolTable;
     private final TypeGraph myTypeGraph;
     private final MTType BOOLEAN;
     private final MTType MTYPE;
@@ -237,7 +238,7 @@ public class Verifier extends ResolveConceptualVisitor {
             final CompileEnvironment instanceEnvironment) {
         this.table = table;
 
-        myRealSymbolTable = realSymbolTable;
+        myRealSymbolTable = (MathSymbolTableBuilder) realSymbolTable;
         myTypeGraph = myRealSymbolTable.getTypeGraph();
         BOOLEAN = myTypeGraph.BOOLEAN;
         MTYPE = myTypeGraph.MTYPE;
