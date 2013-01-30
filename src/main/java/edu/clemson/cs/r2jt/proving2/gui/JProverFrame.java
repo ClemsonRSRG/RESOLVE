@@ -1,25 +1,22 @@
 package edu.clemson.cs.r2jt.proving2.gui;
 
-import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
-import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
-import edu.clemson.cs.r2jt.proving.absyn.NodeIdentifier;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.SimpleImmutableList;
 import edu.clemson.cs.r2jt.proving2.Antecedent;
 import edu.clemson.cs.r2jt.proving2.Consequent;
 import edu.clemson.cs.r2jt.proving2.Theorem;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.EliminateTrueConjunctInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.ReplaceSymmetricEqualityWithTrueInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.proving2.utilities.MapOfLists;
-import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
 import java.awt.BorderLayout;
@@ -31,7 +28,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Collections;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,9 +36,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.imageio.ImageIO;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -92,8 +91,6 @@ public class JProverFrame extends JFrame {
     private final EnterTheoremSelectionOnModelChange TO_THEOREM_SELECTION =
             new EnterTheoremSelectionOnModelChange();
 
-    private final JProverFrame PARENT_THIS = this;
-
     private final JProverStateDisplay myProverStateDisplay;
 
     private final JCheckBox myDetailsCheckBox = new JCheckBox("Details");
@@ -103,16 +100,19 @@ public class JProverFrame extends JFrame {
     private JLabel myProvingLabel = new JLabel();
     private JButton myNextVCButton = new JButton("VC>");
     private JButton myLastVCButton = new JButton("<VC");
-    private JButton myPlayButton = new JButton(">");
-    private JButton myPauseButton = new JButton("||");
-    private JButton myStopButton = new JButton("@");
-    private JButton myStepButton = new JButton("step");
+    private JButton mySkipButton = new JButton("Skip VC");
+    private JButton myCancelButton = new JButton("Cancel");
+    private final JButton myPlayButton;
+    private final JButton myPauseButton;
+    private final JButton myStopButton;
+    private final JButton myStepButton;
 
     private final CardLayout myOptionalTransportLayout = new CardLayout();
     private final JPanel myOptionalTransportPanel =
             new JPanel(myOptionalTransportLayout);
 
-    private final JComponent myBasicArea = buildBasicPanel();
+    private final JScrollPane myTopLevelScrollWrapper;
+    private final JComponent myBasicArea;
 
     private ImmutableList<Theorem> myGlobalTheorems;
     private Set<PExp> myGlobalTheoremAssertions = new HashSet<PExp>();
@@ -185,7 +185,34 @@ public class JProverFrame extends JFrame {
         p.highlightPExp(nid, new Color(200, 200, 200));*/
     }
 
-    public JProverFrame(PerVCProverModel m) {
+    public JProverFrame(final PerVCProverModel m) {
+        try {
+            myPlayButton =
+                    new JButton(new ImageIcon(ImageIO.read(ClassLoader
+                            .getSystemResource("images/play.png"))));
+            myPlayButton.setToolTipText("Start Automated Prover");
+
+            myPauseButton =
+                    new JButton(new ImageIcon(ImageIO.read(ClassLoader
+                            .getSystemResource("images/pause.png"))));
+            myPauseButton.setToolTipText("Enter Interactive Mode");
+
+            myStepButton =
+                    new JButton(new ImageIcon(ImageIO.read(ClassLoader
+                            .getSystemResource("images/step.png"))));
+            myStepButton.setToolTipText("Step Automated Prover");
+
+            myStopButton =
+                    new JButton(new ImageIcon(ImageIO.read(ClassLoader
+                            .getSystemResource("images/stop.png"))));
+            myStopButton.setToolTipText("Clear Proof Progress");
+        }
+        catch (IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
+
+        myBasicArea = buildBasicPanel();
+
         ImmutableList<Theorem> globalTheorems = m.getTheoremLibrary();
 
         myProofDisplay = new JProofDisplay(m);
@@ -204,46 +231,27 @@ public class JProverFrame extends JFrame {
         topLevel.add(myBasicArea, BorderLayout.NORTH);
         topLevel.add(myDetailsArea, BorderLayout.CENTER);
 
-        JScrollPane scroll = new JScrollPane(topLevel);
-        add(scroll, BorderLayout.CENTER);
+        myTopLevelScrollWrapper = new JScrollPane(topLevel);
+        add(myTopLevelScrollWrapper, BorderLayout.CENTER);
 
         myDetailsArea.setVisible(false);
-        myDetailsCheckBox.addChangeListener(new ChangeListener() {
-
-            @Override
-            public void stateChanged(ChangeEvent arg0) {
-                boolean checked = myDetailsCheckBox.isSelected();
-
-                if (checked != myDetailsArea.isVisible()) {
-                    myDetailsArea.setVisible(checked);
-
-                    String state;
-                    if (checked) {
-                        state = CONTROLS_VISIBLE;
-                    }
-                    else {
-                        myDetailsArea.setPreferredSize(myDetailsArea.getSize());
-                        state = CONTROLS_HIDDEN;
-                    }
-                    myOptionalTransportLayout.show(myOptionalTransportPanel,
-                            state);
-
-                    myBasicArea.setPreferredSize(myBasicArea.getSize());
-                    PARENT_THIS.pack();
-                    myBasicArea.setPreferredSize(null);
-
-                    if (checked) {
-                        myDetailsArea.setPreferredSize(null);
-                    }
-                }
-            }
-        });
+        myDetailsCheckBox.addChangeListener(new DetailsDisplayer());
 
         myProverStateDisplay.getModel().addChangeListener(TO_THEOREM_SELECTION);
         myProverStateDisplay.getModel().setChangeEventMode(
                 PerVCProverModel.ChangeEventMode.INTERMITTENT);
 
+        myCancelButton.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                System.exit(0);
+            }
+        });
+
         setGlobalTheorems(globalTheorems);
+
+        setModel(m);
 
         pack();
     }
@@ -273,7 +281,7 @@ public class JProverFrame extends JFrame {
                 if (interactive) {
                     myProverStateDisplay.getModel().setChangeEventMode(
                             PerVCProverModel.ChangeEventMode.ALWAYS);
-                    myProverStateDisplay.getModel().removeChangeListener(
+                    myProverStateDisplay.getModel().addChangeListener(
                             TO_THEOREM_SELECTION);
                     myProverStateDisplay.getModel().touch();
                     prepForTheoremSelection();
@@ -307,6 +315,7 @@ public class JProverFrame extends JFrame {
 
     public void addNextVCButtonActionListener(ActionListener l) {
         myNextVCButton.addActionListener(l);
+        mySkipButton.addActionListener(l);
     }
 
     public void addLastVCButtonActionListener(ActionListener l) {
@@ -359,7 +368,6 @@ public class JProverFrame extends JFrame {
     }
 
     private void prepForTheoremApplication(Theorem theorem) {
-        System.out.println("prepForTheoremApplication()");
         removeClickTargetsFromModel();
 
         myLoadedApplications.clear();
@@ -395,8 +403,6 @@ public class JProverFrame extends JFrame {
     }
 
     private void prepForTheoremSelection() {
-        System.out.println("prepForTheoremSelection()");
-
         removeClickTargetsFromModel();
 
         myLoadedApplications.clear();
@@ -518,8 +524,7 @@ public class JProverFrame extends JFrame {
 
         horizontalProgressPanel.add(Box.createHorizontalStrut(20));
 
-        JProgressBar progress = new JProgressBar();
-        progress = new JProgressBar(0, 100);
+        JProgressBar progress = new JProgressBar(0, 100);
         progress.setValue(33);
         progress.setStringPainted(true);
 
@@ -550,8 +555,8 @@ public class JProverFrame extends JFrame {
         buttonPanel.add(myOptionalTransportPanel);
         //buttonPanel.add(Box.createHorizontalGlue());
         buttonPanel.add(Box.createHorizontalStrut(10));
-        buttonPanel.add(new JButton("Cancel"));
-        buttonPanel.add(new JButton("Skip >>>"));
+        buttonPanel.add(myCancelButton);
+        buttonPanel.add(mySkipButton);
 
         return buttonPanel;
     }
@@ -705,6 +710,47 @@ public class JProverFrame extends JFrame {
                     prepForTheoremSelection();
                 }
             });
+        }
+    }
+
+    private class DetailsDisplayer implements ChangeListener {
+
+        @Override
+        public void stateChanged(ChangeEvent arg0) {
+            boolean checked = myDetailsCheckBox.isSelected();
+
+            if (checked != myDetailsArea.isVisible()) {
+                myDetailsArea.setVisible(checked);
+
+                String state;
+                if (checked) {
+                    state = CONTROLS_VISIBLE;
+                }
+                else {
+                    state = CONTROLS_HIDDEN;
+                }
+                myOptionalTransportLayout.show(myOptionalTransportPanel, state);
+
+                /*myBasicArea.setPreferredSize(myBasicArea.getSize());
+                JProverFrame.this.setPreferredSize(null);
+                myTopLevelScrollWrapper.setPreferredSize(null);
+
+                JProverFrame.this.pack();
+
+                myTopLevelScrollWrapper.setPreferredSize(
+                        JProverFrame.this.getPreferredSize());
+                JProverFrame.this.setPreferredSize(
+                        JProverFrame.this.getPreferredSize());
+                myBasicArea.setPreferredSize(null);
+
+                if (checked) {
+                    myDetailsArea.setPreferredSize(null);
+                }*/
+
+                JProverFrame.this.pack();
+                myDetailsArea
+                        .setPreferredSize(myDetailsArea.getPreferredSize());
+            }
         }
     }
 }

@@ -122,6 +122,8 @@ public class AlgebraicProver {
         proverPanel.addPauseButtonActionListener(GO_INTERACTIVE);
         proverPanel.addStepButtonActionListener(STEP_PROVER);
 
+        proverPanel.setInteractiveMode(startInteractive);
+
         myTypeGraph = g;
         myVCs = vcs;
         myUI = proverPanel;
