@@ -88,7 +88,7 @@ public abstract class ResolveConceptualElement implements AsStringCapability {
         }
     }
 
-    public List<ResolveConceptualElement> getChildren() {
+    public java.util.List<ResolveConceptualElement> getChildren() {
 
         //We'd like to hit the fields in the order they appear in the class,
         //starting with the most general class and getting more specific.  So,
@@ -136,25 +136,35 @@ public abstract class ResolveConceptualElement implements AsStringCapability {
                     }
                     // is this member a list of ResolveConceptualElements?
                     // if so, add the elements to the list of children
-                    else if (List.class.isAssignableFrom(fieldType)) {
-                        List<?> fieldList = List.class.cast(curField.get(this));
+                    else if (java.util.List.class.isAssignableFrom(fieldType)) {
+                        Class<?> listOf =
+                                (Class<?>) ((ParameterizedType) curField
+                                        .getGenericType())
+                                        .getActualTypeArguments()[0];
+                        java.util.List<?> fieldList =
+                                java.util.List.class.cast(curField.get(this));
                         if (fieldList != null
                                 && fieldList.size() > 0
                                 && ResolveConceptualElement.class
-                                        .isAssignableFrom(fieldList.get(0)
-                                                .getClass())) {
-                            children.add(new VirtualListNode(this, curField
-                                    .getName(),
-                                    (List<ResolveConceptualElement>) fieldList,
-                                    (Class<?>) ((ParameterizedType) curField
-                                            .getGenericType())
-                                            .getActualTypeArguments()[0]));
+                                        .isAssignableFrom(listOf)) {
+                            children
+                                    .add(new VirtualListNode(
+                                            this,
+                                            curField.getName(),
+                                            (java.util.List<ResolveConceptualElement>) fieldList,
+                                            (Class<?>) ((ParameterizedType) curField
+                                                    .getGenericType())
+                                                    .getActualTypeArguments()[0]));
                         }
-
                     }
                 }
                 catch (Exception ex) {
-                    ex.printStackTrace();
+                    if (ex instanceof RuntimeException) {
+                        throw (RuntimeException) ex;
+                    }
+                    else {
+                        throw new RuntimeException(ex);
+                    }
                 }
             }
         }

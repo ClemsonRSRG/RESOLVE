@@ -4,9 +4,10 @@
  */
 package edu.clemson.cs.r2jt.absyn;
 
-import edu.clemson.cs.r2jt.collections.Iterator;
-import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class VirtualListNode extends ResolveConceptualElement {
@@ -39,7 +40,7 @@ public class VirtualListNode extends ResolveConceptualElement {
     @Override
     public List<ResolveConceptualElement> getChildren() {
         List<ResolveConceptualElement> children =
-                new List<ResolveConceptualElement>();
+                new LinkedList<ResolveConceptualElement>();
         Iterator<ResolveConceptualElement> iter = myList.iterator();
         while (iter.hasNext()) {
             children.add(ResolveConceptualElement.class.cast(iter.next()));

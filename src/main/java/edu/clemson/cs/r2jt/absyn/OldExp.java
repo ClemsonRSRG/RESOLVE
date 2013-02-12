@@ -62,6 +62,7 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 public class OldExp extends Exp {
 
@@ -94,6 +95,18 @@ public class OldExp extends Exp {
         }
     }
 
+    @Override
+    public void setMathType(MTType t) {
+        super.setMathType(t);
+        exp.setMathType(t);
+    }
+    
+    @Override
+    public void setMathTypeValue(MTType t) {
+        super.setMathTypeValue(t);
+        exp.setMathTypeValue(t);
+    }
+    
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
         return new OldExp(location, substitute(exp, substitutions));
     }

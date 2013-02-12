@@ -26,10 +26,10 @@ import edu.clemson.cs.r2jt.type.Type;
 public class CrossTypeExpression extends Exp {
 
     private final List<Exp> myFields = new LinkedList<Exp>();
+    private final List<PosSymbol> myTags = new LinkedList<PosSymbol>();
+
     private final Map<PosSymbol, Exp> myTagsToFields =
             new HashMap<PosSymbol, Exp>();
-    private final Map<Exp, PosSymbol> myFieldsToTags =
-            new HashMap<Exp, PosSymbol>();
 
     private final Location myLocation;
 
@@ -39,12 +39,13 @@ public class CrossTypeExpression extends Exp {
 
     public void addField(Exp field) {
         myFields.add(field);
+        myTags.add(null);
     }
 
     public void addTaggedField(PosSymbol tag, Exp field) {
         myTagsToFields.put(tag, field);
-        myFieldsToTags.put(field, tag);
-        addField(field);
+        myFields.add(field);
+        myTags.add(tag);
     }
 
     public int getFieldCount() {
@@ -60,11 +61,11 @@ public class CrossTypeExpression extends Exp {
     }
 
     public boolean fieldIsTagged(int index) {
-        return myFieldsToTags.containsKey(myFields.get(index));
+        return (myTags.get(index) != null);
     }
 
     public PosSymbol getTag(int index) {
-        return myFieldsToTags.get(myFields.get(index));
+        return myTags.get(index);
     }
 
     @Override
@@ -82,6 +83,7 @@ public class CrossTypeExpression extends Exp {
         String result = "(";
 
         boolean first = true;
+        int index = 0;
         for (Exp field : myFields) {
             if (first) {
                 first = false;
@@ -90,11 +92,13 @@ public class CrossTypeExpression extends Exp {
                 result += ", ";
             }
 
-            if (myFieldsToTags.containsKey(field)) {
-                result += myFieldsToTags.get(field) + " : ";
+            PosSymbol tag = myTags.get(index);
+            if (tag != null) {
+                result += tag + " : ";
             }
 
             result += field;
+            index++;
         }
 
         result += ")";

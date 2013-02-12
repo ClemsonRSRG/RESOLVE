@@ -646,6 +646,7 @@ public class Verifier extends ResolveConceptualVisitor {
             ConcType pval = getPVAL();
 
             var.setName(pval.getName());
+            var.setMathType(Z);
 
             InfixExp PExp = new InfixExp();
             PExp.setLeft((Exp) Exp.clone(((ProcedureDec) tmp).getDecreasing()));
@@ -4603,6 +4604,7 @@ public class Verifier extends ResolveConceptualVisitor {
         assertion.addFreeVar(pval);
         assertion.addFreeVar(pval);
         var.setName(pval.getName());
+        var.setMathType(Z);
         PExp.setOperator(EqualsExp.EQUAL);
         PExp.setLeft((Exp) Exp.clone(var));
         PExp.setRight((Exp) Exp.clone((stmt.getDecreasing())));
@@ -4626,6 +4628,7 @@ public class Verifier extends ResolveConceptualVisitor {
         pval = NQV(assertion.getFinalConfirm(), pval, assertion);
         assertion.addFreeVar(pval);
         var.setName(pval.getName());
+        var.setMathType(Z);
         InfixExp PExp = new InfixExp();
         PExp.setLeft((Exp) Exp.clone(stmt.getDecreasing()));
         PExp.setRight((Exp) Exp.clone(var));
@@ -7811,6 +7814,7 @@ public class Verifier extends ResolveConceptualVisitor {
             ConcType pVAL = getPVAL();
             assertion.addFreeVar(pVAL);
             pval.setName(pVAL.getName());
+            pval.setMathType(Z);
             setLocation(pval, dec.getDecreasing().getLocation());
 
             EqualsExp recurs =
@@ -8304,6 +8308,7 @@ public class Verifier extends ResolveConceptualVisitor {
             ConcType pVAL = getPVAL();
             assertion.addFreeVar(pVAL);
             pval.setName(pVAL.getName());
+            pval.setMathType(Z);
             setLocation(pval, dec.getDecreasing().getLocation());
             EqualsExp recurs =
                     new EqualsExp(dec.getDecreasing().getLocation(), pval,
