@@ -87,7 +87,8 @@ public class TreeWalker {
                 // invoke the "pre" visitor method(s)
                 invokeVisitorMethods("pre", e);
 
-                List<ResolveConceptualElement> children = e.getChildren();
+                java.util.List<ResolveConceptualElement> children =
+                        e.getChildren();
 
                 if (children.size() > 0) {
                     Iterator<ResolveConceptualElement> iter =

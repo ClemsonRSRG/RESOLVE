@@ -2011,16 +2011,15 @@ primitive_expression returns [Exp exp = null]
     
 tagged_cartesian_product_type_expression 
 returns [CrossTypeExpression exp = null]
-    :   id=CARTPROD^ { $exp = new CrossTypeExpression(getLocation($id)); } 
-        (varList=cartprod_variable_declaration_group SEMICOLON!
+    :   ^(id=CARTPROD { $exp = new CrossTypeExpression(getLocation($id)); } 
+        (varList=cartprod_variable_declaration_group
             {
               for (MathVarDec d : $varList.vars) {
                 $exp.addTaggedField(d.getName(), 
                     ((ArbitraryExpTy) d.getTy()).getArbitraryExp());
               }
             }
-        )+
-        END!;
+        )+);
 
 // ---------------------------------------------------------------
 // Articulated expression rules (expression with '.')

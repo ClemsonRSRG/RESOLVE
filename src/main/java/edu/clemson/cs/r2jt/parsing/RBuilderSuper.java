@@ -293,8 +293,9 @@ public class RBuilderSuper extends TreeParser {
 
     public String getErrorMessage(RecognitionException e, String[] tokenNames) {
         System.out.println("Builder Exception:");
-        List stack =
-                (List) getRuleInvocationStack(e, this.getClass().getName());
+        java.util.List stack =
+                (java.util.List) getRuleInvocationStack(e, this.getClass()
+                        .getName());
         String msg = null;
         if (e instanceof NoViableAltException) {
             NoViableAltException nvae = (NoViableAltException) e;
