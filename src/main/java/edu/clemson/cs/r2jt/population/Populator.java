@@ -15,6 +15,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScopeBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
@@ -29,6 +30,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry.Quantification;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTElement;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRecord;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
@@ -51,6 +53,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 public class Populator extends TreeWalkerVisitor {
@@ -316,6 +319,39 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         d.setMathType(d.getWrappedDec().getMathType());
+    }
+
+    @Override
+    public void preCrossTypeExpression(CrossTypeExpression e) {
+        myTypeValueDepth++;
+    }
+
+    @Override
+    public void postCrossTypeExpression(CrossTypeExpression e) {
+        int fieldCount = e.getFieldCount();
+        List<MTCartesian.Element> fieldTypes =
+                new LinkedList<MTCartesian.Element>();
+
+        PosSymbol psTag;
+        String tag;
+        for (int i = 0; i < fieldCount; i++) {
+
+            psTag = e.getTag(i);
+            if (psTag != null) {
+                tag = psTag.getName();
+            }
+            else {
+                tag = null;
+            }
+
+            fieldTypes.add(new MTCartesian.Element(tag, e.getField(i)
+                    .getMathTypeValue()));
+        }
+
+        e.setMathType(myTypeGraph.MTYPE);
+        e.setMathTypeValue(new MTCartesian(myTypeGraph, fieldTypes));
+
+        myTypeValueDepth--;
     }
 
     @Override
@@ -1461,22 +1497,140 @@ public class Populator extends TreeWalkerVisitor {
         }
     }
 
+    public VarExp getSegmentAsVarExp(Exp e) {
+        if (e instanceof OldExp) {
+            e = ((OldExp) e).getExp();
+        }
+        
+        return (VarExp) e;
+    }
+    
     @Override
-    public boolean walkDotExp(DotExp e) {
-        boolean result = e.getSegments().get(0).toString().equals("Conc");
+    public boolean walkDotExp(DotExp dot) {
+        boolean conceptual = dot.getSegments().get(0).toString().equals("Conc");
 
-        if (result) {
-            //Still want to pre and post, even though we're not going to visit
-            //children
-            preAny(e);
-            preExp(e);
-            preDotExp(e);
-            postDotExp(e);
-            postExp(e);
-            postAny(e);
+        preAny(dot);
+        preExp(dot);
+        preDotExp(dot);
+
+        if (!conceptual) {
+            List<Exp> segments = dot.getSegments();
+            VarExp first = getSegmentAsVarExp(segments.get(0));
+            VarExp second = getSegmentAsVarExp(segments.get(1));
+
+            MathSymbolEntry entry;
+            int skip;
+            //The first segment either identifies a locally-accessible variable 
+            //or a module
+            try {
+                //Treat the first segment as a variable name
+                entry =
+                        myBuilder
+                                .getInnermostActiveScope()
+                                .queryForOne(
+                                        new NameQuery(
+                                                null,
+                                                first.getName(),
+                                                ImportStrategy.IMPORT_NAMED,
+                                                FacilityStrategy.FACILITY_IGNORE,
+                                                true)).toMathSymbolEntry(
+                                        first.getLocation());
+                skip = 1;
+                
+                //This looks a little weird--keep in mind that "first" is not
+                //necessarily the Exp in segments.get(0).  segments.get(0) could
+                //be an OldExp wrapping "first".  OldExp will set the type of
+                //the inner expression
+                segments.get(0).setMathType(entry.getType());
+                try {
+                    segments.get(0).setMathTypeValue(entry.getTypeValue());
+                }
+                catch (SymbolNotOfKindTypeException snokte) {
+
+                }
+            }
+            catch (NoSuchSymbolException nsse) {
+                try {
+                    //Treat the first segment as a qualifier
+                    entry =
+                            myBuilder.getInnermostActiveScope().queryForOne(
+                                    new NameQuery(first.getName(), second
+                                            .getName(),
+                                            ImportStrategy.IMPORT_NAMED,
+                                            FacilityStrategy.FACILITY_IGNORE,
+                                            true)).toMathSymbolEntry(
+                                    first.getLocation());
+                    skip = 2;
+                    
+                    //See not above on why we use segments.get(0) instead of
+                    //"first"
+                    segments.get(0).setMathType(myTypeGraph.BOOLEAN);
+                    segments.get(1).setMathType(entry.getType());
+                    try {
+                        segments.get(1).setMathTypeValue(entry.getTypeValue());
+                    }
+                    catch (SymbolNotOfKindTypeException snokte) {
+
+                    }
+                }
+                catch (NoSuchSymbolException nsse2) {
+                    noSuchSymbol(first.getName(), second.getName());
+                    throw new RuntimeException(); //This will never fire
+                }
+                catch (DuplicateSymbolException dse) {
+                    //This shouldn't be possible--there can only be one symbol
+                    //with the given name inside a particular module
+                    throw new RuntimeException();
+                }
+            }
+            catch (DuplicateSymbolException dse) {
+                duplicateSymbol(first.getName());
+                throw new RuntimeException(); //This will never fire
+            }
+
+            Location lastGood = null;
+            Iterator<Exp> segmentsIter = segments.iterator();
+            for (int i = 0; i < skip; i++) {
+                lastGood = segmentsIter.next().getLocation();
+            }
+
+            MTType curType = entry.getType();
+            MTCartesian curTypeCartesian;
+            VarExp curSegment = null;
+            while (segmentsIter.hasNext()) {
+                try {
+                    curTypeCartesian = (MTCartesian) curType;
+
+                    try {
+                        curSegment = (VarExp) segmentsIter.next();
+                        curType =
+                                curTypeCartesian.getFactor(curSegment.getName()
+                                        .getName());
+                        lastGood = curSegment.getLocation();
+
+                        curSegment.setMathType(curType);
+                        curSegment.setMathTypeValue(curType.getType());
+                    }
+                    catch (ClassCastException cce2) {
+                        throw new RuntimeException(cce2);
+                    }
+                }
+                catch (ClassCastException cce) {
+                    throw new SourceErrorException("Value is not a tuple.",
+                            lastGood);
+                }
+                catch (NoSuchElementException nsee) {
+                    throw new SourceErrorException("No such field.", curSegment
+                            .getLocation());
+                }
+            }
         }
 
-        return result;
+        postDotExp(dot);
+        postExp(dot);
+        postAny(dot);
+
+        return true;
     }
 
     @Override
@@ -1763,16 +1917,11 @@ public class Populator extends TreeWalkerVisitor {
         return result;
     }
 
-    private MathSymbolEntry postSymbolExp(PosSymbol qualifier,
-            String symbolName, Exp node) {
-
-        MathSymbolEntry intendedEntry =
-                getIntendedEntry(qualifier, symbolName, node);
-        node.setMathType(intendedEntry.getType());
+    private void setSymbolTypeValue(Exp node, String symbolName,
+            MathSymbolEntry intendedEntry) {
 
         try {
-            if (intendedEntry.getQuantification() == SymbolTableEntry.Quantification.NONE) {
-
+            if (intendedEntry.getQuantification() == Quantification.NONE) {
                 node.setMathTypeValue(intendedEntry.getTypeValue());
             }
             else {
@@ -1787,6 +1936,16 @@ public class Populator extends TreeWalkerVisitor {
                 notAType(intendedEntry, node.getLocation());
             }
         }
+    }
+
+    private MathSymbolEntry postSymbolExp(PosSymbol qualifier,
+            String symbolName, Exp node) {
+
+        MathSymbolEntry intendedEntry =
+                getIntendedEntry(qualifier, symbolName, node);
+        node.setMathType(intendedEntry.getType());
+
+        setSymbolTypeValue(node, symbolName, intendedEntry);
 
         Populator.emitDebug("Processed symbol " + symbolName + " with type "
                 + node.getMathType() + ", referencing math type "
