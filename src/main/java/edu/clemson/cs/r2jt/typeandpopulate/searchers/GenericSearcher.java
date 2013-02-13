@@ -35,11 +35,9 @@ public class GenericSearcher
         while (parameters.hasNext()) {
             parameter = parameters.next();
 
-            try {
+            if (parameter.getParameterMode().equals(
+                    ProgramParameterEntry.ParameterMode.TYPE)) {
                 matches.add(parameter.toProgramTypeEntry(null));
-            }
-            catch (SourceErrorException see) {
-                //No problem, just not what we're looking for
             }
         }
 
