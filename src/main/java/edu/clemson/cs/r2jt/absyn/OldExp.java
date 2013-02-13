@@ -100,13 +100,13 @@ public class OldExp extends Exp {
         super.setMathType(t);
         exp.setMathType(t);
     }
-    
+
     @Override
     public void setMathTypeValue(MTType t) {
         super.setMathTypeValue(t);
         exp.setMathTypeValue(t);
     }
-    
+
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
         return new OldExp(location, substitute(exp, substitutions));
     }

@@ -1,5 +1,6 @@
 package edu.clemson.cs.r2jt.utilities;
 
+import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.absyn.FacilityModuleDec;
 import edu.clemson.cs.r2jt.absyn.ModuleDec;
 import edu.clemson.cs.r2jt.absyn.VarExp;
@@ -9,6 +10,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
 import edu.clemson.cs.r2jt.typeandpopulate.MTPowertypeApplication;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry.Quantification;
@@ -108,5 +110,19 @@ public class HardCoded {
             //Not possible--we're the first ones to add anything
             throw new RuntimeException(dse);
         }
+    }
+    
+    public static MTType getMetaFieldType(TypeGraph g, Exp e, 
+            String metaSegment) {
+        
+        MTType result = null;
+        
+        if (e.getMathTypeValue() != null && 
+                metaSegment.equals("Is_Initial")) {
+            
+            result = new MTFunction(g, g.BOOLEAN, g.ENTITY);
+        }
+        
+        return result;
     }
 }
