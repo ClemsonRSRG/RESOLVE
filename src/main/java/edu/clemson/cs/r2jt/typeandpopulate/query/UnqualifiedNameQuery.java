@@ -19,7 +19,7 @@ public class UnqualifiedNameQuery
     }
 
     public UnqualifiedNameQuery(String searchString) {
-        this(searchString, ImportStrategy.IMPORT_NONE,
+        this(searchString, ImportStrategy.IMPORT_NAMED,
                 FacilityStrategy.FACILITY_INSTANTIATE, true, true);
     }
 }
