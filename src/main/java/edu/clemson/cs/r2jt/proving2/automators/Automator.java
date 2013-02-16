@@ -28,7 +28,7 @@ import java.util.Deque;
  *      <li>Pop itself off the stack.</li>
  * </ul>
  * 
- * <p>While clearly an automator is permitted to take no action, an automator
+ * <p>While it follows that an automator may take no action, an automator
  * that takes no action is guaranteed to receive the next heartbeat, and thus
  * must itself guarantee that after a finite number of heartbeats, it will take
  * action (otherwise the automated prover will go into an infinite loop).</p>

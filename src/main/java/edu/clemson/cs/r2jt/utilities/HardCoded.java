@@ -111,18 +111,16 @@ public class HardCoded {
             throw new RuntimeException(dse);
         }
     }
-    
-    public static MTType getMetaFieldType(TypeGraph g, Exp e, 
-            String metaSegment) {
-        
+
+    public static MTType getMetaFieldType(TypeGraph g, Exp e, String metaSegment) {
+
         MTType result = null;
-        
-        if (e.getMathTypeValue() != null && 
-                metaSegment.equals("Is_Initial")) {
-            
+
+        if (e.getMathTypeValue() != null && metaSegment.equals("Is_Initial")) {
+
             result = new MTFunction(g, g.BOOLEAN, g.ENTITY);
         }
-        
+
         return result;
     }
 }
