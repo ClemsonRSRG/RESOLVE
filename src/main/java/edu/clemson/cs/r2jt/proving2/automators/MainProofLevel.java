@@ -25,7 +25,7 @@ import java.util.Set;
  *     Transformation}s, by spawning a 
  * {@link ApplicationApplier ApplicationApplier} on the automator stack for 
  * each application of each transformation.  When applying the application is
- * done, this automator spawns a {@link Simplifier Simplifier} automator,
+ * done, this automator spawns a {@link Simplify Simplify} automator,
  * followed by a {@link CheckDone CheckDone} automator.  Assuming the proof is
  * not completed, it then spawns a {@link Restore Restore} automator on the
  * stack that will restore the proof to how it looked before the application,

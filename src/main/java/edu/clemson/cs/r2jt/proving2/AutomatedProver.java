@@ -11,7 +11,9 @@ import edu.clemson.cs.r2jt.proving2.automators.AntecedentDeveloper;
 import edu.clemson.cs.r2jt.proving2.automators.ApplyN;
 import edu.clemson.cs.r2jt.proving2.automators.Automator;
 import edu.clemson.cs.r2jt.proving2.automators.MainProofLevel;
+import edu.clemson.cs.r2jt.proving2.automators.Minimizer;
 import edu.clemson.cs.r2jt.proving2.automators.PushSequence;
+import edu.clemson.cs.r2jt.proving2.automators.Simplify;
 import edu.clemson.cs.r2jt.proving2.automators.VariablePropagator;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
@@ -94,6 +96,10 @@ public class AutomatedProver {
         steps.add(new VariablePropagator());
         steps.add(new ApplyN(
                 new NoOpLabel("--- Done Developing Antecedent ---"), 1));
+        steps.add(new Minimizer(myTheoremLibrary));
+        steps.add(new ApplyN(
+                new NoOpLabel("--- Done Minimizing Consequent ---"), 1));
+        steps.add(Simplify.INSTANCE);
         steps.add(new MainProofLevel(m, 3, transformations));
 
         myAutomatorStack.push(new PushSequence(steps));
@@ -132,6 +138,10 @@ public class AutomatedProver {
         }
     }
 
+    public boolean doneSearching() {
+        return myAutomatorStack.isEmpty();
+    }
+    
     public void start() {
         myWorkerThread = Thread.currentThread();
 
