@@ -752,7 +752,7 @@ public class Populator extends TreeWalkerVisitor {
             throw new RuntimeException(dse);
         }
     }
-    
+
     @Override
     public void postFacilityDec(FacilityDec facility) {
         try {
@@ -1160,11 +1160,11 @@ public class Populator extends TreeWalkerVisitor {
         e.setProgramType(getIntegerProgramType());
         e.setMathType(myTypeGraph.Z);
     }
-    
+
     @Override
     public void postProgramStringExp(ProgramStringExp e) {
         e.setProgramType(getStringProgramType());
-        e.setMathType(new MTProper(myTypeGraph)); 
+        e.setMathType(new MTProper(myTypeGraph));
         //TODO : Figure out how to get Str(N) here, given that Str() is not 
         //built in
     }
@@ -1519,7 +1519,7 @@ public class Populator extends TreeWalkerVisitor {
 
         return (VarExp) e;
     }
-    
+
     /**
      * <p>This method has to do an annoying amount of work, so pay attention:
      * takes an iterator over segments as returned from DotExp.getSegments(). 
@@ -1532,33 +1532,33 @@ public class Populator extends TreeWalkerVisitor {
      * <code>MathSymbolEntry</code> corresponding to the correct top-level value
      * will be returned.</p>
      */
-    private MathSymbolEntry getTopLevelValue(Iterator<Exp> segments, 
+    private MathSymbolEntry getTopLevelValue(Iterator<Exp> segments,
             Indirect<Exp> lastGood) {
         MathSymbolEntry result;
-        
+
         Exp first = segments.next();
-        
+
         PosSymbol firstName;
         if (first instanceof OldExp) {
-            firstName = 
-                    ((VarExp) ((OldExp) first).getExp()).getName();
+            firstName = ((VarExp) ((OldExp) first).getExp()).getName();
         }
         else if (first instanceof VarExp) {
             firstName = ((VarExp) first).getName();
         }
         else {
-            throw new RuntimeException("DotExp must start with VarExp or " +
-                    "OldExp, found: " + first + " (" + first.getClass() + ")");
+            throw new RuntimeException("DotExp must start with VarExp or "
+                    + "OldExp, found: " + first + " (" + first.getClass() + ")");
         }
-        
+
         //First we'll see if there's a locally-accessible symbol with this name
         try {
-            result = myBuilder.getInnermostActiveScope().queryForOne(
-                    new NameQuery(null, firstName,
-                            ImportStrategy.IMPORT_NAMED,
-                            FacilityStrategy.FACILITY_IGNORE, true))
-                        .toMathSymbolEntry(first.getLocation());
-            
+            result =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameQuery(null, firstName,
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_IGNORE, true))
+                            .toMathSymbolEntry(first.getLocation());
+
             //There is.  Cool.  We type it and we're done
             lastGood.data = first;
             first.setMathType(result.getType());
@@ -1566,7 +1566,7 @@ public class Populator extends TreeWalkerVisitor {
                 first.setMathTypeValue(result.getTypeValue());
             }
             catch (SymbolNotOfKindTypeException snokte) {
-                
+
             }
         }
         catch (NoSuchSymbolException nsse) {
@@ -1574,19 +1574,24 @@ public class Populator extends TreeWalkerVisitor {
             //second segment (which had better be a VarExp) is the name of
             //the value we want
             VarExp second = (VarExp) segments.next();
-            
+
             try {
-                result = myBuilder.getInnermostActiveScope().queryForOne(
-                        new NameQuery(firstName, second.getName(),
-                                ImportStrategy.IMPORT_NAMED,
-                                FacilityStrategy.FACILITY_IGNORE,
-                                true)).toMathSymbolEntry(
-                        first.getLocation());
-                
+                result =
+                        myBuilder
+                                .getInnermostActiveScope()
+                                .queryForOne(
+                                        new NameQuery(
+                                                firstName,
+                                                second.getName(),
+                                                ImportStrategy.IMPORT_NAMED,
+                                                FacilityStrategy.FACILITY_IGNORE,
+                                                true)).toMathSymbolEntry(
+                                        first.getLocation());
+
                 //A qualifier doesn't have a sensible type, but we'll set one
                 //for completeness.
                 first.setMathType(myTypeGraph.BOOLEAN);
-                
+
                 //Now the value itself
                 lastGood.data = second;
                 second.setMathType(result.getType());
@@ -1611,10 +1616,10 @@ public class Populator extends TreeWalkerVisitor {
             duplicateSymbol(firstName);
             throw new RuntimeException(); //This will never fire
         }
-        
+
         return result;
     }
-    
+
     /**
      * <p>Returns the 'name' component of a VarExp or FunctionExp.</p>
      * 
@@ -1623,7 +1628,7 @@ public class Populator extends TreeWalkerVisitor {
      */
     private String getName(Exp e) {
         String result;
-        
+
         if (e instanceof VarExp) {
             result = ((VarExp) e).getName().getName();
         }
@@ -1631,16 +1636,16 @@ public class Populator extends TreeWalkerVisitor {
             result = ((FunctionExp) e).getName().getName();
         }
         else {
-            throw new RuntimeException("Not a VarExp or FunctionExp:  " + e +
-                    " (" + e.getClass() + ")");
+            throw new RuntimeException("Not a VarExp or FunctionExp:  " + e
+                    + " (" + e.getClass() + ")");
         }
-        
+
         return result;
     }
-    
+
     private MTType applyFunction(FunctionExp functionSegment, MTType type) {
         MTType result;
-        
+
         try {
             MTFunction functionType = (MTFunction) type;
 
@@ -1651,28 +1656,28 @@ public class Populator extends TreeWalkerVisitor {
                 myWalker.visit(args.next());
             }
 
-            if (!INEXACT_DOMAIN_MATCH.compare(functionSegment, 
-                    functionSegment.getConservativePreApplicationType(
-                        myTypeGraph), 
+            if (!INEXACT_DOMAIN_MATCH.compare(functionSegment, functionSegment
+                    .getConservativePreApplicationType(myTypeGraph),
                     functionType)) {
-                throw new SourceErrorException("Parameters do not " +
-                        "match function range.\n\nExpected: " + 
-                        functionType.getDomain() + "\nFound:    " +
-                        functionSegment.getConservativePreApplicationType(
-                            myTypeGraph).getDomain(),
-                        functionSegment.getLocation());
+                throw new SourceErrorException("Parameters do not "
+                        + "match function range.\n\nExpected: "
+                        + functionType.getDomain()
+                        + "\nFound:    "
+                        + functionSegment.getConservativePreApplicationType(
+                                myTypeGraph).getDomain(), functionSegment
+                        .getLocation());
             }
 
             result = functionType.getRange();
         }
         catch (ClassCastException cce) {
-            throw new SourceErrorException("Not a function.", 
-                    functionSegment.getLocation());
+            throw new SourceErrorException("Not a function.", functionSegment
+                    .getLocation());
         }
-        
+
         return result;
     }
-    
+
     @Override
     public boolean walkDotExp(DotExp dot) {
         boolean conceptual = dot.getSegments().get(0).toString().equals("Conc");
@@ -1701,8 +1706,9 @@ public class Populator extends TreeWalkerVisitor {
                     curType = curTypeCartesian.getFactor(segmentName);
                 }
                 catch (ClassCastException cce) {
-                    curType = HardCoded.getMetaFieldType(myTypeGraph, 
-                            lastSegment, segmentName);
+                    curType =
+                            HardCoded.getMetaFieldType(myTypeGraph,
+                                    lastSegment, segmentName);
 
                     if (curType == null) {
                         throw new SourceErrorException("Value not a tuple.",
@@ -1710,15 +1716,16 @@ public class Populator extends TreeWalkerVisitor {
                     }
                 }
                 catch (NoSuchElementException nsee) {
-                    curType = HardCoded.getMetaFieldType(myTypeGraph, 
-                            lastSegment, segmentName);
+                    curType =
+                            HardCoded.getMetaFieldType(myTypeGraph,
+                                    lastSegment, segmentName);
 
                     if (curType == null) {
                         throw new SourceErrorException("No such factor.",
                                 lastGood);
                     }
                 }
-                
+
                 //getName() would have thrown an exception if nextSegment wasn't
                 //a VarExp or a FunctionExp.  In the former case, we're good to
                 //go--but in the latter case, we still need to typecheck 
@@ -1728,7 +1735,7 @@ public class Populator extends TreeWalkerVisitor {
                 if (nextSegment instanceof FunctionExp) {
                     curType = applyFunction((FunctionExp) nextSegment, curType);
                 }
-                
+
                 nextSegment.setMathType(curType);
                 lastGood = nextSegment.getLocation();
             }
@@ -1871,7 +1878,7 @@ public class Populator extends TreeWalkerVisitor {
 
         return result;
     }
-    
+
     private PTType getIntegerProgramType() {
         PTType result;
 

@@ -9,5 +9,6 @@ package edu.clemson.cs.r2jt.utilities;
  * @author hamptos
  */
 public class Indirect<T> {
+
     public T data;
 }
