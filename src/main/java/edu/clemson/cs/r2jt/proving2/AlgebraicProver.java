@@ -143,8 +143,9 @@ public class AlgebraicProver {
             }
             System.out.println("Out -- Interactive: " + myInteractiveModeFlag);
             myModels[myVCIndex].touch();
-            if (myModels[myVCIndex].noConsequents()) {
-                //Proved.
+            if (myModels[myVCIndex].noConsequents() || 
+                    myAutomatedProvers[myVCIndex].doneSearching()) {
+                //We finished searching--either proved or failed
 
                 if (myVCIndex == myVCs.size() - 1) {
                     //We're done with every VC

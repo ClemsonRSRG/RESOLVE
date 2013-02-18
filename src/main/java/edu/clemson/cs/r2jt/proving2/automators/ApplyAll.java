@@ -17,9 +17,14 @@ import java.util.Iterator;
 public class ApplyAll implements Automator {
 
     private final Transformation myTransformation;
+    private int myApplicationCount;
 
     public ApplyAll(Transformation t) {
         myTransformation = t;
+    }
+
+    public int getApplicationCount() {
+        return myApplicationCount;
     }
 
     @Override
@@ -29,6 +34,7 @@ public class ApplyAll implements Automator {
 
         if (applications.hasNext()) {
             applications.next().apply(model);
+            myApplicationCount++;
         }
         else {
             stack.pop();
