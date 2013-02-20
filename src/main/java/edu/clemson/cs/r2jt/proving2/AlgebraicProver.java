@@ -4,6 +4,7 @@
  */
 package edu.clemson.cs.r2jt.proving2;
 
+import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving2.gui.JProverFrame;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.justifications.Library;
@@ -87,8 +88,11 @@ public class AlgebraicProver {
 
     private Thread myWorkingThread;
 
+    private final List<ProverListener> myProverListeners =
+            new LinkedList<ProverListener>();
+
     public AlgebraicProver(TypeGraph g, List<VC> vcs, ModuleScope scope,
-            boolean startInteractive) {
+            boolean startInteractive, CompileEnvironment environment) {
 
         myModels = new PerVCProverModel[vcs.size()];
         myAutomatedProvers = new AutomatedProver[vcs.size()];
@@ -111,24 +115,37 @@ public class AlgebraicProver {
         myAutomatedProvers[0] =
                 new AutomatedProver(myModels[0], myTheoremLibrary);
 
-        JProverFrame proverPanel = new JProverFrame(myModels[0]);
-        proverPanel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        proverPanel.setVisible(true);
-        proverPanel.setInteractiveMode(startInteractive);
+        if (environment.flags.isFlagSet(Prover.FLAG_NOGUI)) {
+            myUI = null;
+        }
+        else {
+            JProverFrame proverPanel = new JProverFrame(myModels[0]);
+            proverPanel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            proverPanel.setVisible(true);
+            proverPanel.setInteractiveMode(startInteractive);
 
-        proverPanel.addNextVCButtonActionListener(NEXT_VC);
-        proverPanel.addLastVCButtonActionListener(LAST_VC);
-        proverPanel.addPlayButtonActionListener(GO_AUTOMATIC);
-        proverPanel.addPauseButtonActionListener(GO_INTERACTIVE);
-        proverPanel.addStepButtonActionListener(STEP_PROVER);
+            proverPanel.addNextVCButtonActionListener(NEXT_VC);
+            proverPanel.addLastVCButtonActionListener(LAST_VC);
+            proverPanel.addPlayButtonActionListener(GO_AUTOMATIC);
+            proverPanel.addPauseButtonActionListener(GO_INTERACTIVE);
+            proverPanel.addStepButtonActionListener(STEP_PROVER);
 
-        proverPanel.setInteractiveMode(startInteractive);
+            proverPanel.setInteractiveMode(startInteractive);
+            myUI = proverPanel;
+        }
 
         myTypeGraph = g;
         myVCs = vcs;
-        myUI = proverPanel;
 
         myInteractiveModeFlag = startInteractive;
+    }
+
+    public void addProverListener(ProverListener l) {
+        myProverListeners.add(l);
+    }
+
+    public void removeProverListener(ProverListener l) {
+        myProverListeners.remove(l);
     }
 
     public synchronized void start() {
@@ -143,8 +160,8 @@ public class AlgebraicProver {
             }
             System.out.println("Out -- Interactive: " + myInteractiveModeFlag);
             myModels[myVCIndex].touch();
-            if (myModels[myVCIndex].noConsequents() || 
-                    myAutomatedProvers[myVCIndex].doneSearching()) {
+            if (myModels[myVCIndex].noConsequents()
+                    || myAutomatedProvers[myVCIndex].doneSearching()) {
                 //We finished searching--either proved or failed
 
                 if (myVCIndex == myVCs.size() - 1) {

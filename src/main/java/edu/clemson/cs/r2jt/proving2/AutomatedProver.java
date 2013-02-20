@@ -141,7 +141,7 @@ public class AutomatedProver {
     public boolean doneSearching() {
         return myAutomatorStack.isEmpty();
     }
-    
+
     public void start() {
         myWorkerThread = Thread.currentThread();
 

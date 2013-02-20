@@ -978,7 +978,8 @@ public class Verifier extends ResolveConceptualVisitor {
         else {
             rightV = new VarExp();
             ((VarExp) rightV).setName(getVarName(right));
-
+            rightV.setMathType(right.getMathType());
+            rightV.setMathTypeValue(right.getMathTypeValue());
         }
 
         // Need to Set Exp for rightV and leftV
