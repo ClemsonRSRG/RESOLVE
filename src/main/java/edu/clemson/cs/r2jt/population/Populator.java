@@ -2268,7 +2268,8 @@ public class Populator extends TreeWalkerVisitor {
         public boolean compare(AbstractFunctionExp foundValue,
                 MTFunction foundType, MTFunction expectedType) {
 
-            return myTypeGraph.isSubtype(foundType, expectedType);
+            return expectedType.parametersMatch(foundValue.getParameters(),
+                    INEXACT_PARAMETER_MATCH);
         }
 
         @Override
