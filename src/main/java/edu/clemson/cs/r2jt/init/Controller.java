@@ -1667,7 +1667,8 @@ public class Controller {
                                 vcs,
                                 scope,
                                 myInstanceEnvironment.flags
-                                        .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE));
+                                        .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE),
+                                myInstanceEnvironment);
                 prover.start();
             }
             catch (NoSuchSymbolException nsse) {
