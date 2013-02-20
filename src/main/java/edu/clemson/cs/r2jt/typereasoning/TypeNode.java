@@ -133,7 +133,8 @@ public class TypeNode {
 
     //XXX : Can we do this so that analyzer isn't setting up TypeRelationship objects?
     void addRelationship(TypeRelationship relationship) {
-        Set<TypeRelationship> bucket = myRelationships.get(relationship);
+        Set<TypeRelationship> bucket =
+                myRelationships.get(relationship.getDestinationType());
         if (bucket == null) {
             bucket = new HashSet<TypeRelationship>();
             myRelationships.put(relationship.getDestinationType(), bucket);
