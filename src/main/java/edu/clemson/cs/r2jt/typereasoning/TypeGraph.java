@@ -154,8 +154,7 @@ public class TypeGraph {
             try {
                 Exp conditions =
                         getValidTypeConditions(subtype,
-                                new MTPowertypeApplication(this, supertype),
-                                false);
+                                new MTPowertypeApplication(this, supertype));
                 result = conditions.isLiteralTrue();
             }
             catch (TypeMismatchException e) {
@@ -188,16 +187,14 @@ public class TypeGraph {
      */
     public boolean isKnownToBeIn(Exp value, MTType expected) {
 
-        boolean result = isSubtype(value.getMathType(), expected);
-
-        if (!result) {
-            try {
-                Exp conditions = getValidTypeConditions(value, expected);
-                result = conditions.isLiteralTrue();
-            }
-            catch (TypeMismatchException e) {
-                result = false;
-            }
+        boolean result;
+        
+        try {
+            Exp conditions = getValidTypeConditions(value, expected);
+            result = conditions.isLiteralTrue();
+        }
+        catch (TypeMismatchException e) {
+            result = false;
         }
 
         return result;
@@ -279,13 +276,8 @@ public class TypeGraph {
      *         which <code>value</code> could be demonstrated to be in 
      *         <code>expected</code>.
      */
-    public Exp getValidTypeConditions(MTType value, MTType expected)
+    private Exp getValidTypeConditions(MTType value, MTType expected) 
             throws TypeMismatchException {
-        return getValidTypeConditions(value, expected, true);
-    }
-
-    private Exp getValidTypeConditions(MTType value, MTType expected,
-            boolean permitDemotion) throws TypeMismatchException {
         //See note in the getValidTypeConditionsTo() in TypeRelationship,
         //re: Lovecraftian nightmare-scape
 
@@ -301,20 +293,18 @@ public class TypeGraph {
                 result = getTrueVarExp();
             }
             else {
-                if (permitDemotion) {
-                    //If "expected" happens to be Power(t) for some t, we can 
-                    //"demote" value to an INSTANCE of itself (provided it is not
-                    //the empty set), and expected to just t
-                    MTPowertypeApplication expectedAsPowertypeApplication =
-                            (MTPowertypeApplication) expected;
+                //If "expected" happens to be Power(t) for some t, we can 
+                //"demote" value to an INSTANCE of itself (provided it is not
+                //the empty set), and expected to just t
+                MTPowertypeApplication expectedAsPowertypeApplication =
+                        (MTPowertypeApplication) expected;
 
-                    DummyExp memberOfValue = new DummyExp(value);
+                DummyExp memberOfValue = new DummyExp(value);
 
-                    if (isKnownToBeIn(memberOfValue,
-                            expectedAsPowertypeApplication.getArgument(0))) {
+                if (isKnownToBeIn(memberOfValue,
+                        expectedAsPowertypeApplication.getArgument(0))) {
 
-                        result = getTrueVarExp();
-                    }
+                    result = getTrueVarExp();
                 }
             }
         }
