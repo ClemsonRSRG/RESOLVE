@@ -6913,7 +6913,6 @@ public class Verifier extends ResolveConceptualVisitor {
                                     .toString(), true)
                                     || ensures.containsVar(specVar.getName()
                                             .toString(), false)) {
-
                                 ensures = replace(ensures, specVarExp, undqRep);
                                 ensures = replace(ensures, oSpecVar, oRealVar);
                                 undRepList.add(undqRep);
