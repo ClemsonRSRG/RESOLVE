@@ -188,7 +188,7 @@ public class TypeGraph {
     public boolean isKnownToBeIn(Exp value, MTType expected) {
 
         boolean result;
-        
+
         try {
             Exp conditions = getValidTypeConditions(value, expected);
             result = conditions.isLiteralTrue();
@@ -276,7 +276,7 @@ public class TypeGraph {
      *         which <code>value</code> could be demonstrated to be in 
      *         <code>expected</code>.
      */
-    private Exp getValidTypeConditions(MTType value, MTType expected) 
+    private Exp getValidTypeConditions(MTType value, MTType expected)
             throws TypeMismatchException {
         //See note in the getValidTypeConditionsTo() in TypeRelationship,
         //re: Lovecraftian nightmare-scape
@@ -301,8 +301,8 @@ public class TypeGraph {
 
                 DummyExp memberOfValue = new DummyExp(value);
 
-                if (isKnownToBeIn(memberOfValue,
-                        expectedAsPowertypeApplication.getArgument(0))) {
+                if (isKnownToBeIn(memberOfValue, expectedAsPowertypeApplication
+                        .getArgument(0))) {
 
                     result = getTrueVarExp();
                 }
