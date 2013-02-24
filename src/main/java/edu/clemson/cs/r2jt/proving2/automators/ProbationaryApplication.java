@@ -19,12 +19,17 @@ public class ProbationaryApplication implements Automator {
     private final Application myApplication;
     private final Predicate<ProofStep> myPredicate;
     private boolean myAppliedFlag = false;
+    private boolean myChangeStuckFlag = true;
 
     public ProbationaryApplication(Application application,
             Predicate<ProofStep> p) {
 
         myApplication = application;
         myPredicate = p;
+    }
+
+    public boolean changeStuck() {
+        return myChangeStuckFlag;
     }
 
     @Override
@@ -36,6 +41,7 @@ public class ProbationaryApplication implements Automator {
         else {
             if (!myPredicate.test(model.getLastProofStep())) {
                 model.undoLastProofStep();
+                myChangeStuckFlag = false;
             }
 
             stack.pop();
