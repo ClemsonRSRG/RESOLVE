@@ -237,7 +237,6 @@ public class JProverFrame extends JFrame {
         myDetailsArea.setVisible(false);
         myDetailsCheckBox.addChangeListener(new DetailsDisplayer());
 
-        myProverStateDisplay.getModel().addChangeListener(TO_THEOREM_SELECTION);
         myProverStateDisplay.getModel().setChangeEventMode(
                 PerVCProverModel.ChangeEventMode.INTERMITTENT);
 

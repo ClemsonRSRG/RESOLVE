@@ -6,12 +6,14 @@ package edu.clemson.cs.r2jt.proving2.utilities;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.LocalTheorem;
+import edu.clemson.cs.r2jt.proving2.Theorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheoremStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.transformations.ExpandAntecedentByImplication;
 import edu.clemson.cs.r2jt.proving2.transformations.ExpandAntecedentBySubstitution;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -49,21 +51,29 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
             if (result) {
                 Transformation transformation = tLT.getTransformation();
 
-                if (transformation instanceof ExpandAntecedentBySubstitution) {
+                if (transformation instanceof ExpandAntecedentBySubstitution
+                        || transformation instanceof ExpandAntecedentByImplication) {
                     result =
                             transformation.functionApplicationCountDelta() <= 0;
 
                     if (!result) {
+                        Set<Theorem> origialTheorems =
+                                tLT.getPrerequisiteTheorems();
+                        Set<String> originalSymbolNames = new HashSet<String>();
+                        for (Theorem ot : origialTheorems) {
+                            originalSymbolNames.addAll(ot.getAssertion()
+                                    .getSymbolNames());
+                        }
+
                         Set<String> introduced =
                                 transformation.getReplacementSymbolNames();
 
-                        introduced.removeAll(transformation
-                                .getPatternSymbolNames());
+                        introduced.removeAll(originalSymbolNames);
 
                         result = !introduced.isEmpty();
                     }
                 }
-                else if (!(transformation instanceof ExpandAntecedentByImplication)) {
+                else {
                     //Not prepared to deal with other kinds of transformations
                     throw new RuntimeException();
                 }
