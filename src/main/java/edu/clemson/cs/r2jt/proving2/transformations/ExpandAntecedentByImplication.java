@@ -10,6 +10,7 @@ import edu.clemson.cs.r2jt.proving.absyn.BindingException;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.LocalTheorem;
+import edu.clemson.cs.r2jt.proving2.Theorem;
 import edu.clemson.cs.r2jt.proving2.Utilities;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.justifications.TheoremApplication;
@@ -18,6 +19,7 @@ import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheoremStep;
+import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collection;
 import java.util.HashSet;
@@ -218,11 +220,23 @@ public class ExpandAntecedentByImplication implements Transformation {
 
         private Map<PExp, PExp> myBindings;
         private Collection<Site> myBindSites;
+        private Set<Theorem> myBindTheorems = new HashSet<Theorem>();
 
         public ExpandAntecedentByImplicationApplication(
                 Map<PExp, PExp> bindings, Collection<Site> bindSites) {
             myBindings = bindings;
             myBindSites = bindSites;
+
+            try {
+                for (Site s : bindSites) {
+                    myBindTheorems.add(s.getRootTheorem());
+                }
+            }
+            catch (NoSolutionException nse) {
+                //In this case we're sure that all the sites are derived from
+                //local or global theorems
+                throw new RuntimeException(nse);
+            }
         }
 
         @Override
@@ -240,7 +254,7 @@ public class ExpandAntecedentByImplication implements Transformation {
                         m.addLocalTheorem(a, new TheoremApplication(
                                 ExpandAntecedentByImplication.this), false);
                 m.addProofStep(new IntroduceLocalTheoremStep(t,
-                        ExpandAntecedentByImplication.this));
+                        ExpandAntecedentByImplication.this, myBindTheorems));
             }
         }
 
