@@ -8,6 +8,7 @@ import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.LocalTheorem;
+import edu.clemson.cs.r2jt.proving2.Theorem;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.AbstractBinder;
@@ -16,6 +17,7 @@ import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheoremStep;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
+import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collections;
 import java.util.Iterator;
@@ -180,6 +182,7 @@ public class ExpandAntecedentBySubstitution implements Transformation {
             implements
                 Application {
 
+        private final Set<Theorem> myBindTheorem;
         private final Site myBindSite;
         private final Map<PExp, PExp> myBindings;
 
@@ -187,6 +190,16 @@ public class ExpandAntecedentBySubstitution implements Transformation {
                 Map<PExp, PExp> bindings) {
             myBindSite = bindSite;
             myBindings = bindings;
+
+            try {
+                myBindTheorem =
+                        Collections.singleton(bindSite.getRootTheorem());
+            }
+            catch (NoSolutionException nse) {
+                //In this case we're certain that the bind site is associated
+                //with a local theorem
+                throw new RuntimeException(nse);
+            }
         }
 
         @Override
@@ -208,7 +221,7 @@ public class ExpandAntecedentBySubstitution implements Transformation {
                     m.addLocalTheorem(topLevelTransformed, null, false);
 
             m.addProofStep(new IntroduceLocalTheoremStep(newTheorem,
-                    ExpandAntecedentBySubstitution.this));
+                    ExpandAntecedentBySubstitution.this, myBindTheorem));
         }
 
         @Override
