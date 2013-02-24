@@ -8,6 +8,8 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.Theorem;
+import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -28,12 +30,23 @@ public class Site {
             public PExp getPExp(PerVCProverModel m, int index) {
                 return m.getLocalTheorem(index).getAssertion();
             }
+
+            @Override
+            public Theorem getRootTheorem(PerVCProverModel m, int index) {
+                return m.getLocalTheorem(index);
+            }
         },
         CONSEQUENTS {
 
             @Override
             public PExp getPExp(PerVCProverModel m, int index) {
                 return m.getConsequent(index);
+            }
+
+            @Override
+            public Theorem getRootTheorem(PerVCProverModel m, int index)
+                    throws NoSolutionException {
+                throw NoSolutionException.INSTANCE;
             }
         },
         THEOREM_LIBRARY {
@@ -42,9 +55,18 @@ public class Site {
             public PExp getPExp(PerVCProverModel m, int index) {
                 return m.getTheoremLibrary().get(index).getAssertion();
             }
+
+            @Override
+            public Theorem getRootTheorem(PerVCProverModel m, int index)
+                    throws NoSolutionException {
+                return m.getTheoremLibrary().get(index);
+            }
         };
 
         public abstract PExp getPExp(PerVCProverModel m, int index);
+
+        public abstract Theorem getRootTheorem(PerVCProverModel m, int index)
+                throws NoSolutionException;
     };
 
     public final Section section;
@@ -88,6 +110,10 @@ public class Site {
         }
 
         mySource = source;
+    }
+
+    public Theorem getRootTheorem() throws NoSolutionException {
+        return section.getRootTheorem(mySource, index);
     }
 
     @Override
