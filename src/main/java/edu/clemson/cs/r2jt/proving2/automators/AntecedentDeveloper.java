@@ -68,7 +68,11 @@ public class AntecedentDeveloper implements Automator {
      */
     private class AntecedentDeveloperRound implements Automator {
 
+        public static final int MAX_DEVELOPMENTS = 100;
+
+        private int myDevelopmentCount;
         private Iterator<Application> myApplications;
+        private ProbationaryApplication myProbationaryApplication;
 
         public AntecedentDeveloperRound(PerVCProverModel model) {
             List<Application> applications = new LinkedList<Application>();
@@ -107,9 +111,18 @@ public class AntecedentDeveloper implements Automator {
 
         @Override
         public void step(Deque<Automator> stack, PerVCProverModel model) {
-            if (myApplications.hasNext()) {
-                stack.push(new ProbationaryApplication(myApplications.next(),
-                        myDevelopmentPredicate));
+            if (myDevelopmentCount < MAX_DEVELOPMENTS
+                    && myApplications.hasNext()) {
+
+                if (myProbationaryApplication != null
+                        && myProbationaryApplication.changeStuck()) {
+                    myDevelopmentCount++;
+                }
+
+                myProbationaryApplication =
+                        new ProbationaryApplication(myApplications.next(),
+                                myDevelopmentPredicate);
+                stack.push(myProbationaryApplication);
             }
             else {
                 stack.pop();
