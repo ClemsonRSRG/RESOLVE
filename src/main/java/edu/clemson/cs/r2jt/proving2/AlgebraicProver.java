@@ -26,9 +26,11 @@ import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.verification.Verifier;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -80,7 +82,7 @@ public class AlgebraicProver {
     private final TypeGraph myTypeGraph;
     private final ImmutableList<Theorem> myTheoremLibrary;
 
-    private final JProverFrame myUI;
+    private JProverFrame myUI;
 
     private boolean myInteractiveModeFlag = false;
 
@@ -92,7 +94,7 @@ public class AlgebraicProver {
             new LinkedList<ProverListener>();
 
     public AlgebraicProver(TypeGraph g, List<VC> vcs, ModuleScope scope,
-            boolean startInteractive, CompileEnvironment environment) {
+            final boolean startInteractive, CompileEnvironment environment) {
 
         myModels = new PerVCProverModel[vcs.size()];
         myAutomatedProvers = new AutomatedProver[vcs.size()];
@@ -119,19 +121,32 @@ public class AlgebraicProver {
             myUI = null;
         }
         else {
-            JProverFrame proverPanel = new JProverFrame(myModels[0]);
-            proverPanel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            proverPanel.setVisible(true);
-            proverPanel.setInteractiveMode(startInteractive);
+            try {
+                SwingUtilities.invokeAndWait(new Runnable() {
+                    @Override
+                    public void run() {
+                        JProverFrame proverPanel = new JProverFrame(myModels[0]);
+                        proverPanel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                        proverPanel.setVisible(true);
+                        proverPanel.setInteractiveMode(startInteractive);
 
-            proverPanel.addNextVCButtonActionListener(NEXT_VC);
-            proverPanel.addLastVCButtonActionListener(LAST_VC);
-            proverPanel.addPlayButtonActionListener(GO_AUTOMATIC);
-            proverPanel.addPauseButtonActionListener(GO_INTERACTIVE);
-            proverPanel.addStepButtonActionListener(STEP_PROVER);
+                        proverPanel.addNextVCButtonActionListener(NEXT_VC);
+                        proverPanel.addLastVCButtonActionListener(LAST_VC);
+                        proverPanel.addPlayButtonActionListener(GO_AUTOMATIC);
+                        proverPanel.addPauseButtonActionListener(GO_INTERACTIVE);
+                        proverPanel.addStepButtonActionListener(STEP_PROVER);
 
-            proverPanel.setInteractiveMode(startInteractive);
-            myUI = proverPanel;
+                        proverPanel.setInteractiveMode(startInteractive);
+                        myUI = proverPanel;
+                    }
+                });
+            }
+            catch (InterruptedException ie) {
+                throw new RuntimeException(ie);
+            }
+            catch (InvocationTargetException ite) {
+                throw new RuntimeException(ite);
+            }
         }
 
         myTypeGraph = g;
@@ -152,14 +167,14 @@ public class AlgebraicProver {
         myWorkingThread = Thread.currentThread();
         myRunningFlag = true;
         while (myRunningFlag) {
-            System.out.println("Top");
+            System.out.println("AlgebraicProver - Starting");
             //This will block until it either finishes proving or is told to
             //stop by, e.g., a "pause" action
             if (!myInteractiveModeFlag) {
                 myAutomatedProvers[myVCIndex].start();
             }
-            System.out.println("Out -- Interactive: " + myInteractiveModeFlag);
-            myModels[myVCIndex].touch();
+            System.out.println("AlgebraicProver - Out -- Interactive: " + myInteractiveModeFlag);
+            //myModels[myVCIndex].touch();
             if (myModels[myVCIndex].noConsequents()
                     || myAutomatedProvers[myVCIndex].doneSearching()) {
                 //We finished searching--either proved or failed
@@ -191,7 +206,7 @@ public class AlgebraicProver {
     }
 
     private void setVCIndex(int index) {
-        System.out.println("SET VC INDEX " + index);
+        System.out.println("Algebraic Prover - SET VC INDEX " + index);
         int previousIndex = myVCIndex;
 
         myVCIndex = index;
@@ -205,7 +220,14 @@ public class AlgebraicProver {
         }
 
         if (myUI != null) {
-            myUI.setModel(myModels[myVCIndex]);
+            Runnable setModel = new Runnable() {
+                @Override
+                public void run() {
+                    myUI.setModel(myModels[myVCIndex]);
+                }
+            };
+
+            invokeAndWait(setModel);
         }
 
         if (!myInteractiveModeFlag) {
@@ -215,13 +237,30 @@ public class AlgebraicProver {
         }
     }
 
+    private void invokeAndWait(Runnable r) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            r.run();
+        }
+        else {
+            try {
+                SwingUtilities.invokeAndWait(r);
+            }
+            catch (InterruptedException ie) {
+                throw new RuntimeException(ie);
+            }
+            catch (InvocationTargetException ite) {
+                throw new RuntimeException(ite);
+            }
+        }
+    }
+    
     private class GoInteractive implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
             myInteractiveModeFlag = true;
-            myUI.setInteractiveMode(true);
             myAutomatedProvers[myVCIndex].pause();
+            myUI.setInteractiveMode(true);
         }
     }
 

@@ -39,6 +39,7 @@ public class AutomatedProver {
     private final ImmutableList<Theorem> myTheoremLibrary;
 
     private boolean myRunningFlag = true;
+    private boolean myWaitingForUIUpdateFlag = false;
 
     private final Deque<Automator> myAutomatorStack =
             new ArrayDeque<Automator>(20);
@@ -46,6 +47,7 @@ public class AutomatedProver {
     private boolean myPrepForUIUpdateFlag = false;
     private boolean myTakingStepFlag = false;
 
+    private final Object TRANSPORT_LOCK = new Object();
     private Thread myWorkerThread;
 
     private MainProofFitnessFunction myFitnessFunction;
@@ -133,7 +135,10 @@ public class AutomatedProver {
     public void uiUpdateFinished() {
         myPrepForUIUpdateFlag = false;
 
+        System.out.println("AutomatedProver - uiUpdateFinished");
+        
         if (myWorkerThread != null) {
+            System.out.println("AutomatedProver - Interrupting");
             myWorkerThread.interrupt();
         }
     }
@@ -143,18 +148,39 @@ public class AutomatedProver {
     }
 
     public void start() {
-        myWorkerThread = Thread.currentThread();
+        synchronized (TRANSPORT_LOCK) {
+            if (myWorkerThread != null) {
+                throw new RuntimeException("Can't start from two threads.");
+            }
 
-        myRunningFlag = true;
-        while (myRunningFlag) {
-            step();
+            myWorkerThread = Thread.currentThread();
+
+            System.out.println("============= AutomatedProver - start() ==============");
+
+            myRunningFlag = true;
+            while (myRunningFlag) {
+                step();
+            }
+
+            System.out.println("AutomatedProver - end of start()");
+
+            myWorkerThread = null;
         }
-
-        myWorkerThread = null;
     }
 
     public void pause() {
+        System.out.println("AutomatedProver - pause()");
         myRunningFlag = false;
+        myPrepForUIUpdateFlag = false;
+        
+        synchronized (TRANSPORT_LOCK) {
+            //This block just makes pause() block until start() terminates on 
+            //the other thread
+            myRunningFlag = false;  //This supresses the "empty synchronized 
+                                    //block" warning
+        }
+        
+        System.out.println("AutomatedProver - end of pause()");
     }
 
     public void step() {
@@ -162,38 +188,48 @@ public class AutomatedProver {
         myTakingStepFlag = true;
 
         if (myPrepForUIUpdateFlag) {
+            System.out.println("AutomatedProver - Prepping for UI update");
             synchronized (this) {
-                myModel.triggerUIUpdates();
+                if (myRunningFlag) {
+                    myWaitingForUIUpdateFlag = true;
 
-                while (myPrepForUIUpdateFlag) {
-                    try {
-                        wait();
-                    }
-                    catch (InterruptedException ie) {
+                    myModel.triggerUIUpdates();
 
+                    while (myPrepForUIUpdateFlag) {
+                        try {
+                            wait();
+                        }
+                        catch (InterruptedException ie) {
+
+                        }
                     }
+
+                    myWaitingForUIUpdateFlag = false;
                 }
             }
+            System.out.println("AutomatedProver - Done with UI update");
         }
 
-        List<ProofStep> proofSteps = myModel.getProofSteps();
+        if (myRunningFlag) {
+            List<ProofStep> proofSteps = myModel.getProofSteps();
 
-        int originalProofLength = proofSteps.size();
-        while (!myAutomatorStack.isEmpty()
-                && originalProofLength == proofSteps.size()
-                && !myModel.noConsequents()) {
+            int originalProofLength = proofSteps.size();
+            while (!myAutomatorStack.isEmpty()
+                    && originalProofLength == proofSteps.size()
+                    && !myModel.noConsequents()) {
 
-            myAutomatorStack.peek().step(myAutomatorStack, myModel);
-        }
-
-        if (myAutomatorStack.isEmpty() || myModel.noConsequents()) {
-            if (myAutomatorStack.isEmpty()) {
-                System.out.println("Proof space exhausted.");
+                myAutomatorStack.peek().step(myAutomatorStack, myModel);
             }
-            if (myModel.noConsequents()) {
-                System.out.println("Proved.");
+
+            if (myAutomatorStack.isEmpty() || myModel.noConsequents()) {
+                if (myAutomatorStack.isEmpty()) {
+                    System.out.println("Proof space exhausted.");
+                }
+                if (myModel.noConsequents()) {
+                    System.out.println("Proved.");
+                }
+                myRunningFlag = false;
             }
-            myRunningFlag = false;
         }
 
         myTakingStepFlag = false;

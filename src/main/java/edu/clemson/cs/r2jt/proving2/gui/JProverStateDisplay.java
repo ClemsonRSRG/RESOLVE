@@ -215,7 +215,9 @@ public class JProverStateDisplay extends JTextPane {
             bgColor.addAttribute(StyleConstants.Background, data);
 
             if (!myNodeToStart.containsKey(id)) {
-                throw new RuntimeException("Danger Will Robinson!");
+                System.out.println("DANGER WILL ROBINSON");
+                (new RuntimeException("Danger Will Robinson!")).printStackTrace();
+                System.exit(1);
             }
 
             int start = myNodeToStart.get(id);
