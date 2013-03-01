@@ -29,6 +29,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -91,10 +92,10 @@ public class JProverFrame extends JFrame {
     private final EnterTheoremSelectionOnModelChange TO_THEOREM_SELECTION =
             new EnterTheoremSelectionOnModelChange();
 
-    private final JProverStateDisplay myProverStateDisplay;
+    private JProverStateDisplay myProverStateDisplay;
 
     private final JCheckBox myDetailsCheckBox = new JCheckBox("Details");
-    private final JComponent myDetailsArea;
+    private JComponent myDetailsArea;
     private JList myTheoremList;
     private JProofDisplay myProofDisplay;
     private JLabel myProvingLabel = new JLabel();
@@ -102,17 +103,17 @@ public class JProverFrame extends JFrame {
     private JButton myLastVCButton = new JButton("<VC");
     private JButton mySkipButton = new JButton("Skip VC");
     private JButton myCancelButton = new JButton("Cancel");
-    private final JButton myPlayButton;
-    private final JButton myPauseButton;
-    private final JButton myStopButton;
-    private final JButton myStepButton;
+    private JButton myPlayButton;
+    private JButton myPauseButton;
+    private JButton myStopButton;
+    private JButton myStepButton;
 
     private final CardLayout myOptionalTransportLayout = new CardLayout();
     private final JPanel myOptionalTransportPanel =
             new JPanel(myOptionalTransportLayout);
 
-    private final JScrollPane myTopLevelScrollWrapper;
-    private final JComponent myBasicArea;
+    private JScrollPane myTopLevelScrollWrapper;
+    private JComponent myBasicArea;
 
     private ImmutableList<Theorem> myGlobalTheorems;
     private Set<PExp> myGlobalTheoremAssertions = new HashSet<PExp>();
@@ -219,7 +220,6 @@ public class JProverFrame extends JFrame {
         myProverStateDisplay = new JProverStateDisplay(m);
         myProverStateDisplay.addMouseListener(APPLICATION_CANCELLER);
 
-        m.setChangeEventMode(PerVCProverModel.ChangeEventMode.ALWAYS);
         myDetailsArea = buildDetailsArea();
 
         setLayout(new BorderLayout());
@@ -236,10 +236,7 @@ public class JProverFrame extends JFrame {
 
         myDetailsArea.setVisible(false);
         myDetailsCheckBox.addChangeListener(new DetailsDisplayer());
-
-        myProverStateDisplay.getModel().setChangeEventMode(
-                PerVCProverModel.ChangeEventMode.INTERMITTENT);
-
+        
         myCancelButton.addMouseListener(new MouseAdapter() {
 
             @Override
@@ -251,6 +248,7 @@ public class JProverFrame extends JFrame {
         setGlobalTheorems(globalTheorems);
 
         setModel(m);
+        setInteractiveMode(true);
 
         pack();
     }
@@ -271,30 +269,28 @@ public class JProverFrame extends JFrame {
     }
 
     public void setInteractiveMode(final boolean interactive) {
-        SwingUtilities.invokeLater(new Runnable() {
+        boolean changed = (interactive && !myInteractiveModeFlag) ||
+                (!interactive && myInteractiveModeFlag);
 
-            @Override
-            public void run() {
-                myInteractiveModeFlag = interactive;
-
-                if (interactive) {
-                    myProverStateDisplay.getModel().setChangeEventMode(
-                            PerVCProverModel.ChangeEventMode.ALWAYS);
-                    myProverStateDisplay.getModel().addChangeListener(
-                            TO_THEOREM_SELECTION);
-                    myProverStateDisplay.getModel().touch();
-                    prepForTheoremSelection();
-                }
-                else {
-                    myProverStateDisplay.getModel().setChangeEventMode(
-                            PerVCProverModel.ChangeEventMode.INTERMITTENT);
-                    removeClickTargetsFromModel();
-                    myProverStateDisplay.getModel().removeChangeListener(
-                            TO_THEOREM_SELECTION);
-                }
+        if (changed) {
+            myInteractiveModeFlag = interactive;
+            
+            if (interactive) {
+                myProverStateDisplay.getModel().setChangeEventMode(
+                        PerVCProverModel.ChangeEventMode.ALWAYS);
+                myProverStateDisplay.getModel().addChangeListener(
+                        TO_THEOREM_SELECTION);
+                myProverStateDisplay.getModel().touch();
+                prepForTheoremSelection();
             }
-
-        });
+            else {
+                myProverStateDisplay.getModel().setChangeEventMode(
+                        PerVCProverModel.ChangeEventMode.INTERMITTENT);
+                removeClickTargetsFromModel();
+                myProverStateDisplay.getModel().removeChangeListener(
+                        TO_THEOREM_SELECTION);
+            }
+        }
     }
 
     private void removeClickTargetsFromModel() {
@@ -650,15 +646,9 @@ public class JProverFrame extends JFrame {
 
         @Override
         public void mouseClicked(final MouseEvent e) {
-            SwingUtilities.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    System.out.println("LocalTheoremSelect");
-                    prepForTheoremApplication(myProverStateDisplay.getModel()
-                            .getLocalTheoremAncestor((Site) e.getSource()));
-                }
-            });
+            System.out.println("LocalTheoremSelect");
+            prepForTheoremApplication(myProverStateDisplay.getModel()
+                    .getLocalTheoremAncestor((Site) e.getSource()));
         }
 
         @Override
@@ -702,13 +692,17 @@ public class JProverFrame extends JFrame {
 
         @Override
         public void stateChanged(ChangeEvent e) {
+            System.out.println("JProverFrame.EnterTheoremSelectionOnModelChange - enter");
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
+                    System.out.println("JProverFrame.EnterTheoremSelectionOnModelChange - enterJob");
                     prepForTheoremSelection();
+                    System.out.println("JProverFrame.EnterTheoremSelectionOnModelChange - exitJob");
                 }
             });
+            System.out.println("JProverFrame.EnterTheoremSelectionOnModelChange - exit");
         }
     }
 

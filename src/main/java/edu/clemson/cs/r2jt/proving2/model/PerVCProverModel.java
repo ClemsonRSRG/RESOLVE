@@ -208,7 +208,9 @@ public final class PerVCProverModel {
 
             @Override
             public void run() {
+                System.out.println("PerVCProverModel - Alerting Change Listeners");
                 alertChangeListeners();
+                System.out.println("PerVCProverModel - Done Alerting Change Listeners");
             }
         });
     }
