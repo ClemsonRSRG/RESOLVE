@@ -216,7 +216,8 @@ public class JProverStateDisplay extends JTextPane {
 
             if (!myNodeToStart.containsKey(id)) {
                 System.out.println("DANGER WILL ROBINSON");
-                (new RuntimeException("Danger Will Robinson!")).printStackTrace();
+                (new RuntimeException("Danger Will Robinson!"))
+                        .printStackTrace();
                 System.exit(1);
             }
 

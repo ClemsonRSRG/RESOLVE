@@ -123,17 +123,21 @@ public class AlgebraicProver {
         else {
             try {
                 SwingUtilities.invokeAndWait(new Runnable() {
+
                     @Override
                     public void run() {
-                        JProverFrame proverPanel = new JProverFrame(myModels[0]);
-                        proverPanel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                        JProverFrame proverPanel =
+                                new JProverFrame(myModels[0]);
+                        proverPanel
+                                .setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                         proverPanel.setVisible(true);
                         proverPanel.setInteractiveMode(startInteractive);
 
                         proverPanel.addNextVCButtonActionListener(NEXT_VC);
                         proverPanel.addLastVCButtonActionListener(LAST_VC);
                         proverPanel.addPlayButtonActionListener(GO_AUTOMATIC);
-                        proverPanel.addPauseButtonActionListener(GO_INTERACTIVE);
+                        proverPanel
+                                .addPauseButtonActionListener(GO_INTERACTIVE);
                         proverPanel.addStepButtonActionListener(STEP_PROVER);
 
                         proverPanel.setInteractiveMode(startInteractive);
@@ -173,7 +177,8 @@ public class AlgebraicProver {
             if (!myInteractiveModeFlag) {
                 myAutomatedProvers[myVCIndex].start();
             }
-            System.out.println("AlgebraicProver - Out -- Interactive: " + myInteractiveModeFlag);
+            System.out.println("AlgebraicProver - Out -- Interactive: "
+                    + myInteractiveModeFlag);
             //myModels[myVCIndex].touch();
             if (myModels[myVCIndex].noConsequents()
                     || myAutomatedProvers[myVCIndex].doneSearching()) {
@@ -221,6 +226,7 @@ public class AlgebraicProver {
 
         if (myUI != null) {
             Runnable setModel = new Runnable() {
+
                 @Override
                 public void run() {
                     myUI.setModel(myModels[myVCIndex]);
@@ -253,7 +259,7 @@ public class AlgebraicProver {
             }
         }
     }
-    
+
     private class GoInteractive implements ActionListener {
 
         @Override

@@ -48,6 +48,7 @@ public class AutomatedProver {
     private boolean myTakingStepFlag = false;
 
     private final Object TRANSPORT_LOCK = new Object();
+    private final Object WORKER_THREAD_LOCK = new Object();
     private Thread myWorkerThread;
 
     private MainProofFitnessFunction myFitnessFunction;
@@ -107,6 +108,10 @@ public class AutomatedProver {
         myAutomatorStack.push(new PushSequence(steps));
     }
 
+    public boolean isRunning() {
+        return myRunningFlag;
+    }
+    
     public void prepForUIUpdate() {
         if (SwingUtilities.isEventDispatchThread()) {
             //Changes are happening on the event dispatching thread, which
@@ -136,7 +141,7 @@ public class AutomatedProver {
         myPrepForUIUpdateFlag = false;
 
         System.out.println("AutomatedProver - uiUpdateFinished");
-        
+
         if (myWorkerThread != null) {
             System.out.println("AutomatedProver - Interrupting");
             myWorkerThread.interrupt();
@@ -155,7 +160,8 @@ public class AutomatedProver {
 
             myWorkerThread = Thread.currentThread();
 
-            System.out.println("============= AutomatedProver - start() ==============");
+            System.out
+                    .println("============= AutomatedProver - start() ==============");
 
             myRunningFlag = true;
             while (myRunningFlag) {
@@ -164,7 +170,9 @@ public class AutomatedProver {
 
             System.out.println("AutomatedProver - end of start()");
 
-            myWorkerThread = null;
+            synchronized (WORKER_THREAD_LOCK) {
+                myWorkerThread = null;
+            }
         }
     }
 
@@ -172,14 +180,18 @@ public class AutomatedProver {
         System.out.println("AutomatedProver - pause()");
         myRunningFlag = false;
         myPrepForUIUpdateFlag = false;
-        
-        synchronized (TRANSPORT_LOCK) {
-            //This block just makes pause() block until start() terminates on 
-            //the other thread
-            myRunningFlag = false;  //This supresses the "empty synchronized 
-                                    //block" warning
+
+        synchronized (WORKER_THREAD_LOCK) {
+            if (myWorkerThread != null) {
+                myWorkerThread.interrupt();
+            }
         }
-        
+
+        synchronized (TRANSPORT_LOCK) {
+            //Redundant, just suppressing empty block warning
+            myPrepForUIUpdateFlag = false;
+        }
+
         System.out.println("AutomatedProver - end of pause()");
     }
 
