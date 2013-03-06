@@ -236,7 +236,7 @@ public class JProverFrame extends JFrame {
 
         myDetailsArea.setVisible(false);
         myDetailsCheckBox.addChangeListener(new DetailsDisplayer());
-        
+
         myCancelButton.addMouseListener(new MouseAdapter() {
 
             @Override
@@ -269,12 +269,13 @@ public class JProverFrame extends JFrame {
     }
 
     public void setInteractiveMode(final boolean interactive) {
-        boolean changed = (interactive && !myInteractiveModeFlag) ||
-                (!interactive && myInteractiveModeFlag);
+        boolean changed =
+                (interactive && !myInteractiveModeFlag)
+                        || (!interactive && myInteractiveModeFlag);
 
         if (changed) {
             myInteractiveModeFlag = interactive;
-            
+
             if (interactive) {
                 myProverStateDisplay.getModel().setChangeEventMode(
                         PerVCProverModel.ChangeEventMode.ALWAYS);
@@ -692,17 +693,21 @@ public class JProverFrame extends JFrame {
 
         @Override
         public void stateChanged(ChangeEvent e) {
-            System.out.println("JProverFrame.EnterTheoremSelectionOnModelChange - enter");
+            System.out
+                    .println("JProverFrame.EnterTheoremSelectionOnModelChange - enter");
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
-                    System.out.println("JProverFrame.EnterTheoremSelectionOnModelChange - enterJob");
+                    System.out
+                            .println("JProverFrame.EnterTheoremSelectionOnModelChange - enterJob");
                     prepForTheoremSelection();
-                    System.out.println("JProverFrame.EnterTheoremSelectionOnModelChange - exitJob");
+                    System.out
+                            .println("JProverFrame.EnterTheoremSelectionOnModelChange - exitJob");
                 }
             });
-            System.out.println("JProverFrame.EnterTheoremSelectionOnModelChange - exit");
+            System.out
+                    .println("JProverFrame.EnterTheoremSelectionOnModelChange - exit");
         }
     }
 

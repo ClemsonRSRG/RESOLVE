@@ -208,9 +208,11 @@ public final class PerVCProverModel {
 
             @Override
             public void run() {
-                System.out.println("PerVCProverModel - Alerting Change Listeners");
+                System.out
+                        .println("PerVCProverModel - Alerting Change Listeners");
                 alertChangeListeners();
-                System.out.println("PerVCProverModel - Done Alerting Change Listeners");
+                System.out
+                        .println("PerVCProverModel - Done Alerting Change Listeners");
             }
         });
     }
@@ -244,14 +246,20 @@ public final class PerVCProverModel {
     private void modelChanged(boolean important) {
         if (myChangeEventMode.report(important)) {
 
-            if (myAutomatedProver == null) {
-                SwingUtilities.invokeLater(new Runnable() {
-
+            if (myAutomatedProver == null || !myAutomatedProver.isRunning()) {
+                Runnable alertListeners = new Runnable() {
                     @Override
                     public void run() {
                         alertChangeListeners();
                     }
-                });
+                };
+                
+                if (SwingUtilities.isEventDispatchThread()) {
+                    alertListeners.run();
+                }
+                else {
+                    SwingUtilities.invokeLater(alertListeners);
+                }
             }
             else {
                 myAutomatedProver.prepForUIUpdate();
