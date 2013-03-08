@@ -18,13 +18,11 @@ import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.proving2.justifications.Given;
 import edu.clemson.cs.r2jt.proving2.justifications.Justification;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
-import edu.clemson.cs.r2jt.proving2.utilities.AddsSomethingNewPredicate;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
 import edu.clemson.cs.r2jt.proving2.utilities.UnsafeIteratorLinkedList;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -145,9 +143,9 @@ public final class PerVCProverModel {
      * the model simply alerts the automated prover that the model would like
      * to alert its listeners, at which case the ball is in the automated 
      * prover's court to clean up, pause any further modifications to the model,
-     * then alert the model that it's ready.  At that point, the model alerts
-     * sends out its change alerts, then calls alerts the automated prover that
-     * it is done, whereupon the automated prover continues its work.</p>
+     * then alert the model that it's ready.  At that point, the model sends out
+     * its change alerts, then alerts the automated prover that it is done, 
+     * whereupon the automated prover continues its work.</p>
      */
     private AutomatedProver myAutomatedProver;
 
@@ -208,7 +206,11 @@ public final class PerVCProverModel {
 
             @Override
             public void run() {
+                System.out
+                        .println("PerVCProverModel - Alerting Change Listeners");
                 alertChangeListeners();
+                System.out
+                        .println("PerVCProverModel - Done Alerting Change Listeners");
             }
         });
     }
@@ -242,14 +244,21 @@ public final class PerVCProverModel {
     private void modelChanged(boolean important) {
         if (myChangeEventMode.report(important)) {
 
-            if (myAutomatedProver == null) {
-                SwingUtilities.invokeLater(new Runnable() {
+            if (myAutomatedProver == null || !myAutomatedProver.isRunning()) {
+                Runnable alertListeners = new Runnable() {
 
                     @Override
                     public void run() {
                         alertChangeListeners();
                     }
-                });
+                };
+
+                if (SwingUtilities.isEventDispatchThread()) {
+                    alertListeners.run();
+                }
+                else {
+                    SwingUtilities.invokeLater(alertListeners);
+                }
             }
             else {
                 myAutomatedProver.prepForUIUpdate();
@@ -339,7 +348,7 @@ public final class PerVCProverModel {
     }
 
     /**
-     * <p>Alters the value atthe given site, assuming it indicates either an
+     * <p>Alters the value at the given site, assuming it indicates either an
      * antecedent or consequent (indicating a global theorem will trigger an
      * <code>IllegalArgumentException</code>.  Returns the original value of the
      * root site.</p>
