@@ -246,12 +246,13 @@ public final class PerVCProverModel {
 
             if (myAutomatedProver == null || !myAutomatedProver.isRunning()) {
                 Runnable alertListeners = new Runnable() {
+
                     @Override
                     public void run() {
                         alertChangeListeners();
                     }
                 };
-                
+
                 if (SwingUtilities.isEventDispatchThread()) {
                     alertListeners.run();
                 }

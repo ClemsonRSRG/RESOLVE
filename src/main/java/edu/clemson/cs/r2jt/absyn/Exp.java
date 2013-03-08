@@ -512,6 +512,18 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
         return trueExp;
     }
 
+    /**
+     * <p>Oh, you poor bastard, you need to use <code>replace</code>.  Keep in
+     * mind that if <code>replace</code> doesn't need to make any internal
+     * replacements, it returns <code>null</code> to indicate "no change" rather
+     * than returning the unmodified object.  Other code depends on this 
+     * functionality so it can't be changed--if you return the unmodified 
+     * object, things will start to misbehave.</p>
+     * @param exp
+     * @param old
+     * @param replacement
+     * @return 
+     */
     public static Exp replace(Exp exp, Exp old, Exp replacement) {
         MTType originalType = exp.getMathType();
         MTType originalTypeValue = exp.getMathTypeValue();

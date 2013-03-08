@@ -107,7 +107,7 @@ public class AutomatedProver {
     public boolean isRunning() {
         return myRunningFlag;
     }
-    
+
     public void prepForUIUpdate() {
         if (SwingUtilities.isEventDispatchThread()) {
             //Changes are happening on the event dispatching thread, which
@@ -149,7 +149,7 @@ public class AutomatedProver {
     }
 
     public void start() {
-        
+
         //This synchronization provides a convenient way for other methods to
         //wait until we've actually gotten out of the automated proof loop--
         //just synchronize on TRANSPORT_LOCK
@@ -203,7 +203,7 @@ public class AutomatedProver {
 
         if (myPrepForUIUpdateFlag) {
             System.out.println("AutomatedProver - Prepping for UI update");
-            
+
             //We're not actually trying to make this code mutually exclusive
             //with anything--we're just grabbing the object's monitor so we can
             //wait()
