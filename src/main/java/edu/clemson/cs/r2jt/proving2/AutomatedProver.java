@@ -6,7 +6,6 @@ package edu.clemson.cs.r2jt.proving2;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.automators.AntecedentDeveloper;
 import edu.clemson.cs.r2jt.proving2.automators.ApplyN;
 import edu.clemson.cs.r2jt.proving2.automators.Automator;
@@ -25,8 +24,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
-import java.util.TreeSet;
 import javax.swing.SwingUtilities;
 
 /**
@@ -39,7 +36,6 @@ public class AutomatedProver {
     private final ImmutableList<Theorem> myTheoremLibrary;
 
     private boolean myRunningFlag = true;
-    private boolean myWaitingForUIUpdateFlag = false;
 
     private final Deque<Automator> myAutomatorStack =
             new ArrayDeque<Automator>(20);
@@ -153,6 +149,10 @@ public class AutomatedProver {
     }
 
     public void start() {
+        
+        //This synchronization provides a convenient way for other methods to
+        //wait until we've actually gotten out of the automated proof loop--
+        //just synchronize on TRANSPORT_LOCK
         synchronized (TRANSPORT_LOCK) {
             if (myWorkerThread != null) {
                 throw new RuntimeException("Can't start from two threads.");
@@ -188,7 +188,9 @@ public class AutomatedProver {
         }
 
         synchronized (TRANSPORT_LOCK) {
-            //Redundant, just suppressing empty block warning
+            //Redundant, just suppressing empty block warning.  This 
+            //synchronization just serves to make us wait here while the prover
+            //loop unwinds and start() terminates
             myPrepForUIUpdateFlag = false;
         }
 
@@ -201,10 +203,12 @@ public class AutomatedProver {
 
         if (myPrepForUIUpdateFlag) {
             System.out.println("AutomatedProver - Prepping for UI update");
+            
+            //We're not actually trying to make this code mutually exclusive
+            //with anything--we're just grabbing the object's monitor so we can
+            //wait()
             synchronized (this) {
                 if (myRunningFlag) {
-                    myWaitingForUIUpdateFlag = true;
-
                     myModel.triggerUIUpdates();
 
                     while (myPrepForUIUpdateFlag) {
@@ -215,8 +219,6 @@ public class AutomatedProver {
 
                         }
                     }
-
-                    myWaitingForUIUpdateFlag = false;
                 }
             }
             System.out.println("AutomatedProver - Done with UI update");
