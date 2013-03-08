@@ -53,6 +53,7 @@ public class AntecedentDeveloper implements Automator {
     @Override
     public void step(Deque<Automator> stack, PerVCProverModel model) {
         if (myRemainingRounds > 0) {
+            System.out.println("AntecedentDeveloper got the heartbeat.");
             stack.push(new AntecedentDeveloperRound(model));
         }
         else {

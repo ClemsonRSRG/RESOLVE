@@ -398,7 +398,7 @@ public class VarExp extends Exp {
             }
         }
 
-        return this;
+        return null;
     }
 
     public void prettyPrint() {

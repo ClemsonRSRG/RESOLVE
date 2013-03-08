@@ -6,7 +6,6 @@ package edu.clemson.cs.r2jt.proving2;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.automators.AntecedentDeveloper;
 import edu.clemson.cs.r2jt.proving2.automators.ApplyN;
 import edu.clemson.cs.r2jt.proving2.automators.Automator;
@@ -25,8 +24,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
-import java.util.TreeSet;
 import javax.swing.SwingUtilities;
 
 /**
@@ -46,6 +43,8 @@ public class AutomatedProver {
     private boolean myPrepForUIUpdateFlag = false;
     private boolean myTakingStepFlag = false;
 
+    private final Object TRANSPORT_LOCK = new Object();
+    private final Object WORKER_THREAD_LOCK = new Object();
     private Thread myWorkerThread;
 
     private MainProofFitnessFunction myFitnessFunction;
@@ -105,6 +104,10 @@ public class AutomatedProver {
         myAutomatorStack.push(new PushSequence(steps));
     }
 
+    public boolean isRunning() {
+        return myRunningFlag;
+    }
+
     public void prepForUIUpdate() {
         if (SwingUtilities.isEventDispatchThread()) {
             //Changes are happening on the event dispatching thread, which
@@ -133,7 +136,10 @@ public class AutomatedProver {
     public void uiUpdateFinished() {
         myPrepForUIUpdateFlag = false;
 
+        System.out.println("AutomatedProver - uiUpdateFinished");
+
         if (myWorkerThread != null) {
+            System.out.println("AutomatedProver - Interrupting");
             myWorkerThread.interrupt();
         }
     }
@@ -143,18 +149,52 @@ public class AutomatedProver {
     }
 
     public void start() {
-        myWorkerThread = Thread.currentThread();
 
-        myRunningFlag = true;
-        while (myRunningFlag) {
-            step();
+        //This synchronization provides a convenient way for other methods to
+        //wait until we've actually gotten out of the automated proof loop--
+        //just synchronize on TRANSPORT_LOCK
+        synchronized (TRANSPORT_LOCK) {
+            if (myWorkerThread != null) {
+                throw new RuntimeException("Can't start from two threads.");
+            }
+
+            myWorkerThread = Thread.currentThread();
+
+            System.out
+                    .println("============= AutomatedProver - start() ==============");
+
+            myRunningFlag = true;
+            while (myRunningFlag) {
+                step();
+            }
+
+            System.out.println("AutomatedProver - end of start()");
+
+            synchronized (WORKER_THREAD_LOCK) {
+                myWorkerThread = null;
+            }
         }
-
-        myWorkerThread = null;
     }
 
     public void pause() {
+        System.out.println("AutomatedProver - pause()");
         myRunningFlag = false;
+        myPrepForUIUpdateFlag = false;
+
+        synchronized (WORKER_THREAD_LOCK) {
+            if (myWorkerThread != null) {
+                myWorkerThread.interrupt();
+            }
+        }
+
+        synchronized (TRANSPORT_LOCK) {
+            //Redundant, just suppressing empty block warning.  This 
+            //synchronization just serves to make us wait here while the prover
+            //loop unwinds and start() terminates
+            myPrepForUIUpdateFlag = false;
+        }
+
+        System.out.println("AutomatedProver - end of pause()");
     }
 
     public void step() {
@@ -162,38 +202,48 @@ public class AutomatedProver {
         myTakingStepFlag = true;
 
         if (myPrepForUIUpdateFlag) {
+            System.out.println("AutomatedProver - Prepping for UI update");
+
+            //We're not actually trying to make this code mutually exclusive
+            //with anything--we're just grabbing the object's monitor so we can
+            //wait()
             synchronized (this) {
-                myModel.triggerUIUpdates();
+                if (myRunningFlag) {
+                    myModel.triggerUIUpdates();
 
-                while (myPrepForUIUpdateFlag) {
-                    try {
-                        wait();
-                    }
-                    catch (InterruptedException ie) {
+                    while (myPrepForUIUpdateFlag) {
+                        try {
+                            wait();
+                        }
+                        catch (InterruptedException ie) {
 
+                        }
                     }
                 }
             }
+            System.out.println("AutomatedProver - Done with UI update");
         }
 
-        List<ProofStep> proofSteps = myModel.getProofSteps();
+        if (myRunningFlag) {
+            List<ProofStep> proofSteps = myModel.getProofSteps();
 
-        int originalProofLength = proofSteps.size();
-        while (!myAutomatorStack.isEmpty()
-                && originalProofLength == proofSteps.size()
-                && !myModel.noConsequents()) {
+            int originalProofLength = proofSteps.size();
+            while (!myAutomatorStack.isEmpty()
+                    && originalProofLength == proofSteps.size()
+                    && !myModel.noConsequents()) {
 
-            myAutomatorStack.peek().step(myAutomatorStack, myModel);
-        }
-
-        if (myAutomatorStack.isEmpty() || myModel.noConsequents()) {
-            if (myAutomatorStack.isEmpty()) {
-                System.out.println("Proof space exhausted.");
+                myAutomatorStack.peek().step(myAutomatorStack, myModel);
             }
-            if (myModel.noConsequents()) {
-                System.out.println("Proved.");
+
+            if (myAutomatorStack.isEmpty() || myModel.noConsequents()) {
+                if (myAutomatorStack.isEmpty()) {
+                    System.out.println("Proof space exhausted.");
+                }
+                if (myModel.noConsequents()) {
+                    System.out.println("Proved.");
+                }
+                myRunningFlag = false;
             }
-            myRunningFlag = false;
         }
 
         myTakingStepFlag = false;
