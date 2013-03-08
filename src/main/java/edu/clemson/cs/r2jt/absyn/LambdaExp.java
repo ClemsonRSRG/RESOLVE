@@ -235,6 +235,12 @@ public class LambdaExp extends Exp {
         if (!(old instanceof LambdaExp)) {
             LambdaExp result = (LambdaExp) Exp.copy(this);
             result.body = Exp.replace(result.body, old, replace);
+            
+            //replace is idiotically implemented, so we have to do this
+            if (result.body == null) {
+                result.body = Exp.copy(body);
+            }
+            
             if (variable.getName() != null) {
                 if (old instanceof VarExp && replace instanceof VarExp) {
                     if (((VarExp) old).getName().toString().equals(
