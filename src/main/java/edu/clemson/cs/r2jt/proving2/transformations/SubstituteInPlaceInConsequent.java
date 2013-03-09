@@ -17,6 +17,7 @@ import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -69,8 +70,8 @@ public class SubstituteInPlaceInConsequent implements Transformation {
 
     @Override
     public boolean introducesQuantifiedVariables() {
-        Set<PSymbol> introduced =
-                myTransformationTemplate.getQuantifiedVariables();
+        Set<PSymbol> introduced = new HashSet<PSymbol>(
+                myTransformationTemplate.getQuantifiedVariables());
 
         introduced.removeAll(myMatchPattern.getFunctionApplications());
 

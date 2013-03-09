@@ -32,6 +32,7 @@ import edu.clemson.cs.r2jt.proving2.Utilities;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 
 /**
@@ -541,7 +542,8 @@ public abstract class PExp {
     public final Set<String> getSymbolNames() {
         if (myCachedSymbolNames == null) {
             //We're immutable, so only do this once
-            myCachedSymbolNames = getSymbolNamesNoCache();
+            myCachedSymbolNames = Collections.unmodifiableSet(
+                    getSymbolNamesNoCache());
         }
 
         return myCachedSymbolNames;
@@ -552,7 +554,8 @@ public abstract class PExp {
     public final Set<PSymbol> getQuantifiedVariables() {
         if (myCachedQuantifiedVariables == null) {
             //We're immutable, so only do this once
-            myCachedQuantifiedVariables = getQuantifiedVariablesNoCache();
+            myCachedQuantifiedVariables = Collections.unmodifiableSet(
+                    getQuantifiedVariablesNoCache());
         }
 
         return myCachedQuantifiedVariables;
