@@ -22,6 +22,7 @@ import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheoremStep;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -126,7 +127,7 @@ public class ExpandAntecedentByImplication implements Transformation {
         }
 
         Set<PSymbol> consequentQuantifiedVariables =
-                myConsequent.getQuantifiedVariables();
+                new HashSet<PSymbol>(myConsequent.getQuantifiedVariables());
 
         consequentQuantifiedVariables.removeAll(antecedentQuantifiedVariables);
 

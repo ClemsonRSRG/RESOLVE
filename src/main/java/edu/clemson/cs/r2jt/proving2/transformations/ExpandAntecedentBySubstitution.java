@@ -20,6 +20,7 @@ import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +76,8 @@ public class ExpandAntecedentBySubstitution implements Transformation {
 
     @Override
     public boolean introducesQuantifiedVariables() {
-        Set<PSymbol> introduced =
-                myTransformationTemplate.getQuantifiedVariables();
+        Set<PSymbol> introduced = new HashSet<PSymbol>(
+                myTransformationTemplate.getQuantifiedVariables());
         introduced.removeAll(myMatchPattern.getQuantifiedVariables());
 
         return !introduced.isEmpty();
