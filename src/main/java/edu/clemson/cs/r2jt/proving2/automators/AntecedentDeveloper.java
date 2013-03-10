@@ -84,6 +84,11 @@ public class AntecedentDeveloper implements Automator {
             //that we're going to apply them all, we slurp them all up now 
             //to be applied later one at a time.
             Iterator<Application> tApplications;
+            
+            if (model.getLocalTheoremList().isEmpty()) {
+                throw new RuntimeException();
+            }
+            
             for (Theorem t : model.getLocalTheoremList()) {
                 for (Transformation transformation : t.getTransformations()) {
                     if (transformation instanceof ExpandAntecedentByImplication
@@ -115,6 +120,8 @@ public class AntecedentDeveloper implements Automator {
             if (myDevelopmentCount < MAX_DEVELOPMENTS
                     && myApplications.hasNext()) {
 
+                System.out.println("AntecedentDeveloperRound - adding development");
+                
                 if (myProbationaryApplication != null
                         && myProbationaryApplication.changeStuck()) {
                     myDevelopmentCount++;

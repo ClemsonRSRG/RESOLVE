@@ -12,6 +12,7 @@ import java.util.Set;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import java.util.Collections;
 
 /**
  * <p>A <code>PSymbol</code> represents a reference to a named element such as
