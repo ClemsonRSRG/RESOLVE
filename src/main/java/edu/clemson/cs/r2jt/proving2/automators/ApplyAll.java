@@ -40,4 +40,9 @@ public class ApplyAll implements Automator {
             stack.pop();
         }
     }
+    
+    @Override
+    public String toString() {
+        return "Apply all: " + myTransformation;
+    }
 }

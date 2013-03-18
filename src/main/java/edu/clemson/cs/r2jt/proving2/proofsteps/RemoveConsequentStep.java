@@ -31,6 +31,6 @@ public class RemoveConsequentStep implements ProofStep {
 
     @Override
     public String toString() {
-        return "" + myTransformation;
+        return "Remove " + myTransformation;
     }
 }

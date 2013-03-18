@@ -27,6 +27,8 @@ import edu.clemson.cs.r2jt.verification.Verifier;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JFrame;
@@ -92,30 +94,37 @@ public class AlgebraicProver {
 
     private final List<ProverListener> myProverListeners =
             new LinkedList<ProverListener>();
+    
+    private final ModuleScope myModuleScope;
 
     public AlgebraicProver(TypeGraph g, List<VC> vcs, ModuleScope scope,
             final boolean startInteractive, CompileEnvironment environment) {
 
         myModels = new PerVCProverModel[vcs.size()];
         myAutomatedProvers = new AutomatedProver[vcs.size()];
+        myModuleScope = scope;
 
         List<TheoremEntry> theoremEntries =
                 scope.query(new EntryTypeQuery(TheoremEntry.class,
                         ImportStrategy.IMPORT_RECURSIVE,
                         FacilityStrategy.FACILITY_IGNORE));
+        
+        //Ensure that the theorems are in a consistent (even if arbitrary) order
+        //so that proof results are likewise consistent
+        Collections.sort(theoremEntries, new AlphabeticalByTheoremName());
 
         List<Theorem> theorems = new LinkedList<Theorem>();
         for (TheoremEntry e : theoremEntries) {
             theorems.add(new Theorem(e.getAssertion(), new Library(e)));
         }
-
+        
         myTheoremLibrary = new ArrayBackedImmutableList<Theorem>(theorems);
 
         myModels[0] =
                 new PerVCProverModel(g, vcs.get(0).getName(), vcs.get(0),
                         myTheoremLibrary);
         myAutomatedProvers[0] =
-                new AutomatedProver(myModels[0], myTheoremLibrary);
+                new AutomatedProver(myModels[0], myTheoremLibrary, scope);
 
         if (environment.flags.isFlagSet(Prover.FLAG_NOGUI)) {
             myUI = null;
@@ -221,7 +230,8 @@ public class AlgebraicProver {
                     new PerVCProverModel(myTypeGraph, myVCs.get(myVCIndex)
                             .getName(), myVCs.get(myVCIndex), myTheoremLibrary);
             myAutomatedProvers[myVCIndex] =
-                    new AutomatedProver(myModels[myVCIndex], myTheoremLibrary);
+                    new AutomatedProver(myModels[myVCIndex], myTheoremLibrary, 
+                        myModuleScope);
         }
 
         if (myUI != null) {
@@ -306,5 +316,14 @@ public class AlgebraicProver {
                 setVCIndex(myVCIndex - 1);
             }
         }
+    }
+    
+    private class AlphabeticalByTheoremName implements Comparator<TheoremEntry> {
+
+        @Override
+        public int compare(TheoremEntry o1, TheoremEntry o2) {
+            return o1.getName().compareTo(o2.getName());
+        }
+        
     }
 }
