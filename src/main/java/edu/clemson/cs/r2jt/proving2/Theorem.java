@@ -11,6 +11,7 @@ import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.transformations.ExpandAntecedentByImplication;
 import edu.clemson.cs.r2jt.proving2.transformations.ExpandAntecedentBySubstitution;
 import edu.clemson.cs.r2jt.proving2.transformations.ReplaceTheoremInConsequentWithTrue;
+import edu.clemson.cs.r2jt.proving2.transformations.StrengthenConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.SubstituteInPlaceInConsequent;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.LinkedList;
@@ -58,6 +59,8 @@ public class Theorem {
 
                 result.add(new ExpandAntecedentByImplication(left
                         .splitIntoConjuncts(), right));
+                result.add(new StrengthenConsequent(left.splitIntoConjuncts(), 
+                        right.splitIntoConjuncts()));
             }
             else if (assertionAsPS.name.equals("=")) {
                 PExp left = assertionAsPS.arguments.get(0);

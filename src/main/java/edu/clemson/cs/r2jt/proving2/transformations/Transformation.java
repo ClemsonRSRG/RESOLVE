@@ -41,7 +41,7 @@ public interface Transformation {
     public int functionApplicationCountDelta();
 
     public boolean introducesQuantifiedVariables();
-
+    
     public Set<String> getPatternSymbolNames();
 
     public Set<String> getReplacementSymbolNames();

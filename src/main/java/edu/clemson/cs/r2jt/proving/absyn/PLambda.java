@@ -9,6 +9,9 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.SingletonImmutableList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 
 public class PLambda extends PExp {
 
@@ -28,6 +31,7 @@ public class PLambda extends PExp {
         v.beginPLambda(this);
 
         v.beginChildren(this);
+        myBody.accept(v);
         v.endChildren(this);
 
         v.endPLambda(this);
@@ -89,11 +93,21 @@ public class PLambda extends PExp {
     protected void bindTo(PExp target, Map<PExp, PExp> accumulator)
             throws BindingException {
 
-        //As a lambda expression, we can't be quantified and our body is
-        //indivisible, so we only bind to identical things.
-        if (!this.equals(target)) {
+        if (!(target instanceof PLambda) || !typeMatches(target)) {
             throw BINDING_EXCEPTION;
         }
+        
+        MTFunction type = (MTFunction) getType();
+        
+        PLambda targetAsPLambda = (PLambda) target;
+        
+        Map<PExp, PExp> substitutions = new HashMap<PExp, PExp>();
+        substitutions.put(new PSymbol(type.getDomain(), 
+                    null, targetAsPLambda.variableName),
+                new PSymbol(type.getDomain(), null, variableName));
+        targetAsPLambda = (PLambda) targetAsPLambda.substitute(accumulator);
+        
+        myBody.bindTo(targetAsPLambda.myBody, accumulator);
     }
 
     @Override
@@ -117,7 +131,11 @@ public class PLambda extends PExp {
 
     @Override
     public Set<String> getSymbolNamesNoCache() {
-        return myBody.getSymbolNames();
+        Set<String> bodyNames = new HashSet<String>(myBody.getSymbolNames());
+        
+        bodyNames.add("lambda");
+        
+        return bodyNames;
     }
 
     @Override
@@ -127,7 +145,12 @@ public class PLambda extends PExp {
 
     @Override
     public List<PExp> getFunctionApplicationsNoCache() {
-        return myBody.getFunctionApplications();
+        List<PExp> bodyFunctions = 
+                new LinkedList<PExp>(myBody.getFunctionApplications());
+        
+        bodyFunctions.add(new PSymbol(getType(), null, "lambda"));
+        
+        return bodyFunctions;
     }
 
     @Override
