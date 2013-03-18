@@ -233,7 +233,7 @@ public class Populator extends TreeWalkerVisitor {
         myBuilder.endScope();
 
         l.setMathType(new MTFunction(myTypeGraph, l.getBody().getMathType(), l
-                .getTy().getMathType()));
+                .getTy().getMathTypeValue()));
     }
 
     @Override
@@ -798,10 +798,7 @@ public class Populator extends TreeWalkerVisitor {
 
         node.setMathType(mathTypeValue);
 
-        SymbolTableEntry.Quantification q =
-                SymbolTableEntry.Quantification.UNIVERSAL;
-        //TODO : the for-alls in a type theorem should be normal QuantExps and
-        //       the quantification here should depend on the innermost QuantExp
+        SymbolTableEntry.Quantification q = myActiveQuantifications.peek();
         addBinding(varName, node.getName().getLocation(), q, node,
                 mathTypeValue, null);
 
@@ -1324,11 +1321,13 @@ public class Populator extends TreeWalkerVisitor {
     public void preTypeTheoremDec(TypeTheoremDec node) {
         myBuilder.startScope(node);
         myInTypeTheoremBindingExpFlag = false;
+        myActiveQuantifications.push(Quantification.UNIVERSAL);
     }
 
     @Override
     public void postTypeTheoremDecMyUniversalVars(TypeTheoremDec node) {
         myInTypeTheoremBindingExpFlag = true;
+        myActiveQuantifications.pop();
     }
 
     @Override

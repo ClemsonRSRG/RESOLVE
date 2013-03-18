@@ -93,7 +93,7 @@ public class SymmetricBoundVariableVisitor extends SymmetricVisitor {
         }
 
         if (result == null) {
-            throw NO_SUCH_ELEMENT;
+            throw new NoSuchElementException(name);
         }
 
         return result;

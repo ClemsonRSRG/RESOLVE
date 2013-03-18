@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+//TODO : this comment is entirely out of date and the class should be renamed
 /**
  * <p>This predicate is used during antecedent development to ensure that 1)
  * duplicate antecedents are not added, and 2) that we don't endlessly add "+ 0"
@@ -32,9 +33,12 @@ import java.util.Set;
 public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
 
     private final PerVCProverModel myModel;
+    private final Set<String> myVariableSymbols;
 
-    public AddsSomethingNewPredicate(PerVCProverModel model) {
+    public AddsSomethingNewPredicate(PerVCProverModel model, 
+            Set<String> variableSymbols) {
         myModel = model;
+        myVariableSymbols = variableSymbols;
     }
 
     @Override
@@ -44,38 +48,73 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
         if (result) {
             IntroduceLocalTheoremStep tLT = (IntroduceLocalTheoremStep) t;
 
+            //Any development that repeats something we already know should be
+            //rolled back
             result =
                     appearsOnce(tLT.getIntroducedTheorem().getAssertion(),
                             myModel);
 
             if (result) {
-                Transformation transformation = tLT.getTransformation();
+                
+                //Any development that doesn't tell us something about at least 
+                //one of the variable symbols in the consequent of the VC should
+                //be rolled back
+                Set<String> finalSymbolNames =
+                                tLT.getIntroducedTheorem().getAssertion()
+                                        .getSymbolNames();
+                
+                result = containsAny(finalSymbolNames, myVariableSymbols);
+                
+                if (result) {
+                    Transformation transformation = tLT.getTransformation();
 
-                if (transformation instanceof ExpandAntecedentBySubstitution
-                        || transformation instanceof ExpandAntecedentByImplication) {
-                    result =
+                    //Any development that reduces the function count should be
+                    //accepted
+                    result = 
                             transformation.functionApplicationCountDelta() <= 0;
 
                     if (!result) {
-                        Set<Theorem> origialTheorems =
-                                tLT.getPrerequisiteTheorems();
-                        Set<String> originalSymbolNames = new HashSet<String>();
-                        for (Theorem ot : origialTheorems) {
-                            originalSymbolNames.addAll(ot.getAssertion()
-                                    .getSymbolNames());
+                        if (transformation instanceof ExpandAntecedentBySubstitution ||
+                                transformation instanceof ExpandAntecedentByImplication) {
+                            Set<Theorem> originalTheorems =
+                                    tLT.getPrerequisiteTheorems();
+                            Set<String> originalSymbolNames = new HashSet<String>();
+                            for (Theorem ot : originalTheorems) {
+                                originalSymbolNames.addAll(ot.getAssertion()
+                                        .getSymbolNames());
+                            }
+
+                            originalSymbolNames.removeAll(finalSymbolNames);
+
+                            //Any substitution that doesn't eliminate at least
+                            //one symbol should be rolled back
+                            result = !originalSymbolNames.isEmpty();
                         }
+                        else if (transformation instanceof ExpandAntecedentByImplication) {
+                            Set<Theorem> originalTheorems =
+                                    tLT.getPrerequisiteTheorems();
+                            Set<String> originalSymbolNames = new HashSet<String>();
+                            for (Theorem ot : originalTheorems) {
+                                originalSymbolNames.addAll(ot.getAssertion()
+                                        .getSymbolNames());
+                            }
 
-                        Set<String> introduced = new HashSet<String>(
-                                transformation.getReplacementSymbolNames());
+                            Set<String> introduced =
+                                    new HashSet<String>(transformation
+                                            .getReplacementSymbolNames());
 
-                        introduced.removeAll(originalSymbolNames);
+                            introduced.removeAll(originalSymbolNames);
 
-                        result = !introduced.isEmpty();
+                            //Any implication that doesn't introduce at least
+                            //one symbol should be rolled back
+                            result = !introduced.isEmpty();
+                        }
+                        else {
+                            //Not prepared to deal with other kinds of 
+                            //transformations
+                            throw new RuntimeException();
+                        }
                     }
-                }
-                else {
-                    //Not prepared to deal with other kinds of transformations
-                    throw new RuntimeException();
                 }
             }
         }
@@ -84,6 +123,17 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
                     "Expecting a local theorem introduction?");
         }
 
+        return result;
+    }
+    
+    private static <T> boolean containsAny(Set<T> container, Set<T> possibilities) {
+        boolean result = false;
+        
+        Iterator<T> possibilitiesIter = possibilities.iterator();
+        while (!result && possibilitiesIter.hasNext()) {
+            result = container.contains(possibilitiesIter.next());
+        }
+        
         return result;
     }
 

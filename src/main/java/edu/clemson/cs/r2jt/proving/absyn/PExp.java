@@ -412,6 +412,8 @@ public abstract class PExp {
 
             String symbol = "";
 
+            List<PExp> arguments = new LinkedList<PExp>();
+            
             boolean first = true;
             for (Exp s : eAsDotExp.getSegments()) {
                 if (!first) {
@@ -421,14 +423,25 @@ public abstract class PExp {
                     first = false;
                 }
 
-                symbol += s;
+                if (s instanceof FunctionExp) {
+                    FunctionExp sAsFE = (FunctionExp) s;
+                    symbol += sAsFE.getOperatorAsString();
+                    
+                    for (Exp param : sAsFE.getParameters()) {
+                        arguments.add(buildPExp(param));
+                    }
+                }
+                else {
+                    symbol += s;
+                }
             }
 
             if (eAsDotExp.getSemanticExp() != null) {
                 symbol += PExp.buildPExp(eAsDotExp.getSemanticExp());
             }
 
-            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol);
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol, 
+                    arguments);
         }
         else if (e instanceof VarExp) {
             VarExp eAsVarExp = (VarExp) e;
@@ -467,21 +480,6 @@ public abstract class PExp {
             AlternativeExp eAsAlternativeExp = (AlternativeExp) e;
 
             retval = new PAlternatives(eAsAlternativeExp);
-        }
-        else if (e instanceof VariableDotExp) {
-            VariableDotExp eAsDotExp = (VariableDotExp) e;
-
-            String finalName = "";
-            for (Exp s : eAsDotExp.getSegments()) {
-                finalName += "." + s.toString(0);
-            }
-
-            finalName += eAsDotExp.getSemanticExp().toString(0);
-
-            retval =
-                    new PSymbol(eAsDotExp.getSemanticExp().getMathType(),
-                            eAsDotExp.getSemanticExp().getMathTypeValue(),
-                            finalName);
         }
         else if (e instanceof LambdaExp) {
             LambdaExp eAsLambdaExp = (LambdaExp) e;
@@ -542,8 +540,8 @@ public abstract class PExp {
     public final Set<String> getSymbolNames() {
         if (myCachedSymbolNames == null) {
             //We're immutable, so only do this once
-            myCachedSymbolNames = Collections.unmodifiableSet(
-                    getSymbolNamesNoCache());
+            myCachedSymbolNames =
+                    Collections.unmodifiableSet(getSymbolNamesNoCache());
         }
 
         return myCachedSymbolNames;
@@ -554,8 +552,9 @@ public abstract class PExp {
     public final Set<PSymbol> getQuantifiedVariables() {
         if (myCachedQuantifiedVariables == null) {
             //We're immutable, so only do this once
-            myCachedQuantifiedVariables = Collections.unmodifiableSet(
-                    getQuantifiedVariablesNoCache());
+            myCachedQuantifiedVariables =
+                    Collections
+                            .unmodifiableSet(getQuantifiedVariablesNoCache());
         }
 
         return myCachedQuantifiedVariables;

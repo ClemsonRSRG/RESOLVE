@@ -329,8 +329,17 @@ public final class PerVCProverModel {
         return myLocalTheoremsSet.keySet().contains(t);
     }
 
+    public void addConsequent(PExp c) {
+        myConsequents.add(c);
+        myConsequentsHash += c.hashCode();
+
+        //This is an important change if it took us away from a proved state
+        modelChanged(myConsequents.size() == 1);
+    }
+    
     public void addConsequent(PExp c, int index) {
         myConsequents.add(index, c);
+        myConsequentsHash += c.hashCode();
 
         //This is an important change if it took us away from a proved state
         modelChanged(myConsequents.size() == 1);

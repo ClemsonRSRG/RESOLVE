@@ -46,6 +46,14 @@ public class ExpandAntecedentBySubstitution implements Transformation {
         myTheorem = theorem;
     }
 
+    public PExp getMatchPattern() {
+        return myMatchPattern;
+    }
+    
+    public PExp getTransformationTemplate() {
+        return myTransformationTemplate;
+    }
+    
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
         Iterator<BindResult> bindResults =
@@ -76,8 +84,9 @@ public class ExpandAntecedentBySubstitution implements Transformation {
 
     @Override
     public boolean introducesQuantifiedVariables() {
-        Set<PSymbol> introduced = new HashSet<PSymbol>(
-                myTransformationTemplate.getQuantifiedVariables());
+        Set<PSymbol> introduced =
+                new HashSet<PSymbol>(myTransformationTemplate
+                        .getQuantifiedVariables());
         introduced.removeAll(myMatchPattern.getQuantifiedVariables());
 
         return !introduced.isEmpty();
