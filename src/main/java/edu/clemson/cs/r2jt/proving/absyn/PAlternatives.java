@@ -41,7 +41,7 @@ public class PAlternatives extends PExp {
         }
 
         Iterator<PExp> conditionIter = conditions.iterator();
-        Iterator<PExp> resultIter = conditions.iterator();
+        Iterator<PExp> resultIter = results.iterator();
 
         while (conditionIter.hasNext()) {
             myAlternatives.add(new Alternative(conditionIter.next(), resultIter
@@ -222,9 +222,8 @@ public class PAlternatives extends PExp {
             throw new IndexOutOfBoundsException("" + index);
         }
         else {
-            index /= 2;
-
             if (index % 2 == 0) {
+                index /= 2;
                 if (index < myAlternatives.size()) {
                     newResults.set(index, e);
                 }
@@ -233,7 +232,7 @@ public class PAlternatives extends PExp {
                 }
             }
             else {
-                newConditions.set(index, e);
+                newConditions.set(index / 2, e);
             }
         }
 
@@ -286,11 +285,32 @@ public class PAlternatives extends PExp {
     protected void bindTo(PExp target, Map<PExp, PExp> accumulator)
             throws BindingException {
 
-        //For the moment, we only bind to identical things
-        if (!this.equals(target)) {
+        if (!(target instanceof PAlternatives)) {
             throw BINDING_EXCEPTION;
         }
-
+        
+        PAlternatives targetAsPAlternatives = (PAlternatives) target;
+        
+        if (myAlternatives.size() != 
+                targetAsPAlternatives.myAlternatives.size()) {
+            throw BINDING_EXCEPTION;
+        }
+        
+        Iterator<Alternative> thisAlternatives = myAlternatives.iterator();
+        Iterator<Alternative> targetAlternatives = 
+                targetAsPAlternatives.myAlternatives.iterator();
+        
+        Alternative curThisAlt, curTargetAlt;
+        while (thisAlternatives.hasNext()) {
+            curThisAlt = thisAlternatives.next();
+            curTargetAlt = targetAlternatives.next();
+            
+            curThisAlt.result.bindTo(curTargetAlt.result, accumulator);
+            curThisAlt.condition.bindTo(curTargetAlt.condition, accumulator);
+        }
+        
+        myOtherwiseClauseResult.bindTo(
+                targetAsPAlternatives.myOtherwiseClauseResult, accumulator);
     }
 
     @Override
@@ -359,6 +379,8 @@ public class PAlternatives extends PExp {
 
         result.addAll(myOtherwiseClauseResult.getFunctionApplications());
 
+        result.add(this);
+        
         return result;
     }
 

@@ -574,8 +574,13 @@ public class PSymbol extends PExp {
     public Set<PSymbol> getQuantifiedVariablesNoCache() {
         Set<PSymbol> result = new HashSet<PSymbol>();
 
-        if (myArgumentsSize == 0 && quantification != Quantification.NONE) {
-            result.add(this);
+        if (quantification != Quantification.NONE) {
+            if (arguments.size() == 0) {
+                result.add(this);
+            }
+            else {
+                result.add(new PSymbol(getType(), null, name, quantification));
+            }
         }
 
         Iterator<PExp> argumentIter = arguments.iterator();
@@ -624,7 +629,12 @@ public class PSymbol extends PExp {
         Set<String> result = new HashSet<String>();
 
         if (quantification == Quantification.NONE) {
-            result.add(name);
+            if (displayType.equals(DisplayType.OUTFIX)) {
+                result.add(leftPrint + "_" + rightPrint);
+            }
+            else {
+                result.add(name);
+            }
         }
 
         Iterator<PExp> argumentIter = arguments.iterator();

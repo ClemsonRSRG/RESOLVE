@@ -5,6 +5,7 @@
 package edu.clemson.cs.r2jt.proving2.transformations;
 
 import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
+import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;

@@ -7,6 +7,7 @@ package edu.clemson.cs.r2jt.proving2;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.automators.AntecedentDeveloper;
+import edu.clemson.cs.r2jt.proving2.automators.AntecedentMinimizer;
 import edu.clemson.cs.r2jt.proving2.automators.ApplyN;
 import edu.clemson.cs.r2jt.proving2.automators.Automator;
 import edu.clemson.cs.r2jt.proving2.automators.MainProofLevel;
@@ -18,12 +19,26 @@ import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
+import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
+import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Set;
 import javax.swing.SwingUtilities;
 
 /**
@@ -48,20 +63,24 @@ public class AutomatedProver {
     private Thread myWorkerThread;
 
     private MainProofFitnessFunction myFitnessFunction;
+    
+    private final Set<String> myVariableSymbols;
 
     public AutomatedProver(PerVCProverModel m,
-            ImmutableList<Theorem> theoremLibrary) {
+            ImmutableList<Theorem> theoremLibrary, ModuleScope moduleScope) {
         myModel = m;
         myFitnessFunction = new MainProofFitnessFunction(m);
 
         m.setAutomatedProver(this);
 
         myTheoremLibrary = theoremLibrary;
-
-        List<PExp> truths = new LinkedList<PExp>();
-        for (Theorem t : theoremLibrary) {
-            truths.add(t.getAssertion());
-        }
+        
+        //The consequents will contain many symbols like "min_int",
+        //"S", "Empty_String", etc.  For the purposes of a number of 
+        //optimizations/heuristics it's useful to know which of those come from 
+        //programmatic variables and which come from mathematical definitions
+        myVariableSymbols = determineVariableSymbols(myModel, moduleScope);
+        System.out.println("VARSYM: " + myVariableSymbols);
 
         PriorityQueue<Transformation> transformationHeap =
                 new PriorityQueue<Transformation>(11,
@@ -71,28 +90,49 @@ public class AutomatedProver {
             theoremTransformations = t.getTransformations();
 
             for (Transformation transformation : theoremTransformations) {
-                if (!transformation.couldAffectAntecedent()) {
+                if (!transformation.couldAffectAntecedent() && 
+                        !transformation.introducesQuantifiedVariables()) {
                     transformationHeap.add(transformation);
                 }
             }
         }
         List<Transformation> transformations = new LinkedList<Transformation>();
         Transformation top;
-        while (!transformationHeap.isEmpty()) {
+        while (!transformationHeap.isEmpty() && 
+                myFitnessFunction.calculateFitness(
+                    transformationHeap.peek()) >= 0) {
+            
             top = transformationHeap.poll();
             transformations.add(top);
             System.out.println(top + " (" + top.getClass() + ") -- "
                     + myFitnessFunction.calculateFitness(top));
         }
+        
+        if (transformationHeap.size() > 0) {
+            System.out.println("<<<<<<<<<<<<<<< recommend against");
+            while (!transformationHeap.isEmpty()) {
+                top = transformationHeap.poll();
+                System.out.println(top + " (" + top.getClass() + ") -- "
+                    + myFitnessFunction.calculateFitness(top));
+            }
+        }
+        
 
         List<Automator> steps = new LinkedList<Automator>();
         steps.add(new VariablePropagator());
-        steps.add(new AntecedentDeveloper(myModel, myTheoremLibrary, 1));
+        steps.add(new AntecedentMinimizer(myTheoremLibrary));
         steps.add(new VariablePropagator());
-        steps.add(new AntecedentDeveloper(myModel, myTheoremLibrary, 1));
+        steps.add(new ApplyN(
+                new NoOpLabel("--- Done Minimizing Antecedent ---"), 1));
+        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols, myTheoremLibrary, 1));
         steps.add(new VariablePropagator());
-        steps.add(new AntecedentDeveloper(myModel, myTheoremLibrary, 1));
+        steps.add(new AntecedentMinimizer(myTheoremLibrary));
+        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols, myTheoremLibrary, 1));
         steps.add(new VariablePropagator());
+        steps.add(new AntecedentMinimizer(myTheoremLibrary));
+        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols, myTheoremLibrary, 1));
+        steps.add(new VariablePropagator());
+        steps.add(new AntecedentMinimizer(myTheoremLibrary));
         steps.add(new ApplyN(
                 new NoOpLabel("--- Done Developing Antecedent ---"), 1));
         steps.add(new Minimizer(myTheoremLibrary));
@@ -102,6 +142,57 @@ public class AutomatedProver {
         steps.add(new MainProofLevel(m, 3, transformations));
 
         myAutomatorStack.push(new PushSequence(steps));
+    }
+    
+    private Set<String> determineVariableSymbols(PerVCProverModel model, 
+            ModuleScope moduleScope) {
+        
+        //With apologies to whoever has to deal with this mess, this is not a
+        //very good way of dealing with this.  Ideally the populator would 
+        //attach the entry that corresponds to each symbol to its Exp, making
+        //answering this questions really easy.  But because the Verifier builds
+        //lots of Exps from scratch based on existing ones, getting new 
+        //information through the verifier is a nightmare.  Once a better 
+        //verifier exists, that change would be a lot easier and this can be
+        //made a lot more robust.
+        
+        //First, get a list of all symbols
+        Set<String> symbols = new HashSet<String>();
+        for (PExp consequent : model.getConsequentList()) {
+            symbols.addAll(consequent.getSymbolNames());
+        }
+        
+        //Next, find all those that come from mathematical definitions
+        Set<String> mathSymbols = new HashSet<String>();
+        for (String s : symbols) {
+            List<SymbolTableEntry> entries = moduleScope.query(
+                    new NameQuery(null, s, ImportStrategy.IMPORT_RECURSIVE, 
+                        FacilityStrategy.FACILITY_INSTANTIATE, false));
+
+            if (entries.isEmpty()) {
+                //Symbol must be inside an operation scope, in which case it's
+                //a programmatic variable
+            }
+            else {
+                boolean math = true;
+                
+                Iterator<SymbolTableEntry> entriesIter = entries.iterator();
+                SymbolTableEntry entry;
+                while (math && entriesIter.hasNext()) {
+                    entry = entriesIter.next();
+                    math = entry instanceof MathSymbolEntry;
+                }
+                
+                if (math) {
+                    mathSymbols.add(s);
+                }
+            }
+        }
+        
+        //Everything that isn't a math symbol is a variable symbol
+        symbols.removeAll(mathSymbols);
+        
+        return Collections.unmodifiableSet(symbols);
     }
 
     public boolean isRunning() {

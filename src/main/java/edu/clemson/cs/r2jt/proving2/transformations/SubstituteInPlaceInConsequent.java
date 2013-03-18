@@ -70,10 +70,11 @@ public class SubstituteInPlaceInConsequent implements Transformation {
 
     @Override
     public boolean introducesQuantifiedVariables() {
-        Set<PSymbol> introduced = new HashSet<PSymbol>(
-                myTransformationTemplate.getQuantifiedVariables());
+        Set<PSymbol> introduced =
+                new HashSet<PSymbol>(myTransformationTemplate
+                        .getQuantifiedVariables());
 
-        introduced.removeAll(myMatchPattern.getFunctionApplications());
+        introduced.removeAll(myMatchPattern.getQuantifiedVariables());
 
         return !introduced.isEmpty();
     }
@@ -88,6 +89,14 @@ public class SubstituteInPlaceInConsequent implements Transformation {
         return myTransformationTemplate.getSymbolNames();
     }
 
+    public PExp getPattern() {
+        return myMatchPattern;
+    }
+    
+    public PExp getReplacement() {
+        return myTransformationTemplate;
+    }
+    
     @Override
     public Equivalence getEquivalence() {
         return Equivalence.EQUIVALENT;

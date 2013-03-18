@@ -42,7 +42,8 @@ public class ProbationaryApplication implements Automator {
             if (!myPredicate.test(model.getLastProofStep())) {
                 model.undoLastProofStep();
                 myChangeStuckFlag = false;
-                System.out.println("ProbationaryApplication - Rolling back change");
+                System.out
+                        .println("ProbationaryApplication - Rolling back change");
             }
 
             stack.pop();

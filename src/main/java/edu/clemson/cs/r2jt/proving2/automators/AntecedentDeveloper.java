@@ -17,6 +17,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -27,11 +28,16 @@ public class AntecedentDeveloper implements Automator {
     private final Iterable<Transformation> myTheoremTransformations;
     private final AddsSomethingNewPredicate myDevelopmentPredicate;
     private int myRemainingRounds;
+    
+    private final Set<String> myVariableSymbols;
 
-    public AntecedentDeveloper(PerVCProverModel model,
+    public AntecedentDeveloper(PerVCProverModel model, 
+            Set<String> variableSymbols,
             Iterable<Theorem> theorems, int totalRounds) {
-        myDevelopmentPredicate = new AddsSomethingNewPredicate(model);
+        myDevelopmentPredicate = 
+                new AddsSomethingNewPredicate(model, variableSymbols);
         myRemainingRounds = totalRounds;
+        myVariableSymbols = variableSymbols;
 
         List<Transformation> transformations = new LinkedList<Transformation>();
         List<Transformation> tTransformations;
@@ -84,11 +90,11 @@ public class AntecedentDeveloper implements Automator {
             //that we're going to apply them all, we slurp them all up now 
             //to be applied later one at a time.
             Iterator<Application> tApplications;
-            
+
             if (model.getLocalTheoremList().isEmpty()) {
                 throw new RuntimeException();
             }
-            
+
             for (Theorem t : model.getLocalTheoremList()) {
                 for (Transformation transformation : t.getTransformations()) {
                     if (transformation instanceof ExpandAntecedentByImplication
@@ -120,12 +126,14 @@ public class AntecedentDeveloper implements Automator {
             if (myDevelopmentCount < MAX_DEVELOPMENTS
                     && myApplications.hasNext()) {
 
-                System.out.println("AntecedentDeveloperRound - adding development");
-                
                 if (myProbationaryApplication != null
                         && myProbationaryApplication.changeStuck()) {
                     myDevelopmentCount++;
                 }
+
+                System.out
+                        .println("AntecedentDeveloperRound - adding development - "
+                                + myDevelopmentCount);
 
                 myProbationaryApplication =
                         new ProbationaryApplication(myApplications.next(),
