@@ -49,11 +49,11 @@ public class ExpandAntecedentBySubstitution implements Transformation {
     public PExp getMatchPattern() {
         return myMatchPattern;
     }
-    
+
     public PExp getTransformationTemplate() {
         return myTransformationTemplate;
     }
-    
+
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
         Iterator<BindResult> bindResults =

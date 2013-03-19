@@ -92,11 +92,11 @@ public class SubstituteInPlaceInConsequent implements Transformation {
     public PExp getPattern() {
         return myMatchPattern;
     }
-    
+
     public PExp getReplacement() {
         return myTransformationTemplate;
     }
-    
+
     @Override
     public Equivalence getEquivalence() {
         return Equivalence.EQUIVALENT;

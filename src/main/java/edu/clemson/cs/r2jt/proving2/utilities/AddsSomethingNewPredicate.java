@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-//TODO : this comment is entirely out of date and the class should be renamed
+// TODO : this comment is entirely out of date and the class should be renamed
 /**
  * <p>This predicate is used during antecedent development to ensure that 1)
  * duplicate antecedents are not added, and 2) that we don't endlessly add "+ 0"
@@ -35,7 +35,7 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
     private final PerVCProverModel myModel;
     private final Set<String> myVariableSymbols;
 
-    public AddsSomethingNewPredicate(PerVCProverModel model, 
+    public AddsSomethingNewPredicate(PerVCProverModel model,
             Set<String> variableSymbols) {
         myModel = model;
         myVariableSymbols = variableSymbols;
@@ -55,30 +55,31 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
                             myModel);
 
             if (result) {
-                
+
                 //Any development that doesn't tell us something about at least 
                 //one of the variable symbols in the consequent of the VC should
                 //be rolled back
                 Set<String> finalSymbolNames =
-                                tLT.getIntroducedTheorem().getAssertion()
-                                        .getSymbolNames();
-                
+                        tLT.getIntroducedTheorem().getAssertion()
+                                .getSymbolNames();
+
                 result = containsAny(finalSymbolNames, myVariableSymbols);
-                
+
                 if (result) {
                     Transformation transformation = tLT.getTransformation();
 
                     //Any development that reduces the function count should be
                     //accepted
-                    result = 
+                    result =
                             transformation.functionApplicationCountDelta() <= 0;
 
                     if (!result) {
-                        if (transformation instanceof ExpandAntecedentBySubstitution ||
-                                transformation instanceof ExpandAntecedentByImplication) {
+                        if (transformation instanceof ExpandAntecedentBySubstitution
+                                || transformation instanceof ExpandAntecedentByImplication) {
                             Set<Theorem> originalTheorems =
                                     tLT.getPrerequisiteTheorems();
-                            Set<String> originalSymbolNames = new HashSet<String>();
+                            Set<String> originalSymbolNames =
+                                    new HashSet<String>();
                             for (Theorem ot : originalTheorems) {
                                 originalSymbolNames.addAll(ot.getAssertion()
                                         .getSymbolNames());
@@ -93,7 +94,8 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
                         else if (transformation instanceof ExpandAntecedentByImplication) {
                             Set<Theorem> originalTheorems =
                                     tLT.getPrerequisiteTheorems();
-                            Set<String> originalSymbolNames = new HashSet<String>();
+                            Set<String> originalSymbolNames =
+                                    new HashSet<String>();
                             for (Theorem ot : originalTheorems) {
                                 originalSymbolNames.addAll(ot.getAssertion()
                                         .getSymbolNames());
@@ -125,15 +127,16 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
 
         return result;
     }
-    
-    private static <T> boolean containsAny(Set<T> container, Set<T> possibilities) {
+
+    private static <T> boolean containsAny(Set<T> container,
+            Set<T> possibilities) {
         boolean result = false;
-        
+
         Iterator<T> possibilitiesIter = possibilities.iterator();
         while (!result && possibilitiesIter.hasNext()) {
             result = container.contains(possibilitiesIter.next());
         }
-        
+
         return result;
     }
 

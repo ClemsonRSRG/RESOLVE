@@ -288,27 +288,27 @@ public class PAlternatives extends PExp {
         if (!(target instanceof PAlternatives)) {
             throw BINDING_EXCEPTION;
         }
-        
+
         PAlternatives targetAsPAlternatives = (PAlternatives) target;
-        
-        if (myAlternatives.size() != 
-                targetAsPAlternatives.myAlternatives.size()) {
+
+        if (myAlternatives.size() != targetAsPAlternatives.myAlternatives
+                .size()) {
             throw BINDING_EXCEPTION;
         }
-        
+
         Iterator<Alternative> thisAlternatives = myAlternatives.iterator();
-        Iterator<Alternative> targetAlternatives = 
+        Iterator<Alternative> targetAlternatives =
                 targetAsPAlternatives.myAlternatives.iterator();
-        
+
         Alternative curThisAlt, curTargetAlt;
         while (thisAlternatives.hasNext()) {
             curThisAlt = thisAlternatives.next();
             curTargetAlt = targetAlternatives.next();
-            
+
             curThisAlt.result.bindTo(curTargetAlt.result, accumulator);
             curThisAlt.condition.bindTo(curTargetAlt.condition, accumulator);
         }
-        
+
         myOtherwiseClauseResult.bindTo(
                 targetAsPAlternatives.myOtherwiseClauseResult, accumulator);
     }
@@ -380,7 +380,7 @@ public class PAlternatives extends PExp {
         result.addAll(myOtherwiseClauseResult.getFunctionApplications());
 
         result.add(this);
-        
+
         return result;
     }
 

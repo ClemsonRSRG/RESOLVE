@@ -413,7 +413,7 @@ public abstract class PExp {
             String symbol = "";
 
             List<PExp> arguments = new LinkedList<PExp>();
-            
+
             boolean first = true;
             for (Exp s : eAsDotExp.getSegments()) {
                 if (!first) {
@@ -426,7 +426,7 @@ public abstract class PExp {
                 if (s instanceof FunctionExp) {
                     FunctionExp sAsFE = (FunctionExp) s;
                     symbol += sAsFE.getOperatorAsString();
-                    
+
                     for (Exp param : sAsFE.getParameters()) {
                         arguments.add(buildPExp(param));
                     }
@@ -440,8 +440,9 @@ public abstract class PExp {
                 symbol += PExp.buildPExp(eAsDotExp.getSemanticExp());
             }
 
-            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol, 
-                    arguments);
+            retval =
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol,
+                            arguments);
         }
         else if (e instanceof VarExp) {
             VarExp eAsVarExp = (VarExp) e;
@@ -529,6 +530,7 @@ public abstract class PExp {
     protected abstract void bindTo(PExp target, Map<PExp, PExp> accumulator)
             throws BindingException;
 
+    @Override
     public int hashCode() {
         return valueHash;
     }
