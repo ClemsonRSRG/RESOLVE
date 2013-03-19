@@ -59,7 +59,7 @@ public class Theorem {
 
                 result.add(new ExpandAntecedentByImplication(left
                         .splitIntoConjuncts(), right));
-                result.add(new StrengthenConsequent(left.splitIntoConjuncts(), 
+                result.add(new StrengthenConsequent(left.splitIntoConjuncts(),
                         right.splitIntoConjuncts()));
             }
             else if (assertionAsPS.name.equals("=")) {

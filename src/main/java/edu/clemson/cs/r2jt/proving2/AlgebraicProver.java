@@ -94,7 +94,7 @@ public class AlgebraicProver {
 
     private final List<ProverListener> myProverListeners =
             new LinkedList<ProverListener>();
-    
+
     private final ModuleScope myModuleScope;
 
     public AlgebraicProver(TypeGraph g, List<VC> vcs, ModuleScope scope,
@@ -108,7 +108,7 @@ public class AlgebraicProver {
                 scope.query(new EntryTypeQuery(TheoremEntry.class,
                         ImportStrategy.IMPORT_RECURSIVE,
                         FacilityStrategy.FACILITY_IGNORE));
-        
+
         //Ensure that the theorems are in a consistent (even if arbitrary) order
         //so that proof results are likewise consistent
         Collections.sort(theoremEntries, new AlphabeticalByTheoremName());
@@ -117,7 +117,7 @@ public class AlgebraicProver {
         for (TheoremEntry e : theoremEntries) {
             theorems.add(new Theorem(e.getAssertion(), new Library(e)));
         }
-        
+
         myTheoremLibrary = new ArrayBackedImmutableList<Theorem>(theorems);
 
         myModels[0] =
@@ -230,8 +230,8 @@ public class AlgebraicProver {
                     new PerVCProverModel(myTypeGraph, myVCs.get(myVCIndex)
                             .getName(), myVCs.get(myVCIndex), myTheoremLibrary);
             myAutomatedProvers[myVCIndex] =
-                    new AutomatedProver(myModels[myVCIndex], myTheoremLibrary, 
-                        myModuleScope);
+                    new AutomatedProver(myModels[myVCIndex], myTheoremLibrary,
+                            myModuleScope);
         }
 
         if (myUI != null) {
@@ -317,13 +317,13 @@ public class AlgebraicProver {
             }
         }
     }
-    
+
     private class AlphabeticalByTheoremName implements Comparator<TheoremEntry> {
 
         @Override
         public int compare(TheoremEntry o1, TheoremEntry o2) {
             return o1.getName().compareTo(o2.getName());
         }
-        
+
     }
 }

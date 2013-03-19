@@ -27,21 +27,21 @@ public class MainProofFitnessFunction {
 
     public double calculateFitness(Transformation t) {
         double result = 0;
-        
+
         if (t instanceof SubstituteInPlaceInConsequent) {
-            SubstituteInPlaceInConsequent tAsSIPIC = 
+            SubstituteInPlaceInConsequent tAsSIPIC =
                     (SubstituteInPlaceInConsequent) t;
-            
+
             PExp pattern = tAsSIPIC.getPattern();
             PExp replacement = tAsSIPIC.getReplacement();
-            if (pattern.getFunctionApplications().isEmpty() &&
-                    pattern.getQuantifiedVariables().size() == 1 &&
-                    replacement.getQuantifiedVariables().contains(
-                        pattern.getQuantifiedVariables().iterator().next())) {
+            if (pattern.getFunctionApplications().isEmpty()
+                    && pattern.getQuantifiedVariables().size() == 1
+                    && replacement.getQuantifiedVariables().contains(
+                            pattern.getQuantifiedVariables().iterator().next())) {
                 result = -1;
             }
         }
-        
+
         if (result == 0) {
             Set<String> introduced =
                     new HashSet<String>(t.getReplacementSymbolNames());
@@ -50,13 +50,14 @@ public class MainProofFitnessFunction {
             double simplificationFactor =
                     unitAtan(t.functionApplicationCountDelta() * -1);
 
-            result = Math.min(
-                    Math.pow(0.5, introduced.size()) * simplificationFactor, 1.0);
+            result =
+                    Math.min(Math.pow(0.5, introduced.size())
+                            * simplificationFactor, 1.0);
         }
-        
+
         return result;
     }
-    
+
     private double unitAtan(int i) {
         return (Math.atan(i) * 2 / Math.PI + 1) / 2;
     }

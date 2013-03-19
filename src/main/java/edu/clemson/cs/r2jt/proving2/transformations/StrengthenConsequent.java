@@ -33,22 +33,23 @@ import java.util.Set;
  */
 public class StrengthenConsequent implements Transformation {
 
-    private final BindResultToApplication BIND_RESULT_TO_APPLICATION = 
+    private final BindResultToApplication BIND_RESULT_TO_APPLICATION =
             new BindResultToApplication();
-    
+
     private final List<PExp> myAntecedents;
     private final List<PExp> myConsequents;
-    
-    public StrengthenConsequent(List<PExp> theoremAntecedents, 
+
+    public StrengthenConsequent(List<PExp> theoremAntecedents,
             List<PExp> theoremConsequent) {
-        
+
         myAntecedents = theoremAntecedents;
         myConsequents = theoremConsequent;
     }
-    
+
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
-        Set<PerVCProverModel.Binder> binders = new HashSet<PerVCProverModel.Binder>();
+        Set<PerVCProverModel.Binder> binders =
+                new HashSet<PerVCProverModel.Binder>();
         for (PExp c : myConsequents) {
             binders.add(new TopLevelConsequentBinder(c));
         }
@@ -125,7 +126,7 @@ public class StrengthenConsequent implements Transformation {
     public Equivalence getEquivalence() {
         return Equivalence.STRONGER;
     }
-    
+
     private class BindResultToApplication
             implements
                 Mapping<PerVCProverModel.BindResult, Application> {
@@ -136,24 +137,23 @@ public class StrengthenConsequent implements Transformation {
                     input.freeVariableBindings, input.bindSites.values());
         }
     }
-    
+
     @Override
     public String toString() {
-        return "Strengthen to " + 
-                    Utilities.conjunctListToString(myAntecedents);
+        return "Strengthen to " + Utilities.conjunctListToString(myAntecedents);
     }
-    
+
     private class StrengthenConsequentApplication implements Application {
 
         private final Map<PExp, PExp> myBindings;
         private final int[] myBindSiteIndecis;
         private final Collection<Site> myBindSites;
-        
-        public StrengthenConsequentApplication(Map<PExp, PExp> bindings, 
+
+        public StrengthenConsequentApplication(Map<PExp, PExp> bindings,
                 Collection<Site> bindSites) {
             myBindings = bindings;
             myBindSites = bindSites;
-            
+
             myBindSiteIndecis = new int[bindSites.size()];
             Iterator<Site> siteIter = bindSites.iterator();
             for (int i = 0; i < myBindSiteIndecis.length; i++) {
@@ -164,13 +164,13 @@ public class StrengthenConsequent implements Transformation {
 
         @Override
         public String description() {
-            return "Strengthen to " + 
-                    Utilities.conjunctListToString(myAntecedents);
+            return "Strengthen to "
+                    + Utilities.conjunctListToString(myAntecedents);
         }
 
         @Override
         public void apply(PerVCProverModel m) {
-            
+
             //We want to start removing at the end so we aren't adjusting 
             //indecis
             for (int i = myBindSiteIndecis.length - 1; i >= 0; i--) {
@@ -181,8 +181,8 @@ public class StrengthenConsequent implements Transformation {
                 m.getConsequentList().size();
                 m.addConsequent(a.substitute(myBindings));
             }
-            
-            m.addProofStep(new StrengthenConsequentStep(myBindSites, 
+
+            m.addProofStep(new StrengthenConsequentStep(myBindSites,
                     myAntecedents.size(), StrengthenConsequent.this));
         }
 
