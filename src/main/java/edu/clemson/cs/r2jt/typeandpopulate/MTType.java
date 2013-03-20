@@ -13,6 +13,8 @@ import edu.clemson.cs.r2jt.type.FormalType;
 import edu.clemson.cs.r2jt.type.NewType;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,6 +26,8 @@ public abstract class MTType {
     protected final TypeGraph myTypeGraph;
 
     private final Set<Object> myKnownAlphaEquivalencies = new HashSet<Object>();
+    private final Map<MTType, Map<String, MTType>> myKnownSyntacticSubtypeBindings =
+            new HashMap<MTType, Map<String, MTType>>();
 
     public MTType(TypeGraph typeGraph) {
         myTypeGraph = typeGraph;
@@ -128,27 +132,38 @@ public abstract class MTType {
     public final Map<String, MTType> getSyntacticSubtypeBindings(MTType o)
             throws NoSolutionException {
 
-        SyntacticSubtypeChecker checker =
-                new SyntacticSubtypeChecker(myTypeGraph);
+        Map<String, MTType> result;
 
-        try {
-            checker.visit(this, o);
+        if (myKnownSyntacticSubtypeBindings.containsKey(o)) {
+            result = myKnownSyntacticSubtypeBindings.get(o);
         }
-        catch (RuntimeException e) {
+        else {
+            SyntacticSubtypeChecker checker =
+                    new SyntacticSubtypeChecker(myTypeGraph);
 
-            Throwable cause = e;
-            while (cause != null && !(cause instanceof TypeMismatchException)) {
-                cause = cause.getCause();
+            try {
+                checker.visit(this, o);
+            }
+            catch (RuntimeException e) {
+
+                Throwable cause = e;
+                while (cause != null
+                        && !(cause instanceof TypeMismatchException)) {
+                    cause = cause.getCause();
+                }
+
+                if (cause == null) {
+                    throw e;
+                }
+
+                throw NoSolutionException.INSTANCE;
             }
 
-            if (cause == null) {
-                throw e;
-            }
-
-            throw NoSolutionException.INSTANCE;
+            result = Collections.unmodifiableMap(checker.getBindings());
+            myKnownSyntacticSubtypeBindings.put(o, result);
         }
 
-        return checker.getBindings();
+        return result;
     }
 
     public final boolean isSubtypeOf(MTType o) {

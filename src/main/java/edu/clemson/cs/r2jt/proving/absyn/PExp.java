@@ -527,7 +527,7 @@ public abstract class PExp {
         return bindings;
     }
 
-    protected abstract void bindTo(PExp target, Map<PExp, PExp> accumulator)
+    public abstract void bindTo(PExp target, Map<PExp, PExp> accumulator)
             throws BindingException;
 
     @Override
@@ -538,6 +538,8 @@ public abstract class PExp {
     public abstract PExp substitute(Map<PExp, PExp> substitutions);
 
     public abstract boolean containsName(String name);
+
+    public abstract String getTopLevelOperation();
 
     public final Set<String> getSymbolNames() {
         if (myCachedSymbolNames == null) {
