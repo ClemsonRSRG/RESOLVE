@@ -90,23 +90,28 @@ public class PLambda extends PExp {
     }
 
     @Override
-    protected void bindTo(PExp target, Map<PExp, PExp> accumulator)
+    public String getTopLevelOperation() {
+        return "lambda";
+    }
+
+    @Override
+    public void bindTo(PExp target, Map<PExp, PExp> accumulator)
             throws BindingException {
 
         if (!(target instanceof PLambda) || !typeMatches(target)) {
             throw BINDING_EXCEPTION;
         }
-        
+
         MTFunction type = (MTFunction) getType();
-        
+
         PLambda targetAsPLambda = (PLambda) target;
-        
+
         Map<PExp, PExp> substitutions = new HashMap<PExp, PExp>();
-        substitutions.put(new PSymbol(type.getDomain(), 
-                    null, targetAsPLambda.variableName),
-                new PSymbol(type.getDomain(), null, variableName));
+        substitutions.put(new PSymbol(type.getDomain(), null,
+                targetAsPLambda.variableName), new PSymbol(type.getDomain(),
+                null, variableName));
         targetAsPLambda = (PLambda) targetAsPLambda.substitute(accumulator);
-        
+
         myBody.bindTo(targetAsPLambda.myBody, accumulator);
     }
 
@@ -132,9 +137,9 @@ public class PLambda extends PExp {
     @Override
     public Set<String> getSymbolNamesNoCache() {
         Set<String> bodyNames = new HashSet<String>(myBody.getSymbolNames());
-        
+
         bodyNames.add("lambda");
-        
+
         return bodyNames;
     }
 
@@ -145,11 +150,11 @@ public class PLambda extends PExp {
 
     @Override
     public List<PExp> getFunctionApplicationsNoCache() {
-        List<PExp> bodyFunctions = 
+        List<PExp> bodyFunctions =
                 new LinkedList<PExp>(myBody.getFunctionApplications());
-        
+
         bodyFunctions.add(new PSymbol(getType(), null, "lambda"));
-        
+
         return bodyFunctions;
     }
 

@@ -122,6 +122,7 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
      * <p>Resets a checker so that it is prepared to check a new pair of types.
      * </p>
      */
+    @Override
     public void reset() {
         super.reset();
         myBindings.clear();
@@ -219,22 +220,7 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
             int quantifiedVariableCount =
                     t2AsMTBigUnion.getQuantifiedVariables().size();
 
-            //TODO : Find a more graceful solution to this
-            //Note that since "*" cannot appear in a RESOLVE variable name, 
-            //these names must be unique
-            if (myPromotedVariablesWorkingSpace == null) {
-                myPromotedVariablesWorkingSpace = new HashMap<String, MTType>();
-            }
-            else {
-                myPromotedVariablesWorkingSpace.clear();
-            }
-            for (int i = 0; i < quantifiedVariableCount; i++) {
-                myPromotedVariablesWorkingSpace.put("*" + i, myTypeGraph.MTYPE);
-            }
-
-            t1 =
-                    new MTBigUnion(t1.getTypeGraph(),
-                            myPromotedVariablesWorkingSpace, t1);
+            t1 = new MTBigUnion(t1.getTypeGraph(), quantifiedVariableCount, t1);
 
             visit(t1, t2);
         }

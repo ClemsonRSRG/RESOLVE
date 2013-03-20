@@ -38,7 +38,7 @@ public class Minimizer implements Automator {
     public Minimizer(ImmutableList<Theorem> theoremLibrary) {
         for (Theorem theorem : theoremLibrary) {
             for (Transformation t : theorem.getTransformations()) {
-                if (t.getEquivalence().equals(Equivalence.EQUIVALENT) 
+                if (t.getEquivalence().equals(Equivalence.EQUIVALENT)
                         && !t.introducesQuantifiedVariables()
                         && !t.couldAffectAntecedent()
                         && t.functionApplicationCountDelta() < 0) {
@@ -54,12 +54,11 @@ public class Minimizer implements Automator {
     @Override
     public void step(Deque<Automator> stack, PerVCProverModel model) {
         myProductiveRoundFlag =
-                    myProductiveRoundFlag
-                            || (myCurrentApplier.getApplicationCount() > 0);
-        
-        if (myCurrentRound.hasNext()) {    
-            myCurrentApplier = new ApplyAll(myCurrentRound.next()
-                    );
+                myProductiveRoundFlag
+                        || (myCurrentApplier.getApplicationCount() > 0);
+
+        if (myCurrentRound.hasNext()) {
+            myCurrentApplier = new ApplyAll(myCurrentRound.next());
             stack.push(myCurrentApplier);
         }
         else {

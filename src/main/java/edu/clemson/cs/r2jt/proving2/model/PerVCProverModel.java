@@ -41,6 +41,9 @@ import javax.swing.event.ChangeListener;
  */
 public final class PerVCProverModel {
 
+    private static final BindingException BINDING_EXCEPTION =
+            new BindingException();
+
     public static enum ChangeEventMode {
         ALWAYS {
 
@@ -86,6 +89,8 @@ public final class PerVCProverModel {
     private final Map<PExp, Integer> myLocalTheoremsSet =
             new HashMap<PExp, Integer>();
     private final Set<PExp> myLocalTheoremSetForReturning;
+    private final Map<String, List<Site>> myLocalTheoremsByTopLevel =
+            new HashMap<String, List<Site>>();
 
     /**
      * <p>A list of local theorems in the order they were introduced, for 
@@ -336,7 +341,7 @@ public final class PerVCProverModel {
         //This is an important change if it took us away from a proved state
         modelChanged(myConsequents.size() == 1);
     }
-    
+
     public void addConsequent(PExp c, int index) {
         myConsequents.add(index, c);
         myConsequentsHash += c.hashCode();
@@ -585,8 +590,7 @@ public final class PerVCProverModel {
     }
 
     public Iterator<BindResult> bind(Set<Binder> binders) {
-        return new BinderSatisfyingIterator(binders, new HashMap<PExp, PExp>(),
-                new LinkedList<Site>());
+        return new BinderSatisfyingIterator(binders, new HashMap<PExp, PExp>());
     }
 
     public int implicationHashCode() {
@@ -599,7 +603,7 @@ public final class PerVCProverModel {
         private final Iterator<Site> myFirstBinderSites;
 
         private Site myCurFirstSite;
-        private Map<PExp, PExp> myCurFirstSiteBindings;
+        private final Map<PExp, PExp> myCurFirstSiteBindings;
 
         private final Set<Binder> myOtherBinders = new HashSet<Binder>();
         private Iterator<BindResult> myOtherBindings;
@@ -607,12 +611,14 @@ public final class PerVCProverModel {
         private BindResult myNextReturn;
 
         private final Map<PExp, PExp> myAssumedBindings;
-        private final List<Site> myBoundSiteSoFar;
+
+        private final Map<PExp, PExp> myInductiveBindingsScratch =
+                new HashMap<PExp, PExp>();
 
         public BinderSatisfyingIterator(Set<Binder> binders,
-                Map<PExp, PExp> assumedBindings, List<Site> boundSitesSoFar) {
+                Map<PExp, PExp> assumedBindings) {
             myAssumedBindings = assumedBindings;
-            myBoundSiteSoFar = boundSitesSoFar;
+            myCurFirstSiteBindings = new HashMap<PExp, PExp>();
 
             if (!binders.isEmpty()) {
                 myFirstBinder = binders.iterator().next();
@@ -667,26 +673,24 @@ public final class PerVCProverModel {
                     myCurFirstSite = myFirstBinderSites.next();
 
                     try {
-                        myCurFirstSiteBindings =
-                                myFirstBinder.considerSite(myCurFirstSite,
-                                        myAssumedBindings);
+                        myCurFirstSiteBindings.clear();
+
+                        myFirstBinder.considerSite(myCurFirstSite,
+                                myAssumedBindings, myCurFirstSiteBindings);
 
                         if (!myCurFirstSite.exp.getQuantifiedVariables()
                                 .isEmpty()) {
                             throw new BindingException();
                         }
 
-                        Map<PExp, PExp> inductiveBindings =
-                                new HashMap<PExp, PExp>(myAssumedBindings);
-                        inductiveBindings.putAll(myCurFirstSiteBindings);
-
-                        List<Site> inductiveSites =
-                                new LinkedList<Site>(myBoundSiteSoFar);
-                        inductiveSites.add(myCurFirstSite);
+                        myInductiveBindingsScratch.clear();
+                        myInductiveBindingsScratch.putAll(myAssumedBindings);
+                        myInductiveBindingsScratch
+                                .putAll(myCurFirstSiteBindings);
 
                         myOtherBindings =
                                 new BinderSatisfyingIterator(myOtherBinders,
-                                        inductiveBindings, inductiveSites);
+                                        myInductiveBindingsScratch);
                     }
                     catch (BindingException be) {
                         //Can't bind the current site.  No worries--just keep
@@ -755,6 +759,9 @@ public final class PerVCProverModel {
          */
         public Map<PExp, PExp> considerSite(Site s,
                 Map<PExp, PExp> assumedBindings) throws BindingException;
+
+        public void considerSite(Site s, Map<PExp, PExp> assumedBindings,
+                Map<PExp, PExp> accumulator) throws BindingException;
     }
 
     public static class TopLevelAntecedentBinder extends AbstractBinder {
@@ -837,7 +844,27 @@ public final class PerVCProverModel {
         @Override
         public Map<PExp, PExp> considerSite(Site s,
                 Map<PExp, PExp> assumedBindings) throws BindingException {
-            return myPattern.substitute(assumedBindings).bindTo(s.exp);
+            Map<PExp, PExp> result = new HashMap<PExp, PExp>();
+
+            considerSite(s, assumedBindings, result);
+
+            return result;
+        }
+
+        @Override
+        public void considerSite(Site s, Map<PExp, PExp> assumedBindings,
+                Map<PExp, PExp> accumulator) throws BindingException {
+            PExp substituted = myPattern.substitute(assumedBindings);
+
+            //This is a simple optimization that prevents us from traversing the
+            //expression if there's no way we could match
+            if (s.exp.getSymbolNames().contains(
+                    substituted.getTopLevelOperation())) {
+                substituted.bindTo(s.exp, accumulator);
+            }
+            else {
+                throw BINDING_EXCEPTION;
+            }
         }
     }
 
