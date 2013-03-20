@@ -195,7 +195,18 @@ public class ExpandAntecedentByImplication implements Transformation {
         @Override
         public Map<PExp, PExp> considerSite(Site s,
                 Map<PExp, PExp> assumedBindings) throws BindingException {
-            return myPattern.substitute(assumedBindings).bindTo(s.exp);
+            Map<PExp, PExp> result = new HashMap<PExp, PExp>();
+
+            considerSite(s, assumedBindings, result);
+
+            return result;
+        }
+
+        @Override
+        public void considerSite(Site s, Map<PExp, PExp> assumedBindings,
+                Map<PExp, PExp> accumulator) throws BindingException {
+
+            myPattern.substitute(assumedBindings).bindTo(s.exp, accumulator);
         }
 
         @Override

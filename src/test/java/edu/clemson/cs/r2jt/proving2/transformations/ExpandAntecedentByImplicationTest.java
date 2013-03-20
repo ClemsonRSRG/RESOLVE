@@ -4,22 +4,6 @@
  */
 package edu.clemson.cs.r2jt.proving2.transformations;
 
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving2.BindingsIterator;
-import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 /**
  * 
  * @author hamptos

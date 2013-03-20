@@ -282,7 +282,7 @@ public class PAlternatives extends PExp {
     }
 
     @Override
-    protected void bindTo(PExp target, Map<PExp, PExp> accumulator)
+    public void bindTo(PExp target, Map<PExp, PExp> accumulator)
             throws BindingException {
 
         if (!(target instanceof PAlternatives)) {
@@ -409,6 +409,11 @@ public class PAlternatives extends PExp {
     @Override
     public boolean isVariable() {
         return false;
+    }
+
+    @Override
+    public String getTopLevelOperation() {
+        return "{{";
     }
 
     private static class UnboxResult implements Mapping<Alternative, PExp> {

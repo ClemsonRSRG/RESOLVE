@@ -90,7 +90,12 @@ public class PLambda extends PExp {
     }
 
     @Override
-    protected void bindTo(PExp target, Map<PExp, PExp> accumulator)
+    public String getTopLevelOperation() {
+        return "lambda";
+    }
+
+    @Override
+    public void bindTo(PExp target, Map<PExp, PExp> accumulator)
             throws BindingException {
 
         if (!(target instanceof PLambda) || !typeMatches(target)) {
