@@ -63,7 +63,7 @@ public class AutomatedProver {
     private Thread myWorkerThread;
 
     private MainProofFitnessFunction myFitnessFunction;
-    
+
     private final Set<String> myVariableSymbols;
 
     public AutomatedProver(PerVCProverModel m,
@@ -74,7 +74,7 @@ public class AutomatedProver {
         m.setAutomatedProver(this);
 
         myTheoremLibrary = theoremLibrary;
-        
+
         //The consequents will contain many symbols like "min_int",
         //"S", "Empty_String", etc.  For the purposes of a number of 
         //optimizations/heuristics it's useful to know which of those come from 
@@ -90,33 +90,32 @@ public class AutomatedProver {
             theoremTransformations = t.getTransformations();
 
             for (Transformation transformation : theoremTransformations) {
-                if (!transformation.couldAffectAntecedent() && 
-                        !transformation.introducesQuantifiedVariables()) {
+                if (!transformation.couldAffectAntecedent()
+                        && !transformation.introducesQuantifiedVariables()) {
                     transformationHeap.add(transformation);
                 }
             }
         }
         List<Transformation> transformations = new LinkedList<Transformation>();
         Transformation top;
-        while (!transformationHeap.isEmpty() && 
-                myFitnessFunction.calculateFitness(
-                    transformationHeap.peek()) >= 0) {
-            
+        while (!transformationHeap.isEmpty()
+                && myFitnessFunction
+                        .calculateFitness(transformationHeap.peek()) >= 0) {
+
             top = transformationHeap.poll();
             transformations.add(top);
             System.out.println(top + " (" + top.getClass() + ") -- "
                     + myFitnessFunction.calculateFitness(top));
         }
-        
+
         if (transformationHeap.size() > 0) {
             System.out.println("<<<<<<<<<<<<<<< recommend against");
             while (!transformationHeap.isEmpty()) {
                 top = transformationHeap.poll();
                 System.out.println(top + " (" + top.getClass() + ") -- "
-                    + myFitnessFunction.calculateFitness(top));
+                        + myFitnessFunction.calculateFitness(top));
             }
         }
-        
 
         List<Automator> steps = new LinkedList<Automator>();
         steps.add(new VariablePropagator());
@@ -124,13 +123,16 @@ public class AutomatedProver {
         steps.add(new VariablePropagator());
         steps.add(new ApplyN(
                 new NoOpLabel("--- Done Minimizing Antecedent ---"), 1));
-        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols, myTheoremLibrary, 1));
+        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
+                myTheoremLibrary, 1));
         steps.add(new VariablePropagator());
         steps.add(new AntecedentMinimizer(myTheoremLibrary));
-        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols, myTheoremLibrary, 1));
+        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
+                myTheoremLibrary, 1));
         steps.add(new VariablePropagator());
         steps.add(new AntecedentMinimizer(myTheoremLibrary));
-        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols, myTheoremLibrary, 1));
+        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
+                myTheoremLibrary, 1));
         steps.add(new VariablePropagator());
         steps.add(new AntecedentMinimizer(myTheoremLibrary));
         steps.add(new ApplyN(
@@ -143,10 +145,10 @@ public class AutomatedProver {
 
         myAutomatorStack.push(new PushSequence(steps));
     }
-    
-    private Set<String> determineVariableSymbols(PerVCProverModel model, 
+
+    private Set<String> determineVariableSymbols(PerVCProverModel model,
             ModuleScope moduleScope) {
-        
+
         //With apologies to whoever has to deal with this mess, this is not a
         //very good way of dealing with this.  Ideally the populator would 
         //attach the entry that corresponds to each symbol to its Exp, making
@@ -155,19 +157,20 @@ public class AutomatedProver {
         //information through the verifier is a nightmare.  Once a better 
         //verifier exists, that change would be a lot easier and this can be
         //made a lot more robust.
-        
+
         //First, get a list of all symbols
         Set<String> symbols = new HashSet<String>();
         for (PExp consequent : model.getConsequentList()) {
             symbols.addAll(consequent.getSymbolNames());
         }
-        
+
         //Next, find all those that come from mathematical definitions
         Set<String> mathSymbols = new HashSet<String>();
         for (String s : symbols) {
-            List<SymbolTableEntry> entries = moduleScope.query(
-                    new NameQuery(null, s, ImportStrategy.IMPORT_RECURSIVE, 
-                        FacilityStrategy.FACILITY_INSTANTIATE, false));
+            List<SymbolTableEntry> entries =
+                    moduleScope.query(new NameQuery(null, s,
+                            ImportStrategy.IMPORT_RECURSIVE,
+                            FacilityStrategy.FACILITY_INSTANTIATE, false));
 
             if (entries.isEmpty()) {
                 //Symbol must be inside an operation scope, in which case it's
@@ -175,23 +178,23 @@ public class AutomatedProver {
             }
             else {
                 boolean math = true;
-                
+
                 Iterator<SymbolTableEntry> entriesIter = entries.iterator();
                 SymbolTableEntry entry;
                 while (math && entriesIter.hasNext()) {
                     entry = entriesIter.next();
                     math = entry instanceof MathSymbolEntry;
                 }
-                
+
                 if (math) {
                     mathSymbols.add(s);
                 }
             }
         }
-        
+
         //Everything that isn't a math symbol is a variable symbol
         symbols.removeAll(mathSymbols);
-        
+
         return Collections.unmodifiableSet(symbols);
     }
 

@@ -482,6 +482,11 @@ public class PSymbol extends PExp {
     }
 
     @Override
+    public String getTopLevelOperation() {
+        return getCanonicalName();
+    }
+
+    @Override
     public void bindTo(PExp target, Map<PExp, PExp> accumulator)
             throws BindingException {
 
@@ -623,18 +628,26 @@ public class PSymbol extends PExp {
         return result;
     }
 
+    private String getCanonicalName() {
+        String result;
+
+        if (displayType.equals(DisplayType.OUTFIX)) {
+            result = leftPrint + "_" + rightPrint;
+        }
+        else {
+            result = name;
+        }
+
+        return result;
+    }
+
     @Override
     public Set<String> getSymbolNamesNoCache() {
 
         Set<String> result = new HashSet<String>();
 
         if (quantification == Quantification.NONE) {
-            if (displayType.equals(DisplayType.OUTFIX)) {
-                result.add(leftPrint + "_" + rightPrint);
-            }
-            else {
-                result.add(name);
-            }
+            result.add(getCanonicalName());
         }
 
         Iterator<PExp> argumentIter = arguments.iterator();

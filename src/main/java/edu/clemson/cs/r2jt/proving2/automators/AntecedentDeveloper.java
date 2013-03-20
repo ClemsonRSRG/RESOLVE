@@ -4,8 +4,6 @@
  */
 package edu.clemson.cs.r2jt.proving2.automators;
 
-import edu.clemson.cs.r2jt.proving.ChainingIterator;
-import edu.clemson.cs.r2jt.proving.DummyIterator;
 import edu.clemson.cs.r2jt.proving2.Theorem;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
@@ -28,16 +26,13 @@ public class AntecedentDeveloper implements Automator {
     private final Iterable<Transformation> myTheoremTransformations;
     private final AddsSomethingNewPredicate myDevelopmentPredicate;
     private int myRemainingRounds;
-    
-    private final Set<String> myVariableSymbols;
 
-    public AntecedentDeveloper(PerVCProverModel model, 
-            Set<String> variableSymbols,
-            Iterable<Theorem> theorems, int totalRounds) {
-        myDevelopmentPredicate = 
+    public AntecedentDeveloper(PerVCProverModel model,
+            Set<String> variableSymbols, Iterable<Theorem> theorems,
+            int totalRounds) {
+        myDevelopmentPredicate =
                 new AddsSomethingNewPredicate(model, variableSymbols);
         myRemainingRounds = totalRounds;
-        myVariableSymbols = variableSymbols;
 
         List<Transformation> transformations = new LinkedList<Transformation>();
         List<Transformation> tTransformations;
