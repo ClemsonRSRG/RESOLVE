@@ -313,6 +313,10 @@ public final class PerVCProverModel {
         return myLocalTheoremsList;
     }
 
+    public ImmutableList<Theorem> getGlobalTheoremLibrary() {
+        return myTheoremLibrary;
+    }
+
     public List<PExp> getConsequentList() {
         return myConsequents;
     }

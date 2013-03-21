@@ -6,6 +6,7 @@ package edu.clemson.cs.r2jt.proving2;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.automators.AntecedentDeveloper;
 import edu.clemson.cs.r2jt.proving2.automators.AntecedentMinimizer;
 import edu.clemson.cs.r2jt.proving2.automators.ApplyN;
@@ -17,7 +18,9 @@ import edu.clemson.cs.r2jt.proving2.automators.Simplify;
 import edu.clemson.cs.r2jt.proving2.automators.VariablePropagator;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
+import edu.clemson.cs.r2jt.proving2.transformations.ExpandAntecedentBySubstitution;
 import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
+import edu.clemson.cs.r2jt.proving2.transformations.SubstituteInPlaceInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
@@ -162,6 +165,25 @@ public class AutomatedProver {
         Set<String> symbols = new HashSet<String>();
         for (PExp consequent : model.getConsequentList()) {
             symbols.addAll(consequent.getSymbolNames());
+        }
+
+        //We also include any symbols that could be easily 'swapped in' by a
+        //local theorem equality.  For example, if we know (P o Q) = (P' o Q'),
+        //then even if P' and Q' don't currently appear in the consequent... if
+        //(P o Q) -does- appear, we'll include P' and Q' as symbols
+        for (LocalTheorem t : model.getLocalTheoremList()) {
+            if (t.getAssertion().isEquality()) {
+                for (Transformation trans : t.getTransformations()) {
+                    if (trans instanceof SubstituteInPlaceInConsequent) {
+                        Iterator<Application> applications =
+                                trans.getApplications(model);
+
+                        if (applications.hasNext()) {
+                            symbols.addAll(trans.getReplacementSymbolNames());
+                        }
+                    }
+                }
+            }
         }
 
         //Next, find all those that come from mathematical definitions
