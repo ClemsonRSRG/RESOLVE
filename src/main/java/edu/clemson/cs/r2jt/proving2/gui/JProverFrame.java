@@ -30,6 +30,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,6 +38,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -63,6 +65,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -115,7 +119,6 @@ public class JProverFrame extends JFrame {
     private JScrollPane myTopLevelScrollWrapper;
     private JComponent myBasicArea;
 
-    private ImmutableList<Theorem> myGlobalTheorems;
     private Set<PExp> myGlobalTheoremAssertions = new HashSet<PExp>();
 
     private final MapOfLists<Site, Application> myLoadedApplications =
@@ -253,8 +256,7 @@ public class JProverFrame extends JFrame {
         pack();
     }
 
-    public void setGlobalTheorems(ImmutableList<Theorem> globalTheorems) {
-        myGlobalTheorems = globalTheorems;
+    public void setGlobalTheorems(Iterable<Theorem> globalTheorems) {
         myGlobalTheoremAssertions.clear();
 
         DefaultListModel m = new DefaultListModel();
@@ -476,7 +478,10 @@ public class JProverFrame extends JFrame {
         theoremView
                 .setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-        theoremListPanel.add(new JTextField(), BorderLayout.NORTH);
+        JTextField search = new JTextField();
+        search.getDocument().addDocumentListener(new TheoremSearch(search));
+
+        theoremListPanel.add(search, BorderLayout.NORTH);
         theoremListPanel.add(theoremView, BorderLayout.CENTER);
 
         JMenuBar filterListBar = new JMenuBar();
@@ -708,6 +713,88 @@ public class JProverFrame extends JFrame {
             });
             System.out
                     .println("JProverFrame.EnterTheoremSelectionOnModelChange - exit");
+        }
+    }
+
+    private class TheoremSearch implements DocumentListener {
+
+        private final JTextField mySearchField;
+
+        public TheoremSearch(JTextField searchField) {
+            mySearchField = searchField;
+        }
+
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            changedUpdate(e);
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            changedUpdate(e);
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            ImmutableList<Theorem> theorems =
+                    myProverStateDisplay.getModel().getGlobalTheoremLibrary();
+
+            String searchText = mySearchField.getText().toLowerCase().trim();
+            if (searchText.isEmpty()) {
+                setGlobalTheorems(theorems);
+            }
+            else {
+                //All this complicated stuff turns a "simple" regex (i.e., one
+                //that only recognizes "*" for "anything" and "\*" for "literal
+                //star" into an "official" regex supported by Pattern
+                String pattern = ".*?";
+                String[] literalStarSplit = searchText.split("\\\\\\*");
+
+                if (searchText.startsWith("\\*")) {
+                    pattern += "\\*";
+                }
+
+                boolean firstNonLiteralStarChunk = true;
+                for (String nonLiteralStarChunk : literalStarSplit) {
+                    if (firstNonLiteralStarChunk) {
+                        firstNonLiteralStarChunk = false;
+                    }
+                    else {
+                        pattern += "\\*";
+                    }
+
+                    String[] literalChunks = nonLiteralStarChunk.split("\\*");
+
+                    boolean firstLiteralChunk = true;
+                    for (String literalChunk : literalChunks) {
+                        if (firstLiteralChunk) {
+                            firstLiteralChunk = false;
+                        }
+                        else {
+                            pattern += ".*?";
+                        }
+
+                        pattern += Pattern.quote(literalChunk.toLowerCase());
+                    }
+                }
+                if (searchText.endsWith("\\*")) {
+                    pattern += "\\*";
+                }
+
+                pattern += ".*?";
+
+                //Now that we have an official regex, we select the theorems
+                //that match
+                List<Theorem> matchingTheorems = new LinkedList<Theorem>();
+                for (Theorem t : theorems) {
+                    if (Pattern.matches(pattern, t.getAssertion().toString()
+                            .toLowerCase())) {
+                        matchingTheorems.add(t);
+                    }
+                }
+
+                setGlobalTheorems(matchingTheorems);
+            }
         }
     }
 
