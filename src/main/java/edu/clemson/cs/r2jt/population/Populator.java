@@ -311,7 +311,6 @@ public class Populator extends TreeWalkerVisitor {
     public void preFacilityOperationDec(FacilityOperationDec dec) {
         myBuilder.startScope(dec);
         myCurrentParameters = new LinkedList<ProgramParameterEntry>();
-
     }
 
     @Override
@@ -575,6 +574,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postFacilityOperationDec(FacilityOperationDec dec) {
+        myCurrentParameters = null;
         myBuilder.endScope();
         myCurrentParameters = null;
 
@@ -1027,6 +1027,8 @@ public class Populator extends TreeWalkerVisitor {
                 + ((typeValue != null) ? " with type value " + typeValue : ""));
 
         myCurrentDirectDefinition = null;
+
+        node.setMathType(declaredType);
     }
 
     @Override
@@ -1265,7 +1267,7 @@ public class Populator extends TreeWalkerVisitor {
         Exp typeExp = node.getArbitraryExp();
         MTType mathType = typeExp.getMathType();
         MTType mathTypeValue = typeExp.getMathTypeValue();
-        if (!mathType.isKnownToContainOnlyMTypes()) {
+        if (mathTypeValue == null) {
             notAType(typeExp);
         }
 
