@@ -96,6 +96,10 @@ public class Site {
         this.path = new ArrayBackedImmutableList(path);
         this.exp = exp;
 
+        if (exp == null) {
+            throw new IllegalArgumentException("Null exp");
+        }
+
         myHashCode =
                 section.hashCode()
                         + (41 * (index + (57 * this.path.hashCode())));
