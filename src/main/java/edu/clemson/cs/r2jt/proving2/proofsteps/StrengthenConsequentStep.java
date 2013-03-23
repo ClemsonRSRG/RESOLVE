@@ -41,8 +41,16 @@ public class StrengthenConsequentStep implements ProofStep {
 
         List<Site> sites = new ArrayList<Site>(myEliminatedSites);
         Collections.sort(sites, BY_INDEX);
+
+        //Note that the same site could appear twice
+        int lastIndex = -1;
         for (Site s : sites) {
-            m.addConsequent(s.exp, s.index);
+
+            if (s.index != lastIndex) {
+                m.addConsequent(s.exp, s.index);
+            }
+
+            lastIndex = s.index;
         }
     }
 

@@ -19,9 +19,11 @@ import edu.clemson.cs.r2jt.proving2.justifications.Given;
 import edu.clemson.cs.r2jt.proving2.justifications.Justification;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
+import edu.clemson.cs.r2jt.proving2.utilities.SimpleArrayList;
 import edu.clemson.cs.r2jt.proving2.utilities.UnsafeIteratorLinkedList;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -110,8 +112,8 @@ public final class PerVCProverModel {
      * the conjuncts would have been broken up into separate entries in this 
      * list.) Once we empty this list, the proof is complete.</p>
      */
-    private final List<PExp> myConsequents =
-            new UnsafeIteratorLinkedList<PExp>();
+    private final SimpleArrayList<PExp> myConsequents =
+            new SimpleArrayList<PExp>();
 
     private int myLocalTheoremsHash;
     private int myConsequentsHash;
@@ -317,7 +319,7 @@ public final class PerVCProverModel {
         return myTheoremLibrary;
     }
 
-    public List<PExp> getConsequentList() {
+    public SimpleArrayList<PExp> getConsequentList() {
         return myConsequents;
     }
 
