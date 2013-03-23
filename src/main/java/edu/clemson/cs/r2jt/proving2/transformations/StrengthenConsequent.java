@@ -172,13 +172,21 @@ public class StrengthenConsequent implements Transformation {
         public void apply(PerVCProverModel m) {
 
             //We want to start removing at the end so we aren't adjusting 
-            //indecis
+            //indecis.  Note that it's possible two binders bound to the same
+            //site.
+            int lastIndex = -1;
+            int nextIndex;
             for (int i = myBindSiteIndecis.length - 1; i >= 0; i--) {
-                m.removeConsequent(myBindSiteIndecis[i]);
+                nextIndex = myBindSiteIndecis[i];
+
+                if (nextIndex != lastIndex) {
+                    m.removeConsequent(nextIndex);
+                }
+
+                lastIndex = nextIndex;
             }
 
             for (PExp a : myAntecedents) {
-                m.getConsequentList().size();
                 m.addConsequent(a.substitute(myBindings));
             }
 
