@@ -150,7 +150,7 @@ public class ResolveCompiler {
         Main.runMain(args, myCompileReport, myInputFile, myUserFileMap);
     }
 
-    public void compiles(String[] args, ProverListener listener) {
+    public void compile(String[] args, ProverListener listener) {
         WebListener = listener;
         Main.runMain(args, myCompileReport, myInputFile, myUserFileMap);
     }
