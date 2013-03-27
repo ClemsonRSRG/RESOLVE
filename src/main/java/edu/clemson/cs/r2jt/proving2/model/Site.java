@@ -171,7 +171,6 @@ public class Site {
 
     @Override
     public String toString() {
-        return section + ":" + section.getPExp(mySource, index) + "(" + index
-                + "):" + exp;
+        return section + ":" + root.exp + "(" + index + "):" + exp;
     }
 }

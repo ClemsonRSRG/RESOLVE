@@ -137,7 +137,11 @@ public class SubstituteInPlaceInConsequent implements Transformation {
             PExp transformed = myTransformationTemplate.substitute(myBindings);
             m.alterSite(myBindSite, transformed);
 
-            m.addProofStep(new ModifyConsequentStep(myBindSite,
+            Site finalSite =
+                    new Site(m, Site.Section.CONSEQUENTS, myBindSite.index,
+                            myBindSite.path, transformed);
+
+            m.addProofStep(new ModifyConsequentStep(myBindSite, finalSite,
                     SubstituteInPlaceInConsequent.this));
         }
 

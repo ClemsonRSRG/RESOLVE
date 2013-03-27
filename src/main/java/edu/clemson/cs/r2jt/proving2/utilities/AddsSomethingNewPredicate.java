@@ -70,8 +70,7 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
 
                     //Any development that reduces the function count should be
                     //accepted
-                    result =
-                            transformation.functionApplicationCountDelta() <= 0;
+                    result = transformation.functionApplicationCountDelta() < 0;
 
                     if (!result) {
                         if (transformation instanceof ExpandAntecedentBySubstitution

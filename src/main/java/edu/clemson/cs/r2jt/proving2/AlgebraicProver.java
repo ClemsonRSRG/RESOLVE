@@ -4,29 +4,31 @@
  */
 package edu.clemson.cs.r2jt.proving2;
 
-import edu.clemson.cs.r2jt.ResolveCompiler;
+import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
+import edu.clemson.cs.r2jt.proving.Prover;
+import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
+import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.gui.JProverFrame;
-import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.justifications.Library;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
+import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.proofsteps.LabelStep;
+import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
+import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
+import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
-import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
-import edu.clemson.cs.r2jt.typeandpopulate.SymbolTable;
-import edu.clemson.cs.r2jt.proving.Prover;
-import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
-import edu.clemson.cs.r2jt.verification.Verifier;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Comparator;
@@ -98,10 +100,13 @@ public class AlgebraicProver {
 
     private final ModuleScope myModuleScope;
 
+    private final CompileEnvironment myInstanceEnvironment;
+
     public AlgebraicProver(TypeGraph g, List<VC> vcs, ModuleScope scope,
             final boolean startInteractive, CompileEnvironment environment,
             ProverListener listener) {
 
+        myInstanceEnvironment = environment;
         myModels = new PerVCProverModel[vcs.size()];
         myAutomatedProvers = new AutomatedProver[vcs.size()];
         myModuleScope = scope;
@@ -182,7 +187,7 @@ public class AlgebraicProver {
         myProverListeners.remove(l);
     }
 
-    public synchronized void start() {
+    public synchronized void start() throws IOException {
         myWorkingThread = Thread.currentThread();
         myRunningFlag = true;
         while (myRunningFlag) {
@@ -202,6 +207,20 @@ public class AlgebraicProver {
                 if (myVCIndex == myVCs.size() - 1) {
                     //We're done with every VC
                     myRunningFlag = false;
+
+                    SwingUtilities.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            myUI.setInteractiveMode(true);
+                        }
+                    });
+
+                    //TODO: It's unclear if it's possible for us to be in
+                    //interactive mode here
+                    if (!myInteractiveModeFlag) {
+                        outputProofFile();
+                    }
                 }
                 else {
                     //Start on next VC.
@@ -209,6 +228,24 @@ public class AlgebraicProver {
                 }
             }
             else {
+
+                //This implements a debugging feature where the prover will 
+                //automatically pause whenever a label is reached.  To enable
+                //this feature, see NoOpLabel.NoOpLabelApplication.apply().
+                if (!myModels[myVCIndex].getProofSteps().isEmpty()
+                        && myModels[myVCIndex].getLastProofStep() instanceof LabelStep) {
+
+                    myInteractiveModeFlag = true;
+                }
+
+                SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        myUI.setInteractiveMode(true);
+                    }
+                });
+
                 //Stopped for some other reason.  Might be because interactive
                 //mode is now on, in which case we want to cool our heels
                 while (myInteractiveModeFlag && myRunningFlag) {
@@ -223,6 +260,55 @@ public class AlgebraicProver {
         }
 
         myWorkingThread = null;
+    }
+
+    private void outputProofFile() throws IOException {
+        FileWriter w = new FileWriter(new File(proofFileName()));
+
+        for (int i = 0; i < myModels.length; i++) {
+            w.write("=================================== "
+                    + myModels[i].getTheoremName()
+                    + " ===================================\n\n");
+
+            if (myModels[i].getConsequentList().isEmpty()) {
+                w.write("[PROVED] via:\n\n");
+
+                PerVCProverModel workingModel =
+                        new PerVCProverModel(myTypeGraph, myVCs.get(i)
+                                .getName(), myVCs.get(i), myTheoremLibrary);
+
+                w.write(workingModel.toString() + "\n\n");
+
+                int lastHash = workingModel.implicationHashCode();
+                Transformation stepTransformation;
+                List<ProofStep> steps = myModels[i].getProductiveProofSteps();
+                //List<ProofStep> steps = myModels[i].getProofSteps();
+                for (ProofStep step : steps) {
+                    workingModel.mimic(step);
+
+                    if (lastHash != workingModel.implicationHashCode()) {
+                        lastHash = workingModel.implicationHashCode();
+                        stepTransformation = step.getTransformation();
+
+                        if (stepTransformation instanceof NoOpLabel) {
+                            w.write("" + stepTransformation + "\n\n");
+                        }
+                        else {
+                            w.write("Applied " + stepTransformation + "\n\n");
+                            w.write(workingModel.toString() + "\n\n");
+                        }
+                    }
+                }
+
+                w.write("Q.E.D.\n\n");
+            }
+            else {
+                w.write("[NOT PROVED]\n\n");
+            }
+        }
+
+        w.flush();
+        w.close();
     }
 
     private void setVCIndex(int index) {
@@ -276,6 +362,20 @@ public class AlgebraicProver {
         }
     }
 
+    private String proofFileName() {
+        File file = myInstanceEnvironment.getTargetFile();
+        ModuleID cid = myInstanceEnvironment.getModuleID(file);
+        file = myInstanceEnvironment.getFile(cid);
+        String filename = file.toString();
+        int temp = filename.indexOf(".");
+        String tempfile = filename.substring(0, temp);
+        String mainFileName;
+
+        mainFileName = tempfile + ".proof";
+
+        return mainFileName;
+    }
+
     private class GoInteractive implements ActionListener {
 
         @Override
@@ -301,6 +401,7 @@ public class AlgebraicProver {
         @Override
         public void actionPerformed(ActionEvent e) {
             myAutomatedProvers[myVCIndex].step();
+            System.out.println("AlgebraicProver - step");
         }
     }
 

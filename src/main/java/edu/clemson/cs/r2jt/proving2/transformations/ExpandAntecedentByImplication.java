@@ -262,11 +262,12 @@ public class ExpandAntecedentByImplication implements Transformation {
                     myConsequent.substitute(myBindings).splitIntoConjuncts();
 
             for (PExp a : newAntecedents) {
-                LocalTheorem t =
+                Site t =
                         m.addLocalTheorem(a, new TheoremApplication(
                                 ExpandAntecedentByImplication.this), false);
+
                 m.addProofStep(new IntroduceLocalTheoremStep(t,
-                        ExpandAntecedentByImplication.this, myBindTheorems));
+                        ExpandAntecedentByImplication.this, myBindSites));
             }
         }
 

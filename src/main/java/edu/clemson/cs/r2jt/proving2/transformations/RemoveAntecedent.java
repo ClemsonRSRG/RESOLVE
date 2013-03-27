@@ -77,7 +77,7 @@ public class RemoveAntecedent implements Transformation {
         public void apply(PerVCProverModel m) {
             myLocalTheoremWhenRemoved = m.removeLocalTheorem(mySite.index);
             m.addProofStep(new RemoveAntecedentStep(myLocalTheoremWhenRemoved,
-                    mySite.index, RemoveAntecedent.this));
+                    mySite, RemoveAntecedent.this));
         }
 
         @Override

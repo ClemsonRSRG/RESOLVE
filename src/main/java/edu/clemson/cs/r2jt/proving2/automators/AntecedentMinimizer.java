@@ -23,7 +23,7 @@ import java.util.List;
 public class AntecedentMinimizer implements Automator {
 
     private static final ApplyAll DUMMY_APPLIER =
-            new ApplyAll(new NoOpLabel("Dummy"));
+            new ApplyAll(new NoOpLabel(null, "Dummy"));
 
     public List<ExpandAntecedentBySubstitution> myReducingTranformations =
             new LinkedList<ExpandAntecedentBySubstitution>();

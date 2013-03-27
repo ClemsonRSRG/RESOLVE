@@ -108,10 +108,13 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
 
         @Override
         public void apply(PerVCProverModel m) {
-            m.alterSite(myBindSite, PExp.trueExp(myTheorem.getType()
-                    .getTypeGraph()));
+            m.alterSite(myBindSite, m.getTrue());
 
-            m.addProofStep(new ModifyConsequentStep(myBindSite,
+            Site finalSite =
+                    new Site(m, Site.Section.CONSEQUENTS, myBindSite.index,
+                            myBindSite.path, m.getTrue());
+
+            m.addProofStep(new ModifyConsequentStep(myBindSite, finalSite,
                     ReplaceTheoremInConsequentWithTrue.this));
         }
 
