@@ -8,6 +8,7 @@ import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.MetaFile;
 import edu.clemson.cs.r2jt.data.ModuleKind;
 import edu.clemson.cs.r2jt.proving.Prover;
+import edu.clemson.cs.r2jt.proving2.ProverListener;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 
@@ -69,6 +70,8 @@ public class ResolveCompiler {
     public static final Flag FLAG_EXPORT_AST =
             new Flag(FLAG_SECTION_NAME, "exportAST", FLAG_DESC_EXPORT_AST,
                     Flag.Type.HIDDEN);
+
+    public static ProverListener WebListener;
 
     //private String myTargetSource = null;
     //private String myTargetFileName = null;
@@ -144,6 +147,11 @@ public class ResolveCompiler {
     }
 
     public void compile(String[] args) {
+        Main.runMain(args, myCompileReport, myInputFile, myUserFileMap);
+    }
+
+    public void compiles(String[] args, ProverListener listener) {
+        WebListener = listener;
         Main.runMain(args, myCompileReport, myInputFile, myUserFileMap);
     }
 
