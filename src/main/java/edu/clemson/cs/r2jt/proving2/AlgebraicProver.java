@@ -4,6 +4,7 @@
  */
 package edu.clemson.cs.r2jt.proving2;
 
+import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving2.gui.JProverFrame;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
@@ -98,11 +99,16 @@ public class AlgebraicProver {
     private final ModuleScope myModuleScope;
 
     public AlgebraicProver(TypeGraph g, List<VC> vcs, ModuleScope scope,
-            final boolean startInteractive, CompileEnvironment environment) {
+            final boolean startInteractive, CompileEnvironment environment,
+            ProverListener listener) {
 
         myModels = new PerVCProverModel[vcs.size()];
         myAutomatedProvers = new AutomatedProver[vcs.size()];
         myModuleScope = scope;
+
+        if (listener != null) {
+            myProverListeners.add(listener);
+        }
 
         List<TheoremEntry> theoremEntries =
                 scope.query(new EntryTypeQuery(TheoremEntry.class,
