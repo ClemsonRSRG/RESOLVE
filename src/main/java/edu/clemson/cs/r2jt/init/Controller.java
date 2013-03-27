@@ -1668,7 +1668,8 @@ public class Controller {
                                 scope,
                                 myInstanceEnvironment.flags
                                         .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE),
-                                myInstanceEnvironment);
+                                myInstanceEnvironment,
+                                ResolveCompiler.WebListener);
                 prover.start();
             }
             catch (NoSuchSymbolException nsse) {
