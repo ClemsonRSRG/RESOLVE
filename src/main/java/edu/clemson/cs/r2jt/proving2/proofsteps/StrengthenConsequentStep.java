@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -25,12 +27,30 @@ public class StrengthenConsequentStep implements ProofStep {
     private final Collection<Site> myEliminatedSites;
     private final int myIntroducedCount;
     private final Transformation myTransformation;
+    private final Set<Site> myNewSites;
 
     public StrengthenConsequentStep(Collection<Site> eliminatedSites,
-            int introducedCount, Transformation transformation) {
+            Set<Site> newSites, int introducedCount,
+            Transformation transformation) {
         myEliminatedSites = eliminatedSites;
         myIntroducedCount = introducedCount;
         myTransformation = transformation;
+        myNewSites = newSites;
+    }
+
+    @Override
+    public Transformation getTransformation() {
+        return myTransformation;
+    }
+
+    @Override
+    public Set<Site> getPrerequisiteSites() {
+        return new HashSet<Site>(myEliminatedSites);
+    }
+
+    @Override
+    public Set<Site> getAffectedSites() {
+        return myNewSites;
     }
 
     @Override

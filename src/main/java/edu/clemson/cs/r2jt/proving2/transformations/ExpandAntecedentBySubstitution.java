@@ -227,11 +227,12 @@ public class ExpandAntecedentBySubstitution implements Transformation {
                     myBindSite.root.exp.withSiteAltered(myBindSite
                             .pathIterator(), transformed);
 
-            LocalTheorem newTheorem =
+            Site newTheorem =
                     m.addLocalTheorem(topLevelTransformed, null, false);
 
             m.addProofStep(new IntroduceLocalTheoremStep(newTheorem,
-                    ExpandAntecedentBySubstitution.this, myBindTheorem));
+                    ExpandAntecedentBySubstitution.this, Collections
+                            .singleton(myBindSite.root)));
         }
 
         @Override

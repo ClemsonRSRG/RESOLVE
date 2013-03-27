@@ -110,7 +110,7 @@ public class EliminateTrueConjunctInConsequent implements Transformation {
         public void apply(PerVCProverModel m) {
             m.removeConsequent(mySite.index);
 
-            m.addProofStep(new RemoveConsequentStep(mySite.exp, mySite.index,
+            m.addProofStep(new RemoveConsequentStep(mySite.exp, mySite,
                     EliminateTrueConjunctInConsequent.this));
         }
 

@@ -12,6 +12,7 @@ import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.model.Site.Section;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collections;
@@ -105,7 +106,11 @@ public class ReplaceSymmetricEqualityWithTrueInConsequent
         public void apply(PerVCProverModel m) {
             m.alterSite(mySite, m.getTrue());
 
-            m.addProofStep(new ModifyConsequentStep(mySite,
+            Site finalSite =
+                    new Site(m, Section.CONSEQUENTS, mySite.index, mySite.path,
+                            m.getTrue());
+
+            m.addProofStep(new ModifyConsequentStep(mySite, finalSite,
                     ReplaceSymmetricEqualityWithTrueInConsequent.this));
         }
 

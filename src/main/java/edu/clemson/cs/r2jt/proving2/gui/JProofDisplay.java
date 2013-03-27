@@ -86,6 +86,7 @@ public class JProofDisplay extends JPanel {
 
         @Override
         public void stateChanged(ChangeEvent e) {
+            System.out.println("JProofDisplay - stateChanged()");
             refreshProofSteps();
         }
     }

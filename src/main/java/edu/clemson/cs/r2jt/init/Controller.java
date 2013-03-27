@@ -1670,7 +1670,13 @@ public class Controller {
                                         .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE),
                                 myInstanceEnvironment,
                                 ResolveCompiler.WebListener);
-                prover.start();
+                
+                try {
+                    prover.start();
+                }
+                catch (IOException ioe) {
+                    throw new RuntimeException(ioe);
+                }
             }
             catch (NoSuchSymbolException nsse) {
                 //Can't find the module we're in.  Shouldn't be possible.

@@ -186,11 +186,12 @@ public class StrengthenConsequent implements Transformation {
                 lastIndex = nextIndex;
             }
 
+            Set<Site> newSites = new HashSet<Site>();
             for (PExp a : myAntecedents) {
-                m.addConsequent(a.substitute(myBindings));
+                newSites.add(m.addConsequent(a.substitute(myBindings)));
             }
 
-            m.addProofStep(new StrengthenConsequentStep(myBindSites,
+            m.addProofStep(new StrengthenConsequentStep(myBindSites, newSites,
                     myAntecedents.size(), StrengthenConsequent.this));
         }
 
