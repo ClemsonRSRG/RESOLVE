@@ -26,7 +26,7 @@ import java.util.LinkedList;
 public class Minimizer implements Automator {
 
     private static final ApplyAll DUMMY_APPLIER =
-            new ApplyAll(new NoOpLabel("Dummy"));
+            new ApplyAll(new NoOpLabel(null, "Dummy"));
 
     private Collection<Transformation> myReducingTranformations =
             new LinkedList<Transformation>();

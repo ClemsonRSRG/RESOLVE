@@ -4,6 +4,7 @@
  */
 package edu.clemson.cs.r2jt.proving2.transformations;
 
+import edu.clemson.cs.r2jt.proving2.AutomatedProver;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Site;
@@ -19,9 +20,11 @@ import java.util.Set;
 public class NoOpLabel implements Transformation {
 
     private final String myLabel;
+    private final AutomatedProver myProver;
 
-    public NoOpLabel(String label) {
+    public NoOpLabel(AutomatedProver p, String label) {
         myLabel = label;
+        myProver = p;
     }
 
     @Override
@@ -65,11 +68,20 @@ public class NoOpLabel implements Transformation {
         return Equivalence.EQUIVALENT;
     }
 
+    @Override
+    public String toString() {
+        return myLabel;
+    }
+
     private class NoOpLabelApplication implements Application {
 
         @Override
         public void apply(PerVCProverModel m) {
-            m.addProofStep(new LabelStep(myLabel));
+            m.addProofStep(new LabelStep(myLabel, NoOpLabel.this));
+
+            //Useful for debugging--pauses automated prover when a label is 
+            //reached
+            //myProver.markToPause();  
         }
 
         @Override

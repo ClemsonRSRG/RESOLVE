@@ -15,9 +15,13 @@ import edu.clemson.cs.r2jt.proving2.AutomatedProver;
 import edu.clemson.cs.r2jt.proving2.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.Theorem;
 import edu.clemson.cs.r2jt.proving2.VC;
+import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.justifications.Given;
 import edu.clemson.cs.r2jt.proving2.justifications.Justification;
+import edu.clemson.cs.r2jt.proving2.model.Site.Section;
+import edu.clemson.cs.r2jt.proving2.proofsteps.LabelStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
+import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
 import edu.clemson.cs.r2jt.proving2.utilities.SimpleArrayList;
 import edu.clemson.cs.r2jt.proving2.utilities.UnsafeIteratorLinkedList;
@@ -125,7 +129,10 @@ public final class PerVCProverModel {
      * applying these steps in order, would bring the fresh model into the exact
      * same state that this one is currently in.</p>
      */
-    private final List<ProofStep> myProofSoFar = new LinkedList<ProofStep>();
+    private final LinkedList<ProofStep> myProofSoFar =
+            new LinkedList<ProofStep>();
+    private final List<ProofStep> myUnmodifiableProofSoFar =
+            Collections.unmodifiableList(myProofSoFar);
 
     /**
      * <p>A link to the global theorem library.</p>
@@ -198,6 +205,62 @@ public final class PerVCProverModel {
     }
 
     /**
+     * <p>Returns a subset of the steps in the full proof list that, when
+     * applied in order, would arrive at the current consequent.  This method
+     * attempts to prune out steps that were not productive.</p>
+     */
+    public List<ProofStep> getProductiveProofSteps() {
+        List<ProofStep> result = new LinkedList<ProofStep>();
+
+        Set<Site> prerequisiteSites = new HashSet<Site>();
+
+        int i = 0;
+        for (PExp c : myConsequents) {
+            prerequisiteSites.add(new Site(this, Section.CONSEQUENTS, i, c));
+            i++;
+        }
+
+        Set<Site> stepAffectedSites, stepPrerequisites;
+        Iterator<ProofStep> steps = myProofSoFar.descendingIterator();
+        ProofStep step;
+        boolean overlap;
+        while (steps.hasNext()) {
+            step = steps.next();
+
+            stepPrerequisites = step.getPrerequisiteSites();
+            stepAffectedSites = step.getAffectedSites();
+
+            overlap = step instanceof LabelStep;
+            for (Site s : stepAffectedSites) {
+                if (prerequisiteSites.contains(s)) {
+                    //This step is important if it establishes sites that are
+                    //current global prerequisites
+                    overlap = true;
+                }
+            }
+
+            for (Site s : stepPrerequisites) {
+                if (s.section.equals(Section.CONSEQUENTS)) {
+                    //This step is important if it operated on a consequent
+                    overlap = true;
+                }
+            }
+
+            if (overlap) {
+                //This step is important.  Any sites it established are cleared
+                //(we've found what gave us the prerequisite) and any sites it
+                //depended on are added as new global prerequisites
+                prerequisiteSites.removeAll(stepAffectedSites);
+                prerequisiteSites.addAll(stepPrerequisites);
+
+                result.add(0, step);
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * <p>Sets the automated prover that is working on this model.  The prover
      * will be alerted before change events go out so that it can stop modifying
      * the model.</p>
@@ -248,7 +311,89 @@ public final class PerVCProverModel {
         modelChanged(true);
     }
 
+    /**
+     * <p>Attempts to follow the series of steps provided, so long as all 
+     * requisite facts are available at each step (but even if the model is not
+     * otherwise exactly the same as when each step was first enacted.)</p>
+     * 
+     * @param steps 
+     */
+    public void mimic(ProofStep step) {
+
+        Transformation transformation;
+        Iterator<Application> applications;
+        boolean stepMimicked, firstApplication;
+        int stepCount;
+        Set<Site> affectedSites;
+        transformation = step.getTransformation();
+        applications = transformation.getApplications(this);
+
+        stepMimicked = false;
+        firstApplication = true;
+        stepCount = myProofSoFar.size();
+        affectedSites = step.getAffectedSites();
+
+        if (mimicked(affectedSites)) {
+            return;
+        }
+
+        System.out
+                .println("################################################ step");
+        System.out.println("Affected sites: " + affectedSites);
+        System.out.println(this);
+
+        while (!stepMimicked && applications.hasNext()) {
+            if (firstApplication) {
+                firstApplication = false;
+            }
+            else {
+                while (myProofSoFar.size() > stepCount) {
+                    undoLastProofStep();
+                }
+            }
+
+            applications.next().apply(this);
+            //System.out.println("\n" + this);
+
+            stepMimicked = mimicked(affectedSites);
+        }
+
+        System.out.println("" + step + " (" + step.getClass() + ", "
+                + transformation.getClass() + ")");
+
+        System.out.flush();
+        if (!stepMimicked) {
+            System.out.println("ERROR!");
+            System.out.flush();
+            throw new IllegalArgumentException("Couldn't mimic step: " + step
+                    + " (" + step.getClass() + ", " + transformation.getClass()
+                    + ")");
+        }
+    }
+
+    private boolean mimicked(Set<Site> affectedSites) {
+
+        boolean stepMimicked = true;
+        Iterator<Site> affectedSitesIter = affectedSites.iterator();
+        Site affectedSite;
+        while (stepMimicked && affectedSitesIter.hasNext()) {
+            affectedSite = affectedSitesIter.next();
+            if (affectedSite.section.equals(Section.ANTECEDENTS)) {
+                stepMimicked = myLocalTheoremsSet.containsKey(affectedSite.exp);
+            }
+            else if (affectedSite.section.equals(Section.CONSEQUENTS)) {
+                stepMimicked = myConsequents.contains(affectedSite.exp);
+            }
+            else {
+                throw new RuntimeException();
+            }
+        }
+
+        return stepMimicked;
+    }
+
     private void modelChanged(boolean important) {
+        System.out.println("PerVCProverModel - modelChanged()");
         if (myChangeEventMode.report(important)) {
 
             if (myAutomatedProver == null || !myAutomatedProver.isRunning()) {
@@ -274,7 +419,7 @@ public final class PerVCProverModel {
     }
 
     public List<ProofStep> getProofSteps() {
-        return myProofSoFar;
+        return myUnmodifiableProofSoFar;
     }
 
     public ProofStep getLastProofStep() {
@@ -284,6 +429,8 @@ public final class PerVCProverModel {
     public void undoLastProofStep() {
         myProofSoFar.get(myProofSoFar.size() - 1).undo(this);
         myProofSoFar.remove(myProofSoFar.size() - 1);
+
+        modelChanged(false);
     }
 
     public ImmutableList<Theorem> getTheoremLibrary() {
@@ -340,12 +487,15 @@ public final class PerVCProverModel {
         return myLocalTheoremsSet.keySet().contains(t);
     }
 
-    public void addConsequent(PExp c) {
+    public Site addConsequent(PExp c) {
         myConsequents.add(c);
         myConsequentsHash += c.hashCode();
 
         //This is an important change if it took us away from a proved state
         modelChanged(myConsequents.size() == 1);
+
+        return new Site(this, Site.Section.CONSEQUENTS,
+                myConsequents.size() - 1, c);
     }
 
     public void addConsequent(PExp c, int index) {
@@ -437,7 +587,7 @@ public final class PerVCProverModel {
      * @param tryingToProveThis
      * @return 
      */
-    public LocalTheorem addLocalTheorem(PExp assertion, Justification j,
+    public Site addLocalTheorem(PExp assertion, Justification j,
             boolean tryingToProveThis, int index) {
 
         myLocalTheoremsHash += assertion.hashCode();
@@ -457,10 +607,10 @@ public final class PerVCProverModel {
 
         modelChanged(false);
 
-        return theorem;
+        return new Site(this, Site.Section.ANTECEDENTS, index, assertion);
     }
 
-    public LocalTheorem addLocalTheorem(PExp assertion, Justification j,
+    public Site addLocalTheorem(PExp assertion, Justification j,
             boolean tryingToProveThis) {
         return addLocalTheorem(assertion, j, tryingToProveThis,
                 myLocalTheoremsList.size());
@@ -518,6 +668,15 @@ public final class PerVCProverModel {
         myProofSoFar.add(s);
 
         modelChanged(false);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+
+        processStringRepresentation(new ProverModelVisitor(this), b);
+
+        return b.toString();
     }
 
     public void processStringRepresentation(ProverModelVisitor visitor,

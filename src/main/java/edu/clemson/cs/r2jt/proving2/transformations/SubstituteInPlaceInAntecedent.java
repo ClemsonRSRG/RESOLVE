@@ -126,7 +126,11 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
             PExp transformed = myTransformationTemplate.substitute(myBindings);
             m.alterSite(myBindSite, transformed);
 
-            m.addProofStep(new ModifyAntecedentStep(myBindSite,
+            Site finalSite =
+                    new Site(m, Site.Section.ANTECEDENTS, myBindSite.index,
+                            myBindSite.path, transformed);
+
+            m.addProofStep(new ModifyAntecedentStep(myBindSite, finalSite,
                     SubstituteInPlaceInAntecedent.this));
         }
 

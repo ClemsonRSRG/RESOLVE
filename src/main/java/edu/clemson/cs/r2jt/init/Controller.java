@@ -1669,7 +1669,13 @@ public class Controller {
                                 myInstanceEnvironment.flags
                                         .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE),
                                 myInstanceEnvironment);
-                prover.start();
+
+                try {
+                    prover.start();
+                }
+                catch (IOException ioe) {
+                    throw new RuntimeException(ioe);
+                }
             }
             catch (NoSuchSymbolException nsse) {
                 //Can't find the module we're in.  Shouldn't be possible.
