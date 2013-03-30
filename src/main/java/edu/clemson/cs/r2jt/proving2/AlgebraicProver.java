@@ -6,29 +6,25 @@ package edu.clemson.cs.r2jt.proving2;
 
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.proving2.gui.JProverFrame;
-import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
-import edu.clemson.cs.r2jt.proving2.justifications.Library;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
-import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
-import edu.clemson.cs.r2jt.typeandpopulate.SymbolTable;
 import edu.clemson.cs.r2jt.proving.Prover;
 import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.gui.JProverFrame;
+import edu.clemson.cs.r2jt.proving2.justifications.Library;
+import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.LabelStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
+import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
-import edu.clemson.cs.r2jt.verification.Verifier;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -335,7 +331,24 @@ public class AlgebraicProver {
                 }
             };
 
-            invokeAndWait(setModel);
+            if (SwingUtilities.isEventDispatchThread()) {
+                setModel.run();
+            }
+            else {
+                try {
+                    while (myUI.getModel() != myModels[myVCIndex]) {
+                        try {
+                            SwingUtilities.invokeAndWait(setModel);
+                        }
+                        catch (InterruptedException ie) {
+
+                        }
+                    }
+                }
+                catch (InvocationTargetException ite) {
+                    throw new RuntimeException(ite);
+                }
+            }
         }
 
         if (!myInteractiveModeFlag) {

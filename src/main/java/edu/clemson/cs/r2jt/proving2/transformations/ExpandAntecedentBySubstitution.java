@@ -7,14 +7,15 @@ package edu.clemson.cs.r2jt.proving2.transformations;
 import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
-import edu.clemson.cs.r2jt.proving2.LocalTheorem;
-import edu.clemson.cs.r2jt.proving2.Theorem;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
+import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.AbstractBinder;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheoremStep;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
@@ -37,10 +38,10 @@ public class ExpandAntecedentBySubstitution implements Transformation {
 
     private final PExp myMatchPattern;
     private final PExp myTransformationTemplate;
-    private final PExp myTheorem;
+    private final Theorem myTheorem;
 
     public ExpandAntecedentBySubstitution(PExp matchPattern,
-            PExp transformationTemplate, PExp theorem) {
+            PExp transformationTemplate, Theorem theorem) {
         myMatchPattern = matchPattern;
         myTransformationTemplate = transformationTemplate;
         myTheorem = theorem;
@@ -130,7 +131,8 @@ public class ExpandAntecedentBySubstitution implements Transformation {
                 List<Site> boundSitesSoFar) {
             return new InductiveSiteIteratorIterator(
                     new SkipOneTopLevelAntecedentIterator(m
-                            .topLevelAntecedentSiteIterator(), myTheorem));
+                            .topLevelAntecedentSiteIterator(), myTheorem
+                            .getAssertion()));
         }
     }
 
@@ -195,6 +197,7 @@ public class ExpandAntecedentBySubstitution implements Transformation {
         private final Set<Theorem> myBindTheorem;
         private final Site myBindSite;
         private final Map<PExp, PExp> myBindings;
+        private LocalTheorem myNewTheorem;
 
         public ExpandAntecedentBySubstitutionApplication(Site bindSite,
                 Map<PExp, PExp> bindings) {
@@ -227,17 +230,26 @@ public class ExpandAntecedentBySubstitution implements Transformation {
                     myBindSite.root.exp.withSiteAltered(myBindSite
                             .pathIterator(), transformed);
 
-            Site newTheorem =
-                    m.addLocalTheorem(topLevelTransformed, null, false);
+            myNewTheorem = m.addLocalTheorem(topLevelTransformed, null, false);
 
-            m.addProofStep(new IntroduceLocalTheoremStep(newTheorem,
-                    ExpandAntecedentBySubstitution.this, Collections
-                            .singleton(myBindSite.root)));
+            m.addProofStep(new IntroduceLocalTheoremStep(myNewTheorem,
+                    Collections.singleton(myTheorem),
+                    ExpandAntecedentBySubstitution.this, this));
         }
 
         @Override
         public Set<Site> involvedSubExpressions() {
             return Collections.singleton(myBindSite);
+        }
+
+        @Override
+        public Set<Conjunct> getPrerequisiteConjuncts() {
+            return Collections.<Conjunct> singleton(myTheorem);
+        }
+
+        @Override
+        public Set<Conjunct> getAffectedConjuncts() {
+            return Collections.<Conjunct> singleton(myNewTheorem);
         }
     }
 

@@ -4,7 +4,6 @@
  */
 package edu.clemson.cs.r2jt.proving2;
 
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.automators.AntecedentDeveloper;
@@ -16,7 +15,10 @@ import edu.clemson.cs.r2jt.proving2.automators.Minimizer;
 import edu.clemson.cs.r2jt.proving2.automators.PushSequence;
 import edu.clemson.cs.r2jt.proving2.automators.Simplify;
 import edu.clemson.cs.r2jt.proving2.automators.VariablePropagator;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
+import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
 import edu.clemson.cs.r2jt.proving2.transformations.SubstituteInPlaceInConsequent;
@@ -160,8 +162,8 @@ public class AutomatedProver {
 
         //First, get a list of all symbols
         Set<String> symbols = new HashSet<String>();
-        for (PExp consequent : model.getConsequentList()) {
-            symbols.addAll(consequent.getSymbolNames());
+        for (Conjunct consequent : model.getConsequentList()) {
+            symbols.addAll(consequent.getExpression().getSymbolNames());
         }
 
         //We also include any symbols that could be easily 'swapped in' by a

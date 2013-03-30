@@ -72,6 +72,24 @@ public class SimpleArrayList<E> implements Iterable<E> {
         myData[index] = e;
     }
 
+    public boolean remove(Object o) {
+        int foundIndex = -1;
+        int index = 0;
+        while (foundIndex == -1 && index < myFirstEmptyIndex) {
+            if (myData[index] == o) {
+                foundIndex = index;
+            }
+
+            index++;
+        }
+
+        if (foundIndex != -1) {
+            remove(foundIndex);
+        }
+
+        return (foundIndex != -1);
+    }
+
     public E remove(int index) {
         if (index > myFirstEmptyIndex) {
             throw new IndexOutOfBoundsException("" + index);

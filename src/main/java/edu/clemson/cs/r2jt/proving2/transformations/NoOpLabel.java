@@ -6,6 +6,7 @@ package edu.clemson.cs.r2jt.proving2.transformations;
 
 import edu.clemson.cs.r2jt.proving2.AutomatedProver;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.proofsteps.LabelStep;
@@ -77,7 +78,7 @@ public class NoOpLabel implements Transformation {
 
         @Override
         public void apply(PerVCProverModel m) {
-            m.addProofStep(new LabelStep(myLabel, NoOpLabel.this));
+            m.addProofStep(new LabelStep(myLabel, NoOpLabel.this, this));
 
             //Useful for debugging--pauses automated prover when a label is 
             //reached
@@ -92,6 +93,16 @@ public class NoOpLabel implements Transformation {
         @Override
         public String description() {
             return "Label with \"" + myLabel + "\"";
+        }
+
+        @Override
+        public Set<Conjunct> getPrerequisiteConjuncts() {
+            return Collections.EMPTY_SET;
+        }
+
+        @Override
+        public Set<Conjunct> getAffectedConjuncts() {
+            return Collections.EMPTY_SET;
         }
     }
 }

@@ -4,6 +4,8 @@
  */
 package edu.clemson.cs.r2jt.proving2.proofsteps;
 
+import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
@@ -19,7 +21,9 @@ public interface ProofStep {
 
     public Transformation getTransformation();
 
-    public Set<Site> getPrerequisiteSites();
+    public Application getApplication();
 
-    public Set<Site> getAffectedSites();
+    public Set<Conjunct> getPrerequisiteSites();
+
+    public Set<Conjunct> getAffectedSites();
 }

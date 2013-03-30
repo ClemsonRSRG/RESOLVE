@@ -6,7 +6,7 @@ import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.Antecedent;
 import edu.clemson.cs.r2jt.proving2.Consequent;
-import edu.clemson.cs.r2jt.proving2.Theorem;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
@@ -653,8 +653,7 @@ public class JProverFrame extends JFrame {
         @Override
         public void mouseClicked(final MouseEvent e) {
             System.out.println("LocalTheoremSelect");
-            prepForTheoremApplication(myProverStateDisplay.getModel()
-                    .getLocalTheoremAncestor((Site) e.getSource()));
+            prepForTheoremApplication((Theorem) ((Site) e.getSource()).conjunct);
         }
 
         @Override

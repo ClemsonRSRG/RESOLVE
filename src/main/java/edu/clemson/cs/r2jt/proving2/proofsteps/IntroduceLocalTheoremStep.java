@@ -4,12 +4,12 @@
  */
 package edu.clemson.cs.r2jt.proving2.proofsteps;
 
-import edu.clemson.cs.r2jt.proving2.LocalTheorem;
-import edu.clemson.cs.r2jt.proving2.Theorem;
+import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
+import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
-import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
-import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,76 +19,36 @@ import java.util.Set;
  *
  * @author hamptos
  */
-public class IntroduceLocalTheoremStep implements ProofStep {
+public class IntroduceLocalTheoremStep extends AbstractProofStep {
 
-    private final Site myIntroducedSite;
-    private final LocalTheorem myLocalTheorem;
-    private final Transformation myTransformation;
+    private final LocalTheorem myIntroducedTheorem;
     private final Set<Theorem> myPrerequisiteTheorems;
-    private final Collection<Site> myPrerequisiteSites;
 
-    public IntroduceLocalTheoremStep(Site introducedSite,
-            Transformation transformation, Collection<Site> prerequisiteSites) {
-        myIntroducedSite = introducedSite;
+    public IntroduceLocalTheoremStep(LocalTheorem introducedTheorem,
+            Set<Theorem> prerequisiteTheorems, Transformation t, Application a) {
+        super(t, a);
 
-        try {
-            myLocalTheorem = (LocalTheorem) myIntroducedSite.getRootTheorem();
-        }
-        catch (NoSolutionException nse) {
-            throw new IllegalArgumentException("Site " + introducedSite
-                    + " not a local theorem.");
-        }
-        catch (ClassCastException cce) {
-            throw new IllegalArgumentException("Site " + introducedSite
-                    + " not a local theorem.");
-        }
-
-        myTransformation = transformation;
-        myPrerequisiteSites = prerequisiteSites;
-
-        myPrerequisiteTheorems = new HashSet<Theorem>();
-        for (Site s : prerequisiteSites) {
-            try {
-                myPrerequisiteTheorems.add(s.getRootTheorem());
-            }
-            catch (NoSolutionException nse) {
-                throw new IllegalArgumentException("Site " + s + " does not "
-                        + "identify a theorem.");
-            }
-        }
-    }
-
-    @Override
-    public Transformation getTransformation() {
-        return myTransformation;
-    }
-
-    @Override
-    public Set<Site> getPrerequisiteSites() {
-        return new HashSet<Site>(myPrerequisiteSites);
-    }
-
-    @Override
-    public Set<Site> getAffectedSites() {
-        return Collections.singleton(myIntroducedSite.root);
+        myIntroducedTheorem = introducedTheorem;
+        myPrerequisiteTheorems =
+                Collections.unmodifiableSet(prerequisiteTheorems);
     }
 
     public Set<Theorem> getPrerequisiteTheorems() {
-        return myPrerequisiteTheorems;
+        return new HashSet<Theorem>(myPrerequisiteTheorems);
     }
 
     public LocalTheorem getIntroducedTheorem() {
-        return myLocalTheorem;
+        return myIntroducedTheorem;
     }
 
     @Override
     public String toString() {
-        return "" + myTransformation;
+        return "" + getTransformation();
     }
 
     @Override
     public void undo(PerVCProverModel m) {
-        m.removeLocalTheorem(myLocalTheorem);
+        m.removeLocalTheorem(myIntroducedTheorem);
     }
 
 }

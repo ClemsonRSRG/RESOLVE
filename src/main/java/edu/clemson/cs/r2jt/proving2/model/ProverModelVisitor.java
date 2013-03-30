@@ -23,21 +23,15 @@ public class ProverModelVisitor extends PExpVisitor {
     private Site myRoot;
 
     private final PerVCProverModel myModel;
-    private Site.Section mySection;
-    private int myIndex;
+    private Conjunct myConjunct;
 
     public ProverModelVisitor(PerVCProverModel model) {
         myModel = model;
-        mySection = Site.Section.ANTECEDENTS;
-        myIndex = 0;
+        myConjunct = null;
     }
 
-    public void setSection(Site.Section section) {
-        mySection = section;
-    }
-
-    public void setIndex(int index) {
-        myIndex = index;
+    public void setConjunct(Conjunct c) {
+        myConjunct = c;
     }
 
     protected Site getID() {
@@ -59,7 +53,7 @@ public class ProverModelVisitor extends PExpVisitor {
 
         Site s;
         if (myRoot == null) {
-            myRoot = new Site(myModel, mySection, myIndex, p);
+            myRoot = new Site(myModel, myConjunct, p);
             s = myRoot;
         }
         else {
@@ -79,7 +73,7 @@ public class ProverModelVisitor extends PExpVisitor {
             idIndices.add(indicesIter.next());
         }
 
-        return new Site(myModel, mySection, myIndex, idIndices, p);
+        return new Site(myModel, myConjunct, idIndices, p);
     }
 
     public void doBeginPExp(PExp p) {

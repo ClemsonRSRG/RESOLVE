@@ -7,6 +7,7 @@ package edu.clemson.cs.r2jt.proving2.transformations;
 import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
@@ -111,16 +112,26 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
             m.alterSite(myBindSite, m.getTrue());
 
             Site finalSite =
-                    new Site(m, Site.Section.CONSEQUENTS, myBindSite.index,
-                            myBindSite.path, m.getTrue());
+                    new Site(m, myBindSite.conjunct, myBindSite.path, m
+                            .getTrue());
 
             m.addProofStep(new ModifyConsequentStep(myBindSite, finalSite,
-                    ReplaceTheoremInConsequentWithTrue.this));
+                    ReplaceTheoremInConsequentWithTrue.this, this));
         }
 
         @Override
         public Set<Site> involvedSubExpressions() {
             return Collections.singleton(myBindSite);
+        }
+
+        @Override
+        public Set<Conjunct> getPrerequisiteConjuncts() {
+            return Collections.singleton(myBindSite.conjunct);
+        }
+
+        @Override
+        public Set<Conjunct> getAffectedConjuncts() {
+            return Collections.singleton(myBindSite.conjunct);
         }
     }
 

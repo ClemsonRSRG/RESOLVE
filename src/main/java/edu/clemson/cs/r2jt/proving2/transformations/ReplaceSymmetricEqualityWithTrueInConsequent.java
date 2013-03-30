@@ -5,20 +5,16 @@
 package edu.clemson.cs.r2jt.proving2.transformations;
 
 import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
-import edu.clemson.cs.r2jt.proving.absyn.BindingException;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
-import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
-import edu.clemson.cs.r2jt.proving2.model.Site.Section;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -107,11 +103,10 @@ public class ReplaceSymmetricEqualityWithTrueInConsequent
             m.alterSite(mySite, m.getTrue());
 
             Site finalSite =
-                    new Site(m, Section.CONSEQUENTS, mySite.index, mySite.path,
-                            m.getTrue());
+                    new Site(m, mySite.conjunct, mySite.path, m.getTrue());
 
             m.addProofStep(new ModifyConsequentStep(mySite, finalSite,
-                    ReplaceSymmetricEqualityWithTrueInConsequent.this));
+                    ReplaceSymmetricEqualityWithTrueInConsequent.this, this));
         }
 
         @Override
@@ -122,6 +117,16 @@ public class ReplaceSymmetricEqualityWithTrueInConsequent
         @Override
         public String description() {
             return "To true";
+        }
+
+        @Override
+        public Set<Conjunct> getPrerequisiteConjuncts() {
+            return Collections.singleton(mySite.conjunct);
+        }
+
+        @Override
+        public Set<Conjunct> getAffectedConjuncts() {
+            return Collections.singleton(mySite.conjunct);
         }
 
     }
