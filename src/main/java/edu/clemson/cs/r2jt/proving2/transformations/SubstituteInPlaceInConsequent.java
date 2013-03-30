@@ -8,6 +8,7 @@ import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
@@ -138,16 +139,26 @@ public class SubstituteInPlaceInConsequent implements Transformation {
             m.alterSite(myBindSite, transformed);
 
             Site finalSite =
-                    new Site(m, Site.Section.CONSEQUENTS, myBindSite.index,
-                            myBindSite.path, transformed);
+                    new Site(m, myBindSite.conjunct, myBindSite.path,
+                            transformed);
 
             m.addProofStep(new ModifyConsequentStep(myBindSite, finalSite,
-                    SubstituteInPlaceInConsequent.this));
+                    SubstituteInPlaceInConsequent.this, this));
         }
 
         @Override
         public Set<Site> involvedSubExpressions() {
             return Collections.singleton(myBindSite);
+        }
+
+        @Override
+        public Set<Conjunct> getPrerequisiteConjuncts() {
+            return Collections.singleton(myBindSite.conjunct);
+        }
+
+        @Override
+        public Set<Conjunct> getAffectedConjuncts() {
+            return Collections.singleton(myBindSite.conjunct);
         }
     }
 

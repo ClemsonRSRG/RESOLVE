@@ -12,6 +12,7 @@ import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.gui.JProverFrame;
 import edu.clemson.cs.r2jt.proving2.justifications.Library;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.LabelStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
@@ -335,7 +336,24 @@ public class AlgebraicProver {
                 }
             };
 
-            invokeAndWait(setModel);
+            if (SwingUtilities.isEventDispatchThread()) {
+                setModel.run();
+            }
+            else {
+                try {
+                    while (myUI.getModel() != myModels[myVCIndex]) {
+                        try {
+                            SwingUtilities.invokeAndWait(setModel);
+                        }
+                        catch (InterruptedException ie) {
+
+                        }
+                    }
+                }
+                catch (InvocationTargetException ite) {
+                    throw new RuntimeException(ite);
+                }
+            }
         }
 
         if (!myInteractiveModeFlag) {

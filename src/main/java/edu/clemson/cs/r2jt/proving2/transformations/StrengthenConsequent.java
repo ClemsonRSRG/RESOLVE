@@ -9,13 +9,13 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.Utilities;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
+import edu.clemson.cs.r2jt.proving2.model.Consequent;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.TopLevelConsequentBinder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.proofsteps.StrengthenConsequentStep;
-import edu.clemson.cs.r2jt.proving2.proofsteps.RemoveConsequentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -146,20 +146,19 @@ public class StrengthenConsequent implements Transformation {
     private class StrengthenConsequentApplication implements Application {
 
         private final Map<PExp, PExp> myBindings;
-        private final int[] myBindSiteIndecis;
         private final Collection<Site> myBindSites;
+
+        private final Set<Conjunct> myNewConsequents = new HashSet<Conjunct>();
+        private final Set<Conjunct> myOldConsequents = new HashSet<Conjunct>();
 
         public StrengthenConsequentApplication(Map<PExp, PExp> bindings,
                 Collection<Site> bindSites) {
             myBindings = bindings;
             myBindSites = bindSites;
 
-            myBindSiteIndecis = new int[bindSites.size()];
-            Iterator<Site> siteIter = bindSites.iterator();
-            for (int i = 0; i < myBindSiteIndecis.length; i++) {
-                myBindSiteIndecis[i] = siteIter.next().index;
+            for (Site s : bindSites) {
+                myOldConsequents.add(s.conjunct);
             }
-            Arrays.sort(myBindSiteIndecis);
         }
 
         @Override
@@ -171,28 +170,27 @@ public class StrengthenConsequent implements Transformation {
         @Override
         public void apply(PerVCProverModel m) {
 
-            //We want to start removing at the end so we aren't adjusting 
-            //indecis.  Note that it's possible two binders bound to the same
-            //site.
-            int lastIndex = -1;
-            int nextIndex;
-            for (int i = myBindSiteIndecis.length - 1; i >= 0; i--) {
-                nextIndex = myBindSiteIndecis[i];
+            List<Conjunct> removedConjuncts = new LinkedList<Conjunct>();
+            List<Integer> removedConjunctsIndex = new LinkedList<Integer>();
+            Set<Conjunct> alreadyRemoved = new HashSet<Conjunct>();
+            for (Site s : myBindSites) {
+                if (!alreadyRemoved.contains(s.conjunct)) {
+                    alreadyRemoved.add(s.conjunct);
 
-                if (nextIndex != lastIndex) {
-                    m.removeConsequent(nextIndex);
+                    removedConjuncts.add(s.conjunct);
+                    removedConjunctsIndex.add(m.getConjunctIndex(s.conjunct));
+
+                    m.removeConjunct(s.conjunct);
                 }
-
-                lastIndex = nextIndex;
             }
 
-            Set<Site> newSites = new HashSet<Site>();
             for (PExp a : myAntecedents) {
-                newSites.add(m.addConsequent(a.substitute(myBindings)));
+                myNewConsequents.add(m.addConsequent(a.substitute(myBindings)));
             }
 
-            m.addProofStep(new StrengthenConsequentStep(myBindSites, newSites,
-                    myAntecedents.size(), StrengthenConsequent.this));
+            m.addProofStep(new StrengthenConsequentStep(removedConjuncts,
+                    removedConjunctsIndex, myNewConsequents,
+                    StrengthenConsequent.this, this));
         }
 
         @Override
@@ -200,12 +198,22 @@ public class StrengthenConsequent implements Transformation {
             Set<Site> result = new HashSet<Site>();
 
             for (Site s : myBindSites) {
-                if (s.section.equals(Site.Section.CONSEQUENTS)) {
+                if (s.conjunct instanceof Consequent) {
                     result.add(s);
                 }
             }
 
             return result;
+        }
+
+        @Override
+        public Set<Conjunct> getPrerequisiteConjuncts() {
+            return myOldConsequents;
+        }
+
+        @Override
+        public Set<Conjunct> getAffectedConjuncts() {
+            return myNewConsequents;
         }
     }
 }

@@ -4,30 +4,24 @@
  */
 package edu.clemson.cs.r2jt.proving2.proofsteps;
 
+import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
-import edu.clemson.cs.r2jt.proving2.model.Site;
-import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  *
  * @author hamptos
  */
-public class LabelStep implements ProofStep {
+public class LabelStep extends AbstractProofStep {
 
     private final String myLabel;
     private final Transformation myTransformation;
 
-    public LabelStep(String label, Transformation t) {
+    public LabelStep(String label, Transformation t, Application a) {
+        super(t, a);
+
         myLabel = label;
         myTransformation = t;
-    }
-
-    @Override
-    public Transformation getTransformation() {
-        return myTransformation;
     }
 
     @Override
@@ -38,15 +32,5 @@ public class LabelStep implements ProofStep {
     @Override
     public String toString() {
         return myLabel;
-    }
-
-    @Override
-    public Set<Site> getPrerequisiteSites() {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Set<Site> getAffectedSites() {
-        return Collections.emptySet();
     }
 }
