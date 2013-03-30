@@ -7,7 +7,7 @@ package edu.clemson.cs.r2jt.proving2.automators;
 import edu.clemson.cs.r2jt.proving.ChainingIterator;
 import edu.clemson.cs.r2jt.proving.DummyIterator;
 import edu.clemson.cs.r2jt.proving.Simplifier;
-import edu.clemson.cs.r2jt.proving2.Theorem;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;

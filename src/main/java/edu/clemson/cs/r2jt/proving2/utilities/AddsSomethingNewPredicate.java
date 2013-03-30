@@ -5,8 +5,8 @@
 package edu.clemson.cs.r2jt.proving2.utilities;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving2.LocalTheorem;
-import edu.clemson.cs.r2jt.proving2.Theorem;
+import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheoremStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;

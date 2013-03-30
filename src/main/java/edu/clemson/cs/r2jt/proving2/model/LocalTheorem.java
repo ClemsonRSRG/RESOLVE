@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.clemson.cs.r2jt.proving2;
+package edu.clemson.cs.r2jt.proving2.model;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.justifications.Justification;
@@ -30,7 +30,7 @@ public class LocalTheorem extends Theorem {
      */
     private boolean myThingWeWereTryingToProveFlag;
 
-    public LocalTheorem(PExp assertion, Justification justification,
+    LocalTheorem(PExp assertion, Justification justification,
             boolean tryingToProveThis) {
 
         super(assertion, justification);

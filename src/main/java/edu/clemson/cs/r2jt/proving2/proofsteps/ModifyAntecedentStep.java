@@ -4,6 +4,8 @@
  */
 package edu.clemson.cs.r2jt.proving2.proofsteps;
 
+import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
@@ -14,41 +16,26 @@ import java.util.Set;
  *
  * @author hamptos
  */
-public class ModifyAntecedentStep implements ProofStep {
+public class ModifyAntecedentStep extends AbstractProofStep {
 
     private final Site myOriginalSite;
-    private final Transformation myTransformation;
     private final Site myFinalSite;
 
     public ModifyAntecedentStep(Site originalSite, Site finalSite,
-            Transformation transformation) {
+            Transformation t, Application a) {
+        super(t, a);
+
         myOriginalSite = originalSite;
-        myTransformation = transformation;
         myFinalSite = finalSite;
     }
 
     @Override
-    public Transformation getTransformation() {
-        return myTransformation;
-    }
-
-    @Override
-    public Set<Site> getPrerequisiteSites() {
-        return Collections.singleton(myOriginalSite.root);
-    }
-
-    @Override
-    public Set<Site> getAffectedSites() {
-        return Collections.singleton(myFinalSite.root);
-    }
-
-    @Override
     public void undo(PerVCProverModel m) {
-        m.alterSite(myOriginalSite, myOriginalSite.root.exp);
+        m.alterSite(myFinalSite, myOriginalSite.exp);
     }
 
     @Override
     public String toString() {
-        return "" + myTransformation;
+        return "" + getTransformation();
     }
 }

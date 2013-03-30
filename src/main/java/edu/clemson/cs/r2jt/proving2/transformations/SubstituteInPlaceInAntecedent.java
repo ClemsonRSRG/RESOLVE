@@ -8,11 +8,11 @@ import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.InductiveAntecedentBinder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyAntecedentStep;
-import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collections;
 import java.util.Iterator;
@@ -127,16 +127,26 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
             m.alterSite(myBindSite, transformed);
 
             Site finalSite =
-                    new Site(m, Site.Section.ANTECEDENTS, myBindSite.index,
-                            myBindSite.path, transformed);
+                    new Site(m, myBindSite.conjunct, myBindSite.path,
+                            transformed);
 
             m.addProofStep(new ModifyAntecedentStep(myBindSite, finalSite,
-                    SubstituteInPlaceInAntecedent.this));
+                    SubstituteInPlaceInAntecedent.this, this));
         }
 
         @Override
         public Set<Site> involvedSubExpressions() {
             return Collections.singleton(myBindSite);
+        }
+
+        @Override
+        public Set<Conjunct> getPrerequisiteConjuncts() {
+            return Collections.singleton(myBindSite.conjunct);
+        }
+
+        @Override
+        public Set<Conjunct> getAffectedConjuncts() {
+            return Collections.singleton(myBindSite.conjunct);
         }
     }
 

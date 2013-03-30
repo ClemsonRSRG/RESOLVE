@@ -4,53 +4,35 @@
  */
 package edu.clemson.cs.r2jt.proving2.proofsteps;
 
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Consequent;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
-import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  *
  * @author hamptos
  */
-public class RemoveConsequentStep implements ProofStep {
+public class RemoveConsequentStep extends AbstractProofStep {
 
-    private final PExp myConsequent;
-    private final int myIndex;
-    private final Transformation myTransformation;
-    private final Site mySite;
+    private final Consequent myConsequent;
+    private final int myOriginalIndex;
 
-    public RemoveConsequentStep(PExp consequent, Site site, Transformation t) {
+    public RemoveConsequentStep(Consequent consequent, int originalIndex,
+            Transformation t, Application a) {
+        super(t, a);
+
+        myOriginalIndex = originalIndex;
         myConsequent = consequent;
-        myIndex = site.index;
-        myTransformation = t;
-        mySite = site;
-    }
-
-    @Override
-    public Transformation getTransformation() {
-        return myTransformation;
-    }
-
-    @Override
-    public Set<Site> getPrerequisiteSites() {
-        return Collections.singleton(mySite);
-    }
-
-    @Override
-    public Set<Site> getAffectedSites() {
-        return Collections.emptySet();
     }
 
     @Override
     public void undo(PerVCProverModel m) {
-        m.addConsequent(myConsequent, myIndex);
+        m.insertConjunct(myConsequent, myOriginalIndex);
     }
 
     @Override
     public String toString() {
-        return "Remove " + myTransformation;
+        return "Remove " + getTransformation();
     }
 }
