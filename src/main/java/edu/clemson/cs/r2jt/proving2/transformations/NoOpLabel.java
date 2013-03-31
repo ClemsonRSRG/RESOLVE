@@ -104,5 +104,10 @@ public class NoOpLabel implements Transformation {
         public Set<Conjunct> getAffectedConjuncts() {
             return Collections.EMPTY_SET;
         }
+
+        @Override
+        public Set<Site> getAffectedSites() {
+            return Collections.EMPTY_SET;
+        }
     }
 }
