@@ -16,7 +16,9 @@ import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.justifications.Given;
 import edu.clemson.cs.r2jt.proving2.justifications.Justification;
 import edu.clemson.cs.r2jt.proving2.proofsteps.LabelStep;
+import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
+import edu.clemson.cs.r2jt.proving2.transformations.ReplaceTheoremInConsequentWithTrue;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
 import edu.clemson.cs.r2jt.proving2.utilities.SimpleArrayList;
@@ -221,8 +223,12 @@ public final class PerVCProverModel {
         while (steps.hasNext()) {
             step = steps.next();
 
-            stepPrerequisites = step.getPrerequisiteSites();
-            stepAffectedSites = step.getAffectedSites();
+            if (step instanceof ModifyConsequentStep && ((ModifyConsequentStep) step).getTransformation() instanceof ReplaceTheoremInConsequentWithTrue && myTheoremName.contains("0_3")) {
+                int i = 5;
+            }
+            
+            stepPrerequisites = step.getPrerequisiteConjuncts();
+            stepAffectedSites = step.getAffectedConjuncts();
 
             overlap = step instanceof LabelStep;
             for (Conjunct s : stepAffectedSites) {
@@ -322,19 +328,13 @@ public final class PerVCProverModel {
         Iterator<Application> applications;
         boolean stepMimicked, firstApplication;
         int stepCount;
-        Set<Conjunct> affectedSites;
         transformation = step.getTransformation();
         applications = transformation.getApplications(this);
 
         stepMimicked = false;
         firstApplication = true;
         stepCount = myProofSoFar.size();
-        affectedSites = step.getAffectedSites();
-
-        System.out
-                .println("################################################ step");
-        System.out.println("Affected sites: " + affectedSites);
-        System.out.println(this);
+        Set<Site> affectedSites = step.getAffectedSites();
 
         while (!stepMimicked && applications.hasNext()) {
             if (firstApplication) {
@@ -347,38 +347,33 @@ public final class PerVCProverModel {
             }
 
             applications.next().apply(this);
-            //System.out.println("\n" + this);
 
             stepMimicked = mimicked(affectedSites);
         }
-
-        System.out.println("" + step + " (" + step.getClass() + ", "
-                + transformation.getClass() + ")");
-
-        System.out.flush();
+        
         if (!stepMimicked) {
-            System.out.println("ERROR!");
-            System.out.flush();
+            System.out.println(this);
+            System.out.println("\n\nToward affected sites:\n" + affectedSites);
+            
             throw new IllegalArgumentException("Couldn't mimic step: " + step
                     + " (" + step.getClass() + ", " + transformation.getClass()
                     + ")");
         }
     }
 
-    private boolean mimicked(Set<Conjunct> affectedSites) {
+    private boolean mimicked(Set<Site> affectedSites) {
 
         boolean stepMimicked = true;
-        Iterator<Conjunct> affectedSitesIter = affectedSites.iterator();
-        Conjunct affectedSite;
+        Iterator<Site> affectedSitesIter = affectedSites.iterator();
+        Site affectedSite;
         while (stepMimicked && affectedSitesIter.hasNext()) {
             affectedSite = affectedSitesIter.next();
-            if (affectedSite instanceof LocalTheorem) {
+            if (affectedSite.conjunct instanceof LocalTheorem) {
                 stepMimicked =
-                        myLocalTheoremsSet.containsKey(affectedSite
-                                .getExpression());
+                        myLocalTheoremsSet.containsKey(affectedSite.root.exp);
             }
-            else if (affectedSite instanceof Consequent) {
-                PExp value = affectedSite.getExpression();
+            else if (affectedSite.conjunct instanceof Consequent) {
+                PExp value = affectedSite.root.exp;
 
                 Iterator<Consequent> consequentIter = myConsequents.iterator();
                 boolean found = false;
@@ -397,7 +392,6 @@ public final class PerVCProverModel {
     }
 
     private void modelChanged(boolean important) {
-        System.out.println("PerVCProverModel - modelChanged()");
         if (myChangeEventMode.report(important)) {
 
             if (myAutomatedProver == null || !myAutomatedProver.isRunning()) {

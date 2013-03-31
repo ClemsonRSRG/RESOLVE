@@ -33,4 +33,9 @@ public class Consequent implements Conjunct {
     public void setExpression(PExp newValue) {
         myExp = newValue;
     }
+    
+    @Override
+    public String toString() {
+        return "" + myExp;
+    }
 }

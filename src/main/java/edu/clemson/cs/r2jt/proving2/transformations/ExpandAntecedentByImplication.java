@@ -71,12 +71,14 @@ public class ExpandAntecedentByImplication implements Transformation {
     private final List<PExp> myAntecedents;
     private final int myAntecedentsSize;
     private final PExp myConsequent;
+    private final Theorem myTheorem;
 
-    public ExpandAntecedentByImplication(List<PExp> localTheorems,
-            PExp consequent) {
-        myAntecedents = localTheorems;
+    public ExpandAntecedentByImplication(Theorem t, List<PExp> tAntecedents,
+            PExp tConsequent) {
+        myTheorem = t;
+        myAntecedents = tAntecedents;
         myAntecedentsSize = myAntecedents.size();
-        myConsequent = consequent;
+        myConsequent = tConsequent;
     }
 
     @Override
@@ -233,6 +235,7 @@ public class ExpandAntecedentByImplication implements Transformation {
         private Collection<Site> myBindSites;
         private Set<Theorem> myBindSiteTheorems = new HashSet<Theorem>();
         private Set<Conjunct> myAddedTheorems = new HashSet<Conjunct>();
+        private Set<Site> myAddedSites = new HashSet<Site>();
 
         public ExpandAntecedentByImplicationApplication(
                 Map<PExp, PExp> bindings, Collection<Site> bindSites) {
@@ -258,6 +261,8 @@ public class ExpandAntecedentByImplication implements Transformation {
                 LocalTheorem t =
                         m.addLocalTheorem(a, new TheoremApplication(
                                 ExpandAntecedentByImplication.this), false);
+                
+                myAddedSites.add(new Site(m, t, a));
 
                 m.addProofStep(new IntroduceLocalTheoremStep(t,
                         myBindSiteTheorems, ExpandAntecedentByImplication.this,
@@ -282,12 +287,21 @@ public class ExpandAntecedentByImplication implements Transformation {
 
         @Override
         public Set<Conjunct> getPrerequisiteConjuncts() {
-            return new HashSet<Conjunct>(myBindSiteTheorems);
+            Set<Conjunct> result = new HashSet<Conjunct>(myBindSiteTheorems);
+            
+            result.add(myTheorem);
+            
+            return result;
         }
 
         @Override
         public Set<Conjunct> getAffectedConjuncts() {
             return myAddedTheorems;
+        }
+        
+        @Override
+        public Set<Site> getAffectedSites() {
+            return myAddedSites;
         }
     }
 }

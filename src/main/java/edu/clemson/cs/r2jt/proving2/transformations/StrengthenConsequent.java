@@ -14,6 +14,7 @@ import edu.clemson.cs.r2jt.proving2.model.Consequent;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.TopLevelConsequentBinder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.StrengthenConsequentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collection;
@@ -38,12 +39,14 @@ public class StrengthenConsequent implements Transformation {
 
     private final List<PExp> myAntecedents;
     private final List<PExp> myConsequents;
+    private final Theorem myTheorem;
 
-    public StrengthenConsequent(List<PExp> theoremAntecedents,
-            List<PExp> theoremConsequent) {
+    public StrengthenConsequent(Theorem t, List<PExp> tTheoremAntecedents,
+            List<PExp> tTheoremConsequent) {
 
-        myAntecedents = theoremAntecedents;
-        myConsequents = theoremConsequent;
+        myTheorem = t;
+        myAntecedents = tTheoremAntecedents;
+        myConsequents = tTheoremConsequent;
     }
 
     @Override
@@ -149,6 +152,8 @@ public class StrengthenConsequent implements Transformation {
         private final Collection<Site> myBindSites;
 
         private final Set<Conjunct> myNewConsequents = new HashSet<Conjunct>();
+        private final Set<Site> myNewSites = new HashSet<Site>();
+        
         private final Set<Conjunct> myOldConsequents = new HashSet<Conjunct>();
 
         public StrengthenConsequentApplication(Map<PExp, PExp> bindings,
@@ -184,8 +189,11 @@ public class StrengthenConsequent implements Transformation {
                 }
             }
 
+            Conjunct c;
             for (PExp a : myAntecedents) {
-                myNewConsequents.add(m.addConsequent(a.substitute(myBindings)));
+                c = m.addConsequent(a.substitute(myBindings));
+                myNewConsequents.add(c);
+                myNewSites.add(c.toSite(m));
             }
 
             m.addProofStep(new StrengthenConsequentStep(removedConjuncts,
@@ -208,12 +216,20 @@ public class StrengthenConsequent implements Transformation {
 
         @Override
         public Set<Conjunct> getPrerequisiteConjuncts() {
-            return myOldConsequents;
+            Set<Conjunct> result = new HashSet<Conjunct>(myOldConsequents);
+            result.add(myTheorem);
+            
+            return result;
         }
 
         @Override
         public Set<Conjunct> getAffectedConjuncts() {
             return myNewConsequents;
+        }
+
+        @Override
+        public Set<Site> getAffectedSites() {
+            return myNewSites;
         }
     }
 }

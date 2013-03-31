@@ -9,6 +9,7 @@ import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving.Prover;
 import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.gui.JProverFrame;
 import edu.clemson.cs.r2jt.proving2.justifications.Library;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
@@ -280,15 +281,15 @@ public class AlgebraicProver {
 
                 w.write(workingModel.toString() + "\n\n");
 
-                int lastHash = workingModel.implicationHashCode();
+                Application lastApplication = null;
                 Transformation stepTransformation;
                 List<ProofStep> steps = myModels[i].getProductiveProofSteps();
                 //List<ProofStep> steps = myModels[i].getProofSteps();
                 for (ProofStep step : steps) {
                     workingModel.mimic(step);
 
-                    if (lastHash != workingModel.implicationHashCode()) {
-                        lastHash = workingModel.implicationHashCode();
+                    if (step.getApplication() != lastApplication) {
+                        lastApplication = step.getApplication();
                         stepTransformation = step.getTransformation();
 
                         if (stepTransformation instanceof NoOpLabel) {
