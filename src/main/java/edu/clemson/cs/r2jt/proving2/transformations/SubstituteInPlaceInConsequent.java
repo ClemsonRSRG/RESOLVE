@@ -12,9 +12,9 @@ import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
-import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.InductiveAntecedentBinder;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.InductiveConsequentBinder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collections;
@@ -34,12 +34,14 @@ public class SubstituteInPlaceInConsequent implements Transformation {
 
     private PExp myMatchPattern;
     private PExp myTransformationTemplate;
+    private final Theorem myThorem;
 
-    public SubstituteInPlaceInConsequent(PExp matchPattern,
-            PExp transformationTemplate) {
+    public SubstituteInPlaceInConsequent(Theorem t, PExp tMatchPattern,
+            PExp tTransformationTemplate) {
 
-        myMatchPattern = matchPattern;
-        myTransformationTemplate = transformationTemplate;
+        myThorem = t;
+        myMatchPattern = tMatchPattern;
+        myTransformationTemplate = tTransformationTemplate;
     }
 
     @Override
@@ -120,6 +122,8 @@ public class SubstituteInPlaceInConsequent implements Transformation {
                 Application {
 
         private final Site myBindSite;
+        private Site myFinalSite;
+        
         private final Map<PExp, PExp> myBindings;
 
         public SubstituteInPlaceInConsequentApplication(Site bindSite,
@@ -138,11 +142,11 @@ public class SubstituteInPlaceInConsequent implements Transformation {
             PExp transformed = myTransformationTemplate.substitute(myBindings);
             m.alterSite(myBindSite, transformed);
 
-            Site finalSite =
+            myFinalSite =
                     new Site(m, myBindSite.conjunct, myBindSite.path,
                             transformed);
 
-            m.addProofStep(new ModifyConsequentStep(myBindSite, finalSite,
+            m.addProofStep(new ModifyConsequentStep(myBindSite, myFinalSite,
                     SubstituteInPlaceInConsequent.this, this));
         }
 
@@ -153,12 +157,22 @@ public class SubstituteInPlaceInConsequent implements Transformation {
 
         @Override
         public Set<Conjunct> getPrerequisiteConjuncts() {
-            return Collections.singleton(myBindSite.conjunct);
+            Set<Conjunct> result = new HashSet<Conjunct>();
+            
+            result.add(myBindSite.conjunct);
+            result.add(myThorem);
+            
+            return result;
         }
 
         @Override
         public Set<Conjunct> getAffectedConjuncts() {
             return Collections.singleton(myBindSite.conjunct);
+        }
+
+        @Override
+        public Set<Site> getAffectedSites() {
+            return Collections.singleton(myFinalSite);
         }
     }
 

@@ -6,6 +6,7 @@ package edu.clemson.cs.r2jt.proving2.proofsteps;
 
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.Conjunct;
+import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import java.util.Set;
 
@@ -34,12 +35,17 @@ public abstract class AbstractProofStep implements ProofStep {
     }
 
     @Override
-    public final Set<Conjunct> getPrerequisiteSites() {
+    public final Set<Conjunct> getPrerequisiteConjuncts() {
         return myApplication.getPrerequisiteConjuncts();
     }
 
     @Override
-    public final Set<Conjunct> getAffectedSites() {
+    public final Set<Conjunct> getAffectedConjuncts() {
         return myApplication.getAffectedConjuncts();
+    }
+    
+    @Override
+    public final Set<Site> getAffectedSites() {
+        return myApplication.getAffectedSites();
     }
 }

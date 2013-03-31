@@ -93,6 +93,7 @@ public class ReplaceSymmetricEqualityWithTrueInConsequent
                 Application {
 
         private final Site mySite;
+        private Site myFinalSite;
 
         public ReplaceSymmetricEqualityWithTrueInConsequentApplication(Site site) {
             mySite = site;
@@ -102,10 +103,10 @@ public class ReplaceSymmetricEqualityWithTrueInConsequent
         public void apply(PerVCProverModel m) {
             m.alterSite(mySite, m.getTrue());
 
-            Site finalSite =
+            myFinalSite =
                     new Site(m, mySite.conjunct, mySite.path, m.getTrue());
 
-            m.addProofStep(new ModifyConsequentStep(mySite, finalSite,
+            m.addProofStep(new ModifyConsequentStep(mySite, myFinalSite,
                     ReplaceSymmetricEqualityWithTrueInConsequent.this, this));
         }
 
@@ -129,6 +130,10 @@ public class ReplaceSymmetricEqualityWithTrueInConsequent
             return Collections.singleton(mySite.conjunct);
         }
 
+        @Override
+        public Set<Site> getAffectedSites() {
+            return Collections.<Site>singleton(myFinalSite);
+        }
     }
 
     private class SymmetricEqualityIterator implements Iterator<Site> {

@@ -13,6 +13,7 @@ import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.InductiveConsequentBinder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collection;
@@ -30,16 +31,18 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
     private final BindResultToApplication BIND_RESULT_TO_APPLICATION =
             new BindResultToApplication();
 
-    private final PExp myTheorem;
+    private final Theorem myTheorem;
+    private final PExp myTheoremAssertion;
 
-    public ReplaceTheoremInConsequentWithTrue(PExp theorem) {
+    public ReplaceTheoremInConsequentWithTrue(Theorem theorem) {
         myTheorem = theorem;
+        myTheoremAssertion = myTheorem.getAssertion();
     }
 
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
         Set<Binder> binders = new HashSet<Binder>();
-        binders.add(new InductiveConsequentBinder(myTheorem));
+        binders.add(new InductiveConsequentBinder(myTheoremAssertion));
 
         return new LazyMappingIterator<BindResult, Application>(
                 m.bind(binders), BIND_RESULT_TO_APPLICATION);
@@ -57,7 +60,7 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
 
     @Override
     public int functionApplicationCountDelta() {
-        return myTheorem.getFunctionApplications().size() * -1;
+        return myTheoremAssertion.getFunctionApplications().size() * -1;
     }
 
     @Override
@@ -67,7 +70,7 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
 
     @Override
     public Set<String> getPatternSymbolNames() {
-        return myTheorem.getSymbolNames();
+        return myTheoremAssertion.getSymbolNames();
     }
 
     @Override
@@ -96,6 +99,7 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
                 Application {
 
         private final Site myBindSite;
+        private Site myFinalSite;
 
         public ReplaceTheoremInConsequentWithTrueApplication(
                 Collection<Site> bindSites) {
@@ -111,11 +115,11 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
         public void apply(PerVCProverModel m) {
             m.alterSite(myBindSite, m.getTrue());
 
-            Site finalSite =
+            myFinalSite =
                     new Site(m, myBindSite.conjunct, myBindSite.path, m
                             .getTrue());
 
-            m.addProofStep(new ModifyConsequentStep(myBindSite, finalSite,
+            m.addProofStep(new ModifyConsequentStep(myBindSite, myFinalSite,
                     ReplaceTheoremInConsequentWithTrue.this, this));
         }
 
@@ -126,12 +130,22 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
 
         @Override
         public Set<Conjunct> getPrerequisiteConjuncts() {
-            return Collections.singleton(myBindSite.conjunct);
+            Set<Conjunct> result = new HashSet<Conjunct>();
+            
+            result.add(myBindSite.conjunct);
+            result.add(myTheorem);
+            
+            return result;
         }
 
         @Override
         public Set<Conjunct> getAffectedConjuncts() {
             return Collections.singleton(myBindSite.conjunct);
+        }
+
+        @Override
+        public Set<Site> getAffectedSites() {
+            return Collections.singleton(myFinalSite);
         }
     }
 
