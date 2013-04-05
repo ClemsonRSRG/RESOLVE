@@ -222,7 +222,7 @@ public class MathSymbolEntry extends SymbolTableEntry {
 
     private static List<MTType> expandAsNeeded(MTType t) {
         List<MTType> result = new LinkedList<MTType>();
-        
+
         if (t instanceof MTCartesian) {
             MTCartesian domainAsMTCartesian = (MTCartesian) t;
 
@@ -236,13 +236,13 @@ public class MathSymbolEntry extends SymbolTableEntry {
                 result.add(t);
             }
         }
-        
+
         return result;
     }
-    
+
     private static List<MTType> getArgumentTypes(List<Exp> arguments) {
         List<MTType> result;
-        
+
         if (arguments.size() == 1) {
             result = expandAsNeeded(arguments.get(0).getMathType());
         }
@@ -252,10 +252,10 @@ public class MathSymbolEntry extends SymbolTableEntry {
                 result.add(e.getMathType());
             }
         }
-        
+
         return result;
     }
-    
+
     private static List<MTType> getParameterTypes(MTFunction source) {
         MTType domain = source.getDomain();
         List<MTType> result = expandAsNeeded(domain);
