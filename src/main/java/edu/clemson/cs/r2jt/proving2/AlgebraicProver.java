@@ -206,6 +206,11 @@ public class AlgebraicProver {
                     || myAutomatedProvers[myVCIndex].doneSearching()) {
                 //We finished searching--either proved or failed
 
+                boolean proved = myModels[myVCIndex].noConsequents();
+                for (ProverListener l : myProverListeners) {
+                    l.vcResult(proved, myModels[myVCIndex], null);
+                }
+
                 if (myVCIndex == myVCs.size() - 1) {
                     //We're done with every VC
                     myRunningFlag = false;

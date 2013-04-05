@@ -1670,7 +1670,7 @@ public class Controller {
                                         .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE),
                                 myInstanceEnvironment,
                                 ResolveCompiler.WebListener);
-                
+
                 try {
                     prover.start();
                 }

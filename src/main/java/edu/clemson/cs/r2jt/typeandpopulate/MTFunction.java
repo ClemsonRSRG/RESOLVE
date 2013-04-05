@@ -190,8 +190,8 @@ public class MTFunction extends MTAbstract<MTFunction> {
                 else {
                     for (int i = 0; i < domainSize; i++) {
                         deschematizeParameter(domainAsMTCartesian.getTag(i),
-                                domainAsMTCartesian.getFactor(i),
-                                parameters.get(i), concreteValues);
+                                domainAsMTCartesian.getFactor(i), parameters
+                                        .get(i), concreteValues);
                     }
                 }
             }
