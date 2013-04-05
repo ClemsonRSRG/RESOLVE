@@ -5,6 +5,7 @@
 package edu.clemson.cs.r2jt.proving2.utilities;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
@@ -79,8 +80,8 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
                                     tLT.getPrerequisiteTheorems();
                             Set<String> originalSymbolNames =
                                     new HashSet<String>();
-                            for (Theorem ot : originalTheorems) {
-                                originalSymbolNames.addAll(ot.getAssertion()
+                            for (Conjunct ot : originalTheorems) {
+                                originalSymbolNames.addAll(ot.getExpression()
                                         .getSymbolNames());
                             }
 

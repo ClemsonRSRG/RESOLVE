@@ -261,7 +261,7 @@ public class ExpandAntecedentByImplication implements Transformation {
                 LocalTheorem t =
                         m.addLocalTheorem(a, new TheoremApplication(
                                 ExpandAntecedentByImplication.this), false);
-                
+
                 myAddedSites.add(new Site(m, t, a));
 
                 m.addProofStep(new IntroduceLocalTheoremStep(t,
@@ -288,9 +288,9 @@ public class ExpandAntecedentByImplication implements Transformation {
         @Override
         public Set<Conjunct> getPrerequisiteConjuncts() {
             Set<Conjunct> result = new HashSet<Conjunct>(myBindSiteTheorems);
-            
+
             result.add(myTheorem);
-            
+
             return result;
         }
 
@@ -298,7 +298,7 @@ public class ExpandAntecedentByImplication implements Transformation {
         public Set<Conjunct> getAffectedConjuncts() {
             return myAddedTheorems;
         }
-        
+
         @Override
         public Set<Site> getAffectedSites() {
             return myAddedSites;

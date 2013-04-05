@@ -39,6 +39,7 @@ public class StrengthenConsequentStep extends AbstractProofStep {
         while (conjunctIter.hasNext()) {
             myEliminatedConjuncts[index] =
                     new ConjunctWithIndex(conjunctIter.next(), indexIter.next());
+            index++;
         }
         Arrays.sort(myEliminatedConjuncts);
 

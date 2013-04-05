@@ -57,9 +57,9 @@ public class AntecedentMinimizer implements Automator {
 
             ExpandAntecedentBySubstitution expander = myCurrentRound.next();
             SubstituteInPlaceInAntecedent substituter =
-                    new SubstituteInPlaceInAntecedent(expander.getTheorem(), 
-                            expander.getMatchPattern(), 
-                            expander.getTransformationTemplate());
+                    new SubstituteInPlaceInAntecedent(expander.getTheorem(),
+                            expander.getMatchPattern(), expander
+                                    .getTransformationTemplate());
 
             myCurrentApplier = new ApplyAll(substituter);
             stack.push(myCurrentApplier);

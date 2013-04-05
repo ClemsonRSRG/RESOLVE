@@ -43,7 +43,7 @@ public abstract class AbstractProofStep implements ProofStep {
     public final Set<Conjunct> getAffectedConjuncts() {
         return myApplication.getAffectedConjuncts();
     }
-    
+
     @Override
     public final Set<Site> getAffectedSites() {
         return myApplication.getAffectedSites();

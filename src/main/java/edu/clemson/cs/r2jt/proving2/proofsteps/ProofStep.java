@@ -24,6 +24,8 @@ public interface ProofStep {
     public Application getApplication();
 
     public Set<Conjunct> getPrerequisiteConjuncts();
+
     public Set<Conjunct> getAffectedConjuncts();
+
     public Set<Site> getAffectedSites();
 }
