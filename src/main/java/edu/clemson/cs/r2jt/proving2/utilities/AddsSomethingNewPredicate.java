@@ -5,8 +5,9 @@
 package edu.clemson.cs.r2jt.proving2.utilities;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving2.LocalTheorem;
-import edu.clemson.cs.r2jt.proving2.Theorem;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
+import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheoremStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
@@ -70,8 +71,7 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
 
                     //Any development that reduces the function count should be
                     //accepted
-                    result =
-                            transformation.functionApplicationCountDelta() <= 0;
+                    result = transformation.functionApplicationCountDelta() < 0;
 
                     if (!result) {
                         if (transformation instanceof ExpandAntecedentBySubstitution
@@ -80,8 +80,8 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
                                     tLT.getPrerequisiteTheorems();
                             Set<String> originalSymbolNames =
                                     new HashSet<String>();
-                            for (Theorem ot : originalTheorems) {
-                                originalSymbolNames.addAll(ot.getAssertion()
+                            for (Conjunct ot : originalTheorems) {
+                                originalSymbolNames.addAll(ot.getExpression()
                                         .getSymbolNames());
                             }
 

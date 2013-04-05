@@ -109,9 +109,8 @@ public class InductiveSiteIterator implements Iterator<Site> {
         @Override
         public Site next() {
             Site result =
-                    new Site(myBasis.getModel(), myBasis.section,
-                            myBasis.index, myBasis.path
-                                    .appended(mySiblingIndex), myPExps.next());
+                    new Site(myBasis.getModel(), myBasis.conjunct, myBasis.path
+                            .appended(mySiblingIndex), myPExps.next());
 
             mySiblingIndex++;
 

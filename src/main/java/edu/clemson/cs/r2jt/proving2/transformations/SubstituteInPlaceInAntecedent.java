@@ -8,13 +8,15 @@ import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.InductiveAntecedentBinder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyAntecedentStep;
-import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -30,12 +32,14 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
 
     private PExp myMatchPattern;
     private PExp myTransformationTemplate;
+    private final Theorem myTheorem;
 
-    public SubstituteInPlaceInAntecedent(PExp matchPattern,
-            PExp transformationTemplate) {
+    public SubstituteInPlaceInAntecedent(Theorem t, PExp tMatchPattern,
+            PExp tTransformationTemplate) {
 
-        myMatchPattern = matchPattern;
-        myTransformationTemplate = transformationTemplate;
+        myTheorem = t;
+        myMatchPattern = tMatchPattern;
+        myTransformationTemplate = tTransformationTemplate;
     }
 
     @Override
@@ -108,6 +112,7 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
                 Application {
 
         private final Site myBindSite;
+        private Site myFinalSite;
         private final Map<PExp, PExp> myBindings;
 
         public SubstituteInPlaceInAntecedentApplication(Site bindSite,
@@ -126,13 +131,37 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
             PExp transformed = myTransformationTemplate.substitute(myBindings);
             m.alterSite(myBindSite, transformed);
 
-            m.addProofStep(new ModifyAntecedentStep(myBindSite,
-                    SubstituteInPlaceInAntecedent.this));
+            myFinalSite =
+                    new Site(m, myBindSite.conjunct, myBindSite.path,
+                            transformed);
+
+            m.addProofStep(new ModifyAntecedentStep(myBindSite, myFinalSite,
+                    SubstituteInPlaceInAntecedent.this, this));
         }
 
         @Override
         public Set<Site> involvedSubExpressions() {
             return Collections.singleton(myBindSite);
+        }
+
+        @Override
+        public Set<Conjunct> getPrerequisiteConjuncts() {
+            Set<Conjunct> result = new HashSet<Conjunct>();
+
+            result.add(myBindSite.conjunct);
+            result.add(myTheorem);
+
+            return result;
+        }
+
+        @Override
+        public Set<Conjunct> getAffectedConjuncts() {
+            return Collections.singleton(myBindSite.conjunct);
+        }
+
+        @Override
+        public Set<Site> getAffectedSites() {
+            return Collections.singleton(myFinalSite);
         }
     }
 

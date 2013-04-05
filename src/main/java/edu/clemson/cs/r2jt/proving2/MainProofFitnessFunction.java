@@ -5,6 +5,7 @@
 package edu.clemson.cs.r2jt.proving2;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.transformations.SubstituteInPlaceInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
@@ -20,8 +21,9 @@ public class MainProofFitnessFunction {
     private Set<String> myConsequentVariableNames = new HashSet<String>();
 
     public MainProofFitnessFunction(PerVCProverModel model) {
-        for (PExp c : model.getConsequentList()) {
-            myConsequentVariableNames.addAll(c.getSymbolNames());
+        for (Conjunct c : model.getConsequentList()) {
+            myConsequentVariableNames
+                    .addAll(c.getExpression().getSymbolNames());
         }
     }
 

@@ -7,14 +7,15 @@ package edu.clemson.cs.r2jt.proving2.transformations;
 import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
-import edu.clemson.cs.r2jt.proving2.LocalTheorem;
-import edu.clemson.cs.r2jt.proving2.Theorem;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
+import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.AbstractBinder;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheoremStep;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
@@ -37,13 +38,17 @@ public class ExpandAntecedentBySubstitution implements Transformation {
 
     private final PExp myMatchPattern;
     private final PExp myTransformationTemplate;
-    private final PExp myTheorem;
+    private final Theorem myTheorem;
 
-    public ExpandAntecedentBySubstitution(PExp matchPattern,
-            PExp transformationTemplate, PExp theorem) {
-        myMatchPattern = matchPattern;
-        myTransformationTemplate = transformationTemplate;
-        myTheorem = theorem;
+    public ExpandAntecedentBySubstitution(Theorem t, PExp tMatchPattern,
+            PExp tTransformationTemplate) {
+        myMatchPattern = tMatchPattern;
+        myTransformationTemplate = tTransformationTemplate;
+        myTheorem = t;
+    }
+
+    public Theorem getTheorem() {
+        return myTheorem;
     }
 
     public PExp getMatchPattern() {
@@ -130,7 +135,8 @@ public class ExpandAntecedentBySubstitution implements Transformation {
                 List<Site> boundSitesSoFar) {
             return new InductiveSiteIteratorIterator(
                     new SkipOneTopLevelAntecedentIterator(m
-                            .topLevelAntecedentSiteIterator(), myTheorem));
+                            .topLevelAntecedentSiteIterator(), myTheorem
+                            .getAssertion()));
         }
     }
 
@@ -195,6 +201,8 @@ public class ExpandAntecedentBySubstitution implements Transformation {
         private final Set<Theorem> myBindTheorem;
         private final Site myBindSite;
         private final Map<PExp, PExp> myBindings;
+        private LocalTheorem myNewTheorem;
+        private Site myNewSite;
 
         public ExpandAntecedentBySubstitutionApplication(Site bindSite,
                 Map<PExp, PExp> bindings) {
@@ -227,16 +235,36 @@ public class ExpandAntecedentBySubstitution implements Transformation {
                     myBindSite.root.exp.withSiteAltered(myBindSite
                             .pathIterator(), transformed);
 
-            LocalTheorem newTheorem =
-                    m.addLocalTheorem(topLevelTransformed, null, false);
+            myNewTheorem = m.addLocalTheorem(topLevelTransformed, null, false);
+            myNewSite = new Site(m, myNewTheorem, topLevelTransformed);
 
-            m.addProofStep(new IntroduceLocalTheoremStep(newTheorem,
-                    ExpandAntecedentBySubstitution.this, myBindTheorem));
+            m.addProofStep(new IntroduceLocalTheoremStep(myNewTheorem,
+                    Collections.singleton((Theorem) myBindSite.conjunct),
+                    ExpandAntecedentBySubstitution.this, this));
         }
 
         @Override
         public Set<Site> involvedSubExpressions() {
             return Collections.singleton(myBindSite);
+        }
+
+        @Override
+        public Set<Conjunct> getPrerequisiteConjuncts() {
+            Set<Conjunct> result = new HashSet<Conjunct>();
+            result.add(myTheorem);
+            result.add(myBindSite.conjunct);
+
+            return result;
+        }
+
+        @Override
+        public Set<Conjunct> getAffectedConjuncts() {
+            return Collections.<Conjunct> singleton(myNewTheorem);
+        }
+
+        @Override
+        public Set<Site> getAffectedSites() {
+            return Collections.<Site> singleton(myNewSite);
         }
     }
 

@@ -5,8 +5,9 @@
 package edu.clemson.cs.r2jt.proving2.transformations;
 
 import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
+import edu.clemson.cs.r2jt.proving2.model.Consequent;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
@@ -108,15 +109,32 @@ public class EliminateTrueConjunctInConsequent implements Transformation {
 
         @Override
         public void apply(PerVCProverModel m) {
-            m.removeConsequent(mySite.index);
+            m.addProofStep(new RemoveConsequentStep(
+                    (Consequent) mySite.conjunct, m
+                            .getConjunctIndex(mySite.conjunct),
+                    EliminateTrueConjunctInConsequent.this, this));
 
-            m.addProofStep(new RemoveConsequentStep(mySite.exp, mySite.index,
-                    EliminateTrueConjunctInConsequent.this));
+            m.removeConjunct(mySite.conjunct);
         }
 
         @Override
         public Set<Site> involvedSubExpressions() {
             return Collections.singleton(mySite);
+        }
+
+        @Override
+        public Set<Conjunct> getPrerequisiteConjuncts() {
+            return Collections.singleton(mySite.conjunct);
+        }
+
+        @Override
+        public Set<Conjunct> getAffectedConjuncts() {
+            return Collections.EMPTY_SET;
+        }
+
+        @Override
+        public Set<Site> getAffectedSites() {
+            return Collections.EMPTY_SET;
         }
     }
 

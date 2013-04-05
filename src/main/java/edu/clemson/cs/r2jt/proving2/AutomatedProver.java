@@ -4,8 +4,8 @@
  */
 package edu.clemson.cs.r2jt.proving2;
 
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.automators.AntecedentDeveloper;
 import edu.clemson.cs.r2jt.proving2.automators.AntecedentMinimizer;
 import edu.clemson.cs.r2jt.proving2.automators.ApplyN;
@@ -15,18 +15,18 @@ import edu.clemson.cs.r2jt.proving2.automators.Minimizer;
 import edu.clemson.cs.r2jt.proving2.automators.PushSequence;
 import edu.clemson.cs.r2jt.proving2.automators.Simplify;
 import edu.clemson.cs.r2jt.proving2.automators.VariablePropagator;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
+import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
+import edu.clemson.cs.r2jt.proving2.transformations.SubstituteInPlaceInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
-import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
-import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import java.util.ArrayDeque;
@@ -71,7 +71,9 @@ public class AutomatedProver {
         myModel = m;
         myFitnessFunction = new MainProofFitnessFunction(m);
 
-        m.setAutomatedProver(this);
+        //This looks weird but suppresses a "leaked this" warning
+        AutomatedProver p = this;
+        m.setAutomatedProver(p);
 
         myTheoremLibrary = theoremLibrary;
 
@@ -121,8 +123,8 @@ public class AutomatedProver {
         steps.add(new VariablePropagator());
         steps.add(new AntecedentMinimizer(myTheoremLibrary));
         steps.add(new VariablePropagator());
-        steps.add(new ApplyN(
-                new NoOpLabel("--- Done Minimizing Antecedent ---"), 1));
+        steps.add(new ApplyN(new NoOpLabel(this,
+                "--- Done Minimizing Antecedent ---"), 1));
         steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
                 myTheoremLibrary, 1));
         steps.add(new VariablePropagator());
@@ -135,11 +137,11 @@ public class AutomatedProver {
                 myTheoremLibrary, 1));
         steps.add(new VariablePropagator());
         steps.add(new AntecedentMinimizer(myTheoremLibrary));
-        steps.add(new ApplyN(
-                new NoOpLabel("--- Done Developing Antecedent ---"), 1));
+        steps.add(new ApplyN(new NoOpLabel(this,
+                "--- Done Developing Antecedent ---"), 1));
         steps.add(new Minimizer(myTheoremLibrary));
-        steps.add(new ApplyN(
-                new NoOpLabel("--- Done Minimizing Consequent ---"), 1));
+        steps.add(new ApplyN(new NoOpLabel(this,
+                "--- Done Minimizing Consequent ---"), 1));
         steps.add(Simplify.INSTANCE);
         steps.add(new MainProofLevel(m, 3, transformations));
 
@@ -160,8 +162,27 @@ public class AutomatedProver {
 
         //First, get a list of all symbols
         Set<String> symbols = new HashSet<String>();
-        for (PExp consequent : model.getConsequentList()) {
-            symbols.addAll(consequent.getSymbolNames());
+        for (Conjunct consequent : model.getConsequentList()) {
+            symbols.addAll(consequent.getExpression().getSymbolNames());
+        }
+
+        //We also include any symbols that could be easily 'swapped in' by a
+        //local theorem equality.  For example, if we know (P o Q) = (P' o Q'),
+        //then even if P' and Q' don't currently appear in the consequent... if
+        //(P o Q) -does- appear, we'll include P' and Q' as symbols
+        for (LocalTheorem t : model.getLocalTheoremList()) {
+            if (t.getAssertion().isEquality()) {
+                for (Transformation trans : t.getTransformations()) {
+                    if (trans instanceof SubstituteInPlaceInConsequent) {
+                        Iterator<Application> applications =
+                                trans.getApplications(model);
+
+                        if (applications.hasNext()) {
+                            symbols.addAll(trans.getReplacementSymbolNames());
+                        }
+                    }
+                }
+            }
         }
 
         //Next, find all those that come from mathematical definitions
@@ -259,7 +280,7 @@ public class AutomatedProver {
 
             myRunningFlag = true;
             while (myRunningFlag) {
-                step();
+                workerStep();
             }
 
             System.out.println("AutomatedProver - end of start()");
@@ -291,8 +312,18 @@ public class AutomatedProver {
         System.out.println("AutomatedProver - end of pause()");
     }
 
-    public void step() {
+    /**
+     * <p>markToPause is like {@link #pause() pause()} except that it does not 
+     * block and must be called from the worker thread.  This is mostly useful 
+     * for proof steps that want to trigger a pause (and can't use pause because
+     * they're already on the worker thread).</p>
+     */
+    public void markToPause() {
+        myRunningFlag = false;
+        myPrepForUIUpdateFlag = false;
+    }
 
+    private void workerStep() {
         myTakingStepFlag = true;
 
         if (myPrepForUIUpdateFlag) {
@@ -319,25 +350,33 @@ public class AutomatedProver {
         }
 
         if (myRunningFlag) {
-            List<ProofStep> proofSteps = myModel.getProofSteps();
+            step();
+        }
 
-            int originalProofLength = proofSteps.size();
-            while (!myAutomatorStack.isEmpty()
-                    && originalProofLength == proofSteps.size()
-                    && !myModel.noConsequents()) {
+        myTakingStepFlag = false;
+    }
 
-                myAutomatorStack.peek().step(myAutomatorStack, myModel);
+    public void step() {
+        myTakingStepFlag = true;
+
+        List<ProofStep> proofSteps = myModel.getProofSteps();
+
+        int originalProofLength = proofSteps.size();
+        while (!myAutomatorStack.isEmpty()
+                && originalProofLength == proofSteps.size()
+                && !myModel.noConsequents()) {
+
+            myAutomatorStack.peek().step(myAutomatorStack, myModel);
+        }
+
+        if (myAutomatorStack.isEmpty() || myModel.noConsequents()) {
+            if (myAutomatorStack.isEmpty()) {
+                System.out.println("Proof space exhausted.");
             }
-
-            if (myAutomatorStack.isEmpty() || myModel.noConsequents()) {
-                if (myAutomatorStack.isEmpty()) {
-                    System.out.println("Proof space exhausted.");
-                }
-                if (myModel.noConsequents()) {
-                    System.out.println("Proved.");
-                }
-                myRunningFlag = false;
+            if (myModel.noConsequents()) {
+                System.out.println("Proved.");
             }
+            myRunningFlag = false;
         }
 
         myTakingStepFlag = false;

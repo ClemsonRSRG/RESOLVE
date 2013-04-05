@@ -4,61 +4,91 @@
  */
 package edu.clemson.cs.r2jt.proving2.proofsteps;
 
+import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
  * @author hamptos
  */
-public class StrengthenConsequentStep implements ProofStep {
+public class StrengthenConsequentStep extends AbstractProofStep {
 
-    private static final SiteIndexComparator BY_INDEX =
-            new SiteIndexComparator();
+    private final Set<Conjunct> myNewSites;
+    private final ConjunctWithIndex[] myEliminatedConjuncts;
 
-    private final Collection<Site> myEliminatedSites;
-    private final int myIntroducedCount;
-    private final Transformation myTransformation;
+    public StrengthenConsequentStep(List<Conjunct> eliminatedConjuncts,
+            List<Integer> eliminatedConjunctsIndecis,
+            Set<Conjunct> newConjuncts, Transformation t, Application a) {
+        super(t, a);
 
-    public StrengthenConsequentStep(Collection<Site> eliminatedSites,
-            int introducedCount, Transformation transformation) {
-        myEliminatedSites = eliminatedSites;
-        myIntroducedCount = introducedCount;
-        myTransformation = transformation;
+        myEliminatedConjuncts =
+                new ConjunctWithIndex[eliminatedConjuncts.size()];
+        Iterator<Conjunct> conjunctIter = eliminatedConjuncts.iterator();
+        Iterator<Integer> indexIter = eliminatedConjunctsIndecis.iterator();
+        int index = 0;
+        while (conjunctIter.hasNext()) {
+            myEliminatedConjuncts[index] =
+                    new ConjunctWithIndex(conjunctIter.next(), indexIter.next());
+            index++;
+        }
+        Arrays.sort(myEliminatedConjuncts);
+
+        myNewSites = newConjuncts;
     }
 
     @Override
     public void undo(PerVCProverModel m) {
-        for (int i = 0; i < myIntroducedCount; i++) {
-            m.removeConsequent(m.getConsequentList().size() - 1);
+        for (Conjunct newConjunct : myNewSites) {
+            m.removeConjunct(newConjunct);
         }
 
-        List<Site> sites = new ArrayList<Site>(myEliminatedSites);
-        Collections.sort(sites, BY_INDEX);
-        for (Site s : sites) {
-            m.addConsequent(s.exp, s.index);
+        Set<Conjunct> alreadyAdded = new HashSet<Conjunct>();
+        for (ConjunctWithIndex elminatedConjunct : myEliminatedConjuncts) {
+            if (!alreadyAdded.contains(elminatedConjunct.getConjunct())) {
+                m.insertConjunct(elminatedConjunct.getConjunct(),
+                        elminatedConjunct.getIndex());
+
+                alreadyAdded.add(elminatedConjunct.getConjunct());
+            }
         }
     }
 
     @Override
     public String toString() {
-        return "" + myTransformation;
+        return "" + getTransformation();
     }
 
-    /**
-     * <p>Sorts Sites in order by index.</p>
-     */
-    private static class SiteIndexComparator implements Comparator<Site> {
+    private class ConjunctWithIndex implements Comparable<ConjunctWithIndex> {
+
+        private final Conjunct myConjunct;
+        private final int myIndex;
+
+        public ConjunctWithIndex(Conjunct c, int i) {
+            myConjunct = c;
+            myIndex = i;
+        }
 
         @Override
-        public int compare(Site o1, Site o2) {
-            return o1.index - o2.index;
+        public int compareTo(ConjunctWithIndex o) {
+            return myIndex - o.myIndex;
+        }
+
+        public Conjunct getConjunct() {
+            return myConjunct;
+        }
+
+        public int getIndex() {
+            return myIndex;
         }
     }
 }

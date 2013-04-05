@@ -9,17 +9,17 @@ import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.BindingException;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
-import edu.clemson.cs.r2jt.proving2.LocalTheorem;
-import edu.clemson.cs.r2jt.proving2.Theorem;
 import edu.clemson.cs.r2jt.proving2.Utilities;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.justifications.TheoremApplication;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
+import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheoremStep;
-import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collection;
 import java.util.HashMap;
@@ -71,12 +71,14 @@ public class ExpandAntecedentByImplication implements Transformation {
     private final List<PExp> myAntecedents;
     private final int myAntecedentsSize;
     private final PExp myConsequent;
+    private final Theorem myTheorem;
 
-    public ExpandAntecedentByImplication(List<PExp> localTheorems,
-            PExp consequent) {
-        myAntecedents = localTheorems;
+    public ExpandAntecedentByImplication(Theorem t, List<PExp> tAntecedents,
+            PExp tConsequent) {
+        myTheorem = t;
+        myAntecedents = tAntecedents;
         myAntecedentsSize = myAntecedents.size();
-        myConsequent = consequent;
+        myConsequent = tConsequent;
     }
 
     @Override
@@ -178,8 +180,7 @@ public class ExpandAntecedentByImplication implements Transformation {
                 Iterator<Site> boundSitesSoFarIter = boundSitesSoFar.iterator();
                 while (!includeGlobal && boundSitesSoFarIter.hasNext()) {
                     includeGlobal =
-                            (boundSitesSoFarIter.next().section
-                                    .equals(Site.Section.ANTECEDENTS));
+                            (boundSitesSoFarIter.next().conjunct instanceof LocalTheorem);
                 }
             }
 
@@ -232,22 +233,17 @@ public class ExpandAntecedentByImplication implements Transformation {
 
         private Map<PExp, PExp> myBindings;
         private Collection<Site> myBindSites;
-        private Set<Theorem> myBindTheorems = new HashSet<Theorem>();
+        private Set<Theorem> myBindSiteTheorems = new HashSet<Theorem>();
+        private Set<Conjunct> myAddedTheorems = new HashSet<Conjunct>();
+        private Set<Site> myAddedSites = new HashSet<Site>();
 
         public ExpandAntecedentByImplicationApplication(
                 Map<PExp, PExp> bindings, Collection<Site> bindSites) {
             myBindings = bindings;
             myBindSites = bindSites;
 
-            try {
-                for (Site s : bindSites) {
-                    myBindTheorems.add(s.getRootTheorem());
-                }
-            }
-            catch (NoSolutionException nse) {
-                //In this case we're sure that all the sites are derived from
-                //local or global theorems
-                throw new RuntimeException(nse);
+            for (Site s : bindSites) {
+                myBindSiteTheorems.add((Theorem) s.conjunct);
             }
         }
 
@@ -265,8 +261,14 @@ public class ExpandAntecedentByImplication implements Transformation {
                 LocalTheorem t =
                         m.addLocalTheorem(a, new TheoremApplication(
                                 ExpandAntecedentByImplication.this), false);
+
+                myAddedSites.add(new Site(m, t, a));
+
                 m.addProofStep(new IntroduceLocalTheoremStep(t,
-                        ExpandAntecedentByImplication.this, myBindTheorems));
+                        myBindSiteTheorems, ExpandAntecedentByImplication.this,
+                        this));
+
+                myAddedTheorems.add(t);
             }
         }
 
@@ -275,12 +277,31 @@ public class ExpandAntecedentByImplication implements Transformation {
             Set<Site> result = new HashSet<Site>();
 
             for (Site s : myBindSites) {
-                if (s.section.equals(Site.Section.ANTECEDENTS)) {
+                if (s.conjunct instanceof LocalTheorem) {
                     result.add(s);
                 }
             }
 
             return result;
+        }
+
+        @Override
+        public Set<Conjunct> getPrerequisiteConjuncts() {
+            Set<Conjunct> result = new HashSet<Conjunct>(myBindSiteTheorems);
+
+            result.add(myTheorem);
+
+            return result;
+        }
+
+        @Override
+        public Set<Conjunct> getAffectedConjuncts() {
+            return myAddedTheorems;
+        }
+
+        @Override
+        public Set<Site> getAffectedSites() {
+            return myAddedSites;
         }
     }
 }
