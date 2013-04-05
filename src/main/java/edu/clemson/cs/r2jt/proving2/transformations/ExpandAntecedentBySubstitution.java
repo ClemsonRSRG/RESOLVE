@@ -46,7 +46,7 @@ public class ExpandAntecedentBySubstitution implements Transformation {
         myTransformationTemplate = tTransformationTemplate;
         myTheorem = t;
     }
-    
+
     public Theorem getTheorem() {
         return myTheorem;
     }
@@ -239,7 +239,7 @@ public class ExpandAntecedentBySubstitution implements Transformation {
             myNewSite = new Site(m, myNewTheorem, topLevelTransformed);
 
             m.addProofStep(new IntroduceLocalTheoremStep(myNewTheorem,
-                    Collections.singleton(myTheorem),
+                    Collections.singleton((Theorem) myBindSite.conjunct),
                     ExpandAntecedentBySubstitution.this, this));
         }
 
@@ -253,7 +253,7 @@ public class ExpandAntecedentBySubstitution implements Transformation {
             Set<Conjunct> result = new HashSet<Conjunct>();
             result.add(myTheorem);
             result.add(myBindSite.conjunct);
-            
+
             return result;
         }
 
@@ -264,7 +264,7 @@ public class ExpandAntecedentBySubstitution implements Transformation {
 
         @Override
         public Set<Site> getAffectedSites() {
-            return Collections.<Site>singleton(myNewSite);
+            return Collections.<Site> singleton(myNewSite);
         }
     }
 

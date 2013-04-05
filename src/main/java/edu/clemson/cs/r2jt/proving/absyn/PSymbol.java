@@ -12,6 +12,7 @@ import java.util.Set;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import java.util.Collections;
 
 /**
@@ -156,6 +157,8 @@ public class PSymbol extends PExp {
     final DisplayType displayType;
     final String leftPrint, rightPrint;
 
+    private MTType myPreApplicationType;
+
     private int myArgumentsSize;
     private final PExp[] myScratchSpace;
 
@@ -293,6 +296,21 @@ public class PSymbol extends PExp {
         v.endPExp(this);
     }
 
+    public final MTType getPreApplicationType() {
+        if (myPreApplicationType == null) {
+            List<MTType> argTypes = new LinkedList<MTType>();
+            for (PExp arg : arguments) {
+                argTypes.add(arg.getType());
+            }
+
+            myPreApplicationType =
+                    new MTFunction(getType().getTypeGraph(), getType(),
+                            argTypes);
+        }
+
+        return myPreApplicationType;
+    }
+
     public boolean isFunction() {
         return myArgumentsSize > 0;
     }
@@ -384,6 +402,25 @@ public class PSymbol extends PExp {
         PExp retval = substitutions.get(this);
 
         if (retval == null) {
+
+            String newLeft = leftPrint, newRight = rightPrint;
+            Quantification newQuantification = quantification;
+
+            if (arguments.size() > 0 && displayType.equals(DisplayType.PREFIX)) {
+                PExp asVar =
+                        new PSymbol(getType(), getTypeValue(), leftPrint,
+                                quantification);
+
+                PExp functionSubstitution = substitutions.get(asVar);
+
+                if (functionSubstitution != null) {
+                    newLeft = ((PSymbol) functionSubstitution).leftPrint;
+                    newRight = ((PSymbol) functionSubstitution).rightPrint;
+                    newQuantification =
+                            ((PSymbol) functionSubstitution).quantification;
+                }
+            }
+
             boolean argumentChanged = false;
             int argIndex = 0;
             Iterator<PExp> argumentsIter = arguments.iterator();
@@ -400,9 +437,9 @@ public class PSymbol extends PExp {
 
             if (argumentChanged) {
                 retval =
-                        new PSymbol(myType, myTypeValue, leftPrint, rightPrint,
+                        new PSymbol(myType, myTypeValue, newLeft, newRight,
                                 new ArrayBackedImmutableList<PExp>(
-                                        myScratchSpace), quantification,
+                                        myScratchSpace), newQuantification,
                                 displayType);
             }
             else {
@@ -518,7 +555,7 @@ public class PSymbol extends PExp {
                 }
 
                 accumulator.put(new PSymbol(myType, myTypeValue, name),
-                        new PSymbol(sTarget.getType(), sTarget.getTypeValue(),
+                        new PSymbol(sTarget.getPreApplicationType(), null,
                                 sTarget.name));
 
                 Iterator<PExp> thisArgumentsIter = arguments.iterator();

@@ -65,6 +65,7 @@ import edu.clemson.cs.r2jt.entry.*;
 import edu.clemson.cs.r2jt.errors.*;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.init.Environment;
+import edu.clemson.cs.r2jt.init.ImportScanner;
 import edu.clemson.cs.r2jt.location.TypeLocator;
 import edu.clemson.cs.r2jt.scope.Binding;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
@@ -122,44 +123,50 @@ public class OldPopulator extends ResolveConceptualVisitor {
         // ImportScanner.visitModuleDec(), perhaps combine these somehow? -JCK
         String[] stdUses = myInstanceEnvironment.getStdUses();
         String decName = dec.getName().getName();
-        List<List<UsesItem>> listOfDependLists =
-                myInstanceEnvironment.getStdUsesDepends();
 
-        for (int i = 0; i < stdUses.length; i++) {
-            if (decName.equals("Std_" + stdUses[i] + "_Fac")
-                    || decName.equals(stdUses[i] + "_Template")
-                    || decName.equals(stdUses[i] + "_Theory")) {
-                // Don't need to do anything for these
-                dec.accept(this);
-                return;
-            }
-            else {
-                // Check if this Dec is a dependency
-                if (!listOfDependLists.isEmpty()) {
-                    List<UsesItem> dependencies = listOfDependLists.get(i);
-                    if (dependencies != null) {
-                        Iterator<UsesItem> it = dependencies.iterator();
-                        while (it.hasNext()) {
-                            if (it.next().getName().getName().equals(decName)) {
-                                // This is a dependency do NOT add
-                                dec.accept(this);
-                                return;
+        if (!ImportScanner.NO_DEFAULT_IMPORT_MODULES.contains(decName)) {
+
+            List<List<UsesItem>> listOfDependLists =
+                    myInstanceEnvironment.getStdUsesDepends();
+
+            for (int i = 0; i < stdUses.length; i++) {
+                if (decName.equals("Std_" + stdUses[i] + "_Fac")
+                        || decName.equals(stdUses[i] + "_Template")
+                        || decName.equals(stdUses[i] + "_Theory")) {
+                    // Don't need to do anything for these
+                    dec.accept(this);
+                    return;
+                }
+                else {
+                    // Check if this Dec is a dependency
+                    if (!listOfDependLists.isEmpty()) {
+                        List<UsesItem> dependencies = listOfDependLists.get(i);
+                        if (dependencies != null) {
+                            Iterator<UsesItem> it = dependencies.iterator();
+                            while (it.hasNext()) {
+                                if (it.next().getName().getName().equals(
+                                        decName)) {
+                                    // This is a dependency do NOT add
+                                    dec.accept(this);
+                                    return;
+                                }
                             }
                         }
                     }
-                }
-                // Not a Std_Fac or dependency; Add the Fac to the table scope
-                Symbol stdFac;
-                stdFac = Symbol.symbol("Std_" + stdUses[i] + "_Fac");
+                    // Not a Std_Fac or dependency; Add the Fac to the table scope
+                    Symbol stdFac;
+                    stdFac = Symbol.symbol("Std_" + stdUses[i] + "_Fac");
 
-                PosSymbol stdFacPosSymbol = new PosSymbol(null, stdFac);
-                ModuleID stdBooleanFacModuleID =
-                        ModuleID.createFacilityID(stdFac);
-                ModuleEntry entry =
-                        new ModuleEntry(stdFacPosSymbol, myInstanceEnvironment
-                                .getSymbolTable(stdBooleanFacModuleID)
-                                .getModuleScope());
-                table.addFacilityToScope(entry);
+                    PosSymbol stdFacPosSymbol = new PosSymbol(null, stdFac);
+                    ModuleID stdBooleanFacModuleID =
+                            ModuleID.createFacilityID(stdFac);
+                    ModuleEntry entry =
+                            new ModuleEntry(stdFacPosSymbol,
+                                    myInstanceEnvironment.getSymbolTable(
+                                            stdBooleanFacModuleID)
+                                            .getModuleScope());
+                    table.addFacilityToScope(entry);
+                }
             }
         }
 

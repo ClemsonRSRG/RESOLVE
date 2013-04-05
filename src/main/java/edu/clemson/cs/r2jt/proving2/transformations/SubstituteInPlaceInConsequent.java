@@ -123,7 +123,7 @@ public class SubstituteInPlaceInConsequent implements Transformation {
 
         private final Site myBindSite;
         private Site myFinalSite;
-        
+
         private final Map<PExp, PExp> myBindings;
 
         public SubstituteInPlaceInConsequentApplication(Site bindSite,
@@ -158,10 +158,10 @@ public class SubstituteInPlaceInConsequent implements Transformation {
         @Override
         public Set<Conjunct> getPrerequisiteConjuncts() {
             Set<Conjunct> result = new HashSet<Conjunct>();
-            
+
             result.add(myBindSite.conjunct);
             result.add(myThorem);
-            
+
             return result;
         }
 

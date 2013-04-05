@@ -153,7 +153,7 @@ public class StrengthenConsequent implements Transformation {
 
         private final Set<Conjunct> myNewConsequents = new HashSet<Conjunct>();
         private final Set<Site> myNewSites = new HashSet<Site>();
-        
+
         private final Set<Conjunct> myOldConsequents = new HashSet<Conjunct>();
 
         public StrengthenConsequentApplication(Map<PExp, PExp> bindings,
@@ -218,7 +218,7 @@ public class StrengthenConsequent implements Transformation {
         public Set<Conjunct> getPrerequisiteConjuncts() {
             Set<Conjunct> result = new HashSet<Conjunct>(myOldConsequents);
             result.add(myTheorem);
-            
+
             return result;
         }
 

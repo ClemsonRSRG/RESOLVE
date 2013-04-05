@@ -119,7 +119,7 @@ public class MathSymbolEntry extends SymbolTableEntry {
      * contain an <code>MTNamed</code>) will not attempt to bind to its 
      * argument (thus permitting later type flexibility via type theorem).  As a
      * result, simply because a call to this method succeeds <em>does not 
-     * mean</em> those arguments are valid for the types of the parameters of
+     * mean</em> the arguments are valid for the types of the parameters of
      * this function: the types of arguments corresponding to non-schematized 
      * formal parameters may not match even if a call to this method succeeds.
      * </p>
@@ -140,7 +140,8 @@ public class MathSymbolEntry extends SymbolTableEntry {
      * @throws NoSolutionException 
      */
     public MathSymbolEntry deschematize(List<Exp> arguments,
-            Scope callingContext) throws NoSolutionException {
+            Scope callingContext, Map<String, MTType> definitionSchematicTypes)
+            throws NoSolutionException {
 
         if (!(myType instanceof MTFunction)) {
             throw NoSolutionException.INSTANCE;
@@ -148,27 +149,28 @@ public class MathSymbolEntry extends SymbolTableEntry {
 
         List<MTType> formalParameterTypes =
                 getParameterTypes(((MTFunction) myType));
+        List<MTType> actualArgumentTypes = getArgumentTypes(arguments);
 
-        if (formalParameterTypes.size() != arguments.size()) {
+        if (formalParameterTypes.size() != actualArgumentTypes.size()) {
             throw NoSolutionException.INSTANCE;
         }
 
         List<ProgramTypeEntry> callingContextProgramGenerics =
                 callingContext.query(GenericQuery.INSTANCE);
         Map<String, MTType> callingContextMathGenerics =
-                new HashMap<String, MTType>();
+                new HashMap<String, MTType>(definitionSchematicTypes);
 
         MathSymbolEntry mathGeneric;
         for (ProgramTypeEntry e : callingContextProgramGenerics) {
-            //This guaranteed not to fail--all program types can be coerced to
-            //math types, so the passed location is irrelevant
+            //This is guaranteed not to fail--all program types can be coerced 
+            //to math types, so the passed location is irrelevant
             mathGeneric = e.toMathSymbolEntry(null);
 
             callingContextMathGenerics.put(mathGeneric.getName(),
                     mathGeneric.myType);
         }
 
-        Iterator<Exp> argumentIter = arguments.iterator();
+        Iterator<MTType> argumentTypeIter = actualArgumentTypes.iterator();
         Map<String, MTType> bindingsSoFar = new HashMap<String, MTType>();
         Map<String, MTType> iterationBindings;
         MTType argumentType;
@@ -180,14 +182,20 @@ public class MathSymbolEntry extends SymbolTableEntry {
 
                 //We know arguments and formalParameterTypes are the same 
                 //length, see above
-                argumentType = argumentIter.next().getMathType();
+                argumentType = argumentTypeIter.next();
 
                 if (containsSchematicType(formalParameterType)) {
+                    //try{
                     iterationBindings =
                             argumentType.bindTo(formalParameterType,
                                     callingContextMathGenerics,
                                     mySchematicTypes);
+
                     bindingsSoFar.putAll(iterationBindings);
+                    /*}
+                    catch (NoSuchElementException nsee) {
+                        int i = 0;
+                    }*/
                 }
             }
         }
@@ -212,12 +220,11 @@ public class MathSymbolEntry extends SymbolTableEntry {
                 null, myGenericsInDefiningContext, getSourceModuleIdentifier());
     }
 
-    private static List<MTType> getParameterTypes(MTFunction source) {
-        MTType domain = source.getDomain();
+    private static List<MTType> expandAsNeeded(MTType t) {
         List<MTType> result = new LinkedList<MTType>();
-
-        if (domain instanceof MTCartesian) {
-            MTCartesian domainAsMTCartesian = (MTCartesian) domain;
+        
+        if (t instanceof MTCartesian) {
+            MTCartesian domainAsMTCartesian = (MTCartesian) t;
 
             int size = domainAsMTCartesian.size();
             for (int i = 0; i < size; i++) {
@@ -225,10 +232,33 @@ public class MathSymbolEntry extends SymbolTableEntry {
             }
         }
         else {
-            if (!domain.equals(source.getTypeGraph().VOID)) {
-                result.add(domain);
+            if (!t.equals(t.getTypeGraph().VOID)) {
+                result.add(t);
             }
         }
+        
+        return result;
+    }
+    
+    private static List<MTType> getArgumentTypes(List<Exp> arguments) {
+        List<MTType> result;
+        
+        if (arguments.size() == 1) {
+            result = expandAsNeeded(arguments.get(0).getMathType());
+        }
+        else {
+            result = new LinkedList<MTType>();
+            for (Exp e : arguments) {
+                result.add(e.getMathType());
+            }
+        }
+        
+        return result;
+    }
+    
+    private static List<MTType> getParameterTypes(MTFunction source) {
+        MTType domain = source.getDomain();
+        List<MTType> result = expandAsNeeded(domain);
 
         return result;
     }

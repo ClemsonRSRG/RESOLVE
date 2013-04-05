@@ -24,5 +24,6 @@ public interface Application {
     public Set<Conjunct> getPrerequisiteConjuncts();
 
     public Set<Conjunct> getAffectedConjuncts();
+
     public Set<Site> getAffectedSites();
 }

@@ -9,6 +9,8 @@ import edu.clemson.cs.r2jt.proving.DummyIterator;
 import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.BindingException;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
+import edu.clemson.cs.r2jt.proving.absyn.PSymbol.Quantification;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.AutomatedProver;
 import edu.clemson.cs.r2jt.proving2.VC;
@@ -223,10 +225,12 @@ public final class PerVCProverModel {
         while (steps.hasNext()) {
             step = steps.next();
 
-            if (step instanceof ModifyConsequentStep && ((ModifyConsequentStep) step).getTransformation() instanceof ReplaceTheoremInConsequentWithTrue && myTheoremName.contains("0_3")) {
+            if (step instanceof ModifyConsequentStep
+                    && ((ModifyConsequentStep) step).getTransformation() instanceof ReplaceTheoremInConsequentWithTrue
+                    && myTheoremName.contains("0_3")) {
                 int i = 5;
             }
-            
+
             stepPrerequisites = step.getPrerequisiteConjuncts();
             stepAffectedSites = step.getAffectedConjuncts();
 
@@ -350,11 +354,11 @@ public final class PerVCProverModel {
 
             stepMimicked = mimicked(affectedSites);
         }
-        
+
         if (!stepMimicked) {
             System.out.println(this);
             System.out.println("\n\nToward affected sites:\n" + affectedSites);
-            
+
             throw new IllegalArgumentException("Couldn't mimic step: " + step
                     + " (" + step.getClass() + ", " + transformation.getClass()
                     + ")");
@@ -1033,8 +1037,9 @@ public final class PerVCProverModel {
 
             //This is a simple optimization that prevents us from traversing the
             //expression if there's no way we could match
-            if (s.exp.getSymbolNames().contains(
-                    substituted.getTopLevelOperation())) {
+            if ((substituted instanceof PSymbol && ((PSymbol) substituted).quantification == Quantification.FOR_ALL)
+                    || s.exp.getSymbolNames().contains(
+                            substituted.getTopLevelOperation())) {
                 substituted.bindTo(s.exp, accumulator);
             }
             else {

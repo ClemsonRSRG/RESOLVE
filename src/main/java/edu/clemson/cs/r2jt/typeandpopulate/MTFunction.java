@@ -140,7 +140,7 @@ public class MTFunction extends MTAbstract<MTFunction> {
      * the parameters in this example <em>do not</em> type against the given
      * function type, but that is irrelevant to this method.  The unbound
      * type variable <code>T</code> would be matched to <code>Z</code> and 
-     * replaced throughout, while the unbound type variable <code>S</code> would
+     * replaced throughout, while the unbound type variable <code>R</code> would
      * not be bound, since it is not at the top level.  Note for simplicity of
      * implementation that the top-level type parameter itself remains unchanged
      * (i.e., in theory you could later pass a <em>different</em> type to 
@@ -179,13 +179,20 @@ public class MTFunction extends MTAbstract<MTFunction> {
                 int parametersSize = parameters.size();
 
                 if (domainSize != parametersSize) {
-                    throw NoSolutionException.INSTANCE;
+                    if (parametersSize == 1 && mySingleParameterName != null) {
+                        deschematizeParameter(mySingleParameterName, myDomain,
+                                parameters.get(0), concreteValues);
+                    }
+                    else {
+                        throw NoSolutionException.INSTANCE;
+                    }
                 }
-
-                for (int i = 0; i < domainSize; i++) {
-                    deschematizeParameter(domainAsMTCartesian.getTag(i),
-                            domainAsMTCartesian.getFactor(i),
-                            parameters.get(i), concreteValues);
+                else {
+                    for (int i = 0; i < domainSize; i++) {
+                        deschematizeParameter(domainAsMTCartesian.getTag(i),
+                                domainAsMTCartesian.getFactor(i),
+                                parameters.get(i), concreteValues);
+                    }
                 }
             }
             else {

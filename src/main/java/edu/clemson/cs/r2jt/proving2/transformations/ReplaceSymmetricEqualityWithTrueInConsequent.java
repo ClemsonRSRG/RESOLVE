@@ -132,7 +132,7 @@ public class ReplaceSymmetricEqualityWithTrueInConsequent
 
         @Override
         public Set<Site> getAffectedSites() {
-            return Collections.<Site>singleton(myFinalSite);
+            return Collections.<Site> singleton(myFinalSite);
         }
     }
 

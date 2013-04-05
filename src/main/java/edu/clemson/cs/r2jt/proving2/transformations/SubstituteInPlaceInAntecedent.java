@@ -147,10 +147,10 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
         @Override
         public Set<Conjunct> getPrerequisiteConjuncts() {
             Set<Conjunct> result = new HashSet<Conjunct>();
-            
+
             result.add(myBindSite.conjunct);
             result.add(myTheorem);
-            
+
             return result;
         }
 
