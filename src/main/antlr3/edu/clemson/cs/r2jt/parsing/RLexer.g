@@ -287,7 +287,7 @@ IFF
   ;
   
 IMPLICIT
-  : 'Inplicit'
+  : 'Implicit'
   ;
   
 IMPLIES

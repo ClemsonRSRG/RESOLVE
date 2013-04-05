@@ -16,13 +16,10 @@ import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScopeBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate.ParameterGenericApplyingVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.SymbolNotOfKindTypeException;
-import edu.clemson.cs.r2jt.typeandpopulate.VariableReplacingVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
@@ -118,6 +115,12 @@ public class Populator extends TreeWalkerVisitor {
      */
     private DefinitionDec myCurrentDirectDefinition;
 
+    /**
+     * <p>While walking the parameters of a definition, this flag will be set
+     * to true.</p>
+     */
+    private boolean myDefinitionParameterSectionFlag = false;
+
     private Map<String, MTType> myDefinitionSchematicTypes =
             new HashMap<String, MTType>();
 
@@ -186,7 +189,8 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preModuleDec(ModuleDec node) {
-        Populator.emitDebug("----------------------\nBEGIN MATH POPULATOR");
+        Populator.emitDebug("----------------------\nModule: "
+                + node.getName().getName() + "\n----------------------");
         myCurModuleScope = myBuilder.startModuleScope(node);
     }
 
@@ -311,7 +315,6 @@ public class Populator extends TreeWalkerVisitor {
     public void preFacilityOperationDec(FacilityOperationDec dec) {
         myBuilder.startScope(dec);
         myCurrentParameters = new LinkedList<ProgramParameterEntry>();
-
     }
 
     @Override
@@ -575,6 +578,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postFacilityOperationDec(FacilityOperationDec dec) {
+        myCurrentParameters = null;
         myBuilder.endScope();
         myCurrentParameters = null;
 
@@ -795,19 +799,33 @@ public class Populator extends TreeWalkerVisitor {
         if (myCurrentDirectDefinition != null
                 && mathTypeValue.isKnownToContainOnlyMTypes()
                 && myDefinitionNamedTypes.contains(varName)) {
-            throw new SourceErrorException("Introduction of type parameter "
-                    + "must precede any use of that variable name.", node
-                    .getLocation());
+
+            throw new SourceErrorException("Introduction of type "
+                    + "parameter must precede any use of that variable "
+                    + "name.", node.getLocation());
+        }
+
+        if (myDefinitionParameterSectionFlag
+                && mathTypeValue.isKnownToContainOnlyMTypes()) {
+
+            myDefinitionSchematicTypes.put(varName, mathTypeValue);
         }
 
         node.setMathType(mathTypeValue);
 
-        SymbolTableEntry.Quantification q = myActiveQuantifications.peek();
+        SymbolTableEntry.Quantification q;
+        if (myDefinitionParameterSectionFlag && myTypeValueDepth == 0) {
+            q = Quantification.UNIVERSAL;
+        }
+        else {
+            q = myActiveQuantifications.peek();
+        }
+
         addBinding(varName, node.getName().getLocation(), q, node,
                 mathTypeValue, null);
 
         Populator.emitDebug("  New variable: " + varName + " of type "
-                + mathTypeValue.toString() + " with quantification " + q);
+                + mathTypeValue.toString() + " with quantification " + q + ".");
     }
 
     @Override
@@ -962,6 +980,9 @@ public class Populator extends TreeWalkerVisitor {
                     //need to check here
                     myDefinitionSchematicTypes.put(nodeExp.getName().getName(),
                             node.getAssertedTy().getMathType());
+
+                    Populator.emitDebug("Added schematic variable: "
+                            + nodeExp.getName().getName());
                 }
                 catch (DuplicateSymbolException dse) {
                     duplicateSymbol(nodeExp.getName().getName(), nodeExp
@@ -988,6 +1009,16 @@ public class Populator extends TreeWalkerVisitor {
 
         myDefinitionSchematicTypes.clear();
         myDefinitionNamedTypes.clear();
+    }
+
+    @Override
+    public void preDefinitionDecParameters(DefinitionDec node) {
+        myDefinitionParameterSectionFlag = true;
+    }
+
+    @Override
+    public void postDefinitionDecParameters(DefinitionDec node) {
+        myDefinitionParameterSectionFlag = false;
     }
 
     @Override
@@ -1027,6 +1058,9 @@ public class Populator extends TreeWalkerVisitor {
                 + ((typeValue != null) ? " with type value " + typeValue : ""));
 
         myCurrentDirectDefinition = null;
+        myDefinitionSchematicTypes.clear();
+
+        node.setMathType(declaredType);
     }
 
     @Override
@@ -1265,7 +1299,7 @@ public class Populator extends TreeWalkerVisitor {
         Exp typeExp = node.getArbitraryExp();
         MTType mathType = typeExp.getMathType();
         MTType mathTypeValue = typeExp.getMathTypeValue();
-        if (!mathType.isKnownToContainOnlyMTypes()) {
+        if (mathTypeValue == null) {
             notAType(typeExp);
         }
 
@@ -1956,80 +1990,6 @@ public class Populator extends TreeWalkerVisitor {
         myTypeValueDepth--;
     }
 
-    private static MTFunction deschematize(MTFunction original,
-            Exp soleParameter) {
-
-        Map<String, MTType> bindings = new HashMap<String, MTType>();
-
-        MTType domain = original.getDomain();
-        if (domain instanceof MTCartesian) {
-            if (!(soleParameter instanceof TupleExp)) {
-                deschematize((MTCartesian) domain, (TupleExp) soleParameter,
-                        bindings);
-            }
-        }
-        else {
-            MTType parameterTypeValue = soleParameter.getMathTypeValue();
-            if (parameterTypeValue != null) {
-                String tag = original.getSingleParameterName();
-
-                if (tag != null) {
-                    bindings.put(tag, parameterTypeValue);
-                }
-            }
-
-            deschematize(original, soleParameter.getMathType(), bindings);
-        }
-
-        VariableReplacingVisitor replacer =
-                new VariableReplacingVisitor(bindings);
-
-        original.accept(replacer);
-
-        return (MTFunction) replacer.getFinalExpression();
-    }
-
-    private static void deschematize(MTCartesian original, TupleExp value,
-            Map<String, MTType> bindings) {
-
-        int originalSize = original.size();
-        if (originalSize != value.getSize()) {
-            throw new IllegalArgumentException();
-        }
-
-        String tag;
-        Exp field;
-        MTType fieldTypeValue, factor;
-        for (int i = 0; i < originalSize; i++) {
-            factor = original.getFactor(i);
-            field = value.getField(i);
-            fieldTypeValue = field.getMathTypeValue();
-
-            if (fieldTypeValue != null) {
-                tag = original.getTag(i);
-
-                if (tag != null) {
-                    bindings.put(tag, fieldTypeValue);
-                }
-            }
-
-            deschematize(factor, field.getMathType(), bindings);
-        }
-    }
-
-    private static void deschematize(MTType original, MTType value,
-            Map<String, MTType> bindings) {
-
-        ParameterGenericApplyingVisitor genericApplier =
-                new ParameterGenericApplyingVisitor(bindings);
-
-        genericApplier.visit(original, value);
-
-        if (genericApplier.encounteredError()) {
-            throw new IllegalArgumentException();
-        }
-    }
-
     public static void emitDebug(String msg) {
         if (PRINT_DEBUG) {
             System.out.println(msg);
@@ -2089,9 +2049,16 @@ public class Populator extends TreeWalkerVisitor {
 
         setSymbolTypeValue(node, symbolName, intendedEntry);
 
+        String typeValueDesc = "";
+
+        if (node.getMathTypeValue() != null) {
+            typeValueDesc =
+                    ", referencing math type " + node.getMathTypeValue() + " ("
+                            + node.getMathTypeValue().getClass() + ")";
+        }
+
         Populator.emitDebug("Processed symbol " + symbolName + " with type "
-                + node.getMathType() + ", referencing math type "
-                + node.getMathTypeValue());
+                + node.getMathType() + typeValueDesc);
 
         return intendedEntry;
     }
@@ -2184,7 +2151,6 @@ public class Populator extends TreeWalkerVisitor {
         return getDomainTypeMatch(e, candidates, INEXACT_DOMAIN_MATCH);
     }
 
-    //TODO : This is a mess, clean it up!
     private MathSymbolEntry getDomainTypeMatch(AbstractFunctionExp e,
             List<MathSymbolEntry> candidates,
             TypeComparison<AbstractFunctionExp, MTFunction> comparison)
@@ -2201,7 +2167,8 @@ public class Populator extends TreeWalkerVisitor {
                 try {
                     candidate =
                             candidate.deschematize(e.getParameters(), myBuilder
-                                    .getInnermostActiveScope());
+                                    .getInnermostActiveScope(),
+                                    myDefinitionSchematicTypes);
                     candidateType = (MTFunction) candidate.getType();
                     emitDebug(candidate.getType() + " deschematizes to "
                             + candidateType);

@@ -4,7 +4,8 @@
  */
 package edu.clemson.cs.r2jt.proving2.proofsteps;
 
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Consequent;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 
@@ -12,25 +13,26 @@ import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
  *
  * @author hamptos
  */
-public class RemoveConsequentStep implements ProofStep {
+public class RemoveConsequentStep extends AbstractProofStep {
 
-    private final PExp myConsequent;
-    private final int myIndex;
-    private final Transformation myTransformation;
+    private final Consequent myConsequent;
+    private final int myOriginalIndex;
 
-    public RemoveConsequentStep(PExp consequent, int index, Transformation t) {
+    public RemoveConsequentStep(Consequent consequent, int originalIndex,
+            Transformation t, Application a) {
+        super(t, a);
+
+        myOriginalIndex = originalIndex;
         myConsequent = consequent;
-        myIndex = index;
-        myTransformation = t;
     }
 
     @Override
     public void undo(PerVCProverModel m) {
-        m.addConsequent(myConsequent, myIndex);
+        m.insertConjunct(myConsequent, myOriginalIndex);
     }
 
     @Override
     public String toString() {
-        return "Remove " + myTransformation;
+        return "Remove " + getTransformation();
     }
 }

@@ -9,20 +9,27 @@ import edu.clemson.cs.r2jt.proving.DummyIterator;
 import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.BindingException;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
+import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
+import edu.clemson.cs.r2jt.proving.absyn.PSymbol.Quantification;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.AutomatedProver;
-import edu.clemson.cs.r2jt.proving2.LocalTheorem;
-import edu.clemson.cs.r2jt.proving2.Theorem;
 import edu.clemson.cs.r2jt.proving2.VC;
+import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.justifications.Given;
 import edu.clemson.cs.r2jt.proving2.justifications.Justification;
+import edu.clemson.cs.r2jt.proving2.proofsteps.LabelStep;
+import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
+import edu.clemson.cs.r2jt.proving2.transformations.ReplaceTheoremInConsequentWithTrue;
+import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
+import edu.clemson.cs.r2jt.proving2.utilities.SimpleArrayList;
 import edu.clemson.cs.r2jt.proving2.utilities.UnsafeIteratorLinkedList;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,6 +74,8 @@ public final class PerVCProverModel {
         public abstract boolean report(boolean important);
     };
 
+    private final ConjunctToSite CONJUNCT_TO_SITE = new ConjunctToSite();
+
     private final TypeGraph myTypeGraph;
 
     /**
@@ -89,8 +98,6 @@ public final class PerVCProverModel {
     private final Map<PExp, Integer> myLocalTheoremsSet =
             new HashMap<PExp, Integer>();
     private final Set<PExp> myLocalTheoremSetForReturning;
-    private final Map<String, List<Site>> myLocalTheoremsByTopLevel =
-            new HashMap<String, List<Site>>();
 
     /**
      * <p>A list of local theorems in the order they were introduced, for 
@@ -110,8 +117,8 @@ public final class PerVCProverModel {
      * the conjuncts would have been broken up into separate entries in this 
      * list.) Once we empty this list, the proof is complete.</p>
      */
-    private final List<PExp> myConsequents =
-            new UnsafeIteratorLinkedList<PExp>();
+    private final SimpleArrayList<Consequent> myConsequents =
+            new SimpleArrayList<Consequent>();
 
     private int myLocalTheoremsHash;
     private int myConsequentsHash;
@@ -123,7 +130,10 @@ public final class PerVCProverModel {
      * applying these steps in order, would bring the fresh model into the exact
      * same state that this one is currently in.</p>
      */
-    private final List<ProofStep> myProofSoFar = new LinkedList<ProofStep>();
+    private final LinkedList<ProofStep> myProofSoFar =
+            new LinkedList<ProofStep>();
+    private final List<ProofStep> myUnmodifiableProofSoFar =
+            Collections.unmodifiableList(myProofSoFar);
 
     /**
      * <p>A link to the global theorem library.</p>
@@ -167,8 +177,7 @@ public final class PerVCProverModel {
         }
 
         for (PExp consequent : consequents) {
-            myConsequentsHash += consequents.hashCode();
-            myConsequents.add(consequent);
+            addConsequent(consequent);
         }
 
         myLocalTheoremSetForReturning = myLocalTheoremsSet.keySet();
@@ -193,6 +202,66 @@ public final class PerVCProverModel {
 
     public void addChangeListener(ChangeListener l) {
         myChangeListeners.add(l);
+    }
+
+    /**
+     * <p>Returns a subset of the steps in the full proof list that, when
+     * applied in order, would arrive at the current consequent.  This method
+     * attempts to prune out steps that were not productive.</p>
+     */
+    public List<ProofStep> getProductiveProofSteps() {
+        List<ProofStep> result = new LinkedList<ProofStep>();
+
+        Set<Conjunct> prerequisiteSites = new HashSet<Conjunct>();
+
+        for (Consequent c : myConsequents) {
+            prerequisiteSites.add(c);
+        }
+
+        Set<Conjunct> stepAffectedSites, stepPrerequisites;
+        Iterator<ProofStep> steps = myProofSoFar.descendingIterator();
+        ProofStep step;
+        boolean overlap;
+        while (steps.hasNext()) {
+            step = steps.next();
+
+            if (step instanceof ModifyConsequentStep
+                    && ((ModifyConsequentStep) step).getTransformation() instanceof ReplaceTheoremInConsequentWithTrue
+                    && myTheoremName.contains("0_3")) {
+                int i = 5;
+            }
+
+            stepPrerequisites = step.getPrerequisiteConjuncts();
+            stepAffectedSites = step.getAffectedConjuncts();
+
+            overlap = step instanceof LabelStep;
+            for (Conjunct s : stepAffectedSites) {
+                if (prerequisiteSites.contains(s)) {
+                    //This step is important if it establishes sites that are
+                    //current global prerequisites
+                    overlap = true;
+                }
+            }
+
+            for (Conjunct c : stepPrerequisites) {
+                if (c instanceof Consequent) {
+                    //This step is important if it operated on a consequent
+                    overlap = true;
+                }
+            }
+
+            if (overlap) {
+                //This step is important.  Any sites it established are cleared
+                //(we've found what gave us the prerequisite) and any sites it
+                //depended on are added as new global prerequisites
+                prerequisiteSites.removeAll(stepAffectedSites);
+                prerequisiteSites.addAll(stepPrerequisites);
+
+                result.add(0, step);
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -246,6 +315,86 @@ public final class PerVCProverModel {
         modelChanged(true);
     }
 
+    void touch(boolean important) {
+        modelChanged(important);
+    }
+
+    /**
+     * <p>Attempts to follow the series of steps provided, so long as all 
+     * requisite facts are available at each step (but even if the model is not
+     * otherwise exactly the same as when each step was first enacted.)</p>
+     * 
+     * @param steps 
+     */
+    public void mimic(ProofStep step) {
+
+        Transformation transformation;
+        Iterator<Application> applications;
+        boolean stepMimicked, firstApplication;
+        int stepCount;
+        transformation = step.getTransformation();
+        applications = transformation.getApplications(this);
+
+        stepMimicked = false;
+        firstApplication = true;
+        stepCount = myProofSoFar.size();
+        Set<Site> affectedSites = step.getAffectedSites();
+
+        while (!stepMimicked && applications.hasNext()) {
+            if (firstApplication) {
+                firstApplication = false;
+            }
+            else {
+                while (myProofSoFar.size() > stepCount) {
+                    undoLastProofStep();
+                }
+            }
+
+            applications.next().apply(this);
+
+            stepMimicked = mimicked(affectedSites);
+        }
+
+        if (!stepMimicked) {
+            System.out.println(this);
+            System.out.println("\n\nToward affected sites:\n" + affectedSites);
+
+            throw new IllegalArgumentException("Couldn't mimic step: " + step
+                    + " (" + step.getClass() + ", " + transformation.getClass()
+                    + ")");
+        }
+    }
+
+    private boolean mimicked(Set<Site> affectedSites) {
+
+        boolean stepMimicked = true;
+        Iterator<Site> affectedSitesIter = affectedSites.iterator();
+        Site affectedSite;
+        while (stepMimicked && affectedSitesIter.hasNext()) {
+            affectedSite = affectedSitesIter.next();
+            if (affectedSite.conjunct instanceof LocalTheorem) {
+                stepMimicked =
+                        myLocalTheoremsSet.containsKey(affectedSite.root.exp);
+            }
+            else if (affectedSite.conjunct instanceof Consequent) {
+                PExp value = affectedSite.root.exp;
+
+                Iterator<Consequent> consequentIter = myConsequents.iterator();
+                boolean found = false;
+                while (!found && consequentIter.hasNext()) {
+                    found = consequentIter.next().getExpression().equals(value);
+                }
+
+                stepMimicked = found;
+            }
+            else {
+                throw new RuntimeException();
+            }
+        }
+
+        return stepMimicked;
+    }
+
     private void modelChanged(boolean important) {
         if (myChangeEventMode.report(important)) {
 
@@ -272,7 +421,7 @@ public final class PerVCProverModel {
     }
 
     public List<ProofStep> getProofSteps() {
-        return myProofSoFar;
+        return myUnmodifiableProofSoFar;
     }
 
     public ProofStep getLastProofStep() {
@@ -282,27 +431,49 @@ public final class PerVCProverModel {
     public void undoLastProofStep() {
         myProofSoFar.get(myProofSoFar.size() - 1).undo(this);
         myProofSoFar.remove(myProofSoFar.size() - 1);
+
+        modelChanged(false);
     }
 
     public ImmutableList<Theorem> getTheoremLibrary() {
         return myTheoremLibrary;
     }
 
-    public PExp getConsequent(int index) {
+    public Consequent getConsequent(int index) {
         return myConsequents.get(index);
-    }
-
-    public void setConsequent(int index, PExp newConsequent) {
-
-        myConsequentsHash -= myConsequents.get(index).hashCode();
-        myConsequentsHash += newConsequent.hashCode();
-
-        myConsequents.set(index, newConsequent);
-        modelChanged(false);
     }
 
     public boolean noConsequents() {
         return myConsequents.isEmpty();
+    }
+
+    public int getConjunctIndex(Conjunct c) {
+        int result = -1;
+
+        int i = 0;
+        while (i < myConsequents.size() && result == -1) {
+            if (myConsequents.get(i) == c) {
+                result = i;
+            }
+
+            i++;
+        }
+
+        i = 0;
+        Iterator<LocalTheorem> theoremIter = myLocalTheoremsList.iterator();
+        while (theoremIter.hasNext() && result == -1) {
+            if (theoremIter.next() == c) {
+                result = i;
+            }
+
+            i++;
+        }
+
+        if (result == -1) {
+            throw new IllegalArgumentException();
+        }
+
+        return result;
     }
 
     public LocalTheorem getLocalTheorem(int index) {
@@ -313,7 +484,11 @@ public final class PerVCProverModel {
         return myLocalTheoremsList;
     }
 
-    public List<PExp> getConsequentList() {
+    public ImmutableList<Theorem> getGlobalTheoremLibrary() {
+        return myTheoremLibrary;
+    }
+
+    public SimpleArrayList<Consequent> getConsequentList() {
         return myConsequents;
     }
 
@@ -334,25 +509,57 @@ public final class PerVCProverModel {
         return myLocalTheoremsSet.keySet().contains(t);
     }
 
-    public void addConsequent(PExp c) {
-        myConsequents.add(c);
-        myConsequentsHash += c.hashCode();
+    public Consequent addConsequent(PExp c) {
+        Consequent result = new Consequent(c);
 
-        //This is an important change if it took us away from a proved state
-        modelChanged(myConsequents.size() == 1);
+        insertConsequent(result, myConsequents.size());
+
+        return result;
     }
 
-    public void addConsequent(PExp c, int index) {
+    public void insertConsequent(Consequent c, int index) {
         myConsequents.add(index, c);
-        myConsequentsHash += c.hashCode();
+        myConsequentsHash += c.getExpression().hashCode();
 
         //This is an important change if it took us away from a proved state
         modelChanged(myConsequents.size() == 1);
     }
 
-    public PExp removeConsequent(int index) {
-        PExp result = myConsequents.remove(index);
-        myConsequentsHash -= result.hashCode();
+    public int removeConjunct(Conjunct c) {
+        int result;
+
+        if (c instanceof LocalTheorem) {
+            result = removeLocalTheorem((LocalTheorem) c);
+        }
+        else if (c instanceof Consequent) {
+            result = removeConsequent((Consequent) c);
+        }
+        else {
+            throw new IllegalArgumentException(
+                    "Cannot remove conjunct of type " + c.getClass().getName());
+        }
+
+        return result;
+    }
+
+    public void insertConjunct(Conjunct c, int index) {
+        if (c instanceof LocalTheorem) {
+            insertLocalTheorem((LocalTheorem) c, index);
+        }
+        else if (c instanceof Consequent) {
+            insertConsequent((Consequent) c, index);
+        }
+        else {
+            throw new IllegalArgumentException(
+                    "Cannot insert conjunct of type " + c.getClass().getName());
+        }
+    }
+
+    public int removeConsequent(Consequent c) {
+        int result = getConjunctIndex(c);
+
+        myConsequents.remove(c);
+        myConsequentsHash -= c.getExpression().hashCode();
 
         //This change is important if it eleminates the last conjunct--because
         //then we've proved it!
@@ -372,7 +579,7 @@ public final class PerVCProverModel {
      * @return 
      */
     public PExp alterSite(Site s, PExp newValue) {
-        PExp result;
+        PExp result = s.root.exp;
 
         if (s.getModel() != this) {
             throw new IllegalArgumentException(
@@ -384,33 +591,14 @@ public final class PerVCProverModel {
                     "Can't change value to a null PExp.");
         }
 
-        switch (s.section) {
-        case ANTECEDENTS:
-            LocalTheorem t = myLocalTheoremsList.get(s.index);
-            result = t.getAssertion();
-            removeLocalTheorem(t);
+        int index = removeConjunct(s.conjunct);
 
-            addLocalTheorem(t.getAssertion().withSiteAltered(s.pathIterator(),
-                    newValue), t.getJustification(), t.amTryingToProveThis(),
-                    s.index);
-            break;
-        case CONSEQUENTS:
-            result = myConsequents.get(s.index);
-            myConsequentsHash -= result.hashCode();
+        PExp newRootExp =
+                s.root.exp.withSiteAltered(s.pathIterator(), newValue);
 
-            PExp altered = result.withSiteAltered(s.pathIterator(), newValue);
+        s.conjunct.setExpression(newRootExp);
 
-            myConsequentsHash += altered.hashCode();
-
-            myConsequents.set(s.index, altered);
-            break;
-        case THEOREM_LIBRARY:
-            throw new IllegalArgumentException("Can't modify a global theorem.");
-        default:
-            throw new RuntimeException("No way to get here.");
-        }
-
-        modelChanged(false);
+        insertConjunct(s.conjunct, index);
 
         return result;
     }
@@ -434,24 +622,29 @@ public final class PerVCProverModel {
     public LocalTheorem addLocalTheorem(PExp assertion, Justification j,
             boolean tryingToProveThis, int index) {
 
-        myLocalTheoremsHash += assertion.hashCode();
-
         LocalTheorem theorem =
                 new LocalTheorem(assertion, j, tryingToProveThis);
 
-        myLocalTheoremsList.add(index, theorem);
+        insertLocalTheorem(theorem, index);
 
-        Integer count = myLocalTheoremsSet.get(assertion);
+        return theorem;
+    }
+
+    public void insertLocalTheorem(LocalTheorem t, int index) {
+        PExp tAssertion = t.getAssertion();
+
+        myLocalTheoremsHash += tAssertion.hashCode();
+        myLocalTheoremsList.add(index, t);
+
+        Integer count = myLocalTheoremsSet.get(tAssertion);
 
         if (count == null) {
             count = 0;
         }
 
-        myLocalTheoremsSet.put(assertion, count + 1);
+        myLocalTheoremsSet.put(tAssertion, count + 1);
 
         modelChanged(false);
-
-        return theorem;
     }
 
     public LocalTheorem addLocalTheorem(PExp assertion, Justification j,
@@ -463,19 +656,19 @@ public final class PerVCProverModel {
     public LocalTheorem removeLocalTheorem(int index) {
         LocalTheorem t = getLocalTheorem(index);
 
-        myLocalTheoremsHash -= t.hashCode();
-
         removeLocalTheorem(t);
 
         return t;
     }
 
-    public void removeLocalTheorem(LocalTheorem t) {
+    public int removeLocalTheorem(LocalTheorem t) {
+        int result = getConjunctIndex(t);
+
         PExp tAssertion = t.getAssertion();
 
         boolean removed = myLocalTheoremsList.remove(t);
         if (removed) {
-            myLocalTheoremsHash -= t.getAssertion().hashCode();
+            myLocalTheoremsHash -= tAssertion.hashCode();
         }
         else {
             throw new RuntimeException("No such theorem.");
@@ -491,21 +684,8 @@ public final class PerVCProverModel {
         }
 
         modelChanged(false);
-    }
 
-    public LocalTheorem getLocalTheoremAncestor(Site s)
-            throws NoSuchElementException {
-
-        if (s.getModel() != this) {
-            throw new IllegalArgumentException(
-                    "Site does not belong to this model.");
-        }
-
-        if (!s.section.equals(Site.Section.ANTECEDENTS)) {
-            throw new NoSuchElementException();
-        }
-
-        return myLocalTheoremsList.get(s.index);
+        return result;
     }
 
     public void addProofStep(ProofStep s) {
@@ -514,17 +694,23 @@ public final class PerVCProverModel {
         modelChanged(false);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+
+        processStringRepresentation(new ProverModelVisitor(this), b);
+
+        return b.toString();
+    }
+
     public void processStringRepresentation(ProverModelVisitor visitor,
             Appendable a) {
 
         try {
             boolean first = true;
 
-            int i = 0;
-            visitor.setSection(Site.Section.ANTECEDENTS);
             for (LocalTheorem t : myLocalTheoremsList) {
-                visitor.setIndex(i);
-                i++;
+                visitor.setConjunct(t);
 
                 if (first) {
                     first = false;
@@ -538,12 +724,9 @@ public final class PerVCProverModel {
 
             a.append("\n  -->\n");
 
-            i = 0;
             first = true;
-            visitor.setSection(Site.Section.CONSEQUENTS);
-            for (PExp c : myConsequents) {
-                visitor.setIndex(i);
-                i++;
+            for (Consequent c : myConsequents) {
+                visitor.setConjunct(c);
 
                 if (first) {
                     first = false;
@@ -552,7 +735,7 @@ public final class PerVCProverModel {
                     a.append(" and\n");
                 }
 
-                c.processStringRepresentation(visitor, a);
+                c.getExpression().processStringRepresentation(visitor, a);
             }
         }
         catch (IOException e) {
@@ -561,15 +744,13 @@ public final class PerVCProverModel {
     }
 
     public Iterator<Site> topLevelAntecedentSiteIterator() {
-        return new IndexIncrementingSiteIterator(
-                new LazyMappingIterator<LocalTheorem, PExp>(myLocalTheoremsList
-                        .iterator(), LocalTheorem.UNWRAPPER),
-                Site.Section.ANTECEDENTS, 0);
+        return new LazyMappingIterator(myLocalTheoremsList.iterator(),
+                CONJUNCT_TO_SITE);
     }
 
     public Iterator<Site> topLevelConsequentSiteIterator() {
-        return new IndexIncrementingSiteIterator(myConsequents.iterator(),
-                Site.Section.CONSEQUENTS, 0);
+        return new LazyMappingIterator(myConsequents.iterator(),
+                CONJUNCT_TO_SITE);
     }
 
     public Iterator<Site> topLevelAntecedentAndConsequentSiteIterator() {
@@ -578,10 +759,8 @@ public final class PerVCProverModel {
     }
 
     public Iterator<Site> topLevelGlobalTheoremsIterator() {
-        return new IndexIncrementingSiteIterator(
-                new LazyMappingIterator<Theorem, PExp>(myTheoremLibrary
-                        .iterator(), Theorem.UNWRAPPER),
-                Site.Section.THEOREM_LIBRARY, 0);
+        return new LazyMappingIterator(myTheoremLibrary.iterator(),
+                CONJUNCT_TO_SITE);
     }
 
     public Iterator<Site> topLevelAntecedentAndGlobalTheoremSiteIterator() {
@@ -858,8 +1037,9 @@ public final class PerVCProverModel {
 
             //This is a simple optimization that prevents us from traversing the
             //expression if there's no way we could match
-            if (s.exp.getSymbolNames().contains(
-                    substituted.getTopLevelOperation())) {
+            if ((substituted instanceof PSymbol && ((PSymbol) substituted).quantification == Quantification.FOR_ALL)
+                    || s.exp.getSymbolNames().contains(
+                            substituted.getTopLevelOperation())) {
                 substituted.bindTo(s.exp, accumulator);
             }
             else {
@@ -868,42 +1048,28 @@ public final class PerVCProverModel {
         }
     }
 
-    private class IndexIncrementingSiteIterator implements Iterator<Site> {
+    private class ConjunctToSite implements Mapping<Conjunct, Site> {
 
-        private final Site.Section mySection;
-        private final ImmutableList<Integer> myPath =
-                new EmptyImmutableList<Integer>();
-        private int myCurIndex;
+        @Override
+        public Site map(Conjunct input) {
+            return new Site(PerVCProverModel.this, input,
+                    Collections.EMPTY_LIST, input.getExpression());
+        }
 
-        private final Iterator<PExp> myExpressions;
+    }
 
-        public IndexIncrementingSiteIterator(Iterator<PExp> expressions,
-                Site.Section section, int startIndex) {
+    private static class ConjunctComparator implements Comparator<Conjunct> {
 
-            myExpressions = expressions;
-            mySection = section;
-            myCurIndex = startIndex;
+        public static final ConjunctComparator INSTANCE =
+                new ConjunctComparator();
+
+        private ConjunctComparator() {
+
         }
 
         @Override
-        public boolean hasNext() {
-            return myExpressions.hasNext();
-        }
-
-        @Override
-        public Site next() {
-            Site result =
-                    new Site(PerVCProverModel.this, mySection, myCurIndex,
-                            myPath, myExpressions.next());
-
-            myCurIndex++;
-
-            return result;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
+        public int compare(Conjunct o1, Conjunct o2) {
+            return o1.toString().compareTo(o2.toString());
         }
     }
 }

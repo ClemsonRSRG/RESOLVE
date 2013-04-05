@@ -4,7 +4,7 @@
  */
 package edu.clemson.cs.r2jt.proving2.proofsteps;
 
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
@@ -13,23 +13,26 @@ import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
  *
  * @author hamptos
  */
-public class ModifyConsequentStep implements ProofStep {
+public class ModifyConsequentStep extends AbstractProofStep {
 
     private final Site myOriginalSite;
-    private final Transformation myTransformation;
+    private final Site myFinalSite;
 
-    public ModifyConsequentStep(Site originalSite, Transformation transformation) {
+    public ModifyConsequentStep(Site originalSite, Site finalSite,
+            Transformation t, Application a) {
+        super(t, a);
+
         myOriginalSite = originalSite;
-        myTransformation = transformation;
+        myFinalSite = finalSite;
     }
 
     @Override
     public void undo(PerVCProverModel m) {
-        m.setConsequent(myOriginalSite.index, myOriginalSite.root.exp);
+        m.alterSite(myFinalSite, myOriginalSite.exp);
     }
 
     @Override
     public String toString() {
-        return "" + myTransformation;
+        return "" + getTransformation();
     }
 }

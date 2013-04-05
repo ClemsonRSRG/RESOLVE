@@ -85,6 +85,11 @@ public class CompileEnvironment {
      * ImportScanner/Populator. Simply add additional Std_Facs to the array; if
      * the Fac is named Std_XXX_Fac, just add "XXX" to the array.
      * This array should never be altered while running
+     * 
+     * Order matters.  Files that match strings later in the array will import
+     * ones earlier in the array.  So Integer_Theory will have Boolean_Theory to
+     * work with, but Boolean_Theory will not have Integer_Theory.
+     * 
      * NOTE: This assumes that all files are formatted:
      * Std_XXX_Fac, XXX_Template, XXX_Theory
      */

@@ -5,7 +5,7 @@
 package edu.clemson.cs.r2jt.proving2.transformations;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving2.LocalTheorem;
+import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import java.util.Iterator;

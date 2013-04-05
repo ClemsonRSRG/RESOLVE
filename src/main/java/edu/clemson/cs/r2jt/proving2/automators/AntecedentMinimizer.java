@@ -5,7 +5,7 @@
 package edu.clemson.cs.r2jt.proving2.automators;
 
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.proving2.Theorem;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.transformations.ExpandAntecedentBySubstitution;
 import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
@@ -23,7 +23,7 @@ import java.util.List;
 public class AntecedentMinimizer implements Automator {
 
     private static final ApplyAll DUMMY_APPLIER =
-            new ApplyAll(new NoOpLabel("Dummy"));
+            new ApplyAll(new NoOpLabel(null, "Dummy"));
 
     public List<ExpandAntecedentBySubstitution> myReducingTranformations =
             new LinkedList<ExpandAntecedentBySubstitution>();
@@ -57,9 +57,9 @@ public class AntecedentMinimizer implements Automator {
 
             ExpandAntecedentBySubstitution expander = myCurrentRound.next();
             SubstituteInPlaceInAntecedent substituter =
-                    new SubstituteInPlaceInAntecedent(expander
-                            .getMatchPattern(), expander
-                            .getTransformationTemplate());
+                    new SubstituteInPlaceInAntecedent(expander.getTheorem(),
+                            expander.getMatchPattern(), expander
+                                    .getTransformationTemplate());
 
             myCurrentApplier = new ApplyAll(substituter);
             stack.push(myCurrentApplier);

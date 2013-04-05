@@ -6,14 +6,10 @@ package edu.clemson.cs.r2jt.proving2.model;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.proving2.Theorem;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * <p>A <code>Site</code> identifies a particular <code>PExp</code> accessible
@@ -27,21 +23,11 @@ public class Site {
         ANTECEDENTS {
 
             @Override
-            public PExp getPExp(PerVCProverModel m, int index) {
-                return m.getLocalTheorem(index).getAssertion();
-            }
-
-            @Override
             public Theorem getRootTheorem(PerVCProverModel m, int index) {
                 return m.getLocalTheorem(index);
             }
         },
         CONSEQUENTS {
-
-            @Override
-            public PExp getPExp(PerVCProverModel m, int index) {
-                return m.getConsequent(index);
-            }
 
             @Override
             public Theorem getRootTheorem(PerVCProverModel m, int index)
@@ -52,25 +38,17 @@ public class Site {
         THEOREM_LIBRARY {
 
             @Override
-            public PExp getPExp(PerVCProverModel m, int index) {
-                return m.getTheoremLibrary().get(index).getAssertion();
-            }
-
-            @Override
             public Theorem getRootTheorem(PerVCProverModel m, int index)
                     throws NoSolutionException {
                 return m.getTheoremLibrary().get(index);
             }
         };
 
-        public abstract PExp getPExp(PerVCProverModel m, int index);
-
         public abstract Theorem getRootTheorem(PerVCProverModel m, int index)
                 throws NoSolutionException;
     };
 
-    public final Section section;
-    public final int index;
+    public final Conjunct conjunct;
     public final ImmutableList path;
     public final PExp exp;
     public final Site root;
@@ -79,26 +57,26 @@ public class Site {
 
     private final PerVCProverModel mySource;
 
-    public Site(PerVCProverModel source, Section section, int index,
-            Iterable<Integer> path, PExp exp) {
-        this(source, section, index, path, exp, new Site(source, section,
-                index, section.getPExp(source, index)));
+    public Site(PerVCProverModel source, Conjunct c, Iterable<Integer> path,
+            PExp exp) {
+        this(source, c, path, exp, new Site(source, c, c.getExpression()));
     }
 
-    public Site(PerVCProverModel source, Section section, int index, PExp exp) {
-        this(source, section, index, Collections.EMPTY_LIST, exp, null);
+    public Site(PerVCProverModel source, Conjunct c, PExp exp) {
+        this(source, c, Collections.EMPTY_LIST, exp, null);
     }
 
-    private Site(PerVCProverModel source, Section section, int index,
-            Iterable<Integer> path, PExp exp, Site root) {
-        this.section = section;
-        this.index = index;
+    private Site(PerVCProverModel source, Conjunct c, Iterable<Integer> path,
+            PExp exp, Site root) {
+        this.conjunct = c;
         this.path = new ArrayBackedImmutableList(path);
         this.exp = exp;
 
-        myHashCode =
-                section.hashCode()
-                        + (41 * (index + (57 * this.path.hashCode())));
+        if (exp == null) {
+            throw new IllegalArgumentException("Null exp");
+        }
+
+        myHashCode = c.hashCode() + (57 * this.path.hashCode());
 
         if (root == null) {
             //This looks weird but suppresses a "leaked this" warning
@@ -113,7 +91,16 @@ public class Site {
     }
 
     public Theorem getRootTheorem() throws NoSolutionException {
-        return section.getRootTheorem(mySource, index);
+        Theorem result;
+
+        try {
+            result = (Theorem) conjunct;
+        }
+        catch (ClassCastException cce) {
+            throw new NoSolutionException("Site is not rooted in a theorem.");
+        }
+
+        return result;
     }
 
     @Override
@@ -128,8 +115,7 @@ public class Site {
         if (result) {
             Site oAsSite = (Site) o;
             result =
-                    section.equals(oAsSite.section) && index == oAsSite.index
-                            && path.equals(oAsSite.path);
+                    (conjunct == oAsSite.conjunct) && path.equals(oAsSite.path);
         }
 
         return result;
@@ -148,7 +134,7 @@ public class Site {
             throw new RuntimeException("Incomparable sites--different models.");
         }
 
-        boolean result = (section.equals(s.section)) && (index == s.index);
+        boolean result = (conjunct == s.conjunct);
 
         if (result) {
             Iterator<Integer> myIter = pathIterator();
@@ -167,7 +153,6 @@ public class Site {
 
     @Override
     public String toString() {
-        return section + ":" + section.getPExp(mySource, index) + "(" + index
-                + "):" + exp;
+        return conjunct.getClass().getSimpleName() + ":" + root.exp + ":" + exp;
     }
 }

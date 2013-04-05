@@ -63,6 +63,9 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.translation.Translator;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class scans the module dec for imported modules: associates, uses items,
@@ -74,6 +77,19 @@ public class ImportScanner extends ResolveConceptualVisitor {
     // ===========================================================
     // Variables
     // ===========================================================
+
+    //Modules with names matching a name in this set will not get any default
+    //imports
+    public static final Set<String> NO_DEFAULT_IMPORT_MODULES;
+
+    static {
+        Set<String> noDefault = new HashSet<String>();
+
+        noDefault.add("Basic_Function_Properties_Theory");
+        noDefault.add("Monogenerator_Theory");
+
+        NO_DEFAULT_IMPORT_MODULES = Collections.unmodifiableSet(noDefault);
+    }
 
     private List<Import> imports = new List<Import>();
 
@@ -110,57 +126,64 @@ public class ImportScanner extends ResolveConceptualVisitor {
         // perhaps combine these somehow? -JCK
         String[] stdUses = myInstanceEnvironment.getStdUses();
         String decName = dec.getName().getName();
-        List<List<UsesItem>> listOfDependLists =
-                myInstanceEnvironment.getStdUsesDepends();
-        // System.out.println("list: " + listOfDependLists.toString());
-        for (int i = 0; i < stdUses.length; i++) {
-            if (decName.equals("Std_" + stdUses[i] + "_Fac")
-                    || decName.equals(stdUses[i] + "_Template")
-                    || decName.equals(stdUses[i] + "_Theory")) {
-                if (decName.equals(stdUses[i] + "_Template")
+
+        if (!NO_DEFAULT_IMPORT_MODULES.contains(decName)) {
+
+            List<List<UsesItem>> listOfDependLists =
+                    myInstanceEnvironment.getStdUsesDepends();
+            // System.out.println("list: " + listOfDependLists.toString());
+            for (int i = 0; i < stdUses.length; i++) {
+                if (decName.equals("Std_" + stdUses[i] + "_Fac")
+                        || decName.equals(stdUses[i] + "_Template")
                         || decName.equals(stdUses[i] + "_Theory")) {
-                    // Set the dependencies
-                    listOfDependLists.get(i).addAllUnique((dec.getUsesItems()));
-                    myInstanceEnvironment.setStdUsesDepends(listOfDependLists);
+                    if (decName.equals(stdUses[i] + "_Template")
+                            || decName.equals(stdUses[i] + "_Theory")) {
+                        // Set the dependencies
+                        listOfDependLists.get(i).addAllUnique(
+                                (dec.getUsesItems()));
+                        myInstanceEnvironment
+                                .setStdUsesDepends(listOfDependLists);
+                    }
+                    dec.accept(this);
+                    return;
                 }
-                dec.accept(this);
-                return;
-            }
-            else {
-                // Include this std UsesItem unless it is a Dependency
-                if (!listOfDependLists.isEmpty()) {
-                    List<UsesItem> dependencies = listOfDependLists.get(i);
-                    if (dependencies != null) {
-                        Iterator<UsesItem> it = dependencies.iterator();
-                        while (it.hasNext()) {
-                            if (it.next().getName().getName().equals(decName)) {
-                                // This is a dependency do NOT annex/add
-                                dec.accept(this);
-                                return;
+                else {
+                    // Include this std UsesItem unless it is a Dependency
+                    if (!listOfDependLists.isEmpty()) {
+                        List<UsesItem> dependencies = listOfDependLists.get(i);
+                        if (dependencies != null) {
+                            Iterator<UsesItem> it = dependencies.iterator();
+                            while (it.hasNext()) {
+                                if (it.next().getName().getName().equals(
+                                        decName)) {
+                                    // This is a dependency do NOT annex/add
+                                    dec.accept(this);
+                                    return;
+                                }
                             }
                         }
                     }
-                }
-                // Update the dec's UsesItemList
-                PosSymbol facSymbol =
-                        new PosSymbol(null, Symbol.symbol("Std_" + stdUses[i]
-                                + "_Fac"));
-                List<UsesItem> decUses = dec.getUsesItems();
-                if (decUses == null) {
-                    decUses = new List<UsesItem>();
-                }
-                for (int j = 0; j < decUses.size(); j++) {
-                    if (decUses.get(j).getName().getName().equals(
-                            facSymbol.getName())) {
-                        decUses.remove(j);
+                    // Update the dec's UsesItemList
+                    PosSymbol facSymbol =
+                            new PosSymbol(null, Symbol.symbol("Std_"
+                                    + stdUses[i] + "_Fac"));
+                    List<UsesItem> decUses = dec.getUsesItems();
+                    if (decUses == null) {
+                        decUses = new List<UsesItem>();
                     }
-                }
-                decUses.add(new UsesItem(facSymbol));
-                dec.setUsesItems(decUses);
+                    for (int j = 0; j < decUses.size(); j++) {
+                        if (decUses.get(j).getName().getName().equals(
+                                facSymbol.getName())) {
+                            decUses.remove(j);
+                        }
+                    }
+                    decUses.add(new UsesItem(facSymbol));
+                    dec.setUsesItems(decUses);
 
-                // Add the StdDec to the ImportList by annexing
-                annexUsesItem(new PosSymbol(null, Symbol.symbol("Std_"
-                        + stdUses[i] + "_Fac")));
+                    // Add the StdDec to the ImportList by annexing
+                    annexUsesItem(new PosSymbol(null, Symbol.symbol("Std_"
+                            + stdUses[i] + "_Fac")));
+                }
             }
         }
 

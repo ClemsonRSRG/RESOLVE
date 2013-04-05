@@ -79,8 +79,10 @@ public class HardCoded {
         try {
             b.addBinding("Entity", v, g.MTYPE, g.ENTITY);
             b.addBinding("MType", v, g.MTYPE, g.MTYPE);
-            b.addBinding("Is_Initial", v,
-                    new MTFunction(g, g.BOOLEAN, g.ENTITY));
+
+            b.addBinding("Instance_Of", v, new MTFunction(g, g.BOOLEAN,
+                    g.MTYPE, g.ENTITY));
+
             b.addBinding("SSet", v, g.MTYPE, g.SET);
             b.addBinding("B", v, g.MTYPE, g.BOOLEAN);
 
@@ -91,7 +93,6 @@ public class HardCoded {
             b.addBinding("union", v, g.UNION);
             b.addBinding("intersect", v, g.INTERSECT);
             b.addBinding("->", v, g.FUNCTION);
-            b.addBinding("implies", v, g.BOOLEAN);
             b.addBinding("and", v, g.AND);
             b.addBinding("not", v, g.NOT);
             b.addBinding("*", v, g.CROSS);

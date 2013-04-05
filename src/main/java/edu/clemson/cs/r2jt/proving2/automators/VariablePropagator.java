@@ -6,7 +6,7 @@ package edu.clemson.cs.r2jt.proving2.automators;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
-import edu.clemson.cs.r2jt.proving2.LocalTheorem;
+import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.transformations.RemoveAntecedent;
 import edu.clemson.cs.r2jt.proving2.transformations.SubstituteInPlaceInAntecedent;
@@ -30,13 +30,15 @@ public class VariablePropagator implements Automator {
         PExp variable = null;
         PExp expansion = null;
         int antecedentIndex = -1;
-        PExp curTheorem;
+        PExp curTheoremAssertion;
+        LocalTheorem curTheorem = null;
         while (variable == null && localTheorems.hasNext()) {
-            curTheorem = localTheorems.next().getAssertion();
+            curTheorem = localTheorems.next();
+            curTheoremAssertion = curTheorem.getAssertion();
             antecedentIndex++;
 
-            if (curTheorem instanceof PSymbol) {
-                PSymbol curTheoremSymbol = (PSymbol) curTheorem;
+            if (curTheoremAssertion instanceof PSymbol) {
+                PSymbol curTheoremSymbol = (PSymbol) curTheoremAssertion;
 
                 if (curTheoremSymbol.name.equals("=")) {
                     PExp left = curTheoremSymbol.arguments.get(0);
@@ -62,12 +64,11 @@ public class VariablePropagator implements Automator {
         }
         else {
             List<Automator> steps = new LinkedList<Automator>();
-            steps.add(new ApplyAll(new SubstituteInPlaceInAntecedent(variable,
-                    expansion)));
-            steps.add(new ApplyAll(new SubstituteInPlaceInConsequent(variable,
-                    expansion)));
-            steps.add(new ApplyN(new RemoveAntecedent(model, antecedentIndex),
-                    1));
+            steps.add(new ApplyAll(new SubstituteInPlaceInAntecedent(
+                    curTheorem, variable, expansion)));
+            steps.add(new ApplyAll(new SubstituteInPlaceInConsequent(
+                    curTheorem, variable, expansion)));
+            steps.add(new ApplyN(new RemoveAntecedent(model, curTheorem), 1));
             stack.push(new PushSequence(steps));
         }
     }

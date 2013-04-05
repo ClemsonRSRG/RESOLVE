@@ -5,7 +5,7 @@
 package edu.clemson.cs.r2jt.proving2.automators;
 
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.proving2.Theorem;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
@@ -26,7 +26,7 @@ import java.util.LinkedList;
 public class Minimizer implements Automator {
 
     private static final ApplyAll DUMMY_APPLIER =
-            new ApplyAll(new NoOpLabel("Dummy"));
+            new ApplyAll(new NoOpLabel(null, "Dummy"));
 
     private Collection<Transformation> myReducingTranformations =
             new LinkedList<Transformation>();

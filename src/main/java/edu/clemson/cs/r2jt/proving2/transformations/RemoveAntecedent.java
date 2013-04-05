@@ -4,9 +4,9 @@
  */
 package edu.clemson.cs.r2jt.proving2.transformations;
 
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving2.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
+import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.proofsteps.RemoveAntecedentStep;
@@ -20,14 +20,12 @@ import java.util.Set;
  */
 public class RemoveAntecedent implements Transformation {
 
-    private final Site mySite;
-    private LocalTheorem myLocalTheoremWhenRemoved;
+    private final LocalTheorem myLocalTheorem;
+    private final PerVCProverModel mySourceModel;
 
-    public RemoveAntecedent(PerVCProverModel model, int index) {
-        mySite =
-                new Site(model, Site.Section.ANTECEDENTS, index,
-                        Collections.EMPTY_LIST, model.getLocalTheorem(index)
-                                .getAssertion());
+    public RemoveAntecedent(PerVCProverModel m, LocalTheorem t) {
+        myLocalTheorem = t;
+        mySourceModel = m;
     }
 
     @Override
@@ -48,7 +46,8 @@ public class RemoveAntecedent implements Transformation {
 
     @Override
     public int functionApplicationCountDelta() {
-        return mySite.exp.getFunctionApplications().size() * -1;
+        return myLocalTheorem.getExpression().getFunctionApplications().size()
+                * -1;
     }
 
     @Override
@@ -75,19 +74,35 @@ public class RemoveAntecedent implements Transformation {
 
         @Override
         public void apply(PerVCProverModel m) {
-            myLocalTheoremWhenRemoved = m.removeLocalTheorem(mySite.index);
-            m.addProofStep(new RemoveAntecedentStep(myLocalTheoremWhenRemoved,
-                    mySite.index, RemoveAntecedent.this));
+            m.addProofStep(new RemoveAntecedentStep(myLocalTheorem, m
+                    .getConjunctIndex(myLocalTheorem), RemoveAntecedent.this,
+                    this));
+            m.removeLocalTheorem(myLocalTheorem);
         }
 
         @Override
         public Set<Site> involvedSubExpressions() {
-            return Collections.singleton(mySite);
+            return Collections.singleton(myLocalTheorem.toSite(mySourceModel));
         }
 
         @Override
         public String description() {
-            return "Remove " + mySite.exp;
+            return "Remove " + myLocalTheorem;
+        }
+
+        @Override
+        public Set<Conjunct> getPrerequisiteConjuncts() {
+            return Collections.<Conjunct> singleton(myLocalTheorem);
+        }
+
+        @Override
+        public Set<Conjunct> getAffectedConjuncts() {
+            return Collections.EMPTY_SET;
+        }
+
+        @Override
+        public Set<Site> getAffectedSites() {
+            return Collections.EMPTY_SET;
         }
     }
 
@@ -95,11 +110,11 @@ public class RemoveAntecedent implements Transformation {
     public String toString() {
         String result = "Remove ";
 
-        if (myLocalTheoremWhenRemoved == null) {
-            result += mySite.exp;
+        if (myLocalTheorem == null) {
+            result += myLocalTheorem;
         }
         else {
-            result += myLocalTheoremWhenRemoved.getAssertion();
+            result += myLocalTheorem.getAssertion();
         }
 
         return result;

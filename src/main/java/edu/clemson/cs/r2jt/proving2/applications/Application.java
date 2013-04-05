@@ -4,10 +4,9 @@
  */
 package edu.clemson.cs.r2jt.proving2.applications;
 
-import edu.clemson.cs.r2jt.proving.absyn.NodeIdentifier;
+import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Site;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -21,4 +20,10 @@ public interface Application {
     public Set<Site> involvedSubExpressions();
 
     public String description();
+
+    public Set<Conjunct> getPrerequisiteConjuncts();
+
+    public Set<Conjunct> getAffectedConjuncts();
+
+    public Set<Site> getAffectedSites();
 }
