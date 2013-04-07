@@ -71,8 +71,6 @@ public class ResolveCompiler {
             new Flag(FLAG_SECTION_NAME, "exportAST", FLAG_DESC_EXPORT_AST,
                     Flag.Type.HIDDEN);
 
-    public static ProverListener WebListener;
-
     //private String myTargetSource = null;
     //private String myTargetFileName = null;
     private HashMap<String, MetaFile> myUserFileMap;
@@ -151,8 +149,8 @@ public class ResolveCompiler {
     }
 
     public void compile(String[] args, ProverListener listener) {
-        WebListener = listener;
-        Main.runMain(args, myCompileReport, myInputFile, myUserFileMap);
+        Main.runMain(args, myCompileReport, myInputFile, myUserFileMap,
+                listener);
     }
 
     /*public void wsCompile(String[] args, WebSocketWriter writer){
