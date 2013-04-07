@@ -15,6 +15,7 @@ import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.MetaFile;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
+import edu.clemson.cs.r2jt.proving2.ProverListener;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
@@ -52,6 +53,7 @@ public class CompileEnvironment {
     private String myTargetSource = null;
     private String myTargetFileName = null;
     private String myCurrentTargetFileName = null;
+    private ProverListener myListener = null;
 
     // variables brought in from the old Environment class
     private Map<ModuleID, ModuleRecord> map = new Map<ModuleID, ModuleRecord>();
@@ -193,6 +195,14 @@ public class CompileEnvironment {
 
     public MetaFile getUserFileFromMap(String key) {
         return myUserFileMap.get(key);
+    }
+
+    public void setProverListener(ProverListener listener) {
+        myListener = listener;
+    }
+
+    public ProverListener getProverListener() {
+        return myListener;
     }
 
     /**
