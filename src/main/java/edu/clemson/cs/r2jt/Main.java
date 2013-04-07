@@ -81,6 +81,7 @@ import edu.clemson.cs.r2jt.parsing.RSimpleTrans;
 import edu.clemson.cs.r2jt.proofchecking.ProofChecker;
 import edu.clemson.cs.r2jt.proving.Prover;
 import edu.clemson.cs.r2jt.proving2.AlgebraicProver;
+import edu.clemson.cs.r2jt.proving2.ProverListener;
 import edu.clemson.cs.r2jt.verification.Verifier;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
@@ -220,12 +221,18 @@ public class Main {
         }
     }
 
+    public static void runMain(String[] args, CompileReport rep,
+            MetaFile inputFile, HashMap<String, MetaFile> userFileMap) {
+        runMain(args, rep, inputFile, userFileMap, null);
+    }
+
     /*
      * Added this so we could make the CompileReport non static, and pass
      * it in from the ResolveCompiler class (for use in the web interface)
      */
     public static void runMain(String[] args, CompileReport rep,
-            MetaFile inputFile, HashMap<String, MetaFile> userFileMap) {
+            MetaFile inputFile, HashMap<String, MetaFile> userFileMap,
+            ProverListener listener) {
         //Environment.newInstance();
         //env = Environment.getInstance();
 
@@ -239,6 +246,7 @@ public class Main {
             compileEnvironment.setTargetFileName(fileName);
             compileEnvironment.setTargetSource(fileSource);
             compileEnvironment.setUserFileMap(userFileMap);
+            compileEnvironment.setProverListener(listener);
             args = compileEnvironment.getRemainingArgs();
             ErrorHandler err = new ErrorHandler(compileEnvironment);
             compileEnvironment.setErrorHandler(err);

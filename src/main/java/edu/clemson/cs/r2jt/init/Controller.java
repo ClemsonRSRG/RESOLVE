@@ -1668,8 +1668,8 @@ public class Controller {
                                 scope,
                                 myInstanceEnvironment.flags
                                         .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE),
-                                myInstanceEnvironment,
-                                ResolveCompiler.WebListener);
+                                myInstanceEnvironment, myInstanceEnvironment
+                                        .getProverListener());
 
                 try {
                     prover.start();
