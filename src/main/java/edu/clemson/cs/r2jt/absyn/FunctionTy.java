@@ -169,8 +169,8 @@ public class FunctionTy extends Ty {
     }
 
     public Ty copy() {
-        Ty newDomain = domain.copy();
-        Ty newRange = range.copy();
+        Ty newDomain = Ty.copy(domain);
+        Ty newRange = Ty.copy(range);
         return new FunctionTy(newDomain, newRange);
     }
 

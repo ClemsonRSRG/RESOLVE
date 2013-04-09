@@ -108,7 +108,19 @@ public abstract class Ty extends ResolveConceptualElement implements Cloneable {
         myProgramTypeValue = programTypeValue;
     }
 
-    public Ty copy() {
+    public static Ty copy(Ty t) {
+        MTType mathType = t.getMathType();
+        MTType mathTypeValue = t.getMathTypeValue();
+
+        Ty result = t.copy();
+
+        result.setMathType(mathType);
+        result.setMathTypeValue(mathTypeValue);
+
+        return result;
+    }
+
+    protected Ty copy() {
         throw new RuntimeException("Shouldn't be calling Ty.copy()!  Type: "
                 + this.getClass());
     }

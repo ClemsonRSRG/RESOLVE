@@ -18,6 +18,7 @@ import edu.clemson.cs.r2jt.absyn.InfixExp;
 import edu.clemson.cs.r2jt.absyn.IntegerExp;
 import edu.clemson.cs.r2jt.absyn.IsInExp;
 import edu.clemson.cs.r2jt.absyn.LambdaExp;
+import edu.clemson.cs.r2jt.absyn.MathVarDec;
 import edu.clemson.cs.r2jt.absyn.OutfixExp;
 import edu.clemson.cs.r2jt.absyn.PrefixExp;
 import edu.clemson.cs.r2jt.absyn.VarExp;
@@ -27,6 +28,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol.DisplayType;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol.Quantification;
+import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.Utilities;
 import edu.clemson.cs.r2jt.proving2.model.Site;
@@ -472,23 +474,21 @@ public abstract class PExp {
         else if (e instanceof LambdaExp) {
             LambdaExp eAsLambdaExp = (LambdaExp) e;
 
+            List<PLambda.Parameter> parameters =
+                    new LinkedList<PLambda.Parameter>();
+            for (MathVarDec p : eAsLambdaExp.getParameters()) {
+                parameters.add(new PLambda.Parameter(p.getName().getName(), p
+                        .getTy().getMathTypeValue()));
+            }
+
             retval =
-                    new PLambda(eAsLambdaExp.getName().getName(), eAsLambdaExp
-                            .getMathType(), PExp.buildPExp(eAsLambdaExp
-                            .getBody()));
+                    new PLambda(new ArrayBackedImmutableList(parameters), PExp
+                            .buildPExp(eAsLambdaExp.getBody()));
         }
         else if (e instanceof AlternativeExp) {
             AlternativeExp eAsAlternativeExp = (AlternativeExp) e;
 
             retval = new PAlternatives(eAsAlternativeExp);
-        }
-        else if (e instanceof LambdaExp) {
-            LambdaExp eAsLambdaExp = (LambdaExp) e;
-
-            retval =
-                    new PLambda(eAsLambdaExp.getName().getName(), eAsLambdaExp
-                            .getMathType(), PExp.buildPExp(eAsLambdaExp
-                            .getBody()));
         }
         else if (e instanceof AlternativeExp) {
             AlternativeExp eAsAlternativeExp = (AlternativeExp) e;

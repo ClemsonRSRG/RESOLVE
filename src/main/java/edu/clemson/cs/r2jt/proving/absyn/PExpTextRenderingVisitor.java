@@ -81,9 +81,23 @@ public class PExpTextRenderingVisitor extends PExpVisitor {
         }
     }
 
-    public void beginPLambda(PLambda p) {
+    public void beginPLambda(PLambda l) {
         try {
-            myOutput.append("lambda " + p.variableName + ".");
+            myOutput.append("lambda (");
+
+            boolean first = true;
+            for (PLambda.Parameter p : l.parameters) {
+                if (first) {
+                    first = false;
+                }
+                else {
+                    myOutput.append(", ");
+                }
+
+                myOutput.append("" + p);
+            }
+
+            myOutput.append(").");
         }
         catch (IOException e) {
             throw new RuntimeException(e);

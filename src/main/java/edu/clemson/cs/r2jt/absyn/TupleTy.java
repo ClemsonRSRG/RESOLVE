@@ -164,7 +164,7 @@ public class TupleTy extends Ty {
         Iterator<Ty> it = fields.iterator();
         List<Ty> newFields = new List<Ty>();
         while (it.hasNext()) {
-            newFields.add(it.next().copy());
+            newFields.add(Ty.copy(it.next()));
         }
         return new TupleTy(null, newFields);
     }

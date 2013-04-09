@@ -176,4 +176,9 @@ public class FuncAssignStmt extends Statement {
         return sb.toString();
     }
 
+    @Override
+    public String toString() {
+        return toString(0);
+    }
+
 }

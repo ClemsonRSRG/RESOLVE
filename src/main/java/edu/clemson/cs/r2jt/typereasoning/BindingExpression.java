@@ -166,6 +166,18 @@ public class BindingExpression {
                 }
             }
         }
+        else if (expr1 instanceof LambdaExp && expr2 instanceof LambdaExp) {
+            LambdaExp expr1AsLambdaExp = (LambdaExp) expr1;
+            LambdaExp expr2AsLambdaExp = (LambdaExp) expr2;
+
+            //Note that we don't have to worry about parameters counts or types:
+            //the original type check would have kicked us out if those didn't
+            //match
+
+            bindTo(expr1AsLambdaExp.getBody(), expr2AsLambdaExp.getBody(),
+                    typeBindings, accumulator);
+
+        }
         else {
             throw new BindingException(expr1, expr2);
         }

@@ -953,10 +953,14 @@ public class OldPopulator extends ResolveConceptualVisitor {
 
     public void visitLambdaExp(LambdaExp exp) {
         table.createExpressionScope();
-        VarEntry ve =
-                new VarEntry(table.getCurrentScope(), Mode.MATH, exp.getName(),
-                        getMathType(exp.getTy()));
-        table.addVariableToScope(ve);
+
+        for (MathVarDec p : exp.getParameters()) {
+            VarEntry ve =
+                    new VarEntry(table.getCurrentScope(), Mode.MATH, p
+                            .getName(), getMathType(p.getTy()));
+            table.addVariableToScope(ve);
+        }
+
         table.completeExpressionScope();
     }
 
