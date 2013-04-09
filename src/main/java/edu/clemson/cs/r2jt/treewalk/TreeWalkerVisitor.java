@@ -430,6 +430,18 @@ public abstract class TreeWalkerVisitor {
 
     public void postLambdaExp(LambdaExp data) {}
 
+    // LambdaExpParameters
+    public boolean walkLambdaExpParameters(LambdaExp data) {
+        return false;
+    }
+
+    public void preLambdaExpParameters(LambdaExp data) {}
+
+    public void midLambdaExpParameters(LambdaExp node, MathVarDec previous,
+            MathVarDec next) {}
+
+    public void postLambdaExpParameters(LambdaExp data) {}
+
     // ProofModuleDec
     public boolean walkProofModuleDec(ProofModuleDec data) {
         return false;

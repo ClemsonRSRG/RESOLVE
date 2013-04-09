@@ -66,10 +66,14 @@ public class AutomatedProver {
 
     private final Set<String> myVariableSymbols;
 
+    private final int myTimeout;
+
     public AutomatedProver(PerVCProverModel m,
-            ImmutableList<Theorem> theoremLibrary, ModuleScope moduleScope) {
+            ImmutableList<Theorem> theoremLibrary, ModuleScope moduleScope,
+            int timeout) {
         myModel = m;
         myFitnessFunction = new MainProofFitnessFunction(m);
+        myTimeout = timeout;
 
         //This looks weird but suppresses a "leaked this" warning
         AutomatedProver p = this;
@@ -278,10 +282,17 @@ public class AutomatedProver {
             System.out
                     .println("============= AutomatedProver - start() ==============");
 
+            long stopTime = System.currentTimeMillis() + myTimeout;
             myRunningFlag = true;
-            while (myRunningFlag) {
+            while (myRunningFlag
+                    && (myTimeout == -1 || System.currentTimeMillis() < stopTime)) {
                 workerStep();
             }
+            
+            if (myRunningFlag) {
+                myAutomatorStack.clear();
+            }
+            myRunningFlag = false;
 
             System.out.println("AutomatedProver - end of start()");
 

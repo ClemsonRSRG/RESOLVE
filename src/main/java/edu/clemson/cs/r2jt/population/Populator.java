@@ -106,6 +106,7 @@ public class Populator extends TreeWalkerVisitor {
      * to the ProcedureDec.  Otherwise it will be null.</p>
      */
     private ProcedureDec myCurrentProcedure;
+    private FacilityOperationDec myCurrentPrivateProcedure;
 
     /**
      * <p>While we walk the children of a direct definition, this will be set
@@ -120,6 +121,7 @@ public class Populator extends TreeWalkerVisitor {
      * to true.</p>
      */
     private boolean myDefinitionParameterSectionFlag = false;
+    private boolean myLambdaParameterSectionFlag = false;
 
     private Map<String, MTType> myDefinitionSchematicTypes =
             new HashMap<String, MTType>();
@@ -230,14 +232,30 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void preLambdaExp(LambdaExp l) {
         myBuilder.startScope(l);
+        emitDebug("Lambda Expression: " + l);
+    }
+
+    @Override
+    public void preLambdaExpParameters(LambdaExp data) {
+        myDefinitionParameterSectionFlag = true;
+    }
+
+    @Override
+    public void postLambdaExpParameters(LambdaExp data) {
+        myDefinitionParameterSectionFlag = false;
     }
 
     @Override
     public void postLambdaExp(LambdaExp l) {
         myBuilder.endScope();
 
-        l.setMathType(new MTFunction(myTypeGraph, l.getBody().getMathType(), l
-                .getTy().getMathTypeValue()));
+        List<MTType> parameterTypes = new LinkedList<MTType>();
+        for (MathVarDec p : l.getParameters()) {
+            parameterTypes.add(p.getTy().getMathTypeValue());
+        }
+
+        l.setMathType(new MTFunction(myTypeGraph, l.getBody().getMathType(),
+                parameterTypes));
     }
 
     @Override
@@ -315,6 +333,29 @@ public class Populator extends TreeWalkerVisitor {
     public void preFacilityOperationDec(FacilityOperationDec dec) {
         myBuilder.startScope(dec);
         myCurrentParameters = new LinkedList<ProgramParameterEntry>();
+        myCurrentPrivateProcedure = dec;
+    }
+
+    @Override
+    public void midFacilityOperationDec(FacilityOperationDec node,
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+
+        if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
+            try {
+                //Inside the operation's assertions, the name of the operation
+                //refers to its return value
+                myBuilder.getInnermostActiveScope().addBinding(
+                        node.getName().getName(), node,
+                        node.getReturnTy().getMathTypeValue());
+            }
+            catch (DuplicateSymbolException dse) {
+                //This shouldn't be possible--the operation declaration has a 
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                throw new RuntimeException(dse);
+            }
+        }
     }
 
     @Override
@@ -407,16 +448,33 @@ public class Populator extends TreeWalkerVisitor {
         if (v instanceof VariableNameExp) {
             VariableNameExp vAsNVE = (VariableNameExp) v;
 
-            walkVar =
-                    !vAsNVE.getName().getName().equals(
-                            myCurrentProcedure.getName().getName());
+            String name;
+            if (myCurrentProcedure == null) {
+                name = myCurrentPrivateProcedure.getName().getName();
+            }
+            else {
+                name = myCurrentProcedure.getName().getName();
+            }
+
+            walkVar = !vAsNVE.getName().getName().equals(name);
         }
 
         if (walkVar) {
             myWalker.visit(v);
         }
         else {
-            v.setMathType(myCurrentProcedure.getReturnTy().getMathTypeValue());
+            MTType mathTypeValue;
+            if (myCurrentProcedure == null) {
+                mathTypeValue =
+                        myCurrentPrivateProcedure.getReturnTy()
+                                .getMathTypeValue();
+            }
+            else {
+                mathTypeValue =
+                        myCurrentProcedure.getReturnTy().getMathTypeValue();
+            }
+
+            v.setMathType(mathTypeValue);
         }
         myWalker.visit(s.getAssign());
 
@@ -554,8 +612,26 @@ public class Populator extends TreeWalkerVisitor {
     public void postOperationDec(OperationDec dec) {
         myBuilder.endScope();
 
+        putOperationLikeThingInSymbolTable(dec.getName(), dec.getReturnTy(),
+                dec);
+
+        myCurrentParameters = null;
+    }
+
+    @Override
+    public void postFacilityOperationDec(FacilityOperationDec dec) {
+        myBuilder.endScope();
+
+        putOperationLikeThingInSymbolTable(dec.getName(), dec.getReturnTy(),
+                dec);
+
+        myCurrentParameters = null;
+        myCurrentPrivateProcedure = null;
+    }
+
+    private void putOperationLikeThingInSymbolTable(PosSymbol name,
+            Ty returnTy, ResolveConceptualElement dec) {
         try {
-            Ty returnTy = dec.getReturnTy();
             PTType returnType;
             if (returnTy == null) {
                 returnType = PTVoid.getInstance(myTypeGraph);
@@ -564,24 +640,12 @@ public class Populator extends TreeWalkerVisitor {
                 returnType = returnTy.getProgramTypeValue();
             }
 
-            myBuilder.getInnermostActiveScope().addOperation(
-                    dec.getName().getName(), dec, myCurrentParameters,
-                    returnType);
+            myBuilder.getInnermostActiveScope().addOperation(name.getName(),
+                    dec, myCurrentParameters, returnType);
         }
         catch (DuplicateSymbolException dse) {
-            duplicateSymbol(dec.getName().getName(), dec.getName()
-                    .getLocation());
+            duplicateSymbol(name.getName(), name.getLocation());
         }
-
-        myCurrentParameters = null;
-    }
-
-    @Override
-    public void postFacilityOperationDec(FacilityOperationDec dec) {
-        myCurrentParameters = null;
-        myBuilder.endScope();
-        myCurrentParameters = null;
-
     }
 
     @Override
@@ -2268,7 +2332,24 @@ public class Populator extends TreeWalkerVisitor {
         public boolean compare(Exp foundValue, MTType foundType,
                 MTType expectedType) {
 
-            return myTypeGraph.isKnownToBeIn(foundValue, expectedType);
+            boolean result =
+                    myTypeGraph.isKnownToBeIn(foundValue, expectedType);
+
+            if (!result && foundValue instanceof LambdaExp
+                    && expectedType instanceof MTFunction) {
+                LambdaExp foundValueAsLambda = (LambdaExp) foundValue;
+                MTFunction expectedTypeAsFunction = (MTFunction) expectedType;
+
+                result =
+                        myTypeGraph.isSubtype(foundValueAsLambda.getMathType()
+                                .getDomain(), expectedTypeAsFunction
+                                .getDomain())
+                                && myTypeGraph.isKnownToBeIn(foundValueAsLambda
+                                        .getBody(), expectedTypeAsFunction
+                                        .getRange());
+            }
+
+            return result;
         }
 
         @Override

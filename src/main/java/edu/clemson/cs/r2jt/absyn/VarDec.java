@@ -147,7 +147,7 @@ public class VarDec extends Dec {
     public Object clone() {
         VarDec clone = new VarDec();
         clone.setName(createPosSymbol(this.getName().toString()));
-        clone.setTy((Ty) this.getTy().copy());
+        clone.setTy(Ty.copy((Ty) this.getTy()));
         return clone;
     }
 
