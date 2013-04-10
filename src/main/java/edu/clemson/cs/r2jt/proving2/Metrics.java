@@ -6,7 +6,7 @@ import java.math.BigInteger;
  * <p>The <code>Metrics</code> class contains aggregate data about a full proof
  * attempt.</p>
  */
-class Metrics {
+public class Metrics {
 
     public BigInteger numProofsConsidered;
     public BigInteger numTimesBacktracked;
