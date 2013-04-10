@@ -6,12 +6,14 @@ import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.Antecedent;
 import edu.clemson.cs.r2jt.proving2.Consequent;
+import edu.clemson.cs.r2jt.proving2.DummyTheorem;
 import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.EliminateTrueConjunctInConsequent;
+import edu.clemson.cs.r2jt.proving2.transformations.ExistentialInstantiation;
 import edu.clemson.cs.r2jt.proving2.transformations.ReplaceSymmetricEqualityWithTrueInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.proving2.utilities.MapOfLists;
@@ -264,6 +266,7 @@ public class JProverFrame extends JFrame {
             myGlobalTheoremAssertions.add(t.getAssertion());
             m.addElement(t);
         }
+        m.addElement(new DummyTheorem(ExistentialInstantiation.INSTANCE));
         myTheoremList.setModel(m);
 
         System.out.println("setGlobalTheorems");

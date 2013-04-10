@@ -149,7 +149,7 @@ public class TypeConverter {
                         + "embedded mathematical type.");
             }
 
-            t = new NewType(newType);
+            t = new NewMathType(newType);
         }
         else {
             throw new RuntimeException("Invalid type: " + ty + "("
