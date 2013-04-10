@@ -191,7 +191,7 @@ public class StrengthenConsequent implements Transformation {
 
             Conjunct c;
             for (PExp a : myAntecedents) {
-                c = m.addConsequent(a.substitute(myBindings));
+                c = m.addConsequent(a.substitute(myBindings).flipQuantifiers());
                 myNewConsequents.add(c);
                 myNewSites.add(c.toSite(m));
             }

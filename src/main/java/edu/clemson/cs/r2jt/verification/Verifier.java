@@ -1839,12 +1839,7 @@ public class Verifier extends ResolveConceptualVisitor {
                 Type paramType = TC.getMathType((tmp.getTy()));
                 TypeMatcher TM = new TypeMatcher();
 
-                Type mathParamType = paramType.toMath();
-                Type mathArgType = argType.toMath();
                 Type convParamType = TC.getProgramType(tmp.getTy());
-
-                TypeName programParamType = convParamType.getProgramName();
-                TypeName programArgType = argType.getProgramName();
 
                 if (TM.programMatches(argType, convParamType)) {}
                 else if (paramType instanceof IndirectType
@@ -2039,7 +2034,7 @@ public class Verifier extends ResolveConceptualVisitor {
                     new ConcType(curr.getModuleID(), name, (TupleType) type);
             return tmp;
         }
-        else if (type instanceof NewType) {
+        else if (type instanceof NewMathType) {
             ConcType tmp = new ConcType(curr.getModuleID(), name, type);
             return tmp;
         }
@@ -4339,7 +4334,7 @@ public class Verifier extends ResolveConceptualVisitor {
         }
         Binding binding = curr.getBinding();
 
-        type = new NewType(varTy.getMathTypeValue());
+        type = new NewMathType(varTy.getMathTypeValue());
 
         return convertToConcType(var.getName(), type);
     }

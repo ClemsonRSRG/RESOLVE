@@ -1037,7 +1037,7 @@ public final class PerVCProverModel {
 
             //This is a simple optimization that prevents us from traversing the
             //expression if there's no way we could match
-            if ((substituted instanceof PSymbol && ((PSymbol) substituted).quantification == Quantification.FOR_ALL)
+            if ((substituted instanceof PSymbol && ((PSymbol) substituted).quantification != Quantification.NONE)
                     || s.exp.getSymbolNames().contains(
                             substituted.getTopLevelOperation())) {
                 substituted.bindTo(s.exp, accumulator);
