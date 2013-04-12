@@ -875,7 +875,13 @@ public final class PerVCProverModel {
                         myFirstBinder.considerSite(myCurFirstSite,
                                 myAssumedBindings, myCurFirstSiteBindings);
 
-                        if (!myCurFirstSite.exp.getQuantifiedVariables()
+                        //This prevents a binder from binding to a global 
+                        //theorem that contains quantified variables.  So we'd
+                        //like to be able to notice that 0 < 1, for example,
+                        //but we shouldn't be incorporating a theorem like
+                        //For all i : Z, i - 1 < i into our bindings.
+                        if (myCurFirstSite.conjunct.libraryTheorem() &&
+                                !myCurFirstSite.exp.getQuantifiedVariables()
                                 .isEmpty()) {
                             throw new BindingException();
                         }

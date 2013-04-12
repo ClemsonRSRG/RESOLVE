@@ -70,7 +70,7 @@ public class AntecedentDeveloper implements Automator {
      */
     private class AntecedentDeveloperRound implements Automator {
 
-        public static final int MAX_DEVELOPMENTS = 100;
+        public static final int MAX_DEVELOPMENTS = 200;
 
         private int myDevelopmentCount;
         private Iterator<Application> myApplications;
