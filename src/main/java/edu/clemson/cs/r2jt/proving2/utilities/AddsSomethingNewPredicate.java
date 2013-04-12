@@ -47,32 +47,32 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
                 (t instanceof GeneralStep);
 
         if (result) {
-            Transformation tTransformation = t.getTransformation();
-            
-            //Any development that reduces the function count should be
-            //accepted
-            result = tTransformation.functionApplicationCountDelta() < 0;
-            
-            if (!result) {
-                //Any development that doesn't tell us something about at least 
-                //one of the variable symbols in the consequent of the VC or
-                //doesn't introduce at least one new theorem should be rolled 
-                //back
-                Set<String> finalSymbolNames = new HashSet<String>();
-                
-                boolean somethingNew = false;
-                for (Conjunct c : t.getAffectedConjuncts()) {
-                    finalSymbolNames.addAll(c.getExpression().getSymbolNames());
-                    
-                    somethingNew = somethingNew || 
-                            appearsOnce(c.getExpression(), myModel);
-                }
+            //Any development that doesn't tell us something about at least 
+            //one of the variable symbols in the consequent of the VC or
+            //doesn't introduce at least one new theorem should be rolled 
+            //back
+            Set<String> finalSymbolNames = new HashSet<String>();
 
-                result = somethingNew &&
-                        Utilities.containsAny(finalSymbolNames,
-                                myVariableSymbols);
-                
-                if (result) {
+            boolean somethingNew = false;
+            for (Conjunct c : t.getAffectedConjuncts()) {
+                finalSymbolNames.addAll(c.getExpression().getSymbolNames());
+
+                somethingNew = somethingNew || 
+                        appearsOnce(c.getExpression(), myModel);
+            }
+
+            result = somethingNew &&
+                    Utilities.containsAny(finalSymbolNames,
+                            myVariableSymbols);
+
+            if (result) {
+                Transformation tTransformation = t.getTransformation();
+
+                //Any development that reduces the function count should be
+                //accepted
+                result = tTransformation.functionApplicationCountDelta() < 0;
+            
+                if (!result) {
                     //Any substitution that doesn't eliminate at least
                     //one symbol should be rolled back
                     Set<Conjunct> originalTheorems = t.getBoundConjuncts();
@@ -83,7 +83,7 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
                     }
 
                     originalSymbolNames.removeAll(finalSymbolNames);
-                    
+
                     result = !originalSymbolNames.isEmpty();
                 }
             }
