@@ -12,6 +12,7 @@ import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.Utilities;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.justifications.TheoremApplication;
+import edu.clemson.cs.r2jt.proving2.model.AtLeastOneLocalTheoremBinder;
 import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
@@ -91,7 +92,7 @@ public class ExpandAntecedentByImplication implements Transformation {
     public Iterator<Application> getApplications(PerVCProverModel m) {
         Set<Binder> binders = new HashSet<Binder>();
         for (PExp a : myAntecedents) {
-            binders.add(new QuirkyBinder(a, myAntecedentsSize));
+            binders.add(new AtLeastOneLocalTheoremBinder(a, myAntecedentsSize));
         }
 
         return new LazyMappingIterator(m.bind(binders),
@@ -155,65 +156,6 @@ public class ExpandAntecedentByImplication implements Transformation {
     @Override
     public Equivalence getEquivalence() {
         return Equivalence.WEAKER;
-    }
-
-    public class QuirkyBinder implements PerVCProverModel.Binder {
-
-        private int myTotalBindingCount;
-        private PExp myPattern;
-
-        public QuirkyBinder(PExp pattern, int totalBindings) {
-            myTotalBindingCount = totalBindings;
-            myPattern = pattern;
-        }
-
-        @Override
-        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m,
-                List<Site> boundSitesSoFar) {
-            Iterator<Site> result = m.topLevelAntecedentSiteIterator();
-
-            boolean includeGlobal = true;
-            if (boundSitesSoFar.size() == (myTotalBindingCount - 1)) {
-                //We are the last binding.  If all other bindings are to global
-                //theorems, then we must bind to something local
-                includeGlobal = false;
-                Iterator<Site> boundSitesSoFarIter = boundSitesSoFar.iterator();
-                while (!includeGlobal && boundSitesSoFarIter.hasNext()) {
-                    includeGlobal =
-                            (boundSitesSoFarIter.next().conjunct instanceof LocalTheorem);
-                }
-            }
-
-            if (includeGlobal) {
-                result =
-                        new ChainingIterator<Site>(result, m
-                                .topLevelGlobalTheoremsIterator());
-            }
-
-            return result;
-        }
-
-        @Override
-        public Map<PExp, PExp> considerSite(Site s,
-                Map<PExp, PExp> assumedBindings) throws BindingException {
-            Map<PExp, PExp> result = new HashMap<PExp, PExp>();
-
-            considerSite(s, assumedBindings, result);
-
-            return result;
-        }
-
-        @Override
-        public void considerSite(Site s, Map<PExp, PExp> assumedBindings,
-                Map<PExp, PExp> accumulator) throws BindingException {
-
-            myPattern.substitute(assumedBindings).bindTo(s.exp, accumulator);
-        }
-
-        @Override
-        public String toString() {
-            return "" + myPattern;
-        }
     }
 
     public class BindResultToApplication

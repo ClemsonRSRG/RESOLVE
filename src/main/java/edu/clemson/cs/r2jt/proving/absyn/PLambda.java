@@ -1,31 +1,61 @@
 package edu.clemson.cs.r2jt.proving.absyn;
 
+import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving.immutableadts.SingletonImmutableList;
+import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
-import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.SingletonImmutableList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-
 public class PLambda extends PExp {
 
-    public final String variableName;
+    public final ImmutableList<Parameter> parameters;
     private final PExp myBody;
 
-    public PLambda(String variableName, MTType type, PExp body) {
-        super(body.structureHash * 34, body.valueHash * 31
-                + variableName.hashCode(), type, null);
+    public PLambda(ImmutableList<Parameter> parameters, PExp body) {
+        super(body.structureHash * 34, parameterHash(parameters),
+                new MTFunction(body.getType().getTypeGraph(), body.getType(),
+                        parameterTypes(parameters)), null);
 
-        this.variableName = variableName;
+        this.parameters = parameters;
         myBody = body;
     }
 
+    private static List<MTType> parameterTypes(Iterable<Parameter> parameters) {
+        List<MTType> result = new LinkedList<MTType>();
+
+        for (Parameter p : parameters) {
+            result.add(p.type);
+        }
+
+        return result;
+    }
+
+    private static int parameterHash(Iterable<Parameter> parameters) {
+        int hash = 0;
+
+        for (Parameter p : parameters) {
+            if (p.name == null) {
+                throw new IllegalArgumentException("Null parameter name.");
+            }
+            else if (p.type == null) {
+                throw new IllegalArgumentException("Null parameter type.");
+            }
+
+            hash += p.name.hashCode() * 27 + p.type.hashCode();
+            hash *= 49;
+        }
+
+        return hash;
+    }
+
+    @Override
     public void accept(PExpVisitor v) {
         v.beginPExp(this);
         v.beginPLambda(this);
@@ -40,18 +70,14 @@ public class PLambda extends PExp {
 
     @Override
     public PLambda withTypeReplaced(MTType t) {
-        return new PLambda(variableName, t, myBody);
+        throw new UnsupportedOperationException("Cannot set the type "
+                + "value on a " + this.getClass() + ".");
     }
 
     @Override
     public PLambda withTypeValueReplaced(MTType t) {
-
-        if (t != null) {
-            throw new UnsupportedOperationException("Cannot set the type "
-                    + "value on a " + this.getClass() + ".");
-        }
-
-        return this;
+        throw new UnsupportedOperationException("Cannot set the type "
+                + "value on a " + this.getClass() + ".");
     }
 
     @Override
@@ -60,7 +86,7 @@ public class PLambda extends PExp {
             throw new IndexOutOfBoundsException("" + i);
         }
 
-        return new PLambda(variableName, myType, e);
+        return new PLambda(parameters, e);
     }
 
     @Override
@@ -102,14 +128,8 @@ public class PLambda extends PExp {
             throw BINDING_EXCEPTION;
         }
 
-        MTFunction type = (MTFunction) getType();
-
         PLambda targetAsPLambda = (PLambda) target;
 
-        Map<PExp, PExp> substitutions = new HashMap<PExp, PExp>();
-        substitutions.put(new PSymbol(type.getDomain(), null,
-                targetAsPLambda.variableName), new PSymbol(type.getDomain(),
-                null, variableName));
         targetAsPLambda = (PLambda) targetAsPLambda.substitute(accumulator);
 
         myBody.bindTo(targetAsPLambda.myBody, accumulator);
@@ -131,7 +151,12 @@ public class PLambda extends PExp {
 
     @Override
     public boolean containsName(String name) {
-        return variableName.equals(name) || myBody.containsName(name);
+        boolean result = false;
+        Iterator<Parameter> parameterIter = parameters.iterator();
+        while (!result && parameterIter.hasNext()) {
+            result = parameterIter.next().name.equals(name);
+        }
+        return result || myBody.containsName(name);
     }
 
     @Override
@@ -198,8 +223,27 @@ public class PLambda extends PExp {
 
         @Override
         public PExp replaceLast(PExp newExpression) {
-            return new PLambda(variableName, myType, myBody);
+            return new PLambda(parameters, myBody);
         }
 
+    }
+
+    public static class Parameter {
+
+        public final String name;
+        public final MTType type;
+
+        public Parameter(String name, MTType type) {
+            if (name == null) {
+                throw new IllegalArgumentException("Parameter name is null");
+            }
+
+            if (type == null) {
+                throw new IllegalArgumentException("Parameter type is null");
+            }
+
+            this.name = name;
+            this.type = type;
+        }
     }
 }

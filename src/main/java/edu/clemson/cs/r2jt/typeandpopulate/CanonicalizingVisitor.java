@@ -1,19 +1,18 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
-import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
+import edu.clemson.cs.r2jt.typereasoning.EqualsPredicate;
+import edu.clemson.cs.r2jt.typereasoning.IsInPredicate;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import edu.clemson.cs.r2jt.typereasoning.TypeRelationshipPredicate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-
-import edu.clemson.cs.r2jt.typereasoning.EqualsPredicate;
-import edu.clemson.cs.r2jt.typereasoning.IsInPredicate;
-import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import edu.clemson.cs.r2jt.typereasoning.TypeRelationshipPredicate;
 
 public class CanonicalizingVisitor extends MutatingVisitor {
 

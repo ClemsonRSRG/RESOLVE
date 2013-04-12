@@ -21,6 +21,7 @@ import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
+import edu.clemson.cs.r2jt.proving2.transformations.StrengthenConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.SubstituteInPlaceInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
@@ -66,10 +67,14 @@ public class AutomatedProver {
 
     private final Set<String> myVariableSymbols;
 
+    private final int myTimeout;
+
     public AutomatedProver(PerVCProverModel m,
-            ImmutableList<Theorem> theoremLibrary, ModuleScope moduleScope) {
+            ImmutableList<Theorem> theoremLibrary, ModuleScope moduleScope,
+            int timeout) {
         myModel = m;
         myFitnessFunction = new MainProofFitnessFunction(m);
+        myTimeout = timeout;
 
         //This looks weird but suppresses a "leaked this" warning
         AutomatedProver p = this;
@@ -93,7 +98,9 @@ public class AutomatedProver {
 
             for (Transformation transformation : theoremTransformations) {
                 if (!transformation.couldAffectAntecedent()
-                        && !transformation.introducesQuantifiedVariables()) {
+                        && (transformation instanceof StrengthenConsequent || !transformation
+                                .introducesQuantifiedVariables())) {
+
                     transformationHeap.add(transformation);
                 }
             }
@@ -278,10 +285,17 @@ public class AutomatedProver {
             System.out
                     .println("============= AutomatedProver - start() ==============");
 
+            long stopTime = System.currentTimeMillis() + myTimeout;
             myRunningFlag = true;
-            while (myRunningFlag) {
+            while (myRunningFlag
+                    && (myTimeout == -1 || System.currentTimeMillis() < stopTime)) {
                 workerStep();
             }
+
+            if (myRunningFlag) {
+                myAutomatorStack.clear();
+            }
+            myRunningFlag = false;
 
             System.out.println("AutomatedProver - end of start()");
 

@@ -1026,7 +1026,7 @@ public class Analyzer extends ResolveConceptualVisitor {
     private Type getDefinitionReturnType(DefinitionDec dec) {
 
         //All hail the new type system!  Hail!  Hail!
-        return new NewType(dec.getReturnTy().getMathTypeValue());
+        return new NewMathType(dec.getReturnTy().getMathTypeValue());
     }
 
     // -----------------------------------------------------------
@@ -1192,11 +1192,11 @@ public class Analyzer extends ResolveConceptualVisitor {
         try {
             Type etype = petr.getProgramExpType(exp);
             if (!matcher.programMatches(etype, type)) {
-                Location loc = exp.getLocation();
+                /*Location loc = exp.getLocation();
                 String msg =
                         expectedDiffTypeMessage(etype.getRelativeName(loc),
                                 type.getRelativeName(loc));
-                err.error(loc, msg);
+                err.error(loc, msg);*/
             }
             exp.setType(etype);
         }
@@ -1566,7 +1566,7 @@ public class Analyzer extends ResolveConceptualVisitor {
         Type wrkType = null;
 
         for (ParameterVarDec p : parameters) {
-            parameterTypes.add(new NewType(p.getMathType()));
+            parameterTypes.add(new NewMathType(p.getMathType()));
         }
 
         return parameterTypes;

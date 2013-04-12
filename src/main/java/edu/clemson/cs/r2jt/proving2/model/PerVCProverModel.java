@@ -20,6 +20,7 @@ import edu.clemson.cs.r2jt.proving2.justifications.Justification;
 import edu.clemson.cs.r2jt.proving2.proofsteps.LabelStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
+import edu.clemson.cs.r2jt.proving2.transformations.ExistentialInstantiation.ConsequentBasedBinder;
 import edu.clemson.cs.r2jt.proving2.transformations.ReplaceTheoremInConsequentWithTrue;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
@@ -603,6 +604,23 @@ public final class PerVCProverModel {
         return result;
     }
 
+    public PExp alterConjunct(Conjunct c, PExp newValue) {
+        PExp result = c.getExpression();
+
+        if (newValue == null) {
+            throw new IllegalArgumentException(
+                    "Can't change value to a null PExp.");
+        }
+
+        int index = removeConjunct(c);
+
+        c.setExpression(newValue);
+
+        insertConjunct(c, index);
+
+        return result;
+    }
+
     /**
      * <p>Adds a theorem to the list of local theorems (i.e., the antecedent of
      * the implication represented by the current proof state) with the given
@@ -1037,7 +1055,7 @@ public final class PerVCProverModel {
 
             //This is a simple optimization that prevents us from traversing the
             //expression if there's no way we could match
-            if ((substituted instanceof PSymbol && ((PSymbol) substituted).quantification == Quantification.FOR_ALL)
+            if ((substituted instanceof PSymbol && ((PSymbol) substituted).quantification != Quantification.NONE)
                     || s.exp.getSymbolNames().contains(
                             substituted.getTopLevelOperation())) {
                 substituted.bindTo(s.exp, accumulator);

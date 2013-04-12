@@ -120,10 +120,8 @@ public class PrintAssertions extends ResolveConceptualVisitor {
     public void visitLambdaExp(LambdaExp exp) {
         printSpace(indent, sb);
 
-        sb.append("lambda " + exp.getName().toString() + ": ");
-        if (exp.getTy() != null)
-            sb.append(exp.getTy().toString(0));
-        sb.append(" (");
+        sb.append("lambda " + exp.getParameters());
+        sb.append(".(");
         visitAssertion(exp.getBody());
         sb.append(")");
     }

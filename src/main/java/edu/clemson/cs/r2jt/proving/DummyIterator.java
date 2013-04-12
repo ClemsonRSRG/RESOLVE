@@ -17,6 +17,11 @@ public class DummyIterator<T> implements Iterator<T> {
         return (Iterator<T>) INSTANCE;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> Iterator<T> getInstance() {
+        return (Iterator<T>) INSTANCE;
+    }
+
     @Override
     public boolean hasNext() {
         return false;

@@ -12,11 +12,11 @@ import edu.clemson.cs.r2jt.scope.ScopeID;
  * Ultimately there should be no need for this class--nobody will use the old
  * type system.</p>
  */
-public class NewType extends Type {
+public class NewMathType extends Type {
 
     private final MTType myMTType;
 
-    public NewType(MTType mtType) {
+    public NewMathType(MTType mtType) {
         myMTType = mtType;
     }
 
@@ -25,7 +25,7 @@ public class NewType extends Type {
     }
 
     @Override
-    public NewType instantiate(ScopeID sid, Binding binding) {
+    public NewMathType instantiate(ScopeID sid, Binding binding) {
         return this;
     }
 
@@ -42,7 +42,7 @@ public class NewType extends Type {
     }
 
     @Override
-    public NewType toMath() {
+    public NewMathType toMath() {
         return this;
     }
 

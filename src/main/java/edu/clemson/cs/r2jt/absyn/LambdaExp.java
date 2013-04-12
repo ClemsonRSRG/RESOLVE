@@ -64,6 +64,8 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
+import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
+import java.util.LinkedList;
 
 public class LambdaExp extends Exp {
 
@@ -74,7 +76,7 @@ public class LambdaExp extends Exp {
     /** The location member. */
     private Location location;
 
-    private MathVarDec variable;
+    private List<MathVarDec> parameters;
 
     /** The body member. */
     private Exp body;
@@ -83,15 +85,14 @@ public class LambdaExp extends Exp {
     // Constructors
     // ===========================================================
 
-    public LambdaExp() {};
+    public LambdaExp(Location location, List<MathVarDec> params, Exp body) {
 
-    public LambdaExp(Location location, PosSymbol name, Ty ty, Exp body) {
-        this(location, new MathVarDec(name, ty), body);
-    }
+        if (params == null) {
+            throw new IllegalArgumentException("null LambdaExp params");
+        }
 
-    public LambdaExp(Location location, MathVarDec variable, Exp body) {
         this.location = location;
-        this.variable = variable;
+        this.parameters = params;
         this.body = body;
     }
 
@@ -108,14 +109,8 @@ public class LambdaExp extends Exp {
         return location;
     }
 
-    /** Returns the value of the name variable. */
-    public PosSymbol getName() {
-        return variable.getName();
-    }
-
-    /** Returns the value of the ty variable. */
-    public Ty getTy() {
-        return variable.getTy();
+    public List<MathVarDec> getParameters() {
+        return parameters;
     }
 
     /** Returns the value of the body variable. */
@@ -132,14 +127,13 @@ public class LambdaExp extends Exp {
         this.location = location;
     }
 
-    /** Sets the name variable to the specified value. */
-    public void setName(PosSymbol name) {
-        variable.setName(name);
-    }
+    public void setParameters(List<MathVarDec> params) {
 
-    /** Sets the ty variable to the specified value. */
-    public void setTy(Ty ty) {
-        variable.setTy(ty);
+        if (params == null) {
+            throw new IllegalArgumentException("null LambdaExp params");
+        }
+
+        parameters = params;
     }
 
     /** Sets the body variable to the specified value. */
@@ -152,7 +146,7 @@ public class LambdaExp extends Exp {
     // ===========================================================
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        return new LambdaExp(location, variable,
+        return new LambdaExp(location, new List<MathVarDec>(parameters),
                 substitute(body, substitutions));
     }
 
@@ -174,8 +168,8 @@ public class LambdaExp extends Exp {
         printSpace(indent, sb);
         sb.append("LambdaExp\n");
 
-        if (variable != null) {
-            sb.append(variable);
+        if (parameters != null) {
+            sb.append(parameters);
         }
 
         if (body != null) {
@@ -191,7 +185,16 @@ public class LambdaExp extends Exp {
         if (result) {
             LambdaExp eAsLambdaExp = (LambdaExp) e;
 
-            result = eAsLambdaExp.variable.equals(variable);
+            result = (parameters.size() == eAsLambdaExp.parameters.size());
+
+            Iterator<MathVarDec> parameterIterator = parameters.iterator();
+            Iterator<MathVarDec> eParameterIterator =
+                    eAsLambdaExp.parameters.iterator();
+            while (parameterIterator.hasNext() && result) {
+                result =
+                        parameterIterator.next().equals(
+                                eParameterIterator.next());
+            }
         }
 
         return result;
@@ -200,15 +203,18 @@ public class LambdaExp extends Exp {
     /** Returns true if the variable is found in any sub expression   
         of this one. **/
     public boolean containsVar(String varName, boolean IsOldExp) {
-        if (variable.getName().toString().equals(varName)) {
-            return true;
+        boolean result = false;
+
+        Iterator<MathVarDec> parameterIter = parameters.iterator();
+        while (!result && parameterIter.hasNext()) {
+            result = parameterIter.next().getName().getName().equals(varName);
         }
 
-        if (body != null) {
-            return body.containsVar(varName, IsOldExp);
+        if (!result && body != null) {
+            result = body.containsVar(varName, IsOldExp);
         }
 
-        return false;
+        return result;
     }
 
     public List<Exp> getSubExpressions() {
@@ -225,10 +231,21 @@ public class LambdaExp extends Exp {
         if (!(e2 instanceof LambdaExp)) {
             return false;
         }
-        if (!(variable.getName().equals(((LambdaExp) e2).getName().getName()))) {
-            return false;
+
+        LambdaExp e2AsLambdaExp = (LambdaExp) e2;
+        boolean result = (parameters.size() == e2AsLambdaExp.parameters.size());
+
+        Iterator<MathVarDec> parameterIter = parameters.iterator();
+        Iterator<MathVarDec> e2ParameterIter =
+                e2AsLambdaExp.parameters.iterator();
+
+        while (result && parameterIter.hasNext()) {
+            result =
+                    parameterIter.next().getName().equals(
+                            e2ParameterIter.next().getName());
         }
-        return true;
+
+        return result;
     }
 
     public Exp replace(Exp old, Exp replace) {
@@ -241,22 +258,32 @@ public class LambdaExp extends Exp {
                 result.body = Exp.copy(body);
             }
 
-            if (variable.getName() != null) {
-                if (old instanceof VarExp && replace instanceof VarExp) {
+            List<MathVarDec> finalParameters = new List<MathVarDec>();
+            if (old instanceof VarExp && replace instanceof VarExp) {
+                Iterator<MathVarDec> parameterIter = parameters.iterator();
+                MathVarDec param;
+                while (parameterIter.hasNext()) {
+                    param = parameterIter.next();
+
                     if (((VarExp) old).getName().toString().equals(
-                            variable.getName().toString())) {
-                        this.variable.setName(((VarExp) replace).getName());
-                        return this;
+                            param.getName().toString())) {
+
+                        param.setName(((VarExp) replace).getName());
                     }
                 }
             }
+
+            for (MathVarDec p : parameters) {
+                finalParameters.add(p.copy());
+            }
+
             return result;
         }
         return this;
     }
 
     public void prettyPrint() {
-        System.out.print("lambda " + variable);
+        System.out.print("lambda " + parameters);
         System.out.print(" (");
         body.prettyPrint();
         System.out.print(")");
@@ -264,7 +291,7 @@ public class LambdaExp extends Exp {
 
     public String toString(int indent) {
         StringBuffer sb = new StringBuffer();
-        sb.append("lambda " + variable);
+        sb.append("lambda " + parameters);
         sb.append(" (");
         sb.append(body.toString(0));
         sb.append(")");
@@ -272,21 +299,20 @@ public class LambdaExp extends Exp {
     }
 
     public Exp copy() {
-        MathVarDec newVariable = variable.copy();
+        List<MathVarDec> newParams = new List<MathVarDec>();
+        for (MathVarDec p : parameters) {
+            newParams.add(p.copy());
+        }
+
         Exp newBody = Exp.copy(body);
-        Exp result = new LambdaExp(null, newVariable, newBody);
+        Exp result = new LambdaExp(null, newParams, newBody);
         result.setType(type);
 
         return result;
     }
 
     public Object clone() {
-        MathVarDec newVariable = variable.copy();
-        Exp newBody = (Exp) Exp.clone(body);
-        Exp result = new LambdaExp(null, newVariable, newBody);
-        result.setType(type);
-
-        return result;
+        return copy();
     }
 
     public Exp remember() {
@@ -300,4 +326,8 @@ public class LambdaExp extends Exp {
         return this;
     }
 
+    @Override
+    public MTFunction getMathType() {
+        return (MTFunction) super.getMathType();
+    }
 }

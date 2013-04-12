@@ -1587,7 +1587,7 @@ iterated_construct
 
 //NOTE: Allows only very rudimentary lambda expressions.
 lambda_expression
-    :   LAMBDA^ LPAREN! math_variable_declaration RPAREN!
+    :   LAMBDA^ definition_formal_param_section
         DOT! LPAREN! math_expression RPAREN!
     ;
 

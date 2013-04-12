@@ -48,11 +48,15 @@ public class BindingVisitor extends SymmetricBoundVariableVisitor {
         MTType t1DeclaredType = getInnermostBinding1(t1.name);
         MTType t2DeclaredType = getInnermostBinding2(t2.name);
 
+        if (myBindings.containsKey(t2.name)) {
+            t1DeclaredType = myBindings.get(t2.name);
+        }
+
         //Fine if the declared type of t1 restricts the declared type of t2
         myMatchSoFarFlag &=
                 myTypeGraph.isSubtype(t1DeclaredType, t2DeclaredType);
 
-        if (myMatchSoFarFlag) {
+        if (!myBindings.containsKey(t2.name) && myMatchSoFarFlag) {
             myBindings.put(t2.name, t1);
         }
 
@@ -75,9 +79,15 @@ public class BindingVisitor extends SymmetricBoundVariableVisitor {
         if (t2 instanceof MTNamed) {
             String t2Name = ((MTNamed) t2).name;
             MTType t2DeclaredType = getInnermostBinding2(t2Name);
+
+            if (myBindings.containsKey(((MTNamed) t2).name)) {
+                t1 = myBindings.get(((MTNamed) t2).name);
+            }
+
             myMatchSoFarFlag &= myTypeGraph.isSubtype(t1, t2DeclaredType);
 
-            if (myMatchSoFarFlag) {
+            if (!myBindings.containsKey(((MTNamed) t2).name)
+                    && myMatchSoFarFlag) {
                 myBindings.put(t2Name, t1);
             }
         }
