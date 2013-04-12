@@ -1104,4 +1104,15 @@ public class Utilities {
             l.add(e);
         }
     }
+
+    public static <T> boolean containsAny(Set<T> container, Set<T> possibilities) {
+        boolean result = false;
+
+        Iterator<T> possibilitiesIter = possibilities.iterator();
+        while (!result && possibilitiesIter.hasNext()) {
+            result = container.contains(possibilitiesIter.next());
+        }
+
+        return result;
+    }
 }

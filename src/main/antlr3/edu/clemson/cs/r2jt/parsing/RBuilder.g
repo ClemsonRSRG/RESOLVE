@@ -2108,11 +2108,11 @@ lambda_expression returns [LambdaExp exp = null]
     PosSymbol tql = null;
     PosSymbol tnm = null;
 }
-    :   ^(  LAMBDA dec=math_variable_declaration
+    :   ^(  LAMBDA params=definition_formal_param_section
             body=math_expression
         )
         {   
-            $exp = new LambdaExp(getLocation($LAMBDA), $dec.var.getName(), $dec.var.getTy(), $body.exp);
+            $exp = new LambdaExp(getLocation($LAMBDA), $params.decs, $body.exp);
         }
     ;
 

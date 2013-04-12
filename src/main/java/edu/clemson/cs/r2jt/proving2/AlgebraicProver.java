@@ -104,6 +104,8 @@ public class AlgebraicProver {
 
     private final CompileEnvironment myInstanceEnvironment;
 
+    private final int myTimeout;
+
     public AlgebraicProver(TypeGraph g, List<VC> vcs, ModuleScope scope,
             final boolean startInteractive, CompileEnvironment environment,
             ProverListener listener) {
@@ -112,6 +114,15 @@ public class AlgebraicProver {
         myModels = new PerVCProverModel[vcs.size()];
         myAutomatedProvers = new AutomatedProver[vcs.size()];
         myModuleScope = scope;
+
+        if (environment.flags.isFlagSet(Prover.FLAG_TIMEOUT)) {
+            myTimeout =
+                    Integer.parseInt(environment.flags.getFlagArgument(
+                            Prover.FLAG_TIMEOUT, Prover.FLAG_TIMEOUT_ARG_NAME));
+        }
+        else {
+            myTimeout = -1;
+        }
 
         if (listener != null) {
             myProverListeners.add(listener);
@@ -137,7 +148,8 @@ public class AlgebraicProver {
                 new PerVCProverModel(g, vcs.get(0).getName(), vcs.get(0),
                         myTheoremLibrary);
         myAutomatedProvers[0] =
-                new AutomatedProver(myModels[0], myTheoremLibrary, scope);
+                new AutomatedProver(myModels[0], myTheoremLibrary, scope,
+                        myTimeout);
 
         if (environment.flags.isFlagSet(Prover.FLAG_NOGUI)) {
             myUI = null;
@@ -330,7 +342,7 @@ public class AlgebraicProver {
                             .getName(), myVCs.get(myVCIndex), myTheoremLibrary);
             myAutomatedProvers[myVCIndex] =
                     new AutomatedProver(myModels[myVCIndex], myTheoremLibrary,
-                            myModuleScope);
+                            myModuleScope, myTimeout);
         }
 
         if (myUI != null) {

@@ -10,7 +10,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.type.ConcType;
 import edu.clemson.cs.r2jt.type.FormalType;
-import edu.clemson.cs.r2jt.type.NewType;
+import edu.clemson.cs.r2jt.type.NewMathType;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.Collections;
@@ -36,8 +36,8 @@ public abstract class MTType {
     public static MTType fromOldType(Type oldType, ScopeRepository repo) {
         MTType result;
 
-        if (oldType instanceof NewType) {
-            result = ((NewType) oldType).getWrappedType();
+        if (oldType instanceof NewMathType) {
+            result = ((NewMathType) oldType).getWrappedType();
         }
         else if (oldType instanceof ConcType) {
             result = fromOldType(((ConcType) oldType).getType(), repo);

@@ -94,15 +94,9 @@ public class TypeMatcher {
     // ===========================================================
 
     public boolean programMatches(Type t1, Type t2) {
-        if (t1 instanceof VoidType && t2 instanceof VoidType) {
-            return true;
-        }
-        TypeName tn1 = t1.getProgramName();
-        TypeName tn2 = t2.getProgramName();
-        if (tn1 == null || tn2 == null) {
-            return false;
-        }
-        return (tn1.equals(tn2));
+        //Dummy result to keep Analyzer running--the new populator will take
+        //care of all the real type checking
+        return true;
     }
 
     public boolean mathMatches(Type t1, Type t2) {

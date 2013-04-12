@@ -235,7 +235,7 @@ public class ConstructedTy extends Ty {
         Iterator<Ty> it = args.iterator();
         List<Ty> newArgs = new List<Ty>();
         while (it.hasNext()) {
-            newArgs.add(it.next().copy());
+            newArgs.add(Ty.copy(it.next()));
         }
         return new ConstructedTy(newQualifier, newName, newArgs);
     }

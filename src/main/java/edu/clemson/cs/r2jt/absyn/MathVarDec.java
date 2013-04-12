@@ -210,7 +210,7 @@ public class MathVarDec extends Dec {
 
         Ty newTy = null;
         if (ty != null) {
-            newTy = ty.copy();
+            newTy = Ty.copy(ty);
         }
         return new MathVarDec(newName, newTy);
     }

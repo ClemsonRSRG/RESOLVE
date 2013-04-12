@@ -171,7 +171,16 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
 
     public Type getProgramExpType(ProgramExp exp)
             throws TypeResolutionException {
-        return exp.accept(this);
+        Type result;
+
+        if (exp.getMathType() != null) {
+            result = new NewProgramType(exp.getProgramType());
+        }
+        else {
+            result = exp.accept(this);
+        }
+
+        return result;
     }
 
     public Type getVariableExpType(VariableExp exp)
@@ -274,6 +283,7 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
          * Note: This may not be the place that we throw this exception. - YS
          */
         try {
+
             if (exp.getSemanticExp() == null) {
                 exp.setSemanticExp(extractSemanticExp(exp));
                 exp.getSemanticExp().setType(

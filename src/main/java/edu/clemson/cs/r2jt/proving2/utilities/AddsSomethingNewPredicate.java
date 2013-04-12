@@ -5,6 +5,7 @@
 package edu.clemson.cs.r2jt.proving2.utilities;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving2.Utilities;
 import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.Theorem;
@@ -64,7 +65,9 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
                         tLT.getIntroducedTheorem().getAssertion()
                                 .getSymbolNames();
 
-                result = containsAny(finalSymbolNames, myVariableSymbols);
+                result =
+                        Utilities.containsAny(finalSymbolNames,
+                                myVariableSymbols);
 
                 if (result) {
                     Transformation transformation = tLT.getTransformation();
