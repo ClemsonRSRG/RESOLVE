@@ -23,9 +23,30 @@ public interface ProofStep {
 
     public Application getApplication();
 
+    /**
+     * <p>Those conjuncts that must be present for this step to make sense--this 
+     * will include any conjuncts containing sites that were bound against, any
+     * conjuncts representing the theorem that motivated this step, and possibly
+     * others.</p>
+     * 
+     * @return 
+     */
     public Set<Conjunct> getPrerequisiteConjuncts();
+    
+    /**
+     * <p>A subset of the prerequisite conjuncts: those conjuncts that were
+     * bound against.</p>
+     * 
+     * @return 
+     */
+    public Set<Conjunct> getBoundConjuncts();
 
     public Set<Conjunct> getAffectedConjuncts();
 
+    /**
+     * <p>Any sites that were modified or introduced.</p>
+     * 
+     * @return 
+     */
     public Set<Site> getAffectedSites();
 }

@@ -21,4 +21,8 @@ public interface Conjunct {
     public PExp getExpression();
 
     void setExpression(PExp newValue);
+
+    public boolean editable();
+
+    public boolean libraryTheorem();
 }

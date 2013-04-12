@@ -18,7 +18,7 @@ public class LabelStep extends AbstractProofStep {
     private final Transformation myTransformation;
 
     public LabelStep(String label, Transformation t, Application a) {
-        super(t, a);
+        super(t, a, null);
 
         myLabel = label;
         myTransformation = t;

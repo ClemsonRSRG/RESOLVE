@@ -208,7 +208,7 @@ public class ExpandAntecedentByImplication implements Transformation {
 
                 m.addProofStep(new IntroduceLocalTheoremStep(t,
                         myBindSiteTheorems, ExpandAntecedentByImplication.this,
-                        this));
+                        this, myBindSites));
 
                 myAddedTheorems.add(t);
             }

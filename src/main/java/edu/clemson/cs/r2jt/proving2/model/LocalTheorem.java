@@ -51,4 +51,14 @@ public class LocalTheorem extends Theorem {
     public boolean amTryingToProveThis() {
         return myThingWeWereTryingToProveFlag;
     }
+
+    @Override
+    public boolean editable() {
+        return true;
+    }
+
+    @Override
+    public boolean libraryTheorem() {
+        return false;
+    }
 }

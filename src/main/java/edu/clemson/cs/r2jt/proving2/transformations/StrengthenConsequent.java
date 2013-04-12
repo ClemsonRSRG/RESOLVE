@@ -198,7 +198,7 @@ public class StrengthenConsequent implements Transformation {
 
             m.addProofStep(new StrengthenConsequentStep(removedConjuncts,
                     removedConjunctsIndex, myNewConsequents,
-                    StrengthenConsequent.this, this));
+                    StrengthenConsequent.this, this, myBindSites));
         }
 
         @Override

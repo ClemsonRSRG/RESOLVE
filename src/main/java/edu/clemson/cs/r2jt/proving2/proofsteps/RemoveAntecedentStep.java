@@ -9,6 +9,8 @@ import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  *
@@ -20,8 +22,9 @@ public class RemoveAntecedentStep extends AbstractProofStep {
     private final int myOriginalIndex;
 
     public RemoveAntecedentStep(LocalTheorem originalTheorem,
-            int originalIndex, Transformation t, Application a) {
-        super(t, a);
+            int originalIndex, Transformation t, Application a, 
+            Collection<Site> boundSites) {
+        super(t, a, boundSites);
 
         myOriginalIndex = originalIndex;
         myOriginalTheorem = originalTheorem;
