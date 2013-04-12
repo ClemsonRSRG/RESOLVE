@@ -10,6 +10,7 @@ import edu.clemson.cs.r2jt.proving2.automators.AntecedentDeveloper;
 import edu.clemson.cs.r2jt.proving2.automators.AntecedentMinimizer;
 import edu.clemson.cs.r2jt.proving2.automators.ApplyN;
 import edu.clemson.cs.r2jt.proving2.automators.Automator;
+import edu.clemson.cs.r2jt.proving2.automators.EliminateRedundantAntecedents;
 import edu.clemson.cs.r2jt.proving2.automators.MainProofLevel;
 import edu.clemson.cs.r2jt.proving2.automators.Minimizer;
 import edu.clemson.cs.r2jt.proving2.automators.PushSequence;
@@ -109,23 +110,21 @@ public class AutomatedProver {
         steps.add(new VariablePropagator());
         steps.add(new ApplyN(new NoOpLabel(this,
                 "--- Done Minimizing Antecedent ---"), 1));
-        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
-                antecedentTransformations, 1));
-        steps.add(new VariablePropagator());
-        steps.add(new AntecedentMinimizer(myTheoremLibrary));
-        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
-                antecedentTransformations, 1));
-        steps.add(new VariablePropagator());
-        steps.add(new AntecedentMinimizer(myTheoremLibrary));
-        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
-                antecedentTransformations, 1));
-        steps.add(new VariablePropagator());
-        steps.add(new AntecedentMinimizer(myTheoremLibrary));
+        
+        for (int i = 0; i < 3; i++) {
+            steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
+                    antecedentTransformations, 1));
+            steps.add(new VariablePropagator());
+            steps.add(new AntecedentMinimizer(myTheoremLibrary));
+            steps.add(EliminateRedundantAntecedents.INSTANCE);
+        }
         steps.add(new ApplyN(new NoOpLabel(this,
                 "--- Done Developing Antecedent ---"), 1));
+        
         steps.add(new Minimizer(myTheoremLibrary));
         steps.add(new ApplyN(new NoOpLabel(this,
                 "--- Done Minimizing Consequent ---"), 1));
+        
         steps.add(Simplify.INSTANCE);
         steps.add(new MainProofLevel(m, 3, consequentTransformations));
 
