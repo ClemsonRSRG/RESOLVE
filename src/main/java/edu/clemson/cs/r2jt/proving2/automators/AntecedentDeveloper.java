@@ -28,27 +28,25 @@ public class AntecedentDeveloper implements Automator {
     private int myRemainingRounds;
 
     public AntecedentDeveloper(PerVCProverModel model,
-            Set<String> variableSymbols, Iterable<Theorem> theorems,
+            Set<String> variableSymbols, Iterable<Transformation> transformations,
             int totalRounds) {
         myDevelopmentPredicate =
                 new AddsSomethingNewPredicate(model, variableSymbols);
         myRemainingRounds = totalRounds;
 
-        List<Transformation> transformations = new LinkedList<Transformation>();
-        List<Transformation> tTransformations;
-        for (Theorem t : theorems) {
-            tTransformations = t.getTransformations();
-            for (Transformation transformation : tTransformations) {
-                if (transformation instanceof ExpandAntecedentByImplication
-                        || transformation instanceof ExpandAntecedentBySubstitution) {
+        List<Transformation> finalTransformations =
+                new LinkedList<Transformation>();
+        for (Transformation transformation : transformations) {
+            if (transformation instanceof ExpandAntecedentByImplication
+                    || transformation instanceof ExpandAntecedentBySubstitution) {
 
-                    if (!transformation.introducesQuantifiedVariables()) {
-                        transformations.add(transformation);
-                    }
+                if (!transformation.introducesQuantifiedVariables()) {
+                    finalTransformations.add(transformation);
                 }
             }
         }
-        myTheoremTransformations = transformations;
+
+        myTheoremTransformations = finalTransformations;
     }
 
     @Override
@@ -56,8 +54,7 @@ public class AntecedentDeveloper implements Automator {
         if (myRemainingRounds > 0) {
             System.out.println("AntecedentDeveloper got the heartbeat.");
             stack.push(new AntecedentDeveloperRound(model));
-        }
-        else {
+        } else {
             stack.pop();
         }
 
@@ -70,8 +67,7 @@ public class AntecedentDeveloper implements Automator {
      */
     private class AntecedentDeveloperRound implements Automator {
 
-        public static final int MAX_DEVELOPMENTS = 100;
-
+        public static final int MAX_DEVELOPMENTS = 200;
         private int myDevelopmentCount;
         private Iterator<Application> myApplications;
         private ProbationaryApplication myProbationaryApplication;
@@ -128,14 +124,13 @@ public class AntecedentDeveloper implements Automator {
 
                 System.out
                         .println("AntecedentDeveloperRound - adding development - "
-                                + myDevelopmentCount);
+                        + myDevelopmentCount);
 
                 myProbationaryApplication =
                         new ProbationaryApplication(myApplications.next(),
-                                myDevelopmentPredicate);
+                        myDevelopmentPredicate);
                 stack.push(myProbationaryApplication);
-            }
-            else {
+            } else {
                 stack.pop();
             }
         }

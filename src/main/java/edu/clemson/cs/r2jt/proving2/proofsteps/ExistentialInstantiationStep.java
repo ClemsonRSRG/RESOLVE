@@ -11,6 +11,7 @@ import edu.clemson.cs.r2jt.proving2.model.Consequent;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,8 +29,8 @@ public class ExistentialInstantiationStep extends AbstractProofStep {
 
     public ExistentialInstantiationStep(Transformation t, Application a,
             Conjunct existentialConjunct, int existentialConjunctIndex,
-            List<PExp> originalValues) {
-        super(t, a);
+            List<PExp> originalValues, Collection<Site> boundSites) {
+        super(t, a, boundSites);
 
         myExistentialConsequent = existentialConjunct;
         myExistentialConsequentIndex = existentialConjunctIndex;

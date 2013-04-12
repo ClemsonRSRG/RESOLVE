@@ -8,6 +8,8 @@ import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  *
@@ -19,8 +21,8 @@ public class ModifyConsequentStep extends AbstractProofStep {
     private final Site myFinalSite;
 
     public ModifyConsequentStep(Site originalSite, Site finalSite,
-            Transformation t, Application a) {
-        super(t, a);
+            Transformation t, Application a, Collection<Site> boundSites) {
+        super(t, a, boundSites);
 
         myOriginalSite = originalSite;
         myFinalSite = finalSite;

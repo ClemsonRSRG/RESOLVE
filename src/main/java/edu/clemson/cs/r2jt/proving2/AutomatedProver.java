@@ -10,6 +10,7 @@ import edu.clemson.cs.r2jt.proving2.automators.AntecedentDeveloper;
 import edu.clemson.cs.r2jt.proving2.automators.AntecedentMinimizer;
 import edu.clemson.cs.r2jt.proving2.automators.ApplyN;
 import edu.clemson.cs.r2jt.proving2.automators.Automator;
+import edu.clemson.cs.r2jt.proving2.automators.EliminateRedundantAntecedents;
 import edu.clemson.cs.r2jt.proving2.automators.MainProofLevel;
 import edu.clemson.cs.r2jt.proving2.automators.Minimizer;
 import edu.clemson.cs.r2jt.proving2.automators.PushSequence;
@@ -63,7 +64,9 @@ public class AutomatedProver {
     private final Object WORKER_THREAD_LOCK = new Object();
     private Thread myWorkerThread;
 
-    private MainProofFitnessFunction myFitnessFunction;
+    private MainProofFitnessFunction myMainProofFitnessFunction;
+    private AntecedentDeveloperFitnessFunction 
+            myAntecedentDeveloperFitnessFunction;
 
     private final Set<String> myVariableSymbols;
 
@@ -73,7 +76,9 @@ public class AutomatedProver {
             ImmutableList<Theorem> theoremLibrary, ModuleScope moduleScope,
             int timeout) {
         myModel = m;
-        myFitnessFunction = new MainProofFitnessFunction(m);
+        myMainProofFitnessFunction = new MainProofFitnessFunction(m);
+        myAntecedentDeveloperFitnessFunction = 
+                new AntecedentDeveloperFitnessFunction(m);
         myTimeout = timeout;
 
         //This looks weird but suppresses a "leaked this" warning
@@ -89,32 +94,67 @@ public class AutomatedProver {
         myVariableSymbols = determineVariableSymbols(myModel, moduleScope);
         System.out.println("VARSYM: " + myVariableSymbols);
 
+        System.out.println("###################### consequent transformations");
+        List<Transformation> consequentTransformations = 
+                orderByFitnessFunction(myTheoremLibrary, 
+                myMainProofFitnessFunction);
+        
+        System.out.println("###################### antecedent transformations");
+        List<Transformation> antecedentTransformations = 
+                orderByFitnessFunction(myTheoremLibrary, 
+                myAntecedentDeveloperFitnessFunction);
+        
+        List<Automator> steps = new LinkedList<Automator>();
+        steps.add(new VariablePropagator());
+        steps.add(new AntecedentMinimizer(myTheoremLibrary));
+        steps.add(new VariablePropagator());
+        steps.add(new ApplyN(new NoOpLabel(this,
+                "--- Done Minimizing Antecedent ---"), 1));
+        
+        for (int i = 0; i < 3; i++) {
+            steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
+                    antecedentTransformations, 1));
+            steps.add(new VariablePropagator());
+            steps.add(new AntecedentMinimizer(myTheoremLibrary));
+            steps.add(EliminateRedundantAntecedents.INSTANCE);
+        }
+        steps.add(new ApplyN(new NoOpLabel(this,
+                "--- Done Developing Antecedent ---"), 1));
+        
+        steps.add(new Minimizer(myTheoremLibrary));
+        steps.add(new ApplyN(new NoOpLabel(this,
+                "--- Done Minimizing Consequent ---"), 1));
+        
+        steps.add(Simplify.INSTANCE);
+        steps.add(new MainProofLevel(m, 3, consequentTransformations));
+
+        myAutomatorStack.push(new PushSequence(steps));
+    }
+
+    private List<Transformation> orderByFitnessFunction(
+            Iterable<Theorem> theorems, FitnessFunction<Transformation> f) {
+        
         PriorityQueue<Transformation> transformationHeap =
                 new PriorityQueue<Transformation>(11,
-                        new TransformationComparator());
+                        new TransformationComparator(f));
         List<Transformation> theoremTransformations;
-        for (Theorem t : theoremLibrary) {
+        for (Theorem t : theorems) {
             theoremTransformations = t.getTransformations();
 
             for (Transformation transformation : theoremTransformations) {
-                if (!transformation.couldAffectAntecedent()
-                        && (transformation instanceof StrengthenConsequent || !transformation
-                                .introducesQuantifiedVariables())) {
-
-                    transformationHeap.add(transformation);
-                }
+                transformationHeap.add(transformation);
             }
         }
+        
         List<Transformation> transformations = new LinkedList<Transformation>();
         Transformation top;
         while (!transformationHeap.isEmpty()
-                && myFitnessFunction
-                        .calculateFitness(transformationHeap.peek()) >= 0) {
+                && f.calculateFitness(transformationHeap.peek()) >= 0) {
 
             top = transformationHeap.poll();
             transformations.add(top);
             System.out.println(top + " (" + top.getClass() + ") -- "
-                    + myFitnessFunction.calculateFitness(top));
+                    + f.calculateFitness(top));
         }
 
         if (transformationHeap.size() > 0) {
@@ -122,39 +162,13 @@ public class AutomatedProver {
             while (!transformationHeap.isEmpty()) {
                 top = transformationHeap.poll();
                 System.out.println(top + " (" + top.getClass() + ") -- "
-                        + myFitnessFunction.calculateFitness(top));
+                        + f.calculateFitness(top));
             }
         }
-
-        List<Automator> steps = new LinkedList<Automator>();
-        steps.add(new VariablePropagator());
-        steps.add(new AntecedentMinimizer(myTheoremLibrary));
-        steps.add(new VariablePropagator());
-        steps.add(new ApplyN(new NoOpLabel(this,
-                "--- Done Minimizing Antecedent ---"), 1));
-        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
-                myTheoremLibrary, 1));
-        steps.add(new VariablePropagator());
-        steps.add(new AntecedentMinimizer(myTheoremLibrary));
-        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
-                myTheoremLibrary, 1));
-        steps.add(new VariablePropagator());
-        steps.add(new AntecedentMinimizer(myTheoremLibrary));
-        steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
-                myTheoremLibrary, 1));
-        steps.add(new VariablePropagator());
-        steps.add(new AntecedentMinimizer(myTheoremLibrary));
-        steps.add(new ApplyN(new NoOpLabel(this,
-                "--- Done Developing Antecedent ---"), 1));
-        steps.add(new Minimizer(myTheoremLibrary));
-        steps.add(new ApplyN(new NoOpLabel(this,
-                "--- Done Minimizing Consequent ---"), 1));
-        steps.add(Simplify.INSTANCE);
-        steps.add(new MainProofLevel(m, 3, transformations));
-
-        myAutomatorStack.push(new PushSequence(steps));
+        
+        return transformations;
     }
-
+    
     private Set<String> determineVariableSymbols(PerVCProverModel model,
             ModuleScope moduleScope) {
 
@@ -400,6 +414,12 @@ public class AutomatedProver {
             implements
                 Comparator<Transformation> {
 
+        private final FitnessFunction<Transformation> myFitnessFunction;
+        
+        public TransformationComparator(FitnessFunction<Transformation> f) {
+            myFitnessFunction = f;
+        }
+        
         @Override
         public int compare(Transformation o1, Transformation o2) {
             int result;

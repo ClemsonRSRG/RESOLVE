@@ -106,6 +106,16 @@ public class Theorem implements Conjunct {
         myAssertion = newValue;
     }
 
+    @Override
+    public boolean editable() {
+        return false;
+    }
+
+    @Override
+    public boolean libraryTheorem() {
+        return true;
+    }
+
     private static class TheoremUnwrapper implements Mapping<Theorem, PExp> {
 
         @Override

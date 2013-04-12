@@ -8,6 +8,7 @@ import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import java.util.Collection;
@@ -25,8 +26,9 @@ public class IntroduceLocalTheoremStep extends AbstractProofStep {
     private final Set<Theorem> myPrerequisiteTheorems;
 
     public IntroduceLocalTheoremStep(LocalTheorem introducedTheorem,
-            Set<Theorem> prerequisiteTheorems, Transformation t, Application a) {
-        super(t, a);
+            Set<Theorem> prerequisiteTheorems, Transformation t, Application a,
+            Collection<Site> boundSites) {
+        super(t, a, boundSites);
 
         myIntroducedTheorem = introducedTheorem;
         myPrerequisiteTheorems =
