@@ -25,21 +25,21 @@ public class ExistentialInstantiationStep extends AbstractProofStep {
     private final Conjunct myExistentialConsequent;
     private final List<PExp> myOriginalValues;
     private final int myExistentialConsequentIndex;
-    
+
     public ExistentialInstantiationStep(Transformation t, Application a,
             Conjunct existentialConjunct, int existentialConjunctIndex,
             List<PExp> originalValues) {
         super(t, a);
-        
+
         myExistentialConsequent = existentialConjunct;
         myExistentialConsequentIndex = existentialConjunctIndex;
         myOriginalValues = originalValues;
     }
-    
+
     @Override
     public void undo(PerVCProverModel m) {
         m.insertConjunct(myExistentialConsequent, myExistentialConsequentIndex);
-        
+
         Iterator<PExp> originals = myOriginalValues.iterator();
         for (Consequent c : m.getConsequentList()) {
             m.alterSite(c.toSite(m), originals.next());

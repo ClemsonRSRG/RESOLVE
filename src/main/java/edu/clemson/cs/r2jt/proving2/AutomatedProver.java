@@ -98,9 +98,9 @@ public class AutomatedProver {
 
             for (Transformation transformation : theoremTransformations) {
                 if (!transformation.couldAffectAntecedent()
-                        && (transformation instanceof StrengthenConsequent ||
-                        !transformation.introducesQuantifiedVariables())) {
-                    
+                        && (transformation instanceof StrengthenConsequent || !transformation
+                                .introducesQuantifiedVariables())) {
+
                     transformationHeap.add(transformation);
                 }
             }

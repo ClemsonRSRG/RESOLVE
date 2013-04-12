@@ -4,12 +4,14 @@
  */
 package edu.clemson.cs.r2jt.proving2.proofsteps;
 
+import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
-import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
-import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -18,20 +20,49 @@ import java.util.Set;
  */
 public class ModifyAntecedentStep extends AbstractProofStep {
 
-    private final Site myOriginalSite;
-    private final Site myFinalSite;
+    private final List<Conjunct> myRemovedConjuncts;
+    private final List<Integer> myRemovedConjunctsIndecis;
 
-    public ModifyAntecedentStep(Site originalSite, Site finalSite,
-            Transformation t, Application a) {
+    private Map<Conjunct, PExp> myOriginalValues;
+
+    private Set<Conjunct> myIntroducedConjuncts;
+
+    public ModifyAntecedentStep(List<Conjunct> removedConjuncts,
+            List<Integer> removedConjunctsIndecis,
+            Map<Conjunct, PExp> originalValues,
+            Set<Conjunct> introducedConjuncts, Transformation t, Application a) {
         super(t, a);
 
-        myOriginalSite = originalSite;
-        myFinalSite = finalSite;
+        myRemovedConjuncts = removedConjuncts;
+        myRemovedConjunctsIndecis = removedConjunctsIndecis;
+
+        myOriginalValues = originalValues;
+
+        myIntroducedConjuncts = introducedConjuncts;
     }
 
     @Override
     public void undo(PerVCProverModel m) {
-        m.alterSite(myFinalSite, myOriginalSite.exp);
+        //Reintroduce removed conjuncts
+        Iterator<Conjunct> removedConjunctIter = myRemovedConjuncts.iterator();
+        Iterator<Integer> removedConjunctIndexIter =
+                myRemovedConjunctsIndecis.iterator();
+
+        while (removedConjunctIter.hasNext()) {
+            m.insertConjunct(removedConjunctIter.next(),
+                    removedConjunctIndexIter.next());
+        }
+
+        //Restore original values
+        for (Map.Entry<Conjunct, PExp> originalValue : myOriginalValues
+                .entrySet()) {
+            m.alterConjunct(originalValue.getKey(), originalValue.getValue());
+        }
+
+        //Remove introduced conjuncts
+        for (Conjunct introducedConjunct : myIntroducedConjuncts) {
+            m.removeConjunct(introducedConjunct);
+        }
     }
 
     @Override
