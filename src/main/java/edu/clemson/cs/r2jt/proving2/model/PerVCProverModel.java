@@ -20,6 +20,7 @@ import edu.clemson.cs.r2jt.proving2.justifications.Justification;
 import edu.clemson.cs.r2jt.proving2.proofsteps.LabelStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
+import edu.clemson.cs.r2jt.proving2.transformations.ExistentialInstantiation.ConsequentBasedBinder;
 import edu.clemson.cs.r2jt.proving2.transformations.ReplaceTheoremInConsequentWithTrue;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
@@ -599,6 +600,23 @@ public final class PerVCProverModel {
         s.conjunct.setExpression(newRootExp);
 
         insertConjunct(s.conjunct, index);
+
+        return result;
+    }
+
+    public PExp alterConjunct(Conjunct c, PExp newValue) {
+        PExp result = c.getExpression();
+
+        if (newValue == null) {
+            throw new IllegalArgumentException(
+                    "Can't change value to a null PExp.");
+        }
+
+        int index = removeConjunct(c);
+
+        c.setExpression(newValue);
+
+        insertConjunct(c, index);
 
         return result;
     }

@@ -14,20 +14,20 @@ import java.util.List;
  * transformation.</p>
  */
 public class DummyTheorem extends Theorem {
-    
+
     private final Transformation myTransformation;
-    
+
     public DummyTheorem(Transformation t) {
         super(null, null);
-        
+
         myTransformation = t;
     }
-    
+
     @Override
     public List<Transformation> getTransformations() {
         return Collections.singletonList(myTransformation);
     }
-    
+
     @Override
     public String toString() {
         return "" + myTransformation;
