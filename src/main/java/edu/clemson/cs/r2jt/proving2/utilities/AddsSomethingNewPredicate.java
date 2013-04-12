@@ -8,12 +8,10 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.Utilities;
 import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
-import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.proofsteps.GeneralStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.IntroduceLocalTheoremStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
-import edu.clemson.cs.r2jt.proving2.transformations.ExpandAntecedentByImplication;
-import edu.clemson.cs.r2jt.proving2.transformations.ExpandAntecedentBySubstitution;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,99 +43,54 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
 
     @Override
     public boolean test(ProofStep t) {
-        boolean result = (t instanceof IntroduceLocalTheoremStep);
+        boolean result = (t instanceof IntroduceLocalTheoremStep) ||
+                (t instanceof GeneralStep);
 
         if (result) {
-            IntroduceLocalTheoremStep tLT = (IntroduceLocalTheoremStep) t;
-
-            //Any development that repeats something we already know should be
-            //rolled back
-            result =
-                    appearsOnce(tLT.getIntroducedTheorem().getAssertion(),
-                            myModel);
-
-            if (result) {
-
+            Transformation tTransformation = t.getTransformation();
+            
+            //Any development that reduces the function count should be
+            //accepted
+            result = tTransformation.functionApplicationCountDelta() < 0;
+            
+            if (!result) {
                 //Any development that doesn't tell us something about at least 
-                //one of the variable symbols in the consequent of the VC should
-                //be rolled back
-                Set<String> finalSymbolNames =
-                        tLT.getIntroducedTheorem().getAssertion()
-                                .getSymbolNames();
+                //one of the variable symbols in the consequent of the VC or
+                //doesn't introduce at least one new theorem should be rolled 
+                //back
+                Set<String> finalSymbolNames = new HashSet<String>();
+                
+                boolean somethingNew = false;
+                for (Conjunct c : t.getAffectedConjuncts()) {
+                    finalSymbolNames.addAll(c.getExpression().getSymbolNames());
+                    
+                    somethingNew = somethingNew || 
+                            appearsOnce(c.getExpression(), myModel);
+                }
 
-                result =
+                result = somethingNew &&
                         Utilities.containsAny(finalSymbolNames,
                                 myVariableSymbols);
-
+                
                 if (result) {
-                    Transformation transformation = tLT.getTransformation();
-
-                    //Any development that reduces the function count should be
-                    //accepted
-                    result = transformation.functionApplicationCountDelta() < 0;
-
-                    if (!result) {
-                        if (transformation instanceof ExpandAntecedentBySubstitution
-                                || transformation instanceof ExpandAntecedentByImplication) {
-                            Set<Theorem> originalTheorems =
-                                    tLT.getPrerequisiteTheorems();
-                            Set<String> originalSymbolNames =
-                                    new HashSet<String>();
-                            for (Conjunct ot : originalTheorems) {
-                                originalSymbolNames.addAll(ot.getExpression()
-                                        .getSymbolNames());
-                            }
-
-                            originalSymbolNames.removeAll(finalSymbolNames);
-
-                            //Any substitution that doesn't eliminate at least
-                            //one symbol should be rolled back
-                            result = !originalSymbolNames.isEmpty();
-                        }
-                        else if (transformation instanceof ExpandAntecedentByImplication) {
-                            Set<Theorem> originalTheorems =
-                                    tLT.getPrerequisiteTheorems();
-                            Set<String> originalSymbolNames =
-                                    new HashSet<String>();
-                            for (Theorem ot : originalTheorems) {
-                                originalSymbolNames.addAll(ot.getAssertion()
-                                        .getSymbolNames());
-                            }
-
-                            Set<String> introduced =
-                                    new HashSet<String>(transformation
-                                            .getReplacementSymbolNames());
-
-                            introduced.removeAll(originalSymbolNames);
-
-                            //Any implication that doesn't introduce at least
-                            //one symbol should be rolled back
-                            result = !introduced.isEmpty();
-                        }
-                        else {
-                            //Not prepared to deal with other kinds of 
-                            //transformations
-                            throw new RuntimeException();
-                        }
+                    //Any substitution that doesn't eliminate at least
+                    //one symbol should be rolled back
+                    Set<Conjunct> originalTheorems = t.getBoundConjuncts();
+                    Set<String> originalSymbolNames = new HashSet<String>();
+                    for (Conjunct ot : originalTheorems) {
+                        originalSymbolNames.addAll(ot.getExpression()
+                                .getSymbolNames());
                     }
+
+                    originalSymbolNames.removeAll(finalSymbolNames);
+                    
+                    result = !originalSymbolNames.isEmpty();
                 }
             }
         }
         else {
             throw new RuntimeException(
-                    "Expecting a local theorem introduction?");
-        }
-
-        return result;
-    }
-
-    private static <T> boolean containsAny(Set<T> container,
-            Set<T> possibilities) {
-        boolean result = false;
-
-        Iterator<T> possibilitiesIter = possibilities.iterator();
-        while (!result && possibilitiesIter.hasNext()) {
-            result = container.contains(possibilitiesIter.next());
+                    "Expecting a local theorem introduction?  Got: " + t.getClass());
         }
 
         return result;

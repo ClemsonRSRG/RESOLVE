@@ -107,7 +107,8 @@ public class ReplaceSymmetricEqualityWithTrueInConsequent
                     new Site(m, mySite.conjunct, mySite.path, m.getTrue());
 
             m.addProofStep(new ModifyConsequentStep(mySite, myFinalSite,
-                    ReplaceSymmetricEqualityWithTrueInConsequent.this, this));
+                    ReplaceSymmetricEqualityWithTrueInConsequent.this, this,
+                    Collections.singleton(mySite)));
         }
 
         @Override

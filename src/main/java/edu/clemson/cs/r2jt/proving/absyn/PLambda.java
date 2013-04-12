@@ -245,7 +245,7 @@ public class PLambda extends PExp {
             this.name = name;
             this.type = type;
         }
-        
+
         @Override
         public String toString() {
             return name + " : " + type;

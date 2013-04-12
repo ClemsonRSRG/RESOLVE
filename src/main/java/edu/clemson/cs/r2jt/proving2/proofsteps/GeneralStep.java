@@ -8,7 +8,9 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +20,7 @@ import java.util.Set;
  *
  * @author hamptos
  */
-public class ModifyAntecedentStep extends AbstractProofStep {
+public class GeneralStep extends AbstractProofStep {
 
     private final List<Conjunct> myRemovedConjuncts;
     private final List<Integer> myRemovedConjunctsIndecis;
@@ -27,11 +29,12 @@ public class ModifyAntecedentStep extends AbstractProofStep {
 
     private Set<Conjunct> myIntroducedConjuncts;
 
-    public ModifyAntecedentStep(List<Conjunct> removedConjuncts,
+    public GeneralStep(List<Conjunct> removedConjuncts,
             List<Integer> removedConjunctsIndecis,
             Map<Conjunct, PExp> originalValues,
-            Set<Conjunct> introducedConjuncts, Transformation t, Application a) {
-        super(t, a);
+            Set<Conjunct> introducedConjuncts, Transformation t, Application a,
+            Collection<Site> boundSites) {
+        super(t, a, boundSites);
 
         myRemovedConjuncts = removedConjuncts;
         myRemovedConjunctsIndecis = removedConjunctsIndecis;
@@ -39,6 +42,10 @@ public class ModifyAntecedentStep extends AbstractProofStep {
         myOriginalValues = originalValues;
 
         myIntroducedConjuncts = introducedConjuncts;
+    }
+    
+    public Set<Conjunct> getIntroducedConjuncts() {
+        return myIntroducedConjuncts;
     }
 
     @Override

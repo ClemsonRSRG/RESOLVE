@@ -4,22 +4,21 @@
  */
 package edu.clemson.cs.r2jt.proving2.transformations;
 
+import edu.clemson.cs.r2jt.proving.ChainingIterator;
 import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
-import edu.clemson.cs.r2jt.proving2.justifications.TheoremApplication;
+import edu.clemson.cs.r2jt.proving2.applications.GeneralApplication;
 import edu.clemson.cs.r2jt.proving2.model.AtLeastOneLocalTheoremBinder;
 import edu.clemson.cs.r2jt.proving2.model.Conjunct;
-import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.InductiveAntecedentBinder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.model.Theorem;
-import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyAntecedentStep;
 import edu.clemson.cs.r2jt.utilities.Mapping;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,12 +61,19 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
 
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
-        Set<Binder> binders = new HashSet<Binder>();
+        Iterator<Application> result;
+        
+        Iterator<BindResult> bindResults = m.bind(Collections.singleton(
+                    (Binder) new InductiveAntecedentBinder(myMatchPattern)));
 
-        if (myMatchPatternConjuncts.size() == 1) {
-            binders.add(new InductiveAntecedentBinder(myMatchPattern));
-        }
-        else {
+        result = new LazyMappingIterator<BindResult, Application>(
+                bindResults, BIND_RESULT_TO_APPLICATION);
+        
+        //We might also have to account for the situation where the conjuncts of
+        //the match span multiple theorems
+        if (myMatchPatternConjuncts.size() > 1) {
+            Set<Binder> binders = new HashSet<Binder>();
+            
             Binder binder;
             for (PExp matchConjunct : myMatchPatternConjuncts) {
                 binder =
@@ -76,12 +82,13 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
 
                 binders.add(binder);
             }
+            
+            result = new ChainingIterator(result, 
+                    new LazyMappingIterator<BindResult, Application>(
+                        m.bind(binders), BIND_RESULT_TO_APPLICATION));
         }
 
-        Iterator<PerVCProverModel.BindResult> bindResults = m.bind(binders);
-
-        return new LazyMappingIterator<PerVCProverModel.BindResult, Application>(
-                bindResults, BIND_RESULT_TO_APPLICATION);
+        return result;
     }
 
     @Override
@@ -135,14 +142,15 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
             List<PExp> newTheorems = new LinkedList<PExp>();
             List<Integer> newIndecis = new LinkedList<Integer>();
 
-            if (myMatchPatternConjunctsSize > 1) {
+            if (input.bindSites.size() > 1) {
 
                 //Delete the existing things we matched
                 int maxBindIndex = -1;
                 int curBindIndex;
                 for (Site s : input.bindSites.values()) {
                     if (s.conjunct.editable()) {
-                        curBindIndex = s.getModel().getConjunctIndex(s.conjunct);
+                        curBindIndex =
+                                s.getModel().getConjunctIndex(s.conjunct);
                         if (curBindIndex > maxBindIndex) {
                             maxBindIndex = curBindIndex;
                         }
@@ -190,164 +198,12 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
                         newIndecis.add(index);
                         index++;
                     }
-
                 }
             }
 
-            return new SubstituteInPlaceInAntecedentApplication(input.bindSites
-                    .values(), newValues, newTheorems, newIndecis);
-        }
-    }
-
-    //TODO: This application is needlessly complicated because it's intended to
-    //      be further generalized into a "GeneralApplication" with a 
-    //      corrseponding "GeneralProofStep" that can take care of the needs of
-    //      SubstituteInPlaceInAntecedent, ExpandAntecedentBy*, and
-    //      StrengthenConsequent
-    private class SubstituteInPlaceInAntecedentApplication
-            implements
-                Application {
-
-        //This is stuff we're initialized with
-        private final Map<Conjunct, PExp> myConjunctsToUpdate;
-        private final List<PExp> myLocalTheoremsToAdd;
-        private final List<Integer> myLocalTheoremsToAddIndecis;
-        private final Collection<Site> myInvolvedSubExpressions;
-
-        //This is stuff that gets filled in after apply() that helps our proof
-        //step perform an undo()
-        private List<Conjunct> myRemovedConjuncts = new LinkedList<Conjunct>();
-        private List<Integer> myRemovedConjunctsIndecis =
-                new LinkedList<Integer>();
-
-        private Map<Conjunct, PExp> myOriginalConjunctValues =
-                new HashMap<Conjunct, PExp>();
-        private Set<Conjunct> myAddedConjuncts = new HashSet<Conjunct>();
-
-        private Set<Site> myAffectedSites = new HashSet<Site>();
-
-        public SubstituteInPlaceInAntecedentApplication(
-                Collection<Site> involvedSubExpressions,
-                Map<Conjunct, PExp> updateConjuncts,
-                List<PExp> addLocalTheorems,
-                List<Integer> addLocalTheoremsIndecis) {
-
-            if (addLocalTheorems.size() != addLocalTheoremsIndecis.size()) {
-                throw new IllegalArgumentException("addLocalTheorems and "
-                        + "addLocalTheoremsIndecis must have the same size.");
-            }
-
-            myConjunctsToUpdate = updateConjuncts;
-            myLocalTheoremsToAdd = addLocalTheorems;
-            myLocalTheoremsToAddIndecis = addLocalTheoremsIndecis;
-            myInvolvedSubExpressions = involvedSubExpressions;
-        }
-
-        @Override
-        public String description() {
-            String result;
-
-            if (myLocalTheoremsToAdd.isEmpty()) {
-                result = "To " + myConjunctsToUpdate.values().iterator().next();
-            }
-            else {
-                result = "To " + myLocalTheoremsToAdd.get(0);
-            }
-
-            return result;
-        }
-
-        @Override
-        public void apply(PerVCProverModel m) {
-            //First, do any adding
-            List<LocalTheorem> mLocalTheoremList = m.getLocalTheoremList();
-            LocalTheorem addedTheorem;
-
-            Iterator<PExp> newTheoremIter = myLocalTheoremsToAdd.iterator();
-            Iterator<Integer> newTheoremIndexIter =
-                    myLocalTheoremsToAddIndecis.iterator();
-            while (newTheoremIter.hasNext()) {
-
-                Integer index = newTheoremIndexIter.next();
-                if (index == null) {
-                    index = mLocalTheoremList.size();
-                }
-
-                addedTheorem =
-                        m.addLocalTheorem(newTheoremIter.next(),
-                                new TheoremApplication(
-                                        SubstituteInPlaceInAntecedent.this),
-                                false, index);
-                myAddedConjuncts.add(addedTheorem);
-                myAffectedSites.add(addedTheorem.toSite(m));
-            }
-
-            //Now, make any changes and removals
-            Set<Conjunct> removed = new HashSet<Conjunct>();
-            int removedIndex;
-            for (Map.Entry<Conjunct, PExp> toUpdate : myConjunctsToUpdate
-                    .entrySet()) {
-
-                Conjunct key = toUpdate.getKey();
-                PExp value = toUpdate.getValue();
-                if (value == null) {
-                    if (!removed.contains(key)) {
-                        removed.add(key);
-
-                        removedIndex = m.removeConjunct(key);
-                        myRemovedConjuncts.add(0, key);
-                        myRemovedConjunctsIndecis.add(0, removedIndex);
-                    }
-                }
-                else {
-                    myOriginalConjunctValues.put(key, key.getExpression());
-                    m.alterConjunct(key, value);
-                    myAffectedSites.add(key.toSite(m));
-                }
-            }
-
-            //Finally, add a proof step that represents this application
-            m
-                    .addProofStep(new ModifyAntecedentStep(myRemovedConjuncts,
-                            myRemovedConjunctsIndecis,
-                            myOriginalConjunctValues, myAddedConjuncts,
-                            SubstituteInPlaceInAntecedent.this, this));
-        }
-
-        @Override
-        public Set<Site> involvedSubExpressions() {
-            return new HashSet<Site>(myInvolvedSubExpressions);
-        }
-
-        @Override
-        public Set<Conjunct> getPrerequisiteConjuncts() {
-            Set<Conjunct> result = new HashSet<Conjunct>();
-
-            for (Site s : myInvolvedSubExpressions) {
-                result.add(s.conjunct);
-            }
-
-            result.addAll(myRemovedConjuncts);
-            result.addAll(myConjunctsToUpdate.keySet());
-
-            result.add(myTheorem);
-
-            return result;
-        }
-
-        @Override
-        public Set<Conjunct> getAffectedConjuncts() {
-            Set<Conjunct> result = new HashSet<Conjunct>();
-
-            result.addAll(myAddedConjuncts);
-            result.addAll(myConjunctsToUpdate.keySet());
-
-            return result;
-        }
-
-        @Override
-        public Set<Site> getAffectedSites() {
-            return myAffectedSites;
+            return new GeneralApplication(input.bindSites.values(), newValues, 
+                    newTheorems, newIndecis, SubstituteInPlaceInAntecedent.this,
+                    myTheorem);
         }
     }
 
