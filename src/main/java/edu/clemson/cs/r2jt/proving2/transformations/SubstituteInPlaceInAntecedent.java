@@ -141,13 +141,15 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
                 int maxBindIndex = -1;
                 int curBindIndex;
                 for (Site s : input.bindSites.values()) {
-                    curBindIndex = s.getModel().getConjunctIndex(s.conjunct);
-                    if (curBindIndex > maxBindIndex) {
-                        maxBindIndex = curBindIndex;
-                    }
+                    if (s.conjunct.editable()) {
+                        curBindIndex = s.getModel().getConjunctIndex(s.conjunct);
+                        if (curBindIndex > maxBindIndex) {
+                            maxBindIndex = curBindIndex;
+                        }
 
-                    //We're going to want to delete each of these
-                    newValues.put(s.conjunct, null);
+                        //We're going to want to delete each of these
+                        newValues.put(s.conjunct, null);
+                    }
                 }
 
                 //Add the new, transformed conjuncts
