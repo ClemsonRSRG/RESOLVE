@@ -63,7 +63,9 @@ public class AutomatedProver {
     private final Object WORKER_THREAD_LOCK = new Object();
     private Thread myWorkerThread;
 
-    private MainProofFitnessFunction myFitnessFunction;
+    private MainProofFitnessFunction myMainProofFitnessFunction;
+    private AntecedentDeveloperFitnessFunction 
+            myAntecedentDeveloperFitnessFunction;
 
     private final Set<String> myVariableSymbols;
 
@@ -73,7 +75,9 @@ public class AutomatedProver {
             ImmutableList<Theorem> theoremLibrary, ModuleScope moduleScope,
             int timeout) {
         myModel = m;
-        myFitnessFunction = new MainProofFitnessFunction(m);
+        myMainProofFitnessFunction = new MainProofFitnessFunction(m);
+        myAntecedentDeveloperFitnessFunction = 
+                new AntecedentDeveloperFitnessFunction(m);
         myTimeout = timeout;
 
         //This looks weird but suppresses a "leaked this" warning
@@ -89,43 +93,16 @@ public class AutomatedProver {
         myVariableSymbols = determineVariableSymbols(myModel, moduleScope);
         System.out.println("VARSYM: " + myVariableSymbols);
 
-        PriorityQueue<Transformation> transformationHeap =
-                new PriorityQueue<Transformation>(11,
-                        new TransformationComparator());
-        List<Transformation> theoremTransformations;
-        for (Theorem t : theoremLibrary) {
-            theoremTransformations = t.getTransformations();
-
-            for (Transformation transformation : theoremTransformations) {
-                if (!transformation.couldAffectAntecedent()
-                        && (transformation instanceof StrengthenConsequent || !transformation
-                                .introducesQuantifiedVariables())) {
-
-                    transformationHeap.add(transformation);
-                }
-            }
-        }
-        List<Transformation> transformations = new LinkedList<Transformation>();
-        Transformation top;
-        while (!transformationHeap.isEmpty()
-                && myFitnessFunction
-                        .calculateFitness(transformationHeap.peek()) >= 0) {
-
-            top = transformationHeap.poll();
-            transformations.add(top);
-            System.out.println(top + " (" + top.getClass() + ") -- "
-                    + myFitnessFunction.calculateFitness(top));
-        }
-
-        if (transformationHeap.size() > 0) {
-            System.out.println("<<<<<<<<<<<<<<< recommend against");
-            while (!transformationHeap.isEmpty()) {
-                top = transformationHeap.poll();
-                System.out.println(top + " (" + top.getClass() + ") -- "
-                        + myFitnessFunction.calculateFitness(top));
-            }
-        }
-
+        System.out.println("###################### consequent transformations");
+        List<Transformation> consequentTransformations = 
+                orderByFitnessFunction(myTheoremLibrary, 
+                myMainProofFitnessFunction);
+        
+        System.out.println("###################### antecedent transformations");
+        List<Transformation> antecedentTransformations = 
+                orderByFitnessFunction(myTheoremLibrary, 
+                myAntecedentDeveloperFitnessFunction);
+        
         List<Automator> steps = new LinkedList<Automator>();
         steps.add(new VariablePropagator());
         steps.add(new AntecedentMinimizer(myTheoremLibrary));
@@ -133,15 +110,15 @@ public class AutomatedProver {
         steps.add(new ApplyN(new NoOpLabel(this,
                 "--- Done Minimizing Antecedent ---"), 1));
         steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
-                myTheoremLibrary, 1));
+                antecedentTransformations, 1));
         steps.add(new VariablePropagator());
         steps.add(new AntecedentMinimizer(myTheoremLibrary));
         steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
-                myTheoremLibrary, 1));
+                antecedentTransformations, 1));
         steps.add(new VariablePropagator());
         steps.add(new AntecedentMinimizer(myTheoremLibrary));
         steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
-                myTheoremLibrary, 1));
+                antecedentTransformations, 1));
         steps.add(new VariablePropagator());
         steps.add(new AntecedentMinimizer(myTheoremLibrary));
         steps.add(new ApplyN(new NoOpLabel(this,
@@ -150,11 +127,49 @@ public class AutomatedProver {
         steps.add(new ApplyN(new NoOpLabel(this,
                 "--- Done Minimizing Consequent ---"), 1));
         steps.add(Simplify.INSTANCE);
-        steps.add(new MainProofLevel(m, 3, transformations));
+        steps.add(new MainProofLevel(m, 3, consequentTransformations));
 
         myAutomatorStack.push(new PushSequence(steps));
     }
 
+    private List<Transformation> orderByFitnessFunction(
+            Iterable<Theorem> theorems, FitnessFunction<Transformation> f) {
+        
+        PriorityQueue<Transformation> transformationHeap =
+                new PriorityQueue<Transformation>(11,
+                        new TransformationComparator(f));
+        List<Transformation> theoremTransformations;
+        for (Theorem t : theorems) {
+            theoremTransformations = t.getTransformations();
+
+            for (Transformation transformation : theoremTransformations) {
+                transformationHeap.add(transformation);
+            }
+        }
+        
+        List<Transformation> transformations = new LinkedList<Transformation>();
+        Transformation top;
+        while (!transformationHeap.isEmpty()
+                && f.calculateFitness(transformationHeap.peek()) >= 0) {
+
+            top = transformationHeap.poll();
+            transformations.add(top);
+            System.out.println(top + " (" + top.getClass() + ") -- "
+                    + f.calculateFitness(top));
+        }
+
+        if (transformationHeap.size() > 0) {
+            System.out.println("<<<<<<<<<<<<<<< recommend against");
+            while (!transformationHeap.isEmpty()) {
+                top = transformationHeap.poll();
+                System.out.println(top + " (" + top.getClass() + ") -- "
+                        + f.calculateFitness(top));
+            }
+        }
+        
+        return transformations;
+    }
+    
     private Set<String> determineVariableSymbols(PerVCProverModel model,
             ModuleScope moduleScope) {
 
@@ -400,6 +415,12 @@ public class AutomatedProver {
             implements
                 Comparator<Transformation> {
 
+        private final FitnessFunction<Transformation> myFitnessFunction;
+        
+        public TransformationComparator(FitnessFunction<Transformation> f) {
+            myFitnessFunction = f;
+        }
+        
         @Override
         public int compare(Transformation o1, Transformation o2) {
             int result;

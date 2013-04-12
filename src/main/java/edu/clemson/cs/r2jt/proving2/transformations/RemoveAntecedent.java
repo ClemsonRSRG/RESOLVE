@@ -76,7 +76,7 @@ public class RemoveAntecedent implements Transformation {
         public void apply(PerVCProverModel m) {
             m.addProofStep(new RemoveAntecedentStep(myLocalTheorem, m
                     .getConjunctIndex(myLocalTheorem), RemoveAntecedent.this,
-                    this));
+                    this, null));
             m.removeLocalTheorem(myLocalTheorem);
         }
 

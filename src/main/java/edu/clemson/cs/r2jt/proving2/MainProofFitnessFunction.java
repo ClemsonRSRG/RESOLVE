@@ -7,6 +7,7 @@ package edu.clemson.cs.r2jt.proving2;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.transformations.StrengthenConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.SubstituteInPlaceInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import java.util.HashSet;
@@ -16,7 +17,8 @@ import java.util.Set;
  *
  * @author hamptos
  */
-public class MainProofFitnessFunction {
+public class MainProofFitnessFunction 
+        implements FitnessFunction<Transformation> {
 
     private Set<String> myConsequentVariableNames = new HashSet<String>();
 
@@ -27,10 +29,16 @@ public class MainProofFitnessFunction {
         }
     }
 
+    @Override
     public double calculateFitness(Transformation t) {
         double result = 0;
 
-        if (t instanceof SubstituteInPlaceInConsequent) {
+        if (t.couldAffectAntecedent() || 
+                (!(t instanceof StrengthenConsequent) && 
+                 t.introducesQuantifiedVariables())) {
+            result = -1;
+        }
+        else if (t instanceof SubstituteInPlaceInConsequent) {
             SubstituteInPlaceInConsequent tAsSIPIC =
                     (SubstituteInPlaceInConsequent) t;
 

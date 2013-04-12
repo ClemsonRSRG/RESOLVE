@@ -43,7 +43,7 @@ public class Consequent implements Conjunct {
     public boolean editable() {
         return true;
     }
-    
+
     @Override
     public boolean libraryTheorem() {
         return false;

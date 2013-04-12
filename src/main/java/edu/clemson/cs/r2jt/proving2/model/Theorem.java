@@ -110,7 +110,7 @@ public class Theorem implements Conjunct {
     public boolean editable() {
         return false;
     }
-    
+
     @Override
     public boolean libraryTheorem() {
         return true;

@@ -7,7 +7,10 @@ package edu.clemson.cs.r2jt.proving2.proofsteps;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.Consequent;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  *
@@ -19,8 +22,8 @@ public class RemoveConsequentStep extends AbstractProofStep {
     private final int myOriginalIndex;
 
     public RemoveConsequentStep(Consequent consequent, int originalIndex,
-            Transformation t, Application a) {
-        super(t, a);
+            Transformation t, Application a, Collection<Site> boundSites) {
+        super(t, a, boundSites);
 
         myOriginalIndex = originalIndex;
         myConsequent = consequent;
