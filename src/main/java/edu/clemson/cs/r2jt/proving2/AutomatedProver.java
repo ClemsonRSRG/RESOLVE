@@ -49,6 +49,9 @@ import javax.swing.SwingUtilities;
  */
 public class AutomatedProver {
 
+    public static final String SEARCH_START_LABEL =
+            "--- Done Minimizing Consequent ---";
+
     private final PerVCProverModel myModel;
     private final ImmutableList<Theorem> myTheoremLibrary;
 
@@ -70,6 +73,9 @@ public class AutomatedProver {
     private final Set<String> myVariableSymbols;
 
     private final int myTimeout;
+
+    private long myStartTime;
+    private long myEndTime;
 
     public AutomatedProver(PerVCProverModel m,
             ImmutableList<Theorem> theoremLibrary, ModuleScope moduleScope,
@@ -121,8 +127,7 @@ public class AutomatedProver {
                 "--- Done Developing Antecedent ---"), 1));
 
         steps.add(new Minimizer(myTheoremLibrary));
-        steps.add(new ApplyN(new NoOpLabel(this,
-                "--- Done Minimizing Consequent ---"), 1));
+        steps.add(new ApplyN(new NoOpLabel(this, SEARCH_START_LABEL), 1));
 
         steps.add(Simplify.INSTANCE);
         steps.add(new MainProofLevel(m, 3, consequentTransformations));
@@ -289,6 +294,8 @@ public class AutomatedProver {
         //wait until we've actually gotten out of the automated proof loop--
         //just synchronize on TRANSPORT_LOCK
         synchronized (TRANSPORT_LOCK) {
+            myStartTime = System.currentTimeMillis();
+
             if (myWorkerThread != null) {
                 throw new RuntimeException("Can't start from two threads.");
             }
@@ -309,6 +316,7 @@ public class AutomatedProver {
                 myAutomatorStack.clear();
             }
             myRunningFlag = false;
+            myEndTime = System.currentTimeMillis();
 
             System.out.println("AutomatedProver - end of start()");
 
@@ -316,6 +324,10 @@ public class AutomatedProver {
                 myWorkerThread = null;
             }
         }
+    }
+
+    public long getLastStartLength() {
+        return myEndTime - myStartTime;
     }
 
     public void pause() {
