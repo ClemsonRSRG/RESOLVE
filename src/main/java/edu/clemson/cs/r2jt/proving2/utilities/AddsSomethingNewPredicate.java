@@ -43,8 +43,9 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
 
     @Override
     public boolean test(ProofStep t) {
-        boolean result = (t instanceof IntroduceLocalTheoremStep) ||
-                (t instanceof GeneralStep);
+        boolean result =
+                (t instanceof IntroduceLocalTheoremStep)
+                        || (t instanceof GeneralStep);
 
         if (result) {
             //Any development that doesn't tell us something about at least 
@@ -57,13 +58,14 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
             for (Conjunct c : t.getAffectedConjuncts()) {
                 finalSymbolNames.addAll(c.getExpression().getSymbolNames());
 
-                somethingNew = somethingNew || 
-                        appearsOnce(c.getExpression(), myModel);
+                somethingNew =
+                        somethingNew || appearsOnce(c.getExpression(), myModel);
             }
 
-            result = somethingNew &&
-                    Utilities.containsAny(finalSymbolNames,
-                            myVariableSymbols);
+            result =
+                    somethingNew
+                            && Utilities.containsAny(finalSymbolNames,
+                                    myVariableSymbols);
 
             if (result) {
                 Transformation tTransformation = t.getTransformation();
@@ -71,7 +73,7 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
                 //Any development that reduces the function count should be
                 //accepted
                 result = tTransformation.functionApplicationCountDelta() < 0;
-            
+
                 if (!result) {
                     //Any substitution that doesn't eliminate at least
                     //one symbol should be rolled back
@@ -90,7 +92,8 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
         }
         else {
             throw new RuntimeException(
-                    "Expecting a local theorem introduction?  Got: " + t.getClass());
+                    "Expecting a local theorem introduction?  Got: "
+                            + t.getClass());
         }
 
         return result;

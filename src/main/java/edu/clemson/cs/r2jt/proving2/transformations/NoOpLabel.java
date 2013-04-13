@@ -82,7 +82,7 @@ public class NoOpLabel implements Transformation {
 
             //Useful for debugging--pauses automated prover when a label is 
             //reached
-            //myProver.markToPause();  
+            //myProver.markToPause();
         }
 
         @Override

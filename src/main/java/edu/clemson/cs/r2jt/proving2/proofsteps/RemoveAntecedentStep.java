@@ -22,7 +22,7 @@ public class RemoveAntecedentStep extends AbstractProofStep {
     private final int myOriginalIndex;
 
     public RemoveAntecedentStep(LocalTheorem originalTheorem,
-            int originalIndex, Transformation t, Application a, 
+            int originalIndex, Transformation t, Application a,
             Collection<Site> boundSites) {
         super(t, a, boundSites);
 

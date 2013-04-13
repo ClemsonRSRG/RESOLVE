@@ -19,36 +19,37 @@ import java.util.Set;
  */
 public class EliminateRedundantAntecedents implements Automator {
 
-    public static final EliminateRedundantAntecedents INSTANCE = 
+    public static final EliminateRedundantAntecedents INSTANCE =
             new EliminateRedundantAntecedents();
-    
+
     private EliminateRedundantAntecedents() {
-        
+
     }
-    
+
     @Override
     public void step(Deque<Automator> stack, PerVCProverModel model) {
         Set<PExp> seen = new HashSet<PExp>();
-        
+
         LocalTheorem curTheorem;
         LocalTheorem toRemove = null;
-        Iterator<LocalTheorem> localTheorems = 
+        Iterator<LocalTheorem> localTheorems =
                 model.getLocalTheoremList().iterator();
         while (toRemove == null && localTheorems.hasNext()) {
             curTheorem = localTheorems.next();
-            
+
             if (seen.contains(curTheorem.getAssertion())) {
                 toRemove = curTheorem;
             }
-            
+
             seen.add(curTheorem.getAssertion());
         }
-        
+
         if (toRemove == null) {
             stack.pop();
         }
         else {
-            new RemoveAntecedent(model, toRemove).getApplications(model).next().apply(model);
+            new RemoveAntecedent(model, toRemove).getApplications(model).next()
+                    .apply(model);
         }
     }
 }

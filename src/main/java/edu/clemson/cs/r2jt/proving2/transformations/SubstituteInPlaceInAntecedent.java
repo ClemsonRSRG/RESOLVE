@@ -62,18 +62,21 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
         Iterator<Application> result;
-        
-        Iterator<BindResult> bindResults = m.bind(Collections.singleton(
-                    (Binder) new InductiveAntecedentBinder(myMatchPattern)));
 
-        result = new LazyMappingIterator<BindResult, Application>(
-                bindResults, BIND_RESULT_TO_APPLICATION);
-        
+        Iterator<BindResult> bindResults =
+                m.bind(Collections
+                        .singleton((Binder) new InductiveAntecedentBinder(
+                                myMatchPattern)));
+
+        result =
+                new LazyMappingIterator<BindResult, Application>(bindResults,
+                        BIND_RESULT_TO_APPLICATION);
+
         //We might also have to account for the situation where the conjuncts of
         //the match span multiple theorems
         if (myMatchPatternConjuncts.size() > 1) {
             Set<Binder> binders = new HashSet<Binder>();
-            
+
             Binder binder;
             for (PExp matchConjunct : myMatchPatternConjuncts) {
                 binder =
@@ -82,10 +85,11 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
 
                 binders.add(binder);
             }
-            
-            result = new ChainingIterator(result, 
-                    new LazyMappingIterator<BindResult, Application>(
-                        m.bind(binders), BIND_RESULT_TO_APPLICATION));
+
+            result =
+                    new ChainingIterator(result,
+                            new LazyMappingIterator<BindResult, Application>(m
+                                    .bind(binders), BIND_RESULT_TO_APPLICATION));
         }
 
         return result;
@@ -201,9 +205,9 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
                 }
             }
 
-            return new GeneralApplication(input.bindSites.values(), newValues, 
-                    newTheorems, newIndecis, SubstituteInPlaceInAntecedent.this,
-                    myTheorem);
+            return new GeneralApplication(input.bindSites.values(), newValues,
+                    newTheorems, newIndecis,
+                    SubstituteInPlaceInAntecedent.this, myTheorem);
         }
     }
 

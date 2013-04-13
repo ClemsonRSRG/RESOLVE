@@ -183,8 +183,8 @@ public class ExistentialInstantiation implements Transformation {
 
             m.addProofStep(new ExistentialInstantiationStep(
                     ExistentialInstantiation.this, this,
-                    myExistentialConsequent, index, originals, 
-                    Collections.singleton(myBindSite)));
+                    myExistentialConsequent, index, originals, Collections
+                            .singleton(myBindSite)));
         }
 
         @Override
