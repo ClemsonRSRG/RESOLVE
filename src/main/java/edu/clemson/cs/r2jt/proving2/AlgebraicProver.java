@@ -16,7 +16,9 @@ import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.LabelStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
+import edu.clemson.cs.r2jt.proving2.transformations.EliminateTrueConjunctInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
+import edu.clemson.cs.r2jt.proving2.transformations.ReplaceSymmetricEqualityWithTrueInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
@@ -34,6 +36,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JFrame;
@@ -284,19 +287,36 @@ public class AlgebraicProver {
     private void outputProofFile() throws IOException {
         FileWriter w = new FileWriter(new File(proofFileName()));
 
-        for (int i = 0; i < myModels.length; i++) {
-            w.write("=================================== "
-                    + myModels[i].getTheoremName()
-                    + " ===================================\n\n");
+        w.write("Proofs for " + myModuleScope.getModuleIdentifier()
+                + " generated " + new Date() + "\n\n");
 
-            if (myModels[i].getConsequentList().isEmpty()) {
-                w.write("[PROVED] via:\n\n");
+        w.write("=================================== ");
+        w.write("Summary");
+        w.write(" ===================================\n\n");
+
+        int[] stepCount = new int[myModels.length];
+        int[] searchStepCount = new int[myModels.length];
+
+        boolean doneWithAntecedentDevelopment;
+
+        StringBuilder[] buffers = new StringBuilder[myModels.length];
+        for (int i = 0; i < myModels.length; i++) {
+            doneWithAntecedentDevelopment = false;
+
+            buffers[i] = new StringBuilder();
+            buffers[i].append("=================================== ");
+            buffers[i].append(myModels[i].getTheoremName());
+            buffers[i].append(" ===================================\n\n");
+
+            if (myModels[i].noConsequents()) {
+                buffers[i].append("[PROVED] via:\n\n");
 
                 PerVCProverModel workingModel =
                         new PerVCProverModel(myTypeGraph, myVCs.get(i)
                                 .getName(), myVCs.get(i), myTheoremLibrary);
 
-                w.write(workingModel.toString() + "\n\n");
+                buffers[i].append(workingModel.toString());
+                buffers[i].append("\n\n");
 
                 Application lastApplication = null;
                 Transformation stepTransformation;
@@ -306,24 +326,62 @@ public class AlgebraicProver {
                     workingModel.mimic(step);
 
                     if (step.getApplication() != lastApplication) {
+                        stepCount[i]++;
+
+                        if (doneWithAntecedentDevelopment
+                                && !(step.getTransformation() instanceof EliminateTrueConjunctInConsequent)
+                                && !(step.getTransformation() instanceof ReplaceSymmetricEqualityWithTrueInConsequent)) {
+                            searchStepCount[i]++;
+                        }
+
                         lastApplication = step.getApplication();
                         stepTransformation = step.getTransformation();
 
                         if (stepTransformation instanceof NoOpLabel) {
-                            w.write("" + stepTransformation + "\n\n");
+                            doneWithAntecedentDevelopment =
+                                    doneWithAntecedentDevelopment
+                                            || stepTransformation
+                                                    .toString()
+                                                    .equals(
+                                                            AutomatedProver.SEARCH_START_LABEL);
+
+                            buffers[i].append(stepTransformation.toString());
+                            buffers[i].append("\n\n");
                         }
                         else {
-                            w.write("Applied " + stepTransformation + "\n\n");
-                            w.write(workingModel.toString() + "\n\n");
+                            buffers[i].append("Applied ");
+                            buffers[i].append(stepTransformation);
+                            buffers[i].append("\n\n");
+                            buffers[i].append(workingModel.toString());
+                            buffers[i].append("\n\n");
                         }
                     }
                 }
 
-                w.write("Q.E.D.\n\n");
+                buffers[i].append("Q.E.D.\n\n");
             }
             else {
-                w.write("[NOT PROVED]\n\n");
+                buffers[i].append("[NOT PROVED]\n\n");
             }
+
+            w.write("\t" + myModels[i].getTheoremName() + "\t......... ");
+
+            if (myModels[i].noConsequents()) {
+                w.write("proved in "
+                        + myAutomatedProvers[i].getLastStartLength()
+                        + "ms via " + stepCount[i] + " steps ("
+                        + searchStepCount[i] + " search)\n");
+            }
+            else {
+                w.write("[SKIPPED] after "
+                        + myAutomatedProvers[i].getLastStartLength() + "ms");
+            }
+        }
+
+        w.write("\n");
+
+        for (int i = 0; i < myModels.length; i++) {
+            w.write(buffers[i].toString());
         }
 
         w.flush();

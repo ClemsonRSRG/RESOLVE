@@ -112,8 +112,8 @@ public class EliminateTrueConjunctInConsequent implements Transformation {
             m.addProofStep(new RemoveConsequentStep(
                     (Consequent) mySite.conjunct, m
                             .getConjunctIndex(mySite.conjunct),
-                    EliminateTrueConjunctInConsequent.this, this, 
-                    Collections.singleton(mySite)));
+                    EliminateTrueConjunctInConsequent.this, this, Collections
+                            .singleton(mySite)));
 
             m.removeConjunct(mySite.conjunct);
         }

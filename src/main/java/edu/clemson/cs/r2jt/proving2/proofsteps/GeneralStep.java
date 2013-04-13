@@ -43,7 +43,7 @@ public class GeneralStep extends AbstractProofStep {
 
         myIntroducedConjuncts = introducedConjuncts;
     }
-    
+
     public Set<Conjunct> getIntroducedConjuncts() {
         return myIntroducedConjuncts;
     }
