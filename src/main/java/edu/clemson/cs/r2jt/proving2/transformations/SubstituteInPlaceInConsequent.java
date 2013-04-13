@@ -147,8 +147,8 @@ public class SubstituteInPlaceInConsequent implements Transformation {
                             transformed);
 
             m.addProofStep(new ModifyConsequentStep(myBindSite, myFinalSite,
-                    SubstituteInPlaceInConsequent.this, this, 
-                    Collections.singleton(myBindSite)));
+                    SubstituteInPlaceInConsequent.this, this, Collections
+                            .singleton(myBindSite)));
         }
 
         @Override

@@ -17,8 +17,9 @@ import java.util.Set;
  *
  * @author hamptos
  */
-public class MainProofFitnessFunction 
-        implements FitnessFunction<Transformation> {
+public class MainProofFitnessFunction
+        implements
+            FitnessFunction<Transformation> {
 
     private Set<String> myConsequentVariableNames = new HashSet<String>();
 
@@ -33,9 +34,9 @@ public class MainProofFitnessFunction
     public double calculateFitness(Transformation t) {
         double result = 0;
 
-        if (t.couldAffectAntecedent() || 
-                (!(t instanceof StrengthenConsequent) && 
-                 t.introducesQuantifiedVariables())) {
+        if (t.couldAffectAntecedent()
+                || (!(t instanceof StrengthenConsequent) && t
+                        .introducesQuantifiedVariables())) {
             result = -1;
         }
         else if (t instanceof SubstituteInPlaceInConsequent) {
