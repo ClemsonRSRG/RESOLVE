@@ -28,7 +28,7 @@ public class StrengthenConsequentStep extends AbstractProofStep {
 
     public StrengthenConsequentStep(List<Conjunct> eliminatedConjuncts,
             List<Integer> eliminatedConjunctsIndecis,
-            Set<Conjunct> newConjuncts, Transformation t, Application a, 
+            Set<Conjunct> newConjuncts, Transformation t, Application a,
             Collection<Site> boundSites) {
         super(t, a, boundSites);
 

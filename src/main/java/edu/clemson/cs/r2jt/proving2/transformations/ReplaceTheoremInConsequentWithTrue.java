@@ -120,8 +120,8 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
                             .getTrue());
 
             m.addProofStep(new ModifyConsequentStep(myBindSite, myFinalSite,
-                    ReplaceTheoremInConsequentWithTrue.this, this, 
-                    Collections.singleton(myBindSite)));
+                    ReplaceTheoremInConsequentWithTrue.this, this, Collections
+                            .singleton(myBindSite)));
         }
 
         @Override

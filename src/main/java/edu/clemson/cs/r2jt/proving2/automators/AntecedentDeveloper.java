@@ -28,8 +28,8 @@ public class AntecedentDeveloper implements Automator {
     private int myRemainingRounds;
 
     public AntecedentDeveloper(PerVCProverModel model,
-            Set<String> variableSymbols, Iterable<Transformation> transformations,
-            int totalRounds) {
+            Set<String> variableSymbols,
+            Iterable<Transformation> transformations, int totalRounds) {
         myDevelopmentPredicate =
                 new AddsSomethingNewPredicate(model, variableSymbols);
         myRemainingRounds = totalRounds;
@@ -54,7 +54,8 @@ public class AntecedentDeveloper implements Automator {
         if (myRemainingRounds > 0) {
             System.out.println("AntecedentDeveloper got the heartbeat.");
             stack.push(new AntecedentDeveloperRound(model));
-        } else {
+        }
+        else {
             stack.pop();
         }
 
@@ -124,13 +125,14 @@ public class AntecedentDeveloper implements Automator {
 
                 System.out
                         .println("AntecedentDeveloperRound - adding development - "
-                        + myDevelopmentCount);
+                                + myDevelopmentCount);
 
                 myProbationaryApplication =
                         new ProbationaryApplication(myApplications.next(),
-                        myDevelopmentPredicate);
+                                myDevelopmentPredicate);
                 stack.push(myProbationaryApplication);
-            } else {
+            }
+            else {
                 stack.pop();
             }
         }

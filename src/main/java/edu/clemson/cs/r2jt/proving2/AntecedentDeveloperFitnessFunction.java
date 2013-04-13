@@ -18,9 +18,10 @@ import java.util.Set;
  *
  * @author hamptos
  */
-public class AntecedentDeveloperFitnessFunction 
-        implements FitnessFunction<Transformation> {
-    
+public class AntecedentDeveloperFitnessFunction
+        implements
+            FitnessFunction<Transformation> {
+
     private Set<String> myConsequentVariableNames = new HashSet<String>();
 
     public AntecedentDeveloperFitnessFunction(PerVCProverModel model) {

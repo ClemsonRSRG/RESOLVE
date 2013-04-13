@@ -37,8 +37,7 @@ public class GeneralApplication implements Application {
     //This is stuff that gets filled in after apply() that helps our proof
     //step perform an undo()
     private List<Conjunct> myRemovedConjuncts = new LinkedList<Conjunct>();
-    private List<Integer> myRemovedConjunctsIndecis =
-            new LinkedList<Integer>();
+    private List<Integer> myRemovedConjunctsIndecis = new LinkedList<Integer>();
 
     private Map<Conjunct, PExp> myOriginalConjunctValues =
             new HashMap<Conjunct, PExp>();
@@ -50,8 +49,7 @@ public class GeneralApplication implements Application {
     private final Theorem myTheorem;
 
     public GeneralApplication(Collection<Site> involvedSubExpressions,
-            Map<Conjunct, PExp> updateConjuncts, 
-            List<PExp> addLocalTheorems,
+            Map<Conjunct, PExp> updateConjuncts, List<PExp> addLocalTheorems,
             List<Integer> addLocalTheoremsIndecis, Transformation t,
             Theorem theorem) {
 
@@ -100,8 +98,8 @@ public class GeneralApplication implements Application {
 
             addedTheorem =
                     m.addLocalTheorem(newTheoremIter.next(),
-                            new TheoremApplication(myTransformation),
-                            false, index);
+                            new TheoremApplication(myTransformation), false,
+                            index);
             myAddedConjuncts.add(addedTheorem);
             myAffectedSites.add(addedTheorem.toSite(m));
         }
@@ -131,11 +129,10 @@ public class GeneralApplication implements Application {
         }
 
         //Finally, add a proof step that represents this application
-        m
-                .addProofStep(new GeneralStep(myRemovedConjuncts,
-                        myRemovedConjunctsIndecis,
-                        myOriginalConjunctValues, myAddedConjuncts,
-                        myTransformation, this, myInvolvedSubExpressions));
+        m.addProofStep(new GeneralStep(myRemovedConjuncts,
+                myRemovedConjunctsIndecis, myOriginalConjunctValues,
+                myAddedConjuncts, myTransformation, this,
+                myInvolvedSubExpressions));
     }
 
     @Override

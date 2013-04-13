@@ -32,7 +32,7 @@ public interface ProofStep {
      * @return 
      */
     public Set<Conjunct> getPrerequisiteConjuncts();
-    
+
     /**
      * <p>A subset of the prerequisite conjuncts: those conjuncts that were
      * bound against.</p>

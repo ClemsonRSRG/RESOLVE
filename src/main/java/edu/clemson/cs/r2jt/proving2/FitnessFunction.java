@@ -11,5 +11,6 @@ import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
  * @author hamptos
  */
 public interface FitnessFunction<T> {
+
     public double calculateFitness(T t);
 }

@@ -49,6 +49,9 @@ import javax.swing.SwingUtilities;
  */
 public class AutomatedProver {
 
+    public static final String SEARCH_START_LABEL =
+            "--- Done Minimizing Consequent ---";
+
     private final PerVCProverModel myModel;
     private final ImmutableList<Theorem> myTheoremLibrary;
 
@@ -65,19 +68,21 @@ public class AutomatedProver {
     private Thread myWorkerThread;
 
     private MainProofFitnessFunction myMainProofFitnessFunction;
-    private AntecedentDeveloperFitnessFunction 
-            myAntecedentDeveloperFitnessFunction;
+    private AntecedentDeveloperFitnessFunction myAntecedentDeveloperFitnessFunction;
 
     private final Set<String> myVariableSymbols;
 
     private final int myTimeout;
+
+    private long myStartTime;
+    private long myEndTime;
 
     public AutomatedProver(PerVCProverModel m,
             ImmutableList<Theorem> theoremLibrary, ModuleScope moduleScope,
             int timeout) {
         myModel = m;
         myMainProofFitnessFunction = new MainProofFitnessFunction(m);
-        myAntecedentDeveloperFitnessFunction = 
+        myAntecedentDeveloperFitnessFunction =
                 new AntecedentDeveloperFitnessFunction(m);
         myTimeout = timeout;
 
@@ -95,22 +100,22 @@ public class AutomatedProver {
         System.out.println("VARSYM: " + myVariableSymbols);
 
         System.out.println("###################### consequent transformations");
-        List<Transformation> consequentTransformations = 
-                orderByFitnessFunction(myTheoremLibrary, 
-                myMainProofFitnessFunction);
-        
+        List<Transformation> consequentTransformations =
+                orderByFitnessFunction(myTheoremLibrary,
+                        myMainProofFitnessFunction);
+
         System.out.println("###################### antecedent transformations");
-        List<Transformation> antecedentTransformations = 
-                orderByFitnessFunction(myTheoremLibrary, 
-                myAntecedentDeveloperFitnessFunction);
-        
+        List<Transformation> antecedentTransformations =
+                orderByFitnessFunction(myTheoremLibrary,
+                        myAntecedentDeveloperFitnessFunction);
+
         List<Automator> steps = new LinkedList<Automator>();
         steps.add(new VariablePropagator());
         steps.add(new AntecedentMinimizer(myTheoremLibrary));
         steps.add(new VariablePropagator());
         steps.add(new ApplyN(new NoOpLabel(this,
                 "--- Done Minimizing Antecedent ---"), 1));
-        
+
         for (int i = 0; i < 3; i++) {
             steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
                     antecedentTransformations, 1));
@@ -120,11 +125,10 @@ public class AutomatedProver {
         }
         steps.add(new ApplyN(new NoOpLabel(this,
                 "--- Done Developing Antecedent ---"), 1));
-        
+
         steps.add(new Minimizer(myTheoremLibrary));
-        steps.add(new ApplyN(new NoOpLabel(this,
-                "--- Done Minimizing Consequent ---"), 1));
-        
+        steps.add(new ApplyN(new NoOpLabel(this, SEARCH_START_LABEL), 1));
+
         steps.add(Simplify.INSTANCE);
         steps.add(new MainProofLevel(m, 3, consequentTransformations));
 
@@ -133,7 +137,7 @@ public class AutomatedProver {
 
     private List<Transformation> orderByFitnessFunction(
             Iterable<Theorem> theorems, FitnessFunction<Transformation> f) {
-        
+
         PriorityQueue<Transformation> transformationHeap =
                 new PriorityQueue<Transformation>(11,
                         new TransformationComparator(f));
@@ -145,7 +149,7 @@ public class AutomatedProver {
                 transformationHeap.add(transformation);
             }
         }
-        
+
         List<Transformation> transformations = new LinkedList<Transformation>();
         Transformation top;
         while (!transformationHeap.isEmpty()
@@ -165,10 +169,10 @@ public class AutomatedProver {
                         + f.calculateFitness(top));
             }
         }
-        
+
         return transformations;
     }
-    
+
     private Set<String> determineVariableSymbols(PerVCProverModel model,
             ModuleScope moduleScope) {
 
@@ -290,6 +294,8 @@ public class AutomatedProver {
         //wait until we've actually gotten out of the automated proof loop--
         //just synchronize on TRANSPORT_LOCK
         synchronized (TRANSPORT_LOCK) {
+            myStartTime = System.currentTimeMillis();
+
             if (myWorkerThread != null) {
                 throw new RuntimeException("Can't start from two threads.");
             }
@@ -310,6 +316,7 @@ public class AutomatedProver {
                 myAutomatorStack.clear();
             }
             myRunningFlag = false;
+            myEndTime = System.currentTimeMillis();
 
             System.out.println("AutomatedProver - end of start()");
 
@@ -317,6 +324,10 @@ public class AutomatedProver {
                 myWorkerThread = null;
             }
         }
+    }
+
+    public long getLastStartLength() {
+        return myEndTime - myStartTime;
     }
 
     public void pause() {
@@ -415,11 +426,11 @@ public class AutomatedProver {
                 Comparator<Transformation> {
 
         private final FitnessFunction<Transformation> myFitnessFunction;
-        
+
         public TransformationComparator(FitnessFunction<Transformation> f) {
             myFitnessFunction = f;
         }
-        
+
         @Override
         public int compare(Transformation o1, Transformation o2) {
             int result;

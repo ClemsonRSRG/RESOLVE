@@ -39,10 +39,10 @@ public class ExpandAntecedentBySubstitution implements Transformation {
     private final PExp myMatchPattern;
     private final List<PExp> myMatchPatternConjuncts;
     private final int myMatchPatternConjunctsSize;
-    
+
     private final PExp myTransformationTemplate;
     private final List<PExp> myTransformationTemplateConjuncts;
-    
+
     private final Theorem myTheorem;
 
     public ExpandAntecedentBySubstitution(Theorem t, PExp tMatchPattern,
@@ -50,11 +50,11 @@ public class ExpandAntecedentBySubstitution implements Transformation {
         myMatchPattern = tMatchPattern;
         myMatchPatternConjuncts = tMatchPattern.splitIntoConjuncts();
         myMatchPatternConjunctsSize = myMatchPatternConjuncts.size();
-        
+
         myTransformationTemplate = tTransformationTemplate;
-        myTransformationTemplateConjuncts = 
+        myTransformationTemplateConjuncts =
                 tTransformationTemplate.splitIntoConjuncts();
-        
+
         myTheorem = t;
     }
 
@@ -73,18 +73,22 @@ public class ExpandAntecedentBySubstitution implements Transformation {
     @Override
     public Iterator<Application> getApplications(PerVCProverModel m) {
         Iterator<Application> result;
-        
-        Iterator<BindResult> bindResults = m.bind(Collections.singleton(
-                    (Binder) new PerVCProverModel.InductiveAntecedentBinder(myMatchPattern)));
 
-        result = new LazyMappingIterator<BindResult, Application>(
-                bindResults, BIND_RESULT_TO_APPLICATION);
-        
+        Iterator<BindResult> bindResults =
+                m
+                        .bind(Collections
+                                .singleton((Binder) new PerVCProverModel.InductiveAntecedentBinder(
+                                        myMatchPattern)));
+
+        result =
+                new LazyMappingIterator<BindResult, Application>(bindResults,
+                        BIND_RESULT_TO_APPLICATION);
+
         //We might also have to account for the situation where the conjuncts of
         //the match span multiple theorems
         if (myMatchPatternConjuncts.size() > 1) {
             Set<Binder> binders = new HashSet<Binder>();
-            
+
             Binder binder;
             for (PExp matchConjunct : myMatchPatternConjuncts) {
                 binder =
@@ -93,10 +97,11 @@ public class ExpandAntecedentBySubstitution implements Transformation {
 
                 binders.add(binder);
             }
-            
-            result = new ChainingIterator(result, 
-                    new LazyMappingIterator<BindResult, Application>(
-                        m.bind(binders), BIND_RESULT_TO_APPLICATION));
+
+            result =
+                    new ChainingIterator(result,
+                            new LazyMappingIterator<BindResult, Application>(m
+                                    .bind(binders), BIND_RESULT_TO_APPLICATION));
         }
 
         return result;
@@ -152,7 +157,7 @@ public class ExpandAntecedentBySubstitution implements Transformation {
             Map<Conjunct, PExp> newValues = new HashMap<Conjunct, PExp>();
             List<PExp> newTheorems = new LinkedList<PExp>();
             List<Integer> newIndecis = new LinkedList<Integer>();
-            
+
             if (input.bindSites.size() > 1) {
                 //Add the new, transformed conjuncts
                 for (PExp newTheorem : myTransformationTemplateConjuncts) {
@@ -181,8 +186,8 @@ public class ExpandAntecedentBySubstitution implements Transformation {
                 }
             }
 
-            return new GeneralApplication(input.bindSites.values(), newValues, 
-                    newTheorems, newIndecis, 
+            return new GeneralApplication(input.bindSites.values(), newValues,
+                    newTheorems, newIndecis,
                     ExpandAntecedentBySubstitution.this, myTheorem);
         }
     }
