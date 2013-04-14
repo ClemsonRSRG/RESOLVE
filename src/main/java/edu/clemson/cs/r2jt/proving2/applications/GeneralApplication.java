@@ -151,7 +151,7 @@ public class GeneralApplication implements Application {
         result.addAll(myRemovedConjuncts);
         result.addAll(myConjunctsToUpdate.keySet());
 
-        if (myTheorem == null) {
+        if (myTheorem != null) {
             result.add(myTheorem);
         }
 

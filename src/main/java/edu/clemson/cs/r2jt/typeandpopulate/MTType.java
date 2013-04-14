@@ -29,6 +29,11 @@ public abstract class MTType {
     private final Map<MTType, Map<String, MTType>> myKnownSyntacticSubtypeBindings =
             new HashMap<MTType, Map<String, MTType>>();
 
+    /**
+     * <p>Allows us to detect if we're getting into an equals-loop.</p>
+     */
+    private int myEqualsDepth = 0;
+
     public MTType(TypeGraph typeGraph) {
         myTypeGraph = typeGraph;
     }
@@ -97,13 +102,19 @@ public abstract class MTType {
      */
     @Override
     public final boolean equals(Object o) {
+        myEqualsDepth++;
+
         boolean result;
 
         if (this == o) {
             result = true;
         }
         else {
-            result = myKnownAlphaEquivalencies.contains(o);
+            //We only check our cache if we're at the first level of equals
+            //comparison to avoid an infinite recursive loop
+            result =
+                    (myEqualsDepth == 1)
+                            && myKnownAlphaEquivalencies.contains(o);
 
             if (!result) {
                 try {
@@ -114,17 +125,22 @@ public abstract class MTType {
                     alphaEq.reset();
 
                     alphaEq.visit(this, (MTType) o);
+
                     result = alphaEq.getResult();
                 }
                 catch (ClassCastException cce) {
                     result = false;
                 }
 
-                if (result) {
+                //We only cache our answer at the first level to avoid an 
+                //infinite equals loop
+                if ((myEqualsDepth == 1) && result) {
                     myKnownAlphaEquivalencies.add(o);
                 }
             }
         }
+
+        myEqualsDepth--;
 
         return result;
     }
@@ -291,5 +307,24 @@ public abstract class MTType {
      */
     public boolean membersKnownToContainOnlyMTypes() {
         return false;
+    }
+
+    private class MTTypeObjectHashWrapper {
+
+        public final MTType type;
+
+        public MTTypeObjectHashWrapper(MTType t) {
+            type = t;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return type.equals(o);
+        }
+
+        @Override
+        public int hashCode() {
+            return type.objectReferenceHashCode();
+        }
     }
 }

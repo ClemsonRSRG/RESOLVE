@@ -19,6 +19,7 @@ import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.transformations.EliminateTrueConjunctInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
 import edu.clemson.cs.r2jt.proving2.transformations.ReplaceSymmetricEqualityWithTrueInConsequent;
+import edu.clemson.cs.r2jt.proving2.transformations.ReplaceTheoremInConsequentWithTrue;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
@@ -330,7 +331,8 @@ public class AlgebraicProver {
 
                         if (doneWithAntecedentDevelopment
                                 && !(step.getTransformation() instanceof EliminateTrueConjunctInConsequent)
-                                && !(step.getTransformation() instanceof ReplaceSymmetricEqualityWithTrueInConsequent)) {
+                                && !(step.getTransformation() instanceof ReplaceSymmetricEqualityWithTrueInConsequent)
+                                && !(step.getTransformation() instanceof ReplaceTheoremInConsequentWithTrue)) {
                             searchStepCount[i]++;
                         }
 
@@ -374,7 +376,7 @@ public class AlgebraicProver {
             }
             else {
                 w.write("[SKIPPED] after "
-                        + myAutomatedProvers[i].getLastStartLength() + "ms");
+                        + myAutomatedProvers[i].getLastStartLength() + "ms\n");
             }
         }
 
@@ -436,23 +438,6 @@ public class AlgebraicProver {
             myAutomatedProvers[previousIndex].pause();
             //The prover thread will take care of starting the appropriate
             //automated prover now
-        }
-    }
-
-    private void invokeAndWait(Runnable r) {
-        if (SwingUtilities.isEventDispatchThread()) {
-            r.run();
-        }
-        else {
-            try {
-                SwingUtilities.invokeAndWait(r);
-            }
-            catch (InterruptedException ie) {
-                throw new RuntimeException(ie);
-            }
-            catch (InvocationTargetException ite) {
-                throw new RuntimeException(ite);
-            }
         }
     }
 
