@@ -34,12 +34,12 @@ public class SubstituteInPlaceInConsequent implements Transformation {
 
     private PExp myMatchPattern;
     private PExp myTransformationTemplate;
-    private final Theorem myThorem;
+    private final Theorem myTheorem;
 
     public SubstituteInPlaceInConsequent(Theorem t, PExp tMatchPattern,
             PExp tTransformationTemplate) {
 
-        myThorem = t;
+        myTheorem = t;
         myMatchPattern = tMatchPattern;
         myTransformationTemplate = tTransformationTemplate;
     }
@@ -105,6 +105,11 @@ public class SubstituteInPlaceInConsequent implements Transformation {
         return Equivalence.EQUIVALENT;
     }
 
+    @Override
+    public String getKey() {
+        return myTheorem.getAssertion() + " " + this.getClass().getName();
+    }
+
     private class BindResultToApplication
             implements
                 Mapping<BindResult, Application> {
@@ -161,7 +166,7 @@ public class SubstituteInPlaceInConsequent implements Transformation {
             Set<Conjunct> result = new HashSet<Conjunct>();
 
             result.add(myBindSite.conjunct);
-            result.add(myThorem);
+            result.add(myTheorem);
 
             return result;
         }

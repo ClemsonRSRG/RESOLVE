@@ -158,6 +158,11 @@ public class ExpandAntecedentByImplication implements Transformation {
         return Equivalence.WEAKER;
     }
 
+    @Override
+    public String getKey() {
+        return myTheorem.getAssertion() + " " + this.getClass().getName();
+    }
+
     public class BindResultToApplication
             implements
                 Mapping<BindResult, Application> {
