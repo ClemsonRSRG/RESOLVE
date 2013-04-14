@@ -68,7 +68,7 @@ public final class PerVCProverModel {
             public boolean report(boolean important) {
                 eventCount++;
 
-                return important || (eventCount % 20 == 0);
+                return (eventCount % 300 == 0);
             }
         };
 
@@ -559,8 +559,13 @@ public final class PerVCProverModel {
     public int removeConsequent(Consequent c) {
         int result = getConjunctIndex(c);
 
-        myConsequents.remove(c);
-        myConsequentsHash -= c.getExpression().hashCode();
+        boolean removed = myConsequents.remove(c);
+        if (removed) {
+            myConsequentsHash -= c.getExpression().hashCode();
+        }
+        else {
+            throw new IllegalArgumentException("No such consequent.");
+        }
 
         //This change is important if it eleminates the last conjunct--because
         //then we've proved it!

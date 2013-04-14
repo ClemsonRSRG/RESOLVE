@@ -13,10 +13,12 @@ import edu.clemson.cs.r2jt.proving2.applications.GeneralApplication;
 import edu.clemson.cs.r2jt.proving2.model.AtLeastOneLocalTheoremBinder;
 import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.AbstractBinder;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.BindResult;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.proving2.model.Theorem;
+import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;
 import edu.clemson.cs.r2jt.utilities.Mapping;
 import java.util.Collections;
 import java.util.HashMap;
@@ -77,7 +79,7 @@ public class ExpandAntecedentBySubstitution implements Transformation {
         Iterator<BindResult> bindResults =
                 m
                         .bind(Collections
-                                .singleton((Binder) new PerVCProverModel.InductiveAntecedentBinder(
+                                .singleton((Binder) new SkipOneTopLevelAntecedentBinder(
                                         myMatchPattern)));
 
         result =
@@ -146,6 +148,74 @@ public class ExpandAntecedentBySubstitution implements Transformation {
     @Override
     public Equivalence getEquivalence() {
         return Equivalence.EQUIVALENT;
+    }
+
+    private class SkipOneTopLevelAntecedentBinder extends AbstractBinder {
+
+        public SkipOneTopLevelAntecedentBinder(PExp pattern) {
+            super(pattern);
+        }
+
+        @Override
+        public Iterator<Site> getInterestingSiteVisitor(PerVCProverModel m,
+                List<Site> boundSitesSoFar) {
+            return new InductiveSiteIteratorIterator(
+                    new SkipOneTopLevelAntecedentIterator(m
+                            .topLevelAntecedentSiteIterator(), myTheorem));
+        }
+    }
+
+    private static class SkipOneTopLevelAntecedentIterator
+            implements
+                Iterator<Site> {
+
+        private final Conjunct myTheoremToSkip;
+        private final Iterator<Site> myBaseIterator;
+        private Site myNextReturn;
+
+        public SkipOneTopLevelAntecedentIterator(Iterator<Site> sites,
+                Conjunct theoremToSkip) {
+            myTheoremToSkip = theoremToSkip;
+            myBaseIterator = sites;
+
+            setUpNext();
+        }
+
+        private void setUpNext() {
+            if (myBaseIterator.hasNext()) {
+                myNextReturn = myBaseIterator.next();
+
+                if (myNextReturn.conjunct == myTheoremToSkip) {
+                    setUpNext();
+                }
+            }
+            else {
+                myNextReturn = null;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return (myNextReturn != null);
+        }
+
+        @Override
+        public Site next() {
+            if (myNextReturn == null) {
+                throw new UnsupportedOperationException();
+            }
+
+            Site result = myNextReturn;
+
+            setUpNext();
+
+            return result;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     private class BindResultToApplication
