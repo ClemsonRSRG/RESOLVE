@@ -150,6 +150,11 @@ public class ExpandAntecedentBySubstitution implements Transformation {
         return Equivalence.EQUIVALENT;
     }
 
+    @Override
+    public String getKey() {
+        return myTheorem.getAssertion() + " " + this.getClass().getName();
+    }
+
     private class SkipOneTopLevelAntecedentBinder extends AbstractBinder {
 
         public SkipOneTopLevelAntecedentBinder(PExp pattern) {

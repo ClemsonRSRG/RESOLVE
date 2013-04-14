@@ -5,6 +5,7 @@
 package edu.clemson.cs.r2jt.proving2.utilities;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving2.AutomatedProver;
 import edu.clemson.cs.r2jt.proving2.Utilities;
 import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
@@ -64,8 +65,9 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
 
             result =
                     somethingNew
-                            && Utilities.containsAny(finalSymbolNames,
-                                    myVariableSymbols);
+                            && (!AutomatedProver.H_ONLY_DEVELOP_RELEVANT_TERMS || Utilities
+                                    .containsAny(finalSymbolNames,
+                                            myVariableSymbols));
 
             if (result) {
                 Transformation tTransformation = t.getTransformation();
@@ -74,7 +76,7 @@ public class AddsSomethingNewPredicate implements Predicate<ProofStep> {
                 //accepted
                 result = tTransformation.functionApplicationCountDelta() < 0;
 
-                if (!result) {
+                if (!result && AutomatedProver.H_ENCOURAGE_ANTECEDENT_DIVERSITY) {
                     //Any substitution that doesn't eliminate at least
                     //one symbol should be rolled back
                     Set<Conjunct> originalTheorems = t.getBoundConjuncts();

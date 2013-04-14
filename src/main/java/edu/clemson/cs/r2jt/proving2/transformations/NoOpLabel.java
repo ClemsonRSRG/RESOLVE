@@ -74,6 +74,11 @@ public class NoOpLabel implements Transformation {
         return myLabel;
     }
 
+    @Override
+    public String getKey() {
+        return myLabel + " " + this.getClass().getName();
+    }
+
     private class NoOpLabelApplication implements Application {
 
         @Override

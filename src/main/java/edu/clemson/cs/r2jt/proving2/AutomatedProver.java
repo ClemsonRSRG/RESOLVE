@@ -10,6 +10,7 @@ import edu.clemson.cs.r2jt.proving2.automators.AntecedentDeveloper;
 import edu.clemson.cs.r2jt.proving2.automators.AntecedentMinimizer;
 import edu.clemson.cs.r2jt.proving2.automators.ApplyN;
 import edu.clemson.cs.r2jt.proving2.automators.Automator;
+import edu.clemson.cs.r2jt.proving2.automators.EliminateObviousAntecedents;
 import edu.clemson.cs.r2jt.proving2.automators.EliminateRedundantAntecedents;
 import edu.clemson.cs.r2jt.proving2.automators.MainProofLevel;
 import edu.clemson.cs.r2jt.proving2.automators.Minimizer;
@@ -48,6 +49,31 @@ import javax.swing.SwingUtilities;
  * @author hamptos
  */
 public class AutomatedProver {
+
+    /* The flags in this section permit certain heuristics to be turned on/off
+     * for testing purposes.  They should all default to "on".
+     */
+
+    //Look for statements of identity functions (like i + 0 = i) and never 
+    //use them to expand something.  I.e., never take i and make it i + 0.
+    public static final boolean H_DETECT_IDENTITY_EXPANSION = true;
+
+    //Prevent new givens from being developed if they don't mention "important"
+    //terms that appear in the consequent
+    public static final boolean H_ONLY_DEVELOP_RELEVANT_TERMS = true;
+
+    //Only accept antecedent developments that put things in new terms
+    public static final boolean H_ENCOURAGE_ANTECEDENT_DIVERSITY = true;
+
+    //Apply minimization steps to antecedents and consequents
+    public static final boolean H_PERFORM_MINIMIZATION = true;
+
+    //Detect and avoid cycles
+    public static final boolean H_DETECT_CYCLES = true;
+
+    //Use a fitness function to try and order transformations so that "better"
+    //transformations are applied first
+    public static final boolean H_BEST_FIRST_CONSEQUENT_EXPLORATION = true;
 
     public static final String SEARCH_START_LABEL =
             "--- Done Minimizing Consequent ---";
@@ -111,8 +137,13 @@ public class AutomatedProver {
 
         List<Automator> steps = new LinkedList<Automator>();
         steps.add(new VariablePropagator());
-        steps.add(new AntecedentMinimizer(myTheoremLibrary));
+
+        if (H_PERFORM_MINIMIZATION) {
+            steps.add(new AntecedentMinimizer(myTheoremLibrary));
+        }
+
         steps.add(new VariablePropagator());
+        steps.add(new EliminateObviousAntecedents());
         steps.add(new ApplyN(new NoOpLabel(this,
                 "--- Done Minimizing Antecedent ---"), 1));
 
@@ -120,13 +151,21 @@ public class AutomatedProver {
             steps.add(new AntecedentDeveloper(myModel, myVariableSymbols,
                     antecedentTransformations, 1));
             steps.add(new VariablePropagator());
-            steps.add(new AntecedentMinimizer(myTheoremLibrary));
+
+            if (H_PERFORM_MINIMIZATION) {
+                steps.add(new AntecedentMinimizer(myTheoremLibrary));
+            }
+
             steps.add(EliminateRedundantAntecedents.INSTANCE);
+            steps.add(new EliminateObviousAntecedents());
         }
         steps.add(new ApplyN(new NoOpLabel(this,
                 "--- Done Developing Antecedent ---"), 1));
 
-        steps.add(new Minimizer(myTheoremLibrary));
+        if (H_PERFORM_MINIMIZATION) {
+            steps.add(new Minimizer(myTheoremLibrary));
+        }
+
         steps.add(new ApplyN(new NoOpLabel(this, SEARCH_START_LABEL), 1));
 
         steps.add(Simplify.INSTANCE);
@@ -445,7 +484,8 @@ public class AutomatedProver {
                 result = 1;
             }
             else {
-                result = 0;
+                //Give us a consistent, if arbitrary, order
+                result = o1.getKey().compareTo(o2.getKey());
             }
 
             return result;

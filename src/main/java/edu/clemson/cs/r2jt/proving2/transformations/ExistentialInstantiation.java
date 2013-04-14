@@ -107,6 +107,11 @@ public class ExistentialInstantiation implements Transformation {
         return "Existential Instantiation";
     }
 
+    @Override
+    public String getKey() {
+        return this.getClass().getName();
+    }
+
     public static class ConsequentBasedBinder extends AbstractBinder {
 
         private final Consequent myConsequent;
