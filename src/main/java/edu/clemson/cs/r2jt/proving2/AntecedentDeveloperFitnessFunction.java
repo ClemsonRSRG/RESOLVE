@@ -38,7 +38,8 @@ public class AntecedentDeveloperFitnessFunction
         if (t.couldAffectConsequent() || t.introducesQuantifiedVariables()) {
             result = -1;
         }
-        else if (t instanceof ExpandAntecedentBySubstitution) {
+        else if (AutomatedProver.H_DETECT_IDENTITY_EXPANSION
+                && t instanceof ExpandAntecedentBySubstitution) {
             ExpandAntecedentBySubstitution tAsSIPIC =
                     (ExpandAntecedentBySubstitution) t;
 

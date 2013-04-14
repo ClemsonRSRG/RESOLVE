@@ -47,4 +47,14 @@ public interface Transformation {
     public Set<String> getReplacementSymbolNames();
 
     public Equivalence getEquivalence();
+
+    /**
+     * <p>A string key that identifies a transformation consistently between 
+     * invocations of the compiler.  That is: all transformations of the same
+     * concrete class that do the same thing should share a key, and that key
+     * should not change from invocation to invocation of the compiler.</p>
+     * 
+     * @return 
+     */
+    public String getKey();
 }

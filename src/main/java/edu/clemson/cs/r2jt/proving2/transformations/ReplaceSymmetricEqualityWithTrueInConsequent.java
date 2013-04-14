@@ -79,6 +79,11 @@ public class ReplaceSymmetricEqualityWithTrueInConsequent
         return Equivalence.EQUIVALENT;
     }
 
+    @Override
+    public String getKey() {
+        return this.getClass().getName();
+    }
+
     private class SiteToApplication implements Mapping<Site, Application> {
 
         @Override

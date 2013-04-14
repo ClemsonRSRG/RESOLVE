@@ -146,6 +146,11 @@ public class StrengthenConsequent implements Transformation {
         return "Strengthen to " + Utilities.conjunctListToString(myAntecedents);
     }
 
+    @Override
+    public String getKey() {
+        return myTheorem.getAssertion() + " " + this.getClass().getName();
+    }
+
     private class StrengthenConsequentApplication implements Application {
 
         private final Map<PExp, PExp> myBindings;
