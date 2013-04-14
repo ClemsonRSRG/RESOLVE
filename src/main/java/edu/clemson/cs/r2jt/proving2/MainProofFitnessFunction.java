@@ -39,7 +39,8 @@ public class MainProofFitnessFunction
                         .introducesQuantifiedVariables())) {
             result = -1;
         }
-        else if (t instanceof SubstituteInPlaceInConsequent) {
+        else if (AutomatedProver.H_DETECT_IDENTITY_EXPANSION
+                && t instanceof SubstituteInPlaceInConsequent) {
             SubstituteInPlaceInConsequent tAsSIPIC =
                     (SubstituteInPlaceInConsequent) t;
 
@@ -53,7 +54,7 @@ public class MainProofFitnessFunction
             }
         }
 
-        if (result == 0) {
+        if (result == 0 && AutomatedProver.H_BEST_FIRST_CONSEQUENT_EXPLORATION) {
             Set<String> introduced =
                     new HashSet<String>(t.getReplacementSymbolNames());
             introduced.removeAll(myConsequentVariableNames);

@@ -70,6 +70,12 @@ public class RemoveAntecedent implements Transformation {
         return Equivalence.WEAKER;
     }
 
+    @Override
+    public String getKey() {
+        return mySourceModel.getConjunctIndex(myLocalTheorem) + " "
+                + this.getClass().getName();
+    }
+
     private class RemoveAntecedentApplication implements Application {
 
         @Override

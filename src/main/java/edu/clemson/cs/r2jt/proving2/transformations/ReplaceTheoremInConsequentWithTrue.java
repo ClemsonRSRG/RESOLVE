@@ -83,6 +83,11 @@ public class ReplaceTheoremInConsequentWithTrue implements Transformation {
         return Equivalence.EQUIVALENT;
     }
 
+    @Override
+    public String getKey() {
+        return myTheorem.getAssertion() + " " + this.getClass().getName();
+    }
+
     private class BindResultToApplication
             implements
                 Mapping<BindResult, Application> {

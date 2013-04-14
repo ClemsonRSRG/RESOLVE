@@ -7,6 +7,7 @@ package edu.clemson.cs.r2jt.proving2.automators;
 import edu.clemson.cs.r2jt.proving.ChainingIterator;
 import edu.clemson.cs.r2jt.proving.DummyIterator;
 import edu.clemson.cs.r2jt.proving.Simplifier;
+import edu.clemson.cs.r2jt.proving2.AutomatedProver;
 import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
@@ -137,8 +138,9 @@ public class MainProofLevel implements Automator {
             stack.push(myRestore);
 
             myDetectedCycleFlag =
-                    myPreviousProofStates.contains(myModel
-                            .implicationHashCode());
+                    AutomatedProver.H_DETECT_CYCLES
+                            && myPreviousProofStates.contains(myModel
+                                    .implicationHashCode());
 
             if (myTetherLength > 0 && !myDetectedCycleFlag) {
                 stack.push(new MainProofLevel(myModel, myTetherLength - 1,

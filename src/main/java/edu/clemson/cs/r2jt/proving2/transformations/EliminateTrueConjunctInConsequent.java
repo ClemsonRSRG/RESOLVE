@@ -143,4 +143,9 @@ public class EliminateTrueConjunctInConsequent implements Transformation {
     public String toString() {
         return "Eliminate true conjunct";
     }
+
+    @Override
+    public String getKey() {
+        return this.getClass().getName();
+    }
 }

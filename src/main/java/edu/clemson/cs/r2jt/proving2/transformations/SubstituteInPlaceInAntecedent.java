@@ -136,6 +136,11 @@ public class SubstituteInPlaceInAntecedent implements Transformation {
         return Transformation.Equivalence.EQUIVALENT;
     }
 
+    @Override
+    public String getKey() {
+        return myTheorem.getAssertion() + " " + this.getClass().getName();
+    }
+
     private class BindResultToApplication
             implements
                 Mapping<PerVCProverModel.BindResult, Application> {
