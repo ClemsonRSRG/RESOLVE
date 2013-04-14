@@ -53,6 +53,8 @@ public class MainProofLevel implements Automator {
 
     private final Set<Integer> myPreviousProofStates;
 
+    private boolean myDetectedCycleFlag;
+
     public MainProofLevel(PerVCProverModel model, int tetherLength,
             Iterable<Transformation> transformations) {
         this(model, tetherLength, transformations, new HashSet<Integer>());
@@ -94,7 +96,10 @@ public class MainProofLevel implements Automator {
      * <p>Performs bookkeeping before a restore happens.</p>
      */
     public void prepForRestore() {
-        myPreviousProofStates.remove(myModel.implicationHashCode());
+        if (!myDetectedCycleFlag) {
+            myPreviousProofStates.remove(myModel.implicationHashCode());
+        }
+        myDetectedCycleFlag = false;
     }
 
     @Override
@@ -130,10 +135,12 @@ public class MainProofLevel implements Automator {
         case 2:
             //Next level
             stack.push(myRestore);
-            if (myTetherLength > 0
-                    && !myPreviousProofStates.contains(myModel
-                            .implicationHashCode())) {
 
+            myDetectedCycleFlag =
+                    myPreviousProofStates.contains(myModel
+                            .implicationHashCode());
+
+            if (myTetherLength > 0 && !myDetectedCycleFlag) {
                 stack.push(new MainProofLevel(myModel, myTetherLength - 1,
                         myTransformations, myPreviousProofStates));
             }
