@@ -55,6 +55,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Populator extends TreeWalkerVisitor {
 
@@ -210,6 +212,23 @@ public class Populator extends TreeWalkerVisitor {
         //Concept realizations implicitly import the concepts they realize
         myCurModuleScope.addImport(new ModuleIdentifier(conceptBody
                 .getConceptName().getName()));
+    }
+
+    @Override
+    public void midFacilityOperationDec(FacilityOperationDec node,
+            ResolveConceptualElement previous, ResolveConceptualElement next) {
+        if (previous == node.getReturnTy()) {
+            try {
+                myBuilder.startScope(node);
+                myBuilder.getInnermostActiveScope().addProgramVariable(
+                        node.getName().getName(), node,
+                        node.getReturnTy().getProgramTypeValue());
+            }
+            catch (DuplicateSymbolException dse) {
+                duplicateSymbol(node.getName().getName(), node.getName()
+                        .getLocation());
+            }
+        }
     }
 
     @Override
@@ -405,8 +424,6 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preProcedureDec(ProcedureDec dec) {
-        myCurrentProcedure = dec;
-
         try {
             //Figure out what Operation we correspond to (we don't use 
             //OperationQuery because we want to check parameter types 
@@ -438,51 +455,19 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
-    public boolean walkFuncAssignStmt(FuncAssignStmt s) {
-        preAny(s);
-        preStatement(s);
-        preFuncAssignStmt(s);
-
-        boolean walkVar = true;
-        VariableExp v = s.getVar();
-        if (v instanceof VariableNameExp) {
-            VariableNameExp vAsNVE = (VariableNameExp) v;
-
-            String name;
-            if (myCurrentProcedure == null) {
-                name = myCurrentPrivateProcedure.getName().getName();
+    public void midProcedureDec(ProcedureDec node,
+            ResolveConceptualElement previous, ResolveConceptualElement next) {
+        if (previous != null && previous == node.getReturnTy()) {
+            try {
+                myBuilder.getInnermostActiveScope().addProgramVariable(
+                        node.getName().getName(), node,
+                        node.getReturnTy().getProgramTypeValue());
             }
-            else {
-                name = myCurrentProcedure.getName().getName();
+            catch (DuplicateSymbolException dse) {
+                duplicateSymbol(node.getName().getName(), node.getName()
+                        .getLocation());
             }
-
-            walkVar = !vAsNVE.getName().getName().equals(name);
         }
-
-        if (walkVar) {
-            myWalker.visit(v);
-        }
-        else {
-            MTType mathTypeValue;
-            if (myCurrentProcedure == null) {
-                mathTypeValue =
-                        myCurrentPrivateProcedure.getReturnTy()
-                                .getMathTypeValue();
-            }
-            else {
-                mathTypeValue =
-                        myCurrentProcedure.getReturnTy().getMathTypeValue();
-            }
-
-            v.setMathType(mathTypeValue);
-        }
-        myWalker.visit(s.getAssign());
-
-        postFuncAssignStmt(s);
-        postStatement(s);
-        postAny(s);
-
-        return true;
     }
 
     @Override
@@ -576,7 +561,6 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         myCurrentParameters = null;
-        myCurrentProcedure = null;
     }
 
     @Override
