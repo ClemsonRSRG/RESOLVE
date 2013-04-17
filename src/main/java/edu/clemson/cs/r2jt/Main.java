@@ -381,11 +381,6 @@ public class Main {
                 compileMainSource(inputFile, instanceEnvironment, symbolTable);
             }
         }
-        if (files.size() == 0) {
-            if (instanceEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_WEB)) {
-                compileMainSource(inputFile, instanceEnvironment, symbolTable);
-            }
-        }
     }
 
     public static void compileFilesInDir(File dir,

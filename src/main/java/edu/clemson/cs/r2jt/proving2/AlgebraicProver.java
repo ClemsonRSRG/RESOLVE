@@ -231,13 +231,16 @@ public class AlgebraicProver {
                     //We're done with every VC
                     myRunningFlag = false;
 
-                    SwingUtilities.invokeLater(new Runnable() {
+                    // YS: check if we have a ui
+                    if (myUI != null) {
+                        SwingUtilities.invokeLater(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            myUI.setInteractiveMode(true);
-                        }
-                    });
+                            @Override
+                            public void run() {
+                                myUI.setInteractiveMode(true);
+                            }
+                        });
+                    }
 
                     //TODO: It's unclear if it's possible for us to be in
                     //interactive mode here
@@ -261,13 +264,16 @@ public class AlgebraicProver {
                     myInteractiveModeFlag = true;
                 }
 
-                SwingUtilities.invokeLater(new Runnable() {
+                // YS: check if we have a ui
+                if (myUI != null) {
+                    SwingUtilities.invokeLater(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        myUI.setInteractiveMode(true);
-                    }
-                });
+                        @Override
+                        public void run() {
+                            myUI.setInteractiveMode(true);
+                        }
+                    });
+                }
 
                 //Stopped for some other reason.  Might be because interactive
                 //mode is now on, in which case we want to cool our heels
