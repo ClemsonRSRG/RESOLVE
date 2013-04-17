@@ -111,8 +111,7 @@ public class PLambda extends PExp {
 
     @Override
     public PExp flipQuantifiers() {
-        throw new UnsupportedOperationException("This method has not yet "
-                + "been implemented.");
+        return this;
     }
 
     @Override
