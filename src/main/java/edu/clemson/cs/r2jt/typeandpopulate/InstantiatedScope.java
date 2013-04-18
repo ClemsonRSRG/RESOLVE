@@ -19,7 +19,7 @@ import java.util.Set;
  * the search method to which all others defer, are augmented with an additional
  * set of generic instantiations and an instantiating facility.</p>
  */
-public class InstantiatedScope implements Scope {
+public class InstantiatedScope extends AbstractScope {
 
     private final Scope myBaseScope;
     private final FacilityEntry myInstantiatingFacility;
@@ -64,13 +64,6 @@ public class InstantiatedScope implements Scope {
 
         return myBaseScope.addMatches(searcher, matches, searchedScopes,
                 myAdditionalGenericInstantiations, myInstantiatingFacility, l);
-    }
-
-    @Override
-    public <E extends SymbolTableEntry> List<E> getMatches(
-            TableSearcher<E> searcher, SearchContext l)
-            throws DuplicateSymbolException {
-        return myBaseScope.getMatches(searcher, l);
     }
 
     @Override

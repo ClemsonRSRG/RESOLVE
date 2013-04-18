@@ -288,6 +288,11 @@ public class DotExp extends Exp {
         return sb.toString();
     }
 
+    @Override
+    public String toString() {
+        return toString(0);
+    }
+
     private String segmentsToString(List<Exp> segments) {
         StringBuffer sb = new StringBuffer();
         //Environment env = Environment.getInstance();
