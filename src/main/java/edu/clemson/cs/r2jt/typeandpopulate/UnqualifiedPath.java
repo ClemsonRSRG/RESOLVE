@@ -136,7 +136,6 @@ public class UnqualifiedPath implements ScopeSearchPath {
                 source.getMatches(EntryTypeSearcher.FACILITY_SEARCHER,
                         SearchContext.SOURCE_MODULE);
 
-        Map<String, PTType> inductiveInstantiations = genericInstantiations;
         FacilityEntry facility;
 
         boolean finished = false;

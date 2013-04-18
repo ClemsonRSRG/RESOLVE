@@ -816,27 +816,6 @@ public class Analyzer extends ResolveConceptualVisitor {
 
     public void visitCallStmt(CallStmt stmt) {
 
-        //ProgramExpTypeResolver petr = new ProgramExpTypeResolver(table);
-        TypeMatcher matcher = new TypeMatcher();
-        Location loc =
-                (stmt.getQualifier() == null) ? stmt.getName().getLocation()
-                        : stmt.getQualifier().getLocation();
-        ProgramFunctionExp exp =
-                new ProgramFunctionExp(loc, stmt.getQualifier(),
-                        stmt.getName(), stmt.getArguments());
-
-        try {
-            Type rtype = petr.getProgramExpType(exp);
-            if (!matcher.programMatches(new VoidType(), rtype)) {
-                String msg = expectedProcMessage();
-                err.error(stmt.getName().getLocation(), msg);
-            }
-        }
-        catch (TypeResolutionException trex) {
-            err.error(exp.getLocation(),
-                    "Cannot locate an operation with this name.");
-            // do nothing - the error was already reported
-        }
     }
 
     /*

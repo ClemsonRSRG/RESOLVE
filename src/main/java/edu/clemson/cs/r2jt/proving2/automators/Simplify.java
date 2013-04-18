@@ -33,7 +33,7 @@ public class Simplify implements Automator {
     public void step(Deque<Automator> stack, PerVCProverModel model) {
         //Turn local theorems in the consequent into true
         boolean replacedTheorem = simplifyTheorem(model);
-        
+
         if (!replacedTheorem) {
             //Turn symmetric equalities into true
             Iterator<Application> symmetricEqualities =
@@ -58,7 +58,7 @@ public class Simplify implements Automator {
             }
         }
     }
-    
+
     private boolean simplifyTheorem(PerVCProverModel model) {
         //As an optimization we first make sure there's something to find...
         Set<PExp> localTheoremSet = model.getLocalTheoremSet();
@@ -67,33 +67,33 @@ public class Simplify implements Automator {
         Consequent c = null;
         while (consequents.hasNext() && !foundMatch) {
             c = consequents.next();
-            
+
             foundMatch = localTheoremSet.contains(c.getExpression());
         }
-        
+
         if (foundMatch) {
             //Now we actually go find it
             LocalTheorem t = null;
-            Iterator<LocalTheorem> theorems = 
+            Iterator<LocalTheorem> theorems =
                     model.getLocalTheoremList().iterator();
-            
+
             LocalTheorem curTheorem;
             while (t == null && theorems.hasNext()) {
                 curTheorem = theorems.next();
-                
+
                 if (curTheorem.getAssertion().equals(c.getExpression())) {
                     t = curTheorem;
                 }
             }
-            
+
             if (t == null) {
                 throw new RuntimeException("uhhh...?");
             }
-            
-            new ReplaceTheoremInConsequentWithTrue(t).getApplications(
-                    model).next().apply(model);
+
+            new ReplaceTheoremInConsequentWithTrue(t).getApplications(model)
+                    .next().apply(model);
         }
-        
+
         return foundMatch;
     }
 }

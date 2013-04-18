@@ -1192,12 +1192,14 @@ public class Verifier extends ResolveConceptualVisitor {
                     cExem = new VarExp();
                     exemplar.setName(((TypeDec) tmpDec).getExemplar());
                     exemplar.setType(exemType);
-                    exemplar.setMathType(((TypeDec) tmpDec).getMathType());
+                    exemplar.setMathType(((TypeDec) tmpDec).getModel()
+                            .getMathTypeValue());
 
                     cExem.setName(createPosSymbol("Conc_"
                             + ((TypeDec) tmpDec).getExemplar().toString()));
                     cExem.setType(exemType);
-                    cExem.setMathType(((TypeDec) tmpDec).getMathType());
+                    cExem.setMathType(((TypeDec) tmpDec).getModel()
+                            .getMathTypeValue());
 
                     VarDec concVar = new VarDec();
                     concVar.setName(createPosSymbol("Conc"
@@ -1322,9 +1324,11 @@ public class Verifier extends ResolveConceptualVisitor {
                     Type exemType =
                             getTypeFromTy(((TypeDec) tmpDec).getModel());
                     exemplar.setType(exemType);
-                    exemplar.setMathType(((TypeDec) tmpDec).getMathType());
+                    exemplar.setMathType(((TypeDec) tmpDec).getModel()
+                            .getMathTypeValue());
                     cExem.setType(exemType);
-                    cExem.setMathType(((TypeDec) tmpDec).getMathType());
+                    cExem.setMathType(((TypeDec) tmpDec).getModel()
+                            .getMathTypeValue());
 
                     cExem.setName(createPosSymbol("Conc_"
                             + ((TypeDec) tmpDec).getExemplar().toString()));
@@ -6359,7 +6363,14 @@ public class Verifier extends ResolveConceptualVisitor {
                     expToUse.setName(createPosSymbol(concItem.getEvalExp()
                             .toString()));
                 }
-                expToUse.setMathType(concItem.getProgramTypeValue().toMath());
+
+                if (concItem.getProgramTypeValue() == null) {
+                    expToUse.setMathType(concItem.getMathType());
+                }
+                else {
+                    expToUse.setMathType(concItem.getProgramTypeValue()
+                            .toMath());
+                }
 
                 if (req == null) {
                     req = getTrueVarExp();
@@ -8506,13 +8517,22 @@ public class Verifier extends ResolveConceptualVisitor {
                         + dec.getName().getName());
                 if (constraint != null) {
 
-                    assertion.setFinalConfirm(new QuantExp(corrLoc,
-                            QuantExp.EXISTS, lst, null, myTypeGraph
-                                    .formConjunct(corr, constraint)));
+                    QuantExp q =
+                            new QuantExp(corrLoc, QuantExp.EXISTS, lst, null,
+                                    myTypeGraph.formConjunct(corr, constraint));
+                    q.setMathType(myTypeGraph.BOOLEAN);
+
+                    assertion.setFinalConfirm(q);
                 }
                 else {
-                    assertion.setFinalConfirm(new QuantExp(corrLoc,
-                            QuantExp.EXISTS, lst, null, corr));
+
+                    QuantExp q =
+                            new QuantExp(corrLoc, QuantExp.EXISTS, lst, null,
+                                    corr);
+
+                    q.setMathType(myTypeGraph.BOOLEAN);
+
+                    assertion.setFinalConfirm(q);
                 }
             }
         }

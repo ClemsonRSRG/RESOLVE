@@ -194,6 +194,11 @@ public class VariableDotExp extends VariableExp {
         return sb.toString();
     }
 
+    @Override
+    public String toString() {
+        return toString(0);
+    }
+
     /** Returns true if the variable is found in any sub expression
         of this one. **/
     public boolean containsVar(String varName, boolean IsOldExp) {

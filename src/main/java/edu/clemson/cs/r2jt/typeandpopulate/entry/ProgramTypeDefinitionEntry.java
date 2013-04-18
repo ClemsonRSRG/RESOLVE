@@ -20,11 +20,19 @@ import edu.clemson.cs.r2jt.utilities.SourceErrorException;
  */
 public class ProgramTypeDefinitionEntry extends ProgramTypeEntry {
 
+    private final MathSymbolEntry myExemplar;
+
     public ProgramTypeDefinitionEntry(TypeGraph g, String name,
             ResolveConceptualElement definingElement,
             ModuleIdentifier sourceModule, MTType modelType,
-            PTFamily programType) {
+            PTFamily programType, MathSymbolEntry exemplarEntry) {
         super(g, name, definingElement, sourceModule, modelType, programType);
+
+        myExemplar = exemplarEntry;
+    }
+
+    public MathSymbolEntry getExemplar() {
+        return myExemplar;
     }
 
     @Override

@@ -60,6 +60,7 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 
 public class ModuleArgumentItem extends ResolveConceptualElement {
@@ -73,6 +74,15 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
      * populator to point to the correct type.</p>
      */
     private PTType myTypeValue;
+
+    /**
+     * <p>So if the expression to be passed happens to just be a name, rather
+     * than setting evalExp with a normal VarExp so that all the usual 
+     * mechanisms can be used, we just set the name parameter.  I have no words
+     * for how angry that makes me, but I have no time to fix it.  This field
+     * will hold the type of the "expression" represented by </p>
+     */
+    private MTType myMathType;
 
     /** The qualifier member. */
     private PosSymbol qualifier;
@@ -106,6 +116,14 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
 
     public PTType getProgramTypeValue() {
         return myTypeValue;
+    }
+
+    public void setMathType(MTType t) {
+        myMathType = t;
+    }
+
+    public MTType getMathType() {
+        return myMathType;
     }
 
     public Location getLocation() {
