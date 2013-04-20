@@ -1192,14 +1192,12 @@ public class Verifier extends ResolveConceptualVisitor {
                     cExem = new VarExp();
                     exemplar.setName(((TypeDec) tmpDec).getExemplar());
                     exemplar.setType(exemType);
-                    exemplar.setMathType(((TypeDec) tmpDec).getModel()
-                            .getMathTypeValue());
+                    exemplar.setMathType(((TypeDec) tmpDec).getMathType());
 
                     cExem.setName(createPosSymbol("Conc_"
                             + ((TypeDec) tmpDec).getExemplar().toString()));
                     cExem.setType(exemType);
-                    cExem.setMathType(((TypeDec) tmpDec).getModel()
-                            .getMathTypeValue());
+                    cExem.setMathType(((TypeDec) tmpDec).getMathType());
 
                     VarDec concVar = new VarDec();
                     concVar.setName(createPosSymbol("Conc"
@@ -1324,11 +1322,9 @@ public class Verifier extends ResolveConceptualVisitor {
                     Type exemType =
                             getTypeFromTy(((TypeDec) tmpDec).getModel());
                     exemplar.setType(exemType);
-                    exemplar.setMathType(((TypeDec) tmpDec).getModel()
-                            .getMathTypeValue());
+                    exemplar.setMathType(((TypeDec) tmpDec).getMathType());
                     cExem.setType(exemType);
-                    cExem.setMathType(((TypeDec) tmpDec).getModel()
-                            .getMathTypeValue());
+                    cExem.setMathType(((TypeDec) tmpDec).getMathType());
 
                     cExem.setName(createPosSymbol("Conc_"
                             + ((TypeDec) tmpDec).getExemplar().toString()));
@@ -4512,7 +4508,8 @@ public class Verifier extends ResolveConceptualVisitor {
                             par.setName(createPosSymbol(var.getName()
                                     .toString()));
                             par.setType(getTypeFromTy(varTy));
-                            par.setMathType(varTy.getMathTypeValue());
+                            par.setMathType(((TypeDec) tmp).getModel()
+                                    .getMathType());
 
                             VarExp old = new VarExp();
                             old.setName(((TypeDec) tmp).getExemplar());
@@ -6364,12 +6361,12 @@ public class Verifier extends ResolveConceptualVisitor {
                             .toString()));
                 }
 
-                if (concItem.getProgramTypeValue() == null) {
-                    expToUse.setMathType(concItem.getMathType());
-                }
-                else {
+                if (concItem.getProgramTypeValue() != null) {
                     expToUse.setMathType(concItem.getProgramTypeValue()
                             .toMath());
+                }
+                else {
+                    expToUse.setMathType(concItem.getMathType());
                 }
 
                 if (req == null) {
@@ -8517,22 +8514,13 @@ public class Verifier extends ResolveConceptualVisitor {
                         + dec.getName().getName());
                 if (constraint != null) {
 
-                    QuantExp q =
-                            new QuantExp(corrLoc, QuantExp.EXISTS, lst, null,
-                                    myTypeGraph.formConjunct(corr, constraint));
-                    q.setMathType(myTypeGraph.BOOLEAN);
-
-                    assertion.setFinalConfirm(q);
+                    assertion.setFinalConfirm(new QuantExp(corrLoc,
+                            QuantExp.EXISTS, lst, null, myTypeGraph
+                                    .formConjunct(corr, constraint)));
                 }
                 else {
-
-                    QuantExp q =
-                            new QuantExp(corrLoc, QuantExp.EXISTS, lst, null,
-                                    corr);
-
-                    q.setMathType(myTypeGraph.BOOLEAN);
-
-                    assertion.setFinalConfirm(q);
+                    assertion.setFinalConfirm(new QuantExp(corrLoc,
+                            QuantExp.EXISTS, lst, null, corr));
                 }
             }
         }
