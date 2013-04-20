@@ -37,13 +37,6 @@ public class CrossTypeExpression extends Exp {
         myLocation = location;
     }
 
-    private CrossTypeExpression(CrossTypeExpression e) {
-        myFields.addAll(e.myFields);
-        myTags.addAll(e.myTags);
-        myTagsToFields.putAll(e.myTagsToFields);
-        myLocation = e.myLocation;
-    }
-
     public void addField(Exp field) {
         myFields.add(field);
         myTags.add(null);
@@ -147,8 +140,4 @@ public class CrossTypeExpression extends Exp {
                 + "cross type.");
     }
 
-    @Override
-    protected Exp copy() {
-        return new CrossTypeExpression(this);
-    }
 }
