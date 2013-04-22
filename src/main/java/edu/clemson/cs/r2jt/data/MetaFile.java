@@ -97,6 +97,9 @@ public class MetaFile {
         if (myKind.equals(ModuleKind.FACILITY)) {
             filePath += File.separator + "Facilities" + File.separator;
         }
+        else if (myKind.equals(ModuleKind.THEORY)) {
+            filePath += File.separator + "Theories" + File.separator;
+        }
         else {
             filePath += File.separator + "Concepts" + File.separator;
         }
@@ -110,6 +113,9 @@ public class MetaFile {
             if (myKind.equals(ModuleKind.FACILITY)) {
                 filePath += File.separator + "Facilities" + File.separator;
             }
+            else if (myKind.equals(ModuleKind.THEORY)) {
+                filePath += File.separator + "Theories" + File.separator;
+            }
             else {
                 filePath += File.separator + "Concepts" + File.separator;
             }
@@ -121,6 +127,9 @@ public class MetaFile {
             String filePath = mainDir.getAbsolutePath();
             if (myKind.equals(ModuleKind.FACILITY)) {
                 filePath += File.separator + "Facilities" + File.separator;
+            }
+            else if (myKind.equals(ModuleKind.THEORY)) {
+                filePath += File.separator + "Theories" + File.separator;
             }
             else {
                 filePath += File.separator + "Concepts" + File.separator;

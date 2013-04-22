@@ -24,8 +24,16 @@ target/
 ###########################
 # Per-developer IDE Files #
 ###########################
+
+# Netbeans
 nbactions*.xml
 !nbactions-RSRG-Global.xml
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/
 
 
 #######################
