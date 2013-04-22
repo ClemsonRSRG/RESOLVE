@@ -215,23 +215,6 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
-    public void midFacilityOperationDec(FacilityOperationDec node,
-            ResolveConceptualElement previous, ResolveConceptualElement next) {
-        if (previous == node.getReturnTy()) {
-            try {
-                myBuilder.startScope(node);
-                myBuilder.getInnermostActiveScope().addProgramVariable(
-                        node.getName().getName(), node,
-                        node.getReturnTy().getProgramTypeValue());
-            }
-            catch (DuplicateSymbolException dse) {
-                duplicateSymbol(node.getName().getName(), node.getName()
-                        .getLocation());
-            }
-        }
-    }
-
-    @Override
     public void preEnhancementBodyModuleDec(
             EnhancementBodyModuleDec enhancementRealization) {
 
@@ -364,9 +347,9 @@ public class Populator extends TreeWalkerVisitor {
             try {
                 //Inside the operation's assertions, the name of the operation
                 //refers to its return value
-                myBuilder.getInnermostActiveScope().addBinding(
+                myBuilder.getInnermostActiveScope().addProgramVariable(
                         node.getName().getName(), node,
-                        node.getReturnTy().getMathTypeValue());
+                        node.getReturnTy().getProgramTypeValue());
             }
             catch (DuplicateSymbolException dse) {
                 //This shouldn't be possible--the operation declaration has a 
