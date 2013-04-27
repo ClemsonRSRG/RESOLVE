@@ -387,6 +387,7 @@ public class AutomatedProver {
         }
 
         System.out.println("AutomatedProver - end of pause()");
+        System.out.println("Goal stack: " + myAutomatorStack);
     }
 
     /**

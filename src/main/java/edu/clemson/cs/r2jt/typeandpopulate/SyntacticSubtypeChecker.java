@@ -1,10 +1,8 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
-import java.util.Collections;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.HashMap;
 import java.util.Map;
-
-import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.NoSuchElementException;
 
 /**
