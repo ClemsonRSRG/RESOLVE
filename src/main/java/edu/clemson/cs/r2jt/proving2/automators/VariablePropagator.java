@@ -64,10 +64,13 @@ public class VariablePropagator implements Automator {
         }
         else {
             List<Automator> steps = new LinkedList<Automator>();
-            steps.add(new ApplyAll(new SubstituteInPlaceInAntecedent(
-                    curTheorem, variable, expansion)));
-            steps.add(new ApplyAll(new SubstituteInPlaceInConsequent(
-                    curTheorem, variable, expansion)));
+            
+            if (!variable.equals(expansion)) {
+                steps.add(new ApplyAll(new SubstituteInPlaceInAntecedent(
+                        curTheorem, variable, expansion)));
+                steps.add(new ApplyAll(new SubstituteInPlaceInConsequent(
+                        curTheorem, variable, expansion)));
+            }
             steps.add(new ApplyN(new RemoveAntecedent(model, curTheorem), 1));
             stack.push(new PushSequence(steps));
         }
