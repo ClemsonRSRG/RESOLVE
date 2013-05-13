@@ -43,6 +43,15 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     }
 
     @Override
+    public boolean beginMTFunctionApplication(MTFunctionApplication t1,
+            MTFunctionApplication t2) {
+
+        myResult = (t1.getName().equals(t2.getName()));
+
+        return myResult;
+    }
+
+    @Override
     public boolean beginMTNamed(MTNamed t1, MTNamed t2) {
         //TODO: This doesn't deal correctly with multiple appearances of a
         //variable
