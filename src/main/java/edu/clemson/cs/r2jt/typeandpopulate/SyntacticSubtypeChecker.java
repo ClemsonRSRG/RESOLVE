@@ -127,6 +127,17 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
     }
 
     @Override
+    public boolean beginMTFunctionApplication(MTFunctionApplication t1,
+            MTFunctionApplication t2) {
+
+        if (!t1.getName().equals(t2.getName())) {
+            throw MISMATCH;
+        }
+
+        return true;
+    }
+
+    @Override
     public boolean beginMTType(MTType t1, MTType t2) {
         //Alpha-equivalent types are definitely syntactic subtypes.  No need 
         //to descend

@@ -64,7 +64,7 @@ public class VariablePropagator implements Automator {
         }
         else {
             List<Automator> steps = new LinkedList<Automator>();
-            
+
             if (!variable.equals(expansion)) {
                 steps.add(new ApplyAll(new SubstituteInPlaceInAntecedent(
                         curTheorem, variable, expansion)));
