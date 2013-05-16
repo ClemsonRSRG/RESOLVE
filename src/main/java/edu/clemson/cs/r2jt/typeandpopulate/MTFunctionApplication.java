@@ -170,6 +170,10 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
         return myComponents;
     }
 
+    public String getName() {
+        return myName;
+    }
+
     @Override
     public MTType withComponentReplaced(int index, MTType newType) {
         MTFunction newFunction = myFunction;
@@ -189,7 +193,7 @@ public class MTFunctionApplication extends MTAbstract<MTFunctionApplication> {
 
     @Override
     public int getHashCode() {
-        int result = BASE_HASH + myFunction.getHashCode();
+        int result = BASE_HASH + myFunction.getHashCode() + myName.hashCode();
 
         for (MTType t : myArguments) {
             result *= 73;

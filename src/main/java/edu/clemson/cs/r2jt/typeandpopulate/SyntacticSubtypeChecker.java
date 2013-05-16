@@ -1,10 +1,8 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
-import java.util.Collections;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.HashMap;
 import java.util.Map;
-
-import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.NoSuchElementException;
 
 /**
@@ -126,6 +124,17 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
     public void reset() {
         super.reset();
         myBindings.clear();
+    }
+
+    @Override
+    public boolean beginMTFunctionApplication(MTFunctionApplication t1,
+            MTFunctionApplication t2) {
+
+        if (!t1.getName().equals(t2.getName())) {
+            throw MISMATCH;
+        }
+
+        return true;
     }
 
     @Override

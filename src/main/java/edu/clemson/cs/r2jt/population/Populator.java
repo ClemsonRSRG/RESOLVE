@@ -3,6 +3,7 @@ package edu.clemson.cs.r2jt.population;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.treewalk.*;
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
 import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian;
@@ -172,6 +173,8 @@ public class Populator extends TreeWalkerVisitor {
      * not inside such a declaration, this will be null.</p>
      */
     private ProgramTypeDefinitionEntry myTypeDefinitionEntry;
+
+    private MathSymbolEntry myExemplarEntry;
 
     public Populator(MathSymbolTableBuilder builder) {
         myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
@@ -706,21 +709,28 @@ public class Populator extends TreeWalkerVisitor {
 
         if (prevChild == dec.getModel()) {
             //We've parsed the model, but nothing else, so we can add our 
-            //exemplar to scope if we've got one
+            //exemplar to scope
             PosSymbol exemplar = dec.getExemplar();
 
-            if (exemplar != null) {
-                try {
-                    myBuilder.getInnermostActiveScope().addBinding(
-                            exemplar.getName(), dec,
-                            dec.getModel().getMathTypeValue());
-                }
-                catch (DuplicateSymbolException dse) {
-                    //This shouldn't be possible--the type declaration has a 
-                    //scope all its own and we're the first ones to get to
-                    //introduce anything
-                    throw new RuntimeException(dse);
-                }
+            if (exemplar == null) {
+                //Sane default exemplar name
+                String exemplarName =
+                        dec.getName().getName().substring(0, 1).toUpperCase();
+                dec.setExemplar(new PosSymbol(dec.getName().getLocation(),
+                        Symbol.symbol(exemplarName)));
+            }
+
+            try {
+                myExemplarEntry =
+                        myBuilder.getInnermostActiveScope().addBinding(
+                                exemplar.getName(), dec,
+                                dec.getModel().getMathTypeValue());
+            }
+            catch (DuplicateSymbolException dse) {
+                //This shouldn't be possible--the type declaration has a 
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                throw new RuntimeException(dse);
             }
         }
     }
@@ -732,12 +742,15 @@ public class Populator extends TreeWalkerVisitor {
         try {
             myBuilder.getInnermostActiveScope().addProgramTypeDefinition(
                     dec.getName().getName(), dec,
-                    dec.getModel().getMathTypeValue());
+                    dec.getModel().getMathTypeValue(), myExemplarEntry);
+
+            myExemplarEntry = null;
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(dec.getName().getName(), dec.getName()
                     .getLocation());
         }
+
     }
 
     @Override
@@ -1471,6 +1484,14 @@ public class Populator extends TreeWalkerVisitor {
                 ambiguousSymbol(i.getName(), es);
             }
             else {
+                if (i.getEvalExp() == null) {
+                    i.setMathType(es.get(0).toProgramVariableEntry(
+                            i.getLocation()).getProgramType().toMath());
+                }
+                else {
+                    i.setMathType(i.getEvalExp().getMathType());
+                }
+
                 try {
                     ProgramTypeEntry e =
                             es.get(0).toProgramTypeEntry(i.getLocation());
@@ -1561,44 +1582,17 @@ public class Populator extends TreeWalkerVisitor {
         return true;
     }
 
-    @Override
-    public void preDotExp(DotExp e) {
-        if (e.getSegments().get(0).toString().equals("Conc")) {
-            if (e.getSegments().size() != 2
-                    || !e.getSegments().get(1).toString().equals(
-                            myTypeDefinitionEntry.getProgramType()
-                                    .getExemplarName())) {
-                throw new RuntimeException("No idea what's going on here.");
-            }
-
-            //No idea.  Conc is a made up thing.
-            e.getSegments().get(0).setMathType(myTypeGraph.BOOLEAN);
-
-            e.getSegments().get(1).setMathType(
-                    myTypeDefinitionEntry.getModelType());
-            e.setMathType(myTypeDefinitionEntry.getModelType());
-        }
-    }
-
-    private VarExp getSegmentAsVarExp(Exp e) {
-        if (e instanceof OldExp) {
-            e = ((OldExp) e).getExp();
-        }
-
-        return (VarExp) e;
-    }
-
     /**
      * <p>This method has to do an annoying amount of work, so pay attention:
      * takes an iterator over segments as returned from DotExp.getSegments(). 
      * Either the first segment or first two segments will be advanced over
      * from the iterator, depending on whether this method determines the DotExp
-     * refers to a local value (one segment) or is a qualified name referring to
-     * a value in another module (two segments).  The segments will receive
-     * appropriate types.  The data field of lastGood will be set with the 
-     * location of the last segment read.  Then, the 
-     * <code>MathSymbolEntry</code> corresponding to the correct top-level value
-     * will be returned.</p>
+     * refers to a local value (one segment), is a qualified name referring to
+     * a value in another module (two segments), or is a Conc expression (two 
+     * segments).  The segments will receive appropriate types.  The data field 
+     * of lastGood will be set with the location of the last segment read.  
+     * Then, the <code>MathSymbolEntry</code> corresponding to the correct 
+     * top-level value will be returned.</p>
      */
     private MathSymbolEntry getTopLevelValue(Iterator<Exp> segments,
             Indirect<Exp> lastGood) {
@@ -1618,71 +1612,96 @@ public class Populator extends TreeWalkerVisitor {
                     + "OldExp, found: " + first + " (" + first.getClass() + ")");
         }
 
-        //First we'll see if there's a locally-accessible symbol with this name
-        try {
-            result =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new NameQuery(null, firstName,
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_IGNORE, true))
-                            .toMathSymbolEntry(first.getLocation());
-
-            //There is.  Cool.  We type it and we're done
-            lastGood.data = first;
-            first.setMathType(result.getType());
-            try {
-                first.setMathTypeValue(result.getTypeValue());
-            }
-            catch (SymbolNotOfKindTypeException snokte) {
-
-            }
-        }
-        catch (NoSuchSymbolException nsse) {
-            //No such luck.  Maybe firstName identifies a module and the
-            //second segment (which had better be a VarExp) is the name of
-            //the value we want
+        //First, we'll see if we're a Conc expression
+        if (firstName.getName().equals("Conc")) {
+            //Awesome.  We better be in a type definition and our second segment
+            //better refer to the exemplar
             VarExp second = (VarExp) segments.next();
 
+            if (!second.toString().equals(
+                    myTypeDefinitionEntry.getProgramType().getExemplarName())) {
+                throw new RuntimeException("No idea what's going on here.");
+            }
+
+            //The Conc segment doesn't have a sensible type, but we'll set one
+            //for completeness.
+            first.setMathType(myTypeGraph.BOOLEAN);
+
+            second.setMathType(myTypeDefinitionEntry.getModelType());
+
+            result = myTypeDefinitionEntry.getExemplar();
+
+            lastGood.data = second;
+        }
+        else {
+            //Next, we'll see if there's a locally-accessible symbol with this 
+            //name
             try {
                 result =
                         myBuilder
                                 .getInnermostActiveScope()
                                 .queryForOne(
                                         new NameQuery(
+                                                null,
                                                 firstName,
-                                                second.getName(),
                                                 ImportStrategy.IMPORT_NAMED,
                                                 FacilityStrategy.FACILITY_IGNORE,
                                                 true)).toMathSymbolEntry(
                                         first.getLocation());
 
-                //A qualifier doesn't have a sensible type, but we'll set one
-                //for completeness.
-                first.setMathType(myTypeGraph.BOOLEAN);
-
-                //Now the value itself
-                lastGood.data = second;
-                second.setMathType(result.getType());
+                //There is.  Cool.  We type it and we're done
+                lastGood.data = first;
+                first.setMathType(result.getType());
                 try {
-                    second.setMathTypeValue(result.getTypeValue());
+                    first.setMathTypeValue(result.getTypeValue());
                 }
                 catch (SymbolNotOfKindTypeException snokte) {
 
                 }
             }
-            catch (NoSuchSymbolException nsse2) {
-                noSuchSymbol(firstName, second.getName());
-                throw new RuntimeException(); //This will never fire
+            catch (NoSuchSymbolException nsse) {
+                //No such luck.  Maybe firstName identifies a module and the
+                //second segment (which had better be a VarExp) is the name of
+                //the value we want
+                VarExp second = (VarExp) segments.next();
+
+                try {
+                    result =
+                            myBuilder.getInnermostActiveScope().queryForOne(
+                                    new NameQuery(firstName, second.getName(),
+                                            ImportStrategy.IMPORT_NAMED,
+                                            FacilityStrategy.FACILITY_IGNORE,
+                                            true)).toMathSymbolEntry(
+                                    first.getLocation());
+
+                    //A qualifier doesn't have a sensible type, but we'll set one
+                    //for completeness.
+                    first.setMathType(myTypeGraph.BOOLEAN);
+
+                    //Now the value itself
+                    lastGood.data = second;
+                    second.setMathType(result.getType());
+                    try {
+                        second.setMathTypeValue(result.getTypeValue());
+                    }
+                    catch (SymbolNotOfKindTypeException snokte) {
+
+                    }
+                }
+                catch (NoSuchSymbolException nsse2) {
+                    noSuchSymbol(firstName, second.getName());
+                    throw new RuntimeException(); //This will never fire
+                }
+                catch (DuplicateSymbolException dse) {
+                    //This shouldn't be possible--there can only be one symbol
+                    //with the given name inside a particular module
+                    throw new RuntimeException();
+                }
             }
             catch (DuplicateSymbolException dse) {
-                //This shouldn't be possible--there can only be one symbol
-                //with the given name inside a particular module
-                throw new RuntimeException();
+                duplicateSymbol(firstName);
+                throw new RuntimeException(); //This will never fire
             }
-        }
-        catch (DuplicateSymbolException dse) {
-            duplicateSymbol(firstName);
-            throw new RuntimeException(); //This will never fire
         }
 
         return result;
@@ -1748,65 +1767,61 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public boolean walkDotExp(DotExp dot) {
-        boolean conceptual = dot.getSegments().get(0).toString().equals("Conc");
 
         preAny(dot);
         preExp(dot);
         preDotExp(dot);
 
-        if (!conceptual) {
-            Indirect<Exp> lastGoodOut = new Indirect<Exp>();
-            Iterator<Exp> segments = dot.getSegments().iterator();
-            MathSymbolEntry entry = getTopLevelValue(segments, lastGoodOut);
+        Indirect<Exp> lastGoodOut = new Indirect<Exp>();
+        Iterator<Exp> segments = dot.getSegments().iterator();
+        MathSymbolEntry entry = getTopLevelValue(segments, lastGoodOut);
 
-            Location lastGood = lastGoodOut.data.getLocation();
+        Location lastGood = lastGoodOut.data.getLocation();
 
-            MTType curType = entry.getType();
-            MTCartesian curTypeCartesian;
-            Exp nextSegment = lastGoodOut.data, lastSegment;
-            while (segments.hasNext()) {
-                lastSegment = nextSegment;
-                nextSegment = segments.next();
-                String segmentName = getName(nextSegment);
+        MTType curType = entry.getType();
+        MTCartesian curTypeCartesian;
+        Exp nextSegment = lastGoodOut.data, lastSegment;
+        while (segments.hasNext()) {
+            lastSegment = nextSegment;
+            nextSegment = segments.next();
+            String segmentName = getName(nextSegment);
 
-                try {
-                    curTypeCartesian = (MTCartesian) curType;
-                    curType = curTypeCartesian.getFactor(segmentName);
-                }
-                catch (ClassCastException cce) {
-                    curType =
-                            HardCoded.getMetaFieldType(myTypeGraph,
-                                    lastSegment, segmentName);
-
-                    if (curType == null) {
-                        throw new SourceErrorException("Value not a tuple.",
-                                lastGood);
-                    }
-                }
-                catch (NoSuchElementException nsee) {
-                    curType =
-                            HardCoded.getMetaFieldType(myTypeGraph,
-                                    lastSegment, segmentName);
-
-                    if (curType == null) {
-                        throw new SourceErrorException("No such factor.",
-                                lastGood);
-                    }
-                }
-
-                //getName() would have thrown an exception if nextSegment wasn't
-                //a VarExp or a FunctionExp.  In the former case, we're good to
-                //go--but in the latter case, we still need to typecheck 
-                //parameters, assure they match the signature, and adjust 
-                //curType to reflect the RANGE of the function type rather than
-                //the entire type
-                if (nextSegment instanceof FunctionExp) {
-                    curType = applyFunction((FunctionExp) nextSegment, curType);
-                }
-
-                nextSegment.setMathType(curType);
-                lastGood = nextSegment.getLocation();
+            try {
+                curTypeCartesian = (MTCartesian) curType;
+                curType = curTypeCartesian.getFactor(segmentName);
             }
+            catch (ClassCastException cce) {
+                curType =
+                        HardCoded.getMetaFieldType(myTypeGraph, lastSegment,
+                                segmentName);
+
+                if (curType == null) {
+                    throw new SourceErrorException("Value not a tuple.",
+                            lastGood);
+                }
+            }
+            catch (NoSuchElementException nsee) {
+                curType =
+                        HardCoded.getMetaFieldType(myTypeGraph, lastSegment,
+                                segmentName);
+
+                if (curType == null) {
+                    throw new SourceErrorException("No such factor.", lastGood);
+                }
+            }
+
+            //getName() would have thrown an exception if nextSegment wasn't
+            //a VarExp or a FunctionExp.  In the former case, we're good to
+            //go--but in the latter case, we still need to typecheck 
+            //parameters, assure they match the signature, and adjust 
+            //curType to reflect the RANGE of the function type rather than
+            //the entire type
+            if (nextSegment instanceof FunctionExp) {
+                curType = applyFunction((FunctionExp) nextSegment, curType);
+            }
+
+            nextSegment.setMathType(curType);
+            lastGood = nextSegment.getLocation();
         }
 
         postDotExp(dot);

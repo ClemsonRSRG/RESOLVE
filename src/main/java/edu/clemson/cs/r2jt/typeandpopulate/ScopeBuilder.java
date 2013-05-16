@@ -156,19 +156,14 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public ProgramTypeEntry addProgramTypeDefinition(String name,
-            TypeDec definingElement, MTType model)
+            TypeDec definingElement, MTType model, MathSymbolEntry exemplarEntry)
             throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, model);
 
         PosSymbol exemplarSymbol = definingElement.getExemplar();
-        String exemplarName;
-
         if (exemplarSymbol == null) {
-            exemplarName = name.substring(0, 1).toUpperCase();
-        }
-        else {
-            exemplarName = exemplarSymbol.getName();
+            throw new IllegalArgumentException("Null exemplar.");
         }
 
         InitItem init = definingElement.getInitialization();
@@ -184,10 +179,10 @@ public class ScopeBuilder extends SyntacticScope {
         ProgramTypeEntry entry =
                 new ProgramTypeDefinitionEntry(myTypeGraph, name,
                         definingElement, myRootModule, model, new PTFamily(
-                                model, name, exemplarName, definingElement
-                                        .getConstraint(), initRequires,
+                                model, name, exemplarSymbol.getName(),
+                                definingElement.getConstraint(), initRequires,
                                 initEnsures, finalizationRequires,
-                                finalizationEnsures));
+                                finalizationEnsures), exemplarEntry);
 
         myBindings.put(name, entry);
 
