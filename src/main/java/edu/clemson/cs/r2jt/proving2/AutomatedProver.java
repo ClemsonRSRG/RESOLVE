@@ -23,7 +23,6 @@ import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
-import edu.clemson.cs.r2jt.proving2.transformations.StrengthenConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.SubstituteInPlaceInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
@@ -388,6 +387,7 @@ public class AutomatedProver {
         }
 
         System.out.println("AutomatedProver - end of pause()");
+        System.out.println("Goal stack: " + myAutomatorStack);
     }
 
     /**

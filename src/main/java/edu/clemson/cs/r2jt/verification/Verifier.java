@@ -4508,7 +4508,8 @@ public class Verifier extends ResolveConceptualVisitor {
                             par.setName(createPosSymbol(var.getName()
                                     .toString()));
                             par.setType(getTypeFromTy(varTy));
-                            par.setMathType(varTy.getMathTypeValue());
+                            par.setMathType(((TypeDec) tmp).getModel()
+                                    .getMathType());
 
                             VarExp old = new VarExp();
                             old.setName(((TypeDec) tmp).getExemplar());
@@ -6359,7 +6360,14 @@ public class Verifier extends ResolveConceptualVisitor {
                     expToUse.setName(createPosSymbol(concItem.getEvalExp()
                             .toString()));
                 }
-                expToUse.setMathType(concItem.getProgramTypeValue().toMath());
+
+                if (concItem.getProgramTypeValue() != null) {
+                    expToUse.setMathType(concItem.getProgramTypeValue()
+                            .toMath());
+                }
+                else {
+                    expToUse.setMathType(concItem.getMathType());
+                }
 
                 if (req == null) {
                     req = getTrueVarExp();

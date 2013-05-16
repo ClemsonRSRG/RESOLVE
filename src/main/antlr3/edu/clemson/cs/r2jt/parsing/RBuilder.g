@@ -2032,7 +2032,7 @@ dot_expression returns [Exp exp = null]
 }
     :   exp1=function_expression { $exp = $exp1.exp; }
     |   ^(DOT (seg=function_expression { segs.add($seg.exp); })
-        seg1=clean_function_expression* { segs.add($seg1.exp); })
+        (seg1=clean_function_expression { segs.add($seg1.exp); })*)
         { $exp = new DotExp(getLocation($DOT), segs, sem); }
     ;
 
