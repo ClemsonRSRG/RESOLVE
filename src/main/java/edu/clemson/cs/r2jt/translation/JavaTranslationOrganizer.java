@@ -26,6 +26,11 @@ public class JavaTranslationOrganizer {
         header = new StringBuffer();
         rest = new StringBuffer();
     }
+	
+	class Header {
+
+  
+    }
 
     class Function {
 
