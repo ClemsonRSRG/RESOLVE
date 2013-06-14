@@ -19,7 +19,7 @@ import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.MetaFile;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.translation.Translator;
+import edu.clemson.cs.r2jt.translation.JavaTranslator;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 
@@ -518,8 +518,9 @@ public class Archiver {
 
     public static final void setUpFlags() {
         FlagDependencies.addRequires(FLAG_VERBOSE_ARCHIVE, FLAG_ARCHIVE);
-        FlagDependencies.addImplies(FLAG_ARCHIVE, Translator.FLAG_TRANSLATE);
         FlagDependencies.addImplies(FLAG_ARCHIVE,
-                Translator.FLAG_TRANSLATE_CLEAN);
+                JavaTranslator.JAVA_FLAG_TRANSLATE);
+        FlagDependencies.addImplies(FLAG_ARCHIVE,
+                JavaTranslator.FLAG_TRANSLATE_CLEAN);
     }
 }

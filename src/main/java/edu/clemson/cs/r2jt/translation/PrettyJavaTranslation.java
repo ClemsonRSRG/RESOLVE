@@ -83,7 +83,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
 
     @Override
     public void preModuleDec(ModuleDec dec) {
-    //Stuff done before start of dec trees
+    //Stuff done before dec trees
     }
 
     @Override

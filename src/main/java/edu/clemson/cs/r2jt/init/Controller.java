@@ -111,7 +111,7 @@ import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslation;
 import edu.clemson.cs.r2jt.translation.PrettyCTranslation;
-import edu.clemson.cs.r2jt.translation.Translator;
+import edu.clemson.cs.r2jt.translation.JavaTranslator;
 import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.verification.AssertiveCode;
@@ -505,7 +505,7 @@ public class Controller {
                 System.out.println("");
             }
             if (myInstanceEnvironment.flags
-                    .isFlagSet(Translator.FLAG_TRANSLATE)) {
+                    .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
                 translateModuleDec(file, table, dec);
                 //System.out.println("Translated: " + file.toString());
                 if (myInstanceEnvironment.flags
@@ -616,7 +616,7 @@ public class Controller {
             myInstanceEnvironment.completeRecord(id, table);
             //env.setSuccess();
             if (myInstanceEnvironment.flags
-                    .isFlagSet(Translator.FLAG_TRANSLATE)) {
+                    .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
                 if (inputFile.getIsCustomLoc()) {
                     file = inputFile.getMyCustomFile();
                 }
@@ -1714,38 +1714,22 @@ public class Controller {
 
     private void translateModuleDec(File file, OldSymbolTable table,
             ModuleDec dec) {
-        Translator translator =
-                new Translator(myInstanceEnvironment, table, dec, err);
-        if (myArchive != null && !translator.onNoCompileList(file)) {
-            myArchive.addFileToArchive(file);
-        }
-        String targetFile = myInstanceEnvironment.getTargetFile().toString();
-        String thisFile = dec.getName().getFile().toString();
-        // We only translate if this is the target file or if file is stale
-        if ((thisFile.equals(targetFile)) || translator.needToTranslate(file)) {
-            //System.out.println("Starting Translation: "+dec.getName().getName());
-            translator.visitModuleDec(dec);
-            //System.out.println("Translated: "+dec.getName().getName());
-            translator.outputJavaCode(file);
-        }
+
+        JavaTranslator javaTranslate =
+                new JavaTranslator(myInstanceEnvironment, dec, err);
+
+        TreeWalker tw = new TreeWalker(javaTranslate);
+        tw.visit(dec);
+
+        javaTranslate.outputCode(file);
     }
 
     private void translatePrettyModuleDec(File file, OldSymbolTable table,
             ModuleDec dec) {
-        /*PrettyJavaTranslator translator =
-                new PrettyJavaTranslator(myInstanceEnvironment, table, dec, err);
-        String targetFile = myInstanceEnvironment.getTargetFile().toString();
-        String thisFile = dec.getName().getFile().toString();
-        // We only translate if this is the target file or if file is stale
-        if ((thisFile.equals(targetFile)) || translator.needToTranslate(file)) {
-            //System.out.println("Starting Translation: "+dec.getName().getName());
-            translator.visitModuleDec(dec);
-            //System.out.println("Translated: "+dec.getName().getName());
-            translator.outputJavaCode(file);
-        }*/
 
         if (myInstanceEnvironment.flags
                 .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)) {
+
             PrettyJavaTranslation prettyT =
                     new PrettyJavaTranslation(myInstanceEnvironment, table,
                             dec, err);
