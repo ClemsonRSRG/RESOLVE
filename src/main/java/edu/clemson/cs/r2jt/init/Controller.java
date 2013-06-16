@@ -111,7 +111,7 @@ import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslation;
 import edu.clemson.cs.r2jt.translation.PrettyCTranslation;
-import edu.clemson.cs.r2jt.translation.JavaTranslator;
+import edu.clemson.cs.r2jt.translation.JavaTranslation;
 import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.verification.AssertiveCode;
@@ -505,7 +505,7 @@ public class Controller {
                 System.out.println("");
             }
             if (myInstanceEnvironment.flags
-                    .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
+                    .isFlagSet(JavaTranslation.JAVA_FLAG_TRANSLATE)) {
                 translateModuleDec(file, table, dec);
                 //System.out.println("Translated: " + file.toString());
                 if (myInstanceEnvironment.flags
@@ -616,7 +616,7 @@ public class Controller {
             myInstanceEnvironment.completeRecord(id, table);
             //env.setSuccess();
             if (myInstanceEnvironment.flags
-                    .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
+                    .isFlagSet(JavaTranslation.JAVA_FLAG_TRANSLATE)) {
                 if (inputFile.getIsCustomLoc()) {
                     file = inputFile.getMyCustomFile();
                 }
@@ -1715,8 +1715,8 @@ public class Controller {
     private void translateModuleDec(File file, OldSymbolTable table,
             ModuleDec dec) {
 
-        JavaTranslator javaTranslate =
-                new JavaTranslator(myInstanceEnvironment, dec, err);
+        JavaTranslation javaTranslate =
+                new JavaTranslation(myInstanceEnvironment, dec, err);
 
         TreeWalker tw = new TreeWalker(javaTranslate);
         tw.visit(dec);
