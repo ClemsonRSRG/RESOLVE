@@ -68,8 +68,8 @@ public class JavaTranslation extends TreeWalkerVisitor {
         // and can be replaced by a more elegant approach?
 
         // I'm confused why we need two of these.. but apparently
-        // we do since env.contains(id) fails to acknowledge
-        // Location_Linking_template_1 & Static_Array_Template
+        // we do since the env.contains(id) check fails to acknowledge
+        // either Location_Linking_template_1 or Static_Array_Template
 
         ModuleID id = ModuleID.createFacilityID(data.getName());
         ModuleID conId = ModuleID.createConceptID(data.getName());
@@ -87,14 +87,13 @@ public class JavaTranslation extends TreeWalkerVisitor {
         }
     }
 
-	@Override
-	public void preFacilityModuleDec(FacilityModuleDec data) {
-		bookkeeper.appendToRest("\n");
-        bookkeeper.appendToRest("class ");
-           organizer.appendToRest(data.getName().toString());
-           organizer.appendToRest(" {\n");
-           // note: closing brace is done in the organizer's toString
-       }*/
+    // ===========================================================
+
+    @Override
+    public void preFacilityModuleDec(FacilityModuleDec data) {
+        String title = "public class " + data.getName().toString();
+        bookkeeper.addClassDeclaration(title);
+    }
 
     @Override
     public void postFacilityModuleDec(FacilityModuleDec data) {
@@ -104,43 +103,72 @@ public class JavaTranslation extends TreeWalkerVisitor {
     	organizer.appendToRest("() {}"); */
     }
 
+    @Override
+    public void preFacilityOperationDec(FacilityOperationDec data) {
+        PosSymbol retType = null;
+        if (data.getReturnTy() != null) {
+            retType = ((NameTy) data.getReturnTy()).getName();
+        }
+        // addFuncion (<accesslvl>, <return type>, <fxn name>)
+        bookkeeper.addFunction("public ", retType, data.getName());
+    }
+
+    @Override
+    public void preParameterVarDec(ParameterVarDec dec) {
+
+        PosSymbol varType = ((NameTy) dec.getTy()).getName();
+        PosSymbol varName = dec.getName();
+
+        bookkeeper.addFunctionParameter(varType, varName);
+    }
+
+    @Override
+    public void preVarDec(VarDec dec) {
+        PosSymbol varType = ((NameTy) dec.getTy()).getName();
+        PosSymbol varName = dec.getName();
+
+        //System.out.println(dec.getName().toString() + " " + type.toString());
+        bookkeeper.addFunctionInitVariable(varType, varName);
+    }
+
+    @Override
+    public void midFuncAssignStmt(FuncAssignStmt stmt,
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+        if (prevChild != null && nextChild != null) {
+            bookkeeper.appendToStatement(" = ");
+        }
+    }
+
+    @Override
+    public void preVariableNameExp(VariableNameExp var) {
+        bookkeeper.appendToStatement(var.getName().toString());
+    }
+
+    @Override
+    public void postVariableNameExp(VariableNameExp var) {
+        bookkeeper.appendToStatement(var.getName().toString());
+    }
+
+    @Override
+    public void preProgramIntegerExp(ProgramIntegerExp exp) {
+        bookkeeper.appendToStatement("Std_Integer_Fac.createInteger(");
+        bookkeeper.appendToStatement(Integer.toString(exp.getValue()));
+    }
+
+    @Override
+    public void postProgramIntegerExp(ProgramIntegerExp exp) {
+        bookkeeper.appendToStatement(");");
+    }
+
     /*    @Override
-     public void preFacilityOperationDec(FacilityOperationDec data) {
-     PosSymbol returnType = null;
-     if (data.getReturnTy() != null) {
-     returnType = ((NameTy) data.getReturnTy()).getName();
-     }
-
-     organizer.addFunction("public ", returnType, data.getName());
-     }
-
-     @Override
-     public void preParameterVarDec(ParameterVarDec dec) {
-
-     PosSymbol varType = ((NameTy) dec.getTy()).getName();
-     PosSymbol varName = dec.getName();
-
-     String typeAndVarName = organizer.formParameter(varType, varName);
-     organizer.appendToCurrParamList(typeAndVarName);
-
-     }
-
-     @Override
-     public void preVarDec(VarDec dec) {
-     System.out.println(dec.getName().toString());
-     }
-
-     @Override
-     public void postFacilityOperationDec(FacilityOperationDec data) {}
-
-     @Override
-     public void preOperationDec(OperationDec data) {
-     PosSymbol returnType = null;
-     if (data.getReturnTy() != null) {
-     returnType = ((NameTy) data.getReturnTy()).getName();
-     }
-     organizer.addFunction("", returnType, data.getName());*/
-    //  }
+        public void preOperationDec(OperationDec data) {
+        PosSymbol returnType = null;
+        if (data.getReturnTy() != null) {
+        returnType = ((NameTy) data.getReturnTy()).getName();
+        }
+        organizer.addFunction("", returnType, data.getName());
+        }*/
 
     // ===========================================================
     // Misc Helper Methods

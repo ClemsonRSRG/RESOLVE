@@ -20,18 +20,18 @@ import edu.clemson.cs.r2jt.errors.ErrorHandler;
 public class JavaTranslationBookkeeper {
 
     // scopes
+    private ElementFunction currentFunction;
+    //private ElementBody body;
+
+    private ArrayList<String> headerImportList;
+    private ArrayList<ElementFunction> functionList;
+
+    // this might be an idea... 
+    //private String moduleType;
+
+    private String headerClassDeclaration;
     private ErrorHandler err;
-
-    // everything will eventually be written to this file
-    private StringBuilder currentDocument;
-
-    // current resolve file to translate
     private File srcFile;
-
-    // containers
-    private ArrayList<String> importList;
-
-    //private ArrayList<String> globalVarList;
 
     // ===========================================================
     // Constructor(s)
@@ -40,112 +40,167 @@ public class JavaTranslationBookkeeper {
     public JavaTranslationBookkeeper(ErrorHandler err, File doc) {
         this.err = err;
         this.srcFile = doc;
-        importList = new ArrayList();
-        currentDocument = new StringBuilder();
+
+        functionList = new ArrayList();
+        headerImportList = new ArrayList();
     }
 
     // ===========================================================
-    // Public Methods
+    // Public methods
     // ===========================================================
 
-    // The file being passed here isn't the same srcFile
-    // in the constructor, but one for a usesitem!
-
-    // It's admittedly weird reading a file here but it seems
-    // like the cleanest place to do it until we find a better
-    // solution for retrieving import items
     public void addImport(File file) {
         String impStr = "import " + formPkgPath(file) + ".*;\n";
-        if (!importList.contains(impStr)) {
-            importList.add(impStr);
+        if (!headerImportList.contains(impStr)) {
+            headerImportList.add(impStr);
         }
     }
-	
-	public void appendToCurrentDoc(String line) {
-		currentDocument.append(line);
-	}
+
+    public void addClassDeclaration(String line) {
+        headerClassDeclaration = line;
+    }
 
     @Override
     public String toString() {
-        currentDocument.append(buildHeaderComment(srcFile));
-        currentDocument.append("package ");
-        currentDocument.append(formPkgPath(srcFile));
-        currentDocument.append("\n\n");
-        currentDocument.append("import RESOLVE.*\n");
-        for (String imp : importList) {
-            currentDocument.append(imp);
-        }
-		currentDocument.append("\n");
-        return currentDocument.toString();
-    }
+        StringBuilder finalCode = new StringBuilder();
 
+        finalCode.append(buildHeaderComment(srcFile));
+        finalCode.append("package ");
+        finalCode.append(formPkgPath(srcFile));
+        finalCode.append("\n\n");
+        finalCode.append("import RESOLVE.*\n");
+        for (String imp : headerImportList) {
+            finalCode.append(imp);
+        }
+        finalCode.append("\n");
+        finalCode.append(headerClassDeclaration).append(" {\n");
+
+        for (ElementFunction func : functionList) {
+            finalCode.append(func.writeFunction());
+
+        }
+        return finalCode.toString();
+
+    }
 
     // ===========================================================
     // Element Classes
     // ===========================================================
-	
 
-  /*  private class ElementFunction {
+    // elementbody will keep track of everything inside 
+    // (not including) the outermost { ... }.
+    // come back to this later... I have some questions.
+    /*   private class ElementBody {
 
-        StringBuffer functionBody;
-        String retTyandName;
-        String returnType;
+           private ArrayList<String> bodyList;
 
-        List<String> parameters;
-        List<String> statements;
-        List<String> initializedVariables;
-    }*/
-
-    /*   private class ElementFunction {
-
-           StringBuffer functionBody;
-           String retTyandName;
-           String returnType;
-
-           List<String> parameters;
-           List<String> statements;
-           List<String> varInit;
-       }
-
-       public void addFunction(String modifier, PosSymbol retType, PosSymbol name) {
-           ElementFunction newFunc = new ElementFunction();
-
-           newFunc.returnType = "void ";
-           if (retType != null) {
-               newFunc.returnType = retType.getName().toString();
+           public ElementBody() {
+               bodyList = new ArrayList();
            }
 
-           newFunc.retTyandName = modifier + newFunc.returnType + name.toString();
-           funcList.add(newFunc);
-
-           newFunc.functionBody = new StringBuffer();
-           newFunc.parameters = new ArrayList<String>();
-           newFunc.statements = new ArrayList<String>();
-           newFunc.varInit = new ArrayList<String>();
-           currentFunction = newFunc;
        }*/
 
-    /*   public void addToCurrFunction(String line) {
-           currentFunction.functionBody.append(line);
-       }
+    private class ElementFunction {
 
-       public void addToCurrParamList(String line) {
-           // if (currentFunction != null) { }
-           currentFunction.parameters.add(line);
-       }
+        private String name;
+        private String returnType;
+        private StringBuffer allStatements;
 
-       public void appendToHeader(String line) {
-           header.append(line);
-       }
+        private List<String> parameterList;
+        private List<String> statementList;
+        private List<String> variableInitList;
 
-       public void appendToRest(String line) {
-           rest.append(line);
-       }*/
+        // default constructor is fine in this case
 
-    //   public String formParameter(PosSymbol type, PosSymbol par) {
-    // remember to add in Integer_Template.<type>, etc, etc
-    //       return type.getName().toString() + " " + par.getName().toString();
-    //   }
+        public String writeFunction() {
+
+            StringBuilder completeFunc = new StringBuilder();
+            completeFunc.append(returnType).append(" ");
+            completeFunc.append(name).append("(");
+
+            for (int i = 0; i < parameterList.size(); i++) {
+                completeFunc.append(parameterList.get(i));
+                if (i != parameterList.size() - 1) {
+                    completeFunc.append(", ");
+                }
+            }
+            // need something in here to differentiate 
+            // between facility/realization fxns and 
+            // those declarations found in concept files...
+            //if (returnType.equals("void ")) {
+            //	fullFuncStr.append(");");
+            //	return 
+            //}
+            completeFunc.append(") {\n");
+
+            if (allStatements != null) {
+                completeFunc.append("\t");
+                completeFunc.append(allStatements);
+            }
+            if (!returnType.equals("void ")) {
+                completeFunc.append("return ").append(name).append(";\n");
+            }
+            completeFunc.append("}\n\n");
+            return completeFunc.toString();
+        }
+    }
+
+    public void appendToStatement(String line) {
+        if (currentFunction != null) {
+            currentFunction.allStatements.append(line);
+        }
+    }
+
+    // acc = access (i.e. public, private, etc)
+    public void addFunction(String acc, PosSymbol retType, PosSymbol name) {
+        ElementFunction newFunc = new ElementFunction();
+
+        newFunc.returnType = "void ";
+        if (retType != null) {
+            newFunc.returnType = retType.getName().toString();
+        }
+
+        newFunc.name = name.toString();
+        newFunc.allStatements = new StringBuffer();
+        newFunc.parameterList = new ArrayList<String>();
+        newFunc.statementList = new ArrayList<String>();
+        newFunc.variableInitList = new ArrayList<String>();
+        functionList.add(newFunc);
+        currentFunction = newFunc;
+    }
+
+    // ===========================================================
+    // 
+    // ===========================================================
+
+    // qualifiers are a going to need to be added..
+    public void addFunctionInitVariable(PosSymbol type, PosSymbol name) {
+        if (currentFunction != null) {
+            String completeVar = formFunctionVariable(type, name);
+            currentFunction.allStatements.append(completeVar);
+            currentFunction.allStatements.append("\n\t");
+            currentFunction.variableInitList.add(completeVar);
+        }
+    }
+
+    public void addFunctionParameter(PosSymbol type, PosSymbol name) {
+        if (currentFunction != null) {
+            String completeParameter = formFunctionParameter(type, name);
+            currentFunction.parameterList.add(completeParameter);
+        }
+    }
+
+    //	public void addLineToFuncion()
+    private String formFunctionParameter(PosSymbol type, PosSymbol name) {
+        // remember to add in Integer_Template.<type>, etc, etc
+        // right now it just does <type> <name>
+        return type.getName().toString() + " " + name.getName().toString();
+    }
+
+    private String formFunctionVariable(PosSymbol type, PosSymbol name) {
+
+        return type.getName().toString() + " " + name.getName().toString();
+    }
 
     // ===========================================================
     // Misc Helper Methods
