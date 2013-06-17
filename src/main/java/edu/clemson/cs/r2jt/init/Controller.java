@@ -1072,6 +1072,7 @@ public class Controller {
                 myInstanceEnvironment.completeRecord(id, table);
                 return;
             }
+            MathSymbolTable mathSymTab = getMathSymbolTable(dec, symbolTable);
             OldSymbolTable table = analyzeModuleDec(symbolTable, dec);
 
             myInstanceEnvironment.completeRecord(id, table);
@@ -1283,29 +1284,22 @@ public class Controller {
         try {
             ModuleID mid = pid.getModuleID();
             ModuleKind kind = mid.getModuleKind();
-            if (kind != ModuleKind.USES_ITEM) {
-                String key = "";
-                if (kind != ModuleKind.CONCEPT) {
-                    key += mid.getConceptName().getName() + ".";
-                }
-                else {
-                    key += mid.getName().getName() + ".";
-                    //key += "User_Concept.";
-                }
-                key += mid.getName().getName();
-                //System.out.println("Attempting to compile: " + key + " from hashmap (Controller(1002)");
-                if (myInstanceEnvironment.isUserFile(key)) {
-                    MetaFile importFile =
-                            myInstanceEnvironment.getUserFileFromMap(key);
-                    compileNewImportSource(key, importFile, symbolTable);
-                }
-                else {
-                    File file = getPosModuleFile(pid, targetFile);
-                    if (file != null) {
-                        checkModuleDependencies(file, pid.getLocation());
-                        compileImportFile(file, symbolTable);
-                    }
-                }
+            String key = "";
+
+            if (kind == ModuleKind.CONCEPT_BODY
+                    || kind == ModuleKind.ENHANCEMENT
+                    || kind == ModuleKind.ENHANCEMENT_BODY) {
+                key += mid.getConceptName().getName() + ".";
+            }
+            else {
+                key += mid.getName().getName() + ".";
+            }
+            key += mid.getName().getName();
+
+            if (myInstanceEnvironment.isUserFile(key)) {
+                MetaFile importFile =
+                        myInstanceEnvironment.getUserFileFromMap(key);
+                compileNewImportSource(key, importFile, symbolTable);
             }
             else {
                 File file = getPosModuleFile(pid, targetFile);
@@ -1314,7 +1308,6 @@ public class Controller {
                     compileImportFile(file, symbolTable);
                 }
             }
-
         }
         catch (CompilerException cex) {
             /*
