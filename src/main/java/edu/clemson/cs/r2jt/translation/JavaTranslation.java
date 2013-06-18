@@ -17,6 +17,7 @@ import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 
 /**
  *
@@ -30,6 +31,7 @@ public class JavaTranslation extends TreeWalkerVisitor {
 
     private ErrorHandler err;
     private final CompileEnvironment env;
+	private final MathSymbolTable table;
     JavaTranslationBookkeeper bookkeeper;
 
     private static final String FLAG_SECTION_NAME = "Translation";
@@ -49,10 +51,11 @@ public class JavaTranslation extends TreeWalkerVisitor {
     // Constructor(s)
     // ===========================================================
 
-    public JavaTranslation(CompileEnvironment env, ModuleDec dec,
+    public JavaTranslation(CompileEnvironment env, MathSymbolTable tbl, ModuleDec dec,
             ErrorHandler err) {
         this.err = err;
         this.env = env;
+		this.table = tbl;
         File srcFile = dec.getName().getFile();
         bookkeeper = new JavaTranslationBookkeeper(err, srcFile);
     }
@@ -126,9 +129,41 @@ public class JavaTranslation extends TreeWalkerVisitor {
     public void preVarDec(VarDec dec) {
         PosSymbol varType = ((NameTy) dec.getTy()).getName();
         PosSymbol varName = dec.getName();
-
+		// only preprocessor variables
+		// if (!dec.getName().getName().startsWith("_")) {
+			
+		//}
         //System.out.println(dec.getName().toString() + " " + type.toString());
         bookkeeper.addFunctionInitVariable(varType, varName);
+    }
+
+    @Override
+    public void preProgramParamExp(ProgramParamExp exp) {
+        //function with return
+        bookkeeper.appendToStatement(exp.toString());
+        bookkeeper.appendToStatement("(");
+    }
+
+    /*   @Override
+       public void preVariableNameExp(VariableNameExp var) {
+           bookkeeper.appendToStatement(var.getName().toString());
+       }
+
+       @Override
+       public void postVariableNameExp(VariableNameExp var) {
+           bookkeeper.appendToStatement(var.getName().toString());
+       }*/
+
+    @Override
+    public void preFuncAssignStmt(FuncAssignStmt data) {
+        bookkeeper.appendToStatement("assign(");
+        bookkeeper.appendToStatement(data.getVar().toString());
+
+    }
+
+    @Override
+    public void postFuncAssignStmt(FuncAssignStmt data) {
+        bookkeeper.appendToStatement(");");
     }
 
     @Override
@@ -136,18 +171,13 @@ public class JavaTranslation extends TreeWalkerVisitor {
             ResolveConceptualElement prevChild,
             ResolveConceptualElement nextChild) {
         if (prevChild != null && nextChild != null) {
-            bookkeeper.appendToStatement(" = ");
+            bookkeeper.appendToStatement(", ");
         }
     }
 
     @Override
-    public void preVariableNameExp(VariableNameExp var) {
-        bookkeeper.appendToStatement(var.getName().toString());
-    }
-
-    @Override
-    public void postVariableNameExp(VariableNameExp var) {
-        bookkeeper.appendToStatement(var.getName().toString());
+    public boolean walkProgramFunctionExp(ProgramFunctionExp exp) {
+        return true;
     }
 
     @Override
@@ -158,7 +188,7 @@ public class JavaTranslation extends TreeWalkerVisitor {
 
     @Override
     public void postProgramIntegerExp(ProgramIntegerExp exp) {
-        bookkeeper.appendToStatement(");");
+        bookkeeper.appendToStatement(")");
     }
 
     /*    @Override

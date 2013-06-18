@@ -115,7 +115,7 @@ public class JavaTranslationBookkeeper {
         public String writeFunction() {
 
             StringBuilder completeFunc = new StringBuilder();
-            completeFunc.append(returnType).append(" ");
+            completeFunc.append(returnType);
             completeFunc.append(name).append("(");
 
             for (int i = 0; i < parameterList.size(); i++) {

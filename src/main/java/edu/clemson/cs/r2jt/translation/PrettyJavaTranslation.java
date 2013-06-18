@@ -276,6 +276,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
      * https://www.pivotaltracker.com/story/show/37258073
      * This will skip over all children of ProgramFunctionExp
      */
+    //  @Override
     public boolean walkProgramFunctionExp(ProgramFunctionExp exp) {
         return true;
     }
@@ -406,6 +407,8 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
             ResolveConceptualElement prevChild,
             ResolveConceptualElement nextChild) {
         if (prevChild != null && nextChild != null) {
+            System.out.println("here");
+
             switch (exp.getOperator()) {
             case ProgramOpExp.AND:
                 cInfo.appendToStmt(" && ");

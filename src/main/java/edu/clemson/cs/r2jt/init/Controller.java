@@ -506,7 +506,7 @@ public class Controller {
             }
             if (myInstanceEnvironment.flags
                     .isFlagSet(JavaTranslation.JAVA_FLAG_TRANSLATE)) {
-                translateModuleDec(file, table, dec);
+                translateModuleDec(file, mathSymTab, dec);
                 //System.out.println("Translated: " + file.toString());
                 if (myInstanceEnvironment.flags
                         .isFlagSet(Archiver.FLAG_ARCHIVE)) {
@@ -620,7 +620,7 @@ public class Controller {
                 if (inputFile.getIsCustomLoc()) {
                     file = inputFile.getMyCustomFile();
                 }
-                translateModuleDec(file, table, dec);
+                translateModuleDec(file, mathSymTab, dec);
                 //System.out.println("Translated: " + file.toString());
                 if (myInstanceEnvironment.flags
                         .isFlagSet(Archiver.FLAG_ARCHIVE)) {
@@ -1020,7 +1020,7 @@ public class Controller {
             //if(arc.needToTranslate(file)) translateModuleDec(table, dec);
             //if(env.createJarOn() && arc.needToTranslate(file)){
             if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-                translateModuleDec(file, table, dec);
+                translateModuleDec(file, mathSymTab, dec);
                 //arc.addFiletoArchive(file);
                 //arc.printArchiveList();
             }
@@ -1084,7 +1084,7 @@ public class Controller {
                 if (importFile.getIsCustomLoc()) {
                     file = importFile.getMyCustomFile();
                 }
-                translateModuleDec(file, table, dec);
+				translateModuleDec(file, mathSymTab, dec);
                 //arc.addFiletoArchive(file);
                 //arc.printArchiveList();
             }
@@ -1712,11 +1712,11 @@ public class Controller {
     // Translation Related Methods
     // ------------------------------------------------------------
 
-    private void translateModuleDec(File file, OldSymbolTable table,
+    private void translateModuleDec(File file, MathSymbolTable table,
             ModuleDec dec) {
 
         JavaTranslation javaTranslate =
-                new JavaTranslation(myInstanceEnvironment, dec, err);
+                new JavaTranslation(myInstanceEnvironment, table, dec, err);
 
         TreeWalker tw = new TreeWalker(javaTranslate);
         tw.visit(dec);
