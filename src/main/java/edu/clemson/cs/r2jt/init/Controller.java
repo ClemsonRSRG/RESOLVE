@@ -1519,6 +1519,12 @@ public class Controller {
     private OldSymbolTable getSymbolTable(ScopeRepository aRealSymbolTable,
             ModuleDec dec) throws CompilerException {
         int initErrorCount = err.getErrorCount();
+
+        // change to whatever visitor logic you want to use
+        //VisitorPrintStructure vps = new VisitorPrintStructure();
+        //TreeWalker twvps = new TreeWalker(vps);
+        //twvps.visit(dec);
+
         OldSymbolTable table =
                 new OldSymbolTable(ModuleID.createID(dec),
                         myInstanceEnvironment);
@@ -1526,11 +1532,6 @@ public class Controller {
         populator.visitModuleDec(dec);
 
         // *** This next section is for testing the new tree walker ***
-
-        // change twv to whatever visitor logic you want to use
-        //VisitorPrintStructure twv = new VisitorPrintStructure();
-        //TreeWalker tw = new TreeWalker(twv);
-        //tw.visit(dec);
 
         //SanityCheck Walker -JCK
         VisitorSanityCheck sctwv =
@@ -1568,14 +1569,16 @@ public class Controller {
 
         //VisitorCodeGeneration.generateVisitorClass();
 
-        /*edu.clemson.cs.r2jt.treewalk.VisitorPrintStructure ps = new edu.clemson.cs.r2jt.treewalk.VisitorPrintStructure();
-        TreeWalker twps = new TreeWalker(ps);
-        twps.visit(dec);*/
+        //edu.clemson.cs.r2jt.treewalk.VisitorPrintStructure ps =
+        //        new edu.clemson.cs.r2jt.treewalk.VisitorPrintStructure();
+        //TreeWalker twps = new TreeWalker(ps);
+        //twps.visit(dec);
 
         System.err.flush();
         System.out.flush();
 
         Populator populator = new Populator(symbolTable);
+        myInstanceEnvironment.setTypeGraph(populator.getTypeGraph());
         TreeWalker tw = new TreeWalker(populator);
         populator.setTreeWalker(tw);
         tw.visit(dec);

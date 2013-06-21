@@ -7992,7 +7992,7 @@ public class Verifier extends ResolveConceptualVisitor {
         }
 
         Exp requires = new VarExp();
-        Exp ensures = Exp.getTrueVarExp(); //new VarExp();  
+        Exp ensures = Exp.getTrueVarExp(myInstanceEnvironment.getTypeGraph()); //new VarExp();  
         boolean thisConcept = false;
 
         if (moduleDec != null && moduleDec instanceof ConceptBodyModuleDec

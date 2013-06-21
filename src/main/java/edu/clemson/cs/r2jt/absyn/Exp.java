@@ -72,6 +72,7 @@ import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
+import edu.clemson.cs.r2jt.typeandpopulate.MTProper;
 
 public abstract class Exp extends ResolveConceptualElement implements Cloneable {
 
@@ -317,7 +318,7 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
 
     protected Exp copy() {
         System.out.println("Shouldn't be calling Exp.copy() from type "
-                + this.getClass() + ".");
+                + this.getClass());
         throw new RuntimeException();
         //return null;
     }
@@ -340,6 +341,7 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
 
     public void setMathType(MTType mathType) {
         if (mathType == null) {
+            System.out.println(this.asString(0, 0));
             throw new RuntimeException("Null Math Type on: " + this.getClass());
         }
 
@@ -480,7 +482,7 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
 
     public Exp compareWithAssumptions(Exp exp) {
         if (this.equals(exp))
-            return getTrueVarExp();
+            return getTrueVarExp(exp.getMathType().getTypeGraph());
         return this;
     }
 
@@ -502,12 +504,13 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
                 BooleanType.INSTANCE);
     }
 
-    public static VarExp getTrueVarExp() {
+    public static VarExp getTrueVarExp(TypeGraph tg) {
         Symbol trueSym = Symbol.symbol("true");
         PosSymbol truePosSym = new PosSymbol();
         truePosSym.setSymbol(trueSym);
         VarExp trueExp = new VarExp(null, null, truePosSym);
         trueExp.setType(BooleanType.INSTANCE);
+        trueExp.setMathType(tg.BOOLEAN);
 
         return trueExp;
     }
