@@ -1,13 +1,13 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
-import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.clemson.cs.r2jt.absyn.ModuleDec;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import edu.clemson.cs.r2jt.absyn.ModuleDec;
 
 /**
  * <p>A <code>MathSymbolTable</code> represents an immutable mapping from

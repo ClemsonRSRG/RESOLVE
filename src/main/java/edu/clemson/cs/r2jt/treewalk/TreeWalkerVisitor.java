@@ -1960,18 +1960,16 @@ public abstract class TreeWalkerVisitor {
     public boolean walkProgramOpExp(ProgramOpExp data) {
         return false;
     }
-	
-	public void preProgramOpExp(ProgramOpExp data) {
-    }
-	
-	public void midProgramOpExp(ProgramOpExp data,
+
+    public void preProgramOpExp(ProgramOpExp data) {}
+
+    public void midProgramOpExp(ProgramOpExp data,
             ResolveConceptualElement prevChild,
             ResolveConceptualElement nextChild) {
-		
-	}
-	
-	public void postProgramOpExp(ProgramOpExp data) {
+
     }
+
+    public void postProgramOpExp(ProgramOpExp data) {}
 
     // FunctionExp
     public boolean walkFunctionExp(FunctionExp data) {

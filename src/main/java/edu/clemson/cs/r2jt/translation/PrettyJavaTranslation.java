@@ -245,6 +245,9 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
         cInfo.appendToStmt("(");
     }
 
+    // have a boolean for this saying when your in a parameter expression list...
+    // preProgramParamExpArguments
+    // disregard.
     @Override
     public void midProgramParamExpArguments(ProgramParamExp node,
             ProgramExp previous, ProgramExp next) {
