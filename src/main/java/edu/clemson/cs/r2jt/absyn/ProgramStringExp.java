@@ -177,4 +177,15 @@ public class ProgramStringExp extends ProgramExp {
     public void setSubExpression(int index, Exp e) {
 
     }
+
+    @Override
+    protected ProgramStringExp copy() {
+        ProgramStringExp c = new ProgramStringExp(location, value);
+        c.bType = this.bType;
+        c.setType(this.type);
+        c.setMathType(this.myMathType);
+        c.setMathTypeValue(this.myMathTypeValue);
+        return c;
+    }
+
 }

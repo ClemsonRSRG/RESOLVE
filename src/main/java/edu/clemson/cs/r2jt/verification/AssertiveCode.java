@@ -85,7 +85,7 @@ public class AssertiveCode implements Cloneable {
 
     public AssertiveCode(CompileEnvironment env) {
         this.env = env;
-        confirm = Exp.getTrueVarExp();
+        confirm = Exp.getTrueVarExp(env.getTypeGraph());
         this.err = env.getErrorHandler();
     }
 
@@ -96,7 +96,7 @@ public class AssertiveCode implements Cloneable {
      * @param sourceModule The module this assertive code will represent.
      */
     public AssertiveCode(ModuleID sourceModule, ErrorHandler err) {
-        confirm = Exp.getTrueVarExp();
+        confirm = Exp.getTrueVarExp(env.getTypeGraph());
         mySourceModule = sourceModule;
         this.err = err;
     }
@@ -296,7 +296,7 @@ public class AssertiveCode implements Cloneable {
 
     public void setFinalConfirm(Exp confirm) {
         if (confirm == null) {
-            confirm = VarExp.getTrueVarExp();
+            confirm = VarExp.getTrueVarExp(env.getTypeGraph());
         }
 
         this.confirm = confirm;
@@ -525,7 +525,7 @@ public class AssertiveCode implements Cloneable {
         List<InfixExp> tmp2 = new List<InfixExp>();
         while (it2.hasNext()) {
             Exp tmpExp = it2.next();//.simplify();
-            if (!tmpExp.equals(VarExp.getTrueVarExp())
+            if (!tmpExp.equals(VarExp.getTrueVarExp(env.getTypeGraph()))
                     && tmpExp instanceof InfixExp) {
                 tmp2.add((InfixExp) tmpExp);
             }

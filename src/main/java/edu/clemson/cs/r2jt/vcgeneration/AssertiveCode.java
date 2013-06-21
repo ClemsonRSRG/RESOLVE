@@ -31,7 +31,7 @@ public class AssertiveCode {
 
     public AssertiveCode(CompileEnvironment env) {
         myInstanceEnvironment = env;
-        myConfirm = Exp.getTrueVarExp();
+        myConfirm = Exp.getTrueVarExp(env.getTypeGraph());
         myErr = env.getErrorHandler();
     }
 }

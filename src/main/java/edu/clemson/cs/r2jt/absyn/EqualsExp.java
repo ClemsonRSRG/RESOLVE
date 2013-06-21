@@ -419,7 +419,7 @@ public class EqualsExp extends AbstractFunctionExp {
     public Exp simplify() {
         Exp simplified = this;
         if (left.equals(right)) {
-            simplified = getTrueVarExp();
+            simplified = getTrueVarExp(this.myMathType.getTypeGraph());
         }
         return simplified;
     }

@@ -280,6 +280,8 @@ public class ProgramParamExp extends ProgramExp {
                 new ProgramParamExp(location, name, arguments, semanticExp);
 
         result.setType(getType());
+        result.setMathType(myMathType);
+        result.setMathTypeValue(myMathTypeValue);
 
         return result;
     }
