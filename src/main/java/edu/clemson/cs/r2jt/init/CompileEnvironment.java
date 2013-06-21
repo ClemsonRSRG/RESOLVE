@@ -20,6 +20,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
 import edu.clemson.cs.r2jt.scope.OldSymbolTable;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
 import edu.clemson.cs.r2jt.utilities.FlagManager;
 
@@ -54,6 +55,7 @@ public class CompileEnvironment {
     private String myTargetFileName = null;
     private String myCurrentTargetFileName = null;
     private ProverListener myListener = null;
+    private TypeGraph myTypeGraph = null;
 
     // variables brought in from the old Environment class
     private Map<ModuleID, ModuleRecord> map = new Map<ModuleID, ModuleRecord>();
@@ -133,6 +135,14 @@ public class CompileEnvironment {
         }
 
         mySymbolTable = table;
+    }
+
+    public void setTypeGraph(TypeGraph t) {
+        myTypeGraph = t;
+    }
+
+    public TypeGraph getTypeGraph() {
+        return myTypeGraph;
     }
 
     public ScopeRepository getSymbolTable() {

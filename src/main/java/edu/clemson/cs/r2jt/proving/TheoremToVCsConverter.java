@@ -50,7 +50,7 @@ public class TheoremToVCsConverter implements Iterable<VerificationCondition> {
             consequent = eAsInfixExp.getRight();
         }
         else {
-            antecedent = VarExp.getTrueVarExp();
+            antecedent = Exp.getTrueVarExp(e.getMathType().getTypeGraph());
             consequent = e;
         }
 

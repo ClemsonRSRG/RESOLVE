@@ -46,7 +46,10 @@ public class AlphaEquivalencyChecker extends SymmetricBoundVariableVisitor {
     public boolean beginMTFunctionApplication(MTFunctionApplication t1,
             MTFunctionApplication t2) {
 
-        myResult = (t1.getName().equals(t2.getName()));
+        //myResult = (t1.getName().equals(t2.getName()));
+
+        // Not sure if this is the right fix.... -BD
+        myResult = (t1.getHashCode() == t2.getHashCode());
 
         return myResult;
     }

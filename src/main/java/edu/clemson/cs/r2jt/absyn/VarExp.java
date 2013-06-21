@@ -429,6 +429,8 @@ public class VarExp extends Exp {
         retval = new VarExp(location, newQualifier, newName, quantification);
         retval.setType(type);
         retval.setIsLocal(local);
+        retval.setMathType(myMathType);
+        retval.setMathTypeValue(myMathTypeValue);
 
         return retval;
     }

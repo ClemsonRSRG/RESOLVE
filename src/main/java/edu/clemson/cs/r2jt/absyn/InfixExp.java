@@ -688,8 +688,8 @@ public class InfixExp extends AbstractFunctionExp {
         }
         else if (single) {
             if (assumpts == null) {
-                lst.add(new InfixExp(null, getTrueVarExp(),
-                        createPosSymbol("implies"), this));
+                lst.add(new InfixExp(null, getTrueVarExp(this.myMathType
+                        .getTypeGraph()), createPosSymbol("implies"), this));
             }
             else {
                 lst.add(new InfixExp(null, assumpts,
@@ -832,18 +832,20 @@ public class InfixExp extends AbstractFunctionExp {
             ((InfixExp) simplified).setLeft(((InfixExp) simplified).left
                     .simplify());
         else
-            ((InfixExp) simplified).setLeft(getTrueVarExp());
+            ((InfixExp) simplified).setLeft(getTrueVarExp(myMathType
+                    .getTypeGraph()));
 
         if (((InfixExp) simplified).getRight() != null)
             ((InfixExp) simplified).setRight(((InfixExp) simplified).right
                     .simplify());
         else
-            ((InfixExp) simplified).setLeft(getTrueVarExp());
+            ((InfixExp) simplified).setLeft(getTrueVarExp(myMathType
+                    .getTypeGraph()));
 
         // Simplify A -> true to true
         if (((InfixExp) simplified).opName.equals("implies")
                 && isTrueExp(((InfixExp) simplified).getRight())) {
-            return getTrueVarExp();
+            return getTrueVarExp(myMathType.getTypeGraph());
         }
 
         if (((InfixExp) simplified).getOpName().equals("implies")
@@ -935,7 +937,7 @@ public class InfixExp extends AbstractFunctionExp {
 
     public Exp compareWithAssumptions(Exp exp) {
         if (this.equals(exp))
-            return getTrueVarExp();
+            return getTrueVarExp(myMathType.getTypeGraph());
         if (opName.toString().equals("and")) {
             this.left = left.compareWithAssumptions(exp);
             this.right = right.compareWithAssumptions(exp);
@@ -1009,7 +1011,8 @@ public class InfixExp extends AbstractFunctionExp {
     private boolean isTrueExp(Exp exp) {
         if (exp instanceof VarExp) {
             if (((VarExp) exp).getName().toString().equals(
-                    getTrueVarExp().getName().toString())) {
+                    getTrueVarExp(myMathType.getTypeGraph()).getName()
+                            .toString())) {
                 ;
                 return true;
             }

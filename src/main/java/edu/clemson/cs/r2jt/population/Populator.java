@@ -190,6 +190,10 @@ public class Populator extends TreeWalkerVisitor {
         myWalker = w;
     }
 
+    public TypeGraph getTypeGraph() {
+        return myTypeGraph;
+    }
+
     //-------------------------------------------------------------------
     //   Visitor methods
     //-------------------------------------------------------------------
@@ -372,6 +376,13 @@ public class Populator extends TreeWalkerVisitor {
             }
 
             d.setMathType(d.getWrappedDec().getMathType());
+        }
+        else {
+            MTType t = ((OperationDec) d.getWrappedDec()).getMathType();
+            if (t == null) {
+                t = myTypeGraph.VOID;
+            }
+            d.setMathType(t);
         }
     }
 
@@ -640,6 +651,8 @@ public class Populator extends TreeWalkerVisitor {
             duplicateSymbol(dec.getName().getName(), dec.getName()
                     .getLocation());
         }
+
+        dec.setMathType(dec.getTy().getMathTypeValue());
     }
 
     @Override
@@ -1284,6 +1297,7 @@ public class Populator extends TreeWalkerVisitor {
                 + foundExpType.toString());
 
         MathSymbolEntry intendedEntry = getIntendedFunction(foundExp);
+
         MTFunction expectedType = (MTFunction) intendedEntry.getType();
 
         //We know we match expectedType--otherwise the above would have thrown
@@ -1484,17 +1498,30 @@ public class Populator extends TreeWalkerVisitor {
                 ambiguousSymbol(i.getName(), es);
             }
             else {
-                if (i.getEvalExp() == null) {
-                    i.setMathType(es.get(0).toProgramVariableEntry(
-                            i.getLocation()).getProgramType().toMath());
+                SymbolTableEntry ste = es.get(0);
+                ResolveConceptualElement rce = ste.getDefiningElement();
+                PTType pt;
+
+                if (rce instanceof TypeDec) {
+                    pt =
+                            ste.toProgramTypeEntry(i.getLocation())
+                                    .getProgramType();
+                }
+                else if (rce instanceof OperationDec) {
+                    pt = ste.toOperationEntry(i.getLocation()).getReturnType();
+
                 }
                 else {
-                    i.setMathType(i.getEvalExp().getMathType());
+                    pt =
+                            ste.toProgramVariableEntry(i.getLocation())
+                                    .getProgramType();
                 }
+
+                i.setMathType(pt.toMath());
 
                 try {
                     ProgramTypeEntry e =
-                            es.get(0).toProgramTypeEntry(i.getLocation());
+                            ste.toProgramTypeEntry(i.getLocation());
 
                     i.setProgramTypeValue(e.getProgramType());
                 }
@@ -1503,6 +1530,7 @@ public class Populator extends TreeWalkerVisitor {
                     //of what they should be, then raise appropriate errors if,
                     //e.g., you provide a type where an operation is expected.
                     //For right now, we just ignore all that.
+                    i.setProgramTypeValue(PTVoid.getInstance(myTypeGraph));
                 }
             }
         }
