@@ -922,7 +922,6 @@ public class Populator extends TreeWalkerVisitor {
                                     .getName()));
 
             node.setProgramType(entry.getProgramType());
-
             //Handle math typing stuff
             postSymbolExp(node.getQualifier(), node.getName().getName(), node);
         }

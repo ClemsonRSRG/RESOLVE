@@ -17,7 +17,7 @@ public class JavaFunctionBook implements FunctionBook {
      * that provides a container for some function named 
      * <code>name</code> with return type <code>type</code>. 
      * The function's parameters, variables, and 'stmts' will be 
-     * added-to using standard @link Supervisor methods.</p>
+     * added-to using standard @link JavaFunctionBook methods.</p>
      *
      * @param name The function's name.
      * @param type The function's return type.
