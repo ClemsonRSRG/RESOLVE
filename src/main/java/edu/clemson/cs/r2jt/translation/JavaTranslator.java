@@ -4,6 +4,9 @@
  */
 package edu.clemson.cs.r2jt.translation;
 
+import edu.clemson.cs.r2jt.translation.bookkeeping.Bookkeeper;
+import edu.clemson.cs.r2jt.translation.bookkeeping.JavaConceptBookkeeper;
+import edu.clemson.cs.r2jt.translation.bookkeeping.JavaFacilityBookkeeper;
 import java.io.File;
 import java.util.Date;
 import java.util.Deque;
@@ -14,7 +17,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.FinalizedScope;
 
 import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
-import edu.clemson.cs.r2jt.translation.supervising.*;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
@@ -32,14 +34,10 @@ import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
  */
 public class JavaTranslator extends TreeWalkerVisitor {
 
-    // ===========================================================
-    // Variables & Flags
-    // ===========================================================
-
     private ErrorHandler err;
     private final CompileEnvironment env;
-    private final MathSymbolTable table;
-    Supervisor mySupervisor;
+    private final MathSymbolTable table; // get rid of this. Work w/ scopes instead.
+    Bookkeeper myBookkeeper;
 
     private static final String FLAG_SECTION_NAME = "Translation";
     private static final String FLAG_DESC_TRANSLATE =
@@ -54,10 +52,6 @@ public class JavaTranslator extends TreeWalkerVisitor {
             new Flag(FLAG_SECTION_NAME, "translateClean",
                     FLAG_DESC_TRANSLATE_CLEAN);
 
-    // ===========================================================
-    // Constructor(s)
-    // ===========================================================
-
     public JavaTranslator(CompileEnvironment env, MathSymbolTable tbl,
             ModuleDec dec, ErrorHandler err) {
         this.err = err;
@@ -66,75 +60,79 @@ public class JavaTranslator extends TreeWalkerVisitor {
         File srcFile = dec.getName().getFile();
     }
 
-    // ===========================================================
-    // TreeWalker Visitor Methods
-    // ===========================================================
+    /** Visitor Methods */
 
-    // this preUsesItem method should change once a better sol. is 
-    // found.
     @Override
     public void preUsesItem(UsesItem data) {
 
         ModuleID id = ModuleID.createFacilityID(data.getName());
-        ModuleID conId = ModuleID.createConceptID(data.getName());
-
         if (env.contains(id)) {
-            ModuleDec dec = env.getModuleDec(id);
-            FacilityDec fdec = ((ShortFacilityModuleDec) (dec)).getDec();
-            PosSymbol cname = fdec.getConceptName();
-            ModuleID cid = ModuleID.createConceptID(cname);
 
+            ModuleDec dec = env.getModuleDec(id);
+            if (dec instanceof ShortFacilityModuleDec) {
+
+                FacilityDec fdec = ((ShortFacilityModuleDec) (dec)).getDec();
+                PosSymbol cname = fdec.getConceptName();
+                ModuleID cid = ModuleID.createConceptID(cname);
+                String imp = "import " + formPkgPath(env.getFile(cid)) + ".*;";
+                myBookkeeper.addUses(imp);
+            }
+        }
+        ModuleID cid = ModuleID.createConceptID(data.getName());
+        if (env.contains(cid)) {
             String imp = "import " + formPkgPath(env.getFile(cid)) + ".*;";
-            mySupervisor.addUses(imp);
+            myBookkeeper.addUses(imp);
         }
-        if (env.contains(conId)) {
-            String imp = "import " + formPkgPath(env.getFile(conId)) + ".*;";
-            mySupervisor.addUses(imp);
+    }
+
+    @Override
+    public void preConceptModuleDec(ConceptModuleDec data) {
+        String conceptName = data.getName().toString();
+        myBookkeeper = new JavaConceptBookkeeper(conceptName, false);
+    }
+
+    @Override
+    public void preTypeDec(TypeDec data) {
+    //	myBookkeeper.addConceptConstructor(data.getName().toString(),"");
+    // System.out.println(data.getName().toString());
+    }
+
+    @Override
+    public void preOperationDec(OperationDec data) {
+        String retType = "void";
+        if (data.getReturnTy() != null) {
+            retType = "<ReturnType>"; // obviously a placeholder.
         }
+        myBookkeeper.fxnAdd(retType, data.getName().toString());
     }
 
     @Override
     public void preFacilityModuleDec(FacilityModuleDec data) {
         String facName = data.getName().toString();
-        mySupervisor = new JavaFacilitySupervisor(facName);
+        myBookkeeper = new JavaFacilityBookkeeper(facName, true);
     }
 
     @Override
     public void preFacilityOperationDec(FacilityOperationDec data) {
-        // PosSymbol retType = null;
-        // System.out.println(data.getReturnTy().toString());
-        // if (data.getReturnTy() != null) {
-        //     System.out.println(data.getReturnTy().toString());
-        //retType = ((NameTy) data.getReturnTy()).getName();
-        // }
-        mySupervisor.fxnAdd("void ", data.getName().toString());
+        myBookkeeper.fxnAdd("void", data.getName().toString());
     }
 
     @Override
     public void preParameterVarDec(ParameterVarDec dec) {
-        String paramVariable = dec.getName().toString();
-        mySupervisor.fxnAddParam(paramVariable);
+        myBookkeeper.fxnAddParam(dec.getName().toString());
     }
 
     @Override
     public void preVarDec(VarDec dec) {
-        //PosSymbol varType = ((NameTy) dec.getTy()).getName();
-        //PosSymbol varName = dec.getName();
-        //FinalizedScope scope = table.getScope(dec);
-
-        /*SymbolTableEntry test = table.getScope(dec).queryForOne(new UnqualifiedNameQuery(
-                                        dec.getName().toString()));*/
-        //   table.getScope(dec).query(
-        //           new NameQuery(null, dec.getName().toString()));
-
-        mySupervisor.fxnAddVarDecl(dec.getName().toString());
+        myBookkeeper.fxnAddVarDecl(dec.getName().toString());
     }
+
+    ////////////////
 
     @Override
     public void preFuncAssignStmt(FuncAssignStmt data) {
-        mySupervisor.fxnAppendTo("TEMP.");
-        mySupervisor.fxnAppendTo("assign(");
-        mySupervisor.fxnAppendTo(data.getVar().toString());
+        myBookkeeper.fxnAppendTo("assign(");
+        myBookkeeper.fxnAppendTo(data.getVar().toString());
     }
 
     @Override
@@ -142,68 +140,67 @@ public class JavaTranslator extends TreeWalkerVisitor {
             ResolveConceptualElement prevChild,
             ResolveConceptualElement nextChild) {
         if (prevChild != null && nextChild != null) {
-            mySupervisor.fxnAppendTo(", ");
+            myBookkeeper.fxnAppendTo(", ");
         }
     }
 
     @Override
     public void postFuncAssignStmt(FuncAssignStmt data) {
-        mySupervisor.fxnAppendTo(");");
+        myBookkeeper.fxnAppendTo(");");
     }
 
     @Override
     public void preProgramParamExp(ProgramParamExp exp) {
-        mySupervisor.fxnAppendTo("TEMP.");
-        mySupervisor.fxnAppendTo(exp.toString());
-        mySupervisor.fxnAppendTo("(");
+        myBookkeeper.fxnAppendTo(exp.toString());
+        myBookkeeper.fxnAppendTo("(");
     }
 
     @Override
     public void preProgramIntegerExp(ProgramIntegerExp exp) {
-        mySupervisor.fxnAppendTo("Std_Integer_Fac.createInteger(");
-        mySupervisor.fxnAppendTo(Integer.toString(exp.getValue()));
+        myBookkeeper.fxnAppendTo("Std_Integer_Fac.createInteger(");
+        myBookkeeper.fxnAppendTo(Integer.toString(exp.getValue()));
     }
 
     @Override
     public void postProgramIntegerExp(ProgramIntegerExp exp) {
-        mySupervisor.fxnAppendTo(")");
+        myBookkeeper.fxnAppendTo(")");
     }
 
     @Override
     public void postProgramParamExp(ProgramParamExp exp) {
-        mySupervisor.fxnAppendTo(")");
+        myBookkeeper.fxnAppendTo(")");
     }
 
     @Override
     public void preCallStmt(CallStmt stmt) {
-        mySupervisor.fxnAppendTo(stmt.getName().toString());
-        mySupervisor.fxnAppendTo("(");
+        myBookkeeper.fxnAppendTo(stmt.getName().toString());
+        myBookkeeper.fxnAppendTo("(");
     }
 
     @Override
     public void midCallStmtArguments(CallStmt node, ProgramExp previous,
             ProgramExp next) {
         if (next != null && previous != null) {
-            mySupervisor.fxnAppendTo(", ");
+            myBookkeeper.fxnAppendTo(", ");
         }
     }
 
     @Override
     public void postCallStmt(CallStmt stmt) {
-        mySupervisor.fxnAppendTo(");");
+        myBookkeeper.fxnAppendTo(");");
     }
 
-    // ===========================================================
-    // Misc Helper Methods
-    // ===========================================================
+    /** Helper Methods */
 
     public void outputCode(File outputFile) {
         if (!env.flags.isFlagSet(ResolveCompiler.FLAG_WEB)
                 || env.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-            System.out.println(mySupervisor.output());
+
+            String code = Formatter.formatCode(myBookkeeper.output());
+            System.out.println(code);
         }
         else {
-            outputToReport(mySupervisor.output().toString());
+            outputToReport(myBookkeeper.output().toString());
         }
     }
 
@@ -214,17 +211,6 @@ public class JavaTranslator extends TreeWalkerVisitor {
     }
 
     public static final void setUpFlags() {}
-
-    private String formatDoc(StringBuilder input) {
-
-        for (int i = 0; i < input.length(); i++) {
-            if (input.charAt(i) == ';') {
-                input.insert(i, "\n");
-            }
-
-        }
-        return input.toString();
-    }
 
     //This should only be temporary..
     private String formPkgPath(File file) {
@@ -279,8 +265,8 @@ public class JavaTranslator extends TreeWalkerVisitor {
 
         String[] temp = targetFileName.split("\\\\");
         String fileName = temp[temp.length - 1];
-        return "//\n" + "// Generated by the Resolve to Java Translator" + "\n"
-                + "// from file:  " + fileName + "\n" + "// on:         "
+        return "//\n// Generated by the Resolve to Java Translator\n"
+                + "// from file:  " + fileName + "\n// on:         "
                 + new Date() + "\n" + "//\n";
     }
 
