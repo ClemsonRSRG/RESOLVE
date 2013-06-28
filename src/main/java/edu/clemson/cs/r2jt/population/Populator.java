@@ -2041,7 +2041,7 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * Given a Ty <code>t</code> and a ModuleIdentifier <code>ConceptName</code>
+     * Given a Ty <code>t</code> and a ModuleIdentifier, <code>ConceptName</code>,
      * we find the corresponding facility for the dec, stmt, etc.
      */
     private String getCorrespondingFacility(Ty t, ModuleIdentifier conceptName) {

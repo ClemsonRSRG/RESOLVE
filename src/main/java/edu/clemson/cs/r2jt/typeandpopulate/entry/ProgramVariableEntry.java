@@ -35,17 +35,6 @@ public class ProgramVariableEntry extends SymbolTableEntry {
         return myType;
     }
 
-    // not sure if this is the best way to go about this but here goes.
-    // translation really needs this kind of information. However, I'm
-    // worried about the ModuleIdentifier class (see comment there)...
-
-    // Returns a string of the program type qualified by its defining
-    // module. (I.e., for "Integer", getFullyQualifiedVarType gives
-    // "Integer_Template.Integer"
-    public String getFullyQualifiedVarType() {
-        return myTypeQualifierModule.fullyQualifiedRepresentation(myName);
-    }
-
     @Override
     public String getEntryTypeDescription() {
         return "a program variable";
@@ -82,4 +71,15 @@ public class ProgramVariableEntry extends SymbolTableEntry {
     public MathSymbolEntry toMathSymbolEntry(Location l) {
         return myMathSymbolAlterEgo;
     }
+	
+	/** Translation-Centric getter methods */
+	
+    // Returns a string of the program type qualified by its defining
+    // module. (I.e., for "Integer", getFormedProgramType gives
+    // "Integer_Template.Integer"
+    public String getFormedProgramType() {
+        return myTypeQualifierModule.fullyQualifiedRepresentation(myName);
+    }
+	
+	// additions here!
 }
