@@ -74,14 +74,15 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public ProgramVariableEntry addProgramVariable(String name,
-            ResolveConceptualElement definingElement, PTType type)
+            ResolveConceptualElement definingElement, PTType type,
+            ModuleIdentifier typeQualifierSrcModule)
             throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, type);
 
         ProgramVariableEntry entry =
                 new ProgramVariableEntry(name, definingElement, myRootModule,
-                        type);
+                        type, typeQualifierSrcModule);
 
         myBindings.put(name, entry);
 
@@ -93,6 +94,7 @@ public class ScopeBuilder extends SyntacticScope {
 
         SymbolTableEntry curLocalEntry =
                 myBindings.get(facility.getName().getName());
+
         if (curLocalEntry != null) {
             throw new DuplicateSymbolException(curLocalEntry);
         }
@@ -175,6 +177,9 @@ public class ScopeBuilder extends SyntacticScope {
                 (finalization == null) ? null : finalization.getRequires();
         Exp finalizationEnsures =
                 (finalization == null) ? null : finalization.getEnsures();
+
+        //   System.out.println("myRootmodule: "
+        //           + myRootModule.fullyQualifiedRepresentation(name));
 
         ProgramTypeEntry entry =
                 new ProgramTypeDefinitionEntry(myTypeGraph, name,

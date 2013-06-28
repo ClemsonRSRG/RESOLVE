@@ -6,6 +6,7 @@ import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.treewalk.*;
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
@@ -21,6 +22,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.ModuleScopeBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
 import edu.clemson.cs.r2jt.typeandpopulate.SymbolNotOfKindTypeException;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
@@ -30,6 +32,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry.Quantification;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTElement;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRecord;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
@@ -203,6 +206,7 @@ public class Populator extends TreeWalkerVisitor {
         Populator.emitDebug("----------------------\nModule: "
                 + node.getName().getName() + "\n----------------------");
         myCurModuleScope = myBuilder.startModuleScope(node);
+
     }
 
     @Override
@@ -351,12 +355,17 @@ public class Populator extends TreeWalkerVisitor {
             ResolveConceptualElement nextChild) {
 
         if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
+            ModuleIdentifier varConcept;
             try {
+
+                varConcept = getCorrespondingConcept(node.getReturnTy());
+
                 //Inside the operation's assertions, the name of the operation
                 //refers to its return value
                 myBuilder.getInnermostActiveScope().addProgramVariable(
                         node.getName().getName(), node,
-                        node.getReturnTy().getProgramTypeValue());
+                        node.getReturnTy().getProgramTypeValue(),
+                        varConcept);
             }
             catch (DuplicateSymbolException dse) {
                 //This shouldn't be possible--the operation declaration has a 
@@ -455,10 +464,16 @@ public class Populator extends TreeWalkerVisitor {
     public void midProcedureDec(ProcedureDec node,
             ResolveConceptualElement previous, ResolveConceptualElement next) {
         if (previous != null && previous == node.getReturnTy()) {
+
+            ModuleIdentifier varConcept;
+
             try {
+                varConcept = getCorrespondingConcept(node.getReturnTy());
+
                 myBuilder.getInnermostActiveScope().addProgramVariable(
                         node.getName().getName(), node,
-                        node.getReturnTy().getProgramTypeValue());
+                        node.getReturnTy().getProgramTypeValue(),
+                        varConcept);
             }
             catch (DuplicateSymbolException dse) {
                 duplicateSymbol(node.getName().getName(), node.getName()
@@ -896,14 +911,29 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postVarDec(VarDec programVar) {
 
+        ModuleIdentifier varConcept;
+        String varFacility;
         MTType mathTypeValue = programVar.getTy().getMathTypeValue();
         String varName = programVar.getName().getName();
-
         programVar.setMathType(mathTypeValue);
 
         try {
+            // get the variable type's - base module. (i.e. for "Integer", gives "Integer_Template"
+            // or for "Stack", gives "Stack_Template"
+            varConcept = getCorrespondingConcept(programVar.getTy());
+            varFacility =
+                    getCorrespondingFacility(programVar.getTy(), varConcept);
+
             myBuilder.getInnermostActiveScope().addProgramVariable(varName,
-                    programVar, programVar.getTy().getProgramTypeValue());
+                    programVar, programVar.getTy().getProgramTypeValue(),
+                    varConcept);
+
+            System.out.println("Variable Name: " + varName
+                    + "  Corresponding Concept: " + varConcept.toString()
+                    + "  Corresponding Facility: " + varFacility);
+
+            //   System.out.println("type: '" + progVarType + "' Source Module: '"
+            //          + type.getSourceModuleIdentifier().toString() + "'");
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(varName, programVar.getLocation());
@@ -916,6 +946,7 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postVariableNameExp(VariableNameExp node) {
         try {
+
             ProgramVariableEntry entry =
                     myBuilder.getInnermostActiveScope().queryForOne(
                             new ProgramVariableQuery(node.getQualifier(), node
@@ -1980,6 +2011,73 @@ public class Populator extends TreeWalkerVisitor {
     //-------------------------------------------------------------------
     //   Helper functions
     //-------------------------------------------------------------------
+
+    // Given a PTType, find its defining conceptual module
+    private ModuleIdentifier getCorrespondingConcept(Ty t) {
+
+        String searchStr = t.getProgramTypeValue().toString();
+        ModuleIdentifier result;
+
+        try {
+            ProgramTypeEntry type =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameQuery(((NameTy) t).getQualifier(),
+                                    searchStr, ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false)).toProgramTypeEntry(t.getLocation());
+            result = type.getSourceModuleIdentifier();
+
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException("No originating module for "
+                    + t.toString() + " ???");
+        }
+        catch (DuplicateSymbolException dse) {
+            //Shouldn't be possible--NameQuery can't throw this
+            throw new RuntimeException(dse);
+        }
+        return result;
+
+    }
+
+    /**
+     * Given a Ty <code>t</code> and a ModuleIdentifier <code>ConceptName</code>
+     * we find the corresponding facility for the dec, stmt, etc.
+     */
+    private String getCorrespondingFacility(Ty t, ModuleIdentifier conceptName) {
+
+        ModuleIdentifier facEntryConcept;
+        String result = "";
+
+        // in the case where we don't have a qualifier handed to 
+        // us by the programmer, we have to messily call upon and
+        // root through all facilities (available?).
+
+        // I'm still trying to figure out if there is a cleaner way
+        // to query for a given specification module inside a FacilityEntry.
+        // Currently, all query's only allow you to search for the name
+        // of the entryType, not fields buried within it (as far as I can see).
+        // So until there is a better way...
+        if (((NameTy) t).getQualifier() == null) {
+
+            List<FacilityEntry> facEntryList =
+                    myBuilder.getInnermostActiveScope().query(
+                            new EntryTypeQuery(FacilityEntry.class,
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_IGNORE));
+
+            for (FacilityEntry f : facEntryList) {
+                facEntryConcept =
+                        f.getFacility().getSpecification()
+                                .getModuleIdentifier();
+
+                if (conceptName.equals(facEntryConcept)) {
+                    return f.getName();
+                }
+            }
+        }
+        return ((NameTy) t).getQualifier().getName();
+    }
 
     private PTType getStringProgramType() {
         PTType result;

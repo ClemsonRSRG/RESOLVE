@@ -9,15 +9,19 @@ import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 
 public class ProgramVariableEntry extends SymbolTableEntry {
 
+    private String myName;
     private final PTType myType;
+    private final ModuleIdentifier myTypeQualifierModule;
     private final MathSymbolEntry myMathSymbolAlterEgo;
 
     public ProgramVariableEntry(String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, PTType type) {
+            ModuleIdentifier sourceModule, PTType type,
+            ModuleIdentifier typeQualifierSrcModule) {
         super(name, definingElement, sourceModule);
-
+        myName = name;
         myType = type;
+        myTypeQualifierModule = typeQualifierSrcModule;
 
         //TODO: Probably need to recajigger this to correctly account for any
         //      generics in the defining context
@@ -29,6 +33,17 @@ public class ProgramVariableEntry extends SymbolTableEntry {
 
     public PTType getProgramType() {
         return myType;
+    }
+
+    // not sure if this is the best way to go about this but here goes.
+    // translation really needs this kind of information. However, I'm
+    // worried about the ModuleIdentifier class (see comment there)...
+
+    // Returns a string of the program type qualified by its defining
+    // module. (I.e., for "Integer", getFullyQualifiedVarType gives
+    // "Integer_Template.Integer"
+    public String getFullyQualifiedVarType() {
+        return myTypeQualifierModule.fullyQualifiedRepresentation(myName);
     }
 
     @Override
@@ -50,7 +65,8 @@ public class ProgramVariableEntry extends SymbolTableEntry {
         if (instantiatedType != myType) {
             result =
                     new ProgramVariableEntry(getName(), getDefiningElement(),
-                            getSourceModuleIdentifier(), instantiatedType);
+                            getSourceModuleIdentifier(), instantiatedType,
+                            getSourceModuleIdentifier());
         }
         else {
             result = this;

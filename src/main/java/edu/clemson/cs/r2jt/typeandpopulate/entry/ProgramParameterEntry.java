@@ -140,7 +140,8 @@ public class ProgramParameterEntry extends SymbolTableEntry {
 
         myProgramVariableAlterEgo =
                 new ProgramVariableEntry(getName(), getDefiningElement(),
-                        getSourceModuleIdentifier(), myDeclaredType);
+                        getSourceModuleIdentifier(), myDeclaredType,
+                        getSourceModuleIdentifier());
     }
 
     @Override

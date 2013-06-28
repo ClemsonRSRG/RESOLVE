@@ -13,7 +13,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 /**
  * <p>A <code>NameAndEntryQuery</code> takes a (possibly-null) qualifier, a 
  * name, and an entry type descended from <code>SymbolTableEntry</code>, and
- * searched for entries that match, disregarding any entries with the correct
+ * searches for entries that match, disregarding any entries with the correct
  * name but incorrect type.  If the qualifier is non-null, the
  * appropriate facility or module is searched.  If it <em>is</em> null, a
  * search is performed using the provided <code>ImportStrategy</code> and

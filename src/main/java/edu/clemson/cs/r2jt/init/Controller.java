@@ -506,7 +506,7 @@ public class Controller {
             }
             if (myInstanceEnvironment.flags
                     .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
-                translateModuleDec(file, mathSymTab, dec);
+                translateModuleDec(file, symbolTable, dec);
                 //System.out.println("Translated: " + file.toString());
                 if (myInstanceEnvironment.flags
                         .isFlagSet(Archiver.FLAG_ARCHIVE)) {
@@ -620,7 +620,7 @@ public class Controller {
                 if (inputFile.getIsCustomLoc()) {
                     file = inputFile.getMyCustomFile();
                 }
-                translateModuleDec(file, mathSymTab, dec);
+                translateModuleDec(file, symbolTable, dec);
                 //System.out.println("Translated: " + file.toString());
                 if (myInstanceEnvironment.flags
                         .isFlagSet(Archiver.FLAG_ARCHIVE)) {
@@ -1020,7 +1020,7 @@ public class Controller {
             //if(arc.needToTranslate(file)) translateModuleDec(table, dec);
             //if(env.createJarOn() && arc.needToTranslate(file)){
             if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-                translateModuleDec(file, mathSymTab, dec);
+                translateModuleDec(file, symbolTable, dec);
                 //arc.addFiletoArchive(file);
                 //arc.printArchiveList();
             }
@@ -1084,7 +1084,7 @@ public class Controller {
                 if (importFile.getIsCustomLoc()) {
                     file = importFile.getMyCustomFile();
                 }
-                translateModuleDec(file, mathSymTab, dec);
+                translateModuleDec(file, symbolTable, dec);
                 //arc.addFiletoArchive(file);
                 //arc.printArchiveList();
             }
@@ -1666,7 +1666,6 @@ public class Controller {
                                         .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE),
                                 myInstanceEnvironment, myInstanceEnvironment
                                         .getProverListener());
-
                 try {
                     prover.start();
                 }
@@ -1712,16 +1711,22 @@ public class Controller {
     // Translation Related Methods
     // ------------------------------------------------------------
 
-    private void translateModuleDec(File file, MathSymbolTable table,
+    private void translateModuleDec(File file, ScopeRepository realTable,
             ModuleDec dec) {
+        try {
+            ModuleScope scope =
+                    realTable.getModuleScope(new ModuleIdentifier(dec));
+            JavaTranslator javaT =
+                    new JavaTranslator(myInstanceEnvironment, scope, dec, err);
 
-        JavaTranslator javaTranslate =
-                new JavaTranslator(myInstanceEnvironment, table, dec, err);
-
-        TreeWalker tw = new TreeWalker(javaTranslate);
-        tw.visit(dec);
-
-        javaTranslate.outputCode(file);
+            TreeWalker tw = new TreeWalker(javaT);
+            tw.visit(dec);
+            javaT.outputCode(file);
+        }
+        catch (NoSuchSymbolException nsse) {
+            //Can't find the module we're in.  Shouldn't be possible.
+            throw new RuntimeException(nsse);
+        }
     }
 
     private void translatePrettyModuleDec(File file, OldSymbolTable table,

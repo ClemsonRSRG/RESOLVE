@@ -1,32 +1,22 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.clemson.cs.r2jt.translation;
 
-import edu.clemson.cs.r2jt.translation.bookkeeping.Bookkeeper;
-import edu.clemson.cs.r2jt.translation.bookkeeping.JavaConceptBookkeeper;
-import edu.clemson.cs.r2jt.translation.bookkeeping.JavaFacilityBookkeeper;
 import java.io.File;
 import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
 
-import edu.clemson.cs.r2jt.typeandpopulate.FinalizedScope;
-
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
+import edu.clemson.cs.r2jt.translation.bookkeeping.*;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.data.*;
-
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 
 /**
  *
@@ -34,10 +24,10 @@ import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
  */
 public class JavaTranslator extends TreeWalkerVisitor {
 
-    private ErrorHandler err;
+    private final ModuleScope myModuleScope;
     private final CompileEnvironment env;
-    private final MathSymbolTable table; // get rid of this. Work w/ scopes instead.
-    Bookkeeper myBookkeeper;
+    private Bookkeeper myBookkeeper;
+    private ErrorHandler err;
 
     private static final String FLAG_SECTION_NAME = "Translation";
     private static final String FLAG_DESC_TRANSLATE =
@@ -52,60 +42,39 @@ public class JavaTranslator extends TreeWalkerVisitor {
             new Flag(FLAG_SECTION_NAME, "translateClean",
                     FLAG_DESC_TRANSLATE_CLEAN);
 
-    public JavaTranslator(CompileEnvironment env, MathSymbolTable tbl,
+    public JavaTranslator(CompileEnvironment env, ModuleScope scope,
             ModuleDec dec, ErrorHandler err) {
         this.err = err;
         this.env = env;
-        this.table = tbl;
+
+        myModuleScope = scope;
         File srcFile = dec.getName().getFile();
     }
 
     /** Visitor Methods */
 
-    @Override
-    public void preUsesItem(UsesItem data) {
+    // @Override
+    /* public void preUsesItem(UsesItem data) {
 
-        ModuleID id = ModuleID.createFacilityID(data.getName());
-        if (env.contains(id)) {
+         ModuleID id = ModuleID.createFacilityID(data.getName());
+         if (env.contains(id)) {
 
-            ModuleDec dec = env.getModuleDec(id);
-            if (dec instanceof ShortFacilityModuleDec) {
+             ModuleDec dec = env.getModuleDec(id);
+             if (dec instanceof ShortFacilityModuleDec) {
 
-                FacilityDec fdec = ((ShortFacilityModuleDec) (dec)).getDec();
-                PosSymbol cname = fdec.getConceptName();
-                ModuleID cid = ModuleID.createConceptID(cname);
-                String imp = "import " + formPkgPath(env.getFile(cid)) + ".*;";
-                myBookkeeper.addUses(imp);
-            }
-        }
-        ModuleID cid = ModuleID.createConceptID(data.getName());
-        if (env.contains(cid)) {
-            String imp = "import " + formPkgPath(env.getFile(cid)) + ".*;";
-            myBookkeeper.addUses(imp);
-        }
-    }
-
-    @Override
-    public void preConceptModuleDec(ConceptModuleDec data) {
-        String conceptName = data.getName().toString();
-        myBookkeeper = new JavaConceptBookkeeper(conceptName, false);
-    }
-
-    @Override
-    public void preTypeDec(TypeDec data) {
-    //	myBookkeeper.addConceptConstructor(data.getName().toString(),"");
-    // System.out.println(data.getName().toString());
-    }
-
-    @Override
-    public void preOperationDec(OperationDec data) {
-        String retType = "void";
-        if (data.getReturnTy() != null) {
-            retType = "<ReturnType>"; // obviously a placeholder.
-        }
-        myBookkeeper.fxnAdd(retType, data.getName().toString());
-    }
-
+                 FacilityDec fdec = ((ShortFacilityModuleDec) (dec)).getDec();
+                 PosSymbol cname = fdec.getConceptName();
+                 ModuleID cid = ModuleID.createConceptID(cname);
+                 String imp = "import " + formPkgPath(env.getFile(cid)) + ".*;";
+                 myBookkeeper.addUses(imp);
+             }
+         }
+         ModuleID cid = ModuleID.createConceptID(data.getName());
+         if (env.contains(cid)) {
+             String imp = "import " + formPkgPath(env.getFile(cid)) + ".*;";
+             myBookkeeper.addUses(imp);
+         }
+     }*/
     @Override
     public void preFacilityModuleDec(FacilityModuleDec data) {
         String facName = data.getName().toString();
@@ -113,81 +82,28 @@ public class JavaTranslator extends TreeWalkerVisitor {
     }
 
     @Override
-    public void preFacilityOperationDec(FacilityOperationDec data) {
-        myBookkeeper.fxnAdd("void", data.getName().toString());
-    }
-
-    @Override
-    public void preParameterVarDec(ParameterVarDec dec) {
-        myBookkeeper.fxnAddParam(dec.getName().toString());
-    }
-
-    @Override
     public void preVarDec(VarDec dec) {
-        myBookkeeper.fxnAddVarDecl(dec.getName().toString());
-    }
 
-    ////////////////
+    //  try {
+    //SymbolTableEntry entry =
+    //  myBuilder.
 
-    @Override
-    public void preFuncAssignStmt(FuncAssignStmt data) {
-        myBookkeeper.fxnAppendTo("assign(");
-        myBookkeeper.fxnAppendTo(data.getVar().toString());
-    }
+    //getInnermostActiveScope().queryForOne(
+    //       new NameQuery(null, dec.getName().getName()));
 
-    @Override
-    public void midFuncAssignStmt(FuncAssignStmt stmt,
-            ResolveConceptualElement prevChild,
-            ResolveConceptualElement nextChild) {
-        if (prevChild != null && nextChild != null) {
-            myBookkeeper.fxnAppendTo(", ");
-        }
-    }
+    // }
+    /*  catch (NoSuchSymbolException nsse) {
 
-    @Override
-    public void postFuncAssignStmt(FuncAssignStmt data) {
-        myBookkeeper.fxnAppendTo(");");
-    }
-
-    @Override
-    public void preProgramParamExp(ProgramParamExp exp) {
-        myBookkeeper.fxnAppendTo(exp.toString());
-        myBookkeeper.fxnAppendTo("(");
-    }
-
-    @Override
-    public void preProgramIntegerExp(ProgramIntegerExp exp) {
-        myBookkeeper.fxnAppendTo("Std_Integer_Fac.createInteger(");
-        myBookkeeper.fxnAppendTo(Integer.toString(exp.getValue()));
-    }
-
-    @Override
-    public void postProgramIntegerExp(ProgramIntegerExp exp) {
-        myBookkeeper.fxnAppendTo(")");
-    }
-
-    @Override
-    public void postProgramParamExp(ProgramParamExp exp) {
-        myBookkeeper.fxnAppendTo(")");
-    }
-
-    @Override
-    public void preCallStmt(CallStmt stmt) {
-        myBookkeeper.fxnAppendTo(stmt.getName().toString());
-        myBookkeeper.fxnAppendTo("(");
-    }
-
-    @Override
-    public void midCallStmtArguments(CallStmt node, ProgramExp previous,
-            ProgramExp next) {
-        if (next != null && previous != null) {
-            myBookkeeper.fxnAppendTo(", ");
-        }
-    }
-
-    @Override
-    public void postCallStmt(CallStmt stmt) {
-        myBookkeeper.fxnAppendTo(");");
+      }
+      catch (DuplicateSymbolException dse) {
+          //Shouldn't be possible--NameQuery can't throw this
+          throw new RuntimeException(dse);
+      }*/
+    //String progVarType =
+    //        (dec.getTy().getProgramTypeValue()).toString();
+    //SymbolTableEntry entry = myBuilder.getInnermostActiveScope().queryForOne(new NameQuery(null, progVarType,
+    //                     ImportStrategy.IMPORT_RECURSIVE,
+    //                     FacilityStrategy.FACILITY_INSTANTIATE, false));*/
     }
 
     /** Helper Methods */
@@ -196,8 +112,9 @@ public class JavaTranslator extends TreeWalkerVisitor {
         if (!env.flags.isFlagSet(ResolveCompiler.FLAG_WEB)
                 || env.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
 
-            String code = Formatter.formatCode(myBookkeeper.output());
-            System.out.println(code);
+            //   String code = Formatter.formatCode(myBookkeeper.output());
+            //   System.out.println(code);
+            System.out.println(myBookkeeper.output());
         }
         else {
             outputToReport(myBookkeeper.output().toString());
