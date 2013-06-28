@@ -364,8 +364,7 @@ public class Populator extends TreeWalkerVisitor {
                 //refers to its return value
                 myBuilder.getInnermostActiveScope().addProgramVariable(
                         node.getName().getName(), node,
-                        node.getReturnTy().getProgramTypeValue(),
-                        varConcept);
+                        node.getReturnTy().getProgramTypeValue(), varConcept);
             }
             catch (DuplicateSymbolException dse) {
                 //This shouldn't be possible--the operation declaration has a 
@@ -472,8 +471,7 @@ public class Populator extends TreeWalkerVisitor {
 
                 myBuilder.getInnermostActiveScope().addProgramVariable(
                         node.getName().getName(), node,
-                        node.getReturnTy().getProgramTypeValue(),
-                        varConcept);
+                        node.getReturnTy().getProgramTypeValue(), varConcept);
             }
             catch (DuplicateSymbolException dse) {
                 duplicateSymbol(node.getName().getName(), node.getName()
@@ -2012,7 +2010,12 @@ public class Populator extends TreeWalkerVisitor {
     //   Helper functions
     //-------------------------------------------------------------------
 
-    // Given a PTType, find its defining conceptual module
+    /**
+     * Given a programming type Ty <code>t</code>, find and return the id 
+     * of its defining concept module.
+     * 
+     * @param t A type Ty.
+     */
     private ModuleIdentifier getCorrespondingConcept(Ty t) {
 
         String searchStr = t.getProgramTypeValue().toString();
@@ -2041,25 +2044,36 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     /**
-     * Given a Ty <code>t</code> and a ModuleIdentifier, <code>ConceptName</code>,
-     * we find the corresponding facility for the dec, stmt, etc.
+     * Given a generic Ty <code>t</code> find the corresponding facility that
+     * matches <code>conceptName</code>.
+     * 
+     * @param v A Ty.
      */
     private String getCorrespondingFacility(Ty t, ModuleIdentifier conceptName) {
 
         ModuleIdentifier facEntryConcept;
         String result = "";
-
-        // in the case where we don't have a qualifier handed to 
-        // us by the programmer, we have to messily call upon and
-        // root through all facilities (available?).
+        PosSymbol qualifier = ((NameTy) t).getQualifier();
 
         // I'm still trying to figure out if there is a cleaner way
         // to query for a given specification module inside a FacilityEntry.
         // Currently, all query's only allow you to search for the name
         // of the entryType, not fields buried within it (as far as I can see).
         // So until there is a better way...
-        if (((NameTy) t).getQualifier() == null) {
 
+        // In the case where v has a qualifier, our job is easy:
+        // take it and return it.
+        if (qualifier != null) {
+            result = qualifier.getName();
+        }
+        // Otherwise we don't have a qualifier. This means the qualifier is going
+        // to be some facility name. So we root through all facilities visible from
+        // the module, comparing v's conceptual type to the specification type 
+        // listed inside all facility declarations until we find one that matches. 
+        // Note: this isn't a very good way to do this. While there is indeed a way 
+        // to query for individual FacilityEntries, as far as I can tell, there is 
+        // no way to query for one based on its specification field. 
+        else {
             List<FacilityEntry> facEntryList =
                     myBuilder.getInnermostActiveScope().query(
                             new EntryTypeQuery(FacilityEntry.class,
@@ -2072,11 +2086,11 @@ public class Populator extends TreeWalkerVisitor {
                                 .getModuleIdentifier();
 
                 if (conceptName.equals(facEntryConcept)) {
-                    return f.getName();
+                    result = f.getName();
                 }
             }
         }
-        return ((NameTy) t).getQualifier().getName();
+        return result;
     }
 
     private PTType getStringProgramType() {

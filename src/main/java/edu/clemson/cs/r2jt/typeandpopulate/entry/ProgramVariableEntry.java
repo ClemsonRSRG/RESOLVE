@@ -71,15 +71,15 @@ public class ProgramVariableEntry extends SymbolTableEntry {
     public MathSymbolEntry toMathSymbolEntry(Location l) {
         return myMathSymbolAlterEgo;
     }
-	
-	/** Translation-Centric getter methods */
-	
+
+    /** Translation-Centric getter methods */
+
     // Returns a string of the program type qualified by its defining
     // module. (I.e., for "Integer", getFormedProgramType gives
     // "Integer_Template.Integer"
     public String getFormedProgramType() {
         return myTypeQualifierModule.fullyQualifiedRepresentation(myName);
     }
-	
-	// additions here!
+
+    // additions here!
 }
