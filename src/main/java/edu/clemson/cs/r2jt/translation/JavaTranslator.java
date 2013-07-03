@@ -75,11 +75,20 @@ public class JavaTranslator extends TreeWalkerVisitor {
              myBookkeeper.addUses(imp);
          }
      }*/
-    @Override
+
+    public void preModuleDec(ModuleDec dec) {
+        if (dec instanceof FacilityModuleDec) {
+            String facName = dec.getName().toString();
+            myBookkeeper = new JavaFacilityBookkeeper(facName, true);
+        }
+    }
+
+    //Hidden. Calls can happen in preModuleDec
+    /*@Override
     public void preFacilityModuleDec(FacilityModuleDec data) {
         String facName = data.getName().toString();
         myBookkeeper = new JavaFacilityBookkeeper(facName, true);
-    }
+    }*/
 
     @Override
     public void preVarDec(VarDec dec) {

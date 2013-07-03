@@ -34,7 +34,18 @@ public interface Bookkeeper {
      */
     public void addUses(String uses);
 
-    /** FunctionEmployee Methods */
+    /* FacilityDeclBook Methods */
+    public void facAdd(String name, String concept, String realiz);
+
+    public void facAddParam(String parameter);
+
+    public void facAddEnhance(String name, String realiz);
+
+    public void facAddEnhanceParam(String parameter);
+
+    /* End FacilityDeclBook Methods */
+
+    /* FunctionBook Methods */
 
     /**
      * <p>Builds a <code>FunctionBook</code> object w/ name 
@@ -71,6 +82,8 @@ public interface Bookkeeper {
 
     //TODO annotate me.
     public void fxnEnd();
+
+    /* End FunctionBook methods */
 
     /**
      * <p>Returns a string representation of the module undergoing

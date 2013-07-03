@@ -1,6 +1,6 @@
 package edu.clemson.cs.r2jt.translation.bookkeeping;
 
-import edu.clemson.cs.r2jt.translation.bookkeeping.books.JavaFunctionBook;
+import edu.clemson.cs.r2jt.translation.bookkeeping.books.*;
 import java.util.ArrayList;
 
 /**
@@ -34,7 +34,7 @@ public class JavaConceptBookkeeper extends JavaBookkeeper {
         }*/
 
         // Now print all functions 
-        for (JavaFunctionBook operDecl : functionList) {
+        for (FunctionBook operDecl : functionList) {
             translateDoc.append(operDecl.getString());
         }
 

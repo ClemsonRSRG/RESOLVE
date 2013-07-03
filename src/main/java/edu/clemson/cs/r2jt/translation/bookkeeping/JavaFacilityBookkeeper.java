@@ -4,8 +4,7 @@
  */
 package edu.clemson.cs.r2jt.translation.bookkeeping;
 
-import edu.clemson.cs.r2jt.translation.bookkeeping.JavaBookkeeper;
-import edu.clemson.cs.r2jt.translation.bookkeeping.books.JavaFunctionBook;
+import edu.clemson.cs.r2jt.translation.bookkeeping.books.*;
 
 /**
  * @author Welch D
@@ -27,7 +26,7 @@ public class JavaFacilityBookkeeper extends JavaBookkeeper {
         translateDoc.append(moduleName).append(" {");
 
         // Now print all functions 
-        for (JavaFunctionBook func : functionList) {
+        for (FunctionBook func : functionList) {
             translateDoc.append(func.getString());
         }
 
