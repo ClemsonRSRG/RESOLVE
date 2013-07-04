@@ -4,8 +4,6 @@
  */
 package edu.clemson.cs.r2jt.translation.bookkeeping;
 
-import edu.clemson.cs.r2jt.translation.bookkeeping.books.*;
-
 /**
  * @author Welch D
  */

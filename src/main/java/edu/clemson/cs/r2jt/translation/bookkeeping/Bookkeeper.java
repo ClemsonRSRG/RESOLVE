@@ -1,5 +1,7 @@
 package edu.clemson.cs.r2jt.translation.bookkeeping;
 
+import java.util.ArrayList;
+
 /**
  * Collects, stores, and passes-off info encountered during 
  * translation-related TreeWalkerVisitor traversals to specialized 
@@ -43,6 +45,8 @@ public interface Bookkeeper {
 
     public void facAddEnhanceParam(String parameter);
 
+    public void facEnd();
+    
     /* End FacilityDeclBook Methods */
 
     /* FunctionBook Methods */
