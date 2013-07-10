@@ -10,18 +10,21 @@ import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 public class ProgramVariableEntry extends SymbolTableEntry {
 
     private String myName;
+    private String myTypeQualifier;
+    private String myTypeSpecification;
+
     private final PTType myType;
-    private final ModuleIdentifier myTypeQualifierModule;
     private final MathSymbolEntry myMathSymbolAlterEgo;
 
     public ProgramVariableEntry(String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, PTType type,
-            ModuleIdentifier typeQualifierSrcModule) {
+            ModuleIdentifier sourceModule, PTType type, String typeQualifier,
+            String spec) {
         super(name, definingElement, sourceModule);
         myName = name;
         myType = type;
-        myTypeQualifierModule = typeQualifierSrcModule;
+        myTypeQualifier = typeQualifier;
+        myTypeSpecification = spec;
 
         //TODO: Probably need to recajigger this to correctly account for any
         //      generics in the defining context
@@ -33,6 +36,14 @@ public class ProgramVariableEntry extends SymbolTableEntry {
 
     public PTType getProgramType() {
         return myType;
+    }
+
+    public String getTypeQualifier() {
+        return myTypeQualifier;
+    }
+
+    public String getTypeSpecification() {
+        return myTypeSpecification;
     }
 
     @Override
@@ -55,7 +66,7 @@ public class ProgramVariableEntry extends SymbolTableEntry {
             result =
                     new ProgramVariableEntry(getName(), getDefiningElement(),
                             getSourceModuleIdentifier(), instantiatedType,
-                            getSourceModuleIdentifier());
+                            getName(), getName());
         }
         else {
             result = this;
@@ -72,14 +83,4 @@ public class ProgramVariableEntry extends SymbolTableEntry {
         return myMathSymbolAlterEgo;
     }
 
-    /** Translation-Centric getter methods */
-
-    // Returns a string of the program type qualified by its defining
-    // module. (I.e., for "Integer", getFormedProgramType gives
-    // "Integer_Template.Integer"
-    public String getFormedProgramType() {
-        return myTypeQualifierModule.fullyQualifiedRepresentation(myName);
-    }
-
-    // additions here!
 }

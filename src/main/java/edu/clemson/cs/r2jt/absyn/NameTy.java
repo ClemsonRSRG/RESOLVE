@@ -72,6 +72,8 @@ public class NameTy extends Ty {
     /** The qualifier member. */
     private PosSymbol qualifier;
 
+    private PosSymbol tempQualifier;
+
     /** The name member. */
     private PosSymbol name;
 
@@ -83,6 +85,7 @@ public class NameTy extends Ty {
 
     public NameTy(PosSymbol qualifier, PosSymbol name) {
         this.qualifier = qualifier;
+        this.tempQualifier = qualifier; // see story below..
         this.name = name;
     }
 
@@ -103,6 +106,14 @@ public class NameTy extends Ty {
         return qualifier;
     }
 
+    // Setting the qualifier for types causes problems with 
+    // the remaining pieces of the old symbol table. 
+    // So this is a temporary hack to get around issues with the 
+    // old symbol table not recognizing qualifiers in scope
+    public PosSymbol getTempQualifier() {
+        return tempQualifier;
+    }
+
     /** Returns the value of the name variable. */
     public PosSymbol getName() {
         return name;
@@ -115,6 +126,23 @@ public class NameTy extends Ty {
     /** Sets the qualifier variable to the specified value. */
     public void setQualifier(PosSymbol qualifier) {
         this.qualifier = qualifier;
+    }
+
+    // This is a temporary hack to get around issues with the 
+    // old symbol table not recognizing qualifiers in scope
+
+    // Here's the story. The new translator (4-7-2013) needs more 
+    // information about variables, types, etc in order to translate
+    // into java, c, etc. The original plan then was to find, using the
+    // new population query methods, the information we need, then add
+    // to the appropriate qualifier slot here. However, by setting the
+    // default qualifier field in this class, we mess up pieces that still
+    // access this NameTy's in the old populator/modules that still use the
+    // old table/populator ... So to get around this for the
+    // moment, the new qualifier methods "get/set TempQualifier" will 
+    // hold info relevant for translation purposes.
+    public void setTempQualifier(PosSymbol qualifier) {
+        this.tempQualifier = qualifier;
     }
 
     /** Sets the name variable to the specified value. */

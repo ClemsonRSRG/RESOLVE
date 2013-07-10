@@ -75,14 +75,14 @@ public class ScopeBuilder extends SyntacticScope {
 
     public ProgramVariableEntry addProgramVariable(String name,
             ResolveConceptualElement definingElement, PTType type,
-            ModuleIdentifier typeQualifierSrcModule)
+            String varQualifier, String specModule)
             throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, type);
 
         ProgramVariableEntry entry =
                 new ProgramVariableEntry(name, definingElement, myRootModule,
-                        type, typeQualifierSrcModule);
+                        type, varQualifier, specModule);
 
         myBindings.put(name, entry);
 

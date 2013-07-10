@@ -91,6 +91,12 @@ public class JavaTranslator extends TreeWalkerVisitor {
     }*/
 
     @Override
+    public void preCallStmt(CallStmt data) {
+        System.out.println(data.getQualifier().toString() + "."
+                + data.getName().getName());
+    }
+
+    @Override
     public void preVarDec(VarDec dec) {
 
     //  try {

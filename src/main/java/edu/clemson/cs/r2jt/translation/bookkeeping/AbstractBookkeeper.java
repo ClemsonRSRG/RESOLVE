@@ -4,10 +4,15 @@
  */
 package edu.clemson.cs.r2jt.translation.bookkeeping;
 
+<<<<<<< HEAD
 import edu.clemson.cs.r2jt.translation.bookkeeping.FacilityDeclBook.FacilityDeclEnhance;
 
 import java.util.ArrayList;
 import edu.clemson.cs.r2jt.translation.bookkeeping.Bookkeeper.*;
+=======
+import edu.clemson.cs.r2jt.translation.bookkeeping.books.*;
+import java.util.ArrayList;
+>>>>>>> intial version of type and call qualification -- expect copious amounts of bugs and unintended behavior
 
 /**
  *
@@ -15,13 +20,22 @@ import edu.clemson.cs.r2jt.translation.bookkeeping.Bookkeeper.*;
  */
 public abstract class AbstractBookkeeper implements Bookkeeper {
 
+<<<<<<< HEAD
     FunctionBook currentFunction;
     FacilityDeclBook currentFacility;
+=======
+    private FunctionBook currentFunction;
+    private FacilityDeclBook currentFacility;
+>>>>>>> intial version of type and call qualification -- expect copious amounts of bugs and unintended behavior
     /**
      * Name of the module we are translating (e.g., 'Stack_Template,'
      * 'Int_Do_Nothing,' etc).
      */
+<<<<<<< HEAD
     String moduleName;
+=======
+    protected String moduleName;
+>>>>>>> intial version of type and call qualification -- expect copious amounts of bugs and unintended behavior
 
     /**
      * If we aren't translating a realization, then we don't need
@@ -29,12 +43,21 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
      * outputting will be class interfaces. Thus, this should only 
      * be false for Concepts and Enhancement declaration modules.
      */
+<<<<<<< HEAD
     Boolean isRealization;
 
     ArrayList<FacilityDeclBook> facilityList;
     ArrayList<String> constructorList;
     ArrayList<String> importList;
     ArrayList<FunctionBook> functionList;
+=======
+    protected Boolean isRealization;
+
+    protected ArrayList<FacilityDeclBook> facilityList;
+    protected ArrayList<String> constructorList;
+    protected ArrayList<String> importList;
+    protected ArrayList<FunctionBook> functionList;
+>>>>>>> intial version of type and call qualification -- expect copious amounts of bugs and unintended behavior
 
     /**
      * Construct a supervisor to manage Java modules undergoing 
@@ -57,6 +80,7 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
     }
 
     /* FacilityDeclBook Methods */
+<<<<<<< HEAD
     /*@Override
     public void facAdd(String name, String concept, String realiz) {
         FacilityDeclBook newFac = new FacilityDeclBook(name,concept,realiz);
@@ -99,22 +123,54 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
     @Override
     public void fxnAddParam(String parName) {
         currentFunction.parameterList.add(parName);
+=======
+    public void facAdd(String name, String concept, String realiz) {
+    // TODO : This...
+    }
+
+    public void facAddParam(String parameter) {
+        currentFacility.addParameter(parameter);
+    }
+
+    public void facAddEnhance(String name, String realiz) {
+        currentFacility.addEnhancement(name, realiz);
+    }
+
+    public void facAddEnhanceParam(String parameter) {
+        currentFacility.addEnhanceParameter(parameter);
+    }
+
+    /* End FacilityDeclBook Methods */
+    /* Abstract FunctionBook calls */
+    @Override
+    public void fxnAddParam(String parName) {
+        currentFunction.addParameter(parName);
+>>>>>>> intial version of type and call qualification -- expect copious amounts of bugs and unintended behavior
     }
 
     @Override
     public void fxnAddVarDecl(String varName) {
+<<<<<<< HEAD
         currentFunction.varInitList.add(varName);
+=======
+        currentFunction.addVariable(varName);
+>>>>>>> intial version of type and call qualification -- expect copious amounts of bugs and unintended behavior
     }
 
     @Override
     public void fxnAppendTo(String stmt) {
+<<<<<<< HEAD
         currentFunction.allStmt.append(stmt);
+=======
+        currentFunction.appendToStmt(stmt);
+>>>>>>> intial version of type and call qualification -- expect copious amounts of bugs and unintended behavior
     }
 
     @Override
     public void fxnEnd() {
         currentFunction = null;
     }
+<<<<<<< HEAD
     
     
     
@@ -208,3 +264,6 @@ abstract class FacilityDeclBook{
 class RecordBook{
 
 }
+=======
+}
+>>>>>>> intial version of type and call qualification -- expect copious amounts of bugs and unintended behavior
