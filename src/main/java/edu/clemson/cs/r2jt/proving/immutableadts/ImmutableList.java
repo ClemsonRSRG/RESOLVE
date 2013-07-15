@@ -46,5 +46,7 @@ public interface ImmutableList<E> extends Iterable<E> {
      * Utility methods.
      */
 
+    public boolean contains(E item);
+
     public int size();
 }

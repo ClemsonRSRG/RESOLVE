@@ -17,6 +17,15 @@ import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.absyn.*;
+import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
+import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramQualifiedEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
+import java.util.List;
 
 /**
  *
@@ -76,6 +85,7 @@ public class JavaTranslator extends TreeWalkerVisitor {
          }
      }*/
 
+    @Override
     public void preModuleDec(ModuleDec dec) {
         if (dec instanceof FacilityModuleDec) {
             String facName = dec.getName().toString();
@@ -83,42 +93,70 @@ public class JavaTranslator extends TreeWalkerVisitor {
         }
     }
 
-    //Hidden. Calls can happen in preModuleDec
-    /*@Override
-    public void preFacilityModuleDec(FacilityModuleDec data) {
-        String facName = data.getName().toString();
-        myBookkeeper = new JavaFacilityBookkeeper(facName, true);
-    }*/
+    @Override
+    public void preOperationDec(OperationDec data) {
+        String opName = data.getName().getName();
+        String retType = "void";
+        if (data.getReturnTy() != null) {
+            retType = data.getReturnTy().toString();
+            System.out.println("retType: " + retType);
+
+        }
+        myBookkeeper.fxnAdd(retType, opName);
+    }
 
     @Override
     public void preCallStmt(CallStmt data) {
-        System.out.println(data.getQualifier().toString() + "."
+        //  if (data.getQualifier() == null) {
+        System.out.println(data.getQualifier().getName() + "."
                 + data.getName().getName());
+        //   }
     }
 
     @Override
     public void preVarDec(VarDec dec) {
 
-    //  try {
-    //SymbolTableEntry entry =
-    //  myBuilder.
+    // this is stupid. regular queries work but queryForOne refuses to work..
 
-    //getInnermostActiveScope().queryForOne(
-    //       new NameQuery(null, dec.getName().getName()));
+    /*  List<TheoremEntry> theoremEntries =
+              myModuleScope.query(new EntryTypeQuery(TheoremEntry.class,
+                      MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
+                      MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
 
-    // }
-    /*  catch (NoSuchSymbolException nsse) {
+      System.out.println(theoremEntries.size());*/
+    /*  try {
+          //SymbolTableEntry entry =
+          //  myBuilder.
+          //PosSymbol qual = 
+          ProgramVariableEntry q =
+                  myModuleScope
+                          .queryForOne(
+                                  new NameQuery(
+                                          ((NameTy) dec.getTy())
+                                                  .getTempQualifier(),
+                                          dec.getName(),
+                                          MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                          MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                                          true)).toProgramVariableEntry(
+                                  dec.getLocation()); //.toProgramQualifiedEntry(
+          //dec.getLocation());
 
+          //getInnermostActiveScope().queryForOne(
+          //       new NameQuery(null, dec.getName().getName()));
+
+      }
+      catch (NoSuchSymbolException nsse) {
+          System.out.println("NO SUCH SYMBOL");
       }
       catch (DuplicateSymbolException dse) {
           //Shouldn't be possible--NameQuery can't throw this
           throw new RuntimeException(dse);
-      }*/
-    //String progVarType =
-    //        (dec.getTy().getProgramTypeValue()).toString();
-    //SymbolTableEntry entry = myBuilder.getInnermostActiveScope().queryForOne(new NameQuery(null, progVarType,
-    //                     ImportStrategy.IMPORT_RECURSIVE,
-    //                     FacilityStrategy.FACILITY_INSTANTIATE, false));*/
+      }
+      //String progVarType =
+      //        (dec.getTy().getProgramTypeValue()).toString();
+      //SymbolTableEntry entry = myBuilder.getInnermostActiveScope().queryForOne(new NameQuery(null, progVarType,
+      //                     ImportStrategy.IMPORT_RECURSIVE,
+      //                     FacilityStrategy.FACILITY_INSTANTIATE, false));*/
     }
 
     /** Helper Methods */

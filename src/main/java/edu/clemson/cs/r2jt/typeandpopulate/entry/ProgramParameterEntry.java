@@ -116,10 +116,12 @@ public class ProgramParameterEntry extends SymbolTableEntry {
 
     private final MathSymbolEntry myMathSymbolAlterEgo;
     private final ProgramVariableEntry myProgramVariableAlterEgo;
+    private final ProgramQualifiedEntry myProgramQualifiedAlterEgo;
 
     public ProgramParameterEntry(TypeGraph g, String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, PTType type, ParameterMode mode) {
+            ModuleIdentifier sourceModule, ModuleIdentifier spec, PTType type,
+            ParameterMode mode, String qual) {
         super(name, definingElement, sourceModule);
 
         myTypeGraph = g;
@@ -140,8 +142,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
 
         myProgramVariableAlterEgo =
                 new ProgramVariableEntry(getName(), getDefiningElement(),
-                        getSourceModuleIdentifier(), myDeclaredType, getName(),
-                        getName());
+                        getSourceModuleIdentifier(), spec, myDeclaredType, qual);
+
+        myProgramQualifiedAlterEgo =
+                new ProgramQualifiedEntry(getName(), getDefiningElement(),
+                        getSourceModuleIdentifier(), spec, qual);
     }
 
     @Override
@@ -157,6 +162,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     @Override
     public ProgramVariableEntry toProgramVariableEntry(Location l) {
         return myProgramVariableAlterEgo;
+    }
+
+    @Override
+    public ProgramQualifiedEntry toProgramQualifiedEntry(Location l) {
+        return myProgramQualifiedAlterEgo;
     }
 
     @Override
@@ -199,8 +209,10 @@ public class ProgramParameterEntry extends SymbolTableEntry {
 
         return new ProgramParameterEntry(myTypeGraph, getName(),
                 getDefiningElement(), getSourceModuleIdentifier(),
-                myDeclaredType.instantiateGenerics(genericInstantiations,
-                        instantiatingFacility), myPassingMode);
+                getSourceModuleIdentifier(), myDeclaredType
+                        .instantiateGenerics(genericInstantiations,
+                                instantiatingFacility), myPassingMode,
+                getName());
     }
 
     @Override

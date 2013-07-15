@@ -117,6 +117,12 @@ public abstract class SymbolTableEntry {
                 + "Found " + getEntryTypeDescription(), l);
     }
 
+    public ProgramQualifiedEntry toProgramQualifiedEntry(Location l) {
+        throw new SourceErrorException(
+                "Expecting a parameter, variable, or call. Found "
+                        + getEntryTypeDescription(), l);
+    }
+
     public ProgramVariableEntry toProgramVariableEntry(Location l) {
         throw new SourceErrorException("Expecting a program variable.  "
                 + "Found " + getEntryTypeDescription(), l);

@@ -4,7 +4,6 @@ import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
-import edu.clemson.cs.r2jt.processing.Utilities;
 import edu.clemson.cs.r2jt.treewalk.*;
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
 import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
@@ -28,9 +27,11 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramQualifiedEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.RepresentationTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry.Quantification;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
@@ -47,6 +48,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.query.NameAndEntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.ProgramVariableQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.r2jt.typereasoning.*;
 import edu.clemson.cs.r2jt.utilities.HardCoded;
 import edu.clemson.cs.r2jt.utilities.Indirect;
@@ -68,6 +70,8 @@ import java.util.logging.Logger;
 public class Populator extends TreeWalkerVisitor {
 
     private static final boolean PRINT_DEBUG = false;
+
+    private static final boolean PRINT_DEBUG_TEMP = true;
 
     private static final TypeComparison<AbstractFunctionExp, MTFunction> EXACT_DOMAIN_MATCH =
             new ExactDomainMatch();
@@ -166,7 +170,6 @@ public class Populator extends TreeWalkerVisitor {
      * myCorrespondingOperation.</p>
      */
     private List<ProgramParameterEntry> myCurrentParameters;
-    private List<ProgramParameterEntry> myCallArgs;
 
     /**
      * <p>A mapping from generic types that appear in the module to the math
@@ -265,7 +268,6 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postLambdaExp(LambdaExp l) {
         myBuilder.endScope();
-
         List<MTType> parameterTypes = new LinkedList<MTType>();
         for (MathVarDec p : l.getParameters()) {
             parameterTypes.add(p.getTy().getMathTypeValue());
@@ -277,6 +279,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postAltItemExp(AltItemExp e) {
+
         if (e.getTest() != null) {
             expectType(e.getTest(), myTypeGraph.BOOLEAN);
         }
@@ -307,11 +310,16 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postConstantParamDec(ConstantParamDec param) {
         try {
+
             String paramName = param.getName().getName();
+            ModuleIdentifier paramSpec =
+                    getTypeSpecification2((NameTy) param.getTy());
+            String qual =
+                    ((NameTy) param.getTy()).getTempQualifier().toString();
 
             myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
-                    param, ParameterMode.EVALUATES,
-                    param.getTy().getProgramTypeValue());
+                    param, paramSpec, ParameterMode.EVALUATES,
+                    param.getTy().getProgramTypeValue(), qual);
             param.setMathType(param.getTy().getMathTypeValue());
         }
         catch (DuplicateSymbolException dse) {
@@ -323,10 +331,12 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postConceptTypeParamDec(ConceptTypeParamDec param) {
         try {
+
             String paramName = param.getName().getName();
 
             myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
-                    param, ParameterMode.TYPE, new PTElement(myTypeGraph));
+                    param, null, ParameterMode.TYPE,
+                    new PTElement(myTypeGraph), null);
 
             myGenericTypes.put(paramName, myTypeGraph.MTYPE);
             param.setMathType(myTypeGraph.MTYPE);
@@ -348,6 +358,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preFacilityOperationDec(FacilityOperationDec dec) {
+
         myBuilder.startScope(dec);
         myCurrentParameters = new LinkedList<ProgramParameterEntry>();
         myCurrentPrivateProcedure = dec;
@@ -360,8 +371,8 @@ public class Populator extends TreeWalkerVisitor {
 
         if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
             try {
-                String varSpec =
-                        getTypeSpecification((NameTy) node.getReturnTy());
+                ModuleIdentifier spec =
+                        getTypeSpecification2((NameTy) node.getReturnTy());
                 String qual =
                         ((NameTy) node.getReturnTy()).getTempQualifier()
                                 .toString();
@@ -370,10 +381,9 @@ public class Populator extends TreeWalkerVisitor {
                 //            + qual.getName());
                 //Inside the operation's assertions, the name of the operation
                 //refers to its return value
-                myBuilder.getInnermostActiveScope()
-                        .addProgramVariable(node.getName().getName(), node,
-                                node.getReturnTy().getProgramTypeValue(), qual,
-                                varSpec);
+                myBuilder.getInnermostActiveScope().addProgramVariable(
+                        node.getName().getName(), node, spec,
+                        node.getReturnTy().getProgramTypeValue(), qual);
             }
             catch (DuplicateSymbolException dse) {
                 //This shouldn't be possible--the operation declaration has a 
@@ -386,6 +396,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postModuleParameterDec(ModuleParameterDec d) {
+
         if (!(d.getWrappedDec() instanceof OperationDec)) {
             if (d.getWrappedDec().getMathType() == null) {
                 throw new RuntimeException(d.getWrappedDec().getClass()
@@ -410,6 +421,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postCrossTypeExpression(CrossTypeExpression e) {
+
         int fieldCount = e.getFieldCount();
         List<MTCartesian.Element> fieldTypes =
                 new LinkedList<MTCartesian.Element>();
@@ -442,6 +454,7 @@ public class Populator extends TreeWalkerVisitor {
             //Figure out what Operation we correspond to (we don't use 
             //OperationQuery because we want to check parameter types 
             //separately in postProcedureDec)
+
             myCorrespondingOperation =
                     myBuilder.getInnermostActiveScope().queryForOne(
                             new NameAndEntryTypeQuery(null, dec.getName(),
@@ -471,20 +484,20 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void midProcedureDec(ProcedureDec node,
             ResolveConceptualElement previous, ResolveConceptualElement next) {
+
         if (previous != null && previous == node.getReturnTy()) {
 
             try {
-                String varSpec =
-                        getTypeSpecification((NameTy) node.getReturnTy());
+                ModuleIdentifier spec =
+                        getTypeSpecification2((NameTy) node.getReturnTy());
                 String qual =
                         ((NameTy) node.getReturnTy()).getTempQualifier()
                                 .toString();
                 //   System.out.println("spec1: " + varSpec + "          qual1: "
                 //          + qual.getName().toString());
-                myBuilder.getInnermostActiveScope()
-                        .addProgramVariable(node.getName().getName(), node,
-                                node.getReturnTy().getProgramTypeValue(), qual,
-                                varSpec);
+                myBuilder.getInnermostActiveScope().addProgramVariable(
+                        node.getName().getName(), node, spec,
+                        node.getReturnTy().getProgramTypeValue(), qual);
             }
             catch (DuplicateSymbolException dse) {
                 duplicateSymbol(node.getName().getName(), node.getName()
@@ -667,10 +680,22 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         try {
+            ModuleIdentifier paramSpec;
+            String qual = "";
+            if (dec.getTy().getProgramTypeValue() instanceof PTGeneric
+                    || dec.getTy().getProgramTypeValue() instanceof PTRepresentation) {
+                paramSpec = null;
+                qual = null;
+            }
+            else {
+                paramSpec = getTypeSpecification2((NameTy) dec.getTy());
+                qual = ((NameTy) dec.getTy()).getTempQualifier().toString();
+            }
+
             ProgramParameterEntry paramEntry =
                     myBuilder.getInnermostActiveScope().addFormalParameter(
-                            dec.getName().getName(), dec, mode,
-                            dec.getTy().getProgramTypeValue());
+                            dec.getName().getName(), dec, paramSpec, mode,
+                            dec.getTy().getProgramTypeValue(), qual);
             myCurrentParameters.add(paramEntry);
         }
         catch (DuplicateSymbolException e) {
@@ -684,7 +709,6 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void preRepresentationDec(RepresentationDec r) {
         myBuilder.startScope(r);
-
         PosSymbol type = r.getName();
 
         List<SymbolTableEntry> es =
@@ -793,13 +817,13 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postRecordTy(RecordTy ty) {
+
         Map<String, PTType> fieldMap = new HashMap<String, PTType>();
         List<VarDec> fields = ty.getFields();
         for (VarDec field : fields) {
             fieldMap.put(field.getName().getName(), field.getTy()
                     .getProgramTypeValue());
         }
-
         PTRecord record = new PTRecord(myTypeGraph, fieldMap);
 
         ty.setProgramTypeValue(record);
@@ -809,6 +833,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postNameTy(NameTy ty) {
+
         //Note that all mathematical types are ArbitraryExpTys, so this must
         //be in a program-type syntactic slot.
         PosSymbol tySymbol = ty.getName();
@@ -831,7 +856,6 @@ public class Populator extends TreeWalkerVisitor {
                                             FacilityStrategy.FACILITY_INSTANTIATE,
                                             true)).toProgramTypeEntry(
                                     tyLocation);
-
             ty.setProgramTypeValue(type.getProgramType());
             ty.setMathType(myTypeGraph.MTYPE);
             ty.setMathTypeValue(type.getModelType());
@@ -847,8 +871,7 @@ public class Populator extends TreeWalkerVisitor {
             // The only case in which there isn't a unique fac declaration
             // is when two facilities are declared that use the same 
             // conceptual module. Though, in that case, the user is 
-            // required to qualify the type anyways.
-            // It would be nice if that requirement held for calls too...
+            // forced by the semantic checker to qualify the type.
 
             if (tyQualifier == null) {
 
@@ -856,7 +879,7 @@ public class Populator extends TreeWalkerVisitor {
                         .getProgramTypeValue() instanceof PTGeneric)) {
 
                     tyConcept = getTypeSpecification(ty);
-                    tyFacility = getTypeFacility(ty, tyConcept);
+                    tyFacility = getTypeFacility(tyConcept);
 
                     PosSymbol newQualifier = new PosSymbol();
 
@@ -881,98 +904,114 @@ public class Populator extends TreeWalkerVisitor {
         }
     }
 
+    // Since calls in most cases do not have to be qualified while 
+    // variable declarations do, RESOLVE relies on argument dependent
+    // lookups (ADL) to qualify calls. What follows is probably not 
+    // the optimal way to do it in context of adl (and probably even
+    // this compiler) but it nevertheless seems to be working so far. 
+    // But as additional, more complicated cases are encountered, 
+    // expect modules reliant on call qualifiers (i.e. translation) 
+    // to break frequently.
+
+    // TODO : Handle the cases where generics are the only argument
     @Override
     public void postCallStmt(CallStmt data) {
+
         try {
-            String srcModule = "";
-            String localModule =
-                    myBuilder.getInnermostActiveScope().getRootModule()
-                            .toString();
+            String resultQual = "";
+            String callSrcModule = "";
 
             List<ProgramExp> args = data.getArguments();
             List<PTType> argTypes = new LinkedList<PTType>();
-            List<ProgramVariableEntry> argEntries =
-                    new LinkedList<ProgramVariableEntry>();
 
-            List<ProgramVariableEntry> allEntries =
-                    myBuilder.getInnermostActiveScope().query(
-                            new EntryTypeQuery(ProgramVariableEntry.class,
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_IGNORE));
-
-            // Build a list of programVarEntries corresponding to the 
-            // arguments of the call (obtaining these entries allows 
-            // us to skip over making some extra queries here)
             for (ProgramExp arg : args) {
-                for (ProgramVariableEntry entry : allEntries) {
-                    if (arg.toString().equals(entry.getName())) {
-                        argEntries.add(entry);
-                    }
-                }
                 argTypes.add(arg.getProgramType());
             }
 
-            // Now figure out in which module the operation owning the 
-            // call lives
+            // Now figure out which module declares the call-owning 
+            // operation
             OperationEntry matchingOp =
                     myBuilder.getInnermostActiveScope().queryForOne(
                             new OperationQuery(data.getQualifier(), data
                                     .getName(), argTypes));
 
-            // Name of the module that declares the operation called
-            srcModule = matchingOp.getSourceModuleIdentifier().toString();
-            PosSymbol newQualifier = new PosSymbol();
+            callSrcModule = matchingOp.getSourceModuleIdentifier().toString();
 
-            // Operation is local and no need to qualify
-            if (srcModule.equals(localModule)) {
-                newQualifier.setSymbol(Symbol.symbol(""));
-                data.setQualifier(newQualifier);
-            }
-            if (args.isEmpty()) {
-                // Then we're looking at a parameterless operation... look 
-                // for facility declarations that use srcModule as their spec, grab the 
-                // name of said facility decl, and that should be the qualifier
-                // for this paramterless call... Note: according to Murali, it is not 
-                // symantically valid for two unqualified, parameterlesss calls instantiated
-				// from a facility with the same spec to exist within the same scope -- 
-				// so we shouldn't have to worry about that. THOUGH, for calls with parameters,
-				// it is o.k. to have unqualified calls, even if there are more than one 
-				// instantiated facilities that use the same parameters.
-
-                List<FacilityEntry> facilityEntries =
-                        myBuilder.getInnermostActiveScope().query(
-                                new EntryTypeQuery(FacilityEntry.class,
-                                        ImportStrategy.IMPORT_NAMED,
-                                        FacilityStrategy.FACILITY_IGNORE));
-
-                String facSpec = "";
-                for (FacilityEntry f : facilityEntries) {
-                    facSpec =
-                            f.getFacility().getSpecification()
-                                    .getModuleIdentifier().toString();
-
-                    if (srcModule.equals(facSpec)) {
-                        newQualifier.setSymbol(Symbol.symbol(f.getName()));
-                        data.setQualifier(newQualifier);
-                    }
-                }
-
+            // Is the call's corresponding operation defined locally in 
+            // moduleScope?
+            if (callSrcModule.equals(myBuilder.getInnermostActiveScope()
+                    .getRootModule().toString())) {
+                // Yep. So qualification isn't necessary and shouldn't 
+                // be attempted.
+                resultQual = "";
             }
             else {
-                for (ProgramVariableEntry entry : argEntries) {
-                    if (entry.getTypeSpecification().equals(srcModule)) {
-                        newQualifier.setSymbol(Symbol.symbol(entry
-                                .getTypeQualifier()));
-                        data.setQualifier(newQualifier);
+
+                if (args.isEmpty()) {
+                    resultQual = findQualifyingFacilityName(callSrcModule);
+                }
+                else {
+
+                    for (ProgramExp arg : args) {
+
+                        // Pluck out parameters that come from records.
+                        // We can't query for individual record fields
+                        // since they are no longer in the working scope. 
+
+                        // Hacky. Cleaner way?
+                        if (arg.toString().contains(".")) {
+                            String argType = arg.getProgramType().toString();
+                            ProgramTypeEntry type =
+                                    myBuilder
+                                            .getInnermostActiveScope()
+                                            .queryForOne(
+                                                    new NameQuery(
+                                                            null,
+                                                            argType,
+                                                            ImportStrategy.IMPORT_NAMED,
+                                                            FacilityStrategy.FACILITY_INSTANTIATE,
+                                                            true))
+                                            .toProgramTypeEntry(
+                                                    arg.getLocation());
+                            if (type.getName().equals(callSrcModule)) {
+                                resultQual =
+                                        findQualifyingFacilityName(callSrcModule);
+                            }
+                        }
+                        // everything else passable as an argument 
+                        // should be findable from the current
+                        // working scope. So use regular NameQueries
+                        // with .toProgramQualifiedEntry
+                        else {
+
+                            ProgramQualifiedEntry entry =
+                                    myBuilder
+                                            .getInnermostActiveScope()
+                                            .queryForOne(
+                                                    new NameQuery(
+                                                            null,
+                                                            arg.toString(),
+                                                            ImportStrategy.IMPORT_NAMED,
+                                                            FacilityStrategy.FACILITY_INSTANTIATE,
+                                                            true))
+                                            .toProgramQualifiedEntry(
+                                                    arg.getLocation());
+
+                            resultQual = entry.getQualifier();
+                            // For generics that get through with null qualifiers. 
+                            if (resultQual == null) {
+                                resultQual = "";
+                            }
+
+                        }
                     }
                 }
             }
-
-            /*  if (data.getQualifier() != null) {
-                  System.out.println(data.getQualifier().toString() + "."
-                          + data.getName().getName());
-              }*/
-
+            // Finally build the qualifier PosSymbol and add set
+            // the calls qualifier to it.
+            PosSymbol newQualifier = new PosSymbol();
+            newQualifier.setSymbol(Symbol.symbol(resultQual));
+            data.setQualifier(newQualifier);
         }
         catch (NoSuchSymbolException nsse) {
             System.out.println("No operation found in scope or elsewhere");
@@ -984,8 +1023,42 @@ public class Populator extends TreeWalkerVisitor {
         }
     }
 
+    /**
+     * Returns the name of a facility that matches <code>symbolSpec</code>.
+     * Note that this simply returns the name of the first facility 
+     * found that matches the given parameter.
+     * 
+     * @param symbolSpec A specification (i.e. Integer_Template, etc)
+     * @return The name of the facility whose specification matches
+     *	       <code>symbolSpec</code>.
+     */
+
+    private String findQualifyingFacilityName(String symbolSpec) {
+
+        String facSpec = "";
+        String result = "";
+
+        List<FacilityEntry> facilityEntries =
+                myBuilder.getInnermostActiveScope().query(
+                        new EntryTypeQuery(FacilityEntry.class,
+                                ImportStrategy.IMPORT_NAMED,
+                                FacilityStrategy.FACILITY_IGNORE));
+
+        for (FacilityEntry f : facilityEntries) {
+            facSpec =
+                    f.getFacility().getSpecification().getModuleIdentifier()
+                            .toString();
+
+            if (symbolSpec.equals(facSpec)) {
+                result = f.getName();
+            }
+        }
+        return result;
+    }
+
     @Override
     public void postFacilityDec(FacilityDec facility) {
+
         try {
             myBuilder.getInnermostActiveScope().addFacility(facility);
         }
@@ -997,6 +1070,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postMathAssertionDec(MathAssertionDec node) {
+
         //if (node.getAssertion() != null) {
         expectType(node.getAssertion(), myTypeGraph.BOOLEAN);
         //}
@@ -1069,26 +1143,23 @@ public class Populator extends TreeWalkerVisitor {
         String varSpec = getTypeSpecification((NameTy) programVar.getTy());
         String qual =
                 ((NameTy) programVar.getTy()).getTempQualifier().toString();
-        //  System.out.println("  qualifier: " + qual.toString() + "       spec: "
-        //          + varSpec);
+        ModuleIdentifier spec =
+                getTypeSpecification2((NameTy) programVar.getTy());
+
         try {
             myBuilder.getInnermostActiveScope().addProgramVariable(varName,
-                    programVar, programVar.getTy().getProgramTypeValue(), qual,
-                    varSpec);
+                    programVar, spec, programVar.getTy().getProgramTypeValue(),
+                    qual);
 
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(varName, programVar.getLocation());
         }
-
-        Populator.emitDebug("  New program variable: " + varName + " of type "
-                + mathTypeValue.toString() + " with quantification NONE");
     }
 
     @Override
     public void postVariableNameExp(VariableNameExp node) {
         try {
-
             ProgramVariableEntry entry =
                     myBuilder.getInnermostActiveScope().queryForOne(
                             new ProgramVariableQuery(node.getQualifier(), node
@@ -1109,6 +1180,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postProgramParamExp(ProgramParamExp node) {
+
         List<ProgramExp> args = node.getArguments();
 
         List<PTType> argTypes = new LinkedList<PTType>();
@@ -1136,6 +1208,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postOldExp(OldExp exp) {
+
         exp.setMathType(exp.getExp().getMathType());
         exp.setMathTypeValue(exp.getExp().getMathTypeValue());
     }
@@ -1162,6 +1235,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postTypeAssertionExp(TypeAssertionExp node) {
+
         if (myTypeValueDepth == 0
                 && (myExpressionDepth > 2 || !myInTypeTheoremBindingExpFlag)) {
             throw new SourceErrorException("This construct only permitted in "
@@ -1246,6 +1320,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preDefinitionDec(DefinitionDec node) {
+
         myBuilder.startScope(node);
 
         if (!node.isInductive()) {
@@ -1268,6 +1343,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postDefinitionDec(DefinitionDec node) {
+
         myBuilder.endScope();
 
         MTType declaredType = node.getReturnTy().getMathTypeValue();
@@ -1370,6 +1446,7 @@ public class Populator extends TreeWalkerVisitor {
 
         //TODO : Currently, the parser permits the else clause to be optional.
         //       That is nonsense in a functional context and should be fixed.
+
         if (exp.getElseclause() == null) {
             throw new RuntimeException("IfExp has no else clause.  The "
                     + "parser should be changed to disallow this and this "
@@ -1409,11 +1486,13 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preArbitraryExpTy(ArbitraryExpTy node) {
+
         enteringTypeValueNode();
     }
 
     @Override
     public void postSetExp(SetExp e) {
+
         MathVarDec varDec = e.getVar();
         MTType varType = varDec.getMathType();
 
@@ -1432,17 +1511,20 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postIntegerExp(IntegerExp e) {
+
         postSymbolExp(e.getQualifier(), "" + e.getValue(), e);
     }
 
     @Override
     public void postProgramIntegerExp(ProgramIntegerExp e) {
+
         e.setProgramType(getIntegerProgramType());
         e.setMathType(myTypeGraph.Z);
     }
 
     @Override
     public void postProgramStringExp(ProgramStringExp e) {
+
         e.setProgramType(getStringProgramType());
         e.setMathType(new MTProper(myTypeGraph));
         //TODO : Figure out how to get Str(N) here, given that Str() is not 
@@ -1451,12 +1533,14 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postProgramOpExp(ProgramOpExp e) {
+
         e.setProgramType(e.getProgramType(myTypeGraph));
         e.setMathType(e.getProgramType().toMath());
     }
 
     @Override
     public void postVarExp(VarExp e) {
+
         MathSymbolEntry intendedEntry =
                 postSymbolExp(e.getQualifier(), e.getName().getName(), e);
 
@@ -1522,6 +1606,7 @@ public class Populator extends TreeWalkerVisitor {
         //This looks weird, but we're converting from the ridiculous 
         //RESOLVE-internal List into an ordinary java.util.List because we don't
         //live in bizarro-world
+
         List<Exp> fields = new LinkedList<Exp>(node.getFields());
 
         if (fields.size() < 2) {
@@ -1560,6 +1645,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postAny(ResolveConceptualElement e) {
+
         if (e instanceof Ty) {
             Ty eTy = (Ty) e;
             if (eTy.getMathTypeValue() == null) {
@@ -1603,6 +1689,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preTypeTheoremDec(TypeTheoremDec node) {
+
         myBuilder.startScope(node);
         myInTypeTheoremBindingExpFlag = false;
         myActiveQuantifications.push(Quantification.UNIVERSAL);
@@ -1610,12 +1697,14 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postTypeTheoremDecMyUniversalVars(TypeTheoremDec node) {
+
         myInTypeTheoremBindingExpFlag = true;
         myActiveQuantifications.pop();
     }
 
     @Override
     public void postTypeTheoremDec(TypeTheoremDec node) {
+
         node.setMathType(myTypeGraph.BOOLEAN);
 
         Exp assertion = node.getAssertion();
@@ -1737,7 +1826,6 @@ public class Populator extends TreeWalkerVisitor {
         //this method just deals with the cases we've encountered so far and 
         //lots of assumptions are made.  Expect it to break frequently when you
         //encounter some new case
-
         PosSymbol firstNamePos =
                 ((VariableNameExp) e.getSegments().get(0)).getName();
         String firstName = firstNamePos.getName();
@@ -1747,6 +1835,7 @@ public class Populator extends TreeWalkerVisitor {
                     myBuilder.getInnermostActiveScope().queryForOne(
                             new NameQuery(null, firstName))
                             .toProgramVariableEntry(firstNamePos.getLocation());
+
             e.getSegments().get(0).setProgramType(eEntry.getProgramType());
             e.getSegments().get(0)
                     .setMathType(eEntry.getProgramType().toMath());
@@ -2001,7 +2090,6 @@ public class Populator extends TreeWalkerVisitor {
             lastSegment = nextSegment;
             nextSegment = segments.next();
             String segmentName = getName(nextSegment);
-
             try {
                 curTypeCartesian = (MTCartesian) curType;
                 curType = curTypeCartesian.getFactor(segmentName);
@@ -2181,7 +2269,38 @@ public class Populator extends TreeWalkerVisitor {
         }
         catch (NoSuchSymbolException nsse) {
             throw new RuntimeException("No originating module for "
-                    + t.toString() + " ???");
+                    + t.getName().toString() + "???");
+        }
+        catch (DuplicateSymbolException dse) {
+            //Shouldn't be possible--NameQuery can't throw this
+            throw new RuntimeException(dse);
+        }
+        return result;
+
+    }
+
+    private ModuleIdentifier getTypeSpecification2(NameTy t) {
+
+        String searchStr = t.getProgramTypeValue().toString();
+        ModuleIdentifier result;
+        try {
+            ProgramTypeEntry type =
+                    myBuilder
+                            .getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery(
+                                            null,
+                                            searchStr,
+                                            ImportStrategy.IMPORT_NAMED,
+                                            FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true)).toProgramTypeEntry(
+                                    t.getLocation());
+            result = type.getSourceModuleIdentifier();
+
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException("No originating module for "
+                    + t.getName().toString() + "???");
         }
         catch (DuplicateSymbolException dse) {
             //Shouldn't be possible--NameQuery can't throw this
@@ -2197,7 +2316,7 @@ public class Populator extends TreeWalkerVisitor {
      * 
      * @param v A Ty.
      */
-    private String getTypeFacility(NameTy t, String conceptName) {
+    private String getTypeFacility(String conceptName) {
 
         String facEntryConcept;
         String result = "";

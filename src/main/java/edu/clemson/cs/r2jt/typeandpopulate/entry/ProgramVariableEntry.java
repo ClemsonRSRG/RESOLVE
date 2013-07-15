@@ -15,16 +15,15 @@ public class ProgramVariableEntry extends SymbolTableEntry {
 
     private final PTType myType;
     private final MathSymbolEntry myMathSymbolAlterEgo;
+    private final ProgramQualifiedEntry myQualifiedAlterEgo;
 
     public ProgramVariableEntry(String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, PTType type, String typeQualifier,
-            String spec) {
+            ModuleIdentifier sourceModule, ModuleIdentifier typeSpec,
+            PTType type, String typeQualifier) {
         super(name, definingElement, sourceModule);
         myName = name;
         myType = type;
-        myTypeQualifier = typeQualifier;
-        myTypeSpecification = spec;
 
         //TODO: Probably need to recajigger this to correctly account for any
         //      generics in the defining context
@@ -32,18 +31,15 @@ public class ProgramVariableEntry extends SymbolTableEntry {
                 new MathSymbolEntry(type.getTypeGraph(), name,
                         Quantification.NONE, definingElement, type.toMath(),
                         null, null, null, sourceModule);
+
+        myQualifiedAlterEgo =
+                new ProgramQualifiedEntry(name, getDefiningElement(),
+                        getSourceModuleIdentifier(), typeSpec, typeQualifier);
+
     }
 
     public PTType getProgramType() {
         return myType;
-    }
-
-    public String getTypeQualifier() {
-        return myTypeQualifier;
-    }
-
-    public String getTypeSpecification() {
-        return myTypeSpecification;
     }
 
     @Override
@@ -65,8 +61,9 @@ public class ProgramVariableEntry extends SymbolTableEntry {
         if (instantiatedType != myType) {
             result =
                     new ProgramVariableEntry(getName(), getDefiningElement(),
+                            getSourceModuleIdentifier(),
                             getSourceModuleIdentifier(), instantiatedType,
-                            getName(), getName());
+                            getName());
         }
         else {
             result = this;
@@ -83,4 +80,7 @@ public class ProgramVariableEntry extends SymbolTableEntry {
         return myMathSymbolAlterEgo;
     }
 
+    public ProgramQualifiedEntry toProgramQualifiedEntry(Location l) {
+        return myQualifiedAlterEgo;
+    }
 }

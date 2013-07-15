@@ -18,12 +18,15 @@ import edu.clemson.cs.r2jt.absyn.FacilityDec;
 import edu.clemson.cs.r2jt.absyn.FinalItem;
 import edu.clemson.cs.r2jt.absyn.InitItem;
 import edu.clemson.cs.r2jt.absyn.MathAssertionDec;
+import edu.clemson.cs.r2jt.absyn.NameTy;
 import edu.clemson.cs.r2jt.absyn.RepresentationDec;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.absyn.TypeDec;
+import edu.clemson.cs.r2jt.absyn.VarDec;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramQualifiedEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.RepresentationTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
@@ -74,15 +77,14 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public ProgramVariableEntry addProgramVariable(String name,
-            ResolveConceptualElement definingElement, PTType type,
-            String varQualifier, String specModule)
-            throws DuplicateSymbolException {
+            ResolveConceptualElement definingElement, ModuleIdentifier spec,
+            PTType type, String varQualifier) throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, type);
 
         ProgramVariableEntry entry =
                 new ProgramVariableEntry(name, definingElement, myRootModule,
-                        type, varQualifier, specModule);
+                        spec, type, varQualifier);
 
         myBindings.put(name, entry);
 
@@ -208,14 +210,15 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public ProgramParameterEntry addFormalParameter(String name,
-            ResolveConceptualElement definingElement, ParameterMode mode,
-            PTType type) throws DuplicateSymbolException {
+            ResolveConceptualElement definingElement, ModuleIdentifier spec,
+            ParameterMode mode, PTType type, String varQualifier)
+            throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, type);
 
         ProgramParameterEntry entry =
                 new ProgramParameterEntry(myTypeGraph, name, definingElement,
-                        myRootModule, type, mode);
+                        myRootModule, spec, type, mode, varQualifier);
 
         myBindings.put(name, entry);
 

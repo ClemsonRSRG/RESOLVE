@@ -2,7 +2,6 @@ package edu.clemson.cs.r2jt.translation.bookkeeping;
 
 import java.util.ArrayList;
 
-
 /**
  *
  * @author Welch D
@@ -20,7 +19,7 @@ public class JavaBookkeeper extends AbstractBookkeeper {
     @Override
     public void facAdd(String name, String concept, String realiz) {
         JavaFacilityDeclBook newFac;
-        
+
     }
 
     /* FunctionBook Adders */
@@ -33,19 +32,18 @@ public class JavaBookkeeper extends AbstractBookkeeper {
         currentFunction = f;
     }
 
-
-    
     @Override
     public String output() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }   
-}
-class JavaFunctionBook extends FunctionBook{
-    
-    JavaFunctionBook(String name, String returnType, boolean hasBody){
-        super(name,returnType,hasBody);
     }
-    
+}
+
+class JavaFunctionBook extends FunctionBook {
+
+    JavaFunctionBook(String name, String returnType, boolean hasBody) {
+        super(name, returnType, hasBody);
+    }
+
     /**
      * <p>Returns an unformatted (no newlines or tabs) Java string 
      * representation of <code>JavaFunctionBook</code>.</p>
@@ -80,9 +78,10 @@ class JavaFunctionBook extends FunctionBook{
     }
 }
 
-class JavaFacilityDeclBook extends FacilityDeclBook{
-    JavaFacilityDeclBook(String name, String concept, String realiz){
-        super(name,concept,realiz);
+class JavaFacilityDeclBook extends FacilityDeclBook {
+
+    JavaFacilityDeclBook(String name, String concept, String realiz) {
+        super(name, concept, realiz);
     }
 
     @Override

@@ -46,7 +46,7 @@ public interface Bookkeeper {
     public void facAddEnhanceParam(String parameter);
 
     public void facEnd();
-    
+
     /* End FacilityDeclBook Methods */
 
     /* FunctionBook Methods */

@@ -6,14 +6,11 @@ import java.util.LinkedList;
 /**
  * Little class that automatically supplements a user supplied string 
  * of translated Java or C code with:
+ * 
  * <ul>
- * <li> 
- * Newlines after semicolons and left/right curly braces.
- * </li>
- * <li>
- * Appropriate 'tabification' for each level of left/right 
- * curly braces.
- * </li>
+ * <li> Newlines after semicolons and left/right curly braces.</li>
+ * <li> Appropriate 'tabification' for each level of left/right curly 
+ * braces.</li>
  * </ul>
  * 
  * @author Welch D
@@ -46,11 +43,6 @@ public class Formatter {
                 tabStack.push("\t");
             }
         }
-
-        //TODO: Here's an idea, After this function finishes,
-        //		go through and add in some addition "convenient"
-        //		newlines. Such as one between the end of the import
-        //		list and the "public class/interface ... "
         return formattedCode.toString();
     }
 
@@ -64,11 +56,9 @@ public class Formatter {
      */
     private static String writeTabs(Deque<String> tabs) {
         StringBuilder tabStr = new StringBuilder();
-
         for (String t : tabs) {
             tabStr.append(t);
         }
-
         return tabStr.toString();
     }
 
@@ -80,7 +70,6 @@ public class Formatter {
      * @param code The code string.
      */
     private static String normalizeWhitespace(String code) {
-
         // I'm sure all of this and more could be accomplished in
         // one expression, but I'm not an expert in Java regular
         // expressions -- and this seems to be working so fine so..	
