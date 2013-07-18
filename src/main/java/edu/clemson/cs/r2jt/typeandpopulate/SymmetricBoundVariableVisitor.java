@@ -12,9 +12,6 @@ import java.util.NoSuchElementException;
 
 public class SymmetricBoundVariableVisitor extends SymmetricVisitor {
 
-    private static final NoSuchElementException NO_SUCH_ELEMENT =
-            new NoSuchElementException();
-
     private Deque<Map<String, MTType>> myBoundVariables1 =
             new LinkedList<Map<String, MTType>>();
 
@@ -83,7 +80,8 @@ public class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     }
 
     private static MTType getInnermostBinding(
-            Deque<Map<String, MTType>> scopes, String name) {
+            Deque<Map<String, MTType>> scopes, String name)
+            throws NoSuchElementException {
 
         MTType result = null;
 

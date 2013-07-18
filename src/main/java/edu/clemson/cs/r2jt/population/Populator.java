@@ -844,6 +844,8 @@ public class Populator extends TreeWalkerVisitor {
             duplicateSymbol(name, node.getName().getLocation());
         }
 
+        myDefinitionSchematicTypes.clear();
+
         Populator.emitDebug("New theorem: " + name);
     }
 
@@ -862,11 +864,17 @@ public class Populator extends TreeWalkerVisitor {
                     + "name.", node.getLocation());
         }
 
-        if (myDefinitionParameterSectionFlag
+        if ((myDefinitionParameterSectionFlag || (myActiveQuantifications
+                .size() > 0 && myActiveQuantifications.peek() != SymbolTableEntry.Quantification.NONE))
                 && mathTypeValue.isKnownToContainOnlyMTypes()) {
 
             myDefinitionSchematicTypes.put(varName, mathTypeValue);
         }
+
+        /*if (myDefinitionParameterSectionFlag
+                && mathTypeValue.isKnownToContainOnlyMTypes()) {
+            myDefinitionSchematicTypes.put(varName, mathTypeValue);
+        }*/
 
         node.setMathType(mathTypeValue);
 
@@ -989,6 +997,14 @@ public class Populator extends TreeWalkerVisitor {
                     + "   Type Theorem <name>: <quantifiers>, \n"
                     + "       [<condition> implies] <expression> : "
                     + "<assertedType>", node.getLocation());
+        }
+        else if (myActiveQuantifications.size() > 0
+                && myActiveQuantifications.peek() != SymbolTableEntry.Quantification.NONE) {
+            throw new SourceErrorException(
+                    "Implicit types are not permitted inside "
+                            + "quantified variable declarations. \n"
+                            + "Quantify the type explicitly instead.", node
+                            .getLocation());
         }
         //Note that postTypeTheoremDec() checks the "form" of a type theorem at
         //the top two levels.  So all we're checking for here is that the type
