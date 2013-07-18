@@ -46,7 +46,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath edu.clemson.cs.r2jt.Main -vcs Facilities\User\Stack_Examples\Alt_Rev_Stack.fa</exec.args>
+                <exec.args>-classpath %classpath edu.clemson.cs.r2jt.Main Math_Units\Basic_Ordering_Theory.mt</exec.args>
                 <exec.executable>java</exec.executable>
                 <exec.workingdir>C:\Users\Blair\Development\RESOLVE-Workspace2\RESOLVE\Main</exec.workingdir>
             </properties>
@@ -58,7 +58,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath edu.clemson.cs.r2jt.Main -vcs Facilities\User\Stack_Examples\Alt_Rev_Stack.fa</exec.args>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath edu.clemson.cs.r2jt.Main Math_Units\Basic_Ordering_Theory.mt</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
                 <exec.workingdir>C:\Users\Blair\Development\RESOLVE-Workspace2\RESOLVE\Main</exec.workingdir>
@@ -71,7 +71,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>${profiler.args} -classpath %classpath edu.clemson.cs.r2jt.Main -vcs Facilities\User\Stack_Examples\Alt_Rev_Stack.fa</exec.args>
+                <exec.args>${profiler.args} -classpath %classpath edu.clemson.cs.r2jt.Main Math_Units\Basic_Ordering_Theory.mt</exec.args>
                 <exec.executable>${profiler.java}</exec.executable>
                 <exec.workingdir>C:\Users\Blair\Development\RESOLVE-Workspace2\RESOLVE\Main</exec.workingdir>
             </properties>
