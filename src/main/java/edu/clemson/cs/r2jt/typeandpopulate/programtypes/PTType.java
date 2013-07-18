@@ -1,5 +1,6 @@
 package edu.clemson.cs.r2jt.typeandpopulate.programtypes;
 
+import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
@@ -37,5 +38,9 @@ public abstract class PTType {
      */
     public boolean acceptableFor(PTType t) {
         return equals(t);
+    }
+
+    public Location getLocation() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

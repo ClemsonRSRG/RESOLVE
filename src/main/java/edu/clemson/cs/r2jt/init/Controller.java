@@ -1713,6 +1713,7 @@ public class Controller {
 
     private void translateModuleDec(File file, ScopeRepository realTable,
             ModuleDec dec) {
+
         try {
             ModuleScope scope =
                     realTable.getModuleScope(new ModuleIdentifier(dec));

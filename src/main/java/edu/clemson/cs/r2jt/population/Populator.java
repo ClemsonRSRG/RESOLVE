@@ -71,8 +71,6 @@ public class Populator extends TreeWalkerVisitor {
 
     private static final boolean PRINT_DEBUG = false;
 
-    private static final boolean PRINT_DEBUG_TEMP = true;
-
     private static final TypeComparison<AbstractFunctionExp, MTFunction> EXACT_DOMAIN_MATCH =
             new ExactDomainMatch();
 
@@ -757,7 +755,6 @@ public class Populator extends TreeWalkerVisitor {
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(r.getName());
         }
-
         myTypeDefinitionEntry = null;
     }
 
@@ -904,154 +901,218 @@ public class Populator extends TreeWalkerVisitor {
         }
     }
 
-    // Since calls in most cases do not have to be qualified while 
+    // Since calls in most cases do not have to be qualified whereas
     // variable declarations do, RESOLVE relies on argument dependent
     // lookups (ADL) to qualify calls. What follows is probably not 
     // the optimal way to do it in context of adl (and probably even
     // this compiler) but it nevertheless seems to be working so far. 
-    // But as additional, more complicated cases are encountered, 
-    // expect modules reliant on call qualifiers (i.e. translation) 
-    // to break frequently.
-
-    // TODO : Handle the cases where generics are the only argument
+    //
+    // Note : As additional, more complicated cases emerge, 
+    //		  expect compiler-modules reliant on call qualifiers 
+    //		  (*cough* translation) to break frequently.
     @Override
     public void postCallStmt(CallStmt data) {
 
-        try {
-            String resultQual = "";
-            String callSrcModule = "";
+        String resultQual;
+        String callSrcModule;
 
-            List<ProgramExp> args = data.getArguments();
-            List<PTType> argTypes = new LinkedList<PTType>();
+        List<ProgramExp> args = data.getArguments();
+        List<PTType> argTypes = new LinkedList<PTType>();
 
-            for (ProgramExp arg : args) {
-                argTypes.add(arg.getProgramType());
+        if (data.getQualifier() == null) {
+            try {
+                for (ProgramExp arg : args) {
+                    argTypes.add(arg.getProgramType());
+                }
+
+                // Find the module that declares the call-owning op
+                OperationEntry matchingOp =
+                        myBuilder.getInnermostActiveScope().queryForOne(
+                                new OperationQuery(data.getQualifier(), data
+                                        .getName(), argTypes));
+
+                callSrcModule =
+                        matchingOp.getSourceModuleIdentifier().toString();
+
+                // If the call's corresponding operation isn't defined 
+                // locally then we have work to do. Otherwise stop.
+                if (!(callSrcModule.equals(myBuilder.getInnermostActiveScope()
+                        .getRootModule().toString()))) {
+
+                    // If argslist is empty and the call-owning op isn't
+                    // defined in local namespace, then stop and error.
+                    if (args.isEmpty()) {
+                        throw new SourceErrorException(
+                                "Ambiguous call. Needs qualification", data
+                                        .getLocation());
+                    }
+
+                    // These are any parameters to the fxn housing the 
+                    // call.
+                    // example :  Oper Foo(<housing params>) {
+                    //				Bar(x, y, z);
+                    //			  }
+                    List<ProgramParameterEntry> houseParams =
+                            myBuilder.getInnermostActiveScope().query(
+                                    new EntryTypeQuery(
+                                            ProgramParameterEntry.class,
+                                            ImportStrategy.IMPORT_NONE,
+                                            FacilityStrategy.FACILITY_IGNORE));
+
+                    // We make two-passes over the arguments.
+                    // The first checks for satisfying record-args.
+                    // Note : 
+                    // While the second, if no satisfying record args
+                    // are found, checks the rest 
+
+                    // First check.
+                    resultQual =
+                            checkCallRecordArgs(args, houseParams,
+                                    callSrcModule);
+
+                    if (resultQual == null) {
+                        // Looks like no record-args were it.
+                        // So lets give non-record args a shot.
+                        //resultQual = checkArgs();
+
+                    }
+
+                }
             }
+            catch (NoSuchSymbolException nsse) {
+                System.out.println("No operation found in scope or elsewhere");
+                //        noSuchSymbol(data.getQualifier(), data.getName(), data.getLocation());
+            }
+            catch (DuplicateSymbolException dse) {
+                //TODO : Error gracefully
+                throw new RuntimeException(dse);
+            }
+        }
+    }
 
-            // Now figure out which module declares the call-owning 
-            // operation
-            OperationEntry matchingOp =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new OperationQuery(data.getQualifier(), data
-                                    .getName(), argTypes));
-
-            callSrcModule = matchingOp.getSourceModuleIdentifier().toString();
-
-            // Is the call's corresponding operation defined locally in 
-            // moduleScope?
-            if (callSrcModule.equals(myBuilder.getInnermostActiveScope()
-                    .getRootModule().toString())) {
-                // Yep. So qualification isn't necessary and shouldn't 
-                // be attempted.
-                resultQual = "";
+    /*private String checkCallArgs(List<ProgramExp> args, List<ProgramParameterEntry> houseParams, String callSrcModule) {
+    	
+    	
+    
+    	for (ProgramExp arg : args) {
+    		
+    		if (!(arg instanceof VariableDotExp)) {
+    			List<SymbolTableEntry> argEntry =
+    			myBuilder.getInnermostActiveScope()
+    							.query(new NameQuery(null, arg.toString(),
+                                    ImportStrategy.IMPORT_NONE,
+                                    FacilityStrategy.FACILITY_IGNORE, true));
+    			
+    			if (argEntry.isEmpty()) {
+    				noSuchSymbol(arg.toString(), arg);
+    			}
+            else if (es.size() > 1) {
+                ambiguousSymbol(i.getName(), es);
             }
             else {
+                SymbolTableEntry ste = es.get(0);
+                ResolveConceptualElement rce = ste.getDefiningElement();
+                PTType pt;
+    			
+    			if (argEntry.size() > 1) {
+    				ambiguousSymbol(arg.toString(), argEntry);
+    			}
+    		
+    	}
+    	
+    	return null;
+    }*/
 
-                if (args.isEmpty()) {
-                    resultQual = findQualifyingFacilityName(callSrcModule);
-                }
-                else {
+    // Scan only arguments that come from records. If a non-null
+    // string is returned, a satisfying record-arg has been 
+    // found and we no longer have to look at "regular"
+    // args (those that are not fields in records).
 
-                    for (ProgramExp arg : args) {
+    private String checkCallRecordArgs(List<ProgramExp> args,
+            List<ProgramParameterEntry> houseParams, String callSrcModule) {
+        for (ProgramExp arg : args) {
 
-                        // Pluck out parameters that come from records.
-                        // We can't query for individual record fields
-                        // since they are no longer in the working scope. 
+            // All arguments from records must be VariableDotExps
+            if (arg instanceof VariableDotExp) {
+                for (ProgramParameterEntry par : houseParams) {
+                    if (par.getDeclaredType() instanceof PTRepresentation) {
+                        if (((VariableDotExp) arg).getSegments().get(0)
+                                .toString().equals(par.getName())) {
 
-                        // Hacky. Cleaner way?
-                        if (arg.toString().contains(".")) {
-                            String argType = arg.getProgramType().toString();
-                            ProgramTypeEntry type =
-                                    myBuilder
-                                            .getInnermostActiveScope()
-                                            .queryForOne(
-                                                    new NameQuery(
-                                                            null,
-                                                            argType,
-                                                            ImportStrategy.IMPORT_NAMED,
-                                                            FacilityStrategy.FACILITY_INSTANTIATE,
-                                                            true))
-                                            .toProgramTypeEntry(
-                                                    arg.getLocation());
-                            if (type.getName().equals(callSrcModule)) {
-                                resultQual =
-                                        findQualifyingFacilityName(callSrcModule);
+                            ResolveConceptualElement de =
+                                    par.getDefiningElement();
+
+                            if (de instanceof ParameterVarDec) {
+                                PosSymbol repName =
+                                        ((NameTy) ((ParameterVarDec) de)
+                                                .getTy()).getName();
+                                ProgramQualifiedEntry pqe =
+                                        findRepAndGetFieldEntry(arg, repName);
+                                if (pqe.getSpecification()
+                                        .equals(callSrcModule)) {
+                                    return pqe.getQualifier();
+                                }
                             }
-                        }
-                        // everything else passable as an argument 
-                        // should be findable from the current
-                        // working scope. So use regular NameQueries
-                        // with .toProgramQualifiedEntry
-                        else {
-
-                            ProgramQualifiedEntry entry =
-                                    myBuilder
-                                            .getInnermostActiveScope()
-                                            .queryForOne(
-                                                    new NameQuery(
-                                                            null,
-                                                            arg.toString(),
-                                                            ImportStrategy.IMPORT_NAMED,
-                                                            FacilityStrategy.FACILITY_INSTANTIATE,
-                                                            true))
-                                            .toProgramQualifiedEntry(
-                                                    arg.getLocation());
-
-                            resultQual = entry.getQualifier();
-                            // For generics that get through with null qualifiers. 
-                            if (resultQual == null) {
-                                resultQual = "";
-                            }
-
                         }
                     }
                 }
             }
-            // Finally build the qualifier PosSymbol and add set
-            // the calls qualifier to it.
-            PosSymbol newQualifier = new PosSymbol();
-            newQualifier.setSymbol(Symbol.symbol(resultQual));
-            data.setQualifier(newQualifier);
         }
-        catch (NoSuchSymbolException nsse) {
-            System.out.println("No operation found in scope or elsewhere");
-            //        noSuchSymbol(data.getQualifier(), data.getName(), data.getLocation());
-        }
-        catch (DuplicateSymbolException dse) {
-            //TODO : Error gracefully
-            throw new RuntimeException(dse);
-        }
+        // if we get through the arglist w/o returning then
+        // we clearly didn't find a winner and should look at
+        // the rest of the non-record args.
+        return null;
     }
 
-    /**
-     * Returns the name of a facility that matches <code>symbolSpec</code>.
-     * Note that this simply returns the name of the first facility 
-     * found that matches the given parameter.
-     * 
-     * @param symbolSpec A specification (i.e. Integer_Template, etc)
-     * @return The name of the facility whose specification matches
-     *	       <code>symbolSpec</code>.
-     */
+    private ProgramQualifiedEntry findRepAndGetFieldEntry(ProgramExp arg,
+            PosSymbol repName) {
 
-    private String findQualifyingFacilityName(String symbolSpec) {
+        ProgramQualifiedEntry result;
+        try {
+            RepresentationTypeEntry rte =
+                    myBuilder
+                            .getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery(
+                                            null,
+                                            repName,
+                                            ImportStrategy.IMPORT_NAMED,
+                                            FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true)).toRepresentationTypeEntry(
+                                    null);
 
-        String facSpec = "";
-        String result = "";
+            // Not sure if searching around in a shut working-scope is 
+            // entirely kosher. It better be since 1: The functionality
+            // is there, and 2: This is the only clean, concievable way 
+            // I see to access record-field information once the 
+            // representation scope has been passed by in the tree.
 
-        List<FacilityEntry> facilityEntries =
-                myBuilder.getInnermostActiveScope().query(
-                        new EntryTypeQuery(FacilityEntry.class,
-                                ImportStrategy.IMPORT_NAMED,
-                                FacilityStrategy.FACILITY_IGNORE));
+            ResolveConceptualElement r = rte.getDefiningElement();
 
-        for (FacilityEntry f : facilityEntries) {
-            facSpec =
-                    f.getFacility().getSpecification().getModuleIdentifier()
-                            .toString();
+            String fieldStr =
+                    ((VariableDotExp) arg).getSegments().get(1).toString();
 
-            if (symbolSpec.equals(facSpec)) {
-                result = f.getName();
-            }
+            ProgramQualifiedEntry pqe =
+                    myBuilder
+                            .getScope(r)
+                            .queryForOne(
+                                    new NameQuery(
+                                            null,
+                                            fieldStr,
+                                            ImportStrategy.IMPORT_NAMED,
+                                            FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true))
+                            .toProgramQualifiedEntry(null);
+
+            result = pqe;
+        }
+        catch (NoSuchSymbolException nsse) {
+            System.out.println("Can't find representation by that name...");
+            throw new RuntimeException(nsse);
+
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
         }
         return result;
     }
@@ -1140,11 +1201,17 @@ public class Populator extends TreeWalkerVisitor {
         String varName = programVar.getName().getName();
         programVar.setMathType(mathTypeValue);
 
-        String varSpec = getTypeSpecification((NameTy) programVar.getTy());
-        String qual =
-                ((NameTy) programVar.getTy()).getTempQualifier().toString();
-        ModuleIdentifier spec =
-                getTypeSpecification2((NameTy) programVar.getTy());
+        String qual;
+        ModuleIdentifier spec;
+        if (!(programVar.getTy().getProgramTypeValue() instanceof PTRepresentation || programVar
+                .getTy().getProgramTypeValue() instanceof PTGeneric)) {
+            qual = ((NameTy) programVar.getTy()).getTempQualifier().toString();
+            spec = getTypeSpecification2((NameTy) programVar.getTy());
+        }
+        else {
+            qual = null;
+            spec = null;
+        }
 
         try {
             myBuilder.getInnermostActiveScope().addProgramVariable(varName,

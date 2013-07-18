@@ -1,13 +1,14 @@
 package edu.clemson.cs.r2jt.translation;
 
-import java.io.File;
-import java.util.Date;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.StringTokenizer;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.*;
 
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.translation.bookkeeping.*;
@@ -17,27 +18,25 @@ import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
-import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
+import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramQualifiedEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
-import java.util.List;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.RepresentationTypeEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
+import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
-/**
- *
- * @author Welch D
- */
+import java.util.LinkedList;
+import java.util.List;
+import java.io.File;
+
 public class JavaTranslator extends TreeWalkerVisitor {
 
-    private final ModuleScope myModuleScope;
     private final CompileEnvironment env;
+    private final ModuleScope myScope;
     private Bookkeeper myBookkeeper;
     private ErrorHandler err;
 
+    private static final boolean PRINT_DEBUG = true;
     private static final String FLAG_SECTION_NAME = "Translation";
     private static final String FLAG_DESC_TRANSLATE =
             "Translate RESOLVE file to Java source file.";
@@ -53,52 +52,33 @@ public class JavaTranslator extends TreeWalkerVisitor {
 
     public JavaTranslator(CompileEnvironment env, ModuleScope scope,
             ModuleDec dec, ErrorHandler err) {
+
         this.err = err;
         this.env = env;
-
-        myModuleScope = scope;
-        File srcFile = dec.getName().getFile();
+        myScope = scope;
     }
 
-    /** Visitor Methods */
-
-    // @Override
-    /* public void preUsesItem(UsesItem data) {
-
-         ModuleID id = ModuleID.createFacilityID(data.getName());
-         if (env.contains(id)) {
-
-             ModuleDec dec = env.getModuleDec(id);
-             if (dec instanceof ShortFacilityModuleDec) {
-
-                 FacilityDec fdec = ((ShortFacilityModuleDec) (dec)).getDec();
-                 PosSymbol cname = fdec.getConceptName();
-                 ModuleID cid = ModuleID.createConceptID(cname);
-                 String imp = "import " + formPkgPath(env.getFile(cid)) + ".*;";
-                 myBookkeeper.addUses(imp);
-             }
-         }
-         ModuleID cid = ModuleID.createConceptID(data.getName());
-         if (env.contains(cid)) {
-             String imp = "import " + formPkgPath(env.getFile(cid)) + ".*;";
-             myBookkeeper.addUses(imp);
-         }
-     }*/
+    //-------------------------------------------------------------------
+    //   Visitor methods
+    //-------------------------------------------------------------------
 
     @Override
-    public void preModuleDec(ModuleDec dec) {
-        if (dec instanceof FacilityModuleDec) {
-            String facName = dec.getName().toString();
+    public void preModuleDec(ModuleDec node) {
+        JavaTranslator.emitDebug("---------------------------------\n"
+                + "Translate module: " + node.getName().getName()
+                + "\n---------------------------------");
+        if (node instanceof FacilityModuleDec) {
+            String facName = node.getName().toString();
             myBookkeeper = new JavaFacilityBookkeeper(facName, true);
         }
     }
 
     @Override
-    public void preOperationDec(OperationDec data) {
-        String opName = data.getName().getName();
+    public void preOperationDec(OperationDec node) {
+        String opName = node.getName().getName();
         String retType = "void";
-        if (data.getReturnTy() != null) {
-            retType = data.getReturnTy().toString();
+        if (node.getReturnTy() != null) {
+            retType = node.getReturnTy().toString();
             System.out.println("retType: " + retType);
 
         }
@@ -106,60 +86,41 @@ public class JavaTranslator extends TreeWalkerVisitor {
     }
 
     @Override
-    public void preCallStmt(CallStmt data) {
-        //  if (data.getQualifier() == null) {
-        System.out.println(data.getQualifier().getName() + "."
-                + data.getName().getName());
-        //   }
+    public void preCallStmt(CallStmt node) {
+
+        String callQualifier;
+        String callSrcModule;
+
+        List<ProgramExp> args = node.getArguments();
+
+        JavaTranslator.emitDebug("Encountered call: " + node.getName()
+                + args.toString());
+
+        if (node.getQualifier() == null) {
+            callQualifier = getCallFacility(node.getName(), args);
+        }
     }
 
     @Override
     public void preVarDec(VarDec dec) {
+        String varName = dec.getName().getName();
+        PTType varType = dec.getTy().getProgramTypeValue();
 
-    // this is stupid. regular queries work but queryForOne refuses to work..
+        String typeSpec = getTypeSpecification((NameTy) dec.getTy());
+        String typeQual = getTypeFacility(typeSpec);
+        //	String typeQual = ((NameTy) dec.getTy()).getQualifier().toString();
+        //	if (typeQual == null) {
+        //		typeQual = getTypeQualifier(typeSpec);
+        //	}
 
-    /*  List<TheoremEntry> theoremEntries =
-              myModuleScope.query(new EntryTypeQuery(TheoremEntry.class,
-                      MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
-                      MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
-
-      System.out.println(theoremEntries.size());*/
-    /*  try {
-          //SymbolTableEntry entry =
-          //  myBuilder.
-          //PosSymbol qual = 
-          ProgramVariableEntry q =
-                  myModuleScope
-                          .queryForOne(
-                                  new NameQuery(
-                                          ((NameTy) dec.getTy())
-                                                  .getTempQualifier(),
-                                          dec.getName(),
-                                          MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                                          MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
-                                          true)).toProgramVariableEntry(
-                                  dec.getLocation()); //.toProgramQualifiedEntry(
-          //dec.getLocation());
-
-          //getInnermostActiveScope().queryForOne(
-          //       new NameQuery(null, dec.getName().getName()));
-
-      }
-      catch (NoSuchSymbolException nsse) {
-          System.out.println("NO SUCH SYMBOL");
-      }
-      catch (DuplicateSymbolException dse) {
-          //Shouldn't be possible--NameQuery can't throw this
-          throw new RuntimeException(dse);
-      }
-      //String progVarType =
-      //        (dec.getTy().getProgramTypeValue()).toString();
-      //SymbolTableEntry entry = myBuilder.getInnermostActiveScope().queryForOne(new NameQuery(null, progVarType,
-      //                     ImportStrategy.IMPORT_RECURSIVE,
-      //                     FacilityStrategy.FACILITY_INSTANTIATE, false));*/
+        JavaTranslator.emitDebug("Translating variable: " + varName
+                + " of type: " + varType + " \twith spec: " + typeSpec
+                + " and qualifier: " + typeQual);
     }
 
-    /** Helper Methods */
+    //-------------------------------------------------------------------
+    //   Helper methods
+    //-------------------------------------------------------------------
 
     public void outputCode(File outputFile) {
         if (!env.flags.isFlagSet(ResolveCompiler.FLAG_WEB)
@@ -167,7 +128,7 @@ public class JavaTranslator extends TreeWalkerVisitor {
 
             //   String code = Formatter.formatCode(myBookkeeper.output());
             //   System.out.println(code);
-            System.out.println(myBookkeeper.output());
+            // System.out.println(myBookkeeper.output());
         }
         else {
             outputToReport(myBookkeeper.output().toString());
@@ -182,62 +143,237 @@ public class JavaTranslator extends TreeWalkerVisitor {
 
     public static final void setUpFlags() {}
 
-    //This should only be temporary..
-    private String formPkgPath(File file) {
-        StringBuffer pkgPath = new StringBuffer();
-        String filePath;
-        if (file.exists()) {
-            filePath = file.getAbsolutePath();
+    public static void emitDebug(String msg) {
+        if (PRINT_DEBUG) {
+            System.out.println(msg);
         }
-        else {
-            filePath = file.getParentFile().getAbsolutePath();
+    }
+
+    /**
+     * Given NameTy <code>t</code>, <code>getTypeSpecification</code> 
+     * finds and returns the name of the conceptual module that 
+     * defines <code>t</code>.
+     * 
+     * @param t A NameTy.
+     * @return A string containing <code>t</code>'s specification.
+     */
+    private String getTypeSpecification(NameTy t) {
+
+        String result;
+        try {
+            ProgramTypeEntry type =
+                    myScope
+                            .queryForOne(
+                                    new NameQuery(
+                                            null,
+                                            t.getName(),
+                                            ImportStrategy.IMPORT_NAMED,
+                                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true)).toProgramTypeEntry(
+                                    t.getLocation());
+            result = type.getSourceModuleIdentifier().toString();
+
         }
-        StringTokenizer stTok = new StringTokenizer(filePath, File.separator);
-        Deque<String> tokenStack = new LinkedList<String>();
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException(
+                    "No specification module found for type " + t.toString());
+        }
+        catch (DuplicateSymbolException dse) {
+            //Shouldn't be possible--NameQuery can't throw this
+            throw new RuntimeException(dse);
+        }
+        return result;
+    }
 
-        String curToken;
-        while (stTok.hasMoreTokens()) {
-            curToken = stTok.nextToken();
-            tokenStack.push(curToken);
+    /**
+     * Given a string <code>s</code> containing a specification,
+     * <code>getTypeFacility</code> returns the name of first 
+     * facility whose specification matches <code>s</code>.
+     * 
+     * @param s A string containing a specification module-name.
+     * 
+     * @return A string containing the name of the first instantiated 
+     *		   facility found w/ a spec matching <code>s</code>.
+     */
+    private String getTypeFacility(String s) {
+
+        String result = "";
+        String facSpec;
+
+        List<FacilityEntry> facilities =
+                myScope.query(new EntryTypeQuery(FacilityEntry.class,
+                        ImportStrategy.IMPORT_NAMED,
+                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
+
+        for (FacilityEntry f : facilities) {
+            facSpec =
+                    f.getFacility().getSpecification().getModuleIdentifier()
+                            .toString();
+            if (s.equals(facSpec)) {
+                result = f.getName();
+            }
+        }
+        if (result.equals("")) {
+            throw new RuntimeException(
+                    "No matching facility found for specification: " + s);
+        }
+        return result;
+    }
+
+    /**
+     * Given a PosSymbol <code>n</code> containing a callStmt's name,
+     * <code>getCallFacility</code> searches through <code>n</code>'s
+     * arguments, <code>args</code>, and returns the facility qualifier
+     * for the call.
+     * 
+     * @param n A PosSymbol containing the calls name.
+     * @param args The calls argument list.
+     * 
+     * @return A string containing the name of the call-qualifying 
+     *		   facility.
+     */
+
+    private String getCallFacility(PosSymbol n, List<ProgramExp> args) {
+
+        String resultQual;
+        String callSrcModule;
+        String curModuleName;
+
+        List<PTType> argTypes = new LinkedList<PTType>();
+
+        for (ProgramExp arg : args) {
+            argTypes.add(arg.getProgramType());
         }
 
-        //Get rid of the actual file -- we only care about the path to it
-        if (file.isFile()) {
-            tokenStack.pop();
-        }
+        try {
+            // Find the module that declares the call-owning op
+            OperationEntry matchingOp =
+                    myScope.queryForOne(new OperationQuery(null, n, argTypes));
 
-        curToken = "";
-        boolean foundRootDirectory = false;
-        while (!tokenStack.isEmpty() && !foundRootDirectory) {
-            curToken = tokenStack.pop();
+            callSrcModule = matchingOp.getSourceModuleIdentifier().toString();
+            curModuleName = myScope.getModuleIdentifier().toString();
+            // If the call's corresponding operation isn't defined 
+            // locally then we have work to do. Otherwise stop.
+            if (!(callSrcModule.equals(curModuleName))) {
 
-            if (pkgPath.length() != 0) {
-                pkgPath.insert(0, '.');
+                // If args is empty and the call-owning op isn't
+                // defined in local namespace, then error.
+                if (args.isEmpty()) {
+                    throw new SourceErrorException(
+                            "Ambiguous call. Needs qualification", n
+                                    .getLocation());
+                }
+
+                // These are any parameters to the fxn housing the call.
+                // example :  Oper Foo(<housing params>) {
+                //				Bar(x, y, z);
+                //			  }
+                //	myScope.qu
+                // for (ProgramParameterEntry p : matchingOp.getParameters()) {
+                //     System.out.println(p.getName());
+                // }
+                // checkCallRecordArgs(args, houseParams, callSrcModule);
             }
 
-            pkgPath.insert(0, curToken);
-
-            foundRootDirectory = curToken.equalsIgnoreCase("RESOLVE");
+        }
+        catch (NoSuchSymbolException nsse) {
+            System.out.println("No operation found in scope or elsewhere");
+            // TODO : Error Properly.
+            // noSuchSymbol(data.getQualifier(), data.getName(), data.getLocation());
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
         }
 
-        if (!foundRootDirectory) {
-            err.error("Translation expects all compiled files to have a "
-                    + "directory named 'RESOLVE' somewhere in their path, but "
-                    + "the file:\n\t" + filePath + "\ndoes not.  Keep in mind "
-                    + "that directories are case sensitive.");
+        return "";
+
+    }
+
+    private void checkCallRecordArgs(List<ProgramExp> args,
+            List<ProgramParameterEntry> houseParams, String callSrcModule) {
+
+    /*   for (ProgramExp arg : args) {
+
+           // All arguments from records must be VariableDotExps
+           if (arg instanceof VariableDotExp) {
+               System.out.println("arg: " + arg.toString());
+
+            //   for (ProgramParameterEntry par : houseParams) {
+
+                   // System.out.println("before rep check: " + par.getName()
+                   //         + "  declared type: " + par.getDeclaredType());
+
+                   if (par.getDeclaredType() instanceof PTRepresentation) {
+                       if (((VariableDotExp) arg).getSegments().get(0)
+                               .toString().equals(par.getName())) {
+
+                           ResolveConceptualElement de =
+                                   par.getDefiningElement();
+
+                           if (de instanceof ParameterVarDec) {
+                               NameTy repNameTy =
+                                       ((NameTy) ((ParameterVarDec) de)
+                                               .getTy());
+                               String argSpec =
+                                       getTypeSpecification(repNameTy);
+                               //      System.out.println("record parameter "
+                               //              + repNameTy.getName().getName()
+                               //              + " with spec: " + argSpec);
+
+                               //   ProgramQualifiedEntry pqe =
+                               //           findRepAndGetFieldEntry(arg, repName);
+                               //   if (pqe.getSpecification()
+                               //           .equals(callSrcModule)) {
+                               //       return pqe.getQualifier();
+                           }
+                       }
+                   }
+               }
+           }
+       }*/
+    // if we get through the arglist w/o returning then
+    // we clearly didn't find a winner and should look at
+    // the rest of the non-record args.
+    //return null;
+    }
+
+    //private ProgramQualifiedEntry findRepAndGetFieldEntry(ProgramExp arg,
+    //         PosSymbol repName) {
+
+    private void findRepAndGetFieldEntry(ProgramExp arg, PosSymbol repName) {
+
+        ProgramQualifiedEntry result;
+        try {
+            RepresentationTypeEntry rte =
+                    myScope
+                            .queryForOne(
+                                    new NameQuery(
+                                            null,
+                                            repName,
+                                            ImportStrategy.IMPORT_NAMED,
+                                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true)).toRepresentationTypeEntry(
+                                    null);
+
+            // Not sure if searching around in a shut working-scope is 
+            // entirely kosher. It better be since 1: The functionality
+            // is there, and 2: This is the only clean, concievable way 
+            // I see to access record-field information once the 
+            // representation scope has been passed by in the tree.
+
+            ResolveConceptualElement r = rte.getDefiningElement();
+
+            String fieldStr =
+                    ((VariableDotExp) arg).getSegments().get(1).toString();
         }
-        return pkgPath.toString();
+        catch (NoSuchSymbolException nsse) {
+            System.out.println("Can't find representation by that name...");
+            throw new RuntimeException(nsse);
+
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
+        }
+        // return result;
     }
-
-    // This should also only be temporary..
-    private String buildHeaderComment(File file) {
-        String targetFileName = file.toString();
-
-        String[] temp = targetFileName.split("\\\\");
-        String fileName = temp[temp.length - 1];
-        return "//\n// Generated by the Resolve to Java Translator\n"
-                + "// from file:  " + fileName + "\n// on:         "
-                + new Date() + "\n" + "//\n";
-    }
-
 }
