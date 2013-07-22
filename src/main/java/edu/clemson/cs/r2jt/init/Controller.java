@@ -108,6 +108,7 @@ import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.parsing.RSimpleTrans;
 import edu.clemson.cs.r2jt.proving2.AlgebraicProver;
 import edu.clemson.cs.r2jt.proving2.VC;
+import edu.clemson.cs.r2jt.translation.CTranslator;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslation;
 import edu.clemson.cs.r2jt.translation.PrettyCTranslation;
@@ -1713,23 +1714,21 @@ public class Controller {
 
     private void translateModuleDec(File file, ScopeRepository realTable,
             ModuleDec dec) {
-
-        //  try {
-        //   ModuleScope scope =
-        //           realTable.getModuleScope(new ModuleIdentifier(dec));
-        JavaTranslator javaT =
-                new JavaTranslator(myInstanceEnvironment, dec, err);
-        // JavaTranslator javaT =
-        //          new JavaTranslator(myInstanceEnvironment, realTable, dec, err);
-
-        TreeWalker tw = new TreeWalker(javaT);
-        tw.visit(dec);
-        javaT.outputCode(file);
-        /*   }
-           catch (NoSuchSymbolException nsse) {
-               //Can't find the module we're in.  Shouldn't be possible.
-               throw new RuntimeException(nsse);
-           }*/
+        try {
+            ModuleScope scope =
+                    realTable.getModuleScope(new ModuleIdentifier(dec));
+            JavaTranslator javaT =
+                    new JavaTranslator(myInstanceEnvironment, scope, dec, err);
+            CTranslator cT =
+                    new CTranslator(myInstanceEnvironment, scope, dec, err);
+            TreeWalker tw = new TreeWalker(cT);
+            tw.visit(dec);
+            cT.outputCode(file);
+        }
+        catch (NoSuchSymbolException nsse) {
+            //Can't find the module we're in.  Shouldn't be possible.
+            throw new RuntimeException(nsse);
+        }
     }
 
     private void translatePrettyModuleDec(File file, OldSymbolTable table,

@@ -88,6 +88,7 @@ import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
 import edu.clemson.cs.r2jt.translation.PrettyCTranslation;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslation;
 import edu.clemson.cs.r2jt.scope.OldSymbolTable;
+import edu.clemson.cs.r2jt.translation.CTranslator;
 import edu.clemson.cs.r2jt.translation.JavaTranslator;
 import edu.clemson.cs.r2jt.treewalk.VisitorCodeGeneration;
 import edu.clemson.cs.r2jt.utilities.Flag;
@@ -572,6 +573,7 @@ public class Main {
             PrettyCTranslation.setUpFlags();
             PrettyJavaTranslation.setUpFlags();
             JavaTranslator.setUpFlags();
+            CTranslator.setUpFlags();
             Archiver.setUpFlags();
             ResolveCompiler.setUpFlags();
             PrettyJavaTranslator.setUpFlags();

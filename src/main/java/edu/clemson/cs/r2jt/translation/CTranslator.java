@@ -1,33 +1,19 @@
 package edu.clemson.cs.r2jt.translation;
 
 import java.io.File;
-import java.util.Date;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.StringTokenizer;
 
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
-import edu.clemson.cs.r2jt.compilereport.CompileReport;
-import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.translation.bookkeeping.*;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
-import edu.clemson.cs.r2jt.archiving.Archiver;
-import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.absyn.*;
 
 /**
  *
- * @author Welch D
+ * @author Welch D and Mark T
  */
-public class CTranslator extends TreeWalkerVisitor {
-
-    private final ModuleScope myModuleScope;
-    private final CompileEnvironment env;
-    private Bookkeeper myBookkeeper;
-    private ErrorHandler err;
+public class CTranslator extends AbstractTranslator {
 
     private static final String FLAG_SECTION_NAME = "C Translation";
     private static final String FLAG_DESC_TRANSLATE =
@@ -35,46 +21,21 @@ public class CTranslator extends TreeWalkerVisitor {
     private static final String FLAG_DESC_TRANSLATE_CLEAN =
             "Regenerates C code for all supporting RESOLVE files.";
 
-    public static final Flag JAVA_FLAG_TRANSLATE =
+    public static final Flag C_FLAG_TRANSLATE =
             new Flag(FLAG_SECTION_NAME, "cTranslate", FLAG_DESC_TRANSLATE);
 
-    public static final Flag FLAG_TRANSLATE_CLEAN =
+    public static final Flag C_FLAG_TRANSLATE_CLEAN =
             new Flag(FLAG_SECTION_NAME, "cTranslateClean",
                     FLAG_DESC_TRANSLATE_CLEAN);
 
     public CTranslator(CompileEnvironment env, ModuleScope scope,
             ModuleDec dec, ErrorHandler err) {
-        this.err = err;
-        this.env = env;
-
-        myModuleScope = scope;
+        super(env, scope, dec, err);
+        qualifyingSymbol = "->";
         File srcFile = dec.getName().getFile();
     }
 
-    /** Visitor Methods */
-
-    // @Override
-    /* public void preUsesItem(UsesItem data) {
-
-         ModuleID id = ModuleID.createFacilityID(data.getName());
-         if (env.contains(id)) {
-
-             ModuleDec dec = env.getModuleDec(id);
-             if (dec instanceof ShortFacilityModuleDec) {
-
-                 FacilityDec fdec = ((ShortFacilityModuleDec) (dec)).getDec();
-                 PosSymbol cname = fdec.getConceptName();
-                 ModuleID cid = ModuleID.createConceptID(cname);
-                 String imp = "import " + formPkgPath(env.getFile(cid)) + ".*;";
-                 myBookkeeper.addUses(imp);
-             }
-         }
-         ModuleID cid = ModuleID.createConceptID(data.getName());
-         if (env.contains(cid)) {
-             String imp = "import " + formPkgPath(env.getFile(cid)) + ".*;";
-             myBookkeeper.addUses(imp);
-         }
-     }*/
+    /* Visitor Methods */
 
     public void preModuleDec(ModuleDec dec) {
         if (dec instanceof FacilityModuleDec) {
@@ -83,117 +44,62 @@ public class CTranslator extends TreeWalkerVisitor {
         }
     }
 
-    //Hidden. Calls can happen in preModuleDec
-    /*@Override
-    public void preFacilityModuleDec(FacilityModuleDec data) {
-        String facName = data.getName().toString();
-        myBookkeeper = new CFacilityBookkeeper(facName, true);
-    }*/
-
     @Override
     public void preVarDec(VarDec dec) {
+        String varName = dec.getName().getName();
+        String varType = ((NameTy) dec.getTy()).toString(0);
 
-    //  try {
-    //SymbolTableEntry entry =
-    //  myBuilder.
-
-    //getInnermostActiveScope().queryForOne(
-    //       new NameQuery(null, dec.getName().getName()));
-
-    // }
-    /*  catch (NoSuchSymbolException nsse) {
-
-      }
-      catch (DuplicateSymbolException dse) {
-          //Shouldn't be possible--NameQuery can't throw this
-          throw new RuntimeException(dse);
-      }*/
-    //String progVarType =
-    //        (dec.getTy().getProgramTypeValue()).toString();
-    //SymbolTableEntry entry = myBuilder.getInnermostActiveScope().queryForOne(new NameQuery(null, progVarType,
-    //                     ImportStrategy.IMPORT_RECURSIVE,
-    //                     FacilityStrategy.FACILITY_INSTANTIATE, false));*/
+        String facName = getTypeFacility((NameTy) dec.getTy());
+        //String conceptName = getTypeConceptName(facName);
+        myBookkeeper.fxnAddVarDecl("r_type_ptr " + varName + " = " + facName
+                + qualifyingSymbol + varType + qualifyingSymbol + "init("
+                + facName + qualifyingSymbol + varType + ");");
     }
 
-    /** Helper Methods */
+    @Override
+    public void preParameterVarDec(ParameterVarDec dec) {
+        String varName = dec.getName().getName();
 
-    public void outputCode(File outputFile) {
-        if (!env.flags.isFlagSet(ResolveCompiler.FLAG_WEB)
-                || env.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-
-            //   String code = Formatter.formatCode(myBookkeeper.output());
-            //   System.out.println(code);
-            System.out.println(myBookkeeper.output());
-        }
-        else {
-            outputToReport(myBookkeeper.output().toString());
-        }
+        String facName = getTypeFacility((NameTy) dec.getTy());
+        myBookkeeper.fxnAddParam("r_type_ptr " + varName);
     }
 
-    private void outputToReport(String fileContents) {
-        CompileReport report = env.getCompileReport();
-        report.setTranslateSuccess();
-        report.setOutput(fileContents);
-    }
-
-    public static final void setUpFlags() {}
-
-    //This should only be temporary..
-    private String formPkgPath(File file) {
-        StringBuffer pkgPath = new StringBuffer();
-        String filePath;
-        if (file.exists()) {
-            filePath = file.getAbsolutePath();
-        }
-        else {
-            filePath = file.getParentFile().getAbsolutePath();
-        }
-        StringTokenizer stTok = new StringTokenizer(filePath, File.separator);
-        Deque<String> tokenStack = new LinkedList<String>();
-
-        String curToken;
-        while (stTok.hasMoreTokens()) {
-            curToken = stTok.nextToken();
-            tokenStack.push(curToken);
-        }
-
-        //Get rid of the actual file -- we only care about the path to it
-        if (file.isFile()) {
-            tokenStack.pop();
-        }
-
-        curToken = "";
-        boolean foundRootDirectory = false;
-        while (!tokenStack.isEmpty() && !foundRootDirectory) {
-            curToken = tokenStack.pop();
-
-            if (pkgPath.length() != 0) {
-                pkgPath.insert(0, '.');
+    @Override
+    public void postProcedureDecParameters(ProcedureDec dec) {
+        int i = 0;
+        ResolveConceptualElement a = this.getParent();
+        ModuleDec myMod = (ModuleDec) a;
+        String b;
+        for (; i < this.getAncestorSize(); i++) {
+            a = this.getAncestor(i);
+            if (a instanceof ModuleDec) {
+                break;
             }
-
-            pkgPath.insert(0, curToken);
-
-            foundRootDirectory = curToken.equalsIgnoreCase("RESOLVE");
         }
-
-        if (!foundRootDirectory) {
-            err.error("Translation expects all compiled files to have a "
-                    + "directory named 'RESOLVE' somewhere in their path, but "
-                    + "the file:\n\t" + filePath + "\ndoes not.  Keep in mind "
-                    + "that directories are case sensitive.");
-        }
-        return pkgPath.toString();
+        myBookkeeper.fxnAddParam(", " + getConceptName(myMod) + " _thisFac");
     }
 
-    // This should also only be temporary..
-    private String buildHeaderComment(File file) {
-        String targetFileName = file.toString();
-
-        String[] temp = targetFileName.split("\\\\");
-        String fileName = temp[temp.length - 1];
-        return "//\n// Generated by the Resolve to C Translator\n"
-                + "// from file:  " + fileName + "\n// on:         "
-                + new Date() + "\n" + "//\n";
+    @Override
+    public void postFacilityOperationDecParameters(FacilityOperationDec dec) {
+    //may need you later, shhhh
     }
 
+    // Helper Functions
+    protected String getConceptName(ModuleDec dec) {
+        if (dec instanceof ConceptBodyModuleDec) {
+            return ((ConceptBodyModuleDec) dec).getConceptName().getName();
+        }
+        else if (dec instanceof EnhancementBodyModuleDec) {
+            return ((EnhancementBodyModuleDec) dec).getConceptName().getName();
+        }
+        else if (dec instanceof ConceptModuleDec) {
+            return ((ConceptModuleDec) dec).getName().getName();
+        }
+        else if (dec instanceof EnhancementModuleDec) {
+            return ((EnhancementModuleDec) dec).getConceptName().getName();
+        }
+        else {
+            return "FIND PROPER ERROR TO THROW";
+        }
+    }
 }

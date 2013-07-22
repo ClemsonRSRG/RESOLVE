@@ -9,16 +9,12 @@ import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.absyn.*;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 
 import java.io.File;
 
-public class JavaTranslator extends TreeWalkerVisitor {
+public class JavaTranslator extends AbstractTranslator {
 
-    private final CompileEnvironment env;
-    private Bookkeeper myBookkeeper;
-    private ErrorHandler err;
-
-    private static final boolean PRINT_DEBUG = true;
     private static final String FLAG_SECTION_NAME = "Translation";
     private static final String FLAG_DESC_TRANSLATE =
             "Translate RESOLVE file to Java source file.";
@@ -28,15 +24,15 @@ public class JavaTranslator extends TreeWalkerVisitor {
     public static final Flag JAVA_FLAG_TRANSLATE =
             new Flag(FLAG_SECTION_NAME, "javaTranslate", FLAG_DESC_TRANSLATE);
 
-    public static final Flag FLAG_TRANSLATE_CLEAN =
-            new Flag(FLAG_SECTION_NAME, "translateClean",
+    public static final Flag JAVA_FLAG_TRANSLATE_CLEAN =
+            new Flag(FLAG_SECTION_NAME, "javaTranslateClean",
                     FLAG_DESC_TRANSLATE_CLEAN);
 
-    public JavaTranslator(CompileEnvironment env, ModuleDec dec,
+    public JavaTranslator(CompileEnvironment env, ModuleScope scope, ModuleDec dec, 
             ErrorHandler err) {
 
-        this.err = err;
-        this.env = env;
+        super(env, scope, dec, err);
+        qualifyingSymbol = ".";
     }
 
     //-------------------------------------------------------------------
@@ -51,74 +47,6 @@ public class JavaTranslator extends TreeWalkerVisitor {
         if (node instanceof FacilityModuleDec) {
             String facName = node.getName().toString();
             myBookkeeper = new JavaFacilityBookkeeper(facName, true);
-        }
-    }
-
-    @Override
-    public void preOperationDec(OperationDec node) {
-    /*  String opName = node.getName().getName();
-      String retType = "void";
-      if (node.getReturnTy() != null) {
-          retType = node.getReturnTy().toString();
-          System.out.println("retType: " + retType);
-
-      }
-      myBookkeeper.fxnAdd(retType, opName);*/
-    }
-
-    @Override
-    public void preCallStmt(CallStmt node) {
-
-        if (node.getQualifier() != null) {
-            System.out.println(node.getQualifier().toString() + "."
-                    + node.getName());
-        }
-        else {
-            System.out.println("Requires ADL record lookup.");
-        }
-
-        //   JavaTranslator.emitDebug("Encountered call: " + node.getName()
-        //           + args.toString());
-    }
-
-    @Override
-    public void preVarDec(VarDec dec) {
-    //  String varName = dec.getName().getName();
-    //  PTType varType = dec.getTy().getProgramTypeValue();
-
-    // JavaTranslator.emitDebug("Translating variable: " + varName
-    //         + " of type: " + varType + " \twith spec: " + typeSpec
-    //         + " and qualifier: " + typeQual);
-    }
-
-    //-------------------------------------------------------------------
-    //   Helper methods
-    //-------------------------------------------------------------------
-
-    public void outputCode(File outputFile) {
-        if (!env.flags.isFlagSet(ResolveCompiler.FLAG_WEB)
-                || env.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-
-            //   String code = Formatter.formatCode(myBookkeeper.output());
-            //   System.out.println(code);
-            // System.out.println(myBookkeeper.output());
-        }
-        else {
-            outputToReport(myBookkeeper.output().toString());
-        }
-    }
-
-    private void outputToReport(String fileContents) {
-        CompileReport report = env.getCompileReport();
-        report.setTranslateSuccess();
-        report.setOutput(fileContents);
-    }
-
-    public static final void setUpFlags() {}
-
-    private static void emitDebug(String msg) {
-        if (PRINT_DEBUG) {
-            System.out.println(msg);
         }
     }
 }

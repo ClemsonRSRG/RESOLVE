@@ -159,7 +159,7 @@ abstract class FunctionBook {
      * @param name The function's name.
      * @param returnType The function's return type.
      */
-    FunctionBook(String name, String returnType, boolean hasBody) {
+    FunctionBook(String returnType, String name, boolean hasBody) {
         myName = name;
         myReturnType = returnType;
         this.hasBody = hasBody;
