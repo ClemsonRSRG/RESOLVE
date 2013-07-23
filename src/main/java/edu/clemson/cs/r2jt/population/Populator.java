@@ -903,13 +903,14 @@ public class Populator extends TreeWalkerVisitor {
                 // NameAndEntryType to find the call's corresponding operation.
 
                 // Find the call stmt's corresponding operation entry
-                ProgramParameterEntry matchingOp =
+                OperationEntry matchingOp =
                         myBuilder.getInnermostActiveScope().queryForOne(
-                                new NameAndEntryTypeQuery(null, "I",
-                                        ProgramParameterEntry.class,
+                                new NameAndEntryTypeQuery(null, data.getName(),
+                                        OperationEntry.class,
                                         ImportStrategy.IMPORT_NAMED,
                                         FacilityStrategy.FACILITY_INSTANTIATE,
-                                        false)).toProgramParameterEntry(null);
+                                        false)).toOperationEntry(
+                                data.getLocation());
 
                 System.out.println("GETSHERE");
                 //  callSrcModule =
