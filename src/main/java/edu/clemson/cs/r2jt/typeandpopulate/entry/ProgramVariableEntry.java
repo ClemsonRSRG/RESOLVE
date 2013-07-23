@@ -34,7 +34,8 @@ public class ProgramVariableEntry extends SymbolTableEntry {
 
         myQualifiedAlterEgo =
                 new ProgramQualifiedEntry(name, getDefiningElement(),
-                        getSourceModuleIdentifier(), typeSpec, typeQualifier);
+                        getSourceModuleIdentifier(), typeSpec, typeQualifier,
+                        type);
 
     }
 

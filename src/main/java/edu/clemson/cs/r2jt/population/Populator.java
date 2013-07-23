@@ -837,6 +837,7 @@ public class Populator extends TreeWalkerVisitor {
         String tyFacility;
 
         try {
+
             ProgramTypeEntry type =
                     myBuilder
                             .getInnermostActiveScope()
@@ -888,113 +889,236 @@ public class Populator extends TreeWalkerVisitor {
 
         String resultQual;
         String callSrcModule;
-        PosSymbol newCallQual = new PosSymbol();
 
+        PosSymbol newCallQual = new PosSymbol();
         List<ProgramExp> args = data.getArguments();
         List<PTType> argTypes = new LinkedList<PTType>();
 
         if (data.getQualifier() == null) {
-
+            System.out.println("Non-Qualified call: "
+                    + data.getName().getName());
             try {
 
                 // Note: Since we can assume for the time being that no two 
                 // facilities imported by some client module share an 
                 // operation with the same name, we can safely queryForOne
-                // NameAndEntryType to find the call's corresponding operation.
+                // with a NameQuery to find the call's corresponding operation.
 
                 // Find the call stmt's corresponding operation entry
-                OperationEntry matchingOp =
+                OperationEntry matchOp =
                         myBuilder.getInnermostActiveScope().queryForOne(
-                                new NameAndEntryTypeQuery(null, data.getName(),
-                                        OperationEntry.class,
+                                new NameQuery(null, data.getName(),
                                         ImportStrategy.IMPORT_NAMED,
                                         FacilityStrategy.FACILITY_INSTANTIATE,
                                         false)).toOperationEntry(
                                 data.getLocation());
-
-                System.out.println("GETSHERE");
-                //  callSrcModule =
-                //          matchingOp.getSourceModuleIdentifier().toString();
+                callSrcModule = matchOp.getSourceModuleIdentifier().toString();
 
                 // If the call's corresponding operation isn't defined 
                 // in local namespace then we have work to do. Otherwise stop.
-                /*       if (!(callSrcModule.equals(myBuilder.getInnermostActiveScope()
-                               .getRootModule().toString()))) {
+                if (!(callSrcModule.equals(myBuilder.getInnermostActiveScope()
+                        .getRootModule().toString()))) {
 
-                           // Retrieve all programtypedefs? 
-                           ProgramTypeDefinitionEntry ptde =
-                                   myBuilder
-                                           .getModuleScope(
-                                                   matchingOp
-                                                           .getSourceModuleIdentifier())
-                                           .queryForOne(
-                                                   new EntryTypeQuery(
-                                                           ProgramTypeDefinitionEntry.class,
-                                                           ImportStrategy.IMPORT_NONE,
-                                                           FacilityStrategy.FACILITY_IGNORE))
-                                           .toProgramTypeDefinitionEntry(null);
+                    // Retrieve all programtypedefs? 
 
-                           // If the type family of the module where the call's
-                           // corresponding op is declared does not appear as 
-                           // a type in the call's args, then don't attempt ADL 
-                           // qualification.
-                           //if (!(argTypes.  contains(ptde.getProgramType()))) {
-                           //         throw new SourceErrorException(
-                           //                 "Ambiguous call. Needs qualification", data
-                           //                         .getLocation());
-                           //     }
+                    ProgramTypeDefinitionEntry ptde =
+                            myBuilder
+                                    .getModuleScope(
+                                            matchOp.getSourceModuleIdentifier())
+                                    .queryForOne(
+                                            new EntryTypeQuery(
+                                                    ProgramTypeDefinitionEntry.class,
+                                                    ImportStrategy.IMPORT_NONE,
+                                                    FacilityStrategy.FACILITY_IGNORE))
+                                    .toProgramTypeDefinitionEntry(null);
 
-                           for (ProgramExp arg : args) {
+                    // TODO : throw ambiguous call if #ptde's in args > 1 or
+                    // #ptde's in args < 1.
 
-                               if (arg instanceof VariableDotExp) {
+                    for (ProgramExp arg : args) {
 
-                               }
-                               else if (arg instanceof ProgramOpExp) {
-                                   ProgramOpExp opExp = ((ProgramOpExp) arg);
-                                   String spec = opExp.getStringProgramType();
+                        if (arg instanceof VariableDotExp) {
+                            VariableDotExp dotExp = ((VariableDotExp) arg);
+                            // For now I assume X.X.X cannot happen. No more than two.
+                            String firstPos =
+                                    dotExp.getSegments().get(0).toString();
+                            String secondPos =
+                                    dotExp.getSegments().get(1).toString();
 
-                                   if (callSrcModule.equals(spec)) {
-                                       resultQual = getTypeFacility(callSrcModule);
-                                       newCallQual
-                                               .setSymbol(Symbol.symbol(resultQual));
-                                       data.setQualifier(newCallQual);
-                                       break;
-                                   }
-                               }
-                               else if (arg instanceof VariableExp) {
-                                   ProgramQualifiedEntry pqe =
-                                           myBuilder
-                                                   .getInnermostActiveScope()
-                                                   .queryForOne(
-                                                           new NameQuery(
-                                                                   null,
-                                                                   arg.toString(),
-                                                                   ImportStrategy.IMPORT_NAMED,
-                                                                   FacilityStrategy.FACILITY_INSTANTIATE,
-                                                                   true))
-                                                   .toProgramQualifiedEntry(
-                                                           arg.getLocation());
+                            ProgramQualifiedEntry pqe =
+                                    myBuilder
+                                            .getInnermostActiveScope()
+                                            .queryForOne(
+                                                    new NameQuery(
+                                                            null,
+                                                            firstPos,
+                                                            ImportStrategy.IMPORT_NONE,
+                                                            FacilityStrategy.FACILITY_IGNORE,
+                                                            true))
+                                            .toProgramQualifiedEntry(
+                                                    arg.getLocation());
 
-                                   // If pqe.getSpec == "" then it is something 
-                                   // lacking a sensible qualifier (i.e. a generic)
-                                   if (!(pqe.getSpecification().equals(""))) {
-                                       if (pqe.getSpecification()
-                                               .equals(callSrcModule)) {
+                            try {
+                                String repName =
+                                        ((PTRepresentation) pqe
+                                                .getProgramType())
+                                                .getFamilyName();
 
-                                           newCallQual.setSymbol(Symbol.symbol(pqe
-                                                   .getQualifier()));
-                                           data.setQualifier(newCallQual);
-                                           break;
-                                       }
-                                   }
-                               }
-                               else {
-                                   throw new SourceErrorException(
-                                           "Ambiguous call. Needs qualification", data
-                                                   .getLocation());
-                               }
-                           }
-                       }*/
+                                RepresentationTypeEntry rte =
+                                        myBuilder
+                                                .getInnermostActiveScope()
+                                                .queryForOne(
+                                                        new NameQuery(
+                                                                null,
+                                                                repName,
+                                                                ImportStrategy.IMPORT_NAMED,
+                                                                FacilityStrategy.FACILITY_INSTANTIATE,
+                                                                true))
+                                                .toRepresentationTypeEntry(null);
+                                ProgramQualifiedEntry repField =
+                                        myBuilder
+                                                .getScope(
+                                                        rte
+                                                                .getDefiningElement())
+                                                .queryForOne(
+                                                        new NameQuery(
+                                                                null,
+                                                                secondPos,
+                                                                ImportStrategy.IMPORT_NONE,
+                                                                FacilityStrategy.FACILITY_IGNORE,
+                                                                true))
+                                                .toProgramQualifiedEntry(null);
+
+                                if (!(repField.getSpecification().equals(""))) {
+                                    if (repField.getSpecification().equals(
+                                            callSrcModule)) {
+
+                                        newCallQual
+                                                .setSymbol(Symbol
+                                                        .symbol(repField
+                                                                .getQualifier()));
+                                        data.setQualifier(newCallQual);
+                                        break;
+                                    }
+                                }
+
+                            }
+                            catch (ClassCastException cce) {
+                                throw new RuntimeException(cce);
+                            }
+
+                            //	ResolveConceptualElement rce = pqe.getDefiningElement();
+                            //	if (rce instanceof ParameterVarDec) {
+                            //		NameTy repName = ((ParameterVarDec) rce).getTy();
+                            //	}
+
+                        }
+                        else if (arg instanceof ProgramOpExp) {
+                            ProgramOpExp opExp = ((ProgramOpExp) arg);
+                            String spec = opExp.getStringProgramType();
+
+                            if (callSrcModule.equals(spec)) {
+                                resultQual = getTypeFacility(callSrcModule);
+                                newCallQual
+                                        .setSymbol(Symbol.symbol(resultQual));
+                                data.setQualifier(newCallQual);
+                                break;
+                            }
+
+                            System.out.println("argument: " + arg.toString()
+                                    + "  is a: ProgramOpExp");
+                        }
+
+                        else if (arg instanceof VariableExp) {
+                            System.out.println("argument: " + arg.toString()
+                                    + "  is a: VariableExp");
+
+                            ProgramQualifiedEntry pqe =
+                                    myBuilder
+                                            .getInnermostActiveScope()
+                                            .queryForOne(
+                                                    new NameQuery(
+                                                            null,
+                                                            arg.toString(),
+                                                            ImportStrategy.IMPORT_NAMED,
+                                                            FacilityStrategy.FACILITY_INSTANTIATE,
+                                                            true))
+                                            .toProgramQualifiedEntry(
+                                                    arg.getLocation());
+                            //System.out.println("HERE2");
+
+                            // If pqe.getSpec == "" then it is something 
+                            // lacking a sensible qualifier (i.e. a generic)
+                            if (!(pqe.getSpecification().equals(""))) {
+                                if (pqe.getSpecification()
+                                        .equals(callSrcModule)) {
+
+                                    newCallQual.setSymbol(Symbol.symbol(pqe
+                                            .getQualifier()));
+                                    data.setQualifier(newCallQual);
+                                    break;
+                                }
+                            }
+                        }
+                        else if (arg instanceof ProgramCharExp) {
+                            System.out.println("argument: " + arg.toString()
+                                    + "  is a: ProgramCharExp");
+                        }
+                        else if (arg instanceof ProgramDotExp) {
+                            System.out.println("argument: " + arg.toString()
+                                    + "  is a: ProgramDotExp");
+                        }
+                        else if (arg instanceof ProgramDoubleExp) {
+                            System.out.println("argument: " + arg.toString()
+                                    + "  is a: ProgramDoubleExp");
+                        }
+                        else if (arg instanceof ProgramFunctionExp) {
+                            System.out.println("argument: " + arg.toString()
+                                    + "  is a: ProgramFunctionExp");
+                        }
+                        else if (arg instanceof ProgramIntegerExp) {
+                            System.out.println("argument: " + arg.toString()
+                                    + "  is a: ProgramIntegerExp");
+                        }
+                        else if (arg instanceof ProgramParamExp) {
+                            PTType type = arg.getProgramType();
+
+                            if (callSrcModule.equals(getSpecification(type
+                                    .toString()))) {
+                                resultQual = getTypeFacility(callSrcModule);
+                                newCallQual
+                                        .setSymbol(Symbol.symbol(resultQual));
+                                data.setQualifier(newCallQual);
+                                break;
+                            }
+                        }
+                        else if (arg instanceof ProgramStringExp) {
+                            System.out.println("argument: " + arg.toString()
+                                    + "  is a: ProgramStringExp");
+                        }
+                        else if (arg instanceof VariableArrayExp) {
+                            System.out.println("argument: " + arg.toString()
+                                    + "  is a: ProgramArrayExp");
+                        }
+                        else if (arg instanceof VariableDotExp) {
+                            System.out.println("argument: " + arg.toString()
+                                    + "  is a: VariableDotExp");
+                        }
+                        else if (arg instanceof VariableNameExp) {
+                            System.out.println("argument: " + arg.toString()
+                                    + "  is a: VariableNameExp");
+                        }
+                        else if (arg instanceof VariableRecordExp) {
+                            System.out.println("argument: " + arg.toString()
+                                    + "  is a: VariableRecordExp");
+                        }
+                        else {
+                            throw new SourceErrorException(
+                                    "Ambiguous call. Needs qualification", data
+                                            .getLocation());
+                        }
+                    }
+                }
             }
             catch (NoSuchSymbolException nsse) {
                 noSuchSymbol(data.getQualifier(), data.getName().getName(),
@@ -1148,7 +1272,6 @@ public class Populator extends TreeWalkerVisitor {
         MTType mathTypeValue = programVar.getTy().getMathTypeValue();
         String varName = programVar.getName().getName();
         programVar.setMathType(mathTypeValue);
-
         String varQual;
         String varSpec;
         if (!(programVar.getTy().getProgramTypeValue() instanceof PTRepresentation || programVar
@@ -2270,6 +2393,7 @@ public class Populator extends TreeWalkerVisitor {
         String searchStr = t.getProgramTypeValue().toString();
         ModuleIdentifier result;
         try {
+
             ProgramTypeEntry type =
                     myBuilder
                             .getInnermostActiveScope()

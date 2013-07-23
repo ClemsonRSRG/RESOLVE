@@ -20,22 +20,26 @@ public class ProgramQualifiedEntry extends SymbolTableEntry {
     private String myName;
     private String myQualifier;
     private String mySpecification;
-
-    // private final PTType myType;
+    private final PTType myType;
 
     public ProgramQualifiedEntry(String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, String spec, String qualifier) {
+            ModuleIdentifier sourceModule, String spec, String qualifier,
+            PTType type) {
         super(name, definingElement, sourceModule);
 
         myName = name;
         myQualifier = qualifier;
         mySpecification = spec;
-        // myType = type;
+        myType = type;
     }
 
     public ProgramQualifiedEntry toProgramQualifiedSymbolEntry(Location l) {
         return this;
+    }
+
+    public PTType getProgramType() {
+        return myType;
     }
 
     @Override
@@ -58,8 +62,22 @@ public class ProgramQualifiedEntry extends SymbolTableEntry {
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
 
-        return new ProgramQualifiedEntry(getName(), getDefiningElement(),
-                getSourceModuleIdentifier(), getName(), getName());
+        SymbolTableEntry result;
+        PTType instantiatedType =
+                myType.instantiateGenerics(genericInstantiations,
+                        instantiatingFacility);
+
+        if (instantiatedType != myType) {
+            result =
+                    new ProgramQualifiedEntry(getName(), getDefiningElement(),
+                            getSourceModuleIdentifier(), getName(), getName(),
+                            instantiatedType);
+        }
+        else {
+            result = this;
+        }
+
+        return result;
         /*    SymbolTableEntry result;
 
             PTType instantiatedType =

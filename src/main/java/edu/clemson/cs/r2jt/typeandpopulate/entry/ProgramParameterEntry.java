@@ -146,7 +146,7 @@ public class ProgramParameterEntry extends SymbolTableEntry {
 
         myProgramQualifiedAlterEgo =
                 new ProgramQualifiedEntry(getName(), getDefiningElement(),
-                        getSourceModuleIdentifier(), spec, qual);
+                        getSourceModuleIdentifier(), spec, qual, type);
     }
 
     @Override
