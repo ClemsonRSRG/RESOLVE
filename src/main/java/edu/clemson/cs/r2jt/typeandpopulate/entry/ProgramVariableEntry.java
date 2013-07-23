@@ -19,8 +19,8 @@ public class ProgramVariableEntry extends SymbolTableEntry {
 
     public ProgramVariableEntry(String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, ModuleIdentifier typeSpec,
-            PTType type, String typeQualifier) {
+            ModuleIdentifier sourceModule, String typeSpec, PTType type,
+            String typeQualifier) {
         super(name, definingElement, sourceModule);
         myName = name;
         myType = type;
@@ -61,9 +61,8 @@ public class ProgramVariableEntry extends SymbolTableEntry {
         if (instantiatedType != myType) {
             result =
                     new ProgramVariableEntry(getName(), getDefiningElement(),
-                            getSourceModuleIdentifier(),
-                            getSourceModuleIdentifier(), instantiatedType,
-                            getName());
+                            getSourceModuleIdentifier(), getName(),
+                            instantiatedType, getName());
         }
         else {
             result = this;

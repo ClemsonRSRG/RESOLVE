@@ -29,7 +29,7 @@ public class Formatter {
         StringBuilder formattedCode = new StringBuilder();
         code = normalizeWhitespace(code);
 
-        // You could also use positive regex lookaheads: (?=;)
+        // You could also use positive regex lookaheads (i.e.: ?=;)
         String[] curSplit = code.split("(?<=;)|(?<=\\{)|(?<=\\})");
         Deque<String> tabStack = new LinkedList<String>();
 

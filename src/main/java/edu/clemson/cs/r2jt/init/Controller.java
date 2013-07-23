@@ -1714,20 +1714,22 @@ public class Controller {
     private void translateModuleDec(File file, ScopeRepository realTable,
             ModuleDec dec) {
 
-        try {
-            ModuleScope scope =
-                    realTable.getModuleScope(new ModuleIdentifier(dec));
-            JavaTranslator javaT =
-                    new JavaTranslator(myInstanceEnvironment, scope, dec, err);
+        //  try {
+        //   ModuleScope scope =
+        //           realTable.getModuleScope(new ModuleIdentifier(dec));
+        JavaTranslator javaT =
+                new JavaTranslator(myInstanceEnvironment, dec, err);
+        // JavaTranslator javaT =
+        //          new JavaTranslator(myInstanceEnvironment, realTable, dec, err);
 
-            TreeWalker tw = new TreeWalker(javaT);
-            tw.visit(dec);
-            javaT.outputCode(file);
-        }
-        catch (NoSuchSymbolException nsse) {
-            //Can't find the module we're in.  Shouldn't be possible.
-            throw new RuntimeException(nsse);
-        }
+        TreeWalker tw = new TreeWalker(javaT);
+        tw.visit(dec);
+        javaT.outputCode(file);
+        /*   }
+           catch (NoSuchSymbolException nsse) {
+               //Can't find the module we're in.  Shouldn't be possible.
+               throw new RuntimeException(nsse);
+           }*/
     }
 
     private void translatePrettyModuleDec(File file, OldSymbolTable table,

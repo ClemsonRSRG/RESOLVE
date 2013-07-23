@@ -1916,6 +1916,7 @@ public class Translator extends ResolveConceptualVisitor {
         else {
             ProgramExpTypeResolver resolver =
                     new ProgramExpTypeResolver(table, myInstanceEnvironment);
+
             Location loc =
                     (stmt.getQualifier() == null) ? stmt.getName()
                             .getLocation() : stmt.getQualifier().getLocation();

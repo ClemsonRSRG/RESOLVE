@@ -77,8 +77,8 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public ProgramVariableEntry addProgramVariable(String name,
-            ResolveConceptualElement definingElement, ModuleIdentifier spec,
-            PTType type, String varQualifier) throws DuplicateSymbolException {
+            ResolveConceptualElement definingElement, String spec, PTType type,
+            String varQualifier) throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, type);
 
@@ -210,7 +210,7 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public ProgramParameterEntry addFormalParameter(String name,
-            ResolveConceptualElement definingElement, ModuleIdentifier spec,
+            ResolveConceptualElement definingElement, String spec,
             ParameterMode mode, PTType type, String varQualifier)
             throws DuplicateSymbolException {
 

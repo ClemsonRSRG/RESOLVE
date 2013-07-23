@@ -120,7 +120,7 @@ public class ProgramParameterEntry extends SymbolTableEntry {
 
     public ProgramParameterEntry(TypeGraph g, String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, ModuleIdentifier spec, PTType type,
+            ModuleIdentifier sourceModule, String spec, PTType type,
             ParameterMode mode, String qual) {
         super(name, definingElement, sourceModule);
 
@@ -208,11 +208,9 @@ public class ProgramParameterEntry extends SymbolTableEntry {
             FacilityEntry instantiatingFacility) {
 
         return new ProgramParameterEntry(myTypeGraph, getName(),
-                getDefiningElement(), getSourceModuleIdentifier(),
-                getSourceModuleIdentifier(), myDeclaredType
-                        .instantiateGenerics(genericInstantiations,
-                                instantiatingFacility), myPassingMode,
-                getName());
+                getDefiningElement(), getSourceModuleIdentifier(), getName(),
+                myDeclaredType.instantiateGenerics(genericInstantiations,
+                        instantiatingFacility), myPassingMode, getName());
     }
 
     @Override

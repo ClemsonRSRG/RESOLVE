@@ -20,8 +20,6 @@ public abstract class PTType {
 
     public abstract MTType toMath();
 
-    // public abstract String toQualifier(); ???
-
     public abstract PTType instantiateGenerics(
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility);

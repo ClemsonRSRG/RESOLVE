@@ -19,14 +19,13 @@ public class ProgramQualifiedEntry extends SymbolTableEntry {
 
     private String myName;
     private String myQualifier;
-    private ModuleIdentifier mySpecification;
+    private String mySpecification;
 
     // private final PTType myType;
 
     public ProgramQualifiedEntry(String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, ModuleIdentifier spec,
-            String qualifier) {
+            ModuleIdentifier sourceModule, String spec, String qualifier) {
         super(name, definingElement, sourceModule);
 
         myName = name;
@@ -60,8 +59,7 @@ public class ProgramQualifiedEntry extends SymbolTableEntry {
             FacilityEntry instantiatingFacility) {
 
         return new ProgramQualifiedEntry(getName(), getDefiningElement(),
-                getSourceModuleIdentifier(), getSourceModuleIdentifier(),
-                getName());
+                getSourceModuleIdentifier(), getName(), getName());
         /*    SymbolTableEntry result;
 
             PTType instantiatedType =
