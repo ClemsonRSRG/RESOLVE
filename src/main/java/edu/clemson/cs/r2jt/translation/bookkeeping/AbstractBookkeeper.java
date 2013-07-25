@@ -46,6 +46,7 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
 
         importList = new ArrayList();
         functionList = new ArrayList();
+        facilityList = new ArrayList();
     }
 
     /**
@@ -84,8 +85,18 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
     }
 
     @Override
+    public boolean facEnhanceIsOpen() {
+        return currentFacility.currentEnhance != null;
+    }
+
+    @Override
     public void facAddEnhanceParam(String parameter) {
         currentFacility.currentEnhance.parameterList.add(parameter);
+    }
+
+    @Override
+    public void facEnhanceEnd() {
+        currentFacility.currentEnhance = null;
     }
 
     @Override
@@ -200,6 +211,7 @@ abstract class FacilityDeclBook {
         FacilityDeclEnhance(String newEnhance, String realiz) {
             myName = newEnhance;
             myRealiz = realiz;
+            parameterList = new ArrayList();
         }
     }
 

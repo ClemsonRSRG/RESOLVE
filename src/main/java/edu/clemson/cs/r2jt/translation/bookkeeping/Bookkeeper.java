@@ -45,6 +45,10 @@ public interface Bookkeeper {
 
     public void facAddEnhanceParam(String parameter);
 
+    public boolean facEnhanceIsOpen();
+
+    public void facEnhanceEnd();
+
     public void facEnd();
 
     /* End FacilityDeclBook Methods */

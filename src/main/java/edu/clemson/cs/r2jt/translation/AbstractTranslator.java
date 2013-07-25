@@ -5,18 +5,7 @@
 package edu.clemson.cs.r2jt.translation;
 
 import edu.clemson.cs.r2jt.ResolveCompiler;
-import edu.clemson.cs.r2jt.absyn.CallStmt;
-import edu.clemson.cs.r2jt.absyn.FacilityModuleDec;
-import edu.clemson.cs.r2jt.absyn.FacilityOperationDec;
-import edu.clemson.cs.r2jt.absyn.ModuleDec;
-import edu.clemson.cs.r2jt.absyn.NameTy;
-import edu.clemson.cs.r2jt.absyn.OperationDec;
-import edu.clemson.cs.r2jt.absyn.ParameterVarDec;
-import edu.clemson.cs.r2jt.absyn.ProcedureDec;
-import edu.clemson.cs.r2jt.absyn.ProgramExp;
-import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
-import edu.clemson.cs.r2jt.absyn.VarDec;
-import edu.clemson.cs.r2jt.absyn.VariableDotExp;
+import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.PosSymbol;
@@ -40,8 +29,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,10 +71,11 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
         if (stmt.getQualifier() != null) {
             callQualifier = stmt.getQualifier().getName();
-            callString = callQualifier + qualifyingSymbol + stmt.toString();
+            callString =
+                    callQualifier + qualifyingSymbol + stmt.getName().getName();
         }
         else {
-            callString = stmt.toString();
+            callString = stmt.getName().getName();
         }
         myBookkeeper.fxnAppendTo(callString + "(");
     }
@@ -100,9 +88,88 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         }
     }
 
+    @Override
+    public void postCallStmt(CallStmt stmt) {
+        myBookkeeper.fxnAppendTo(");");
+    }
+
+    @Override
+    public void preIfStmt(IfStmt stmt) {
+        myBookkeeper.fxnAppendTo("if(");
+    }
+
+    @Override
+    public void preIfStmtThenclause(IfStmt stmt) {
+        myBookkeeper.fxnAppendTo("){");
+    }
+
+    @Override
+    public void postIfStmtThenclause(IfStmt node) {
+        myBookkeeper.fxnAppendTo("}");
+    }
+
+    @Override
+    public void preWhileStmt(WhileStmt stmt) {
+        myBookkeeper.fxnAppendTo("while(");
+    }
+
+    @Override
+    public void preWhileStmtStatements(WhileStmt stmt) {
+        myBookkeeper.fxnAppendTo("){");
+    }
+
+    @Override
+    public void postWhileStmt(WhileStmt stmt) {
+        myBookkeeper.fxnAppendTo("}");
+    }
+
     /* End Visit Statements */
 
     /* Visit Declarations */
+
+    //For Facilities
+    @Override
+    public void preFacilityDec(FacilityDec dec) {
+        myBookkeeper.facAdd(dec.getName().getName(), dec.getConceptName()
+                .getName(), dec.getBodyName().getName());
+    }
+
+    @Override
+    public void preEnhancementBodyItem(EnhancementBodyItem item) {
+        myBookkeeper.facAddEnhance(item.getName().getName(), item.getBodyName()
+                .getName());
+    }
+
+    @Override
+    public void preModuleArgumentItem(ModuleArgumentItem item) {
+        String param = "CONSTANTTYPENEEDSLANGUAGESPECIFIC";
+        if (item.getName() != null) {
+            if (item.getQualifier() != null) {
+                param = item.getQualifier() + " . " + item.getName().getName(); //qual
+            }
+            else {
+                param = "UNQUALIFIED." + item.getName().getName();
+            }
+        }
+        if (myBookkeeper.facEnhanceIsOpen()) {
+            myBookkeeper.facAddEnhanceParam(param);
+        }
+        else {
+            myBookkeeper.facAddParam(param);
+        }
+    }
+
+    @Override
+    public void postEnhancementBodyItem(EnhancementBodyItem item) {
+        myBookkeeper.facEnhanceEnd();
+    }
+
+    @Override
+    public void postFacilityDec(FacilityDec dec) {
+        myBookkeeper.facEnd();
+    }
+
+    //End Facilities
 
     @Override
     public void preFacilityOperationDec(FacilityOperationDec dec) {

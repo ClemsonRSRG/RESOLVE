@@ -37,6 +37,7 @@ public class CTranslator extends AbstractTranslator {
 
     /* Visitor Methods */
 
+    /* Visit the DECS!!!! */
     public void preModuleDec(ModuleDec dec) {
         if (dec instanceof FacilityModuleDec) {
             String facName = dec.getName().toString();
@@ -56,26 +57,23 @@ public class CTranslator extends AbstractTranslator {
                 + facName + qualifyingSymbol + varType + ");");
     }
 
+    //Operation/Procedures
     @Override
     public void preParameterVarDec(ParameterVarDec dec) {
         String varName = dec.getName().getName();
 
-        String facName = getTypeFacility((NameTy) dec.getTy());
+        //String facName = getTypeFacility((NameTy) dec.getTy());
+        //I don't need type information >,>
         myBookkeeper.fxnAddParam("r_type_ptr " + varName);
     }
 
     @Override
     public void postProcedureDecParameters(ProcedureDec dec) {
         int i = 0;
-        ResolveConceptualElement a = this.getParent();
-        ModuleDec myMod = (ModuleDec) a;
+        ResolveConceptualElement a;
         String b;
-        for (; i < this.getAncestorSize(); i++) {
-            a = this.getAncestor(i);
-            if (a instanceof ModuleDec) {
-                break;
-            }
-        }
+        a = getAncestorMatchingClass(dec, ModuleDec.class);
+        ModuleDec myMod = (ModuleDec) a;
         myBookkeeper.fxnAddParam(", " + getConceptName(myMod) + " _thisFac");
     }
 
@@ -83,6 +81,35 @@ public class CTranslator extends AbstractTranslator {
     public void postFacilityOperationDecParameters(FacilityOperationDec dec) {
     //may need you later, shhhh
     }
+
+    //Facility Decs
+    @Override
+    public void preModuleArgumentItem(ModuleArgumentItem item) {
+        String param = "";
+        if (item.getName() == null) {
+            if (item.getEvalExp() instanceof ProgramIntegerExp) {
+                param =
+                        "Std_Integer_Fac->CreateIntFromConstant("
+                                + item.getEvalExp().toString() + ")";
+            }
+            else if (item.getEvalExp() instanceof ProgramCharExp) {
+                param =
+                        "Std_Character_Fac->CreateCharFromConstant('"
+                                + item.getEvalExp().toString() + "')";
+            }
+            if (myBookkeeper.facEnhanceIsOpen()) {
+                myBookkeeper.facAddEnhanceParam(param);
+            }
+            else {
+                myBookkeeper.facAddParam(param);
+            }
+        }
+        else {
+            super.preModuleArgumentItem(item);
+        }
+    }
+
+    /* End of Dec visits!!! */
 
     // Helper Functions
     protected String getConceptName(ModuleDec dec) {
@@ -99,7 +126,20 @@ public class CTranslator extends AbstractTranslator {
             return ((EnhancementModuleDec) dec).getConceptName().getName();
         }
         else {
-            return "FIND PROPER ERROR TO THROW";
+            throw new RuntimeException("Module does not have a Concept: "
+                    + dec.toString());
         }
+    }
+
+    protected ResolveConceptualElement getAncestorMatchingClass(
+            ResolveConceptualElement element, Class ancClass) {
+        ResolveConceptualElement a;
+        for (int i = 0; i < this.getAncestorSize(); i++) {
+            a = this.getAncestor(i);
+            if (ancClass.isInstance(a)) {
+                return a;
+            }
+        }
+        return null;
     }
 }

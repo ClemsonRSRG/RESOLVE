@@ -19,7 +19,7 @@ public class CBookkeeper extends AbstractBookkeeper {
 
     protected String conceptName;
 
-    /*C SPECIFIC CALLS */
+    /*C SPECIFIC HELPERS */
     public void setConceptName(String name) {
         conceptName = name;
     }
@@ -32,9 +32,14 @@ public class CBookkeeper extends AbstractBookkeeper {
         super(name, isRealiz);
     }
 
+    /* End C SPECIFIC HELPERS */
+
     @Override
     public void facAdd(String name, String concept, String realiz) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        FacilityDeclBook f;
+        f = new CFacilityDeclBook(name, concept, realiz);
+        facilityList.add(f);
+        currentFacility = f;
     }
 
     /* FunctionBook Adders */
@@ -52,6 +57,19 @@ public class CBookkeeper extends AbstractBookkeeper {
         return "empty";
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+}
+
+class CFacilityDeclBook extends FacilityDeclBook {
+
+    CFacilityDeclBook(String name, String concept, String realiz) {
+        super(name, concept, realiz);
+    }
+
+    @Override
+    String getString() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }
 
 class CFunctionBook extends FunctionBook {
