@@ -13,7 +13,7 @@ import edu.clemson.cs.r2jt.absyn.*;
  *
  * @author Welch D and Mark T
  */
-public class CTranslator extends AbstractTranslator {
+public class CTranslator extends Translator {
 
     private static final String FLAG_SECTION_NAME = "C Translation";
     private static final String FLAG_DESC_TRANSLATE =
@@ -31,7 +31,7 @@ public class CTranslator extends AbstractTranslator {
     public CTranslator(CompileEnvironment env, ModuleScope scope,
             ModuleDec dec, ErrorHandler err) {
         super(env, scope, dec, err);
-        qualifyingSymbol = "->";
+        qualSymbol = "->";
         File srcFile = dec.getName().getFile();
     }
 
@@ -53,8 +53,8 @@ public class CTranslator extends AbstractTranslator {
         String facName = getTypeFacility((NameTy) dec.getTy());
         //String conceptName = getTypeConceptName(facName);
         myBookkeeper.fxnAddVarDecl("r_type_ptr " + varName + " = " + facName
-                + qualifyingSymbol + varType + qualifyingSymbol + "init("
-                + facName + qualifyingSymbol + varType + ");");
+                + qualSymbol + varType + qualSymbol + "init("
+                + facName + qualSymbol + varType + ");");
     }
 
     //Operation/Procedures

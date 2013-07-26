@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.clemson.cs.r2jt.translation.bookkeeping;
 
 import edu.clemson.cs.r2jt.translation.bookkeeping.FacilityDeclBook.FacilityDeclEnhance;
@@ -18,8 +14,7 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
     FunctionBook currentFunction;
     FacilityDeclBook currentFacility;
     /**
-     * Name of the module we are translating (e.g., 'Stack_Template,'
-     * 'Int_Do_Nothing,' etc).
+	 * <p>Name of the module currently undergoing translation.</p>		
      */
     String moduleName;
 

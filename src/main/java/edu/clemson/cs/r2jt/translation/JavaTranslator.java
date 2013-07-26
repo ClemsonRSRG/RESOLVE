@@ -1,19 +1,13 @@
 package edu.clemson.cs.r2jt.translation;
 
-import edu.clemson.cs.r2jt.compilereport.CompileReport;
-import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 import edu.clemson.cs.r2jt.translation.bookkeeping.*;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
-import edu.clemson.cs.r2jt.archiving.Archiver;
-import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 
-import java.io.File;
-
-public class JavaTranslator extends AbstractTranslator {
+public class JavaTranslator extends Translator {
 
     private static final String FLAG_SECTION_NAME = "Translation";
     private static final String FLAG_DESC_TRANSLATE =
@@ -28,25 +22,26 @@ public class JavaTranslator extends AbstractTranslator {
             new Flag(FLAG_SECTION_NAME, "javaTranslateClean",
                     FLAG_DESC_TRANSLATE_CLEAN);
 
-    public JavaTranslator(CompileEnvironment env, ModuleScope scope, ModuleDec dec, 
-            ErrorHandler err) {
+    public JavaTranslator(CompileEnvironment env, ModuleScope scope,
+            ModuleDec dec, ErrorHandler err) {
 
         super(env, scope, dec, err);
-        qualifyingSymbol = ".";
+        qualSymbol = ".";
     }
 
-    //-------------------------------------------------------------------
+    // -----------------------------------------------------------
     //   Visitor methods
-    //-------------------------------------------------------------------
+    // -----------------------------------------------------------
 
     @Override
     public void preModuleDec(ModuleDec node) {
-        JavaTranslator.emitDebug("---------------------------------\n"
+        JavaTranslator.emitDebug("-----------------------------\n"
                 + "Translate module: " + node.getName().getName()
-                + "\n---------------------------------");
+                + "\n-----------------------------");
+
+        String moduleName = node.getName().toString();
         if (node instanceof FacilityModuleDec) {
-            String facName = node.getName().toString();
-            myBookkeeper = new JavaFacilityBookkeeper(facName, true);
+            myBookkeeper = new JavaFacilityBookkeeper(moduleName, true);
         }
     }
 }
