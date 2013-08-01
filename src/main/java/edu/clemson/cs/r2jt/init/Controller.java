@@ -1721,9 +1721,9 @@ public class Controller {
                     new JavaTranslator(myInstanceEnvironment, scope, dec, err);
             CTranslator cT =
                     new CTranslator(myInstanceEnvironment, scope, dec, err);
-            TreeWalker tw = new TreeWalker(cT);
+            TreeWalker tw = new TreeWalker(javaT);
             tw.visit(dec);
-            cT.outputCode(file);
+            javaT.outputCode(file);
         }
         catch (NoSuchSymbolException nsse) {
             //Can't find the module we're in.  Shouldn't be possible.

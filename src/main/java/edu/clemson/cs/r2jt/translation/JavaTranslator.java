@@ -7,7 +7,7 @@ import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.absyn.*;
 
-public class JavaTranslator extends Translator {
+public class JavaTranslator extends AbstractTranslator {
 
     private static final String FLAG_SECTION_NAME = "Translation";
     private static final String FLAG_DESC_TRANSLATE =
@@ -26,7 +26,7 @@ public class JavaTranslator extends Translator {
             ModuleDec dec, ErrorHandler err) {
 
         super(env, scope, dec, err);
-        qualSymbol = ".";
+        myQualSymbol = ".";
     }
 
     // -----------------------------------------------------------
@@ -40,6 +40,7 @@ public class JavaTranslator extends Translator {
                 + "\n-----------------------------");
 
         String moduleName = node.getName().toString();
+
         if (node instanceof FacilityModuleDec) {
             myBookkeeper = new JavaFacilityBookkeeper(moduleName, true);
         }

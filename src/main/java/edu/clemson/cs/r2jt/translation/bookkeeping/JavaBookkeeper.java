@@ -18,7 +18,7 @@ public class JavaBookkeeper extends AbstractBookkeeper {
 
     @Override
     public void facAdd(String name, String concept, String realiz) {
-        JavaFacilityDeclBook newFac;
+    //     JavaFacilityDeclBook newFac;
 
     }
 
@@ -26,7 +26,9 @@ public class JavaBookkeeper extends AbstractBookkeeper {
 
     @Override
     public void fxnAdd(String retType, String funcName) {
+
         FunctionBook f;
+
         f = new JavaFunctionBook(retType, funcName, isRealization);
         functionList.add(f);
         currentFunction = f;
@@ -50,21 +52,25 @@ class JavaFunctionBook extends FunctionBook {
      */
     @Override
     String getString() {
+
         StringBuilder finalFunc = new StringBuilder();
         finalFunc.append("public ").append(myReturnType).append(" ");
         finalFunc.append(myName).append("(");
 
-        for (int i = 0; i < parameterList.size(); i++) {
-            finalFunc.append(parameterList.get(i));
-            if (i != parameterList.size() - 1) {
+        for (int i = 0; i < myParameterList.size(); i++) {
+            finalFunc.append(myParameterList.get(i));
+            if (i != myParameterList.size() - 1) {
                 finalFunc.append(", ");
             }
         }
         if (hasBody) {
             finalFunc.append(") {");
 
-            if (allStmt != null) {
-                finalFunc.append(allStmt);
+            for (String s : myVarInitList) {
+                finalFunc.append(s);
+            }
+            if (myStmt != null) {
+                finalFunc.append(myStmt);
             }
             //  if (!returnType.equals("void ")) {
             //      finalFunc.append("return ").append(functionName);

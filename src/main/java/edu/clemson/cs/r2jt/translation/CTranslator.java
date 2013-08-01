@@ -13,7 +13,7 @@ import edu.clemson.cs.r2jt.absyn.*;
  *
  * @author Welch D and Mark T
  */
-public class CTranslator extends Translator {
+public class CTranslator extends AbstractTranslator {
 
     private static final String FLAG_SECTION_NAME = "C Translation";
     private static final String FLAG_DESC_TRANSLATE =
@@ -31,115 +31,114 @@ public class CTranslator extends Translator {
     public CTranslator(CompileEnvironment env, ModuleScope scope,
             ModuleDec dec, ErrorHandler err) {
         super(env, scope, dec, err);
-        qualSymbol = "->";
+        myQualSymbol = "->";
         File srcFile = dec.getName().getFile();
     }
 
     /* Visitor Methods */
 
     /* Visit the DECS!!!! */
-    public void preModuleDec(ModuleDec dec) {
-        if (dec instanceof FacilityModuleDec) {
-            String facName = dec.getName().toString();
-            myBookkeeper = new CFacilityBookkeeper(facName, true);
-        }
-    }
+    /*  public void preModuleDec(ModuleDec dec) {
+          if (dec instanceof FacilityModuleDec) {
+              String facName = dec.getName().toString();
+              myBookkeeper = new CFacilityBookkeeper(facName, true);
+          }
+      }
 
-    @Override
-    public void preVarDec(VarDec dec) {
-        String varName = dec.getName().getName();
-        String varType = ((NameTy) dec.getTy()).toString(0);
+      @Override
+      public void preVarDec(VarDec dec) {
+          String varName = dec.getName().getName();
+          String varType = ((NameTy) dec.getTy()).toString(0);
 
-        String facName = getTypeFacility((NameTy) dec.getTy());
-        //String conceptName = getTypeConceptName(facName);
-        myBookkeeper.fxnAddVarDecl("r_type_ptr " + varName + " = " + facName
-                + qualSymbol + varType + qualSymbol + "init("
-                + facName + qualSymbol + varType + ");");
-    }
+          String facName = getTypeFacility((NameTy) dec.getTy());
+          //String conceptName = getTypeConceptName(facName);
+          myBookkeeper.fxnAddVarDecl("r_type_ptr " + varName + " = " + facName
+                  + qualSymbol + varType + qualSymbol + "init(" + facName
+                  + qualSymbol + varType + ");");
+      }
 
-    //Operation/Procedures
-    @Override
-    public void preParameterVarDec(ParameterVarDec dec) {
-        String varName = dec.getName().getName();
+      //Operation/Procedures
+      @Override
+      public void preParameterVarDec(ParameterVarDec dec) {
+          String varName = dec.getName().getName();
 
-        //String facName = getTypeFacility((NameTy) dec.getTy());
-        //I don't need type information >,>
-        myBookkeeper.fxnAddParam("r_type_ptr " + varName);
-    }
+          //String facName = getTypeFacility((NameTy) dec.getTy());
+          //I don't need type information >,>
+          myBookkeeper.fxnAddParam("r_type_ptr " + varName);
+      }
 
-    @Override
-    public void postProcedureDecParameters(ProcedureDec dec) {
-        int i = 0;
-        ResolveConceptualElement a;
-        String b;
-        a = getAncestorMatchingClass(dec, ModuleDec.class);
-        ModuleDec myMod = (ModuleDec) a;
-        myBookkeeper.fxnAddParam(", " + getConceptName(myMod) + " _thisFac");
-    }
+      @Override
+      public void postProcedureDecParameters(ProcedureDec dec) {
+          int i = 0;
+          ResolveConceptualElement a;
+          String b;
+          a = getAncestorMatchingClass(dec, ModuleDec.class);
+          ModuleDec myMod = (ModuleDec) a;
+          myBookkeeper.fxnAddParam(", " + getConceptName(myMod) + " _thisFac");
+      }
 
-    @Override
-    public void postFacilityOperationDecParameters(FacilityOperationDec dec) {
-    //may need you later, shhhh
-    }
+      @Override
+      public void postFacilityOperationDecParameters(FacilityOperationDec dec) {
+      //may need you later, shhhh
+      }
 
-    //Facility Decs
-    @Override
-    public void preModuleArgumentItem(ModuleArgumentItem item) {
-        String param = "";
-        if (item.getName() == null) {
-            if (item.getEvalExp() instanceof ProgramIntegerExp) {
-                param =
-                        "Std_Integer_Fac->CreateIntFromConstant("
-                                + item.getEvalExp().toString() + ")";
-            }
-            else if (item.getEvalExp() instanceof ProgramCharExp) {
-                param =
-                        "Std_Character_Fac->CreateCharFromConstant('"
-                                + item.getEvalExp().toString() + "')";
-            }
-            if (myBookkeeper.facEnhanceIsOpen()) {
-                myBookkeeper.facAddEnhanceParam(param);
-            }
-            else {
-                myBookkeeper.facAddParam(param);
-            }
-        }
-        else {
-            super.preModuleArgumentItem(item);
-        }
-    }
+      //Facility Decs
+      @Override
+      public void preModuleArgumentItem(ModuleArgumentItem item) {
+          String param = "";
+          if (item.getName() == null) {
+              if (item.getEvalExp() instanceof ProgramIntegerExp) {
+                  param =
+                          "Std_Integer_Fac->CreateIntFromConstant("
+                                  + item.getEvalExp().toString() + ")";
+              }
+              else if (item.getEvalExp() instanceof ProgramCharExp) {
+                  param =
+                          "Std_Character_Fac->CreateCharFromConstant('"
+                                  + item.getEvalExp().toString() + "')";
+              }
+              if (myBookkeeper.facEnhanceIsOpen()) {
+                  myBookkeeper.facAddEnhanceParam(param);
+              }
+              else {
+                  myBookkeeper.facAddParam(param);
+              }
+          }
+          else {
+              super.preModuleArgumentItem(item);
+          }
+      }
 
-    /* End of Dec visits!!! */
 
-    // Helper Functions
-    protected String getConceptName(ModuleDec dec) {
-        if (dec instanceof ConceptBodyModuleDec) {
-            return ((ConceptBodyModuleDec) dec).getConceptName().getName();
-        }
-        else if (dec instanceof EnhancementBodyModuleDec) {
-            return ((EnhancementBodyModuleDec) dec).getConceptName().getName();
-        }
-        else if (dec instanceof ConceptModuleDec) {
-            return ((ConceptModuleDec) dec).getName().getName();
-        }
-        else if (dec instanceof EnhancementModuleDec) {
-            return ((EnhancementModuleDec) dec).getConceptName().getName();
-        }
-        else {
-            throw new RuntimeException("Module does not have a Concept: "
-                    + dec.toString());
-        }
-    }
+      // Helper Functions
+      protected String getConceptName(ModuleDec dec) {
+          if (dec instanceof ConceptBodyModuleDec) {
+              return ((ConceptBodyModuleDec) dec).getConceptName().getName();
+          }
+          else if (dec instanceof EnhancementBodyModuleDec) {
+              return ((EnhancementBodyModuleDec) dec).getConceptName().getName();
+          }
+          else if (dec instanceof ConceptModuleDec) {
+              return ((ConceptModuleDec) dec).getName().getName();
+          }
+          else if (dec instanceof EnhancementModuleDec) {
+              return ((EnhancementModuleDec) dec).getConceptName().getName();
+          }
+          else {
+              throw new RuntimeException("Module does not have a Concept: "
+                      + dec.toString());
+          }
+      }
 
-    protected ResolveConceptualElement getAncestorMatchingClass(
-            ResolveConceptualElement element, Class ancClass) {
-        ResolveConceptualElement a;
-        for (int i = 0; i < this.getAncestorSize(); i++) {
-            a = this.getAncestor(i);
-            if (ancClass.isInstance(a)) {
-                return a;
-            }
-        }
-        return null;
-    }
+      protected ResolveConceptualElement getAncestorMatchingClass(
+              ResolveConceptualElement element, Class ancClass) {
+          ResolveConceptualElement a;
+          for (int i = 0; i < this.getAncestorSize(); i++) {
+              a = this.getAncestor(i);
+              if (ancClass.isInstance(a)) {
+                  return a;
+              }
+          }
+          return null;
+      }*/
 }

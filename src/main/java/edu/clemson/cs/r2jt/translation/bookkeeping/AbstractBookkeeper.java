@@ -4,6 +4,8 @@ import edu.clemson.cs.r2jt.translation.bookkeeping.FacilityDeclBook.FacilityDecl
 
 import java.util.ArrayList;
 import edu.clemson.cs.r2jt.translation.bookkeeping.Bookkeeper.*;
+import edu.clemson.cs.r2jt.translation.bookkeeping.books.FunctionBook;
+import java.util.Iterator;
 
 /**
  *
@@ -11,12 +13,12 @@ import edu.clemson.cs.r2jt.translation.bookkeeping.Bookkeeper.*;
  */
 public abstract class AbstractBookkeeper implements Bookkeeper {
 
-    FunctionBook currentFunction;
-    FacilityDeclBook currentFacility;
+    FunctionBook myCurFunctionBook;
+    FacilityDeclBook myCurFacilityDeclarationBook;
     /**
-	 * <p>Name of the module currently undergoing translation.</p>		
+     * <p>Name of the module currently undergoing translation.</p>		
      */
-    String moduleName;
+    String myModuleName;
 
     /**
      * If we aren't translating a realization, then we don't need
@@ -60,6 +62,10 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
         currentFacility = newFac;
     }*/
 
+    // -----------------------------------------------------------
+    //   Facility book methods
+    // -----------------------------------------------------------
+
     @Override
     public void facAddParam(String parameter) {
         currentFacility.parameterList.add(parameter);
@@ -99,22 +105,23 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
         currentFacility = null;
     }
 
-    /* End FacilityDeclBook Methods */
+    // -----------------------------------------------------------
+    //   Function book methods
+    // -----------------------------------------------------------
 
-    /* Abstract FunctionBook calls */
     @Override
     public void fxnAddParam(String parName) {
-        currentFunction.parameterList.add(parName);
+        currentFunction.myParameterList.add(parName);
     }
 
     @Override
     public void fxnAddVarDecl(String varName) {
-        currentFunction.varInitList.add(varName);
+        currentFunction.myVarInitList.add(varName);
     }
 
     @Override
     public void fxnAppendTo(String stmt) {
-        currentFunction.allStmt.append(stmt);
+        currentFunction.myStmt.append(stmt);
     }
 
     @Override
@@ -122,8 +129,6 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
         currentFunction = null;
     }
 }
-
-/* Books! */
 
 /**
  * Provides a container for RESOLVE functions that allows users
@@ -145,38 +150,35 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
  * @author Mark T
  * @author Welch D
  */
-abstract class FunctionBook {
+/*abstract class FunctionBook {
 
     protected String myName;
     protected String myReturnType;
     protected Boolean hasBody;
 
-    protected ArrayList<String> parameterList;
-    protected ArrayList<String> varInitList;
-    protected StringBuilder allStmt;
+    protected ArrayList<String> myParameterList;
+    protected ArrayList<String> myVarInitList;
 
-    /**
-     * <p>Constructs an <code>AbstractFunctionBook</code> object 
-     * that provides a container for some function named 
-     * <code>name</code> with return type <code>type</code>. 
-     * The function's parameters, variables, and 'stmts' will be 
-     * added using standard @link FunctionBook methods.</p>
-     *
-     * @param name The function's name.
-     * @param returnType The function's return type.
-     */
+    protected StringBuilder myStmt;
+
+
     FunctionBook(String returnType, String name, boolean hasBody) {
         myName = name;
         myReturnType = returnType;
         this.hasBody = hasBody;
 
-        parameterList = new ArrayList<String>();
-        varInitList = new ArrayList<String>();
-        allStmt = new StringBuilder();
+        myParameterList = new ArrayList<String>();
+        myVarInitList = new ArrayList<String>();
+        myStmt = new StringBuilder();
+
+    }
+
+    public String getName() {
+        return myName;
     }
 
     abstract String getString();
-}
+}*/
 
 abstract class FacilityDeclBook {
 

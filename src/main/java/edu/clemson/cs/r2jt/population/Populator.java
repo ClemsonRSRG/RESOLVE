@@ -222,6 +222,7 @@ public class Populator extends TreeWalkerVisitor {
         //Enhancements implicitly import the concepts they enhance
         myCurModuleScope.addImport(new ModuleIdentifier(enhancement
                 .getConceptName().getName()));
+
     }
 
     @Override
@@ -931,86 +932,159 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public boolean walkCallStmt(CallStmt node) {
+
+        // If the call is user-qualified, then 
+        // skip over callStmt's children.
         if (node.getQualifier() != null) {
             return true;
         }
+        // Otherwise we have work to do
         return false;
     }
 
     @Override
     public void postCallStmt(CallStmt node) {
-        // The name of the module that declares the call's operation
-        String definingContext;
 
-        // The name of the module where the call itself takes place
-        String callingContext =
-                myBuilder.getInnermostActiveScope().getRootModule().toString();
+        List<FacilityEntry> matchingFacilities;
         List<ProgramExp> args = node.getArguments();
-        // System.out.println("Call encountered: " + node.getName().getName());
+        List<PTType> argTypes = new LinkedList<PTType>();
+
+        PosSymbol newCallQualifier = new PosSymbol();
+        String opDeclarationModule;
+        String qualName;
+
+        for (ProgramExp arg : args) {
+            argTypes.add(arg.getProgramType());
+        }
         try {
-            // TODO : Once programParamExps are fixed, change this
-            //		  to an op query.
-            OperationEntry matchingOp =
+            // Find the operation declaration corresponding to the CallStmt
+            OperationEntry op =
                     myBuilder.getInnermostActiveScope().queryForOne(
-                            new NameQuery(null, node.getName(),
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_INSTANTIATE,
-                                    false))
-                            .toOperationEntry(node.getLocation());
+                            new OperationQuery(null, node.getName(), argTypes))
+                            .toOperationEntry(null);
 
-            definingContext = matchingOp.getSourceModuleIdentifier().toString();
+            // Grab the name of the module containing the op declaration 
+            // and look through facilities instantiated in local namespace
+            // for those that list that name as their specification field.
+            opDeclarationModule = op.getSourceModuleIdentifier().toString();
+            matchingFacilities = getMatchingFacilities(opDeclarationModule);
 
-            ProgramQualifiedEntry entry;
-            PosSymbol newCallQual = new PosSymbol();
-
-            // If the call's defining operation isn't declared 
-            // in local namespace then we have work to do.
-            // Otherwise - no need to qualify.
-            if (!(definingContext.equals(callingContext))) {
-
-                for (ProgramExp arg : args) {
-
-                    if (arg instanceof VariableDotExp) {
-
-                        VariableDotExp dotExp = ((VariableDotExp) arg);
-                        entry = getRecordQualifiedEntry(dotExp, arg);
-                        if (isQualifyingArg(node, arg, entry, definingContext)) {
-                            break;
-                        }
-                    }
-                    else if (arg instanceof ProgramOpExp) {
-                        // Should only be temporary... No call args should actually
-                        // be this. Should have been converted to a programParamExp
-                        // somewhere in the preprocessor.
-                    }
-                    else if (arg instanceof VariableExp) {
-                        entry = getQualifiedEntry(arg.toString(), null, arg);
-                        if (isQualifyingArg(node, arg, entry, definingContext)) {
-                            break;
-                        }
-                    }
-                    else if (arg instanceof ProgramParamExp) {
-                        ProgramParamExp pExp = ((ProgramParamExp) arg);
-                        if (isQualifyingArg(node, pExp, null, definingContext)) {
-                            break;
-                        }
-                    }
-                    else {
-                        throw new SourceErrorException(
-                                "Ambiguous Call. Requires qualification.", arg
-                                        .getLocation());
-                    }
-                }
+            // There are 2 cases to handle:
+            // 1. If size == 1, then there is a unique facility instantiated
+            //    that uses specification "opDeclarationModule," so the name
+            //    of that facility should be the qualifier to the curr call.
+            if (matchingFacilities.size() == 1) {
+                qualName = matchingFacilities.get(0).getName();
+                newCallQualifier.setSymbol(Symbol.symbol(qualName));
+                node.setQualifier(newCallQualifier);
             }
+            // 2. If size > 1, then multiple facilities instantiated use 
+            //    opDeclarationModule as a specification. Which facility to 
+            //    use is ambiguous, so we go in and see if we can figure out
+            //    for the careless user what the appropriate qualifier should be.
+            if (matchingFacilities.size() > 1) {
+                // Put a try catch around this?
+                qualName = findCallQualifier(op, args, opDeclarationModule);
+                newCallQualifier.setSymbol(Symbol.symbol(qualName));
+                node.setQualifier(newCallQualifier);
+            }
+            // 3. If size == 0, then no need to qualify. Some reasons?
+            //	  opDeclarationModule might simply refer to the name
+            //    of a client facility that declares (and implements)
+            //    the operation called. In which case it shouldn't show
+            //	  up in the spec field of any instantiated facility -
+            //    meaning qualification shouldn't be necessary. 
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(node.getQualifier(), node.getName().getName(), node
                     .getLocation());
         }
         catch (DuplicateSymbolException dse) {
-            //TODO : Error gracefully
             throw new RuntimeException(dse);
         }
+    }
+
+    /**
+     * Returns a list of <code>FacilityEntry</code>s with specifications
+     * matching <code>spec</code>.
+     * 
+     * @param spec	A string containing a specification (i.e. Stack_Template).
+     * @return		A list of <code>FacilityEntry</code>'s specified 
+     *				by <code>spec</code>.
+     */
+    private List<FacilityEntry> getMatchingFacilities(String spec) {
+        String candidateFacSpec;
+        List<FacilityEntry> facilityPool = new LinkedList<FacilityEntry>();
+
+        List<FacilityEntry> facilityList =
+                myBuilder.getInnermostActiveScope().query(
+                        new EntryTypeQuery(FacilityEntry.class,
+                                ImportStrategy.IMPORT_NAMED,
+                                FacilityStrategy.FACILITY_IGNORE));
+
+        for (FacilityEntry f : facilityList) {
+            candidateFacSpec =
+                    f.getFacility().getSpecification().getModuleIdentifier()
+                            .toString();
+
+            if (candidateFacSpec.equals(spec)) {
+                facilityPool.add(f);
+            }
+        }
+        return facilityPool;
+    }
+
+    private String findCallQualifier(OperationEntry callOp,
+            List<ProgramExp> callArgs, String declarationContext)
+            throws SourceErrorException {
+
+        ProgramQualifiedEntry entry;
+
+        for (ProgramExp arg : callArgs) {
+
+            if (arg instanceof VariableDotExp) {
+
+                VariableDotExp dotExp = ((VariableDotExp) arg);
+                entry = getRecordQualifiedEntry(dotExp, arg);
+                String spec = entry.getSpecification();
+                if (isQualifyingArg(spec, declarationContext)) {
+                    return entry.getQualifier();
+                }
+            }
+            else if (arg instanceof ProgramOpExp) {
+                // Shouldn't encounter any of these here! Should have
+                // been converted to programParamExp in preprocessor.
+                // Contact Sami.
+            }
+            else if (arg instanceof VariableExp) {
+
+                entry = getQualifiedEntry(arg.toString(), null, arg);
+                String spec = entry.getSpecification();
+
+                if (isQualifyingArg(spec, declarationContext)) {
+                    return entry.getQualifier();
+                }
+            }
+            else if (arg instanceof ProgramParamExp) {
+                // ProgramParamExp's are ideally going to have qualifiers
+                // themselves before they arrive here. So we'll have to 
+                // do something different to account for that.
+                ProgramParamExp pExp = ((ProgramParamExp) arg);
+                String type = pExp.getProgramType().toString();
+                String spec = getSpecification(type);
+
+                if (isQualifyingArg(spec, declarationContext)) {
+                    return getTypeFacility(spec);
+                }
+            }
+            else {
+                throw new SourceErrorException(
+                        "Ambiguous Call. Requires qualification.", arg
+                                .getLocation());
+            }
+        }
+        // Shouldn't get here. Would throw an ambiguous call error first.
+        return null;
     }
 
     private ProgramQualifiedEntry getQualifiedEntry(String s,
@@ -1054,26 +1128,9 @@ public class Populator extends TreeWalkerVisitor {
         return pqe;
     }
 
-    private boolean isQualifyingArg(CallStmt node, ProgramExp exp,
-            ProgramQualifiedEntry entry, String definingCallContext) {
+    private boolean isQualifyingArg(String argSpec, String definingCallContext) {
 
-        String qual;
-        String spec;
-        PosSymbol newCallQual = new PosSymbol();
-
-        if (entry != null) {
-            spec = entry.getSpecification();
-            qual = entry.getQualifier();
-        }
-        else {
-            String type = exp.getProgramType().toString();
-            spec = getSpecification(type);
-            qual = getTypeFacility(definingCallContext);
-        }
-
-        if (spec.equals(definingCallContext)) {
-            newCallQual.setSymbol(Symbol.symbol(qual));
-            node.setQualifier(newCallQual);
+        if (argSpec.equals(definingCallContext)) {
             return true;
         }
         return false;
@@ -1333,6 +1390,7 @@ public class Populator extends TreeWalkerVisitor {
         //If we're the assertion of a type theorem, then postTypeTheoremDec()
         //will take care of any logic.  If we're part of a type declaration,
         //on the other hand, we've got some bookkeeping to do...
+
         if (myTypeValueDepth > 0) {
             try {
                 VarExp nodeExp = (VarExp) node.getExp();
