@@ -1,20 +1,18 @@
 package edu.clemson.cs.r2jt.translation.bookkeeping;
 
-import java.util.ArrayList;
-
 /**
  *
  * @author Welch D
  */
 public class JavaBookkeeper extends AbstractBookkeeper {
 
-    /**
-     * Construct a supervisor to manage Java modules undergoing 
-     * translation.
-     */
-    public JavaBookkeeper(String name, Boolean isRealiz) {
-        super(name, isRealiz);
+    public JavaBookkeeper(String moduleName, Boolean isRealiz) {
+        super(moduleName, isRealiz);
     }
+
+	// -----------------------------------------------------------
+    //   FacilityBook methods
+    // -----------------------------------------------------------
 
     @Override
     public void facAdd(String name, String concept, String realiz) {
@@ -26,65 +24,24 @@ public class JavaBookkeeper extends AbstractBookkeeper {
 
     @Override
     public void fxnAdd(String retType, String funcName) {
+        throw new UnsupportedOperationException("Not supported yet.");
 
-        FunctionBook f;
+    /*    FunctionBook f;
 
         f = new JavaFunctionBook(retType, funcName, isRealization);
-        functionList.add(f);
-        currentFunction = f;
+        myFunctionList.add(f);
+        myCurrentFunction = f;*/
     }
 
     @Override
     public String output() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
 
-class JavaFunctionBook extends FunctionBook {
 
-    JavaFunctionBook(String name, String returnType, boolean hasBody) {
-        super(name, returnType, hasBody);
-    }
 
-    /**
-     * <p>Returns an unformatted (no newlines or tabs) Java string 
-     * representation of <code>JavaFunctionBook</code>.</p>
-     */
-    @Override
-    String getString() {
-
-        StringBuilder finalFunc = new StringBuilder();
-        finalFunc.append("public ").append(myReturnType).append(" ");
-        finalFunc.append(myName).append("(");
-
-        for (int i = 0; i < myParameterList.size(); i++) {
-            finalFunc.append(myParameterList.get(i));
-            if (i != myParameterList.size() - 1) {
-                finalFunc.append(", ");
-            }
-        }
-        if (hasBody) {
-            finalFunc.append(") {");
-
-            for (String s : myVarInitList) {
-                finalFunc.append(s);
-            }
-            if (myStmt != null) {
-                finalFunc.append(myStmt);
-            }
-            //  if (!returnType.equals("void ")) {
-            //      finalFunc.append("return ").append(functionName);
-            //  }
-            finalFunc.append("}");
-        }
-        else {
-            finalFunc.append(");");
-        }
-        return finalFunc.toString();
-    }
-}
-
-class JavaFacilityDeclBook extends FacilityDeclBook {
+class JavaFacilityDeclBook extends FacilityDeclarationBook {
 
     JavaFacilityDeclBook(String name, String concept, String realiz) {
         super(name, concept, realiz);

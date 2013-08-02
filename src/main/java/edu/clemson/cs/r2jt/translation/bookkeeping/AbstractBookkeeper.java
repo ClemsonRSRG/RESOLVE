@@ -1,11 +1,10 @@
 package edu.clemson.cs.r2jt.translation.bookkeeping;
 
-import edu.clemson.cs.r2jt.translation.bookkeeping.FacilityDeclBook.FacilityDeclEnhance;
+import edu.clemson.cs.r2jt.translation.bookkeeping.Bookkeeper.*;
+//import edu.clemson.cs.r2jt.translation.bookkeeping.book.AbstractBookDecorator;
 
 import java.util.ArrayList;
-import edu.clemson.cs.r2jt.translation.bookkeeping.Bookkeeper.*;
-import edu.clemson.cs.r2jt.translation.bookkeeping.books.FunctionBook;
-import java.util.Iterator;
+import java.util.List;
 
 /**
  *
@@ -13,72 +12,62 @@ import java.util.Iterator;
  */
 public abstract class AbstractBookkeeper implements Bookkeeper {
 
-    FunctionBook myCurFunctionBook;
-    FacilityDeclBook myCurFacilityDeclarationBook;
-    /**
-     * <p>Name of the module currently undergoing translation.</p>		
+	/**
+     * <p>Pointers to the various books currently being handled by
+	 * the Bookkeeper.</p>		
      */
-    String myModuleName;
+     protected FunctionBook myCurrentFunction;
+     protected FacilityDeclarationBook myCurrentFacility;
+	
+	//protected AbstractBookDecorator myCurrentBook;
+    /**
+     * <p>Name of the module being managed by the Bookkeeper.</p>		
+     */
+    protected String myModuleName;
 
     /**
-     * If we aren't translating a realization, then we don't need
-     * bodies following function declarations as the files we are 
-     * outputting will be class interfaces. Thus, this should only 
-     * be false for Concepts and Enhancement declaration modules.
+     * <p>Flag that indicates to the Bookkeeper whether or not bodies
+	 * will proceed declarations (I.e. functions).</p>
      */
-    Boolean isRealization;
+    protected Boolean isRealization;
 
-    ArrayList<FacilityDeclBook> facilityList;
-    ArrayList<String> constructorList;
-    ArrayList<String> importList;
-    ArrayList<FunctionBook> functionList;
-
-    /**
-     * Construct a supervisor to manage Java modules undergoing 
-     * translation.
+	/**
+     * <p>These lists can be thought of as the Bookkeeper's shelf - 
+	 * where all completed and current books are stored.</p>
      */
-    public AbstractBookkeeper(String name, Boolean isRealiz) {
-        moduleName = name;
+	List<FacilityDeclarationBook> myFacilityList;
+	List<FunctionBook> myFunctionList;
+	List<String> myConstructorList;
+    List<String> myImportList;
+
+    public AbstractBookkeeper(String moduleName, Boolean isRealiz) {
+        myModuleName = moduleName;
         isRealization = isRealiz;
 
-        importList = new ArrayList();
-        functionList = new ArrayList();
-        facilityList = new ArrayList();
+        myImportList = new ArrayList();
+        myFunctionList = new ArrayList();
+        myFacilityList = new ArrayList();
     }
 
-    /**
-     * Stores packages needed by the module undergoing translation.
-     */
     @Override
     public void addUses(String usesName) {
-        importList.add(usesName);
+        myImportList.add(usesName);
     }
 
-    /* FacilityDeclBook Methods */
-    /*@Override
-    public void facAdd(String name, String concept, String realiz) {
-        FacilityDeclBook newFac = new FacilityDeclBook(name,concept,realiz);
-        facilityList.add(newFac);
-        currentFacility = newFac;
-    }*/
-
     // -----------------------------------------------------------
-    //   Facility book methods
+    //   FacilityBook methods
     // -----------------------------------------------------------
 
     @Override
-    public void facAddParam(String parameter) {
-        currentFacility.parameterList.add(parameter);
+    public void facAddParameter(String parameter) {
+        myCurrentFacility.parameterList.add(parameter);
     }
 
     @Override
-    public void facAddEnhance(String name, String realiz) {
+    public void facAddEnhancement(String name, String realiz) {
         try {
-            FacilityDeclEnhance newEnhance;
-            //The below is the correct syntax, it just...wrinkles my brain
-            newEnhance = currentFacility.new FacilityDeclEnhance(name, realiz);
-            currentFacility.enhanceList.add(newEnhance);
-            currentFacility.currentEnhance = newEnhance;
+            FacilityEnhancementBook enhancement = new FacilityEnhancementBook(name, realiz);
+			myCurrentFacility.enhancementList.add(enhancement);
         }
         catch (NullPointerException e) {
 
@@ -87,132 +76,102 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
 
     @Override
     public boolean facEnhanceIsOpen() {
-        return currentFacility.currentEnhance != null;
+        return myCurrentFacility.currentEnhancement != null;
     }
 
     @Override
-    public void facAddEnhanceParam(String parameter) {
-        currentFacility.currentEnhance.parameterList.add(parameter);
+    public void facAddEnhancementParameter(String parameter) {
+        myCurrentFacility.currentEnhancement.parameterList.add(parameter);
     }
 
     @Override
-    public void facEnhanceEnd() {
-        currentFacility.currentEnhance = null;
+    public void facEnhancementEnd() {
+        myCurrentFacility.currentEnhancement = null;
     }
 
     @Override
     public void facEnd() {
-        currentFacility = null;
+        myCurrentFacility = null;
     }
 
     // -----------------------------------------------------------
-    //   Function book methods
+    //   FunctionBook methods
     // -----------------------------------------------------------
 
     @Override
-    public void fxnAddParam(String parName) {
-        currentFunction.myParameterList.add(parName);
+    public void fxnAddParameter(String parameter) {
+        myCurrentFunction.parameterList.add(parameter);
     }
 
     @Override
-    public void fxnAddVarDecl(String varName) {
-        currentFunction.myVarInitList.add(varName);
+    public void fxnAddVariableDeclaration(String variable) {
+        myCurrentFunction.varInitList.add(variable);
     }
 
     @Override
     public void fxnAppendTo(String stmt) {
-        currentFunction.myStmt.append(stmt);
+        myCurrentFunction.allStmt.append(stmt);
     }
 
     @Override
     public void fxnEnd() {
-        currentFunction = null;
+        myCurrentFunction = null;
     }
 }
 
-/**
- * Provides a container for RESOLVE functions that allows users
- * to easily collect, add-to, and maintain translation relevant
- * information (i.e. function name, variable name/type, parameter 
- * name/type, etc).
- * 
- * <p>Functions in RESOLVE are reliably serialized using
- * <code>TreeWalkerVisitor</code> traversals. Thus, Each 
- * <code>FunctionBook</code> has a StringBuilder instance variable, 
- * <code>allstmt</code>, which, throughout the various TreeWalker
- * traversals over the function's statements and expressions, gets 
- * automatically "filled in" with corresponding, correctly translated 
- * Java, C, etc code. This eases the task of translation considerably 
- * since it allows one to store entire chunks of fully translated code 
- * within a <code>FunctionBook</code> object for later ordering 
- * and output by the <code>Bookkeeper</code>.</p>
- * 
- * @author Mark T
- * @author Welch D
- */
-/*abstract class FunctionBook {
+abstract class FunctionBook {
+	protected String name;
+	protected String returnType;
+	protected ArrayList<String> parameterList;
+	protected ArrayList<String> varInitList;
+	
+	protected StringBuilder allStmt;
+	
+	protected boolean hasBody;
+	public FunctionBook (String myReturnType, String myName, boolean isRealiz) {
+		name = myName;
+		returnType = myReturnType;
+		hasBody = isRealiz;
+		
+		parameterList = new ArrayList<String>();
+		varInitList = new ArrayList<String>();
+	}
+	abstract String getString();
+}
 
-    protected String myName;
-    protected String myReturnType;
-    protected Boolean hasBody;
+abstract class FacilityDeclarationBook {
 
-    protected ArrayList<String> myParameterList;
-    protected ArrayList<String> myVarInitList;
+    protected String name;
+    protected String concept;
+    protected String conceptRealiz;
 
-    protected StringBuilder myStmt;
-
-
-    FunctionBook(String returnType, String name, boolean hasBody) {
-        myName = name;
-        myReturnType = returnType;
-        this.hasBody = hasBody;
-
-        myParameterList = new ArrayList<String>();
-        myVarInitList = new ArrayList<String>();
-        myStmt = new StringBuilder();
-
-    }
-
-    public String getName() {
-        return myName;
-    }
-
-    abstract String getString();
-}*/
-
-abstract class FacilityDeclBook {
-
-    protected String myName;
-    protected String myConcept;
-    protected String myConceptRealiz;
-
-    protected ArrayList<FacilityDeclEnhance> enhanceList;
+    protected ArrayList<FacilityEnhancementBook> enhancementList;
     protected ArrayList<String> parameterList;
-    protected FacilityDeclEnhance currentEnhance;
+    protected FacilityEnhancementBook currentEnhancement;
 
-    FacilityDeclBook(String name, String concept, String realiz) {
-        myName = name;
-        myConcept = concept;
-        myConceptRealiz = realiz;
+    FacilityDeclarationBook(String myName, String myConcept, String myRealiz) {
+        name = myName;
+        concept = myConcept;
+        conceptRealiz = myRealiz;
 
-        enhanceList = new ArrayList<FacilityDeclEnhance>();
+        enhancementList = new ArrayList<FacilityEnhancementBook>();
         parameterList = new ArrayList<String>();
     }
 
-    class FacilityDeclEnhance {
+    abstract String getString();
+}
 
-        protected String myName;
-        protected String myRealiz;
+class FacilityEnhancementBook {
+
+        protected String name;
+        protected String realization;
         protected ArrayList<String> parameterList;
 
-        FacilityDeclEnhance(String newEnhance, String realiz) {
-            myName = newEnhance;
-            myRealiz = realiz;
+        FacilityEnhancementBook(String myName, String myRealiz) {
+            name = myName;
+            realization = myRealiz;
             parameterList = new ArrayList();
         }
-    }
-
-    abstract String getString();
 }
 
 class RecordBook {

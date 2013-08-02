@@ -21,10 +21,10 @@ public class JavaConceptBookkeeper extends JavaBookkeeper {
     public String output() {
         StringBuilder translateDoc = new StringBuilder();
 
-        for (String imp : importList) {
+        for (String imp : myImportList) {
             translateDoc.append(imp);
         }
-        translateDoc.append("public interface ").append(moduleName);
+        translateDoc.append("public interface ").append(myModuleName);
         translateDoc.append(" extends RESOLVE_INTERFACE {");
 
         // print constructors/interfaces
@@ -33,7 +33,7 @@ public class JavaConceptBookkeeper extends JavaBookkeeper {
         }*/
 
         // Now print all functions 
-        for (FunctionBook operDecl : functionList) {
+        for (FunctionBook operDecl : myFunctionList) {
             translateDoc.append(operDecl.getString());
         }
 

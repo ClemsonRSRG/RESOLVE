@@ -17,14 +17,14 @@ public class CFacilityBookkeeper extends CBookkeeper {
     public String output() {
         StringBuilder translateDoc = new StringBuilder();
 
-        for (String imp : importList) {
+        for (String imp : myImportList) {
             translateDoc.append(imp);
         }
         translateDoc.append("public class ");
-        translateDoc.append(moduleName).append(" {");
+        translateDoc.append(myModuleName).append(" {");
 
         // Now print all functions 
-        for (FunctionBook func : functionList) {
+        for (FunctionBook func : myFunctionList) {
             translateDoc.append(func.getString());
         }
 

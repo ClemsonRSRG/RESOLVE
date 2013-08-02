@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.clemson.cs.r2jt.translation;
 
 import edu.clemson.cs.r2jt.ResolveCompiler;
@@ -57,8 +53,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public void preCallStmt(CallStmt stmt) {
 
-        AbstractTranslator.emitDebug("Encountered call: " + stmt.getName());
-
         String callName = stmt.getName().getName();
         String callQual;
 
@@ -67,6 +61,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
             callName = callQual + myQualSymbol + callName;
         }
         myBookkeeper.fxnAppendTo(callName);
+		
+		AbstractTranslator.emitDebug("Encountered call: '" + stmt.getName());
+
     }
 
     @Override
@@ -213,7 +210,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                     + "' and specification: '" + typeSpec
                     + "' to the Bookkeeper.");
 
-            myBookkeeper.fxnAddVarDecl(lhs + rhs + "();");
+            myBookkeeper.fxnAddVariableDeclaration(lhs + rhs + "();");
         }
     }
 

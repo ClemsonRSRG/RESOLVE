@@ -36,10 +36,10 @@ public class CBookkeeper extends AbstractBookkeeper {
 
     @Override
     public void facAdd(String name, String concept, String realiz) {
-        FacilityDeclBook f;
+        FacilityDeclarationBook f;
         f = new CFacilityDeclBook(name, concept, realiz);
-        facilityList.add(f);
-        currentFacility = f;
+        myFacilityList.add(f);
+        myCurrentFacility = f;
     }
 
     /* FunctionBook Adders */
@@ -48,8 +48,8 @@ public class CBookkeeper extends AbstractBookkeeper {
     public void fxnAdd(String retType, String funcName) {
         FunctionBook f;
         f = new CFunctionBook(retType, funcName, isRealization);
-        functionList.add(f);
-        currentFunction = f;
+        myFunctionList.add(f);
+        myCurrentFunction = f;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class CBookkeeper extends AbstractBookkeeper {
     }
 }
 
-class CFacilityDeclBook extends FacilityDeclBook {
+class CFacilityDeclBook extends FacilityDeclarationBook {
 
     CFacilityDeclBook(String name, String concept, String realiz) {
         super(name, concept, realiz);
