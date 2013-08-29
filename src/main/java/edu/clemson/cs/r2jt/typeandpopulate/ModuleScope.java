@@ -3,6 +3,7 @@ package edu.clemson.cs.r2jt.typeandpopulate;
 import java.util.List;
 
 import edu.clemson.cs.r2jt.absyn.ModuleDec;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 
 /**
  * <p>A <code>ModuleScope</code> refines {@link Scope Scope} to provide methods
@@ -41,4 +42,9 @@ public interface ModuleScope extends Scope {
      * @returns A <code>List</code> of imported modules.
      */
     public List<ModuleIdentifier> getImports();
+
+    // ADDED 8-24-2013 as a TEMPORARY workaround for scope's currently
+    // insufficient Scope's getFormalParameterEntries method. See Scope 
+    // for more info.
+    public List<SymbolTableEntry> getModuleFormalParameters();
 }

@@ -53,6 +53,33 @@ public class ModuleParameterization {
         return Collections.unmodifiableList(myParameters);
     }
 
+    // Added 8-22-2013. This technically shouldn't be here.
+    // It was added to test how I might gather information about
+    // module formal parameters. More specifically, I originally added this 
+    // so I could (more) easily grab the "definingElement" of a given scope 
+    // to recover arguments' formal counterparts. Instead, a method was
+    // added to modulescope that gives a list of symbolTableEntries corresponding
+    // a module's formal parameters. This is a workaround! HwS built in a 
+    // more general way of getting formal parameters from ANY scope (not just
+    // moduleScope) look at getFormalParameterEntries in @Link{Scope Scope}. 
+    // This was insufficient for translation purposes however since it currently
+    // only returns programParameterEntries while completely ignore OperationEntries
+    // (which can be parameters aswell although the symbol table currently doesn't
+    // support that). I'm still looking into it.
+    public ModuleScope getModuleScope() {
+        ModuleScope result;
+        try {
+            ModuleScope scope = mySourceRepository.getModuleScope(myModule);
+            result = scope;
+
+        }
+        catch (NoSuchSymbolException nsse) {
+            //Shouldn't be possible--we'd have caught it by now
+            throw new RuntimeException(nsse);
+        }
+        return result;
+    }
+
     public Scope getScope(boolean instantiated) {
 
         Scope result;

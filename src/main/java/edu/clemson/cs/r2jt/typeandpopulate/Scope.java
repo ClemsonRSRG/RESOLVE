@@ -146,6 +146,22 @@ public interface Scope {
      * sort that can define parameters, returns an empty list.</p>
      * 
      * @return Entries for the parameters of the current scope.
+     * 
+     * NOTE: THIS IS NEARLY USELESS ATM. It was not designed to recognize 
+     *		 Operation formal parameters.. only programParameterEntries.
+     *		 Wonderful. Anyways, since there is some concern about alter-ego'ing 
+     *		 programParameterEntries further, I suppose I'll just add a dedicated
+     *		 symbolTableEntry for module formal parameters -- though the operation
+     *		 which is technically a parameter is treated the same as any other operation
+     *		 declaration -- So I'm essentially going to be adding something with the
+     *		 same name to the symbol table twice.. Not sure yet how I'm going to avoid
+     *		 getting a duplicate symbol exception.
+     * 
+     * UPDATE: Ok, for now I've added a "getModuleFormalParameters" to 
+     *		   "scope" subclass moduleScope. I'll come back to this
+     *		   later and see if I can't get it working.. though that means
+     *		   trying to understand how all this "generic instantiation" shit
+     *		   works.
      */
     public List<ProgramParameterEntry> getFormalParameterEntries();
 }

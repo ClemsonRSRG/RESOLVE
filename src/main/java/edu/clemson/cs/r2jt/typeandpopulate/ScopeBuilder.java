@@ -77,14 +77,14 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public ProgramVariableEntry addProgramVariable(String name,
-            ResolveConceptualElement definingElement, String spec, PTType type,
-            String varQualifier) throws DuplicateSymbolException {
+            ResolveConceptualElement definingElement, PTType type)
+            throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, type);
 
         ProgramVariableEntry entry =
                 new ProgramVariableEntry(name, definingElement, myRootModule,
-                        spec, type, varQualifier);
+                        type);
 
         myBindings.put(name, entry);
 
@@ -180,9 +180,6 @@ public class ScopeBuilder extends SyntacticScope {
         Exp finalizationEnsures =
                 (finalization == null) ? null : finalization.getEnsures();
 
-        //   System.out.println("myRootmodule: "
-        //           + myRootModule.fullyQualifiedRepresentation(name));
-
         ProgramTypeEntry entry =
                 new ProgramTypeDefinitionEntry(myTypeGraph, name,
                         definingElement, myRootModule, model, new PTFamily(
@@ -210,15 +207,14 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public ProgramParameterEntry addFormalParameter(String name,
-            ResolveConceptualElement definingElement, String spec,
-            ParameterMode mode, PTType type, String varQualifier)
-            throws DuplicateSymbolException {
+            ResolveConceptualElement definingElement, ParameterMode mode,
+            PTType type) throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, type);
 
         ProgramParameterEntry entry =
                 new ProgramParameterEntry(myTypeGraph, name, definingElement,
-                        myRootModule, spec, type, mode, varQualifier);
+                        myRootModule, type, mode);
 
         myBindings.put(name, entry);
 

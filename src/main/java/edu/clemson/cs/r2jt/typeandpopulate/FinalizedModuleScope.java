@@ -9,6 +9,7 @@ import edu.clemson.cs.r2jt.absyn.ModuleDec;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 
 /**
  * <p>A <code>FinalizedModuleScope</code> is an immutable realization of 
@@ -21,22 +22,29 @@ import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 public class FinalizedModuleScope extends FinalizedScope implements ModuleScope {
 
     private final List<ModuleIdentifier> myImportedModules;
+    private final List<SymbolTableEntry> myFormalParameters;
     private final MathSymbolTable mySymbolTable;
 
     FinalizedModuleScope(ModuleIdentifier module,
             ResolveConceptualElement definingElement, Scope parent,
             BaseSymbolTable bindings, List<ModuleIdentifier> importedModules,
-            MathSymbolTable symbolTable) {
+            List<SymbolTableEntry> formalParameters, MathSymbolTable symbolTable) {
 
         super(symbolTable, definingElement, module, parent, bindings);
 
         myImportedModules = new LinkedList<ModuleIdentifier>(importedModules);
+        myFormalParameters = new LinkedList<SymbolTableEntry>(formalParameters);
         mySymbolTable = symbolTable;
     }
 
     @Override
     public ModuleDec getDefiningElement() {
         return (ModuleDec) myDefiningElement;
+    }
+
+    @Override
+    public List<SymbolTableEntry> getModuleFormalParameters() {
+        return new LinkedList<SymbolTableEntry>(myFormalParameters);
     }
 
     @Override

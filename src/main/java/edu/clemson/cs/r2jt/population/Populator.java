@@ -171,6 +171,8 @@ public class Populator extends TreeWalkerVisitor {
      */
     private List<ProgramParameterEntry> myCurrentParameters;
 
+    private List<String> myModuleFormalParameters;
+
     /**
      * <p>A mapping from generic types that appear in the module to the math
      * types that bound their possible values.</p>
@@ -213,6 +215,7 @@ public class Populator extends TreeWalkerVisitor {
         Populator.emitDebug("----------------------\nModule: "
                 + node.getName().getName() + "\n----------------------");
         myCurModuleScope = myBuilder.startModuleScope(node);
+        myModuleFormalParameters = new LinkedList<String>();
 
     }
 
@@ -311,15 +314,11 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postConstantParamDec(ConstantParamDec param) {
         try {
-
             String paramName = param.getName().getName();
-            String paramSpec = getTypeSpecification((NameTy) param.getTy());
-            String paramQual =
-                    ((NameTy) param.getTy()).getTempQualifier().toString();
 
             myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
-                    param, paramSpec, ParameterMode.EVALUATES,
-                    param.getTy().getProgramTypeValue(), paramQual);
+                    param, ParameterMode.EVALUATES,
+                    param.getTy().getProgramTypeValue());
             param.setMathType(param.getTy().getMathTypeValue());
         }
         catch (DuplicateSymbolException dse) {
@@ -335,8 +334,7 @@ public class Populator extends TreeWalkerVisitor {
             String paramName = param.getName().getName();
 
             myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
-                    param, null, ParameterMode.TYPE,
-                    new PTElement(myTypeGraph), null);
+                    param, ParameterMode.TYPE, new PTElement(myTypeGraph));
 
             myGenericTypes.put(paramName, myTypeGraph.MTYPE);
             param.setMathType(myTypeGraph.MTYPE);
@@ -370,16 +368,11 @@ public class Populator extends TreeWalkerVisitor {
 
         if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
             try {
-                String spec = getTypeSpecification((NameTy) node.getReturnTy());
-                String qual =
-                        ((NameTy) node.getReturnTy()).getTempQualifier()
-                                .toString();
-
                 //Inside the operation's assertions, the name of the operation
                 //refers to its return value
                 myBuilder.getInnermostActiveScope().addProgramVariable(
-                        node.getName().getName(), node, spec,
-                        node.getReturnTy().getProgramTypeValue(), qual);
+                        node.getName().getName(), node,
+                        node.getReturnTy().getProgramTypeValue());
             }
             catch (DuplicateSymbolException dse) {
                 //This shouldn't be possible--the operation declaration has a 
@@ -408,6 +401,7 @@ public class Populator extends TreeWalkerVisitor {
             }
             d.setMathType(t);
         }
+        myModuleFormalParameters.add(d.getName().getName());
     }
 
     @Override
@@ -484,14 +478,9 @@ public class Populator extends TreeWalkerVisitor {
         if (previous != null && previous == node.getReturnTy()) {
 
             try {
-                String spec = getTypeSpecification((NameTy) node.getReturnTy());
-                String qual =
-                        ((NameTy) node.getReturnTy()).getTempQualifier()
-                                .toString();
-
                 myBuilder.getInnermostActiveScope().addProgramVariable(
-                        node.getName().getName(), node, spec,
-                        node.getReturnTy().getProgramTypeValue(), qual);
+                        node.getName().getName(), node,
+                        node.getReturnTy().getProgramTypeValue());
             }
             catch (DuplicateSymbolException dse) {
                 duplicateSymbol(node.getName().getName(), node.getName()
@@ -653,7 +642,6 @@ public class Populator extends TreeWalkerVisitor {
             else {
                 returnType = returnTy.getProgramTypeValue();
             }
-
             myBuilder.getInnermostActiveScope().addOperation(name.getName(),
                     dec, myCurrentParameters, returnType);
         }
@@ -674,22 +662,11 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         try {
-            String qual;
-            String spec;
-            if (!(dec.getTy().getProgramTypeValue() instanceof PTRepresentation || dec
-                    .getTy().getProgramTypeValue() instanceof PTGeneric)) {
 
-                qual = ((NameTy) dec.getTy()).getTempQualifier().toString();
-                spec = getTypeSpecification(((NameTy) dec.getTy()));
-            }
-            else {
-                qual = "";
-                spec = "";
-            }
             ProgramParameterEntry paramEntry =
                     myBuilder.getInnermostActiveScope().addFormalParameter(
-                            dec.getName().getName(), dec, spec, mode,
-                            dec.getTy().getProgramTypeValue(), qual);
+                            dec.getName().getName(), dec, mode,
+                            dec.getTy().getProgramTypeValue());
             myCurrentParameters.add(paramEntry);
         }
         catch (DuplicateSymbolException e) {
@@ -825,62 +802,23 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
-    public void postProgramFunctionExp(ProgramFunctionExp node) {
-
-        PosSymbol newQualifier = new PosSymbol();
-        String definingContext;
-        String qual;
-        if (node.getQualifier() == null) {
-
-            try {
-                // might need import recursive 
-                // TODO : Once programParamExps are fixed, change this
-                //		  to an op query.
-                OperationEntry matchingOp =
-                        myBuilder.getInnermostActiveScope().queryForOne(
-                                new NameQuery(null, node.getName(),
-                                        ImportStrategy.IMPORT_NAMED,
-                                        FacilityStrategy.FACILITY_INSTANTIATE,
-                                        false)).toOperationEntry(
-                                node.getLocation());
-                definingContext =
-                        matchingOp.getSourceModuleIdentifier().toString();
-                qual = getTypeFacility(definingContext);
-
-                newQualifier.setSymbol(Symbol.symbol(qual));
-                node.setQualifier(newQualifier);
-            }
-            catch (NoSuchSymbolException nsse) {
-                // temporary debug measure
-                System.out.println("postProgramFunctionExpression");
-                noSuchSymbol(node.getQualifier(), node.getName().getName(),
-                        node.getLocation());
-            }
-            catch (SourceErrorException see) {
-                throw new SourceErrorException(
-                        "Ambiguous expression. Needs qualification", node
-                                .getLocation());
-            }
-            catch (DuplicateSymbolException dse) {
-                // temporary debug measure
-                System.out.println("postProgramFunctionExpression");
-                throw new RuntimeException(dse);
-            }
-        }
-    }
-
-    @Override
     public void postNameTy(NameTy ty) {
-
         //Note that all mathematical types are ArbitraryExpTys, so this must
         //be in a program-type syntactic slot.
-        PosSymbol tySymbol = ty.getName();
-        PosSymbol tyQualifier = ty.getTempQualifier();
-        Location tyLocation = tySymbol.getLocation();
 
+        /* System.out.println("HERE IS A TY: " + ty.getName().getName());
+         System.out.println("is it qualified? ");
+         if (ty.getQualifier() != null) {
+             System.out.println("yes, it is: " + ty.getQualifier().getName());
+         }
+         else {
+             System.out.println("no, it isn't");
+
+         }*/
+        PosSymbol tySymbol = ty.getName();
+        PosSymbol tyQualifier = ty.getQualifier();
+        Location tyLocation = tySymbol.getLocation();
         String tyName = tySymbol.getName();
-        String tyConcept;
-        String tyFacility;
 
         try {
 
@@ -895,31 +833,14 @@ public class Populator extends TreeWalkerVisitor {
                                             FacilityStrategy.FACILITY_INSTANTIATE,
                                             true)).toProgramTypeEntry(
                                     tyLocation);
+
+            if (tyQualifier != null) {
+                type.getProgramType().setQualifier(tyQualifier.getName());
+
+            }
             ty.setProgramTypeValue(type.getProgramType());
             ty.setMathType(myTypeGraph.MTYPE);
             ty.setMathTypeValue(type.getModelType());
-
-            if (tyQualifier == null) {
-
-                if (!(ty.getProgramTypeValue() instanceof PTRepresentation || ty
-                        .getProgramTypeValue() instanceof PTGeneric)) {
-
-                    tyConcept = getTypeSpecification(ty);
-                    tyFacility = getTypeFacility(tyConcept);
-
-                    PosSymbol newQualifier = new PosSymbol();
-
-                    // If there is no facility to find for the type, then set
-                    // the qualifier to be the name of the conceptual  module...
-                    if (tyFacility.equals("")) {
-                        newQualifier.setSymbol(Symbol.symbol(tyConcept));
-                    }
-                    else {
-                        newQualifier.setSymbol(Symbol.symbol(tyFacility));
-                    }
-                    ty.setTempQualifier(newQualifier);
-                }
-            }
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(tyQualifier, tyName, tyLocation);
@@ -928,255 +849,6 @@ public class Populator extends TreeWalkerVisitor {
             //TODO : Error gracefully
             throw new RuntimeException(dse);
         }
-    }
-
-    @Override
-    public boolean walkCallStmt(CallStmt node) {
-
-        // If the call is user-qualified, then 
-        // skip over callStmt's children.
-        if (node.getQualifier() != null) {
-            return true;
-        }
-        // Otherwise we have work to do
-        return false;
-    }
-
-    @Override
-    public void postCallStmt(CallStmt node) {
-
-        List<FacilityEntry> matchingFacilities;
-        List<ProgramExp> args = node.getArguments();
-        List<PTType> argTypes = new LinkedList<PTType>();
-
-        PosSymbol newCallQualifier = new PosSymbol();
-        String opDeclarationModule;
-        String qualName;
-
-        for (ProgramExp arg : args) {
-            argTypes.add(arg.getProgramType());
-        }
-        try {
-            // Find the operation declaration corresponding to the CallStmt
-            OperationEntry op =
-                    myBuilder.getInnermostActiveScope().queryForOne(
-                            new OperationQuery(null, node.getName(), argTypes))
-                            .toOperationEntry(null);
-
-            // Grab the name of the module containing the op declaration 
-            // and look through facilities instantiated in local namespace
-            // for those that list that name as their specification field.
-            opDeclarationModule = op.getSourceModuleIdentifier().toString();
-            matchingFacilities = getMatchingFacilities(opDeclarationModule);
-
-            // There are 2 cases to handle:
-            // 1. If size == 1, then there is a unique facility instantiated
-            //    that uses specification "opDeclarationModule," so the name
-            //    of that facility should be the qualifier to the curr call.
-            if (matchingFacilities.size() == 1) {
-                qualName = matchingFacilities.get(0).getName();
-                newCallQualifier.setSymbol(Symbol.symbol(qualName));
-                node.setQualifier(newCallQualifier);
-            }
-            // 2. If size > 1, then multiple facilities instantiated use 
-            //    opDeclarationModule as a specification. Which facility to 
-            //    use is ambiguous, so we go in and see if we can figure out
-            //    for the careless user what the appropriate qualifier should be.
-            if (matchingFacilities.size() > 1) {
-                // Put a try catch around this?
-                qualName = findCallQualifier(op, args, opDeclarationModule);
-                newCallQualifier.setSymbol(Symbol.symbol(qualName));
-                node.setQualifier(newCallQualifier);
-            }
-            // 3. If size == 0, then no need to qualify. Some reasons?
-            //	  opDeclarationModule might simply refer to the name
-            //    of a client facility that declares (and implements)
-            //    the operation called. In which case it shouldn't show
-            //	  up in the spec field of any instantiated facility -
-            //    meaning qualification shouldn't be necessary. 
-        }
-        catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(node.getQualifier(), node.getName().getName(), node
-                    .getLocation());
-        }
-        catch (DuplicateSymbolException dse) {
-            throw new RuntimeException(dse);
-        }
-    }
-
-    /**
-     * Returns a list of <code>FacilityEntry</code>s with specifications
-     * matching <code>spec</code>.
-     * 
-     * @param spec	A string containing a specification (i.e. Stack_Template).
-     * @return		A list of <code>FacilityEntry</code>'s specified 
-     *				by <code>spec</code>.
-     */
-    private List<FacilityEntry> getMatchingFacilities(String spec) {
-        String candidateFacSpec;
-        List<FacilityEntry> facilityPool = new LinkedList<FacilityEntry>();
-
-        List<FacilityEntry> facilityList =
-                myBuilder.getInnermostActiveScope().query(
-                        new EntryTypeQuery(FacilityEntry.class,
-                                ImportStrategy.IMPORT_NAMED,
-                                FacilityStrategy.FACILITY_IGNORE));
-
-        for (FacilityEntry f : facilityList) {
-            candidateFacSpec =
-                    f.getFacility().getSpecification().getModuleIdentifier()
-                            .toString();
-
-            if (candidateFacSpec.equals(spec)) {
-                facilityPool.add(f);
-            }
-        }
-        return facilityPool;
-    }
-
-    private String findCallQualifier(OperationEntry callOp,
-            List<ProgramExp> callArgs, String declarationContext)
-            throws SourceErrorException {
-
-        ProgramQualifiedEntry entry;
-
-        for (ProgramExp arg : callArgs) {
-
-            if (arg instanceof VariableDotExp) {
-
-                VariableDotExp dotExp = ((VariableDotExp) arg);
-                entry = getRecordQualifiedEntry(dotExp, arg);
-                String spec = entry.getSpecification();
-                if (isQualifyingArg(spec, declarationContext)) {
-                    return entry.getQualifier();
-                }
-            }
-            else if (arg instanceof ProgramOpExp) {
-                // Shouldn't encounter any of these here! Should have
-                // been converted to programParamExp in preprocessor.
-                // Contact Sami.
-            }
-            else if (arg instanceof VariableExp) {
-
-                entry = getQualifiedEntry(arg.toString(), null, arg);
-                String spec = entry.getSpecification();
-
-                if (isQualifyingArg(spec, declarationContext)) {
-                    return entry.getQualifier();
-                }
-            }
-            else if (arg instanceof ProgramParamExp) {
-                // ProgramParamExp's are ideally going to have qualifiers
-                // themselves before they arrive here. So we'll have to 
-                // do something different to account for that.
-                ProgramParamExp pExp = ((ProgramParamExp) arg);
-                String type = pExp.getProgramType().toString();
-                String spec = getSpecification(type);
-
-                if (isQualifyingArg(spec, declarationContext)) {
-                    return getTypeFacility(spec);
-                }
-            }
-            else {
-                throw new SourceErrorException(
-                        "Ambiguous Call. Requires qualification.", arg
-                                .getLocation());
-            }
-        }
-        // Shouldn't get here. Would throw an ambiguous call error first.
-        return null;
-    }
-
-    private ProgramQualifiedEntry getQualifiedEntry(String s,
-            SymbolTableEntry e, ProgramExp a) {
-
-        ProgramQualifiedEntry pqe = null;
-        try {
-            if (e == null) {
-                pqe =
-                        myBuilder
-                                .getInnermostActiveScope()
-                                .queryForOne(
-                                        new NameQuery(
-                                                null,
-                                                s,
-                                                ImportStrategy.IMPORT_NONE,
-                                                FacilityStrategy.FACILITY_IGNORE,
-                                                true)).toProgramQualifiedEntry(
-                                        a.getLocation());
-            }
-            else {
-                pqe =
-                        myBuilder
-                                .getScope(e.getDefiningElement())
-                                .queryForOne(
-                                        new NameQuery(
-                                                null,
-                                                s,
-                                                ImportStrategy.IMPORT_NONE,
-                                                FacilityStrategy.FACILITY_IGNORE,
-                                                true)).toProgramQualifiedEntry(
-                                        null);
-            }
-        }
-        catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(null, a.toString(), a.getLocation());
-        }
-        catch (DuplicateSymbolException dse) {
-            throw new RuntimeException(dse);
-        }
-        return pqe;
-    }
-
-    private boolean isQualifyingArg(String argSpec, String definingCallContext) {
-
-        if (argSpec.equals(definingCallContext)) {
-            return true;
-        }
-        return false;
-    }
-
-    private ProgramQualifiedEntry getRecordQualifiedEntry(
-            VariableDotExp dotExp, ProgramExp arg) {
-
-        // Note: For the moment we only handle dot expresions with one
-        //		 dot! That is, only a first and second position. So
-        //       expect this code to break frequently as more and
-        //       more complicated dot expressions emerge.
-        ProgramQualifiedEntry pqe = null;
-        ProgramQualifiedEntry repField = null;
-
-        String first = dotExp.getSegments().get(0).toString();
-        String second = dotExp.getSegments().get(1).toString();
-
-        try {
-
-            pqe = getQualifiedEntry(first, null, arg);
-            try {
-                String repName =
-                        ((PTRepresentation) pqe.getProgramType())
-                                .getFamilyName();
-
-                RepresentationTypeEntry rte =
-                        myBuilder.getInnermostActiveScope().queryForOne(
-                                new NameQuery(null, repName,
-                                        ImportStrategy.IMPORT_NAMED,
-                                        FacilityStrategy.FACILITY_INSTANTIATE,
-                                        true)).toRepresentationTypeEntry(null);
-
-                repField = getQualifiedEntry(second, rte, arg);
-            }
-            catch (ClassCastException cce) {
-                throw new RuntimeException(cce);
-            }
-        }
-        catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(null, arg.toString(), arg.getLocation());
-        }
-        catch (DuplicateSymbolException dse) {
-            throw new RuntimeException(dse);
-        }
-        return repField;
     }
 
     @Override
@@ -1262,23 +934,10 @@ public class Populator extends TreeWalkerVisitor {
         MTType mathTypeValue = programVar.getTy().getMathTypeValue();
         String varName = programVar.getName().getName();
         programVar.setMathType(mathTypeValue);
-        String varQual;
-        String varSpec;
-        if (!(programVar.getTy().getProgramTypeValue() instanceof PTRepresentation || programVar
-                .getTy().getProgramTypeValue() instanceof PTGeneric)) {
-            varQual =
-                    ((NameTy) programVar.getTy()).getTempQualifier().toString();
-            varSpec = getTypeSpecification(((NameTy) programVar.getTy()));
-        }
-        else {
-            varSpec = "";
-            varQual = "";
-        }
+
         try {
             myBuilder.getInnermostActiveScope().addProgramVariable(varName,
-                    programVar, varSpec,
-                    programVar.getTy().getProgramTypeValue(), varQual);
-
+                    programVar, programVar.getTy().getProgramTypeValue());
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(varName, programVar.getLocation());
@@ -1295,6 +954,7 @@ public class Populator extends TreeWalkerVisitor {
 
             node.setProgramType(entry.getProgramType());
             //Handle math typing stuff
+            // uh oh. Looks like hampton is calling other parts of the tree
             postSymbolExp(node.getQualifier(), node.getName().getName(), node);
         }
         catch (NoSuchSymbolException nsse) {
@@ -1310,13 +970,10 @@ public class Populator extends TreeWalkerVisitor {
     public void postProgramParamExp(ProgramParamExp node) {
 
         List<ProgramExp> args = node.getArguments();
-
         List<PTType> argTypes = new LinkedList<PTType>();
-        //  System.out.println(node.toString());
+
         for (ProgramExp arg : args) {
             argTypes.add(arg.getProgramType());
-            //     System.out.println("programParamExp argument: " + arg.toString()
-            //             + "  arg program type: " + arg.getProgramType().toString());
         }
 
         try {
@@ -1667,7 +1324,7 @@ public class Populator extends TreeWalkerVisitor {
     public void postProgramOpExp(ProgramOpExp e) {
 
         // Theoretically this should never be visited. Everything 
-        // should have already been converted in the preprocessor.
+        // should have already been converted to paramExp in the preprocessor.
         e.setProgramType(e.getProgramType(myTypeGraph));
         e.setMathType(e.getProgramType().toMath());
     }
@@ -1895,6 +1552,7 @@ public class Populator extends TreeWalkerVisitor {
             i.setProgramTypeValue(i.getEvalExp().getProgramType());
         }
         else if (i.getName() != null) {
+
             List<SymbolTableEntry> es =
                     myBuilder.getInnermostActiveScope().query(
                             new NameQuery(i.getQualifier(), i.getName(),
@@ -1949,6 +1607,36 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postModuleDec(ModuleDec node) {
+
+        try {
+            for (String formalParameter : myModuleFormalParameters) {
+                SymbolTableEntry ste =
+                        myBuilder
+                                .getInnermostActiveScope()
+                                .queryForOne(
+                                        new NameQuery(
+                                                null,
+                                                formalParameter,
+                                                ImportStrategy.IMPORT_NONE,
+                                                FacilityStrategy.FACILITY_IGNORE,
+                                                true));
+
+                // TEMPORARY FIX. We need to getFormalParameterEntries working
+                // add these symboltableEntries found here to a list
+                // in moduleScope... then they should be there for that
+                // module.. right??
+                myCurModuleScope.addFormalParameter(ste);
+            }
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException(
+                    "could not find module parameter after (search initiated in postModuleDec)");
+        }
+        catch (DuplicateSymbolException dse) {
+            //Shouldn't be possible--NameQuery can't throw this
+            throw new RuntimeException(dse);
+        }
+        myModuleFormalParameters = null;
         myBuilder.endScope();
 
         Populator.emitDebug("END MATH POPULATOR\n----------------------\n");
@@ -2375,102 +2063,6 @@ public class Populator extends TreeWalkerVisitor {
     //-------------------------------------------------------------------
     //   Helper functions
     //-------------------------------------------------------------------
-
-    /**
-     * Given NameTy <code>t</code>, <code>getTypeSpecification</code> 
-     * finds and returns the name of the conceptual module that 
-     * defines <code>t</code>.
-     * 
-     * @param t A NameTy.
-     * @return A string containing <code>t</code>'s specification.
-     */
-    private String getTypeSpecification(NameTy t) {
-
-        String searchStr = t.getProgramTypeValue().toString();
-        ModuleIdentifier result;
-        try {
-
-            ProgramTypeEntry type =
-                    myBuilder
-                            .getInnermostActiveScope()
-                            .queryForOne(
-                                    new NameQuery(
-                                            null,
-                                            searchStr,
-                                            ImportStrategy.IMPORT_NAMED,
-                                            FacilityStrategy.FACILITY_INSTANTIATE,
-                                            true)).toProgramTypeEntry(
-                                    t.getLocation());
-            result = type.getSourceModuleIdentifier();
-
-        }
-        catch (NoSuchSymbolException nsse) {
-            throw new RuntimeException("No originating module for "
-                    + t.getName().toString() + "???");
-        }
-        catch (DuplicateSymbolException dse) {
-            //Shouldn't be possible--NameQuery can't throw this
-            throw new RuntimeException(dse);
-        }
-        return result.toString();
-    }
-
-    private String getSpecification(String t) {
-
-        String result;
-        try {
-            ProgramTypeEntry type =
-                    myBuilder
-                            .getInnermostActiveScope()
-                            .queryForOne(
-                                    new NameQuery(
-                                            null,
-                                            t,
-                                            ImportStrategy.IMPORT_NAMED,
-                                            FacilityStrategy.FACILITY_INSTANTIATE,
-                                            true)).toProgramTypeEntry(null);
-            result = type.getSourceModuleIdentifier().toString();
-
-        }
-        catch (NoSuchSymbolException nsse) {
-            throw new RuntimeException("No originating module for "
-                    + t.toString() + "???");
-        }
-        catch (DuplicateSymbolException dse) {
-            //Shouldn't be possible--NameQuery can't throw this
-            throw new RuntimeException(dse);
-        }
-        return result;
-    }
-
-    /**
-     * Given a generic Ty <code>t</code> find the corresponding facility that
-     * matches <code>conceptName</code>.
-     * 
-     * @param v A Ty.
-     */
-    private String getTypeFacility(String conceptName) {
-
-        String facEntryConcept;
-        String result = "";
-
-        List<FacilityEntry> facilityList =
-                myBuilder.getInnermostActiveScope().query(
-                        new EntryTypeQuery(FacilityEntry.class,
-                                ImportStrategy.IMPORT_NAMED,
-                                FacilityStrategy.FACILITY_IGNORE));
-
-        for (FacilityEntry f : facilityList) {
-            facEntryConcept =
-                    f.getFacility().getSpecification().getModuleIdentifier()
-                            .toString();
-
-            if (conceptName.equals(facEntryConcept)) {
-                result = f.getName();
-            }
-        }
-        return result;
-    }
 
     private PTType getStringProgramType() {
         PTType result;

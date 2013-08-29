@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.clemson.cs.r2jt.translation.bookkeeping;
 
 /**
@@ -24,7 +20,7 @@ public class CFacilityBookkeeper extends CBookkeeper {
         translateDoc.append(myModuleName).append(" {");
 
         // Now print all functions 
-        for (FunctionBook func : myFunctionList) {
+        for (AbstractFunctionBook func : myFunctionList) {
             translateDoc.append(func.getString());
         }
 

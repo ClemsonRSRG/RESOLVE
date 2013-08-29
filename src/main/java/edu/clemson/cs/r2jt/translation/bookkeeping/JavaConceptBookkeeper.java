@@ -33,8 +33,8 @@ public class JavaConceptBookkeeper extends JavaBookkeeper {
         }*/
 
         // Now print all functions 
-        for (FunctionBook operDecl : myFunctionList) {
-            translateDoc.append(operDecl.getString());
+        for (AbstractFunctionBook operation : myFunctionList) {
+            translateDoc.append(operation.getString());
         }
 
         translateDoc.append("}");

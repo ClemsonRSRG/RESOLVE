@@ -36,7 +36,7 @@ public class CBookkeeper extends AbstractBookkeeper {
 
     @Override
     public void facAdd(String name, String concept, String realiz) {
-        FacilityDeclarationBook f;
+        CFacilityDeclBook f;
         f = new CFacilityDeclBook(name, concept, realiz);
         myFacilityList.add(f);
         myCurrentFacility = f;
@@ -46,10 +46,10 @@ public class CBookkeeper extends AbstractBookkeeper {
 
     @Override
     public void fxnAdd(String retType, String funcName) {
-        FunctionBook f;
-        f = new CFunctionBook(retType, funcName, isRealization);
-        myFunctionList.add(f);
-        myCurrentFunction = f;
+    //  FunctionBook f;
+    //  f = new CFunctionBook(retType, funcName, isRealization);
+    //  myFunctionList.add(f);
+    //  myCurrentFunction = f;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class CBookkeeper extends AbstractBookkeeper {
     }
 }
 
-class CFacilityDeclBook extends FacilityDeclarationBook {
+class CFacilityDeclBook extends AbstractFacilityDecBook {
 
     CFacilityDeclBook(String name, String concept, String realiz) {
         super(name, concept, realiz);
@@ -72,15 +72,15 @@ class CFacilityDeclBook extends FacilityDeclarationBook {
 
 }
 
-class CFunctionBook extends FunctionBook {
+/*class CFunctionBook extends FunctionBook {
 
-    CFunctionBook(String returnType, String name, boolean hasBody) {
-        super(returnType, name, hasBody);
-    }
+ CFunctionBook(String returnType, String name, boolean hasBody) {
+ super(returnType, name, hasBody);
+ }
 
-    @Override
-    String getString() {
-        return "GETSTRINGFORFUNCTIONBOOK";
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-}
+ @Override
+ String getString() {
+ return "GETSTRINGFORFUNCTIONBOOK";
+ //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+ }
+ }*/

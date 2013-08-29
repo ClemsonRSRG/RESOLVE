@@ -9,20 +9,14 @@ import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 
 public class ProgramVariableEntry extends SymbolTableEntry {
 
-    private String myName;
-    private String myTypeQualifier;
-    private String myTypeSpecification;
-
     private final PTType myType;
     private final MathSymbolEntry myMathSymbolAlterEgo;
-    private final ProgramQualifiedEntry myQualifiedAlterEgo;
 
     public ProgramVariableEntry(String name,
             ResolveConceptualElement definingElement,
-            ModuleIdentifier sourceModule, String typeSpec, PTType type,
-            String typeQualifier) {
+            ModuleIdentifier sourceModule, PTType type) {
         super(name, definingElement, sourceModule);
-        myName = name;
+
         myType = type;
 
         //TODO: Probably need to recajigger this to correctly account for any
@@ -31,11 +25,6 @@ public class ProgramVariableEntry extends SymbolTableEntry {
                 new MathSymbolEntry(type.getTypeGraph(), name,
                         Quantification.NONE, definingElement, type.toMath(),
                         null, null, null, sourceModule);
-
-        myQualifiedAlterEgo =
-                new ProgramQualifiedEntry(name, getDefiningElement(),
-                        getSourceModuleIdentifier(), typeSpec, typeQualifier,
-                        type);
 
     }
 
@@ -62,8 +51,7 @@ public class ProgramVariableEntry extends SymbolTableEntry {
         if (instantiatedType != myType) {
             result =
                     new ProgramVariableEntry(getName(), getDefiningElement(),
-                            getSourceModuleIdentifier(), getName(),
-                            instantiatedType, getName());
+                            getSourceModuleIdentifier(), instantiatedType);
         }
         else {
             result = this;
@@ -78,9 +66,5 @@ public class ProgramVariableEntry extends SymbolTableEntry {
 
     public MathSymbolEntry toMathSymbolEntry(Location l) {
         return myMathSymbolAlterEgo;
-    }
-
-    public ProgramQualifiedEntry toProgramQualifiedEntry(Location l) {
-        return myQualifiedAlterEgo;
     }
 }

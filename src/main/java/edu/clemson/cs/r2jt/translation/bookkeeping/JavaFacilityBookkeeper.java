@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.clemson.cs.r2jt.translation.bookkeeping;
 
 /**
@@ -15,21 +11,24 @@ public class JavaFacilityBookkeeper extends JavaBookkeeper {
 
     @Override
     public String output() {
-        StringBuilder translateDoc = new StringBuilder();
+        StringBuilder documentBuilder = new StringBuilder();
 
         for (String imp : myImportList) {
-            translateDoc.append(imp);
+            documentBuilder.append(imp);
         }
-        translateDoc.append("public class ");
-        translateDoc.append(myModuleName).append(" {");
+        documentBuilder.append("public class ");
+        documentBuilder.append(myModuleName).append(" {");
 
-        // Now print all functions 
-        for (FunctionBook func : myFunctionList) {
-            translateDoc.append(func.getString());
+        for (AbstractFacilityDecBook facility : myFacilityList) {
+            documentBuilder.append(facility.getString());
         }
 
-        translateDoc.append("}");
-        return translateDoc.toString();
+        for (AbstractFunctionBook func : myFunctionList) {
+            documentBuilder.append(func.getString());
+        }
+
+        documentBuilder.append("}");
+        return documentBuilder.toString();
     }
 
 }

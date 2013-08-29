@@ -1,10 +1,11 @@
 package edu.clemson.cs.r2jt.translation.bookkeeping;
 
 import edu.clemson.cs.r2jt.translation.bookkeeping.Bookkeeper.*;
-//import edu.clemson.cs.r2jt.translation.bookkeeping.book.AbstractBookDecorator;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  *
@@ -12,14 +13,13 @@ import java.util.List;
  */
 public abstract class AbstractBookkeeper implements Bookkeeper {
 
-	/**
+    /**
      * <p>Pointers to the various books currently being handled by
-	 * the Bookkeeper.</p>		
+     * the Bookkeeper.</p>		
      */
-     protected FunctionBook myCurrentFunction;
-     protected FacilityDeclarationBook myCurrentFacility;
-	
-	//protected AbstractBookDecorator myCurrentBook;
+    AbstractFunctionBook myCurrentFunction;
+    AbstractFacilityDecBook myCurrentFacility;
+
     /**
      * <p>Name of the module being managed by the Bookkeeper.</p>		
      */
@@ -27,17 +27,17 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
 
     /**
      * <p>Flag that indicates to the Bookkeeper whether or not bodies
-	 * will proceed declarations (I.e. functions).</p>
+     * will proceed declarations (I.e. functions, etc).</p>
      */
     protected Boolean isRealization;
 
-	/**
+    /**
      * <p>These lists can be thought of as the Bookkeeper's shelf - 
-	 * where all completed and current books are stored.</p>
+     * where all completed and current books are stored.</p>
      */
-	List<FacilityDeclarationBook> myFacilityList;
-	List<FunctionBook> myFunctionList;
-	List<String> myConstructorList;
+    List<AbstractFacilityDecBook> myFacilityList;
+    List<AbstractFunctionBook> myFunctionList;
+    List<String> myConstructorList;
     List<String> myImportList;
 
     public AbstractBookkeeper(String moduleName, Boolean isRealiz) {
@@ -66,8 +66,10 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
     @Override
     public void facAddEnhancement(String name, String realiz) {
         try {
-            FacilityEnhancementBook enhancement = new FacilityEnhancementBook(name, realiz);
-			myCurrentFacility.enhancementList.add(enhancement);
+            FacilityEnhancementBook enhancement =
+                    new FacilityEnhancementBook(name, realiz);
+            myCurrentFacility.enhancementList.add(enhancement);
+            myCurrentFacility.currentEnhancement = enhancement;
         }
         catch (NullPointerException e) {
 
@@ -75,7 +77,7 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
     }
 
     @Override
-    public boolean facEnhanceIsOpen() {
+    public boolean facEnhancementIsOpen() {
         return myCurrentFacility.currentEnhancement != null;
     }
 
@@ -119,43 +121,46 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
     }
 }
 
-abstract class FunctionBook {
-	protected String name;
-	protected String returnType;
-	protected ArrayList<String> parameterList;
-	protected ArrayList<String> varInitList;
-	
-	protected StringBuilder allStmt;
-	
-	protected boolean hasBody;
-	public FunctionBook (String myReturnType, String myName, boolean isRealiz) {
-		name = myName;
-		returnType = myReturnType;
-		hasBody = isRealiz;
-		
-		parameterList = new ArrayList<String>();
-		varInitList = new ArrayList<String>();
-	}
-	abstract String getString();
+abstract class AbstractFunctionBook {
+
+    protected String name;
+    protected String returnType;
+    protected ArrayList<String> parameterList;
+    protected ArrayList<String> varInitList;
+
+    protected StringBuilder allStmt;
+    protected boolean isRealization;
+
+    public AbstractFunctionBook(String nameStr, String retStr, boolean isRealiz) {
+        name = retStr;
+        returnType = nameStr;
+        isRealization = isRealiz;
+
+        allStmt = new StringBuilder();
+        parameterList = new ArrayList<String>();
+        varInitList = new ArrayList<String>();
+    }
+
+    abstract String getString();
 }
 
-abstract class FacilityDeclarationBook {
+abstract class AbstractFacilityDecBook {
 
     protected String name;
     protected String concept;
-    protected String conceptRealiz;
+    protected String conceptRealization;
 
-    protected ArrayList<FacilityEnhancementBook> enhancementList;
-    protected ArrayList<String> parameterList;
+    protected List<FacilityEnhancementBook> enhancementList;
+    protected List<String> parameterList;
     protected FacilityEnhancementBook currentEnhancement;
 
-    FacilityDeclarationBook(String myName, String myConcept, String myRealiz) {
-        name = myName;
-        concept = myConcept;
-        conceptRealiz = myRealiz;
+    AbstractFacilityDecBook(String nameStr, String conStr, String realizStr) {
+        name = nameStr;
+        concept = conStr;
+        conceptRealization = realizStr;
 
-        enhancementList = new ArrayList<FacilityEnhancementBook>();
-        parameterList = new ArrayList<String>();
+        enhancementList = new LinkedList<FacilityEnhancementBook>();
+        parameterList = new LinkedList<String>();
     }
 
     abstract String getString();
@@ -163,15 +168,15 @@ abstract class FacilityDeclarationBook {
 
 class FacilityEnhancementBook {
 
-        protected String name;
-        protected String realization;
-        protected ArrayList<String> parameterList;
+    protected String name;
+    protected String realization;
+    protected ArrayList<String> parameterList;
 
-        FacilityEnhancementBook(String myName, String myRealiz) {
-            name = myName;
-            realization = myRealiz;
-            parameterList = new ArrayList();
-        }
+    FacilityEnhancementBook(String nameStr, String realizStr) {
+        name = nameStr;
+        realization = realizStr;
+        parameterList = new ArrayList();
+    }
 }
 
 class RecordBook {

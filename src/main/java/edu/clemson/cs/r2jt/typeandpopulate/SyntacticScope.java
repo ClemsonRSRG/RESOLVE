@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher.SearchContext;
 
 /**
@@ -121,9 +122,11 @@ public abstract class SyntacticScope extends AbstractScope {
             SymbolTable symbolTableView = myBindings;
 
             if (instantiatingFacility != null) {
+                //  System.out.println("gets");
                 symbolTableView =
                         new InstantiatedSymbolTable(myBindings,
                                 genericInstantiations, instantiatingFacility);
+
             }
 
             finished = searcher.addMatches(symbolTableView, matches, l);
@@ -144,14 +147,12 @@ public abstract class SyntacticScope extends AbstractScope {
     public List<ProgramParameterEntry> getFormalParameterEntries() {
         List<ProgramParameterEntry> result =
                 new LinkedList<ProgramParameterEntry>();
-
         Iterator<ProgramParameterEntry> formalBindings =
                 myBindings.iterateByType(ProgramParameterEntry.class);
 
         while (formalBindings.hasNext()) {
             result.add(formalBindings.next());
         }
-
         return result;
     }
 

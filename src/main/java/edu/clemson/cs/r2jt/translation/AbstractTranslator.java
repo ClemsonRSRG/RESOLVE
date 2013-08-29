@@ -4,46 +4,101 @@ import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.compilereport.CompileReport;
+import edu.clemson.cs.r2jt.data.Location;
+import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.translation.bookkeeping.Bookkeeper;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleParameterization;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.NoneProvidedException;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.RepresentationTypeEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.query.NameAndEntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
+import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author Mark T
+ * Overrides translation specific visitor methods share-able 
+ * between currently supported target languages (C & Java). Modify
+ * as needed when/if new target languages are incorporated into the
+ * project.
+ * 
+ * @author Markt, Welchd
  */
 public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     protected static final boolean PRINT_DEBUG = true;
-    protected final CompileEnvironment myEnv;
-    protected final ModuleScope myScope;
-    protected Bookkeeper myBookkeeper;
+    protected final CompileEnvironment myInstanceEnvironment;
+    protected final ModuleScope myModuleScope;
     protected ErrorHandler err;
+
+    /**
+     * <p>This is where all information is ultimately stored. The 
+     * <code>bookkeeper</code> (and it's concrete subclasses) handle 
+     * how all information is collected, organized, and ultimately
+     * arranged on the translated page via calls to concrete 
+     * <code>getString</code> methods.</p>
+     */
+    protected Bookkeeper myBookkeeper;
 
     /**
      * <p>Indicates a language-specific qualification style.
      * For example, StackFac.Pop vs StackFac->Pop.</p>
      */
-    protected String myQualSymbol;
+    protected String myQualifierSymbol;
 
-    protected String myCurrentVarDeclaration;
+    /**
+     * <p>A pointer to the facility declaration currently undergoing
+     * translation. Any enhancements accompanying this facility 
+     * declaration (if any) are enclosed within.</p>
+     */
+    protected FacilityEntry myCurrentFacility;
 
-    public AbstractTranslator(CompileEnvironment env, ModuleScope scope,
-            ModuleDec dec, ErrorHandler err) {
+    /**
+     * <p>A mapping between the actual parameters of a module and the
+     * symbolTableEntries representing their formal counterparts.
+     * Note that this maps parameters of <em>only</em> one level of
+     * facility/facility enhancement. In other words, this map keeps 
+     * track of only the specification and realization argument-formal 
+     * parameter mappings for the current facility / enhancement we 
+     * might be walking -- and is cleared afterwards.</p>
+     */
+    protected Map<String, SymbolTableEntry> myModuleFormalParameters =
+            new HashMap<String, SymbolTableEntry>();
+
+    public AbstractTranslator(CompileEnvironment environment,
+            ModuleScope scope, ModuleDec dec, ErrorHandler err) {
         this.err = err;
-        myEnv = env;
-        myScope = scope;
+        myInstanceEnvironment = environment;
+        myModuleScope = scope;
     }
 
     // -----------------------------------------------------------
@@ -51,41 +106,96 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     @Override
-    public void preCallStmt(CallStmt stmt) {
+    public void preCallStmt(CallStmt node) {
 
-        String callName = stmt.getName().getName();
-        String callQual;
+        String qualifier = "";
+        List<ProgramExp> args = node.getArguments();
+        List<PTType> argTypes = new LinkedList<PTType>();
+        List<FacilityEntry> matches = new LinkedList<FacilityEntry>();
 
-        if (stmt.getQualifier() != null) {
-            callQual = stmt.getQualifier().getName();
-            callName = callQual + myQualSymbol + callName;
+        // User saw fit to not qualify their call. Tsk tsk.
+        if (node.getQualifier() == null) {
+
+            try {
+
+                // Gather the argument types for the OperationQuery
+                for (ProgramExp arg : args) {
+                    argTypes.add(arg.getProgramType());
+                }
+
+                OperationEntry oe =
+                        myModuleScope.queryForOne(
+                                new OperationQuery(node.getQualifier(), node
+                                        .getName(), argTypes))
+                                .toOperationEntry(null);
+
+                // Now grab any FacilityEntries in scope whose 
+                // specification matches oe's SourceModuleIdentifier.
+                List<FacilityEntry> facilities =
+                        myModuleScope.query(new EntryTypeQuery(
+                                FacilityEntry.class,
+                                ImportStrategy.IMPORT_NAMED,
+                                FacilityStrategy.FACILITY_IGNORE));
+
+                for (FacilityEntry facility : facilities) {
+                    if (oe.getSourceModuleIdentifier().equals(
+                            facility.getFacility().getSpecification()
+                                    .getModuleIdentifier())) {
+                        matches.add(facility);
+                    }
+                }
+
+                // Two cases:
+                // 1. Size == 1 => a unique facility is instantiated 
+                //	  in scope whose specification matches oe's. So the 
+                //	  appropriate qualifier is that facility's name.
+                if (matches.size() == 1) {
+                    qualifier = matches.get(0).getName();
+                }
+                // 2. Size > 1 => multiple facilities instantiated use 
+                //    oe's SourceModuleIdentifier as a specification. 
+                //	  Which facility's name to use as a qualifier is 
+                //	  ambiguous, so off to argument examination we go.
+                if (matches.size() > 1) {
+                    try {
+                        qualifier = getIntendedCallQualifier(oe, args);
+                    }
+                    catch (SourceErrorException see) {
+                        throw new SourceErrorException(
+                                "Ambiguous Call. Consider qualifying.", node
+                                        .getLocation());
+                    }
+                }
+                // 3. Size == 0 => operation owning the call defined
+                //	  locally. So no need to qualify.
+            }
+            catch (NoSuchSymbolException nsse) {
+                noSuchSymbol(node.getQualifier(), node.getName().getName(),
+                        node.getLocation());
+            }
+            catch (DuplicateSymbolException dse) {
+                throw new RuntimeException(dse);
+            }
         }
-        myBookkeeper.fxnAppendTo(callName);
-		
-		AbstractTranslator.emitDebug("Encountered call: '" + stmt.getName());
-
+        else {
+            qualifier = node.getQualifier().getName();
+        }
+        myBookkeeper.fxnAppendTo(qualifier + myQualifierSymbol
+                + node.getName().getName() + "(");
     }
 
     @Override
-    public void midCallStmtArguments(CallStmt node, ProgramExp previous,
-            ProgramExp next) {
-        if (next != null && previous != null) {
-            myBookkeeper.fxnAppendTo(", ");
-        }
-    }
-
-    @Override
-    public void postCallStmt(CallStmt stmt) {
+    public void postCallStmt(CallStmt node) {
         myBookkeeper.fxnAppendTo(");");
     }
 
     @Override
-    public void preIfStmt(IfStmt stmt) {
+    public void preIfStmt(IfStmt node) {
         myBookkeeper.fxnAppendTo("if(");
     }
 
     @Override
-    public void preIfStmtThenclause(IfStmt stmt) {
+    public void preIfStmtThenclause(IfStmt node) {
         myBookkeeper.fxnAppendTo(") {");
     }
 
@@ -95,151 +205,65 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     @Override
-    public void preWhileStmt(WhileStmt stmt) {
+    public void preWhileStmt(WhileStmt node) {
         myBookkeeper.fxnAppendTo("while(");
     }
 
     @Override
-    public void preWhileStmtStatements(WhileStmt stmt) {
+    public void preWhileStmtStatements(WhileStmt node) {
         myBookkeeper.fxnAppendTo(") {");
     }
 
     @Override
-    public void postWhileStmt(WhileStmt stmt) {
+    public void postWhileStmt(WhileStmt node) {
         myBookkeeper.fxnAppendTo("}");
     }
 
-    /*     @Override
-         public void preFacilityDec(FacilityDec dec) {
-             myBookkeeper.facAdd(dec.getName().getName(), dec.getConceptName()
-                     .getName(), dec.getBodyName().getName());
-         }
-
-         @Override
-         public void preEnhancementBodyItem(EnhancementBodyItem item) {
-             myBookkeeper.facAddEnhance(item.getName().getName(), item.getBodyName()
-                     .getName());
-         }
-
-         @Override
-         public void preModuleArgumentItem(ModuleArgumentItem item) {
-             String param = "CONSTANTTYPENEEDSLANGUAGESPECIFIC";
-             if (item.getName() != null) {
-                 if (item.getQualifier() != null) {
-                     param = item.getQualifier() + " . " + item.getName().getName(); //qual
-                 }
-                 else {
-                     param = "UNQUALIFIED." + item.getName().getName();
-                 }
-             }
-             if (myBookkeeper.facEnhanceIsOpen()) {
-                 myBookkeeper.facAddEnhanceParam(param);
-             }
-             else {
-                 myBookkeeper.facAddParam(param);
-             }
-         }
-
-         @Override
-         public void postEnhancementBodyItem(EnhancementBodyItem item) {
-             myBookkeeper.facEnhanceEnd();
-         }
-
-         @Override
-         public void postFacilityDec(FacilityDec dec) {
-             myBookkeeper.facEnd();
-         }
-     */
-
-    // TODO : MAKE IT SO YOU CAN ADD IN A POSSYMBOL OR A STRING.. IT JUST
-    // CONVERTS THE POSSYMBOL BEHIND THE SCENES... 
-
     @Override
-    public void preFacilityOperationDec(FacilityOperationDec dec) {
+    public void preFacilityDec(FacilityDec node) {
 
-        String returnType = "void";
-        String returnSpec;
-
-        if (dec.getReturnTy() != null) {
-            NameTy ty = (NameTy) dec.getReturnTy();
-            returnSpec =
-                    getFacilitySpecification(ty.getTempQualifier().toString());
-            returnType = returnSpec + myQualSymbol + ty.getName().getName();
-        }
-
-        myBookkeeper.fxnAdd(returnType, dec.getName().getName());
-    }
-
-    /*   @Override
-       public void preProcedureDec(ProcedureDec dec) {
-           String operName = dec.getName().getName();
-    	  String returnTypeName = ((NameTy) dec.getTy()).getName().getName();
-    	  String returnTypeSpec = getSpecification(varQual);
-      
-    	  
-    	  String typeSpec = getSpecification(varQual);
-           String returnType = "void";
-           String facName, qualRetType;
-           if (dec.getReturnTy() != null) {
-               returnType = ((NameTy) dec.getReturnTy()).toString();
-               facName = getFacilitySpecification((NameTy) dec.getReturnTy());
-               qualRetType = facName + myQualSymbol + returnType;
-           }
-           else {
-               qualRetType = returnType;
-           }
-           myBookkeeper.fxnAdd(qualRetType, operName);
-       }*/
-
-    @Override
-    public void preVarDec(VarDec dec) {
-
-        String varName = dec.getName().getName();
-        String varQual = ((NameTy) dec.getTy()).getTempQualifier().toString();
-        String typeName = ((NameTy) dec.getTy()).getName().getName();
-        String typeSpec = getFacilitySpecification(varQual);
-
-        String lhs = typeSpec + myQualSymbol + typeName + " " + varName;
-        String rhs = " = " + varQual + myQualSymbol + "create" + typeName;
-
-        // Ignore preprocessor variables (_Integer, _Boolean, etc)
-        if (!varName.startsWith("_")) {
-
-            AbstractTranslator.emitDebug("\tAdding " + typeName + ": '"
-                    + dec.getName().getName() + "' with qualifier: '" + varQual
-                    + "' and specification: '" + typeSpec
-                    + "' to the Bookkeeper.");
-
-            myBookkeeper.fxnAddVariableDeclaration(lhs + rhs + "();");
-        }
-    }
-
-    @Override
-    public void preParameterVarDec(ParameterVarDec dec) {
-        throw new UnsupportedOperationException(dec.getClass().getName()
-                + " not yet supported");
-    }
-
-    // -----------------------------------------------------------
-    //   Helper methods
-    // -----------------------------------------------------------
-
-    protected String getFacilitySpecification(String facilityName) {
-        String result = "";
         try {
-            FacilityEntry fe =
-                    myScope
-                            .queryForOne(
-                                    new NameQuery(
-                                            null,
-                                            facilityName,
-                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE,
-                                            true)).toFacilityEntry(null);
+            myCurrentFacility =
+                    myModuleScope.queryForOne(
+                            new NameAndEntryTypeQuery(null, node.getName(),
+                                    FacilityEntry.class,
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_IGNORE, false))
+                            .toFacilityEntry(node.getLocation());
 
-            result =
-                    fe.getFacility().getSpecification().getModuleIdentifier()
-                            .toString();
+            List<ModuleArgumentItem> args =
+                    new LinkedList<ModuleArgumentItem>(myCurrentFacility
+                            .getFacility().getSpecification().getParameters());
+
+            List<SymbolTableEntry> formalParams =
+                    new LinkedList<SymbolTableEntry>(myCurrentFacility
+                            .getFacility().getSpecification().getModuleScope()
+                            .getModuleFormalParameters());
+            try {
+                args.addAll(myCurrentFacility.getFacility().getRealization()
+                        .getParameters());
+
+                formalParams.addAll(myCurrentFacility.getFacility()
+                        .getRealization().getModuleScope()
+                        .getModuleFormalParameters());
+            }
+            catch (NoneProvidedException npe) {
+                // This shouldn't happen with a base facility
+            }
+
+            int argIndex = 0;
+            for (SymbolTableEntry entry : formalParams) {
+
+                String argument;
+                if (args.get(argIndex).getEvalExp() != null) {
+                    argument = args.get(argIndex).getEvalExp().toString();
+                }
+                else {
+                    argument = args.get(argIndex).getName().getName();
+                }
+                myModuleFormalParameters.put(argument, entry);
+                argIndex++;
+            }
         }
         catch (NoSuchSymbolException ex) {
             Logger.getLogger(CTranslator.class.getName()).log(Level.SEVERE,
@@ -249,8 +273,276 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
             Logger.getLogger(CTranslator.class.getName()).log(Level.SEVERE,
                     null, ex);
         }
+        myBookkeeper.facAdd(node.getName().getName(), node.getConceptName()
+                .getName(), node.getBodyName().getName());
+        AbstractTranslator.emitDebug("Entering FacilityDec");
+    }
+
+    @Override
+    public void preEnhancementBodyItem(EnhancementBodyItem node) {
+        myModuleFormalParameters.clear();
+
+        for (ModuleParameterization m : myCurrentFacility.getEnhancements()) {
+
+            if (m.getModuleIdentifier().toString().equals(
+                    node.getName().getName())) {
+
+                List<ModuleArgumentItem> moduleArgs =
+                        new LinkedList<ModuleArgumentItem>(m.getParameters());
+                List<SymbolTableEntry> moduleFormalParams =
+                        new LinkedList<SymbolTableEntry>(m.getModuleScope()
+                                .getModuleFormalParameters());
+
+                moduleArgs.addAll(myCurrentFacility
+                        .getEnhancementRealization(m).getParameters());
+                moduleFormalParams.addAll(myCurrentFacility
+                        .getEnhancementRealization(m).getModuleScope()
+                        .getModuleFormalParameters());
+
+                int argIndex = 0;
+                for (SymbolTableEntry entry : moduleFormalParams) {
+                    String argument;
+                    if (moduleArgs.get(argIndex).getEvalExp() != null) {
+                        argument =
+                                moduleArgs.get(argIndex).getEvalExp()
+                                        .toString();
+                    }
+                    else {
+                        argument = moduleArgs.get(argIndex).getName().getName();
+                    }
+                    myModuleFormalParameters.put(argument, entry);
+                    argIndex++;
+                }
+            }
+        }
+
+        myBookkeeper.facAddEnhancement(node.getName().getName(), node
+                .getBodyName().getName());
+        AbstractTranslator.emitDebug("Entering EnhancementBodyItem");
+    }
+
+    @Override
+    public void postEnhancementBodyItem(EnhancementBodyItem node) {
+        myBookkeeper.facEnhancementEnd();
+        AbstractTranslator.emitDebug("Leaving EnhancementBodyItem");
+    }
+
+    @Override
+    public void postFacilityDec(FacilityDec node) {
+        myBookkeeper.facEnd();
+        myModuleFormalParameters.clear();
+        myCurrentFacility = null;
+        AbstractTranslator.emitDebug("Leaving FacilityDec");
+    }
+
+    // TODO : Maybe add some sort of private operation that handles both 
+    //		  preFacilityOperationDec and preProcedureOperationDec.
+    //        (right now there's some duplication, though not too much)..
+
+    @Override
+    public void preFacilityOperationDec(FacilityOperationDec node) {
+
+        PTType type;
+        String returnType = "void";
+
+        if (node.getReturnTy() != null) {
+            type = node.getReturnTy().getProgramTypeValue();
+            returnType =
+                    getDefiningFacilityEntry(type).getFacility()
+                            .getSpecification().getModuleIdentifier()
+                            .toString()
+                            + myQualifierSymbol + type.toString();
+        }
+
+        AbstractTranslator.emitDebug("Adding operation/procedure: <name: '"
+                + node.getName().getName() + "', return type: '" + returnType
+                + "'>");
+        myBookkeeper.fxnAdd(node.getName().getName(), returnType);
+    }
+
+    @Override
+    public void preOperationDec(OperationDec node) {
+        throw new UnsupportedOperationException(node.getClass().getName()
+                + " not yet supported");
+    }
+
+    @Override
+    public void preProcedureDec(ProcedureDec node) {
+        throw new UnsupportedOperationException(node.getClass().getName()
+                + " not yet supported");
+    }
+
+    @Override
+    public void preVarDec(VarDec node) {
+
+        String qual, specification;
+        PTType type = node.getTy().getProgramTypeValue();
+
+        if (node.getTy().getProgramTypeValue() instanceof PTGeneric) {
+            myBookkeeper.fxnAddVariableDeclaration("RType "
+                    + node.getName().getName());
+        }
+        else {
+            // Ignore preprocessor variables: "_Integer", etc.
+            if (!node.getName().getName().startsWith("_")) {
+
+                qual = getDefiningFacilityEntry(type).getName();
+                specification =
+                        getDefiningFacilityEntry(type).getFacility()
+                                .getSpecification().getModuleIdentifier()
+                                .toString();
+
+                if (((NameTy) node.getTy()).getQualifier() != null) {
+                    qual = ((NameTy) node.getTy()).getQualifier().toString();
+                }
+
+                myBookkeeper.fxnAddVariableDeclaration(specification
+                        + myQualifierSymbol + type.toString() + " "
+                        + node.getName().getName() + " = " + qual
+                        + myQualifierSymbol + "create" + type.toString()
+                        + "();");
+
+                AbstractTranslator.emitDebug("Adding variable: <name: '"
+                        + node.getName().getName() + "', type: '"
+                        + type.toString() + "', specification: '"
+                        + specification + "'>");
+            }
+        }
+    }
+
+    @Override
+    public void preParameterVarDec(ParameterVarDec node) {
+    //     throw new UnsupportedOperationException(node.getClass().getName()
+    //             + " not yet supported");
+    }
+
+    // -----------------------------------------------------------
+    //   Helper methods
+    // -----------------------------------------------------------
+
+    /**
+     * Given a PTType, <code>type</code>, this method finds the first 
+     * facility declared in scope that uses <code>type</code>s 
+     * defining module as its specification.
+     * 
+     * @param type A PTType.
+     * @return The first <code>FacilityEntry</code> in scope whose 
+     *		   specification field matches <code>type</code>s
+     *		   <code>SourceModuleIdentifier</code>.
+     */
+    protected FacilityEntry getDefiningFacilityEntry(PTType type) {
+
+        FacilityEntry result = null;
+        try {
+            ProgramTypeEntry te =
+                    myModuleScope.queryForOne(
+                            new UnqualifiedNameQuery(type.toString()))
+                            .toProgramTypeEntry(null);
+
+            List<FacilityEntry> facilities =
+                    myModuleScope.query(new EntryTypeQuery(FacilityEntry.class,
+                            ImportStrategy.IMPORT_NAMED,
+                            FacilityStrategy.FACILITY_IGNORE));
+
+            for (FacilityEntry facility : facilities) {
+                if (te.getSourceModuleIdentifier().equals(
+                        facility.getFacility().getSpecification()
+                                .getModuleIdentifier())) {
+                    result = facility;
+                }
+            }
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException("No local facility available for type!?");
+        }
         return result;
     }
+
+    private String getIntendedCallQualifier(OperationEntry operation,
+            List<ProgramExp> arguments) {//throws SourceErrorException {
+
+        String result = null;
+        for (ProgramExp arg : arguments) {
+
+            if (arg.getProgramType().getQualifier() != null) {
+
+                try {
+                    FacilityEntry fe =
+                            myModuleScope.queryForOne(
+                                    new UnqualifiedNameQuery(arg
+                                            .getProgramType().getQualifier()))
+                                    .toFacilityEntry(null);
+
+                    if (fe.getFacility().getSpecification()
+                            .getModuleIdentifier().equals(
+                                    operation.getSourceModuleIdentifier())) {
+                        result = fe.getName();
+                        break; // Leave -- looks like we've found it.
+                    }
+                }
+                catch (DuplicateSymbolException dse) {
+                    throw new RuntimeException(dse);
+                }
+                catch (NoSuchSymbolException nsse) {
+                    throw new RuntimeException(
+                            "Couldn't find facility in moduleScope.");
+                }
+            }
+            if (getDefiningFacilityEntry(arg.getProgramType()).getFacility()
+                    .getSpecification().getModuleIdentifier().equals(
+                            operation.getSourceModuleIdentifier())) {
+                result =
+                        getDefiningFacilityEntry(arg.getProgramType())
+                                .getName();
+
+            }
+        }
+        return result;
+    }
+
+    // -----------------------------------------------------------
+    //   Error handling methods
+    // -----------------------------------------------------------
+
+    public void noSuchModule(PosSymbol qualifier) {
+        throw new SourceErrorException(
+                "Module does not exist or is not in scope.", qualifier);
+    }
+
+    public void noSuchSymbol(PosSymbol qualifier, PosSymbol symbol) {
+        noSuchSymbol(qualifier, symbol.getName(), symbol.getLocation());
+    }
+
+    public void noSuchSymbol(PosSymbol qualifier, String symbolName, Location l) {
+
+        String message;
+
+        if (qualifier == null) {
+            message = "No such symbol: " + symbolName;
+        }
+        else {
+            message =
+                    "No such symbol in module: " + qualifier.getName() + "."
+                            + symbolName;
+        }
+
+        throw new SourceErrorException(message, l);
+    }
+
+    public void duplicateSymbol(PosSymbol symbol) {
+        duplicateSymbol(symbol.getName(), symbol.getLocation());
+    }
+
+    public void duplicateSymbol(String symbol, Location l) {
+        throw new SourceErrorException("Duplicate symbol: " + symbol, l);
+    }
+
+    // -----------------------------------------------------------
+    //   Flag and output-related methods
+    // -----------------------------------------------------------
 
     public static final void setUpFlags() {}
 
@@ -261,8 +553,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     public void outputCode(File outputFile) {
-        if (!myEnv.flags.isFlagSet(ResolveCompiler.FLAG_WEB)
-                || myEnv.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
+        if (!myInstanceEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_WEB)
+                || myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
 
             String code = Formatter.formatCode(myBookkeeper.output());
             System.out.println(code);
@@ -274,7 +566,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     private void outputToReport(String fileContents) {
         String b = "Just want to breakpoint here.";
-        CompileReport report = myEnv.getCompileReport();
+        CompileReport report = myInstanceEnvironment.getCompileReport();
         report.setTranslateSuccess();
         report.setOutput(fileContents);
     }

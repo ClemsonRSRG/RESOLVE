@@ -31,7 +31,7 @@ public class CTranslator extends AbstractTranslator {
     public CTranslator(CompileEnvironment env, ModuleScope scope,
             ModuleDec dec, ErrorHandler err) {
         super(env, scope, dec, err);
-        myQualSymbol = "->";
+        myQualifierSymbol = "->";
         File srcFile = dec.getName().getFile();
     }
 

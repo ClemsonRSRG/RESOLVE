@@ -57,7 +57,9 @@ public class QualifiedPath implements ScopeSearchPath {
                     source.queryForOne(
                             new UnqualifiedNameQuery(myQualifier.getName()))
                             .toFacilityEntry(myQualifier.getLocation());
-
+            //     System.out
+            //             .println("LOOK HERE (in QualifiedPath : ScopeSearchPath) : "
+            //                     + facility.getName());
             Scope facilityScope =
                     facility
                             .getFacility()
@@ -65,7 +67,12 @@ public class QualifiedPath implements ScopeSearchPath {
                             .getScope(
                                     myFacilityStrategy == FacilityStrategy.FACILITY_INSTANTIATE);
 
+            //       System.out.println("pre getMatches");
+
             result = facilityScope.getMatches(searcher, SearchContext.FACILITY);
+
+            //        System.out.println("post getMatches");
+
         }
         catch (NoSuchSymbolException nsse) {
             //There's nothing by that name in local scope, so it must be the

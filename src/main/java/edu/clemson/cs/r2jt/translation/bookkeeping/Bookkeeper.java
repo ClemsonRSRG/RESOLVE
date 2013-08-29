@@ -1,5 +1,7 @@
 package edu.clemson.cs.r2jt.translation.bookkeeping;
 
+import java.util.List;
+
 /**
  * Collects, stores, and passes-off info encountered during 
  * translation-related TreeWalkerVisitor traversals to specialized 
@@ -9,17 +11,10 @@ package edu.clemson.cs.r2jt.translation.bookkeeping;
  * for the translation of a given module.</p>
  * 
  * <p>The rest of the time, <code>Bookkeeper</code> simply collects 
- * as much info from non-serializable <code>TreeWalkerVisistor</code>
- * traversals as possible, then passes this information to more
- * specialized <em>Book</em> classes that store, sort, and print 
- * that particular specialized chunk of code out in its correct 
- * form.</p>
- * 
- * <p>So you can think of <code>Bookkeeper</code> then as both liason
- * and supervisor. Something that stands in the middle - passing off
- * raw data from Translator <code>TreeWalkerVisitor</code> methods 
- * to specialized book-classes that then give data back in its full
- * form to be placed on the shelf by the <code>Bookkeeper</code>.
+ * info from <code>TreeWalkerVisistor</code> traversals and passes 
+ * this info to more specialized <em>Book</em> classes that store, 
+ * sort, and ultimately print that particular specialized chunk of 
+ * code out in its correct form/order.</p>
  * 
  * @author Mark T 
  * @author Welch D
@@ -36,7 +31,7 @@ public interface Bookkeeper {
     // -----------------------------------------------------------
     //   Facility methods
     // -----------------------------------------------------------
-	
+
     public void facAdd(String name, String concept, String realiz);
 
     public void facAddParameter(String parameter);
@@ -45,7 +40,7 @@ public interface Bookkeeper {
 
     public void facAddEnhancementParameter(String parameter);
 
-    public boolean facEnhanceIsOpen();
+    public boolean facEnhancementIsOpen();
 
     public void facEnhancementEnd();
 

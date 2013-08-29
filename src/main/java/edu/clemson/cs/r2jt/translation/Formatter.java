@@ -9,11 +9,10 @@ import java.util.LinkedList;
  * 
  * <ul>
  * <li> Newlines after semicolons and left/right curly braces.</li>
- * <li> Appropriate 'tabification' for each level of left/right curly 
- * braces.</li>
+ * <li> Appropriate 'tabification' for each level of curly brace.</li>
  * </ul>
  * 
- * @author Welch D
+ * @author Welchd
  */
 public class Formatter {
 
@@ -46,7 +45,9 @@ public class Formatter {
         return formattedCode.toString();
     }
 
-    /** Helper Methods */
+    // -----------------------------------------------------------
+    //   Helper methods
+    // -----------------------------------------------------------
 
     /**
      * <p>Given a container of tab strings, <code>writeTabs</code> 
@@ -70,12 +71,10 @@ public class Formatter {
      * @param code The code string.
      */
     private static String normalizeWhitespace(String code) {
-        // I'm sure all of this and more could be accomplished in
-        // one expression, but I'm not an expert in Java regular
-        // expressions -- and this seems to be working so fine so..	
-        code = code.replaceAll("; +", ";"); // remove trailing
-        code = code.replaceAll("\\{ +", "{"); // remove trailing
-        code = code.replaceAll("\\s+\\}", "}"); // remove preceding
+
+        code = code.replaceAll("; +", ";"); // remove trailing ws
+        code = code.replaceAll("\\{ +", "{"); // remove trailing ws
+        code = code.replaceAll("\\s+\\}", "}"); // remove preceding ws
         return code.toString();
     }
 

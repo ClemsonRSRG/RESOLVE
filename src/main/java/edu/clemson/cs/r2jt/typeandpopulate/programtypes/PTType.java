@@ -8,6 +8,7 @@ import java.util.Map;
 
 public abstract class PTType {
 
+    private String myQualifier;
     private final TypeGraph myTypeGraph;
 
     public PTType(TypeGraph g) {
@@ -24,6 +25,14 @@ public abstract class PTType {
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility);
 
+    public final void setQualifier(String qualifier) {
+        this.myQualifier = qualifier;
+    }
+
+    public final String getQualifier() {
+        return myQualifier;
+    }
+
     /**
      * <p>Returns <code>true</code> <strong>iff</strong> an value of this type
      * would be acceptable where one of type <code>t</code> were required.</p>
@@ -39,6 +48,6 @@ public abstract class PTType {
     }
 
     public Location getLocation() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
