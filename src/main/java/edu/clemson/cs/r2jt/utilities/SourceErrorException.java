@@ -8,6 +8,10 @@ public class SourceErrorException extends RuntimeException {
     private static final long serialVersionUID = 1L;
     private final Location myErrorLocation;
 
+    public SourceErrorException() {
+        this.myErrorLocation = null;
+    }
+
     public SourceErrorException(String message, PosSymbol symbol,
             Throwable cause) {
 

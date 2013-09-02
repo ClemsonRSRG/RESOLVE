@@ -43,11 +43,6 @@ public class FinalizedModuleScope extends FinalizedScope implements ModuleScope 
     }
 
     @Override
-    public List<SymbolTableEntry> getModuleFormalParameters() {
-        return new LinkedList<SymbolTableEntry>(myFormalParameters);
-    }
-
-    @Override
     public ModuleIdentifier getModuleIdentifier() {
         return myRootModule;
     }

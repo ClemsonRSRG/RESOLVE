@@ -11,6 +11,8 @@ public class JavaFacilityBookkeeper extends JavaBookkeeper {
 
     @Override
     public String output() {
+
+        boolean standardMainDefined = false;
         StringBuilder documentBuilder = new StringBuilder();
 
         for (String imp : myImportList) {
@@ -24,7 +26,18 @@ public class JavaFacilityBookkeeper extends JavaBookkeeper {
         }
 
         for (AbstractFunctionBook func : myFunctionList) {
+            if (func.name.equals("main")) {
+                standardMainDefined = true;
+            }
             documentBuilder.append(func.getString());
+        }
+
+        if (!standardMainDefined) {
+            documentBuilder.append("public static void main(String args[]) {");
+            documentBuilder.append(myModuleName).append(" ").append("start");
+            documentBuilder.append(" = new ").append(myModuleName)
+                    .append("();");
+            documentBuilder.append("start.Main(); }"); // TODO : parameters??
         }
 
         documentBuilder.append("}");

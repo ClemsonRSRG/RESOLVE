@@ -11,6 +11,7 @@ import java.util.Map;
 
 import edu.clemson.cs.r2jt.absyn.ModuleArgumentItem;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.utilities.Mapping3;
 import edu.clemson.cs.r2jt.utilities.RCollections;
 
@@ -53,33 +54,6 @@ public class ModuleParameterization {
         return Collections.unmodifiableList(myParameters);
     }
 
-    // Added 8-22-2013. This technically shouldn't be here.
-    // It was added to test how I might gather information about
-    // module formal parameters. More specifically, I originally added this 
-    // so I could (more) easily grab the "definingElement" of a given scope 
-    // to recover arguments' formal counterparts. Instead, a method was
-    // added to modulescope that gives a list of symbolTableEntries corresponding
-    // a module's formal parameters. This is a workaround! HwS built in a 
-    // more general way of getting formal parameters from ANY scope (not just
-    // moduleScope) look at getFormalParameterEntries in @Link{Scope Scope}. 
-    // This was insufficient for translation purposes however since it currently
-    // only returns programParameterEntries while completely ignore OperationEntries
-    // (which can be parameters aswell although the symbol table currently doesn't
-    // support that). I'm still looking into it.
-    public ModuleScope getModuleScope() {
-        ModuleScope result;
-        try {
-            ModuleScope scope = mySourceRepository.getModuleScope(myModule);
-            result = scope;
-
-        }
-        catch (NoSuchSymbolException nsse) {
-            //Shouldn't be possible--we'd have caught it by now
-            throw new RuntimeException(nsse);
-        }
-        return result;
-    }
-
     public Scope getScope(boolean instantiated) {
 
         Scope result;
@@ -110,11 +84,27 @@ public class ModuleParameterization {
 
         Map<String, PTType> result = new HashMap<String, PTType>();
 
-        List<ProgramParameterEntry> formalParams =
+        List<SymbolTableEntry> allParams =
                 moduleScope.getFormalParameterEntries();
 
+        List<ProgramParameterEntry> formalProgramParameters =
+                new LinkedList<ProgramParameterEntry>();
+
+        // Operations are currently unsupported by the generic
+        // instantiation methods HwS implemented. For now, I'm 
+        // sidestepping it. 
+        // 
+        // TODO	:	Look closer at it and see if you can get it working for regular 
+        //			programParameterEntries AND OperationEntries.
+        for (SymbolTableEntry e : allParams) {
+            if (e instanceof ProgramParameterEntry) {
+                ProgramParameterEntry addition = (ProgramParameterEntry) e;
+                formalProgramParameters.add(addition);
+            }
+        }
+
         result =
-                RCollections.foldr2(formalParams, myParameters,
+                RCollections.foldr2(formalProgramParameters, myParameters,
                         BuildGenericInstantiations.INSTANCE, result);
 
         return result;

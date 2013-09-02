@@ -106,29 +106,35 @@ class JavaFacilityDecBook extends AbstractFacilityDecBook {
             facilityBuilder.append("new ").append(
                     enhancementList.get(0).realization);
             facilityBuilder.append("(");
-
-            allParameters.addAll(enhancementList.get(0).parameterList);
-
-            originalInstantiation.append("new ").append(conceptRealization);
-            originalInstantiation.append("(");
-
-            int i = originalInstantiation.length();
-            for (String parameter : parameterList) {
-                if (originalInstantiation.length() != i) {
-                    originalInstantiation.append(", ");
-                }
-                originalInstantiation.append(parameter);
-
-            }
-            originalInstantiation.append(")");
-            allParameters.add(originalInstantiation.toString());
         }
         else {
-            // iterate over facility enhancement list and for each one,
-            // do like your doing right below this line.
-            facilityBuilder.append(conceptRealization).append(".createProxy(");
+            facilityBuilder.append(enhancementList.get(0).realization);
+            facilityBuilder.append(".createProxy").append("(");
         }
 
+        // Add parameters from any enhancements into our final 
+        // output list, "allParameters".
+        for (int i = 0; i < enhancementList.size(); i++) {
+            allParameters.addAll(enhancementList.get(i).parameterList);
+        }
+
+        // Don't forget to tack on the last piece which instantiates 
+        // the original baseFacility's realization (originalInstantiation).
+        originalInstantiation.append("new ").append(conceptRealization);
+        originalInstantiation.append("(");
+
+        int i = originalInstantiation.length();
+        for (String parameter : parameterList) {
+            if (originalInstantiation.length() != i) {
+                originalInstantiation.append(", ");
+            }
+            originalInstantiation.append(parameter);
+
+        }
+        originalInstantiation.append(")");
+        allParameters.add(originalInstantiation.toString());
+
+        // Now we just print the parameters and we're done.
         int incomingLength = facilityBuilder.length();
         for (String parameter : allParameters) {
             if (facilityBuilder.length() != incomingLength) {

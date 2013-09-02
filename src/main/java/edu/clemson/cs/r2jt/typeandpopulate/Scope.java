@@ -5,8 +5,9 @@ import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.query.MultimatchSymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.SymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.query.BaseMultimatchSymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher.SearchContext;
 import java.util.List;
 import java.util.Map;
@@ -143,25 +144,14 @@ public interface Scope {
      * </p>
      * 
      * <p>If there are no parameters, or the syntactic element is not of the 
-     * sort that can define parameters, returns an empty list.</p>
+     * sort that can define parameters, returns an empty list.</p> 
+     * 
+     * <p>NOTE: The reason this now returns a list of SymbolTableEntries and 
+     * not ProgramParameterEntrys is because operations, in addition to 
+     * ProgramParameterEntrys, are permitted for certain scopes, namely 
+     * ModuleScope.</p>
      * 
      * @return Entries for the parameters of the current scope.
-     * 
-     * NOTE: THIS IS NEARLY USELESS ATM. It was not designed to recognize 
-     *		 Operation formal parameters.. only programParameterEntries.
-     *		 Wonderful. Anyways, since there is some concern about alter-ego'ing 
-     *		 programParameterEntries further, I suppose I'll just add a dedicated
-     *		 symbolTableEntry for module formal parameters -- though the operation
-     *		 which is technically a parameter is treated the same as any other operation
-     *		 declaration -- So I'm essentially going to be adding something with the
-     *		 same name to the symbol table twice.. Not sure yet how I'm going to avoid
-     *		 getting a duplicate symbol exception.
-     * 
-     * UPDATE: Ok, for now I've added a "getModuleFormalParameters" to 
-     *		   "scope" subclass moduleScope. I'll come back to this
-     *		   later and see if I can't get it working.. though that means
-     *		   trying to understand how all this "generic instantiation" shit
-     *		   works.
      */
-    public List<ProgramParameterEntry> getFormalParameterEntries();
+    public List<SymbolTableEntry> getFormalParameterEntries();
 }

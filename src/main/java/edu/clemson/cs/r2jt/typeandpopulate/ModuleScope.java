@@ -42,9 +42,4 @@ public interface ModuleScope extends Scope {
      * @returns A <code>List</code> of imported modules.
      */
     public List<ModuleIdentifier> getImports();
-
-    // ADDED 8-24-2013 as a TEMPORARY workaround for scope's currently
-    // insufficient Scope's getFormalParameterEntries method. See Scope 
-    // for more info.
-    public List<SymbolTableEntry> getModuleFormalParameters();
 }

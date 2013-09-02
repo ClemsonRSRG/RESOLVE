@@ -35,11 +35,6 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
     }
 
     @Override
-    public List<SymbolTableEntry> getModuleFormalParameters() {
-        return myFormalParameters;
-    }
-
-    @Override
     public ModuleIdentifier getModuleIdentifier() {
         return myRootModule;
     }

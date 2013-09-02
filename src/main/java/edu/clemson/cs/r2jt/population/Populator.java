@@ -28,7 +28,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramQualifiedEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
@@ -171,7 +170,29 @@ public class Populator extends TreeWalkerVisitor {
      */
     private List<ProgramParameterEntry> myCurrentParameters;
 
-    private List<String> myModuleFormalParameters;
+    /**
+     * <p>Since formal parameters that are operations are treated no
+     * different from any other operation declaration - in this list
+     * we keep track of the names of those "special" operations that 
+     * are technically formal parameters. This allows us to, every-time 
+     * we are about to add a OperationEntry into the table, check whether
+     * or not it can be treated as a formal parameter, and set an internal 
+     * flag in the Entry itself that says whether or not it can/should
+     * be seen as a parameter.</p>
+     * 
+     * <p><em>Note:<em> The motivation for all of this is to get HwS's
+     * <code>getFormalParameterEntries</code> method in {@Link Scope Scope} 
+     * properly distinguishing between formal parameters that are operations
+     * and any other run-of-the-mill operation declaration.</p>
+     * 
+     * <p>Currently the method only returns anything that is aProgramParameterEntry,
+     * ignoring the fact that ModuleScope <em>can<em> have operations as parameters.
+     * See {@Link https://www.pivotaltracker.com/story/show/55770086}.
+     * This is an effort to patch/address that. All further changes that reflect this
+     * are pretty slight and take place in {@Link Scope Scope} and some of its 
+     * subclasses.</p>
+     */
+    private List<String> myOperationBasedParameters = new LinkedList<String>();
 
     /**
      * <p>A mapping from generic types that appear in the module to the math
@@ -215,8 +236,6 @@ public class Populator extends TreeWalkerVisitor {
         Populator.emitDebug("----------------------\nModule: "
                 + node.getName().getName() + "\n----------------------");
         myCurModuleScope = myBuilder.startModuleScope(node);
-        myModuleFormalParameters = new LinkedList<String>();
-
     }
 
     @Override
@@ -384,6 +403,13 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
+    public void preModuleParameterDec(ModuleParameterDec d) {
+        if (d.getWrappedDec() instanceof OperationDec) {
+            myOperationBasedParameters.add(d.getName().getName());
+        }
+    }
+
+    @Override
     public void postModuleParameterDec(ModuleParameterDec d) {
 
         if (!(d.getWrappedDec() instanceof OperationDec)) {
@@ -396,12 +422,12 @@ public class Populator extends TreeWalkerVisitor {
         }
         else {
             MTType t = ((OperationDec) d.getWrappedDec()).getMathType();
+
             if (t == null) {
                 t = myTypeGraph.VOID;
             }
             d.setMathType(t);
         }
-        myModuleFormalParameters.add(d.getName().getName());
     }
 
     @Override
@@ -634,6 +660,7 @@ public class Populator extends TreeWalkerVisitor {
 
     private void putOperationLikeThingInSymbolTable(PosSymbol name,
             Ty returnTy, ResolveConceptualElement dec) {
+        boolean isParameter = false;
         try {
             PTType returnType;
             if (returnTy == null) {
@@ -642,8 +669,11 @@ public class Populator extends TreeWalkerVisitor {
             else {
                 returnType = returnTy.getProgramTypeValue();
             }
+            if (myOperationBasedParameters.contains(name.getName())) {
+                isParameter = true;
+            }
             myBuilder.getInnermostActiveScope().addOperation(name.getName(),
-                    dec, myCurrentParameters, returnType);
+                    dec, myCurrentParameters, returnType, isParameter);
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(name.getName(), name.getLocation());
@@ -806,15 +836,6 @@ public class Populator extends TreeWalkerVisitor {
         //Note that all mathematical types are ArbitraryExpTys, so this must
         //be in a program-type syntactic slot.
 
-        /* System.out.println("HERE IS A TY: " + ty.getName().getName());
-         System.out.println("is it qualified? ");
-         if (ty.getQualifier() != null) {
-             System.out.println("yes, it is: " + ty.getQualifier().getName());
-         }
-         else {
-             System.out.println("no, it isn't");
-
-         }*/
         PosSymbol tySymbol = ty.getName();
         PosSymbol tyQualifier = ty.getQualifier();
         Location tyLocation = tySymbol.getLocation();
@@ -1607,38 +1628,8 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postModuleDec(ModuleDec node) {
-
-        try {
-            for (String formalParameter : myModuleFormalParameters) {
-                SymbolTableEntry ste =
-                        myBuilder
-                                .getInnermostActiveScope()
-                                .queryForOne(
-                                        new NameQuery(
-                                                null,
-                                                formalParameter,
-                                                ImportStrategy.IMPORT_NONE,
-                                                FacilityStrategy.FACILITY_IGNORE,
-                                                true));
-
-                // TEMPORARY FIX. We need to getFormalParameterEntries working
-                // add these symboltableEntries found here to a list
-                // in moduleScope... then they should be there for that
-                // module.. right??
-                myCurModuleScope.addFormalParameter(ste);
-            }
-        }
-        catch (NoSuchSymbolException nsse) {
-            throw new RuntimeException(
-                    "could not find module parameter after (search initiated in postModuleDec)");
-        }
-        catch (DuplicateSymbolException dse) {
-            //Shouldn't be possible--NameQuery can't throw this
-            throw new RuntimeException(dse);
-        }
-        myModuleFormalParameters = null;
+        myOperationBasedParameters.clear();
         myBuilder.endScope();
-
         Populator.emitDebug("END MATH POPULATOR\n----------------------\n");
     }
 

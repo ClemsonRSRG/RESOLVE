@@ -122,7 +122,6 @@ public abstract class SyntacticScope extends AbstractScope {
             SymbolTable symbolTableView = myBindings;
 
             if (instantiatingFacility != null) {
-                //  System.out.println("gets");
                 symbolTableView =
                         new InstantiatedSymbolTable(myBindings,
                                 genericInstantiations, instantiatingFacility);
@@ -144,14 +143,25 @@ public abstract class SyntacticScope extends AbstractScope {
     }
 
     @Override
-    public List<ProgramParameterEntry> getFormalParameterEntries() {
-        List<ProgramParameterEntry> result =
-                new LinkedList<ProgramParameterEntry>();
-        Iterator<ProgramParameterEntry> formalBindings =
+    public List<SymbolTableEntry> getFormalParameterEntries() {
+        List<SymbolTableEntry> result = new LinkedList<SymbolTableEntry>();
+
+        Iterator<ProgramParameterEntry> formalParameterEntryBindings =
                 myBindings.iterateByType(ProgramParameterEntry.class);
 
-        while (formalBindings.hasNext()) {
-            result.add(formalBindings.next());
+        Iterator<OperationEntry> formalOperationEntryBindings =
+                myBindings.iterateByType(OperationEntry.class);
+
+        while (formalParameterEntryBindings.hasNext()) {
+            result.add(formalParameterEntryBindings.next());
+        }
+
+        while (formalOperationEntryBindings.hasNext()) {
+            OperationEntry currentEntry = formalOperationEntryBindings.next();
+
+            if (currentEntry.isFormalParameter()) {
+                result.add(currentEntry);
+            }
         }
         return result;
     }

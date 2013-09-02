@@ -6,17 +6,14 @@ import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.translation.bookkeeping.Bookkeeper;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
 import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleParameterization;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
@@ -25,14 +22,10 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.RepresentationTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameAndEntryTypeQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
@@ -55,7 +48,13 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
+    /**
+     * <p>If <code>true</code>, as we walk the tree, debug information 
+     * will stream to the console. This should be <code>false</code> 
+     * when the translator isn't actively being worked on.</p>
+     */
     protected static final boolean PRINT_DEBUG = true;
+
     protected final CompileEnvironment myInstanceEnvironment;
     protected final ModuleScope myModuleScope;
     protected ErrorHandler err;
@@ -77,7 +76,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     /**
      * <p>A pointer to the facility declaration currently undergoing
-     * translation. Any enhancements accompanying this facility 
+     * translation. Any enhancements accompanying this current facility 
      * declaration (if any) are enclosed within.</p>
      */
     protected FacilityEntry myCurrentFacility;
@@ -87,9 +86,10 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * symbolTableEntries representing their formal counterparts.
      * Note that this maps parameters of <em>only</em> one level of
      * facility/facility enhancement. In other words, this map keeps 
-     * track of only the specification and realization argument-formal 
-     * parameter mappings for the current facility / enhancement we 
-     * might be walking -- and is cleared afterwards.</p>
+     * track of only the argument-to-formal parameter mappings for 
+     * whatever current facility/enhancement we might be walking
+     * and is cleared as soon as the next is encountered or the  
+     * current facility ends.</p>
      */
     protected Map<String, SymbolTableEntry> myModuleFormalParameters =
             new HashMap<String, SymbolTableEntry>();
@@ -104,85 +104,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
     //   Visitor methods
     // -----------------------------------------------------------
-
-    @Override
-    public void preCallStmt(CallStmt node) {
-
-        String qualifier = "";
-        List<ProgramExp> args = node.getArguments();
-        List<PTType> argTypes = new LinkedList<PTType>();
-        List<FacilityEntry> matches = new LinkedList<FacilityEntry>();
-
-        // User saw fit to not qualify their call. Tsk tsk.
-        if (node.getQualifier() == null) {
-
-            try {
-
-                // Gather the argument types for the OperationQuery
-                for (ProgramExp arg : args) {
-                    argTypes.add(arg.getProgramType());
-                }
-
-                OperationEntry oe =
-                        myModuleScope.queryForOne(
-                                new OperationQuery(node.getQualifier(), node
-                                        .getName(), argTypes))
-                                .toOperationEntry(null);
-
-                // Now grab any FacilityEntries in scope whose 
-                // specification matches oe's SourceModuleIdentifier.
-                List<FacilityEntry> facilities =
-                        myModuleScope.query(new EntryTypeQuery(
-                                FacilityEntry.class,
-                                ImportStrategy.IMPORT_NAMED,
-                                FacilityStrategy.FACILITY_IGNORE));
-
-                for (FacilityEntry facility : facilities) {
-                    if (oe.getSourceModuleIdentifier().equals(
-                            facility.getFacility().getSpecification()
-                                    .getModuleIdentifier())) {
-                        matches.add(facility);
-                    }
-                }
-
-                // Two cases:
-                // 1. Size == 1 => a unique facility is instantiated 
-                //	  in scope whose specification matches oe's. So the 
-                //	  appropriate qualifier is that facility's name.
-                if (matches.size() == 1) {
-                    qualifier = matches.get(0).getName();
-                }
-                // 2. Size > 1 => multiple facilities instantiated use 
-                //    oe's SourceModuleIdentifier as a specification. 
-                //	  Which facility's name to use as a qualifier is 
-                //	  ambiguous, so off to argument examination we go.
-                if (matches.size() > 1) {
-                    try {
-                        qualifier = getIntendedCallQualifier(oe, args);
-                    }
-                    catch (SourceErrorException see) {
-                        throw new SourceErrorException(
-                                "Ambiguous Call. Consider qualifying.", node
-                                        .getLocation());
-                    }
-                }
-                // 3. Size == 0 => operation owning the call defined
-                //	  locally. So no need to qualify.
-            }
-            catch (NoSuchSymbolException nsse) {
-                noSuchSymbol(node.getQualifier(), node.getName().getName(),
-                        node.getLocation());
-            }
-            catch (DuplicateSymbolException dse) {
-                throw new RuntimeException(dse);
-            }
-        }
-        else {
-            qualifier = node.getQualifier().getName();
-        }
-        myBookkeeper.fxnAppendTo(qualifier + myQualifierSymbol
-                + node.getName().getName() + "(");
-    }
 
     @Override
     public void postCallStmt(CallStmt node) {
@@ -231,21 +152,24 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                                     FacilityStrategy.FACILITY_IGNORE, false))
                             .toFacilityEntry(node.getLocation());
 
+            // First add any arguments for the specification.
             List<ModuleArgumentItem> args =
                     new LinkedList<ModuleArgumentItem>(myCurrentFacility
                             .getFacility().getSpecification().getParameters());
 
             List<SymbolTableEntry> formalParams =
                     new LinkedList<SymbolTableEntry>(myCurrentFacility
-                            .getFacility().getSpecification().getModuleScope()
-                            .getModuleFormalParameters());
+                            .getFacility().getSpecification().getScope(false)
+                            .getFormalParameterEntries());
+
             try {
+                // Add any arguments and formal parameters from the realization now.
                 args.addAll(myCurrentFacility.getFacility().getRealization()
                         .getParameters());
 
                 formalParams.addAll(myCurrentFacility.getFacility()
-                        .getRealization().getModuleScope()
-                        .getModuleFormalParameters());
+                        .getRealization().getScope(false)
+                        .getFormalParameterEntries());
             }
             catch (NoneProvidedException npe) {
                 // This shouldn't happen with a base facility
@@ -265,14 +189,13 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 argIndex++;
             }
         }
-        catch (NoSuchSymbolException ex) {
-            Logger.getLogger(CTranslator.class.getName()).log(Level.SEVERE,
-                    null, ex);
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, node.getName());
         }
-        catch (DuplicateSymbolException ex) {
-            Logger.getLogger(CTranslator.class.getName()).log(Level.SEVERE,
-                    null, ex);
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
         }
+
         myBookkeeper.facAdd(node.getName().getName(), node.getConceptName()
                 .getName(), node.getBodyName().getName());
         AbstractTranslator.emitDebug("Entering FacilityDec");
@@ -287,17 +210,23 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
             if (m.getModuleIdentifier().toString().equals(
                     node.getName().getName())) {
 
+                // Get any arguments for the enhancement specification.
                 List<ModuleArgumentItem> moduleArgs =
                         new LinkedList<ModuleArgumentItem>(m.getParameters());
-                List<SymbolTableEntry> moduleFormalParams =
-                        new LinkedList<SymbolTableEntry>(m.getModuleScope()
-                                .getModuleFormalParameters());
 
+                // Now get formal parameters to the enhancement specification.
+                List<SymbolTableEntry> moduleFormalParams =
+                        new LinkedList<SymbolTableEntry>(m.getScope(false)
+                                .getFormalParameterEntries());
+
+                // Combine arguments-to and formal parameters of the 
+                // specification
                 moduleArgs.addAll(myCurrentFacility
                         .getEnhancementRealization(m).getParameters());
+
                 moduleFormalParams.addAll(myCurrentFacility
-                        .getEnhancementRealization(m).getModuleScope()
-                        .getModuleFormalParameters());
+                        .getEnhancementRealization(m).getScope(false)
+                        .getFormalParameterEntries());
 
                 int argIndex = 0;
                 for (SymbolTableEntry entry : moduleFormalParams) {
@@ -335,23 +264,25 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         AbstractTranslator.emitDebug("Leaving FacilityDec");
     }
 
-    // TODO : Maybe add some sort of private operation that handles both 
-    //		  preFacilityOperationDec and preProcedureOperationDec.
-    //        (right now there's some duplication, though not too much)..
+    // TODO : Maybe add a private operation that handles:
+    //		  preFacilityOperationDec, preProcedureDec, and 
+    //		  preOperationDec.
 
     @Override
     public void preFacilityOperationDec(FacilityOperationDec node) {
 
-        PTType type;
         String returnType = "void";
 
         if (node.getReturnTy() != null) {
-            type = node.getReturnTy().getProgramTypeValue();
+
             returnType =
-                    getDefiningFacilityEntry(type).getFacility()
-                            .getSpecification().getModuleIdentifier()
-                            .toString()
-                            + myQualifierSymbol + type.toString();
+                    getDefiningFacilityEntry(
+                            node.getReturnTy().getProgramTypeValue())
+                            .getFacility().getSpecification()
+                            .getModuleIdentifier().toString()
+                            + myQualifierSymbol
+                            + node.getReturnTy().getProgramTypeValue()
+                                    .toString();
         }
 
         AbstractTranslator.emitDebug("Adding operation/procedure: <name: '"
@@ -378,11 +309,12 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         String qual, specification;
         PTType type = node.getTy().getProgramTypeValue();
 
-        if (node.getTy().getProgramTypeValue() instanceof PTGeneric) {
+        if (type instanceof PTGeneric) {
             myBookkeeper.fxnAddVariableDeclaration("RType "
                     + node.getName().getName());
         }
         else {
+
             // Ignore preprocessor variables: "_Integer", etc.
             if (!node.getName().getName().startsWith("_")) {
 
@@ -422,7 +354,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     /**
      * Given a PTType, <code>type</code>, this method finds the first 
-     * facility declared in scope that uses <code>type</code>s 
+     * facility declared in ModuleScope that uses <code>type</code>s 
      * defining module as its specification.
      * 
      * @param type A PTType.
@@ -452,19 +384,82 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 }
             }
         }
-        catch (DuplicateSymbolException dse) {
-            throw new RuntimeException(dse);
-        }
         catch (NoSuchSymbolException nsse) {
             throw new RuntimeException("No local facility available for type!?");
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
         }
         return result;
     }
 
-    private String getIntendedCallQualifier(OperationEntry operation,
-            List<ProgramExp> arguments) {//throws SourceErrorException {
+    protected String getIntendedCallQualifier(CallStmt node) {
+
+        String qualifier = "";
+        List<ProgramExp> args = node.getArguments();
+        List<PTType> argTypes = new LinkedList<PTType>();
+        List<FacilityEntry> matches = new LinkedList<FacilityEntry>();
+
+        try {
+
+            // First gather the call's arg types for an OperationQuery.
+            for (ProgramExp arg : args) {
+                argTypes.add(arg.getProgramType());
+            }
+
+            OperationEntry oe =
+                    myModuleScope.queryForOne(
+                            new OperationQuery(node.getQualifier(), node
+                                    .getName(), argTypes)).toOperationEntry(
+                            null);
+
+            // Now grab any FacilityEntries in scope whose 
+            // specification matches oe's SourceModuleIdentifier.
+            List<FacilityEntry> facilities =
+                    myModuleScope.query(new EntryTypeQuery(FacilityEntry.class,
+                            ImportStrategy.IMPORT_NAMED,
+                            FacilityStrategy.FACILITY_IGNORE));
+
+            for (FacilityEntry facility : facilities) {
+                if (oe.getSourceModuleIdentifier().equals(
+                        facility.getFacility().getSpecification()
+                                .getModuleIdentifier())) {
+                    matches.add(facility);
+                }
+            }
+
+            // There should only be two cases:
+            // 1. Size == 1 => a unique facility is instantiated 
+            //	  in scope whose specification matches oe's. So the 
+            //	  appropriate qualifier is that facility's name.
+            if (matches.size() == 1) {
+                qualifier = matches.get(0).getName();
+            }
+            // 2. Size > 1 => multiple facilities instantiated use 
+            //    oe's SourceModuleIdentifier as a specification.
+            //	  Which facility's name to use as a qualifier is 
+            //	  ambiguous - so off to argument examination we go.
+            if (matches.size() > 1) {
+                qualifier = findQualifyingArgument(oe, args);
+            }
+            // 3. Size == 0 => the operation owning the call is 
+            //	  defined locally. So no need to qualify at all.
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(node.getQualifier(), node.getName().getName(), node
+                    .getLocation());
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
+        }
+        return qualifier;
+    }
+
+    private String findQualifyingArgument(OperationEntry operation,
+            List<ProgramExp> arguments) throws SourceErrorException {
 
         String result = null;
+
         for (ProgramExp arg : arguments) {
 
             if (arg.getProgramType().getQualifier() != null) {
@@ -480,7 +475,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                             .getModuleIdentifier().equals(
                                     operation.getSourceModuleIdentifier())) {
                         result = fe.getName();
-                        break; // Leave -- looks like we've found it.
+                        break; // Leave - we've found a suitable qualifier.
                     }
                 }
                 catch (DuplicateSymbolException dse) {
@@ -491,14 +486,23 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                             "Couldn't find facility in moduleScope.");
                 }
             }
-            if (getDefiningFacilityEntry(arg.getProgramType()).getFacility()
-                    .getSpecification().getModuleIdentifier().equals(
-                            operation.getSourceModuleIdentifier())) {
-                result =
-                        getDefiningFacilityEntry(arg.getProgramType())
-                                .getName();
-
+            // Qualifier not explicitly defined for this instance of
+            // current argument's type. This means all we have to do
+            // is find the first facility whose specification matches 
+            // the call-owning operation's SourceModule and use that 
+            // facility's name as the qualifier.
+            else {
+                if (getDefiningFacilityEntry(arg.getProgramType())
+                        .getFacility().getSpecification().getModuleIdentifier()
+                        .equals(operation.getSourceModuleIdentifier())) {
+                    result =
+                            getDefiningFacilityEntry(arg.getProgramType())
+                                    .getName();
+                }
             }
+        }
+        if (result == null) {
+            throw new SourceErrorException();
         }
         return result;
     }
@@ -510,6 +514,11 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public void noSuchModule(PosSymbol qualifier) {
         throw new SourceErrorException(
                 "Module does not exist or is not in scope.", qualifier);
+    }
+
+    public void ambiguousCall(PosSymbol symbol) {
+        throw new SourceErrorException("Ambiguous call. Needs Qualification.",
+                symbol);
     }
 
     public void noSuchSymbol(PosSymbol qualifier, PosSymbol symbol) {
@@ -565,7 +574,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     private void outputToReport(String fileContents) {
-        String b = "Just want to breakpoint here.";
         CompileReport report = myInstanceEnvironment.getCompileReport();
         report.setTranslateSuccess();
         report.setOutput(fileContents);

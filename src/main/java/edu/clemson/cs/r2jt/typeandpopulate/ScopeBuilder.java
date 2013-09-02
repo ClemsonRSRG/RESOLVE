@@ -26,7 +26,6 @@ import edu.clemson.cs.r2jt.absyn.VarDec;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramQualifiedEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.RepresentationTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
@@ -111,14 +110,14 @@ public class ScopeBuilder extends SyntacticScope {
 
     public OperationEntry addOperation(String name,
             ResolveConceptualElement definingElement,
-            List<ProgramParameterEntry> params, PTType returnType)
-            throws DuplicateSymbolException {
+            List<ProgramParameterEntry> params, PTType returnType,
+            boolean isParameter) throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, returnType);
 
         OperationEntry entry =
                 new OperationEntry(name, definingElement, myRootModule,
-                        returnType, params);
+                        returnType, params, isParameter);
 
         myBindings.put(name, entry);
 

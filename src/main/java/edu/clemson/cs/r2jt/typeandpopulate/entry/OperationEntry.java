@@ -14,27 +14,34 @@ import java.util.Map;
 
 public class OperationEntry extends SymbolTableEntry {
 
+    private boolean myParameterIndicator = false;
     private final PTType myReturnType;
     private final ImmutableList<ProgramParameterEntry> myParameters;
 
     public OperationEntry(String name,
             ResolveConceptualElement definingElement,
             ModuleIdentifier sourceModule, PTType returnType,
-            List<ProgramParameterEntry> parameters) {
+            List<ProgramParameterEntry> parameters, boolean parameter) {
 
-        this(name, definingElement, sourceModule, returnType,
-                new ArrayBackedImmutableList<ProgramParameterEntry>(parameters));
+        this(
+                name,
+                definingElement,
+                sourceModule,
+                returnType,
+                new ArrayBackedImmutableList<ProgramParameterEntry>(parameters),
+                parameter);
     }
 
     public OperationEntry(String name,
             ResolveConceptualElement definingElement,
             ModuleIdentifier sourceModule, PTType returnType,
-            ImmutableList<ProgramParameterEntry> parameters) {
+            ImmutableList<ProgramParameterEntry> parameters, boolean parameter) {
 
         super(name, definingElement, sourceModule);
 
         myParameters = parameters;
         myReturnType = returnType;
+        myParameterIndicator = parameter;
     }
 
     public OperationEntry toOperationEntry(Location l) {
@@ -54,6 +61,10 @@ public class OperationEntry extends SymbolTableEntry {
         return "an operation";
     }
 
+    public boolean isFormalParameter() {
+        return myParameterIndicator;
+    }
+
     @Override
     public OperationEntry instantiateGenerics(
             Map<String, PTType> genericInstantiations,
@@ -67,7 +78,8 @@ public class OperationEntry extends SymbolTableEntry {
                         instantiatingFacility),
                 new LazilyMappedImmutableList<ProgramParameterEntry, ProgramParameterEntry>(
                         myParameters, new InstantiationMapping(
-                                genericInstantiations, instantiatingFacility)));
+                                genericInstantiations, instantiatingFacility)),
+                myParameterIndicator);
     }
 
     private static class InstantiationMapping

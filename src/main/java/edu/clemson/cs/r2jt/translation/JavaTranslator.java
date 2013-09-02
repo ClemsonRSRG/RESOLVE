@@ -8,15 +8,22 @@ import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleParameterization;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTVoid;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
+import edu.clemson.cs.r2jt.utilities.SourceErrorException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 
@@ -58,7 +65,7 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preModuleDec(ModuleDec node) {
         JavaTranslator.emitDebug("-----------------------------\n"
-                + "Translate module: " + node.getName().getName()
+                + "Translate [Java]: " + node.getName().getName()
                 + "\n-----------------------------");
 
         String moduleName = node.getName().toString();
@@ -68,6 +75,47 @@ public class JavaTranslator extends AbstractTranslator {
         }
         else if (node instanceof ConceptModuleDec) {
             myBookkeeper = new JavaConceptBookkeeper(moduleName, false);
+        }
+    }
+
+    /**
+     * <p>This isn't in <code>AbstractTranslator</code> since Java 
+     * translation requires that calls to operations derived from
+     * facility enhancements be specially qualified. Since this
+     * special case doesn't apply to C, the separation seems necessary.
+     * 
+     * Note <code>preCallStmt</code> in {@link CTranslator CTranslator} 
+     * still needs to qualify calls so qualification finding methods
+     * are still found in the <code>AbstractTranslator</code>.</p>
+     */
+    @Override
+    public void preCallStmt(CallStmt node) {
+
+        String qualifier;
+        StringBuilder enhancementQualifier = new StringBuilder();
+        try {
+            // For instance, if we see a call to "Read" and our
+            // facility is enhanced with "Reading_Capability", 
+            // AND there is more than a single enhancement, we
+            // need to qualify the call to Read specially.
+            if (isCallFromEnhancement(node.getName().getName(),
+                    enhancementQualifier)) {
+                qualifier = enhancementQualifier.toString();
+            }
+            // Otherwise, we are dealing with a regular call to an 
+            // operation defined in a concept. Yet it looks like the
+            // user saw fit to not qualify it. So lets try to find it.
+            else if (node.getQualifier() == null) {
+                qualifier = getIntendedCallQualifier(node);
+            }
+            else {
+                qualifier = node.getQualifier().getName();
+            }
+            myBookkeeper.fxnAppendTo(qualifier + myQualifierSymbol
+                    + node.getName().getName() + "(");
+        }
+        catch (SourceErrorException see) {
+            ambiguousCall(node.getName());
         }
     }
 
@@ -82,6 +130,12 @@ public class JavaTranslator extends AbstractTranslator {
             parameter =
                     buildOperationParameter(node.getName().getName(), node
                             .getQualifier());
+
+            JavaTranslator.emitDebug("\t"
+                    + node.getName().getName()
+                    + " -> "
+                    + myModuleFormalParameters.get(node.getName().getName())
+                            .getName());
         }
 
         // Argument is an EvalExp - typically an integer in {0 ... n}.
@@ -100,7 +154,7 @@ public class JavaTranslator extends AbstractTranslator {
         else {
             parameter =
                     getDefiningFacilityEntry(type).getName() + ".create"
-                            + node.getProgramTypeValue() + "()";
+                            + node.getProgramTypeValue().toString() + "()";
             JavaTranslator.emitDebug("\t"
                     + node.getName().getName()
                     + " -> "
@@ -111,33 +165,78 @@ public class JavaTranslator extends AbstractTranslator {
         // Finally, add the built parameter to the appropriate book.
         if (myBookkeeper.facEnhancementIsOpen()) {
             myBookkeeper.facAddEnhancementParameter(parameter);
-            JavaTranslator.emitDebug("Adding enhancement parameter");
         }
         else {
             myBookkeeper.facAddParameter(parameter);
-            JavaTranslator.emitDebug("Adding facility parameter");
         }
+    }
+
+    @Override
+    public void postModuleDec(ModuleDec node) {
+        JavaTranslator.emitDebug("-----------------------------\n"
+                + "End translate: " + node.getName().getName()
+                + "\n-----------------------------");
     }
 
     // -----------------------------------------------------------
     //   Helper methods
     // -----------------------------------------------------------
 
+    private boolean isCallFromEnhancement(String callName,
+            StringBuilder qualifier) {
+
+        List<ModuleArgumentItem> allArgs = new LinkedList<ModuleArgumentItem>();
+
+        List<FacilityEntry> facilities =
+                myModuleScope.query(new EntryTypeQuery(FacilityEntry.class,
+                        ImportStrategy.IMPORT_NAMED,
+                        FacilityStrategy.FACILITY_IGNORE));
+
+        // Look through all facilities for 
+        for (FacilityEntry f : facilities) {
+
+            for (ModuleParameterization p : f.getEnhancements()) {
+
+                allArgs.addAll(p.getParameters());
+                allArgs.addAll(f.getEnhancementRealization(p).getParameters());
+
+                for (ModuleArgumentItem i : allArgs) {
+                    if (i.getName().getName().equals(callName)) {
+                        // If there is more than one enhancement, we
+                        if (f.getEnhancements().size() > 1) {
+                            qualifier.append("((").append(
+                                    p.getModuleIdentifier().toString()).append(
+                                    ")").append(f.getName()).append(")");
+                        }
+                        else {
+                            // Else - only one enhancement. Just use the 
+                            // facility's name.
+                            qualifier.append(f.getName());
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private String buildOperationParameter(String argument, PosSymbol qualifier) {
         StringBuilder parameter = new StringBuilder();
 
+        /**
+         * TODO	: For some reason NameAndEntryTypeQueries are
+         * bombing. See: 
+         * {@Link https://www.pivotaltracker.com/story/show/55770154}
+         * Ideally here we would use a query that looks 
+         * at both name and entry-type (i.e. NameAndEntryTypeQuery)
+         * but unfortunately it's not working. Until I'm able to 
+         * figure would what exactly is going wrong and fix it, 
+         * regular NameQueries will have to suffice. So expect 
+         * the unexpected here until then.
+         */
         try {
-            // TODO	:	For some reason NameAndEntryTypeQueries are
-            //			bombing. See: 		
-            //			https://www.pivotaltracker.com/story/show/55770154
-            //			Ideally here we would want to use a query that
-            //			looks specifically at "OperationEntries", a name, 
-            //			and nothing else. However, until I'm able to figure
-            //			out exacty what's going wrong and fix it, regular 
-            //			NameQueries will have to suffice. So expect unexpected
-            //			behavior here until that point.
 
-            // First find the OperationEntry corresponding to the actual op.
             OperationEntry actualOp =
                     myModuleScope.queryForOne(
                             new NameQuery(qualifier, argument,
@@ -186,7 +285,6 @@ public class JavaTranslator extends AbstractTranslator {
                         parameter.append(", ");
                     }
 
-                    // From "Std_Integer_Fac", we want: "Integer_Template".
                     String facilitySpec =
                             getDefiningFacilityEntry(pe.getDeclaredType())
                                     .getFacility().getSpecification()
@@ -204,7 +302,6 @@ public class JavaTranslator extends AbstractTranslator {
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(qualifier, argument, qualifier.getLocation());
-            throw new RuntimeException();
         }
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException(dse);
