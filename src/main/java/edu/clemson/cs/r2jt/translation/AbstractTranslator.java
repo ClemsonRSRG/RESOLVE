@@ -20,7 +20,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
 import edu.clemson.cs.r2jt.typeandpopulate.NoneProvidedException;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
@@ -35,8 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Overrides translation specific visitor methods share-able 
@@ -219,12 +216,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                         new LinkedList<SymbolTableEntry>(m.getScope(false)
                                 .getFormalParameterEntries());
 
-                System.out.println("formal parameter size: "
-                        + moduleFormalParams.size());
-
-                for (SymbolTableEntry e : moduleFormalParams) {
-                    System.out.println("FORMAL PARAM: " + e.getName());
-                }
                 // Combine arguments-to and formal parameters of the 
                 // specification
                 moduleArgs.addAll(myCurrentFacility
