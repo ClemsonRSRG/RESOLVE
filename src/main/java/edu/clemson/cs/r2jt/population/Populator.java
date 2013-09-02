@@ -31,14 +31,10 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.Parameter
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.RepresentationTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry.Quantification;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTElement;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTInstantiated;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTInteger;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRecord;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
@@ -49,7 +45,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.query.NameAndEntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.ProgramVariableQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.r2jt.typereasoning.*;
 import edu.clemson.cs.r2jt.utilities.HardCoded;
 import edu.clemson.cs.r2jt.utilities.Indirect;
@@ -65,8 +60,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Populator extends TreeWalkerVisitor {
 
@@ -139,6 +132,20 @@ public class Populator extends TreeWalkerVisitor {
             new HashMap<String, MTType>();
 
     /**
+     * Currently HwS's getFormalParameterEntries method in {@link Scope Scope} 
+     * only returns a list of ProgramParameterEntries visible in that current
+     * scope but fails to recognize any op declarations that are parameters 
+     * (they are treated no differently from any other operation declaration).
+     * Since Operation Declarations technically CAN serve as formal parameters 
+     * to a module, this list keeps track of the current module's formal parameter
+     * names. This enables us to check, every time we're about to add an operationEntry 
+     * into the table, whether or not is also a formal parameter and set a flag in
+     * {@link OperationEntry OperationEntry} accordingly. This in turn allows us to 
+     * easily fix getFormalParameterEntries method to also return relevant Operations.
+     */
+    private List<String> myCurrentModuleParameters = new LinkedList<String>();
+
+    /**
      * <p>This simply enables an error check--as a definition uses named types,
      * we keep track of them, and when an implicit type is introduced, we make
      * sure that it hasn't been "used" yet, thus leading to a confusing scenario
@@ -169,30 +176,6 @@ public class Populator extends TreeWalkerVisitor {
      * myCorrespondingOperation.</p>
      */
     private List<ProgramParameterEntry> myCurrentParameters;
-
-    /**
-     * <p>Since formal parameters that are operations are treated no
-     * different from any other operation declaration - in this list
-     * we keep track of the names of those "special" operations that 
-     * are technically formal parameters. This allows us to, every-time 
-     * we are about to add a OperationEntry into the table, check whether
-     * or not it can be treated as a formal parameter, and set an internal 
-     * flag in the Entry itself that says whether or not it can/should
-     * be seen as a parameter.</p>
-     * 
-     * <p><em>Note:<em> The motivation for all of this is to get HwS's
-     * <code>getFormalParameterEntries</code> method in {@Link Scope Scope} 
-     * properly distinguishing between formal parameters that are operations
-     * and any other run-of-the-mill operation declaration.</p>
-     * 
-     * <p>Currently the method only returns anything that is aProgramParameterEntry,
-     * ignoring the fact that ModuleScope <em>can<em> have operations as parameters.
-     * See {@Link https://www.pivotaltracker.com/story/show/55770086}.
-     * This is an effort to patch/address that. All further changes that reflect this
-     * are pretty slight and take place in {@Link Scope Scope} and some of its 
-     * subclasses.</p>
-     */
-    private List<String> myOperationBasedParameters = new LinkedList<String>();
 
     /**
      * <p>A mapping from generic types that appear in the module to the math
@@ -236,6 +219,7 @@ public class Populator extends TreeWalkerVisitor {
         Populator.emitDebug("----------------------\nModule: "
                 + node.getName().getName() + "\n----------------------");
         myCurModuleScope = myBuilder.startModuleScope(node);
+
     }
 
     @Override
@@ -333,6 +317,7 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postConstantParamDec(ConstantParamDec param) {
         try {
+
             String paramName = param.getName().getName();
 
             myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
@@ -387,6 +372,7 @@ public class Populator extends TreeWalkerVisitor {
 
         if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
             try {
+
                 //Inside the operation's assertions, the name of the operation
                 //refers to its return value
                 myBuilder.getInnermostActiveScope().addProgramVariable(
@@ -404,9 +390,11 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preModuleParameterDec(ModuleParameterDec d) {
+
         if (d.getWrappedDec() instanceof OperationDec) {
-            myOperationBasedParameters.add(d.getName().getName());
+            myCurrentModuleParameters.add(d.getName().getName());
         }
+
     }
 
     @Override
@@ -422,7 +410,6 @@ public class Populator extends TreeWalkerVisitor {
         }
         else {
             MTType t = ((OperationDec) d.getWrappedDec()).getMathType();
-
             if (t == null) {
                 t = myTypeGraph.VOID;
             }
@@ -504,6 +491,7 @@ public class Populator extends TreeWalkerVisitor {
         if (previous != null && previous == node.getReturnTy()) {
 
             try {
+
                 myBuilder.getInnermostActiveScope().addProgramVariable(
                         node.getName().getName(), node,
                         node.getReturnTy().getProgramTypeValue());
@@ -660,7 +648,8 @@ public class Populator extends TreeWalkerVisitor {
 
     private void putOperationLikeThingInSymbolTable(PosSymbol name,
             Ty returnTy, ResolveConceptualElement dec) {
-        boolean isParameter = false;
+
+        boolean isOperationFormalParameter = false;
         try {
             PTType returnType;
             if (returnTy == null) {
@@ -669,11 +658,14 @@ public class Populator extends TreeWalkerVisitor {
             else {
                 returnType = returnTy.getProgramTypeValue();
             }
-            if (myOperationBasedParameters.contains(name.getName())) {
-                isParameter = true;
+
+            if (myCurrentModuleParameters.contains(name.getName())) {
+                isOperationFormalParameter = true;
             }
+
             myBuilder.getInnermostActiveScope().addOperation(name.getName(),
-                    dec, myCurrentParameters, returnType, isParameter);
+                    dec, myCurrentParameters, returnType,
+                    isOperationFormalParameter);
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(name.getName(), name.getLocation());
@@ -692,7 +684,6 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         try {
-
             ProgramParameterEntry paramEntry =
                     myBuilder.getInnermostActiveScope().addFormalParameter(
                             dec.getName().getName(), dec, mode,
@@ -833,9 +824,9 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postNameTy(NameTy ty) {
+
         //Note that all mathematical types are ArbitraryExpTys, so this must
         //be in a program-type syntactic slot.
-
         PosSymbol tySymbol = ty.getName();
         PosSymbol tyQualifier = ty.getQualifier();
         Location tyLocation = tySymbol.getLocation();
@@ -855,13 +846,13 @@ public class Populator extends TreeWalkerVisitor {
                                             true)).toProgramTypeEntry(
                                     tyLocation);
 
-            if (tyQualifier != null) {
-                type.getProgramType().setQualifier(tyQualifier.getName());
-
-            }
             ty.setProgramTypeValue(type.getProgramType());
             ty.setMathType(myTypeGraph.MTYPE);
             ty.setMathTypeValue(type.getModelType());
+            if (tyQualifier != null) {
+                type.getProgramType().setQualifier(tyQualifier.getName());
+            }
+
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(tyQualifier, tyName, tyLocation);
@@ -959,6 +950,7 @@ public class Populator extends TreeWalkerVisitor {
         try {
             myBuilder.getInnermostActiveScope().addProgramVariable(varName,
                     programVar, programVar.getTy().getProgramTypeValue());
+
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(varName, programVar.getLocation());
@@ -975,7 +967,6 @@ public class Populator extends TreeWalkerVisitor {
 
             node.setProgramType(entry.getProgramType());
             //Handle math typing stuff
-            // uh oh. Looks like hampton is calling other parts of the tree
             postSymbolExp(node.getQualifier(), node.getName().getName(), node);
         }
         catch (NoSuchSymbolException nsse) {
@@ -1345,7 +1336,7 @@ public class Populator extends TreeWalkerVisitor {
     public void postProgramOpExp(ProgramOpExp e) {
 
         // Theoretically this should never be visited. Everything 
-        // should have already been converted to paramExp in the preprocessor.
+        // should have already been converted in the preprocessor.
         e.setProgramType(e.getProgramType(myTypeGraph));
         e.setMathType(e.getProgramType().toMath());
     }
@@ -1573,7 +1564,6 @@ public class Populator extends TreeWalkerVisitor {
             i.setProgramTypeValue(i.getEvalExp().getProgramType());
         }
         else if (i.getName() != null) {
-
             List<SymbolTableEntry> es =
                     myBuilder.getInnermostActiveScope().query(
                             new NameQuery(i.getQualifier(), i.getName(),
@@ -1628,8 +1618,8 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postModuleDec(ModuleDec node) {
-        myOperationBasedParameters.clear();
         myBuilder.endScope();
+        myCurrentModuleParameters.clear();
         Populator.emitDebug("END MATH POPULATOR\n----------------------\n");
     }
 

@@ -219,6 +219,12 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                         new LinkedList<SymbolTableEntry>(m.getScope(false)
                                 .getFormalParameterEntries());
 
+                System.out.println("formal parameter size: "
+                        + moduleFormalParams.size());
+
+                for (SymbolTableEntry e : moduleFormalParams) {
+                    System.out.println("FORMAL PARAM: " + e.getName());
+                }
                 // Combine arguments-to and formal parameters of the 
                 // specification
                 moduleArgs.addAll(myCurrentFacility
