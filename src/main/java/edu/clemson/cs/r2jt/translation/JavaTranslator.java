@@ -192,7 +192,6 @@ public class JavaTranslator extends AbstractTranslator {
                         ImportStrategy.IMPORT_NAMED,
                         FacilityStrategy.FACILITY_IGNORE));
 
-        // Look through all facilities for 
         for (FacilityEntry f : facilities) {
 
             for (ModuleParameterization p : f.getEnhancements()) {
