@@ -23,6 +23,10 @@ import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 
@@ -35,8 +39,12 @@ public class VCGenerator extends TreeWalkerVisitor {
     // Global Variables 
     // ===========================================================
 
-    // Symbol Table
-    private OldSymbolTable mySymbolTable;
+    // Symbol table related items
+    private final MathSymbolTableBuilder mySymbolTable;
+    private final TypeGraph myTypeGraph;
+    private final MTType BOOLEAN;
+    private final MTType MTYPE;
+    private final MTType Z;
 
     // Compile Environment
     private CompileEnvironment myInstanceEnvironment;
@@ -71,8 +79,14 @@ public class VCGenerator extends TreeWalkerVisitor {
     // Constructors
     // ===========================================================
 
-    public VCGenerator(OldSymbolTable table, final CompileEnvironment env) {
-        mySymbolTable = table;
+    public VCGenerator(ScopeRepository table, final CompileEnvironment env) {
+        // Symbol table items
+        mySymbolTable = (MathSymbolTableBuilder) table;
+        myTypeGraph = mySymbolTable.getTypeGraph();
+        BOOLEAN = myTypeGraph.BOOLEAN;
+        MTYPE = myTypeGraph.MTYPE;
+        Z = myTypeGraph.Z;
+
         myInstanceEnvironment = env;
         myUtilities = new Utilities(myInstanceEnvironment);
 
@@ -96,46 +110,12 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     @Override
     public void preEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
-        // Begin the new symbol table scope
-        mySymbolTable.beginModuleScope();
 
-        // Add the dec to the stack
-        myUtilities.addCurrentModuleDec(dec);
-
-        // Construct list of parameters from the ConceptModuleDec
-        myUtilities.constructParamList(dec.getConceptName());
-
-        // Get Corresponding EnhancementModuleDec
-        ModuleID eid =
-                ModuleID.createEnhancementID(dec.getEnhancementName(), dec
-                        .getConceptName());
-        myUtilities
-                .setEnhancementModuleDec((EnhancementModuleDec) myInstanceEnvironment
-                        .getModuleDec(eid));
-
-        // Get Corresponding ConceptModuleDec
-        ModuleID cid = ModuleID.createConceptID(dec.getConceptName());
-        myUtilities
-                .setConceptModuleDec((ConceptModuleDec) myInstanceEnvironment
-                        .getModuleDec(cid));
     }
 
     @Override
     public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
-        // Clear the list of parameters from ConceptModuleDec
-        myUtilities.clearParamList();
 
-        // Set EnhancementModuleDec to null
-        myUtilities.setEnhancementModuleDec(null);
-
-        // Set ConceptModuleDec to null
-        myUtilities.setConceptModuleDec(null);
-
-        // Remove the dec from the stack
-        myUtilities.removeCurrentModuleDec();
-
-        // End the current symbol table scope
-        mySymbolTable.endModuleScope();
     }
 
     // -----------------------------------------------------------
@@ -144,17 +124,12 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     @Override
     public void preProcedureDec(ProcedureDec dec) {
-        // Begin the new symbol table scope
-        mySymbolTable.beginOperationScope();
-        mySymbolTable.beginProcedureScope();
-        mySymbolTable.bindProcedureTypeNames();
+
     }
 
     @Override
     public void postProcedureDec(ProcedureDec dec) {
-        // End the current symbol table scope
-        mySymbolTable.endProcedureScope();
-        mySymbolTable.endOperationScope();
+
     }
 
     // ===========================================================
