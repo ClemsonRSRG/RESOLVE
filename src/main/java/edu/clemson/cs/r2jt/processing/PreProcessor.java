@@ -1607,6 +1607,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
      * @return Newly created operation call.
      */
     private ProgramParamExp replaceProgramOpExp(ProgramOpExp exp) {
+        /*
         // Variables
         int operator = exp.getOperator();
         ProgramParamExp newExp = null;
@@ -1688,6 +1689,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             newExp = new ProgramParamExp(loc, operationName, args, null);
         }
 
-        return newExp;
+        return newExp; */
+        return null;
     }
 }
