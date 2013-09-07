@@ -40,10 +40,16 @@ import java.util.Map;
  * between currently supported target languages (C & Java). Modify
  * as needed when/if new target languages are incorporated into the
  * project.
+ *
  * 
  * @author Markt, Welchd
  */
 public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
+
+    protected static final String FLAG_SECTION_NAME = "Translation";
+
+    protected static final String FLAG_DESC_TRANSLATE_CLEAN =
+            "Regenerates code for all supporting RESOLVE files.";
 
     /**
      * <p>If <code>true</code>, as we walk the tree, debug information 
@@ -60,7 +66,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * <p>This is where all information is ultimately stored. The 
      * <code>bookkeeper</code> (and it's concrete subclasses) handle 
      * how all information is collected, organized, and ultimately
-     * arranged on the translated page via calls to concrete 
+     * arranged on the translated page via calls to overriden, concrete
      * <code>getString</code> methods.</p>
      */
     protected Bookkeeper myBookkeeper;
@@ -72,9 +78,11 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     protected String myQualifierSymbol;
 
     /**
-     * <p>A pointer to the facility declaration currently undergoing
-     * translation. Any enhancements accompanying this current facility 
-     * declaration (if any) are enclosed within.</p>
+     * <p>While walking a FacilityDec or its children, this maintains
+     * a pointer to that facility, and, by extension, any enhancements
+     * (<code>ModuleParameterizations</code>) enclosed within. If we
+     * haven't encountered a <code>FacilityDec</code> or we've finished
+     * walking one, this is set to <code>null</code>.</p>
      */
     protected FacilityEntry myCurrentFacility;
 

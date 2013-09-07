@@ -1,7 +1,7 @@
 package edu.clemson.cs.r2jt.translation.bookkeeping;
 
 /**
- * @author Welch D
+ * @author Welchd
  */
 public class JavaFacilityBookkeeper extends JavaBookkeeper {
 
@@ -27,6 +27,9 @@ public class JavaFacilityBookkeeper extends JavaBookkeeper {
 
         for (AbstractFunctionBook func : myFunctionList) {
             if (func.name.equals("main")) {
+                standardMainDefined = true;
+            }
+            else if (!func.name.equals("Main")) {
                 standardMainDefined = true;
             }
             documentBuilder.append(func.getString());

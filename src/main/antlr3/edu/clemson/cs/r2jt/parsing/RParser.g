@@ -451,8 +451,9 @@ operation_parameter
     :   operation_declaration
     ;
 
+// c
 concept_realization_parameter
-    :   REALIZATION^ ident
+    :   MODULE_REALIZATION^ ident
         FOR! (CONCEPT!)? ident
     ;
 
@@ -543,11 +544,12 @@ state_aux_variable_declaration
 // ---------------------------------------------------------------
 
 facility_declaration
-    :   FACILITY^ ident
+    :
+		FACILITY^ ident
         IS! ident
         module_argument_section?
         facility_enhancement*
-        REALIZED BY! ident
+        REALIZED (EXTERNALLY)? BY! ident
         (WITH_PROFILE ident)? module_argument_section?
         facility_body_enhancement*
         SEMICOLON!

@@ -244,7 +244,8 @@ public class CompileEnvironment {
 
     /**
      * Sets the <code>stdUsesDepends</code> lists to the provided updated list
-     * @param list The <code>List</code> of <code>List</code> of <code>UsesItem</code> which will be assigned to the global <code>stdUsesDepends</code>
+     * @param list The <code>List</code> of <code>List</code> of <code>UsesItem</code>
+     *                which will be assigned to the global <code>stdUsesDepends</code>
      */
     public void setStdUsesDepends(List<List<UsesItem>> list) {
         stdUsesDepends = list;
@@ -252,7 +253,8 @@ public class CompileEnvironment {
 
     /**
      * Sets the <code>stdUsesDepends</code> lists to the provided updated list
-     * @param list The <code>List</code> of <code>List</code> of <code>UsesItem</code> which will be assigned to the global <code>stdUsesDepends</code>
+     * @param list The <code>List</code> of <code>List</code> of <code>UsesItem</code>
+     *                which will be assigned to the global <code>stdUsesDepends</code>
      */
     public List<OldSymbolTable> getSymbolTables() {
         List<OldSymbolTable> stList = new List<OldSymbolTable>();

@@ -1,5 +1,6 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
+import edu.clemson.cs.r2jt.absyn.Dec;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
@@ -155,6 +156,20 @@ public class ScopeBuilder extends SyntacticScope {
 
         myBindings.put(name, result);
 
+        return result;
+    }
+
+    // not working quite right yet.
+    public ProgramTypeEntry addProgramTypeEntry(String name,
+            Dec definingElement, MTType model, PTType programType)
+            throws DuplicateSymbolException {
+        sanityCheckBindArguments(name, definingElement, "");
+
+        ProgramTypeEntry result =
+                new ProgramTypeEntry(myTypeGraph, name, definingElement,
+                        myRootModule, model, programType);
+
+        myBindings.put(name, result);
         return result;
     }
 

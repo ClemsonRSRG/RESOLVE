@@ -807,6 +807,28 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
+    public void preFacilityTypeDec(FacilityTypeDec node) {
+        myBuilder.startScope(node);
+    }
+
+    // Added 9-4-2013 --DtW
+    @Override
+    public void postFacilityTypeDec(FacilityTypeDec node) {
+        myBuilder.endScope();
+
+        try {
+            myBuilder.getInnermostActiveScope().addProgramTypeEntry(
+                    node.getName().getName(), node,
+                    node.getRepresentation().getMathTypeValue(),
+                    node.getRepresentation().getProgramTypeValue());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(node.getName().getName(), node.getName()
+                    .getLocation());
+        }
+    }
+
+    @Override
     public void postRecordTy(RecordTy ty) {
 
         Map<String, PTType> fieldMap = new HashMap<String, PTType>();
@@ -833,7 +855,6 @@ public class Populator extends TreeWalkerVisitor {
         String tyName = tySymbol.getName();
 
         try {
-
             ProgramTypeEntry type =
                     myBuilder
                             .getInnermostActiveScope()

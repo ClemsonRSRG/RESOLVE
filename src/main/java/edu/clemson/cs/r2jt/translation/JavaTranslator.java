@@ -32,20 +32,16 @@ import java.util.List;
 
 public class JavaTranslator extends AbstractTranslator {
 
-    private static final String FLAG_SECTION_NAME = "Translation";
-
     private static final String FLAG_DESC_TRANSLATE =
             "Translate a RESOLVE file to Java source file.";
-
-    private static final String FLAG_DESC_TRANSLATE_CLEAN =
-            "Regenerates Java code for all supporting RESOLVE files.";
 
     /**
      * <p>The Java Translator flag. Specifies that Java should be 
      * used as the compiler's target language.</p>
      */
     public static final Flag JAVA_FLAG_TRANSLATE =
-            new Flag(FLAG_SECTION_NAME, "javaTranslate", FLAG_DESC_TRANSLATE);
+            new Flag(AbstractTranslator.FLAG_SECTION_NAME, "javaTranslate",
+                    FLAG_DESC_TRANSLATE);
 
     public static final Flag JAVA_FLAG_TRANSLATE_CLEAN =
             new Flag(FLAG_SECTION_NAME, "javaTranslateClean",
@@ -94,10 +90,9 @@ public class JavaTranslator extends AbstractTranslator {
         String qualifier;
         StringBuilder enhancementQualifier = new StringBuilder();
         try {
-            // For instance, if we see a call to "Read" and our
-            // facility is enhanced with "Reading_Capability", 
-            // AND there is more than a single enhancement, we
-            // need to qualify the call to Read specially.
+            // If we see a call to "Read" and our facility is enhanced
+            // with "Reading_Capability", AND there is more than a single
+            // enhancement, we need to qualify the call to Read specially.
             if (isCallFromEnhancement(node.getName().getName(),
                     enhancementQualifier)) {
                 qualifier = enhancementQualifier.toString();
@@ -182,6 +177,39 @@ public class JavaTranslator extends AbstractTranslator {
     //   Helper methods
     // -----------------------------------------------------------
 
+    /**
+     * This method returns <code>true</code> <strong>iff</strong>
+     * <code>callName</code> matches an argument to a facility
+     * enhancement. Additionally, to avoid code duplication, if
+     * <code>true</code> is returned, this method takes the liberty
+     * of mutating the initially empty stringBuilder parameter,
+     * <code>qualifier</code>, into one that is appropriate for
+     * qualifying an enhancement defined call.
+     *
+     * "Appropriate" simply means wrapping the normal qualifier
+     * with the specificational name of the current enhancement.
+     * For instance, in the case of two or more enhancements:
+     *
+     * <pre>
+     * Facility SF is Stack_Template(..) realized by Array_Realiz
+     * 		enhanced with Reading_Capability realized by
+     * 			Obvious_Reading_Realiz(Std_Int_Fac.Read)
+     * 		enhanced with Writing_Capability realized by
+     * 			Obvious_Writing_Capability(Std_Int_Fac.Write);
+     * </pre>
+     *
+     * a call to <code>Read</code> should ideally look something like,
+     * <code>((Reading_Capability)SF).Read</code>. However, in the
+     * case where there is only a single enhancement, this method
+     * goes ahead simply makes the qualifier the base facility's
+     * name, I.e.: <code>SF.Read</code>.
+     *
+     * @param callName
+     * @param qualifier
+     * @return A boolean indicating whether or not
+     * 		   <code>callName</code> matches a facility enhancement
+     * 		   argument.
+     */
     private boolean isCallFromEnhancement(String callName,
             StringBuilder qualifier) {
 
@@ -200,16 +228,21 @@ public class JavaTranslator extends AbstractTranslator {
                 allArgs.addAll(f.getEnhancementRealization(p).getParameters());
 
                 for (ModuleArgumentItem i : allArgs) {
+
+                    // Does callName match an enhancement argument
                     if (i.getName().getName().equals(callName)) {
-                        // If there is more than one enhancement, we
+
+                        // It does. Ok, is there more than one enhancement?
                         if (f.getEnhancements().size() > 1) {
+
+                            // Yep, so lets wrap the qualifier appropriately.
                             qualifier.append("((").append(
                                     p.getModuleIdentifier().toString()).append(
                                     ")").append(f.getName()).append(")");
                         }
                         else {
-                            // Else - only one enhancement. Just use the 
-                            // facility's name.
+                            // Looks like there's only one enhancement.
+                            // Just use the base-facility's name.
                             qualifier.append(f.getName());
                         }
                         return true;
