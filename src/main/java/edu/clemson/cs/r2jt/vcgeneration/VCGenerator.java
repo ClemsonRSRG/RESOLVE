@@ -15,20 +15,27 @@ package edu.clemson.cs.r2jt.vcgeneration;
 /*
  * Libraries
  */
-import edu.clemson.cs.r2jt.absyn.ConceptModuleDec;
-import edu.clemson.cs.r2jt.absyn.EnhancementBodyModuleDec;
-import edu.clemson.cs.r2jt.absyn.EnhancementModuleDec;
-import edu.clemson.cs.r2jt.absyn.ProcedureDec;
+import edu.clemson.cs.r2jt.absyn.*;
+import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.ModuleID;
+import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.scope.OldSymbolTable;
+import edu.clemson.cs.r2jt.scope.*;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
-import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
-import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
+import edu.clemson.cs.r2jt.type.BooleanType;
+import edu.clemson.cs.r2jt.type.ConcType;
+import edu.clemson.cs.r2jt.type.NameType;
+import edu.clemson.cs.r2jt.type.Type;
+import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
+import edu.clemson.cs.r2jt.utilities.SourceErrorException;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * TODO: Write a description of this module
@@ -51,6 +58,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     // Utilties
     private Utilities myUtilities;
+
+    // Assertive Code
+    private AssertiveCode myAssertion;
 
     // ===========================================================
     // Flag Strings
@@ -89,15 +99,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         myInstanceEnvironment = env;
         myUtilities = new Utilities(myInstanceEnvironment);
-
-        /*
-         * Check if we have set the flag for Verbose Output * if
-         * (myInstanceEnvironment.flags.isFlagSet(FLAG_VERBOSE_VC)) {
-         * myVerboseHandler = new
-         * VerboseOutput(myInstanceEnvironment.getTargetFileName()); } else {
-         * myVerboseHandler = null;
-        }
-         */
+        myAssertion = null;
     }
 
     // ===========================================================
@@ -119,87 +121,445 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // FacilityOperationDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void preFacilityOperationDec(FacilityOperationDec dec) {
+
+    }
+
+    @Override
+    public void postFacilityOperationDec(FacilityOperationDec dec) {
+        // Create assertive code
+        myAssertion = new AssertiveCode(myInstanceEnvironment);
+
+        // Obtain the id for the module we are in.
+        ModuleIdentifier id = mySymbolTable.getScope(dec).getRootModule();
+        try {
+            // Obtain the module dec and use it to obtain the global requires clause
+            ModuleDec mDec =
+                    mySymbolTable.getModuleScope(id).getDefiningElement();
+            Exp gRequires = getRequiresClause(mDec);
+
+            // Obtains items from the current operation
+            Exp ensures =
+                    modifyEnsuresClause(dec.getEnsures(), dec.getLocation(),
+                            dec.getName());
+            List<Statement> statementList = dec.getStatements();
+
+            // Apply the procedure declaration rule
+            applyProcedureDeclRule(gRequires, ensures, statementList);
+
+            // Apply proof rules
+            applyEBRules();
+
+            System.out.println(myAssertion.getFinalConfirm());
+        }
+        catch (NoSuchSymbolException nsse) {
+            System.err.println("Module " + id
+                    + " does not exist or is not in scope.");
+            noSuchModule(dec.getLocation());
+        }
+
+        myAssertion = null;
+    }
+
+    // -----------------------------------------------------------
     // ProcedureDec
     // -----------------------------------------------------------
 
     @Override
     public void preProcedureDec(ProcedureDec dec) {
+    /*
+    // Create assertive code
+    myAssertion = new AssertiveCode(myInstanceEnvironment);
 
+    // Obtain the id for the module we are in.
+    ModuleIdentifier id = mySymbolTable.getScope(dec).getRootModule();
+    try {
+        // Obtain the module dec and use it to obtain the global requires clause
+        ModuleDec mDec =
+                mySymbolTable.getModuleScope(id).getDefiningElement();
+        Exp gRequires = getGlobalRequiresClause(mDec);
+
+        // Apply the procedure declaration rule
+        applyProcedureDeclRule(gRequires);
+    }
+    catch (NoSuchSymbolException nsse) {
+        System.err.println("Module " + id
+                + " does not exist or is not in scope.");
+        noSuchModule(dec.getLocation());
+    } */
     }
 
     @Override
     public void postProcedureDec(ProcedureDec dec) {
-
+    //myAssertion = null;
     }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
 
+    //-------------------------------------------------------------------
+    //   Error handling
+    //-------------------------------------------------------------------
+
+    public void noSuchModule(Location location) {
+        throw new SourceErrorException(
+                "Module does not exist or is not in scope.", location);
+    }
+
+    public void noSuchModule(PosSymbol qualifier) {
+        throw new SourceErrorException(
+                "Module does not exist or is not in scope.", qualifier);
+    }
+
+    public void noSuchSymbol(PosSymbol qualifier, PosSymbol symbol) {
+        noSuchSymbol(qualifier, symbol.getName(), symbol.getLocation());
+    }
+
+    public void noSuchSymbol(PosSymbol qualifier, String symbolName, Location l) {
+
+        String message;
+
+        if (qualifier == null) {
+            message = "No such symbol: " + symbolName;
+        }
+        else {
+            message =
+                    "No such symbol in module: " + qualifier.getName() + "."
+                            + symbolName;
+        }
+
+        throw new SourceErrorException(message, l);
+    }
+
     // ===========================================================
     // Private Methods
     // ===========================================================
 
     /**
+     * <p>Returns the requires clause for the current <code>Dec</code>.</p>
      *
-     * @param assertion This
-     * <code>AssertiveCode</code> will be stored for later use and therefore
-     * should be considered immutable after a call to this method.
+     * @param dec The corresponding <code>Dec</code>.
+     *
+     * @return The requires clause <code>Exp</code>.
      */
-    /*
-    private void applyEBRules(AssertiveCode assertion) {
-        // Loop through all the assertions
-        while (assertion.hasAnotherAssertion()) {
-            // Obtain the last VerificationStatement
-            VerificationStatement curAssertion = assertion.getLastAssertion();
-            
-            // Check if it is an ASSUME statement
-            if (curAssertion.getType() == VerificationStatement.ASSUME) {
-                applyAssumeRule(curAssertion, assertion);
-            }
-            // Check if it is a CONFIRM statement
-            else if (curAssertion.getType() == VerificationStatement.CONFIRM) {
-                applyConfirmRule(curAssertion, assertion);
-            }
-            // Check if it is a CODE statement
-            else if (curAssertion.getType() == VerificationStatement.CODE) {
-                visitEBCodeRule(curAssertion, assertion);
-                
-                // Don't do anything if it is a WHILE or IF statement
-                if ((Statement) curAssertion.getAssertion() instanceof WhileStmt
-                        || (Statement) curAssertion.getAssertion() instanceof IfStmt) {
-                    return;
-                }
-            } 
-            // Check if it is a REMEMBER statement
-            else if (curAssertion.getType() == VerificationStatement.REMEMBER) {
-                applyRememberRule(curAssertion, assertion);
-            } 
-            // Check if it is a VARIABLE declaration
-            else if (curAssertion.getType() == VerificationStatement.VARIABLE) {
-                applyVariableDeclRule(curAssertion, assertion);
-            }
-            // Check if it is a CHANGE statement
-            else if (curAssertion.getType() == VerificationStatement.CHANGE) {
-                applyChangeRule(curAssertion, assertion);
-            } 
-            // TODO should throw an exception here!!
-            else {
-            }
-            
-            // Apply simplyfication if the flag is set
-            if (myInstanceEnvironment.flags.isFlagSet(FLAG_SIMPLIFY_VC)) {
-                applySimplificationRules(assertion);
+    private Exp getRequiresClause(Dec dec) {
+        PosSymbol name = dec.getName();
+        Exp retExp = null;
+
+        // Check for each kind of ModuleDec possible
+        if (dec instanceof FacilityOperationDec) {
+            retExp = ((FacilityOperationDec) dec).getRequires();
+        }
+        else if (dec instanceof EnhancementBodyModuleDec) {
+            retExp = ((EnhancementBodyModuleDec) dec).getRequires();
+        }
+        else if (dec instanceof FacilityModuleDec) {
+            retExp = ((FacilityModuleDec) dec).getRequirement();
+        }
+
+        if (retExp != null) {
+            if (retExp.getLocation() != null) {
+                Location myLoc = retExp.getLocation();
+                myLoc.setDetails("Requires Clause for " + name);
+                setLocation(retExp, myLoc);
             }
         }
-        
-        
-        assertion.setName(name);
-        
-        myFinalVCs.add(assertion);
-        
-        assrtBuf.append(assertion.assertionToString(true) + "\n\n");
-        
-        return;
-    }*/
+
+        return retExp;
+    }
+
+    // Get the PosSymbol associated with the VariableExp left
+    private PosSymbol getVarName(VariableExp left) {
+        PosSymbol name;
+        if (left instanceof VariableNameExp) {
+            name = ((VariableNameExp) left).getName();
+        }
+        else if (left instanceof VariableDotExp) {
+            VariableRecordExp varRecExp =
+                    (VariableRecordExp) ((VariableDotExp) left)
+                            .getSemanticExp();
+            name = varRecExp.getName();
+        }
+        else if (left instanceof VariableRecordExp) {
+            VariableRecordExp varRecExp = (VariableRecordExp) left;
+            name = varRecExp.getName();
+        }
+        else if (left instanceof VariableArrayExp) {
+            name = ((VariableArrayExp) left).getName();
+        }
+        else {
+            name = createPosSymbol("false");
+        }
+        return name;
+    }
+
+    private PosSymbol createPosSymbol(String name) {
+        PosSymbol posSym = new PosSymbol();
+        posSym.setSymbol(Symbol.symbol(name));
+        return posSym;
+    }
+
+    // replace in exp, any instance of old with repl
+    private Exp replace(Exp exp, Exp old, Exp repl) {
+
+        Exp tmp = Exp.replace(exp, (Exp) Exp.clone(old), (Exp) Exp.clone(repl));
+        if (tmp != null)
+            return tmp;
+        else
+            return exp;
+    }
+
+    /**
+     * <p>Returns the requires clause for the current <code>Dec</code>.</p>
+     *
+     * @param ensures The <code>Exp</code> containing the ensures clause.
+     * @param loc Location of the <code>Operation</code>
+     * @param name Name of the <code>Operation</code>
+     *
+     * @return The ensures clause <code>Exp</code>.
+     */
+    private Exp modifyEnsuresClause(Exp ensures, Location loc, PosSymbol name) {
+        Location ensuresLoc;
+        if (ensures == null) {
+            ensuresLoc = (Location) loc.clone();
+        }
+        else {
+            ensuresLoc = (Location) (ensures.getLocation().clone());
+        }
+
+        if (ensuresLoc != null) {
+            ensuresLoc.setDetails("Ensures Clause of " + name);
+            setLocation(ensures, ensuresLoc);
+        }
+
+        return ensures;
+    }
+
+    /**
+     * <p>Changes the <code>Exp</code> with the new
+     * <code>Location</code>.</p>
+     *
+     * @param exp The <code>Exp</code> that needs to be modified.
+     * @param loc The new <code>Location</code>.
+     */
+    private void setLocation(Exp exp, Location loc) {
+        // Special handling for InfixExp
+        if (exp instanceof InfixExp) {
+            ((InfixExp) exp).setAllLocations(loc);
+        }
+        else {
+            exp.setLocation(loc);
+        }
+    }
+
+    // ===========================================================
+    // Proof Rules Methods
+    // ===========================================================
+
+    /**
+     * Applies the assume rule.
+     *
+     * @param assume The assume clause
+     */
+    private void applyAssumeRule(VerificationStatement assume) {
+        Exp conf = myAssertion.getFinalConfirm();
+        InfixExp newConf = new InfixExp();
+        PosSymbol opName = new PosSymbol();
+        opName.setSymbol(Symbol.symbol("implies"));
+        newConf.setType(BooleanType.INSTANCE);
+        newConf.setMathType(BOOLEAN);
+
+        newConf.setLeft(((Exp) assume.getAssertion()));
+        newConf.setOpName(opName);
+        newConf.setRight(conf);
+        myAssertion.setFinalConfirm(newConf);
+    }
+
+    /**
+     * Applies different rules to code statements.
+     *
+     * @param statement The different statements.
+     */
+    private void applyCodeRules(Statement statement) {
+        if (statement instanceof SwapStmt) {
+            applyEBSwapStmtRule((SwapStmt) statement);
+        }
+    }
+
+    /**
+     * Applies the confirm rule.
+     *
+     * @param confirm The confirm clause
+     */
+    private void applyConfirmRule(VerificationStatement confirm) {
+        Exp conf = myAssertion.getFinalConfirm();
+        InfixExp newConf = new InfixExp();
+        PosSymbol opName = new PosSymbol();
+        opName.setSymbol(Symbol.symbol("and"));
+        newConf.setType(BooleanType.INSTANCE);
+        newConf.setMathType(BOOLEAN);
+
+        newConf.setLeft((Exp) confirm.getAssertion());
+        newConf.setOpName(opName);
+        newConf.setRight(conf);
+
+        myAssertion.setFinalConfirm(newConf);
+    }
+
+    /**
+     * Applies each of the proof rules. This <code>AssertiveCode</code> will be
+     * stored for later use and therefore should be considered immutable after
+     * a call to this method.
+     */
+    private void applyEBRules() {
+        while (myAssertion.hasAnotherAssertion()) {
+            VerificationStatement curAssertion = myAssertion.getLastAssertion();
+            if (curAssertion.getType() == VerificationStatement.ASSUME)
+                applyAssumeRule(curAssertion);
+            else if (curAssertion.getType() == VerificationStatement.CONFIRM)
+                applyConfirmRule(curAssertion);
+            else if (curAssertion.getType() == VerificationStatement.CODE) {
+                applyCodeRules((Statement) curAssertion.getAssertion());
+                if ((Statement) curAssertion.getAssertion() instanceof WhileStmt
+                        || (Statement) curAssertion.getAssertion() instanceof IfStmt)
+                    return;
+            }
+            else if (curAssertion.getType() == VerificationStatement.REMEMBER)
+                applyRememberRule();
+        }
+    }
+
+    private void applyEBSwapStmtRule(SwapStmt stmt) {
+        Exp conf = myAssertion.getFinalConfirm();
+
+        VariableExp left = (VariableExp) Exp.copy(stmt.getLeft());
+        VariableExp right = (VariableExp) Exp.copy(stmt.getRight());
+
+        String lftStr = getVarName(left).toString();
+
+        String lftTmp = "_";
+        lftTmp = lftTmp.concat(lftStr);
+
+        Exp leftV;
+        Exp rightV;
+        if (left instanceof VariableDotExp) {
+            leftV = new DotExp();
+            ((DotExp) leftV).setSemanticExp(((VariableDotExp) left)
+                    .getSemanticExp());
+            edu.clemson.cs.r2jt.collections.List<Exp> myList =
+                    new edu.clemson.cs.r2jt.collections.List<Exp>();
+            for (int i = 0; i < ((VariableDotExp) left).getSegments().size(); i++) {
+                VariableExp varExp =
+                        ((VariableDotExp) left).getSegments().get(i);
+                varExp.setType(left.getType());
+                varExp.setMathType(left.getMathType());
+                varExp.setMathTypeValue(left.getMathTypeValue());
+                myList.add(i, varExp);
+            }
+            ((DotExp) leftV).setSegments(myList);
+        }
+        else {
+            leftV = new VarExp();
+            ((VarExp) leftV).setName(getVarName(left));
+        }
+        leftV.setType(left.getType());
+        leftV.setMathType(left.getMathType());
+        leftV.setMathTypeValue(left.getMathTypeValue());
+
+        if (right instanceof VariableDotExp) {
+            rightV = new DotExp();
+            ((DotExp) rightV).setSemanticExp(((VariableDotExp) right)
+                    .getSemanticExp());
+            edu.clemson.cs.r2jt.collections.List<Exp> myList =
+                    new edu.clemson.cs.r2jt.collections.List<Exp>();
+            for (int i = 0; i < ((VariableDotExp) right).getSegments().size(); i++) {
+                VariableExp varExp =
+                        ((VariableDotExp) right).getSegments().get(i);
+                varExp.setType(right.getType());
+                varExp.setMathType(right.getMathType());
+                varExp.setMathTypeValue(right.getMathTypeValue());
+                myList.add(i, varExp);
+            }
+            ((DotExp) rightV).setSegments(myList);
+        }
+        else {
+            rightV = new VarExp();
+            ((VarExp) rightV).setName(getVarName(right));
+            rightV.setMathType(right.getMathType());
+            rightV.setMathTypeValue(right.getMathTypeValue());
+        }
+
+        // Need to Set Exp for rightV and leftV
+
+        List lst = conf.getSubExpressions();
+        for (int i = 0; i < lst.size(); i++) {
+            if (lst.get(i) instanceof VarExp) {
+                VarExp thisExp = (VarExp) lst.get(i);
+                if (rightV instanceof VarExp) {
+                    if (thisExp.getName().toString().equals(
+                            ((VarExp) rightV).getName().toString())) {
+                        rightV.setType(thisExp.getType());
+                        rightV.setMathType(thisExp.getMathType());
+                        rightV.setMathTypeValue(thisExp.getMathTypeValue());
+                    }
+                }
+                if (leftV instanceof VarExp) {
+                    if (thisExp.getName().toString().equals(
+                            ((VarExp) leftV).getName().toString())) {
+                        leftV.setType(thisExp.getType());
+                        leftV.setMathType(thisExp.getMathType());
+                        leftV.setMathTypeValue(thisExp.getMathTypeValue());
+                    }
+                }
+            }
+        }
+
+        VarExp tmp = new VarExp();
+        tmp.setName(createPosSymbol(lftTmp));
+        tmp.setType(left.getType());
+        tmp.setMathType(left.getMathType());
+        tmp.setMathTypeValue(left.getMathTypeValue());
+
+        conf = replace(conf, rightV, tmp);
+        conf = replace(conf, leftV, rightV);
+        conf = replace(conf, tmp, leftV);
+
+        myAssertion.setFinalConfirm(conf);
+    }
+
+    /**
+     * <p>Applies the procedure declaration rule</p>
+     *
+     */
+    private void applyProcedureDeclRule(Exp gRequires, Exp ensures,
+            List<Statement> statementList) {
+        // Add the global requires clause
+        if (gRequires != null) {
+            myAssertion.addAssume(gRequires);
+        }
+
+        // Add the remember rule
+        myAssertion.addRemember();
+
+        // Add the list of statements
+        myAssertion.addStatements(statementList);
+
+        // Add the final confirms clause
+        myAssertion.setFinalConfirm(ensures);
+    }
+
+    /**
+     * <p>Applies the Proof rule for Remember.</p>
+     */
+    private void applyRememberRule() {
+        Exp conf = myAssertion.getFinalConfirm();
+        conf = conf.remember();
+
+        myAssertion.setFinalConfirm(conf);
+    }
 }

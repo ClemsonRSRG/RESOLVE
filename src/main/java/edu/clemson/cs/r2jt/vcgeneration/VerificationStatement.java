@@ -29,71 +29,84 @@ public class VerificationStatement implements Cloneable {
     // Global Variables 
     // ===========================================================
 
-    private int type;
-    private Object assertion;
-    static final public int ASSUME = 1;
-    static final public int CODE = 2;
-    static final public int VARIABLE = 3;
-    static final public int CONFIRM = 4;
-    static final public int REMEMBER = 5;
-    static final public int CHANGE = 6;
+    // Type of Verification Statement
+    private int myType;
+
+    // Each assertion object
+    private Object myAssertion;
+
+    // Code for each type of Verification Statement
+    public static final int ASSUME = 1;
+    public static final int CODE = 2;
+    public static final int VARIABLE = 3;
+    public static final int CONFIRM = 4;
+    public static final int REMEMBER = 5;
+    public static final int CHANGE = 6;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
+    // Default constructor
+    VerificationStatement() {}
+
+    // Our defined constructor
     VerificationStatement(int type, Object assertion) {
         if (((type == ASSUME || type == CONFIRM) && (assertion instanceof Exp))
                 || ((type == CODE) && (assertion instanceof Statement))
                 || (type == VARIABLE && assertion instanceof VarDec)
                 || (type == CHANGE)) {
-            this.type = type;
-            this.assertion = assertion;
+            myType = type;
+            myAssertion = assertion;
         }
         else if (type == REMEMBER) {
-            this.type = type;
+            myType = type;
         }
     }
 
-    VerificationStatement() {}
+    // Copy constructor
+    public VerificationStatement copy() {
+        return new VerificationStatement(this.getType(), this.getAssertion());
+    }
 
+    // Clone the object
     @Override
     public Object clone() {
         try {
             VerificationStatement clone = new VerificationStatement();
-            if ((type == ASSUME) || (type == CONFIRM)) {
-                if (assertion instanceof Exp) {
+            if ((myType == ASSUME) || (myType == CONFIRM)) {
+                if (myAssertion instanceof Exp) {
                     clone =
-                            new VerificationStatement(type, ((Exp) assertion)
-                                    .clone());
+                            new VerificationStatement(myType,
+                                    ((Exp) myAssertion).clone());
                 }
                 return clone;
             }
-            else if (type == CODE) {
-                if (assertion instanceof Statement) {
+            else if (myType == CODE) {
+                if (myAssertion instanceof Statement) {
                     clone =
-                            new VerificationStatement(type,
-                                    ((Statement) assertion).clone());
+                            new VerificationStatement(myType,
+                                    ((Statement) myAssertion).clone());
                 }
                 return clone;
             }
-            else if (type == VARIABLE) {
-                if (assertion instanceof VarDec) {
+            else if (myType == VARIABLE) {
+                if (myAssertion instanceof VarDec) {
                     clone =
-                            new VerificationStatement(type,
-                                    ((VarDec) assertion).clone());
+                            new VerificationStatement(myType,
+                                    ((VarDec) myAssertion).clone());
                 }
                 return clone;
             }
-            else if (type == REMEMBER) {
-                clone = new VerificationStatement(type, null);
+            else if (myType == REMEMBER) {
+                clone = new VerificationStatement(myType, null);
                 return clone;
             }
-            else if (type == CHANGE) {
-                if (assertion instanceof List<?>) {
+            else if (myType == CHANGE) {
+                if (myAssertion instanceof List<?>) {
                     clone =
-                            new VerificationStatement(type,
-                                    ((List<?>) assertion).clone());
+                            new VerificationStatement(myType,
+                                    ((List<?>) myAssertion).clone());
                     return clone();
                 }
                 else {
@@ -109,51 +122,59 @@ public class VerificationStatement implements Cloneable {
         }
     }
 
-    VerificationStatement(int type) {
-        if (type == REMEMBER) {
-            this.type = type;
-        }
-    }
+    // ===========================================================
+    // Mutator/Accessor Methods
+    // ===========================================================
 
-    public VerificationStatement copy() {
-        return new VerificationStatement(this.getType(), this.getAssertion());
-    }
+    // -----------------------------------------------------------
+    // Get Methods
+    // -----------------------------------------------------------
 
-    static public int getAssumeType() {
-        return ASSUME;
-    }
-
-    static public int getCodeType() {
-        return CODE;
-    }
-
-    static public int getVariableType() {
-        return VARIABLE;
-    }
-
-    static public int getConfirmType() {
-        return CONFIRM;
-    }
-
-    static public int getRememberType() {
-        return REMEMBER;
-    }
-
+    /**
+     * <p>Returns the type of the assertion.</p>
+     *
+     * @return The type of <code>VerificationStatement</code>.
+     */
     public int getType() {
-        return type;
+        return myType;
     }
 
-    public void changeAssertion(Object assertion) {
-        this.assertion = assertion;
-    }
-
+    /**
+     * <p>Returns the assertion object.</p>
+     *
+     * @return The object containing an <code>ResolveConceptualElement</code>.
+     */
     public Object getAssertion() {
-        return assertion;
+        return myAssertion;
     }
 
+    // -----------------------------------------------------------
+    // Set Methods
+    // -----------------------------------------------------------
+
+    /**
+     * <p>Sets the <code>ResolveConceptualElement</code>
+     * <code>Object</code>.</p>
+     *
+     * @param assertion The corresponding assertion <code>Object</code>.
+     */
+    public void setAssertion(Object assertion) {
+        myAssertion = assertion;
+    }
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
+
+    /**
+     * <p>Returns the type of the <code>VerificationStatement</code>
+     * as a String.</p>
+     *
+     * @return The string form of the type.
+     */
     public String toString() {
         String str = new String();
-        switch (type) {
+        switch (myType) {
         case 1:
             str = "Assume";
             break;
