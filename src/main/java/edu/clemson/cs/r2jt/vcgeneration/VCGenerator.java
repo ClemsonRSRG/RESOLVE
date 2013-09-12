@@ -56,10 +56,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     // Compile Environment
     private CompileEnvironment myInstanceEnvironment;
 
-    // Utilties
-    private Utilities myUtilities;
-
-    // Assertive Code
+ // Assertive Code
     private AssertiveCode myAssertion;
 
     // ===========================================================
@@ -98,7 +95,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         Z = myTypeGraph.Z;
 
         myInstanceEnvironment = env;
-        myUtilities = new Utilities(myInstanceEnvironment);
         myAssertion = null;
     }
 
@@ -123,11 +119,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
     // FacilityOperationDec
     // -----------------------------------------------------------
-
-    @Override
-    public void preFacilityOperationDec(FacilityOperationDec dec) {
-
-    }
 
     @Override
     public void postFacilityOperationDec(FacilityOperationDec dec) {
@@ -170,41 +161,16 @@ public class VCGenerator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     @Override
-    public void preProcedureDec(ProcedureDec dec) {
-    /*
-    // Create assertive code
-    myAssertion = new AssertiveCode(myInstanceEnvironment);
-
-    // Obtain the id for the module we are in.
-    ModuleIdentifier id = mySymbolTable.getScope(dec).getRootModule();
-    try {
-        // Obtain the module dec and use it to obtain the global requires clause
-        ModuleDec mDec =
-                mySymbolTable.getModuleScope(id).getDefiningElement();
-        Exp gRequires = getGlobalRequiresClause(mDec);
-
-        // Apply the procedure declaration rule
-        applyProcedureDeclRule(gRequires);
-    }
-    catch (NoSuchSymbolException nsse) {
-        System.err.println("Module " + id
-                + " does not exist or is not in scope.");
-        noSuchModule(dec.getLocation());
-    } */
-    }
-
-    @Override
     public void postProcedureDec(ProcedureDec dec) {
-    //myAssertion = null;
     }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
 
-    //-------------------------------------------------------------------
-    //   Error handling
-    //-------------------------------------------------------------------
+    // -----------------------------------------------------------
+    // Error Handling
+    // -----------------------------------------------------------
 
     public void noSuchModule(Location location) {
         throw new SourceErrorException(
@@ -241,6 +207,21 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
+     * <p>Returns a newly created <code>PosSymbol</code>
+     * with the string provided.</p>
+     *
+     * @param name String of the new <code>PosSymbol</code>.
+     *
+     * @return The new <code>PosSymbol</code>.
+     */
+    private PosSymbol createPosSymbol(String name) {
+        // Create the PosSymbol
+        PosSymbol posSym = new PosSymbol();
+        posSym.setSymbol(Symbol.symbol(name));
+        return posSym;
+    }
+
+    /**
      * <p>Returns the requires clause for the current <code>Dec</code>.</p>
      *
      * @param dec The corresponding <code>Dec</code>.
@@ -262,6 +243,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             retExp = ((FacilityModuleDec) dec).getRequirement();
         }
 
+        // Fill in the details of this location
         if (retExp != null) {
             if (retExp.getLocation() != null) {
                 Location myLoc = retExp.getLocation();
@@ -273,45 +255,46 @@ public class VCGenerator extends TreeWalkerVisitor {
         return retExp;
     }
 
-    // Get the PosSymbol associated with the VariableExp left
+    //
+    /**
+     * <p>Get the <code>PosSymbol</code> associated with the
+     * <code>VariableExp</code> left.</p>
+     *
+     * @param left The variable expression.
+     *
+     * @return The <code>PosSymbol</code> of left.
+     */
     private PosSymbol getVarName(VariableExp left) {
+        // Return value
         PosSymbol name;
+
+        // Variable Name Expression
         if (left instanceof VariableNameExp) {
             name = ((VariableNameExp) left).getName();
         }
+        // Variable Dot Expression
         else if (left instanceof VariableDotExp) {
             VariableRecordExp varRecExp =
                     (VariableRecordExp) ((VariableDotExp) left)
                             .getSemanticExp();
             name = varRecExp.getName();
         }
+        // Variable Record Expression
         else if (left instanceof VariableRecordExp) {
             VariableRecordExp varRecExp = (VariableRecordExp) left;
             name = varRecExp.getName();
         }
+        // Variable Array Expression
+        // Note (YS): We shouldn't see this by now. Handled by Preprocessor
         else if (left instanceof VariableArrayExp) {
             name = ((VariableArrayExp) left).getName();
         }
+        // Creates an expression with "false" as its name
         else {
             name = createPosSymbol("false");
         }
+
         return name;
-    }
-
-    private PosSymbol createPosSymbol(String name) {
-        PosSymbol posSym = new PosSymbol();
-        posSym.setSymbol(Symbol.symbol(name));
-        return posSym;
-    }
-
-    // replace in exp, any instance of old with repl
-    private Exp replace(Exp exp, Exp old, Exp repl) {
-
-        Exp tmp = Exp.replace(exp, (Exp) Exp.clone(old), (Exp) Exp.clone(repl));
-        if (tmp != null)
-            return tmp;
-        else
-            return exp;
     }
 
     /**
@@ -324,6 +307,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @return The ensures clause <code>Exp</code>.
      */
     private Exp modifyEnsuresClause(Exp ensures, Location loc, PosSymbol name) {
+        // Obtain the right location
         Location ensuresLoc;
         if (ensures == null) {
             ensuresLoc = (Location) loc.clone();
@@ -332,12 +316,34 @@ public class VCGenerator extends TreeWalkerVisitor {
             ensuresLoc = (Location) (ensures.getLocation().clone());
         }
 
+        // Modify the details
         if (ensuresLoc != null) {
             ensuresLoc.setDetails("Ensures Clause of " + name);
             setLocation(ensures, ensuresLoc);
         }
 
         return ensures;
+    }
+
+    /**
+     * <p>Returns the requires clause for the current
+     * <code>Dec</code>.</p>
+     *
+     * @param exp The <code>Exp</code> to be replaced.
+     * @param old The old sub-expression of <code>exp</code>.
+     * @param repl The new sub-expression of <code>exp</code>.
+     *
+     * @return The new <code>Exp</code>.
+     */
+    private Exp replace(Exp exp, Exp old, Exp repl) {
+        // Clone old and repl and use the Exp replace to do all its work
+        Exp tmp = Exp.replace(exp, (Exp) Exp.clone(old), (Exp) Exp.clone(repl));
+
+        // Return the corresponding Exp
+        if (tmp != null)
+            return tmp;
+        else
+            return exp;
     }
 
     /**
@@ -357,97 +363,138 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
     }
 
-    // ===========================================================
-    // Proof Rules Methods
-    // ===========================================================
+    // -----------------------------------------------------------
+    // Proof Rules
+    // -----------------------------------------------------------
 
     /**
-     * Applies the assume rule.
+     * <p>Applies the assume rule.</p>
      *
      * @param assume The assume clause
      */
     private void applyAssumeRule(VerificationStatement assume) {
+        // Obtain the current final confirm clause
         Exp conf = myAssertion.getFinalConfirm();
+
+        // Create a new expression
         InfixExp newConf = new InfixExp();
+
+        // Create an implies symbol
         PosSymbol opName = new PosSymbol();
         opName.setSymbol(Symbol.symbol("implies"));
         newConf.setType(BooleanType.INSTANCE);
         newConf.setMathType(BOOLEAN);
 
+        // Convert the assume a confirm b into
+        // confirm a implies b.
         newConf.setLeft(((Exp) assume.getAssertion()));
         newConf.setOpName(opName);
         newConf.setRight(conf);
+
+        // Set this new expression as the new final confirm
         myAssertion.setFinalConfirm(newConf);
     }
 
     /**
-     * Applies different rules to code statements.
+     * <p>Applies different rules to code statements.</p>
      *
      * @param statement The different statements.
      */
     private void applyCodeRules(Statement statement) {
+        // Apply each statement rule here.
         if (statement instanceof SwapStmt) {
             applyEBSwapStmtRule((SwapStmt) statement);
         }
     }
 
     /**
-     * Applies the confirm rule.
+     * <p>Applies the confirm rule.</p>
      *
      * @param confirm The confirm clause
      */
     private void applyConfirmRule(VerificationStatement confirm) {
+        // Obtain the current final confirm clause
         Exp conf = myAssertion.getFinalConfirm();
+
+        // Create a new expression
         InfixExp newConf = new InfixExp();
+
+        // Create an and symbol
         PosSymbol opName = new PosSymbol();
         opName.setSymbol(Symbol.symbol("and"));
         newConf.setType(BooleanType.INSTANCE);
         newConf.setMathType(BOOLEAN);
 
+        // Convert the confirm a confirm b into
+        // confirm a and b.
         newConf.setLeft((Exp) confirm.getAssertion());
         newConf.setOpName(opName);
         newConf.setRight(conf);
 
+        // Set this new expression as the new final confirm
         myAssertion.setFinalConfirm(newConf);
     }
 
     /**
-     * Applies each of the proof rules. This <code>AssertiveCode</code> will be
+     * <p>Applies each of the proof rules. This <code>AssertiveCode</code> will be
      * stored for later use and therefore should be considered immutable after
-     * a call to this method.
+     * a call to this method.</p>
      */
     private void applyEBRules() {
+        // Apply a proof rule to each of the assertions
         while (myAssertion.hasAnotherAssertion()) {
+            // Work our way from the last assertion
             VerificationStatement curAssertion = myAssertion.getLastAssertion();
-            if (curAssertion.getType() == VerificationStatement.ASSUME)
+
+            // Assume Assertion
+            if (curAssertion.getType() == VerificationStatement.ASSUME) {
                 applyAssumeRule(curAssertion);
-            else if (curAssertion.getType() == VerificationStatement.CONFIRM)
+            }
+            // Confirm Assertion
+            else if (curAssertion.getType() == VerificationStatement.CONFIRM) {
                 applyConfirmRule(curAssertion);
+            }
+            // Code
             else if (curAssertion.getType() == VerificationStatement.CODE) {
                 applyCodeRules((Statement) curAssertion.getAssertion());
                 if ((Statement) curAssertion.getAssertion() instanceof WhileStmt
-                        || (Statement) curAssertion.getAssertion() instanceof IfStmt)
+                        || (Statement) curAssertion.getAssertion() instanceof IfStmt) {
                     return;
+                }
             }
-            else if (curAssertion.getType() == VerificationStatement.REMEMBER)
+            // Remember Assertion
+            else if (curAssertion.getType() == VerificationStatement.REMEMBER) {
                 applyRememberRule();
+            }
         }
     }
 
+    /**
+     * <p>Applies the swap statement rule to the
+     * <code>Statement</code>.</p>
+     *
+     * @param stmt Our current <code>SwapStmt</code>.
+     */
     private void applyEBSwapStmtRule(SwapStmt stmt) {
+        // Obtain the current final confirm clause
         Exp conf = myAssertion.getFinalConfirm();
 
+        // Create a copy of the left and right hand side
         VariableExp left = (VariableExp) Exp.copy(stmt.getLeft());
         VariableExp right = (VariableExp) Exp.copy(stmt.getRight());
 
+        // Append a _ to the front of the left variable
         String lftStr = getVarName(left).toString();
-
         String lftTmp = "_";
         lftTmp = lftTmp.concat(lftStr);
 
+        // New left and right
         Exp leftV;
         Exp rightV;
+
+        // VariableDotExp
         if (left instanceof VariableDotExp) {
+            // Make a copy of left into leftV
             leftV = new DotExp();
             ((DotExp) leftV).setSemanticExp(((VariableDotExp) left)
                     .getSemanticExp());
@@ -463,15 +510,20 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             ((DotExp) leftV).setSegments(myList);
         }
+        // VariableNameExp
         else {
             leftV = new VarExp();
             ((VarExp) leftV).setName(getVarName(left));
         }
+
+        // Copy the math type information into leftV
         leftV.setType(left.getType());
         leftV.setMathType(left.getMathType());
         leftV.setMathTypeValue(left.getMathTypeValue());
 
+        // VariableDotExp
         if (right instanceof VariableDotExp) {
+            // Make a copy of right into rightV
             rightV = new DotExp();
             ((DotExp) rightV).setSemanticExp(((VariableDotExp) right)
                     .getSemanticExp());
@@ -487,6 +539,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             ((DotExp) rightV).setSegments(myList);
         }
+        // VariableNameExp
         else {
             rightV = new VarExp();
             ((VarExp) rightV).setName(getVarName(right));
@@ -495,7 +548,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Need to Set Exp for rightV and leftV
-
         List lst = conf.getSubExpressions();
         for (int i = 0; i < lst.size(); i++) {
             if (lst.get(i) instanceof VarExp) {
@@ -519,22 +571,28 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
         }
 
+        // Temp variable
         VarExp tmp = new VarExp();
         tmp.setName(createPosSymbol(lftTmp));
         tmp.setType(left.getType());
         tmp.setMathType(left.getMathType());
         tmp.setMathTypeValue(left.getMathTypeValue());
 
+        // Replace according to the swap rule
         conf = replace(conf, rightV, tmp);
         conf = replace(conf, leftV, rightV);
         conf = replace(conf, tmp, leftV);
 
+        // Set this new expression as the new final confirm
         myAssertion.setFinalConfirm(conf);
     }
 
     /**
      * <p>Applies the procedure declaration rule</p>
      *
+     * @param gRequires Global requires clause
+     * @param ensures Ensures clause
+     * @param statementList List of statements for this procedure
      */
     private void applyProcedureDeclRule(Exp gRequires, Exp ensures,
             List<Statement> statementList) {
@@ -557,9 +615,9 @@ public class VCGenerator extends TreeWalkerVisitor {
      * <p>Applies the Proof rule for Remember.</p>
      */
     private void applyRememberRule() {
+        // Obtain the final confirm and apply the remember method for Exp
         Exp conf = myAssertion.getFinalConfirm();
         conf = conf.remember();
-
         myAssertion.setFinalConfirm(conf);
     }
 }
