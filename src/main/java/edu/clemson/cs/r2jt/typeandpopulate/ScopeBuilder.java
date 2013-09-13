@@ -1,5 +1,6 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
+import edu.clemson.cs.r2jt.absyn.Dec;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
@@ -18,9 +19,11 @@ import edu.clemson.cs.r2jt.absyn.FacilityDec;
 import edu.clemson.cs.r2jt.absyn.FinalItem;
 import edu.clemson.cs.r2jt.absyn.InitItem;
 import edu.clemson.cs.r2jt.absyn.MathAssertionDec;
+import edu.clemson.cs.r2jt.absyn.NameTy;
 import edu.clemson.cs.r2jt.absyn.RepresentationDec;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.absyn.TypeDec;
+import edu.clemson.cs.r2jt.absyn.VarDec;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
@@ -93,6 +96,7 @@ public class ScopeBuilder extends SyntacticScope {
 
         SymbolTableEntry curLocalEntry =
                 myBindings.get(facility.getName().getName());
+
         if (curLocalEntry != null) {
             throw new DuplicateSymbolException(curLocalEntry);
         }
@@ -107,14 +111,14 @@ public class ScopeBuilder extends SyntacticScope {
 
     public OperationEntry addOperation(String name,
             ResolveConceptualElement definingElement,
-            List<ProgramParameterEntry> params, PTType returnType)
-            throws DuplicateSymbolException {
+            List<ProgramParameterEntry> params, PTType returnType,
+            boolean isParameter) throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, returnType);
 
         OperationEntry entry =
                 new OperationEntry(name, definingElement, myRootModule,
-                        returnType, params);
+                        returnType, params, isParameter);
 
         myBindings.put(name, entry);
 
@@ -152,6 +156,20 @@ public class ScopeBuilder extends SyntacticScope {
 
         myBindings.put(name, result);
 
+        return result;
+    }
+
+    // not working quite right yet.
+    public ProgramTypeEntry addProgramTypeEntry(String name,
+            Dec definingElement, MTType model, PTType programType)
+            throws DuplicateSymbolException {
+        sanityCheckBindArguments(name, definingElement, "");
+
+        ProgramTypeEntry result =
+                new ProgramTypeEntry(myTypeGraph, name, definingElement,
+                        myRootModule, model, programType);
+
+        myBindings.put(name, result);
         return result;
     }
 

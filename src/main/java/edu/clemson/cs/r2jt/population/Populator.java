@@ -4,8 +4,10 @@ import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
+import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.treewalk.*;
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
+import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
@@ -21,6 +23,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.ModuleScopeBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
 import edu.clemson.cs.r2jt.typeandpopulate.SymbolNotOfKindTypeException;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
@@ -31,6 +34,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry.Quantification;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTElement;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRecord;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
@@ -56,8 +60,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Populator extends TreeWalkerVisitor {
 
@@ -128,6 +130,20 @@ public class Populator extends TreeWalkerVisitor {
 
     private Map<String, MTType> myDefinitionSchematicTypes =
             new HashMap<String, MTType>();
+
+    /**
+     * Currently HwS's getFormalParameterEntries method in {@link Scope Scope}
+     * only returns a list of ProgramParameterEntries visible in that current
+     * scope but fails to recognize any op declarations that are parameters 
+     * (they are treated no differently from any other operation declaration).
+     * Since Operation Declarations technically CAN serve as formal parameters 
+     * to a module, this list keeps track of the current module's formal parameter
+     * names. This enables us to check, every time we're about to add an operationEntry 
+     * into the table, whether or not is also a formal parameter and set a flag in
+     * {@link OperationEntry OperationEntry} accordingly. This in turn allows us to 
+     * fix the getFormalParameterEntries method to also return relevant Operations.
+     */
+    private List<String> myCurrentModuleParameters = new LinkedList<String>();
 
     /**
      * <p>This simply enables an error check--as a definition uses named types,
@@ -203,6 +219,7 @@ public class Populator extends TreeWalkerVisitor {
         Populator.emitDebug("----------------------\nModule: "
                 + node.getName().getName() + "\n----------------------");
         myCurModuleScope = myBuilder.startModuleScope(node);
+
     }
 
     @Override
@@ -211,6 +228,7 @@ public class Populator extends TreeWalkerVisitor {
         //Enhancements implicitly import the concepts they enhance
         myCurModuleScope.addImport(new ModuleIdentifier(enhancement
                 .getConceptName().getName()));
+
     }
 
     @Override
@@ -257,7 +275,6 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postLambdaExp(LambdaExp l) {
         myBuilder.endScope();
-
         List<MTType> parameterTypes = new LinkedList<MTType>();
         for (MathVarDec p : l.getParameters()) {
             parameterTypes.add(p.getTy().getMathTypeValue());
@@ -269,6 +286,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postAltItemExp(AltItemExp e) {
+
         if (e.getTest() != null) {
             expectType(e.getTest(), myTypeGraph.BOOLEAN);
         }
@@ -299,6 +317,7 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postConstantParamDec(ConstantParamDec param) {
         try {
+
             String paramName = param.getName().getName();
 
             myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
@@ -315,6 +334,7 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postConceptTypeParamDec(ConceptTypeParamDec param) {
         try {
+
             String paramName = param.getName().getName();
 
             myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
@@ -352,6 +372,7 @@ public class Populator extends TreeWalkerVisitor {
 
         if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
             try {
+
                 //Inside the operation's assertions, the name of the operation
                 //refers to its return value
                 myBuilder.getInnermostActiveScope().addProgramVariable(
@@ -368,7 +389,17 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
+    public void preModuleParameterDec(ModuleParameterDec d) {
+
+        if (d.getWrappedDec() instanceof OperationDec) {
+            myCurrentModuleParameters.add(d.getName().getName());
+        }
+
+    }
+
+    @Override
     public void postModuleParameterDec(ModuleParameterDec d) {
+
         if (!(d.getWrappedDec() instanceof OperationDec)) {
             if (d.getWrappedDec().getMathType() == null) {
                 throw new RuntimeException(d.getWrappedDec().getClass()
@@ -393,6 +424,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postCrossTypeExpression(CrossTypeExpression e) {
+
         int fieldCount = e.getFieldCount();
         List<MTCartesian.Element> fieldTypes =
                 new LinkedList<MTCartesian.Element>();
@@ -425,6 +457,8 @@ public class Populator extends TreeWalkerVisitor {
             //Figure out what Operation we correspond to (we don't use 
             //OperationQuery because we want to check parameter types 
             //separately in postProcedureDec)
+
+            myCurModuleScope.getDefiningElement().getName().getName();
             myCorrespondingOperation =
                     myBuilder.getInnermostActiveScope().queryForOne(
                             new NameAndEntryTypeQuery(null, dec.getName(),
@@ -454,8 +488,11 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void midProcedureDec(ProcedureDec node,
             ResolveConceptualElement previous, ResolveConceptualElement next) {
+
         if (previous != null && previous == node.getReturnTy()) {
+
             try {
+
                 myBuilder.getInnermostActiveScope().addProgramVariable(
                         node.getName().getName(), node,
                         node.getReturnTy().getProgramTypeValue());
@@ -612,6 +649,8 @@ public class Populator extends TreeWalkerVisitor {
 
     private void putOperationLikeThingInSymbolTable(PosSymbol name,
             Ty returnTy, ResolveConceptualElement dec) {
+
+        boolean isOperationFormalParameter = false;
         try {
             PTType returnType;
             if (returnTy == null) {
@@ -621,8 +660,13 @@ public class Populator extends TreeWalkerVisitor {
                 returnType = returnTy.getProgramTypeValue();
             }
 
+            if (myCurrentModuleParameters.contains(name.getName())) {
+                isOperationFormalParameter = true;
+            }
+
             myBuilder.getInnermostActiveScope().addOperation(name.getName(),
-                    dec, myCurrentParameters, returnType);
+                    dec, myCurrentParameters, returnType,
+                    isOperationFormalParameter);
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(name.getName(), name.getLocation());
@@ -658,7 +702,6 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void preRepresentationDec(RepresentationDec r) {
         myBuilder.startScope(r);
-
         PosSymbol type = r.getName();
 
         List<SymbolTableEntry> es =
@@ -707,7 +750,6 @@ public class Populator extends TreeWalkerVisitor {
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(r.getName());
         }
-
         myTypeDefinitionEntry = null;
     }
 
@@ -763,18 +805,39 @@ public class Populator extends TreeWalkerVisitor {
             duplicateSymbol(dec.getName().getName(), dec.getName()
                     .getLocation());
         }
+    }
 
+    @Override
+    public void preFacilityTypeDec(FacilityTypeDec node) {
+        myBuilder.startScope(node);
+    }
+
+    // Added 9-4-2013 --DtW
+    @Override
+    public void postFacilityTypeDec(FacilityTypeDec node) {
+        myBuilder.endScope();
+
+        try {
+            myBuilder.getInnermostActiveScope().addProgramTypeEntry(
+                    node.getName().getName(), node,
+                    node.getRepresentation().getMathTypeValue(),
+                    node.getRepresentation().getProgramTypeValue());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(node.getName().getName(), node.getName()
+                    .getLocation());
+        }
     }
 
     @Override
     public void postRecordTy(RecordTy ty) {
+
         Map<String, PTType> fieldMap = new HashMap<String, PTType>();
         List<VarDec> fields = ty.getFields();
         for (VarDec field : fields) {
             fieldMap.put(field.getName().getName(), field.getTy()
                     .getProgramTypeValue());
         }
-
         PTRecord record = new PTRecord(myTypeGraph, fieldMap);
 
         ty.setProgramTypeValue(record);
@@ -784,9 +847,9 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postNameTy(NameTy ty) {
+
         //Note that all mathematical types are ArbitraryExpTys, so this must
         //be in a program-type syntactic slot.
-
         PosSymbol tySymbol = ty.getName();
         PosSymbol tyQualifier = ty.getQualifier();
         Location tyLocation = tySymbol.getLocation();
@@ -808,6 +871,10 @@ public class Populator extends TreeWalkerVisitor {
             ty.setProgramTypeValue(type.getProgramType());
             ty.setMathType(myTypeGraph.MTYPE);
             ty.setMathTypeValue(type.getModelType());
+            if (tyQualifier != null) {
+                type.getProgramType().setQualifier(tyQualifier.getName());
+            }
+
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(tyQualifier, tyName, tyLocation);
@@ -820,6 +887,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postFacilityDec(FacilityDec facility) {
+
         try {
             myBuilder.getInnermostActiveScope().addFacility(facility);
         }
@@ -831,6 +899,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postMathAssertionDec(MathAssertionDec node) {
+
         //if (node.getAssertion() != null) {
         expectType(node.getAssertion(), myTypeGraph.BOOLEAN);
         //}
@@ -898,19 +967,16 @@ public class Populator extends TreeWalkerVisitor {
 
         MTType mathTypeValue = programVar.getTy().getMathTypeValue();
         String varName = programVar.getName().getName();
-
         programVar.setMathType(mathTypeValue);
 
         try {
             myBuilder.getInnermostActiveScope().addProgramVariable(varName,
                     programVar, programVar.getTy().getProgramTypeValue());
+
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(varName, programVar.getLocation());
         }
-
-        Populator.emitDebug("  New program variable: " + varName + " of type "
-                + mathTypeValue.toString() + " with quantification NONE");
     }
 
     @Override
@@ -922,7 +988,6 @@ public class Populator extends TreeWalkerVisitor {
                                     .getName()));
 
             node.setProgramType(entry.getProgramType());
-
             //Handle math typing stuff
             postSymbolExp(node.getQualifier(), node.getName().getName(), node);
         }
@@ -937,9 +1002,10 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postProgramParamExp(ProgramParamExp node) {
-        List<ProgramExp> args = node.getArguments();
 
+        List<ProgramExp> args = node.getArguments();
         List<PTType> argTypes = new LinkedList<PTType>();
+
         for (ProgramExp arg : args) {
             argTypes.add(arg.getProgramType());
         }
@@ -964,6 +1030,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postOldExp(OldExp exp) {
+
         exp.setMathType(exp.getExp().getMathType());
         exp.setMathTypeValue(exp.getExp().getMathTypeValue());
     }
@@ -990,6 +1057,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postTypeAssertionExp(TypeAssertionExp node) {
+
         if (myTypeValueDepth == 0
                 && (myExpressionDepth > 2 || !myInTypeTheoremBindingExpFlag)) {
             throw new SourceErrorException("This construct only permitted in "
@@ -1013,6 +1081,7 @@ public class Populator extends TreeWalkerVisitor {
         //If we're the assertion of a type theorem, then postTypeTheoremDec()
         //will take care of any logic.  If we're part of a type declaration,
         //on the other hand, we've got some bookkeeping to do...
+
         if (myTypeValueDepth > 0) {
             try {
                 VarExp nodeExp = (VarExp) node.getExp();
@@ -1074,6 +1143,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preDefinitionDec(DefinitionDec node) {
+
         myBuilder.startScope(node);
 
         if (!node.isInductive()) {
@@ -1096,6 +1166,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postDefinitionDec(DefinitionDec node) {
+
         myBuilder.endScope();
 
         MTType declaredType = node.getReturnTy().getMathTypeValue();
@@ -1198,6 +1269,7 @@ public class Populator extends TreeWalkerVisitor {
 
         //TODO : Currently, the parser permits the else clause to be optional.
         //       That is nonsense in a functional context and should be fixed.
+
         if (exp.getElseclause() == null) {
             throw new RuntimeException("IfExp has no else clause.  The "
                     + "parser should be changed to disallow this and this "
@@ -1237,11 +1309,13 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preArbitraryExpTy(ArbitraryExpTy node) {
+
         enteringTypeValueNode();
     }
 
     @Override
     public void postSetExp(SetExp e) {
+
         MathVarDec varDec = e.getVar();
         MTType varType = varDec.getMathType();
 
@@ -1260,17 +1334,20 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postIntegerExp(IntegerExp e) {
+
         postSymbolExp(e.getQualifier(), "" + e.getValue(), e);
     }
 
     @Override
     public void postProgramIntegerExp(ProgramIntegerExp e) {
+
         e.setProgramType(getIntegerProgramType());
         e.setMathType(myTypeGraph.Z);
     }
 
     @Override
     public void postProgramStringExp(ProgramStringExp e) {
+
         e.setProgramType(getStringProgramType());
         e.setMathType(new MTProper(myTypeGraph));
         //TODO : Figure out how to get Str(N) here, given that Str() is not 
@@ -1279,12 +1356,16 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postProgramOpExp(ProgramOpExp e) {
+
+        // Theoretically this should never be visited. Everything 
+        // should have already been converted in the preprocessor.
         e.setProgramType(e.getProgramType(myTypeGraph));
         e.setMathType(e.getProgramType().toMath());
     }
 
     @Override
     public void postVarExp(VarExp e) {
+
         MathSymbolEntry intendedEntry =
                 postSymbolExp(e.getQualifier(), e.getName().getName(), e);
 
@@ -1350,6 +1431,7 @@ public class Populator extends TreeWalkerVisitor {
         //This looks weird, but we're converting from the ridiculous 
         //RESOLVE-internal List into an ordinary java.util.List because we don't
         //live in bizarro-world
+
         List<Exp> fields = new LinkedList<Exp>(node.getFields());
 
         if (fields.size() < 2) {
@@ -1388,6 +1470,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postAny(ResolveConceptualElement e) {
+
         if (e instanceof Ty) {
             Ty eTy = (Ty) e;
             if (eTy.getMathTypeValue() == null) {
@@ -1431,6 +1514,7 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preTypeTheoremDec(TypeTheoremDec node) {
+
         myBuilder.startScope(node);
         myInTypeTheoremBindingExpFlag = false;
         myActiveQuantifications.push(Quantification.UNIVERSAL);
@@ -1438,12 +1522,14 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postTypeTheoremDecMyUniversalVars(TypeTheoremDec node) {
+
         myInTypeTheoremBindingExpFlag = true;
         myActiveQuantifications.pop();
     }
 
     @Override
     public void postTypeTheoremDec(TypeTheoremDec node) {
+
         node.setMathType(myTypeGraph.BOOLEAN);
 
         Exp assertion = node.getAssertion();
@@ -1555,7 +1641,7 @@ public class Populator extends TreeWalkerVisitor {
     @Override
     public void postModuleDec(ModuleDec node) {
         myBuilder.endScope();
-
+        myCurrentModuleParameters.clear();
         Populator.emitDebug("END MATH POPULATOR\n----------------------\n");
     }
 
@@ -1565,7 +1651,6 @@ public class Populator extends TreeWalkerVisitor {
         //this method just deals with the cases we've encountered so far and 
         //lots of assumptions are made.  Expect it to break frequently when you
         //encounter some new case
-
         PosSymbol firstNamePos =
                 ((VariableNameExp) e.getSegments().get(0)).getName();
         String firstName = firstNamePos.getName();
@@ -1575,6 +1660,7 @@ public class Populator extends TreeWalkerVisitor {
                     myBuilder.getInnermostActiveScope().queryForOne(
                             new NameQuery(null, firstName))
                             .toProgramVariableEntry(firstNamePos.getLocation());
+
             e.getSegments().get(0).setProgramType(eEntry.getProgramType());
             e.getSegments().get(0)
                     .setMathType(eEntry.getProgramType().toMath());
@@ -1829,7 +1915,6 @@ public class Populator extends TreeWalkerVisitor {
             lastSegment = nextSegment;
             nextSegment = segments.next();
             String segmentName = getName(nextSegment);
-
             try {
                 curTypeCartesian = (MTCartesian) curType;
                 curType = curTypeCartesian.getFactor(segmentName);

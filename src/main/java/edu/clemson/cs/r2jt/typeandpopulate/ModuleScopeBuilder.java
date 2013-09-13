@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import edu.clemson.cs.r2jt.absyn.ModuleDec;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
@@ -15,6 +16,8 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
 
     private final MathSymbolTableBuilder myWorkingSymbolTable;
 
+    private final List<SymbolTableEntry> myFormalParameters =
+            new LinkedList<SymbolTableEntry>();
     private final List<ModuleIdentifier> myImportedModules =
             new LinkedList<ModuleIdentifier>();
 
@@ -50,6 +53,10 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
         }
     }
 
+    public void addFormalParameter(SymbolTableEntry ste) {
+        myFormalParameters.add(ste);
+    }
+
     @Override
     public boolean imports(ModuleIdentifier i) {
         return i.equals(myRootModule) || myImportedModules.contains(i);
@@ -63,6 +70,7 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
     @Override
     public FinalizedModuleScope seal(MathSymbolTable finalTable) {
         return new FinalizedModuleScope(myRootModule, myDefiningElement,
-                myParent, myBindings, myImportedModules, finalTable);
+                myParent, myBindings, myImportedModules, myFormalParameters,
+                finalTable);
     }
 }

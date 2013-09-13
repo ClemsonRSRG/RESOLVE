@@ -25,39 +25,48 @@ import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
 import edu.clemson.cs.r2jt.utilities.FlagManager;
 
 /**
- * <p>
- * Unlike <code>Environment</code> which uses lots of static variables that make
- * instantiating the compiler a mess under concurrency, a
- * <code>CompileEnvironment</code> is intended to serve the same purpose but be
- * designed to be instantiated.
- * </p>
- * 
- * <p>
- * Features of <code>Environment</code> should be moved to this class and
- * eventually <code>Environment</code> should be removed in favor of
- * <code>CompileEnvironment</code>.
- * </p>
+ * Encapsulates all the 'pieces' associated with the compilation
+ * of user-provided file(s) -- makes explicit everything from the
+ * symbol table, to the type graph to be used in the compilation
+ * process.
+ *
+ * <p>Unlike the now-deprecated {@link Environment Environment}
+ * which used lots of static variables that made instantiating
+ * the compiler a mess under concurrency, this replacement class
+ * is intended to serve the same purpose but be designed to be
+ * instantiated.</p>
+ *
+ * <p>Features of {@link Environment Environment} should be moved
+ * to this class so that {@link Environment Environment} can be
+ * safely removed in favor of this class.</p>
  */
 public class CompileEnvironment {
 
+    /**
+     * <p>The current configuration of environment flags,as defined
+     * by the user.</p>
+     */
     public final FlagManager flags;
 
-    /*
-     * #########################################################################
-     * All of the guts from the old Environment class have now been moved into
-     * this one. Environment is no longer static and keeps a reference
-     * to this one, and simple has dummy methods that refer to stuff here.
+    /**
+     * <p>A small class that summarizes which stages of compilation
+     * (translation, vc generation, proving, etc) were successfully
+     * carried out and which weren't.</p>
      */
-
-    private ErrorHandler err;
     private CompileReport myCompileReport = new CompileReport();
+
+    /**
+     * <p>A web-interface specific variable that </p>
+     */
     private String myTargetSource = null;
     private String myTargetFileName = null;
     private String myCurrentTargetFileName = null;
+
     private ProverListener myListener = null;
     private TypeGraph myTypeGraph = null;
+    private ErrorHandler err;
 
-    // variables brought in from the old Environment class
+    // Variables brought in from the old Environment class.
     private Map<ModuleID, ModuleRecord> map = new Map<ModuleID, ModuleRecord>();
 
     private Map<File, ModuleID> fmap = new Map<File, ModuleID>();
@@ -85,23 +94,26 @@ public class CompileEnvironment {
     private String outputFile = null;
 
     /**
-     * Array of the names of the Std Facilities to be automatically included by
-     * ImportScanner/Populator. Simply add additional Std_Facs to the array; if
-     * the Fac is named Std_XXX_Fac, just add "XXX" to the array.
-     * This array should never be altered while running
+     * <p>Array of the names of the Std Facilities to be automatically 
+     * included by ImportScanner/Populator. Add additional Std_Facs to 
+     * the array. Note that if the Fac is named <code>Std_XXX_Fac</code>, 
+     * just add "XXX" to the array. This array should never be altered 
+     * while running</p>.
      * 
-     * Order matters.  Files that match strings later in the array will import
-     * ones earlier in the array.  So Integer_Theory will have Boolean_Theory to
-     * work with, but Boolean_Theory will not have Integer_Theory.
+     * Order matters. Files that match strings later in the array will
+     * import ones earlier in the array.  So <code>Integer_Theory</code> 
+     * will have <code>Boolean_Theory</code>, but <code>Boolean_Theory</code> 
+     * will lack <code>Integer_Theory</code>.</p>
      * 
-     * NOTE: This assumes that all files are formatted:
-     * Std_XXX_Fac, XXX_Template, XXX_Theory
+     * <p><strong>NOTE: This assumes that all files are formatted:</strong>
+     * <code>Std_XXX_Fac</code>, <code>XXX_Template</code>, etc</p>.
      */
     private final String[] stdUses =
             { "Boolean", "Integer", "Character", "Char_Str" };
+
     /**
-     * Automatically generated Std_Fac dependency list for
-     * ImportScanner/Populator.visistModuleDec()
+     * <p>Automatically generated Std_Fac dependency list for
+     * ImportScanner/Populator.visitModuleDec()</p>.
      */
     private List<List<UsesItem>> stdUsesDepends;
 
@@ -112,7 +124,6 @@ public class CompileEnvironment {
     public CompileEnvironment(String[] args) throws FlagDependencyException {
 
         flags = new FlagManager(args);
-        //myOldEnvironment = env;
     }
 
     public void setErrorHandler(ErrorHandler err) {
@@ -133,12 +144,11 @@ public class CompileEnvironment {
             throw new IllegalStateException(
                     "Symbol table may only be set once!");
         }
-
         mySymbolTable = table;
     }
 
-    public void setTypeGraph(TypeGraph t) {
-        myTypeGraph = t;
+    public void setTypeGraph(TypeGraph graph) {
+        myTypeGraph = graph;
     }
 
     public TypeGraph getTypeGraph() {
@@ -149,16 +159,16 @@ public class CompileEnvironment {
         return mySymbolTable;
     }
 
-    public void setCompileReport(CompileReport rep) {
-        myCompileReport = rep;
+    public void setCompileReport(CompileReport report) {
+        myCompileReport = report;
     }
 
     public CompileReport getCompileReport() {
         return myCompileReport;
     }
 
-    public void setTargetSource(String src) {
-        myTargetSource = src;
+    public void setTargetSource(String source) {
+        myTargetSource = source;
     }
 
     public void setTargetFileName(String name) {
@@ -186,21 +196,17 @@ public class CompileEnvironment {
     }
 
     /**
-     * Used to set a map of user files when used with the web interface
+     * <p>Sets a map of user files when used with the web interface.</p>
      */
     public void setUserFileMap(HashMap<String, MetaFile> userFileMap) {
         myUserFileMap = userFileMap;
     }
 
-    /**
-     * 
-     */
     public boolean isUserFile(String key) {
-        boolean ret = false;
         if (myUserFileMap != null) {
-            ret = myUserFileMap.containsKey(key);
+            return myUserFileMap.containsKey(key);
         }
-        return ret;
+        return false;
     }
 
     public MetaFile getUserFileFromMap(String key) {
@@ -216,7 +222,7 @@ public class CompileEnvironment {
     }
 
     /**
-     * Returns the array of Std_Fac names
+     * <p>Returns the array of Std_Fac names.</p>
      */
     public String[] getStdUses() {
         if (flags.isFlagSet(Main.FLAG_NO_STANDARD_IMPORT)) {
@@ -228,8 +234,9 @@ public class CompileEnvironment {
     }
 
     /**
-     * Returns the Lists of <code>List</code> of <code>UsesItem</code> which are the Std_Fac's,<br>
-     * dependencies and creates an empty List of Lists if it is empty
+     * <p>Returns the Lists of <code>List</code> of <code>UsesItem</code> 
+     * which are the Std_Fac dependencies and creates an empty list of lists 
+     * if it is empty.</p>
      */
     public List<List<UsesItem>> getStdUsesDepends() {
         if (stdUsesDepends == null) {
@@ -243,17 +250,14 @@ public class CompileEnvironment {
     }
 
     /**
-     * Sets the <code>stdUsesDepends</code> lists to the provided updated list
-     * @param list The <code>List</code> of <code>List</code> of <code>UsesItem</code> which will be assigned to the global <code>stdUsesDepends</code>
+     * <p>Sets the <code>stdUsesDepends</code> lists to the provided updated list.</p>
+     * @param list The <code>List</code> of <code>List</code> of <code>UsesItem</code>
+     *             which will be assigned to the global <code>stdUsesDepends</code>.
      */
     public void setStdUsesDepends(List<List<UsesItem>> list) {
         stdUsesDepends = list;
     }
 
-    /**
-     * Sets the <code>stdUsesDepends</code> lists to the provided updated list
-     * @param list The <code>List</code> of <code>List</code> of <code>UsesItem</code> which will be assigned to the global <code>stdUsesDepends</code>
-     */
     public List<OldSymbolTable> getSymbolTables() {
         List<OldSymbolTable> stList = new List<OldSymbolTable>();
         //Map<ModuleID, ModuleRecord> map = myOldEnvironment.getMap();
@@ -263,10 +267,6 @@ public class CompileEnvironment {
         return stList;
     }
 
-    /*public static void newInstance() {
-    	Environment.newInstance();
-    }*/
-
     public void clearStopFlags() {
         showBuild = false;
         showEnv = false;
@@ -275,11 +275,9 @@ public class CompileEnvironment {
         perf = false;
     }
 
-    /*public static Environment getInstance() {
-    	return Environment.getInstance();
-    }*/
-
-    /** Sets the main directory to the specified directory. */
+    /**
+     * <p>Sets the main directory to the specified directory.</p>
+     */
     public void setMainDir(File mainDir) {
         this.mainDir = mainDir;
     }

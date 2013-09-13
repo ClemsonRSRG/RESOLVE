@@ -36,12 +36,12 @@ public class NameAndEntryTypeSearcher<E extends SymbolTableEntry>
     public boolean addMatches(SymbolTable entries, List<E> matches,
             SearchContext l) {
         SymbolTableEntry match = entries.get(myTargetName);
-
         boolean foundOne =
                 (match != null)
                         && myTargetClass.isAssignableFrom(match.getClass());
 
         if (foundOne) {
+            //    System.out.println("found match : " + match.getName());
             matches.add((E) match);
         }
 

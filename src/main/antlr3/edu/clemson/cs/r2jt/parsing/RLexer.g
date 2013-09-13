@@ -37,9 +37,10 @@ ALTERNATIVE
 AND
   : 'and'
   ;
-  
+
+// c
 ARRAY
-  : 'Array'
+  : 'Array' | 'array'
   ;
   
 ASSUME
@@ -221,7 +222,7 @@ EQUALITY
 EVALUATES
   : 'eval' | 'evaluates'
   ;
-  
+
 EXCLUDED
   : 'excluded'
   ;
@@ -241,9 +242,15 @@ EXISTS
 EXIT
   : 'exit'
   ;
-  
+
+// c
+EXTERNALLY
+	: 'externally'
+	;
+
+// c
 FACILITY
-  : 'Facility'
+  : 'Facility' | 'facility'
   ;
   
 FAC_FINAL
@@ -437,9 +444,10 @@ PONENS
 PRESERVES
   : 'preserves' | 'pres'
   ;
-  
+
+// c
 PROCEDURE
-  : 'Procedure' | 'Proc'
+  : 'Procedure' | 'Proc' | 'procedure' | 'proc'
   ;
   
 MODULE_PROFILE
@@ -465,15 +473,18 @@ QED
 QUANTIFIER
   : 'quantifier'
   ;
+
+// c
+MODULE_REALIZATION
+	: 'Realization' | 'realization'
+    ;
   
-REALIZATION
+
+/*REALIZATION
   : 'realization'
   ;
-  
-MODULE_REALIZATION
-  : 'Realization'
-  ;
-  
+*/
+
 REALIZED
   : 'realized'
   ;
@@ -481,9 +492,10 @@ REALIZED
 REASSIGNS
   : 'reassigns' | 'res'
   ;
-  
+
+// c
 RECORD
-  : 'Record'
+  : 'Record' | 'record'
   ;
   
 RECURSIVE
@@ -613,9 +625,10 @@ UPDATES
 USES
   : 'uses'
   ;
-  
+
+// c
 VAR
-  : 'Variable' | 'Var'
+  : 'Variable' | 'Var' | 'variable' | 'var'
   ;
   
 VARIABLES

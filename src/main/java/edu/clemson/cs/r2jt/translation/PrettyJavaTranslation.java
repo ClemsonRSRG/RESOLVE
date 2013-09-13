@@ -83,7 +83,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
 
     @Override
     public void preModuleDec(ModuleDec dec) {
-    //Stuff done before start of dec trees
+    //Stuff done before dec trees
     }
 
     @Override
@@ -245,6 +245,9 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
         cInfo.appendToStmt("(");
     }
 
+    // have a boolean for this saying when your in a parameter expression list...
+    // preProgramParamExpArguments
+    // disregard.
     @Override
     public void midProgramParamExpArguments(ProgramParamExp node,
             ProgramExp previous, ProgramExp next) {
@@ -276,6 +279,7 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
      * https://www.pivotaltracker.com/story/show/37258073
      * This will skip over all children of ProgramFunctionExp
      */
+    //  @Override
     public boolean walkProgramFunctionExp(ProgramFunctionExp exp) {
         return true;
     }
@@ -406,6 +410,8 @@ public class PrettyJavaTranslation extends TreeWalkerStackVisitor {
             ResolveConceptualElement prevChild,
             ResolveConceptualElement nextChild) {
         if (prevChild != null && nextChild != null) {
+            System.out.println("here");
+
             switch (exp.getOperator()) {
             case ProgramOpExp.AND:
                 cInfo.appendToStmt(" && ");

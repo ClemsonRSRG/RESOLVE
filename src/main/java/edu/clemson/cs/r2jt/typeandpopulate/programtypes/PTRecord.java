@@ -11,6 +11,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *

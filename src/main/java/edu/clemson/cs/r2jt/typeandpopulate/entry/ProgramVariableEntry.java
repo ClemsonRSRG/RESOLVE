@@ -25,6 +25,7 @@ public class ProgramVariableEntry extends SymbolTableEntry {
                 new MathSymbolEntry(type.getTypeGraph(), name,
                         Quantification.NONE, definingElement, type.toMath(),
                         null, null, null, sourceModule);
+
     }
 
     public PTType getProgramType() {

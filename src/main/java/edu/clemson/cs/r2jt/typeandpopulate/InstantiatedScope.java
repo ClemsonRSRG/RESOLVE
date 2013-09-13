@@ -8,6 +8,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.query.MultimatchSymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.SymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher.SearchContext;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,8 +68,7 @@ public class InstantiatedScope extends AbstractScope {
     }
 
     @Override
-    public List<ProgramParameterEntry> getFormalParameterEntries() {
+    public List<SymbolTableEntry> getFormalParameterEntries() {
         return myBaseScope.getFormalParameterEntries();
     }
-
 }

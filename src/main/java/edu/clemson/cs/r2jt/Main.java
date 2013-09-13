@@ -88,7 +88,8 @@ import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
 import edu.clemson.cs.r2jt.translation.PrettyCTranslation;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslation;
 import edu.clemson.cs.r2jt.scope.OldSymbolTable;
-import edu.clemson.cs.r2jt.translation.Translator;
+import edu.clemson.cs.r2jt.translation.CTranslator;
+import edu.clemson.cs.r2jt.translation.JavaTranslator;
 import edu.clemson.cs.r2jt.treewalk.VisitorCodeGeneration;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
@@ -96,11 +97,11 @@ import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 
 /**
- * The main class for the Resolve compiler.
+ * The main class for the RESOLVE compiler.
  */
 public class Main {
 
-    private static final String VERSION = "June 2010";
+    private static final String VERSION = "Fall 2013";
 
     public static final String FLAG_SECTION_GENERAL = "General";
 
@@ -110,34 +111,26 @@ public class Main {
 
     public static final Flag FLAG_EXTENDED_HELP =
             new Flag("General", "xhelp",
-                    "Displays all flags, including development flags and many others "
-                            + "not relevant to most users.");
+                    "Displays all flags, including development flags irrelevant to most users.");
 
     public static final Flag FLAG_NO_STANDARD_IMPORT =
             new Flag("General", "nostdimport",
                     "Prevents the compiler from importing standard uses modules.");
 
-    //private static boolean      bodies      = false;
     private static boolean compileDirs = false;
     private static String mainDirName = "Main";
 
-    //private static Environment env;
-
     public static void main(String[] args) {
-        //Environment.newInstance();
-        //env = Environment.getInstance();
-
         setUpFlagDependencies();
 
         try {
+
             CompileEnvironment compileEnvironment =
                     new CompileEnvironment(args);
+
             args = compileEnvironment.getRemainingArgs();
             ErrorHandler err = new ErrorHandler(compileEnvironment);
             compileEnvironment.setErrorHandler(err);
-            //compileEnvironment.setUserFileMap(getFakeHashMap());
-            //Environment env = new Environment(compileEnvironment);
-            //env.setErrorHandler(err);
             String preferredMainDirectory = null;
 
             List<File> files = new List<File>();
@@ -233,8 +226,6 @@ public class Main {
     public static void runMain(String[] args, CompileReport rep,
             MetaFile inputFile, HashMap<String, MetaFile> userFileMap,
             ProverListener listener) {
-        //Environment.newInstance();
-        //env = Environment.getInstance();
 
         setUpFlagDependencies();
         String fileName = inputFile.getMyFileName();
@@ -424,15 +415,6 @@ public class Main {
 
         Controller control = new Controller(instanceEnvironment);
         control.compileTargetSource(inputFile, symbolTable);
-
-        /*if (env.showBuild()) {
-        //           LOG.debug("showBuild flag set, printing module dec.");
-            printModuleDec(file);
-        } else if (env.showEnv()) {
-            printEnvironment(file);
-        } else if (env.showTable() || env.showBind()) {
-            printSymbolTable(file);
-        }*/
     }
 
     private static void printModuleDec(File file, CompileEnvironment env) {
@@ -506,15 +488,15 @@ public class Main {
     }
 
     /**
-     * Converts the specified pathname to a <code>File</code> representing
-     * the absolute path to the pathname.
+     * <p>Converts the specified pathname to a <code>File</code> representing
+     * the absolute path to the pathname.</p>
      */
     private static File getAbsoluteFile(String pathname) {
         return new File(pathname).getAbsoluteFile();
     }
 
     /**
-     * Determines if the specified filename is a valid Resolve filename.
+     * <p>Determines if the specified filename is a valid Resolve filename.</p>
      */
     private static boolean isResolveFile(String filename) {
         return (filename.endsWith(".mt") || filename.endsWith(".co")
@@ -571,7 +553,8 @@ public class Main {
             Analyzer.setUpFlags();
             PrettyCTranslation.setUpFlags();
             PrettyJavaTranslation.setUpFlags();
-            Translator.setUpFlags();
+            JavaTranslator.setUpFlags();
+            CTranslator.setUpFlags();
             Archiver.setUpFlags();
             ResolveCompiler.setUpFlags();
             PrettyJavaTranslator.setUpFlags();

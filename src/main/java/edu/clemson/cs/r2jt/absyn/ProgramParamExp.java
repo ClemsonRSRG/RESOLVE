@@ -77,6 +77,9 @@ public class ProgramParamExp extends ProgramExp {
     /** The name member. */
     private PosSymbol name;
 
+    /** The qualifier member. Added 8-29-2013*/
+    private PosSymbol qualifier;
+
     /** The arguments member. */
     private List<ProgramExp> arguments;
 
@@ -126,6 +129,10 @@ public class ProgramParamExp extends ProgramExp {
         return location;
     }
 
+    public PosSymbol getQualifier() {
+        return qualifier;
+    }
+
     /** Returns the value of the name variable. */
     public PosSymbol getName() {
         return name;
@@ -148,6 +155,10 @@ public class ProgramParamExp extends ProgramExp {
     /** Sets the location variable to the specified value. */
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public void setQualifier(PosSymbol qual) {
+        this.qualifier = qual;
     }
 
     /** Sets the name variable to the specified value. */

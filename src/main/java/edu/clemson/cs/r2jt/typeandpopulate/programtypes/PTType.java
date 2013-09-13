@@ -1,5 +1,6 @@
 package edu.clemson.cs.r2jt.typeandpopulate.programtypes;
 
+import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
@@ -7,6 +8,7 @@ import java.util.Map;
 
 public abstract class PTType {
 
+    private String myQualifier;
     private final TypeGraph myTypeGraph;
 
     public PTType(TypeGraph g) {
@@ -23,6 +25,14 @@ public abstract class PTType {
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility);
 
+    public final void setQualifier(String qualifier) {
+        this.myQualifier = qualifier;
+    }
+
+    public final String getQualifier() {
+        return myQualifier;
+    }
+
     /**
      * <p>Returns <code>true</code> <strong>iff</strong> an value of this type
      * would be acceptable where one of type <code>t</code> were required.</p>
@@ -35,5 +45,9 @@ public abstract class PTType {
      */
     public boolean acceptableFor(PTType t) {
         return equals(t);
+    }
+
+    public Location getLocation() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

@@ -123,4 +123,15 @@ public abstract class AbstractImmutableList<E> implements ImmutableList<E> {
 
         return buffer.toString();
     }
+
+    @Override
+    public boolean contains(E item) {
+        Iterator<E> iterator = iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().equals(item)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

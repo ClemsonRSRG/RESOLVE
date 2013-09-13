@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher.SearchContext;
 
 /**
@@ -124,6 +125,7 @@ public abstract class SyntacticScope extends AbstractScope {
                 symbolTableView =
                         new InstantiatedSymbolTable(myBindings,
                                 genericInstantiations, instantiatingFacility);
+
             }
 
             finished = searcher.addMatches(symbolTableView, matches, l);
@@ -141,17 +143,26 @@ public abstract class SyntacticScope extends AbstractScope {
     }
 
     @Override
-    public List<ProgramParameterEntry> getFormalParameterEntries() {
-        List<ProgramParameterEntry> result =
-                new LinkedList<ProgramParameterEntry>();
+    public List<SymbolTableEntry> getFormalParameterEntries() {
+        List<SymbolTableEntry> result = new LinkedList<SymbolTableEntry>();
 
-        Iterator<ProgramParameterEntry> formalBindings =
+        Iterator<ProgramParameterEntry> formalParameterEntryBindings =
                 myBindings.iterateByType(ProgramParameterEntry.class);
 
-        while (formalBindings.hasNext()) {
-            result.add(formalBindings.next());
+        Iterator<OperationEntry> formalOperationEntryBindings =
+                myBindings.iterateByType(OperationEntry.class);
+
+        while (formalParameterEntryBindings.hasNext()) {
+            result.add(formalParameterEntryBindings.next());
         }
 
+        while (formalOperationEntryBindings.hasNext()) {
+            OperationEntry currentEntry = formalOperationEntryBindings.next();
+
+            if (currentEntry.isFormalParameter()) {
+                result.add(currentEntry);
+            }
+        }
         return result;
     }
 

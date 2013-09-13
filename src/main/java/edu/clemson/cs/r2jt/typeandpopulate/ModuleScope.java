@@ -3,6 +3,7 @@ package edu.clemson.cs.r2jt.typeandpopulate;
 import java.util.List;
 
 import edu.clemson.cs.r2jt.absyn.ModuleDec;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 
 /**
  * <p>A <code>ModuleScope</code> refines {@link Scope Scope} to provide methods

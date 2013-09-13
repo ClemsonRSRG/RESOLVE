@@ -108,10 +108,11 @@ import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.parsing.RSimpleTrans;
 import edu.clemson.cs.r2jt.proving2.AlgebraicProver;
 import edu.clemson.cs.r2jt.proving2.VC;
+import edu.clemson.cs.r2jt.translation.CTranslator;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
 import edu.clemson.cs.r2jt.translation.PrettyJavaTranslation;
 import edu.clemson.cs.r2jt.translation.PrettyCTranslation;
-import edu.clemson.cs.r2jt.translation.Translator;
+import edu.clemson.cs.r2jt.translation.JavaTranslator;
 import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.verification.AssertiveCode;
@@ -505,8 +506,8 @@ public class Controller {
                 System.out.println("");
             }
             if (myInstanceEnvironment.flags
-                    .isFlagSet(Translator.FLAG_TRANSLATE)) {
-                translateModuleDec(file, table, dec);
+                    .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
+                translateModuleDec(file, symbolTable, dec);
                 //System.out.println("Translated: " + file.toString());
                 if (myInstanceEnvironment.flags
                         .isFlagSet(Archiver.FLAG_ARCHIVE)) {
@@ -616,11 +617,11 @@ public class Controller {
             myInstanceEnvironment.completeRecord(id, table);
             //env.setSuccess();
             if (myInstanceEnvironment.flags
-                    .isFlagSet(Translator.FLAG_TRANSLATE)) {
+                    .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
                 if (inputFile.getIsCustomLoc()) {
                     file = inputFile.getMyCustomFile();
                 }
-                translateModuleDec(file, table, dec);
+                translateModuleDec(file, symbolTable, dec);
                 //System.out.println("Translated: " + file.toString());
                 if (myInstanceEnvironment.flags
                         .isFlagSet(Archiver.FLAG_ARCHIVE)) {
@@ -1020,7 +1021,7 @@ public class Controller {
             //if(arc.needToTranslate(file)) translateModuleDec(table, dec);
             //if(env.createJarOn() && arc.needToTranslate(file)){
             if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-                translateModuleDec(file, table, dec);
+                translateModuleDec(file, symbolTable, dec);
                 //arc.addFiletoArchive(file);
                 //arc.printArchiveList();
             }
@@ -1084,7 +1085,7 @@ public class Controller {
                 if (importFile.getIsCustomLoc()) {
                     file = importFile.getMyCustomFile();
                 }
-                translateModuleDec(file, table, dec);
+                translateModuleDec(file, symbolTable, dec);
                 //arc.addFiletoArchive(file);
                 //arc.printArchiveList();
             }
@@ -1666,7 +1667,6 @@ public class Controller {
                                         .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE),
                                 myInstanceEnvironment, myInstanceEnvironment
                                         .getProverListener());
-
                 try {
                     prover.start();
                 }
@@ -1712,40 +1712,31 @@ public class Controller {
     // Translation Related Methods
     // ------------------------------------------------------------
 
-    private void translateModuleDec(File file, OldSymbolTable table,
+    private void translateModuleDec(File file, ScopeRepository realTable,
             ModuleDec dec) {
-        Translator translator =
-                new Translator(myInstanceEnvironment, table, dec, err);
-        if (myArchive != null && !translator.onNoCompileList(file)) {
-            myArchive.addFileToArchive(file);
+        try {
+            ModuleScope scope =
+                    realTable.getModuleScope(new ModuleIdentifier(dec));
+            JavaTranslator javaT =
+                    new JavaTranslator(myInstanceEnvironment, scope, dec, err);
+            CTranslator cT =
+                    new CTranslator(myInstanceEnvironment, scope, dec, err);
+            TreeWalker tw = new TreeWalker(javaT);
+            tw.visit(dec);
+            javaT.outputCode(file);
         }
-        String targetFile = myInstanceEnvironment.getTargetFile().toString();
-        String thisFile = dec.getName().getFile().toString();
-        // We only translate if this is the target file or if file is stale
-        if ((thisFile.equals(targetFile)) || translator.needToTranslate(file)) {
-            //System.out.println("Starting Translation: "+dec.getName().getName());
-            translator.visitModuleDec(dec);
-            //System.out.println("Translated: "+dec.getName().getName());
-            translator.outputJavaCode(file);
+        catch (NoSuchSymbolException nsse) {
+            //Can't find the module we're in.  Shouldn't be possible.
+            throw new RuntimeException(nsse);
         }
     }
 
     private void translatePrettyModuleDec(File file, OldSymbolTable table,
             ModuleDec dec) {
-        /*PrettyJavaTranslator translator =
-                new PrettyJavaTranslator(myInstanceEnvironment, table, dec, err);
-        String targetFile = myInstanceEnvironment.getTargetFile().toString();
-        String thisFile = dec.getName().getFile().toString();
-        // We only translate if this is the target file or if file is stale
-        if ((thisFile.equals(targetFile)) || translator.needToTranslate(file)) {
-            //System.out.println("Starting Translation: "+dec.getName().getName());
-            translator.visitModuleDec(dec);
-            //System.out.println("Translated: "+dec.getName().getName());
-            translator.outputJavaCode(file);
-        }*/
 
         if (myInstanceEnvironment.flags
                 .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)) {
+
             PrettyJavaTranslation prettyT =
                     new PrettyJavaTranslation(myInstanceEnvironment, table,
                             dec, err);

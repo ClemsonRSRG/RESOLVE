@@ -1963,8 +1963,11 @@ public abstract class TreeWalkerVisitor {
 
     public void preProgramOpExp(ProgramOpExp data) {}
 
-    public void midProgramOpExp(ProgramOpExp node,
-            ResolveConceptualElement previous, ResolveConceptualElement next) {}
+    public void midProgramOpExp(ProgramOpExp data,
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+
+    }
 
     public void postProgramOpExp(ProgramOpExp data) {}
 

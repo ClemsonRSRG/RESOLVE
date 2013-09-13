@@ -67,4 +67,8 @@ public class PTRepresentation extends PTType {
     public String toString() {
         return myFamily.getName() + " as " + myBaseType;
     }
+
+    public String getFamilyName() {
+        return myFamily.getName();
+    }
 }

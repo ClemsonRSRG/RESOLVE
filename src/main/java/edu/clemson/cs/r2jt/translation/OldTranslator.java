@@ -95,7 +95,7 @@ import edu.clemson.cs.r2jt.archiving.Archiver;
 // Error analysis needs more work.
 // - Murali Sitaraman, August 2006.
 
-public class Translator extends ResolveConceptualVisitor {
+public class OldTranslator extends ResolveConceptualVisitor {
 
     private static final String FLAG_SECTION_NAME = "Translation";
 
@@ -191,7 +191,7 @@ public class Translator extends ResolveConceptualVisitor {
     /**
      * Construct a Translator.
      */
-    public Translator(CompileEnvironment e, OldSymbolTable table,
+    public OldTranslator(CompileEnvironment e, OldSymbolTable table,
             ModuleDec dec, ErrorHandler err) {
         myInstanceEnvironment = e;
         targetFileName = dec.getName().getFile().toString();
@@ -1916,6 +1916,7 @@ public class Translator extends ResolveConceptualVisitor {
         else {
             ProgramExpTypeResolver resolver =
                     new ProgramExpTypeResolver(table, myInstanceEnvironment);
+
             Location loc =
                     (stmt.getQualifier() == null) ? stmt.getName()
                             .getLocation() : stmt.getQualifier().getLocation();

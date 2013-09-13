@@ -439,4 +439,21 @@ public class ProgramOpExp extends ProgramExp {
 
         return result;
     }
+
+    public String getStringProgramType() {
+        String result;
+
+        switch (TYPES.get(operator)) {
+        case INTEGER:
+            result = "Integer";
+            break;
+        case BOOLEAN:
+            result = "Boolean";
+            break;
+        default:
+            throw new RuntimeException();
+        }
+
+        return result.toString();
+    }
 }
