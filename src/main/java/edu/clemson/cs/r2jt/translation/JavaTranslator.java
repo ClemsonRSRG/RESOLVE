@@ -81,7 +81,7 @@ public class JavaTranslator extends AbstractTranslator {
      * special case doesn't apply to C, the separation seems necessary.
      * 
      * Note <code>preCallStmt</code> in {@link CTranslator CTranslator} 
-     * still needs to qualify calls so qualification finding methods
+     * will need to qualify calls so qualification finding methods
      * are still found in the <code>AbstractTranslator</code>.</p>
      */
     @Override

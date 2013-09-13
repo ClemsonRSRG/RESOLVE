@@ -121,10 +121,10 @@ public class Main {
     private static String mainDirName = "Main";
 
     public static void main(String[] args) {
-
         setUpFlagDependencies();
 
         try {
+
             CompileEnvironment compileEnvironment =
                     new CompileEnvironment(args);
 
@@ -488,15 +488,15 @@ public class Main {
     }
 
     /**
-     * Converts the specified pathname to a <code>File</code> representing
-     * the absolute path to the pathname.
+     * <p>Converts the specified pathname to a <code>File</code> representing
+     * the absolute path to the pathname.</p>
      */
     private static File getAbsoluteFile(String pathname) {
         return new File(pathname).getAbsoluteFile();
     }
 
     /**
-     * Determines if the specified filename is a valid Resolve filename.
+     * <p>Determines if the specified filename is a valid Resolve filename.</p>
      */
     private static boolean isResolveFile(String filename) {
         return (filename.endsWith(".mt") || filename.endsWith(".co")

@@ -41,7 +41,6 @@ import java.util.Map;
  * as needed when/if new target languages are incorporated into the
  * project.
  *
- * 
  * @author Markt, Welchd
  */
 public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
@@ -80,7 +79,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     /**
      * <p>While walking a FacilityDec or its children, this maintains
      * a pointer to that facility, and, by extension, any enhancements
-     * (<code>ModuleParameterizations</code>) enclosed within. If we
+     * (<code>ModuleParameterizations</code>) enclosed withinataicedd. If we
      * haven't encountered a <code>FacilityDec</code> or we've finished
      * walking one, this is set to <code>null</code>.</p>
      */
@@ -558,7 +557,11 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     //   Flag and output-related methods
     // -----------------------------------------------------------
 
-    public static final void setUpFlags() {}
+    public static final void setUpFlags() {
+
+    // Check Prover to see the correct way to do this using
+    // HwS's FlagDependencies.
+    }
 
     public static void emitDebug(String msg) {
         if (PRINT_DEBUG) {

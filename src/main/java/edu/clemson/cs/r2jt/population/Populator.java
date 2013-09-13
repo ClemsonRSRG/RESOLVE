@@ -132,7 +132,7 @@ public class Populator extends TreeWalkerVisitor {
             new HashMap<String, MTType>();
 
     /**
-     * Currently HwS's getFormalParameterEntries method in {@link Scope Scope} 
+     * Currently HwS's getFormalParameterEntries method in {@link Scope Scope}
      * only returns a list of ProgramParameterEntries visible in that current
      * scope but fails to recognize any op declarations that are parameters 
      * (they are treated no differently from any other operation declaration).
@@ -141,7 +141,7 @@ public class Populator extends TreeWalkerVisitor {
      * names. This enables us to check, every time we're about to add an operationEntry 
      * into the table, whether or not is also a formal parameter and set a flag in
      * {@link OperationEntry OperationEntry} accordingly. This in turn allows us to 
-     * easily fix getFormalParameterEntries method to also return relevant Operations.
+     * fix the getFormalParameterEntries method to also return relevant Operations.
      */
     private List<String> myCurrentModuleParameters = new LinkedList<String>();
 
@@ -458,6 +458,7 @@ public class Populator extends TreeWalkerVisitor {
             //OperationQuery because we want to check parameter types 
             //separately in postProcedureDec)
 
+            myCurModuleScope.getDefiningElement().getName().getName();
             myCorrespondingOperation =
                     myBuilder.getInnermostActiveScope().queryForOne(
                             new NameAndEntryTypeQuery(null, dec.getName(),
