@@ -91,6 +91,14 @@ public class FacilityDec extends Dec {
     /** The enhancementBodies member. */
     private List<EnhancementBodyItem> enhancementBodies;
 
+    /**
+     * <p>Tells us whether or not the facility's realization
+     * has a implementation written in Resolve. If it does,
+     * then this flag should be true, otherwise, it will be
+     * false.</p>
+     */
+    private boolean isExternallyRealized;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -102,6 +110,17 @@ public class FacilityDec extends Dec {
             List<EnhancementItem> enhancements, PosSymbol bodyName,
             PosSymbol profileName, List<ModuleArgumentItem> bodyParams,
             List<EnhancementBodyItem> enhancementBodies) {
+
+        this(name, conceptName, conceptParams, enhancements, bodyName,
+                profileName, bodyParams, enhancementBodies, false);
+    }
+
+    public FacilityDec(PosSymbol name, PosSymbol conceptName,
+            List<ModuleArgumentItem> conceptParams,
+            List<EnhancementItem> enhancements, PosSymbol bodyName,
+            PosSymbol profileName, List<ModuleArgumentItem> bodyParams,
+            List<EnhancementBodyItem> enhancementBodies, boolean externRealized) {
+
         this.name = name;
         this.conceptName = conceptName;
         this.conceptParams = conceptParams;
@@ -110,6 +129,7 @@ public class FacilityDec extends Dec {
         this.profileName = profileName;
         this.bodyParams = bodyParams;
         this.enhancementBodies = enhancementBodies;
+        this.isExternallyRealized = externRealized;
     }
 
     // ===========================================================

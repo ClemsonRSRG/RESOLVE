@@ -731,7 +731,7 @@ facility_declaration returns [FacilityDec dec = null]
     :	^(  FACILITY ps=ident
                     cName=ident (cPars=module_argument_section)?
                     (eItem=facility_enhancement { eItems.add($eItem.item); })*
-                    REALIZED (external=EXTERNALLY)? bName=ident (WITH_PROFILE prof=ident)? (bPars=module_argument_section)?
+                    (external=EXTERNALLY)? REALIZED bName=ident (WITH_PROFILE prof=ident)? (bPars=module_argument_section)?
                     (ebItem=facility_body_enhancement { ebItems.add($ebItem.item); })*
                 )
                 {   $dec = new FacilityDec($ps.ps, $cName.ps,
