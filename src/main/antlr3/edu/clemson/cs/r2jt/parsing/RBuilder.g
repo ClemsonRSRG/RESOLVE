@@ -728,19 +728,19 @@ facility_declaration returns [FacilityDec dec = null]
         = new edu.clemson.cs.r2jt.collections.List<EnhancementBodyItem>("ModuleArgumentItem");
     edu.clemson.cs.r2jt.collections.List<ModuleArgumentItem> args = new edu.clemson.cs.r2jt.collections.List<ModuleArgumentItem>("ModuleArgumentItem");
 }
-    :   ^(  FACILITY ps=ident
-            cName=ident (cPars=module_argument_section)?
-            (eItem=facility_enhancement { eItems.add($eItem.item); })*
-            REALIZED bName=ident (WITH_PROFILE prof=ident)? (bPars=module_argument_section)?
-            (ebItem=facility_body_enhancement { ebItems.add($ebItem.item); })*
-        )
-        {   $dec = new FacilityDec($ps.ps, $cName.ps,
-                                    $cPars.args!=null?$cPars.args:args,
-                                    eItems, $bName.ps, $prof.ps,
-                                    $bPars.args!=null?$bPars.args:args,
-                                    ebItems);
-        }
-    ;
+    :	^(  FACILITY ps=ident
+                    cName=ident (cPars=module_argument_section)?
+                    (eItem=facility_enhancement { eItems.add($eItem.item); })*
+                    REALIZED (external=EXTERNALLY)? bName=ident (WITH_PROFILE prof=ident)? (bPars=module_argument_section)?
+                    (ebItem=facility_body_enhancement { ebItems.add($ebItem.item); })*
+                )
+                {   $dec = new FacilityDec($ps.ps, $cName.ps,
+                                            $cPars.args!=null?$cPars.args:args,
+                                            eItems, $bName.ps, $prof.ps,
+                                            $bPars.args!=null?$bPars.args:args,
+                                            ebItems, $external!=null?true:false);
+                }
+	;
 
 facility_enhancement returns [EnhancementItem item = null]
 @init{
