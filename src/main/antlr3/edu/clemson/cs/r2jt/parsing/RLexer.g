@@ -241,6 +241,10 @@ EXISTS
 EXIT
   : 'exit'
   ;
+
+EXTERNALLY
+	: 'externally'
+	;
   
 FACILITY
   : 'Facility'

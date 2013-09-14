@@ -547,7 +547,7 @@ facility_declaration
         IS! ident
         module_argument_section?
         facility_enhancement*
-        REALIZED BY! ident
+        (EXTERNALLY)? REALIZED BY! ident
         (WITH_PROFILE ident)? module_argument_section?
         facility_body_enhancement*
         SEMICOLON!
