@@ -8,6 +8,7 @@ import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.proving2.utilities.Predicate;
+import edu.clemson.cs.r2jt.utilities.FlagManager;
 import java.util.Deque;
 
 /**
@@ -42,8 +43,10 @@ public class ProbationaryApplication implements Automator {
             if (!myPredicate.test(model.getLastProofStep())) {
                 model.undoLastProofStep();
                 myChangeStuckFlag = false;
-                System.out
-                        .println("ProbationaryApplication - Rolling back change");
+                if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                    System.out
+                            .println("ProbationaryApplication - Rolling back change");
+                }
             }
 
             stack.pop();

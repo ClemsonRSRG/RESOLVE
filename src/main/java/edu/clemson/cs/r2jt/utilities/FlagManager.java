@@ -7,29 +7,30 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <p>A <code>FlagManager</code> represents an actual configuration of flags, as
- * provided by the user.  It may be queried to find out what flags are set, or
+ * <p>A
+ * <code>FlagManager</code> represents an actual configuration of flags, as
+ * provided by the user. It may be queried to find out what flags are set, or
  * what the values of parameters are.</p>
  */
 public class FlagManager {
 
     private Map<Flag, FlagInfo> myFlags = new HashMap<Flag, FlagInfo>();
-
     private final String[] myRemainingArgs;
+    private static FlagManager global_instance;
 
     /**
-     * <p>Creates a new <code>FlagManager</code> based on the provided user
-     * command-line arguments and the current state of 
+     * <p>Creates a new
+     * <code>FlagManager</code> based on the provided user command-line
+     * arguments and the current state of
      * {@link FlagDependencies FlagDependencies}.</p>
-     * 
+     *
      * @param args The command line arguments provided by the user.
-     * 
+     *
      * @throws FlagDependencyException If the set flags are not acceptable for
-     *              some reason.
-     *              
+     * some reason.
+     *
      * @throws IllegalStateException If <code>FlagDependencies</code> has not
-     *              yet been sealed with a call to 
-     *              {@link FlagDependencies#seal() seal()}.
+     * yet been sealed with a call to {@link FlagDependencies#seal() seal()}.
      */
     public FlagManager(String[] args) throws FlagDependencyException {
 
@@ -40,14 +41,25 @@ public class FlagManager {
         }
 
         myRemainingArgs = processArguments(args);
+        assignToGlobalInstance();
+    }
+
+    private void assignToGlobalInstance() {
+        if (global_instance == null) {
+            global_instance = this;
+        }
+    }
+
+    public static FlagManager getInstance() {
+        return global_instance;
     }
 
     /**
      * <p>All arguments in the originally provided array of arguments that
      * looked like flags but didn't match a known flag, up to the first argument
-     * that didn't look like a flag, concatenated with all arguments starting
-     * at the first argument that didn't look like a flag to the end.</p>
-     * 
+     * that didn't look like a flag, concatenated with all arguments starting at
+     * the first argument that didn't look like a flag to the end.</p>
+     *
      * @return Those arguments this <code>FlagManager</code> didn't process.
      */
     public String[] getRemainingArgs() {
@@ -55,18 +67,28 @@ public class FlagManager {
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> the provided flag is
-     * set.  Flags can be set either directly by the user, implicitly because
-     * they have default parameter values, or implicitly by another flag that
-     * was set and had an <em>implies</em> relationship with the provided flag.
-     * </p>
-     * 
+     * <p>Returns
+     * <code>true</code> <strong>iff</strong> the provided flag is set. Flags
+     * can be set either directly by the user, implicitly because they have
+     * default parameter values, or implicitly by another flag that was set and
+     * had an <em>implies</em> relationship with the provided flag. </p>
+     *
      * @param f The flag to check whether or not it is set.
-     * 
+     *
      * @return <code>true</code> <strong>iff</strong> the flag is set.
      */
     public boolean isFlagSet(Flag f) {
         return myFlags.containsKey(f);
+    }
+
+    // could be replace by a map of string -> flag
+    public boolean isFlagSet(String s) {
+        for (Flag f : myFlags.keySet()) {
+            if (f.getName().equals(s)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     Flag getFlagReason(Flag f) {
@@ -76,14 +98,14 @@ public class FlagManager {
     /**
      * <p>Returns the argument provided for a particular parameter name of the
      * given flag.</p>
-     * 
+     *
      * @param f The flag whose argument we would like.
      * @param parameterName The parameter whose value we would like, as original
-     *                      provided to the <code>Flag</code> constructor.
-     *                      
+     * provided to the <code>Flag</code> constructor.
+     *
      * @return The value of the named parameter, either as provided explicitly
-     *         by the user or implicitly via the default.
-     *         
+     * by the user or implicitly via the default.
+     *
      * @throws NullPointerException If the given flag is not set.
      */
     public String getFlagArgument(Flag f, String parameterName) {
