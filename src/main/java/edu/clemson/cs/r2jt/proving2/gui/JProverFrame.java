@@ -21,6 +21,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
+import edu.clemson.cs.r2jt.utilities.FlagManager;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -77,29 +78,20 @@ public class JProverFrame extends JFrame {
     private static final long serialVersionUID = 1L;
     private static final String CONTROLS_HIDDEN = "hidden";
     private static final String CONTROLS_VISIBLE = "visible";
-
     private static final Color POSSIBLE_THEOREM = new Color(200, 255, 200);
     private static final Color POSSIBLE_THEOREM_HOVER = new Color(0, 255, 0);
-
     private static final Color POSSIBLE_APPLICATION = new Color(200, 200, 200);
-
     private static final Color POSSIBLE_APPLICATION_HOVER =
             new Color(0, 255, 255);
-
     private final ApplicationCanceller APPLICATION_CANCELLER =
             new ApplicationCanceller();
-
     private final ApplicationApplier APPLICATION_APPLIER =
             new ApplicationApplier();
-
     private final LocalTheoremSelect LOCAL_THEOREM_SELECT =
             new LocalTheoremSelect();
-
     private final EnterTheoremSelectionOnModelChange TO_THEOREM_SELECTION =
             new EnterTheoremSelectionOnModelChange();
-
     private JProverStateDisplay myProverStateDisplay;
-
     private final JCheckBox myDetailsCheckBox = new JCheckBox("Details");
     private JComponent myDetailsArea;
     private JList myTheoremList;
@@ -113,25 +105,18 @@ public class JProverFrame extends JFrame {
     private JButton myPauseButton;
     private JButton myStopButton;
     private JButton myStepButton;
-
     private final CardLayout myOptionalTransportLayout = new CardLayout();
     private final JPanel myOptionalTransportPanel =
             new JPanel(myOptionalTransportLayout);
-
     private JScrollPane myTopLevelScrollWrapper;
     private JComponent myBasicArea;
-
     private Set<PExp> myGlobalTheoremAssertions = new HashSet<PExp>();
-
     private final MapOfLists<Site, Application> myLoadedApplications =
             new MapOfLists<Site, Application>();
-
     private final Map<Site, MouseListener> myTheoremAppliers =
             new HashMap<Site, MouseListener>();
-
     private final Map<Site, MouseListener> myLocalTheoremSelectors =
             new HashMap<Site, MouseListener>();
-
     private boolean myInteractiveModeFlag = true;
 
     public static void main(String[] args) throws FlagDependencyException {
@@ -181,39 +166,38 @@ public class JProverFrame extends JFrame {
         VC vc = new VC("0_1", a, c);
         JProverFrame p =
                 new JProverFrame(new PerVCProverModel(bldr.getTypeGraph(),
-                        "0_1", vc, new EmptyImmutableList<Theorem>()));
+                "0_1", vc, new EmptyImmutableList<Theorem>()));
         p.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         p.setVisible(true);
 
-        int[] path = { 1 };
+        int[] path = {1};
         /*NodeIdentifier nid = new NodeIdentifier(cc, path);
 
-        p.highlightPExp(nid, new Color(200, 200, 200));*/
+         p.highlightPExp(nid, new Color(200, 200, 200));*/
     }
 
     public JProverFrame(final PerVCProverModel m) {
         try {
             myPlayButton =
                     new JButton(new ImageIcon(ImageIO.read(ClassLoader
-                            .getSystemResource("images/play.png"))));
+                    .getSystemResource("images/play.png"))));
             myPlayButton.setToolTipText("Start Automated Prover");
 
             myPauseButton =
                     new JButton(new ImageIcon(ImageIO.read(ClassLoader
-                            .getSystemResource("images/pause.png"))));
+                    .getSystemResource("images/pause.png"))));
             myPauseButton.setToolTipText("Enter Interactive Mode");
 
             myStepButton =
                     new JButton(new ImageIcon(ImageIO.read(ClassLoader
-                            .getSystemResource("images/step.png"))));
+                    .getSystemResource("images/step.png"))));
             myStepButton.setToolTipText("Step Automated Prover");
 
             myStopButton =
                     new JButton(new ImageIcon(ImageIO.read(ClassLoader
-                            .getSystemResource("images/stop.png"))));
+                    .getSystemResource("images/stop.png"))));
             myStopButton.setToolTipText("Clear Proof Progress");
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
 
@@ -243,7 +227,6 @@ public class JProverFrame extends JFrame {
         myDetailsCheckBox.addChangeListener(new DetailsDisplayer());
 
         myCancelButton.addMouseListener(new MouseAdapter() {
-
             @Override
             public void mouseClicked(MouseEvent e) {
                 System.exit(0);
@@ -268,15 +251,16 @@ public class JProverFrame extends JFrame {
         }
         m.addElement(new DummyTheorem(ExistentialInstantiation.INSTANCE));
         myTheoremList.setModel(m);
-
-        System.out.println("setGlobalTheorems");
+        if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+            System.out.println("setGlobalTheorems");
+        }
         prepForTheoremSelection();
     }
 
     public void setInteractiveMode(final boolean interactive) {
         boolean changed =
                 (interactive && !myInteractiveModeFlag)
-                        || (!interactive && myInteractiveModeFlag);
+                || (!interactive && myInteractiveModeFlag);
 
         if (changed) {
             myInteractiveModeFlag = interactive;
@@ -288,8 +272,7 @@ public class JProverFrame extends JFrame {
                         TO_THEOREM_SELECTION);
                 myProverStateDisplay.getModel().touch();
                 prepForTheoremSelection();
-            }
-            else {
+            } else {
                 myProverStateDisplay.getModel().setChangeEventMode(
                         PerVCProverModel.ChangeEventMode.INTERMITTENT);
                 removeClickTargetsFromModel();
@@ -357,8 +340,7 @@ public class JProverFrame extends JFrame {
 
             //Put us into theorem selection state
             prepForTheoremSelection();
-        }
-        else {
+        } else {
             model
                     .setChangeEventMode(PerVCProverModel.ChangeEventMode.INTERMITTENT);
         }
@@ -415,7 +397,7 @@ public class JProverFrame extends JFrame {
 
         Iterator<Site> antecedents =
                 myProverStateDisplay.getModel()
-                        .topLevelAntecedentSiteIterator();
+                .topLevelAntecedentSiteIterator();
         Site antecedent;
         while (antecedents.hasNext()) {
             antecedent = antecedents.next();
@@ -444,7 +426,7 @@ public class JProverFrame extends JFrame {
 
         JSplitPane split =
                 new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true,
-                        buildProofStatusArea(), buildTheoremListPanel());
+                buildProofStatusArea(), buildTheoremListPanel());
         split.setResizeWeight(1);
 
         panel.add(split, BorderLayout.CENTER);
@@ -614,11 +596,9 @@ public class JProverFrame extends JFrame {
 
                 if (applications.isEmpty()) {
                     throw new RuntimeException("This can't be!");
-                }
-                else if (applications.size() == 1) {
+                } else if (applications.size() == 1) {
                     applications.get(0).apply(myProverStateDisplay.getModel());
-                }
-                else {
+                } else {
                     JPopupMenu popup = new JPopupMenu();
                     JMenuItem menuItem;
 
@@ -700,21 +680,28 @@ public class JProverFrame extends JFrame {
 
         @Override
         public void stateChanged(ChangeEvent e) {
-            System.out
-                    .println("JProverFrame.EnterTheoremSelectionOnModelChange - enter");
+            if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                System.out
+                        .println("JProverFrame.EnterTheoremSelectionOnModelChange - enter");
+            }
             SwingUtilities.invokeLater(new Runnable() {
-
                 @Override
                 public void run() {
-                    System.out
-                            .println("JProverFrame.EnterTheoremSelectionOnModelChange - enterJob");
+                    if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                        System.out
+                                .println("JProverFrame.EnterTheoremSelectionOnModelChange - enterJob");
+                    }
                     prepForTheoremSelection();
-                    System.out
-                            .println("JProverFrame.EnterTheoremSelectionOnModelChange - exitJob");
+                    if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                        System.out
+                                .println("JProverFrame.EnterTheoremSelectionOnModelChange - exitJob");
+                    }
                 }
             });
-            System.out
-                    .println("JProverFrame.EnterTheoremSelectionOnModelChange - exit");
+            if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                System.out
+                        .println("JProverFrame.EnterTheoremSelectionOnModelChange - exit");
+            }
         }
     }
 
@@ -744,8 +731,7 @@ public class JProverFrame extends JFrame {
             String searchText = mySearchField.getText().toLowerCase().trim();
             if (searchText.isEmpty()) {
                 setGlobalTheorems(theorems);
-            }
-            else {
+            } else {
                 //All this complicated stuff turns a "simple" regex (i.e., one
                 //that only recognizes "*" for "anything" and "\*" for "literal
                 //star" into an "official" regex supported by Pattern
@@ -760,8 +746,7 @@ public class JProverFrame extends JFrame {
                 for (String nonLiteralStarChunk : literalStarSplit) {
                     if (firstNonLiteralStarChunk) {
                         firstNonLiteralStarChunk = false;
-                    }
-                    else {
+                    } else {
                         pattern += "\\*";
                     }
 
@@ -771,8 +756,7 @@ public class JProverFrame extends JFrame {
                     for (String literalChunk : literalChunks) {
                         if (firstLiteralChunk) {
                             firstLiteralChunk = false;
-                        }
-                        else {
+                        } else {
                             pattern += ".*?";
                         }
 
@@ -812,27 +796,26 @@ public class JProverFrame extends JFrame {
                 String state;
                 if (checked) {
                     state = CONTROLS_VISIBLE;
-                }
-                else {
+                } else {
                     state = CONTROLS_HIDDEN;
                 }
                 myOptionalTransportLayout.show(myOptionalTransportPanel, state);
 
                 /*myBasicArea.setPreferredSize(myBasicArea.getSize());
-                JProverFrame.this.setPreferredSize(null);
-                myTopLevelScrollWrapper.setPreferredSize(null);
+                 JProverFrame.this.setPreferredSize(null);
+                 myTopLevelScrollWrapper.setPreferredSize(null);
 
-                JProverFrame.this.pack();
+                 JProverFrame.this.pack();
 
-                myTopLevelScrollWrapper.setPreferredSize(
-                        JProverFrame.this.getPreferredSize());
-                JProverFrame.this.setPreferredSize(
-                        JProverFrame.this.getPreferredSize());
-                myBasicArea.setPreferredSize(null);
+                 myTopLevelScrollWrapper.setPreferredSize(
+                 JProverFrame.this.getPreferredSize());
+                 JProverFrame.this.setPreferredSize(
+                 JProverFrame.this.getPreferredSize());
+                 myBasicArea.setPreferredSize(null);
 
-                if (checked) {
-                    myDetailsArea.setPreferredSize(null);
-                }*/
+                 if (checked) {
+                 myDetailsArea.setPreferredSize(null);
+                 }*/
 
                 JProverFrame.this.pack();
                 myDetailsArea
