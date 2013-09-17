@@ -65,7 +65,7 @@ public class AlgebraicProver {
      */
     public static final Flag FLAG_INTERACTIVE =
             new Flag(Prover.FLAG_SECTION_NAME, "interactive",
-            FLAG_DESC_INTERACTIVE);
+                    FLAG_DESC_INTERACTIVE);
 
     public static void setUpFlags() {
         FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_PROVE);
@@ -73,6 +73,7 @@ public class AlgebraicProver {
 
         FlagDependencies.addImplies(FLAG_PROVE, Prover.FLAG_SOME_PROVER);
     }
+
     private final NextVC NEXT_VC = new NextVC();
     private final LastVC LAST_VC = new LastVC();
     private final StepProver STEP_PROVER = new StepProver();
@@ -106,8 +107,9 @@ public class AlgebraicProver {
         if (environment.flags.isFlagSet(Prover.FLAG_TIMEOUT)) {
             myTimeout =
                     Integer.parseInt(environment.flags.getFlagArgument(
-                    Prover.FLAG_TIMEOUT, Prover.FLAG_TIMEOUT_ARG_NAME));
-        } else {
+                            Prover.FLAG_TIMEOUT, Prover.FLAG_TIMEOUT_ARG_NAME));
+        }
+        else {
             myTimeout = -1;
         }
 
@@ -117,8 +119,8 @@ public class AlgebraicProver {
 
         List<TheoremEntry> theoremEntries =
                 scope.query(new EntryTypeQuery(TheoremEntry.class,
-                ImportStrategy.IMPORT_RECURSIVE,
-                FacilityStrategy.FACILITY_IGNORE));
+                        ImportStrategy.IMPORT_RECURSIVE,
+                        FacilityStrategy.FACILITY_IGNORE));
 
         //Ensure that the theorems are in a consistent (even if arbitrary) order
         //so that proof results are likewise consistent
@@ -133,16 +135,18 @@ public class AlgebraicProver {
 
         myModels[0] =
                 new PerVCProverModel(g, vcs.get(0).getName(), vcs.get(0),
-                myTheoremLibrary);
+                        myTheoremLibrary);
         myAutomatedProvers[0] =
                 new AutomatedProver(myModels[0], myTheoremLibrary, scope,
-                myTimeout);
+                        myTimeout);
 
         if (environment.flags.isFlagSet(Prover.FLAG_NOGUI)) {
             myUI = null;
-        } else {
+        }
+        else {
             try {
                 SwingUtilities.invokeAndWait(new Runnable() {
+
                     @Override
                     public void run() {
                         JProverFrame proverPanel =
@@ -163,9 +167,11 @@ public class AlgebraicProver {
                         myUI = proverPanel;
                     }
                 });
-            } catch (InterruptedException ie) {
+            }
+            catch (InterruptedException ie) {
                 throw new RuntimeException(ie);
-            } catch (InvocationTargetException ite) {
+            }
+            catch (InvocationTargetException ite) {
                 throw new RuntimeException(ite);
             }
         }
@@ -217,6 +223,7 @@ public class AlgebraicProver {
                     // YS: check if we have a ui
                     if (myUI != null) {
                         SwingUtilities.invokeLater(new Runnable() {
+
                             @Override
                             public void run() {
                                 myUI.setInteractiveMode(true);
@@ -229,11 +236,13 @@ public class AlgebraicProver {
                     if (!myInteractiveModeFlag) {
                         outputProofFile();
                     }
-                } else {
+                }
+                else {
                     //Start on next VC.
                     setVCIndex(myVCIndex + 1);
                 }
-            } else {
+            }
+            else {
 
                 //This implements a debugging feature where the prover will 
                 //automatically pause whenever a label is reached.  To enable
@@ -247,6 +256,7 @@ public class AlgebraicProver {
                 // YS: check if we have a ui
                 if (myUI != null) {
                     SwingUtilities.invokeLater(new Runnable() {
+
                         @Override
                         public void run() {
                             myUI.setInteractiveMode(true);
@@ -259,8 +269,8 @@ public class AlgebraicProver {
                 while (myInteractiveModeFlag && myRunningFlag) {
                     try {
                         this.wait();
-                    } catch (InterruptedException ie) {
                     }
+                    catch (InterruptedException ie) {}
                 }
             }
         }
@@ -297,7 +307,7 @@ public class AlgebraicProver {
 
                 PerVCProverModel workingModel =
                         new PerVCProverModel(myTypeGraph, myVCs.get(i)
-                        .getName(), myVCs.get(i), myTheoremLibrary);
+                                .getName(), myVCs.get(i), myTheoremLibrary);
 
                 buffers[i].append(workingModel.toString());
                 buffers[i].append("\n\n");
@@ -325,14 +335,15 @@ public class AlgebraicProver {
                         if (stepTransformation instanceof NoOpLabel) {
                             doneWithAntecedentDevelopment =
                                     doneWithAntecedentDevelopment
-                                    || stepTransformation
-                                    .toString()
-                                    .equals(
-                                    AutomatedProver.SEARCH_START_LABEL);
+                                            || stepTransformation
+                                                    .toString()
+                                                    .equals(
+                                                            AutomatedProver.SEARCH_START_LABEL);
 
                             buffers[i].append(stepTransformation.toString());
                             buffers[i].append("\n\n");
-                        } else {
+                        }
+                        else {
                             buffers[i].append("Applied ");
                             buffers[i].append(stepTransformation);
                             buffers[i].append("\n\n");
@@ -343,7 +354,8 @@ public class AlgebraicProver {
                 }
 
                 buffers[i].append("Q.E.D.\n\n");
-            } else {
+            }
+            else {
                 buffers[i].append("[NOT PROVED]\n\n");
             }
 
@@ -354,7 +366,8 @@ public class AlgebraicProver {
                         + myAutomatedProvers[i].getLastStartLength()
                         + "ms via " + stepCount[i] + " steps ("
                         + searchStepCount[i] + " search)\n");
-            } else {
+            }
+            else {
                 w.write("[SKIPPED] after "
                         + myAutomatedProvers[i].getLastStartLength() + "ms\n");
             }
@@ -381,14 +394,15 @@ public class AlgebraicProver {
         if (myModels[myVCIndex] == null) {
             myModels[myVCIndex] =
                     new PerVCProverModel(myTypeGraph, myVCs.get(myVCIndex)
-                    .getName(), myVCs.get(myVCIndex), myTheoremLibrary);
+                            .getName(), myVCs.get(myVCIndex), myTheoremLibrary);
             myAutomatedProvers[myVCIndex] =
                     new AutomatedProver(myModels[myVCIndex], myTheoremLibrary,
-                    myModuleScope, myTimeout);
+                            myModuleScope, myTimeout);
         }
 
         if (myUI != null) {
             Runnable setModel = new Runnable() {
+
                 @Override
                 public void run() {
                     myUI.setModel(myModels[myVCIndex]);
@@ -397,15 +411,17 @@ public class AlgebraicProver {
 
             if (SwingUtilities.isEventDispatchThread()) {
                 setModel.run();
-            } else {
+            }
+            else {
                 try {
                     while (myUI.getModel() != myModels[myVCIndex]) {
                         try {
                             SwingUtilities.invokeAndWait(setModel);
-                        } catch (InterruptedException ie) {
                         }
+                        catch (InterruptedException ie) {}
                     }
-                } catch (InvocationTargetException ite) {
+                }
+                catch (InvocationTargetException ite) {
                     throw new RuntimeException(ite);
                 }
             }

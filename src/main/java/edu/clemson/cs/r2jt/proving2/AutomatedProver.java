@@ -116,14 +116,14 @@ public class AutomatedProver {
         }
         List<Transformation> consequentTransformations =
                 orderByFitnessFunction(myTheoremLibrary,
-                myMainProofFitnessFunction);
+                        myMainProofFitnessFunction);
         if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
             System.out
                     .println("###################### antecedent transformations");
         }
         List<Transformation> antecedentTransformations =
                 orderByFitnessFunction(myTheoremLibrary,
-                myAntecedentDeveloperFitnessFunction);
+                        myAntecedentDeveloperFitnessFunction);
 
         List<Automator> steps = new LinkedList<Automator>();
         steps.add(new VariablePropagator());
@@ -169,7 +169,7 @@ public class AutomatedProver {
 
         PriorityQueue<Transformation> transformationHeap =
                 new PriorityQueue<Transformation>(11,
-                new TransformationComparator(f));
+                        new TransformationComparator(f));
         List<Transformation> theoremTransformations;
         for (Theorem t : theorems) {
             theoremTransformations = t.getTransformations();
@@ -186,19 +186,22 @@ public class AutomatedProver {
 
             top = transformationHeap.poll();
             transformations.add(top);
-            if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance().isFlagSet(
+                    ResolveCompiler.FLAG_NO_DEBUG)) {
                 System.out.println(top + " (" + top.getClass() + ") -- "
                         + f.calculateFitness(top));
             }
         }
 
         if (transformationHeap.size() > 0) {
-            if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance().isFlagSet(
+                    ResolveCompiler.FLAG_NO_DEBUG)) {
                 System.out.println("<<<<<<<<<<<<<<< recommend against");
             }
             while (!transformationHeap.isEmpty()) {
                 top = transformationHeap.poll();
-                if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+                if (!FlagManager.getInstance().isFlagSet(
+                        ResolveCompiler.FLAG_NO_DEBUG)) {
                     System.out.println(top + " (" + top.getClass() + ") -- "
                             + f.calculateFitness(top));
                 }
@@ -250,13 +253,14 @@ public class AutomatedProver {
         for (String s : symbols) {
             List<SymbolTableEntry> entries =
                     moduleScope.query(new NameQuery(null, s,
-                    ImportStrategy.IMPORT_RECURSIVE,
-                    FacilityStrategy.FACILITY_INSTANTIATE, false));
+                            ImportStrategy.IMPORT_RECURSIVE,
+                            FacilityStrategy.FACILITY_INSTANTIATE, false));
 
             if (entries.isEmpty()) {
                 //Symbol must be inside an operation scope, in which case it's
                 //a programmatic variable
-            } else {
+            }
+            else {
                 boolean math = true;
 
                 Iterator<SymbolTableEntry> entriesIter = entries.iterator();
@@ -288,7 +292,8 @@ public class AutomatedProver {
             //likely means we're in interactive mode--no harm in going ahead
             //and alerting change listeners
             myModel.triggerUIUpdates();
-        } else {
+        }
+        else {
             //We're on the prover thread, so we're in no danger of a race 
             //condition checking myTakingStepFlag
 
@@ -313,7 +318,8 @@ public class AutomatedProver {
         }
 
         if (myWorkerThread != null) {
-            if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance().isFlagSet(
+                    ResolveCompiler.FLAG_NO_DEBUG)) {
                 System.out.println("AutomatedProver - Interrupting");
             }
             myWorkerThread.interrupt();
@@ -338,7 +344,8 @@ public class AutomatedProver {
 
             myWorkerThread = Thread.currentThread();
 
-            if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance().isFlagSet(
+                    ResolveCompiler.FLAG_NO_DEBUG)) {
                 System.out
                         .println("============= AutomatedProver - start() ==============");
             }
@@ -354,7 +361,8 @@ public class AutomatedProver {
             }
             myRunningFlag = false;
             myEndTime = System.currentTimeMillis();
-            if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance().isFlagSet(
+                    ResolveCompiler.FLAG_NO_DEBUG)) {
                 System.out.println("AutomatedProver - end of start()");
             }
 
@@ -408,7 +416,8 @@ public class AutomatedProver {
         myTakingStepFlag = true;
 
         if (myPrepForUIUpdateFlag) {
-            if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance().isFlagSet(
+                    ResolveCompiler.FLAG_NO_DEBUG)) {
                 System.out.println("AutomatedProver - Prepping for UI update");
             }
 
@@ -422,12 +431,13 @@ public class AutomatedProver {
                     while (myPrepForUIUpdateFlag) {
                         try {
                             wait();
-                        } catch (InterruptedException ie) {
                         }
+                        catch (InterruptedException ie) {}
                     }
                 }
             }
-            if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance().isFlagSet(
+                    ResolveCompiler.FLAG_NO_DEBUG)) {
                 System.out.println("AutomatedProver - Done with UI update");
             }
         }
@@ -453,7 +463,8 @@ public class AutomatedProver {
         }
 
         if (myAutomatorStack.isEmpty() || myModel.noConsequents()) {
-            if (!FlagManager.getInstance().isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+            if (!FlagManager.getInstance().isFlagSet(
+                    ResolveCompiler.FLAG_NO_DEBUG)) {
                 if (myAutomatorStack.isEmpty()) {
                     System.out.println("Proof space exhausted.");
                 }
@@ -469,7 +480,7 @@ public class AutomatedProver {
 
     private class TransformationComparator
             implements
-            Comparator<Transformation> {
+                Comparator<Transformation> {
 
         private final FitnessFunction<Transformation> myFitnessFunction;
 
@@ -486,9 +497,11 @@ public class AutomatedProver {
 
             if (fitness1 > fitness2) {
                 result = -1;
-            } else if (fitness2 > fitness1) {
+            }
+            else if (fitness2 > fitness1) {
                 result = 1;
-            } else {
+            }
+            else {
                 //Give us a consistent, if arbitrary, order
                 result = o1.getKey().compareTo(o2.getKey());
             }
