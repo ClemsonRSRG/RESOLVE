@@ -6,6 +6,7 @@ package edu.clemson.cs.r2jt.proving2.gui;
 
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
+import edu.clemson.cs.r2jt.utilities.FlagManager;
 import java.awt.BorderLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -24,7 +25,6 @@ import javax.swing.event.ListSelectionListener;
 public class JProofDisplay extends JPanel {
 
     private final ModelChanged MODEL_CHANGED = new ModelChanged();
-
     private JList myStepList = new JList();
     private PerVCProverModel myModel;
 
@@ -86,7 +86,9 @@ public class JProofDisplay extends JPanel {
 
         @Override
         public void stateChanged(ChangeEvent e) {
-            System.out.println("JProofDisplay - stateChanged()");
+            if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                System.out.println("JProofDisplay - stateChanged()");
+            }
             refreshProofSteps();
         }
     }

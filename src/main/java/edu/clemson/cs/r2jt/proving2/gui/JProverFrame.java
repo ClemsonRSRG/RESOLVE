@@ -21,6 +21,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
+import edu.clemson.cs.r2jt.utilities.FlagManager;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -77,29 +78,20 @@ public class JProverFrame extends JFrame {
     private static final long serialVersionUID = 1L;
     private static final String CONTROLS_HIDDEN = "hidden";
     private static final String CONTROLS_VISIBLE = "visible";
-
     private static final Color POSSIBLE_THEOREM = new Color(200, 255, 200);
     private static final Color POSSIBLE_THEOREM_HOVER = new Color(0, 255, 0);
-
     private static final Color POSSIBLE_APPLICATION = new Color(200, 200, 200);
-
     private static final Color POSSIBLE_APPLICATION_HOVER =
             new Color(0, 255, 255);
-
     private final ApplicationCanceller APPLICATION_CANCELLER =
             new ApplicationCanceller();
-
     private final ApplicationApplier APPLICATION_APPLIER =
             new ApplicationApplier();
-
     private final LocalTheoremSelect LOCAL_THEOREM_SELECT =
             new LocalTheoremSelect();
-
     private final EnterTheoremSelectionOnModelChange TO_THEOREM_SELECTION =
             new EnterTheoremSelectionOnModelChange();
-
     private JProverStateDisplay myProverStateDisplay;
-
     private final JCheckBox myDetailsCheckBox = new JCheckBox("Details");
     private JComponent myDetailsArea;
     private JList myTheoremList;
@@ -113,25 +105,18 @@ public class JProverFrame extends JFrame {
     private JButton myPauseButton;
     private JButton myStopButton;
     private JButton myStepButton;
-
     private final CardLayout myOptionalTransportLayout = new CardLayout();
     private final JPanel myOptionalTransportPanel =
             new JPanel(myOptionalTransportLayout);
-
     private JScrollPane myTopLevelScrollWrapper;
     private JComponent myBasicArea;
-
     private Set<PExp> myGlobalTheoremAssertions = new HashSet<PExp>();
-
     private final MapOfLists<Site, Application> myLoadedApplications =
             new MapOfLists<Site, Application>();
-
     private final Map<Site, MouseListener> myTheoremAppliers =
             new HashMap<Site, MouseListener>();
-
     private final Map<Site, MouseListener> myLocalTheoremSelectors =
             new HashMap<Site, MouseListener>();
-
     private boolean myInteractiveModeFlag = true;
 
     public static void main(String[] args) throws FlagDependencyException {
@@ -188,7 +173,7 @@ public class JProverFrame extends JFrame {
         int[] path = { 1 };
         /*NodeIdentifier nid = new NodeIdentifier(cc, path);
 
-        p.highlightPExp(nid, new Color(200, 200, 200));*/
+         p.highlightPExp(nid, new Color(200, 200, 200));*/
     }
 
     public JProverFrame(final PerVCProverModel m) {
@@ -268,8 +253,9 @@ public class JProverFrame extends JFrame {
         }
         m.addElement(new DummyTheorem(ExistentialInstantiation.INSTANCE));
         myTheoremList.setModel(m);
-
-        System.out.println("setGlobalTheorems");
+        if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+            System.out.println("setGlobalTheorems");
+        }
         prepForTheoremSelection();
     }
 
@@ -700,21 +686,29 @@ public class JProverFrame extends JFrame {
 
         @Override
         public void stateChanged(ChangeEvent e) {
-            System.out
-                    .println("JProverFrame.EnterTheoremSelectionOnModelChange - enter");
+            if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                System.out
+                        .println("JProverFrame.EnterTheoremSelectionOnModelChange - enter");
+            }
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
-                    System.out
-                            .println("JProverFrame.EnterTheoremSelectionOnModelChange - enterJob");
+                    if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                        System.out
+                                .println("JProverFrame.EnterTheoremSelectionOnModelChange - enterJob");
+                    }
                     prepForTheoremSelection();
-                    System.out
-                            .println("JProverFrame.EnterTheoremSelectionOnModelChange - exitJob");
+                    if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                        System.out
+                                .println("JProverFrame.EnterTheoremSelectionOnModelChange - exitJob");
+                    }
                 }
             });
-            System.out
-                    .println("JProverFrame.EnterTheoremSelectionOnModelChange - exit");
+            if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                System.out
+                        .println("JProverFrame.EnterTheoremSelectionOnModelChange - exit");
+            }
         }
     }
 
@@ -819,20 +813,20 @@ public class JProverFrame extends JFrame {
                 myOptionalTransportLayout.show(myOptionalTransportPanel, state);
 
                 /*myBasicArea.setPreferredSize(myBasicArea.getSize());
-                JProverFrame.this.setPreferredSize(null);
-                myTopLevelScrollWrapper.setPreferredSize(null);
+                 JProverFrame.this.setPreferredSize(null);
+                 myTopLevelScrollWrapper.setPreferredSize(null);
 
-                JProverFrame.this.pack();
+                 JProverFrame.this.pack();
 
-                myTopLevelScrollWrapper.setPreferredSize(
-                        JProverFrame.this.getPreferredSize());
-                JProverFrame.this.setPreferredSize(
-                        JProverFrame.this.getPreferredSize());
-                myBasicArea.setPreferredSize(null);
+                 myTopLevelScrollWrapper.setPreferredSize(
+                 JProverFrame.this.getPreferredSize());
+                 JProverFrame.this.setPreferredSize(
+                 JProverFrame.this.getPreferredSize());
+                 myBasicArea.setPreferredSize(null);
 
-                if (checked) {
-                    myDetailsArea.setPreferredSize(null);
-                }*/
+                 if (checked) {
+                 myDetailsArea.setPreferredSize(null);
+                 }*/
 
                 JProverFrame.this.pack();
                 myDetailsArea

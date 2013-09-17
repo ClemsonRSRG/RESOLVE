@@ -11,6 +11,7 @@ import edu.clemson.cs.r2jt.proving2.transformations.ExpandAntecedentByImplicatio
 import edu.clemson.cs.r2jt.proving2.transformations.ExpandAntecedentBySubstitution;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.proving2.utilities.AddsSomethingNewPredicate;
+import edu.clemson.cs.r2jt.utilities.FlagManager;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -52,7 +53,9 @@ public class AntecedentDeveloper implements Automator {
     @Override
     public void step(Deque<Automator> stack, PerVCProverModel model) {
         if (myRemainingRounds > 0) {
-            System.out.println("AntecedentDeveloper got the heartbeat.");
+            if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                System.out.println("AntecedentDeveloper got the heartbeat.");
+            }
             stack.push(new AntecedentDeveloperRound(model));
         }
         else {
@@ -122,10 +125,11 @@ public class AntecedentDeveloper implements Automator {
                         && myProbationaryApplication.changeStuck()) {
                     myDevelopmentCount++;
                 }
-
-                System.out
-                        .println("AntecedentDeveloperRound - adding development - "
-                                + myDevelopmentCount);
+                if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                    System.out
+                            .println("AntecedentDeveloperRound - adding development - "
+                                    + myDevelopmentCount);
+                }
 
                 myProbationaryApplication =
                         new ProbationaryApplication(myApplications.next(),
