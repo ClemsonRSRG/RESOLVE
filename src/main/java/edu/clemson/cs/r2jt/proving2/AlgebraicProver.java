@@ -29,6 +29,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
+import edu.clemson.cs.r2jt.utilities.FlagManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -51,19 +52,14 @@ public class AlgebraicProver {
 
     private static final String FLAG_DESC_NEW_PROVE =
             "Verify target file with RESOLVE's integrated prover.";
-
     private static final String FLAG_DESC_INTERACTIVE =
             "Start the prover in interactive mode.";
-
     /**
-     * <p>
-     * The main prover flag. Causes the integrated prover to attempt to dispatch
-     * generated VCs.
-     * </p>
+     * <p> The main prover flag. Causes the integrated prover to attempt to
+     * dispatch generated VCs. </p>
      */
     public static final Flag FLAG_PROVE =
             new Flag(Prover.FLAG_SECTION_NAME, "newprove", FLAG_DESC_NEW_PROVE);
-
     /**
      * <p>Makes the prover start in interactive mode by default.</p>
      */
@@ -83,31 +79,20 @@ public class AlgebraicProver {
     private final StepProver STEP_PROVER = new StepProver();
     private final GoInteractive GO_INTERACTIVE = new GoInteractive();
     private final GoAutomatic GO_AUTOMATIC = new GoAutomatic();
-
     private int myVCIndex;
-
     private final PerVCProverModel[] myModels;
     private final AutomatedProver[] myAutomatedProvers;
-
     private final List<VC> myVCs;
     private final TypeGraph myTypeGraph;
     private final ImmutableList<Theorem> myTheoremLibrary;
-
     private JProverFrame myUI;
-
     private boolean myInteractiveModeFlag = false;
-
     private boolean myRunningFlag = false;
-
     private Thread myWorkingThread;
-
     private final List<ProverListener> myProverListeners =
             new LinkedList<ProverListener>();
-
     private final ModuleScope myModuleScope;
-
     private final CompileEnvironment myInstanceEnvironment;
-
     private final int myTimeout;
 
     public AlgebraicProver(TypeGraph g, List<VC> vcs, ModuleScope scope,
@@ -209,14 +194,18 @@ public class AlgebraicProver {
         myWorkingThread = Thread.currentThread();
         myRunningFlag = true;
         while (myRunningFlag) {
-            System.out.println("AlgebraicProver - Starting");
+            if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                System.out.println("AlgebraicProver - Starting");
+            }
             //This will block until it either finishes proving or is told to
             //stop by, e.g., a "pause" action
             if (!myInteractiveModeFlag) {
                 myAutomatedProvers[myVCIndex].start();
             }
-            System.out.println("AlgebraicProver - Out -- Interactive: "
-                    + myInteractiveModeFlag);
+            if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                System.out.println("AlgebraicProver - Out -- Interactive: "
+                        + myInteractiveModeFlag);
+            }
             //myModels[myVCIndex].touch();
             if (myModels[myVCIndex].noConsequents()
                     || myAutomatedProvers[myVCIndex].doneSearching()) {
@@ -281,9 +270,7 @@ public class AlgebraicProver {
                     try {
                         this.wait();
                     }
-                    catch (InterruptedException ie) {
-
-                    }
+                    catch (InterruptedException ie) {}
                 }
             }
         }
@@ -397,7 +384,9 @@ public class AlgebraicProver {
     }
 
     private void setVCIndex(int index) {
-        System.out.println("Algebraic Prover - SET VC INDEX " + index);
+        if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+            System.out.println("Algebraic Prover - SET VC INDEX " + index);
+        }
         int previousIndex = myVCIndex;
 
         myVCIndex = index;
@@ -429,9 +418,7 @@ public class AlgebraicProver {
                         try {
                             SwingUtilities.invokeAndWait(setModel);
                         }
-                        catch (InterruptedException ie) {
-
-                        }
+                        catch (InterruptedException ie) {}
                     }
                 }
                 catch (InvocationTargetException ite) {
@@ -516,6 +503,5 @@ public class AlgebraicProver {
         public int compare(TheoremEntry o1, TheoremEntry o2) {
             return o1.getName().compareTo(o2.getName());
         }
-
     }
 }
