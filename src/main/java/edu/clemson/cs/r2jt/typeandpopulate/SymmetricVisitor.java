@@ -95,115 +95,153 @@ public class SymmetricVisitor {
         }
 
         public void beginMTType(MTType t) {
-            myReturn = beginMTType(t, myOtherType);
+            myReturn = SymmetricVisitor.this.beginMTType(t, myOtherType);
         }
 
         public void beginMTAbstract(MTAbstract<?> t) {
-            myReturn = beginMTAbstract(t, (MTAbstract) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.beginMTAbstract(t,
+                            (MTAbstract) myOtherType);
         }
 
         public void beginMTBigUnion(MTBigUnion t) {
-            myReturn = beginMTBigUnion(t, (MTBigUnion) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.beginMTBigUnion(t,
+                            (MTBigUnion) myOtherType);
         }
 
         public void beginMTCartesian(MTCartesian t) {
-            myReturn = beginMTCartesian(t, (MTCartesian) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.beginMTCartesian(t,
+                            (MTCartesian) myOtherType);
         }
 
         public void beginMTFunction(MTFunction t) {
-            myReturn = beginMTFunction(t, (MTFunction) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.beginMTFunction(t,
+                            (MTFunction) myOtherType);
         }
 
         public void beginMTFunctionApplication(MTFunctionApplication t) {
             myReturn =
-                    beginMTFunctionApplication(t,
+                    SymmetricVisitor.this.beginMTFunctionApplication(t,
                             (MTFunctionApplication) myOtherType);
         }
 
         public void beginMTIntersect(MTIntersect t) {
-            myReturn = beginMTIntersect(t, (MTIntersect) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.beginMTIntersect(t,
+                            (MTIntersect) myOtherType);
         }
 
         public void beginMTPowertypeApplication(MTPowertypeApplication t) {
             myReturn =
-                    beginMTPowertypeApplication(t,
+                    SymmetricVisitor.this.beginMTPowertypeApplication(t,
                             (MTPowertypeApplication) myOtherType);
         }
 
         public void beginMTProper(MTProper t) {
-            myReturn = beginMTProper(t, (MTProper) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.beginMTProper(t,
+                            (MTProper) myOtherType);
         }
 
         public void beginMTSetRestriction(MTSetRestriction t) {
-            myReturn = beginMTSetRestriction(t, (MTSetRestriction) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.beginMTSetRestriction(t,
+                            (MTSetRestriction) myOtherType);
         }
 
         public void beginMTUnion(MTUnion t) {
-            myReturn = beginMTUnion(t, (MTUnion) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this
+                            .beginMTUnion(t, (MTUnion) myOtherType);
         }
 
         public void beginMTNamed(MTNamed t) {
-            myReturn = beginMTNamed(t, (MTNamed) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this
+                            .beginMTNamed(t, (MTNamed) myOtherType);
         }
 
         public void beginMTGeneric(MTGeneric t) {
-            myReturn = beginMTGeneric(t, (MTGeneric) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.beginMTGeneric(t,
+                            (MTGeneric) myOtherType);
         }
 
         public void endMTType(MTType t) {
-            myReturn = endMTType(t, (MTType) myOtherType);
+            myReturn = SymmetricVisitor.this.endMTType(t, (MTType) myOtherType);
         }
 
         public void endMTAbstract(MTAbstract<?> t) {
-            myReturn = endMTAbstract(t, (MTAbstract) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.endMTAbstract(t,
+                            (MTAbstract) myOtherType);
         }
 
         public void endMTBigUnion(MTBigUnion t) {
-            myReturn = endMTBigUnion(t, (MTBigUnion) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.endMTBigUnion(t,
+                            (MTBigUnion) myOtherType);
         }
 
         public void endMTCartesian(MTCartesian t) {
-            myReturn = endMTCartesian(t, (MTCartesian) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.endMTCartesian(t,
+                            (MTCartesian) myOtherType);
         }
 
         public void endMTFunction(MTFunction t) {
-            myReturn = endMTFunction(t, (MTFunction) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.endMTFunction(t,
+                            (MTFunction) myOtherType);
         }
 
         public void endMTFunctionApplication(MTFunctionApplication t) {
             myReturn =
-                    endMTFunctionApplication(t,
+                    SymmetricVisitor.this.endMTFunctionApplication(t,
                             (MTFunctionApplication) myOtherType);
         }
 
         public void endMTIntersect(MTIntersect t) {
-            myReturn = endMTIntersect(t, (MTIntersect) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.endMTIntersect(t,
+                            (MTIntersect) myOtherType);
         }
 
         public void endMTPowertypeApplication(MTPowertypeApplication t) {
             myReturn =
-                    endMTPowertypeApplication(t,
+                    SymmetricVisitor.this.endMTPowertypeApplication(t,
                             (MTPowertypeApplication) myOtherType);
         }
 
         public void endMTProper(MTProper t) {
-            myReturn = endMTProper(t, (MTProper) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this
+                            .endMTProper(t, (MTProper) myOtherType);
         }
 
         public void endMTSetRestriction(MTSetRestriction t) {
-            myReturn = endMTSetRestriction(t, (MTSetRestriction) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.endMTSetRestriction(t,
+                            (MTSetRestriction) myOtherType);
         }
 
         public void endMTUnion(MTUnion t) {
-            myReturn = endMTUnion(t, (MTUnion) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.endMTUnion(t, (MTUnion) myOtherType);
         }
 
         public void endMTNamed(MTNamed t) {
-            myReturn = endMTNamed(t, (MTNamed) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.endMTNamed(t, (MTNamed) myOtherType);
         }
 
         public void endMTGeneric(MTGeneric t) {
-            myReturn = endMTGeneric(t, (MTGeneric) myOtherType);
+            myReturn =
+                    SymmetricVisitor.this.endMTGeneric(t,
+                            (MTGeneric) myOtherType);
         }
     }
 
