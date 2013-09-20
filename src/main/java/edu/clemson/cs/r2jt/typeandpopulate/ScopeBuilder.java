@@ -107,8 +107,8 @@ public class ScopeBuilder extends SyntacticScope {
 
     public OperationEntry addOperation(String name,
             ResolveConceptualElement definingElement,
-            List<ProgramParameterEntry> params, PTType returnType, boolean isParameter)
-            throws DuplicateSymbolException {
+            List<ProgramParameterEntry> params, PTType returnType,
+            boolean isParameter) throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, returnType);
 
