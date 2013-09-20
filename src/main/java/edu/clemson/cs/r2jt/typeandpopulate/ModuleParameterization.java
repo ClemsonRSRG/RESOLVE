@@ -2,6 +2,7 @@ package edu.clemson.cs.r2jt.typeandpopulate;
 
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,11 +84,27 @@ public class ModuleParameterization {
 
         Map<String, PTType> result = new HashMap<String, PTType>();
 
-        List<ProgramParameterEntry> formalParams =
+        List<SymbolTableEntry> allParams =
                 moduleScope.getFormalParameterEntries();
 
+        List<ProgramParameterEntry> formalProgramParameters =
+                new LinkedList<ProgramParameterEntry>();
+
+        // Operations are currently unsupported by the generic
+        // instantiation methods HwS implemented. For now, I'm
+        // sidestepping it.
+        //
+        // TODO	:	Look closer at it and see if you can get it working for regular
+        //			programParameterEntries AND OperationEntries.
+        for (SymbolTableEntry e : allParams) {
+            if (e instanceof ProgramParameterEntry) {
+                ProgramParameterEntry addition = (ProgramParameterEntry) e;
+                formalProgramParameters.add(addition);
+            }
+        }
+
         result =
-                RCollections.foldr2(formalParams, myParameters,
+                RCollections.foldr2(formalProgramParameters, myParameters,
                         BuildGenericInstantiations.INSTANCE, result);
 
         return result;

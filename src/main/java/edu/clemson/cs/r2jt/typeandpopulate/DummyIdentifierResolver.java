@@ -17,7 +17,7 @@ import java.util.Set;
 public class DummyIdentifierResolver extends AbstractScope {
 
     @Override
-    public List<ProgramParameterEntry> getFormalParameterEntries() {
+    public List<SymbolTableEntry> getFormalParameterEntries() {
         return Collections.emptyList();
     }
 
