@@ -7,6 +7,7 @@ import java.util.Map;
 
 public abstract class PTType {
 
+    private String myFacilityQualifier = null;
     private final TypeGraph myTypeGraph;
 
     public PTType(TypeGraph g) {
@@ -22,6 +23,14 @@ public abstract class PTType {
     public abstract PTType instantiateGenerics(
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility);
+
+    public void setFacilityQualifier(String facilityName) {
+        myFacilityQualifier = facilityName;
+    }
+
+    public String getFacilityQualifier() {
+        return myFacilityQualifier;
+    }
 
     /**
      * <p>Returns <code>true</code> <strong>iff</strong> an value of this type
