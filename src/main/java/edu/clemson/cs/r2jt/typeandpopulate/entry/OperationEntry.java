@@ -14,27 +14,33 @@ import java.util.Map;
 
 public class OperationEntry extends SymbolTableEntry {
 
+	/**
+	 * This flag is True <strong>iff</strong> this particular
+	 * <code>operationEntry</code> is a formal parameter to a module.
+	 */
+	private boolean myModuleParameterFlag;
     private final PTType myReturnType;
     private final ImmutableList<ProgramParameterEntry> myParameters;
 
     public OperationEntry(String name,
             ResolveConceptualElement definingElement,
             ModuleIdentifier sourceModule, PTType returnType,
-            List<ProgramParameterEntry> parameters) {
+            List<ProgramParameterEntry> parameters, boolean isParameter) {
 
         this(name, definingElement, sourceModule, returnType,
-                new ArrayBackedImmutableList<ProgramParameterEntry>(parameters));
+                new ArrayBackedImmutableList<ProgramParameterEntry>(parameters), isParameter);
     }
 
     public OperationEntry(String name,
             ResolveConceptualElement definingElement,
             ModuleIdentifier sourceModule, PTType returnType,
-            ImmutableList<ProgramParameterEntry> parameters) {
+            ImmutableList<ProgramParameterEntry> parameters, boolean isParameter) {
 
         super(name, definingElement, sourceModule);
 
         myParameters = parameters;
         myReturnType = returnType;
+		myModuleParameterFlag = isParameter;
     }
 
     public OperationEntry toOperationEntry(Location l) {
@@ -44,6 +50,10 @@ public class OperationEntry extends SymbolTableEntry {
     public ImmutableList<ProgramParameterEntry> getParameters() {
         return myParameters;
     }
+
+	public boolean isModuleParameter() {
+		return myModuleParameterFlag;
+	}
 
     public PTType getReturnType() {
         return myReturnType;
@@ -67,7 +77,7 @@ public class OperationEntry extends SymbolTableEntry {
                         instantiatingFacility),
                 new LazilyMappedImmutableList<ProgramParameterEntry, ProgramParameterEntry>(
                         myParameters, new InstantiationMapping(
-                                genericInstantiations, instantiatingFacility)));
+                                genericInstantiations, instantiatingFacility)), myModuleParameterFlag);
     }
 
     private static class InstantiationMapping

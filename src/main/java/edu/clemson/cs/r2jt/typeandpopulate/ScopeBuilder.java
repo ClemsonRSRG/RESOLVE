@@ -107,14 +107,14 @@ public class ScopeBuilder extends SyntacticScope {
 
     public OperationEntry addOperation(String name,
             ResolveConceptualElement definingElement,
-            List<ProgramParameterEntry> params, PTType returnType)
+            List<ProgramParameterEntry> params, PTType returnType, boolean isParameter)
             throws DuplicateSymbolException {
 
         sanityCheckBindArguments(name, definingElement, returnType);
 
         OperationEntry entry =
                 new OperationEntry(name, definingElement, myRootModule,
-                        returnType, params);
+                        returnType, params, isParameter);
 
         myBindings.put(name, entry);
 
@@ -226,7 +226,7 @@ public class ScopeBuilder extends SyntacticScope {
      * @param definingElement The AST Node that introduced the symbol.
      * @param type The declared type of the symbol.
      * @param typeValue The type assigned to the symbol (can be null).
-     * @param schematictypes A map from the names of any implicit type 
+     * @param schematicTypes A map from the names of any implicit type
      *             parameters to their bounding types.  May be 
      *             <code>null</code>, which will be interpreted as the empty
      *             map.
