@@ -137,7 +137,7 @@ public interface Scope {
             throws DuplicateSymbolException;
 
     /**
-     * <p>Returns a list of {@link ProgramParameterEntry ProgramParameterEntry}s
+     * <p>Returns a list of {@link SymbolTableEntry SymbolTableEntry}s
      * contained directly in this scope.  These correspond to the formal 
      * parameters defined by the syntactic element that introduced the scope.
      * </p>
@@ -147,5 +147,5 @@ public interface Scope {
      * 
      * @return Entries for the parameters of the current scope.
      */
-    public List<ProgramParameterEntry> getFormalParameterEntries();
+    public List<SymbolTableEntry> getFormalParameterEntries();
 }

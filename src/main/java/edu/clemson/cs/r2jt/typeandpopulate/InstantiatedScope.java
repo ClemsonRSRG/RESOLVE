@@ -67,7 +67,7 @@ public class InstantiatedScope extends AbstractScope {
     }
 
     @Override
-    public List<ProgramParameterEntry> getFormalParameterEntries() {
+    public List<SymbolTableEntry> getFormalParameterEntries() {
         return myBaseScope.getFormalParameterEntries();
     }
 
