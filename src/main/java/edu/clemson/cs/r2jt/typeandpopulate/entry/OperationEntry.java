@@ -14,11 +14,11 @@ import java.util.Map;
 
 public class OperationEntry extends SymbolTableEntry {
 
-	/**
-	 * This flag is True <strong>iff</strong> this particular
-	 * <code>operationEntry</code> is a formal parameter to a module.
-	 */
-	private boolean myModuleParameterFlag;
+    /**
+     * This flag is True <strong>iff</strong> this particular
+     * <code>operationEntry</code> is a formal parameter to a module.
+     */
+    private boolean myModuleParameterFlag;
     private final PTType myReturnType;
     private final ImmutableList<ProgramParameterEntry> myParameters;
 
@@ -27,8 +27,13 @@ public class OperationEntry extends SymbolTableEntry {
             ModuleIdentifier sourceModule, PTType returnType,
             List<ProgramParameterEntry> parameters, boolean isParameter) {
 
-        this(name, definingElement, sourceModule, returnType,
-                new ArrayBackedImmutableList<ProgramParameterEntry>(parameters), isParameter);
+        this(
+                name,
+                definingElement,
+                sourceModule,
+                returnType,
+                new ArrayBackedImmutableList<ProgramParameterEntry>(parameters),
+                isParameter);
     }
 
     public OperationEntry(String name,
@@ -40,7 +45,7 @@ public class OperationEntry extends SymbolTableEntry {
 
         myParameters = parameters;
         myReturnType = returnType;
-		myModuleParameterFlag = isParameter;
+        myModuleParameterFlag = isParameter;
     }
 
     public OperationEntry toOperationEntry(Location l) {
@@ -51,9 +56,9 @@ public class OperationEntry extends SymbolTableEntry {
         return myParameters;
     }
 
-	public boolean isModuleParameter() {
-		return myModuleParameterFlag;
-	}
+    public boolean isModuleParameter() {
+        return myModuleParameterFlag;
+    }
 
     public PTType getReturnType() {
         return myReturnType;
@@ -77,7 +82,8 @@ public class OperationEntry extends SymbolTableEntry {
                         instantiatingFacility),
                 new LazilyMappedImmutableList<ProgramParameterEntry, ProgramParameterEntry>(
                         myParameters, new InstantiationMapping(
-                                genericInstantiations, instantiatingFacility)), myModuleParameterFlag);
+                                genericInstantiations, instantiatingFacility)),
+                myModuleParameterFlag);
     }
 
     private static class InstantiationMapping

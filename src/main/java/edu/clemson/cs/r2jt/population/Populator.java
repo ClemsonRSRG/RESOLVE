@@ -161,21 +161,22 @@ public class Populator extends TreeWalkerVisitor {
      */
     private List<ProgramParameterEntry> myCurrentParameters;
 
-	/**
-	 * <p>This is keeps track of the names of any parameters to the current
-	 * module that are operations. Since operations can technically serve as
-	 * formal parameters to a module, we need some way of identifying those.
-	 * So we add the names of any module parameters are also operations to this list
-	 * and check everytime we are about to add an operation to the table whether
-	 * or not it appears within this. If it does, then that operation declaration
-	 * doubles as module parameter - so we set a flag indicating this in entry.</p>
-	 *
-	 * <p>This is intended to help HwS's getFormalParameterEntries method in "Scope"
-	 * return operation entries in addition to <code>ProgramParameterEntry</code>s
-	 * Additional info can be found in pivotal story:
-	 * 		{@link "https://www.pivotaltracker.com/s/projects/624389"}.</p>
-	 */
-	private List<String> myCurrentModuleOperationParameters;
+    /**
+     * <p>This is keeps track of the names of any parameters to the current
+     * module that are operations. Since operations can technically serve as
+     * formal parameters to a module, we need some way of identifying those.
+     * So we add the names of any module parameters are also operations to this list
+     * and check everytime we are about to add an operation to the table whether
+     * or not it appears within this. If it does, then that operation declaration
+     * doubles as module parameter - so we set a flag indicating this in entry.</p>
+     *
+     * <p>This is intended to help HwS's getFormalParameterEntries method in "Scope"
+     * return operation entries in addition to <code>ProgramParameterEntry</code>s
+     * Additional info can be found in pivotal story:
+     * 		{@link "https://www.pivotaltracker.com/s/projects/624389"}.</p>
+     */
+    private List<String> myCurrentModuleOperationParameters =
+            new LinkedList<String>();
 
     /**
      * <p>A mapping from generic types that appear in the module to the math
@@ -383,12 +384,12 @@ public class Populator extends TreeWalkerVisitor {
         }
     }
 
-	@Override
-	public void preModuleParameterDec(ModuleParameterDec d) {
-		if (d.getWrappedDec() instanceof OperationDec) {
-			myCurrentModuleOperationParameters.add(d.getName().getName());
-		}
-	}
+    @Override
+    public void preModuleParameterDec(ModuleParameterDec d) {
+        if (d.getWrappedDec() instanceof OperationDec) {
+            myCurrentModuleOperationParameters.add(d.getName().getName());
+        }
+    }
 
     @Override
     public void postModuleParameterDec(ModuleParameterDec d) {
@@ -636,7 +637,7 @@ public class Populator extends TreeWalkerVisitor {
     private void putOperationLikeThingInSymbolTable(PosSymbol name,
             Ty returnTy, ResolveConceptualElement dec) {
 
-		boolean isParameter = false;
+        boolean isParameter = false;
         try {
             PTType returnType;
             if (returnTy == null) {
@@ -646,9 +647,9 @@ public class Populator extends TreeWalkerVisitor {
                 returnType = returnTy.getProgramTypeValue();
             }
 
-			if (myCurrentModuleOperationParameters.contains(name.getName())) {
-				isParameter = true;
-			}
+            if (myCurrentModuleOperationParameters.contains(name.getName())) {
+                isParameter = true;
+            }
             myBuilder.getInnermostActiveScope().addOperation(name.getName(),
                     dec, myCurrentParameters, returnType, isParameter);
         }
