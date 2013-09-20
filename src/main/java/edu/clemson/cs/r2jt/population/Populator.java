@@ -805,9 +805,14 @@ public class Populator extends TreeWalkerVisitor {
                                             true)).toProgramTypeEntry(
                                     tyLocation);
 
+            if (tyQualifier != null) {
+                type.getProgramType().setFacilityQualifier(
+                        tyQualifier.getName());
+            }
             ty.setProgramTypeValue(type.getProgramType());
             ty.setMathType(myTypeGraph.MTYPE);
             ty.setMathTypeValue(type.getModelType());
+
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(tyQualifier, tyName, tyLocation);
