@@ -56,7 +56,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     // Compile Environment
     private CompileEnvironment myInstanceEnvironment;
 
- // Assertive Code
+    // Assertive Code
     private AssertiveCode myAssertion;
 
     // ===========================================================
@@ -134,13 +134,12 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp gRequires = getRequiresClause(mDec);
 
             // Obtains items from the current operation
-            Exp ensures =
-                    modifyEnsuresClause(dec.getEnsures(), dec.getLocation(),
-                            dec.getName());
+            Exp requires = modifyRequiresClause(getRequiresClause(dec));
+            Exp ensures = modifyEnsuresClause(getEnsuresClause(dec));
             List<Statement> statementList = dec.getStatements();
 
             // Apply the procedure declaration rule
-            applyProcedureDeclRule(gRequires, ensures, statementList);
+            applyProcedureDeclRule(gRequires, requires, ensures, statementList);
 
             // Apply proof rules
             applyEBRules();
@@ -161,8 +160,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     @Override
-    public void postProcedureDec(ProcedureDec dec) {
-    }
+    public void postProcedureDec(ProcedureDec dec) {}
 
     // ===========================================================
     // Public Methods
@@ -236,6 +234,18 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (dec instanceof FacilityOperationDec) {
             retExp = ((FacilityOperationDec) dec).getRequires();
         }
+        else if (dec instanceof OperationDec) {
+            retExp = ((OperationDec) dec).getRequires();
+        }
+        else if (dec instanceof ConceptModuleDec) {
+            retExp = ((ConceptModuleDec) dec).getRequirement();
+        }
+        else if (dec instanceof ConceptBodyModuleDec) {
+            retExp = ((ConceptBodyModuleDec) dec).getRequires();
+        }
+        else if (dec instanceof EnhancementModuleDec) {
+            retExp = ((EnhancementModuleDec) dec).getRequirement();
+        }
         else if (dec instanceof EnhancementBodyModuleDec) {
             retExp = ((EnhancementBodyModuleDec) dec).getRequires();
         }
@@ -248,6 +258,37 @@ public class VCGenerator extends TreeWalkerVisitor {
             if (retExp.getLocation() != null) {
                 Location myLoc = retExp.getLocation();
                 myLoc.setDetails("Requires Clause for " + name);
+                setLocation(retExp, myLoc);
+            }
+        }
+
+        return retExp;
+    }
+
+    /**
+     * <p>Returns the ensures clause for the current <code>Dec</code>.</p>
+     *
+     * @param dec The corresponding <code>Dec</code>.
+     *
+     * @return The ensures clause <code>Exp</code>.
+     */
+    private Exp getEnsuresClause(Dec dec) {
+        PosSymbol name = dec.getName();
+        Exp retExp = null;
+
+        // Check for each kind of ModuleDec possible
+        if (dec instanceof FacilityOperationDec) {
+            retExp = ((FacilityOperationDec) dec).getEnsures();
+        }
+        else if (dec instanceof OperationDec) {
+            retExp = ((OperationDec) dec).getEnsures();
+        }
+
+        // Fill in the details of this location
+        if (retExp != null) {
+            if (retExp.getLocation() != null) {
+                Location myLoc = retExp.getLocation();
+                myLoc.setDetails("Ensures Clause of " + name);
                 setLocation(retExp, myLoc);
             }
         }
@@ -298,31 +339,74 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Returns the requires clause for the current <code>Dec</code>.</p>
+     * <p>Returns the ensures clause based on the evaluates mode.</p>
      *
      * @param ensures The <code>Exp</code> containing the ensures clause.
-     * @param loc Location of the <code>Operation</code>
-     * @param name Name of the <code>Operation</code>
      *
-     * @return The ensures clause <code>Exp</code>.
+     * @return The modified ensures clause <code>Exp</code>.
      */
-    private Exp modifyEnsuresClause(Exp ensures, Location loc, PosSymbol name) {
-        // Obtain the right location
-        Location ensuresLoc;
-        if (ensures == null) {
-            ensuresLoc = (Location) loc.clone();
-        }
-        else {
-            ensuresLoc = (Location) (ensures.getLocation().clone());
+    private Exp modifyEnsuresClause(Exp ensures) {
+        return null;
+    }
+
+    /**
+     * <p>Modifies the requires clause based on the replaces mode.</p>
+     *
+     * @param requires The <code>Exp</code> containing the requires clause.
+     *
+     * @return The modified requires clause <code>Exp</code>.
+     */
+    private Exp modifyRequiresClause(Exp requires) {
+        Exp ensures = curOperation.getEnsures();
+
+        Iterator<ParameterVarDec> paramIter =
+                curOperation.getParameters().iterator();
+        while (paramIter.hasNext()) {
+            ParameterVarDec tmpPVD = paramIter.next();
+            VarDec tmpVD = toVarDec(tmpPVD);
+
+            if (tmpVD != null) {
+                Exp constr = getConstraints(tmpVD);
+                Exp init = getInitialExp(tmpVD);
+                if (tmpPVD.getMode() == Mode.REPLACES && init != null) {
+                    if (curOperation.getRequires() != null) {
+                        init.setLocation((Location) (curOperation.getRequires()
+                                .getLocation().clone()));
+                        init.getLocation().setDetails(
+                                "Assumption from Replaces Parameter Mode");
+                    }
+                    if (requires != null) {
+                        requires = myTypeGraph.formConjunct(init, requires);
+                    }
+                    else {
+                        requires = init;
+                    }
+
+                }
+                else {
+                    if (requires != null && constr != null
+                            && !isTrueExp(constr) && !isTrueExp(requires)) {
+                        requires = myTypeGraph.formConjunct(constr, requires);
+                    }
+                    else if (constr != null && !isTrueExp(constr)) {
+                        requires = constr;
+                    }
+                }
+                if (tmpPVD.getMode() == Mode.EVALUATES) {
+                    VarExp exp = new VarExp();
+                    exp.setName(tmpPVD.getName());
+                    exp.setMathType(tmpPVD.getTy().getMathTypeValue());
+
+                    OldExp o = new OldExp(null, exp);
+                    o.setMathType(tmpPVD.getTy().getMathTypeValue());
+
+                    ensures = replace(ensures, exp, o);
+                }
+                addFreeVar(tmpPVD, assertion);
+            }
         }
 
-        // Modify the details
-        if (ensuresLoc != null) {
-            ensuresLoc.setDetails("Ensures Clause of " + name);
-            setLocation(ensures, ensuresLoc);
-        }
-
-        return ensures;
+        return requires;
     }
 
     /**
@@ -594,11 +678,16 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param ensures Ensures clause
      * @param statementList List of statements for this procedure
      */
-    private void applyProcedureDeclRule(Exp gRequires, Exp ensures,
+    private void applyProcedureDeclRule(Exp gRequires, Exp requires, Exp ensures,
             List<Statement> statementList) {
         // Add the global requires clause
         if (gRequires != null) {
             myAssertion.addAssume(gRequires);
+        }
+
+        // Add the requires clause
+        if (requires != null) {
+            myAssertion.addAssume(requires);
         }
 
         // Add the remember rule
