@@ -17,24 +17,17 @@ package edu.clemson.cs.r2jt.vcgeneration;
  */
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.scope.*;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.type.BooleanType;
-import edu.clemson.cs.r2jt.type.ConcType;
-import edu.clemson.cs.r2jt.type.NameType;
-import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -134,7 +127,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp gRequires = getRequiresClause(mDec);
 
             // Obtains items from the current operation
-            Exp requires = modifyRequiresClause(getRequiresClause(dec));
+            Exp requires = null; //modifyRequiresClause(getRequiresClause(dec));
             Exp ensures = modifyEnsuresClause(getEnsuresClause(dec));
             List<Statement> statementList = dec.getStatements();
 
@@ -355,7 +348,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param requires The <code>Exp</code> containing the requires clause.
      *
      * @return The modified requires clause <code>Exp</code>.
-     */
+     *
     private Exp modifyRequiresClause(Exp requires) {
         Exp ensures = curOperation.getEnsures();
 
@@ -407,7 +400,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         return requires;
-    }
+    }       */
 
     /**
      * <p>Returns the requires clause for the current
@@ -678,8 +671,8 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param ensures Ensures clause
      * @param statementList List of statements for this procedure
      */
-    private void applyProcedureDeclRule(Exp gRequires, Exp requires, Exp ensures,
-            List<Statement> statementList) {
+    private void applyProcedureDeclRule(Exp gRequires, Exp requires,
+            Exp ensures, List<Statement> statementList) {
         // Add the global requires clause
         if (gRequires != null) {
             myAssertion.addAssume(gRequires);
