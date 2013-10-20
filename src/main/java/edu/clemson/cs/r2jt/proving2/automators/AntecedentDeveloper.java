@@ -86,10 +86,11 @@ public class AntecedentDeveloper implements Automator {
             //to be applied later one at a time.
             Iterator<Application> tApplications;
 
-            if (model.getLocalTheoremList().isEmpty()) {
-                throw new RuntimeException();
-            }
-
+            // YS: For some reason Hampton decided that it would be a problem
+            // a VC does not contain any givens (antecedents), so he throws a
+            // runtime exception if the local theorem list is empty. But for
+            // cases like "S = S" or "true", we shouldn't need any givens to
+            // prove it. (Probably just need Boolean_Theory)
             for (Theorem t : model.getLocalTheoremList()) {
                 for (Transformation transformation : t.getTransformations()) {
                     if (transformation instanceof ExpandAntecedentByImplication

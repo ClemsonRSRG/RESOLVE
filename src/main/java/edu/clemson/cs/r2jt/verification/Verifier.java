@@ -7319,6 +7319,7 @@ public class Verifier extends ResolveConceptualVisitor {
                                 + ((FacilityModuleDec) curMDec).getName());
                         setLocation(gRequires, myLoc);
                     }
+                    // TODO: Need to replace formals with actuals.
                     assertion.addAssume(gRequires);
                 }
             }
@@ -7333,6 +7334,7 @@ public class Verifier extends ResolveConceptualVisitor {
                                 + ((ConceptBodyModuleDec) curMDec).getName());
                         setLocation(gRequires, myLoc);
                     }
+                    // TODO: Need to replace formals with actuals.
                     assertion.addAssume(gRequires);
                 }
             }
@@ -7349,6 +7351,7 @@ public class Verifier extends ResolveConceptualVisitor {
                                         .getName());
                         setLocation(gRequires, myLoc);
                     }
+                    // TODO: Need to replace formals with actuals.
                     assertion.addAssume(gRequires);
                 }
             }
@@ -7483,13 +7486,7 @@ public class Verifier extends ResolveConceptualVisitor {
 
             // Get the Spec for the Facility
             if (curMDec instanceof ConceptModuleDec) {
-                //curCDec = (ConceptModuleDec)curMDec;
-                ModuleID facConceptID =
-                        myInstanceEnvironment.getModuleID(facCDec.getName()
-                                .getFile());
-                curCDec =
-                        (ConceptModuleDec) myInstanceEnvironment
-                                .getModuleDec(facConceptID);
+                curCDec = (ConceptModuleDec) curMDec;
                 if (req != null) {
                     req =
                             replaceFacilityDeclarationVariables(req, facCDec
