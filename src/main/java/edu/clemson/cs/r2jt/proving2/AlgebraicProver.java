@@ -233,7 +233,8 @@ public class AlgebraicProver {
 
                     //TODO: It's unclear if it's possible for us to be in
                     //interactive mode here
-                    if (!myInteractiveModeFlag) {
+                    if (!myInteractiveModeFlag
+                            && !myInstanceEnvironment.isWebIDEFlagSet()) {
                         outputProofFile();
                     }
                 }
