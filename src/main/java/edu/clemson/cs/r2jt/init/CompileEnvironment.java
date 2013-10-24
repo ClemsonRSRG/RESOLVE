@@ -207,6 +207,16 @@ public class CompileEnvironment {
         return myUserFileMap.get(key);
     }
 
+    /**
+     * <p>Checks to see if the web interface flag is set
+     * or not.</p>
+     *
+     * @return Results from the operation check
+     */
+    public boolean isWebIDEFlagSet() {
+        return (flags.isFlagSet("webinterface") ? true : false);
+    }
+
     public void setProverListener(ProverListener listener) {
         myListener = listener;
     }
