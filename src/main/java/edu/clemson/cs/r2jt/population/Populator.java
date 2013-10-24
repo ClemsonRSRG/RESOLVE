@@ -473,12 +473,12 @@ public class Populator extends TreeWalkerVisitor {
 
         try {
             OperationEntry op =
-                    myCurModuleScope.queryForOne(new OperationQuery(qualifier,
-                            name, argTypes));
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new OperationQuery(qualifier, name, argTypes));
         }
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException("No operation found corresponding "
-                       + "to call: ", stmt.getLocation());
+                    + "to call: ", stmt.getLocation());
         }
         catch (DuplicateSymbolException dse) {
             //This should be caught earlier, when the duplicate operation is
