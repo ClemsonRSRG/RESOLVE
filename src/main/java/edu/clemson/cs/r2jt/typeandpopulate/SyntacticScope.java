@@ -5,6 +5,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.searchers.TableSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.query.MultimatchSymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.SymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import java.util.Iterator;
@@ -141,17 +142,26 @@ public abstract class SyntacticScope extends AbstractScope {
     }
 
     @Override
-    public List<ProgramParameterEntry> getFormalParameterEntries() {
-        List<ProgramParameterEntry> result =
-                new LinkedList<ProgramParameterEntry>();
+    public List<SymbolTableEntry> getFormalParameterEntries() {
+        List<SymbolTableEntry> result = new LinkedList<SymbolTableEntry>();
 
-        Iterator<ProgramParameterEntry> formalBindings =
+        Iterator<ProgramParameterEntry> formalParameterEntryBindings =
                 myBindings.iterateByType(ProgramParameterEntry.class);
 
-        while (formalBindings.hasNext()) {
-            result.add(formalBindings.next());
+        Iterator<OperationEntry> formalOperationEntryBindings =
+                myBindings.iterateByType(OperationEntry.class);
+
+        while (formalParameterEntryBindings.hasNext()) {
+            result.add(formalParameterEntryBindings.next());
         }
 
+        while (formalOperationEntryBindings.hasNext()) {
+            OperationEntry currentEntry = formalOperationEntryBindings.next();
+
+            if (currentEntry.isModuleParameter()) {
+                result.add(currentEntry);
+            }
+        }
         return result;
     }
 
