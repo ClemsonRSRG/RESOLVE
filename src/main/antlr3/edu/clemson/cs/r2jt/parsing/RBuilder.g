@@ -2026,6 +2026,7 @@ adding_expression returns [Exp exp = null]
         |   ^(id=UNION lf=adding_expression rt=multiplying_expression)
         |   ^(id=INTERSECT lf=adding_expression rt=multiplying_expression)
         |   ^(id=WITHOUT lf=adding_expression rt=multiplying_expression)
+        |   ^(id=TILDE lf=adding_expression rt=multiplying_expression)
         )
         { $exp = new InfixExp(getLocation($id), $lf.exp, getPosSymbol($id), $rt.exp); }
     ;
@@ -2279,6 +2280,7 @@ parenthesized_expression returns [Exp exp = null]
 set_constructor returns [SetExp exp = null]
 @init{
     MathVarDec var = null;
+    edu.clemson.cs.r2jt.collections.List<VarExp> vars = new edu.clemson.cs.r2jt.collections.List<VarExp>("VarExp");
 }
     :   ^(  LBRACE vnm=ident vty=math_type_expression
             (where=where_clause)? body=math_expression
@@ -2286,6 +2288,8 @@ set_constructor returns [SetExp exp = null]
         {   var = new MathVarDec($vnm.ps, $vty.ty);
             $exp = new SetExp(getLocation($LBRACE), var, $where.exp, $body.exp);
         }
+    |   ^(  SET (id=ident { vars.add(new VarExp(getLocation($SET), null, $id.ps)); })*)
+        {   $exp = new SetExp(getLocation($SET), null, null, null, vars);   }
     ;
 
 tuple_expression returns [TupleExp exp = null]
