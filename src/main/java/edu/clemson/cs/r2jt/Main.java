@@ -76,6 +76,7 @@ import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.init.Controller;
 import edu.clemson.cs.r2jt.init.Environment;
+import edu.clemson.cs.r2jt.translation.*;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.parsing.RSimpleTrans;
 import edu.clemson.cs.r2jt.proofchecking.ProofChecker;
@@ -84,11 +85,7 @@ import edu.clemson.cs.r2jt.proving2.AlgebraicProver;
 import edu.clemson.cs.r2jt.proving2.ProverListener;
 import edu.clemson.cs.r2jt.verification.Verifier;
 import edu.clemson.cs.r2jt.scope.ModuleScope;
-import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
-import edu.clemson.cs.r2jt.translation.PrettyCTranslation;
-import edu.clemson.cs.r2jt.translation.PrettyJavaTranslation;
 import edu.clemson.cs.r2jt.scope.OldSymbolTable;
-import edu.clemson.cs.r2jt.translation.Translator;
 import edu.clemson.cs.r2jt.treewalk.VisitorCodeGeneration;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
@@ -566,6 +563,10 @@ public class Main {
 
             setUpFlags();
             Prover.setUpFlags();
+
+            JavaTranslator.setUpFlags();
+            CTranslator.setUpFlags();
+
             Verifier.setUpFlags();
             ProofChecker.setUpFlags();
             Analyzer.setUpFlags();

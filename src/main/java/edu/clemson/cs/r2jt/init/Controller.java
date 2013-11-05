@@ -65,6 +65,7 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.clemson.cs.r2jt.translation.*;
 import org.antlr.runtime.ANTLRFileStream;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;
@@ -108,10 +109,6 @@ import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.parsing.RSimpleTrans;
 import edu.clemson.cs.r2jt.proving2.AlgebraicProver;
 import edu.clemson.cs.r2jt.proving2.VC;
-import edu.clemson.cs.r2jt.translation.PrettyJavaTranslator;
-import edu.clemson.cs.r2jt.translation.PrettyJavaTranslation;
-import edu.clemson.cs.r2jt.translation.PrettyCTranslation;
-import edu.clemson.cs.r2jt.translation.Translator;
 import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.verification.AssertiveCode;
@@ -520,6 +517,14 @@ public class Controller {
                 }
                 myInstanceEnvironment.printModules();
             }
+
+            if (myInstanceEnvironment.flags
+                    .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
+                NEWtranslateModuleDec(file, symbolTable, dec);
+                //System.out.println("Translated: " + file.toString());
+
+            }
+
             if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_VERIFY_VC)) {
                 verifyModuleDec(symbolTable, table, dec);
             }
@@ -621,6 +626,25 @@ public class Controller {
                     file = inputFile.getMyCustomFile();
                 }
                 translateModuleDec(file, table, dec);
+                //System.out.println("Translated: " + file.toString());
+                if (myInstanceEnvironment.flags
+                        .isFlagSet(Archiver.FLAG_ARCHIVE)) {
+                    myArchive.addFileToArchive(file);
+                    if (!myCompileReport.hasError()) {
+                        if (myArchive.createJar()) {
+                            myCompileReport.setJarSuccess();
+                        }
+                    }
+                    //arc.printArchiveList();
+                }
+                myInstanceEnvironment.printModules();
+            }
+            if (myInstanceEnvironment.flags
+                    .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
+                if (inputFile.getIsCustomLoc()) {
+                    file = inputFile.getMyCustomFile();
+                }
+                NEWtranslateModuleDec(file, symbolTable, dec);
                 //System.out.println("Translated: " + file.toString());
                 if (myInstanceEnvironment.flags
                         .isFlagSet(Archiver.FLAG_ARCHIVE)) {
@@ -1727,6 +1751,24 @@ public class Controller {
             translator.visitModuleDec(dec);
             //System.out.println("Translated: "+dec.getName().getName());
             translator.outputJavaCode(file);
+        }
+    }
+
+    private void NEWtranslateModuleDec(File file, ScopeRepository realTable,
+            ModuleDec dec) {
+        try {
+            ModuleScope scope =
+                    realTable.getModuleScope(new ModuleIdentifier(dec));
+            JavaTranslator javaT =
+                    new JavaTranslator(myInstanceEnvironment, scope, dec);
+            CTranslator cT = new CTranslator(myInstanceEnvironment, scope, dec);
+            TreeWalker tw = new TreeWalker(javaT);
+            tw.visit(dec);
+            javaT.outputCode(file);
+        }
+        catch (NoSuchSymbolException nsse) {
+            //Can't find the module we're in.  Shouldn't be possible.
+            throw new RuntimeException(nsse);
         }
     }
 
