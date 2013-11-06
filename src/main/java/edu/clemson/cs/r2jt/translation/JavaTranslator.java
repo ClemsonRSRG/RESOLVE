@@ -373,4 +373,10 @@ public class JavaTranslator extends AbstractTranslator {
         }
         return parameter.toString();
     }
+
+    public static final void setUpFlags() {
+
+    // TODO:         Check Prover to see the correct way to do this using
+    //                         HwS's FlagDependencies system.
+    }
 }

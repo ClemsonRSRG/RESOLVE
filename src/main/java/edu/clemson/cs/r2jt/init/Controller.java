@@ -520,6 +520,8 @@ public class Controller {
 
             if (myInstanceEnvironment.flags
                     .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
+
+                System.out.println("GETS HERE DAWG2");
                 NEWtranslateModuleDec(file, symbolTable, dec);
                 //System.out.println("Translated: " + file.toString());
 

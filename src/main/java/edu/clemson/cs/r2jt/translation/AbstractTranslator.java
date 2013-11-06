@@ -707,12 +707,6 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     //   Flag and output-related methods
     // -----------------------------------------------------------
 
-    public static final void setUpFlags() {
-
-    // TODO:         Check Prover to see the correct way to do this using
-    //                         HwS's FlagDependencies system.
-    }
-
     public static void emitDebug(String msg) {
         if (PRINT_DEBUG) {
             System.out.println(msg);

@@ -135,4 +135,10 @@ public class CTranslator extends AbstractTranslator {
           }
           return null;
       }*/
+
+    public static final void setUpFlags() {
+
+    // TODO:         Check Prover to see the correct way to do this using
+    //                         HwS's FlagDependencies system.
+    }
 }
