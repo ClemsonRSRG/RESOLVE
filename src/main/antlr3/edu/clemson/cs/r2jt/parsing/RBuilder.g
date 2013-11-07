@@ -50,9 +50,11 @@ this.err = err;
         |   { enhancementModule = true; } dec5=enhancement_module 
             { $dec = $dec5.dec; }
         |   { facilityModule = true; }    dec6=facility_module
-            { $dec = $dec6.dec; } 
-        |   { performanceModule = true; }    dec7=performance_module
-            { $dec = $dec7.dec; } 
+            { $dec = $dec6.dec; }  
+        |   { performanceEModule = true; } dec8=performance_enhancement_module
+            { $dec = $dec8.dec; } 
+        |   { performanceCModule = true; }    dec7=performance_concept_module
+            { $dec = $dec7.dec; }
         )
     ;
 
@@ -162,10 +164,10 @@ concept_item_sequence returns [ConceptModuleDec dec = null]
     ;
 
 // ---------------------------------------------------------------
-// Performance  Module
+// Performance Module for Concept
 // ---------------------------------------------------------------
 
-performance_module returns [PerformanceModuleDec dec = null]
+performance_concept_module returns [PerformanceCModuleDec dec = null]
 @init{
     edu.clemson.cs.r2jt.collections.List<Exp> cons = new edu.clemson.cs.r2jt.collections.List<Exp>("Exp");
     InitItem init = null;
@@ -176,14 +178,13 @@ performance_module returns [PerformanceModuleDec dec = null]
     edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = new edu.clemson.cs.r2jt.collections.List<ModuleParameterDec>("ModuleParameterDec");
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new edu.clemson.cs.r2jt.collections.List<UsesItem>("UsesItem");
 }
-    :   ^(  MODULE_PROFILE pn1=ident
+    :   ^(  CONCEPT_PROFILE pn1=ident
             (pars2=module_formal_param_section)?
              pn2=ident
-             ps1=ident
-             (ps2=ident ps3=ident)?
+             pn3=ident
             (uses2=uses_list)?
             (req=requires_clause)?
-            (dec2=performance_item_sequence)?
+            (dec2=performance_C_item_sequence)?
         )
         {   if ($dec2.dec != null) {
                 cons = $dec2.dec.getConstraints();
@@ -193,14 +194,13 @@ performance_module returns [PerformanceModuleDec dec = null]
                 fin = $dec2.dec.getFacilityFinal();
                 decs = $dec2.dec.getDecs();
             }
-            $dec = new PerformanceModuleDec($pn1.ps,
-                                        $pars2.pars!=null?$pars2.pars:pars,
-                                        $pn2.ps,
-                                        $ps1.ps,
-                                        $uses2.uses!=null?$uses2.uses:uses,
-                                        $req.exp, cons,
-                                        perfInit, perfFinal, 
-                                        init, fin, decs);
+            
+           $dec = new PerformanceCModuleDec($pn1.ps, $pn2.ps, $pn3.ps,            
+                                     $pars2.pars!=null?$pars2.pars:pars,
+                                     $uses2.uses!=null?$uses2.uses:uses,
+                                     $req.exp, cons,
+                                     perfInit, perfFinal, 
+                                     init, fin, decs);
         }
     ;
 
@@ -208,13 +208,11 @@ performance_module returns [PerformanceModuleDec dec = null]
  //     :   (performance_item)+
  //     ;
  
-performance_item_sequence returns [PerformanceModuleDec  dec = null]
+performance_C_item_sequence returns [PerformanceCModuleDec  dec = null]
 @init{
-    PosSymbol ps = null; //dummy
     PosSymbol pn1 = null; //dummy
     PosSymbol pn2 = null; //dummy
-    PosSymbol ps3 = null; //dummy
-    PosSymbol ps4 = null; //dummy
+    PosSymbol pn3 = null; //dummy
 
     edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = null; //dummy
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = null; //dummy
@@ -234,12 +232,78 @@ performance_item_sequence returns [PerformanceModuleDec  dec = null]
         |   dec5=definition_declaration { decs.add($dec5.dec); }
         |   dec6=defines_declaration { decs.add($dec6.dec); }
         )+
-        {   $dec = new PerformanceModuleDec(pn1, pars, pn2, ps, uses, req, cons,
-                                            $perfInit.item, $perfFinal.item, $init.item, $fin.item, decs); 
+        {   
+         $dec = new PerformanceCModuleDec(pn1, pn2, pn3,            
+                                       pars, uses, req, cons,
+                                        $perfInit.item, $perfFinal.item, $init.item, $fin.item, decs);
         }
     ;
     
-    // ---------------------------------------------------------------
+
+// ---------------------------------------------------------------
+// Performance Module for Enhancement
+// ---------------------------------------------------------------
+
+performance_enhancement_module returns [PerformanceEModuleDec dec = null]
+@init{
+    edu.clemson.cs.r2jt.collections.List<Exp> cons = new edu.clemson.cs.r2jt.collections.List<Exp>("Exp");
+    edu.clemson.cs.r2jt.collections.List<Dec> decs = new edu.clemson.cs.r2jt.collections.List<Dec>("Dec");
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = new edu.clemson.cs.r2jt.collections.List<ModuleParameterDec>("ModuleParameterDec");
+    edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new edu.clemson.cs.r2jt.collections.List<UsesItem>("UsesItem");
+}
+    :   ^(  ENHANCEMENT_PROFILE pn1=ident
+            (pars2=module_formal_param_section)?
+             pn2=ident
+             pn3=ident
+             pcn=ident pcp=ident
+            (uses2=uses_list)?
+            (req=requires_clause)?
+            (dec2=performance_E_item_sequence)?
+        )
+        {   if ($dec2.dec != null) {
+                decs = $dec2.dec.getDecs();
+            }
+            
+              $dec = new PerformanceEModuleDec($pn1.ps, $pn2.ps, $pn3.ps,
+                                        $pcn.ps, $pcp.ps,            
+                                        $pars2.pars!=null?$pars2.pars:pars,
+                                        $uses2.uses!=null?$uses2.uses:uses,
+                                        $req.exp, decs);
+        }
+    ;
+
+ // performance_item_sequence
+ //     :   (performance_item)+
+ //     ;
+ 
+performance_E_item_sequence returns [PerformanceEModuleDec  dec = null]
+@init{
+    PosSymbol pn1 = null; //dummy
+    PosSymbol pn2 = null; //dummy
+    PosSymbol pn3 = null; //dummy
+    PosSymbol pcn = null; //dummy
+    PosSymbol pcp = null; //dummy
+
+    edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = null; //dummy
+    edu.clemson.cs.r2jt.collections.List<UsesItem> uses = null; //dummy
+    Exp req = null; //dummy
+    edu.clemson.cs.r2jt.collections.List<Exp> cons = new edu.clemson.cs.r2jt.collections.List<Exp>("Exp");
+    edu.clemson.cs.r2jt.collections.List<Dec> decs = new edu.clemson.cs.r2jt.collections.List<Dec>("Dec");
+}
+    :   (   dec2=confirm_math_type_declaration { decs.add($dec2.mvd1); }
+        |   dec3=performance_type_declaration { decs.add($dec3.dec); }
+        |   dec4=performance_operation_declaration { decs.add($dec4.dec); }
+        |   dec5=definition_declaration { decs.add($dec5.dec); }
+        |   dec6=defines_declaration { decs.add($dec6.dec); }
+        )+
+        {   
+              $dec = new PerformanceEModuleDec(pn1, pn2, pn3,
+                                        pcn, pcp,            
+                                        pars, uses, req, decs);
+         }
+    ;
+    
+// ---------------------------------------------------------------
 // Enhancement Module
 // ---------------------------------------------------------------
 
@@ -308,7 +372,8 @@ realization_body_module returns [ModuleDec dec = null]
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new edu.clemson.cs.r2jt.collections.List<UsesItem>("UsesItem");
 }
     :   ^(  MODULE_REALIZATION ps=ident
-            (WITH_PROFILE prof=ident)? (pars2=module_formal_param_section)?
+            (pars2=module_formal_param_section)?
+            (WITH_PROFILE pName=ident)?
             (   dec2=body_concept_section
             |   dec3=body_enhancement_section
             )
@@ -326,7 +391,7 @@ realization_body_module returns [ModuleDec dec = null]
             if ($dec2.dec != null) {
                 cName = $dec2.dec.getConceptName();
                 eNames = $dec2.dec.getEnhancementNames();
-                $dec = new ConceptBodyModuleDec($ps.ps, $prof.ps,
+                $dec = new ConceptBodyModuleDec($ps.ps, $pName.ps,
                     $pars2.pars!=null?$pars2.pars:pars, cName, eNames,
                     $uses2.uses!=null?$uses2.uses:uses, $req.exp, convs,
                     corrs, init, fin, decs);
@@ -334,7 +399,7 @@ realization_body_module returns [ModuleDec dec = null]
                 eName = $dec3.dec.getEnhancementName();
                 cName = $dec3.dec.getConceptName();
                 eItems = $dec3.dec.getEnhancementBodies();
-                $dec = new EnhancementBodyModuleDec($ps.ps, $prof.ps, $pars2.pars!=null?$pars2.pars:pars, eName,
+                $dec = new EnhancementBodyModuleDec($ps.ps, $pName.ps, $pars2.pars!=null?$pars2.pars:pars, eName,
                     cName, eItems,$uses2.uses!=null?$uses2.uses:uses, $req.exp, convs, corrs,
                     init, fin, decs);
             } else {
@@ -346,6 +411,7 @@ realization_body_module returns [ModuleDec dec = null]
 body_concept_section returns [ConceptBodyModuleDec dec = null]
 @init{   PosSymbol ps = null; //dummy
     edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = null; //dummy
+    PosSymbol pName = null; //dummy
     edu.clemson.cs.r2jt.collections.List<PosSymbol> eNames = new edu.clemson.cs.r2jt.collections.List<PosSymbol>("PosSymbol");
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new edu.clemson.cs.r2jt.collections.List<UsesItem>("UsesItem");
     Exp req = null; //dummy
@@ -357,7 +423,8 @@ body_concept_section returns [ConceptBodyModuleDec dec = null]
 }
     :   ^(CONCEPT cName=ident (ps2=ident { eNames.add($ps2.ps); })*
         )
-        {   $dec = new ConceptBodyModuleDec(ps, null, pars, $cName.ps, eNames,
+//        {   $dec = new ConceptBodyModuleDec(ps, null, pars, $cName.ps, eNames,
+        {   $dec = new ConceptBodyModuleDec(ps, pName, pars, $cName.ps, eNames,
                 uses, req, convs, corrs, init, fin, decs);
         }
     ;
@@ -365,6 +432,7 @@ body_concept_section returns [ConceptBodyModuleDec dec = null]
 body_enhancement_section returns [EnhancementBodyModuleDec dec = null]
 @init{   PosSymbol ps = null; //dummy
     edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = null; //dummy
+    PosSymbol pName = null; //dummy
     edu.clemson.cs.r2jt.collections.List<EnhancementBodyItem> eItems
         = new edu.clemson.cs.r2jt.collections.List<EnhancementBodyItem>("EnhancementBodyItem");
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new edu.clemson.cs.r2jt.collections.List<UsesItem>("UsesItem");
@@ -378,7 +446,8 @@ body_enhancement_section returns [EnhancementBodyModuleDec dec = null]
     :   ^(  ENHANCEMENT eName=ident cName=ident
             (item2=added_enhancement_section { eItems.add($item2.item); })*
         )
-        {   $dec = new EnhancementBodyModuleDec(ps, null, pars, $eName.ps, $cName.ps,
+//        {   $dec = new EnhancementBodyModuleDec(ps, null, pars, $eName.ps, $cName.ps,
+        {   $dec = new EnhancementBodyModuleDec(ps, pName, pars, $eName.ps, $cName.ps,
                 eItems, uses, req, convs, corrs, init, fin, decs);
         }
     ;
@@ -388,11 +457,11 @@ added_enhancement_section returns [EnhancementBodyItem item = null]
   edu.clemson.cs.r2jt.collections.List<ModuleArgumentItem> args = new edu.clemson.cs.r2jt.collections.List<ModuleArgumentItem>("ModuleArgumentItem");
 }
     :   ^(  ENHANCED ps=ident (args2=module_argument_section)?
-            REALIZED bName=ident (WITH_PROFILE prof=ident)? (bArgs2=module_argument_section)?
+            REALIZED bName=ident (WITH_PROFILE pName=ident)? (bArgs2=module_argument_section)?
         )
         { $item = new EnhancementBodyItem($ps.ps,
                                           $args2.args!=null?$args2.args:args,
-                                          $bName.ps, $prof.ps,
+                                          $bName.ps, $pName.ps,
                                           $bArgs2.args!=null?$bArgs2.args:args); }
     ;
 
@@ -404,6 +473,7 @@ body_item_sequence returns [ConceptBodyModuleDec dec = null]
 @init{
     PosSymbol ps = null; //dummy
     edu.clemson.cs.r2jt.collections.List<ModuleParameterDec> pars = null; //dummy
+    PosSymbol pName = null; //dummy
     PosSymbol cSym = null; //dummy
     edu.clemson.cs.r2jt.collections.List<PosSymbol> eNames = null; //dummy
     edu.clemson.cs.r2jt.collections.List<UsesItem> uses = null; //dummy
@@ -426,7 +496,8 @@ body_item_sequence returns [ConceptBodyModuleDec dec = null]
         |   dec7=definition_declaration { decs.add($dec7.dec); }
         |   dec8=facility_declaration { decs.add($dec8.dec); }
         )+
-        {   $dec = new ConceptBodyModuleDec(ps, null, pars, cSym,
+//        {   $dec = new ConceptBodyModuleDec(ps, null, pars, cSym,
+        {   $dec = new ConceptBodyModuleDec(ps, pName, pars, cSym,
                 eNames, uses, req, convs, corrs, $init.item, $fin.item, decs);
         }
     ;
@@ -731,12 +802,12 @@ facility_declaration returns [FacilityDec dec = null]
     :	^(  FACILITY ps=ident
                     cName=ident (cPars=module_argument_section)?
                     (eItem=facility_enhancement { eItems.add($eItem.item); })*
-                    (external=EXTERNALLY)? REALIZED bName=ident (WITH_PROFILE prof=ident)? (bPars=module_argument_section)?
+                    (external=EXTERNALLY)? REALIZED bName=ident (WITH_PROFILE pName=ident)? (bPars=module_argument_section)?
                     (ebItem=facility_body_enhancement { ebItems.add($ebItem.item); })*
                 )
                 {   $dec = new FacilityDec($ps.ps, $cName.ps,
                                             $cPars.args!=null?$cPars.args:args,
-                                            eItems, $bName.ps, $prof.ps,
+                                            eItems, $bName.ps, $pName.ps,
                                             $bPars.args!=null?$bPars.args:args,
                                             ebItems, $external!=null?true:false);
                 }
@@ -755,11 +826,11 @@ facility_body_enhancement returns [EnhancementBodyItem item = null]
     edu.clemson.cs.r2jt.collections.List<ModuleArgumentItem> args = new edu.clemson.cs.r2jt.collections.List<ModuleArgumentItem>("ModuleArgumentItem");
 }
     :   ^(  ENHANCED ps=ident (args2=module_argument_section)?
-            REALIZED bName=ident (WITH_PROFILE prof=ident)? (bArgs=module_argument_section)?
+            REALIZED bName=ident (WITH_PROFILE pName=ident)? (bArgs=module_argument_section)?
         )
         { $item = new EnhancementBodyItem($ps.ps,
                                           $args2.args!=null?$args2.args:args,
-                                          $bName.ps, $prof.ps,
+                                          $bName.ps, $pName.ps,
                                           $bArgs.args!=null?$bArgs.args:args); }
     ;
 

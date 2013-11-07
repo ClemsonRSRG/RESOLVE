@@ -44,6 +44,7 @@
  * Ben Markle
  * Kim Roche
  * Murali Sitaraman
+ * Nighat Yasmin
  */
 
 /*
@@ -95,8 +96,8 @@ public class ModuleKind {
     public final static ModuleKind SHORT_FACILITY =
             new ModuleKind("Short Facility");
     public final static ModuleKind USES_ITEM = new ModuleKind("Uses Item");
-    public final static ModuleKind PERFORMANCE =
-            new ModuleKind("Performance Module");
+
+    public final static ModuleKind PROFILE = new ModuleKind("Profile");
     public final static ModuleKind UNDEFINED = new ModuleKind("Undefined");
 
     // ===========================================================
@@ -127,7 +128,7 @@ public class ModuleKind {
                 || this == ModuleKind.LONG_FACILITY) {
             str = ".fa";
         }
-        else if (this == ModuleKind.PERFORMANCE) {
+        else if (this == ModuleKind.PROFILE) {
             str = ".pp";
         }
 

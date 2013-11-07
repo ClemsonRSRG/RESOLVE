@@ -31,10 +31,11 @@ public class RParserSuper extends Parser {
      */
     protected boolean theoryModule = false;
     protected boolean conceptModule = false;
-    protected boolean performanceModule = false;
     protected boolean bodyModule = false;
     protected boolean enhancementModule = false;
     protected boolean facilityModule = false;
+    protected boolean performanceEModule = false;
+    protected boolean performanceCModule = false;
 
     /**
      * Reset the type of module we are parsing.
@@ -42,7 +43,8 @@ public class RParserSuper extends Parser {
     public void resetModuleType() {
         this.theoryModule = false;
         this.conceptModule = false;
-        this.performanceModule = false;
+        this.performanceEModule = false;
+        this.performanceCModule = false;
         this.bodyModule = false;
         this.enhancementModule = false;
         this.facilityModule = false;

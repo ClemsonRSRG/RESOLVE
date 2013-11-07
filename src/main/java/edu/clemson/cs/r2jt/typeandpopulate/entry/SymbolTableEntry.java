@@ -127,6 +127,11 @@ public abstract class SymbolTableEntry {
                 + getEntryTypeDescription(), l);
     }
 
+    public OperationProfileEntry toOperationProfileEntry(Location l) {
+        throw new SourceErrorException("Expecting a operation profile.  Found "
+                + getEntryTypeDescription(), l);
+    }
+
     public ProcedureEntry toProcedureEntry(Location l) {
         throw new SourceErrorException("Expecting a procedure.  Found "
                 + getEntryTypeDescription(), l);

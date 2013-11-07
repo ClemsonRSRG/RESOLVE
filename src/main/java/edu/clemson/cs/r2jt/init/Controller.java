@@ -44,6 +44,7 @@
  * Ben Markle
  * Kim Roche
  * Murali Sitaraman
+ * Nighat Yasmin
  */
 /*
  * Controller.java
@@ -420,6 +421,14 @@ public class Controller {
                     (((ConceptModuleDec) dec).getParameters()).iterator();
             checkOpDecs(decs, dec, params);
         }
+        // -- ny
+        else if (dec instanceof PerformanceEModuleDec) {
+            List<Dec> decs = ((PerformanceEModuleDec) dec).getDecs();
+            Iterator<ModuleParameterDec> params =
+                    (((PerformanceEModuleDec) dec).getParameters()).iterator();
+            //TODO : fixup performance module parameter stuff
+            //checkOpDecs(decs, dec, params);
+        }
         else if (dec instanceof ConceptBodyModuleDec) {
             List<Dec> decs = ((ConceptBodyModuleDec) dec).getDecs();
             Iterator<ModuleParameterDec> params =
@@ -520,11 +529,7 @@ public class Controller {
 
             if (myInstanceEnvironment.flags
                     .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
-
-                System.out.println("GETS HERE DAWG2");
                 NEWtranslateModuleDec(file, symbolTable, dec);
-                //System.out.println("Translated: " + file.toString());
-
             }
 
             if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_VERIFY_VC)) {
@@ -1037,6 +1042,16 @@ public class Controller {
                 myInstanceEnvironment.completeRecord(id, table);
                 return;
             }
+
+            //			// --ny
+            //			if (myInstanceEnvironment.perf()) { // DEBUG
+            if (myInstanceEnvironment.PVCs()) { // DEBUG
+                OldSymbolTable table =
+                        new OldSymbolTable(id, myInstanceEnvironment);
+                myInstanceEnvironment.completeRecord(id, table);
+                return;
+            }
+
             MathSymbolTable mathSymTab = getMathSymbolTable(dec, symbolTable);
             OldSymbolTable table = analyzeModuleDec(symbolTable, dec);
 
@@ -1054,6 +1069,11 @@ public class Controller {
             if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_VERIFY_VC)) {
                 //verifyModuleDec(context, dec);
                 // I don't think this is necessary
+            }
+
+            // --ny
+            if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_PERF_VC)) {
+                verifyModuleDec(symbolTable, table, dec);
             }
         }
         catch (CompilerException cex) {

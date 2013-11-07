@@ -280,9 +280,11 @@ public class ResolveConceptualVisitor {
 
     public void visitPerformanceInitItem(PerformanceInitItem data) {}
 
-    public void visitPerformanceModuleDec(PerformanceModuleDec data) {}
-
     public void visitPerformanceOperationDec(PerformanceOperationDec data) {}
 
     public void visitPerformanceTypeDec(PerformanceTypeDec data) {}
+
+    public void visitPerformanceEModuleDec(PerformanceEModuleDec data) {}
+
+    public void visitPerformanceCModuleDec(PerformanceCModuleDec data) {}
 }
