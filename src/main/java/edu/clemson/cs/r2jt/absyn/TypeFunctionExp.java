@@ -44,6 +44,7 @@
  * Ben Markle
  * Kim Roche
  * Murali Sitaraman
+ * Nighat Yasmin
  */
 /*
  * TypeFunctionExp.java
@@ -75,6 +76,7 @@ public class TypeFunctionExp extends Exp {
     public static final int IS_INITIAL = 2;
     public static final int LAST_SPECIMEN_NUM = 3;
     public static final int SPECIMEN_NUM = 4;
+    public static final int I_DUR = 5;
 
     // ===========================================================
     // Variables
@@ -266,6 +268,9 @@ public class TypeFunctionExp extends Exp {
             break;
         case 4:
             sb.append("SPECIMEN_NUM");
+            break;
+        case 5:
+            sb.append("I_DUR");
             break;
         default:
             sb.append(k);

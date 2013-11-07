@@ -38,12 +38,13 @@ public class RBuilderSuper extends TreeParser {
     protected boolean proofModule = false;
     protected boolean theoryModule = false;
     protected boolean conceptModule = false;
-    protected boolean performanceModule = false;
     protected boolean headerModule = false;
     protected boolean bodyModule = false;
     protected boolean enhancementModule = false;
     protected boolean facilityModule = false;
     protected boolean enhancementBody = false;
+    protected boolean performanceEModule = false;
+    protected boolean performanceCModule = false;
 
     /* enhancementBody is a subclass of bodyModule.  It is only true
      * in the body of an enhancement module.  It is NOT true in a
@@ -57,12 +58,13 @@ public class RBuilderSuper extends TreeParser {
     public void resetModuleType() {
         this.theoryModule = false;
         this.conceptModule = false;
-        this.performanceModule = false;
         this.headerModule = false;
         this.bodyModule = false;
         this.enhancementModule = false;
         this.facilityModule = false;
         this.enhancementBody = false;
+        this.performanceEModule = false;
+        this.performanceCModule = false;
     }
 
     /** The error handler for this parser. */

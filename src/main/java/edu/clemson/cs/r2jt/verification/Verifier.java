@@ -44,6 +44,7 @@
  * Ben Markle
  * Kim Roche
  * Murali Sitaraman
+ * Nighat Yasmin
  */
 /*
  * Verifier.java
@@ -139,6 +140,9 @@ public class Verifier extends ResolveConceptualVisitor {
 
     private static final String FLAG_DESC_VERIFY_VC = "Generate VCs.";
 
+    // --ny
+    private static final String FLAG_DESC_PERF_VC = "Generate performance VCs.";
+
     private static final String FLAG_DESC_FINALVERB_VC =
             "Show Final VCs in Old 'Verbose' Format.";
 
@@ -149,6 +153,13 @@ public class Verifier extends ResolveConceptualVisitor {
      */
     public static final Flag FLAG_VERBOSE_VC =
             new Flag(FLAG_SECTION_NAME, "verbose", FLAG_DESC_VERBOSE_VC);
+
+    /**
+     * --ny <p></p>
+     */
+    public static final Flag FLAG_PERF_VC =
+    //		new Flag(FLAG_SECTION_NAME, "perf", FLAG_DESC_PERF_VC);
+            new Flag(FLAG_SECTION_NAME, "PVCs", FLAG_DESC_PERF_VC);
 
     /**
      * <p></p>
@@ -220,6 +231,10 @@ public class Verifier extends ResolveConceptualVisitor {
         FlagDependencies.addRequires(FLAG_ISABELLE_VC, FLAG_VERIFY_VC);
         FlagDependencies.addRequires(FLAG_SIMPLIFY_VC, FLAG_VERIFY_VC);
         FlagDependencies.addRequires(FLAG_LISTVCS_VC, FLAG_VERIFY_VC);
+        // --ny
+        //FlagDependencies.addRequires(FLAG_PERF_VC, FLAG_VERIFY_VC);				
+        FlagDependencies.addImplies(Verifier.FLAG_PERF_VC,
+                Verifier.FLAG_VERIFY_VC);
 
     }
 

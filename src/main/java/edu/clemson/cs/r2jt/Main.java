@@ -163,7 +163,7 @@ public class Main {
                     else if (args[i].equals("-R")) {
                         compileDirs = true;
                     }
-                    else if (args[i].equals("-perf")) {
+                    else if (args[i].equals("-PVCs")) {
                         compileEnvironment.setPerformanceFlag();
                     }
                     else if (args[i].equalsIgnoreCase("-maindir")) {
@@ -543,6 +543,8 @@ public class Main {
         System.out.println("  -R             Recurse through directories.");
         System.out.println("  -D <dir>       Use <dir> as the main directory.");
         System.out.println("  -translate     Translate to Java code.");
+        System.out.println("  -PVCs           Generate verification "
+                + "conditions for performance.");
         System.out.println("  -VCs           Generate verification "
                 + "conditions.");
         System.out.println("  -isabelle      Used with -VCs to generate "

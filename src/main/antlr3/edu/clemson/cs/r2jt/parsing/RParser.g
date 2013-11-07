@@ -44,6 +44,7 @@
  *     Ben Markle
  *     Kim Roche
  *     Murali Sitaraman
+ *     Nighat Yasmin 
  */
 /*
  * RParser.g
@@ -83,9 +84,11 @@ tokens {
     COMMON_CONCLUSION;
     CONFIRM_TYPE;
     CONJUNCT_ELIMINATION;
+    CONCEPT_PROFILE;
     DECLARATIONS;
     DBL_ANGLE;
     ENHANCED_BY;
+    ENHANCEMENT_PROFILE;
     EXCLUDED_MIDDLE;
     EXISTENTIAL_GENERALIZATION;
     EXISTENTIAL_INSTANTIATION;
@@ -168,7 +171,12 @@ this.err = err;
     :   (   proof_module
         |   theory_module
         |   conceptual_module
-        |   performance_module        
+        |   (MODULE_PROFILE^ id1=ident
+            { performanceEModule = true; }
+		        (module_formal_param_section)? SHORT_FOR!
+		        ident FOR! ident FOR!) =>
+            performance_enhancement_module  
+        |   performance_concept_module 
         |   realization_body_module
         |   enhancement_module
         |   facility_module
@@ -232,33 +240,77 @@ concept_item
     ;
 
 // ---------------------------------------------------------------
-// Performance Module
+// Performance Module for Concept
 // ---------------------------------------------------------------
 
-performance_module
+performance_concept_module
     :  
-        MODULE_PROFILE^ id1=ident
-        { performanceModule = true; }
-        (module_formal_param_section)? SHORT_FOR!
-        ident FOR! ident (FOR! ident WITH_PROFILE! ident)? SEMICOLON!
+        MODULE_PROFILE id1=ident
+        { performanceCModule = true; }
+        (module_formal_param_section)? SHORT_FOR
+        ident FOR ident SEMICOLON
         (uses_list)?
         (requires_clause)?
-        (performance_item_sequence)?
-        END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
-        SEMICOLON!
+        (performance_C_item_sequence)?
+        END (id2=ident { matchModuleIdent(id2.tree, id1.tree); })?
+        SEMICOLON ->
+        ^(CONCEPT_PROFILE ident
+        (module_formal_param_section)? 
+        ident ident 
+        (uses_list)?
+        (requires_clause)?
+        (performance_C_item_sequence)?
+        )
     ;
 
-performance_item_sequence
-    :   (performance_item)+
+performance_C_item_sequence
+    :   (performance_C_item)+
     ;
 
-performance_item
+performance_C_item
     :
     confirm_math_type_declaration
     |   concept_state_variable_declaration
     |   constraint_clause
     |   performance_module_init_declaration
     |   performance_module_final_declaration
+    |   performance_type_declaration
+    |   performance_operation_declaration
+    |   definition_declaration
+    |   defines_declaration
+    ;
+
+// ---------------------------------------------------------------
+// Performance Module for Enhancement
+// ---------------------------------------------------------------
+
+performance_enhancement_module
+    :  
+        MODULE_PROFILE id1=ident
+        { performanceEModule = true; }
+        (module_formal_param_section)? SHORT_FOR
+        ident FOR ident FOR ident WITH_PROFILE ident SEMICOLON
+        (uses_list)?
+        (requires_clause)?
+        (performance_E_item_sequence)?
+        END (id2=ident { matchModuleIdent(id2.tree, id1.tree); })?
+        SEMICOLON ->
+        ^(ENHANCEMENT_PROFILE ident
+        (module_formal_param_section)?
+        ident ident ident ident
+        (uses_list)?
+        (requires_clause)?
+        (performance_E_item_sequence)?
+        )
+    ;
+
+performance_E_item_sequence
+    :   (performance_E_item)+
+    ;
+
+performance_E_item
+    :
+    confirm_math_type_declaration
     |   performance_type_declaration
     |   performance_operation_declaration
     |   definition_declaration
@@ -298,7 +350,8 @@ enhancement_item
 
 realization_body_module
     :   MODULE_REALIZATION^ id1=ident { bodyModule = true; }
-        (WITH_PROFILE ident)? (module_formal_param_section)? FOR!
+        (module_formal_param_section)?
+        (WITH_PROFILE ident)? FOR!
         (   (ident OF)=> body_enhancement_section
         |   body_concept_section
         ) SEMICOLON!

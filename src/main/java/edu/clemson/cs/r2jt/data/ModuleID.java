@@ -44,6 +44,7 @@
  * Ben Markle
  * Kim Roche
  * Murali Sitaraman
+ * Nighat Yasmin
  */
 /*
  * ModuleID.java
@@ -74,6 +75,17 @@ public class ModuleID {
 
     private Symbol cName = null;
 
+    // --ny
+    private Symbol pName = null;
+
+    private Symbol p2Name = null;
+
+    private Symbol p3Name = null;
+
+    private Symbol pcName = null;
+
+    private Symbol pcpName = null;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -89,11 +101,48 @@ public class ModuleID {
         this.kind = kind;
     }
 
+    // --ny
+    private ModuleID(Symbol name, Symbol cName, Symbol pName, ModuleKind kind) {
+        this.name = name;
+        this.cName = cName;
+        this.pName = pName;
+        this.kind = kind;
+    }
+
+    private ModuleID(Symbol name, Symbol eName, Symbol cName, Symbol pName,
+            ModuleKind kind) {
+        this.name = name;
+        this.cName = cName;
+        this.eName = eName;
+        this.pName = pName;
+        this.kind = kind;
+    }
+
     private ModuleID(Symbol name, Symbol eName, Symbol cName) {
         this.name = name;
         this.eName = eName;
         this.cName = cName;
         this.kind = ModuleKind.ENHANCEMENT_BODY;
+    }
+
+    // --ny
+    private ModuleID(Symbol name, Symbol eName, Symbol cName, Symbol pName) {
+        this.name = name;
+        this.eName = eName;
+        this.cName = cName;
+        this.pName = pName;
+        this.kind = ModuleKind.ENHANCEMENT_BODY;
+    }
+
+    // --ny
+    private ModuleID(Symbol name, Symbol p2Name, Symbol p3Name, Symbol pcName,
+            Symbol pcpName, ModuleKind kind) {
+        this.name = name;
+        this.p2Name = p2Name;
+        this.p3Name = p3Name;
+        this.pcName = pcName;
+        this.pcpName = pcpName;
+        this.kind = ModuleKind.PROFILE;
     }
 
     // ===========================================================
@@ -121,7 +170,7 @@ public class ModuleID {
     }
 
     public static ModuleID createPerformanceID(PosSymbol name) {
-        return new ModuleID(name.getSymbol(), ModuleKind.PERFORMANCE);
+        return new ModuleID(name.getSymbol(), ModuleKind.PROFILE);
     }
 
     public static ModuleID createFacilityID(PosSymbol name) {
@@ -142,10 +191,32 @@ public class ModuleID {
                 ModuleKind.CONCEPT_BODY);
     }
 
+    // --ny
+    public static ModuleID createConceptBodyID(PosSymbol name, PosSymbol cName,
+            PosSymbol pName) {
+        return new ModuleID(name.getSymbol(), cName.getSymbol(), pName
+                .getSymbol(), ModuleKind.CONCEPT_BODY);
+    }
+
     public static ModuleID createEnhancementBodyID(PosSymbol name,
             PosSymbol eName, PosSymbol cName) {
         return new ModuleID(name.getSymbol(), eName.getSymbol(), cName
                 .getSymbol());
+    }
+
+    // --ny
+    public static ModuleID createEnhancementBodyID(PosSymbol name,
+            PosSymbol eName, PosSymbol cName, PosSymbol pName) {
+        return new ModuleID(name.getSymbol(), eName.getSymbol(), cName
+                .getSymbol(), pName.getSymbol(), ModuleKind.ENHANCEMENT_BODY);
+    }
+
+    // --ny
+    public static ModuleID createProfileID(PosSymbol name, PosSymbol p2Name,
+            PosSymbol p3Name, PosSymbol pcName, PosSymbol pcpName) {
+        return new ModuleID(name.getSymbol(), p2Name.getSymbol(), p3Name
+                .getSymbol(), pcName.getSymbol(), pcpName.getSymbol(),
+                ModuleKind.PROFILE);
     }
 
     // -----------------------------------------------------------
@@ -191,10 +262,24 @@ public class ModuleID {
             PosSymbol name = dec2.getName();
             id = createProofID(name);
         }
-        else if (dec instanceof PerformanceModuleDec) {
-            PerformanceModuleDec dec2 = (PerformanceModuleDec) dec;
-            PosSymbol name = dec2.getName();
-            id = createPerformanceID(name);
+        else if (dec instanceof PerformanceEModuleDec) {
+            PerformanceEModuleDec dec2 = (PerformanceEModuleDec) dec;
+            PosSymbol Name = dec2.getName();
+            PosSymbol p2Name = dec2.getProfileName2();
+            PosSymbol p3Name = dec2.getProfileName3();
+            PosSymbol pcName = dec2.getProfilecName();
+            PosSymbol pcpName = dec2.getProfilecpName();
+            //    id = createProfileID(Name, p2Name, p3Name, pcName, pcpName);
+            id = createPerformanceID(Name);
+
+        }
+        else if (dec instanceof PerformanceCModuleDec) {
+            PerformanceCModuleDec dec2 = (PerformanceCModuleDec) dec;
+            PosSymbol Name = dec2.getName();
+            PosSymbol p2Name = dec2.getProfileName1();
+            PosSymbol p3Name = dec2.getProfilecName();
+            id = createPerformanceID(Name);
+
         }
         return id;
     }
@@ -225,6 +310,10 @@ public class ModuleID {
         return (eName != null);
     }
 
+    public boolean hasPerfProfile() {
+        return (pName != null);
+    }
+
     public Symbol getName() {
         return name;
     }
@@ -237,6 +326,10 @@ public class ModuleID {
         return cName;
     }
 
+    public Symbol getPerfProfileName() {
+        return pName;
+    }
+
     public ModuleID getConceptID() {
         assert cName != null : "cName is null";
         return new ModuleID(cName, ModuleKind.CONCEPT);
@@ -246,6 +339,12 @@ public class ModuleID {
         assert cName != null : "cName is null";
         assert eName != null : "eName is null";
         return new ModuleID(eName, cName, ModuleKind.ENHANCEMENT);
+    }
+
+    public ModuleID getPerfProfileID() {
+        assert pName != null : "pName is null";
+        assert eName != null : "eName is null";
+        return new ModuleID(pName, ModuleKind.PROFILE);
     }
 
     public String getFilename() {
@@ -263,6 +362,11 @@ public class ModuleID {
     public String getConceptFilename() {
         assert cName != null : "cName is null";
         return cName.toString() + ".co";
+    }
+
+    public String getPerfProfileFilename() {
+        assert pName != null : "pName is null";
+        return pName.toString() + ".pp";
     }
 
     public ModuleKind getModuleKind() {
