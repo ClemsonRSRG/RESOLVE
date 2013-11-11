@@ -513,22 +513,16 @@ facility_module returns [ModuleDec dec = null]
     edu.clemson.cs.r2jt.collections.List<Dec> decs = null;
     FacilityDec fDec = null;
 }
-    :   ^(  FACILITY ps=ident
-            (   dec2=short_facility_section (uses=uses_list)?
-            |   (uses=uses_list)? (req=requires_clause)? (dec3=facility_item_sequence)?
-            )
-        )
+    :   ^(  SHORT_FACILITY dec2=facility_declaration  )
         {   if ($dec2.dec != null) {
-                fDec = new FacilityDec($ps.ps,
-                    $dec2.dec.getConceptName(),
-                    $dec2.dec.getConceptParams(),
-                    $dec2.dec.getEnhancements(),
-                    $dec2.dec.getBodyName(),
-                    null,
-                    $dec2.dec.getBodyParams(),
-                    $dec2.dec.getEnhancementBodies());
-                $dec = new ShortFacilityModuleDec($ps.ps, fDec, $uses.uses);
-            } else if ($dec3.dec != null) {
+                $dec = new ShortFacilityModuleDec($dec2.dec.getName(), $dec2.dec, null);
+            }
+        }
+    |   ^(  FACILITY ps=ident
+            (uses=uses_list)?
+            (req=requires_clause)?
+            (dec3=facility_item_sequence)?  )
+        {   if ($dec3.dec != null) {
                 init = $dec3.dec.getFacilityInit();
                 fin = $dec3.dec.getFacilityFinal();
                 decs = $dec3.dec.getDecs();
@@ -539,30 +533,6 @@ facility_module returns [ModuleDec dec = null]
             }
         }
     ;
-
-short_facility_section returns [FacilityDec dec = null]
-@init{   PosSymbol ps = null; //dummy
-    edu.clemson.cs.r2jt.collections.List<EnhancementItem> eItems
-        = new edu.clemson.cs.r2jt.collections.List<EnhancementItem>("EnhancementItem");
-    edu.clemson.cs.r2jt.collections.List<EnhancementBodyItem> ebItems
-        = new edu.clemson.cs.r2jt.collections.List<EnhancementBodyItem>("EnhancementBodyItem");
-    edu.clemson.cs.r2jt.collections.List<UsesItem> uses = new edu.clemson.cs.r2jt.collections.List<UsesItem>("UsesItem");
-    edu.clemson.cs.r2jt.collections.List<ModuleArgumentItem> args = new edu.clemson.cs.r2jt.collections.List<ModuleArgumentItem>("ModuleArgumentItem");
-} 
-    :   cName=ident (cPars=module_argument_section)?
-        (eItem=facility_enhancement { eItems.add($eItem.item); })*
-        bName=ident (bPars=module_argument_section)?
-        (ebItem=facility_body_enhancement { ebItems.add($ebItem.item); })*
-        {   $dec = new FacilityDec(ps, $cName.ps,
-                                    $cPars.args!=null?$cPars.args:args, eItems,
-                                    $bName.ps, null,
-                                    $bPars.args!=null?$bPars.args:args, ebItems);
-        }
-    ;
-
-  //facility_item_sequence
-  //    :   (facility_item)+
-  //    ;
 
 facility_item_sequence returns [FacilityModuleDec dec = null]
 @init{   PosSymbol ps = null; //dummy

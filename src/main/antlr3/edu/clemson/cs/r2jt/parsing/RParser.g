@@ -116,6 +116,7 @@ tokens {
     PROGDOT;
     SET;
     SET_EXPR;
+    SHORT_FACILITY;
     STATEMENT;
     STATEMENT_SEQUENCE;
     TUPLE;
@@ -425,23 +426,12 @@ body_item
 // ---------------------------------------------------------------
 
 facility_module
-    :   FACILITY^ id1=ident //{ facilityModule = true; }
-        (   short_facility_section (uses_list)?
-        |   SEMICOLON! (uses_list)?
-            (requires_clause)?
-            (facility_item_sequence)?
-            END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
-            SEMICOLON!
-        )
-    ;
-
-short_facility_section
-    :   IS! ident
-        module_argument_section?
-        facility_enhancement*
-        REALIZED! BY! ident
-        module_argument_section?
-        facility_body_enhancement*
+    :   (FACILITY^ id1=ident IS!) => facility_declaration
+        -> ^(SHORT_FACILITY facility_declaration)
+    |   FACILITY^ id1=ident SEMICOLON! (uses_list)?
+        (requires_clause)?
+        (facility_item_sequence)?
+        END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
         SEMICOLON!
     ;
 
