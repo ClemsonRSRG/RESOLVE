@@ -370,7 +370,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
     /**
      * <p>Given a PTType, <code>type</code>, this method finds the first facility
-     * declared in <code>ModuleScope</code> that uses <code>type</code>s
+     * declared in <code>ModuleScope</code> that uses <code>type</code>'s
      * originating module as its specification.</p>
      *
      * @param type A <code>PTType</code>.
@@ -496,8 +496,8 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
     /**
      * <p>Operations in facility modules look pretty much the same as those in
-     * concepts, realizations, etc. So this method adds all things operation /
-     * procedure related into the <code>Bookkeeper</code>.</p>
+     * concepts, realizations, etc. So this method handles adding all things
+     * operation/procedure related into the <code>Bookkeeper</code>.</p>
      *
      * @param name The name of the operation we're adding.
      * @param returnTy A possibly <code>null</code> <code>Ty</code> from the dec's
@@ -663,9 +663,9 @@ public class AbstractTranslator extends TreeWalkerVisitor {
         return result;
     }
 
-    // -----------------------------------------------------------
+    //-------------------------------------------------------------------
     //   Error handling methods
-    // -----------------------------------------------------------
+    //-------------------------------------------------------------------
 
     public void noSuchModule(PosSymbol qualifier) {
         throw new SourceErrorException(

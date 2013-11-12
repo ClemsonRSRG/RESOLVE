@@ -1,7 +1,9 @@
 package edu.clemson.cs.r2jt.translation;
 
 import edu.clemson.cs.r2jt.absyn.*;
+import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.translation.bookkeeping.JavaConceptBookkeeper;
 import edu.clemson.cs.r2jt.translation.bookkeeping.JavaFacilityBookkeeper;
@@ -9,17 +11,22 @@ import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTVoid;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
+import java.io.File;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 public class JavaTranslator extends AbstractTranslator {
 
@@ -69,6 +76,67 @@ public class JavaTranslator extends AbstractTranslator {
         }
     }
 
+    @Override
+    public void preFacilityModuleDec(FacilityModuleDec node) {
+        ModuleID facilityID = ModuleID.createFacilityID(node.getName());
+        File sourceFile = myInstanceEnvironment.getFile(facilityID);
+
+        myBookkeeper.addUses("package " + formPkgPath(sourceFile) + ";");
+        myBookkeeper.addUses("import RESOLVE.*;");
+    }
+
+    @Override
+    public void preConceptModuleDec(ConceptModuleDec node) {
+        ModuleID conceptID = ModuleID.createConceptID(node.getName());
+        File sourceFile = myInstanceEnvironment.getFile(conceptID);
+
+        myBookkeeper.addUses("package " + formPkgPath(sourceFile) + ";");
+        myBookkeeper.addUses("import RESOLVE.*;");
+    }
+
+    /**
+     * <p>A <em>Temporary</em> solution to building workable headers: Say we want
+     * to build a Java pkg for <code>Std_Integer_Fac</code> -- here we query for
+     * that facility. From it we obtain Integer_Template which is what we need. We
+     * don't do this through <code>compileEnvironment</code> since it is 1: messy,
+     * and 2: <em>probably?</em> going to be revamped in the near future.</p>
+     *
+     * <p>Edit: I've also had to add corresponding walker methods for each
+     * specific type of module so I can build a damn file and corresponding
+     * moduleID for these things. Why in the world do we have ModuleIdentifiers
+     * and ModuleIDs as two seperate entities?? This whole thing is such a mess.</p>
+     */
+    @Override
+    public void preUsesItem(UsesItem node) {
+
+        try {
+            FacilityEntry result =
+                myModuleScope.queryForOne(
+                        new UnqualifiedNameQuery(node.getName().getName()))
+                        .toFacilityEntry(null);
+
+            // sigh. Could we please make this process less scream worthy
+            // eventually?
+            String name = result.getFacility().getSpecification()
+                    .getModuleIdentifier().toString();
+
+            PosSymbol conceptName = new PosSymbol(null, Symbol.symbol(name));
+            ModuleID conceptID = ModuleID.createConceptID(conceptName);
+            File sourceFile = myInstanceEnvironment.getFile(conceptID);
+            myBookkeeper.addUses("import " + formPkgPath(sourceFile) + ";");
+
+        }
+        catch (NoSuchSymbolException nsse) {
+            // This shouldn't happen, but if we aren't able to find a
+            // std facility, then we should (probably) die quick.
+            throw new RuntimeException("Couldn't find standard facility: " + node
+                    .getName().getName());
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
+        }
+    }
+
     /**
      * <p>Any conceptual parameters must be transformed into operations and placed
      * in the interface extending <code>RESOLVE_INTERFACE</code>. We do this here
@@ -101,7 +169,7 @@ public class JavaTranslator extends AbstractTranslator {
     /**
      * <p>This isn't in <code>AbstractTranslator</code> since Java translation
      * requires that calls to operations derived from facility enhancements be
-     * specially qualified. Since thisspecial case doesn't apply to C,
+     * specially qualified. Since this special case doesn't apply to C,
      * the separation seems necessary.
      *
      * Note <code>preCallStmt</code> in {@link CTranslator CTranslator} will need
@@ -372,5 +440,60 @@ public class JavaTranslator extends AbstractTranslator {
 
     // TODO:         Check Prover to see the correct way to do this using
     //                         HwS's FlagDependencies system.
+    }
+
+    /**
+     * <p>Constructs the package into which to place this module from the file
+     * name.</p>
+     *
+     * @param file The file for which we are constructing a java package.
+     * @return The fully qualified package name.
+     */
+    private String formPkgPath(File file) {
+        StringBuffer pkgPath = new StringBuffer();
+        String filePath;
+        if (file.exists()) {
+            filePath = file.getAbsolutePath();
+        }
+        else {
+            filePath = file.getParentFile().getAbsolutePath();
+        }
+        StringTokenizer stTok = new StringTokenizer(filePath, File.separator);
+        Deque<String> tokenStack = new LinkedList<String>();
+
+        String curToken;
+        while (stTok.hasMoreTokens()) {
+            curToken = stTok.nextToken();
+            tokenStack.push(curToken);
+        }
+
+        //Get rid of the actual file--we only care about the path to it
+        if (file.isFile()) {
+            tokenStack.pop();
+        }
+
+        curToken = "";
+        boolean foundRootDirectory = false;
+        while (!tokenStack.isEmpty() && !foundRootDirectory) {
+            curToken = tokenStack.pop();
+
+            if (pkgPath.length() != 0) {
+                pkgPath.insert(0, '.');
+            }
+
+            pkgPath.insert(0, curToken);
+
+            foundRootDirectory = curToken.equalsIgnoreCase("RESOLVE");
+        }
+
+        if (!foundRootDirectory) {
+            throw new RuntimeException( "Translation expects all compiled files to" +
+                    " have a "
+                    + "directory named 'RESOLVE' somewhere in their path, but "
+                    + "the file:\n\t" + filePath + "\ndoes not.  Keep in mind "
+                    + "that directories are case sensitive.");
+        }
+
+        return pkgPath.toString();
     }
 }
