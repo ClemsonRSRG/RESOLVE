@@ -32,8 +32,8 @@ public class JavaTranslator extends AbstractTranslator {
             "Regenerates Java code for all supporting RESOLVE files.";
 
     /**
-     * <p>The Java Translator flag. Specifies that Java should be
-     * used as the compiler's target language.</p>
+     * <p>The Java Translator flag. Specifies that Java should be used as the
+     * compiler's target language.</p>
      */
     public static final Flag JAVA_FLAG_TRANSLATE =
             new Flag(FLAG_SECTION_NAME, "javaTranslate", FLAG_DESC_TRANSLATE);
@@ -70,13 +70,12 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Any conceptual parameters must be transformed into operations
-     * and placed in the interface extending <code>RESOLVE_INTERFACE</code>.
-     * We do this here using "fxn" <code>Bookkeeper</code> methods. None
-     * of the if-statements should get tripped if the module being looked
-     * at is anything other than a concept module. If they do, then we
-     * are going to get excess operation declarations in the translated file
-     * and this will have to be re-thought..</p>
+     * <p>Any conceptual parameters must be transformed into operations and placed
+     * in the interface extending <code>RESOLVE_INTERFACE</code>. We do this here
+     * using "fxn" <code>Bookkeeper</code> methods. None of the if-statements
+     * should get tripped if the module being looked at is anything other than a
+     * concept module. If they do, then we are going to get excess operation
+     * declarations in the translated file and this will have to be re-thought.</p>
      */
     @Override
     public void preModuleParameterDec(ModuleParameterDec node) {
@@ -100,14 +99,14 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>This isn't in <code>AbstractTranslator</code> since Java
-     * translation requires that calls to operations derived from
-     * facility enhancements be specially qualified. Since this
-     * special case doesn't apply to C, the separation seems necessary.
+     * <p>This isn't in <code>AbstractTranslator</code> since Java translation
+     * requires that calls to operations derived from facility enhancements be
+     * specially qualified. Since thisspecial case doesn't apply to C,
+     * the separation seems necessary.
      *
-     * Note <code>preCallStmt</code> in {@link CTranslator CTranslator}
-     * will need to qualify calls so qualification finding methods
-     * are still found in the <code>AbstractTranslator</code>.</p>
+     * Note <code>preCallStmt</code> in {@link CTranslator CTranslator} will need
+     * to qualify calls so qualification finding methods are still found in the
+     * <code>AbstractTranslator</code>.</p>
      */
     @Override
     public void preCallStmt(CallStmt node) {
@@ -143,11 +142,10 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Aside: It seems like this visitor method is responsible for
-     * too much. It Handles parameters for not only EVERY KIND of module...
-     * but also parameters to facility/facility enhancement specifications..
-     * So take care if you need to add anything here as it might affect many
-     * things.</p>
+     * <p>Aside: It seems like this visitor method is responsible for too much.
+     * It Handles parameters for not only EVERY KIND of module,
+     * but also parameters to facility/facility enhancement specifications.. So take
+     * care if you need to add anything here as it might affect many things.</p>
      */
     @Override
     public void preModuleArgumentItem(ModuleArgumentItem node) {
@@ -212,18 +210,17 @@ public class JavaTranslator extends AbstractTranslator {
     //   Helper methods
     // -----------------------------------------------------------
 
+
     /**
-     * This method returns <code>true</code> <strong>iff</strong>
-     * <code>callName</code> matches an argument to a facility
-     * enhancement. Additionally, to avoid code duplication, if
-     * <code>true</code> is returned, this method takes the liberty
-     * of mutating the initially empty stringBuilder parameter,
-     * <code>qualifier</code>, into one that is appropriate for
-     * qualifying an enhancement defined call.
+     * <p>This method returns <code>true</code> <strong>iff</strong>
+     * <code>callName</code> matches an argument to a facility enhancement.
+     * Additionally, if <code>true</code> is returned, then <code>qualifier</code>
+     * will also be mutated into one appropriate for qualifying an enhancement
+     * defined call.</p>
      *
-     * "Appropriate" simply means wrapping the normal qualifier
-     * with the specificational name of the current enhancement.
-     * For instance, in the case of two or more enhancements:
+     * <p>"Appropriate" means wrapping the normal qualifier with the
+     * specificational name of the current enhancement. For instance,
+     * in the case of two or more enhancements:</p>
      *
      * <pre>
      * Facility SF is Stack_Template(..) realized by Array_Realiz
@@ -233,17 +230,14 @@ public class JavaTranslator extends AbstractTranslator {
      *                         Obvious_Writing_Capability(Std_Int_Fac.Write);
      * </pre>
      *
-     * a call to <code>Read</code> should ideally look something like,
-     * <code>((Reading_Capability)SF).Read</code>. However, in the
-     * case where there is only a single enhancement, this method
-     * goes ahead simply makes the qualifier the base facility's
-     * name, I.e.: <code>SF.Read</code>.
+     * <p>In the case where there is only a single enhancement,
+     * this method makes the qualifier the base facility's name,
+     * I.e.  <code>SF.Read</code>.</p>
      *
      * @param callName
      * @param qualifier
-     * @return A boolean indicating whether or not
-     *                    <code>callName</code> matches a facility enhancement
-     *                    argument.
+     * @return <code>true</code> if <code>callName</code> matches an argument
+     *         to a facility enhancement.
      */
     private boolean isCallFromEnhancement(String callName,
             StringBuilder qualifier) {

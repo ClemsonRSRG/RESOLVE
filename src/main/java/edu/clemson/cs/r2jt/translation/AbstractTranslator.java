@@ -37,8 +37,8 @@ import java.util.Map;
 public class AbstractTranslator extends TreeWalkerVisitor {
 
     /**
-     * <p>If <code>true</code>, as we walk the tree, debug information will
-     * be streamed to the console. This should be <code>false</code> when the
+     * <p>If <code>true</code>, as we walk the tree, debug information will be
+     * streamed to the console. This should be <code>false</code> when the
      * translator isn't actively being worked on.</p>
      */
     protected static final boolean PRINT_DEBUG = true;
@@ -47,11 +47,10 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     protected final ModuleScope myModuleScope;
 
     /**
-     * <p>This is where all information collected during the treewalk here
-     * goes. The <code>Bookkeeper</code> and its concrete subclasses handle
-     * how all information is collected, organized, and ultimately arranged
-     * on the translated page via calls to override <code>getString</code>
-     * methods.</p>
+     * <p>This is where all information collected during the treewalk here goes.
+     * The <code>Bookkeeper</code> and its concrete subclasses handle how all
+     * information is collected, organized, and ultimately arranged on the
+     * translated page via calls to override <code>getString</code> methods.</p>
      */
     protected Bookkeeper myBookkeeper;
 
@@ -63,8 +62,8 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     protected String myQualifierSymbol;
 
     /**
-     * <p>While walking a <code>FacilityDec</code>, this maintains a pointer
-     * to that facility, and, by extension, enhancements enclosed within. If we
+     * <p>While walking a <code>FacilityDec</code>, this maintains a pointer to
+     * that facility, and, by extension, enhancements enclosed within. If we
      * havent encountered a <code>FacilityDec</code> or we're done walking one,
      * this is set to <code>null</code>.</p>
      */
@@ -114,16 +113,17 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
         String errorMsg =
                 "ProgramOpExp encountered!! This should have been converted to "
-                        + "a programParamExp in preprocessing. Until a fix is introduced, "
-                        + "if you must, write things like 'I+3', etc. as Sum(I, 3)";
+                        + "a programParamExp in preprocessing. Until a fix is  " +
+                        "introduced, if you must, write things like 'I+3', " +
+                        "etc. as Sum(I, 3)";
         throw new SourceErrorException(errorMsg, node.getLocation());
     }
 
     /**
-     * <p>Currently we aren't recognizing <p>ProgramParamExp</p> correctly. Sami took
-     * it out temporarily until Blair and him can come up with an agree on a suitable
-     * fix. For more information and status updates in the meantime, refer to pivotal
-     * story #54742626</p>
+     * <p>Currently we aren't recognizing <p>ProgramParamExp</p>s correctly. Sami
+     * took them out temporarily until Blair and him can come up with an agree on a
+     * suitable fix. For more information and status updates in the meantime,
+     * refer to pivotal story #54742626</p>
      */
     @Override
     public void preProgramParamExp(ProgramParamExp node) {
@@ -414,14 +414,15 @@ public class AbstractTranslator extends TreeWalkerVisitor {
      * pairing and their formal counterparts. Here is an example spec-realization
      * pairing:<code>facility stack_fac is SPEC realized by REALIZATION</code>.</p>
      *
-     * <p>This map takes any actual parameters to SPEC and REALIZATION, combines
-     * them into a single list, then maps each to its corresponding formal parameter
-     * located in the <code>ModuleScope</code>s belonging to SPEC and REALIZATION.</p>
+     * <p>This map takes any actual parameters to SPEC and REALIZATION,
+     * combines them into a single list, then maps each to its corresponding
+     * formal  parameter located in the <code>ModuleScope</code>s belonging to
+     * SPEC and REALIZATION.</p>
      *
      * @param name The name of the facility or facility enhancement we are
      *             constructing the pairing map for.
-     * @param spec The <code>ModuleParameterization</code> for the SPEC portion
-     *             of the facility declaration (see example above).
+     * @param spec The <code>ModuleParameterization</code> for the SPEC portion of
+     *             the facility declaration (see example above).
      * @param realization The <code>ModuleParameterization</code> for the
      *                    realization portion of the facility declaration.
      */
@@ -457,13 +458,13 @@ public class AbstractTranslator extends TreeWalkerVisitor {
      * <p>This  builds <code>ProgramExp</code> arguments that are either qualified
      * or not, depending on the <code>fullyQualified</code> flag.</p>
      *
-     * <p>For example, in <code>A[3]</code>, the <code>3</code> should come out
-     * as <code>Std_Integer_Fac.createInteger(3)</code>. Whereas when we encounter
+     * <p>For example, in <code>A[3]</code>, the <code>3</code> should come out as
+     * <code>Std_Integer_Fac.createInteger(3)</code>. Whereas when we encounter
      * something like: <code>Increment(I)</code>, since <code>I</code> is a
      * <code>VariableExp</code>, it should remain unchanged.</p>
      *
-     * @param value A string containing what should go between the parens
-     *              in the <code>createTYPE( ... )</code> output.
+     * @param value A string containing what should go between the parens in the
+     *              <code>createTYPE( ... )</code> output.
      * @param type The <code>PTType</code> corresponding to the type we
      *             are instantiating.
      * @param fullyQualified If <code>true</code>, the argument will be fully
@@ -482,20 +483,21 @@ public class AbstractTranslator extends TreeWalkerVisitor {
                     qualifier + myQualifierSymbol + "create" + type.toString()
                             + "(" + value + ")";
         }
-        // Note: While ProgramExps DO get visited when instantiating facilities, etc.
-        //                  This method was only intended to handle ProgramExp arguments for functions.
-        //                 Handling these types of things for module parameters and facilities is
-        //                 currently "preModuleArgumentItem"s job. I intend to experiment with this
-        //                  division of labor further, and maybe eventually collapse the two.
+        // Note: While ProgramExps DO get visited when instantiating facilities,
+        //       etc. This method was only intended to handle ProgramExp arguments
+        //       for functions. Handling these types of things for module
+        //       parameters and facilities is currently "preModuleArgumentItem"s
+        //       job. I intend to experiment with this division of labor further,
+        //       and maybe eventually collapse the two.
         if (myBookkeeper.fxnIsOpen()) {
             myBookkeeper.fxnAppendTo(expression);
         }
     }
 
     /**
-     * <p>Operations in facility modules look pretty much the same as those
-     * in concepts, realizations, etc. So this method adds all things
-     * operation/procedure related into the <code>Bookkeeper</code>.</p>
+     * <p>Operations in facility modules look pretty much the same as those in
+     * concepts, realizations, etc. So this method adds all things operation /
+     * procedure related into the <code>Bookkeeper</code>.</p>
      *
      * @param name The name of the operation we're adding.
      * @param returnTy A possibly <code>null</code> <code>Ty</code> from the dec's
