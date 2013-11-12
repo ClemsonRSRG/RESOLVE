@@ -7,8 +7,8 @@ import java.util.LinkedList;
 public abstract class AbstractBookkeeper implements Bookkeeper {
 
     /**
-     * <p>Pointers to the various books currently being handled by
-     * the Bookkeeper.</p>
+     * <p>Pointers to the various books currently being handled by the
+     * Bookkeeper.</p>
      */
     AbstractFunctionBook myCurrentFunction;
     AbstractFacilityDecBook myCurrentFacility;
@@ -19,14 +19,14 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
     protected String myModuleName;
 
     /**
-     * <p>Flag that indicates to the Bookkeeper whether or not bodies
-     * will proceed declarations (I.e. functions, etc).</p>
+     * <p>Flag that indicates to the Bookkeeper whether or not bodies will proceed
+     * declarations (I.e. functions, etc).</p>
      */
     protected Boolean isRealization;
 
     /**
-     * <p>These lists can be thought of as the Bookkeeper's shelf -
-     * where all completed and current books are stored.</p>
+     * <p>These lists can be thought of as the Bookkeeper's shelf - where all
+     * completed and current books are stored.</p>
      */
     List<AbstractFacilityDecBook> myFacilityList;
     List<AbstractFunctionBook> myFunctionList;
@@ -53,9 +53,9 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
         myConstructors.add(constructor);
     }
 
-    // -----------------------------------------------------------
+    //-------------------------------------------------------------------
     //   FacilityBook methods
-    // -----------------------------------------------------------
+    //-------------------------------------------------------------------
 
     @Override
     public void facAddParameter(String parameter) {
@@ -95,9 +95,9 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
         myCurrentFacility = null;
     }
 
-    // -----------------------------------------------------------
+    //-------------------------------------------------------------------
     //   FunctionBook methods
-    // -----------------------------------------------------------
+    //-------------------------------------------------------------------
 
     @Override
     public void fxnAddParameter(String parameter) {

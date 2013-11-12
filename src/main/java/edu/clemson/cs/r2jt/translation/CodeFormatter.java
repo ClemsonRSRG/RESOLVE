@@ -16,14 +16,14 @@ import java.util.LinkedList;
 public class CodeFormatter {
 
     /**
-     * <p>Annotates a tab-less, newline-less string containing Java or C code
-     * with proper newlines and indentation.</p>
+     * <p>Annotates a tab-less, newline-less string containing Java or C code with
+     * proper newlines and indentation.</p>
      *
-     * @param code A raw string of Java or C code <em>lacking</em> newlines or
-     *             tabs.
+     * @param code A raw string of Java or C code <em>lacking</em> newlines
+     *             or tabs.
      *
-     * @return The string, <code>code</code>, with newlines and
-     *         indentation added.
+     * @return The string, <code>code</code>, with newlines and indentation
+     *         added.
      */
     public static String formatCode(String code) {
 
