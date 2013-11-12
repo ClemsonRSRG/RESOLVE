@@ -114,6 +114,7 @@ tokens {
     REDUCTIO_AD_ABSURDUM;
     RELATED_BY;
     PROGDOT;
+    SET;
     SET_EXPR;
     STATEMENT;
     STATEMENT_SEQUENCE;
@@ -1517,6 +1518,7 @@ adding_expression
             |   UNION^
             |   INTERSECT^
             |   WITHOUT^
+            |   TILDE^
             )
             multiplying_expression
         )*
@@ -1678,10 +1680,12 @@ parenthesized_expression
     ;
 
 set_constructor
-    :   LBRACE^ ident
+    :   (LBRACE ident COLON) =>
+        LBRACE^ ident
         COLON! math_type_expression
         (where_clause)? BAR!
         math_expression RBRACE!
+    |   LBRACE (math_expression (COMMA math_expression)*)? RBRACE -> ^(SET math_expression*)
     ;
 
 tuple_expression
