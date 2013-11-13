@@ -197,7 +197,7 @@ public class JavaTranslator extends AbstractTranslator {
             else if (node.getQualifier() == null) {
                 qualifier = getIntendedCallQualifier(node);
             }
-            // Else, the user chose to qualify the call.
+            // Else, the user chose to qualify the call. Good for them!
             else {
                 qualifier = node.getQualifier().getName();
             }
