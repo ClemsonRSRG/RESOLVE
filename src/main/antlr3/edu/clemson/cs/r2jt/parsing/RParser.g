@@ -1588,6 +1588,9 @@ clean_function_expression
             (function_argument_list)+ -> ^(FUNCTION ident hat_expression? function_argument_list+)
         )?*/
         //-> ^(ident)
+    |   OP  ( PLUS | MINUS | MULTIPLY | DIVIDE | 
+             EQL | NOT_EQL | GT_EQL | LT_EQL | GT | LT |
+             EXP | AMPERSAND | MOD | INTERSECT | DIV | AND ) 
     ;
 
 hat_expression

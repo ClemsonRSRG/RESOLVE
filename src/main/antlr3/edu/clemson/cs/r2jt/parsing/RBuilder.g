@@ -2095,6 +2095,9 @@ clean_function_expression returns [Exp exp = null]
     |   ^(FUNCTION ps=ident (hat=hat_expression)?
         (aGrp=function_argument_list { aGrps.add($aGrp.list); })+)
         { $exp = new FunctionExp(getLocation($FUNCTION), qual, $ps.ps, $hat.exp, aGrps); }
+    |   OP  ( PLUS | MINUS | MULTIPLY | DIVIDE | 
+             EQL | NOT_EQL | GT_EQL | LT_EQL | GT | LT |
+             EXP | AMPERSAND | MOD | INTERSECT | DIV | AND )         
     ;
 
 hat_expression returns [Exp exp = null]
