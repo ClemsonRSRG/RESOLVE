@@ -513,9 +513,10 @@ facility_module returns [ModuleDec dec = null]
     edu.clemson.cs.r2jt.collections.List<Dec> decs = null;
     FacilityDec fDec = null;
 }
-    :   ^(  SHORT_FACILITY dec2=facility_declaration  )
+    :   ^(  SHORT_FACILITY dec2=facility_declaration (uses=uses_list)?  )
         {   if ($dec2.dec != null) {
-                $dec = new ShortFacilityModuleDec($dec2.dec.getName(), $dec2.dec, null);
+                $dec = new ShortFacilityModuleDec($dec2.dec.getName(),
+                            $dec2.dec, $uses.uses);
             }
         }
     |   ^(  FACILITY ps=ident

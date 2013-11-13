@@ -426,8 +426,8 @@ body_item
 // ---------------------------------------------------------------
 
 facility_module
-    :   (FACILITY^ id1=ident IS!) => facility_declaration
-        -> ^(SHORT_FACILITY facility_declaration)
+    :   (FACILITY^ id1=ident IS!) => facility_declaration (uses_list)?
+        -> ^(SHORT_FACILITY facility_declaration (uses_list)?)
     |   FACILITY^ id1=ident SEMICOLON! (uses_list)?
         (requires_clause)?
         (facility_item_sequence)?
