@@ -100,41 +100,36 @@ public class JavaTranslator extends AbstractTranslator {
      * that facility. From it we obtain Integer_Template which is what we need. We
      * don't do this through <code>compileEnvironment</code> since it is 1: messy,
      * and 2: <em>probably?</em> going to be revamped in the near future.</p>
-     *
-     * <p>Edit: I've also had to add corresponding walker methods for each
-     * specific type of module so I can build a damn file and corresponding
-     * moduleID for these things. Why in the world do we have ModuleIdentifiers
-     * and ModuleIDs as two seperate entities?? This whole thing is such a mess.</p>
      */
     @Override
     public void preUsesItem(UsesItem node) {
 
-        try {
-            FacilityEntry result =
-                myModuleScope.queryForOne(
-                        new UnqualifiedNameQuery(node.getName().getName()))
-                        .toFacilityEntry(null);
+    /*     try {
+             FacilityEntry result =
+                 myModuleScope.queryForOne(
+                         new UnqualifiedNameQuery(node.getName().getName()))
+                         .toFacilityEntry(null);
 
-            // sigh. Could we please make this process less scream worthy
-            // eventually?
-            String name = result.getFacility().getSpecification()
-                    .getModuleIdentifier().toString();
+             // sigh. Could we please make this process less scream worthy
+             // eventually?
+             String name = result.getFacility().getSpecification()
+                     .getModuleIdentifier().toString();
 
-            PosSymbol conceptName = new PosSymbol(null, Symbol.symbol(name));
-            ModuleID conceptID = ModuleID.createConceptID(conceptName);
-            File sourceFile = myInstanceEnvironment.getFile(conceptID);
-            myBookkeeper.addUses("import " + formPkgPath(sourceFile) + ";");
+             PosSymbol conceptName = new PosSymbol(null, Symbol.symbol(name));
+             ModuleID conceptID = ModuleID.createConceptID(conceptName);
+             File sourceFile = myInstanceEnvironment.getFile(conceptID);
+             myBookkeeper.addUses("import " + formPkgPath(sourceFile) + ";");
 
-        }
-        catch (NoSuchSymbolException nsse) {
-            // This shouldn't happen, but if we aren't able to find a
-            // std facility, then we should (probably) die quick.
-            throw new RuntimeException("Couldn't find standard facility: " + node
-                    .getName().getName());
-        }
-        catch (DuplicateSymbolException dse) {
-            throw new RuntimeException(dse);
-        }
+         }
+         catch (NoSuchSymbolException nsse) {
+             // This shouldn't happen, but if we aren't able to find a
+             // std facility, then we should (probably) die quick.
+             throw new RuntimeException("Couldn't find standard facility: " + node
+                     .getName().getName());
+         }
+         catch (DuplicateSymbolException dse) {
+             throw new RuntimeException(dse);
+         }*/
     }
 
     /**
@@ -277,7 +272,6 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
     //   Helper methods
     // -----------------------------------------------------------
-
 
     /**
      * <p>This method returns <code>true</code> <strong>iff</strong>
@@ -487,11 +481,13 @@ public class JavaTranslator extends AbstractTranslator {
         }
 
         if (!foundRootDirectory) {
-            throw new RuntimeException( "Translation expects all compiled files to" +
-                    " have a "
-                    + "directory named 'RESOLVE' somewhere in their path, but "
-                    + "the file:\n\t" + filePath + "\ndoes not.  Keep in mind "
-                    + "that directories are case sensitive.");
+            throw new RuntimeException(
+                    "Translation expects all compiled files to"
+                            + " have a "
+                            + "directory named 'RESOLVE' somewhere in their path, but "
+                            + "the file:\n\t" + filePath
+                            + "\ndoes not.  Keep in mind "
+                            + "that directories are case sensitive.");
         }
 
         return pkgPath.toString();

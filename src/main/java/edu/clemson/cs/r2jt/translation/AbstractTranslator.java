@@ -50,7 +50,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
      * <p>This is where all information collected during the treewalk here goes.
      * The <code>Bookkeeper</code> and its concrete subclasses handle how all
      * information is collected, organized, and ultimately arranged on the
-     * translated page via calls to override <code>getString</code> methods.</p>
+     * translated page via calls to overriden <code>getString</code> methods.</p>
      */
     protected Bookkeeper myBookkeeper;
 
@@ -63,9 +63,10 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
     /**
      * <p>While walking a <code>FacilityDec</code>, this maintains a pointer to
-     * that facility, and, by extension, enhancements enclosed within. If we
-     * havent encountered a <code>FacilityDec</code> or we're done walking one,
-     * this is set to <code>null</code>.</p>
+     * the <code>SymbolTableEntry</code> representing that facility, and,
+     * by extension, any enhancements enclosed within. If we haven't encountered a
+     * <code>FacilityDec</code>, or we're done walking one,
+     * this is <code>null</code>.</p>
      */
     protected FacilityEntry myCurrentFacility;
 
@@ -113,9 +114,9 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
         String errorMsg =
                 "ProgramOpExp encountered!! This should have been converted to "
-                        + "a programParamExp in preprocessing. Until a fix is  " +
-                        "introduced, if you must, write things like 'I+3', " +
-                        "etc. as Sum(I, 3)";
+                        + "a programParamExp in preprocessing. Until a fix is  "
+                        + "introduced, if you must, write things like 'I+3', "
+                        + "etc. as Sum(I, 3)";
         throw new SourceErrorException(errorMsg, node.getLocation());
     }
 
@@ -216,7 +217,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
             ModuleParameterization specification = pair.getSpecification();
             ModuleParameterization realization = pair.getRealization();
 
-            buildParameterBindings(node.getName(), specification, realization);
+            buildParameterBindings(specification, realization);
         }
         catch (NoneProvidedException npe) {
             // I think this should've already been caught..
@@ -244,7 +245,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
                 ModuleParameterization realization =
                         myCurrentFacility.getEnhancementRealization(m);
-                buildParameterBindings(node.getName(), m, realization);
+                buildParameterBindings(m, realization);
             }
         }
         myBookkeeper.facAddEnhancement(node.getName().getName(), node
@@ -369,9 +370,9 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     //-------------------------------------------------------------------
 
     /**
-     * <p>Given a PTType, <code>type</code>, this method finds the first facility
-     * declared in <code>ModuleScope</code> that uses <code>type</code>'s
-     * originating module as its specification.</p>
+     * <p>Given a PTType, <code>type</code>, this method finds and returns the
+     * first facility declared in <code>ModuleScope</code> whose specification
+     * defines <code>type</code>.</p>
      *
      * @param type A <code>PTType</code>.
      * @return The first <code>FacilityEntry</code> in scope whose
@@ -416,18 +417,16 @@ public class AbstractTranslator extends TreeWalkerVisitor {
      *
      * <p>This map takes any actual parameters to SPEC and REALIZATION,
      * combines them into a single list, then maps each to its corresponding
-     * formal  parameter located in the <code>ModuleScope</code>s belonging to
+     * formal parameter located in the <code>ModuleScope</code>s belonging to
      * SPEC and REALIZATION.</p>
      *
-     * @param name The name of the facility or facility enhancement we are
-     *             constructing the pairing map for.
      * @param spec The <code>ModuleParameterization</code> for the SPEC portion of
      *             the facility declaration (see example above).
      * @param realization The <code>ModuleParameterization</code> for the
      *                    realization portion of the facility declaration.
      */
-    public void buildParameterBindings(PosSymbol name,
-            ModuleParameterization spec, ModuleParameterization realization) {
+    public void buildParameterBindings(ModuleParameterization spec,
+            ModuleParameterization realization) {
 
         List<ModuleArgumentItem> args =
                 new LinkedList<ModuleArgumentItem>(spec.getParameters());
