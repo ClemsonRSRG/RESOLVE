@@ -65,7 +65,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
      * <p>While walking a <code>FacilityDec</code>, this maintains a pointer to
      * the <code>SymbolTableEntry</code> representing that facility, and,
      * by extension, any enhancements enclosed within. If we haven't encountered a
-     * <code>FacilityDec</code>, or we're done walking one,
+     * <code>FacilityDec</code>, or we've finished with walking one,
      * this is <code>null</code>.</p>
      */
     protected FacilityEntry myCurrentFacility;
