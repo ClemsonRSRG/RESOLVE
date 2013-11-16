@@ -11,8 +11,8 @@ public class JavaConceptBookkeeper extends JavaBookkeeper {
     public String output() {
         StringBuilder translateDoc = new StringBuilder();
 
-        for (String imp : myImportList) {
-            translateDoc.append(imp);
+        for (String i : myImports) {
+            translateDoc.append(i);
         }
         translateDoc.append("public interface ").append(myModuleName);
         translateDoc.append(" extends RESOLVE_INTERFACE {");
@@ -28,7 +28,7 @@ public class JavaConceptBookkeeper extends JavaBookkeeper {
         }
 
         // Now print all operation declarations.
-        for (AbstractFunctionBook operation : myFunctionList) {
+        for (AbstractFunctionBook operation : myFunctions) {
             translateDoc.append(operation.getString());
         }
 
