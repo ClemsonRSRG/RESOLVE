@@ -70,7 +70,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     // Sami: Shouldn't these be Facilities???? -DtW
     // List of Concepts that gets added to the Uses List automatically
     private String[] myUsesItems =
-        { "Location_Linking_Template_1", "Static_Array_Template" };
+            { "Location_Linking_Template_1", "Static_Array_Template" };
 
     // ===========================================================
     // Constructors

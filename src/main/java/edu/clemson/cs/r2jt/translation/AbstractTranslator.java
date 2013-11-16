@@ -71,6 +71,13 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     protected FacilityEntry myCurrentFacility;
 
     /**
+     * <p>While walking the children of <code>While</code> statement's
+     * <code>changing</code> clause, this is flag is set to <code>true</code>,
+     * otherwise, it is <code>false</code>.</p>
+     */
+    private boolean myWhileChangingSectionFlag = false;
+
+    /**
      * <p>A mapping between the actual parameters of a module and the
      * <code>SymbolTableEntry</code>s representing their formal counterparts.
      * Note: this <em>only</em> keeps track of one level of facility/enhancement.
@@ -95,7 +102,10 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     @Override
     public void preVariableExp(VariableExp node) {
         // VariableExps should be unqualified. So pass false.
-        buildProgramExpArgument(node.toString(), node.getProgramType(), false);
+        if (!myWhileChangingSectionFlag) {
+            buildProgramExpArgument(node.toString(), node.getProgramType(),
+                    false);
+        }
     }
 
     @Override
@@ -125,11 +135,26 @@ public class AbstractTranslator extends TreeWalkerVisitor {
      * took them out temporarily until Blair and him can come up with an agree on a
      * suitable fix. For more information and status updates in the meantime,
      * refer to pivotal story #54742626</p>
+     *
+     * edit: <p>Unsure about this... I had to make use of my call qualifying
+     * machinery here in order to properly qualify some <code>programParamExps.</code>
+     * See <code>RevStack</code>... Figure out if there is an alternate,
+     * less risky alternative!</p>
      */
     @Override
     public void preProgramParamExp(ProgramParamExp node) {
-        PTType type = node.getProgramType();
-        String qualifier = getDefiningFacilityEntry(type).getName();
+
+        String qualifier = "";
+        try {
+            qualifier = getIntendedCallQualifier(node.getName(), null,
+                    node.getArguments());
+        }
+        catch (SourceErrorException see) {
+            ambiguousCall(node.getName());
+        }
+    //    System.out.println("LOOK: " + node.getName().getName());
+    //    PTType type = node.getProgramType();
+    //    String qualifier = getDefiningFacilityEntry(type).getName();
 
         myBookkeeper.fxnAppendTo(qualifier + myQualifierSymbol
                 + node.getName().getName() + "(");
@@ -178,18 +203,40 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     }
 
     @Override
-    public void preWhileStmt(WhileStmt node) {
-        myBookkeeper.fxnAppendTo("while(");
+    public void preWhileStmtChanging(WhileStmt node) {
+        myWhileChangingSectionFlag = true;
     }
 
     @Override
-    public void preWhileStmtStatements(WhileStmt node) {
-        myBookkeeper.fxnAppendTo(") {");
+    public void postWhileStmtChanging(WhileStmt node) {
+        myWhileChangingSectionFlag = false;
     }
 
     @Override
     public void postWhileStmt(WhileStmt node) {
         myBookkeeper.fxnAppendTo("}");
+    }
+
+    @Override
+    public void preFuncAssignStmt(FuncAssignStmt node) {
+
+        PTType lhs = node.getVar().getProgramType();
+
+        myBookkeeper.fxnAppendTo(getDefiningFacilityEntry(lhs).getName() +
+                myQualifierSymbol + "assign(");
+    }
+
+    @Override
+    public void midFuncAssignStmt(FuncAssignStmt node,
+               ResolveConceptualElement previous, ResolveConceptualElement next) {
+        if (previous != null && next != null) {
+            myBookkeeper.fxnAppendTo(", ");
+        }
+    }
+
+    @Override
+    public void postFuncAssignStmt(FuncAssignStmt node) {
+        myBookkeeper.fxnAppendTo(");");
     }
 
     @Override
@@ -332,7 +379,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     @Override
     public void preParameterVarDec(ParameterVarDec node) {
 
-        String qual, specification, name;
+        String specification, name;
         PTType type = node.getTy().getProgramTypeValue();
         name = node.getName().getName();
 
@@ -344,8 +391,6 @@ public class AbstractTranslator extends TreeWalkerVisitor {
             // If we are unable to find a facility owning the type,
             // then the type should be defined locally, in which
             // case our qualifier is the name of the current module.
-
-            // TODO        :        Figure out if this is actually sound.
             if (getDefiningFacilityEntry(type) == null) {
                 specification = myModuleScope.getModuleIdentifier().toString();
             }
@@ -354,10 +399,6 @@ public class AbstractTranslator extends TreeWalkerVisitor {
                         getDefiningFacilityEntry(type).getFacility()
                                 .getSpecification().getModuleIdentifier()
                                 .toString();
-            }
-
-            if (((NameTy) node.getTy()).getQualifier() != null) {
-                qual = ((NameTy) node.getTy()).getQualifier().toString();
             }
 
             myBookkeeper.fxnAddParameter(specification + myQualifierSymbol
@@ -510,8 +551,8 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     protected void addOperationLikeThingToBookkeeper(String name, Ty returnTy,
             String returnStr) {
 
-        String formedReturnType = "void";
         PTType type;
+        String formedReturnType = "void";
 
         if (returnTy != null) {
             type = returnTy.getProgramTypeValue();
@@ -547,10 +588,10 @@ public class AbstractTranslator extends TreeWalkerVisitor {
         myBookkeeper.fxnAdd(name, formedReturnType);
     }
 
-    protected String getIntendedCallQualifier(CallStmt node) {
+    protected String getIntendedCallQualifier(PosSymbol name, PosSymbol qual,
+                                              List<ProgramExp> args) {
 
         String qualifier = "";
-        List<ProgramExp> args = node.getArguments();
         List<PTType> argTypes = new LinkedList<PTType>();
         List<FacilityEntry> matches = new LinkedList<FacilityEntry>();
 
@@ -562,8 +603,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
             OperationEntry oe =
                     myModuleScope.queryForOne(
-                            new OperationQuery(node.getQualifier(), node
-                                    .getName(), argTypes)).toOperationEntry(
+                            new OperationQuery(qual, name, argTypes)).toOperationEntry(
                             null);
 
             // Now grab any FacilityEntries in scope whose
@@ -591,7 +631,8 @@ public class AbstractTranslator extends TreeWalkerVisitor {
             // 2. Size > 1 => multiple facilities instantiated use
             //    oe's SourceModuleIdentifier as a specification.
             //          Which facility's name to use as a qualifier is
-            //          ambiguous - so off to argument examination we go.
+            //          ambiguous - so off to argument examination we go. Ducking
+            //          out quickly if things get too complicated.
             if (matches.size() > 1) {
                 qualifier = findQualifyingArgument(oe, args);
             }
@@ -599,7 +640,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
             //          defined locally. So no need to qualify at all.
         }
         catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(node.getQualifier(), node.getName().getName(), node
+            noSuchSymbol(qual, name.getName(), name
                     .getLocation());
         }
         catch (DuplicateSymbolException dse) {
@@ -644,8 +685,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
             // first facility whose specification matches the call-owning operation's
             // SourceModule, and use that facility's name as the qualifier.
             else {
-                System.out.println("programt: "
-                        + arg.getProgramType().toString());
+
                 if (getDefiningFacilityEntry(arg.getProgramType())
                         .getFacility().getSpecification().getModuleIdentifier()
                         .equals(operation.getSourceModuleIdentifier())) {

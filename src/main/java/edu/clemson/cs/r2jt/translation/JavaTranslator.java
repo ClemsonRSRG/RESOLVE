@@ -11,7 +11,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTVoid;
@@ -65,28 +64,36 @@ public class JavaTranslator extends AbstractTranslator {
         JavaTranslator.emitDebug("-----------------------------\n"
                 + "Translate [Java]: " + node.getName().getName()
                 + "\n-----------------------------");
+    }
 
-        String moduleName = node.getName().toString();
+    @Override
+    public void preWhileStmt(WhileStmt node) {
+        myBookkeeper.fxnAppendTo("while (((Std_Boolean_Realiz.Boolean)(");
+    }
 
-        if (node instanceof FacilityModuleDec) {
-            myBookkeeper = new JavaFacilityBookkeeper(moduleName, true);
-        }
-        else if (node instanceof ConceptModuleDec) {
-            myBookkeeper = new JavaConceptBookkeeper(moduleName, false);
-        }
+    @Override
+    public void preWhileStmtStatements(WhileStmt node) {
+        myBookkeeper.fxnAppendTo(")).val) {");
     }
 
     @Override
     public void preFacilityModuleDec(FacilityModuleDec node) {
+
+        myBookkeeper =
+                new JavaFacilityBookkeeper(node.getName().getName(), true);
+
         ModuleID facilityID = ModuleID.createFacilityID(node.getName());
         File sourceFile = myInstanceEnvironment.getFile(facilityID);
-
         myBookkeeper.addUses("package " + formPkgPath(sourceFile) + ";");
         myBookkeeper.addUses("import RESOLVE.*;");
     }
 
     @Override
     public void preConceptModuleDec(ConceptModuleDec node) {
+
+        myBookkeeper =
+                new JavaConceptBookkeeper(node.getName().getName(), false);
+
         ModuleID conceptID = ModuleID.createConceptID(node.getName());
         File sourceFile = myInstanceEnvironment.getFile(conceptID);
 
@@ -103,33 +110,32 @@ public class JavaTranslator extends AbstractTranslator {
      */
     @Override
     public void preUsesItem(UsesItem node) {
+        try {
+            FacilityEntry result =
+                    myModuleScope.queryForOne(
+                            new UnqualifiedNameQuery(node.getName().getName()))
+                            .toFacilityEntry(null);
 
-    /*     try {
-             FacilityEntry result =
-                 myModuleScope.queryForOne(
-                         new UnqualifiedNameQuery(node.getName().getName()))
-                         .toFacilityEntry(null);
+            String name =
+                    result.getFacility().getSpecification()
+                            .getModuleIdentifier().toString();
 
-             // sigh. Could we please make this process less scream worthy
-             // eventually?
-             String name = result.getFacility().getSpecification()
-                     .getModuleIdentifier().toString();
+            PosSymbol conceptName = new PosSymbol(null, Symbol.symbol(name));
+            ModuleID conceptID = ModuleID.createConceptID(conceptName);
+            File sourceFile = myInstanceEnvironment.getFile(conceptID);
+            myBookkeeper.addUses("import " + formPkgPath(sourceFile) + ";");
 
-             PosSymbol conceptName = new PosSymbol(null, Symbol.symbol(name));
-             ModuleID conceptID = ModuleID.createConceptID(conceptName);
-             File sourceFile = myInstanceEnvironment.getFile(conceptID);
-             myBookkeeper.addUses("import " + formPkgPath(sourceFile) + ";");
-
-         }
-         catch (NoSuchSymbolException nsse) {
-             // This shouldn't happen, but if we aren't able to find a
-             // std facility, then we should (probably) die quick.
-             throw new RuntimeException("Couldn't find standard facility: " + node
-                     .getName().getName());
-         }
-         catch (DuplicateSymbolException dse) {
-             throw new RuntimeException(dse);
-         }*/
+        }
+        catch (NoSuchSymbolException nsse) {
+            // If we didn't find a facility then we're most likely dealing with
+            // something like: "Location_Linking_Template_1" or
+            // "Static_Array_Template" For now, we just ignore the nsse...
+            //   throw new RuntimeException("Couldn't find standard facility: " + node
+            //            .getName().getName());
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
+        }
     }
 
     /**
@@ -143,7 +149,6 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preModuleParameterDec(ModuleParameterDec node) {
 
-        String operation = "";
         if (node.getWrappedDec() instanceof ConstantParamDec) {
             ConstantParamDec p = (ConstantParamDec) node.getWrappedDec();
             addOperationLikeThingToBookkeeper("get" + node.getName().getName(),
@@ -190,7 +195,8 @@ public class JavaTranslator extends AbstractTranslator {
             // user saw fit to not qualify it. So lets lend them a hand
             // try to find it for them -- erroring if things get hairy.
             else if (node.getQualifier() == null) {
-                qualifier = getIntendedCallQualifier(node);
+                qualifier = getIntendedCallQualifier(node.getName(),
+                        node.getQualifier(), node.getArguments());
             }
             // Else, the user chose to qualify the call. Good for them!
             else {
@@ -376,7 +382,6 @@ public class JavaTranslator extends AbstractTranslator {
                     .append("public void ").append(formalOp.getName()).append(
                             "(");
 
-            // |formalOp.getParameters()| = |actualOp.getParameters()|.
             int parameterCount = 0;
             int incomingLength = parameter.length();
 
