@@ -146,15 +146,16 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
         String qualifier = "";
         try {
-            qualifier = getIntendedCallQualifier(node.getName(), null,
-                    node.getArguments());
+            qualifier =
+                    getIntendedCallQualifier(node.getName(), null, node
+                            .getArguments());
         }
         catch (SourceErrorException see) {
             ambiguousCall(node.getName());
         }
-    //    System.out.println("LOOK: " + node.getName().getName());
-    //    PTType type = node.getProgramType();
-    //    String qualifier = getDefiningFacilityEntry(type).getName();
+        //    System.out.println("LOOK: " + node.getName().getName());
+        //    PTType type = node.getProgramType();
+        //    String qualifier = getDefiningFacilityEntry(type).getName();
 
         myBookkeeper.fxnAppendTo(qualifier + myQualifierSymbol
                 + node.getName().getName() + "(");
@@ -222,13 +223,13 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
         PTType lhs = node.getVar().getProgramType();
 
-        myBookkeeper.fxnAppendTo(getDefiningFacilityEntry(lhs).getName() +
-                myQualifierSymbol + "assign(");
+        myBookkeeper.fxnAppendTo(getDefiningFacilityEntry(lhs).getName()
+                + myQualifierSymbol + "assign(");
     }
 
     @Override
     public void midFuncAssignStmt(FuncAssignStmt node,
-               ResolveConceptualElement previous, ResolveConceptualElement next) {
+            ResolveConceptualElement previous, ResolveConceptualElement next) {
         if (previous != null && next != null) {
             myBookkeeper.fxnAppendTo(", ");
         }
@@ -589,7 +590,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     }
 
     protected String getIntendedCallQualifier(PosSymbol name, PosSymbol qual,
-                                              List<ProgramExp> args) {
+            List<ProgramExp> args) {
 
         String qualifier = "";
         List<PTType> argTypes = new LinkedList<PTType>();
@@ -603,8 +604,8 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
             OperationEntry oe =
                     myModuleScope.queryForOne(
-                            new OperationQuery(qual, name, argTypes)).toOperationEntry(
-                            null);
+                            new OperationQuery(qual, name, argTypes))
+                            .toOperationEntry(null);
 
             // Now grab any FacilityEntries in scope whose
             // specification matches oe's SourceModuleIdentifier.
@@ -640,8 +641,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
             //          defined locally. So no need to qualify at all.
         }
         catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(qual, name.getName(), name
-                    .getLocation());
+            noSuchSymbol(qual, name.getName(), name.getLocation());
         }
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException(dse);

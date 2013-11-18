@@ -195,8 +195,9 @@ public class JavaTranslator extends AbstractTranslator {
             // user saw fit to not qualify it. So lets lend them a hand
             // try to find it for them -- erroring if things get hairy.
             else if (node.getQualifier() == null) {
-                qualifier = getIntendedCallQualifier(node.getName(),
-                        node.getQualifier(), node.getArguments());
+                qualifier =
+                        getIntendedCallQualifier(node.getName(), node
+                                .getQualifier(), node.getArguments());
             }
             // Else, the user chose to qualify the call. Good for them!
             else {
