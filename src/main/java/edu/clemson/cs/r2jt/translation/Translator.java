@@ -696,6 +696,7 @@ public class Translator extends ResolveConceptualVisitor {
     }
 
     public void visitFacilityModuleDec(FacilityModuleDec dec) {
+
         ModuleID facilityID = ModuleID.createFacilityID(dec.getName());
         File sourceFile = myInstanceEnvironment.getFile(facilityID);
 

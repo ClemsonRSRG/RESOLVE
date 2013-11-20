@@ -1,7 +1,9 @@
 package edu.clemson.cs.r2jt.translation;
 
 import edu.clemson.cs.r2jt.absyn.*;
+import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.translation.bookkeeping.JavaConceptBookkeeper;
 import edu.clemson.cs.r2jt.translation.bookkeeping.JavaFacilityBookkeeper;
@@ -15,11 +17,15 @@ import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTVoid;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
+import java.io.File;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 public class JavaTranslator extends AbstractTranslator {
 
@@ -32,8 +38,8 @@ public class JavaTranslator extends AbstractTranslator {
             "Regenerates Java code for all supporting RESOLVE files.";
 
     /**
-     * <p>The Java Translator flag. Specifies that Java should be
-     * used as the compiler's target language.</p>
+     * <p>The Java Translator flag. Specifies that Java should be used as the
+     * compiler's target language.</p>
      */
     public static final Flag JAVA_FLAG_TRANSLATE =
             new Flag(FLAG_SECTION_NAME, "javaTranslate", FLAG_DESC_TRANSLATE);
@@ -58,30 +64,91 @@ public class JavaTranslator extends AbstractTranslator {
         JavaTranslator.emitDebug("-----------------------------\n"
                 + "Translate [Java]: " + node.getName().getName()
                 + "\n-----------------------------");
+    }
 
-        String moduleName = node.getName().toString();
+    @Override
+    public void preWhileStmt(WhileStmt node) {
+        myBookkeeper.fxnAppendTo("while (((Std_Boolean_Realiz.Boolean)(");
+    }
 
-        if (node instanceof FacilityModuleDec) {
-            myBookkeeper = new JavaFacilityBookkeeper(moduleName, true);
+    @Override
+    public void preWhileStmtStatements(WhileStmt node) {
+        myBookkeeper.fxnAppendTo(")).val) {");
+    }
+
+    @Override
+    public void preFacilityModuleDec(FacilityModuleDec node) {
+
+        myBookkeeper =
+                new JavaFacilityBookkeeper(node.getName().getName(), true);
+
+        ModuleID facilityID = ModuleID.createFacilityID(node.getName());
+        File sourceFile = myInstanceEnvironment.getFile(facilityID);
+        myBookkeeper.addUses("package " + formPkgPath(sourceFile) + ";");
+        myBookkeeper.addUses("import RESOLVE.*;");
+    }
+
+    @Override
+    public void preConceptModuleDec(ConceptModuleDec node) {
+
+        myBookkeeper =
+                new JavaConceptBookkeeper(node.getName().getName(), false);
+
+        ModuleID conceptID = ModuleID.createConceptID(node.getName());
+        File sourceFile = myInstanceEnvironment.getFile(conceptID);
+
+        myBookkeeper.addUses("package " + formPkgPath(sourceFile) + ";");
+        myBookkeeper.addUses("import RESOLVE.*;");
+    }
+
+    /**
+     * <p>A <em>Temporary</em> solution to building workable headers: Say we want
+     * to build a Java pkg for <code>Std_Integer_Fac</code> -- here we query for
+     * that facility. From it we obtain Integer_Template which is what we need. We
+     * don't do this through <code>compileEnvironment</code> since it is 1: messy,
+     * and 2: <em>probably?</em> going to be revamped in the near future.</p>
+     */
+    @Override
+    public void preUsesItem(UsesItem node) {
+        try {
+            FacilityEntry result =
+                    myModuleScope.queryForOne(
+                            new UnqualifiedNameQuery(node.getName().getName()))
+                            .toFacilityEntry(null);
+
+            String name =
+                    result.getFacility().getSpecification()
+                            .getModuleIdentifier().toString();
+
+            PosSymbol conceptName = new PosSymbol(null, Symbol.symbol(name));
+            ModuleID conceptID = ModuleID.createConceptID(conceptName);
+            File sourceFile = myInstanceEnvironment.getFile(conceptID);
+            myBookkeeper.addUses("import " + formPkgPath(sourceFile) + ";");
+
         }
-        else if (node instanceof ConceptModuleDec) {
-            myBookkeeper = new JavaConceptBookkeeper(moduleName, false);
+        catch (NoSuchSymbolException nsse) {
+            // If we didn't find a facility then we're most likely dealing with
+            // something like: "Location_Linking_Template_1" or
+            // "Static_Array_Template" For now, we just ignore the nsse...
+            //   throw new RuntimeException("Couldn't find standard facility: " + node
+            //            .getName().getName());
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
         }
     }
 
     /**
-     * <p>Any conceptual parameters must be transformed into operations
-     * and placed in the interface extending <code>RESOLVE_INTERFACE</code>.
-     * We do this here using "fxn" <code>Bookkeeper</code> methods. None
-     * of the if-statements should get tripped if the module being looked
-     * at is anything other than a concept module. If they do, then we
-     * are going to get excess operation declarations in the translated file
-     * and this will have to be re-thought..</p>
+     * <p>Any conceptual parameters must be transformed into operations and placed
+     * in the interface extending <code>RESOLVE_INTERFACE</code>. We do this here
+     * using "fxn" <code>Bookkeeper</code> methods. None of the if-statements
+     * should get tripped if the module being looked at is anything other than a
+     * concept module. If they do, then we are going to get excess operation
+     * declarations in the translated file and this will have to be re-thought.</p>
      */
     @Override
     public void preModuleParameterDec(ModuleParameterDec node) {
 
-        String operation = "";
         if (node.getWrappedDec() instanceof ConstantParamDec) {
             ConstantParamDec p = (ConstantParamDec) node.getWrappedDec();
             addOperationLikeThingToBookkeeper("get" + node.getName().getName(),
@@ -100,14 +167,14 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>This isn't in <code>AbstractTranslator</code> since Java
-     * translation requires that calls to operations derived from
-     * facility enhancements be specially qualified. Since this
-     * special case doesn't apply to C, the separation seems necessary.
+     * <p>This isn't in <code>AbstractTranslator</code> since Java translation
+     * requires that calls to operations derived from facility enhancements be
+     * specially qualified. Since this special case doesn't apply to C,
+     * the separation seems necessary.
      *
-     * Note <code>preCallStmt</code> in {@link CTranslator CTranslator}
-     * will need to qualify calls so qualification finding methods
-     * are still found in the <code>AbstractTranslator</code>.</p>
+     * Note <code>preCallStmt</code> in {@link CTranslator CTranslator} will need
+     * to qualify calls so qualification finding methods are still found in the
+     * <code>AbstractTranslator</code>.</p>
      */
     @Override
     public void preCallStmt(CallStmt node) {
@@ -128,9 +195,11 @@ public class JavaTranslator extends AbstractTranslator {
             // user saw fit to not qualify it. So lets lend them a hand
             // try to find it for them -- erroring if things get hairy.
             else if (node.getQualifier() == null) {
-                qualifier = getIntendedCallQualifier(node);
+                qualifier =
+                        getIntendedCallQualifier(node.getName(), node
+                                .getQualifier(), node.getArguments());
             }
-            // Else, the user chose to qualify the call.
+            // Else, the user chose to qualify the call. Good for them!
             else {
                 qualifier = node.getQualifier().getName();
             }
@@ -143,11 +212,10 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Aside: It seems like this visitor method is responsible for
-     * too much. It Handles parameters for not only EVERY KIND of module...
-     * but also parameters to facility/facility enhancement specifications..
-     * So take care if you need to add anything here as it might affect many
-     * things.</p>
+     * <p>Aside: It seems like this visitor method is responsible for too much.
+     * It Handles parameters for not only EVERY KIND of module,
+     * but also parameters to facility/facility enhancement specifications.. So take
+     * care if you need to add anything here as it might affect many things.</p>
      */
     @Override
     public void preModuleArgumentItem(ModuleArgumentItem node) {
@@ -213,17 +281,15 @@ public class JavaTranslator extends AbstractTranslator {
     // -----------------------------------------------------------
 
     /**
-     * This method returns <code>true</code> <strong>iff</strong>
-     * <code>callName</code> matches an argument to a facility
-     * enhancement. Additionally, to avoid code duplication, if
-     * <code>true</code> is returned, this method takes the liberty
-     * of mutating the initially empty stringBuilder parameter,
-     * <code>qualifier</code>, into one that is appropriate for
-     * qualifying an enhancement defined call.
+     * <p>This method returns <code>true</code> <strong>iff</strong>
+     * <code>callName</code> matches an argument to a facility enhancement.
+     * Additionally, if <code>true</code> is returned, then <code>qualifier</code>
+     * will also be mutated into one appropriate for qualifying an enhancement
+     * defined call.</p>
      *
-     * "Appropriate" simply means wrapping the normal qualifier
-     * with the specificational name of the current enhancement.
-     * For instance, in the case of two or more enhancements:
+     * <p>"Appropriate" means wrapping the normal qualifier with the
+     * specificational name of the current enhancement. For instance,
+     * in the case of two or more enhancements:</p>
      *
      * <pre>
      * Facility SF is Stack_Template(..) realized by Array_Realiz
@@ -233,17 +299,14 @@ public class JavaTranslator extends AbstractTranslator {
      *                         Obvious_Writing_Capability(Std_Int_Fac.Write);
      * </pre>
      *
-     * a call to <code>Read</code> should ideally look something like,
-     * <code>((Reading_Capability)SF).Read</code>. However, in the
-     * case where there is only a single enhancement, this method
-     * goes ahead simply makes the qualifier the base facility's
-     * name, I.e.: <code>SF.Read</code>.
+     * <p>In the case where there is only a single enhancement,
+     * this method makes the qualifier the base facility's name,
+     * I.e.  <code>SF.Read</code>.</p>
      *
      * @param callName
      * @param qualifier
-     * @return A boolean indicating whether or not
-     *                    <code>callName</code> matches a facility enhancement
-     *                    argument.
+     * @return <code>true</code> if <code>callName</code> matches an argument
+     *         to a facility enhancement.
      */
     private boolean isCallFromEnhancement(String callName,
             StringBuilder qualifier) {
@@ -320,7 +383,6 @@ public class JavaTranslator extends AbstractTranslator {
                     .append("public void ").append(formalOp.getName()).append(
                             "(");
 
-            // |formalOp.getParameters()| = |actualOp.getParameters()|.
             int parameterCount = 0;
             int incomingLength = parameter.length();
 
@@ -378,5 +440,62 @@ public class JavaTranslator extends AbstractTranslator {
 
     // TODO:         Check Prover to see the correct way to do this using
     //                         HwS's FlagDependencies system.
+    }
+
+    /**
+     * <p>Constructs the package into which to place this module from the file
+     * name.</p>
+     *
+     * @param file The file for which we are constructing a java package.
+     * @return The fully qualified package name.
+     */
+    private String formPkgPath(File file) {
+        StringBuffer pkgPath = new StringBuffer();
+        String filePath;
+        if (file.exists()) {
+            filePath = file.getAbsolutePath();
+        }
+        else {
+            filePath = file.getParentFile().getAbsolutePath();
+        }
+        StringTokenizer stTok = new StringTokenizer(filePath, File.separator);
+        Deque<String> tokenStack = new LinkedList<String>();
+
+        String curToken;
+        while (stTok.hasMoreTokens()) {
+            curToken = stTok.nextToken();
+            tokenStack.push(curToken);
+        }
+
+        //Get rid of the actual file--we only care about the path to it
+        if (file.isFile()) {
+            tokenStack.pop();
+        }
+
+        curToken = "";
+        boolean foundRootDirectory = false;
+        while (!tokenStack.isEmpty() && !foundRootDirectory) {
+            curToken = tokenStack.pop();
+
+            if (pkgPath.length() != 0) {
+                pkgPath.insert(0, '.');
+            }
+
+            pkgPath.insert(0, curToken);
+
+            foundRootDirectory = curToken.equalsIgnoreCase("RESOLVE");
+        }
+
+        if (!foundRootDirectory) {
+            throw new RuntimeException(
+                    "Translation expects all compiled files to"
+                            + " have a "
+                            + "directory named 'RESOLVE' somewhere in their path, but "
+                            + "the file:\n\t" + filePath
+                            + "\ndoes not.  Keep in mind "
+                            + "that directories are case sensitive.");
+        }
+
+        return pkgPath.toString();
     }
 }

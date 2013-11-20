@@ -12,21 +12,21 @@ public class JavaFacilityBookkeeper extends JavaBookkeeper {
         boolean standardMainDefined = false;
         StringBuilder documentBuilder = new StringBuilder();
 
-        for (String imp : myImportList) {
+        for (String imp : myImports) {
             documentBuilder.append(imp);
         }
-        documentBuilder.append("public class ");
-        documentBuilder.append(myModuleName).append(" {");
+        documentBuilder.append("public class ").append(myModuleName)
+                .append("{");
 
-        for (AbstractFacilityDecBook facility : myFacilityList) {
+        for (AbstractFacilityDecBook facility : myFacilities) {
             documentBuilder.append(facility.getString());
         }
 
-        for (AbstractFunctionBook func : myFunctionList) {
-            if (func.name.equals("main")) {
+        for (AbstractFunctionBook func : myFunctions) {
+            if (func.myName.equals("main")) {
                 standardMainDefined = true;
             }
-            else if (!func.name.equals("Main")) {
+            else if (!func.myName.equals("Main")) {
                 standardMainDefined = true;
             }
             documentBuilder.append(func.getString());
@@ -37,7 +37,7 @@ public class JavaFacilityBookkeeper extends JavaBookkeeper {
             documentBuilder.append(myModuleName).append(" ").append("start");
             documentBuilder.append(" = new ").append(myModuleName)
                     .append("();");
-            documentBuilder.append("start.Main(); }"); // TODO : parameters??
+            documentBuilder.append("start.Main(); }");
         }
 
         documentBuilder.append("}");

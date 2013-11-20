@@ -9,29 +9,25 @@ public class JavaBookkeeper extends AbstractBookkeeper {
         super(moduleName, isRealiz);
     }
 
-    // -----------------------------------------------------------
-    //   FacilityBook methods
-    // -----------------------------------------------------------
-
     @Override
     public void facAdd(String name, String concept, String realiz) {
         JavaFacilityDecBook f;
         f = new JavaFacilityDecBook(name, concept, realiz);
-        myFacilityList.add(f);
+        myFacilities.add(f);
         myCurrentFacility = f;
     }
 
     @Override
-    public void fxnAdd(String retType, String funcName) {
+    public void fxnAdd(String funcName, String retType) {
         JavaFunctionBook f;
         f = new JavaFunctionBook(funcName, retType, isRealization);
-        myFunctionList.add(f);
+        myFunctions.add(f);
         myCurrentFunction = f;
     }
 
     @Override
     public void fxnAddParameter(String parameter) {
-        myCurrentFunction.parameterList.add(parameter);
+        myCurrentFunction.myParameters.add(parameter);
     }
 
     @Override
@@ -42,24 +38,25 @@ public class JavaBookkeeper extends AbstractBookkeeper {
 
 class JavaFunctionBook extends AbstractFunctionBook {
 
-    JavaFunctionBook(String nameStr, String retStr, boolean isRealiz) {
-        super(nameStr, retStr, isRealiz);
+    JavaFunctionBook(String name, String returns, boolean realization) {
+        super(name, returns, realization);
     }
 
     @Override
     public String getString() {
         StringBuilder functionBuilder = new StringBuilder();
-        if (isRealization == true) {
-            functionBuilder.append("public ").append(name);
+        if (isRealization) {
+            functionBuilder.append("public ").append(myReturnType);
+            functionBuilder.append(" ").append(myName);
         }
         else {
-            functionBuilder.append(returnType).append(" ").append(name);
+            functionBuilder.append(myReturnType).append(" ").append(myName);
         }
         functionBuilder.append("(");
 
         int incomingLength = functionBuilder.length();
 
-        for (String parameter : parameterList) {
+        for (String parameter : myParameters) {
             if (functionBuilder.length() != incomingLength) {
                 functionBuilder.append(", ");
             }
@@ -69,10 +66,10 @@ class JavaFunctionBook extends AbstractFunctionBook {
         functionBuilder.append(")");
         if (isRealization) {
             functionBuilder.append(" {");
-            for (String variable : varInitList) {
+            for (String variable : myVariableInitializations) {
                 functionBuilder.append(variable);
             }
-            functionBuilder.append(allStmt);
+            functionBuilder.append(myStatementBlock);
             functionBuilder.append("}");
             return functionBuilder.toString();
         }
@@ -82,8 +79,8 @@ class JavaFunctionBook extends AbstractFunctionBook {
 
 class JavaFacilityDecBook extends AbstractFacilityDecBook {
 
-    JavaFacilityDecBook(String name, String concept, String realiz) {
-        super(name, concept, realiz);
+    JavaFacilityDecBook(String name, String concept, String realization) {
+        super(name, concept, realization);
     }
 
     @Override
@@ -95,44 +92,46 @@ class JavaFacilityDecBook extends AbstractFacilityDecBook {
         // refers to the last parameter: new Array_Realiz(<original params>)
         StringBuilder originalInstantiation = new StringBuilder();
 
-        List<String> allParameters = new LinkedList<String>(parameterList);
-        facilityBuilder.append(concept).append(" ").append(name).append(" = ");
+        List<String> allParameters = new LinkedList<String>(myParameters);
+        facilityBuilder.append(myConcept).append(" ").append(myName).append(
+                " = ");
 
-        if (enhancementList.isEmpty()) {
-            facilityBuilder.append("new ").append(conceptRealization);
+        if (myEnhancements.isEmpty()) {
+            facilityBuilder.append("new ").append(myConceptRealization);
             facilityBuilder.append("(");
         }
-        else if (enhancementList.size() == 1) {
+        else if (myEnhancements.size() == 1) {
             facilityBuilder.append("new ").append(
-                    enhancementList.get(0).realization);
+                    myEnhancements.get(0).realization);
             facilityBuilder.append("(");
         }
         else {
-            facilityBuilder.append(enhancementList.get(0).realization);
+            facilityBuilder.append(myEnhancements.get(0).realization);
             facilityBuilder.append(".createProxy").append("(");
         }
 
         // Add parameters from any enhancements into our final
         // output list, "allParameters".
-        for (int i = 0; i < enhancementList.size(); i++) {
-            allParameters.addAll(enhancementList.get(i).parameterList);
+        for (int i = 0; i < myEnhancements.size(); i++) {
+            allParameters.addAll(myEnhancements.get(i).parameterList);
         }
 
         // Don't forget to tack on the last piece which instantiates
-        // the original baseFacility's realization (originalInstantiation).
-        originalInstantiation.append("new ").append(conceptRealization);
-        originalInstantiation.append("(");
+        // the original baseFacility's realization (originalInstantiation)
+        if (myEnhancements.size() > 0) {
+            originalInstantiation.append("new ").append(myConceptRealization);
+            originalInstantiation.append("(");
 
-        int i = originalInstantiation.length();
-        for (String parameter : parameterList) {
-            if (originalInstantiation.length() != i) {
-                originalInstantiation.append(", ");
+            int i = originalInstantiation.length();
+            for (String parameter : myParameters) {
+                if (originalInstantiation.length() != i) {
+                    originalInstantiation.append(", ");
+                }
+                originalInstantiation.append(parameter);
             }
-            originalInstantiation.append(parameter);
-
+            originalInstantiation.append(")");
+            allParameters.add(originalInstantiation.toString());
         }
-        originalInstantiation.append(")");
-        allParameters.add(originalInstantiation.toString());
 
         // Now we just print the parameters and we're done.
         int incomingLength = facilityBuilder.length();

@@ -475,6 +475,7 @@ public class Controller {
 
             checkNameCompatibility(dec.getName().getLocation(), id, file);
             checkDirectoryCompatibility(dec, id, file);
+
             myInstanceEnvironment.constructRecord(id, file, dec);
             compileImportedModules(dec, symbolTable);
 

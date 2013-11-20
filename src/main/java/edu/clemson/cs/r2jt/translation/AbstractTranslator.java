@@ -37,8 +37,8 @@ import java.util.Map;
 public class AbstractTranslator extends TreeWalkerVisitor {
 
     /**
-     * <p>If <code>true</code>, as we walk the tree, debug information will
-     * be streamed to the console. This should be <code>false</code> when the
+     * <p>If <code>true</code>, as we walk the tree, debug information will be
+     * streamed to the console. This should be <code>false</code> when the
      * translator isn't actively being worked on.</p>
      */
     protected static final boolean PRINT_DEBUG = true;
@@ -47,11 +47,10 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     protected final ModuleScope myModuleScope;
 
     /**
-     * <p>This is where all information collected during the treewalk here
-     * goes. The <code>Bookkeeper</code> and its concrete subclasses handle
-     * how all information is collected, organized, and ultimately arranged
-     * on the translated page via calls to override <code>getString</code>
-     * methods.</p>
+     * <p>This is where all information collected during the treewalk here goes.
+     * The <code>Bookkeeper</code> and its concrete subclasses handle how all
+     * information is collected, organized, and ultimately arranged on the
+     * translated page via calls to overriden <code>getString</code> methods.</p>
      */
     protected Bookkeeper myBookkeeper;
 
@@ -63,12 +62,20 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     protected String myQualifierSymbol;
 
     /**
-     * <p>While walking a <code>FacilityDec</code>, this maintains a pointer
-     * to that facility, and, by extension, enhancements enclosed within. If we
-     * havent encountered a <code>FacilityDec</code> or we're done walking one,
-     * this is set to <code>null</code>.</p>
+     * <p>While walking a <code>FacilityDec</code>, this maintains a pointer to
+     * the <code>SymbolTableEntry</code> representing that facility, and,
+     * by extension, any enhancements enclosed within. If we haven't encountered a
+     * <code>FacilityDec</code>, or we've finished with walking one,
+     * this is <code>null</code>.</p>
      */
     protected FacilityEntry myCurrentFacility;
+
+    /**
+     * <p>While walking the children of <code>While</code> statement's
+     * <code>changing</code> clause, this is flag is set to <code>true</code>,
+     * otherwise, it is <code>false</code>.</p>
+     */
+    private boolean myWhileChangingSectionFlag = false;
 
     /**
      * <p>A mapping between the actual parameters of a module and the
@@ -95,7 +102,10 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     @Override
     public void preVariableExp(VariableExp node) {
         // VariableExps should be unqualified. So pass false.
-        buildProgramExpArgument(node.toString(), node.getProgramType(), false);
+        if (!myWhileChangingSectionFlag) {
+            buildProgramExpArgument(node.toString(), node.getProgramType(),
+                    false);
+        }
     }
 
     @Override
@@ -114,21 +124,38 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
         String errorMsg =
                 "ProgramOpExp encountered!! This should have been converted to "
-                        + "a programParamExp in preprocessing. Until a fix is introduced, "
-                        + "if you must, write things like 'I+3', etc. as Sum(I, 3)";
+                        + "a programParamExp in preprocessing. Until a fix is  "
+                        + "introduced, if you must, write things like 'I+3', "
+                        + "etc. as Sum(I, 3)";
         throw new SourceErrorException(errorMsg, node.getLocation());
     }
 
     /**
-     * <p>Currently we aren't recognizing <p>ProgramParamExp</p> correctly. Sami took
-     * it out temporarily until Blair and him can come up with an agree on a suitable
-     * fix. For more information and status updates in the meantime, refer to pivotal
-     * story #54742626</p>
+     * <p>Currently we aren't recognizing <p>ProgramParamExp</p>s correctly. Sami
+     * took them out temporarily until Blair and him can come up with an agree on a
+     * suitable fix. For more information and status updates in the meantime,
+     * refer to pivotal story #54742626</p>
+     *
+     * edit: <p>Unsure about this... I had to make use of my call qualifying
+     * machinery here in order to properly qualify some <code>programParamExps.</code>
+     * See <code>RevStack</code>... Figure out if there is an alternate,
+     * less risky alternative!</p>
      */
     @Override
     public void preProgramParamExp(ProgramParamExp node) {
-        PTType type = node.getProgramType();
-        String qualifier = getDefiningFacilityEntry(type).getName();
+
+        String qualifier = "";
+        try {
+            qualifier =
+                    getIntendedCallQualifier(node.getName(), null, node
+                            .getArguments());
+        }
+        catch (SourceErrorException see) {
+            ambiguousCall(node.getName());
+        }
+        //    System.out.println("LOOK: " + node.getName().getName());
+        //    PTType type = node.getProgramType();
+        //    String qualifier = getDefiningFacilityEntry(type).getName();
 
         myBookkeeper.fxnAppendTo(qualifier + myQualifierSymbol
                 + node.getName().getName() + "(");
@@ -177,18 +204,40 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     }
 
     @Override
-    public void preWhileStmt(WhileStmt node) {
-        myBookkeeper.fxnAppendTo("while(");
+    public void preWhileStmtChanging(WhileStmt node) {
+        myWhileChangingSectionFlag = true;
     }
 
     @Override
-    public void preWhileStmtStatements(WhileStmt node) {
-        myBookkeeper.fxnAppendTo(") {");
+    public void postWhileStmtChanging(WhileStmt node) {
+        myWhileChangingSectionFlag = false;
     }
 
     @Override
     public void postWhileStmt(WhileStmt node) {
         myBookkeeper.fxnAppendTo("}");
+    }
+
+    @Override
+    public void preFuncAssignStmt(FuncAssignStmt node) {
+
+        PTType lhs = node.getVar().getProgramType();
+
+        myBookkeeper.fxnAppendTo(getDefiningFacilityEntry(lhs).getName()
+                + myQualifierSymbol + "assign(");
+    }
+
+    @Override
+    public void midFuncAssignStmt(FuncAssignStmt node,
+            ResolveConceptualElement previous, ResolveConceptualElement next) {
+        if (previous != null && next != null) {
+            myBookkeeper.fxnAppendTo(", ");
+        }
+    }
+
+    @Override
+    public void postFuncAssignStmt(FuncAssignStmt node) {
+        myBookkeeper.fxnAppendTo(");");
     }
 
     @Override
@@ -216,7 +265,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
             ModuleParameterization specification = pair.getSpecification();
             ModuleParameterization realization = pair.getRealization();
 
-            buildParameterBindings(node.getName(), specification, realization);
+            buildParameterBindings(specification, realization);
         }
         catch (NoneProvidedException npe) {
             // I think this should've already been caught..
@@ -244,7 +293,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
                 ModuleParameterization realization =
                         myCurrentFacility.getEnhancementRealization(m);
-                buildParameterBindings(node.getName(), m, realization);
+                buildParameterBindings(m, realization);
             }
         }
         myBookkeeper.facAddEnhancement(node.getName().getName(), node
@@ -331,7 +380,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     @Override
     public void preParameterVarDec(ParameterVarDec node) {
 
-        String qual, specification, name;
+        String specification, name;
         PTType type = node.getTy().getProgramTypeValue();
         name = node.getName().getName();
 
@@ -343,8 +392,6 @@ public class AbstractTranslator extends TreeWalkerVisitor {
             // If we are unable to find a facility owning the type,
             // then the type should be defined locally, in which
             // case our qualifier is the name of the current module.
-
-            // TODO        :        Figure out if this is actually sound.
             if (getDefiningFacilityEntry(type) == null) {
                 specification = myModuleScope.getModuleIdentifier().toString();
             }
@@ -353,10 +400,6 @@ public class AbstractTranslator extends TreeWalkerVisitor {
                         getDefiningFacilityEntry(type).getFacility()
                                 .getSpecification().getModuleIdentifier()
                                 .toString();
-            }
-
-            if (((NameTy) node.getTy()).getQualifier() != null) {
-                qual = ((NameTy) node.getTy()).getQualifier().toString();
             }
 
             myBookkeeper.fxnAddParameter(specification + myQualifierSymbol
@@ -369,9 +412,9 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     //-------------------------------------------------------------------
 
     /**
-     * <p>Given a PTType, <code>type</code>, this method finds the first facility
-     * declared in <code>ModuleScope</code> that uses <code>type</code>s
-     * originating module as its specification.</p>
+     * <p>Given a PTType, <code>type</code>, this method finds and returns the
+     * first facility declared in <code>ModuleScope</code> whose specification
+     * defines <code>type</code>.</p>
      *
      * @param type A <code>PTType</code>.
      * @return The first <code>FacilityEntry</code> in scope whose
@@ -414,19 +457,18 @@ public class AbstractTranslator extends TreeWalkerVisitor {
      * pairing and their formal counterparts. Here is an example spec-realization
      * pairing:<code>facility stack_fac is SPEC realized by REALIZATION</code>.</p>
      *
-     * <p>This map takes any actual parameters to SPEC and REALIZATION, combines
-     * them into a single list, then maps each to its corresponding formal parameter
-     * located in the <code>ModuleScope</code>s belonging to SPEC and REALIZATION.</p>
+     * <p>This map takes any actual parameters to SPEC and REALIZATION,
+     * combines them into a single list, then maps each to its corresponding
+     * formal parameter located in the <code>ModuleScope</code>s belonging to
+     * SPEC and REALIZATION.</p>
      *
-     * @param name The name of the facility or facility enhancement we are
-     *             constructing the pairing map for.
-     * @param spec The <code>ModuleParameterization</code> for the SPEC portion
-     *             of the facility declaration (see example above).
+     * @param spec The <code>ModuleParameterization</code> for the SPEC portion of
+     *             the facility declaration (see example above).
      * @param realization The <code>ModuleParameterization</code> for the
      *                    realization portion of the facility declaration.
      */
-    public void buildParameterBindings(PosSymbol name,
-            ModuleParameterization spec, ModuleParameterization realization) {
+    public void buildParameterBindings(ModuleParameterization spec,
+            ModuleParameterization realization) {
 
         List<ModuleArgumentItem> args =
                 new LinkedList<ModuleArgumentItem>(spec.getParameters());
@@ -457,13 +499,13 @@ public class AbstractTranslator extends TreeWalkerVisitor {
      * <p>This  builds <code>ProgramExp</code> arguments that are either qualified
      * or not, depending on the <code>fullyQualified</code> flag.</p>
      *
-     * <p>For example, in <code>A[3]</code>, the <code>3</code> should come out
-     * as <code>Std_Integer_Fac.createInteger(3)</code>. Whereas when we encounter
+     * <p>For example, in <code>A[3]</code>, the <code>3</code> should come out as
+     * <code>Std_Integer_Fac.createInteger(3)</code>. Whereas when we encounter
      * something like: <code>Increment(I)</code>, since <code>I</code> is a
      * <code>VariableExp</code>, it should remain unchanged.</p>
      *
-     * @param value A string containing what should go between the parens
-     *              in the <code>createTYPE( ... )</code> output.
+     * @param value A string containing what should go between the parens in the
+     *              <code>createTYPE( ... )</code> output.
      * @param type The <code>PTType</code> corresponding to the type we
      *             are instantiating.
      * @param fullyQualified If <code>true</code>, the argument will be fully
@@ -482,19 +524,20 @@ public class AbstractTranslator extends TreeWalkerVisitor {
                     qualifier + myQualifierSymbol + "create" + type.toString()
                             + "(" + value + ")";
         }
-        // Note: While ProgramExps DO get visited when instantiating facilities, etc.
-        //                  This method was only intended to handle ProgramExp arguments for functions.
-        //                 Handling these types of things for module parameters and facilities is
-        //                 currently "preModuleArgumentItem"s job. I intend to experiment with this
-        //                  division of labor further, and maybe eventually collapse the two.
+        // Note: While ProgramExps DO get visited when instantiating facilities,
+        //       etc. This method was only intended to handle ProgramExp arguments
+        //       for functions. Handling these types of things for module
+        //       parameters and facilities is currently "preModuleArgumentItem"s
+        //       job. I intend to experiment with this division of labor further,
+        //       and maybe eventually collapse the two.
         if (myBookkeeper.fxnIsOpen()) {
             myBookkeeper.fxnAppendTo(expression);
         }
     }
 
     /**
-     * <p>Operations in facility modules look pretty much the same as those
-     * in concepts, realizations, etc. So this method adds all things
+     * <p>Operations in facility modules look pretty much the same as those in
+     * concepts, realizations, etc. So this method handles adding all things
      * operation/procedure related into the <code>Bookkeeper</code>.</p>
      *
      * @param name The name of the operation we're adding.
@@ -509,8 +552,8 @@ public class AbstractTranslator extends TreeWalkerVisitor {
     protected void addOperationLikeThingToBookkeeper(String name, Ty returnTy,
             String returnStr) {
 
-        String formedReturnType = "void";
         PTType type;
+        String formedReturnType = "void";
 
         if (returnTy != null) {
             type = returnTy.getProgramTypeValue();
@@ -546,10 +589,10 @@ public class AbstractTranslator extends TreeWalkerVisitor {
         myBookkeeper.fxnAdd(name, formedReturnType);
     }
 
-    protected String getIntendedCallQualifier(CallStmt node) {
+    protected String getIntendedCallQualifier(PosSymbol name, PosSymbol qual,
+            List<ProgramExp> args) {
 
         String qualifier = "";
-        List<ProgramExp> args = node.getArguments();
         List<PTType> argTypes = new LinkedList<PTType>();
         List<FacilityEntry> matches = new LinkedList<FacilityEntry>();
 
@@ -561,9 +604,8 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
             OperationEntry oe =
                     myModuleScope.queryForOne(
-                            new OperationQuery(node.getQualifier(), node
-                                    .getName(), argTypes)).toOperationEntry(
-                            null);
+                            new OperationQuery(qual, name, argTypes))
+                            .toOperationEntry(null);
 
             // Now grab any FacilityEntries in scope whose
             // specification matches oe's SourceModuleIdentifier.
@@ -590,7 +632,8 @@ public class AbstractTranslator extends TreeWalkerVisitor {
             // 2. Size > 1 => multiple facilities instantiated use
             //    oe's SourceModuleIdentifier as a specification.
             //          Which facility's name to use as a qualifier is
-            //          ambiguous - so off to argument examination we go.
+            //          ambiguous - so off to argument examination we go. Ducking
+            //          out quickly if things get too complicated.
             if (matches.size() > 1) {
                 qualifier = findQualifyingArgument(oe, args);
             }
@@ -598,8 +641,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
             //          defined locally. So no need to qualify at all.
         }
         catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(node.getQualifier(), node.getName().getName(), node
-                    .getLocation());
+            noSuchSymbol(qual, name.getName(), name.getLocation());
         }
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException(dse);
@@ -643,8 +685,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
             // first facility whose specification matches the call-owning operation's
             // SourceModule, and use that facility's name as the qualifier.
             else {
-                System.out.println("programt: "
-                        + arg.getProgramType().toString());
+
                 if (getDefiningFacilityEntry(arg.getProgramType())
                         .getFacility().getSpecification().getModuleIdentifier()
                         .equals(operation.getSourceModuleIdentifier())) {
@@ -661,9 +702,9 @@ public class AbstractTranslator extends TreeWalkerVisitor {
         return result;
     }
 
-    // -----------------------------------------------------------
+    //-------------------------------------------------------------------
     //   Error handling methods
-    // -----------------------------------------------------------
+    //-------------------------------------------------------------------
 
     public void noSuchModule(PosSymbol qualifier) {
         throw new SourceErrorException(
