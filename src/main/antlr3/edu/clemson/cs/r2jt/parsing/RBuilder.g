@@ -2086,6 +2086,7 @@ function_expression returns [Exp exp = null]
     ;
 
 clean_function_expression returns [Exp exp = null]
+options { k = 2; }
 @init{
     PosSymbol qual = null; //dummy
     edu.clemson.cs.r2jt.collections.List<FunctionArgList> aGrps = new edu.clemson.cs.r2jt.collections.List<FunctionArgList>("FunctionArgList");
@@ -2095,10 +2096,10 @@ clean_function_expression returns [Exp exp = null]
     |   ^(FUNCTION ps=ident (hat=hat_expression)?
         (aGrp=function_argument_list { aGrps.add($aGrp.list); })+)
         { $exp = new FunctionExp(getLocation($FUNCTION), qual, $ps.ps, $hat.exp, aGrps); }
-    |   OP  ( PLUS | MINUS | MULTIPLY | DIVIDE | 
-             EQL | NOT_EQL | GT_EQL | LT_EQL | GT | LT |
-             EXP | AMPERSAND | MOD | INTERSECT | DIV | AND )         
+    |   OP inop=infix_symbol  { $exp = new VarExp(($inop.ps).getLocation(), null, $inop.ps); }    
+    |   OP preop=prefix_symbol { $exp = new VarExp(($preop.ps).getLocation(), null, $preop.ps); }    
     ;
+
 
 hat_expression returns [Exp exp = null]
     :   ^(CARAT (exp1=qualified_ident { $exp = $exp1.exp; }
