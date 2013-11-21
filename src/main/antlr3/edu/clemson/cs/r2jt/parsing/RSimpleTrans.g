@@ -769,6 +769,12 @@ infix_symbol
 prefix_symbol
     : PLUS | MINUS | NOT | ABS | COMPLEMENT
     ;
+    
+operator
+    : infix_symbol
+    | NOT
+    | ABS
+    ;    
 
 quant_symbol
     : BIG_UNION | BIG_INTERSECT | BIG_SUM | BIG_PRODUCT | BIG_CONCAT
@@ -2226,6 +2232,6 @@ reference_marker_call
     ;
 
 fn_name
-    :   infix_symbol | prefix_symbol | ident
+    :   operator | ident
     ;
     
