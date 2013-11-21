@@ -2091,7 +2091,6 @@ function_expression returns [Exp exp = null]
     ;
 
 clean_function_expression returns [Exp exp = null]
-options { k = 2; }
 @init{
     PosSymbol qual = null; //dummy
     edu.clemson.cs.r2jt.collections.List<FunctionArgList> aGrps = new edu.clemson.cs.r2jt.collections.List<FunctionArgList>("FunctionArgList");
