@@ -733,6 +733,12 @@ infix_symbol
 prefix_symbol
     : PLUS | MINUS | NOT | ABS | COMPLEMENT
     ;
+    
+operator
+    : infix_symbol
+    | NOT
+    | ABS
+    ;    
 
 quant_symbol
     : BIG_UNION | BIG_INTERSECT | BIG_SUM | BIG_PRODUCT | BIG_CONCAT
@@ -1588,6 +1594,7 @@ clean_function_expression
             (function_argument_list)+ -> ^(FUNCTION ident hat_expression? function_argument_list+)
         )?*/
         //-> ^(ident)
+    |   OP  operator 
     ;
 
 hat_expression
@@ -2048,6 +2055,6 @@ reference_marker_call
     ;
 
 fn_name
-    :   infix_symbol | prefix_symbol | ident
+    :   operator | ident
     ;
     

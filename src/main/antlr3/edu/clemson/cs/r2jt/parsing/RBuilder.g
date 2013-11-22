@@ -1041,6 +1041,11 @@ prefix_symbol returns [PosSymbol ps = null]
     : (sym=PLUS | sym=MINUS | sym=NOT | sym=ABS | sym=COMPLEMENT) { $ps = getPosSymbol($sym); }
     ;
     
+operator returns [PosSymbol ps = null]
+    : isym=infix_symbol { $ps = $isym.ps; }
+    |  (sym=NOT | sym=ABS | sym=COMPLEMENT) { $ps = getPosSymbol($sym); }
+    ;
+    
 quant_symbol
     : BIG_UNION | BIG_INTERSECT | BIG_SUM | BIG_PRODUCT | BIG_CONCAT
     ;
@@ -2095,7 +2100,9 @@ clean_function_expression returns [Exp exp = null]
     |   ^(FUNCTION ps=ident (hat=hat_expression)?
         (aGrp=function_argument_list { aGrps.add($aGrp.list); })+)
         { $exp = new FunctionExp(getLocation($FUNCTION), qual, $ps.ps, $hat.exp, aGrps); }
+    |   OP op=operator  { $exp = new VarExp(($op.ps).getLocation(), null, $op.ps); }    
     ;
+
 
 hat_expression returns [Exp exp = null]
     :   ^(CARAT (exp1=qualified_ident { $exp = $exp1.exp; }
@@ -2894,8 +2901,7 @@ reference_marker_call returns [MathRefExp mre = null]
 
 fn_name returns [PosSymbol name = null]
 :
-  id1=infix_symbol { $name=getPosSymbol((ColsAST)id1.getTree()); }
-  | id2=prefix_symbol { $name=getPosSymbol((ColsAST)id2.getTree()); }
+  id=operator { $name=$id.ps; }
   //| name=ident
 ;
 

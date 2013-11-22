@@ -417,6 +417,10 @@ CAT
 OF
   : 'of'
   ;
+
+OP
+  : 'op'
+  ;
   
 OPERATION
   : 'oper' | 'operation' | 'Oper' | 'Operation'
