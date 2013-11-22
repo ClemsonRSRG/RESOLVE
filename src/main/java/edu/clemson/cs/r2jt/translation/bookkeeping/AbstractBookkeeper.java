@@ -82,7 +82,7 @@ public abstract class AbstractBookkeeper implements Bookkeeper {
 
     @Override
     public void facAddEnhancementParameter(String parameter) {
-        myCurrentFacility.myCurEnhancement.parameterList.add(parameter);
+        myCurrentFacility.myCurEnhancement.myParameters.add(parameter);
     }
 
     @Override
@@ -173,14 +173,14 @@ abstract class AbstractFacilityDecBook {
 
 class FacilityEnhancementBook {
 
-    protected String name;
-    protected String realization;
-    protected ArrayList<String> parameterList;
+    protected String myName;
+    protected String myRealization;
+    protected ArrayList<String> myParameters;
 
-    FacilityEnhancementBook(String nameStr, String realizStr) {
-        name = nameStr;
-        realization = realizStr;
-        parameterList = new ArrayList();
+    FacilityEnhancementBook(String name, String realization) {
+        myName = name;
+        myRealization = realization;
+        myParameters = new ArrayList();
     }
 }
 

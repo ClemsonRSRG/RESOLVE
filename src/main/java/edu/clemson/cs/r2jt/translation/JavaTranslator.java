@@ -102,11 +102,9 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>A <em>Temporary</em> solution to building workable headers: Say we want
-     * to build a Java pkg for <code>Std_Integer_Fac</code> -- here we query for
-     * that facility. From it we obtain Integer_Template which is what we need. We
-     * don't do this through <code>compileEnvironment</code> since it is 1: messy,
-     * and 2: <em>probably?</em> going to be revamped in the near future.</p>
+     * <p>A <em>Temporary</em> solution to building workable headers: Say we
+     * want to build a Java pkg for <code>Std_Integer_Fac</code>. We first
+     * query for that facility to get "Integer_Template".</p>
      */
     @Override
     public void preUsesItem(UsesItem node) {
@@ -130,8 +128,8 @@ public class JavaTranslator extends AbstractTranslator {
             // If we didn't find a facility then we're most likely dealing with
             // something like: "Location_Linking_Template_1" or
             // "Static_Array_Template" For now, we just ignore the nsse...
-            //   throw new RuntimeException("Couldn't find standard facility: " + node
-            //            .getName().getName());
+            //   throw new RuntimeException("Couldn't find standard facility:
+            // "  + node .getName().getName());
         }
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException(dse);
@@ -139,12 +137,13 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Any conceptual parameters must be transformed into operations and placed
-     * in the interface extending <code>RESOLVE_INTERFACE</code>. We do this here
-     * using "fxn" <code>Bookkeeper</code> methods. None of the if-statements
-     * should get tripped if the module being looked at is anything other than a
-     * concept module. If they do, then we are going to get excess operation
-     * declarations in the translated file and this will have to be re-thought.</p>
+     * <p>Any conceptual parameters must be transformed into operations and
+     * placed in the interface extending <code>RESOLVE_INTERFACE</code>. We
+     * do this here  using "fxn" <code>Bookkeeper</code> methods. None of the
+     * if-statements should get tripped if the module being looked at is
+     * anything other than a concept module. If they do,
+     * then we are going to get excess operation declarations in the
+     * translated file and this will have to be re-thought.</p>
      */
     @Override
     public void preModuleParameterDec(ModuleParameterDec node) {
@@ -169,12 +168,11 @@ public class JavaTranslator extends AbstractTranslator {
     /**
      * <p>This isn't in <code>AbstractTranslator</code> since Java translation
      * requires that calls to operations derived from facility enhancements be
-     * specially qualified. Since this special case doesn't apply to C,
-     * the separation seems necessary.
+     * specially qualified.</p>
      *
-     * Note <code>preCallStmt</code> in {@link CTranslator CTranslator} will need
-     * to qualify calls so qualification finding methods are still found in the
-     * <code>AbstractTranslator</code>.</p>
+     * Note <code>preCallStmt</code> in {@link CTranslator CTranslator} will
+     * need to qualify calls, so qualification-finding methods are still kept
+     * in <code>AbstractTranslator</code>.</p>
      */
     @Override
     public void preCallStmt(CallStmt node) {
@@ -214,8 +212,8 @@ public class JavaTranslator extends AbstractTranslator {
     /**
      * <p>Aside: It seems like this visitor method is responsible for too much.
      * It Handles parameters for not only EVERY KIND of module,
-     * but also parameters to facility/facility enhancement specifications.. So take
-     * care if you need to add anything here as it might affect many things.</p>
+     * but also parameters to facility/facility enhancement specifications..
+     * So take care if you need to add anything here.</p>
      */
     @Override
     public void preModuleArgumentItem(ModuleArgumentItem node) {
@@ -283,27 +281,25 @@ public class JavaTranslator extends AbstractTranslator {
     /**
      * <p>This method returns <code>true</code> <strong>iff</strong>
      * <code>callName</code> matches an argument to a facility enhancement.
-     * Additionally, if <code>true</code> is returned, then <code>qualifier</code>
-     * will also be mutated into one appropriate for qualifying an enhancement
-     * defined call.</p>
+     * Additionally, if <code>true</code> is returned,
+     * then <code>qualifier</code> will be mutated into one appropriate for
+     * qualifying an enhancement defined call.</p>
      *
-     * <p>"Appropriate" means wrapping the normal qualifier with the
+     * <p>"Appropriate" simply means wrapping the normal qualifier with the
      * specificational name of the current enhancement. For instance,
      * in the case of two or more enhancements:</p>
      *
-     * <pre>
-     * Facility SF is Stack_Template(..) realized by Array_Realiz
-     *                 enhanced with Reading_Capability realized by
-     *                         Obvious_Reading_Realiz(Std_Int_Fac.Read)
-     *                 enhanced with Writing_Capability realized by
-     *                         Obvious_Writing_Capability(Std_Int_Fac.Write);
-     * </pre>
+     * <pre>Facility SF is Stack_Template(..) realized by Array_Realiz
+     *          enhanced with Reading_Capability realized by
+     *              Obvious_Reading_Realiz(Std_Int_Fac.Read)
+     *          enhanced with Writing_Capability realized by
+     *              Obvious_Writing_Capability(Std_Int_Fac.Write);</pre>
      *
-     * <p>In the case where there is only a single enhancement,
-     * this method makes the qualifier the base facility's name,
-     * I.e.  <code>SF.Read</code>.</p>
+     * <p>If there is only a single enhancement, this method makes the
+     * qualifier for <code>callName</code> the base facility's name (e.g.
+     * <code>SF.Read</code>).</p>
      *
-     * @param callName
+     * @param callName The name of the call in question.
      * @param qualifier
      * @return <code>true</code> if <code>callName</code> matches an argument
      *         to a facility enhancement.
@@ -355,13 +351,8 @@ public class JavaTranslator extends AbstractTranslator {
         StringBuilder parameter = new StringBuilder();
 
         /**
-         * TODO :   For some reason NameAndEntryTypeQueries are bombing. See:
-         *          {@Link https://www.pivotaltracker.com/story/show/55770154}
-         *          Ideally here we would use a query that looks at both name
-         *          and entry-type (i.e. NameAndEntryTypeQuery) but unfortunately
-         *          it's not working. Until I'm able to figure would what exactly
-         *          is going wrong and fix it, regular NameQueries will have to
-         *          suffice. So expect the unexpected here until then.
+         * TODO :   For some reason NameAndEntryTypeQueries are bombing.
+         *          See pivotal story #55770154.
          */
         try {
 

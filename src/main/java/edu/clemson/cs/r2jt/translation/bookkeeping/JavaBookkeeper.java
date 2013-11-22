@@ -102,18 +102,18 @@ class JavaFacilityDecBook extends AbstractFacilityDecBook {
         }
         else if (myEnhancements.size() == 1) {
             facilityBuilder.append("new ").append(
-                    myEnhancements.get(0).realization);
+                    myEnhancements.get(0).myRealization);
             facilityBuilder.append("(");
         }
         else {
-            facilityBuilder.append(myEnhancements.get(0).realization);
+            facilityBuilder.append(myEnhancements.get(0).myRealization);
             facilityBuilder.append(".createProxy").append("(");
         }
 
         // Add parameters from any enhancements into our final
         // output list, "allParameters".
         for (int i = 0; i < myEnhancements.size(); i++) {
-            allParameters.addAll(myEnhancements.get(i).parameterList);
+            allParameters.addAll(myEnhancements.get(i).myParameters);
         }
 
         // Don't forget to tack on the last piece which instantiates

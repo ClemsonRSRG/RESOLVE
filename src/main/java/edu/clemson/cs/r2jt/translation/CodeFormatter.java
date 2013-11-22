@@ -16,8 +16,8 @@ import java.util.LinkedList;
 public class CodeFormatter {
 
     /**
-     * <p>Annotates a tab-less, newline-less string containing Java or C code with
-     * proper newlines and indentation.</p>
+     * <p>Annotates a tab-less, newline-less string containing Java or C code
+     * with proper newlines and indentation.</p>
      *
      * @param code A raw string of Java or C code <em>lacking</em> newlines
      *             or tabs.
@@ -50,7 +50,6 @@ public class CodeFormatter {
      * <p>Creates a string of consecutive tabs of length |T|.</p>
      *
      * @param T A Deque of tab <code>'\t'</code> characters.
-     *
      * @return A string of consecutive tabs.
      */
     private static String writeTabs(Deque<String> T) {
@@ -69,7 +68,6 @@ public class CodeFormatter {
      * </p>
      *
      * @param code The string whitespace should be removed from.
-     *
      * @return The string lacking excess whitespace.
      */
     private static String normalizeWhitespace(String code) {
