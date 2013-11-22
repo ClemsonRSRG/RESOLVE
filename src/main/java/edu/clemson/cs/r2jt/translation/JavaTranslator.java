@@ -74,6 +74,7 @@ public class JavaTranslator extends AbstractTranslator {
                 new JavaFacilityBookkeeper(node.getName().getName(), true);
 
         ModuleID facilityID = ModuleID.createFacilityID(node.getName());
+
         File sourceFile = myInstanceEnvironment.getFile(facilityID);
         myBookkeeper.addUses("package " + formPkgPath(sourceFile) + ";");
         myBookkeeper.addUses("import RESOLVE.*;");
@@ -86,8 +87,8 @@ public class JavaTranslator extends AbstractTranslator {
                 new JavaConceptBookkeeper(node.getName().getName(), false);
 
         ModuleID conceptID = ModuleID.createConceptID(node.getName());
-        File sourceFile = myInstanceEnvironment.getFile(conceptID);
 
+        File sourceFile = myInstanceEnvironment.getFile(conceptID);
         myBookkeeper.addUses("package " + formPkgPath(sourceFile) + ";");
         myBookkeeper.addUses("import RESOLVE.*;");
     }
@@ -96,8 +97,9 @@ public class JavaTranslator extends AbstractTranslator {
     public void preConceptBodyModuleDec(ConceptBodyModuleDec node) {
         myBookkeeper = new JavaBookkeeper(node.getName().getName(), true);
 
-        ModuleID conceptRealizationID = ModuleID.createConceptBodyID(node
-                .getName(), node.getConceptName());
+        ModuleID conceptRealizationID =
+                ModuleID.createConceptBodyID(node.getName(), node
+                        .getConceptName());
 
         File sourceFile = myInstanceEnvironment.getFile(conceptRealizationID);
         myBookkeeper.addUses("package " + formPkgPath(sourceFile) + ";");
@@ -106,8 +108,8 @@ public class JavaTranslator extends AbstractTranslator {
 
     /**
      * <p>A <em>Temporary</em> solution to building workable headers: Say we
-     * want to build a Java pkg for <code>Std_Integer_Fac</code>. We first
-     * query for that facility to get "Integer_Template".</p>
+     * want to build a Java pkg for <code>Std_Integer_Fac</code>. We query
+     * for that facility to get "Integer_Template" -- which is what we need.</p>
      */
     @Override
     public void preUsesItem(UsesItem node) {
@@ -143,11 +145,7 @@ public class JavaTranslator extends AbstractTranslator {
     /**
      * <p>Any conceptual parameters must be transformed into operations and
      * placed in the interface extending <code>RESOLVE_INTERFACE</code>. We
-     * do this here  using "fxn" <code>Bookkeeper</code> methods. None of the
-     * if-statements should get tripped if the module being looked at is
-     * anything other than a concept module. If they do,
-     * then we are going to get excess operation declarations in the
-     * translated file and this will have to be re-thought.</p>
+     * do this here using "fxn" <code>Bookkeeper</code> methods.</p>
      */
     @Override
     public void preModuleParameterDec(ModuleParameterDec node) {
@@ -361,6 +359,13 @@ public class JavaTranslator extends AbstractTranslator {
         return false;
     }
 
+    /**
+     * <p>This big, ugly method builds the wrapped parameters to facility decs</p>
+     *
+     * @param argument
+     * @param qualifier
+     * @return
+     */
     private String buildOperationParameter(String argument, PosSymbol qualifier) {
         StringBuilder parameter = new StringBuilder();
 

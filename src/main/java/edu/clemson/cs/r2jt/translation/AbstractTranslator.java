@@ -56,10 +56,10 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
     /**
      * <p>Abstracts away a language-specific qualification style. For
-     * example:</p>
+     * example, in the case of:</p>
      *
-     * <p><code>StackFac.Pop</code> <em>vs</em> <code>StackFac->Pop</code>
-     * <code>myQualifier</code> could be either "." or "->".</p>
+     * <p><code>StackFac.Pop</code> <em>vs</em> <code>StackFac->Pop</code></p>
+     * <p><code>myQualifier</code> could be either "." or "->".</p>
      */
     protected String myQualifierSymbol;
 
@@ -254,11 +254,14 @@ public class AbstractTranslator extends TreeWalkerVisitor {
                                             false)).toFacilityEntry(
                                     node.getLocation());
 
-            SpecRealizationPairing pair = myCurrentFacility.getFacility();
-            ModuleParameterization specification = pair.getSpecification();
-            ModuleParameterization realization = pair.getRealization();
+            // We don't want to go looking for Std_Array_Realization.
+            if (!node.isExternallyRealized()) {
+                SpecRealizationPairing pair = myCurrentFacility.getFacility();
+                ModuleParameterization specification = pair.getSpecification();
+                ModuleParameterization realization = pair.getRealization();
 
-            buildParameterBindings(specification, realization);
+                buildParameterBindings(specification, realization);
+            }
         }
         catch (NoneProvidedException npe) {
             // I think this should've already been caught..
@@ -418,6 +421,8 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
         FacilityEntry result = null;
         try {
+			System.out.println("Type: " + type.toString());
+
             ProgramTypeEntry te =
                     myModuleScope.queryForOne(
                             new UnqualifiedNameQuery(type.toString()))

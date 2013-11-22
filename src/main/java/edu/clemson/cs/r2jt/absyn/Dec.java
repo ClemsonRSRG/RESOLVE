@@ -7,12 +7,13 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 /**
  * <p>A <code>Dec</code> refers to anything that is able to be declared;
  * hence the name "Dec". This might include anything from an operation
- * declaration to a facility module declaration, or any number of other things
+ * declaration to a facility module declaration -- and any number of things
  * in between.</p>
  */
 public abstract class Dec extends ResolveConceptualElement implements Cloneable {
 
     protected MTType myMathType = null;
+
     //protected MTType myMathTypeValue = null;
 
     public abstract void accept(ResolveConceptualVisitor v);
@@ -22,8 +23,7 @@ public abstract class Dec extends ResolveConceptualElement implements Cloneable 
     /**
      * <p>Returns the name of this <code>Dec</code>.</p>
      *
-     * @return A <code>PosSymbol</code> containing both name and the
-     *         <code>Location</code>.
+     * @return The name of the declaration.
      */
     public abstract PosSymbol getName();
 
@@ -32,7 +32,7 @@ public abstract class Dec extends ResolveConceptualElement implements Cloneable 
      *
      * @param indent The desired level of indentation.</p>
      *
-     * @return A string
+     * @return A string.
      */
     public String toString(int indent) {
         return new String();
@@ -40,18 +40,6 @@ public abstract class Dec extends ResolveConceptualElement implements Cloneable 
 
     public Location getLocation() {
         return getName().getLocation();
-    }
-
-    /**
-     * <p>Copies and returns the root of this AST subtree.</p>
-     */
-    public Object clone() {
-        try {
-            return super.clone();
-        }
-        catch (CloneNotSupportedException e) {
-            throw new InternalError("But we are Cloneable!!!");
-        }
     }
 
     /**
@@ -70,10 +58,20 @@ public abstract class Dec extends ResolveConceptualElement implements Cloneable 
 
         this.myMathType = mt;
     }
+
     //	public MTType getMathTypeValue() {
     //		return myMathTypeValue;
     //	}
     //	public void setMathTypeValue(MTType mathTypeValue) {
     //		this.myMathTypeValue = mathTypeValue;
     //	}
+
+    public Object clone() {
+        try {
+            return super.clone();
+        }
+        catch (CloneNotSupportedException e) {
+            throw new InternalError("But we are Cloneable!!!");
+        }
+    }
 }

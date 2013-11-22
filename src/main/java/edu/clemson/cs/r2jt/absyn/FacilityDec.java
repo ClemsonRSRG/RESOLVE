@@ -13,30 +13,18 @@ import edu.clemson.cs.r2jt.data.PosSymbol;
  *
  * <p>Note that each <code>FacilityDec</code> pairs a (possibly)
  * parameterized specification with a (possibly) parameterized realization.
- * Additionally, any number of <code>EnhancementItem</code>s may follow.</p>
+ * Additionally, any number of <code>EnhancementItem</code>s are permitted
+ * to follow each <code>FacilityDec</code>.</p>
  */
 public class FacilityDec extends Dec {
 
-    /**
-     * <p>A handle to the name of this <code>FacilityDec</code>. For instance,
-     * in the example above, the name is: <code>Std_Integer_Fac</code>.</p>
-     */
     private PosSymbol myName;
-
-    /**
-     * <p>This refers to the specification portion of the current
-     * <code>FacilityDec</code>.</p>
-     */
     private PosSymbol myConceptName;
     private List<ModuleArgumentItem> myConceptParameters;
-
-    /**
-     * <p>A <em>body</em> is simply another way of saying
-     * <em>realization</em>.  This is a handle to the realization portion of
-     * the <code>FacilityDec</code>.</p>
-     */
     private PosSymbol myBodyName;
     private List<ModuleArgumentItem> myBodyParameters;
+    private List<EnhancementItem> myEnhancements;
+    private List<EnhancementBodyItem> myEnhancementBodies;
 
     /**
      * <p>This refers to an (optional) performance profile component for an
@@ -45,23 +33,17 @@ public class FacilityDec extends Dec {
     private PosSymbol myProfileName;
 
     /**
-     * <p>Any enhancements associated with this <code>FacilityDec</code>.</p>
-     */
-    private List<EnhancementItem> myEnhancements;
-    private List<EnhancementBodyItem> myEnhancementBodies;
-
-    /**
      * <p>A flag indicating whether or not this <code>FacilityDec</code>'s
      * body/realization has an implementation written in Resolve.</p>
      */
     private boolean myExternallyRealizedFlag;
 
     public FacilityDec(PosSymbol name, PosSymbol conceptName,
-                       List<ModuleArgumentItem> conceptParams,
-                       List<EnhancementItem> enhancements, PosSymbol bodyName,
-                       PosSymbol profileName, List<ModuleArgumentItem> bodyParams,
-                       List<EnhancementBodyItem> enhancementBodies,
-                       boolean externallyRealized) {
+            List<ModuleArgumentItem> conceptParams,
+            List<EnhancementItem> enhancements, PosSymbol bodyName,
+            PosSymbol profileName, List<ModuleArgumentItem> bodyParams,
+            List<EnhancementBodyItem> enhancementBodies,
+            boolean externallyRealized) {
 
         myName = name;
         myConceptName = conceptName;
@@ -82,18 +64,17 @@ public class FacilityDec extends Dec {
      * <p>Returns the name of this <code>FacilityDec</code>'s
      * specification.</p>
      *
-     * @return A <code>PosSymbol</code> containing the name and
-     *                      <code>Location</code> of the specification.
+     * @return The name of the facility declaration.
      */
     public PosSymbol getConceptName() {
         return myConceptName;
     }
 
     /**
-     * <p>Returns a list of any user-supplied parameters to the
-     * this <code>FacilityDec</code>'s specification.</p>
+     * <p>Returns a list of any user-supplied parameters corresponding to this
+     * <code>FacilityDec</code>'s specification.</p>
      *
-     * @return A list of <code>ModuleArgumentItem</code>s
+     * @return The list of concept/specification parameters
      */
     public List<ModuleArgumentItem> getConceptParams() {
         return myConceptParameters;
@@ -103,7 +84,7 @@ public class FacilityDec extends Dec {
      * <p>Returns a list of enhancements (<code>EnhancementItem</code>s)
      * corresponding to this <code>FacilityDec</code>.</p>
      *
-     * @return
+     * @return The list of enhancements.
      */
     public List<EnhancementItem> getEnhancements() {
         return myEnhancements;
@@ -112,8 +93,7 @@ public class FacilityDec extends Dec {
     /**
      * <p>Returns the name of this <code>FacilityDec</code>'s realization.</p>
      *
-     * @return A <code>PosSymbol</code> containing the name and location of
-     *         the realization.
+     * @return The realization's name.
      */
     public PosSymbol getBodyName() {
         return myBodyName;
@@ -130,8 +110,10 @@ public class FacilityDec extends Dec {
     }
 
     /**
-     * <p>Returns a list of parameters </p>
-     * @return
+     * <p>Returns a list of parameters (<code>ModuleArgumentItem</code>s)
+     * for this <code>FacilityDec</code>s realization.</p>
+     *
+     * @return The list of body parameters.
      */
     public List<ModuleArgumentItem> getBodyParams() {
         return myBodyParameters;
@@ -142,45 +124,91 @@ public class FacilityDec extends Dec {
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> there currently
-     * isn't a Resolve realization for the concept this
+     * <p>Returns <code>true</code> <strong>iff</strong> there does not
+     * exist a Resolve realization for the concept/specification this
      * <code>FacilityDec</code> instantiates.</p>
      *
-     * @return <code>true</code> if the body/spec lacks a Resolve
-     *         implementation; <code>false</code> otherwise.
+     * @return <code>true</code> if the specification lacks a realization
+     * 		   written in Resolve; <code>false</code> otherwise.
      */
     public boolean isExternallyRealized() {
         return myExternallyRealizedFlag;
     }
 
+    /**
+     * <p>Sets the name of this <code>FacilityDec</code>.</p>
+     *
+     * @param name The desired name.
+     */
     public void setName(PosSymbol name) {
         myName = name;
     }
 
+    /**
+     * <p>Sets the name of this <code>FacilityDec</code>s specification.</p>
+     *
+     * @param conceptName The desired name.
+     */
     public void setConceptName(PosSymbol conceptName) {
         myConceptName = conceptName;
     }
 
-    public void setConceptParams(List<ModuleArgumentItem> conceptParams) {
-        myConceptParameters = conceptParams;
+    /**
+     * <p>Sets a list of conceptual (<code>ModuleArgumentItems</code>)
+     * parameters for this <code>FacilityDec</code>'s specification.</p>
+     *
+     * @param conceptParameters The list of conceptual parameters.
+     */
+    public void setConceptParams(List<ModuleArgumentItem> conceptParameters) {
+        myConceptParameters = conceptParameters;
     }
 
+    /**
+     * <p>Sets a list of conceptual (<code>ModuleArgumentItems</code>)
+     * parameters for this <code>FacilityDec</code>'s specification.</p>
+     *
+     * @param enhancements The list of conceptual parameters.
+     */
     public void setEnhancements(List<EnhancementItem> enhancements) {
         myEnhancements = enhancements;
     }
 
+    /**
+     * <p>Sets the name of this <code>FacilityDec</code>'s realization.</p>
+     *
+     * @param bodyName The name of a realization.
+     */
     public void setBodyName(PosSymbol bodyName) {
         myBodyName = bodyName;
     }
 
-    public void setProfileName(PosSymbol name) {
-        myProfileName = name;
+    /**
+     * <p>Sets the name of this <code>FacilityDec</code>'s performance
+     * profile.</p>
+     *
+     * @param performanceProfileName The name of the performance proile.
+     */
+    public void setProfileName(PosSymbol performanceProfileName) {
+        myProfileName = performanceProfileName;
     }
 
+    /**
+     * <p>Sets a list of <code>ModuleArgumentItems</code> parameters for this
+     * <code>FacilityDec</code>'s realization (or, body).</p>
+     *
+     * @param bodyParams The list of realization parameters.
+     */
     public void setBodyParams(List<ModuleArgumentItem> bodyParams) {
         myBodyParameters = bodyParams;
     }
 
+    /**
+     * <p>Sets a list of realizations corresponding to
+     * <code>EnhancementItem</code>s listed by this
+     * <code>FacilityDec</code>.</p>
+     *
+     * @param enhancementBodies The list of enhancement realizations.
+     */
     public void setEnhancementBodies(List<EnhancementBodyItem> enhancementBodies) {
         myEnhancementBodies = enhancementBodies;
     }

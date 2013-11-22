@@ -31,15 +31,17 @@ public abstract class ResolveConceptualElement implements AsStringCapability {
      * <p>Creates and returns a string representation of this
      * <code>ResolveConceptualElement</code>.</p>
      *
-     * @param indent A default indentation level.
-     * @param increment Additional indentation on top of the default.
-     * @return A string representing this <code>ResolveConceptualElement</code>.
+     * @param indent The desired default indentation level.
+     * @param increment The amount of additional indentation to add on top of
+     *                  the default.
+     * @return The string representing this
+     * 		   <code>ResolveConceptualElement</code>.
      */
     public abstract String asString(int indent, int increment);
 
     /**
      * <p>Returns a <code>Location</code> indicating the position of this
-     * <code>ResolveConceptualElement</code> within some Resolve source file.</p>
+     * <code>ResolveConceptualElement</code> within a Resolve source file.</p>
      *
      * @return The <code>Location</code>.
      */
