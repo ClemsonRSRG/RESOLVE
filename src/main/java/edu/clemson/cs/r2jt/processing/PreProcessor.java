@@ -147,26 +147,12 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             listItem.add(new ModuleArgumentItem(null, null, ty.getHi()));
 
             // Call method to createFacilityDec
-            /* FacilityDec arrayFacilityDec =
-                     myUtilities.createFacilityDec(location, newArrayName,
-                             "Static_Array_Template", "Std_Array_Realiz",
-                             listItem, new List<ModuleArgumentItem>(),
-                             new List<EnhancementItem>(),
-                             new List<EnhancementBodyItem>());*/
-
-            // Instantiate a new FacilityDec representing a "de-sugared"
-            // version of Resolve's array declaration syntax.
-            // The last parameter we pass true since arrays (at the moment) are
-            // externally realized...
             FacilityDec arrayFacilityDec =
-                    new FacilityDec(new PosSymbol(location, Symbol
-                            .symbol(newArrayName)), new PosSymbol(location,
-                            Symbol.symbol("Static_Array_Template")), listItem,
+                    myUtilities.createFacilityDec(location, newArrayName,
+                            "Static_Array_Template", "Std_Array_Realiz",
+                            listItem, new List<ModuleArgumentItem>(),
                             new List<EnhancementItem>(),
-                            new PosSymbol(location, Symbol
-                                    .symbol("Std_Array_Realiz")), null,
-                            new List<ModuleArgumentItem>(),
-                            new List<EnhancementBodyItem>(), true);
+                            new List<EnhancementBodyItem>());
 
             //Iterate through AST
             Iterator<ResolveConceptualElement> it = this.getAncestorInterator();

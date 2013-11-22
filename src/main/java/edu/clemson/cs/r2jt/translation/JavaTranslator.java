@@ -5,6 +5,7 @@ import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
+import edu.clemson.cs.r2jt.translation.bookkeeping.JavaBookkeeper;
 import edu.clemson.cs.r2jt.translation.bookkeeping.JavaConceptBookkeeper;
 import edu.clemson.cs.r2jt.translation.bookkeeping.JavaFacilityBookkeeper;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
@@ -67,16 +68,6 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     @Override
-    public void preWhileStmt(WhileStmt node) {
-        myBookkeeper.fxnAppendTo("while (((Std_Boolean_Realiz.Boolean)(");
-    }
-
-    @Override
-    public void preWhileStmtStatements(WhileStmt node) {
-        myBookkeeper.fxnAppendTo(")).val) {");
-    }
-
-    @Override
     public void preFacilityModuleDec(FacilityModuleDec node) {
 
         myBookkeeper =
@@ -101,6 +92,18 @@ public class JavaTranslator extends AbstractTranslator {
         myBookkeeper.addUses("import RESOLVE.*;");
     }
 
+    @Override
+    public void preConceptBodyModuleDec(ConceptBodyModuleDec node) {
+        myBookkeeper = new JavaBookkeeper(node.getName().getName(), true);
+
+        ModuleID conceptRealizationID = ModuleID.createConceptBodyID(node
+                .getName(), node.getConceptName());
+
+        File sourceFile = myInstanceEnvironment.getFile(conceptRealizationID);
+        myBookkeeper.addUses("package " + formPkgPath(sourceFile) + ";");
+        myBookkeeper.addUses("import RESOLVE.*;");
+    }
+
     /**
      * <p>A <em>Temporary</em> solution to building workable headers: Say we
      * want to build a Java pkg for <code>Std_Integer_Fac</code>. We first
@@ -121,6 +124,7 @@ public class JavaTranslator extends AbstractTranslator {
             PosSymbol conceptName = new PosSymbol(null, Symbol.symbol(name));
             ModuleID conceptID = ModuleID.createConceptID(conceptName);
             File sourceFile = myInstanceEnvironment.getFile(conceptID);
+
             myBookkeeper.addUses("import " + formPkgPath(sourceFile) + ";");
 
         }
@@ -265,6 +269,16 @@ public class JavaTranslator extends AbstractTranslator {
         else {
             myBookkeeper.facAddParameter(parameter);
         }
+    }
+
+    @Override
+    public void preWhileStmt(WhileStmt node) {
+        myBookkeeper.fxnAppendTo("while (((Std_Boolean_Realiz.Boolean)(");
+    }
+
+    @Override
+    public void preWhileStmtStatements(WhileStmt node) {
+        myBookkeeper.fxnAppendTo(")).val) {");
     }
 
     @Override
