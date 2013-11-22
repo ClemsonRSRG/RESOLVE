@@ -434,7 +434,7 @@ public class Utilities {
      *
      * @return newly created <code>FacilityDec</code>
      */
-    public FacilityDec createFacilityDec(Location location, String name,
+   /* public FacilityDec createFacilityDec(Location location, String name,
             String conceptName, String conceptRealizationName,
             List<ModuleArgumentItem> conceptParam,
             List<ModuleArgumentItem> conceptBodiesParam,
@@ -454,7 +454,7 @@ public class Utilities {
                     .symbol(conceptName)));
             newFacilityDec.setConceptParams(conceptParam);
 
-            // Set the Concept Realization to "Std_Array_Realiz */
+            // Set the Concept Realization to "Std_Array_Realiz
             newFacilityDec.setBodyName(new PosSymbol(location, Symbol
                     .symbol(conceptRealizationName)));
             newFacilityDec.setBodyParams(conceptBodiesParam);
@@ -465,7 +465,7 @@ public class Utilities {
         }
 
         return newFacilityDec;
-    }
+    }*/
 
     /**
      * <p>
