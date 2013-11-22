@@ -421,7 +421,7 @@ public class AbstractTranslator extends TreeWalkerVisitor {
 
         FacilityEntry result = null;
         try {
-			System.out.println("Type: " + type.toString());
+            System.out.println("Type: " + type.toString());
 
             ProgramTypeEntry te =
                     myModuleScope.queryForOne(
