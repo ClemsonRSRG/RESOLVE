@@ -1,61 +1,3 @@
-/*
- * This software is released under the new BSD 2006 license.
- * 
- * Note the new BSD license is equivalent to the MIT License, except for the
- * no-endorsement final clause.
- * 
- * Copyright (c) 2007, Clemson University
- * 
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * * Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
- * * Neither the name of the Clemson University nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
- * This sofware has been developed by past and present members of the
- * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University. Contributors to the initial version are:
- * 
- * Steven Atkinson
- * Greg Kulczycki
- * Kunal Chopra
- * John Hunt
- * Heather Keown
- * Ben Markle
- * Kim Roche
- * Murali Sitaraman
- */
-/*
- * ResolveConceptualElement.java
- * 
- * The Resolve Software Composition Workbench Project
- * 
- * Copyright (c) 1999-2005
- * Reusable Software Research Group
- * Department of Computer Science
- * Clemson University
- */
-
 package edu.clemson.cs.r2jt.absyn;
 
 import java.lang.reflect.Field;
@@ -70,21 +12,49 @@ import edu.clemson.cs.r2jt.data.AsStringCapability;
 import edu.clemson.cs.r2jt.data.Location;
 import java.lang.reflect.ParameterizedType;
 
+/**
+ * <p>A <code>ResolveConceptualElement</code> represents the various elements
+ * composing Resolve's <em>abstract syntax tree</em> (AST) at the most general,
+ * highest level.</p>
+ */
 public abstract class ResolveConceptualElement implements AsStringCapability {
 
+    /**
+     * <p>Allows a <code>ResolveConceptualElement</code> to accept a
+     * <code>ResolveConceptualVisitor</code> for treewalking purposes.</p>
+     *
+     * @param v The visitor.
+     */
     public abstract void accept(ResolveConceptualVisitor v);
 
+    /**
+     * <p>Creates and returns a string representation of this
+     * <code>ResolveConceptualElement</code>.</p>
+     *
+     * @param indent A default indentation level.
+     * @param increment Additional indentation on top of the default.
+     * @return A string representing this <code>ResolveConceptualElement</code>.
+     */
     public abstract String asString(int indent, int increment);
 
+    /**
+     * <p>Returns a <code>Location</code> indicating the position of this
+     * <code>ResolveConceptualElement</code> within some Resolve source file.</p>
+     *
+     * @return The <code>Location</code>.
+     */
     public abstract Location getLocation();
 
     /**
-     * Builds a sequence of numSpaces spaces and returns that
-     * sequence.
+     * <p>Mutates a buffer, <code>spaces</code>, into one containing
+     * <code>n</code> consecutive blank spaces.</p>
+     *
+     * @param n The number of consecutive blank spaces.
+     * @param spaces The whitespace string buffer.
      */
-    protected void printSpace(int numSpaces, StringBuffer buffer) {
-        for (int i = 0; i < numSpaces; ++i) {
-            buffer.append(" ");
+    protected void printSpace(int n, StringBuffer spaces) {
+        for (int i = 0; i < n; ++i) {
+            spaces.append(" ");
         }
     }
 

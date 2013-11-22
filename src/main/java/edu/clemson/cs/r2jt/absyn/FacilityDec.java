@@ -1,239 +1,194 @@
-/*
- * This software is released under the new BSD 2006 license.
- * 
- * Note the new BSD license is equivalent to the MIT License, except for the
- * no-endorsement final clause.
- * 
- * Copyright (c) 2007, Clemson University
- * 
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * * Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
- * * Neither the name of the Clemson University nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
- * This sofware has been developed by past and present members of the
- * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University. Contributors to the initial version are:
- * 
- * Steven Atkinson
- * Greg Kulczycki
- * Kunal Chopra
- * John Hunt
- * Heather Keown
- * Ben Markle
- * Kim Roche
- * Murali Sitaraman
- */
-/*
- * FacilityDec.java
- * 
- * The Resolve Software Composition Workbench Project
- * 
- * Copyright (c) 1999-2005
- * Reusable Software Research Group
- * Department of Computer Science
- * Clemson University
- */
-
 package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 
+/**
+ * <p>A <code>FacilityDec</code> encapsulates all content responsible for the
+ * instantiation of a abstract concept in a client's source. A typical
+ * facility declaration looks like the following:</p>
+ *
+ * <pre>Std_Integer_Fac is Integer_Template
+ *              realized by Std_Integer_Realiz;</pre>
+ *
+ * <p>Note that each <code>FacilityDec</code> pairs a (possibly)
+ * parameterized specification with a (possibly) parameterized realization.
+ * Additionally, any number of <code>EnhancementItem</code>s may follow.</p>
+ */
 public class FacilityDec extends Dec {
 
-    // ===========================================================
-    // Variables
-    // ===========================================================
-
-    /** The name member. */
-    private PosSymbol name;
-
-    /** The conceptName member. */
-    private PosSymbol conceptName;
-
-    /** The conceptParams member. */
-    private List<ModuleArgumentItem> conceptParams;
-
-    /** The enhancements member. */
-    private List<EnhancementItem> enhancements;
-
-    /** The bodyName member. */
-    private PosSymbol bodyName;
-
-    /** The performance profile name member. */
-    private PosSymbol profileName;
-
-    /** The bodyParams member. */
-    private List<ModuleArgumentItem> bodyParams;
-
-    /** The enhancementBodies member. */
-    private List<EnhancementBodyItem> enhancementBodies;
+    /**
+     * <p>A handle to the name of this <code>FacilityDec</code>. For instance,
+     * in the example above, the name is: <code>Std_Integer_Fac</code>.</p>
+     */
+    private PosSymbol myName;
 
     /**
-     * <p>Tells us whether or not the facility's realization
-     * has a implementation written in Resolve. If it does,
-     * then this flag should be true, otherwise, it will be
-     * false.</p>
+     * <p>This refers to the specification portion of the current
+     * <code>FacilityDec</code>.</p>
      */
-    private boolean isExternallyRealized;
+    private PosSymbol myConceptName;
+    private List<ModuleArgumentItem> myConceptParameters;
 
-    // ===========================================================
-    // Constructors
-    // ===========================================================
+    /**
+     * <p>A <em>body</em> is simply another way of saying
+     * <em>realization</em>.  This is a handle to the realization portion of
+     * the <code>FacilityDec</code>.</p>
+     */
+    private PosSymbol myBodyName;
+    private List<ModuleArgumentItem> myBodyParameters;
 
-    public FacilityDec() {};
+    /**
+     * <p>This refers to an (optional) performance profile component for an
+     * otherwise normal <code>FacilityDec</code>.</p>
+     */
+    private PosSymbol myProfileName;
+
+    /**
+     * <p>Any enhancements associated with this <code>FacilityDec</code>.</p>
+     */
+    private List<EnhancementItem> myEnhancements;
+    private List<EnhancementBodyItem> myEnhancementBodies;
+
+    /**
+     * <p>A flag indicating whether or not this <code>FacilityDec</code>'s
+     * body/realization has an implementation written in Resolve.</p>
+     */
+    private boolean myExternallyRealizedFlag;
 
     public FacilityDec(PosSymbol name, PosSymbol conceptName,
-            List<ModuleArgumentItem> conceptParams,
-            List<EnhancementItem> enhancements, PosSymbol bodyName,
-            PosSymbol profileName, List<ModuleArgumentItem> bodyParams,
-            List<EnhancementBodyItem> enhancementBodies) {
+                       List<ModuleArgumentItem> conceptParams,
+                       List<EnhancementItem> enhancements, PosSymbol bodyName,
+                       PosSymbol profileName, List<ModuleArgumentItem> bodyParams,
+                       List<EnhancementBodyItem> enhancementBodies,
+                       boolean externallyRealized) {
 
-        this(name, conceptName, conceptParams, enhancements, bodyName,
-                profileName, bodyParams, enhancementBodies, false);
+        myName = name;
+        myConceptName = conceptName;
+        myConceptParameters = conceptParams;
+        myEnhancements = enhancements;
+        myBodyName = bodyName;
+        myProfileName = profileName;
+        myBodyParameters = bodyParams;
+        myEnhancementBodies = enhancementBodies;
+        myExternallyRealizedFlag = externallyRealized;
     }
 
-    public FacilityDec(PosSymbol name, PosSymbol conceptName,
-            List<ModuleArgumentItem> conceptParams,
-            List<EnhancementItem> enhancements, PosSymbol bodyName,
-            PosSymbol profileName, List<ModuleArgumentItem> bodyParams,
-            List<EnhancementBodyItem> enhancementBodies, boolean externRealized) {
-
-        this.name = name;
-        this.conceptName = conceptName;
-        this.conceptParams = conceptParams;
-        this.enhancements = enhancements;
-        this.bodyName = bodyName;
-        this.profileName = profileName;
-        this.bodyParams = bodyParams;
-        this.enhancementBodies = enhancementBodies;
-        this.isExternallyRealized = externRealized;
-    }
-
-    // ===========================================================
-    // Accessor Methods
-    // ===========================================================
-
-    // -----------------------------------------------------------
-    // Get Methods
-    // -----------------------------------------------------------
-
-    /** Returns the value of the name variable. */
     public PosSymbol getName() {
-        return name;
+        return myName;
     }
 
-    /** Returns the value of the conceptName variable. */
+    /**
+     * <p>Returns the name of this <code>FacilityDec</code>'s
+     * specification.</p>
+     *
+     * @return A <code>PosSymbol</code> containing the name and
+     *                      <code>Location</code> of the specification.
+     */
     public PosSymbol getConceptName() {
-        return conceptName;
+        return myConceptName;
     }
 
-    /** Returns the value of the conceptParams variable. */
+    /**
+     * <p>Returns a list of any user-supplied parameters to the
+     * this <code>FacilityDec</code>'s specification.</p>
+     *
+     * @return A list of <code>ModuleArgumentItem</code>s
+     */
     public List<ModuleArgumentItem> getConceptParams() {
-        return conceptParams;
+        return myConceptParameters;
     }
 
-    /** Returns the value of the enhancements variable. */
+    /**
+     * <p>Returns a list of enhancements (<code>EnhancementItem</code>s)
+     * corresponding to this <code>FacilityDec</code>.</p>
+     *
+     * @return
+     */
     public List<EnhancementItem> getEnhancements() {
-        return enhancements;
+        return myEnhancements;
     }
 
-    /** Returns the value of the bodyName variable. */
+    /**
+     * <p>Returns the name of this <code>FacilityDec</code>'s realization.</p>
+     *
+     * @return A <code>PosSymbol</code> containing the name and location of
+     *         the realization.
+     */
     public PosSymbol getBodyName() {
-        return bodyName;
+        return myBodyName;
     }
 
-    /** Returns the value of the profileName variable. */
+    /**
+     * <p>Returns the name of the performance profile associated with this
+     * <code>FacilityDec</code>.</p>
+     *
+     * @return The performance profile's name.
+     */
     public PosSymbol getProfileName() {
-        return profileName;
+        return myProfileName;
     }
 
-    /** Returns the value of the bodyParams variable. */
+    /**
+     * <p>Returns a list of parameters </p>
+     * @return
+     */
     public List<ModuleArgumentItem> getBodyParams() {
-        return bodyParams;
+        return myBodyParameters;
     }
 
-    /** Returns the value of the enhancementBodies variable. */
     public List<EnhancementBodyItem> getEnhancementBodies() {
-        return enhancementBodies;
+        return myEnhancementBodies;
     }
 
-    // -----------------------------------------------------------
-    // Set Methods
-    // -----------------------------------------------------------
+    /**
+     * <p>Returns <code>true</code> <strong>iff</strong> there currently
+     * isn't a Resolve realization for the concept this
+     * <code>FacilityDec</code> instantiates.</p>
+     *
+     * @return <code>true</code> if the body/spec lacks a Resolve
+     *         implementation; <code>false</code> otherwise.
+     */
+    public boolean isExternallyRealized() {
+        return myExternallyRealizedFlag;
+    }
 
-    /** Sets the name variable to the specified value. */
     public void setName(PosSymbol name) {
-        this.name = name;
+        myName = name;
     }
 
-    /** Sets the conceptName variable to the specified value. */
     public void setConceptName(PosSymbol conceptName) {
-        this.conceptName = conceptName;
+        myConceptName = conceptName;
     }
 
-    /** Sets the conceptParams variable to the specified value. */
     public void setConceptParams(List<ModuleArgumentItem> conceptParams) {
-        this.conceptParams = conceptParams;
+        myConceptParameters = conceptParams;
     }
 
-    /** Sets the enhancements variable to the specified value. */
     public void setEnhancements(List<EnhancementItem> enhancements) {
-        this.enhancements = enhancements;
+        myEnhancements = enhancements;
     }
 
-    /** Sets the bodyName variable to the specified value. */
     public void setBodyName(PosSymbol bodyName) {
-        this.bodyName = bodyName;
+        myBodyName = bodyName;
     }
 
-    /** Sets the profileName variable to the specified value. */
     public void setProfileName(PosSymbol name) {
-        this.profileName = name;
+        myProfileName = name;
     }
 
-    /** Sets the bodyParams variable to the specified value. */
     public void setBodyParams(List<ModuleArgumentItem> bodyParams) {
-        this.bodyParams = bodyParams;
+        myBodyParameters = bodyParams;
     }
 
-    /** Sets the enhancementBodies variable to the specified value. */
     public void setEnhancementBodies(List<EnhancementBodyItem> enhancementBodies) {
-        this.enhancementBodies = enhancementBodies;
+        myEnhancementBodies = enhancementBodies;
     }
 
-    // ===========================================================
-    // Public Methods
-    // ===========================================================
-
-    /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitFacilityDec(this);
     }
 
-    /** Returns a formatted text string of this class. */
     public String asString(int indent, int increment) {
 
         StringBuffer sb = new StringBuffer();
@@ -241,34 +196,34 @@ public class FacilityDec extends Dec {
         printSpace(indent, sb);
         sb.append("FacilityDec\n");
 
-        if (name != null) {
-            sb.append(name.asString(indent + increment, increment));
+        if (myName != null) {
+            sb.append(myName.asString(indent + increment, increment));
         }
 
-        if (conceptName != null) {
-            sb.append(conceptName.asString(indent + increment, increment));
+        if (myConceptName != null) {
+            sb.append(myConceptName.asString(indent + increment, increment));
         }
 
-        if (conceptParams != null) {
-            sb.append(conceptParams.asString(indent + increment, increment));
+        if (myConceptParameters != null) {
+            sb.append(myConceptParameters.asString(indent + increment,
+                    increment));
         }
 
-        if (enhancements != null) {
-            sb.append(enhancements.asString(indent + increment, increment));
+        if (myEnhancements != null) {
+            sb.append(myEnhancements.asString(indent + increment, increment));
         }
 
-        if (bodyName != null) {
-            sb.append(bodyName.asString(indent + increment, increment));
+        if (myBodyName != null) {
+            sb.append(myBodyName.asString(indent + increment, increment));
         }
 
-        if (bodyParams != null) {
-            sb.append(bodyParams.asString(indent + increment, increment));
+        if (myBodyParameters != null) {
+            sb.append(myBodyParameters.asString(indent + increment, increment));
         }
 
-        if (enhancementBodies != null) {
-            sb
-                    .append(enhancementBodies.asString(indent + increment,
-                            increment));
+        if (myEnhancementBodies != null) {
+            sb.append(myEnhancementBodies.asString(indent + increment,
+                    increment));
         }
 
         return sb.toString();
