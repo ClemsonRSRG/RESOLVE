@@ -434,38 +434,38 @@ public class Utilities {
      *
      * @return newly created <code>FacilityDec</code>
      */
-    public FacilityDec createFacilityDec(Location location, String name,
-            String conceptName, String conceptRealizationName,
-            List<ModuleArgumentItem> conceptParam,
-            List<ModuleArgumentItem> conceptBodiesParam,
-            List<EnhancementItem> enhancementParam,
-            List<EnhancementBodyItem> enhancementBodiesParam) {
-        // Create a FacilityDec
-        FacilityDec newFacilityDec = new FacilityDec();
+    /* public FacilityDec createFacilityDec(Location location, String name,
+             String conceptName, String conceptRealizationName,
+             List<ModuleArgumentItem> conceptParam,
+             List<ModuleArgumentItem> conceptBodiesParam,
+             List<EnhancementItem> enhancementParam,
+             List<EnhancementBodyItem> enhancementBodiesParam) {
+         // Create a FacilityDec
+         FacilityDec newFacilityDec = new FacilityDec();
 
-        // Check for null
-        if (newFacilityDec != null) {
-            // Set the name
-            newFacilityDec
-                    .setName(new PosSymbol(location, Symbol.symbol(name)));
+         // Check for null
+         if (newFacilityDec != null) {
+             // Set the name
+             newFacilityDec
+                     .setName(new PosSymbol(location, Symbol.symbol(name)));
 
-            // Set the Concept to "Static_Array_Template
-            newFacilityDec.setConceptName(new PosSymbol(location, Symbol
-                    .symbol(conceptName)));
-            newFacilityDec.setConceptParams(conceptParam);
+             // Set the Concept to "Static_Array_Template
+             newFacilityDec.setConceptName(new PosSymbol(location, Symbol
+                     .symbol(conceptName)));
+             newFacilityDec.setConceptParams(conceptParam);
 
-            // Set the Concept Realization to "Std_Array_Realiz */
-            newFacilityDec.setBodyName(new PosSymbol(location, Symbol
-                    .symbol(conceptRealizationName)));
-            newFacilityDec.setBodyParams(conceptBodiesParam);
+             // Set the Concept Realization to "Std_Array_Realiz
+             newFacilityDec.setBodyName(new PosSymbol(location, Symbol
+                     .symbol(conceptRealizationName)));
+             newFacilityDec.setBodyParams(conceptBodiesParam);
 
-            // Set the Enhancement to empty
-            newFacilityDec.setEnhancements(enhancementParam);
-            newFacilityDec.setEnhancementBodies(enhancementBodiesParam);
-        }
+             // Set the Enhancement to empty
+             newFacilityDec.setEnhancements(enhancementParam);
+             newFacilityDec.setEnhancementBodies(enhancementBodiesParam);
+         }
 
-        return newFacilityDec;
-    }
+         return newFacilityDec;
+     }*/
 
     /**
      * <p>

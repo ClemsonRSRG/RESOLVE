@@ -67,6 +67,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     // Map of all the local array types encountered
     private Map<String, NameTy> myArrayFacilityMap;
 
+    // Sami: Shouldn't these be Facilities???? -DtW
     // List of Concepts that gets added to the Uses List automatically
     private String[] myUsesItems =
             { "Location_Linking_Template_1", "Static_Array_Template" };
@@ -146,12 +147,26 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             listItem.add(new ModuleArgumentItem(null, null, ty.getHi()));
 
             // Call method to createFacilityDec
+            /* FacilityDec arrayFacilityDec =
+                     myUtilities.createFacilityDec(location, newArrayName,
+                             "Static_Array_Template", "Std_Array_Realiz",
+                             listItem, new List<ModuleArgumentItem>(),
+                             new List<EnhancementItem>(),
+                             new List<EnhancementBodyItem>());*/
+
+            // Instantiate a new FacilityDec representing a "de-sugared"
+            // version of Resolve's array declaration syntax.
+            // The last parameter we pass true since arrays (at the moment) are
+            // externally realized...
             FacilityDec arrayFacilityDec =
-                    myUtilities.createFacilityDec(location, newArrayName,
-                            "Static_Array_Template", "Std_Array_Realiz",
-                            listItem, new List<ModuleArgumentItem>(),
+                    new FacilityDec(new PosSymbol(location, Symbol
+                            .symbol(newArrayName)), new PosSymbol(location,
+                            Symbol.symbol("Static_Array_Template")), listItem,
                             new List<EnhancementItem>(),
-                            new List<EnhancementBodyItem>());
+                            new PosSymbol(location, Symbol
+                                    .symbol("Std_Array_Realiz")), null,
+                            new List<ModuleArgumentItem>(),
+                            new List<EnhancementBodyItem>(), true);
 
             //Iterate through AST
             Iterator<ResolveConceptualElement> it = this.getAncestorInterator();

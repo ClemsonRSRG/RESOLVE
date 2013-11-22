@@ -23,7 +23,7 @@ public class CBookkeeper extends AbstractBookkeeper {
     public void facAdd(String name, String concept, String realiz) {
         CFacilityDeclBook f;
         f = new CFacilityDeclBook(name, concept, realiz);
-        myFacilityList.add(f);
+        myFacilities.add(f);
         myCurrentFacility = f;
     }
 
