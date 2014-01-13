@@ -15,10 +15,7 @@ package edu.clemson.cs.r2jt.vcgeneration;
 /*
  * Libraries
  */
-import edu.clemson.cs.r2jt.absyn.AssumeStmt;
-import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.absyn.Statement;
-import edu.clemson.cs.r2jt.absyn.VarExp;
+import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 
@@ -88,6 +85,21 @@ public class AssertiveCode {
     }
 
     /**
+     * <p>Add the <code>Exp</code> containing a new confirm
+     * clause.</p>
+     *
+     * @param e The corresponding confirm <code>Exp</code>.
+     */
+    public void addConfirm(Exp e) {
+        // Creates a new ConfirmStmt
+        ConfirmStmt confirm = new ConfirmStmt();
+        confirm.setAssertion(e);
+
+        // Adds the confirm to our list of verification statements
+        addCode(confirm);
+    }
+
+    /**
      * <p>Add a Remember statement to the list</p>
      */
     public void addRemember() {
@@ -115,7 +127,7 @@ public class AssertiveCode {
      * @return <code>Exp</code> confirm clause.
      */
     public Exp getFinalConfirm() {
-        return (Exp) Exp.clone(myConfirm);
+        return Exp.copy(myConfirm);
     }
 
     /**

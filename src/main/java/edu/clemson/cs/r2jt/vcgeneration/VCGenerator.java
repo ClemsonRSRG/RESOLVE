@@ -16,6 +16,7 @@ package edu.clemson.cs.r2jt.vcgeneration;
  * Libraries
  */
 import edu.clemson.cs.r2jt.absyn.*;
+import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
@@ -23,11 +24,15 @@ import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.type.BooleanType;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -36,7 +41,7 @@ import java.util.List;
 public class VCGenerator extends TreeWalkerVisitor {
 
     // ===========================================================
-    // Global Variables 
+    // Global Variables
     // ===========================================================
 
     // Symbol table related items
@@ -45,6 +50,10 @@ public class VCGenerator extends TreeWalkerVisitor {
     private final MTType BOOLEAN;
     private final MTType MTYPE;
     private final MTType Z;
+    private ModuleScope myCurrentModuleScope;
+
+    // Current Operation Entry
+    private OperationEntry myCurrentOperationEntry;
 
     // Compile Environment
     private CompileEnvironment myInstanceEnvironment;
@@ -86,6 +95,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         BOOLEAN = myTypeGraph.BOOLEAN;
         MTYPE = myTypeGraph.MTYPE;
         Z = myTypeGraph.Z;
+        myCurrentModuleScope = null;
+        myCurrentOperationEntry = null;
 
         myInstanceEnvironment = env;
         myAssertion = null;
@@ -122,12 +133,21 @@ public class VCGenerator extends TreeWalkerVisitor {
         ModuleIdentifier id = mySymbolTable.getScope(dec).getRootModule();
         try {
             // Obtain the module dec and use it to obtain the global requires clause
-            ModuleDec mDec =
-                    mySymbolTable.getModuleScope(id).getDefiningElement();
+            myCurrentModuleScope = mySymbolTable.getModuleScope(id);
+            ModuleDec mDec = myCurrentModuleScope.getDefiningElement();
             Exp gRequires = getRequiresClause(mDec);
 
+            // Keep the current operation dec
+            List<PTType> argTypes = new LinkedList<PTType>();
+            for (ParameterVarDec p : dec.getParameters()) {
+                argTypes.add(p.getTy().getProgramTypeValue());
+            }
+            myCurrentOperationEntry =
+                    searchOperation(dec.getLocation(), null, dec.getName(),
+                            argTypes);
+
             // Obtains items from the current operation
-            Exp requires = null; //modifyRequiresClause(getRequiresClause(dec));
+            Exp requires = modifyRequiresClause(getRequiresClause(dec));
             Exp ensures = modifyEnsuresClause(getEnsuresClause(dec));
             List<Statement> statementList = dec.getStatements();
 
@@ -138,6 +158,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             applyEBRules();
 
             System.out.println(myAssertion.getFinalConfirm());
+            myCurrentOperationEntry = null;
+            myCurrentModuleScope = null;
         }
         catch (NoSuchSymbolException nsse) {
             System.err.println("Module " + id
@@ -213,6 +235,91 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>Returns a newly created <code>InfixExp</code>
+     * that says "left and right".</p>
+     *
+     * @param left <code>Exp</code> to the left of the and.
+     * @param right <code>Exp</code> to the right of the and.
+     *
+     * @return The new <code>InfixExp</code>.
+     */
+    private InfixExp createAndExp(Exp left, Exp right) {
+        // Create a new expression
+        InfixExp newConf = new InfixExp();
+
+        // Create an implies symbol
+        PosSymbol opName = createPosSymbol("and");
+        newConf.setType(BooleanType.INSTANCE);
+        newConf.setMathType(BOOLEAN);
+
+        // Convert the confirm a confirm b into
+        // confirm a and b.
+        newConf.setLeft(left);
+        newConf.setOpName(opName);
+        newConf.setRight(right);
+
+        return newConf;
+    }
+
+    /**
+     * <p>Returns a newly created <code>InfixExp</code>
+     * that says "left implies right".</p>
+     *
+     * @param left <code>Exp</code> to the left of the implies.
+     * @param right <code>Exp</code> to the right of the implies.
+     *
+     * @return The new <code>InfixExp</code>.
+     */
+    private InfixExp createImpliesExp(Exp left, Exp right) {
+        // Create a new expression
+        InfixExp newConf = new InfixExp();
+
+        // Create an implies symbol
+        PosSymbol opName = createPosSymbol("implies");
+        newConf.setType(BooleanType.INSTANCE);
+        newConf.setMathType(BOOLEAN);
+
+        // Convert the assume a confirm b into
+        // confirm a implies b.
+        newConf.setLeft(left);
+        newConf.setOpName(opName);
+        newConf.setRight(right);
+
+        return newConf;
+    }
+
+    /**
+     * <p>Returns the ensures clause for the current <code>Dec</code>.</p>
+     *
+     * @param dec The corresponding <code>Dec</code>.
+     *
+     * @return The ensures clause <code>Exp</code>.
+     */
+    private Exp getEnsuresClause(Dec dec) {
+        PosSymbol name = dec.getName();
+        Exp retExp = null;
+
+        // Check for each kind of ModuleDec possible
+        if (dec instanceof FacilityOperationDec) {
+            retExp = ((FacilityOperationDec) dec).getEnsures();
+        }
+        else if (dec instanceof OperationDec) {
+            retExp = ((OperationDec) dec).getEnsures();
+        }
+
+        // Fill in the details of this location
+        if (retExp != null) {
+            if (retExp.getLocation() != null) {
+                Location myLoc = retExp.getLocation();
+                myLoc.setDetails("Ensures Clause of " + name);
+                setLocation(retExp, myLoc);
+            }
+        }
+
+        return retExp;
+    }
+
+    /**
      * <p>Returns the requires clause for the current <code>Dec</code>.</p>
      *
      * @param dec The corresponding <code>Dec</code>.
@@ -259,34 +366,21 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Returns the ensures clause for the current <code>Dec</code>.</p>
+     * <p>Returns a True <code>VarExp</code>.</p>
      *
-     * @param dec The corresponding <code>Dec</code>.
-     *
-     * @return The ensures clause <code>Exp</code>.
+     * @return A <code>VarExp</code> representing True.
      */
-    private Exp getEnsuresClause(Dec dec) {
-        PosSymbol name = dec.getName();
-        Exp retExp = null;
+    private VarExp getTrueVarExp() {
+        // true
+        PosSymbol truePosSym = createPosSymbol("true");
 
-        // Check for each kind of ModuleDec possible
-        if (dec instanceof FacilityOperationDec) {
-            retExp = ((FacilityOperationDec) dec).getEnsures();
-        }
-        else if (dec instanceof OperationDec) {
-            retExp = ((OperationDec) dec).getEnsures();
-        }
+        // Construct the VarExp
+        VarExp trueExp = new VarExp();
+        trueExp.setName(truePosSym);
+        trueExp.setType(BooleanType.INSTANCE);
+        trueExp.setMathType(BOOLEAN);
 
-        // Fill in the details of this location
-        if (retExp != null) {
-            if (retExp.getLocation() != null) {
-                Location myLoc = retExp.getLocation();
-                myLoc.setDetails("Ensures Clause of " + name);
-                setLocation(retExp, myLoc);
-            }
-        }
-
-        return retExp;
+        return trueExp;
     }
 
     //
@@ -318,11 +412,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             VariableRecordExp varRecExp = (VariableRecordExp) left;
             name = varRecExp.getName();
         }
-        // Variable Array Expression
-        // Note (YS): We shouldn't see this by now. Handled by Preprocessor
-        else if (left instanceof VariableArrayExp) {
-            name = ((VariableArrayExp) left).getName();
-        }
+        //
         // Creates an expression with "false" as its name
         else {
             name = createPosSymbol("false");
@@ -339,7 +429,28 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @return The modified ensures clause <code>Exp</code>.
      */
     private Exp modifyEnsuresClause(Exp ensures) {
-        return null;
+        if (ensures != null) {
+
+        }
+
+        return ensures;
+    }
+
+    /**
+     * <p>Modifies the requires clause.</p>
+     *
+     * @param requires The <code>Exp</code> containing the requires clause.
+     *
+     * @return The modified requires clause <code>Exp</code>.
+     */
+    private Exp modifyRequiresClause(Exp requires) {
+        if (requires != null) {
+            // Modifies the existing requires clause based on
+            // the parameter modes.
+            modifyRequiresByParameter(requires);
+        }
+
+        return requires;
     }
 
     /**
@@ -348,63 +459,26 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param requires The <code>Exp</code> containing the requires clause.
      *
      * @return The modified requires clause <code>Exp</code>.
-     *
-    private Exp modifyRequiresClause(Exp requires) {
-        Exp ensures = curOperation.getEnsures();
+     */
+    private Exp modifyRequiresByParameter(Exp requires) {
+        // Obtain the list of parameters
+        List<ParameterVarDec> parameterVarDecList;
+        if (myCurrentOperationEntry.getDefiningElement() instanceof FacilityOperationDec) {
+            parameterVarDecList = ((FacilityOperationDec) myCurrentOperationEntry.getDefiningElement()).getParameters();
+        } else {
+            parameterVarDecList = ((OperationDec) myCurrentOperationEntry.getDefiningElement()).getParameters();
+        }
 
-        Iterator<ParameterVarDec> paramIter =
-                curOperation.getParameters().iterator();
-        while (paramIter.hasNext()) {
-            ParameterVarDec tmpPVD = paramIter.next();
-            VarDec tmpVD = toVarDec(tmpPVD);
+        // Loop through each parameter
+        for (ParameterVarDec p : parameterVarDecList) {
 
-            if (tmpVD != null) {
-                Exp constr = getConstraints(tmpVD);
-                Exp init = getInitialExp(tmpVD);
-                if (tmpPVD.getMode() == Mode.REPLACES && init != null) {
-                    if (curOperation.getRequires() != null) {
-                        init.setLocation((Location) (curOperation.getRequires()
-                                .getLocation().clone()));
-                        init.getLocation().setDetails(
-                                "Assumption from Replaces Parameter Mode");
-                    }
-                    if (requires != null) {
-                        requires = myTypeGraph.formConjunct(init, requires);
-                    }
-                    else {
-                        requires = init;
-                    }
-
-                }
-                else {
-                    if (requires != null && constr != null
-                            && !isTrueExp(constr) && !isTrueExp(requires)) {
-                        requires = myTypeGraph.formConjunct(constr, requires);
-                    }
-                    else if (constr != null && !isTrueExp(constr)) {
-                        requires = constr;
-                    }
-                }
-                if (tmpPVD.getMode() == Mode.EVALUATES) {
-                    VarExp exp = new VarExp();
-                    exp.setName(tmpPVD.getName());
-                    exp.setMathType(tmpPVD.getTy().getMathTypeValue());
-
-                    OldExp o = new OldExp(null, exp);
-                    o.setMathType(tmpPVD.getTy().getMathTypeValue());
-
-                    ensures = replace(ensures, exp, o);
-                }
-                addFreeVar(tmpPVD, assertion);
-            }
         }
 
         return requires;
-    }       */
+    }
 
     /**
-     * <p>Returns the requires clause for the current
-     * <code>Dec</code>.</p>
+     * <p>Copy and replace the old <code>Exp</code>.</p>
      *
      * @param exp The <code>Exp</code> to be replaced.
      * @param old The old sub-expression of <code>exp</code>.
@@ -414,13 +488,34 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private Exp replace(Exp exp, Exp old, Exp repl) {
         // Clone old and repl and use the Exp replace to do all its work
-        Exp tmp = Exp.replace(exp, (Exp) Exp.clone(old), (Exp) Exp.clone(repl));
+        Exp tmp = Exp.replace(exp, Exp.copy(old), Exp.copy(repl));
 
         // Return the corresponding Exp
         if (tmp != null)
             return tmp;
         else
             return exp;
+    }
+
+    private OperationEntry searchOperation(Location loc, PosSymbol qualifier,
+            PosSymbol name, List<PTType> argTypes) {
+        // Query for the corresponding operation
+        OperationEntry op = null;
+        try {
+            op =
+                    myCurrentModuleScope.queryForOne(new OperationQuery(
+                            qualifier, name, argTypes));
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, name.getName(), loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate operation is
+            //created
+            throw new RuntimeException(dse);
+        }
+
+        return op;
     }
 
     /**
@@ -453,20 +548,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Obtain the current final confirm clause
         Exp conf = myAssertion.getFinalConfirm();
 
-        // Create a new expression
-        InfixExp newConf = new InfixExp();
-
-        // Create an implies symbol
-        PosSymbol opName = new PosSymbol();
-        opName.setSymbol(Symbol.symbol("implies"));
-        newConf.setType(BooleanType.INSTANCE);
-        newConf.setMathType(BOOLEAN);
-
-        // Convert the assume a confirm b into
-        // confirm a implies b.
-        newConf.setLeft(((Exp) assume.getAssertion()));
-        newConf.setOpName(opName);
-        newConf.setRight(conf);
+        // Create a new implies expression
+        InfixExp newConf = createImpliesExp((Exp) assume.getAssertion(), conf);
 
         // Set this new expression as the new final confirm
         myAssertion.setFinalConfirm(newConf);
@@ -479,7 +562,19 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private void applyCodeRules(Statement statement) {
         // Apply each statement rule here.
-        if (statement instanceof SwapStmt) {
+        if (statement instanceof AssumeStmt) {
+            applyEBAssumeStmtRule((AssumeStmt) statement);
+        }
+        else if (statement instanceof CallStmt) {
+            applyEBCallStmtRule((CallStmt) statement);
+        }
+        else if (statement instanceof ConfirmStmt) {
+            applyEBConfirmStmtRule((ConfirmStmt) statement);
+        }
+        else if (statement instanceof FuncAssignStmt) {
+            applyEBFuncAssignStmtRule((FuncAssignStmt) statement);
+        }
+        else if (statement instanceof SwapStmt) {
             applyEBSwapStmtRule((SwapStmt) statement);
         }
     }
@@ -493,23 +588,173 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Obtain the current final confirm clause
         Exp conf = myAssertion.getFinalConfirm();
 
-        // Create a new expression
-        InfixExp newConf = new InfixExp();
-
-        // Create an and symbol
-        PosSymbol opName = new PosSymbol();
-        opName.setSymbol(Symbol.symbol("and"));
-        newConf.setType(BooleanType.INSTANCE);
-        newConf.setMathType(BOOLEAN);
-
-        // Convert the confirm a confirm b into
-        // confirm a and b.
-        newConf.setLeft((Exp) confirm.getAssertion());
-        newConf.setOpName(opName);
-        newConf.setRight(conf);
+        // Create a new and expression
+        InfixExp newConf = createAndExp((Exp) confirm.getAssertion(), conf);
 
         // Set this new expression as the new final confirm
         myAssertion.setFinalConfirm(newConf);
+    }
+
+    /**
+     * <p>Applies the assume rule to the
+     * <code>Statement</code>.</p>
+     *
+     * @param stmt Our current <code>AssumeStmt</code>.
+     */
+    private void applyEBAssumeStmtRule(AssumeStmt stmt) {
+        // Check to see if our assertion just has "True"
+        Exp assertion = stmt.getAssertion();
+        if (assertion instanceof VarExp && assertion.equals(getTrueVarExp())) {
+            return;
+        }
+
+        // Obtain the current final confirm statement
+        Exp currentFinalConfirm = myAssertion.getFinalConfirm();
+
+        // TODO: Some replacement needs to happen here
+        //currentFinalConfirm = replaceAssumeRule(stmt, currentFinalConfirm, assertion);
+
+        if (assertion != null) {
+            // Create a new implies expression
+            InfixExp newConf = createImpliesExp(assertion, currentFinalConfirm);
+
+            // Set this new expression as the new final confirm
+            myAssertion.setFinalConfirm(newConf);
+        }
+        else {
+            myAssertion.setFinalConfirm(currentFinalConfirm);
+        }
+    }
+
+    /**
+     * <p>Applies the call statement rule to the
+     * <code>Statement</code>.</p>
+     *
+     * @param stmt Our current <code>CallStmt</code>.
+     */
+    private void applyEBCallStmtRule(CallStmt stmt) {
+        Exp ensures = null;
+        Exp requires = null;
+
+        // Obtain the corresponding OperationEntry and OperationDec
+        List<PTType> argTypes = new LinkedList<PTType>();
+        for (ProgramExp arg : stmt.getArguments()) {
+            argTypes.add(arg.getProgramType());
+        }
+        OperationEntry opEntry =
+                searchOperation(stmt.getLocation(), stmt.getQualifier(), stmt
+                        .getName(), argTypes);
+
+        // TODO: Beware, it might also be a FacilityOperationDec
+        OperationDec opDec = (OperationDec) opEntry.getDefiningElement();
+
+        // Get the ensures clause for this operation
+        // Note: If there isn't an ensures clause, it is set to "True"
+        if (opDec.getEnsures() != null) {
+            ensures = Exp.copy(opDec.getEnsures());
+        }
+        else {
+            ensures = getTrueVarExp();
+        }
+
+        // Get the requires clause for this operation
+        if (opDec.getRequires() != null) {
+            requires = Exp.copy(opDec.getRequires());
+        }
+
+        // TODO: Quantified Ensures clauses
+        //ensures =
+        //        modifyEnsuresIfCallingQuantified(ensures, opDec, assertion,
+        //                ensures);
+
+        if (ensures.getLocation() != null) {
+            ensures.getLocation().setDetails(
+                    "Ensures Clause For " + opDec.getName());
+        }
+
+        // TODO:  Check for  recursive call of itself
+        // TODO:  Modify ensures using the parameter modes
+        //ensures = modifyEnsuresForParameterModes(ensures, opDec, stmt);
+
+        // TODO :Replace PreCondition Variables
+        //requires =
+        //replacePreConditionVariables(requires, stmt.getArguments(),
+        // opDec, assertion);
+
+        // TODO: Replace PostCondition Variables
+        //ensures =
+        //replacePostConditionVariables(stmt.getArguments(), ensures,
+        //opDec, assertion);
+
+        // Modify the location of the requires clause and add it to myAssertion
+        if (requires != null) {
+            // Obtain the current location
+            // Note: If we don't have a location, we create one
+            Location loc;
+            if (stmt.getName().getLocation() != null) {
+                loc = (Location) stmt.getName().getLocation().clone();
+            }
+            else {
+                loc = new Location(null, null);
+            }
+
+            // Append the name of the current procedure
+            String details = "";
+            if (myCurrentOperationEntry != null) {
+                details = " in Procedure " + myCurrentOperationEntry.getName();
+            }
+
+            // Set the details of the current location
+            loc.setDetails("Requires Clause of " + opDec.getName() + details);
+            setLocation(requires, loc);
+
+            // Add this to our list of things to confirm
+            myAssertion.addConfirm(requires);
+        }
+
+        // Modify the location of the requires clause and add it to myAssertion
+        if (ensures != null) {
+            // Obtain the current location
+            if (stmt.getName().getLocation() != null) {
+                // Set the details of the current location
+                Location loc = (Location) stmt.getName().getLocation().clone();
+                loc.setDetails("Ensures Clause of " + opDec.getName());
+                setLocation(ensures, loc);
+            }
+
+            // Add this to our list of things to assume
+            myAssertion.addAssume(ensures);
+        }
+    }
+
+    /**
+     * <p>Applies the confirm rule to the
+     * <code>Statement</code>.</p>
+     *
+     * @param stmt Our current <code>ConfirmStmt</code>.
+     */
+    private void applyEBConfirmStmtRule(ConfirmStmt stmt) {
+        // Check to see if our assertion just has "True"
+        Exp assertion = stmt.getAssertion();
+        if (assertion instanceof VarExp && assertion.equals(getTrueVarExp())) {
+            return;
+        }
+
+        // Obtain the current final confirm statement
+        Exp currentFinalConfirm = myAssertion.getFinalConfirm();
+
+        // Check to see if we have a final confirm of "True"
+        if (currentFinalConfirm instanceof VarExp
+                && currentFinalConfirm.equals(getTrueVarExp())) {
+            myAssertion.setFinalConfirm(assertion);
+        }
+        else {
+            // Create a new and expression
+            InfixExp newConf = createAndExp(assertion, currentFinalConfirm);
+
+            // Set this new expression as the new final confirm
+            myAssertion.setFinalConfirm(newConf);
+        }
     }
 
     /**
@@ -544,6 +789,45 @@ public class VCGenerator extends TreeWalkerVisitor {
                 applyRememberRule();
             }
         }
+    }
+
+    /**
+     * <p>Applies the function assignment rule to the
+     * <code>Statement</code>.</p>
+     *
+     * @param stmt Our current <code>FuncAssignStmt</code>.
+     */
+    private void applyEBFuncAssignStmtRule(FuncAssignStmt stmt) {
+    /*ProgramExp assignExp = stmt.getAssign();
+
+    // Check to see what kind of expression is on the right hand side
+    if (assignExp instanceof ProgramParamExp) {
+        // Cast to a ProgramParamExp
+        ProgramParamExp assignParamExp = (ProgramParamExp) assignExp;
+
+        // Items needed to use the query
+        List<ProgramExp> args = assignParamExp.getArguments();
+        List<PTType> argTypes = new LinkedList<PTType>();
+        for (ProgramExp arg : args) {
+            argTypes.add(arg.getProgramType());
+        }
+
+        // Query for the corresponding operation
+        try {
+            OperationEntry op =
+                    myCurrentModuleScope.queryForOne(
+                            new OperationQuery(null, assignParamExp.getName(), argTypes));
+            System.out.println(op.getName());
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, assignParamExp.getName().getName(), assignParamExp.getLocation());
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate operation is
+            //created
+            throw new RuntimeException(dse);
+        }
+    }            */
     }
 
     /**
