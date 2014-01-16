@@ -285,8 +285,6 @@ public class Archiver {
 
 
                                 fileName = formProperPath(files[i]);
-                                System.out.println("to work with: " +
-                                        fileName);
 
                                 JarEntry jarAdd = new JarEntry(fileName);
                                 jarAdd.setTime(files[i].lastModified());
