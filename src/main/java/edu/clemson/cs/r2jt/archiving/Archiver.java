@@ -3,9 +3,7 @@ package edu.clemson.cs.r2jt.archiving;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Locale;
+import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -238,7 +236,7 @@ public class Archiver {
 
     /**
      * <p>Method to invoke the jar utility and create the jar file.</p>
-     * 
+     *
      * @return 0 if successful
      */
     public int createArchive(boolean compileSuccess) {
@@ -284,20 +282,10 @@ public class Archiver {
                         nameMatcher = namePattern.matcher(fileName);
                         if (nameMatcher.find()) {
                             if (compileSuccess) {
-                                fileName = files[i].getAbsolutePath();
-                                fileName =
-                                        fileName
-                                                .replaceAll(
-                                                        "\\"
-                                                                + System
-                                                                        .getProperty("file.separator"),
-                                                        "/");
-                                // now we strip off the first few directories so we have an archive starting at RESOLVE
-                                fileName =
-                                        fileName.substring(fileName
-                                                .indexOf("RESOLVE"));
-                                //System.out.println(fileName);
-                                //fileName = fileName.substring(workspaceDir.length());
+
+
+                                fileName = formProperPath(files[i]);
+
                                 JarEntry jarAdd = new JarEntry(fileName);
                                 jarAdd.setTime(files[i].lastModified());
                                 out.putNextEntry(jarAdd);
@@ -345,6 +333,53 @@ public class Archiver {
             }
         }
         return ret;
+    }
+
+    /**
+     * <p>Returns a string containing a jar-appropriate path. Jar appropriate
+     * simply means making sure that all paths are rooted in a directory named
+     * <code>RESOLVE</code> (capitalization schemes ignored) -- stripping any
+     * excess directories.</p
+     *
+     * <p>For example, given:</p>
+     * <pre>~Documents/RESOLVE-Workspace/RESOLVE/Main/Facilities/f.fa</pre>
+     *
+     * <p>This method returns a path string that looks like:</p>
+     * <pre>RESOLVE/Main/Facilities/f.fa</pre>.
+     *
+     * @param file A file object.
+     * @return A string containing the a properly <code>RESOLVE</code>
+     *         workspace root directory headed path.
+     */
+    public String formProperPath(File file) {
+
+        String filePath = file.getAbsolutePath();
+
+        StringTokenizer stTok = new StringTokenizer(filePath, File.separator);
+        Deque<String> tokenStack = new LinkedList<String>();
+        StringBuffer resultPath = new StringBuffer();
+
+        String curToken;
+        while (stTok.hasMoreTokens()) {
+            curToken = stTok.nextToken();
+            tokenStack.push(curToken);
+        }
+
+        curToken = "";
+        boolean foundRootDirectory = false;
+        while (!tokenStack.isEmpty() && !foundRootDirectory) {
+            curToken = tokenStack.pop();
+
+            if (resultPath.length() != 0) {
+                resultPath.insert(0, File.separator);
+            }
+
+            resultPath.insert(0, curToken);
+
+            foundRootDirectory = curToken.equalsIgnoreCase("RESOLVE");
+        }
+
+        return resultPath.toString();
     }
 
     /**
