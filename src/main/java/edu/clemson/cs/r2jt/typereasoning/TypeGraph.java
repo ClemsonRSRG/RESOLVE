@@ -1014,14 +1014,29 @@ public class TypeGraph {
         PosSymbol andPosSym = new PosSymbol();
         andPosSym.setSymbol(andSym);
 
-        InfixExp orExp = new InfixExp();
-        orExp.setOpName(andPosSym);
-        orExp.setLeft(d1);
-        orExp.setRight(d2);
+        InfixExp andExp = new InfixExp();
+        andExp.setOpName(andPosSym);
+        andExp.setLeft(d1);
+        andExp.setRight(d2);
 
-        orExp.setMathType(BOOLEAN);
+        andExp.setMathType(BOOLEAN);
 
-        return orExp;
+        return andExp;
+    }
+
+    public InfixExp formImplies(Exp d1, Exp d2) {
+        Symbol impliesSym = Symbol.symbol("implies");
+        PosSymbol impliesPosSym = new PosSymbol();
+        impliesPosSym.setSymbol(impliesSym);
+
+        InfixExp impliesExp = new InfixExp();
+        impliesExp.setOpName(impliesPosSym);
+        impliesExp.setLeft(d1);
+        impliesExp.setRight(d2);
+
+        impliesExp.setMathType(BOOLEAN);
+
+        return impliesExp;
     }
 
     private class CanonicalizationResult {

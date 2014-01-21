@@ -21,10 +21,13 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
+import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.type.BooleanType;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
@@ -235,60 +238,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Returns a newly created <code>InfixExp</code>
-     * that says "left and right".</p>
-     *
-     * @param left <code>Exp</code> to the left of the and.
-     * @param right <code>Exp</code> to the right of the and.
-     *
-     * @return The new <code>InfixExp</code>.
-     */
-    private InfixExp createAndExp(Exp left, Exp right) {
-        // Create a new expression
-        InfixExp newConf = new InfixExp();
-
-        // Create an implies symbol
-        PosSymbol opName = createPosSymbol("and");
-        newConf.setType(BooleanType.INSTANCE);
-        newConf.setMathType(BOOLEAN);
-
-        // Convert the confirm a confirm b into
-        // confirm a and b.
-        newConf.setLeft(left);
-        newConf.setOpName(opName);
-        newConf.setRight(right);
-
-        return newConf;
-    }
-
-    /**
-     * <p>Returns a newly created <code>InfixExp</code>
-     * that says "left implies right".</p>
-     *
-     * @param left <code>Exp</code> to the left of the implies.
-     * @param right <code>Exp</code> to the right of the implies.
-     *
-     * @return The new <code>InfixExp</code>.
-     */
-    private InfixExp createImpliesExp(Exp left, Exp right) {
-        // Create a new expression
-        InfixExp newConf = new InfixExp();
-
-        // Create an implies symbol
-        PosSymbol opName = createPosSymbol("implies");
-        newConf.setType(BooleanType.INSTANCE);
-        newConf.setMathType(BOOLEAN);
-
-        // Convert the assume a confirm b into
-        // confirm a implies b.
-        newConf.setLeft(left);
-        newConf.setOpName(opName);
-        newConf.setRight(right);
-
-        return newConf;
-    }
-
-    /**
      * <p>Returns the ensures clause for the current <code>Dec</code>.</p>
      *
      * @param dec The corresponding <code>Dec</code>.
@@ -366,25 +315,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Returns a True <code>VarExp</code>.</p>
-     *
-     * @return A <code>VarExp</code> representing True.
-     */
-    private VarExp getTrueVarExp() {
-        // true
-        PosSymbol truePosSym = createPosSymbol("true");
-
-        // Construct the VarExp
-        VarExp trueExp = new VarExp();
-        trueExp.setName(truePosSym);
-        trueExp.setType(BooleanType.INSTANCE);
-        trueExp.setMathType(BOOLEAN);
-
-        return trueExp;
-    }
-
-    //
-    /**
      * <p>Get the <code>PosSymbol</code> associated with the
      * <code>VariableExp</code> left.</p>
      *
@@ -444,11 +374,10 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @return The modified requires clause <code>Exp</code>.
      */
     private Exp modifyRequiresClause(Exp requires) {
-        if (requires != null) {
-            // Modifies the existing requires clause based on
-            // the parameter modes.
-            modifyRequiresByParameter(requires);
-        }
+
+        // Modifies the existing requires clause based on
+        // the parameter modes.
+        modifyRequiresByParameter(requires);
 
         return requires;
     }
@@ -464,14 +393,33 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Obtain the list of parameters
         List<ParameterVarDec> parameterVarDecList;
         if (myCurrentOperationEntry.getDefiningElement() instanceof FacilityOperationDec) {
-            parameterVarDecList = ((FacilityOperationDec) myCurrentOperationEntry.getDefiningElement()).getParameters();
-        } else {
-            parameterVarDecList = ((OperationDec) myCurrentOperationEntry.getDefiningElement()).getParameters();
+            parameterVarDecList =
+                    ((FacilityOperationDec) myCurrentOperationEntry
+                            .getDefiningElement()).getParameters();
+        }
+        else {
+            parameterVarDecList =
+                    ((OperationDec) myCurrentOperationEntry
+                            .getDefiningElement()).getParameters();
         }
 
         // Loop through each parameter
         for (ParameterVarDec p : parameterVarDecList) {
+            // ProgramType is PTFamily
+            if (p.getTy().getProgramTypeValue() instanceof PTFamily) {
+                // Find the initialization ensures clause
+                PTFamily typeForP = (PTFamily) p.getTy().getProgramTypeValue();
+                PExp initializationEnsuresExp =
+                        typeForP.getInitializationEnsures();
 
+                // Construct a new Exp from initializationEnsuresExp with p.
+                for (PExp e : initializationEnsuresExp.getSubExpressions()) {
+                    if (e instanceof PSymbol) {
+                        PSymbol eSymbol = (PSymbol) e;
+                        //System.out.println(eSymbol.name);
+                    }
+                }
+            }
         }
 
         return requires;
@@ -549,7 +497,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         Exp conf = myAssertion.getFinalConfirm();
 
         // Create a new implies expression
-        InfixExp newConf = createImpliesExp((Exp) assume.getAssertion(), conf);
+        InfixExp newConf =
+                myTypeGraph.formImplies((Exp) assume.getAssertion(), conf);
 
         // Set this new expression as the new final confirm
         myAssertion.setFinalConfirm(newConf);
@@ -589,7 +538,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         Exp conf = myAssertion.getFinalConfirm();
 
         // Create a new and expression
-        InfixExp newConf = createAndExp((Exp) confirm.getAssertion(), conf);
+        InfixExp newConf =
+                myTypeGraph.formConjunct((Exp) confirm.getAssertion(), conf);
 
         // Set this new expression as the new final confirm
         myAssertion.setFinalConfirm(newConf);
@@ -604,7 +554,8 @@ public class VCGenerator extends TreeWalkerVisitor {
     private void applyEBAssumeStmtRule(AssumeStmt stmt) {
         // Check to see if our assertion just has "True"
         Exp assertion = stmt.getAssertion();
-        if (assertion instanceof VarExp && assertion.equals(getTrueVarExp())) {
+        if (assertion instanceof VarExp
+                && assertion.equals(myTypeGraph.getTrueVarExp())) {
             return;
         }
 
@@ -616,7 +567,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         if (assertion != null) {
             // Create a new implies expression
-            InfixExp newConf = createImpliesExp(assertion, currentFinalConfirm);
+            InfixExp newConf =
+                    myTypeGraph.formImplies(assertion, currentFinalConfirm);
 
             // Set this new expression as the new final confirm
             myAssertion.setFinalConfirm(newConf);
@@ -654,7 +606,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             ensures = Exp.copy(opDec.getEnsures());
         }
         else {
-            ensures = getTrueVarExp();
+            ensures = myTypeGraph.getTrueVarExp();
         }
 
         // Get the requires clause for this operation
@@ -736,7 +688,8 @@ public class VCGenerator extends TreeWalkerVisitor {
     private void applyEBConfirmStmtRule(ConfirmStmt stmt) {
         // Check to see if our assertion just has "True"
         Exp assertion = stmt.getAssertion();
-        if (assertion instanceof VarExp && assertion.equals(getTrueVarExp())) {
+        if (assertion instanceof VarExp
+                && assertion.equals(myTypeGraph.getTrueVarExp())) {
             return;
         }
 
@@ -745,12 +698,13 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Check to see if we have a final confirm of "True"
         if (currentFinalConfirm instanceof VarExp
-                && currentFinalConfirm.equals(getTrueVarExp())) {
+                && currentFinalConfirm.equals(myTypeGraph.getTrueVarExp())) {
             myAssertion.setFinalConfirm(assertion);
         }
         else {
             // Create a new and expression
-            InfixExp newConf = createAndExp(assertion, currentFinalConfirm);
+            InfixExp newConf =
+                    myTypeGraph.formConjunct(assertion, currentFinalConfirm);
 
             // Set this new expression as the new final confirm
             myAssertion.setFinalConfirm(newConf);
