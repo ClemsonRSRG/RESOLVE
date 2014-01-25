@@ -16,7 +16,6 @@ package edu.clemson.cs.r2jt.vcgeneration;
  * Libraries
  */
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
@@ -24,11 +23,16 @@ import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
-import edu.clemson.cs.r2jt.type.BooleanType;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
@@ -218,6 +222,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         throw new SourceErrorException(message, l);
     }
 
+    public void tyNotHandled(Ty ty, Location location) {
+        String message = "Ty not handled: " + ty.toString();
+        throw new SourceErrorException(message, location);
+    }
+
     // ===========================================================
     // Private Methods
     // ===========================================================
@@ -405,20 +414,40 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Loop through each parameter
         for (ParameterVarDec p : parameterVarDecList) {
-            // ProgramType is PTFamily
-            if (p.getTy().getProgramTypeValue() instanceof PTFamily) {
-                // Find the initialization ensures clause
-                PTFamily typeForP = (PTFamily) p.getTy().getProgramTypeValue();
-                PExp initializationEnsuresExp =
-                        typeForP.getInitializationEnsures();
-
-                // Construct a new Exp from initializationEnsuresExp with p.
-                for (PExp e : initializationEnsuresExp.getSubExpressions()) {
-                    if (e instanceof PSymbol) {
-                        PSymbol eSymbol = (PSymbol) e;
-                        //System.out.println(eSymbol.name);
-                    }
+            ProgramTypeEntry typeEntry;
+            // Ty is NameTy
+            if (p.getTy() instanceof NameTy) {
+                try {
+                    typeEntry =
+                            myCurrentModuleScope
+                                    .queryForOne(
+                                            new NameQuery(
+                                                    null,
+                                                    ((NameTy) p.getTy())
+                                                            .getName(),
+                                                    ImportStrategy.IMPORT_NAMED,
+                                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                                    false)).toProgramTypeEntry(
+                                            p.getTy().getLocation());
+                    TypeDec type = (TypeDec) typeEntry.getDefiningElement();
+                    System.out.println("Type: " + typeEntry.getName());
+                    System.out.println("Initialization Ensures: "
+                            + type.getInitialization().getEnsures());
                 }
+                catch (NoSuchSymbolException e) {
+                    noSuchSymbol(null,
+                            ((NameTy) p.getTy()).getName().getName(), p.getTy()
+                                    .getLocation());
+                }
+                catch (DuplicateSymbolException dse) {
+                    //This should be caught earlier, when the duplicate type is
+                    //created
+                    throw new RuntimeException(dse);
+                }
+            }
+            else {
+                // Ty not handled.
+                tyNotHandled(p.getTy(), p.getLocation());
             }
         }
 
