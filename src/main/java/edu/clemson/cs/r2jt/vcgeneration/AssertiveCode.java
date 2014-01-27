@@ -18,6 +18,8 @@ package edu.clemson.cs.r2jt.vcgeneration;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -35,8 +37,8 @@ public class AssertiveCode {
     // Compile Environment
     private CompileEnvironment myInstanceEnvironment;
 
-    // Error Handler
-    private ErrorHandler myErr;
+    // Free Variables
+    List<SymbolTableEntry> myFreeVars;
 
     // Verification Statements
     List<VerificationStatement> myVerificationStmtList;
@@ -50,9 +52,9 @@ public class AssertiveCode {
 
     public AssertiveCode(CompileEnvironment env) {
         myInstanceEnvironment = env;
-        myConfirm = Exp.getTrueVarExp(env.getTypeGraph());
-        myErr = env.getErrorHandler();
+        myFreeVars = new ArrayList<SymbolTableEntry>();
         myVerificationStmtList = new ArrayList<VerificationStatement>();
+        myConfirm = Exp.getTrueVarExp(env.getTypeGraph());
     }
 
     // ===========================================================
@@ -97,6 +99,21 @@ public class AssertiveCode {
 
         // Adds the confirm to our list of verification statements
         addCode(confirm);
+    }
+
+    /**
+     * <p>Add the <code>SymbolTableEntry</code> containing the name
+     * and the type of a variable.</p>
+     *
+     * @param ste The corresponding <code>SymbolTableEntry</code>
+     *            stored in the symbol table.
+     */
+    public void addFreeVar(SymbolTableEntry ste) {
+        // Adds the variable entry into our free variable list
+        // if it isn't in our list already.
+        if (!myFreeVars.contains(ste)) {
+            myFreeVars.add(ste);
+        }
     }
 
     /**

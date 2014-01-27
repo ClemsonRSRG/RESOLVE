@@ -17,23 +17,19 @@ package edu.clemson.cs.r2jt.vcgeneration;
  */
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.Location;
+import edu.clemson.cs.r2jt.data.Mode;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.ProgramVariableQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
@@ -154,7 +150,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                             argTypes);
 
             // Obtains items from the current operation
-            Exp requires = modifyRequiresClause(getRequiresClause(dec));
+            Exp requires =
+                    modifyRequiresClause(getRequiresClause(dec), dec
+                            .getLocation());
             Exp ensures = modifyEnsuresClause(getEnsuresClause(dec));
             List<Statement> statementList = dec.getStatements();
 
@@ -379,14 +377,15 @@ public class VCGenerator extends TreeWalkerVisitor {
      * <p>Modifies the requires clause.</p>
      *
      * @param requires The <code>Exp</code> containing the requires clause.
+     * @param opLocation The <code>Location</code> for the operation.
      *
      * @return The modified requires clause <code>Exp</code>.
      */
-    private Exp modifyRequiresClause(Exp requires) {
+    private Exp modifyRequiresClause(Exp requires, Location opLocation) {
 
         // Modifies the existing requires clause based on
         // the parameter modes.
-        modifyRequiresByParameter(requires);
+        modifyRequiresByParameter(requires, opLocation);
 
         return requires;
     }
@@ -395,10 +394,11 @@ public class VCGenerator extends TreeWalkerVisitor {
      * <p>Modifies the requires clause based on the replaces mode.</p>
      *
      * @param requires The <code>Exp</code> containing the requires clause.
+     * @param opLocation The <code>Location</code> for the operation
      *
      * @return The modified requires clause <code>Exp</code>.
      */
-    private Exp modifyRequiresByParameter(Exp requires) {
+    private Exp modifyRequiresByParameter(Exp requires, Location opLocation) {
         // Obtain the list of parameters
         List<ParameterVarDec> parameterVarDecList;
         if (myCurrentOperationEntry.getDefiningElement() instanceof FacilityOperationDec) {
@@ -415,29 +415,86 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Loop through each parameter
         for (ParameterVarDec p : parameterVarDecList) {
             ProgramTypeEntry typeEntry;
+
             // Ty is NameTy
             if (p.getTy() instanceof NameTy) {
+                NameTy pNameTy = (NameTy) p.getTy();
                 try {
+                    // Query for the type entry in the symbol table
                     typeEntry =
                             myCurrentModuleScope
                                     .queryForOne(
                                             new NameQuery(
                                                     null,
-                                                    ((NameTy) p.getTy())
-                                                            .getName(),
+                                                    pNameTy.getName(),
                                                     ImportStrategy.IMPORT_NAMED,
                                                     FacilityStrategy.FACILITY_INSTANTIATE,
                                                     false)).toProgramTypeEntry(
-                                            p.getTy().getLocation());
+                                            pNameTy.getLocation());
+
+                    // Obtain the original dec from the AST
                     TypeDec type = (TypeDec) typeEntry.getDefiningElement();
-                    System.out.println("Type: " + typeEntry.getName());
-                    System.out.println("Initialization Ensures: "
-                            + type.getInitialization().getEnsures());
+
+                    // Deep copy the original initialization ensures and the constraint
+                    Exp init = Exp.copy(type.getInitialization().getEnsures());
+                    Exp constraint = Exp.copy(type.getConstraint());
+
+                    // Only worry about replaces mode parameters
+                    if (p.getMode() == Mode.REPLACES && init != null) {
+                        // Set the details for the new location
+                        if (init.getLocation() != null) {
+                            Location initLoc;
+                            if (requires.getLocation() != null) {
+                                Location reqLoc = requires.getLocation();
+                                initLoc = ((Location) reqLoc.clone());
+                            }
+                            else {
+                                initLoc = ((Location) opLocation.clone());
+                            }
+                            initLoc
+                                    .setDetails("Assumption from Replaces Parameter Mode");
+                            init.setLocation(initLoc);
+                        }
+
+                        // Create an AND infix expression with the requires clause
+                        if (requires != null
+                                && !requires
+                                        .equals(myTypeGraph.getTrueVarExp())) {
+                            requires = myTypeGraph.formConjunct(init, requires);
+                        }
+                        // Make initialization expression the requires clause
+                        else {
+                            requires = init;
+                        }
+                    }
+                    // Constraints for the other parameter modes needs to be added
+                    // to the requires clause as conjuncts.
+                    else {
+                        if (constraint != null
+                                && !constraint.equals(myTypeGraph
+                                        .getTrueVarExp())) {
+                            // Create an AND infix expression with the requires clause
+                            if (requires != null
+                                    && !requires.equals(myTypeGraph
+                                            .getTrueVarExp())) {
+                                requires =
+                                        myTypeGraph.formConjunct(constraint,
+                                                requires);
+                            }
+                            // Make constraint expression the requires clause
+                            else {
+                                requires = constraint;
+                            }
+                        }
+                    }
+
+                    // Add the current variable to our list of free variables
+                    myAssertion.addFreeVar(searchParameterVariable(p
+                            .getLocation(), null, p.getName()));
                 }
                 catch (NoSuchSymbolException e) {
-                    noSuchSymbol(null,
-                            ((NameTy) p.getTy()).getName().getName(), p.getTy()
-                                    .getLocation());
+                    noSuchSymbol(null, pNameTy.getName().getName(), p
+                            .getLocation());
                 }
                 catch (DuplicateSymbolException dse) {
                     //This should be caught earlier, when the duplicate type is
@@ -474,6 +531,20 @@ public class VCGenerator extends TreeWalkerVisitor {
             return exp;
     }
 
+    /**
+     * <p>Given the qualifier, name and the list of argument
+     * types, locate and return the <code>OperationEntry</code>
+     * stored in the symbol table.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param qualifier The qualifier of the operation.
+     * @param name The name of the operation.
+     * @param argTypes The list of argument types.
+     *
+     * @return An <code>OperationEntry</code> from the
+     *         symbol table.
+     */
     private OperationEntry searchOperation(Location loc, PosSymbol qualifier,
             PosSymbol name, List<PTType> argTypes) {
         // Query for the corresponding operation
@@ -493,6 +564,43 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         return op;
+    }
+
+    /**
+     * <p>Given the qualifier and name of the variable return
+     * the <code>ProgramParameterEntry</code>stored in the
+     * symbol table.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param qualifier The qualifier of the variable.
+     * @param name The name of the variable.
+     *
+     * @return An <code>ProgramParameterEntry</code> from the
+     *         symbol table.
+     */
+    private ProgramParameterEntry searchParameterVariable(Location loc,
+            PosSymbol qualifier, PosSymbol name) {
+        // Query for the corresponding variable
+        ProgramParameterEntry ppe = null;
+        try {
+            ppe =
+                    myCurrentModuleScope.queryForOne(
+                            new NameQuery(qualifier, name,
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE, false))
+                            .toProgramParameterEntry(name.getLocation());
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, name.getName(), loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate variable is
+            //created
+            throw new RuntimeException(dse);
+        }
+
+        return ppe;
     }
 
     /**
