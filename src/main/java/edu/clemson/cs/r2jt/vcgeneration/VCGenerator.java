@@ -155,9 +155,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                             .getLocation());
             Exp ensures = modifyEnsuresClause(getEnsuresClause(dec));
             List<Statement> statementList = dec.getStatements();
+            List<VarDec> variableList = dec.getAllVariables();
 
             // Apply the procedure declaration rule
-            applyProcedureDeclRule(gRequires, requires, ensures, statementList);
+            applyProcedureDeclRule(gRequires, requires, ensures, variableList,
+                    statementList);
 
             // Apply proof rules
             applyEBRules();
@@ -230,6 +232,22 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
 
     /**
+     * <p>Loop through the list of <code>VarDec</code>, search
+     * for their corresponding <code>ProgramVariableEntry</code>
+     * and add the result to the list of free variables.</p>
+     *
+     * @param variableList List of the all variables as
+     *                     <code>VarDec</code>.
+     */
+    public void addVarDecsAsFreeVars(List<VarDec> variableList) {
+        // Loop through the variable list
+        for (VarDec v : variableList) {
+            myAssertion
+                    .addFreeVar(searchVariable(v.getLocation(), v.getName()));
+        }
+    }
+
+    /**
      * <p>Returns a newly created <code>PosSymbol</code>
      * with the string provided.</p>
      *
@@ -265,8 +283,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Deep copy and fill in the details of this location
-        retExp = Exp.copy(ensures);
-        if (retExp != null) {
+        if (ensures != null) {
+            retExp = Exp.copy(ensures);
             if (retExp.getLocation() != null) {
                 Location myLoc = retExp.getLocation();
                 myLoc.setDetails("Ensures Clause of " + name);
@@ -313,8 +331,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Deep copy and fill in the details of this location
-        retExp = Exp.copy(requires);
-        if (retExp != null) {
+        if (requires != null) {
+            retExp = Exp.copy(requires);
             if (retExp.getLocation() != null) {
                 Location myLoc = retExp.getLocation();
                 myLoc.setDetails("Requires Clause for " + name);
@@ -527,8 +545,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
 
                     // Add the current variable to our list of free variables
-                    myAssertion.addFreeVar(searchVariable(p.getLocation(),
-                            null, p.getName()));
+                    myAssertion.addFreeVar(searchVariable(p.getLocation(), p
+                            .getName()));
                 }
                 catch (NoSuchSymbolException e) {
                     noSuchSymbol(null, pNameTy.getName().getName(), p
@@ -611,14 +629,12 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @param loc The location in the AST that we are
      *            currently visiting.
-     * @param qualifier The qualifier of the variable.
      * @param name The name of the variable.
      *
      * @return An <code>ProgramVariableEntry</code> from the
      *         symbol table.
      */
-    private ProgramVariableEntry searchVariable(Location loc,
-            PosSymbol qualifier, PosSymbol name) {
+    private ProgramVariableEntry searchVariable(Location loc, PosSymbol name) {
         // Query for the corresponding variable
         ProgramVariableEntry pve = null;
         try {
@@ -626,9 +642,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     mySymbolTable.getScope(myCurrentOperationEntry
                             .getDefiningElement());
             pve =
-                    scope
-                            .queryForOne(
-                                    new ProgramVariableQuery(qualifier, name))
+                    scope.queryForOne(new ProgramVariableQuery(null, name))
                             .toProgramVariableEntry(name.getLocation());
         }
         catch (NoSuchSymbolException nsse) {
@@ -1080,14 +1094,17 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Applies the procedure declaration rule</p>
+     * <p>Applies the procedure declaration rule.</p>
      *
      * @param gRequires Global requires clause
+     * @param requires Requires clause
      * @param ensures Ensures clause
+     * @param variableList List of all variables for this procedure
      * @param statementList List of statements for this procedure
      */
     private void applyProcedureDeclRule(Exp gRequires, Exp requires,
-            Exp ensures, List<Statement> statementList) {
+            Exp ensures, List<VarDec> variableList,
+            List<Statement> statementList) {
         // Add the global requires clause
         if (gRequires != null) {
             myAssertion.addAssume(gRequires);
@@ -1100,6 +1117,11 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Add the remember rule
         myAssertion.addRemember();
+
+        // Add declared variables into the assertion. Also add
+        // them to the list of free variables.
+        myAssertion.addVariableDecs(variableList);
+        addVarDecsAsFreeVars(variableList);
 
         // Add the list of statements
         myAssertion.addStatements(statementList);

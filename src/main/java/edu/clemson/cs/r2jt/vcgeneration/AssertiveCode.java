@@ -38,10 +38,10 @@ public class AssertiveCode {
     private CompileEnvironment myInstanceEnvironment;
 
     // Free Variables
-    List<ProgramVariableEntry> myFreeVars;
+    private List<ProgramVariableEntry> myFreeVars;
 
     // Verification Statements
-    List<VerificationStatement> myVerificationStmtList;
+    private List<VerificationStatement> myVerificationStmtList;
 
     // Final Confirm Statement
     private Exp myConfirm;
@@ -135,6 +135,22 @@ public class AssertiveCode {
         Iterator<Statement> it = statementList.iterator();
         while (it.hasNext()) {
             addCode(it.next());
+        }
+    }
+
+    /**
+     * <p>Loop through the list of <code>VarDec</code> and add
+     * them to the list of verification statements</p>
+     *
+     * @param variableList List of the all variables as
+     *                     <code>VarDec</code>.
+     */
+    public void addVariableDecs(List<VarDec> variableList) {
+        Iterator<VarDec> i = variableList.iterator();
+        while (i.hasNext()) {
+            VarDec dec = i.next();
+            myVerificationStmtList.add(new VerificationStatement(
+                    VerificationStatement.VARIABLE, dec.clone()));
         }
     }
 
