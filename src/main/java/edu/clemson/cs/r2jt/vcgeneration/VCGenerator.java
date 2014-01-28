@@ -253,17 +253,19 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private Exp getEnsuresClause(Dec dec) {
         PosSymbol name = dec.getName();
+        Exp ensures = null;
         Exp retExp = null;
 
         // Check for each kind of ModuleDec possible
         if (dec instanceof FacilityOperationDec) {
-            retExp = ((FacilityOperationDec) dec).getEnsures();
+            ensures = ((FacilityOperationDec) dec).getEnsures();
         }
         else if (dec instanceof OperationDec) {
-            retExp = ((OperationDec) dec).getEnsures();
+            ensures = ((OperationDec) dec).getEnsures();
         }
 
-        // Fill in the details of this location
+        // Deep copy and fill in the details of this location
+        retExp = Exp.copy(ensures);
         if (retExp != null) {
             if (retExp.getLocation() != null) {
                 Location myLoc = retExp.getLocation();
@@ -284,32 +286,34 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private Exp getRequiresClause(Dec dec) {
         PosSymbol name = dec.getName();
+        Exp requires = null;
         Exp retExp = null;
 
         // Check for each kind of ModuleDec possible
         if (dec instanceof FacilityOperationDec) {
-            retExp = ((FacilityOperationDec) dec).getRequires();
+            requires = ((FacilityOperationDec) dec).getRequires();
         }
         else if (dec instanceof OperationDec) {
-            retExp = ((OperationDec) dec).getRequires();
+            requires = ((OperationDec) dec).getRequires();
         }
         else if (dec instanceof ConceptModuleDec) {
-            retExp = ((ConceptModuleDec) dec).getRequirement();
+            requires = ((ConceptModuleDec) dec).getRequirement();
         }
         else if (dec instanceof ConceptBodyModuleDec) {
-            retExp = ((ConceptBodyModuleDec) dec).getRequires();
+            requires = ((ConceptBodyModuleDec) dec).getRequires();
         }
         else if (dec instanceof EnhancementModuleDec) {
-            retExp = ((EnhancementModuleDec) dec).getRequirement();
+            requires = ((EnhancementModuleDec) dec).getRequirement();
         }
         else if (dec instanceof EnhancementBodyModuleDec) {
-            retExp = ((EnhancementBodyModuleDec) dec).getRequires();
+            requires = ((EnhancementBodyModuleDec) dec).getRequires();
         }
         else if (dec instanceof FacilityModuleDec) {
-            retExp = ((FacilityModuleDec) dec).getRequirement();
+            requires = ((FacilityModuleDec) dec).getRequirement();
         }
 
-        // Fill in the details of this location
+        // Deep copy and fill in the details of this location
+        retExp = Exp.copy(requires);
         if (retExp != null) {
             if (retExp.getLocation() != null) {
                 Location myLoc = retExp.getLocation();
@@ -382,11 +386,26 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @return The modified requires clause <code>Exp</code>.
      */
     private Exp modifyRequiresClause(Exp requires, Location opLocation) {
+        // Modifies the existing requires clause based on
+        // the parameter modes.
+        requires = modifyRequiresByParameter(requires, opLocation);
 
         // Modifies the existing requires clause based on
         // the parameter modes.
-        modifyRequiresByParameter(requires, opLocation);
+        // TODO: Ask Murali what this means
+        requires = modifyRequiresByGlobalMode(requires);
 
+        return requires;
+    }
+
+    /**
+     * <p>Modifies the requires clause based on .</p>
+     *
+     * @param requires The <code>Exp</code> containing the requires clause.
+     *
+     * @return The modified requires clause <code>Exp</code>.
+     */
+    private Exp modifyRequiresByGlobalMode(Exp requires) {
         return requires;
     }
 
@@ -444,15 +463,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                         // Set the details for the new location
                         if (init.getLocation() != null) {
                             Location initLoc;
-                            if (requires.getLocation() != null) {
+                            if (requires != null
+                                    && requires.getLocation() != null) {
                                 Location reqLoc = requires.getLocation();
                                 initLoc = ((Location) reqLoc.clone());
                             }
                             else {
                                 initLoc = ((Location) opLocation.clone());
                             }
-                            initLoc
-                                    .setDetails("Assumption from Replaces Parameter Mode");
+                            initLoc.setDetails("Assumption from "
+                                    + p.getMode().getModeName()
+                                    + " parameter mode.");
                             init.setLocation(initLoc);
                         }
 
@@ -473,6 +494,23 @@ public class VCGenerator extends TreeWalkerVisitor {
                         if (constraint != null
                                 && !constraint.equals(myTypeGraph
                                         .getTrueVarExp())) {
+                            // Set the details for the new location
+                            if (constraint.getLocation() != null) {
+                                Location constLoc;
+                                if (requires != null
+                                        && requires.getLocation() != null) {
+                                    Location reqLoc = requires.getLocation();
+                                    constLoc = ((Location) reqLoc.clone());
+                                }
+                                else {
+                                    constLoc = ((Location) opLocation.clone());
+                                }
+                                constLoc.setDetails("Constraint from "
+                                        + p.getMode().getModeName()
+                                        + " parameter mode.");
+                                constraint.setLocation(constLoc);
+                            }
+
                             // Create an AND infix expression with the requires clause
                             if (requires != null
                                     && !requires.equals(myTypeGraph
@@ -489,8 +527,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
 
                     // Add the current variable to our list of free variables
-                    myAssertion.addFreeVar(searchParameterVariable(p
-                            .getLocation(), null, p.getName()));
+                    myAssertion.addFreeVar(searchVariable(p.getLocation(),
+                            null, p.getName()));
                 }
                 catch (NoSuchSymbolException e) {
                     noSuchSymbol(null, pNameTy.getName().getName(), p
@@ -568,7 +606,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     /**
      * <p>Given the qualifier and name of the variable return
-     * the <code>ProgramParameterEntry</code>stored in the
+     * the <code>ProgramVariableEntry</code>stored in the
      * symbol table.</p>
      *
      * @param loc The location in the AST that we are
@@ -576,20 +614,22 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param qualifier The qualifier of the variable.
      * @param name The name of the variable.
      *
-     * @return An <code>ProgramParameterEntry</code> from the
+     * @return An <code>ProgramVariableEntry</code> from the
      *         symbol table.
      */
-    private ProgramParameterEntry searchParameterVariable(Location loc,
+    private ProgramVariableEntry searchVariable(Location loc,
             PosSymbol qualifier, PosSymbol name) {
         // Query for the corresponding variable
-        ProgramParameterEntry ppe = null;
+        ProgramVariableEntry pve = null;
         try {
-            ppe =
-                    myCurrentModuleScope.queryForOne(
-                            new NameQuery(qualifier, name,
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_INSTANTIATE, false))
-                            .toProgramParameterEntry(name.getLocation());
+            Scope scope =
+                    mySymbolTable.getScope(myCurrentOperationEntry
+                            .getDefiningElement());
+            pve =
+                    scope
+                            .queryForOne(
+                                    new ProgramVariableQuery(qualifier, name))
+                            .toProgramVariableEntry(name.getLocation());
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(null, name.getName(), loc);
@@ -600,7 +640,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             throw new RuntimeException(dse);
         }
 
-        return ppe;
+        return pve;
     }
 
     /**

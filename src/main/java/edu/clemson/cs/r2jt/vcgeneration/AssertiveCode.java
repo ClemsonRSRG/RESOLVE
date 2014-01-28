@@ -38,7 +38,7 @@ public class AssertiveCode {
     private CompileEnvironment myInstanceEnvironment;
 
     // Free Variables
-    List<SymbolTableEntry> myFreeVars;
+    List<ProgramVariableEntry> myFreeVars;
 
     // Verification Statements
     List<VerificationStatement> myVerificationStmtList;
@@ -52,7 +52,7 @@ public class AssertiveCode {
 
     public AssertiveCode(CompileEnvironment env) {
         myInstanceEnvironment = env;
-        myFreeVars = new ArrayList<SymbolTableEntry>();
+        myFreeVars = new ArrayList<ProgramVariableEntry>();
         myVerificationStmtList = new ArrayList<VerificationStatement>();
         myConfirm = Exp.getTrueVarExp(env.getTypeGraph());
     }
@@ -102,17 +102,17 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Add the <code>SymbolTableEntry</code> containing the name
-     * and the type of a variable.</p>
+     * <p>Add the <code>ProgramVariableEntry</code> containing the name
+     * and type of a variable.</p>
      *
-     * @param ste The corresponding <code>SymbolTableEntry</code>
+     * @param pve The corresponding <code>ProgramVariableEntry</code>
      *            stored in the symbol table.
      */
-    public void addFreeVar(SymbolTableEntry ste) {
+    public void addFreeVar(ProgramVariableEntry pve) {
         // Adds the variable entry into our free variable list
         // if it isn't in our list already.
-        if (!myFreeVars.contains(ste)) {
-            myFreeVars.add(ste);
+        if (!myFreeVars.contains(pve)) {
+            myFreeVars.add(pve);
         }
     }
 
