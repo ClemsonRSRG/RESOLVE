@@ -16,14 +16,10 @@ package edu.clemson.cs.r2jt.vcgeneration;
  * Libraries
  */
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * TODO: Write a description of this module
@@ -38,7 +34,7 @@ public class AssertiveCode {
     private CompileEnvironment myInstanceEnvironment;
 
     // Free Variables
-    private List<ProgramVariableEntry> myFreeVars;
+    private List<VarExp> myFreeVars;
 
     // Verification Statements
     private List<VerificationStatement> myVerificationStmtList;
@@ -52,8 +48,8 @@ public class AssertiveCode {
 
     public AssertiveCode(CompileEnvironment env) {
         myInstanceEnvironment = env;
-        myFreeVars = new ArrayList<ProgramVariableEntry>();
         myVerificationStmtList = new ArrayList<VerificationStatement>();
+        myFreeVars = new ArrayList<VarExp>();
         myConfirm = Exp.getTrueVarExp(env.getTypeGraph());
     }
 
@@ -102,17 +98,16 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Add the <code>ProgramVariableEntry</code> containing the name
-     * and type of a variable.</p>
+     * <p>Add the <code>VarExp</code> containing the name of the
+     * variable.</p>
      *
-     * @param pve The corresponding <code>ProgramVariableEntry</code>
-     *            stored in the symbol table.
+     * @param var The name of the variable.
      */
-    public void addFreeVar(ProgramVariableEntry pve) {
-        // Adds the variable entry into our free variable list
+    public void addFreeVar(VarExp var) {
+        // Adds the variable into our free variable list
         // if it isn't in our list already.
-        if (!myFreeVars.contains(pve)) {
-            myFreeVars.add(pve);
+        if (!myFreeVars.contains(var)) {
+            myFreeVars.add(var);
         }
     }
 
@@ -152,6 +147,17 @@ public class AssertiveCode {
             myVerificationStmtList.add(new VerificationStatement(
                     VerificationStatement.VARIABLE, dec.clone()));
         }
+    }
+
+    /**
+     * <p>Returns a string containing the assertion formatted for
+     * output.</p>
+     *
+     * @return Readable <code>String</code> form of the assertion.
+     */
+    public String assertionToString() {
+        // TODO: Implement this
+        return new String();
     }
 
     /**
