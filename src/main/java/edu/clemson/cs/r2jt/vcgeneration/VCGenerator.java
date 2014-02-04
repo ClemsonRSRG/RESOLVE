@@ -27,8 +27,10 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.query.MathSymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
@@ -101,10 +103,15 @@ public class VCGenerator extends TreeWalkerVisitor {
         BOOLEAN = myTypeGraph.BOOLEAN;
         MTYPE = myTypeGraph.MTYPE;
         Z = myTypeGraph.Z;
+
+        // Current items
         myCurrentModuleScope = null;
         myCurrentOperationEntry = null;
 
+        // Instance Environment
         myInstanceEnvironment = env;
+
+        // VCs + Debugging String
         myAssertion = null;
         myVCBuffer = new StringBuffer(buildHeaderComment());
     }
@@ -201,6 +208,12 @@ public class VCGenerator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
     // Error Handling
     // -----------------------------------------------------------
+
+    public void notAType(SymbolTableEntry entry, Location l) {
+        throw new SourceErrorException(entry.getSourceModuleIdentifier()
+                .fullyQualifiedRepresentation(entry.getName())
+                + " is not known to be a type.", l);
+    }
 
     public void noSuchModule(Location location) {
         throw new SourceErrorException(
@@ -750,6 +763,41 @@ public class VCGenerator extends TreeWalkerVisitor {
             return tmp;
         else
             return exp;
+    }
+
+    /**
+     * <p>Given a math symbol name, locate and return
+     * the <code>MathSymbolEntry</code> stored in the
+     * symbol table.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param name The string name of the math symbol.
+     *
+     * @return An <code>MathSymbolEntry</code> from the
+     *         symbol table.
+     */
+    private MathSymbolEntry searchMathSymbol(Location loc, String name) {
+        // Query for the corresponding math symbol
+        MathSymbolEntry ms = null;
+        try {
+            ms =
+                    myCurrentModuleScope.queryForOne(
+                            new UnqualifiedNameQuery(name,
+                                    ImportStrategy.IMPORT_RECURSIVE,
+                                    FacilityStrategy.FACILITY_IGNORE, true,
+                                    true)).toMathSymbolEntry(loc);
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, name, loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate symbol is
+            //created
+            throw new RuntimeException(dse);
+        }
+
+        return ms;
     }
 
     /**
@@ -1318,10 +1366,20 @@ public class VCGenerator extends TreeWalkerVisitor {
         // If yes, we will need to create an additional assume clause
         // (P_val = (decreasing clause)) in our list of assertions.
         if (decreasing != null) {
+            // Locate "N" (Natural Number)
+            MathSymbolEntry mse =
+                    searchMathSymbol(decreasing.getLocation(), "N");
+
             // Add P_val as a free variable
-            VarExp pVal =
-                    createVarExp(decreasing.getLocation(),
-                            createPosSymbol("P_val"), Z);
+            VarExp pVal = null;
+            try {
+                pVal =
+                        createVarExp(decreasing.getLocation(),
+                                createPosSymbol("P_val"), mse.getTypeValue());
+            }
+            catch (SymbolNotOfKindTypeException e) {
+                notAType(mse, decreasing.getLocation());
+            }
             myAssertion.addFreeVar(pVal);
 
             // Create an equals expression
