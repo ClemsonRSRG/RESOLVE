@@ -1543,6 +1543,9 @@ public class Controller {
         VCGenerator vcgen = new VCGenerator(table, myInstanceEnvironment);
         TreeWalker tw = new TreeWalker(vcgen);
         tw.visit(dec);
+
+        // Print Debug Information
+        System.out.println(vcgen.verboseOutput());
     }
 
     private void verifyModuleDec(ScopeRepository realTable,

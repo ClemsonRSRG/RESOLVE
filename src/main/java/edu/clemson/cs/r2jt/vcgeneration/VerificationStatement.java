@@ -48,10 +48,10 @@ public class VerificationStatement implements Cloneable {
     // ===========================================================
 
     // Default constructor
-    VerificationStatement() {}
+    public VerificationStatement() {}
 
     // Our defined constructor
-    VerificationStatement(int type, Object assertion) {
+    public VerificationStatement(int type, Object assertion) {
         if (((type == ASSUME || type == CONFIRM) && (assertion instanceof Exp))
                 || ((type == CODE) && (assertion instanceof Statement))
                 || (type == VARIABLE && assertion instanceof VarDec)

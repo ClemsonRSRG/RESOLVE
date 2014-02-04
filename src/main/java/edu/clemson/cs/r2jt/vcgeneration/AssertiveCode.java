@@ -156,12 +156,77 @@ public class AssertiveCode {
      * @return Readable <code>String</code> form of the assertion.
      */
     public String assertionToString() {
-        // TODO: Implement this
-        return new String();
+        // Create the return string
+        String retStr = new String();
+        retStr = retStr.concat("\n");
+
+        // Free variables
+        retStr = retStr.concat("Free Variables: \n");
+        Iterator<VarExp> freeVarIt = myFreeVars.iterator();
+        while (freeVarIt.hasNext()) {
+            VarExp current = freeVarIt.next();
+            retStr =
+                    retStr.concat(current.toString(0) + " : "
+                            + current.getMathType().toString());
+
+            if (freeVarIt.hasNext())
+                retStr = retStr.concat(", ");
+            else
+                retStr = retStr.concat("\n");
+        }
+        retStr = retStr.concat("\n");
+
+        // Verification Statements
+        Iterator<VerificationStatement> vsIt =
+                myVerificationStmtList.iterator();
+        while (vsIt.hasNext()) {
+            VerificationStatement current = vsIt.next();
+
+            // All possible types of verification statements
+            switch (current.getType()) {
+            // Assume Verification Statements
+            case VerificationStatement.ASSUME:
+                retStr =
+                        retStr.concat("Assume "
+                                + ((Exp) current.getAssertion()).toString(0));
+                break;
+            // Change Verification Statements
+            case VerificationStatement.CHANGE:
+                // TODO:  Add when we have change rule implemented.
+                break;
+            // Code Verification Statements
+            case VerificationStatement.CODE:
+                retStr =
+                        retStr.concat(((Statement) current.getAssertion())
+                                .toString(6));
+                break;
+            // Confirm Verification Statements
+            case VerificationStatement.CONFIRM:
+                retStr =
+                        retStr.concat("Confirm "
+                                + ((Exp) current.getAssertion()).toString(0));
+                break;
+            // Remember Verification Statements
+            case VerificationStatement.REMEMBER:
+                retStr = retStr.concat("      Remember");
+                break;
+            // Variable Verification Statements
+            case VerificationStatement.VARIABLE:
+                // TODO:  Add when we have variables.
+                retStr = retStr.concat("      Var <NAME> : <TYPE>");
+                break;
+            }
+            retStr = retStr.concat(";\n");
+        }
+
+        retStr = retStr.concat("      Confirm " + myConfirm.toString(0) + ";");
+
+        return retStr;
     }
 
     /**
-     * <p>Returns the final confirm statement.</p>
+     * <p>Returns a deep copy of the final confirm
+     * statement.</p>
      *
      * @return <code>Exp</code> confirm clause.
      */
