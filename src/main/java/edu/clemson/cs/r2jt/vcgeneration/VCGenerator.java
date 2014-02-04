@@ -465,16 +465,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Loop through each parameter
         for (ParameterVarDec p : parameterVarDecList) {
-            ProgramTypeEntry typeEntry;
-
             // Ty is NameTy
             if (p.getTy() instanceof NameTy) {
                 NameTy pNameTy = (NameTy) p.getTy();
-
-                // Query for the type entry in the symbol table
-                typeEntry =
-                        searchProgramType(pNameTy.getLocation(), pNameTy
-                                .getName());
 
                 // Preserves or Restores mode
                 if (p.getMode() == Mode.PRESERVES
