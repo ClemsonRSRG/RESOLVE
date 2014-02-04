@@ -470,83 +470,73 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Ty is NameTy
             if (p.getTy() instanceof NameTy) {
                 NameTy pNameTy = (NameTy) p.getTy();
-                try {
-                    // Query for the type entry in the symbol table
-                    typeEntry =
-                            myCurrentModuleScope
-                                    .queryForOne(
-                                            new NameQuery(
-                                                    null,
-                                                    pNameTy.getName(),
-                                                    ImportStrategy.IMPORT_NAMED,
-                                                    FacilityStrategy.FACILITY_INSTANTIATE,
-                                                    false)).toProgramTypeEntry(
-                                            pNameTy.getLocation());
 
-                    // Obtain the original dec from the AST
-                    TypeDec type = (TypeDec) typeEntry.getDefiningElement();
+                // Query for the type entry in the symbol table
+                typeEntry =
+                        searchProgramType(pNameTy.getLocation(), pNameTy
+                                .getName());
 
-                    // Preserves or Restores mode
-                    if (p.getMode() == Mode.PRESERVES
-                            || p.getMode() == Mode.RESTORES) {
-                        // Exp form of the parameter variable
-                        VarExp parameterExp =
-                                new VarExp(p.getLocation(), null, p.getName()
-                                        .copy());
-                        parameterExp.setMathType(pNameTy.getMathTypeValue());
+                // Preserves or Restores mode
+                if (p.getMode() == Mode.PRESERVES
+                        || p.getMode() == Mode.RESTORES) {
+                    // Exp form of the parameter variable
+                    VarExp parameterExp =
+                            new VarExp(p.getLocation(), null, p.getName()
+                                    .copy());
+                    parameterExp.setMathType(pNameTy.getMathTypeValue());
 
-                        // Create an old exp (#parameterExp)
-                        OldExp oldParameterExp =
-                                new OldExp(p.getLocation(), Exp
-                                        .copy(parameterExp));
-                        oldParameterExp.setMathType(pNameTy.getMathTypeValue());
+                    // Create an old exp (#parameterExp)
+                    OldExp oldParameterExp =
+                            new OldExp(p.getLocation(), Exp.copy(parameterExp));
+                    oldParameterExp.setMathType(pNameTy.getMathTypeValue());
 
-                        // Create an equals expression of the form "parameterExp = #parameterExp"
-                        EqualsExp equalsExp =
-                                new EqualsExp(opLocation, parameterExp,
-                                        EqualsExp.EQUAL, oldParameterExp);
-                        equalsExp.setMathType(BOOLEAN);
+                    // Create an equals expression of the form "parameterExp = #parameterExp"
+                    EqualsExp equalsExp =
+                            new EqualsExp(opLocation, parameterExp,
+                                    EqualsExp.EQUAL, oldParameterExp);
+                    equalsExp.setMathType(BOOLEAN);
 
-                        // Set the details for the new location
-                        Location equalLoc;
-                        if (ensures != null && ensures.getLocation() != null) {
-                            Location enLoc = ensures.getLocation();
-                            equalLoc = ((Location) enLoc.clone());
-                        }
-                        else {
-                            equalLoc = ((Location) opLocation.clone());
-                        }
-                        equalLoc.setDetails("Condition from "
-                                + p.getMode().getModeName()
-                                + " parameter mode.");
-                        equalsExp.setLocation(equalLoc);
-
-                        // Create an AND infix expression with the ensures clause
-                        if (ensures != null
-                                && !ensures.equals(myTypeGraph.getTrueVarExp())) {
-                            ensures =
-                                    myTypeGraph
-                                            .formConjunct(ensures, equalsExp);
-                        }
-                        // Make new expression the ensures clause
-                        else {
-                            ensures = equalsExp;
-                        }
+                    // Set the details for the new location
+                    Location equalLoc;
+                    if (ensures != null && ensures.getLocation() != null) {
+                        Location enLoc = ensures.getLocation();
+                        equalLoc = ((Location) enLoc.clone());
                     }
-                    // Evaluates mode
-                    else if (p.getMode() == Mode.EVALUATES) {
-                        // TODO
+                    else {
+                        equalLoc = ((Location) opLocation.clone());
+                    }
+                    equalLoc.setDetails("Condition from "
+                            + p.getMode().getModeName() + " parameter mode.");
+                    equalsExp.setLocation(equalLoc);
+
+                    // Create an AND infix expression with the ensures clause
+                    if (ensures != null
+                            && !ensures.equals(myTypeGraph.getTrueVarExp())) {
+                        ensures = myTypeGraph.formConjunct(ensures, equalsExp);
+                    }
+                    // Make new expression the ensures clause
+                    else {
+                        ensures = equalsExp;
                     }
                 }
-                catch (NoSuchSymbolException e) {
-                    noSuchSymbol(null, pNameTy.getName().getName(), p
-                            .getLocation());
+                // Evaluates mode
+                else if (p.getMode() == Mode.EVALUATES) {
+                    // Exp form of the parameter variable
+                    VarExp parameterExp =
+                            new VarExp(p.getLocation(), null, p.getName()
+                                    .copy());
+                    parameterExp.setMathType(pNameTy.getMathTypeValue());
+
+                    // Create an old exp (#parameterExp)
+                    OldExp oldParameterExp =
+                            new OldExp(p.getLocation(), Exp.copy(parameterExp));
+                    oldParameterExp.setMathType(pNameTy.getMathTypeValue());
+
+                    // Replace parameterExp with oldParameterExp in the
+                    // ensures clause.
+                    ensures = replace(ensures, parameterExp, oldParameterExp);
                 }
-                catch (DuplicateSymbolException dse) {
-                    //This should be caught earlier, when the duplicate type is
-                    //created
-                    throw new RuntimeException(dse);
-                }
+
             }
             else {
                 // Ty not handled.
@@ -613,107 +603,87 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Ty is NameTy
             if (p.getTy() instanceof NameTy) {
                 NameTy pNameTy = (NameTy) p.getTy();
-                try {
-                    // Query for the type entry in the symbol table
-                    typeEntry =
-                            myCurrentModuleScope
-                                    .queryForOne(
-                                            new NameQuery(
-                                                    null,
-                                                    pNameTy.getName(),
-                                                    ImportStrategy.IMPORT_NAMED,
-                                                    FacilityStrategy.FACILITY_INSTANTIATE,
-                                                    false)).toProgramTypeEntry(
-                                            pNameTy.getLocation());
 
-                    // Obtain the original dec from the AST
-                    TypeDec type = (TypeDec) typeEntry.getDefiningElement();
+                // Query for the type entry in the symbol table
+                typeEntry =
+                        searchProgramType(pNameTy.getLocation(), pNameTy
+                                .getName());
 
-                    // Deep copy the original initialization ensures and the constraint
-                    Exp init = Exp.copy(type.getInitialization().getEnsures());
-                    Exp constraint = Exp.copy(type.getConstraint());
+                // Obtain the original dec from the AST
+                TypeDec type = (TypeDec) typeEntry.getDefiningElement();
 
-                    // Only worry about replaces mode parameters
-                    if (p.getMode() == Mode.REPLACES && init != null) {
+                // Deep copy the original initialization ensures and the constraint
+                Exp init = Exp.copy(type.getInitialization().getEnsures());
+                Exp constraint = Exp.copy(type.getConstraint());
+
+                // Only worry about replaces mode parameters
+                if (p.getMode() == Mode.REPLACES && init != null) {
+                    // Set the details for the new location
+                    if (init.getLocation() != null) {
+                        Location initLoc;
+                        if (requires != null && requires.getLocation() != null) {
+                            Location reqLoc = requires.getLocation();
+                            initLoc = ((Location) reqLoc.clone());
+                        }
+                        else {
+                            initLoc = ((Location) opLocation.clone());
+                        }
+                        initLoc.setDetails("Assumption from "
+                                + p.getMode().getModeName()
+                                + " parameter mode.");
+                        init.setLocation(initLoc);
+                    }
+
+                    // Create an AND infix expression with the requires clause
+                    if (requires != null
+                            && !requires.equals(myTypeGraph.getTrueVarExp())) {
+                        requires = myTypeGraph.formConjunct(requires, init);
+                    }
+                    // Make initialization expression the requires clause
+                    else {
+                        requires = init;
+                    }
+                }
+                // Constraints for the other parameter modes needs to be added
+                // to the requires clause as conjuncts.
+                else {
+                    if (constraint != null
+                            && !constraint.equals(myTypeGraph.getTrueVarExp())) {
                         // Set the details for the new location
-                        if (init.getLocation() != null) {
-                            Location initLoc;
+                        if (constraint.getLocation() != null) {
+                            Location constLoc;
                             if (requires != null
                                     && requires.getLocation() != null) {
                                 Location reqLoc = requires.getLocation();
-                                initLoc = ((Location) reqLoc.clone());
+                                constLoc = ((Location) reqLoc.clone());
                             }
                             else {
-                                initLoc = ((Location) opLocation.clone());
+                                constLoc = ((Location) opLocation.clone());
                             }
-                            initLoc.setDetails("Assumption from "
+                            constLoc.setDetails("Constraint from "
                                     + p.getMode().getModeName()
                                     + " parameter mode.");
-                            init.setLocation(initLoc);
+                            constraint.setLocation(constLoc);
                         }
 
                         // Create an AND infix expression with the requires clause
                         if (requires != null
                                 && !requires
                                         .equals(myTypeGraph.getTrueVarExp())) {
-                            requires = myTypeGraph.formConjunct(requires, init);
+                            requires =
+                                    myTypeGraph.formConjunct(requires,
+                                            constraint);
                         }
-                        // Make initialization expression the requires clause
+                        // Make constraint expression the requires clause
                         else {
-                            requires = init;
+                            requires = constraint;
                         }
                     }
-                    // Constraints for the other parameter modes needs to be added
-                    // to the requires clause as conjuncts.
-                    else {
-                        if (constraint != null
-                                && !constraint.equals(myTypeGraph
-                                        .getTrueVarExp())) {
-                            // Set the details for the new location
-                            if (constraint.getLocation() != null) {
-                                Location constLoc;
-                                if (requires != null
-                                        && requires.getLocation() != null) {
-                                    Location reqLoc = requires.getLocation();
-                                    constLoc = ((Location) reqLoc.clone());
-                                }
-                                else {
-                                    constLoc = ((Location) opLocation.clone());
-                                }
-                                constLoc.setDetails("Constraint from "
-                                        + p.getMode().getModeName()
-                                        + " parameter mode.");
-                                constraint.setLocation(constLoc);
-                            }
+                }
 
-                            // Create an AND infix expression with the requires clause
-                            if (requires != null
-                                    && !requires.equals(myTypeGraph
-                                            .getTrueVarExp())) {
-                                requires =
-                                        myTypeGraph.formConjunct(requires,
-                                                constraint);
-                            }
-                            // Make constraint expression the requires clause
-                            else {
-                                requires = constraint;
-                            }
-                        }
-                    }
-
-                    // Add the current variable to our list of free variables
-                    myAssertion.addFreeVar(createVarExp(p.getLocation(), p
-                            .getName(), pNameTy.getMathTypeValue()));
-                }
-                catch (NoSuchSymbolException e) {
-                    noSuchSymbol(null, pNameTy.getName().getName(), p
-                            .getLocation());
-                }
-                catch (DuplicateSymbolException dse) {
-                    //This should be caught earlier, when the duplicate type is
-                    //created
-                    throw new RuntimeException(dse);
-                }
+                // Add the current variable to our list of free variables
+                myAssertion.addFreeVar(createVarExp(p.getLocation(), p
+                        .getName(), pNameTy.getMathTypeValue()));
             }
             else {
                 // Ty not handled.
@@ -833,6 +803,41 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         return op;
+    }
+
+    /**
+     * <p>Given the name of the type locate and return
+     * the <code>ProgramTypeEntry</code> stored in the
+     * symbol table.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param name The name of the type.
+     *
+     * @return An <code>ProgramTypeEntry</code> from the
+     *         symbol table.
+     */
+    private ProgramTypeEntry searchProgramType(Location loc, PosSymbol name) {
+        // Query for the corresponding operation
+        ProgramTypeEntry pt = null;
+        try {
+            pt =
+                    myCurrentModuleScope.queryForOne(
+                            new NameQuery(null, name,
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false)).toProgramTypeEntry(loc);
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, name.getName(), loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This should be caught earlier, when the duplicate type is
+            //created
+            throw new RuntimeException(dse);
+        }
+
+        return pt;
     }
 
     /**
