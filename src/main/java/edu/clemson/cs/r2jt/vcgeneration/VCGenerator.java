@@ -307,6 +307,61 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>Returns an <code>DotExp</code> with the <code>VarDec</code>
+     * and its initialization ensures clause.</p>
+     *
+     * @param var The declared variable.
+     * @param initExp The initialization ensures of the variable.
+     *
+     * @return The new <code>DotExp</code>.
+     */
+    private DotExp createInitExp(VarDec var, Exp initExp) {
+        // Convert the declared variable into a VarExp
+        VarExp varExp =
+                createVarExp(var.getLocation(), var.getName(), var.getTy()
+                        .getMathTypeValue());
+
+        // Left hand side of the expression
+        VarExp left = null;
+
+        // NameTy
+        if (var.getTy() instanceof NameTy) {
+            NameTy ty = (NameTy) var.getTy();
+            left = createVarExp(ty.getLocation(), ty.getName(), MTYPE);
+        }
+        else {
+            tyNotHandled(var.getTy(), var.getTy().getLocation());
+        }
+
+        // Complicated steps to construct the argument list
+        // YS: No idea why it is so complicated!
+        edu.clemson.cs.r2jt.collections.List<Exp> expList =
+                new edu.clemson.cs.r2jt.collections.List<Exp>();
+        expList.add(varExp);
+        FunctionArgList argList = new FunctionArgList();
+        argList.setArguments(expList);
+        edu.clemson.cs.r2jt.collections.List<FunctionArgList> functionArgLists =
+                new edu.clemson.cs.r2jt.collections.List<FunctionArgList>();
+        functionArgLists.add(argList);
+
+        // Right hand side of the expression
+        FunctionExp right =
+                new FunctionExp(var.getLocation(), null,
+                        createPosSymbol("is_initial"), null, functionArgLists);
+        right.setMathType(BOOLEAN);
+
+        // Create the DotExp
+        edu.clemson.cs.r2jt.collections.List<Exp> exps =
+                new edu.clemson.cs.r2jt.collections.List<Exp>();
+        exps.add(left);
+        exps.add(right);
+        DotExp exp = new DotExp(var.getLocation(), exps, null);
+        exp.setMathType(BOOLEAN);
+
+        return exp;
+    }
+
+    /**
      * <p>Returns a newly created <code>VarExp</code>
      * with the <code>PosSymbol</code> and math type provided.</p>
      *
@@ -932,6 +987,14 @@ public class VCGenerator extends TreeWalkerVisitor {
                     myTypeGraph
                             .formConjunct((Exp) confirm.getAssertion(), conf);
 
+            // Obtain the current location
+            if (conf.getLocation() != null) {
+                // Set the details of the current location
+                Location loc = (Location) conf.getLocation().clone();
+                loc.setDetails("Confirm Clause");
+                setLocation(newConf, loc);
+            }
+
             // Set this new expression as the new final confirm
             myAssertion.setFinalConfirm(newConf);
 
@@ -1111,6 +1174,15 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Check to see if we have a final confirm of "True"
         if (currentFinalConfirm instanceof VarExp
                 && currentFinalConfirm.equals(myTypeGraph.getTrueVarExp())) {
+
+            // Obtain the current location
+            if (assertion.getLocation() != null) {
+                // Set the details of the current location
+                Location loc = (Location) assertion.getLocation().clone();
+                loc.setDetails("Confirm Clause");
+                setLocation(assertion, loc);
+            }
+
             myAssertion.setFinalConfirm(assertion);
 
             // Verbose Mode Debug Messages
@@ -1122,6 +1194,14 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Create a new and expression
             InfixExp newConf =
                     myTypeGraph.formConjunct(assertion, currentFinalConfirm);
+
+            // Obtain the current location
+            if (assertion.getLocation() != null) {
+                // Set the details of the current location
+                Location loc = (Location) assertion.getLocation().clone();
+                loc.setDetails("Confirm Clause");
+                setLocation(newConf, loc);
+            }
 
             // Set this new expression as the new final confirm
             myAssertion.setFinalConfirm(newConf);
@@ -1144,25 +1224,34 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Work our way from the last assertion
             VerificationStatement curAssertion = myAssertion.getLastAssertion();
 
+            switch (curAssertion.getType()) {
             // Assume Assertion
-            if (curAssertion.getType() == VerificationStatement.ASSUME) {
+            case VerificationStatement.ASSUME:
                 applyAssumeRule(curAssertion);
-            }
+                break;
+            case VerificationStatement.CHANGE:
+                // TODO:  Add when we have change rule implemented.
+                break;
             // Confirm Assertion
-            else if (curAssertion.getType() == VerificationStatement.CONFIRM) {
+            case VerificationStatement.CONFIRM:
                 applyConfirmRule(curAssertion);
-            }
+                break;
             // Code
-            else if (curAssertion.getType() == VerificationStatement.CODE) {
+            case VerificationStatement.CODE:
                 applyCodeRules((Statement) curAssertion.getAssertion());
                 if ((Statement) curAssertion.getAssertion() instanceof WhileStmt
                         || (Statement) curAssertion.getAssertion() instanceof IfStmt) {
                     return;
                 }
-            }
+                break;
             // Remember Assertion
-            else if (curAssertion.getType() == VerificationStatement.REMEMBER) {
+            case VerificationStatement.REMEMBER:
                 applyRememberRule();
+                break;
+            // Variable Declaration Assertion
+            case VerificationStatement.VARIABLE:
+                applyVarDeclRule(curAssertion);
+                break;
             }
         }
     }
@@ -1406,7 +1495,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Applies the Proof rule for Remember.</p>
+     * <p>Applies the remember rule.</p>
      */
     private void applyRememberRule() {
         // Obtain the final confirm and apply the remember method for Exp
@@ -1417,6 +1506,73 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Verbose Mode Debug Messages
         myVCBuffer.append("\n_____________________ \n");
         myVCBuffer.append("\nRemember Rule Applied: \n");
+        myVCBuffer.append(myAssertion.assertionToString());
+    }
+
+    /**
+     * <p>Applies the variable declaration rule.</p>
+     *
+     * @param var A declared variable stored as a
+     *            <code>VerificationStatement</code>
+     */
+    private void applyVarDeclRule(VerificationStatement var) {
+        // Obtain the variable from the verification statement
+        VarDec varDec = (VarDec) var.getAssertion();
+        ProgramTypeEntry typeEntry;
+
+        // Ty is NameTy
+        if (varDec.getTy() instanceof NameTy) {
+            NameTy pNameTy = (NameTy) varDec.getTy();
+
+            // Query for the type entry in the symbol table
+            typeEntry =
+                    searchProgramType(pNameTy.getLocation(), pNameTy.getName());
+
+            // Obtain the original dec from the AST
+            TypeDec type = (TypeDec) typeEntry.getDefiningElement();
+
+            // Deep copy the original initialization ensures
+            Exp init = Exp.copy(type.getInitialization().getEnsures());
+
+            // Create an is_initial dot expression
+            DotExp isInitialExp = createInitExp(varDec, init);
+            if (init.getLocation() != null) {
+                Location loc = (Location) init.getLocation().clone();
+                loc.setDetails("Initial Value for "
+                        + varDec.getName().getName());
+                setLocation(isInitialExp, loc);
+            }
+
+            // Make sure we have a constraint
+            Exp constraint;
+            if (type.getConstraint() == null) {
+                constraint = myTypeGraph.getTrueVarExp();
+            }
+            else {
+                constraint = Exp.copy(type.getConstraint());
+            }
+
+            // Set the location for the constraint
+            Location loc;
+            if (constraint.getLocation() != null) {
+                loc = (Location) constraint.getLocation().clone();
+            }
+            else {
+                loc = (Location) type.getLocation().clone();
+            }
+            loc.setDetails("Constraints on " + varDec.getName().getName());
+            setLocation(constraint, loc);
+
+            // TODO: Finish this!
+        }
+        else {
+            // Ty not handled.
+            tyNotHandled(varDec.getTy(), varDec.getLocation());
+        }
+
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\n_____________________ \n");
+        myVCBuffer.append("\nVariable Declaration Rule Applied: \n");
         myVCBuffer.append(myAssertion.assertionToString());
     }
 }

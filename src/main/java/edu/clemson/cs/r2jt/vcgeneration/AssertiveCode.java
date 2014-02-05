@@ -212,8 +212,14 @@ public class AssertiveCode {
                 break;
             // Variable Verification Statements
             case VerificationStatement.VARIABLE:
-                // TODO:  Add when we have variables.
-                retStr = retStr.concat("      Var <NAME> : <TYPE>");
+                VarDec varDec = (VarDec) current.getAssertion();
+                retStr =
+                        retStr
+                                .concat("      Var "
+                                        + varDec.getName().getName()
+                                        + " : "
+                                        + ((NameTy) varDec.getTy()).getName()
+                                                .getName());
                 break;
             }
             retStr = retStr.concat(";\n");
