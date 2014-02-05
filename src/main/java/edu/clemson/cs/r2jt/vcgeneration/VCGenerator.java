@@ -1147,6 +1147,11 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Add this to our list of things to assume
             myAssertion.addAssume(ensures);
         }
+
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\n_____________________ \n");
+        myVCBuffer.append("\nOperation Call Rule Applied: \n");
+        myVCBuffer.append(myAssertion.assertionToString());
     }
 
     /**
