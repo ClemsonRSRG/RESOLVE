@@ -283,7 +283,6 @@ public class Archiver {
                         if (nameMatcher.find()) {
                             if (compileSuccess) {
 
-
                                 fileName = formProperPath(files[i]);
 
                                 JarEntry jarAdd = new JarEntry(fileName);

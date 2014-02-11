@@ -2292,108 +2292,131 @@ program_expression returns [ProgramExp exp = null]
 
 program_logical_expression returns [ProgramExp exp = null]
 @init{
-    int op = 0;
+    PosSymbol opName = null;
+    edu.clemson.cs.r2jt.collections.List<ProgramExp> args = new edu.clemson.cs.r2jt.collections.List<ProgramExp>("ProgramExp");
 }
     :   exp1=program_relational_expression { $exp = $exp1.exp; }
-    |   (   ^(  id=AND { op = ProgramOpExp.AND; }
-                lf=program_logical_expression
-                rt=program_relational_expression)
-        |   ^(  id=OR { op = ProgramOpExp.OR; }
-                lf=program_logical_expression
-                rt=program_relational_expression)
+    |   (   ^(  id=AND { opName = new PosSymbol(getLocation($id), Symbol.symbol("And")); }
+                lf=program_logical_expression { args.add($lf.exp); }
+                rt=program_relational_expression { args.add($rt.exp); }
+             )
+        |   ^(  id=OR { opName = new PosSymbol(getLocation($id), Symbol.symbol("Or")); }
+                lf=program_logical_expression { args.add($lf.exp); }
+                rt=program_relational_expression { args.add($rt.exp); }
+             )
         )
-        { $exp = new ProgramOpExp(getLocation($id), op, $lf.exp, $rt.exp); }
+        { $exp = new ProgramParamExp(getLocation($id), opName, args, null); }
     ;
 
 program_relational_expression returns [ProgramExp exp = null]
 @init{
-    int op = 0;
+    PosSymbol opName = null;
+    edu.clemson.cs.r2jt.collections.List<ProgramExp> args = new edu.clemson.cs.r2jt.collections.List<ProgramExp>("ProgramExp");
 }
     :   exp1=program_adding_expression { $exp = $exp1.exp; }
-    |   (   ^(  id=EQL { op = ProgramOpExp.EQUAL; }
-                lf=program_relational_expression
-                rt=program_adding_expression)
-        |   ^(  id=NOT_EQL { op = ProgramOpExp.NOT_EQUAL; }
-                lf=program_relational_expression
-                rt=program_adding_expression)
-        |   ^(  id=LT  { op = ProgramOpExp.LT; }
-                lf=program_relational_expression
-                rt=program_adding_expression)
-        |   ^(  id=LT_EQL  { op = ProgramOpExp.LT_EQL; }
-                lf=program_relational_expression
-                rt=program_adding_expression)
-        |   ^(  id=GT  { op = ProgramOpExp.GT; }
-                lf=program_relational_expression
-                rt=program_adding_expression)
-        |   ^(  id=GT_EQL { op = ProgramOpExp.GT_EQL; }
-                lf=program_relational_expression
-                rt=program_adding_expression)
+    |   (   ^(  id=EQL { opName = new PosSymbol(getLocation($id), Symbol.symbol("Are_Equal")); }
+                lf=program_relational_expression { args.add($lf.exp); }
+                rt=program_adding_expression { args.add($rt.exp); }
+             )
+        |   ^(  id=NOT_EQL { opName = new PosSymbol(getLocation($id), Symbol.symbol("Are_Not_Equal")); }
+                lf=program_relational_expression { args.add($lf.exp); }
+                rt=program_adding_expression { args.add($rt.exp); }
+             )
+        |   ^(  id=LT  { opName = new PosSymbol(getLocation($id), Symbol.symbol("Less")); }
+                lf=program_relational_expression { args.add($lf.exp); }
+                rt=program_adding_expression { args.add($rt.exp); }
+             )
+        |   ^(  id=LT_EQL  { opName = new PosSymbol(getLocation($id), Symbol.symbol("Less_Or_Equal")); }
+                lf=program_relational_expression { args.add($lf.exp); }
+                rt=program_adding_expression { args.add($rt.exp); }
+             )
+        |   ^(  id=GT  { opName = new PosSymbol(getLocation($id), Symbol.symbol("Greater")); }
+                lf=program_relational_expression { args.add($lf.exp); }
+                rt=program_adding_expression { args.add($rt.exp); }
+             )
+        |   ^(  id=GT_EQL { opName = new PosSymbol(getLocation($id), Symbol.symbol("Greater_Or_Equal")); }
+                lf=program_relational_expression { args.add($lf.exp); }
+                rt=program_adding_expression { args.add($rt.exp); }
+             )
         )
-        { $exp = new ProgramOpExp(getLocation($id), op, $lf.exp, $rt.exp); }
+        { $exp = new ProgramParamExp(getLocation($id), opName, args, null); }
     ;
 
 program_adding_expression returns [ProgramExp exp = null]
 @init{
-    int op = 0;
+    PosSymbol opName = null;
+    edu.clemson.cs.r2jt.collections.List<ProgramExp> args = new edu.clemson.cs.r2jt.collections.List<ProgramExp>("ProgramExp");
 }
     :   exp1=program_multiplying_expression { $exp = $exp1.exp; }
-    |   (   ^(  id=PLUS { op = ProgramOpExp.PLUS; }
-                lf=program_adding_expression
-                rt=program_multiplying_expression)
-        |   ^(  id=MINUS { op = ProgramOpExp.MINUS; }
-                lf=program_adding_expression
-                rt=program_multiplying_expression)
+    |   (   ^(  id=PLUS { opName = new PosSymbol(getLocation($id), Symbol.symbol("Sum")); }
+                lf=program_adding_expression { args.add($lf.exp); }
+                rt=program_multiplying_expression { args.add($rt.exp); }
+             )
+        |   ^(  id=MINUS { opName = new PosSymbol(getLocation($id), Symbol.symbol("Difference")); }
+                lf=program_adding_expression { args.add($lf.exp); }
+                rt=program_multiplying_expression { args.add($rt.exp); }
+             )
         )
-        { $exp = new ProgramOpExp(getLocation($id), op, $lf.exp, $rt.exp); }
+        { $exp = new ProgramParamExp(getLocation($id), opName, args, null); }
     ;
 
 program_multiplying_expression returns [ProgramExp exp = null]
 @init{
-    int op = 0;
+    PosSymbol opName = null;
+    edu.clemson.cs.r2jt.collections.List<ProgramExp> args = new edu.clemson.cs.r2jt.collections.List<ProgramExp>("ProgramExp");
 }
     :   exp1=program_exponential_expression { $exp = $exp1.exp; }
-    |   (   ^(  id=MULTIPLY { op = ProgramOpExp.MULTIPLY; }
-                lf=program_multiplying_expression
-                rt=program_exponential_expression)
-        |   ^(  id=DIVIDE { op = ProgramOpExp.DIVIDE; }
-                lf=program_multiplying_expression
-                rt=program_exponential_expression)
-        |   ^(  id=MOD { op = ProgramOpExp.MOD; }
-                lf=program_multiplying_expression
-                rt=program_exponential_expression)
-        |   ^(  id=REM { op = ProgramOpExp.REM; }
-                lf=program_multiplying_expression
-                rt=program_exponential_expression)
-        |   ^(  id=DIV { op = ProgramOpExp.DIV; }
-                lf=program_multiplying_expression
-                rt=program_exponential_expression)
+    |   (   ^(  id=MULTIPLY { opName = new PosSymbol(getLocation($id), Symbol.symbol("Product")); }
+                lf=program_multiplying_expression { args.add($lf.exp); }
+                rt=program_exponential_expression { args.add($rt.exp); }
+             )
+        |   ^(  id=DIVIDE { opName = new PosSymbol(getLocation($id), Symbol.symbol("Divide")); }
+                lf=program_multiplying_expression { args.add($lf.exp); }
+                rt=program_exponential_expression { args.add($rt.exp); }
+             )
+        |   ^(  id=MOD { opName = new PosSymbol(getLocation($id), Symbol.symbol("Mod")); }
+                lf=program_multiplying_expression { args.add($lf.exp); }
+                rt=program_exponential_expression { args.add($rt.exp); }
+             )
+        |   ^(  id=REM { opName = new PosSymbol(getLocation($id), Symbol.symbol("Rem")); }
+                lf=program_multiplying_expression { args.add($lf.exp); }
+                rt=program_exponential_expression { args.add($rt.exp); }
+             )
+        |   ^(  id=DIV { opName = new PosSymbol(getLocation($id), Symbol.symbol("Div")); }
+                lf=program_multiplying_expression { args.add($lf.exp); }
+                rt=program_exponential_expression { args.add($rt.exp); }
+             )
         )
-        { $exp = new ProgramOpExp(getLocation($id), op, $lf.exp, $rt.exp); }
+        { $exp = new ProgramParamExp(getLocation($id), opName, args, null); }
     ;
 
 program_exponential_expression returns [ProgramExp exp = null]
 @init{
-    int op = 0;
+    PosSymbol opName = null;
+    edu.clemson.cs.r2jt.collections.List<ProgramExp> args = new edu.clemson.cs.r2jt.collections.List<ProgramExp>("ProgramExp");
 }
     :   exp1=program_unary_expression { $exp = $exp1.exp; }
-    |   ^(  EXP { op = ProgramOpExp.EXP; }
-            lf=program_unary_expression
-            rt=program_exponential_expression)
-        { $exp = new ProgramOpExp(getLocation($EXP), op, $lf.exp, $rt.exp); }
+    |   ^(  id=EXP { opName = new PosSymbol(getLocation($id), Symbol.symbol("Power")); }
+            lf=program_unary_expression { args.add($lf.exp); }
+            rt=program_exponential_expression { args.add($rt.exp); }
+         )
+        { $exp = new ProgramParamExp(getLocation($id), opName, args, null); }
     ;
 
 program_unary_expression returns [ProgramExp exp = null]
 @init{
-    int op = 0;
-    ProgramExp extra = null; //dummy
+    PosSymbol opName = null;
+    edu.clemson.cs.r2jt.collections.List<ProgramExp> args = new edu.clemson.cs.r2jt.collections.List<ProgramExp>("ProgramExp");
 }
     :   exp1=program_primitive_expression { $exp = $exp1.exp; }
-    |   (   ^(  id=NOT { op = ProgramOpExp.NOT; }
-                arg=program_unary_expression)
-        |   ^(  id=UNARY_MINUS { op = ProgramOpExp.UNARY_MINUS; }
-                arg=program_unary_expression)
+    |   (   ^(  id=NOT { opName = new PosSymbol(getLocation($id), Symbol.symbol("Not")); }
+                arg=program_unary_expression { args.add($arg.exp); }
+             )
+        |   ^(  id=UNARY_MINUS { opName = new PosSymbol(getLocation($id), Symbol.symbol("Negate")); }
+                arg=program_unary_expression { args.add($arg.exp); }
+             )
         )
-        { $exp = new ProgramOpExp(getLocation($id), op, $arg.exp, extra); }
+        { $exp = new ProgramParamExp(getLocation($id), opName, args, null); }
     ;
 
 program_primitive_expression returns [ProgramExp exp = null]

@@ -78,7 +78,6 @@ import edu.clemson.cs.r2jt.init.Controller;
 import edu.clemson.cs.r2jt.init.Environment;
 import edu.clemson.cs.r2jt.translation.*;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
-import edu.clemson.cs.r2jt.parsing.RSimpleTrans;
 import edu.clemson.cs.r2jt.proofchecking.ProofChecker;
 import edu.clemson.cs.r2jt.proving.Prover;
 import edu.clemson.cs.r2jt.proving2.AlgebraicProver;
@@ -578,7 +577,6 @@ public class Main {
             Archiver.setUpFlags();
             ResolveCompiler.setUpFlags();
             PrettyJavaTranslator.setUpFlags();
-            RSimpleTrans.setUpFlags();
             VCGenerator.setUpFlags();
             AlgebraicProver.setUpFlags();
             //Your module here!
