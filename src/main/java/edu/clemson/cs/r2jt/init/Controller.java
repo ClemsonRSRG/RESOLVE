@@ -107,7 +107,6 @@ import edu.clemson.cs.r2jt.proving.VCCollector;
 import edu.clemson.cs.r2jt.proving.VerificationCondition;
 import edu.clemson.cs.r2jt.sanitycheck.VisitorSanityCheck;
 import edu.clemson.cs.r2jt.scope.OldSymbolTable;
-import edu.clemson.cs.r2jt.parsing.RSimpleTrans;
 import edu.clemson.cs.r2jt.proving2.AlgebraicProver;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.type.TypeMatcher;
@@ -885,34 +884,6 @@ public class Controller {
         }
         //long end = System.currentTimeMillis();
         //System.out.println("Execution time: " + (end - start) + " ms");
-    }
-
-    private void simpleTranslateTree(CommonTree ast, CommonTokenStream tokens) {
-        try {
-            /*FileReader groupFileR = new FileReader("T.stg");
-            StringTemplateGroup templates = new StringTemplateGroup(groupFileR);
-            groupFileR.close();*/
-            CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
-            nodes.setTokenStream(tokens);
-            RSimpleTrans st = new RSimpleTrans(nodes);
-            //st.setTemplateLib(templates);
-            RSimpleTrans.module_return r = st.module(err);
-            StringTemplate output = (StringTemplate) r.getTemplate();
-            //System.out.println(output.toString());
-            if (myInstanceEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_WEB)) {
-                CompileReport cp = myInstanceEnvironment.getCompileReport();
-                cp.setTranslateSuccess();
-                cp.setOutput(output.toString());
-            }
-            else {
-                System.out.println(output.toString());
-                //st.outputAsFile(fileName, output.toString());
-            }
-        }
-        catch (RecognitionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
     }
 
     // -----------------------------------------------------------
