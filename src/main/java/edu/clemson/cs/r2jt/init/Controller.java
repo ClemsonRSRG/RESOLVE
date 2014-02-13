@@ -477,7 +477,7 @@ public class Controller {
             myInstanceEnvironment.constructRecord(id, file, dec);
 
             /* Invoke PreProcessor */
-            PreProcessor preProc = new PreProcessor(myInstanceEnvironment);
+            PreProcessor preProc = new PreProcessor();
             TreeWalker tw = new TreeWalker(preProc);
             tw.visit(dec);
 
@@ -603,8 +603,8 @@ public class Controller {
             //myInstanceEnvironment.setTargetFile(file);
             myInstanceEnvironment.constructRecord(id, file, dec);
 
-             /* Invoke PreProcessor */
-            PreProcessor preProc = new PreProcessor(myInstanceEnvironment);
+            /* Invoke PreProcessor */
+            PreProcessor preProc = new PreProcessor();
             TreeWalker tw = new TreeWalker(preProc);
             tw.visit(dec);
 
@@ -989,7 +989,7 @@ public class Controller {
             myInstanceEnvironment.constructRecord(id, file, dec);
 
             /* Invoke PreProcessor */
-            PreProcessor preProc = new PreProcessor(myInstanceEnvironment);
+            PreProcessor preProc = new PreProcessor();
             TreeWalker tw = new TreeWalker(preProc);
             tw.visit(dec);
 
@@ -1066,7 +1066,7 @@ public class Controller {
             myInstanceEnvironment.constructRecord(id, file, dec);
 
             /* Invoke PreProcessor */
-            PreProcessor preProc = new PreProcessor(myInstanceEnvironment);
+            PreProcessor preProc = new PreProcessor();
             TreeWalker tw = new TreeWalker(preProc);
             tw.visit(dec);
 
