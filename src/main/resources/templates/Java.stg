@@ -15,6 +15,14 @@ class(decl, variables, classes, constructors, functions, init, params) ::= <%
 	<functions>
 }%>
 
+static_class(decl, variables, classes, functions) ::= <%
+<decl> {
+    <variables>
+    <classes>
+    <functions>
+}
+%>
+
 class_declaration(modifier, kind, name, extension, implementations) ::= <%
     <modifier> <kind> <name> <extension> <implementations>%>
 
@@ -27,11 +35,6 @@ class_implements(names) ::= <%implements <names; separator = ", ">%>
 //-------------------------------------------------------------------
 
 qualified_type(concept, name) ::= <%<concept>.<name>%>
-
-init_function(modifier, variables) ::= <%
-<modifier> void init() {
-    <variables      : {v | <v.name> = <v.init>;}>
-}%>
 
 var_decl(modifier, type, name, init) ::= <%<modifier> <type> <name> = <init>;%>
 

@@ -71,39 +71,21 @@ public class JavaTranslator extends AbstractTranslator {
     public void preModuleDec(ModuleDec node) {
         super.preModuleDec(node);
 
-        // Refine preModuleDec by inserting package information ...
-        LinkedList<String> pkgDirectories =
-                (LinkedList) getPathList(getFile(myModuleScope
-                        .getDefiningElement(), null));
-
-        pkgDirectories.removeLast();
-        ST pkg =
-                myGroup.getInstanceOf("package").add("directories",
-                        pkgDirectories);
-
-        myActiveTemplates.peek().add("directives", pkg);
-
-        // .. and forming the shell of our outermost Java class.
         myOutermostClassDeclaration =
                 myGroup.getInstanceOf("class_declaration").add("modifier",
                         "public").add("name", node.getName().getName());
-
-        myOutermostJavaClass = myGroup.getInstanceOf("class");
-        myOutermostJavaClass.add("decl", myOutermostClassDeclaration);
-
-        myActiveTemplates.push(myOutermostJavaClass);
     }
 
     @Override
     public void preFacilityModuleDec(FacilityModuleDec node) {
 
+        addPackagePath(node);
+
         myOutermostClassDeclaration.add("kind", "class");
+        myOutermostJavaClass = myGroup.getInstanceOf("static_class");
+        myOutermostJavaClass.add("decl", myOutermostClassDeclaration);
 
-        ST initFunction =
-                myGroup.getInstanceOf("init_function").add("modifier",
-                        getFunctionModifier());
-
-        myActiveTemplates.peek().add("init", initFunction);
+        myActiveTemplates.push(myOutermostJavaClass);
     }
 
     @Override
@@ -127,10 +109,6 @@ public class JavaTranslator extends AbstractTranslator {
                 myGroup.getInstanceOf("class_implements").add("names",
                         node.getConceptName().getName());
 
-        ST initFunction =
-                myGroup.getInstanceOf("init_function").add("modifier",
-                        getFunctionModifier());
-
         ST constructor =
                 myGroup.getInstanceOf("constructor").add("name",
                         node.getName().getName()).add("modifier",
@@ -139,7 +117,6 @@ public class JavaTranslator extends AbstractTranslator {
         myOutermostClassDeclaration.add("kind", "class").add("extension",
                 extend).add("implementations", implement);
 
-        myActiveTemplates.peek().add("init", initFunction);
         myActiveTemplates.peek().add("constructors", constructor);
 
         List<ProgramParameterEntry> formals =
@@ -485,6 +462,19 @@ public class JavaTranslator extends AbstractTranslator {
             }
         }
         return modifier;
+    }
+
+    public void addPackagePath(ModuleDec node) {
+        LinkedList<String> pkgDirectories =
+                (LinkedList) getPathList(getFile(myModuleScope
+                        .getDefiningElement(), null));
+
+        pkgDirectories.removeLast();
+        ST pkg =
+                myGroup.getInstanceOf("package").add("directories",
+                        pkgDirectories);
+
+        myActiveTemplates.peek().add("directives", pkg);
     }
 
     @Override
