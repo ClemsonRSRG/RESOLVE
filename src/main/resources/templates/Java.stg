@@ -102,3 +102,16 @@ constructor(modifier, name, parameters, variables) ::= <%
     <parameters : {p | this.<p.name> = <p.name>;}>
     <variables  : {v | <v.name> = <v.init>;}>
 }%>
+
+////////// HERE
+
+unqualified_call(name, arguments) ::= <%
+    <name>(<arguments; separator = ", ">);%>
+
+qualified_call(qualifier, name, arguments) ::= <%
+    <qualifier>.<name>(<arguments; separator = ", ">);%>
+
+while(arguments, stmts) ::= <%
+while (((Std_Boolean_Realiz.Boolean)(<arguments>)).val) {
+    <stmts>
+}%>

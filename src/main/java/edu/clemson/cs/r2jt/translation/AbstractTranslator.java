@@ -133,6 +133,47 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     @Override
+    public void preCallStmt(CallStmt node) {
+
+        ST callStmt;
+        String qualifier =
+                getCallQualifier(node.getQualifier(), node.getName(), node
+                        .getArguments());
+
+        if (qualifier != null) {
+            callStmt =
+                    myGroup.getInstanceOf("qualified_call").add("name",
+                            node.getName().getName()).add("qualifier",
+                            qualifier);
+        }
+        else {
+            callStmt =
+                    myGroup.getInstanceOf("unqualified_call").add("name",
+                            node.getName().getName());
+        }
+
+        myActiveTemplates.push(callStmt);
+    }
+
+    @Override
+    public void postCallStmt(CallStmt node) {
+        ST callStmt = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", callStmt);
+    }
+
+    @Override
+    public void preWhileStmt(WhileStmt node) {
+        ST whileStmt = myGroup.getInstanceOf("while");
+        myActiveTemplates.push(whileStmt);
+    }
+
+    @Override
+    public void postWhileStmt(WhileStmt node) {
+        ST whileStmt = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", whileStmt);
+    }
+
+    @Override
     public void preFacilityOperationDec(FacilityOperationDec node) {
         ST operation =
                 createOperationLikeTemplate((node.getReturnTy() != null) ? node
@@ -140,7 +181,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                         .getName().getName(), true);
 
         myActiveTemplates.push(operation);
-
     }
 
     @Override
