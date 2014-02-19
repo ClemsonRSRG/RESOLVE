@@ -15,13 +15,20 @@ class(decl, variables, classes, constructors, functions, params) ::= <%
 }%>
 
 // i.e. facilities.
-static_class(decl, variables, classes, functions) ::= <%
+static_class(decl, variables, classes, functions, invoker) ::= <%
 <decl> {
     <variables      :   {k | public static final <k>}>
     <classes>
     <functions>
-}
+
+    public static void main(String[] args) {
+        <decl.name> start = new <decl.name>();
+    	start.<invoker>();
+    }
 %>
+
+main(modulename, invocationname) ::= <%
+}%>
 
 class_declaration(modifier, kind, name, extension, implementations) ::= <%
     <modifier> <kind> <name> <extension> <implementations>%>

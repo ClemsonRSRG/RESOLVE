@@ -55,7 +55,6 @@ public class JavaTranslator extends AbstractTranslator {
      * casting.</p>
      */
     private ST myOutermostClassDeclaration;
-
     private ST myBaseInstantiation, myBaseEnhancement;
 
     public JavaTranslator(CompileEnvironment env, ScopeRepository repo) {
@@ -68,24 +67,43 @@ public class JavaTranslator extends AbstractTranslator {
     //-------------------------------------------------------------------
 
     @Override
-    public void preModuleDec(ModuleDec node) {
-        super.preModuleDec(node);
-
-        myOutermostClassDeclaration =
-                myGroup.getInstanceOf("class_declaration").add("modifier",
-                        "public").add("name", node.getName().getName());
-    }
-
-    @Override
     public void preFacilityModuleDec(FacilityModuleDec node) {
 
         addPackagePath(node);
 
-        myOutermostClassDeclaration.add("kind", "class");
+        myOutermostClassDeclaration =
+                myGroup.getInstanceOf("class_declaration").add("modifier",
+                        "public").add("name", node.getName().getName()).add(
+                        "kind", "class");
+
         myOutermostJavaClass = myGroup.getInstanceOf("static_class");
         myOutermostJavaClass.add("decl", myOutermostClassDeclaration);
 
         myActiveTemplates.push(myOutermostJavaClass);
+    }
+
+    @Override
+    public void postFacilityModuleDec(FacilityModuleDec node) {
+
+        String invocationName = null;
+
+        List<OperationEntry> locals =
+                myModuleScope.query(new EntryTypeQuery(OperationEntry.class,
+                        ImportStrategy.IMPORT_NONE,
+                        FacilityStrategy.FACILITY_IGNORE));
+
+        for (OperationEntry o : locals) {
+            if (o.getName() == "Main" || o.getName() == "main") {
+                invocationName = o.getName();
+            }
+        }
+
+        if (invocationName == null) {
+            throw new IllegalStateException("Facility " + node.getName()
+                    .getName() + " cannot be executed. Specify a main!");
+        }
+
+        myOutermostJavaClass.add("invoker", invocationName);
     }
 
     @Override
@@ -95,16 +113,19 @@ public class JavaTranslator extends AbstractTranslator {
                 myGroup.getInstanceOf("class_extends").add("name",
                         "RESOLVE_INTERFACE");
 
-        myOutermostClassDeclaration.add("kind", "interface").add("extension",
-                extend);
+        myOutermostClassDeclaration =
+                myGroup.getInstanceOf("class_declaration").add("modifier",
+                        "public").add("name", node.getName().getName()).add(
+                        "kind", "interface").add("extension", extend);
+
+        myOutermostJavaClass = myGroup.getInstanceOf("class");
+        myOutermostJavaClass.add("decl", myOutermostClassDeclaration);
+
+        myActiveTemplates.push(myOutermostJavaClass);
     }
 
     @Override
     public void preConceptBodyModuleDec(ConceptBodyModuleDec node) {
-
-        myOutermostJavaClass = myGroup.getInstanceOf("class");
-        myOutermostJavaClass.add("decl", myOutermostClassDeclaration);
-        myActiveTemplates.push(myOutermostJavaClass);
 
         ST extend =
                 myGroup.getInstanceOf("class_extends").add("name",
@@ -118,10 +139,17 @@ public class JavaTranslator extends AbstractTranslator {
                         node.getName().getName()).add("modifier",
                         getFunctionModifier());
 
-        myActiveTemplates.peek().add("constructors", constructor);
+        myOutermostClassDeclaration =
+                myGroup.getInstanceOf("class_declaration").add("modifier",
+                        "public").add("name", node.getName().getName()).add(
+                        "kind", "class").add("extension", extend).add(
+                        "implementations", implement);
 
-        myOutermostClassDeclaration.add("kind", "class").add("extension",
-                extend).add("implementations", implement);
+        myOutermostJavaClass = myGroup.getInstanceOf("class");
+        myOutermostJavaClass.add("decl", myOutermostClassDeclaration);
+
+        myActiveTemplates.push(myOutermostJavaClass);
+        myActiveTemplates.peek().add("constructors", constructor);
 
         List<ProgramParameterEntry> formals =
                 getModuleFormalParameters(node.getConceptName());
@@ -242,7 +270,7 @@ public class JavaTranslator extends AbstractTranslator {
 
         // Basically: If we are an enhanced facility, clear the stack of only
         // the templates pushed for each EnhancementBodyItem plus the base
-        // instantiation -- THEN push on the formed (enhanced) rhs.
+        // instantiation.. THEN push on the formed (enhanced) rhs.
         if (myActiveTemplates.peek() != myBaseInstantiation) {
 
             for (ModuleParameterization p : myCurrentFacilityEntry
@@ -280,17 +308,16 @@ public class JavaTranslator extends AbstractTranslator {
 
         }
         else if (type instanceof PTGeneric) {
-            //    myActiveTemplates.peek().add("arguments", node.getName().getName
-            //            ());
+            myActiveTemplates.peek().add("arguments", node.getName());
         }
         else if (node.getEvalExp() == null) {
 
-            /*ST init =
-                    myGroup.getInstanceOf("typeInitializer").add("facility",
+            ST arg =
+                    myGroup.getInstanceOf("var_init").add("facility",
                             getDefiningFacilityEntry(type).getName()).add(
-                            "type", getTypeName(type));*/
+                            "type", getVariableTypeTemplate(type));
 
-            //            myActiveTemplates.peek().add("arguments", "init");
+            myActiveTemplates.peek().add("arguments", arg);
         }
     }
 
@@ -394,9 +421,9 @@ public class JavaTranslator extends AbstractTranslator {
         ST javaClass = myActiveTemplates.pop();
 
         if (!javaClass.equals(myOutermostJavaClass)) {
-            throw new RuntimeException("Java translation template stack "
-                    + "corrupted. Make sure intermediate templates are "
-                    + "popped in their respective post methods!");
+            throw new RuntimeException(
+                    "Wrong Template. Make sure intermediate templates are "
+                            + "popped in their respective post methods!");
         }
         myActiveTemplates.peek().add("structures", javaClass);
     }

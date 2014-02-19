@@ -279,11 +279,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 myGroup.getInstanceOf(attributeName).add("name", name).add(
                         "modifier", getFunctionModifier());
 
-        operationLikeThingy
-                .add(
-                        "type",
-                        (returnType != null) ? getOperationTypeTemplate(returnType)
-                                : "void");
+        operationLikeThingy.add("type",
+                (returnType != null) ? getOperationTypeTemplate(returnType)
+                        : "void");
         return operationLikeThingy;
     }
 
