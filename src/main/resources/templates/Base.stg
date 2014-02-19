@@ -1,0 +1,36 @@
+group Base;
+
+// model = AST
+// controller = TreeWalkerVisitor
+// view = Base.stg/C.stg/Java.stg
+module(directives, includes, structures, variables, functions, eof) ::= <%
+<directives>
+<includes>
+<variables>
+<structures>
+<functions>
+<eof>
+%>
+
+function_decl(modifier, type, name, parameters) ::= <%
+    <modifier> <type> <name>(<parameters; separator = ", ">);%>
+
+var_decl(modifier, type, name, init) ::= <%<modifier> <type> <name> = <init>;%>
+
+function_def(modifier, type, name, parameters, facilities, variables = [],
+                                                            stmts = []) ::= <%
+<modifier> <type> <name>(<parameters; separator = ", ">) {
+    <facilities>
+	<variables>
+	<stmts>
+}%>
+
+parameter(type, name) ::= <%<type> <name>%>
+
+unqualified_type(name) ::= <%<name>%>
+
+//-------------------------------------------------------------------
+//   stmts
+//-------------------------------------------------------------------
+
+return_stmt(name) ::= <%return <name>;%>

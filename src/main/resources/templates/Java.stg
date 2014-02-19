@@ -1,0 +1,104 @@
+group Java;
+import "Base.stg"
+
+package(directories) ::= <%package <directories; separator = {.}>;%>
+
+include(directories) ::= <%import <directories; separator = {.}>.*;%>
+
+class(decl, variables, classes, constructors, functions, params) ::= <%
+<decl> {
+    <params         :   {l | <l>;}>
+	<variables      :   {j | <j.type> <j.name>;}>
+    <constructors   :   {v | <constructor(v.modifier, v.name, params, variables)>}>
+    <classes>
+	<functions>
+}%>
+
+// i.e. facilities.
+static_class(decl, variables, classes, functions, invoker) ::= <%
+<decl> {
+    <variables      :   {k | public static final <k>}>
+    <classes>
+    <functions>
+
+    public static void main(String[] args) {
+        <decl.name> start = new <decl.name>();
+    	start.<invoker>();
+    }
+%>
+
+main(modulename, invocationname) ::= <%
+}%>
+
+class_declaration(modifier, kind, name, extension, implementations) ::= <%
+    <modifier> <kind> <name> <extension> <implementations>%>
+
+class_extends(name) ::= <%extends <name>%>
+
+class_implements(names) ::= <%implements <names; separator = ", ">%>
+
+//-------------------------------------------------------------------
+//   facilities
+//-------------------------------------------------------------------
+
+qualified_type(concept, name) ::= <%<concept>.<name>%>
+
+var_decl(modifier, type, name, init) ::= <%<type> <name> = <init>;%>
+
+rtype_init(typeName) ::= <%getType<typeName>().initialValue()%>
+
+var_init(type, facility)    ::= <%<facility>.init<type.name>()%>
+
+facility_dec(type, name, rhs) ::= <%<type> <name> = <rhs>;%>
+
+facility_init(realization, arguments, isProxied) ::= <%
+    <if(isProxied)><realization>.createProxy
+    <else>new <realization><endif>(<arguments; separator = ", ">)%>
+
+facility_proxied_init(realization, arguments) ::= <%
+    <realization>.createProxy(<arguments; separator = ", ">)%>
+
+//-------------------------------------------------------------------
+//   classes
+//-------------------------------------------------------------------
+
+record_class(decl, variables) ::= <%
+<decl> {
+    <decl.name>_Rep rep;
+    <decl.name>() {
+        rep = new <decl.name>_Rep();
+    }
+    public Object getRep() {
+        return rep;
+    }
+    public void setRep(Object o) {
+        rep = (<decl.name>_Rep)o;
+    }
+    public RType initialValue() {
+        return new <decl.name>();
+    }
+    public String toString() {
+        return rep.toString();
+    }
+}
+class <decl.name>_Rep {
+    <variables      : {v | <v.type> <v.name>;}>
+    <decl.name>_Rep() {
+        <variables  : {v | <v.name> = <v.init>;}>
+    }
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        <variables : {v | sb.append(<v.name>.toString());}>
+        return sb.toString();
+    }
+}%>
+
+//-------------------------------------------------------------------
+//   constructors
+//-------------------------------------------------------------------
+
+constructor(modifier, name, parameters, variables) ::= <%
+<modifier> <name>(<parameters; separator = ", ">) {
+    <parameters : {p | this.<p.name> = <p.name>;}>
+    <variables  : {v | <v.name> = <v.init>;}>
+}%>

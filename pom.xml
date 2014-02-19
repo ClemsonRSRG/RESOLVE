@@ -205,6 +205,11 @@
             <artifactId>git-plugin</artifactId>
             <version>0.0.1-alpha3</version>
         </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>ST4</artifactId>
+            <version>4.0.7</version>
+        </dependency>
     </dependencies>
 </project>
 

@@ -1,0 +1,66 @@
+group C;
+import "Base.stg"
+
+include(directories) ::= <%#include "<last(directories)>.h" <\n>%>
+
+macro_define(name) ::= <%#ifndef <name><\n>#define <name><\n><\n>%>
+
+macro_endif() ::= <%#endif%>
+
+typedef_struct(name) ::= <%typedef struct <name> <name>;%>
+
+struct(name, params, functions, variables) ::= <%
+<typedef_struct(name)>
+struct <name> {
+    <params     : {p | <p>;}>
+    <functions  : {f | <f.modifier> <f.type> (*<f.name>)
+                (<f.parameters : {s | <s.type>}; separator = ", ">);}>
+    <variables>
+};%>
+
+init_and_final(typename, concept, variables, facilities) ::= <%
+typedef struct <typename>_Instance {
+    <variables   : {v | r_type_ptr <v.name>;}>
+} <typename>_Instance;
+
+static r_type_ptr init_<typename>(type_info* <typename>Type) {
+    <concept>* ar = <typename>Type->PointerToFacility;
+    <typename>_Instance* si = malloc(1, sizeof(<typename>_Instance));
+    <facilities>
+    <variables : {v | si-><v.name> = <v.init>;}>
+    <typename>_Instance** t = malloc(sizeof(<typename>_Instance*));
+    t* = si;
+    return (r_type_ptr)t;
+}
+
+static void final_<typename>(r_type_ptr r, type_info* ti) {
+    <typename>_Instance* I = *r;
+    <concept>* ar = ti->PointerToFacility;
+    <variables : {v | <v.init.facility>-><v.type>->final(I-><v.name>,
+                                            <v.init.facility>-><v.type>);}>
+    free(*r);
+    free(r);
+}%>
+
+structure_assignment_function(module, concept, functions, parameters) ::= <%
+extern <concept>* new_<module>_for_<concept>(<parameters; separator = ", ">) {
+    <concept>* ar = calloc(1, sizeof(<concept>));
+
+    <functions : {f | ar-><f.name> = <f.name>;}>
+}%>
+
+concept_realization_header(module, concept, parameters) ::= <%
+    extern <concept>* new_<module>_for_<concept>(<parameters; separator = ", ">);
+    extern void free_<module>_for_<concept>(<concept>* toFree);%>
+
+struct_field(type, name, realization, arguments) ::= <%<type>* <name>;%>
+
+facility_assignment(struct) ::= <%
+    <struct.variables : { f | <f.type>* <f.name> = <f.realization>(<f.arguments;
+                                                        separator = ", ">); }>%>
+
+var_decl(modifier, type, name, init) ::= <%r_type_ptr <name> = <init>;%>
+
+var_init(type, facility) ::= <%<facility>-><type>->init(<facility>-><type>)%>
+
+qualified_type(qualifier, name) ::= <%<qualifier>-><name>%>

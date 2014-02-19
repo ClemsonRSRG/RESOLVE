@@ -2,6 +2,7 @@ package edu.clemson.cs.r2jt.translation;
 
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * <p>A small class that automatically supplements a user supplied string
@@ -10,20 +11,18 @@ import java.util.LinkedList;
  * <li>Newlines after semicolons and left/right curly braces.</li>
  * <li>Appropriate tabification for each level of curly brace.</li>
  * </ul>
- *
- * @author welchd
  */
-public class CodeFormatter {
+public class Formatter {
 
     /**
      * <p>Annotates a tab-less, newline-less string containing Java or C code
      * with proper newlines and indentation.</p>
      *
-     * @param code A raw string of Java or C code <em>lacking</em> newlines or
-     *             tabs.
+     * @param code A raw string of Java or C code <em>lacking</em> newlines
+     *             or tabs.
      *
-     * @return The string, <code>code</code>, with newlines and
-     *         indentation added.
+     * @return The string, <code>code</code>, with newlines and indentation
+     *         added.
      */
     public static String formatCode(String code) {
 
@@ -34,32 +33,39 @@ public class CodeFormatter {
         Deque<String> tabs = new LinkedList<String>();
 
         for (String s : currentSplit) {
+
             if (s.endsWith("}")) {
                 tabs.pop();
             }
+
             formatted.append(writeTabs(tabs).toString());
             formatted.append(s).append("\n");
+
             if (s.endsWith("{")) {
                 tabs.push("\t");
             }
         }
-        return formatted.toString();
+        // If others pop up requiring formatting after tabification,
+        return formatted.toString().replaceAll("\n;", ";");
     }
 
     /**
      * <p>Creates a string of consecutive tabs of length |T|.</p>
      *
      * @param T A Deque of tab <code>'\t'</code> characters.
-     *
      * @return A string of consecutive tabs.
      */
     private static String writeTabs(Deque<String> T) {
-        StringBuilder tabStr = new StringBuilder();
+
+        StringBuilder result = new StringBuilder();
+
         for (String t : T) {
-            tabStr.append(t);
+            result.append(t);
         }
-        return tabStr.toString();
+        return result.toString();
     }
+
+    // somehow figure out a way to get at whitespace preceding semicolons
 
     /**
      * <p>Makes use of regular expressions to:
@@ -69,14 +75,15 @@ public class CodeFormatter {
      * </p>
      *
      * @param code The string whitespace should be removed from.
-     *
      * @return The string lacking excess whitespace.
      */
     private static String normalizeWhitespace(String code) {
-
-        code = code.replaceAll("; +", ";"); // remove trailing ws
-        code = code.replaceAll("\\{ +", "{"); // remove trailing ws
-        code = code.replaceAll("\\s+\\}", "}"); // remove preceding ws
+        code = code.replaceAll("\\s \\s+", " ");
+        code = code.replaceAll("\\s+ \\{", " {"); // preceding ws on {
+        code = code.replaceAll("\\{\\s+", "{"); // proceeding ws on {
+        code = code.replaceAll("\\;\\s+", ";"); // new
+        code = code.replaceAll("\\}\\s+", "}"); // proceeding ws on }
+        code = code.replaceAll("\\s+\\}", "}"); // preceding ws on }
         return code.toString();
     }
 }
