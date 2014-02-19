@@ -7,7 +7,6 @@ import edu.clemson.cs.r2jt.collections.Map;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
-import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
@@ -81,17 +80,15 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                             .symbol(newArrayName)), new PosSymbol(location,
                             Symbol.symbol("Static_Array")));
 
-            //Check if we have a FacilityTypeDec, RepresentationDec or VarDec
+            // Check if we have a FacilityTypeDec, RepresentationDec or VarDec
+            // and set the Ty of the parent node.
             if (parent instanceof FacilityTypeDec) {
-                // Set the Ty of the Parent
                 ((FacilityTypeDec) parent).setRepresentation(newTy);
             }
             else if (parent instanceof RepresentationDec) {
-                // Set the Ty of the Parent
                 ((RepresentationDec) parent).setRepresentation(newTy);
             }
             else if (parent instanceof VarDec) {
-                // Set the Ty of the Parent
                 ((VarDec) parent).setTy(newTy);
             }
 
