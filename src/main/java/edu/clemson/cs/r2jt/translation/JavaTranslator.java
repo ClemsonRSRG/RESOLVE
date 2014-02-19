@@ -12,7 +12,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
-import org.apache.tools.ant.taskdefs.Zip;
 import org.stringtemplate.v4.*;
 
 import java.util.*;
@@ -42,6 +41,9 @@ public class JavaTranslator extends AbstractTranslator {
             new Flag(FLAG_SECTION_NAME, "javaTranslateClean",
                     FLAG_DESC_TRANSLATE_CLEAN);
 
+    private Map<ModuleArgumentItem, ModuleParameterDec> myFacilityParameterBindings =
+            new HashMap<ModuleArgumentItem, ModuleParameterDec>();
+
     /**
      * <p>A pointer to Java's <em>outermost</em> class template. This houses
      * everythingfrom global the <code>class_declaration</code> template, to
@@ -58,9 +60,6 @@ public class JavaTranslator extends AbstractTranslator {
      */
     private ST myOutermostClassDeclaration;
 
-    private EnhancementBodyItem myCurrentEnhancement = null;
-    private int mySeenOperationParameterCount = 0;
-
     private ST myBaseInstantiation, myBaseEnhancement;
 
     public JavaTranslator(CompileEnvironment env, ScopeRepository repo) {
@@ -75,7 +74,7 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preFacilityModuleDec(FacilityModuleDec node) {
 
-        addPackagePath(node);
+        addPackageTemplate(node);
 
         myOutermostClassDeclaration =
                 myGroup.getInstanceOf("class_declaration").add("modifier",
@@ -115,7 +114,8 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preConceptModuleDec(ConceptModuleDec node) {
 
-        addPackagePath(node);
+        addPackageTemplate(node);
+
         ST extend =
                 myGroup.getInstanceOf("class_extends").add("name",
                         "RESOLVE_INTERFACE");
@@ -134,7 +134,7 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preConceptBodyModuleDec(ConceptBodyModuleDec node) {
 
-        addPackagePath(node);
+        addPackageTemplate(node);
 
         ST extend =
                 myGroup.getInstanceOf("class_extends").add("name",
@@ -193,7 +193,6 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preFacilityDec(FacilityDec node) {
 
-        mySeenOperationParameterCount = 0;
         myBaseInstantiation = myGroup.getInstanceOf("facility_init");
         myBaseInstantiation.add("realization", node.getBodyName().getName());
 
@@ -215,12 +214,23 @@ public class JavaTranslator extends AbstractTranslator {
                                     ImportStrategy.IMPORT_NAMED,
                                     FacilityStrategy.FACILITY_IGNORE, false))
                             .toFacilityEntry(node.getLocation());
+
+            ModuleParameterization spec =
+                    myCurrentFacilityEntry.getFacility().getSpecification();
+
+            ModuleParameterization realiz =
+                    myCurrentFacilityEntry.getFacility().getRealization();
+
+            constructFacilityArgBindings(spec, realiz);
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(null, node.getName());
         }
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException(dse);
+        }
+        catch (NoneProvidedException npe) {
+            noSuchModule(node.getBodyName());
         }
     }
 
@@ -231,10 +241,23 @@ public class JavaTranslator extends AbstractTranslator {
                 new LinkedList((List) myBaseInstantiation
                         .getAttribute("arguments"));
 
-        myCurrentEnhancement = node;
+        List<ModuleParameterization> enhancements =
+                myCurrentFacilityEntry.getEnhancements();
 
         boolean proxied = myCurrentFacilityEntry.getEnhancements().size() > 1;
-        mySeenOperationParameterCount = 0;
+
+        for (ModuleParameterization m : enhancements) {
+            if (m.getModuleIdentifier().toString().equals(node.getName()
+                    .getName())) {
+
+                System.out.println("m: " + m.getModuleIdentifier().toString());
+                System.out.println("getenhancementrealiz(m): " +
+                        myCurrentFacilityEntry.getEnhancementRealization(m)
+                                .getModuleIdentifier().toString());
+                constructFacilityArgBindings(m, myCurrentFacilityEntry
+                        .getEnhancementRealization(m));
+            }
+        }
 
         myActiveTemplates.push(myGroup.getInstanceOf("facility_init"));
         myActiveTemplates.peek().add("isProxied", proxied).add("realization",
@@ -247,7 +270,6 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void postEnhancementBodyItem(EnhancementBodyItem node) {
 
-        myCurrentEnhancement = null;
         String curName = node.getBodyName().getName();
 
         List<ModuleParameterization> enhancements =
@@ -314,17 +336,18 @@ public class JavaTranslator extends AbstractTranslator {
         PTType type = node.getProgramTypeValue();
 
         if (type instanceof PTVoid) {
-            mySeenOperationParameterCount++;
-            OperationEntry e = getFormalOperationParameter();
 
-            ST argItem = createOperationArgItemTemplate(e);
-
-            myActiveTemplates.peek().add("arguments", argItem);
+            myActiveTemplates.peek().add("arguments", "operation");
         }
         else if (type instanceof PTGeneric) {
             myActiveTemplates.peek().add("arguments", node.getName());
         }
         else if (node.getEvalExp() == null) {
+
+            JavaTranslator.emitDebug(myCurrentFacilityEntry.getName() + ": "
+                    + node.getName().getName() + " -> "
+                    + myFacilityParameterBindings.get(node).getName());
+
             ST argItem =
                     myGroup.getInstanceOf("var_init").add("facility",
                             getDefiningFacilityEntry(type).getName()).add(
@@ -332,97 +355,6 @@ public class JavaTranslator extends AbstractTranslator {
 
             myActiveTemplates.peek().add("arguments", argItem);
         }
-    }
-
-
-    // IDEA. Create a map between the formals and actuals for each piece of a
-    // facilitydec...The key could be the actual, and the value would be the
-    // formal. Yes, it seems like something that should be done in the
-    // symboltable but that here is a better solution than what I currently
-    // have.
-    public OperationEntry getFormalOperationParameter() {
-
-        // First step: Get the scope for the realization (module) that
-        // takes an operation as a formal parameter -- whether it is an
-        // enhancement realization or a plain old concept realization.
-
-        // In short: given only the actual name of the operation parameter,
-        // you want to find it's formal counterpart as defined in a body
-        // module. It gets tricky though since there can be multiple
-        // operations, so you need to keep track of how many you've seen so
-        // far for this enhancement (or simply facility).
-        ModuleScope scopeToSearch;
-
-        List<ModuleParameterDec> bodyParameters;
-        OperationEntry result = null;
-
-        if (myCurrentFacilityEntry == null) {
-            throw new IllegalStateException("ModuleArgumentItem's "
-                    + "apply to something other than a FacilityDec? This is "
-                    + "translation's fault by the way.");
-        }
-        try {
-            if (myCurrentEnhancement != null) {
-
-                scopeToSearch =
-                        myBuilder.getModuleScope(new ModuleIdentifier(
-                                myCurrentEnhancement.getBodyName().getName()));
-
-                EnhancementBodyModuleDec body =
-                        (EnhancementBodyModuleDec) scopeToSearch
-                                .getDefiningElement();
-
-                bodyParameters = body.getParameters();
-            }
-            else {
-                scopeToSearch =
-                        (ModuleScope) myCurrentFacilityEntry.getFacility()
-                                .getRealization().getScope(false);
-
-                ConceptBodyModuleDec body =
-                        (ConceptBodyModuleDec) scopeToSearch
-                                .getDefiningElement();
-
-                bodyParameters = body.getParameters();
-            }
-
-            int opParamsEncountered = 0;
-            for (ModuleParameterDec p : bodyParameters) {
-
-                if (p.getWrappedDec() instanceof OperationDec) {
-                    opParamsEncountered++;
-                    if (mySeenOperationParameterCount == opParamsEncountered) {
-
-                        result =
-                                scopeToSearch
-                                        .queryForOne(
-                                                new NameAndEntryTypeQuery(
-                                                        null,
-                                                        p.getName(),
-                                                        OperationEntry.class,
-                                                        ImportStrategy.IMPORT_NONE,
-                                                        FacilityStrategy.FACILITY_IGNORE,
-                                                        false))
-                                        .toOperationEntry(null);
-                    }
-                }
-            }
-        }
-        catch (NoSuchSymbolException nsse) {
-            throw new RuntimeException(nsse);
-        }
-        catch (DuplicateSymbolException dse) {
-            throw new RuntimeException(dse);
-        }
-        catch (NoneProvidedException npe) {
-            throw new RuntimeException(npe);
-        }
-
-        if (result == null) {
-            throw new RuntimeException("Unable to obtain formal parameter for"
-                    + " facility " + myCurrentFacilityEntry.getName() + ".");
-        }
-        return result;
     }
 
     @Override
@@ -707,26 +639,60 @@ public class JavaTranslator extends AbstractTranslator {
 
     private ST createOperationArgItemTemplate(OperationEntry e) {
 
-        ST result = myGroup.getInstanceOf
-                ("operation_argument_item").add("name", e.getName());
-        try {
-            String realization;
-            if (myCurrentEnhancement != null) {
-                realization = myCurrentEnhancement.getBodyName().getName();
-            }
-            else {
-                realization = myCurrentFacilityEntry.getFacility()
-                        .getRealization().getModuleIdentifier().toString();
-            }
+        ST result =
+                myGroup.getInstanceOf("operation_argument_item").add("name",
+                        e.getName());
 
-            result.add("realization", realization);
+        String realization;
+        /*     if (myCurrentEnhancement != null) {
+                 realization = myCurrentEnhancement.getBodyName().getName();
+             }
+             else {
+                 realization =
+                         myCurrentFacilityEntry.getFacility().getRealization()
+                                 .getModuleIdentifier().toString();
+             }*/
 
-        }
-        catch (NoneProvidedException npe) {
-
-        }
+        // result.add("realization", realization);
 
         return result;
+    }
+
+    public void constructFacilityArgBindings(
+            ModuleParameterization spec, ModuleParameterization realiz) {
+
+        myFacilityParameterBindings.clear();
+        try {
+            List<ModuleArgumentItem> joinedActuals =
+                    new LinkedList<ModuleArgumentItem>(spec.getParameters());
+
+            AbstractParameterizedModuleDec specModule =
+                    (AbstractParameterizedModuleDec) myBuilder.getModuleScope(
+                            spec.getModuleIdentifier()).getDefiningElement();
+
+            AbstractParameterizedModuleDec realizModule =
+                    (AbstractParameterizedModuleDec) myBuilder.getModuleScope(
+                            spec.getModuleIdentifier()).getDefiningElement();
+
+            List<ModuleParameterDec> joinedFormals =
+                    new LinkedList<ModuleParameterDec>(specModule
+                            .getParameters());
+
+            joinedActuals.addAll(realiz.getParameters());
+            joinedFormals.addAll(realizModule.getParameters());
+            System.out.println(spec.getModuleIdentifier().toString() + ": " +
+                    joinedActuals.size()
+                    + "  " + realiz.getModuleIdentifier() +  ": "
+                    + joinedFormals.size());
+            // Now create the mapping between them..
+            for (int i = 0; i < joinedActuals.size(); i++) {
+                myFacilityParameterBindings.put(joinedActuals.get(i),
+                        joinedFormals.get(i));
+            }
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException(nsse);
+        }
     }
 
     /**
@@ -736,7 +702,7 @@ public class JavaTranslator extends AbstractTranslator {
      *
      * @param node The <code>ModuleDec</code> currently being translated.
      */
-    public void addPackagePath(ModuleDec node) {
+    public void addPackageTemplate(ModuleDec node) {
 
         LinkedList<String> pkgDirectories =
                 (LinkedList) getPathList(getFile(node, null));
