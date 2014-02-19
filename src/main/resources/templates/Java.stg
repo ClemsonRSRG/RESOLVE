@@ -5,19 +5,19 @@ package(directories) ::= <%package <directories; separator = {.}>;%>
 
 include(directories) ::= <%import <directories; separator = {.}>.*;%>
 
-class(decl, variables, classes, constructors, functions, init, params) ::= <%
+class(decl, variables, classes, constructors, functions, params) ::= <%
 <decl> {
     <params         :   {l | <l>;}>
-	<variables      :   {j | <j.modifier> <j.type> <j.name>;}>
-	<init           :   {k | <init_function(k.modifier, variables)>}>
-    <constructors   :   {v | <constructor(v.modifier, v.name, params)>}>
+	<variables      :   {j | <j.type> <j.name>;}>
+    <constructors   :   {v | <constructor(v.modifier, v.name, params, variables)>}>
     <classes>
 	<functions>
 }%>
 
+// i.e. facilities.
 static_class(decl, variables, classes, functions) ::= <%
 <decl> {
-    <variables>
+    <variables      :   {k | public static final <k>}>
     <classes>
     <functions>
 }
@@ -36,7 +36,7 @@ class_implements(names) ::= <%implements <names; separator = ", ">%>
 
 qualified_type(concept, name) ::= <%<concept>.<name>%>
 
-var_decl(modifier, type, name, init) ::= <%<modifier> <type> <name> = <init>;%>
+var_decl(modifier, type, name, init) ::= <%<type> <name> = <init>;%>
 
 rtype_init(typeName) ::= <%getType<typeName>().initialValue()%>
 
@@ -90,8 +90,8 @@ class <decl.name>_Rep {
 //   constructors
 //-------------------------------------------------------------------
 
-constructor(modifier, name, parameters) ::= <%
+constructor(modifier, name, parameters, variables) ::= <%
 <modifier> <name>(<parameters; separator = ", ">) {
     <parameters : {p | this.<p.name> = <p.name>;}>
-    init();
+    <variables  : {v | <v.name> = <v.init>;}>
 }%>

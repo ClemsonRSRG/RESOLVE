@@ -102,6 +102,10 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preConceptBodyModuleDec(ConceptBodyModuleDec node) {
 
+        myOutermostJavaClass = myGroup.getInstanceOf("class");
+        myOutermostJavaClass.add("decl", myOutermostClassDeclaration);
+        myActiveTemplates.push(myOutermostJavaClass);
+
         ST extend =
                 myGroup.getInstanceOf("class_extends").add("name",
                         "RESOLVE_BASE");
@@ -114,10 +118,10 @@ public class JavaTranslator extends AbstractTranslator {
                         node.getName().getName()).add("modifier",
                         getFunctionModifier());
 
+        myActiveTemplates.peek().add("constructors", constructor);
+
         myOutermostClassDeclaration.add("kind", "class").add("extension",
                 extend).add("implementations", implement);
-
-        myActiveTemplates.peek().add("constructors", constructor);
 
         List<ProgramParameterEntry> formals =
                 getModuleFormalParameters(node.getConceptName());
@@ -253,8 +257,7 @@ public class JavaTranslator extends AbstractTranslator {
                 myGroup.getInstanceOf("var_decl").add("type",
                         node.getConceptName().getName()).add("name",
                         node.getName().getName()).add("init",
-                        myActiveTemplates.pop()).add("modifier",
-                        getVariableModifier());
+                        myActiveTemplates.pop());
 
         myActiveTemplates.peek().add("variables", facilityVariable);
 
@@ -439,7 +442,7 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     @Override
-    protected ST getOperationReturnTypeTemplate(PTType type) {
+    protected ST getOperationTypeTemplate(PTType type) {
         // Java function return types happen to look the same as variable
         // return types. So this should be easy.
         return getVariableTypeTemplate(type);
@@ -447,20 +450,18 @@ public class JavaTranslator extends AbstractTranslator {
 
     @Override
     protected ST getParameterTypeTemplate(PTType type) {
+        // Ditto with parameters.
         return getVariableTypeTemplate(type);
     }
 
     @Override
     protected String getFunctionModifier() {
-
         String modifier = "public";
 
         if (myModuleScope.getDefiningElement() instanceof FacilityModuleDec) {
-
-            if (myActiveTemplates.peek().equals(myOutermostJavaClass)) {
-                modifier = "public static";
-            }
+            modifier = "public static";
         }
+
         return modifier;
     }
 
@@ -475,12 +476,6 @@ public class JavaTranslator extends AbstractTranslator {
                         pkgDirectories);
 
         myActiveTemplates.peek().add("directives", pkg);
-    }
-
-    @Override
-    protected String getVariableModifier() {
-        return (getFunctionModifier() == "public") ? null
-                : getFunctionModifier();
     }
 
     public static final void setUpFlags() {

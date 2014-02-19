@@ -216,13 +216,11 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     protected abstract ST getVariableTypeTemplate(PTType type);
 
-    protected abstract ST getOperationReturnTypeTemplate(PTType type);
+    protected abstract ST getOperationTypeTemplate(PTType type);
 
     protected abstract ST getParameterTypeTemplate(PTType type);
 
     protected abstract String getFunctionModifier();
-
-    protected abstract String getVariableModifier();
 
     /**
      * <p>Creates, fills-in, and inserts a formed <code>parameter</code>
@@ -260,8 +258,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         }
         variable =
                 myGroup.getInstanceOf("var_decl").add("name", name).add("type",
-                        getVariableTypeTemplate(type)).add("init", init).add(
-                        "modifier", getVariableModifier());
+                        getVariableTypeTemplate(type)).add("init", init);
 
         myActiveTemplates.peek().add("variables", variable);
     }
@@ -274,7 +271,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * @param hasBody
      */
     protected ST createOperationLikeTemplate(PTType returnType, String name,
-                                             boolean hasBody) {
+            boolean hasBody) {
 
         String attributeName = (hasBody) ? "function_def" : "function_decl";
 
@@ -285,7 +282,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         operationLikeThingy
                 .add(
                         "type",
-                        (returnType != null) ? getOperationReturnTypeTemplate(returnType)
+                        (returnType != null) ? getOperationTypeTemplate(returnType)
                                 : "void");
         return operationLikeThingy;
     }
@@ -401,7 +398,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * @return
      */
     protected String getCallQualifier(PosSymbol qualifier, PosSymbol name,
-                                      List<ProgramExp> args) {
+            List<ProgramExp> args) {
 
         String result = null;
         List<PTType> argTypes = new LinkedList<PTType>();

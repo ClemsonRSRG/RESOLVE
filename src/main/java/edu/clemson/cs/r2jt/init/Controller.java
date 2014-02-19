@@ -1748,7 +1748,7 @@ public class Controller {
     }
 
     private void NEWtranslateModuleDec(File file, ScopeRepository realTable,
-                                       ModuleDec dec) {
+            ModuleDec dec) {
 
         AbstractTranslator translator = null;
 

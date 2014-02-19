@@ -180,8 +180,8 @@ public class CTranslator extends AbstractTranslator {
                 node.getName().getName()
                         + "_for_"
                         + myCurrentFacilityEntry.getFacility()
-                        .getSpecification().getModuleIdentifier()
-                        .toString();
+                                .getSpecification().getModuleIdentifier()
+                                .toString();
         String realiz =
                 node.getBodyName().getName() + "_for_" + enhancementType;
 
@@ -268,7 +268,7 @@ public class CTranslator extends AbstractTranslator {
     }
 
     @Override
-    protected ST getOperationReturnTypeTemplate(PTType type) {
+    protected ST getOperationTypeTemplate(PTType type) {
         ST result = myGroup.getInstanceOf("unqualified_type");
         if (type instanceof PTElement) {
             result.add("name", "type_info*");
@@ -281,7 +281,7 @@ public class CTranslator extends AbstractTranslator {
 
     @Override
     protected ST getParameterTypeTemplate(PTType type) {
-        return getOperationReturnTypeTemplate(type);
+        return getOperationTypeTemplate(type);
     }
 
     @Override
@@ -294,11 +294,6 @@ public class CTranslator extends AbstractTranslator {
         }
 
         return modifier;
-    }
-
-    @Override
-    protected String getVariableModifier() {
-        return null;
     }
 
     /**
