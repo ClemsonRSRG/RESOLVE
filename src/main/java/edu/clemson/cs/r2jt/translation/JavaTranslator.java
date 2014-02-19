@@ -1,7 +1,6 @@
 package edu.clemson.cs.r2jt.translation;
 
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
@@ -86,10 +85,11 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void postFacilityModuleDec(FacilityModuleDec node) {
 
+        addPackagePath(node);
         String invocationName = null;
 
         List<OperationEntry> locals =
-                myModuleScope.query(new EntryTypeQuery(OperationEntry.class,
+                myScope.query(new EntryTypeQuery(OperationEntry.class,
                         ImportStrategy.IMPORT_NONE,
                         FacilityStrategy.FACILITY_IGNORE));
 
@@ -100,8 +100,7 @@ public class JavaTranslator extends AbstractTranslator {
         }
 
         if (invocationName == null) {
-            throw new IllegalStateException("Facility "
-                    + node.getName().getName()
+            throw new NoSuchMethodError("Facility " + node.getName().getName()
                     + " cannot be executed. Specify a main!");
         }
 
@@ -111,6 +110,7 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preConceptModuleDec(ConceptModuleDec node) {
 
+        addPackagePath(node);
         ST extend =
                 myGroup.getInstanceOf("class_extends").add("name",
                         "RESOLVE_INTERFACE");
@@ -128,6 +128,8 @@ public class JavaTranslator extends AbstractTranslator {
 
     @Override
     public void preConceptBodyModuleDec(ConceptBodyModuleDec node) {
+
+        addPackagePath(node);
 
         ST extend =
                 myGroup.getInstanceOf("class_extends").add("name",
@@ -190,12 +192,12 @@ public class JavaTranslator extends AbstractTranslator {
         myBaseInstantiation.add("realization", node.getBodyName().getName());
 
         myActiveTemplates.push(myBaseInstantiation);
-        Scope scopeToSearch = myModuleScope;
+        Scope scopeToSearch = myScope;
 
         // If we're within a function, get the appropriate scope so we
         // can find the SymbolTableEntry representing this FacilityDec.
         // Note : This seems pretty jank.
-        if (!myModuleScope.equals(myBuilder.getScope(this.getAncestor(2)))) {
+        if (!myScope.equals(myBuilder.getScope(this.getAncestor(2)))) {
             scopeToSearch = myBuilder.getScope(this.getAncestor(2));
         }
 
@@ -219,8 +221,9 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preEnhancementBodyItem(EnhancementBodyItem node) {
 
-        //    LinkedList<Object> args = new LinkedList((List) myBaseInstantiation
-        //            .getAttribute("arguments"));
+        LinkedList<Object> args =
+                new LinkedList((List) myBaseInstantiation
+                        .getAttribute("arguments"));
 
         boolean proxied = myCurrentFacilityEntry.getEnhancements().size() > 1;
 
@@ -229,7 +232,7 @@ public class JavaTranslator extends AbstractTranslator {
                 node.getBodyName().getName());
 
         // This shouldn't be a problem once expressions are added.
-        //  myActiveTemplates.peek().add(args);
+        myActiveTemplates.peek().add("arguments", args);
     }
 
     @Override
@@ -322,6 +325,87 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     @Override
+    public void postConceptTypeParamDec(ConceptTypeParamDec node) {
+
+        try {
+            ProgramParameterEntry ppe =
+                    myScope.queryForOne(
+                            new NameAndEntryTypeQuery(null, node.getName(),
+                                    ProgramParameterEntry.class,
+                                    ImportStrategy.IMPORT_NONE,
+                                    FacilityStrategy.FACILITY_IGNORE, true))
+                            .toProgramParameterEntry(node.getLocation());
+
+            ST getter =
+                    createOperationLikeTemplate(ppe.getDeclaredType(),
+                            "getType" + node.getName().getName(), false);
+
+            myActiveTemplates.peek().add("functions", getter);
+        }
+        catch (NoSuchSymbolException nsse) {
+            // Should've been caught way before now -- populators fault.
+            throw new RuntimeException(nsse);
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
+        }
+    }
+
+    @Override
+    public void postConstantParamDec(ConstantParamDec node) {
+
+        String name = node.getName().getName();
+        PTType type = node.getTy().getProgramTypeValue();
+
+        boolean translatingBody =
+                myScope.getDefiningElement() instanceof ConceptBodyModuleDec;
+
+        if (translatingBody) {
+            addParameterTemplate(type, name);
+        }
+
+        ST getter =
+                createOperationLikeTemplate(type, "get" + name, translatingBody);
+
+        getter.add("stmts", myGroup.getInstanceOf("return_stmt").add("name",
+                name));
+
+        myActiveTemplates.peek().add("functions", getter);
+    }
+
+    @Override
+    public void preModuleParameterDec(ModuleParameterDec node) {
+
+        if (node.getWrappedDec() instanceof OperationDec) {
+
+            ST parameter =
+                    myGroup.getInstanceOf("parameter").add("type",
+                            node.getName().getName()).add("name",
+                            node.getName().getName() + "Param");
+
+            ST operationInterface =
+                    myGroup.getInstanceOf("class").add(
+                            "decl",
+                            myGroup.getInstanceOf("class_declaration").add(
+                                    "kind", "interface").add("name",
+                                    node.getName().getName()));
+
+            myActiveTemplates.peek().add("params", parameter);
+            myActiveTemplates.push(operationInterface);
+        }
+    }
+
+    @Override
+    public void postModuleParameterDec(ModuleParameterDec node) {
+
+        if (node.getWrappedDec() instanceof OperationDec) {
+
+            ST operationInterface = myActiveTemplates.pop();
+            myActiveTemplates.peek().add("classes", operationInterface);
+        }
+    }
+
+    @Override
     public void preTypeDec(TypeDec node) {
 
         ST extend = myGroup.getInstanceOf("class_extends").add("name", "RType");
@@ -336,7 +420,7 @@ public class JavaTranslator extends AbstractTranslator {
 
         try {
             ProgramTypeDefinitionEntry ptde =
-                    myModuleScope.queryForOne(
+                    myScope.queryForOne(
                             new UnqualifiedNameQuery(node.getName().getName()))
                             .toProgramTypeDefinitionEntry(node.getLocation());
 
@@ -358,7 +442,7 @@ public class JavaTranslator extends AbstractTranslator {
     public void preRepresentationDec(RepresentationDec node) {
 
         List<SymbolTableEntry> types =
-                myModuleScope.query(new NameQuery(null, node.getName()));
+                myScope.query(new NameQuery(null, node.getName()));
 
         PTType repType =
                 types.get(0).toProgramTypeEntry(node.getLocation())
@@ -391,7 +475,7 @@ public class JavaTranslator extends AbstractTranslator {
         // Now build the "create<TYPENAME>" method for that record.
         try {
             ProgramTypeEntry pte =
-                    myModuleScope.queryForOne(
+                    myScope.queryForOne(
                             new UnqualifiedNameQuery(node.getName().getName()))
                             .toProgramTypeEntry(node.getLocation());
 
@@ -420,9 +504,9 @@ public class JavaTranslator extends AbstractTranslator {
         boolean nonLocal = false;
         ST nameExp = myGroup.getInstanceOf("name_exp");
 
-        if (myModuleScope.getDefiningElement() instanceof ConceptBodyModuleDec) {
+        if (myScope.getDefiningElement() instanceof ConceptBodyModuleDec) {
             ConceptBodyModuleDec thisModule =
-                    ((ConceptBodyModuleDec) myModuleScope.getDefiningElement());
+                    ((ConceptBodyModuleDec) myScope.getDefiningElement());
 
             List<ProgramParameterEntry> formals =
                     getModuleFormalParameters(thisModule.getConceptName());
@@ -465,7 +549,7 @@ public class JavaTranslator extends AbstractTranslator {
     protected ST getVariableTypeTemplate(PTType type) {
 
         ST result;
-        ModuleDec currentModule = myModuleScope.getDefiningElement();
+        ModuleDec currentModule = myScope.getDefiningElement();
         String concept = currentModule.getName().getName();
 
         if (type instanceof PTGeneric || type instanceof PTElement) {
@@ -514,7 +598,7 @@ public class JavaTranslator extends AbstractTranslator {
     protected String getFunctionModifier() {
         String modifier = "public";
 
-        if (myModuleScope.getDefiningElement() instanceof FacilityModuleDec) {
+        if (myScope.getDefiningElement() instanceof FacilityModuleDec) {
             modifier = "public static";
         }
 
@@ -523,8 +607,8 @@ public class JavaTranslator extends AbstractTranslator {
 
     public void addPackagePath(ModuleDec node) {
         LinkedList<String> pkgDirectories =
-                (LinkedList) getPathList(getFile(myModuleScope
-                        .getDefiningElement(), null));
+                (LinkedList) getPathList(getFile(myScope.getDefiningElement(),
+                        null));
 
         pkgDirectories.removeLast();
         ST pkg =

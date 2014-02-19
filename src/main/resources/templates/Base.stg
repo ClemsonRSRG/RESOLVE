@@ -12,7 +12,7 @@ module(directives, includes, structures, variables, functions, eof) ::= <%
 <eof>
 %>
 
-function_decl(modifier, type, name, parameters) ::= <%
+function_decl(modifier, type, name, parameters, stmts) ::= <%
     <modifier> <type> <name>(<parameters; separator = ", ">);%>
 
 var_decl(modifier, type, name, init) ::= <%<modifier> <type> <name> = <init>;%>

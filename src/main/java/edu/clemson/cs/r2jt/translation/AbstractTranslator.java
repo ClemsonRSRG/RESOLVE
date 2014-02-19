@@ -28,7 +28,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     protected static final boolean PRINT_DEBUG = true;
 
     protected final CompileEnvironment myInstanceEnvironment;
-    protected ModuleScope myModuleScope = null;
+    protected ModuleScope myScope = null;
 
     /**
      * <p>This gives us access to additional <code>ModuleScope</code>s. This
@@ -75,9 +75,11 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * <code>whileStmtChanging</code> clause, <code>false</code> otherwise.
      *
      * Note: This global can be safely removed once walk methods for virtual
-     * list nodes are fixed. See Blair.
+     * list nodes are fixed. SEE BLAIR.
      */
     protected boolean myWhileStmtChangingClause = false;
+
+    protected boolean myWalkingOperationParameterFlag = false;
 
     public AbstractTranslator(CompileEnvironment env, ScopeRepository repo) {
         myInstanceEnvironment = env;
@@ -92,8 +94,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public void preModuleDec(ModuleDec node) {
 
         try {
-            myModuleScope =
-                    myBuilder.getModuleScope(new ModuleIdentifier(node));
+            myScope = myBuilder.getModuleScope(new ModuleIdentifier(node));
 
             ST myEnclosingTemplate = myGroup.getInstanceOf("module");
 
@@ -116,7 +117,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public void preUsesItem(UsesItem node) {
         try {
             FacilityEntry e =
-                    myModuleScope.queryForOne(
+                    myScope.queryForOne(
                             new UnqualifiedNameQuery(node.getName().getName()))
                             .toFacilityEntry(null);
 
@@ -232,8 +233,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 getCallQualifier(null, node.getName(), node.getArguments());
 
         ST paramExp =
-                myGroup.getInstanceOf("param_exp").add("qualifier",
-                        qualifier).add("name", node.getName().getName());
+                myGroup.getInstanceOf("param_exp").add("qualifier", qualifier)
+                        .add("name", node.getName().getName());
 
         myActiveTemplates.push(paramExp);
     }
@@ -470,12 +471,12 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
         try {
             ProgramTypeEntry te =
-                    myModuleScope.queryForOne(
+                    myScope.queryForOne(
                             new UnqualifiedNameQuery(type.toString()))
                             .toProgramTypeEntry(null);
 
             List<FacilityEntry> facilities =
-                    myModuleScope.query(new EntryTypeQuery(FacilityEntry.class,
+                    myScope.query(new EntryTypeQuery(FacilityEntry.class,
                             MathSymbolTable.ImportStrategy.IMPORT_NAMED,
                             MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
 
@@ -523,14 +524,14 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
             }
 
             OperationEntry oe =
-                    myModuleScope.queryForOne(
+                    myScope.queryForOne(
                             new OperationQuery(null, name, argTypes))
                             .toOperationEntry(null);
 
             // Grab FacilityEntries in scope whose specification matches
             // oe's SourceModuleIdentifier.
             List<FacilityEntry> facilities =
-                    myModuleScope.query(new EntryTypeQuery(FacilityEntry.class,
+                    myScope.query(new EntryTypeQuery(FacilityEntry.class,
                             MathSymbolTable.ImportStrategy.IMPORT_NAMED,
                             MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
 
