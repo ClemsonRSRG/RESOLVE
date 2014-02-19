@@ -73,6 +73,11 @@ class_extends(name) ::= <%extends <name>%>
 
 class_implements(names) ::= <%implements <names; separator = ", ">%>
 
+operation_argument_item(realization, name, function) ::= <%
+new <realization>.<name>() {
+    <function>
+}%>
+
 //-------------------------------------------------------------------
 //   facilities
 //-------------------------------------------------------------------

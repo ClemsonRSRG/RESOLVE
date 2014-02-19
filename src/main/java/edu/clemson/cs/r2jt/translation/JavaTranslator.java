@@ -12,6 +12,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
+import org.apache.tools.ant.taskdefs.Zip;
 import org.stringtemplate.v4.*;
 
 import java.util.*;
@@ -56,6 +57,10 @@ public class JavaTranslator extends AbstractTranslator {
      * casting.</p>
      */
     private ST myOutermostClassDeclaration;
+
+    private EnhancementBodyItem myCurrentEnhancement = null;
+    private int mySeenOperationParameterCount = 0;
+
     private ST myBaseInstantiation, myBaseEnhancement;
 
     public JavaTranslator(CompileEnvironment env, ScopeRepository repo) {
@@ -188,6 +193,7 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preFacilityDec(FacilityDec node) {
 
+        mySeenOperationParameterCount = 0;
         myBaseInstantiation = myGroup.getInstanceOf("facility_init");
         myBaseInstantiation.add("realization", node.getBodyName().getName());
 
@@ -225,7 +231,10 @@ public class JavaTranslator extends AbstractTranslator {
                 new LinkedList((List) myBaseInstantiation
                         .getAttribute("arguments"));
 
+        myCurrentEnhancement = node;
+
         boolean proxied = myCurrentFacilityEntry.getEnhancements().size() > 1;
+        mySeenOperationParameterCount = 0;
 
         myActiveTemplates.push(myGroup.getInstanceOf("facility_init"));
         myActiveTemplates.peek().add("isProxied", proxied).add("realization",
@@ -238,6 +247,7 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void postEnhancementBodyItem(EnhancementBodyItem node) {
 
+        myCurrentEnhancement = null;
         String curName = node.getBodyName().getName();
 
         List<ModuleParameterization> enhancements =
@@ -304,24 +314,115 @@ public class JavaTranslator extends AbstractTranslator {
         PTType type = node.getProgramTypeValue();
 
         if (type instanceof PTVoid) {
-            /*ST operation =
-                    myGroup.getInstanceOf("operationParameter").add(
-                            "qualifier", node.getQualifier()).add("name",
-                            node.getName().getName());*/
+            mySeenOperationParameterCount++;
+            OperationEntry e = getFormalOperationParameter();
 
-            //    myActiveTemplates.peek().add("arguments", "operation");
+            ST argItem = createOperationArgItemTemplate(e);
+
+            myActiveTemplates.peek().add("arguments", argItem);
         }
         else if (type instanceof PTGeneric) {
             myActiveTemplates.peek().add("arguments", node.getName());
         }
         else if (node.getEvalExp() == null) {
-            ST arg =
+            ST argItem =
                     myGroup.getInstanceOf("var_init").add("facility",
                             getDefiningFacilityEntry(type).getName()).add(
                             "type", getVariableTypeTemplate(type));
 
-            myActiveTemplates.peek().add("arguments", arg);
+            myActiveTemplates.peek().add("arguments", argItem);
         }
+    }
+
+
+    // IDEA. Create a map between the formals and actuals for each piece of a
+    // facilitydec...The key could be the actual, and the value would be the
+    // formal. Yes, it seems like something that should be done in the
+    // symboltable but that here is a better solution than what I currently
+    // have.
+    public OperationEntry getFormalOperationParameter() {
+
+        // First step: Get the scope for the realization (module) that
+        // takes an operation as a formal parameter -- whether it is an
+        // enhancement realization or a plain old concept realization.
+
+        // In short: given only the actual name of the operation parameter,
+        // you want to find it's formal counterpart as defined in a body
+        // module. It gets tricky though since there can be multiple
+        // operations, so you need to keep track of how many you've seen so
+        // far for this enhancement (or simply facility).
+        ModuleScope scopeToSearch;
+
+        List<ModuleParameterDec> bodyParameters;
+        OperationEntry result = null;
+
+        if (myCurrentFacilityEntry == null) {
+            throw new IllegalStateException("ModuleArgumentItem's "
+                    + "apply to something other than a FacilityDec? This is "
+                    + "translation's fault by the way.");
+        }
+        try {
+            if (myCurrentEnhancement != null) {
+
+                scopeToSearch =
+                        myBuilder.getModuleScope(new ModuleIdentifier(
+                                myCurrentEnhancement.getBodyName().getName()));
+
+                EnhancementBodyModuleDec body =
+                        (EnhancementBodyModuleDec) scopeToSearch
+                                .getDefiningElement();
+
+                bodyParameters = body.getParameters();
+            }
+            else {
+                scopeToSearch =
+                        (ModuleScope) myCurrentFacilityEntry.getFacility()
+                                .getRealization().getScope(false);
+
+                ConceptBodyModuleDec body =
+                        (ConceptBodyModuleDec) scopeToSearch
+                                .getDefiningElement();
+
+                bodyParameters = body.getParameters();
+            }
+
+            int opParamsEncountered = 0;
+            for (ModuleParameterDec p : bodyParameters) {
+
+                if (p.getWrappedDec() instanceof OperationDec) {
+                    opParamsEncountered++;
+                    if (mySeenOperationParameterCount == opParamsEncountered) {
+
+                        result =
+                                scopeToSearch
+                                        .queryForOne(
+                                                new NameAndEntryTypeQuery(
+                                                        null,
+                                                        p.getName(),
+                                                        OperationEntry.class,
+                                                        ImportStrategy.IMPORT_NONE,
+                                                        FacilityStrategy.FACILITY_IGNORE,
+                                                        false))
+                                        .toOperationEntry(null);
+                    }
+                }
+            }
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException(nsse);
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
+        }
+        catch (NoneProvidedException npe) {
+            throw new RuntimeException(npe);
+        }
+
+        if (result == null) {
+            throw new RuntimeException("Unable to obtain formal parameter for"
+                    + " facility " + myCurrentFacilityEntry.getName() + ".");
+        }
+        return result;
     }
 
     @Override
@@ -399,7 +500,6 @@ public class JavaTranslator extends AbstractTranslator {
     public void postModuleParameterDec(ModuleParameterDec node) {
 
         if (node.getWrappedDec() instanceof OperationDec) {
-
             ST operationInterface = myActiveTemplates.pop();
             myActiveTemplates.peek().add("classes", operationInterface);
         }
@@ -603,6 +703,30 @@ public class JavaTranslator extends AbstractTranslator {
         }
 
         return modifier;
+    }
+
+    private ST createOperationArgItemTemplate(OperationEntry e) {
+
+        ST result = myGroup.getInstanceOf
+                ("operation_argument_item").add("name", e.getName());
+        try {
+            String realization;
+            if (myCurrentEnhancement != null) {
+                realization = myCurrentEnhancement.getBodyName().getName();
+            }
+            else {
+                realization = myCurrentFacilityEntry.getFacility()
+                        .getRealization().getModuleIdentifier().toString();
+            }
+
+            result.add("realization", realization);
+
+        }
+        catch (NoneProvidedException npe) {
+
+        }
+
+        return result;
     }
 
     /**

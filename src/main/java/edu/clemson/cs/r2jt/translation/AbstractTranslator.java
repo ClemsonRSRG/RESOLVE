@@ -94,12 +94,12 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         try {
             myScope = myBuilder.getModuleScope(new ModuleIdentifier(node));
 
-            ST myEnclosingTemplate = myGroup.getInstanceOf("module");
+            ST outermostEnclosingTemplate = myGroup.getInstanceOf("module");
 
-            myEnclosingTemplate.add("includes", myGroup
-                    .getInstanceOf("include").add("directories", "RESOLVE"));
+            outermostEnclosingTemplate.add("includes", myGroup.getInstanceOf(
+                    "include").add("directories", "RESOLVE"));
 
-            myActiveTemplates.push(myEnclosingTemplate);
+            myActiveTemplates.push(outermostEnclosingTemplate);
 
             AbstractTranslator.emitDebug("----------------------------------\n"
                     + "Translate: " + node.getName().getName()
@@ -241,6 +241,16 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public void postProgramParamExp(ProgramParamExp node) {
         ST paramExp = myActiveTemplates.pop();
         myActiveTemplates.peek().add("arguments", paramExp);
+    }
+
+    @Override
+    public boolean walkVariableRecordExp(VariableRecordExp node) {
+        return true;
+    }
+
+    @Override
+    public void preVariableDotExp(VariableDotExp node) {
+
     }
 
     @Override
