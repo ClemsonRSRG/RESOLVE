@@ -220,9 +220,28 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
         integerExp.add("facility",
                 getDefiningFacilityEntry(node.getProgramType()).getName()).add(
-                "args", node.getValue());
+                "arguments", node.getValue());
 
         myActiveTemplates.peek().add("arguments", integerExp);
+    }
+
+    @Override
+    public void preProgramParamExp(ProgramParamExp node) {
+
+        String qualifier =
+                getCallQualifier(null, node.getName(), node.getArguments());
+
+        ST paramExp =
+                myGroup.getInstanceOf("param_exp").add("qualifier",
+                        qualifier).add("name", node.getName().getName());
+
+        myActiveTemplates.push(paramExp);
+    }
+
+    @Override
+    public void postProgramParamExp(ProgramParamExp node) {
+        ST paramExp = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("arguments", paramExp);
     }
 
     @Override

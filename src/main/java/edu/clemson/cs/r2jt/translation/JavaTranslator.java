@@ -307,13 +307,11 @@ public class JavaTranslator extends AbstractTranslator {
                             node.getName().getName());*/
 
             //    myActiveTemplates.peek().add("arguments", "operation");
-
         }
         else if (type instanceof PTGeneric) {
             myActiveTemplates.peek().add("arguments", node.getName());
         }
         else if (node.getEvalExp() == null) {
-
             ST arg =
                     myGroup.getInstanceOf("var_init").add("facility",
                             getDefiningFacilityEntry(type).getName()).add(

@@ -1,9 +1,48 @@
+/*
+ * This softare is released under the new BSD 2006 license.
+ *
+ * Note the new BSD license is equivalent to the MIT License, except for the
+ * no-endorsement final clause.
+ *
+ * Copyright (c) 2007, Clemson University
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *   * Redistributions of source code must retain the above copyright notice,
+ *     this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *   * Neither the name of the Clemson University nor the names of its
+ *     contributors may be used to endorse or promote products derived from
+ *     this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This sofware has been developed by past and present members of the
+ * Reusable Sofware Research Groups (RSRG) at Clemson University and
+ * The Ohio State University.
+ */
+
 group Java;
 import "Base.stg"
 
-package(directories) ::= <%package <directories; separator = {.}>;%>
+package(directories) ::= "package <directories; separator = {.}>;"
 
-include(directories) ::= <%import <directories; separator = {.}>.*;%>
+include(directories) ::= "import <directories; separator = {.}>.*;"
 
 class(decl, variables, classes, constructors, functions, params) ::= <%
 <decl> {
@@ -14,7 +53,7 @@ class(decl, variables, classes, constructors, functions, params) ::= <%
 	<functions>
 }%>
 
-// i.e. facilities.
+// i.e. facility modules.
 static_class(decl, variables, classes, functions, invoker) ::= <%
 <decl> {
     <variables      :   {k | public static final <k>}>
@@ -26,9 +65,6 @@ static_class(decl, variables, classes, functions, invoker) ::= <%
     	start.<invoker>();
     }
 %>
-
-main(modulename, invocationname) ::= <%
-}%>
 
 class_declaration(modifier, kind, name, extension, implementations) ::= <%
     <modifier> <kind> <name> <extension> <implementations>%>
@@ -47,7 +83,8 @@ var_decl(modifier, type, name, init) ::= <%<type> <name> = <init>;%>
 
 rtype_init(typeName) ::= <%getType<typeName>().initialValue()%>
 
-var_init(type, facility, args) ::= <%<facility>.create<type.name>(<args>)%>
+var_init(type, facility, arguments) ::= <<
+<facility>.create<type.name>(<arguments; separator = ", ">)>>
 
 facility_dec(type, name, rhs) ::= <%<type> <name> = <rhs>;%>
 
@@ -103,8 +140,6 @@ constructor(modifier, name, parameters, variables) ::= <%
     <variables  : {v | <v.name> = <v.init>;}>
 }%>
 
-////////// HERE
-
 unqualified_call(name, arguments) ::= <%
     <name>(<arguments; separator = ", ">);%>
 
@@ -112,6 +147,9 @@ qualified_call(qualifier, name, arguments) ::= <%
     <qualifier>.<name>(<arguments; separator = ", ">);%>
 
 name_exp(name) ::= <%<name>%>
+
+param_exp(qualifier, name, arguments) ::=
+    <%<qualifier>.<name>(<arguments; separator = ", ">)%>
 
 while(arguments, stmts) ::= <%
 while (((Std_Boolean_Realiz.Boolean)(<arguments>)).val) {
