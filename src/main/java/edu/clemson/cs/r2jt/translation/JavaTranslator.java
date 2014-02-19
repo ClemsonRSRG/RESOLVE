@@ -42,9 +42,10 @@ public class JavaTranslator extends AbstractTranslator {
                     FLAG_DESC_TRANSLATE_CLEAN);
 
     /**
-     * <p>A pointer to Java's outermost class template. This template
-     * contains a template, <code>class_declaration</code>, intended to
-     * be mutated in module-specific <code>Dec</code> methods.</p>
+     * <p>A pointer to Java's <em>outermost</em> class template. This houses
+     * everythingfrom global the <code>class_declaration</code> template, to
+     * those for <code>functions</code>, subclasses, and anything else that
+     * might be found in a java class.</p>
      */
     private ST myOutermostJavaClass;
 
@@ -85,7 +86,6 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void postFacilityModuleDec(FacilityModuleDec node) {
 
-        addPackagePath(node);
         String invocationName = null;
 
         List<OperationEntry> locals =
@@ -196,7 +196,7 @@ public class JavaTranslator extends AbstractTranslator {
 
         // If we're within a function, get the appropriate scope so we
         // can find the SymbolTableEntry representing this FacilityDec.
-        // Note : This seems pretty jank.
+        // Note : This seems pretty jank for some reason..
         if (!myScope.equals(myBuilder.getScope(this.getAncestor(2)))) {
             scopeToSearch = myBuilder.getScope(this.getAncestor(2));
         }
@@ -605,10 +605,17 @@ public class JavaTranslator extends AbstractTranslator {
         return modifier;
     }
 
+    /**
+     * Creates and adds a formed java package to the <code>directives</code>
+     * attribute of the <code>module</code> template defined in
+     * <tt>Base.stg</tt>.
+     *
+     * @param node The <code>ModuleDec</code> currently being translated.
+     */
     public void addPackagePath(ModuleDec node) {
+
         LinkedList<String> pkgDirectories =
-                (LinkedList) getPathList(getFile(myScope.getDefiningElement(),
-                        null));
+                (LinkedList) getPathList(getFile(node, null));
 
         pkgDirectories.removeLast();
         ST pkg =

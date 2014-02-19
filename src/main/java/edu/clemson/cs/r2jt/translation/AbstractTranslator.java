@@ -79,8 +79,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      */
     protected boolean myWhileStmtChangingClause = false;
 
-    protected boolean myWalkingOperationParameterFlag = false;
-
     public AbstractTranslator(CompileEnvironment env, ScopeRepository repo) {
         myInstanceEnvironment = env;
         myBuilder = (MathSymbolTableBuilder) repo;
