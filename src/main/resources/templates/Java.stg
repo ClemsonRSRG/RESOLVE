@@ -47,7 +47,7 @@ var_decl(modifier, type, name, init) ::= <%<type> <name> = <init>;%>
 
 rtype_init(typeName) ::= <%getType<typeName>().initialValue()%>
 
-var_init(type, facility)    ::= <%<facility>.init<type.name>()%>
+var_init(type, facility, args) ::= <%<facility>.create<type.name>(<args>)%>
 
 facility_dec(type, name, rhs) ::= <%<type> <name> = <rhs>;%>
 
@@ -110,6 +110,8 @@ unqualified_call(name, arguments) ::= <%
 
 qualified_call(qualifier, name, arguments) ::= <%
     <qualifier>.<name>(<arguments; separator = ", ">);%>
+
+name_exp(name) ::= <%<name>%>
 
 while(arguments, stmts) ::= <%
 while (((Std_Boolean_Realiz.Boolean)(<arguments>)).val) {

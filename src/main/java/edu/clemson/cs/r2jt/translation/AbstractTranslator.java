@@ -63,12 +63,21 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     protected Stack<ST> myActiveTemplates = new Stack<ST>();
 
     /**
-     * <p>This <code>Set</code> keeps track of any additional
-     * <code>includes</code>/imports needed to run the translated file. We call
-     * it <code>Dynamic</code> since only certain nodes add to this collection
-     * (i.e. <code>FacilityDec</code> nodes).</p>
+     * <p>This set keeps track of any additional <code>includes</code> or
+     * <code>imports</code> needed to run the translated file. We call
+     * it <em>dynamic</em> since only certain nodes trigger additions to this
+     * set (i.e. <code>FacilityDec</code> nodes).</p>
      */
     protected Set<String> myDynamicImports = new HashSet<String>();
+
+    /**
+     * <p>This flag is <code>true</code> when walking the children of a
+     * <code>whileStmtChanging</code> clause, <code>false</code> otherwise.
+     *
+     * Note: This global can be safely removed once walk methods for virtual
+     * list nodes are fixed. See Blair.
+     */
+    protected boolean myWhileStmtChangingClause = false;
 
     public AbstractTranslator(CompileEnvironment env, ScopeRepository repo) {
         myInstanceEnvironment = env;
@@ -105,7 +114,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     @Override
     public void preUsesItem(UsesItem node) {
-
         try {
             FacilityEntry e =
                     myModuleScope.queryForOne(
@@ -171,6 +179,50 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public void postWhileStmt(WhileStmt node) {
         ST whileStmt = myActiveTemplates.pop();
         myActiveTemplates.peek().add("stmts", whileStmt);
+    }
+
+    @Override
+    public void preWhileStmtChanging(WhileStmt node) {
+        myWhileStmtChangingClause = true;
+    }
+
+    @Override
+    public void postWhileStmtChanging(WhileStmt node) {
+        myWhileStmtChangingClause = false;
+    }
+
+    @Override
+    public void preFuncAssignStmt(FuncAssignStmt node) {
+
+        String qualifier =
+                getDefiningFacilityEntry(node.getVar().getProgramType())
+                        .getName();
+
+        ST assignStmt =
+                myGroup.getInstanceOf("qualified_call").add("name", "assign")
+                        .add("qualifier", qualifier);
+
+        myActiveTemplates.push(assignStmt);
+    }
+
+    @Override
+    public void postFuncAssignStmt(FuncAssignStmt node) {
+        ST assignStmt = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", assignStmt);
+    }
+
+    @Override
+    public void preProgramIntegerExp(ProgramIntegerExp node) {
+
+        ST integerExp =
+                myGroup.getInstanceOf("var_init").add("type",
+                        getVariableTypeTemplate(node.getProgramType()));
+
+        integerExp.add("facility",
+                getDefiningFacilityEntry(node.getProgramType()).getName()).add(
+                "args", node.getValue());
+
+        myActiveTemplates.peek().add("arguments", integerExp);
     }
 
     @Override

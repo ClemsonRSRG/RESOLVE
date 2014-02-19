@@ -1,6 +1,7 @@
 package edu.clemson.cs.r2jt.translation;
 
 import edu.clemson.cs.r2jt.absyn.*;
+import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
@@ -412,6 +413,35 @@ public class JavaTranslator extends AbstractTranslator {
         catch (DuplicateSymbolException dse) {
             // Populator's fault.
             throw new RuntimeException(dse);
+        }
+    }
+
+    @Override
+    public void preVariableNameExp(VariableNameExp node) {
+
+        boolean nonLocal = false;
+        ST nameExp = myGroup.getInstanceOf("name_exp");
+
+        if (myModuleScope.getDefiningElement() instanceof ConceptBodyModuleDec) {
+            ConceptBodyModuleDec thisModule =
+                    ((ConceptBodyModuleDec) myModuleScope.getDefiningElement());
+
+            List<ProgramParameterEntry> formals =
+                    getModuleFormalParameters(thisModule.getConceptName());
+
+            for (ProgramParameterEntry e : formals) {
+                if (e.getName() == node.getName().getName()) {
+                    nonLocal = true;
+                }
+            }
+        }
+        nameExp =
+                (nonLocal) ? nameExp.add("name", "get"
+                        + node.getName().getName() + "()") : nameExp.add(
+                        "name", node.getName().getName());
+
+        if (!myWhileStmtChangingClause) {
+            myActiveTemplates.peek().add("arguments", nameExp);
         }
     }
 
