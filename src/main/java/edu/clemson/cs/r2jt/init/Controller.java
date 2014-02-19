@@ -1749,19 +1749,24 @@ public class Controller {
 
     private void NEWtranslateModuleDec(File file, ScopeRepository realTable,
             ModuleDec dec) {
-        try {
-            ModuleScope scope =
-                    realTable.getModuleScope(new ModuleIdentifier(dec));
-            JavaTranslator javaT =
-                    new JavaTranslator(myInstanceEnvironment, scope, dec);
-            CTranslator cT = new CTranslator(myInstanceEnvironment, scope, dec);
-            TreeWalker tw = new TreeWalker(javaT);
-            tw.visit(dec);
-            javaT.outputCode(file);
+
+        AbstractTranslator translator = null;
+
+        if (myInstanceEnvironment.flags
+                .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
+            translator = new JavaTranslator(myInstanceEnvironment, realTable);
         }
-        catch (NoSuchSymbolException nsse) {
-            //Can't find the module we're in.  Shouldn't be possible.
-            throw new RuntimeException(nsse);
+
+        if (myInstanceEnvironment.flags.isFlagSet(CTranslator.C_FLAG_TRANSLATE)) {
+            translator = new CTranslator(myInstanceEnvironment, realTable);
+        }
+
+        if (translator != null) {
+            TreeWalker tw = new TreeWalker(translator);
+
+            tw.visit(dec);
+
+            translator.outputCode(file);
         }
     }
 
