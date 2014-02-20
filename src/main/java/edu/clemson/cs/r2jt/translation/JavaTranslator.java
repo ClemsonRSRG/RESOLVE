@@ -140,7 +140,7 @@ public class JavaTranslator extends AbstractTranslator {
                         "public").add("name", node.getName().getName()).add(
                         "kind", "interface").add("extension", extend);
 
-        myOutermostJavaClass = myGroup.getInstanceOf("Class");
+        myOutermostJavaClass = myGroup.getInstanceOf("class");
         myOutermostJavaClass.add("declaration", declaration);
 
         myActiveTemplates.push(myOutermostJavaClass);
@@ -169,7 +169,7 @@ public class JavaTranslator extends AbstractTranslator {
                         "kind", "class").add("extension", extend).add(
                         "implementations", implement);
 
-        myOutermostJavaClass = myGroup.getInstanceOf("Class");
+        myOutermostJavaClass = myGroup.getInstanceOf("class");
         myOutermostJavaClass.add("declaration", declaration);
 
         myActiveTemplates.push(myOutermostJavaClass);
@@ -359,10 +359,6 @@ public class JavaTranslator extends AbstractTranslator {
                                     .getName());
 
             myActiveTemplates.peek().add("arguments", argItem);
-
-            JavaTranslator.emitDebug(myCurrentFacilityEntry.getName() + ": "
-                    + node.getName().getName() + " -> "
-                    + myFacilityBindings.get(node).getName());
         }
         else if (type instanceof PTGeneric) {
             myActiveTemplates.peek().add("arguments", node.getName());
@@ -375,10 +371,6 @@ public class JavaTranslator extends AbstractTranslator {
                             "type", getVariableTypeTemplate(type));
 
             myActiveTemplates.peek().add("arguments", argItem);
-
-            JavaTranslator.emitDebug(myCurrentFacilityEntry.getName() + ": "
-                    + node.getName().getName() + " -> "
-                    + myFacilityBindings.get(node).getName());
         }
     }
 
@@ -462,16 +454,13 @@ public class JavaTranslator extends AbstractTranslator {
         }
     }
 
-
-
-
     @Override
     public void preTypeDec(TypeDec node) {
 
         ST extend = myGroup.getInstanceOf("class_extends").add("name",
                 "RType");
 
-        ST interfaceDec =
+        ST declaration =
                 myGroup.getInstanceOf("class_declaration").add("kind",
                         "interface").add("name", node.getName().getName()).add(
                         "extension", extend);
@@ -480,7 +469,7 @@ public class JavaTranslator extends AbstractTranslator {
                 .add(
                         "classes",
                         myGroup.getInstanceOf("class").add("declaration",
-                                interfaceDec));
+                                declaration));
 
         try {
             ProgramTypeDefinitionEntry ptde =

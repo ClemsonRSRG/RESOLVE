@@ -259,9 +259,24 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         return true;
     }
 
+    // ((Array_Realiz.Stack)S).rep.Top
     @Override
     public void preVariableDotExp(VariableDotExp node) {
 
+        VariableExp first, second;
+        PTType type = node.getSegments().get(0).getProgramType();
+
+        ST dotExp = myGroup.getInstanceOf("variable_dot_exp").add
+                ("modulename", myScope.getDefiningElement().getName().getName
+                        ()).add("typename", getTypeName(type));
+
+        myActiveTemplates.push(dotExp);
+    }
+
+    @Override
+    public void postVariableDotExp(VariableDotExp node) {
+        ST dotExp = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("arguments", dotExp);
     }
 
     @Override

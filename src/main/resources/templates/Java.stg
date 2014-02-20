@@ -46,9 +46,9 @@ include(directories) ::= "import <directories; separator = {.}>.*;"
 
 class(declaration, variables, classes, constructors, functions, parameters, STDFACS) ::= <<
 <declaration> {
+	<STDFACS>
     <parameters     :   {l | <l>;}>
 	<variables      :   {j | <j.type> <j.name>;}>
-	<STDFACS>
     <constructors   :   {v | <constructor(v.modifier, v.name, parameters, variables)>}>
     <classes>
 	<functions>
@@ -57,8 +57,8 @@ class(declaration, variables, classes, constructors, functions, parameters, STDF
 
 facility_class(declaration, variables, classes, functions, invoker, STDFACS) ::= <<
 <declaration> {
-    <variables      :   {k | public static final <k>}>
     <STDFACS>
+    <variables      :   {k | public static final <k>}>
     <classes>
     <functions>
 
@@ -73,7 +73,7 @@ class_declaration(modifier, kind, name, extension, implementations) ::= <<
     <modifier> <kind> <name> <extension> <implementations>
 >>
 
-ClassExtends(name) ::= "extends <name>"
+class_extends(name) ::= "extends <name>"
 
 class_implements(names) ::= "implements <names; separator = {, }>"
 
@@ -162,6 +162,11 @@ qualified_call(qualifier, name, arguments) ::= <%
     <qualifier>.<name>(<arguments; separator = ", ">);%>
 
 name_exp(name) ::= <%<name>%>
+
+variable_dot_exp(modulename, typename, name, field, arguments) ::= <%
+    (((<modulename>.<typename>)<first(arguments)>).rep.<rest(arguments);
+    separator = {.}>
+%>
 
 param_exp(qualifier, name, arguments) ::=
     <%<qualifier>.<name>(<arguments; separator = ", ">)%>
