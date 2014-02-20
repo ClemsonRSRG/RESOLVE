@@ -44,55 +44,59 @@ package(directories) ::= "package <directories; separator = {.}>;"
 
 include(directories) ::= "import <directories; separator = {.}>.*;"
 
-class(decl, variables, classes, constructors, functions, parameters) ::= <%
-<decl> {
+class(declaration, variables, classes, constructors, functions, parameters, STDFACS) ::= <<
+<declaration> {
     <parameters     :   {l | <l>;}>
 	<variables      :   {j | <j.type> <j.name>;}>
+	<STDFACS>
     <constructors   :   {v | <constructor(v.modifier, v.name, parameters, variables)>}>
     <classes>
 	<functions>
-}%>
+}
+>>
 
-// i.e. facility modules.
-static_class(decl, variables, classes, functions, invoker) ::= <%
-<decl> {
+facility_class(declaration, variables, classes, functions, invoker, STDFACS) ::= <<
+<declaration> {
     <variables      :   {k | public static final <k>}>
+    <STDFACS>
     <classes>
     <functions>
 
     public static void main(String[] args) {
-        <decl.name> start = new <decl.name>();
+        <declaration.name> start = new <declaration.name>();
     	start.<invoker>();
     }
-%>
+}
+>>
 
-class_declaration(modifier, kind, name, extension, implementations) ::= <%
-    <modifier> <kind> <name> <extension> <implementations>%>
+class_declaration(modifier, kind, name, extension, implementations) ::= <<
+    <modifier> <kind> <name> <extension> <implementations>
+>>
 
-class_extends(name) ::= <%extends <name>%>
+ClassExtends(name) ::= "extends <name>"
 
-class_implements(names) ::= <%implements <names; separator = ", ">%>
+class_implements(names) ::= "implements <names; separator = {, }>"
 
-//Std_Integer_Fac.Read((Integer_Template.Integer )parm1)
-operation_argument_item(realization, actualQualifier, actualName, formalname,
- type, function) ::= <%
+operation_argument_item(realization, actualQualifier, actualName,
+                        formalname, type, function) ::= <<
 new <realization>.<function.name>() {
     <function   :  {f | <function_def("public", f.type, f.name, f.parameters,
                                   f.facilities, f.variables,
     f.parameters    : { p | <actualQualifier>.<actualName>((TYPE)<p.name>);}
     )>}>
 
-}%>
+}
+>>
 
 //-------------------------------------------------------------------
 //   facilities
 //-------------------------------------------------------------------
 
-qualified_type(concept, name) ::= <%<concept>.<name>%>
+qualified_type(concept, name) ::= "<concept>.<name>"
 
-var_decl(modifier, type, name, init) ::= <%<type> <name> = <init>;%>
+var_decl(modifier, type, name, init) ::= "<type> <name> = <init>;"
 
-rtype_init(typeName) ::= <%getType<typeName>().initialValue()%>
+rtype_init(typeName) ::= "getType<typeName>().initialValue()"
 
 var_init(type, facility, arguments) ::= <<
 <facility>.create<type.name>(<arguments; separator = ", ">)>>
@@ -110,28 +114,28 @@ facility_proxied_init(realization, arguments) ::= <%
 //   classes
 //-------------------------------------------------------------------
 
-record_class(decl, variables) ::= <%
-<decl> {
-    <decl.name>_Rep rep;
-    <decl.name>() {
-        rep = new <decl.name>_Rep();
+record_class(declaration, variables) ::= <%
+<declaration> {
+    <declaration.name>_Rep rep;
+    <declaration.name>() {
+        rep = new <declaration.name>_Rep();
     }
     public Object getRep() {
         return rep;
     }
     public void setRep(Object o) {
-        rep = (<decl.name>_Rep)o;
+        rep = (<declaration.name>_Rep)o;
     }
     public RType initialValue() {
-        return new <decl.name>();
+        return new <declaration.name>();
     }
     public String toString() {
         return rep.toString();
     }
 }
-class <decl.name>_Rep {
+class <declaration.name>_Rep {
     <variables      : {v | <v.type> <v.name>;}>
-    <decl.name>_Rep() {
+    <declaration.name>_Rep() {
         <variables  : {v | <v.name> = <v.init>;}>
     }
     public String toString() {

@@ -439,7 +439,8 @@ public class Utilities {
             List<ModuleArgumentItem> conceptParam,
             List<ModuleArgumentItem> conceptBodiesParam,
             List<EnhancementItem> enhancementParam,
-            List<EnhancementBodyItem> enhancementBodiesParam) {
+            List<EnhancementBodyItem> enhancementBodiesParam,
+            boolean externallyRealized) {
         // Create a FacilityDec
         FacilityDec newFacilityDec = new FacilityDec();
 
@@ -462,6 +463,7 @@ public class Utilities {
             // Set the Enhancement to empty
             newFacilityDec.setEnhancements(enhancementParam);
             newFacilityDec.setEnhancementBodies(enhancementBodiesParam);
+            newFacilityDec.setExternallyRealizedFlag(externallyRealized);
         }
 
         return newFacilityDec;

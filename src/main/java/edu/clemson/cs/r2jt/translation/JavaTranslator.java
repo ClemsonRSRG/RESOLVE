@@ -42,10 +42,20 @@ public class JavaTranslator extends AbstractTranslator {
             new Flag(FLAG_SECTION_NAME, "javaTranslateClean",
                     FLAG_DESC_TRANSLATE_CLEAN);
 
+    /**
+     * <p>A mapping between the <code>ModuleArgumentItem</code>s
+     * representing the actual parameters of a <code>FacilityDec</code> and
+     * their formal <code>ModuleParameterDec</code>-bound counterparts.</p>
+     */
     private Map<ModuleArgumentItem, ModuleParameterDec> myFacilityBindings =
             new HashMap<ModuleArgumentItem, ModuleParameterDec>();
 
+    /**
+     * <p>A <code>ModuleParameterization</code> corresponding to the
+     * <code>EnhancementBodyItem</code> being walked.</p>
+     */
     private ModuleParameterization myCurrentEnhancement = null;
+
     /**
      * <p>A pointer to Java's <em>outermost</em> class template. This houses
      * everythingfrom global the <code>class_declaration</code> template, to
@@ -53,8 +63,18 @@ public class JavaTranslator extends AbstractTranslator {
      * might be found in a java class.</p>
      */
     private ST myOutermostJavaClass;
-
     private ST myBaseInstantiation, myBaseEnhancement;
+
+    /**
+     * <p>A <strong>temporary</strong> measure to get things rolling. This
+     * will <em>hopefully</em> be gone in the near future.</p>
+     */
+    private final String[] myHardcodedStdFacs =
+            {
+                    "Boolean_Template Std_Boolean_Fac = new Std_Boolean_Realiz();",
+                    "Integer_Template Std_Integer_Fac = new Std_Integer_Realiz();",
+                    "Character_Template Std_Character_Fac = new Std_Character_Realiz();",
+                    "Char_Str_Template Std_Char_Str_Fac = new Std_Char_Str_Realiz();" };
 
     public JavaTranslator(CompileEnvironment env, ScopeRepository repo) {
         super(env, repo);
@@ -70,15 +90,16 @@ public class JavaTranslator extends AbstractTranslator {
 
         addPackageTemplate(node);
 
-        ST classDeclaration =
+        ST declaration =
                 myGroup.getInstanceOf("class_declaration").add("modifier",
                         "public").add("name", node.getName().getName()).add(
                         "kind", "class");
 
-        myOutermostJavaClass = myGroup.getInstanceOf("static_class");
-        myOutermostJavaClass.add("decl", classDeclaration);
+        myOutermostJavaClass = myGroup.getInstanceOf("facility_class");
+        myOutermostJavaClass.add("declaration", declaration);
 
         myActiveTemplates.push(myOutermostJavaClass);
+        myActiveTemplates.peek().add("STDFACS", myHardcodedStdFacs);
     }
 
     @Override
@@ -114,13 +135,13 @@ public class JavaTranslator extends AbstractTranslator {
                 myGroup.getInstanceOf("class_extends").add("name",
                         "RESOLVE_INTERFACE");
 
-        ST classDeclaration =
+        ST declaration =
                 myGroup.getInstanceOf("class_declaration").add("modifier",
                         "public").add("name", node.getName().getName()).add(
                         "kind", "interface").add("extension", extend);
 
-        myOutermostJavaClass = myGroup.getInstanceOf("class");
-        myOutermostJavaClass.add("decl", classDeclaration);
+        myOutermostJavaClass = myGroup.getInstanceOf("Class");
+        myOutermostJavaClass.add("declaration", declaration);
 
         myActiveTemplates.push(myOutermostJavaClass);
     }
@@ -142,14 +163,14 @@ public class JavaTranslator extends AbstractTranslator {
                         node.getName().getName()).add("modifier",
                         getFunctionModifier());
 
-        ST classDeclaration =
+        ST declaration =
                 myGroup.getInstanceOf("class_declaration").add("modifier",
                         "public").add("name", node.getName().getName()).add(
                         "kind", "class").add("extension", extend).add(
                         "implementations", implement);
 
-        myOutermostJavaClass = myGroup.getInstanceOf("class");
-        myOutermostJavaClass.add("decl", classDeclaration);
+        myOutermostJavaClass = myGroup.getInstanceOf("Class");
+        myOutermostJavaClass.add("declaration", declaration);
 
         myActiveTemplates.push(myOutermostJavaClass);
         myActiveTemplates.peek().add("constructors", constructor);
@@ -160,6 +181,8 @@ public class JavaTranslator extends AbstractTranslator {
         for (ProgramParameterEntry p : formals) {
             addParameterTemplate(p.getDeclaredType(), p.getName());
         }
+        myActiveTemplates.peek().add("STDFACS", myHardcodedStdFacs);
+
     }
 
     @Override
@@ -215,7 +238,9 @@ public class JavaTranslator extends AbstractTranslator {
             ModuleParameterization realiz =
                     myCurrentFacilityEntry.getFacility().getRealization();
 
-            constructFacilityArgBindings(spec, realiz);
+            if (!node.externallyRealized()) {
+                constructFacilityArgBindings(spec, realiz);
+            }
         }
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(null, node.getName());
@@ -327,10 +352,6 @@ public class JavaTranslator extends AbstractTranslator {
         PTType type = node.getProgramTypeValue();
 
         if (type instanceof PTVoid) {
-            JavaTranslator.emitDebug(myCurrentFacilityEntry.getName() + ": "
-                    + node.getName().getName() + " -> "
-                    + myFacilityBindings.get(node).getName());
-
             ST argItem =
                     createOperationArgItemTemplate(
                             (OperationDec) myFacilityBindings.get(node)
@@ -338,15 +359,15 @@ public class JavaTranslator extends AbstractTranslator {
                                     .getName());
 
             myActiveTemplates.peek().add("arguments", argItem);
+
+            JavaTranslator.emitDebug(myCurrentFacilityEntry.getName() + ": "
+                    + node.getName().getName() + " -> "
+                    + myFacilityBindings.get(node).getName());
         }
         else if (type instanceof PTGeneric) {
             myActiveTemplates.peek().add("arguments", node.getName());
         }
         else if (node.getEvalExp() == null) {
-
-            JavaTranslator.emitDebug(myCurrentFacilityEntry.getName() + ": "
-                    + node.getName().getName() + " -> "
-                    + myFacilityBindings.get(node).getName());
 
             ST argItem =
                     myGroup.getInstanceOf("var_init").add("facility",
@@ -354,6 +375,10 @@ public class JavaTranslator extends AbstractTranslator {
                             "type", getVariableTypeTemplate(type));
 
             myActiveTemplates.peek().add("arguments", argItem);
+
+            JavaTranslator.emitDebug(myCurrentFacilityEntry.getName() + ": "
+                    + node.getName().getName() + " -> "
+                    + myFacilityBindings.get(node).getName());
         }
     }
 
@@ -418,12 +443,12 @@ public class JavaTranslator extends AbstractTranslator {
 
             ST operationInterface =
                     myGroup.getInstanceOf("class").add(
-                            "decl",
+                            "declaration",
                             myGroup.getInstanceOf("class_declaration").add(
                                     "kind", "interface").add("name",
                                     node.getName().getName()));
 
-            myActiveTemplates.peek().add("params", parameter);
+            myActiveTemplates.peek().add("parameters", parameter);
             myActiveTemplates.push(operationInterface);
         }
     }
@@ -437,18 +462,25 @@ public class JavaTranslator extends AbstractTranslator {
         }
     }
 
+
+
+
     @Override
     public void preTypeDec(TypeDec node) {
 
-        ST extend = myGroup.getInstanceOf("class_extends").add("name", "RType");
+        ST extend = myGroup.getInstanceOf("class_extends").add("name",
+                "RType");
 
         ST interfaceDec =
                 myGroup.getInstanceOf("class_declaration").add("kind",
                         "interface").add("name", node.getName().getName()).add(
                         "extension", extend);
 
-        myActiveTemplates.peek().add("classes",
-                myGroup.getInstanceOf("class").add("decl", interfaceDec));
+        myActiveTemplates.peek()
+                .add(
+                        "classes",
+                        myGroup.getInstanceOf("class").add("declaration",
+                                interfaceDec));
 
         try {
             ProgramTypeDefinitionEntry ptde =
@@ -481,7 +513,8 @@ public class JavaTranslator extends AbstractTranslator {
                         .getProgramType();
 
         ST recordDeclaration =
-                myGroup.getInstanceOf("class_declaration").add("kind", "class");
+                myGroup.getInstanceOf("class_declaration").add("kind",
+                        "class");
 
         recordDeclaration.add("name", node.getName()).add(
                 "implementations",
@@ -489,7 +522,7 @@ public class JavaTranslator extends AbstractTranslator {
                         getVariableTypeTemplate(repType)));
 
         myActiveTemplates.push(myGroup.getInstanceOf("record_class").add(
-                "decl", recordDeclaration));
+                "declaration", recordDeclaration));
     }
 
     @Override
@@ -637,6 +670,13 @@ public class JavaTranslator extends AbstractTranslator {
         return modifier;
     }
 
+    /**
+     * <p></p>
+     * @param operation
+     * @param qualifier
+     * @param name
+     * @return
+     */
     private ST createOperationArgItemTemplate(OperationDec operation,
             PosSymbol qualifier, PosSymbol name) {
 
@@ -671,22 +711,25 @@ public class JavaTranslator extends AbstractTranslator {
             myActiveTemplates.push(interior);
 
             for (ParameterVarDec p : operation.getParameters()) {
-                addParameterTemplate(p.getTy().getProgramTypeValue(),
-                        "p" + parameterNum);
+                addParameterTemplate(p.getTy().getProgramTypeValue(), "p"
+                        + parameterNum);
                 parameterNum++;
             }
 
             result.add("function", myActiveTemplates.pop()).add("realization",
                     realization);
-
         }
         catch (NoneProvidedException npe) {
 
         }
-
         return result;
     }
 
+    /**
+     * <p></p>
+     * @param spec
+     * @param realiz
+     */
     public void constructFacilityArgBindings(ModuleParameterization spec,
             ModuleParameterization realiz) {
 
@@ -710,7 +753,6 @@ public class JavaTranslator extends AbstractTranslator {
             joinedActuals.addAll(realiz.getParameters());
             joinedFormals.addAll(realizModule.getParameters());
 
-            // Now create the mapping between them.. Sizes should match!
             for (int i = 0; i < joinedActuals.size(); i++) {
                 myFacilityBindings.put(joinedActuals.get(i), joinedFormals
                         .get(i));
