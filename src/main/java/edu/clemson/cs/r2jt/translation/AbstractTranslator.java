@@ -72,11 +72,10 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     /**
      * <p>This flag is <code>true</code> when walking the children of a
-     * <code>whileStmtChanging</code> clause, <code>false</code> otherwise.
-     *
-     * Note: This global can be safely removed once walk methods for virtual
-     * list nodes are fixed. SEE BLAIR.
+     * <code>whileStmtChanging</code> clause; <code>false</code> otherwise.</p>
      */
+    // TODO : This global can be safely removed once walk methods for virtual
+    //        list nodes are fixed. Talk to Blair about this.
     protected boolean myWhileStmtChangingClause = false;
 
     public AbstractTranslator(CompileEnvironment env, ScopeRepository repo) {
@@ -354,7 +353,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 myGroup.getInstanceOf("parameter").add("type",
                         getVariableTypeTemplate(type)).add("name", name);
 
-        myActiveTemplates.peek().add("params", parameter);
+        myActiveTemplates.peek().add("parameters", parameter);
     }
 
     /**

@@ -44,11 +44,11 @@ package(directories) ::= "package <directories; separator = {.}>;"
 
 include(directories) ::= "import <directories; separator = {.}>.*;"
 
-class(decl, variables, classes, constructors, functions, params) ::= <%
+class(decl, variables, classes, constructors, functions, parameters) ::= <%
 <decl> {
-    <params         :   {l | <l>;}>
+    <parameters     :   {l | <l>;}>
 	<variables      :   {j | <j.type> <j.name>;}>
-    <constructors   :   {v | <constructor(v.modifier, v.name, params, variables)>}>
+    <constructors   :   {v | <constructor(v.modifier, v.name, parameters, variables)>}>
     <classes>
 	<functions>
 }%>
@@ -73,9 +73,15 @@ class_extends(name) ::= <%extends <name>%>
 
 class_implements(names) ::= <%implements <names; separator = ", ">%>
 
-operation_argument_item(realization, name, function) ::= <%
-new <realization>.<name>() {
-    <function>
+//Std_Integer_Fac.Read((Integer_Template.Integer )parm1)
+operation_argument_item(realization, actualQualifier, actualName, formalname,
+ type, function) ::= <%
+new <realization>.<function.name>() {
+    <function   :  {f | <function_def("public", f.type, f.name, f.parameters,
+                                  f.facilities, f.variables,
+    f.parameters    : { p | <actualQualifier>.<actualName>((TYPE)<p.name>);}
+    )>}>
+
 }%>
 
 //-------------------------------------------------------------------
