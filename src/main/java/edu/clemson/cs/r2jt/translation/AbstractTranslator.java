@@ -259,11 +259,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         return true;
     }
 
-    // ((Array_Realiz.Stack)S).rep.Top
     @Override
     public void preVariableDotExp(VariableDotExp node) {
 
-        VariableExp first, second;
         PTType type = node.getSegments().get(0).getProgramType();
 
         ST dotExp = myGroup.getInstanceOf("variable_dot_exp").add
@@ -287,6 +285,11 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                         .getName().getName(), true);
 
         myActiveTemplates.push(operation);
+
+        if (node.getReturnTy() != null) {
+            addVariableTemplate(node.getReturnTy().getProgramTypeValue(),
+                    node.getName().getName());
+        }
     }
 
     @Override
@@ -307,6 +310,11 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                         .getName().getName(), true);
 
         myActiveTemplates.push(operation);
+
+        if (node.getReturnTy() != null) {
+            addVariableTemplate(node.getReturnTy().getProgramTypeValue(),
+                    node.getName().getName());
+        }
     }
 
     @Override
@@ -317,12 +325,28 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     @Override
     public void postProcedureDec(ProcedureDec node) {
+
+        if (node.getReturnTy() != null) {
+            ST returnStmt = myGroup.getInstanceOf("return_stmt").add("name",
+                    node.getName().getName());
+
+            myActiveTemplates.peek().add("stmts", returnStmt);
+        }
+
         ST operation = myActiveTemplates.pop();
         myActiveTemplates.peek().add("functions", operation);
     }
 
     @Override
     public void postFacilityOperationDec(FacilityOperationDec node) {
+
+        if (node.getReturnTy() != null) {
+            ST returnStmt = myGroup.getInstanceOf("return_stmt").add("name",
+                    node.getName().getName());
+
+            myActiveTemplates.peek().add("stmts", returnStmt);
+        }
+
         ST operation = myActiveTemplates.pop();
         myActiveTemplates.peek().add("functions", operation);
     }

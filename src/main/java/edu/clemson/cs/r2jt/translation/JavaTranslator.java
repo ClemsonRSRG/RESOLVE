@@ -57,10 +57,10 @@ public class JavaTranslator extends AbstractTranslator {
     private ModuleParameterization myCurrentEnhancement = null;
 
     /**
-     * <p>A pointer to Java's <em>outermost</em> class template. This houses
-     * everythingfrom global the <code>class_declaration</code> template, to
+     * <p>A pointer to the <em>outermost</em> Java class template. This houses
+     * everything from global the <code>class_declaration</code> template, to
      * those for <code>functions</code>, subclasses, and anything else that
-     * might be found in a java class.</p>
+     * might be found in a java/resolve class.</p>
      */
     private ST myOutermostJavaClass;
     private ST myBaseInstantiation, myBaseEnhancement;
