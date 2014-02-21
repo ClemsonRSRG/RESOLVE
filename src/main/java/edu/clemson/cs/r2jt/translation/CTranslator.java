@@ -211,7 +211,7 @@ public class CTranslator extends AbstractTranslator {
     public void preOperationDec(OperationDec node) {
         String operationName = "(*" + node.getName().getName() + ")";
         ST operation =
-                createOperationLikeTemplate((node.getReturnTy() != null) ? node
+                getOperationLikeTemplate((node.getReturnTy() != null) ? node
                         .getReturnTy().getProgramTypeValue() : null,
                         operationName, false);
 

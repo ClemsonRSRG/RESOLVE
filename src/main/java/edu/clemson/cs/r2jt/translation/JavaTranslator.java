@@ -92,7 +92,6 @@ public class JavaTranslator extends AbstractTranslator {
         facilityModuleClass.add("declaration", declaration);
 
         myActiveTemplates.push(facilityModuleClass);
-        myActiveTemplates.peek().add("STDFACS", myHardcodedStdFacs);
     }
 
     @Override
@@ -125,7 +124,7 @@ public class JavaTranslator extends AbstractTranslator {
         addPackageTemplate(node);
 
         ST conceptInterfaceClass =
-                createModuleInterfaceTemplate(node.getName().getName(),
+                getModuleInterfaceTemplate(node.getName().getName(),
                         "RESOLVE_INTERFACE");
 
         myActiveTemplates.push(conceptInterfaceClass);
@@ -137,7 +136,7 @@ public class JavaTranslator extends AbstractTranslator {
         addPackageTemplate(node);
 
         ST enhancementInterfaceClass =
-                createModuleInterfaceTemplate(node.getName().getName(), node
+                getModuleInterfaceTemplate(node.getName().getName(), node
                         .getConceptName().getName());
 
         myActiveTemplates.push(enhancementInterfaceClass);
@@ -145,7 +144,31 @@ public class JavaTranslator extends AbstractTranslator {
 
     @Override
     public void preEnhancementBodyModuleDec(EnhancementBodyModuleDec node) {
-        
+
+        addPackageTemplate(node);
+
+        ST implement =
+                myGroup.getInstanceOf("class_implements").add("names",
+                        node.getName().getName()).add("names",
+                        node.getConceptName().getName()).add("names",
+                        "InvocationHandler");
+
+        ST declaration =
+                myGroup.getInstanceOf("class_declaration").add("modifier",
+                        "public").add("name", node.getName().getName()).add(
+                        "kind", "class").add("implementations", implement);
+
+        ST constructor =
+                myGroup.getInstanceOf("constructor").add("name",
+                        node.getName().getName()).add("modifier",
+                        getFunctionModifier());
+
+        ST conceptBodyClass = myGroup.getInstanceOf("class");
+        conceptBodyClass.add("declaration", declaration);
+
+        System.out.println("HERE: " + conceptBodyClass.render());
+       // myActiveTemplates.push(conceptBodyClass);
+
     }
 
     @Override
@@ -201,7 +224,7 @@ public class JavaTranslator extends AbstractTranslator {
                             : "get";
 
             ST paramFunction =
-                    createOperationLikeTemplate(p.getDeclaredType(),
+                    getOperationLikeTemplate(p.getDeclaredType(),
                             prefix + p.getName(), true).add("stmts",
                             returnStmt.add("name", p.getName()));
 
@@ -355,7 +378,7 @@ public class JavaTranslator extends AbstractTranslator {
 
         if (type instanceof PTVoid) {
             ST argItem =
-                    createOperationArgItemTemplate(
+                    getOperationArgItemTemplate(
                             (OperationDec) myFacilityBindings.get(node)
                                     .getWrappedDec(), node.getQualifier(), node
                                     .getName());
@@ -389,8 +412,8 @@ public class JavaTranslator extends AbstractTranslator {
                             .toProgramParameterEntry(node.getLocation());
 
             ST getter =
-                    createOperationLikeTemplate(ppe.getDeclaredType(),
-                            "getType" + node.getName().getName(), false);
+                    getOperationLikeTemplate(ppe.getDeclaredType(), "getType"
+                            + node.getName().getName(), false);
 
             myActiveTemplates.peek().add("functions", getter);
         }
@@ -417,7 +440,7 @@ public class JavaTranslator extends AbstractTranslator {
         }
 
         ST getter =
-                createOperationLikeTemplate(type, "get" + name, translatingBody);
+                getOperationLikeTemplate(type, "get" + name, translatingBody);
 
         getter.add("stmts", myGroup.getInstanceOf("return_stmt").add("name",
                 name));
@@ -476,7 +499,7 @@ public class JavaTranslator extends AbstractTranslator {
                             .toProgramTypeDefinitionEntry(node.getLocation());
 
             ST typeDefinition =
-                    createOperationLikeTemplate(ptde.getProgramType(), "create"
+                    getOperationLikeTemplate(ptde.getProgramType(), "create"
                             + node.getName().getName(), false);
 
             myActiveTemplates.peek().add("functions", typeDefinition);
@@ -534,7 +557,7 @@ public class JavaTranslator extends AbstractTranslator {
                     myGroup.getInstanceOf("return_stmt").add("name", instance);
 
             ST createMethod =
-                    createOperationLikeTemplate(pte.getProgramType(),
+                    getOperationLikeTemplate(pte.getProgramType(),
                             "create" + node.getName().getName(), true).add(
                             "stmts", returnStmt);
 
@@ -663,7 +686,7 @@ public class JavaTranslator extends AbstractTranslator {
      * @param name
      * @return
      */
-    private ST createOperationArgItemTemplate(OperationDec operation,
+    private ST getOperationArgItemTemplate(OperationDec operation,
             PosSymbol qualifier, PosSymbol name) {
 
         int parameterNum = 0;
@@ -691,7 +714,7 @@ public class JavaTranslator extends AbstractTranslator {
                             .getProgramTypeValue() : null;
 
             ST interior =
-                    createOperationLikeTemplate(returnType, operation.getName()
+                    getOperationLikeTemplate(returnType, operation.getName()
                             .getName(), true);
 
             myActiveTemplates.push(interior);
@@ -749,8 +772,7 @@ public class JavaTranslator extends AbstractTranslator {
         }
     }
 
-    private ST createModuleInterfaceTemplate(String className,
-            String extendsField) {
+    private ST getModuleInterfaceTemplate(String className, String extendsField) {
 
         ST extend =
                 myGroup.getInstanceOf("class_extends")
@@ -762,7 +784,7 @@ public class JavaTranslator extends AbstractTranslator {
                         "interface").add("extension", extend);
 
         ST result =
-                myGroup.getInstanceOf("class").add("declaraiton", declaration);
+                myGroup.getInstanceOf("class").add("declaration", declaration);
 
         return result;
     }

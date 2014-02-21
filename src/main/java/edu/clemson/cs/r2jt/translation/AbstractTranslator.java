@@ -282,7 +282,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public void preFacilityOperationDec(FacilityOperationDec node) {
         ST operation =
-                createOperationLikeTemplate((node.getReturnTy() != null) ? node
+                getOperationLikeTemplate((node.getReturnTy() != null) ? node
                         .getReturnTy().getProgramTypeValue() : null, node
                         .getName().getName(), true);
 
@@ -297,7 +297,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public void preOperationDec(OperationDec node) {
         ST operation =
-                createOperationLikeTemplate((node.getReturnTy() != null) ? node
+                getOperationLikeTemplate((node.getReturnTy() != null) ? node
                         .getReturnTy().getProgramTypeValue() : null, node
                         .getName().getName(), false);
 
@@ -307,7 +307,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public void preProcedureDec(ProcedureDec node) {
         ST operation =
-                createOperationLikeTemplate((node.getReturnTy() != null) ? node
+                getOperationLikeTemplate((node.getReturnTy() != null) ? node
                         .getReturnTy().getProgramTypeValue() : null, node
                         .getName().getName(), true);
 
@@ -444,7 +444,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      *
      * @param hasBody
      */
-    protected ST createOperationLikeTemplate(PTType returnType, String name,
+    protected ST getOperationLikeTemplate(PTType returnType, String name,
             boolean hasBody) {
 
         String attributeName = (hasBody) ? "function_def" : "function_decl";
