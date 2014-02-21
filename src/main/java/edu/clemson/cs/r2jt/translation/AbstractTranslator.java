@@ -265,9 +265,10 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
         PTType type = node.getSegments().get(0).getProgramType();
 
-        ST dotExp = myGroup.getInstanceOf("variable_dot_exp").add
-                ("modulename", myScope.getDefiningElement().getName().getName
-                        ()).add("typename", getTypeName(type));
+        ST dotExp =
+                myGroup.getInstanceOf("variable_dot_exp").add("modulename",
+                        myScope.getDefiningElement().getName().getName()).add(
+                        "typename", getTypeName(type));
 
         myActiveTemplates.push(dotExp);
     }
@@ -288,8 +289,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         myActiveTemplates.push(operation);
 
         if (node.getReturnTy() != null) {
-            addVariableTemplate(node.getReturnTy().getProgramTypeValue(),
-                    node.getName().getName());
+            addVariableTemplate(node.getReturnTy().getProgramTypeValue(), node
+                    .getName().getName());
         }
     }
 
@@ -313,8 +314,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         myActiveTemplates.push(operation);
 
         if (node.getReturnTy() != null) {
-            addVariableTemplate(node.getReturnTy().getProgramTypeValue(),
-                    node.getName().getName());
+            addVariableTemplate(node.getReturnTy().getProgramTypeValue(), node
+                    .getName().getName());
         }
     }
 
@@ -328,8 +329,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public void postProcedureDec(ProcedureDec node) {
 
         if (node.getReturnTy() != null) {
-            ST returnStmt = myGroup.getInstanceOf("return_stmt").add("name",
-                    node.getName().getName());
+            ST returnStmt =
+                    myGroup.getInstanceOf("return_stmt").add("name",
+                            node.getName().getName());
 
             myActiveTemplates.peek().add("stmts", returnStmt);
         }
@@ -342,8 +344,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public void postFacilityOperationDec(FacilityOperationDec node) {
 
         if (node.getReturnTy() != null) {
-            ST returnStmt = myGroup.getInstanceOf("return_stmt").add("name",
-                    node.getName().getName());
+            ST returnStmt =
+                    myGroup.getInstanceOf("return_stmt").add("name",
+                            node.getName().getName());
 
             myActiveTemplates.peek().add("stmts", returnStmt);
         }

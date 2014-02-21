@@ -56,13 +56,6 @@ public class JavaTranslator extends AbstractTranslator {
      */
     private ModuleParameterization myCurrentEnhancement = null;
 
-    /**
-     * <p>A pointer to the <em>outermost</em> Java class template. This houses
-     * everything from global the <code>class_declaration</code> template, to
-     * those for <code>functions</code>, subclasses, and anything else that
-     * might be found in a java/resolve class.</p>
-     */
-    private ST myOutermostJavaClass;
     private ST myBaseInstantiation, myBaseEnhancement;
 
     /**
@@ -95,10 +88,10 @@ public class JavaTranslator extends AbstractTranslator {
                         "public").add("name", node.getName().getName()).add(
                         "kind", "class");
 
-        myOutermostJavaClass = myGroup.getInstanceOf("facility_class");
-        myOutermostJavaClass.add("declaration", declaration);
+        ST facilityModuleClass = myGroup.getInstanceOf("facility_class");
+        facilityModuleClass.add("declaration", declaration);
 
-        myActiveTemplates.push(myOutermostJavaClass);
+        myActiveTemplates.push(facilityModuleClass);
         myActiveTemplates.peek().add("STDFACS", myHardcodedStdFacs);
     }
 
@@ -123,7 +116,7 @@ public class JavaTranslator extends AbstractTranslator {
                     + " cannot be executed. Specify a main!");
         }
 
-        myOutermostJavaClass.add("invoker", invocationName);
+        myActiveTemplates.peek().add("invoker", invocationName);
     }
 
     @Override
@@ -131,19 +124,28 @@ public class JavaTranslator extends AbstractTranslator {
 
         addPackageTemplate(node);
 
-        ST extend =
-                myGroup.getInstanceOf("class_extends").add("name",
+        ST conceptInterfaceClass =
+                createModuleInterfaceTemplate(node.getName().getName(),
                         "RESOLVE_INTERFACE");
 
-        ST declaration =
-                myGroup.getInstanceOf("class_declaration").add("modifier",
-                        "public").add("name", node.getName().getName()).add(
-                        "kind", "interface").add("extension", extend);
+        myActiveTemplates.push(conceptInterfaceClass);
+    }
 
-        myOutermostJavaClass = myGroup.getInstanceOf("class");
-        myOutermostJavaClass.add("declaration", declaration);
+    @Override
+    public void preEnhancementModuleDec(EnhancementModuleDec node) {
 
-        myActiveTemplates.push(myOutermostJavaClass);
+        addPackageTemplate(node);
+
+        ST enhancementInterfaceClass =
+                createModuleInterfaceTemplate(node.getName().getName(), node
+                        .getConceptName().getName());
+
+        myActiveTemplates.push(enhancementInterfaceClass);
+    }
+
+    @Override
+    public void preEnhancementBodyModuleDec(EnhancementBodyModuleDec node) {
+        
     }
 
     @Override
@@ -169,10 +171,10 @@ public class JavaTranslator extends AbstractTranslator {
                         "kind", "class").add("extension", extend).add(
                         "implementations", implement);
 
-        myOutermostJavaClass = myGroup.getInstanceOf("class");
-        myOutermostJavaClass.add("declaration", declaration);
+        ST conceptBodyClass = myGroup.getInstanceOf("class");
+        conceptBodyClass.add("declaration", declaration);
 
-        myActiveTemplates.push(myOutermostJavaClass);
+        myActiveTemplates.push(conceptBodyClass);
         myActiveTemplates.peek().add("constructors", constructor);
 
         List<ProgramParameterEntry> formals =
@@ -457,19 +459,15 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preTypeDec(TypeDec node) {
 
-        ST extend = myGroup.getInstanceOf("class_extends").add("name",
-                "RType");
+        ST extend = myGroup.getInstanceOf("class_extends").add("name", "RType");
 
         ST declaration =
                 myGroup.getInstanceOf("class_declaration").add("kind",
                         "interface").add("name", node.getName().getName()).add(
                         "extension", extend);
 
-        myActiveTemplates.peek()
-                .add(
-                        "classes",
-                        myGroup.getInstanceOf("class").add("declaration",
-                                declaration));
+        myActiveTemplates.peek().add("classes",
+                myGroup.getInstanceOf("class").add("declaration", declaration));
 
         try {
             ProgramTypeDefinitionEntry ptde =
@@ -502,8 +500,7 @@ public class JavaTranslator extends AbstractTranslator {
                         .getProgramType();
 
         ST recordDeclaration =
-                myGroup.getInstanceOf("class_declaration").add("kind",
-                        "class");
+                myGroup.getInstanceOf("class_declaration").add("kind", "class");
 
         recordDeclaration.add("name", node.getName()).add(
                 "implementations",
@@ -587,7 +584,7 @@ public class JavaTranslator extends AbstractTranslator {
 
         ST completed = myActiveTemplates.pop();
 
-        if (completed != myOutermostJavaClass) {
+        if (myActiveTemplates.size() != 1) {
             throw new RuntimeException(
                     "Wrong Template. Make sure intermediate templates are "
                             + "popped in their respective post methods!");
@@ -750,6 +747,24 @@ public class JavaTranslator extends AbstractTranslator {
         catch (NoSuchSymbolException nsse) {
             throw new RuntimeException(nsse);
         }
+    }
+
+    private ST createModuleInterfaceTemplate(String className,
+            String extendsField) {
+
+        ST extend =
+                myGroup.getInstanceOf("class_extends")
+                        .add("name", extendsField);
+
+        ST declaration =
+                myGroup.getInstanceOf("class_declaration").add("modifier",
+                        "public").add("name", className).add("kind",
+                        "interface").add("extension", extend);
+
+        ST result =
+                myGroup.getInstanceOf("class").add("declaraiton", declaration);
+
+        return result;
     }
 
     /**
