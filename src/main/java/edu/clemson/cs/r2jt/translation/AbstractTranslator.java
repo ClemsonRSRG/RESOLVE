@@ -224,6 +224,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     public void preProgramStringExp(ProgramStringExp node) {
+
         ST stringExp =
                 myGroup.getInstanceOf("var_init").add("type",
                         getVariableTypeTemplate(node.getProgramType()));
