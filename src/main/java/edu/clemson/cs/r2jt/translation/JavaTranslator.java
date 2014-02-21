@@ -166,9 +166,8 @@ public class JavaTranslator extends AbstractTranslator {
         ST conceptBodyClass = myGroup.getInstanceOf("class");
         conceptBodyClass.add("declaration", declaration);
 
-        System.out.println("HERE: " + conceptBodyClass.render());
-       // myActiveTemplates.push(conceptBodyClass);
-
+        myActiveTemplates.push(conceptBodyClass);
+        myActiveTemplates.peek().add("constructors", constructor);
     }
 
     @Override

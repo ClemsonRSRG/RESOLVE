@@ -168,8 +168,11 @@ variable_dot_exp(modulename, typename, name, field, arguments) ::= <%
     separator = {.}>
 %>
 
-param_exp(qualifier, name, arguments) ::=
+qualified_param_exp(qualifier, name, arguments) ::=
     <%<qualifier>.<name>(<arguments; separator = ", ">)%>
+
+unqualified_param_exp(name, arguments) ::=
+    <%<name>(<arguments; separator = ", ">)%>
 
 while(arguments, stmts) ::= <%
 while (((Std_Boolean_Realiz.Boolean)(<arguments>)).val) {

@@ -239,12 +239,20 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public void preProgramParamExp(ProgramParamExp node) {
 
+        ST paramExp;
+
         String qualifier =
                 getCallQualifier(null, node.getName(), node.getArguments());
 
-        ST paramExp =
+        if (qualifier != null) {
+            paramExp =
                 myGroup.getInstanceOf("param_exp").add("qualifier", qualifier)
                         .add("name", node.getName().getName());
+        }
+        else {
+            paramExp = myGroup.getInstanceOf("unqualified_param_exp").add
+                    ("name", node.getName().getName());
+        }
 
         myActiveTemplates.push(paramExp);
     }
