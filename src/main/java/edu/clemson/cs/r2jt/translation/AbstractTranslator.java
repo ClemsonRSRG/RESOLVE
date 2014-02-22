@@ -246,12 +246,14 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
         if (qualifier != null) {
             paramExp =
-                myGroup.getInstanceOf("param_exp").add("qualifier", qualifier)
-                        .add("name", node.getName().getName());
+                    myGroup.getInstanceOf("qualified_param_exp").add(
+                            "qualifier", qualifier).add("name",
+                            node.getName().getName());
         }
         else {
-            paramExp = myGroup.getInstanceOf("unqualified_param_exp").add
-                    ("name", node.getName().getName());
+            paramExp =
+                    myGroup.getInstanceOf("unqualified_param_exp").add("name",
+                            node.getName().getName());
         }
 
         myActiveTemplates.push(paramExp);
@@ -464,6 +466,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         operationLikeThingy.add("type",
                 (returnType != null) ? getOperationTypeTemplate(returnType)
                         : "void");
+
         return operationLikeThingy;
     }
 

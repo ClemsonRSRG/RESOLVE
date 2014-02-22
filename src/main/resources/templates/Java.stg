@@ -52,21 +52,50 @@ class(declaration, variables, classes, constructors, functions, parameters, STDF
     <constructors   :   {v | <constructor(v.modifier, v.name, parameters, variables)>}>
     <classes>
 	<functions>
-}
->>
+}>>
 
 facility_class(declaration, variables, classes, functions, invoker, STDFACS) ::= <<
 <declaration> {
     <STDFACS>
-    <variables      :   {k | public static final <k>}>
+    <variables  :   {k | public static final <k>}>
     <classes>
-    <functions>
+    <functions  :   {f | <function_def("public static", f.type, f.name,
+                                       f.parameters, f.facilities, f.variables,
+                                       f.stmts)>}>
 
     public static void main(String[] args) {
         <declaration.name> start = new <declaration.name>();
     	start.<invoker>();
     }
-}
+}>>
+
+wrapped_module(confunctions, functions) ::= <<
+
+    <confunctions>
+
+    public void swap(RType r1, RType r2) {
+		con.swap(r1, r2);
+	}
+
+	public void assign(RType r1, RType r2) {
+		con.assign(r1, r2);
+	}
+
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if ("Merge_Q".equals(method.getName())) {
+            return method.invoke(this, args);
+        }
+        else if ("Sort_Q".equals(method.getName())) {
+            return method.invoke(this, args);
+        }
+        else {
+            return method.invoke(con, args);
+        }
+    }
+>>
+
+invocation_options(methods) ::= <<
+
 >>
 
 class_declaration(modifier, kind, name, extension, implementations) ::= <<

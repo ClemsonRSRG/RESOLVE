@@ -60,7 +60,8 @@ public class JavaTranslator extends AbstractTranslator {
 
     /**
      * <p>A <strong>temporary</strong> measure to get things rolling. This
-     * will <em>hopefully</em> be gone in the near future.</p>
+     * will <em>hopefully</em> be gone in the near future once our standard
+     * facility import process gets reworked...</p>
      */
     private final String[] myHardcodedStdFacs =
             {
@@ -163,11 +164,37 @@ public class JavaTranslator extends AbstractTranslator {
                         node.getName().getName()).add("modifier",
                         getFunctionModifier());
 
+        ST con =
+                myGroup.getInstanceOf("parameter").add("type",
+                        node.getConceptName().getName()).add("name", "con");
+
         ST conceptBodyClass = myGroup.getInstanceOf("class");
         conceptBodyClass.add("declaration", declaration);
 
         myActiveTemplates.push(conceptBodyClass);
         myActiveTemplates.peek().add("constructors", constructor);
+
+        List<ProgramParameterEntry> formals =
+                getModuleFormalParameters(node.getConceptName());
+
+        for (ProgramParameterEntry p : formals) {
+            addParameterTemplate(p.getDeclaredType(), p.getName());
+        }
+
+        myActiveTemplates.peek().add("parameters", con);
+        myActiveTemplates.peek().add("STDFACS", myHardcodedStdFacs);
+    }
+
+    @Override
+    public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec node) {
+        //c
+      //  ST enhancedConceptBody = myGroup.getInstanceOf("")
+
+        // query for a list of representation entries and make a create
+        // method for each one...
+
+
+        addModuleParameterMethods(node.getConceptName());
     }
 
     @Override
@@ -211,9 +238,13 @@ public class JavaTranslator extends AbstractTranslator {
 
     @Override
     public void postConceptBodyModuleDec(ConceptBodyModuleDec node) {
+        addModuleParameterMethods(node.getConceptName());
+    }
+
+    private void addModuleParameterMethods(PosSymbol moduleName) {
 
         List<ProgramParameterEntry> formals =
-                getModuleFormalParameters(node.getConceptName());
+                getModuleFormalParameters(moduleName);
 
         for (ProgramParameterEntry p : formals) {
             ST returnStmt = myGroup.getInstanceOf("return_stmt");
@@ -639,6 +670,7 @@ public class JavaTranslator extends AbstractTranslator {
                     .getConceptName().getName());
         }
         else { // PTFamily, etc.
+
             result =
                     myGroup.getInstanceOf("qualified_type").add("name",
                             getTypeName(type));
@@ -648,6 +680,11 @@ public class JavaTranslator extends AbstractTranslator {
                         getDefiningFacilityEntry(type).getFacility()
                                 .getSpecification().getModuleIdentifier()
                                 .toString();
+            }
+            else if (myScope.getDefiningElement() instanceof EnhancementModuleDec) {
+                concept =
+                        ((EnhancementModuleDec) myScope.getDefiningElement())
+                                .getConceptName().getName();
             }
             result.add("concept", concept);
         }
@@ -669,13 +706,7 @@ public class JavaTranslator extends AbstractTranslator {
 
     @Override
     protected String getFunctionModifier() {
-        String modifier = "public";
-
-        if (myScope.getDefiningElement() instanceof FacilityModuleDec) {
-            modifier = "public static";
-        }
-
-        return modifier;
+        return "public";
     }
 
     /**
