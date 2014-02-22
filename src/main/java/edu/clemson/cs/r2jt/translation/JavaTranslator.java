@@ -185,16 +185,75 @@ public class JavaTranslator extends AbstractTranslator {
         myActiveTemplates.peek().add("STDFACS", myHardcodedStdFacs);
     }
 
+    /**
+     * <p>This is where we give the enhancement all the functionality defined
+     * in the base concept. This is carried out via the
+     * <code>wrapped_module</code> template which also includes the correctly
+     * formed <code>InvocationHandler</code> method, <code>invoke</code>,
+     * required  for <code>EnhancementBodyModuleDec</code>s</p>.
+     */
     @Override
     public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec node) {
-        //c
-      //  ST enhancedConceptBody = myGroup.getInstanceOf("")
 
-        // query for a list of representation entries and make a create
-        // method for each one...
+        try {
+            ST wrappedModule = myGroup.getInstanceOf("wrapped_module");
 
+            ModuleScope conceptScope =
+                    myBuilder.getModuleScope(new ModuleIdentifier(node
+                            .getConceptName().getName()));
 
-        addModuleParameterMethods(node.getConceptName());
+            List<OperationEntry> conceptOperations =
+                    conceptScope.query(new EntryTypeQuery<OperationEntry>(
+                            OperationEntry.class, ImportStrategy.IMPORT_NONE,
+                            FacilityStrategy.FACILITY_IGNORE));
+
+            List<RepresentationTypeEntry> conceptRepresentations =
+                    conceptScope
+                            .query(new EntryTypeQuery<RepresentationTypeEntry>(
+                                    OperationEntry.class,
+                                    ImportStrategy.IMPORT_NONE,
+                                    FacilityStrategy.FACILITY_IGNORE));
+
+            List<OperationEntry> enhancementOperations =
+                    myScope.query(new EntryTypeQuery<OperationEntry>(
+                            OperationEntry.class, ImportStrategy.IMPORT_NONE,
+                            FacilityStrategy.FACILITY_IGNORE));
+
+            for (OperationEntry c : conceptOperations) {
+
+                PTType returnType =
+                        (c.getReturnType() instanceof PTVoid) ? null : c
+                                .getReturnType();
+
+                ST conStmt =
+                        (returnType != null) ? myGroup
+                                .getInstanceOf("qualified_param_exp") : myGroup
+                                .getInstanceOf("qualified_call");
+
+                conStmt.add("qualifier", "con").add("name", c.getName());
+                myActiveTemplates.push(getOperationLikeTemplate(returnType, c
+                        .getName(), true));
+
+                for (ProgramParameterEntry p : c.getParameters()) {
+                    addParameterTemplate(p.getDeclaredType(), p.getName());
+                    conStmt.add("arguments", p.getName());
+                }
+
+                if (returnType != null) {
+                    conStmt =
+                            myGroup.getInstanceOf("return_stmt").add("name",
+                                    conStmt);
+                }
+                myActiveTemplates.peek().add("stmts", conStmt);
+                wrappedModule.add("confunctions", myActiveTemplates.pop());
+            }
+
+            myActiveTemplates.peek().add("functions", wrappedModule);
+            addModuleParameterMethods(node.getConceptName());
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchModule(node.getConceptName());
+        }
     }
 
     @Override
@@ -254,9 +313,17 @@ public class JavaTranslator extends AbstractTranslator {
                             : "get";
 
             ST paramFunction =
-                    getOperationLikeTemplate(p.getDeclaredType(),
-                            prefix + p.getName(), true).add("stmts",
-                            returnStmt.add("name", p.getName()));
+                    getOperationLikeTemplate(p.getDeclaredType(), prefix
+                            + p.getName(), true);
+
+            if (myScope.getDefiningElement() instanceof EnhancementBodyModuleDec) {
+
+                returnStmt.add("name", myGroup.getInstanceOf(
+                        "qualified_param_exp").add("qualifier", "con").add(
+                        "name", prefix + p.getName()));
+
+                paramFunction.add("stmts", returnStmt);
+            }
 
             myActiveTemplates.peek().add("functions", paramFunction);
         }
@@ -662,6 +729,7 @@ public class JavaTranslator extends AbstractTranslator {
                             "RType");
         }
         else if (type instanceof PTRepresentation) {
+
             result =
                     myGroup.getInstanceOf("qualified_type").add("name",
                             getTypeName(type));
@@ -670,7 +738,6 @@ public class JavaTranslator extends AbstractTranslator {
                     .getConceptName().getName());
         }
         else { // PTFamily, etc.
-
             result =
                     myGroup.getInstanceOf("qualified_type").add("name",
                             getTypeName(type));
@@ -685,6 +752,12 @@ public class JavaTranslator extends AbstractTranslator {
                 concept =
                         ((EnhancementModuleDec) myScope.getDefiningElement())
                                 .getConceptName().getName();
+            }
+            else if (myScope.getDefiningElement() instanceof EnhancementBodyModuleDec) {
+                concept =
+                        ((EnhancementBodyModuleDec) myScope
+                                .getDefiningElement()).getConceptName()
+                                .getName();
             }
             result.add("concept", concept);
         }

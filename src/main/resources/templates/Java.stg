@@ -80,18 +80,6 @@ wrapped_module(confunctions, functions) ::= <<
 	public void assign(RType r1, RType r2) {
 		con.assign(r1, r2);
 	}
-
-	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if ("Merge_Q".equals(method.getName())) {
-            return method.invoke(this, args);
-        }
-        else if ("Sort_Q".equals(method.getName())) {
-            return method.invoke(this, args);
-        }
-        else {
-            return method.invoke(con, args);
-        }
-    }
 >>
 
 invocation_options(methods) ::= <<
