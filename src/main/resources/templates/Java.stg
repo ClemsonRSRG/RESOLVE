@@ -45,7 +45,7 @@ package(directories) ::= <%package <directories; separator = ".">;%>
 include(directories) ::= <%import <directories; separator = ".">.*;%>
 
 class(declaration, variables, classes, constructors, functions, parameters,
-STDFACS) ::= <%
+wrapper, STDFACS) ::= <%
 <declaration> {
 	<STDFACS>
     <parameters     :   {l | <l>;}>
@@ -53,6 +53,8 @@ STDFACS) ::= <%
     <constructors   :   {v | <constructor(v.modifier, v.name, parameters, variables)>}>
     <classes>
 	<functions>
+	<wrapper        :   {w | <wrapped_module(w.confuncs, w.enhfuncs,
+	                                         parameters)>}>
 }%>
 
 facility_class(declaration, variables, classes, functions, invoker,
@@ -71,7 +73,7 @@ STDFACS) ::= <%
     }
 }%>
 
-wrapped_module(confuncs, enhfuncs) ::= <%
+wrapped_module(confuncs, enhfuncs, parameters) ::= <%
 
     <confuncs>
 

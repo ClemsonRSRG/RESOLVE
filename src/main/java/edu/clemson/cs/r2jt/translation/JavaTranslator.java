@@ -186,11 +186,22 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>This is where we give the enhancement all the functionality defined
-     * in the base concept. This is carried out via the
+     * <p>This is where we give the enhancement body all the functionality
+     * defined in the base concept. This is carried out via the
      * <code>wrapped_module</code> template which also includes the correctly
-     * formed <code>InvocationHandler</code> method, <code>invoke</code>,
-     * required  for <code>EnhancementBodyModuleDec</code>s</p>.
+     * formed <code>InvocationHandler</code> method, <code>invoke</code>.</p>
+     *
+     * <p>As an aside: The reason this method is so long (and ugly) is because
+     * here we need to contruct a bunch of things (namely functions +
+     * a nested return stmt template) that have no place in Resolve's AST -- or
+     * ever in a <code>ConceptBodyModuleDec</code>'s scope for that matter.</p>
+     *
+     * <p>Yes, there is temptation to use <code>StringTemplate</code>
+     * conditionals to delegate some of this menial, seemingly simple work
+     * into the view (Java.stg)... However, everwhere else in
+     * translation we consider any logic in the view (i.e. conditionals) a
+     * violation of the MVC design parlence, so instead we form everything
+     * here and let the view do it's simple job.</p>
      */
     @Override
     public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec node) {
@@ -251,10 +262,10 @@ public class JavaTranslator extends AbstractTranslator {
                 myActiveTemplates.peek().add("stmts", conStmt);
                 wrappedModule.add("confuncs", myActiveTemplates.pop());
             }
+
             wrappedModule.add("enhfuncs", enhancementOperations);
             addModuleParameterMethods(node.getConceptName());
-
-            myActiveTemplates.peek().add("functions", wrappedModule);
+            myActiveTemplates.peek().add("wrapper", wrappedModule);
         }
         catch (NoSuchSymbolException nsse) {
             noSuchModule(node.getConceptName());
@@ -322,7 +333,6 @@ public class JavaTranslator extends AbstractTranslator {
                             + p.getName(), true);
 
             if (myScope.getDefiningElement() instanceof EnhancementBodyModuleDec) {
-
                 returnStmt.add("name", myGroup.getInstanceOf(
                         "qualified_param_exp").add("qualifier", "con").add(
                         "name", prefix + p.getName()));
