@@ -40,11 +40,12 @@
 group Java;
 import "Base.stg"
 
-package(directories) ::= "package <directories; separator = {.}>;"
+package(directories) ::= <%package <directories; separator = ".">;%>
 
-include(directories) ::= "import <directories; separator = {.}>.*;"
+include(directories) ::= <%import <directories; separator = ".">.*;%>
 
-class(declaration, variables, classes, constructors, functions, parameters, STDFACS) ::= <<
+class(declaration, variables, classes, constructors, functions, parameters,
+STDFACS) ::= <%
 <declaration> {
 	<STDFACS>
     <parameters     :   {l | <l>;}>
@@ -52,9 +53,10 @@ class(declaration, variables, classes, constructors, functions, parameters, STDF
     <constructors   :   {v | <constructor(v.modifier, v.name, parameters, variables)>}>
     <classes>
 	<functions>
-}>>
+}%>
 
-facility_class(declaration, variables, classes, functions, invoker, STDFACS) ::= <<
+facility_class(declaration, variables, classes, functions, invoker,
+STDFACS) ::= <%
 <declaration> {
     <STDFACS>
     <variables  :   {k | public static final <k>}>
@@ -67,9 +69,9 @@ facility_class(declaration, variables, classes, functions, invoker, STDFACS) ::=
         <declaration.name> start = new <declaration.name>();
     	start.<invoker>();
     }
-}>>
+}%>
 
-wrapped_module(confuncs, enhfuncs) ::= <<
+wrapped_module(confuncs, enhfuncs) ::= <%
 
     <confuncs>
 
@@ -81,7 +83,8 @@ wrapped_module(confuncs, enhfuncs) ::= <<
 		con.assign(r1, r2);
 	}
 
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args)
+                                                        throws Throwable {
         if ("<first(enhfuncs).name>".equals(method.getName())) {
             return method.invoke(this, args);
         }
@@ -93,43 +96,37 @@ wrapped_module(confuncs, enhfuncs) ::= <<
             return method.invoke(con, args);
         }
     }
->>
+%>
 
-invocation_options(methods) ::= <<
-
->>
-
-class_declaration(modifier, kind, name, extension, implementations) ::= <<
+class_declaration(modifier, kind, name, extension, implementations) ::= <%
     <modifier> <kind> <name> <extension> <implementations>
->>
+%>
 
-class_extends(name) ::= "extends <name>"
+class_extends(name) ::= <%extends <name>%>
 
-class_implements(names) ::= "implements <names; separator = {, }>"
+class_implements(names) ::= <%implements <names; separator = ", ">%>
 
 operation_argument_item(realization, actualQualifier, actualName,
-                        formalname, type, function) ::= <<
+                        formalname, type, function) ::= <%
 new <realization>.<function.name>() {
     <function   :  {f | <function_def("public", f.type, f.name, f.parameters,
                                   f.facilities, f.variables,
     f.parameters    : { p | <actualQualifier>.<actualName>((TYPE)<p.name>);}
     )>}>
-
-}
->>
+}%>
 
 //-------------------------------------------------------------------
 //   facilities
 //-------------------------------------------------------------------
 
-qualified_type(concept, name) ::= "<concept>.<name>"
+qualified_type(concept, name) ::= <%<concept>.<name>%>
 
-var_decl(modifier, type, name, init) ::= "<type> <name> = <init>;"
+var_decl(modifier, type, name, init) ::= <%<type> <name> = <init>;%>
 
-rtype_init(typeName) ::= "getType<typeName>().initialValue()"
+rtype_init(typeName) ::= <%getType<typeName>().initialValue()%>
 
-var_init(type, facility, arguments) ::= <<
-<facility>.create<type.name>(<arguments; separator = ", ">)>>
+var_init(type, facility, arguments) ::= <%
+    <facility>.create<type.name>(<arguments; separator = ", ">)%>
 
 facility_dec(type, name, rhs) ::= <%<type> <name> = <rhs>;%>
 

@@ -252,9 +252,9 @@ public class JavaTranslator extends AbstractTranslator {
                 wrappedModule.add("confuncs", myActiveTemplates.pop());
             }
             wrappedModule.add("enhfuncs", enhancementOperations);
+            addModuleParameterMethods(node.getConceptName());
 
             myActiveTemplates.peek().add("functions", wrappedModule);
-            addModuleParameterMethods(node.getConceptName());
         }
         catch (NoSuchSymbolException nsse) {
             noSuchModule(node.getConceptName());
