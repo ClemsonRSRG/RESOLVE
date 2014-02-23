@@ -136,53 +136,34 @@ public class JavaTranslator extends AbstractTranslator {
 
         addPackageTemplate(node);
 
-        ST enhancementInterfaceClass =
+        ST enhancement =
                 getModuleInterfaceTemplate(node.getName().getName(), node
                         .getConceptName().getName());
 
-        myActiveTemplates.push(enhancementInterfaceClass);
+        myActiveTemplates.push(enhancement);
     }
 
     @Override
     public void preEnhancementBodyModuleDec(EnhancementBodyModuleDec node) {
 
         addPackageTemplate(node);
-
-        ST implement =
-                myGroup.getInstanceOf("class_implements").add("names",
-                        node.getName().getName()).add("names",
-                        node.getConceptName().getName()).add("names",
-                        "InvocationHandler");
-
-        ST declaration =
-                myGroup.getInstanceOf("class_declaration").add("modifier",
-                        "public").add("name", node.getName().getName()).add(
-                        "kind", "class").add("implementations", implement);
-
-        ST constructor =
-                myGroup.getInstanceOf("constructor").add("name",
-                        node.getName().getName()).add("modifier",
-                        getFunctionModifier());
-
-        ST con =
-                myGroup.getInstanceOf("parameter").add("type",
-                        node.getConceptName().getName()).add("name", "con");
-
-        ST conceptBodyClass = myGroup.getInstanceOf("class");
-        conceptBodyClass.add("declaration", declaration);
-
-        myActiveTemplates.push(conceptBodyClass);
-        myActiveTemplates.peek().add("constructors", constructor);
-
         List<ProgramParameterEntry> formals =
                 getModuleFormalParameters(node.getConceptName());
+
+        ST enhancementBody =
+                myGroup.getInstanceOf("enhancement_body_class").add("name",
+                        node.getName().getName());
+
+        enhancementBody.add("implement", node.getConceptName().getName());
+        enhancementBody.add("implement", node.getEnhancementName().getName());
+        enhancementBody.add("implement", "InvocationHandler");
+
+        myActiveTemplates.push(enhancementBody);
 
         for (ProgramParameterEntry p : formals) {
             addParameterTemplate(p.getDeclaredType(), p.getName());
         }
-
-        myActiveTemplates.peek().add("parameters", con);
-        myActiveTemplates.peek().add("STDFACS", myHardcodedStdFacs);
+    //    myActiveTemplates.peek().add("STDFACS", myHardcodedStdFacs);
     }
 
     /**
@@ -206,7 +187,7 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec node) {
 
-        try {
+    /*    try {
             ST wrappedModule = myGroup.getInstanceOf("wrapped_module");
 
             ModuleScope conceptScope =
@@ -269,7 +250,7 @@ public class JavaTranslator extends AbstractTranslator {
         }
         catch (NoSuchSymbolException nsse) {
             noSuchModule(node.getConceptName());
-        }
+        }*/
     }
 
     @Override

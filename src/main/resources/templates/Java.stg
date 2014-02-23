@@ -44,6 +44,61 @@ package(directories) ::= <%package <directories; separator = ".">;%>
 
 include(directories) ::= <%import <directories; separator = ".">.*;%>
 
+/**
+ * @param concepts The first must be the name of base concept.
+ */
+enh_body_class(name, implement, parameters, variables, functions, confu) ::= <%
+public class <name> implements <implement; separator = ", "> {
+    <parameters     :   {p | <p>;}>
+	<variables      :   {j | <j.type> <j.name>;}>
+	<first(implement)> con;
+
+    public <name>(<parameters; separator = ", ">, <first(implement)> con) {
+        <parameters : {p | this.<p.name> = <p.name>;}>
+        <variables  : {v | <v.name> = <v.init>;}>
+        this.con = con;
+    }
+
+    <functions>
+
+    public void swap(RType r1, RType r2) {
+		con.swap(r1, r2);
+	}
+	public void assign(RType r1, RType r2) {
+		con.assign(r1, r2);
+	}
+
+    public Object invoke(Object proxy, Method method, Object[] args) throws
+    Throwable {
+        if ("<first(functions).name>".equals(method.getName())) {
+            return method.invoke(this, args);
+        }
+        <rest(functions) :
+            {e | else if ("<e.name>".equals(method.getName()) {
+                return method.invoke(this, args);
+            \} }>
+        else {
+            return method.invoke(con, args);
+        }
+    }
+
+    public static <first(implement)> createProxy(<parameters; separator = ", ">
+        , <first(implement)> toWrap) {
+
+        <name> eObj = new <name>(<parameters : {p | <p.name>};
+                                                    separator = ", ">);
+        Class[] toWrapInterfaces = toWrap.getClass().getInterfaces();
+        Class[] thisInterfaces = new Class[toWrapInterfaces.length+1];
+        Class[] tmpInterfaces = eObj.getClass().getInterfaces();
+        thisInterfaces[0] = tmpInterfaces[0];
+        System.arraycopy(toWrapInterfaces, 0, thisInterfaces, 1,
+                                                 toWrapInterfaces.length);
+
+        return (<first(implement)>)(Proxy.newProxyInstance(<first(implement)>
+            .class.getClassLoader(), thisInterfaces, eObj));
+    }
+}%>
+
 class(declaration, variables, classes, constructors, functions, parameters,
 wrapper, STDFACS) ::= <%
 <declaration> {
@@ -177,6 +232,12 @@ class <declaration.name>_Rep {
 //-------------------------------------------------------------------
 //   constructors
 //-------------------------------------------------------------------
+
+constructor2(name, parameters, variables) ::= <%
+public <name>(<parameters; separator = ", ">) {
+    <parameters : {p | this.<p.name> = <p.name>;}>
+    <variables  : {v | <v.name> = <v.init>;}>
+}%>
 
 constructor(modifier, name, parameters, variables) ::= <%
 <modifier> <name>(<parameters; separator = ", ">) {
