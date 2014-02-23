@@ -202,6 +202,10 @@ public class JavaTranslator extends AbstractTranslator {
                     myBuilder.getModuleScope(new ModuleIdentifier(node
                             .getConceptName().getName()));
 
+            ModuleScope enhancementScope =
+                    myBuilder.getModuleScope(new ModuleIdentifier(node
+                            .getEnhancementName().getName()));
+
             List<OperationEntry> conceptOperations =
                     conceptScope.query(new EntryTypeQuery<OperationEntry>(
                             OperationEntry.class, ImportStrategy.IMPORT_NONE,
@@ -215,7 +219,7 @@ public class JavaTranslator extends AbstractTranslator {
                                     FacilityStrategy.FACILITY_IGNORE));
 
             List<OperationEntry> enhancementOperations =
-                    myScope.query(new EntryTypeQuery<OperationEntry>(
+                    enhancementScope.query(new EntryTypeQuery<OperationEntry>(
                             OperationEntry.class, ImportStrategy.IMPORT_NONE,
                             FacilityStrategy.FACILITY_IGNORE));
 
@@ -245,8 +249,9 @@ public class JavaTranslator extends AbstractTranslator {
                                     conStmt);
                 }
                 myActiveTemplates.peek().add("stmts", conStmt);
-                wrappedModule.add("confunctions", myActiveTemplates.pop());
+                wrappedModule.add("confuncs", myActiveTemplates.pop());
             }
+            wrappedModule.add("enhfuncs", enhancementOperations);
 
             myActiveTemplates.peek().add("functions", wrappedModule);
             addModuleParameterMethods(node.getConceptName());

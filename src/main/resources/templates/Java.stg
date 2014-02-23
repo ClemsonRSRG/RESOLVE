@@ -69,9 +69,9 @@ facility_class(declaration, variables, classes, functions, invoker, STDFACS) ::=
     }
 }>>
 
-wrapped_module(confunctions, functions) ::= <<
+wrapped_module(confuncs, enhfuncs) ::= <<
 
-    <confunctions>
+    <confuncs>
 
     public void swap(RType r1, RType r2) {
 		con.swap(r1, r2);
@@ -80,6 +80,19 @@ wrapped_module(confunctions, functions) ::= <<
 	public void assign(RType r1, RType r2) {
 		con.assign(r1, r2);
 	}
+
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if ("<first(enhfuncs).name>".equals(method.getName())) {
+            return method.invoke(this, args);
+        }
+        <rest(enhfuncs) :
+            {e | else if ("<e.name>".equals(method.getName()) {
+                return method.invoke(this, args);
+            \} }>
+        else {
+            return method.invoke(con, args);
+        }
+    }
 >>
 
 invocation_options(methods) ::= <<
