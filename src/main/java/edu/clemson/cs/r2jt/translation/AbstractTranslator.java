@@ -367,8 +367,10 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     @Override
     public void preVarDec(VarDec node) {
-        addVariableTemplate(node.getTy().getProgramTypeValue(), node.getName()
-                .getName());
+        if (!node.getName().getName().startsWith("_")) {
+            addVariableTemplate(node.getTy().getProgramTypeValue(), node
+                    .getName().getName());
+        }
     }
 
     @Override
@@ -418,6 +420,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 myGroup.getInstanceOf("parameter").add("type",
                         getVariableTypeTemplate(type)).add("name", name);
 
+        System.out.println("HERE: " + myActiveTemplates.peek().getName());
         myActiveTemplates.peek().add("parameters", parameter);
     }
 
@@ -768,8 +771,10 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 || myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
             //    outputAsFile(outputFile.getAbsolutePath(),
             //            myOutermostEnclosingTemplate.render());
-            System.out.println(Formatter.formatCode(myActiveTemplates.peek()
-                    .render()));
+
+          //  System.out.println(Formatter.formatCode(myActiveTemplates.peek()
+          //          .render()));
+            System.out.println(myActiveTemplates.peek().render());
         }
     }
 }

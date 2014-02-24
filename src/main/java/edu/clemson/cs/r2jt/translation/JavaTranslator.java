@@ -85,15 +85,11 @@ public class JavaTranslator extends AbstractTranslator {
 
         addPackageTemplate(node);
 
-        ST declaration =
-                myGroup.getInstanceOf("class_declaration").add("modifier",
-                        "public").add("name", node.getName().getName()).add(
-                        "kind", "class");
+        ST facility =
+                myGroup.getInstanceOf("facility_class").add("name",
+                        node.getName().getName());
 
-        ST facilityModuleClass = myGroup.getInstanceOf("facility_class");
-        facilityModuleClass.add("declaration", declaration);
-
-        myActiveTemplates.push(facilityModuleClass);
+        myActiveTemplates.push(facility);
     }
 
     @Override
@@ -148,6 +144,7 @@ public class JavaTranslator extends AbstractTranslator {
     public void preEnhancementBodyModuleDec(EnhancementBodyModuleDec node) {
 
         addPackageTemplate(node);
+
         List<ProgramParameterEntry> formals =
                 getModuleFormalParameters(node.getConceptName());
 
@@ -172,18 +169,6 @@ public class JavaTranslator extends AbstractTranslator {
      * defined in the base concept. This is carried out via the
      * <code>wrapped_module</code> template which also includes the correctly
      * formed <code>InvocationHandler</code> method, <code>invoke</code>.</p>
-     *
-     * <p>As an aside: The reason this method is so long (and ugly) is because
-     * here we need to contruct a bunch of things (namely functions +
-     * a nested return stmt template) that have no place in Resolve's AST -- or
-     * ever in a <code>ConceptBodyModuleDec</code>'s scope for that matter.</p>
-     *
-     * <p>Yes, there is temptation to use <code>StringTemplate</code>
-     * conditionals to delegate some of this menial, seemingly simple work
-     * into the view (Java.stg)... However, everwhere else in
-     * translation we consider any logic in the view (i.e. conditionals) a
-     * violation of the MVC design parlence, so instead we form everything
-     * here and let the view do it's simple job.</p>
      */
     @Override
     public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec node) {
@@ -198,15 +183,14 @@ public class JavaTranslator extends AbstractTranslator {
                             OperationEntry.class, ImportStrategy.IMPORT_NONE,
                             FacilityStrategy.FACILITY_IGNORE));
 
-            List<RepresentationTypeEntry> conceptRepresentations =
+            List<ProgramTypeDefinitionEntry> conceptTypes =
                     conceptScope
-                            .query(new EntryTypeQuery<RepresentationTypeEntry>(
-                                    OperationEntry.class,
+                            .query(new EntryTypeQuery<ProgramTypeDefinitionEntry>(
+                                    ProgramTypeDefinitionEntry.class,
                                     ImportStrategy.IMPORT_NONE,
                                     FacilityStrategy.FACILITY_IGNORE));
 
             for (OperationEntry o : conceptOperations) {
-
                 PTType returnType =
                         (o.getReturnType() instanceof PTVoid) ? null : o
                                 .getReturnType();
@@ -214,7 +198,19 @@ public class JavaTranslator extends AbstractTranslator {
                 addEnhancementConceptualFunction(returnType, o.getName(), o
                         .getParameters());
             }
-            addModuleParameterMethods(node.getConceptName());
+
+            for (ProgramParameterEntry p : getModuleFormalParameters(node
+                    .getConceptName())) {
+
+                addEnhancementConceptualFunction(p.getDeclaredType(), (p
+                        .getDeclaredType() instanceof PTElement) ? "getType"
+                        + p.getName() : "get" + p.getName(), null);
+            }
+
+            for (ProgramTypeDefinitionEntry e : conceptTypes) {
+                addEnhancementConceptualFunction(e.getProgramType(), "create"
+                        + e.getName(), null);
+            }
         }
         catch (NoSuchSymbolException nsse) {
             noSuchModule(node.getConceptName());
@@ -224,27 +220,23 @@ public class JavaTranslator extends AbstractTranslator {
     private void addEnhancementConceptualFunction(PTType type, String name,
             ImmutableList<ProgramParameterEntry> parameters) {
 
-        ST firstLine =
-                (type != null) ? myGroup.getInstanceOf("qualified_param_exp")
-                        : myGroup.getInstanceOf("qualified_call");
+        ST singleLine =
+                myGroup.getInstanceOf("enhanced_stmt").add("returns", type)
+                        .add("name", name);
 
-        myActiveTemplates.push(getOperationLikeTemplate(type, name, true));
-        firstLine.add("qualifier", "con").add("name", name);
+        ST operation = getOperationLikeTemplate(type, name, true);
 
-        for (ProgramParameterEntry p : parameters) {
-            addParameterTemplate(p.getDeclaredType(), p.getName());
-            firstLine.add("arguments", p.getName());
+        myActiveTemplates.push(operation);
+
+        if (parameters != null) {
+            for (ProgramParameterEntry p : parameters) {
+
+                addParameterTemplate(p.getDeclaredType(), p.getName());
+                singleLine.add("arguments", p.getName());
+            }
         }
-
-        if (type != null) {
-            firstLine =
-                    myGroup.getInstanceOf("return_stmt").add("name", firstLine);
-        }
-
-        ST wrappedFunction = myActiveTemplates.pop();
-        wrappedFunction.add("stmts", firstLine);
-
-        myActiveTemplates.peek().add("conceptfunctions", wrappedFunction);
+        ST result = myActiveTemplates.pop().add("stmts", singleLine);
+        myActiveTemplates.peek().add("conceptfunctions", result);
     }
 
     @Override
@@ -252,29 +244,12 @@ public class JavaTranslator extends AbstractTranslator {
 
         addPackageTemplate(node);
 
-        ST extend =
-                myGroup.getInstanceOf("class_extends").add("name",
-                        "RESOLVE_BASE");
-        ST implement =
-                myGroup.getInstanceOf("class_implements").add("names",
+        ST conceptBody =
+                myGroup.getInstanceOf("concept_body_class").add("name",
+                        node.getName().getName()).add("implement",
                         node.getConceptName().getName());
 
-        ST constructor =
-                myGroup.getInstanceOf("constructor").add("name",
-                        node.getName().getName()).add("modifier",
-                        getFunctionModifier());
-
-        ST declaration =
-                myGroup.getInstanceOf("class_declaration").add("modifier",
-                        "public").add("name", node.getName().getName()).add(
-                        "kind", "class").add("extension", extend).add(
-                        "implementations", implement);
-
-        ST conceptBodyClass = myGroup.getInstanceOf("class");
-        conceptBodyClass.add("declaration", declaration);
-
-        myActiveTemplates.push(conceptBodyClass);
-        myActiveTemplates.peek().add("constructors", constructor);
+        myActiveTemplates.push(conceptBody);
 
         List<ProgramParameterEntry> formals =
                 getModuleFormalParameters(node.getConceptName());
@@ -282,43 +257,21 @@ public class JavaTranslator extends AbstractTranslator {
         for (ProgramParameterEntry p : formals) {
             addParameterTemplate(p.getDeclaredType(), p.getName());
         }
-        myActiveTemplates.peek().add("STDFACS", myHardcodedStdFacs);
-
     }
 
     @Override
     public void postConceptBodyModuleDec(ConceptBodyModuleDec node) {
-        addModuleParameterMethods(node.getConceptName());
-    }
 
-    private void addModuleParameterMethods(PosSymbol moduleName) {
+        for (ProgramParameterEntry p : getModuleFormalParameters(node
+                .getConceptName())) {
 
-        List<ProgramParameterEntry> formals =
-                getModuleFormalParameters(moduleName);
-
-        for (ProgramParameterEntry p : formals) {
-
-            String prefix =
+            String name =
                     (p.getDeclaredType() instanceof PTElement) ? "getType"
-                            : "get";
+                            + p.getName() : "get" + p.getName();
+            ST result =
+                    getOperationLikeTemplate(p.getDeclaredType(), name, true);
+            myActiveTemplates.peek().add("functions", result);
 
-            ST returnStmt = myGroup.getInstanceOf("return_stmt");
-
-            ST paramFunction =
-                    getOperationLikeTemplate(p.getDeclaredType(), prefix
-                            + p.getName(), true);
-
-            if (myScope.getDefiningElement() instanceof EnhancementBodyModuleDec) {
-                returnStmt.add("name", myGroup.getInstanceOf(
-                        "qualified_param_exp").add("qualifier", "con").add(
-                        "name", prefix + p.getName()));
-
-                myActiveTemplates.peek().add("conceptfunctions",
-                        paramFunction.add("stmts", returnStmt));
-            }
-            else {
-                myActiveTemplates.peek().add("functions", paramFunction);
-            }
         }
     }
 
@@ -612,16 +565,12 @@ public class JavaTranslator extends AbstractTranslator {
                 types.get(0).toProgramTypeEntry(node.getLocation())
                         .getProgramType();
 
-        ST recordDeclaration =
-                myGroup.getInstanceOf("class_declaration").add("kind", "class");
+        ST record =
+                myGroup.getInstanceOf("record_class").add("name",
+                        node.getName().getName()).add("implement",
+                        getVariableTypeTemplate(repType));
 
-        recordDeclaration.add("name", node.getName()).add(
-                "implementations",
-                myGroup.getInstanceOf("class_implements").add("names",
-                        getVariableTypeTemplate(repType)));
-
-        myActiveTemplates.push(myGroup.getInstanceOf("record_class").add(
-                "declaration", recordDeclaration));
+        myActiveTemplates.push(record);
     }
 
     @Override
@@ -634,7 +583,7 @@ public class JavaTranslator extends AbstractTranslator {
         // First pop and insert the record built up from preRepresentationDec
         // to now.
         ST record = myActiveTemplates.pop();
-        myActiveTemplates.peek().add("classes", record);
+        myActiveTemplates.peek().add("records", record);
 
         // Now build the "create<TYPENAME>" method for that record.
         try {
@@ -888,7 +837,7 @@ public class JavaTranslator extends AbstractTranslator {
     /**
      * Creates and adds a formed java package template to the
      * <code>directives</code> attribute of the outermost <code>module</code>
-     * template, as defined in <tt>Base.stg</tt>.
+     * template defined in <tt>Base.stg</tt>.
      *
      * @param node The <code>ModuleDec</code> currently being translated.
      */
@@ -898,6 +847,7 @@ public class JavaTranslator extends AbstractTranslator {
                 (LinkedList) getPathList(getFile(node, null));
 
         pkgDirectories.removeLast();
+
         ST pkg =
                 myGroup.getInstanceOf("package").add("directories",
                         pkgDirectories);
