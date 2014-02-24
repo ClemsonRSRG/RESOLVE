@@ -1548,7 +1548,26 @@ aux_code_statement returns [AuxCodeStmt stmt = null]
 function_assignment returns [FuncAssignStmt stmt = null]
     :   ^(ASSIGN_OP var=variable_expression exp=program_expression)
     //: ^(var=variable_expression ASSIGN_OP exp=program_expression)
-        { $stmt = new FuncAssignStmt(getLocation($ASSIGN_OP), $var.exp, $exp.exp); }
+        {
+            if ($exp.exp instanceof VariableExp) {
+                // Location
+                Location loc = $exp.exp.getLocation();
+
+                // Add variable to list
+                edu.clemson.cs.r2jt.collections.List<ProgramExp> args =
+                        new edu.clemson.cs.r2jt.collections.List<ProgramExp>("ProgramExp");
+                args.add($exp.exp);
+
+                // Create replica call
+                ProgramExp replicaExp = new ProgramParamExp(loc,
+                                            new PosSymbol(loc, Symbol.symbol("Replica")),
+                                            args, null);
+                $stmt = new FuncAssignStmt(getLocation($ASSIGN_OP), $var.exp, replicaExp);
+            }
+            else {
+                $stmt = new FuncAssignStmt(getLocation($ASSIGN_OP), $var.exp, $exp.exp);
+            }
+        }
     ;
 
 // Forget and remember -------------------------------------------

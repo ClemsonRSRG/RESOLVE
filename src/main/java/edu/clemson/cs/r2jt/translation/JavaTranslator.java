@@ -99,8 +99,9 @@ public class JavaTranslator extends AbstractTranslator {
         }
 
         if (invocationName == null) {
-            throw new IllegalStateException("Facility " + node.getName()
-                    .getName() + " cannot be executed. Specify a main!");
+            throw new IllegalStateException("Facility "
+                    + node.getName().getName()
+                    + " cannot be executed. Specify a main!");
         }
 
         myOutermostJavaClass.add("invoker", invocationName);
