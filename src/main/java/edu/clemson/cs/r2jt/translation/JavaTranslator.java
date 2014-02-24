@@ -16,7 +16,10 @@ import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import org.stringtemplate.v4.*;
 
+import java.io.File;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JavaTranslator extends AbstractTranslator {
 
@@ -50,6 +53,12 @@ public class JavaTranslator extends AbstractTranslator {
      */
     private Map<ModuleArgumentItem, ModuleParameterDec> myFacilityBindings =
             new HashMap<ModuleArgumentItem, ModuleParameterDec>();
+
+    /**
+     * <p>This set holds the names of any <code>OperationDec</code>s that
+     * parameterize the current module.</p>
+     */
+    private Set<String> myParameterOperationNames = new HashSet<String>();
 
     /**
      * <p>A <code>ModuleParameterization</code> corresponding to the
@@ -154,9 +163,9 @@ public class JavaTranslator extends AbstractTranslator {
 
     /**
      * <p>This is where we give the enhancement body all the functionality
-     * defined in the base concept. This is carried out via the
-     * <code>wrapped_module</code> template which also includes the correctly
-     * formed <code>InvocationHandler</code> method, <code>invoke</code>.</p>
+     * defined in the base concept. This is done via a set of functions
+     * that share the signatures of the functions defined in the base
+     * concept, but whose bodies merely call the <em>real</em> method.</p>
      */
     @Override
     public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec node) {
@@ -205,27 +214,6 @@ public class JavaTranslator extends AbstractTranslator {
         }
     }
 
-    private void addEnhancementConceptualFunction(PTType type, String name,
-            ImmutableList<ProgramParameterEntry> parameters) {
-
-        ST singleLine =
-                myGroup.getInstanceOf("enhanced_stmt").add("returns", type)
-                        .add("name", name);
-
-        ST operation = getOperationLikeTemplate(type, name, true);
-        myActiveTemplates.push(operation);
-
-        if (parameters != null) {
-            for (ProgramParameterEntry p : parameters) {
-
-                addParameterTemplate(p.getDeclaredType(), p.getName());
-                singleLine.add("arguments", p.getName());
-            }
-        }
-        ST result = myActiveTemplates.pop().add("stmts", singleLine);
-        myActiveTemplates.peek().add("conceptfunctions", result);
-    }
-
     @Override
     public void preConceptBodyModuleDec(ConceptBodyModuleDec node) {
 
@@ -249,8 +237,6 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void postConceptBodyModuleDec(ConceptBodyModuleDec node) {
 
-        ST returnStmt = myGroup.getInstanceOf("return_stmt");
-
         for (ProgramParameterEntry p : getModuleFormalParameters(node
                 .getConceptName())) {
 
@@ -258,10 +244,12 @@ public class JavaTranslator extends AbstractTranslator {
                     (p.getDeclaredType() instanceof PTElement) ? "getType"
                             + p.getName() : "get" + p.getName();
             ST result =
-                    getOperationLikeTemplate(p.getDeclaredType(), name, true)
-                            .add("stmts", returnStmt.add("name", p.getName()));
+                    getOperationLikeTemplate(p.getDeclaredType(), name, true);
 
-            myActiveTemplates.peek().add("functions", result);
+            myActiveTemplates.peek().add(
+                    "functions",
+                    result.add("stmts", myGroup.getInstanceOf("return_stmt")
+                            .add("name", p.getName())));
         }
     }
 
@@ -472,6 +460,8 @@ public class JavaTranslator extends AbstractTranslator {
             addParameterTemplate(type, name);
         }
 
+        // TODO : This is going to fail on enhancementbodymoduledecs. Fix it.
+
         ST getter =
                 getOperationLikeTemplate(type, "get" + name, translatingBody);
 
@@ -485,6 +475,8 @@ public class JavaTranslator extends AbstractTranslator {
     public void preModuleParameterDec(ModuleParameterDec node) {
 
         if (node.getWrappedDec() instanceof OperationDec) {
+
+            myParameterOperationNames.add(node.getName().getName());
 
             ST parameter =
                     myGroup.getInstanceOf("parameter").add("type",
@@ -540,6 +532,37 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     @Override
+    public void preCallStmt(CallStmt node) {
+
+        ST callStmt;
+        String qualifier =
+                getCallQualifier(node.getQualifier(), node.getName(), node
+                        .getArguments());
+
+        // If the call references an operation passed as a parameter, we need
+        // to specially qualify it.
+        if (myParameterOperationNames.contains(node.getName().getName())) {
+            callStmt =
+                    myGroup.getInstanceOf("qualified_call").add("name",
+                            node.getName().getName()).add("qualifier",
+                            node.getName().getName() + "Param");
+        }
+        else if (qualifier != null) {
+            callStmt =
+                    myGroup.getInstanceOf("qualified_call").add("name",
+                            node.getName().getName()).add("qualifier",
+                            qualifier);
+        }
+        else {
+            callStmt =
+                    myGroup.getInstanceOf("unqualified_call").add("name",
+                            node.getName().getName());
+        }
+
+        myActiveTemplates.push(callStmt);
+    }
+
+    @Override
     public void preRepresentationDec(RepresentationDec node) {
 
         List<SymbolTableEntry> types =
@@ -565,7 +588,7 @@ public class JavaTranslator extends AbstractTranslator {
                         node.getName().getName());
 
         ST record = myActiveTemplates.pop();
-        myActiveTemplates.peek().add("records", record);
+        myActiveTemplates.peek().add("classes", record);
 
         // Now build the "create<TYPENAME>" method for that record.
         try {
@@ -761,6 +784,27 @@ public class JavaTranslator extends AbstractTranslator {
         return result;
     }
 
+    private void addEnhancementConceptualFunction(PTType type, String name,
+            ImmutableList<ProgramParameterEntry> parameters) {
+
+        ST singleLine =
+                myGroup.getInstanceOf("enhanced_stmt").add("returns", type)
+                        .add("name", name);
+
+        ST operation = getOperationLikeTemplate(type, name, true);
+        myActiveTemplates.push(operation);
+
+        if (parameters != null) {
+            for (ProgramParameterEntry p : parameters) {
+
+                addParameterTemplate(p.getDeclaredType(), p.getName());
+                singleLine.add("arguments", p.getName());
+            }
+        }
+        ST result = myActiveTemplates.pop().add("stmts", singleLine);
+        myActiveTemplates.peek().add("conceptfunctions", result);
+    }
+
     /**
      * <p></p>
      * @param spec
@@ -818,6 +862,44 @@ public class JavaTranslator extends AbstractTranslator {
                         pkgDirectories);
 
         myActiveTemplates.peek().add("directives", pkg);
+    }
+
+    // TODO : See if there is a simpler, less verbose way of writing
+    // the next three methods. And also try to get them into the abstract
+    // translator.
+    public boolean needToTranslate(File file) {
+        boolean translate = false;
+        String inFile = file.toString();
+        String[] temp = inFile.split("\\.");
+        String ext = temp[temp.length - 1];
+        if (!onNoCompileList(file)) {
+            if (ext.equals("co") || ext.equals("rb") || ext.equals("en")
+                    || ext.equals("fa")) {
+                String javaName = modifyString(inFile, "\\." + ext, ".java");
+                File javaFile = new File(javaName);
+                if (!javaFile.exists() || sourceNewerThan(file, javaFile)) {
+                    translate = true;
+                }
+                else if (myInstanceEnvironment.flags
+                        .isFlagSet(JAVA_FLAG_TRANSLATE_CLEAN)) {
+                    translate = true;
+                }
+            }
+        }
+        return translate;
+    }
+
+    private String modifyString(String src, String find, String replace) {
+        Pattern pattern = Pattern.compile(find);
+        Matcher matcher = pattern.matcher(src);
+        return matcher.replaceAll(replace);
+    }
+
+    private boolean sourceNewerThan(File a, File b) {
+        if (a.lastModified() > b.lastModified()) {
+            return true;
+        }
+        return false;
     }
 
     public static final void setUpFlags() {

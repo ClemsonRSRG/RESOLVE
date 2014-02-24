@@ -21,19 +21,19 @@ import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 import org.stringtemplate.v4.*;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     protected static final boolean PRINT_DEBUG = true;
 
     protected final CompileEnvironment myInstanceEnvironment;
-    protected ModuleScope myScope = null;
 
-    /**
-     * <p>This gives us access to additional <code>ModuleScope</code>s. This
-     * comes in handy for <code>ConceptBodyModuleDec</code> translation.</p>
-     */
+    protected ModuleScope myScope = null;
     protected final MathSymbolTableBuilder myBuilder;
 
     /**
@@ -66,9 +66,17 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * <p>This set keeps track of any additional <code>includes</code> or
      * <code>imports</code> needed to run the translated file. We call
      * it <em>dynamic</em> since only certain nodes trigger additions to this
-     * set (i.e. <code>FacilityDec</code> nodes).</p>
+     * set (i.e. <code>FacilityDec</code>s).</p>
      */
     protected Set<String> myDynamicImports = new HashSet<String>();
+
+    private String[] noTranslate =
+            { "Std_Boolean_Fac.fa", "Std_Char_Str_Fac.fa",
+                    "Std_Character_Fac.fa", "Std_Integer_Fac.fa",
+                    "Std_Boolean_Realiz", "Integer_Template.co",
+                    "Character_Template.co", "Char_Str_Template.co",
+                    "Seq_Input_Template.co", "Seq_Output_Template.co",
+                    "Print.co", "Std_Location_Linking_Realiz.rb" };
 
     /**
      * <p>This flag is <code>true</code> when walking the children of a
@@ -136,29 +144,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         catch (DuplicateSymbolException dse) {
             throw new RuntimeException(dse);
         }
-    }
-
-    @Override
-    public void preCallStmt(CallStmt node) {
-
-        ST callStmt;
-        String qualifier =
-                getCallQualifier(node.getQualifier(), node.getName(), node
-                        .getArguments());
-
-        if (qualifier != null) {
-            callStmt =
-                    myGroup.getInstanceOf("qualified_call").add("name",
-                            node.getName().getName()).add("qualifier",
-                            qualifier);
-        }
-        else {
-            callStmt =
-                    myGroup.getInstanceOf("unqualified_call").add("name",
-                            node.getName().getName());
-        }
-
-        myActiveTemplates.push(callStmt);
     }
 
     @Override
@@ -432,18 +417,26 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      */
     protected void addVariableTemplate(PTType type, String name) {
         ST init, variable;
+        System.out.println("Adding variable: " + name + " with type: "
+                + type.toString());
 
         if (type instanceof PTGeneric) {
             init =
                     myGroup.getInstanceOf("rtype_init").add("typeName",
                             getTypeName(type));
         }
-        else {
+        else if (getDefiningFacilityEntry(type) != null) {
             init =
                     myGroup.getInstanceOf("var_init").add("type",
                             getVariableTypeTemplate(type)).add("facility",
                             getDefiningFacilityEntry(type).getName());
         }
+        else {
+            init =
+                    myGroup.getInstanceOf("enhancement_var_init").add("type",
+                            getVariableTypeTemplate(type));
+        }
+
         variable =
                 myGroup.getInstanceOf("var_decl").add("name", name).add("type",
                         getVariableTypeTemplate(type)).add("init", init);
@@ -761,6 +754,18 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         return result;
     }
 
+    public boolean onNoCompileList(File file) {
+        Pattern p = null;
+        String fileName = file.toString();
+        for (String s : noTranslate) {
+            p = Pattern.compile(s);
+            if (p.matcher(fileName).find()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void emitDebug(String msg) {
         if (PRINT_DEBUG) {
             System.out.println(msg);
@@ -770,12 +775,40 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public void outputCode(File outputFile) {
         if (!myInstanceEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_WEB)
                 || myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-            //    outputAsFile(outputFile.getAbsolutePath(),
-            //            myOutermostEnclosingTemplate.render());
+                outputAsFile(outputFile.getAbsolutePath(),
+                    myActiveTemplates.peek().render());
 
             //  System.out.println(Formatter.formatCode(myActiveTemplates.peek()
             //          .render()));
             System.out.println(myActiveTemplates.peek().render());
+        }
+    }
+
+    // TODO : Redo this and make it appropriate for the abstract translator.
+    private void outputAsFile(String fileName, String fileContents) {
+        String[] temp = fileName.split("\\.");
+        fileName = temp[0] + ".java";
+        if (fileContents != null && fileContents.length() > 0) {
+            try {
+                File outputJavaFile = new File(fileName);
+                if (!outputJavaFile.exists()) {
+                    outputJavaFile.createNewFile();
+                }
+                byte buf[] = fileContents.getBytes();
+                OutputStream outFile = new FileOutputStream(outputJavaFile);
+                outFile.write(buf);
+                outFile.close();
+                //System.out.println(fileContents);
+                //System.out.println("Writing file: "+fileName);
+            }
+            catch (IOException ex) {
+                //FIX: Something should be done with this exception
+                //System.out.println(fileName+" : "+ex);
+                ;
+            }
+        }
+        else {
+            System.out.println("No translation available for " + fileName);
         }
     }
 }
