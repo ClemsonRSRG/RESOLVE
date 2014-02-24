@@ -389,7 +389,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public void postModuleDec(ModuleDec node) {
 
-        myActiveTemplates.firstElement().add("includes", myDynamicImports);
+        if (!myDynamicImports.isEmpty()) {
+            myActiveTemplates.firstElement().add("includes", myDynamicImports);
+        }
 
         AbstractTranslator.emitDebug("----------------------------------\n"
                 + "End: " + node.getName().getName()
@@ -420,7 +422,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 myGroup.getInstanceOf("parameter").add("type",
                         getVariableTypeTemplate(type)).add("name", name);
 
-        System.out.println("HERE: " + myActiveTemplates.peek().getName());
         myActiveTemplates.peek().add("parameters", parameter);
     }
 
@@ -772,8 +773,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
             //    outputAsFile(outputFile.getAbsolutePath(),
             //            myOutermostEnclosingTemplate.render());
 
-          //  System.out.println(Formatter.formatCode(myActiveTemplates.peek()
-          //          .render()));
+            //  System.out.println(Formatter.formatCode(myActiveTemplates.peek()
+            //          .render()));
             System.out.println(myActiveTemplates.peek().render());
         }
     }

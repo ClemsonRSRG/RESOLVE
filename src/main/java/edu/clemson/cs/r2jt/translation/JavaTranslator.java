@@ -45,7 +45,7 @@ public class JavaTranslator extends AbstractTranslator {
 
     /**
      * <p>A mapping between the <code>ModuleArgumentItem</code>s
-     * representing the actual parameters of a <code>FacilityDec</code> and
+     * representing the actual arguments of a <code>FacilityDec</code> and
      * their formal <code>ModuleParameterDec</code>-bound counterparts.</p>
      */
     private Map<ModuleArgumentItem, ModuleParameterDec> myFacilityBindings =
@@ -56,20 +56,7 @@ public class JavaTranslator extends AbstractTranslator {
      * <code>EnhancementBodyItem</code> being walked.</p>
      */
     private ModuleParameterization myCurrentEnhancement = null;
-
     private ST myBaseInstantiation, myBaseEnhancement;
-
-    /**
-     * <p>A <strong>temporary</strong> measure to get things rolling. This
-     * will <em>hopefully</em> be gone in the near future once our standard
-     * facility import process gets reworked...</p>
-     */
-    private final String[] myHardcodedStdFacs =
-            {
-                    "Boolean_Template Std_Boolean_Fac = new Std_Boolean_Realiz();",
-                    "Integer_Template Std_Integer_Fac = new Std_Integer_Realiz();",
-                    "Character_Template Std_Character_Fac = new Std_Character_Realiz();",
-                    "Char_Str_Template Std_Char_Str_Fac = new Std_Char_Str_Realiz();" };
 
     public JavaTranslator(CompileEnvironment env, ScopeRepository repo) {
         super(env, repo);
@@ -121,11 +108,12 @@ public class JavaTranslator extends AbstractTranslator {
 
         addPackageTemplate(node);
 
-        ST conceptInterfaceClass =
-                getModuleInterfaceTemplate(node.getName().getName(),
+        ST concept =
+                myGroup.getInstanceOf("interface_class").add("name",
+                        node.getName().getName()).add("extend",
                         "RESOLVE_INTERFACE");
 
-        myActiveTemplates.push(conceptInterfaceClass);
+        myActiveTemplates.push(concept);
     }
 
     @Override
@@ -161,7 +149,6 @@ public class JavaTranslator extends AbstractTranslator {
         for (ProgramParameterEntry p : formals) {
             addParameterTemplate(p.getDeclaredType(), p.getName());
         }
-        //    myActiveTemplates.peek().add("STDFACS", myHardcodedStdFacs);
     }
 
     /**
@@ -225,7 +212,6 @@ public class JavaTranslator extends AbstractTranslator {
                         .add("name", name);
 
         ST operation = getOperationLikeTemplate(type, name, true);
-
         myActiveTemplates.push(operation);
 
         if (parameters != null) {
@@ -262,6 +248,8 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void postConceptBodyModuleDec(ConceptBodyModuleDec node) {
 
+        ST returnStmt = myGroup.getInstanceOf("return_stmt");
+
         for (ProgramParameterEntry p : getModuleFormalParameters(node
                 .getConceptName())) {
 
@@ -269,9 +257,10 @@ public class JavaTranslator extends AbstractTranslator {
                     (p.getDeclaredType() instanceof PTElement) ? "getType"
                             + p.getName() : "get" + p.getName();
             ST result =
-                    getOperationLikeTemplate(p.getDeclaredType(), name, true);
-            myActiveTemplates.peek().add("functions", result);
+                    getOperationLikeTemplate(p.getDeclaredType(), name, true)
+                            .add("stmts", returnStmt.add("name", p.getName()));
 
+            myActiveTemplates.peek().add("functions", result);
         }
     }
 
@@ -502,11 +491,8 @@ public class JavaTranslator extends AbstractTranslator {
                             node.getName().getName() + "Param");
 
             ST operationInterface =
-                    myGroup.getInstanceOf("class").add(
-                            "declaration",
-                            myGroup.getInstanceOf("class_declaration").add(
-                                    "kind", "interface").add("name",
-                                    node.getName().getName()));
+                    myGroup.getInstanceOf("interface_class").add("name",
+                            node.getName().getName()).add("public", false);
 
             myActiveTemplates.peek().add("parameters", parameter);
             myActiveTemplates.push(operationInterface);
@@ -580,8 +566,6 @@ public class JavaTranslator extends AbstractTranslator {
                 myGroup.getInstanceOf("facility_init").add("realization",
                         node.getName().getName());
 
-        // First pop and insert the record built up from preRepresentationDec
-        // to now.
         ST record = myActiveTemplates.pop();
         myActiveTemplates.peek().add("records", record);
 

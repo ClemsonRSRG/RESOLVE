@@ -44,6 +44,15 @@ package(directories) ::= "package <directories; separator = {.}>;"
 
 include(directories) ::= "import <directories; separator = {.}>.*;"
 
+interface_class(name, extend, classes, functions, public=true) ::= <<
+<if(public)>public interface<name> extends <extend> {
+<else>interface <name> extends <extend><endif> {
+    <classes; separator = "\n">
+    <functions; separator = "\n">
+}
+
+>>
+
 facility_class(name, variables, records, functions, invoker) ::= <<
 public class <name> {
     <variables  : {k | public static final <k>}>
@@ -64,8 +73,8 @@ public class <name> extends RESOLVE_BASE implements <implement> {
     <variables  : {j | <j.type> <j.name>;}; separator = "\n">
 
     public <name>(<parameters; separator = ", ">) {
-        <parameters : {p | this.<p.name> = <p.name>;}>
-        <variables  : {v | <v.name> = <v.init>;}>
+        <parameters : {p | this.<p.name> = <p.name>;}; separator = "\n">
+        <variables  : {v | <v.name> = <v.init>;}; separator = "\n">
     }
 
     <records    ; separator = "\n">
