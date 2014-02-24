@@ -122,8 +122,9 @@ public class JavaTranslator extends AbstractTranslator {
         addPackageTemplate(node);
 
         ST enhancement =
-                getModuleInterfaceTemplate(node.getName().getName(), node
-                        .getConceptName().getName());
+                myGroup.getInstanceOf("interface_class").add("name",
+                        node.getName().getName()).add("extend",
+                        node.getConceptName().getName());
 
         myActiveTemplates.push(enhancement);
     }
@@ -511,15 +512,12 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preTypeDec(TypeDec node) {
 
-        ST extend = myGroup.getInstanceOf("class_extends").add("name", "RType");
+        ST typeDec =
+                myGroup.getInstanceOf("interface_class").add("name",
+                        node.getName().getName()).add("extend", "RType").add(
+                        "public", false);
 
-        ST declaration =
-                myGroup.getInstanceOf("class_declaration").add("kind",
-                        "interface").add("name", node.getName().getName()).add(
-                        "extension", extend);
-
-        myActiveTemplates.peek().add("classes",
-                myGroup.getInstanceOf("class").add("declaration", declaration));
+        myActiveTemplates.peek().add("classes", typeDec);
 
         try {
             ProgramTypeDefinitionEntry ptde =
@@ -799,23 +797,6 @@ public class JavaTranslator extends AbstractTranslator {
         catch (NoSuchSymbolException nsse) {
             throw new RuntimeException(nsse);
         }
-    }
-
-    private ST getModuleInterfaceTemplate(String className, String extendsField) {
-
-        ST extend =
-                myGroup.getInstanceOf("class_extends")
-                        .add("name", extendsField);
-
-        ST declaration =
-                myGroup.getInstanceOf("class_declaration").add("modifier",
-                        "public").add("name", className).add("kind",
-                        "interface").add("extension", extend);
-
-        ST result =
-                myGroup.getInstanceOf("class").add("declaration", declaration);
-
-        return result;
     }
 
     /**
