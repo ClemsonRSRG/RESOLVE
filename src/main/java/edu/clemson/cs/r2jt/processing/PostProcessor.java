@@ -44,33 +44,122 @@ public class PostProcessor extends TreeWalkerStackVisitor {
 
     @Override
     public void preCallStmt(CallStmt stmt) {
-        // Variables
-        Location loc = stmt.getLocation();
-        PosSymbol name = stmt.getName();
-        List<ProgramExp> argList = stmt.getArguments();
-        boolean localOper = myUtilities.isLocalOper(name.getName());
+    /*   Commented out until we hear back from Murali
+    // Variables
+    Location loc = stmt.getLocation();
+    PosSymbol name = stmt.getName();
+    List<ProgramExp> argList = stmt.getArguments();
+    boolean localOper = myUtilities.isLocalOper(name.getName());
 
-        // Check if the called operation is a local operation
-        if (localOper) {
-            List<ParameterVarDec> parameterList =
-                    myUtilities.retrieveParameterList(name.getName());
+    // Check if the called operation is a local operation
+    if (localOper) {
+        List<ParameterVarDec> parameterList =
+                myUtilities.retrieveParameterList(name.getName());
 
-            // Make sure that we have the right operation
-            if (parameterList.size() == argList.size()) {
-                // Replaces the modified argument list
-                stmt.setArguments(applyReplica(parameterList, argList));
-            }
-            else {
-                // Found an operation with the same name,
-                // but different argument size
-                wrongOperation(loc, name, parameterList.size(), argList.size());
-            }
+        // Make sure that we have the right operation
+        if (parameterList.size() == argList.size()) {
+            // Replaces the modified argument list
+            stmt.setArguments(applyReplica(parameterList, argList));
         }
         else {
-            /** TODO: Invoke Hampton's new symbol table to look for the
-             * external operation.
-             */
+            // Found an operation with the same name,
+            // but different argument size
+            wrongOperation(loc, name, parameterList.size(), argList.size());
         }
+    }
+    else {
+        // TODO: Invoke Hampton's new symbol table to look for the
+        // external operation.
+    }      */
+    }
+
+    // -----------------------------------------------------------
+    // ConceptBodyModuleDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void preConceptBodyModuleDec(ConceptBodyModuleDec dec) {
+        // Store all global variables, facility declarations,
+        // records and local operations.
+        myUtilities.initModuleDec(dec.getDecs());
+    }
+
+    @Override
+    public void postConceptBodyModuleDec(ConceptBodyModuleDec dec) {
+        // Clean up myUtilities
+        myUtilities.finalModuleDec();
+    }
+
+    // -----------------------------------------------------------
+    // EnhancementBodyModuleDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void preEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
+        // Store all global variables, facility declarations,
+        // records and local operations.
+        myUtilities.initModuleDec(dec.getDecs());
+    }
+
+    @Override
+    public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
+        // Clean up myUtilities
+        myUtilities.finalModuleDec();
+    }
+
+    // -----------------------------------------------------------
+    // FacilityModuleDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void preFacilityModuleDec(FacilityModuleDec dec) {
+        // Store all global variables, facility declarations,
+        // records and local operations.
+        myUtilities.initModuleDec(dec.getDecs());
+    }
+
+    @Override
+    public void postFacilityModuleDec(FacilityModuleDec dec) {
+        // Clean up myUtilities
+        myUtilities.finalModuleDec();
+    }
+
+    // -----------------------------------------------------------
+    // FacilityOperationDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void preFacilityOperationDec(FacilityOperationDec dec) {
+        // Store all parameter and local variables
+        myUtilities.initOperationDec(dec.getParameters(), dec.getVariables());
+    }
+
+    @Override
+    public void postFacilityOperationDec(FacilityOperationDec dec) {
+        // Store the local variable list
+        dec.setVariables(myUtilities.getLocalVarList());
+
+        // Clean up myUtilities
+        myUtilities.finalOperationDec();
+    }
+
+    // -----------------------------------------------------------
+    // ProcedureDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void preProcedureDec(ProcedureDec dec) {
+        // Store all parameter and local variables
+        myUtilities.initOperationDec(dec.getParameters(), dec.getVariables());
+    }
+
+    @Override
+    public void postProcedureDec(ProcedureDec dec) {
+        // Store the local variable list
+        dec.setVariables(myUtilities.getLocalVarList());
+
+        // Clean up myUtilities
+        myUtilities.finalOperationDec();
     }
 
     // ===========================================================
