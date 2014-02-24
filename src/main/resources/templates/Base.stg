@@ -5,6 +5,7 @@ group Base;
 // view = Base.stg/C.stg/Java.stg
 module(directives, includes, structures, variables, functions, eof) ::= <<
 <directives ; separator = "\n">
+
 <includes   ; separator = "\n">
 <variables  ; separator = "\n">
 

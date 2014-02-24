@@ -40,20 +40,19 @@
 group Java;
 import "Base.stg"
 
-package(directories) ::= <%package <directories; separator = ".">;%>
+package(directories) ::= "package <directories; separator = {.}>;"
 
-include(directories) ::= <%import <directories; separator = ".">.*;%>
+include(directories) ::= "import <directories; separator = {.}>.*;"
 
 facility_class(name, variables, records, functions, invoker) ::= <<
 public class <name> {
     <variables  : {k | public static final <k>}>
     <functions  : {f | <function_def("public static", f.type, f.name,
                                       f.parameters, f.facilities, f.variables,
-                                      f.stmts)>}>
-    <records>
-
+                                      f.stmts)>}; separator = "\n">
+    <records; separator = "\n">
     public static void main(String[] args) {
-        <declaration.name> start = new <declaration.name>();
+        <name> start = new <name>();
     	start.<invoker>();
     }
 }>>
@@ -61,8 +60,8 @@ public class <name> {
 concept_body_class(name, implement, parameters, variables, functions,
 records) ::= <<
 public class <name> extends RESOLVE_BASE implements <implement> {
-    <parameters : {p | <p>;}>
-    <variables  : {j | <j.type> <j.name>;}>
+    <parameters : {p | <p>;}; separator = "\n">
+    <variables  : {j | <j.type> <j.name>;}; separator = "\n">
 
     public <name>(<parameters; separator = ", ">) {
         <parameters : {p | this.<p.name> = <p.name>;}>
@@ -188,9 +187,8 @@ facility_proxied_init(realization, arguments) ::= <%
 //-------------------------------------------------------------------
 
 record_class(name, implement, declaration, variables, facility) ::= <<
-<if(facility)>
-    class <name> extends RESOLVE_BASE implements RType {
-<else> class <name> implements <implement> <endif> {
+<if(facility)>class <name> extends RESOLVE_BASE implements RType {
+<else>class <name> implements <implement><endif> {
     <name>_Rep rep;
     <name>() {
         rep = new <name>_Rep();
@@ -209,13 +207,13 @@ record_class(name, implement, declaration, variables, facility) ::= <<
     }
 }
 class <name>_Rep {
-    <variables      : {v | <v.type> <v.name>;}>
+    <variables : {v | <v.type> <v.name>;}; separator = "\n">
     <name>_Rep() {
-        <variables  : {v | <v.name> = <v.init>;}>
+        <variables : {v | <v.name> = <v.init>;}; separator = "\n">
     }
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        <variables : {v | sb.append(<v.name>.toString());}>
+        <variables : {v | sb.append(<v.name>.toString());}; separator = "\n">
         return sb.toString();
     }
 }>>
@@ -223,18 +221,6 @@ class <name>_Rep {
 //-------------------------------------------------------------------
 //   constructors
 //-------------------------------------------------------------------
-
-constructor2(name, parameters, variables) ::= <%
-public <name>(<parameters; separator = ", ">) {
-    <parameters : {p | this.<p.name> = <p.name>;}>
-    <variables  : {v | <v.name> = <v.init>;}>
-}%>
-
-constructor(modifier, name, parameters, variables) ::= <%
-<modifier> <name>(<parameters; separator = ", ">) {
-    <parameters : {p | this.<p.name> = <p.name>;}>
-    <variables  : {v | <v.name> = <v.init>;}>
-}%>
 
 unqualified_call(name, arguments) ::= <%
     <name>(<arguments; separator = ", ">);%>
@@ -255,7 +241,7 @@ qualified_param_exp(qualifier, name, arguments) ::=
 unqualified_param_exp(name, arguments) ::=
     <%<name>(<arguments; separator = ", ">)%>
 
-while(arguments, stmts) ::= <%
+while(arguments, stmts) ::= <<
 while (((Std_Boolean_Realiz.Boolean)(<arguments>)).val) {
-    <stmts>
-}%>
+    <stmts; separator = "\n">
+}>>
