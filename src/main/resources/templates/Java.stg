@@ -44,10 +44,8 @@ package(directories) ::= <%package <directories; separator = ".">;%>
 
 include(directories) ::= <%import <directories; separator = ".">.*;%>
 
-/**
- * @param concepts The first must be the name of base concept.
- */
-enh_body_class(name, implement, parameters, variables, functions, confu) ::= <%
+enhancement_body_class(name, implement, parameters, variables, functions,
+conceptfunctions) ::= <%
 public class <name> implements <implement; separator = ", "> {
     <parameters     :   {p | <p>;}>
 	<variables      :   {j | <j.type> <j.name>;}>
@@ -67,6 +65,8 @@ public class <name> implements <implement; separator = ", "> {
 	public void assign(RType r1, RType r2) {
 		con.assign(r1, r2);
 	}
+
+	<conceptfunctions>
 
     public Object invoke(Object proxy, Method method, Object[] args) throws
     Throwable {

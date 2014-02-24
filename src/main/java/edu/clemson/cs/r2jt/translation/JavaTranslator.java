@@ -3,6 +3,7 @@ package edu.clemson.cs.r2jt.translation;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
+import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.*;
@@ -163,7 +164,7 @@ public class JavaTranslator extends AbstractTranslator {
         for (ProgramParameterEntry p : formals) {
             addParameterTemplate(p.getDeclaredType(), p.getName());
         }
-    //    myActiveTemplates.peek().add("STDFACS", myHardcodedStdFacs);
+        //    myActiveTemplates.peek().add("STDFACS", myHardcodedStdFacs);
     }
 
     /**
@@ -187,16 +188,10 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec node) {
 
-    /*    try {
-            ST wrappedModule = myGroup.getInstanceOf("wrapped_module");
-
+        try {
             ModuleScope conceptScope =
                     myBuilder.getModuleScope(new ModuleIdentifier(node
                             .getConceptName().getName()));
-
-            ModuleScope enhancementScope =
-                    myBuilder.getModuleScope(new ModuleIdentifier(node
-                            .getEnhancementName().getName()));
 
             List<OperationEntry> conceptOperations =
                     conceptScope.query(new EntryTypeQuery<OperationEntry>(
@@ -210,47 +205,46 @@ public class JavaTranslator extends AbstractTranslator {
                                     ImportStrategy.IMPORT_NONE,
                                     FacilityStrategy.FACILITY_IGNORE));
 
-            List<OperationEntry> enhancementOperations =
-                    enhancementScope.query(new EntryTypeQuery<OperationEntry>(
-                            OperationEntry.class, ImportStrategy.IMPORT_NONE,
-                            FacilityStrategy.FACILITY_IGNORE));
-
-            for (OperationEntry c : conceptOperations) {
+            for (OperationEntry o : conceptOperations) {
 
                 PTType returnType =
-                        (c.getReturnType() instanceof PTVoid) ? null : c
+                        (o.getReturnType() instanceof PTVoid) ? null : o
                                 .getReturnType();
 
-                ST conStmt =
-                        (returnType != null) ? myGroup
-                                .getInstanceOf("qualified_param_exp") : myGroup
-                                .getInstanceOf("qualified_call");
-
-                conStmt.add("qualifier", "con").add("name", c.getName());
-                myActiveTemplates.push(getOperationLikeTemplate(returnType, c
-                        .getName(), true));
-
-                for (ProgramParameterEntry p : c.getParameters()) {
-                    addParameterTemplate(p.getDeclaredType(), p.getName());
-                    conStmt.add("arguments", p.getName());
-                }
-
-                if (returnType != null) {
-                    conStmt =
-                            myGroup.getInstanceOf("return_stmt").add("name",
-                                    conStmt);
-                }
-                myActiveTemplates.peek().add("stmts", conStmt);
-                wrappedModule.add("confuncs", myActiveTemplates.pop());
+                addEnhancementConceptualFunction(returnType, o.getName(), o
+                        .getParameters());
             }
-
-            wrappedModule.add("enhfuncs", enhancementOperations);
             addModuleParameterMethods(node.getConceptName());
-            myActiveTemplates.peek().add("wrapper", wrappedModule);
         }
         catch (NoSuchSymbolException nsse) {
             noSuchModule(node.getConceptName());
-        }*/
+        }
+    }
+
+    private void addEnhancementConceptualFunction(PTType type, String name,
+            ImmutableList<ProgramParameterEntry> parameters) {
+
+        ST firstLine =
+                (type != null) ? myGroup.getInstanceOf("qualified_param_exp")
+                        : myGroup.getInstanceOf("qualified_call");
+
+        myActiveTemplates.push(getOperationLikeTemplate(type, name, true));
+        firstLine.add("qualifier", "con").add("name", name);
+
+        for (ProgramParameterEntry p : parameters) {
+            addParameterTemplate(p.getDeclaredType(), p.getName());
+            firstLine.add("arguments", p.getName());
+        }
+
+        if (type != null) {
+            firstLine =
+                    myGroup.getInstanceOf("return_stmt").add("name", firstLine);
+        }
+
+        ST wrappedFunction = myActiveTemplates.pop();
+        wrappedFunction.add("stmts", firstLine);
+
+        myActiveTemplates.peek().add("conceptfunctions", wrappedFunction);
     }
 
     @Override
@@ -303,11 +297,12 @@ public class JavaTranslator extends AbstractTranslator {
                 getModuleFormalParameters(moduleName);
 
         for (ProgramParameterEntry p : formals) {
-            ST returnStmt = myGroup.getInstanceOf("return_stmt");
 
             String prefix =
                     (p.getDeclaredType() instanceof PTElement) ? "getType"
                             : "get";
+
+            ST returnStmt = myGroup.getInstanceOf("return_stmt");
 
             ST paramFunction =
                     getOperationLikeTemplate(p.getDeclaredType(), prefix
@@ -318,10 +313,12 @@ public class JavaTranslator extends AbstractTranslator {
                         "qualified_param_exp").add("qualifier", "con").add(
                         "name", prefix + p.getName()));
 
-                paramFunction.add("stmts", returnStmt);
+                myActiveTemplates.peek().add("conceptfunctions",
+                        paramFunction.add("stmts", returnStmt));
             }
-
-            myActiveTemplates.peek().add("functions", paramFunction);
+            else {
+                myActiveTemplates.peek().add("functions", paramFunction);
+            }
         }
     }
 
