@@ -10,7 +10,7 @@ import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
-import java.util.Iterator;
+import java.util.Set;
 
 /**
  * TODO: Write a description of this module
@@ -39,16 +39,17 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     private List<FacilityDec> myCreatedFacDecList;
 
     /**
-     * <p>A list of all <code>Statements</code> created
-     * by the PreProcessor.</p>
+     * <p>A mapping between the statement that created the
+     * list of new statements and the new statement list.</p>
      */
-    private List<Statement> myCreatedStmtList;
+    private Map<Statement, List<Statement>> myCreatedStmtMap;
 
     /**
-     * <p>A list of all <code>CallStmt</code> to array
-     * swap operation created by the PreProcessor.</p>
+     * <p>A mapping between the statement that created the
+     * list of new call statements and the new call statement
+     * list containing all our swap calls.</p>
      */
-    private List<CallStmt> mySwapCallList;
+    private Map<Statement, List<CallStmt>> mySwapCallMap;
 
     /**
      * <p>Utilities class that contains methods that are used
@@ -68,8 +69,8 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         myArrayFacilityMap = new Map<String, NameTy>();
         myCounter = 1;
         myCreatedFacDecList = new List<FacilityDec>();
-        myCreatedStmtList = new List<Statement>();
-        mySwapCallList = new List<CallStmt>();
+        myCreatedStmtMap = new Map<Statement, List<Statement>>();
+        mySwapCallMap = new Map<Statement, List<CallStmt>>();
         myUtilities = new Utilities();
     }
 
@@ -154,50 +155,49 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     }
 
     // -----------------------------------------------------------
+    // AuxCodeStmt
+    // -----------------------------------------------------------
+
+    @Override
+    public void postAuxCodeStmt(AuxCodeStmt stmt) {
+        // Update our list of statements with any
+        // PreProcessor created statements.
+        List<Statement> stmtList = stmt.getStatements();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmt.setStatements(stmtList);
+    }
+
+    // -----------------------------------------------------------
     // CallStmt
     // -----------------------------------------------------------
 
     @Override
     public void postCallStmt(CallStmt stmt) {
         // Variables
-        Location nLocation = stmt.getName().getLocation();
         List<ProgramExp> argList = stmt.getArguments();
 
         // Change any instances of A[i] and S.A[i] to actual
         // calls to operations in Static_Array_Template
-        argList = arrayExpConversion(argList);
-
-        // Add any created statements into the AST
-        if (!myCreatedStmtList.isEmpty()) {
-            // Ancestor Iterator
-            Iterator<ResolveConceptualElement> it = this.getAncestorInterator();
-
-            // Add it to the AST
-            addStatements(nLocation, it);
-
-            // Clear the list of FuncAssignStmt
-            myCreatedStmtList.clear();
-        }
-
-        // Add any array swap calls into the AST
-        // Note: The reason we do this in two steps is because
-        // when we swap something, we need to swap the result
-        // back to the variable when we are done calling the
-        // operation.
-        if (!mySwapCallList.isEmpty()) {
-            // Ancestor Iterator
-            Iterator<ResolveConceptualElement> it = this.getAncestorInterator();
-
-            // Add it to the AST
-            addSwapCalls(nLocation, it);
-
-            // Clear the list of FuncAssignStmt
-            mySwapCallList.clear();
-        }
+        argList = arrayExpConversion(stmt, argList);
 
         // Replace the original argument list with the one
         // returned by the conversion method.
         stmt.setArguments(argList);
+    }
+
+    // -----------------------------------------------------------
+    // ChoiceItem
+    // -----------------------------------------------------------
+
+    @Override
+    public void postChoiceItem(ChoiceItem item) {
+        // Update our list of statements with any
+        // PreProcessor created statements.
+        List<Statement> stmtList = item.getThenclause();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        item.setThenclause(stmtList);
     }
 
     // -----------------------------------------------------------
@@ -223,6 +223,20 @@ public class PreProcessor extends TreeWalkerStackVisitor {
 
         // Clean up myUtilities
         myUtilities.finalModuleDec();
+    }
+
+    // -----------------------------------------------------------
+    // ConditionItem
+    // -----------------------------------------------------------
+
+    @Override
+    public void postConditionItem(ConditionItem item) {
+        // Update our list of statements with any
+        // PreProcessor created statements.
+        List<Statement> stmtList = item.getThenclause();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        item.setThenclause(stmtList);
     }
 
     // -----------------------------------------------------------
@@ -305,11 +319,123 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             myCreatedFacDecList.clear();
         }
 
+        // Update our list of statements with any
+        // PreProcessor created statements.
+        List<Statement> stmtList = dec.getStatements();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        dec.setStatements(stmtList);
+
         // Store the local variable list
         dec.setVariables(myUtilities.getLocalVarList());
 
         // Clean up myUtilities
         myUtilities.finalOperationDec();
+    }
+
+    // -----------------------------------------------------------
+    // FinalItem
+    // -----------------------------------------------------------
+
+    @Override
+    public void postFinalItem(FinalItem item) {
+        // Update our list of statements with any
+        // PreProcessor created statements.
+        List<Statement> stmtList = item.getStatements();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        item.setStatements(stmtList);
+    }
+
+    // -----------------------------------------------------------
+    // IfStmt
+    // -----------------------------------------------------------
+
+    @Override
+    public void postIfStmt(IfStmt stmt) {
+        // Update our list of then clause statements
+        // with any PreProcessor created statements..
+        List<Statement> stmtList = stmt.getThenclause();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmt.setThenclause(stmtList);
+
+        // Update our list of else clause statements
+        // with any PreProcessor created statements.
+        stmtList = stmt.getElseclause();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmt.setElseclause(stmtList);
+    }
+
+    // -----------------------------------------------------------
+    // InitItem
+    // -----------------------------------------------------------
+
+    @Override
+    public void postInitItem(InitItem item) {
+        // Update our list of statements with any
+        // PreProcessor created statements.
+        List<Statement> stmtList = item.getStatements();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        item.setStatements(stmtList);
+    }
+
+    // -----------------------------------------------------------
+    // IterateExitStmt
+    // -----------------------------------------------------------
+
+    @Override
+    public void postIterateExitStmt(IterateExitStmt stmt) {
+        // Update our list of statements with any
+        // PreProcessor created statements.
+        List<Statement> stmtList = stmt.getStatements();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmt.setStatements(stmtList);
+    }
+
+    // -----------------------------------------------------------
+    // IterateStmt
+    // -----------------------------------------------------------
+
+    @Override
+    public void postIterateStmt(IterateStmt stmt) {
+        // Update our list of statements with any
+        // PreProcessor created statements.
+        List<Statement> stmtList = stmt.getStatements();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmt.setStatements(stmtList);
+    }
+
+    // -----------------------------------------------------------
+    // PerformanceFinalItem
+    // -----------------------------------------------------------
+
+    @Override
+    public void postPerformanceFinalItem(PerformanceFinalItem item) {
+        // Update our list of statements with any
+        // PreProcessor created statements.
+        List<Statement> stmtList = item.getStatements();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        item.setStatements(stmtList);
+    }
+
+    // -----------------------------------------------------------
+    // PerformanceInitItem
+    // -----------------------------------------------------------
+
+    @Override
+    public void postPerformanceInitItem(PerformanceInitItem item) {
+        // Update our list of statements with any
+        // PreProcessor created statements.
+        List<Statement> stmtList = item.getStatements();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        item.setStatements(stmtList);
     }
 
     // -----------------------------------------------------------
@@ -332,11 +458,46 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             myCreatedFacDecList.clear();
         }
 
+        // Update our list of statements with any
+        // PreProcessor created statements.
+        List<Statement> stmtList = dec.getStatements();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        dec.setStatements(stmtList);
+
         // Store the local variable list
         dec.setVariables(myUtilities.getLocalVarList());
 
         // Clean up myUtilities
         myUtilities.finalOperationDec();
+    }
+
+    // -----------------------------------------------------------
+    // SelectionStmt
+    // -----------------------------------------------------------
+
+    @Override
+    public void postSelectionStmt(SelectionStmt stmt) {
+        // Update our list of statements with any
+        // PreProcessor created statements.
+        List<Statement> stmtList = stmt.getDefaultclause();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmt.setDefaultclause(stmtList);
+    }
+
+    // -----------------------------------------------------------
+    // WhileStmt
+    // -----------------------------------------------------------
+
+    @Override
+    public void postWhileStmt(WhileStmt stmt) {
+        // Update our list of statements with any
+        // PreProcessor created statements.
+        List<Statement> stmtList = stmt.getStatements();
+        stmtList = updateStatementList(stmtList);
+        stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmt.setStatements(stmtList);
     }
 
     // ===========================================================
@@ -369,109 +530,79 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     // ===========================================================
 
     /**
-     * <p>Adds the newly created <code>Statements</code> to the
-     * right place in our AST.</p>
-     *
-     * @param location The location in our AST where the statements
-     *                 needs to be added to.
-     * @param it The ancestor iterator.
-     */
-    private void addStatements(Location location,
-            Iterator<ResolveConceptualElement> it) {
-        // Loop
-        while (it.hasNext()) {
-            // Obtain a temp from it
-            ResolveConceptualElement temp = it.next();
-
-            // Our parent is a FacilityOperationDec
-            if (temp instanceof FacilityOperationDec) {
-                List<Statement> statements =
-                        ((FacilityOperationDec) temp).getStatements();
-
-                // Update our list of statements
-                statements = modifyStatementList(location, statements);
-
-                // Update the FacilityOperationDec statement list
-                ((FacilityOperationDec) temp).setStatements(statements);
-                break;
-            }
-            // Our parent is a ProcedureDec
-            else if (temp instanceof ProcedureDec) {
-                List<Statement> statements =
-                        ((ProcedureDec) temp).getStatements();
-
-                // Update our list of statements
-                statements = modifyStatementList(location, statements);
-
-                // Update the FacilityOperationDec statement list
-                ((ProcedureDec) temp).setStatements(statements);
-                break;
-            }
-        }
-    }
-
-    /**
-     * <p>Adds the created <code>CallStmt</code> for swapping array
-     * entries to right places in our AST.</p>
-     *
-     * @param location The location in our AST where the statements
-     *                 needs to be added to.
-     * @param it The ancestor iterator.
-     */
-    private void addSwapCalls(Location location, Iterator<ResolveConceptualElement> it) {
-        // Loop
-        while (it.hasNext()) {
-            // Obtain a temp from it
-            ResolveConceptualElement temp = it.next();
-
-            // Our parent is a FacilityOperationDec
-            if (temp instanceof FacilityOperationDec) {
-                List<Statement> statements =
-                        ((FacilityOperationDec) temp).getStatements();
-
-                // Update our list of statements
-                statements = modifyStatementListForSwapCalls(location, statements);
-
-                // Update the FacilityOperationDec statement list
-                ((FacilityOperationDec) temp).setStatements(statements);
-                break;
-            }
-            // Our parent is a ProcedureDec
-            else if (temp instanceof ProcedureDec) {
-                List<Statement> statements =
-                        ((ProcedureDec) temp).getStatements();
-
-                // Update our list of statements
-                statements = modifyStatementListForSwapCalls(location, statements);
-
-                // Update the FacilityOperationDec statement list
-                ((ProcedureDec) temp).setStatements(statements);
-                break;
-            }
-        }
-    }
-
-    /**
      * <p>Converts any <code>VariableArrayExp</code> to a <code>VariableNameExp</code>
      * by creating a new <code>Exp</code> and applying swap calls provided by the
      * Static_Array_Template.</p>
      *
+     * @param stmt The statement that is calling this operation.
      * @param argList The list of arguments being used to invoke the current
      *                operation.
      *
      * @return The modified argument list
      */
-    private List<ProgramExp> arrayExpConversion(List<ProgramExp> argList) {
+    private List<ProgramExp> arrayExpConversion(Statement stmt,
+            List<ProgramExp> argList) {
+        // Lists to store our newly created items
+        List<Statement> newStmtList = new List<Statement>();
+        List<CallStmt> newCallStmtList = new List<CallStmt>();
+
         // Iterate through the argument list
         for (int i = 0; i < argList.size(); i++) {
             ProgramExp current = argList.get(i);
+            boolean isArrayExp = false;
+            Location location = current.getLocation();
+            PosSymbol name = null;
+            NameTy arrayTy = null;
 
-            // Check if it is a VariableArrayExp
+            // Check if it is a VariableArrayExp.
             if (current instanceof VariableArrayExp) {
-                // Things to be used frequently
-                Location location = current.getLocation();
-                PosSymbol name = ((VariableArrayExp) current).getName();
+                isArrayExp = true;
+                name = ((VariableArrayExp) current).getName();
 
+                // Locate the type of the array.
+                VarDec arrayVarDec = myUtilities.searchVarDecLists(name);
+                NameTy facilityTy = (NameTy) arrayVarDec.getTy();
+                arrayTy =
+                        myArrayFacilityMap.get(facilityTy.getQualifier()
+                                .getName());
+            }
+            // Check if this VariableDotExp contains a
+            // VariableArrayExp as its last segment.
+            else if (current instanceof VariableDotExp) {
+                // Get list of segments
+                List<VariableExp> segList =
+                        ((VariableDotExp) current).getSegments();
+                VariableNameExp first = (VariableNameExp) segList.get(0);
+                VariableExp last = segList.get(segList.size() - 1);
+
+                // Check to see if our dot expression contains an
+                // array expression as its last segment. Ex: S.A[i]
+                if (last instanceof VariableArrayExp) {
+                    isArrayExp = true;
+                    name = ((VariableArrayExp) last).getName();
+
+                    // Locate the array declaration inside the record
+                    VarDec recordVarDec =
+                            myUtilities.searchVarDecLists(first.getName());
+
+                    if (recordVarDec != null) {
+                        // Locate the type of the array inside a record
+                        NameTy recordTy = (NameTy) recordVarDec.getTy();
+                        VarDec arrayVarDec =
+                                myUtilities.searchRecords(recordTy.getName(),
+                                        name);
+                        NameTy facilityTy = (NameTy) arrayVarDec.getTy();
+                        arrayTy =
+                                myArrayFacilityMap.get(facilityTy
+                                        .getQualifier().getName());
+                    }
+                    else {
+                        recordNotFound(location, first.getName());
+                    }
+                }
+            }
+
+            if (isArrayExp) {
                 // Create a new variable name expression for the entire
                 // array expression
                 VariableNameExp newExp =
@@ -483,13 +614,6 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                 VariableNameExp newIndexExp =
                         createVariableNameExp(location, "_ArrayIndex_", name
                                 .getName(), "_" + myCounter++);
-
-                // Locate the type of the array.
-                VarDec arrayVarDec = myUtilities.searchVarDecLists(name);
-                NameTy facilityTy = (NameTy) arrayVarDec.getTy();
-                NameTy arrayTy =
-                        myArrayFacilityMap.get(facilityTy.getQualifier()
-                                .getName());
 
                 // Create new variables for these two new variable
                 // expressions and add these to our list of local
@@ -507,7 +631,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                 FuncAssignStmt funcAssignStmt =
                         new FuncAssignStmt(location, newIndexExp,
                                 ((VariableArrayExp) current).getArgument());
-                myCreatedStmtList.add(funcAssignStmt);
+                newStmtList.add(funcAssignStmt);
 
                 // Create a call to Swap_Entry
                 List<ProgramExp> callArgList = new List<ProgramExp>();
@@ -519,93 +643,20 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                 CallStmt swapEntryStmt =
                         new CallStmt(null, new PosSymbol(location, Symbol
                                 .symbol("Swap_Entry")), callArgList);
-                mySwapCallList.add(swapEntryStmt);
+                newCallStmtList.add(swapEntryStmt);
 
                 // Replace current with the newExp
                 argList.set(i, newExp);
             }
-            else if (current instanceof VariableDotExp) {
-                // Get list of segments
-                List<VariableExp> segList =
-                        ((VariableDotExp) current).getSegments();
-                VariableNameExp first = (VariableNameExp) segList.get(0);
-                VariableExp last = segList.get(segList.size() - 1);
+        }
 
-                // Check to see if our dot expression contains an
-                // array expression as its last segment. Ex: S.A[i]
-                if (last instanceof VariableArrayExp) {
-                    // Things to be used frequently
-                    Location location = current.getLocation();
-                    PosSymbol name = ((VariableArrayExp) last).getName();
-
-                    // Locate the array declaration inside the record
-                    VarDec recordVarDec =
-                            myUtilities.searchVarDecLists(first.getName());
-
-                    if (recordVarDec != null) {
-                        // Create a new variable name expression for the entire
-                        // array expression
-                        VariableNameExp newExp =
-                                createVariableNameExp(location, "_ArrayExp_",
-                                        name.getName(), "_" + myCounter++);
-
-                        // Create a new variable name expression for the index
-                        // of the array expression
-                        VariableNameExp newIndexExp =
-                                createVariableNameExp(location, "_ArrayIndex_",
-                                        name.getName(), "_" + myCounter++);
-
-                        // Locate the type of the array inside a record
-                        NameTy recordTy = (NameTy) recordVarDec.getTy();
-                        VarDec arrayVarDec =
-                                myUtilities.searchRecords(recordTy.getName(),
-                                        name);
-                        NameTy facilityTy = (NameTy) arrayVarDec.getTy();
-                        NameTy arrayTy =
-                                myArrayFacilityMap.get(facilityTy
-                                        .getQualifier().getName());
-
-                        // Create new variables for these two new variable
-                        // expressions and add these to our list of local
-                        // variables.
-                        VarDec expVarDec =
-                                new VarDec(newExp.getName(), arrayTy);
-                        VarDec indexVarDec =
-                                new VarDec(newIndexExp.getName(),
-                                        createIntegerTy(location));
-                        myUtilities.addNewLocalVariable(expVarDec);
-                        myUtilities.addNewLocalVariable(indexVarDec);
-
-                        // Store the index of the array inside "newIndexExp" by
-                        // creating a <code>FunctionAssignStmt</code> and add it
-                        // to the list of statements to be inserted later.
-                        FuncAssignStmt funcAssignStmt =
-                                new FuncAssignStmt(location, newIndexExp,
-                                        ((VariableArrayExp) current)
-                                                .getArgument());
-                        myCreatedStmtList.add(funcAssignStmt);
-
-                        // Create a call to Swap_Entry
-                        List<ProgramExp> callArgList = new List<ProgramExp>();
-                        callArgList.add(createVariableNameExp(location, "",
-                                name.getName(), ""));
-                        callArgList.add(newExp);
-                        callArgList.add(newIndexExp);
-
-                        CallStmt swapEntryStmt =
-                                new CallStmt(null, new PosSymbol(location,
-                                        Symbol.symbol("Swap_Entry")),
-                                        callArgList);
-                        mySwapCallList.add(swapEntryStmt);
-
-                        // Replace current with the newExp
-                        argList.set(i, newExp);
-                    }
-                    else {
-                        recordNotFound(location, first.getName());
-                    }
-                }
-            }
+        // Add the new lists to our maps if they are
+        // not empty
+        if (!newStmtList.isEmpty()) {
+            myCreatedStmtMap.put(stmt, newStmtList);
+        }
+        if (!newCallStmtList.isEmpty()) {
+            mySwapCallMap.put(stmt, newCallStmtList);
         }
 
         return argList;
@@ -637,23 +688,22 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         // Create a FacilityDec
         FacilityDec newFacilityDec = new FacilityDec();
 
-            // Set the name
-            newFacilityDec
-                    .setName(new PosSymbol(location, Symbol.symbol(name)));
+        // Set the name
+        newFacilityDec.setName(new PosSymbol(location, Symbol.symbol(name)));
 
-            // Set the Concept
-            newFacilityDec.setConceptName(new PosSymbol(location, Symbol
-                    .symbol(conceptName)));
-            newFacilityDec.setConceptParams(conceptParam);
+        // Set the Concept
+        newFacilityDec.setConceptName(new PosSymbol(location, Symbol
+                .symbol(conceptName)));
+        newFacilityDec.setConceptParams(conceptParam);
 
-            // Set the Concept Realization
-            newFacilityDec.setBodyName(new PosSymbol(location, Symbol
-                    .symbol(conceptRealizationName)));
-            newFacilityDec.setBodyParams(conceptBodiesParam);
+        // Set the Concept Realization
+        newFacilityDec.setBodyName(new PosSymbol(location, Symbol
+                .symbol(conceptRealizationName)));
+        newFacilityDec.setBodyParams(conceptBodiesParam);
 
-            // Set the Enhancement and Enhancement Realization list
-            newFacilityDec.setEnhancements(enhancementParam);
-            newFacilityDec.setEnhancementBodies(enhancementBodiesParam);
+        // Set the Enhancement and Enhancement Realization list
+        newFacilityDec.setEnhancements(enhancementParam);
+        newFacilityDec.setEnhancementBodies(enhancementBodiesParam);
 
         return newFacilityDec;
     }
@@ -702,7 +752,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
      */
     private List<Dec> modifyFacDecList(List<Dec> decList) {
         // Loop through the list
-        for (int i = myCreatedFacDecList.size()-1; i >= 0; i--) {
+        for (int i = myCreatedFacDecList.size() - 1; i >= 0; i--) {
             // Add to the front of the list
             decList.add(0, myCreatedFacDecList.get(i));
         }
@@ -721,7 +771,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
      */
     private List<FacilityDec> modifyFacDecListForOps(List<FacilityDec> decList) {
         // Loop through the list
-        for (int i = myCreatedFacDecList.size()-1; i >= 0; i--) {
+        for (int i = myCreatedFacDecList.size() - 1; i >= 0; i--) {
             // Add to the front of the list
             decList.add(0, myCreatedFacDecList.get(i));
         }
@@ -734,24 +784,24 @@ public class PreProcessor extends TreeWalkerStackVisitor {
      * the statements created by the PreProcessor in the right
      * location in our AST.</p>
      *
-     * @param location Location of the array variable.
+     * @param statement The original statement that created
+     *                  these extra statements.
      * @param stmtList List of statements to be modified.
      *
      * @return Modified statement list.
      */
-    private List<Statement> modifyStatementList(Location location,
+    private List<Statement> modifyStatementList(Statement statement,
             List<Statement> stmtList) {
         // Loop through the list
         for (int i = 0; i < stmtList.size(); i++) {
             Statement current = stmtList.get(i);
 
-            // The CallStmt or FuncAssignStmt specified by the location
-            if ((current instanceof CallStmt && ((CallStmt) current).getName()
-                    .getLocation().equals(location))
-                    || (current instanceof FuncAssignStmt && current
-                            .getLocation().equals(location))) {
+            // Check if the current statement is the same
+            // as the one passed in.
+            if (current.getLocation().equals(statement.getLocation())) {
                 // Add all created statements before current
-                for (Statement s : myCreatedStmtList) {
+                List<Statement> newStatements = myCreatedStmtMap.get(statement);
+                for (Statement s : newStatements) {
                     stmtList.add(i, s);
                 }
                 break;
@@ -766,31 +816,83 @@ public class PreProcessor extends TreeWalkerStackVisitor {
      * the swap call statements created by the PreProcessor
      * before and after the specified location in our AST.</p>
      *
-     * @param location Location of the array variable.
+     * @param statement The original statement that created
+     *                  these extra statements.
      * @param stmtList List of statements to be modified.
      *
      * @return Modified statement list.
      */
-    private List<Statement> modifyStatementListForSwapCalls(Location location, List<Statement> stmtList) {
+    private List<Statement> modifyStatementListForSwapCalls(
+            Statement statement, List<Statement> stmtList) {
         // Loop through the list
         for (int i = 0; i < stmtList.size(); i++) {
             Statement current = stmtList.get(i);
 
-            // The CallStmt or FuncAssignStmt specified by the location
-            if ((current instanceof CallStmt && ((CallStmt) current).getName()
-                    .getLocation().equals(location))
-                    || (current instanceof FuncAssignStmt && current
-                    .getLocation().equals(location))) {
-                // Add all created statements after current
-                for (int j = 0; j < mySwapCallList.size(); j++) {
-                    stmtList.add(i+1, mySwapCallList.get(j));
+            // Check if the current statement is the same
+            // as the one passed in.
+            if (current.getLocation().equals(statement.getLocation())) {
+                // Add all created statements before current
+                List<CallStmt> newCallStmts = mySwapCallMap.get(statement);
+                for (int j = 0; j < newCallStmts.size(); j++) {
+                    stmtList.add(i + 1, newCallStmts.get(j));
                 }
 
                 // Add all created statements before current
-                for (int j = mySwapCallList.size()-1; j >= 0; j--) {
-                    stmtList.add(i, mySwapCallList.get(j));
+                for (int j = newCallStmts.size() - 1; j >= 0; j--) {
+                    stmtList.add(i, newCallStmts.get(j));
                 }
                 break;
+            }
+        }
+
+        return stmtList;
+    }
+
+    /**
+     * <p>Checks to see if the list of statements passed in needs
+     * to be updated or not. If yes, it will update the list
+     * accordingly. If not, it returns the original list.</p>
+     *
+     * @param stmtList List of statements to be modified.
+     *
+     * @return Modified statement list.
+     */
+    private List<Statement> updateStatementList(List<Statement> stmtList) {
+        // Check to see if we have any statements we need
+        // to add to the original list.
+        if (!myCreatedStmtMap.isEmpty()) {
+            Set<Statement> keys = myCreatedStmtMap.keySet();
+
+            // Loop through each statement
+            for (Statement s : keys) {
+                stmtList = modifyStatementList(s, stmtList);
+                myCreatedStmtMap.remove(s);
+            }
+        }
+
+        return stmtList;
+    }
+
+    /**
+     * <p>Checks to see if the list of statements passed in needs
+     * to be updated or not. If yes, it will update the list
+     * accordingly by adding the swap call before and after.
+     * If not, it returns the original list.</p>
+     *
+     * @param stmtList List of statements to be modified.
+     *
+     * @return Modified statement list.
+     */
+    private List<Statement> updateStmtListWithSwapCalls(List<Statement> stmtList) {
+        // Check to see if we have any statements we need
+        // to add to the original list.
+        if (!mySwapCallMap.isEmpty()) {
+            Set<Statement> keys = mySwapCallMap.keySet();
+
+            // Loop through each statement
+            for (Statement s : keys) {
+                stmtList = modifyStatementListForSwapCalls(s, stmtList);
+                mySwapCallMap.remove(s);
             }
         }
 

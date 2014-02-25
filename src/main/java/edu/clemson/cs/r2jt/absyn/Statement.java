@@ -58,6 +58,8 @@
 
 package edu.clemson.cs.r2jt.absyn;
 
+import edu.clemson.cs.r2jt.data.Location;
+
 public abstract class Statement extends ResolveConceptualElement
         implements
             Cloneable {
@@ -65,6 +67,8 @@ public abstract class Statement extends ResolveConceptualElement
     public abstract void accept(ResolveConceptualVisitor v);
 
     public abstract String asString(int indent, int increment);
+
+    public abstract Location getLocation();
 
     public String toString(int indent) {
         return new String();
