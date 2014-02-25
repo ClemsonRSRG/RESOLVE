@@ -49,14 +49,14 @@ public class JavaTranslator extends AbstractTranslator {
     /**
      * <p>A mapping between the <code>ModuleArgumentItem</code>s
      * representing the actual arguments of a <code>FacilityDec</code> and
-     * their formal <code>ModuleParameterDec</code>-bound counterparts.</p>
+     * their formal <code>ModuleParameterDec</code> bound counterparts.</p>
      */
     private Map<ModuleArgumentItem, ModuleParameterDec> myFacilityBindings =
             new HashMap<ModuleArgumentItem, ModuleParameterDec>();
 
     /**
-     * <p>This set holds the names of any <code>OperationDec</code>s that
-     * parameterize the current module.</p>
+     * <p>This set keeps track of the names of any <code>OperationDec</code>s
+     * that parameterize the current module.</p>
      */
     private Set<String> myParameterOperationNames = new HashSet<String>();
 
@@ -106,7 +106,7 @@ public class JavaTranslator extends AbstractTranslator {
 
         if (invocationName == null) {
             throw new NoSuchMethodError("Facility " + node.getName().getName()
-                    + " cannot be executed. Specify a main!");
+                    + " cannot be executed in Java. Specify a main!");
         }
 
         myActiveTemplates.peek().add("invoker", invocationName);
@@ -806,8 +806,9 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p></p>
-     * @param spec
+     * <p>Creates a mapping between the actual parameters of a
+     * <code>FacilityDec</code> and their formal counterparts.</p>
+     * @param spec 
      * @param realiz
      */
     public void constructFacilityArgBindings(ModuleParameterization spec,
@@ -852,10 +853,7 @@ public class JavaTranslator extends AbstractTranslator {
      */
     public void addPackageTemplate(ModuleDec node) {
 
-        LinkedList<String> pkgDirectories =
-                (LinkedList) getPathList(getFile(node, null));
-
-        pkgDirectories.removeLast();
+        List<String> pkgDirectories = getPathList(getFile(node, null));
 
         ST pkg =
                 myGroup.getInstanceOf("package").add("directories",
