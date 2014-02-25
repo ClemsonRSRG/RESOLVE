@@ -164,8 +164,9 @@ public class JavaTranslator extends AbstractTranslator {
 
     private void addReflectionImportTemplates() {
 
-        ST imp = myGroup.getInstanceOf("include").add("directories",
-                "java.lang.reflect");
+        ST imp =
+                myGroup.getInstanceOf("include").add("directories",
+                        "java.lang.reflect");
 
         myActiveTemplates.firstElement().add("includes", imp);
     }
@@ -629,14 +630,13 @@ public class JavaTranslator extends AbstractTranslator {
     public void preSwapStmt(SwapStmt node) {
 
         ST swapStmt;
-        FacilityEntry definingFacility = getDefiningFacilityEntry(node
-                .getLeft().getProgramType());
+        FacilityEntry definingFacility =
+                getDefiningFacilityEntry(node.getLeft().getProgramType());
 
         if (definingFacility != null) {
             swapStmt =
-                    myGroup.getInstanceOf("qualified_call").add(
-                            "qualifier", definingFacility.getName()).add("name",
-                            "swap");
+                    myGroup.getInstanceOf("qualified_call").add("qualifier",
+                            definingFacility.getName()).add("name", "swap");
         }
         else {
             swapStmt =
