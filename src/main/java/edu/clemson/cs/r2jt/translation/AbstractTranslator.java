@@ -195,6 +195,12 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     @Override
+    public void postSwapStmt(SwapStmt node) {
+        ST swapStmt = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", swapStmt);
+    }
+
+    @Override
     public void preProgramIntegerExp(ProgramIntegerExp node) {
 
         ST integerExp =
@@ -377,9 +383,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public void postModuleDec(ModuleDec node) {
 
-        if (!myDynamicImports.isEmpty()) {
-            myActiveTemplates.firstElement().add("includes", myDynamicImports);
-        }
+        myActiveTemplates.firstElement().add("includes", myDynamicImports);
 
         AbstractTranslator.emitDebug("----------------------------------\n"
                 + "End: " + node.getName().getName()

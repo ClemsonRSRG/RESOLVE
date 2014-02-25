@@ -142,6 +142,7 @@ public class JavaTranslator extends AbstractTranslator {
     public void preEnhancementBodyModuleDec(EnhancementBodyModuleDec node) {
 
         addPackageTemplate(node);
+        addReflectionImportTemplates();
 
         List<ProgramParameterEntry> formals =
                 getModuleFormalParameters(node.getConceptName());
@@ -159,6 +160,14 @@ public class JavaTranslator extends AbstractTranslator {
         for (ProgramParameterEntry p : formals) {
             addParameterTemplate(p.getDeclaredType(), p.getName());
         }
+    }
+
+    private void addReflectionImportTemplates() {
+
+        ST imp = myGroup.getInstanceOf("include").add("directories",
+                "java.lang.reflect");
+
+        myActiveTemplates.firstElement().add("includes", imp);
     }
 
     /**
@@ -464,7 +473,6 @@ public class JavaTranslator extends AbstractTranslator {
 
         ST getter =
                 getOperationLikeTemplate(type, "get" + name, translatingBody);
-
         getter.add("stmts", myGroup.getInstanceOf("return_stmt").add("name",
                 name));
 
@@ -614,6 +622,29 @@ public class JavaTranslator extends AbstractTranslator {
             // Populator's fault.
             throw new RuntimeException(dse);
         }
+    }
+
+    // TODO : Figure out if this is even close to what we need.
+    @Override
+    public void preSwapStmt(SwapStmt node) {
+
+        ST swapStmt;
+        FacilityEntry definingFacility = getDefiningFacilityEntry(node
+                .getLeft().getProgramType());
+
+        if (definingFacility != null) {
+            swapStmt =
+                    myGroup.getInstanceOf("qualified_call").add(
+                            "qualifier", definingFacility.getName()).add("name",
+                            "swap");
+        }
+        else {
+            swapStmt =
+                    myGroup.getInstanceOf("unqualified_call").add("name",
+                            "swap");
+        }
+
+        myActiveTemplates.push(swapStmt);
     }
 
     @Override
