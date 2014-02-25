@@ -33,6 +33,12 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     private int myCounter;
 
     /**
+     * <p>A list of all <code>FacilityDec</code> created
+     * by the PreProcessor.</p>
+     */
+    private List<FacilityDec> myCreatedFacDecList;
+
+    /**
      * <p>A list of all <code>Statements</code> created
      * by the PreProcessor.</p>
      */
@@ -61,6 +67,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     public PreProcessor() {
         myArrayFacilityMap = new Map<String, NameTy>();
         myCounter = 1;
+        myCreatedFacDecList = new List<FacilityDec>();
         myCreatedStmtList = new List<Statement>();
         mySwapCallList = new List<CallStmt>();
         myUtilities = new Utilities();
@@ -135,10 +142,8 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                             new List<EnhancementItem>(),
                             new List<EnhancementBodyItem>());
 
-            // Iterate through AST and add the arrayFacilityDec
-            // to the list of Decs where it belongs
-            Iterator<ResolveConceptualElement> it = this.getAncestorInterator();
-            addFacilityDec(it, arrayFacilityDec);
+            // Add the newly created array facility to our list
+            myCreatedFacDecList.add(arrayFacilityDec);
 
             // Save the Ty of this array for future use
             myArrayFacilityMap.put(newArrayName, oldTy);
@@ -208,6 +213,14 @@ public class PreProcessor extends TreeWalkerStackVisitor {
 
     @Override
     public void postConceptBodyModuleDec(ConceptBodyModuleDec dec) {
+        // Check to see if we created any new FacilityDecs
+        // and add those to the list. When we are done, we
+        // clear our list of created facility declarations.
+        if (!myCreatedFacDecList.isEmpty()) {
+            dec.setDecs(modifyFacDecList(dec.getDecs()));
+            myCreatedFacDecList.clear();
+        }
+
         // Clean up myUtilities
         myUtilities.finalModuleDec();
     }
@@ -225,6 +238,14 @@ public class PreProcessor extends TreeWalkerStackVisitor {
 
     @Override
     public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
+        // Check to see if we created any new FacilityDecs
+        // and add those to the list. When we are done, we
+        // clear our list of created facility declarations.
+        if (!myCreatedFacDecList.isEmpty()) {
+            dec.setDecs(modifyFacDecList(dec.getDecs()));
+            myCreatedFacDecList.clear();
+        }
+
         // Clean up myUtilities
         myUtilities.finalModuleDec();
     }
@@ -242,8 +263,13 @@ public class PreProcessor extends TreeWalkerStackVisitor {
 
     @Override
     public void postFacilityModuleDec(FacilityModuleDec dec) {
-        // Clean up myUtilities
-        myUtilities.finalModuleDec();
+        // Check to see if we created any new FacilityDecs
+        // and add those to the list. When we are done, we
+        // clear our list of created facility declarations.
+        if (!myCreatedFacDecList.isEmpty()) {
+            dec.setDecs(modifyFacDecList(dec.getDecs()));
+            myCreatedFacDecList.clear();
+        }
 
         // TODO: Get rid of this hack, should be handled by the new import module.
         List<UsesItem> usesList = dec.getUsesItems();
@@ -254,6 +280,9 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                     .symbol(s))));
         }
         dec.setUsesItems(usesList);
+
+        // Clean up myUtilities
+        myUtilities.finalModuleDec();
     }
 
     // -----------------------------------------------------------
@@ -268,6 +297,14 @@ public class PreProcessor extends TreeWalkerStackVisitor {
 
     @Override
     public void postFacilityOperationDec(FacilityOperationDec dec) {
+        // Check to see if we created any new FacilityDecs
+        // and add those to the list. When we are done, we
+        // clear our list of created facility declarations.
+        if (!myCreatedFacDecList.isEmpty()) {
+            dec.setFacilities(modifyFacDecListForOps(dec.getFacilities()));
+            myCreatedFacDecList.clear();
+        }
+
         // Store the local variable list
         dec.setVariables(myUtilities.getLocalVarList());
 
@@ -287,6 +324,14 @@ public class PreProcessor extends TreeWalkerStackVisitor {
 
     @Override
     public void postProcedureDec(ProcedureDec dec) {
+        // Check to see if we created any new FacilityDecs
+        // and add those to the list. When we are done, we
+        // clear our list of created facility declarations.
+        if (!myCreatedFacDecList.isEmpty()) {
+            dec.setFacilities(modifyFacDecListForOps(dec.getFacilities()));
+            myCreatedFacDecList.clear();
+        }
+
         // Store the local variable list
         dec.setVariables(myUtilities.getLocalVarList());
 
@@ -322,88 +367,6 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     // ===========================================================
     // Private Methods
     // ===========================================================
-
-    /**
-     * <p>Adds the newly created <code>FacilityDec</code> to the
-     * right place in our AST.</p>
-     *
-     * @param it The ancestor iterator.
-     * @param newDec The newly created <code>FacilityDec</code>.
-     */
-    private void addFacilityDec(Iterator<ResolveConceptualElement> it,
-            FacilityDec newDec) {
-        // Loop
-        while (it.hasNext()) {
-            // Obtain a temp from it
-            ResolveConceptualElement temp = it.next();
-
-            // Check to see if it is an instance of FacilityModuleDec,
-            // FacilityOperationDec, ConceptBodyModuleDec, ProcedureDec
-            // or EnhancementBodyModuleDec
-            if (temp instanceof FacilityModuleDec) {
-                // Obtain a list of Decs from FacilityModuleDec
-                List<Dec> decList = ((FacilityModuleDec) temp).getDecs();
-
-                // Add the FacilityDec created to decList
-                decList.add(0, newDec);
-
-                // Reinsert the modified list back into FacilityModuleDec
-                ((FacilityModuleDec) temp).setDecs(decList);
-
-                break;
-            }
-            else if (temp instanceof FacilityOperationDec) {
-                // Obtain a list of Decs from FacilityOperationDec
-                List<FacilityDec> decList =
-                        ((FacilityOperationDec) temp).getFacilities();
-
-                // Add the FacilityDec created to decList
-                decList.add(0, newDec);
-
-                // Reinsert the modified list back into FacilityOperationDec
-                ((FacilityOperationDec) temp).setFacilities(decList);
-
-                break;
-            }
-            else if (temp instanceof ConceptBodyModuleDec) {
-                // Obtain a list of Decs from ConceptBodyModuleDec
-                List<Dec> decList = ((ConceptBodyModuleDec) temp).getDecs();
-
-                // Add the FacilityDec created to decList
-                decList.add(0, newDec);
-
-                // Reinsert the modified list back into ConceptBodyModuleDec
-                ((ConceptBodyModuleDec) temp).setDecs(decList);
-
-                break;
-            }
-            else if (temp instanceof ProcedureDec) {
-                // Obtain a list of FacilityDecs from ProcedureDec
-                List<FacilityDec> decList =
-                        ((ProcedureDec) temp).getFacilities();
-
-                // Add the FacilityDec created to decList
-                decList.add(0, newDec);
-
-                // Reinsert the modified list back into ProcedureDec
-                ((ProcedureDec) temp).setFacilities(decList);
-
-                break;
-            }
-            else if (temp instanceof EnhancementBodyModuleDec) {
-                // Obtain a list of FacilityDecs from EnhancementBodyModuleDec
-                List<Dec> decList = ((EnhancementBodyModuleDec) temp).getDecs();
-
-                // Add the FacilityDec created to decList
-                decList.add(0, newDec);
-
-                // Reinsert the modified list back into EnhancementBodyModuleDec
-                ((EnhancementBodyModuleDec) temp).setDecs(decList);
-
-                break;
-            }
-        }
-    }
 
     /**
      * <p>Adds the newly created <code>Statements</code> to the
@@ -674,26 +637,23 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         // Create a FacilityDec
         FacilityDec newFacilityDec = new FacilityDec();
 
-        // Check for null
-        if (newFacilityDec != null) {
             // Set the name
             newFacilityDec
                     .setName(new PosSymbol(location, Symbol.symbol(name)));
 
-            // Set the Concept to "Static_Array_Template
+            // Set the Concept
             newFacilityDec.setConceptName(new PosSymbol(location, Symbol
                     .symbol(conceptName)));
             newFacilityDec.setConceptParams(conceptParam);
 
-            // Set the Concept Realization to "Std_Array_Realiz */
+            // Set the Concept Realization
             newFacilityDec.setBodyName(new PosSymbol(location, Symbol
                     .symbol(conceptRealizationName)));
             newFacilityDec.setBodyParams(conceptBodiesParam);
 
-            // Set the Enhancement to empty
+            // Set the Enhancement and Enhancement Realization list
             newFacilityDec.setEnhancements(enhancementParam);
             newFacilityDec.setEnhancementBodies(enhancementBodiesParam);
-        }
 
         return newFacilityDec;
     }
@@ -729,6 +689,44 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         PosSymbol newName = new PosSymbol(location, Symbol.symbol(newNameStr));
 
         return new VariableNameExp(location, null, newName);
+    }
+
+    /**
+     * <p>Modifies the list of <code>Decs</code> passed in by
+     * adding the facilities created by the PreProcessor to the
+     * front of the list.</p>
+     *
+     * @param decList List of <code>Decs</code> to be modified.
+     *
+     * @return Modified list of <code>Decs</code>.
+     */
+    private List<Dec> modifyFacDecList(List<Dec> decList) {
+        // Loop through the list
+        for (int i = myCreatedFacDecList.size()-1; i >= 0; i--) {
+            // Add to the front of the list
+            decList.add(0, myCreatedFacDecList.get(i));
+        }
+
+        return decList;
+    }
+
+    /**
+     * <p>Modifies the list of <code>FacilityDecs</code> passed in by
+     * adding the facilities created by the PreProcessor to the
+     * front of the list.</p>
+     *
+     * @param decList List of <code>FacilityDecs</code> to be modified.
+     *
+     * @return Modified list of <code>FacilityDecs</code>.
+     */
+    private List<FacilityDec> modifyFacDecListForOps(List<FacilityDec> decList) {
+        // Loop through the list
+        for (int i = myCreatedFacDecList.size()-1; i >= 0; i--) {
+            // Add to the front of the list
+            decList.add(0, myCreatedFacDecList.get(i));
+        }
+
+        return decList;
     }
 
     /**
