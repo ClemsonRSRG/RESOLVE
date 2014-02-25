@@ -52,14 +52,16 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     private Map<Statement, List<CallStmt>> mySwapCallMap;
 
     /**
+     * <p>A list of all <code>UsesItems</code> created
+     * by the PreProcessor.</p>
+     */
+    private List<UsesItem> myUsesItemList;
+
+    /**
      * <p>Utilities class that contains methods that are used
      * in both pre and post Processors.</p>
      */
     private Utilities myUtilities;
-
-    // TODO: Get rid of this hack!
-    private String[] myUsesItems =
-            { "Location_Linking_Template_1", "Static_Array_Template" };
 
     // ===========================================================
     // Constructors
@@ -71,6 +73,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         myCreatedFacDecList = new List<FacilityDec>();
         myCreatedStmtMap = new Map<Statement, List<Statement>>();
         mySwapCallMap = new Map<Statement, List<CallStmt>>();
+        myUsesItemList = new List<UsesItem>();
         myUtilities = new Utilities();
     }
 
@@ -148,6 +151,11 @@ public class PreProcessor extends TreeWalkerStackVisitor {
 
             // Save the Ty of this array for future use
             myArrayFacilityMap.put(newArrayName, oldTy);
+
+            // Add Static_Array_Template to our uses list
+            // if is not there already.
+            myUsesItemList.addUnique(new UsesItem(new PosSymbol(null, Symbol
+                    .symbol("Static_Array_Template"))));
         }
         else {
             notHandledArrayTyParent(ty.getLocation(), ty, parent);
@@ -221,6 +229,22 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             myCreatedFacDecList.clear();
         }
 
+        // Add any new concepts needed to our
+        // list of imports.
+        List<UsesItem> usesList = dec.getUsesItems();
+        Location location = usesList.get(0).getName().getLocation();
+        for (UsesItem item : myUsesItemList) {
+            // Edit the location of the name
+            // and put it back into our uses item.
+            PosSymbol name = item.getName();
+            name.setLocation(location);
+            item.setName(name);
+
+            // Adds it if it is not there already.
+            usesList.addUnique(item);
+        }
+        dec.setUsesItems(usesList);
+
         // Clean up myUtilities
         myUtilities.finalModuleDec();
     }
@@ -260,6 +284,22 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             myCreatedFacDecList.clear();
         }
 
+        // Add any new concepts needed to our
+        // list of imports.
+        List<UsesItem> usesList = dec.getUsesItems();
+        Location location = usesList.get(0).getName().getLocation();
+        for (UsesItem item : myUsesItemList) {
+            // Edit the location of the name
+            // and put it back into our uses item.
+            PosSymbol name = item.getName();
+            name.setLocation(location);
+            item.setName(name);
+
+            // Adds it if it is not there already.
+            usesList.addUnique(item);
+        }
+        dec.setUsesItems(usesList);
+
         // Clean up myUtilities
         myUtilities.finalModuleDec();
     }
@@ -285,13 +325,19 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             myCreatedFacDecList.clear();
         }
 
-        // TODO: Get rid of this hack, should be handled by the new import module.
+        // Add any new concepts needed to our
+        // list of imports.
         List<UsesItem> usesList = dec.getUsesItems();
         Location location = usesList.get(0).getName().getLocation();
+        for (UsesItem item : myUsesItemList) {
+            // Edit the location of the name
+            // and put it back into our uses item.
+            PosSymbol name = item.getName();
+            name.setLocation(location);
+            item.setName(name);
 
-        for (String s : myUsesItems) {
-            usesList.addUnique(new UsesItem(new PosSymbol(location, Symbol
-                    .symbol(s))));
+            // Adds it if it is not there already.
+            usesList.addUnique(item);
         }
         dec.setUsesItems(usesList);
 
