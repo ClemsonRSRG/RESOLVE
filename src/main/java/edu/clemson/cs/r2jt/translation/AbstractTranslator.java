@@ -383,8 +383,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public void postModuleDec(ModuleDec node) {
 
-        myActiveTemplates.firstElement().add("includes", myDynamicImports);
-
+        if (!myDynamicImports.isEmpty()) {
+            myActiveTemplates.firstElement().add("includes", myDynamicImports);
+        }
         AbstractTranslator.emitDebug("----------------------------------\n"
                 + "End: " + node.getName().getName()
                 + "\n----------------------------------");
