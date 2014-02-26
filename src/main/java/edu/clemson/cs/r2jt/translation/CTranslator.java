@@ -119,7 +119,7 @@ public class CTranslator extends AbstractTranslator {
     public void preRepresentationDec(RepresentationDec node) {
 
         String conceptName =
-                ((ConceptBodyModuleDec) myModuleScope.getDefiningElement())
+                ((ConceptBodyModuleDec) myScope.getDefiningElement())
                         .getConceptName().getName();
 
         ST initAndFinal =
@@ -145,7 +145,7 @@ public class CTranslator extends AbstractTranslator {
 
         try {
             myCurrentFacilityEntry =
-                    myModuleScope.queryForOne(
+                    myScope.queryForOne(
                             new NameAndEntryTypeQuery(null, node.getName(),
                                     FacilityEntry.class,
                                     ImportStrategy.IMPORT_NAMED,
@@ -211,7 +211,7 @@ public class CTranslator extends AbstractTranslator {
     public void preOperationDec(OperationDec node) {
         String operationName = "(*" + node.getName().getName() + ")";
         ST operation =
-                createOperationLikeTemplate((node.getReturnTy() != null) ? node
+                getOperationLikeTemplate((node.getReturnTy() != null) ? node
                         .getReturnTy().getProgramTypeValue() : null,
                         operationName, false);
 
@@ -224,7 +224,7 @@ public class CTranslator extends AbstractTranslator {
 
         // TODO : Add Struct parameter to every function here...
         //    ST conceptStruct = myGroup.getInstanceOf("unqualified_type").add
-        //            ("name", myModuleScope)
+        //            ("name", myScope)
         if (myActiveTemplates.size() > 1) {
             // If we're translating a concept, then our stack should be two
             // deep since every variable ('operation') is added to a
@@ -289,7 +289,7 @@ public class CTranslator extends AbstractTranslator {
 
         String modifier = null;
 
-        if (myModuleScope.getDefiningElement() instanceof ConceptBodyModuleDec) {
+        if (myScope.getDefiningElement() instanceof ConceptBodyModuleDec) {
             modifier = "static";
         }
 

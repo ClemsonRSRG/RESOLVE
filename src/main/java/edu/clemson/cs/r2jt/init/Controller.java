@@ -511,7 +511,8 @@ public class Controller {
             }
             if (myInstanceEnvironment.flags
                     .isFlagSet(Translator.FLAG_TRANSLATE)) {
-                translateModuleDec(file, table, dec);
+                //translateModuleDec(file, table, dec);
+
                 //System.out.println("Translated: " + file.toString());
                 if (myInstanceEnvironment.flags
                         .isFlagSet(Archiver.FLAG_ARCHIVE)) {
@@ -529,6 +530,18 @@ public class Controller {
             if (myInstanceEnvironment.flags
                     .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
                 NEWtranslateModuleDec(file, symbolTable, dec);
+
+                if (myInstanceEnvironment.flags
+                        .isFlagSet(Archiver.FLAG_ARCHIVE)) {
+                    myArchive.addFileToArchive(file);
+                    if (!myCompileReport.hasError()) {
+                        if (myArchive.createJar()) {
+                            myCompileReport.setJarSuccess();
+                        }
+                    }
+                    //arc.printArchiveList();
+                }
+                myInstanceEnvironment.printModules();
             }
 
             if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_VERIFY_VC)) {
@@ -1032,7 +1045,8 @@ public class Controller {
             //if(arc.needToTranslate(file)) translateModuleDec(table, dec);
             //if(env.createJarOn() && arc.needToTranslate(file)){
             if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-                translateModuleDec(file, table, dec);
+                NEWtranslateModuleDec(file, symbolTable, dec);
+                //translateModuleDec(file, table, dec); OLD OLD
                 //arc.addFiletoArchive(file);
                 //arc.printArchiveList();
             }
@@ -1750,22 +1764,33 @@ public class Controller {
     private void NEWtranslateModuleDec(File file, ScopeRepository realTable,
             ModuleDec dec) {
 
-        AbstractTranslator translator = null;
-
         if (myInstanceEnvironment.flags
                 .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
-            translator = new JavaTranslator(myInstanceEnvironment, realTable);
+            JavaTranslator translator =
+                    new JavaTranslator(myInstanceEnvironment, realTable);
+
+            if (myArchive != null && !translator.onNoCompileList(file)) {
+                myArchive.addFileToArchive(file);
+            }
+
+            String targetFile =
+                    myInstanceEnvironment.getTargetFile().toString();
+            String thisFile = dec.getName().getFile().toString();
+            // We only translate if this is the target file or if file is stale
+            if ((thisFile.equals(targetFile))
+                    || translator.needToTranslate(file)) {
+                TreeWalker tw = new TreeWalker(translator);
+                tw.visit(dec);
+                translator.outputCode(file);
+            }
         }
 
         if (myInstanceEnvironment.flags.isFlagSet(CTranslator.C_FLAG_TRANSLATE)) {
-            translator = new CTranslator(myInstanceEnvironment, realTable);
-        }
+            CTranslator translator =
+                    new CTranslator(myInstanceEnvironment, realTable);
 
-        if (translator != null) {
             TreeWalker tw = new TreeWalker(translator);
-
             tw.visit(dec);
-
             translator.outputCode(file);
         }
     }

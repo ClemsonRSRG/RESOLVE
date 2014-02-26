@@ -140,6 +140,14 @@ public class FacilityDec extends Dec {
     // Get Methods
     // -----------------------------------------------------------
 
+    public boolean externallyRealized() {
+        return myExternallyRealizedFlag;
+    }
+
+    public void setExternallyRealizedFlag(boolean e) {
+        myExternallyRealizedFlag = e;
+    }
+
     /** Returns the value of the name variable. */
     public PosSymbol getName() {
         return name;

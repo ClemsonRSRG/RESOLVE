@@ -151,7 +151,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                             "Static_Array_Template", "Std_Array_Realiz",
                             listItem, new List<ModuleArgumentItem>(),
                             new List<EnhancementItem>(),
-                            new List<EnhancementBodyItem>());
+                            new List<EnhancementBodyItem>(), true);
 
             //Iterate through AST
             Iterator<ResolveConceptualElement> it = this.getAncestorInterator();
