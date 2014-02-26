@@ -49,12 +49,6 @@ public class Utilities {
      */
     private List<RepresentationDec> myRepresentationDecList;
 
-    /**
-     * <p>List of statements to be added to the
-     * <code>ModuleDec</code>.</p>
-     */
-    private List<Statement> myStatementList;
-
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -66,7 +60,6 @@ public class Utilities {
         myLocalVarList = null;
         myParameterVarList = null;
         myRepresentationDecList = null;
-        myStatementList = new List<Statement>();
     }
 
     // ===========================================================
@@ -228,41 +221,6 @@ public class Utilities {
      */
     public boolean isLocalOper(String opName) {
         return myLocalOperMap.containsKey(opName);
-    }
-
-    /**
-     * <p>Keeps a map reference to all local operations, by iterating
-     * through list of <code>Dec</code> looking for any
-     * <code>ProcedureDec</code> or <code>FacilityOperationDec</code>.</p>
-     *
-     * @param decList The list containing all the <code>Dec</code>.
-     */
-    public void retrieveLocalProc(List<Dec> decList) {
-        Iterator<Dec> it = decList.iterator();
-        while (it.hasNext()) {
-            // Temporary holder for the current Dec
-            Dec current = it.next();
-
-            // Check if it is a ProcedureDec or not
-            if (current instanceof ProcedureDec) {
-                // Type cast to ProcedureDec
-                ProcedureDec currentProcDec = (ProcedureDec) current;
-
-                // Update the map
-                myLocalOperMap.put(currentProcDec.getName().getName(),
-                        currentProcDec.getParameters());
-            }
-            // Check if it is a FacilityOperationDec or not
-            else if (current instanceof FacilityOperationDec) {
-                // Type cast to FacilityOperationDec
-                FacilityOperationDec currentProcDec =
-                        (FacilityOperationDec) current;
-
-                // Update the map
-                myLocalOperMap.put(currentProcDec.getName().getName(),
-                        currentProcDec.getParameters());
-            }
-        }
     }
 
     /**
