@@ -450,7 +450,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                         getVariableTypeTemplate(type)).add("init", init);
 
         AbstractTranslator.emitDebug(("Adding variable: " + name
-                + " with type: " + type.toString()));
+                + " with type: " + getTypeName(type)));
 
         myActiveTemplates.peek().add("variables", variable);
     }
@@ -459,14 +459,14 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * <p>Populates and returns a <code>function</code> template with the
      * attributes provided.</p>
      *
-     * @param returnType A <code>PTType</code> to be transformed in the
-     *                   functions <code>type</code> attribute.
+     * @param returnType A <code>PTType</code> representative of the
+     *                   function's return <code>type</code> attribute.
      * @param name       The name attribute.
      * @param hasBody    A boolean indicating whether or not the function being
      *                   created should have a body or not.
      *
      * @return A <code>function</code> template with the <code>type</code>
-     *         and <code>name</code> attributes filled in.
+     *         and <code>name</code> attributes formed and filled in.
      */
     protected ST getOperationLikeTemplate(PTType returnType, String name,
             boolean hasBody) {
