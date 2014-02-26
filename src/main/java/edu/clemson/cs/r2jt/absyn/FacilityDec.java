@@ -97,7 +97,7 @@ public class FacilityDec extends Dec {
      * then this flag should be true, otherwise, it will be
      * false.</p>
      */
-    private boolean isExternallyRealized;
+    private boolean myExternallyRealizedFlag;
 
     // ===========================================================
     // Constructors
@@ -129,7 +129,7 @@ public class FacilityDec extends Dec {
         this.profileName = profileName;
         this.bodyParams = bodyParams;
         this.enhancementBodies = enhancementBodies;
-        this.isExternallyRealized = externRealized;
+        myExternallyRealizedFlag = externRealized;
     }
 
     // ===========================================================
@@ -180,6 +180,11 @@ public class FacilityDec extends Dec {
         return enhancementBodies;
     }
 
+    /** Returns the value of the myExternallyRealizedFlag variable. */
+    public boolean getExternallyRealized() {
+        return myExternallyRealizedFlag;
+    }
+
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
@@ -222,6 +227,11 @@ public class FacilityDec extends Dec {
     /** Sets the enhancementBodies variable to the specified value. */
     public void setEnhancementBodies(List<EnhancementBodyItem> enhancementBodies) {
         this.enhancementBodies = enhancementBodies;
+    }
+
+    /** Sets the myExternallyRealizedFlag variable to the specified value. */
+    public void setExternallyRealized(boolean externRealized) {
+        myExternallyRealizedFlag = externRealized;
     }
 
     // ===========================================================
