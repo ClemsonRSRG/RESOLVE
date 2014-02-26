@@ -49,7 +49,14 @@ public class PreProcessor extends TreeWalkerStackVisitor {
      * list of new call statements and the new call statement
      * list containing all our swap calls.</p>
      */
-    private Map<Statement, List<CallStmt>> mySwapCallMap;
+    private Map<Statement, List<CallStmt>> myCreatedSwapCallMap;
+
+    /**
+     * <p>A mapping between the original statement and the
+     * new statement that needs to take the place of the
+     * original statement in our AST.</p>
+     */
+    private Map<Statement, Statement> myReplacingStmtMap;
 
     /**
      * <p>A list of all <code>UsesItems</code> created
@@ -72,7 +79,8 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         myCounter = 1;
         myCreatedFacDecList = new List<FacilityDec>();
         myCreatedStmtMap = new Map<Statement, List<Statement>>();
-        mySwapCallMap = new Map<Statement, List<CallStmt>>();
+        myCreatedSwapCallMap = new Map<Statement, List<CallStmt>>();
+        myReplacingStmtMap = new Map<Statement, Statement>();
         myUsesItemList = new List<UsesItem>();
         myUtilities = new Utilities();
     }
@@ -173,6 +181,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = stmt.getStatements();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         stmt.setStatements(stmtList);
     }
 
@@ -205,6 +214,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = item.getThenclause();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         item.setThenclause(stmtList);
     }
 
@@ -260,6 +270,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = item.getThenclause();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         item.setThenclause(stmtList);
     }
 
@@ -370,6 +381,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = dec.getStatements();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         dec.setStatements(stmtList);
 
         // Store the local variable list
@@ -390,7 +402,98 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = item.getStatements();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         item.setStatements(stmtList);
+    }
+
+    // -----------------------------------------------------------
+    // FuncAssignStmt
+    // -----------------------------------------------------------
+
+    @Override
+    public void postFuncAssignStmt(FuncAssignStmt stmt) {
+        // Variables
+        Location stmtLoc = stmt.getLocation();
+        VariableExp leftExp = stmt.getVar();
+        ProgramExp rightExp = stmt.getAssign();
+
+        // Check to see if we need to convert the right hand side
+        // to a call to Entry_Replica.
+        // Case #1: VariableArrayExp
+        if (rightExp instanceof VariableArrayExp) {
+            Location varLoc = rightExp.getLocation();
+            VariableNameExp varName =
+                    new VariableNameExp(varLoc, ((VariableArrayExp) rightExp)
+                            .getQualifier(), ((VariableArrayExp) rightExp)
+                            .getName());
+
+            // Call to Entry_Replica and replace it in
+            // the statement
+            rightExp =
+                    createEntryReplicaExp(varLoc, varName,
+                            ((VariableArrayExp) rightExp).getArgument());
+            stmt.setAssign(rightExp);
+        }
+        // Check to see if we need to convert the right hand side
+        // to a call to Entry_Replica.
+        // Case #2: VariableDotExp with a VariableArrayExp
+        else if (rightExp instanceof VariableDotExp) {
+            // Check the last segment to make sure it is not
+            // a VariableArrayExp.
+            List<VariableExp> segs = ((VariableDotExp) rightExp).getSegments();
+            VariableExp lastElement = segs.get(segs.size() - 1);
+            if (lastElement instanceof VariableArrayExp) {
+                Location varLoc = lastElement.getLocation();
+                VariableNameExp varName =
+                        new VariableNameExp(varLoc, ((VariableArrayExp) lastElement)
+                                .getQualifier(), ((VariableArrayExp) lastElement)
+                                .getName());
+
+                // Make the replacement in the dot expression.
+                segs.set(segs.size()-1, varName);
+                ((VariableDotExp) rightExp).setSegments(segs);
+
+                // Call to Entry_Replica and replace it in
+                // the statement
+                Location expLoc = rightExp.getLocation();
+                rightExp =
+                        createEntryReplicaExp(expLoc, ((VariableDotExp) rightExp), ((VariableArrayExp) lastElement).getArgument());
+                stmt.setAssign(rightExp);
+            }
+        }
+        else if (rightExp instanceof ProgramParamExp) {
+            ProgramParamExp funcCall = (ProgramParamExp) rightExp;
+            List<ProgramExp> argList = funcCall.getArguments();
+
+            // Change any instances of A[i] and S.A[i] to actual
+            // calls to operations in Static_Array_Template
+            argList = arrayExpConversion(stmt, argList);
+
+            // Replace the original argument list with the one
+            // returned by the conversion method.
+            funcCall.setArguments(argList);
+
+            // Replace the right hand side expression
+            stmt.setAssign(funcCall);
+        }
+
+        // Check to see if we need to convert the statement
+        // to a call to Assign_Entry because the left hand side
+        // is a VariableArrayExp.
+        if (leftExp instanceof VariableArrayExp) {
+            VariableArrayExp arrayExp = (VariableArrayExp) leftExp;
+
+            // Parameter List
+            List<ProgramExp> params = new List<ProgramExp>();
+            params.add(new VariableNameExp(arrayExp.getLocation(), arrayExp.getQualifier(), arrayExp.getName()));
+            params.add(arrayExp.getArgument());
+
+            // Call to Assign_Entry
+            CallStmt newStmt = new CallStmt(null, new PosSymbol(stmtLoc, Symbol.symbol("Assign_Entry")), params);
+
+            // Add it to our list of statements to be replaced.
+            myReplacingStmtMap.put(stmt, newStmt);
+        }
     }
 
     // -----------------------------------------------------------
@@ -404,14 +507,16 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = stmt.getThenclause();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         stmt.setThenclause(stmtList);
 
         // Update our list of else clause statements
         // with any PreProcessor created statements.
-        stmtList = stmt.getElseclause();
-        stmtList = updateStatementList(stmtList);
-        stmtList = updateStmtListWithSwapCalls(stmtList);
-        stmt.setElseclause(stmtList);
+        List<Statement> stmtList2 = stmt.getElseclause();
+        stmtList2 = updateStatementList(stmtList2);
+        stmtList2 = updateStmtListWithSwapCalls(stmtList2);
+        stmtList2 = updateStmtListByReplacingStmts(stmtList2);
+        stmt.setElseclause(stmtList2);
     }
 
     // -----------------------------------------------------------
@@ -425,6 +530,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = item.getStatements();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         item.setStatements(stmtList);
     }
 
@@ -439,6 +545,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = stmt.getStatements();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         stmt.setStatements(stmtList);
     }
 
@@ -453,6 +560,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = stmt.getStatements();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         stmt.setStatements(stmtList);
     }
 
@@ -467,6 +575,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = item.getStatements();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         item.setStatements(stmtList);
     }
 
@@ -481,6 +590,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = item.getStatements();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         item.setStatements(stmtList);
     }
 
@@ -509,6 +619,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = dec.getStatements();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         dec.setStatements(stmtList);
 
         // Store the local variable list
@@ -529,6 +640,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = stmt.getDefaultclause();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         stmt.setDefaultclause(stmtList);
     }
 
@@ -543,6 +655,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         List<Statement> stmtList = stmt.getStatements();
         stmtList = updateStatementList(stmtList);
         stmtList = updateStmtListWithSwapCalls(stmtList);
+        stmtList = updateStmtListByReplacingStmts(stmtList);
         stmt.setStatements(stmtList);
     }
 
@@ -702,10 +815,32 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             myCreatedStmtMap.put(stmt, newStmtList);
         }
         if (!newCallStmtList.isEmpty()) {
-            mySwapCallMap.put(stmt, newCallStmtList);
+            myCreatedSwapCallMap.put(stmt, newCallStmtList);
         }
 
         return argList;
+    }
+
+    /**
+     * <p>Creates a call to the Entry_Replica operation provided by the
+     * Static_Array_Template.</p>
+     *
+     * @param location The location where the variable expression was found.
+     * @param exp The original variable to be replicated.
+     * @param indexes The indexes of the array expression.
+     *
+     * @return A <code>ProgramParamExp</code> with the call.
+     */
+
+    private ProgramParamExp createEntryReplicaExp(Location location,
+            VariableExp exp, ProgramExp indexes) {
+        // Create the parameter list
+        List<ProgramExp> params = new List<ProgramExp>();
+        params.add(exp);
+        params.add(indexes);
+
+        return new ProgramParamExp(location, new PosSymbol(location, Symbol
+                .symbol("Entry_Replica")), params, null);
     }
 
     /**
@@ -883,7 +1018,8 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             // as the one passed in.
             if (current.getLocation().equals(statement.getLocation())) {
                 // Add all created statements before current
-                List<CallStmt> newCallStmts = mySwapCallMap.get(statement);
+                List<CallStmt> newCallStmts =
+                        myCreatedSwapCallMap.get(statement);
                 for (int j = 0; j < newCallStmts.size(); j++) {
                     stmtList.add(i + 1, newCallStmts.get(j));
                 }
@@ -892,6 +1028,36 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                 for (int j = newCallStmts.size() - 1; j >= 0; j--) {
                     stmtList.add(i, newCallStmts.get(j));
                 }
+                break;
+            }
+        }
+
+        return stmtList;
+    }
+
+    /**
+     * <p>Modify the statement list passed in by replacing
+     * the new statements created by the PreProcessor in the
+     * specified location in our AST.</p>
+     *
+     * @param statement The original statement that needs to
+     *                  be replaced.
+     * @param stmtList List of statements to be modified.
+     *
+     * @return Modified statement list.
+     */
+    private List<Statement> replaceStatementListWithNewStmt(
+            Statement statement, List<Statement> stmtList) {
+        // Loop through the list
+        for (int i = 0; i < stmtList.size(); i++) {
+            Statement current = stmtList.get(i);
+
+            // Check if the current statement is the same
+            // as the one passed in.
+            if (current.getLocation().equals(statement.getLocation())) {
+                // Obtain the new statement from the map
+                Statement newStatement = myReplacingStmtMap.get(statement);
+                stmtList.set(i, newStatement);
                 break;
             }
         }
@@ -927,6 +1093,32 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     /**
      * <p>Checks to see if the list of statements passed in needs
      * to be updated or not. If yes, it will update the list
+     * accordingly by replacing the statement with the one located
+     * in the map. If not, it returns the original list.</p>
+     *
+     * @param stmtList List of statements to be modified.
+     *
+     * @return Modified statement list.
+     */
+    private List<Statement> updateStmtListByReplacingStmts(List<Statement> stmtList) {
+        // Check to see if we have any statements we need
+        // to add to the original list.
+        if (!myReplacingStmtMap.isEmpty()) {
+            Set<Statement> keys = myReplacingStmtMap.keySet();
+
+            // Loop through each statement
+            for (Statement s : keys) {
+                stmtList = replaceStatementListWithNewStmt(s, stmtList);
+                myReplacingStmtMap.remove(s);
+            }
+        }
+
+        return stmtList;
+    }
+
+    /**
+     * <p>Checks to see if the list of statements passed in needs
+     * to be updated or not. If yes, it will update the list
      * accordingly by adding the swap call before and after.
      * If not, it returns the original list.</p>
      *
@@ -937,13 +1129,13 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     private List<Statement> updateStmtListWithSwapCalls(List<Statement> stmtList) {
         // Check to see if we have any statements we need
         // to add to the original list.
-        if (!mySwapCallMap.isEmpty()) {
-            Set<Statement> keys = mySwapCallMap.keySet();
+        if (!myCreatedSwapCallMap.isEmpty()) {
+            Set<Statement> keys = myCreatedSwapCallMap.keySet();
 
             // Loop through each statement
             for (Statement s : keys) {
                 stmtList = modifyStatementListForSwapCalls(s, stmtList);
-                mySwapCallMap.remove(s);
+                myCreatedSwapCallMap.remove(s);
             }
         }
 
