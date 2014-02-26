@@ -144,7 +144,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                             "Static_Array_Template", "Std_Array_Realiz",
                             listItem, new List<ModuleArgumentItem>(),
                             new List<EnhancementItem>(),
-                            new List<EnhancementBodyItem>());
+                            new List<EnhancementBodyItem>(), true);
 
             // Add the newly created array facility to our list
             myCreatedFacDecList.add(arrayFacilityDec);
@@ -730,7 +730,8 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             List<ModuleArgumentItem> conceptParam,
             List<ModuleArgumentItem> conceptBodiesParam,
             List<EnhancementItem> enhancementParam,
-            List<EnhancementBodyItem> enhancementBodiesParam) {
+            List<EnhancementBodyItem> enhancementBodiesParam,
+            boolean externallyRealized) {
         // Create a FacilityDec
         FacilityDec newFacilityDec = new FacilityDec();
 
@@ -750,6 +751,10 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         // Set the Enhancement and Enhancement Realization list
         newFacilityDec.setEnhancements(enhancementParam);
         newFacilityDec.setEnhancementBodies(enhancementBodiesParam);
+
+        // Set the boolean that notes if this file is externally
+        // realized or not.
+        newFacilityDec.setExternallyRealizedFlag(externallyRealized);
 
         return newFacilityDec;
     }
