@@ -484,7 +484,7 @@ public class Controller {
             compileImportedModules(dec, symbolTable);
 
             /* Invoke PostProcessor */
-            PostProcessor postProc = new PostProcessor();
+            PostProcessor postProc = new PostProcessor(symbolTable);
             TreeWalker tw2 = new TreeWalker(postProc);
             tw2.visit(dec);
 
@@ -611,7 +611,7 @@ public class Controller {
             compileImportedModules(dec, symbolTable);
 
             /* Invoke PostProcessor */
-            PostProcessor postProc = new PostProcessor();
+            PostProcessor postProc = new PostProcessor(symbolTable);
             TreeWalker tw2 = new TreeWalker(postProc);
             tw2.visit(dec);
 
@@ -996,7 +996,7 @@ public class Controller {
             compileImportedModules(dec, symbolTable);
 
             /* Invoke PostProcessor */
-            PostProcessor postProc = new PostProcessor();
+            PostProcessor postProc = new PostProcessor(symbolTable);
             TreeWalker tw2 = new TreeWalker(postProc);
             tw2.visit(dec);
 
@@ -1073,7 +1073,7 @@ public class Controller {
             compileImportedModules(dec, symbolTable);
 
             /* Invoke PostProcessor */
-            PostProcessor postProc = new PostProcessor();
+            PostProcessor postProc = new PostProcessor(symbolTable);
             TreeWalker tw2 = new TreeWalker(postProc);
             tw2.visit(dec);
 
