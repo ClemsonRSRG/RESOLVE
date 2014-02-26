@@ -182,9 +182,20 @@ public class Utilities {
 
     /**
      * <p>Retrieves the list of local variables</p>
+     *
+     * @return A list of <code>VarDecs</code>.
      */
     public List<VarDec> getLocalVarList() {
         return myLocalVarList;
+    }
+
+    /**
+     * <p>Retrieves the list of local variables</p>
+     *
+     * @return A list of <code>VarDecs</code>.
+     */
+    public List<VarDec> getParameterVarList() {
+        return myParameterVarList;
     }
 
     /**

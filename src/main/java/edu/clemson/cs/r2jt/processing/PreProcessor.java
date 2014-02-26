@@ -445,19 +445,22 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             if (lastElement instanceof VariableArrayExp) {
                 Location varLoc = lastElement.getLocation();
                 VariableNameExp varName =
-                        new VariableNameExp(varLoc, ((VariableArrayExp) lastElement)
-                                .getQualifier(), ((VariableArrayExp) lastElement)
-                                .getName());
+                        new VariableNameExp(
+                                varLoc,
+                                ((VariableArrayExp) lastElement).getQualifier(),
+                                ((VariableArrayExp) lastElement).getName());
 
                 // Make the replacement in the dot expression.
-                segs.set(segs.size()-1, varName);
+                segs.set(segs.size() - 1, varName);
                 ((VariableDotExp) rightExp).setSegments(segs);
 
                 // Call to Entry_Replica and replace it in
                 // the statement
                 Location expLoc = rightExp.getLocation();
                 rightExp =
-                        createEntryReplicaExp(expLoc, ((VariableDotExp) rightExp), ((VariableArrayExp) lastElement).getArgument());
+                        createEntryReplicaExp(expLoc,
+                                ((VariableDotExp) rightExp),
+                                ((VariableArrayExp) lastElement).getArgument());
                 stmt.setAssign(rightExp);
             }
         }
@@ -485,11 +488,14 @@ public class PreProcessor extends TreeWalkerStackVisitor {
 
             // Parameter List
             List<ProgramExp> params = new List<ProgramExp>();
-            params.add(new VariableNameExp(arrayExp.getLocation(), arrayExp.getQualifier(), arrayExp.getName()));
+            params.add(new VariableNameExp(arrayExp.getLocation(), arrayExp
+                    .getQualifier(), arrayExp.getName()));
             params.add(arrayExp.getArgument());
 
             // Call to Assign_Entry
-            CallStmt newStmt = new CallStmt(null, new PosSymbol(stmtLoc, Symbol.symbol("Assign_Entry")), params);
+            CallStmt newStmt =
+                    new CallStmt(null, new PosSymbol(stmtLoc, Symbol
+                            .symbol("Assign_Entry")), params);
 
             // Add it to our list of statements to be replaced.
             myReplacingStmtMap.put(stmt, newStmt);
@@ -831,7 +837,6 @@ public class PreProcessor extends TreeWalkerStackVisitor {
      *
      * @return A <code>ProgramParamExp</code> with the call.
      */
-
     private ProgramParamExp createEntryReplicaExp(Location location,
             VariableExp exp, ProgramExp indexes) {
         // Create the parameter list
@@ -1100,7 +1105,8 @@ public class PreProcessor extends TreeWalkerStackVisitor {
      *
      * @return Modified statement list.
      */
-    private List<Statement> updateStmtListByReplacingStmts(List<Statement> stmtList) {
+    private List<Statement> updateStmtListByReplacingStmts(
+            List<Statement> stmtList) {
         // Check to see if we have any statements we need
         // to add to the original list.
         if (!myReplacingStmtMap.isEmpty()) {

@@ -9,6 +9,9 @@ import edu.clemson.cs.r2jt.data.Mode;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerStackVisitor;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
 /**
@@ -21,6 +24,18 @@ public class PostProcessor extends TreeWalkerStackVisitor {
     // ===========================================================
 
     /**
+     * <p>Collection of all symbol tables other than my own.
+     * Mine doesn't exist because I haven't gone through the
+     * population stage yet.</p>
+     */
+    private final MathSymbolTableBuilder mySymbolTable;
+
+    /**
+     * <p>Type graph of mathematical expressions.</p>
+     */
+    private final TypeGraph myTypeGraph;
+
+    /**
      * <p>Utilities class that contains methods that are used
      * in both pre and post Processors.</p>
      */
@@ -30,7 +45,9 @@ public class PostProcessor extends TreeWalkerStackVisitor {
     // Constructors
     // ===========================================================
 
-    public PostProcessor() {
+    public PostProcessor(ScopeRepository table) {
+        mySymbolTable = (MathSymbolTableBuilder) table;
+        myTypeGraph = mySymbolTable.getTypeGraph();
         myUtilities = new Utilities();
     }
 
@@ -162,6 +179,27 @@ public class PostProcessor extends TreeWalkerStackVisitor {
         myUtilities.finalOperationDec();
     }
 
+    // -----------------------------------------------------------
+    // WhileStmt
+    // -----------------------------------------------------------
+
+    @Override
+    public void postWhileStmt(WhileStmt stmt) {
+        Location location = stmt.getLocation();
+
+        // If we don't have a changing clause,
+        // set all local variables to be changing.
+        if (stmt.getChanging() == null) {
+            stmt.setChanging(createChangingVarList(location));
+        }
+
+        // If we don't have a maintaining clause,
+        // then set it to "maintaining true"
+        if (stmt.getMaintaining() == null) {
+            stmt.setMaintaining(myTypeGraph.getTrueVarExp());
+        }
+    }
+
     // ===========================================================
     // Public Methods
     // ===========================================================
@@ -221,6 +259,29 @@ public class PostProcessor extends TreeWalkerStackVisitor {
         }
 
         return modifiedArgList;
+    }
+
+    /**
+     * <p>Creates a list of all the local and parameter variables.</p>
+     *
+     * @param location The location for the each of the new
+     *                 variable expressions.
+     *
+     * @return A list of <code>VariableExp</code>.
+     */
+    private List<VariableExp> createChangingVarList(Location location) {
+        // Lists
+        List<VariableExp> retList = new List<VariableExp>();
+        List<VarDec> variableList =
+                new List<VarDec>(myUtilities.getParameterVarList());
+        variableList.addAllUnique(myUtilities.getLocalVarList());
+
+        // Add variables into the variable list once.
+        for (VarDec v : variableList) {
+            retList.addUnique(new VariableNameExp(location, null, v.getName()));
+        }
+
+        return retList;
     }
 
     /**
