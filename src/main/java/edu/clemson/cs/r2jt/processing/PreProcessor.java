@@ -685,6 +685,100 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     }
 
     // -----------------------------------------------------------
+    // SwapStmt
+    // -----------------------------------------------------------
+
+    @Override
+    public void postSwapStmt(SwapStmt stmt) {
+        // Variables
+        Location location = stmt.getLocation();
+        VariableExp leftExp = stmt.getLeft();
+        VariableExp rightExp = stmt.getRight();
+
+        // Case #1: Both left and right are of the same type
+        if ((leftExp instanceof VariableArrayExp && rightExp instanceof VariableArrayExp)
+                || (leftExp instanceof VariableDotExp && rightExp instanceof VariableDotExp)) {
+            // Variables used later on
+            VariableArrayExp left = null;
+            VariableArrayExp right = null;
+            VariableExp arrayName = null;
+
+            // Case #1a: VariableArrayExp :=: VariableArrayExp,
+            // but the arrays are inside a VariableDotExp.
+            // (ie: S.A[i] :=: S.A[j], where "S" is a record,
+            // "A" is an array and "i" and "j" are indexes)
+            if (leftExp instanceof VariableDotExp
+                    && rightExp instanceof VariableDotExp) {
+                // Lists of dot expression segments
+                List<VariableExp> leftDotList =
+                        ((VariableDotExp) leftExp).getSegments();
+                List<VariableExp> rightDotList =
+                        ((VariableDotExp) rightExp).getSegments();
+
+                // Last segment variable expressions
+                VariableExp leftLastExp =
+                        leftDotList.get(leftDotList.size() - 1);
+                VariableExp rightLastExp =
+                        rightDotList.get(rightDotList.size() - 1);
+                if (leftLastExp instanceof VariableArrayExp
+                        && rightLastExp instanceof VariableArrayExp) {
+                    // Check if they are arrays inside the same record
+                    if (isSameRecord(leftDotList, rightDotList)) {
+                        left = (VariableArrayExp) leftLastExp;
+                        right = (VariableArrayExp) rightLastExp;
+                        arrayName =
+                                (VariableDotExp) ((VariableDotExp) leftExp)
+                                        .copy();
+
+                        // Modify the last segment
+                        List<VariableExp> tempList =
+                                ((VariableDotExp) arrayName).getSegments();
+                        tempList.set(tempList.size() - 1, new VariableNameExp(
+                                location, null,
+                                ((VariableArrayExp) leftLastExp).getName()));
+                        ((VariableDotExp) arrayName).setSegments(tempList);
+                    }
+                    else {
+                        recordMismatch(location, ((VariableDotExp) leftExp),
+                                ((VariableDotExp) rightExp));
+                    }
+                }
+            }
+            // Case #1b: VariableArrayExp :=: VariableArrayExp
+            // (ie: A[i] :=: A[j], where "A" is an array and
+            // "i" and "j" are indexes)
+            else {
+                left = (VariableArrayExp) leftExp;
+                right = (VariableArrayExp) rightExp;
+                arrayName = new VariableNameExp(location, null, left.getName());
+            }
+
+            // Check to see if they are swapping entries within
+            // the same array. It is an error if they try to
+            // swap entries between two distinct arrays.
+            if (left.getName().equals(right.getName())) {
+                // Parameter List
+                List<ProgramExp> params = new List<ProgramExp>();
+                params.add(arrayName);
+                params.add(left.getArgument());
+                params.add(right.getArgument());
+
+                // Call to Assign_Entry
+                CallStmt newStmt =
+                        new CallStmt(null, new PosSymbol(location, Symbol
+                                .symbol("Swap_Two_Entries")), params);
+
+                // Add it to our list of statements to be replaced.
+                myReplacingStmtMap.put(stmt, newStmt);
+            }
+            // Error
+            else {
+                arrayMismatch(location, left, right);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------
     // WhileStmt
     // -----------------------------------------------------------
 
@@ -707,6 +801,15 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     // Error Handling
     // -----------------------------------------------------------
 
+    public void arrayMismatch(Location location, VariableArrayExp left,
+            VariableArrayExp right) {
+        String message =
+                "Illegal operation. Cannot swap entries between two different arrays.\n";
+        message += "Left array expression has array: " + left.getName() + "\n";
+        message += "Right array expression has array: " + right.getName();
+        throw new SourceErrorException(message, location);
+    }
+
     public void notHandledArrayTyParent(Location location, ArrayTy ty,
             ResolveConceptualElement parent) {
         String message =
@@ -715,6 +818,15 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                         + "'s parent is "
                         + parent.toString()
                         + ". This type of parent is not handled in the PreProcessor.";
+        throw new SourceErrorException(message, location);
+    }
+
+    public void recordMismatch(Location location, VariableDotExp exp1,
+            VariableDotExp exp2) {
+        String message =
+                "Illegal operation. Cannot swap entries between two different arrays.\n";
+        message += "Left array expression has array: " + exp1.toString() + "\n";
+        message += "Right array expression has array: " + exp2.toString();
         throw new SourceErrorException(message, location);
     }
 
@@ -964,6 +1076,57 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         PosSymbol newName = new PosSymbol(location, Symbol.symbol(newNameStr));
 
         return new VariableNameExp(location, null, newName);
+    }
+
+    /**
+     * <p>Checks if two lists point to the same record.</p>
+     *
+     * @param list1 List of variable expressions 1.
+     * @param list2 List of variable expressions 2.
+     *
+     * @return The boolean result of the check.
+     */
+    private boolean isSameRecord(List<VariableExp> list1,
+            List<VariableExp> list2) {
+        boolean returnVal = true;
+
+        // Need to check deeper if they are the same size
+        if (list1.size() == list2.size()) {
+            for (int i = 0; i < list1.size() - 1; i++) {
+                VariableExp temp1 = list1.get(i);
+                VariableExp temp2 = list2.get(i);
+
+                // Case #1: temp1 and temp2 are both VariableArrayExp
+                if (temp1 instanceof VariableArrayExp
+                        && temp2 instanceof VariableArrayExp) {
+                    // Set to false if they don't have the same name
+                    if (!((VariableArrayExp) temp1).getName().equals(
+                            ((VariableArrayExp) temp2).getName())) {
+                        returnVal = false;
+                    }
+                }
+                // Case #2: temp1 and temp2 are both VariableNameExp
+                else if (temp1 instanceof VariableNameExp
+                        && temp2 instanceof VariableNameExp) {
+                    // Set to false if they don't have the same name
+                    if (!((VariableNameExp) temp1).getName().equals(
+                            ((VariableNameExp) temp2).getName())) {
+                        returnVal = false;
+                    }
+                }
+                // Case #3: temp1 and temp2 aren't the same type
+                else {
+                    returnVal = false;
+                }
+            }
+        }
+        // Obviously they are different because they don't have
+        // the same length.
+        else {
+            returnVal = false;
+        }
+
+        return returnVal;
     }
 
     /**
