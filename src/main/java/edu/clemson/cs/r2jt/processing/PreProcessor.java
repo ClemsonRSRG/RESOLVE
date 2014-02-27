@@ -438,7 +438,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         // to a call to Entry_Replica.
         // Case #2: VariableDotExp with a VariableArrayExp
         else if (rightExp instanceof VariableDotExp) {
-            // Check the last segment to make sure it is not
+            // Check the last segment to see if it is
             // a VariableArrayExp.
             List<VariableExp> segs = ((VariableDotExp) rightExp).getSegments();
             VariableExp lastElement = segs.get(segs.size() - 1);
@@ -481,8 +481,8 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         }
 
         // Check to see if we need to convert the statement
-        // to a call to Assign_Entry because the left hand side
-        // is a VariableArrayExp.
+        // to a call to Assign_Entry.
+        // Case #1: VariableArrayExp
         if (leftExp instanceof VariableArrayExp) {
             VariableArrayExp arrayExp = (VariableArrayExp) leftExp;
 
@@ -499,6 +499,40 @@ public class PreProcessor extends TreeWalkerStackVisitor {
 
             // Add it to our list of statements to be replaced.
             myReplacingStmtMap.put(stmt, newStmt);
+        }
+        // Check to see if we need to convert the statement
+        // to a call to Assign_Entry.
+        // Case #2: VariableDotExp with a VariableArrayExp
+        else if (leftExp instanceof VariableDotExp) {
+            // Check the last segment to see if it is
+            // a VariableArrayExp.
+            List<VariableExp> segs = ((VariableDotExp) rightExp).getSegments();
+            VariableExp lastElement = segs.get(segs.size() - 1);
+            if (lastElement instanceof VariableArrayExp) {
+                Location varLoc = lastElement.getLocation();
+                VariableNameExp varName =
+                        new VariableNameExp(
+                                varLoc,
+                                ((VariableArrayExp) lastElement).getQualifier(),
+                                ((VariableArrayExp) lastElement).getName());
+
+                // Make the replacement in the dot expression.
+                segs.set(segs.size() - 1, varName);
+                ((VariableDotExp) rightExp).setSegments(segs);
+
+                // Parameter List
+                List<ProgramExp> params = new List<ProgramExp>();
+                params.add(rightExp);
+                params.add(((VariableArrayExp) lastElement).getArgument());
+
+                // Call to Assign_Entry
+                CallStmt newStmt =
+                        new CallStmt(null, new PosSymbol(stmtLoc, Symbol
+                                .symbol("Assign_Entry")), params);
+
+                // Add it to our list of statements to be replaced.
+                myReplacingStmtMap.put(stmt, newStmt);
+            }
         }
     }
 
