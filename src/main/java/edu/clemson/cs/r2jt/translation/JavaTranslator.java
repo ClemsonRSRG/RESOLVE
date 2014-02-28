@@ -294,7 +294,7 @@ public class JavaTranslator extends AbstractTranslator {
             ModuleParameterization realiz =
                     myCurrentFacilityEntry.getFacility().getRealization();
 
-            if (!node.externallyRealized()) {
+            if (!node.getExternallyRealizedFlag()) {
                 constructFacilityArgBindings(spec, realiz);
             }
         }

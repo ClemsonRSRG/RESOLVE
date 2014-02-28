@@ -435,7 +435,7 @@ public class Archiver {
      * (need to check the OS to find out what kind of slash to use first).</p>
      */
     private void createStandardImports() {
-        stdImports = new String[14];
+        stdImports = new String[13];
         stdImports[0] =
                 "Boolean_Template" + File.separator + "Boolean_Template.java";
         stdImports[1] =
@@ -464,9 +464,9 @@ public class Archiver {
         stdImports[12] =
                 "Static_Array_Template" + File.separator
                         + "Std_Array_Realiz.java";
-        stdImports[13] =
-                "Location_Linking_Template_1" + File.separator
-                        + "Std_Location_Linking_Realiz.java";
+    //    stdImports[13] =
+    //            "Location_Linking_Template_1" + File.separator
+    //                    + "Std_Location_Linking_Realiz.java";
     }
 
     private void addStandardImports() {
