@@ -1703,31 +1703,19 @@ public class Controller {
     private void translateModuleDec(File file, ScopeRepository realTable,
             ModuleDec dec) {
 
-        if (myInstanceEnvironment.flags
-                .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
-            JavaTranslator translator =
-                    new JavaTranslator(myInstanceEnvironment, realTable);
+        JavaTranslator translator =
+                new JavaTranslator(myInstanceEnvironment, realTable);
 
-            if (myArchive != null && !translator.onNoCompileList(file)) {
-                myArchive.addFileToArchive(file);
-            }
-
-            String targetFile =
-                    myInstanceEnvironment.getTargetFile().toString();
-            String thisFile = dec.getName().getFile().toString();
-            // We only translate if this is the target file or if file is stale
-            if ((thisFile.equals(targetFile))
-                    || translator.needToTranslate(file)) {
-                TreeWalker tw = new TreeWalker(translator);
-                tw.visit(dec);
-                translator.outputCode(file);
-            }
+        if (myArchive != null && !translator.onNoCompileList(file)) {
+            myArchive.addFileToArchive(file);
         }
 
-        if (myInstanceEnvironment.flags.isFlagSet(CTranslator.C_FLAG_TRANSLATE)) {
-            CTranslator translator =
-                    new CTranslator(myInstanceEnvironment, realTable);
-
+        String targetFile =
+                myInstanceEnvironment.getTargetFile().toString();
+        String thisFile = dec.getName().getFile().toString();
+        // We only translate if this is the target file or if file is stale
+        if ((thisFile.equals(targetFile))
+                || translator.needToTranslate(file)) {
             TreeWalker tw = new TreeWalker(translator);
             tw.visit(dec);
             translator.outputCode(file);

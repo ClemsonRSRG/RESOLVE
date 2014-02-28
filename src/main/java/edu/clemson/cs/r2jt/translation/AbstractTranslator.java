@@ -3,6 +3,7 @@ package edu.clemson.cs.r2jt.translation;
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.archiving.Archiver;
+import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.data.PosSymbol;
@@ -29,7 +30,7 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
-    protected static final boolean PRINT_DEBUG = true;
+    protected static final boolean PRINT_DEBUG = false;
 
     protected final CompileEnvironment myInstanceEnvironment;
 
@@ -800,8 +801,17 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
             //  System.out.println(Formatter.formatCode(myActiveTemplates.peek()
             //          .render()));
-            System.out.println(myActiveTemplates.peek().render());
+            //System.out.println(myActiveTemplates.peek().render());
         }
+        else {
+            outputToReport(myActiveTemplates.peek().render());
+        }
+    }
+
+    private void outputToReport(String fileContents) {
+        CompileReport report = myInstanceEnvironment.getCompileReport();
+        report.setTranslateSuccess();
+        report.setOutput(fileContents);
     }
 
     // TODO : Redo this and make it appropriate for the abstract translator.
