@@ -1710,12 +1710,10 @@ public class Controller {
             myArchive.addFileToArchive(file);
         }
 
-        String targetFile =
-                myInstanceEnvironment.getTargetFile().toString();
+        String targetFile = myInstanceEnvironment.getTargetFile().toString();
         String thisFile = dec.getName().getFile().toString();
         // We only translate if this is the target file or if file is stale
-        if ((thisFile.equals(targetFile))
-                || translator.needToTranslate(file)) {
+        if ((thisFile.equals(targetFile)) || translator.needToTranslate(file)) {
             TreeWalker tw = new TreeWalker(translator);
             tw.visit(dec);
             translator.outputCode(file);
