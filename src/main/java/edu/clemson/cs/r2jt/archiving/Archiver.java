@@ -17,6 +17,7 @@ import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.MetaFile;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
+import edu.clemson.cs.r2jt.translation.JavaTranslator;
 import edu.clemson.cs.r2jt.translation.Translator;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
@@ -434,7 +435,7 @@ public class Archiver {
      * (need to check the OS to find out what kind of slash to use first).</p>
      */
     private void createStandardImports() {
-        stdImports = new String[14];
+        stdImports = new String[13];
         stdImports[0] =
                 "Boolean_Template" + File.separator + "Boolean_Template.java";
         stdImports[1] =
@@ -463,9 +464,9 @@ public class Archiver {
         stdImports[12] =
                 "Static_Array_Template" + File.separator
                         + "Std_Array_Realiz.java";
-        stdImports[13] =
-                "Location_Linking_Template_1" + File.separator
-                        + "Std_Location_Linking_Realiz.java";
+    //    stdImports[13] =
+    //            "Location_Linking_Template_1" + File.separator
+    //                    + "Std_Location_Linking_Realiz.java";
     }
 
     private void addStandardImports() {
@@ -530,12 +531,13 @@ public class Archiver {
                 String errMsg =
                         diagnostic.getMessage(null).replaceAll(
                                 Pattern.quote(workspaceDir), "");
+
                 if (!webOutput) {
-                    System.out.println("Javac Error: " + errMsg);
+                    System.out.println("Javac Error: " + diagnostic.toString());
                 }
                 else {
                     myInstanceEnvironment.getCompileReport().addBugReport(
-                            "Javac Error: " + errMsg);
+                            "Javac Error: " + diagnostic.toString());
                 }
             }
         }
@@ -552,8 +554,14 @@ public class Archiver {
 
     public static final void setUpFlags() {
         FlagDependencies.addRequires(FLAG_VERBOSE_ARCHIVE, FLAG_ARCHIVE);
+
         FlagDependencies.addImplies(FLAG_ARCHIVE, Translator.FLAG_TRANSLATE);
         FlagDependencies.addImplies(FLAG_ARCHIVE,
                 Translator.FLAG_TRANSLATE_CLEAN);
+
+        FlagDependencies.addImplies(FLAG_ARCHIVE,
+                JavaTranslator.JAVA_FLAG_TRANSLATE);
+        FlagDependencies.addImplies(FLAG_ARCHIVE,
+                JavaTranslator.JAVA_FLAG_TRANSLATE_CLEAN);
     }
 }
