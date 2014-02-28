@@ -464,9 +464,9 @@ public class Archiver {
         stdImports[12] =
                 "Static_Array_Template" + File.separator
                         + "Std_Array_Realiz.java";
-    //    stdImports[13] =
-    //            "Location_Linking_Template_1" + File.separator
-    //                    + "Std_Location_Linking_Realiz.java";
+        //    stdImports[13] =
+        //            "Location_Linking_Template_1" + File.separator
+        //                    + "Std_Location_Linking_Realiz.java";
     }
 
     private void addStandardImports() {
@@ -554,10 +554,6 @@ public class Archiver {
 
     public static final void setUpFlags() {
         FlagDependencies.addRequires(FLAG_VERBOSE_ARCHIVE, FLAG_ARCHIVE);
-
-        FlagDependencies.addImplies(FLAG_ARCHIVE, Translator.FLAG_TRANSLATE);
-        FlagDependencies.addImplies(FLAG_ARCHIVE,
-                Translator.FLAG_TRANSLATE_CLEAN);
 
         FlagDependencies.addImplies(FLAG_ARCHIVE,
                 JavaTranslator.JAVA_FLAG_TRANSLATE);
