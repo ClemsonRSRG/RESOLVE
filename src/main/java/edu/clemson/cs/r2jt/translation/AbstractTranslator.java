@@ -801,7 +801,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
             //  System.out.println(Formatter.formatCode(myActiveTemplates.peek()
             //          .render()));
-            //System.out.println(myActiveTemplates.peek().render());
+            System.out.println(myActiveTemplates.peek().render());
         }
         else {
             outputToReport(myActiveTemplates.peek().render());
