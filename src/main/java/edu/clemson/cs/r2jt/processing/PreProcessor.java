@@ -59,10 +59,10 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     private Map<Statement, Statement> myReplacingStmtMap;
 
     /**
-     * <p>A list of all <code>UsesItems</code> created
-     * by the PreProcessor.</p>
+     * <p>A temporary placeholder for created
+     * <code>FacilityDecs</code>.</p>
      */
-    private List<UsesItem> myUsesItemList;
+    private List<FacilityDec> myTempFacDecList;
 
     /**
      * <p>Utilities class that contains methods that are used
@@ -81,7 +81,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         myCreatedStmtMap = new Map<Statement, List<Statement>>();
         myCreatedSwapCallMap = new Map<Statement, List<CallStmt>>();
         myReplacingStmtMap = new Map<Statement, Statement>();
-        myUsesItemList = new List<UsesItem>();
+        myTempFacDecList = null;
         myUtilities = new Utilities();
     }
 
@@ -159,11 +159,6 @@ public class PreProcessor extends TreeWalkerStackVisitor {
 
             // Save the Ty of this array for future use
             myArrayFacilityMap.put(newArrayName, oldTy);
-
-            // Add Static_Array_Template to our uses list
-            // if is not there already.
-            myUsesItemList.addUnique(new UsesItem(new PosSymbol(null, Symbol
-                    .symbol("Static_Array_Template"))));
         }
         else {
             notHandledArrayTyParent(ty.getLocation(), ty, parent);
@@ -239,22 +234,6 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             myCreatedFacDecList.clear();
         }
 
-        // Add any new concepts needed to our
-        // list of imports.
-        List<UsesItem> usesList = dec.getUsesItems();
-        Location location = usesList.get(0).getName().getLocation();
-        for (UsesItem item : myUsesItemList) {
-            // Edit the location of the name
-            // and put it back into our uses item.
-            PosSymbol name = item.getName();
-            name.setLocation(location);
-            item.setName(name);
-
-            // Adds it if it is not there already.
-            usesList.addUnique(item);
-        }
-        dec.setUsesItems(usesList);
-
         // Clean up myUtilities
         myUtilities.finalModuleDec();
     }
@@ -295,22 +274,6 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             myCreatedFacDecList.clear();
         }
 
-        // Add any new concepts needed to our
-        // list of imports.
-        List<UsesItem> usesList = dec.getUsesItems();
-        Location location = usesList.get(0).getName().getLocation();
-        for (UsesItem item : myUsesItemList) {
-            // Edit the location of the name
-            // and put it back into our uses item.
-            PosSymbol name = item.getName();
-            name.setLocation(location);
-            item.setName(name);
-
-            // Adds it if it is not there already.
-            usesList.addUnique(item);
-        }
-        dec.setUsesItems(usesList);
-
         // Clean up myUtilities
         myUtilities.finalModuleDec();
     }
@@ -336,22 +299,6 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             myCreatedFacDecList.clear();
         }
 
-        // Add any new concepts needed to our
-        // list of imports.
-        List<UsesItem> usesList = dec.getUsesItems();
-        Location location = usesList.get(0).getName().getLocation();
-        for (UsesItem item : myUsesItemList) {
-            // Edit the location of the name
-            // and put it back into our uses item.
-            PosSymbol name = item.getName();
-            name.setLocation(location);
-            item.setName(name);
-
-            // Adds it if it is not there already.
-            usesList.addUnique(item);
-        }
-        dec.setUsesItems(usesList);
-
         // Clean up myUtilities
         myUtilities.finalModuleDec();
     }
@@ -364,6 +311,11 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     public void preFacilityOperationDec(FacilityOperationDec dec) {
         // Store all parameter and local variables
         myUtilities.initOperationDec(dec.getParameters(), dec.getVariables());
+
+        // Store any global facility creations in the
+        // temp list, so we don't by accident add them here.
+        myTempFacDecList = myCreatedFacDecList;
+        myCreatedFacDecList = new List<FacilityDec>();
     }
 
     @Override
@@ -375,6 +327,10 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             dec.setFacilities(modifyFacDecListForOps(dec.getFacilities()));
             myCreatedFacDecList.clear();
         }
+
+        // Put our original global facility list back
+        myCreatedFacDecList = myTempFacDecList;
+        myTempFacDecList = null;
 
         // Update our list of statements with any
         // PreProcessor created statements.
@@ -486,16 +442,12 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         if (leftExp instanceof VariableArrayExp) {
             VariableArrayExp arrayExp = (VariableArrayExp) leftExp;
 
-            // Parameter List
-            List<ProgramExp> params = new List<ProgramExp>();
-            params.add(new VariableNameExp(arrayExp.getLocation(), arrayExp
-                    .getQualifier(), arrayExp.getName()));
-            params.add(arrayExp.getArgument());
-
             // Call to Assign_Entry
+            VariableNameExp temp =
+                    new VariableNameExp(arrayExp.getLocation(), arrayExp
+                            .getQualifier(), arrayExp.getName());
             CallStmt newStmt =
-                    new CallStmt(null, new PosSymbol(stmtLoc, Symbol
-                            .symbol("Assign_Entry")), params);
+                    createAssignEntryCall(stmtLoc, temp, arrayExp.getArgument());
 
             // Add it to our list of statements to be replaced.
             myReplacingStmtMap.put(stmt, newStmt);
@@ -506,9 +458,10 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         else if (leftExp instanceof VariableDotExp) {
             // Check the last segment to see if it is
             // a VariableArrayExp.
-            List<VariableExp> segs = ((VariableDotExp) rightExp).getSegments();
-            VariableExp lastElement = segs.get(segs.size() - 1);
-            if (lastElement instanceof VariableArrayExp) {
+            if (containsArray((VariableDotExp) leftExp)) {
+                List<VariableExp> segs =
+                        ((VariableDotExp) leftExp).getSegments();
+                VariableExp lastElement = segs.get(segs.size() - 1);
                 Location varLoc = lastElement.getLocation();
                 VariableNameExp varName =
                         new VariableNameExp(
@@ -520,15 +473,10 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                 segs.set(segs.size() - 1, varName);
                 ((VariableDotExp) rightExp).setSegments(segs);
 
-                // Parameter List
-                List<ProgramExp> params = new List<ProgramExp>();
-                params.add(rightExp);
-                params.add(((VariableArrayExp) lastElement).getArgument());
-
                 // Call to Assign_Entry
                 CallStmt newStmt =
-                        new CallStmt(null, new PosSymbol(stmtLoc, Symbol
-                                .symbol("Assign_Entry")), params);
+                        createAssignEntryCall(stmtLoc, rightExp,
+                                ((VariableArrayExp) lastElement).getArgument());
 
                 // Add it to our list of statements to be replaced.
                 myReplacingStmtMap.put(stmt, newStmt);
@@ -642,6 +590,11 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     public void preProcedureDec(ProcedureDec dec) {
         // Store all parameter and local variables
         myUtilities.initOperationDec(dec.getParameters(), dec.getVariables());
+
+        // Store any global facility creations in the
+        // temp list, so we don't by accident add them here.
+        myTempFacDecList = myCreatedFacDecList;
+        myCreatedFacDecList = new List<FacilityDec>();
     }
 
     @Override
@@ -653,6 +606,10 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             dec.setFacilities(modifyFacDecListForOps(dec.getFacilities()));
             myCreatedFacDecList.clear();
         }
+
+        // Put our original global facility list back
+        myCreatedFacDecList = myTempFacDecList;
+        myTempFacDecList = null;
 
         // Update our list of statements with any
         // PreProcessor created statements.
@@ -695,85 +652,233 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         VariableExp leftExp = stmt.getLeft();
         VariableExp rightExp = stmt.getRight();
 
-        // Case #1: Both left and right are of the same type
-        if ((leftExp instanceof VariableArrayExp && rightExp instanceof VariableArrayExp)
-                || (leftExp instanceof VariableDotExp && rightExp instanceof VariableDotExp)) {
-            // Variables used later on
-            VariableArrayExp left = null;
-            VariableArrayExp right = null;
-            VariableExp arrayName = null;
-
-            // Case #1a: VariableArrayExp :=: VariableArrayExp,
-            // but the arrays are inside a VariableDotExp.
-            // (ie: S.A[i] :=: S.A[j], where "S" is a record,
-            // "A" is an array and "i" and "j" are indexes)
-            if (leftExp instanceof VariableDotExp
-                    && rightExp instanceof VariableDotExp) {
-                // Lists of dot expression segments
-                List<VariableExp> leftDotList =
-                        ((VariableDotExp) leftExp).getSegments();
-                List<VariableExp> rightDotList =
-                        ((VariableDotExp) rightExp).getSegments();
-
-                // Last segment variable expressions
-                VariableExp leftLastExp =
-                        leftDotList.get(leftDotList.size() - 1);
-                VariableExp rightLastExp =
-                        rightDotList.get(rightDotList.size() - 1);
-                if (leftLastExp instanceof VariableArrayExp
-                        && rightLastExp instanceof VariableArrayExp) {
-                    // Check if they are arrays inside the same record
-                    if (isSameRecord(leftDotList, rightDotList)) {
-                        left = (VariableArrayExp) leftLastExp;
-                        right = (VariableArrayExp) rightLastExp;
-                        arrayName =
-                                (VariableDotExp) ((VariableDotExp) leftExp)
-                                        .copy();
-
-                        // Modify the last segment
-                        List<VariableExp> tempList =
-                                ((VariableDotExp) arrayName).getSegments();
-                        tempList.set(tempList.size() - 1, new VariableNameExp(
-                                location, null,
-                                ((VariableArrayExp) leftLastExp).getName()));
-                        ((VariableDotExp) arrayName).setSegments(tempList);
-                    }
-                    else {
-                        recordMismatch(location, ((VariableDotExp) leftExp),
-                                ((VariableDotExp) rightExp));
-                    }
-                }
+        // Case #1: VariableNameExp :=: VariableArrayExp or
+        // VariableArrayExp :=: VariableNameExp
+        // (ie: x :=: A[i], where "A" is an array, "i" is
+        // index and "x" is a variable.)
+        if ((leftExp instanceof VariableNameExp && rightExp instanceof VariableArrayExp)
+                || (leftExp instanceof VariableArrayExp && rightExp instanceof VariableNameExp)) {
+            // Convert to correct types
+            VariableNameExp nameExp;
+            VariableArrayExp arrayExp;
+            if (leftExp instanceof VariableNameExp) {
+                nameExp = (VariableNameExp) leftExp;
+                arrayExp = (VariableArrayExp) rightExp;
             }
-            // Case #1b: VariableArrayExp :=: VariableArrayExp
-            // (ie: A[i] :=: A[j], where "A" is an array and
-            // "i" and "j" are indexes)
             else {
-                left = (VariableArrayExp) leftExp;
-                right = (VariableArrayExp) rightExp;
-                arrayName = new VariableNameExp(location, null, left.getName());
+                nameExp = (VariableNameExp) rightExp;
+                arrayExp = (VariableArrayExp) leftExp;
             }
+
+            // Obtain name of the array
+            VariableNameExp arrayName =
+                    new VariableNameExp(location, null, arrayExp.getName());
+
+            // Call to Swap_Entry
+            CallStmt newStmt =
+                    createSwapEntryCall(location, arrayName, nameExp, arrayExp
+                            .getArgument());
+
+            // Add it to our list of statements to be replaced.
+            myReplacingStmtMap.put(stmt, newStmt);
+        }
+        // Case #2: VariableNameExp :=: VariableArrayExp
+        // but the array is inside a VariableDotExp.
+        // Same if the left and right are exchanged.
+        // (ie: x :=: S.A[i], where "S" is a record,
+        // "A" is an array, "i" is index and
+        // "x" is a variable.)
+        else if ((leftExp instanceof VariableNameExp && rightExp instanceof VariableDotExp)
+                || (leftExp instanceof VariableDotExp && rightExp instanceof VariableNameExp)) {
+            // Convert to correct types
+            VariableNameExp nameExp;
+            VariableDotExp dotExp;
+            if (leftExp instanceof VariableNameExp) {
+                nameExp = (VariableNameExp) leftExp;
+                dotExp = (VariableDotExp) rightExp;
+            }
+            else {
+                nameExp = (VariableNameExp) rightExp;
+                dotExp = (VariableDotExp) leftExp;
+            }
+
+            // Check if the dotExp contains an array or not.
+            if (containsArray(dotExp)) {
+                // Obtain name of the array
+                VariableDotExp arrayName = (VariableDotExp) dotExp.copy();
+
+                // Modify the last segment
+                List<VariableExp> tempList = arrayName.getSegments();
+                int lastIndex = tempList.size() - 1;
+                VariableArrayExp lastExp =
+                        (VariableArrayExp) tempList.get(lastIndex);
+                tempList.set(lastIndex, new VariableNameExp(location, null,
+                        lastExp.getName()));
+                arrayName.setSegments(tempList);
+
+                // Call to Swap_Entry
+                CallStmt newStmt =
+                        createSwapEntryCall(location, arrayName, nameExp,
+                                lastExp.getArgument());
+
+                // Add it to our list of statements to be replaced.
+                myReplacingStmtMap.put(stmt, newStmt);
+            }
+        }
+        // Case #3: VariableArrayExp :=: VariableArrayExp
+        // (ie: A[i] :=: A[j], where "A" is an array and
+        // "i" and "j" are indexes)
+        else if (leftExp instanceof VariableArrayExp
+                && rightExp instanceof VariableArrayExp) {
+            VariableArrayExp left = (VariableArrayExp) leftExp;
+            VariableArrayExp right = (VariableArrayExp) rightExp;
 
             // Check to see if they are swapping entries within
             // the same array. It is an error if they try to
             // swap entries between two distinct arrays.
             if (left.getName().equals(right.getName())) {
-                // Parameter List
-                List<ProgramExp> params = new List<ProgramExp>();
-                params.add(arrayName);
-                params.add(left.getArgument());
-                params.add(right.getArgument());
+                // Obtain name of the array
+                VariableNameExp arrayName =
+                        new VariableNameExp(location, null, left.getName());
 
-                // Call to Assign_Entry
+                // Call to Swap_Entry
                 CallStmt newStmt =
-                        new CallStmt(null, new PosSymbol(location, Symbol
-                                .symbol("Swap_Two_Entries")), params);
+                        createSwapTwoEntriesCall(location, arrayName, left
+                                .getArgument(), right.getArgument());
 
                 // Add it to our list of statements to be replaced.
                 myReplacingStmtMap.put(stmt, newStmt);
             }
-            // Error
             else {
                 arrayMismatch(location, left, right);
+            }
+        }
+        // Case #4: VariableArrayExp :=: VariableDotExp or
+        // VariableDotExp :=: VariableArrayExp
+        // Same if the left and right are exchanged.
+        // (ie: A[i] :=: S.x, where "S" is a record,
+        // "A" is an array, "i" is index and "x" is a variable.)
+        else if ((leftExp instanceof VariableArrayExp && rightExp instanceof VariableDotExp)
+                || (leftExp instanceof VariableDotExp && rightExp instanceof VariableArrayExp)) {
+            // Convert to correct types
+            VariableArrayExp arrayExp;
+            VariableDotExp dotExp;
+            if (leftExp instanceof VariableArrayExp) {
+                arrayExp = (VariableArrayExp) leftExp;
+                dotExp = (VariableDotExp) rightExp;
+            }
+            else {
+                arrayExp = (VariableArrayExp) rightExp;
+                dotExp = (VariableDotExp) leftExp;
+            }
+
+            // Error if both expressions are arrays.
+            if (containsArray(dotExp)) {
+                arrayMismatch(location, arrayExp, dotExp);
+            }
+            else {
+                // Obtain name of the array
+                VariableNameExp arrayName =
+                        new VariableNameExp(location, null, arrayExp.getName());
+
+                // Call to Swap_Entry
+                CallStmt newStmt =
+                        createSwapEntryCall(location, arrayName, dotExp,
+                                arrayExp.getArgument());
+
+                // Add it to our list of statements to be replaced.
+                myReplacingStmtMap.put(stmt, newStmt);
+            }
+        }
+        // Case #5: Both left and right are VariableDotExp
+        else if (leftExp instanceof VariableDotExp
+                && rightExp instanceof VariableDotExp) {
+            VariableDotExp leftDotExp = (VariableDotExp) leftExp;
+            VariableDotExp rightDotExp = (VariableDotExp) rightExp;
+
+            // Case #5a: VariableArrayExp :=: VariableArrayExp,
+            // but the arrays are inside a VariableDotExp.
+            // (ie: S.A[i] :=: S.A[j], where "S" is a record,
+            // "A" is an array and "i" and "j" are indexes)
+            if (containsArray(leftDotExp) && containsArray(rightDotExp)) {
+                // Lists of dot expression segments
+                List<VariableExp> leftDotList = leftDotExp.getSegments();
+                List<VariableExp> rightDotList = rightDotExp.getSegments();
+
+                // Check if they are arrays inside the same record
+                if (isSameRecord(leftDotList, rightDotList)) {
+                    // Last segment variable expressions
+                    int lastIndex = leftDotList.size() - 1;
+                    VariableArrayExp leftLastExp =
+                            (VariableArrayExp) leftDotList.get(lastIndex);
+                    VariableArrayExp rightLastExp =
+                            (VariableArrayExp) rightDotList.get(lastIndex);
+                    VariableDotExp arrayName =
+                            (VariableDotExp) leftDotExp.copy();
+
+                    // Modify the last segment
+                    List<VariableExp> tempList = arrayName.getSegments();
+                    tempList.set(lastIndex, new VariableNameExp(location, null,
+                            leftLastExp.getName()));
+                    arrayName.setSegments(tempList);
+
+                    // Check to see if they are swapping entries within
+                    // the same array. It is an error if they try to
+                    // swap entries between two distinct arrays.
+                    if (leftLastExp.getName().equals(rightLastExp.getName())) {
+                        // Call to Swap_Two_Entries
+                        CallStmt newStmt =
+                                createSwapTwoEntriesCall(location, arrayName,
+                                        leftLastExp.getArgument(), rightLastExp
+                                                .getArgument());
+
+                        // Add it to our list of statements to be replaced.
+                        myReplacingStmtMap.put(stmt, newStmt);
+                    }
+                    // Error
+                    else {
+                        arrayMismatch(location, leftExp, rightExp);
+                    }
+                }
+                else {
+                    recordMismatch(location, ((VariableDotExp) leftExp),
+                            ((VariableDotExp) rightExp));
+                }
+            }
+            // Case #5b: VariableNameExp :=: VariableArrayExp,
+            // but the variable and arrays are inside a VariableDotExp.
+            // Same if the left and right are exchanged.
+            // (ie: S.x :=: S.A[i], where "S" is a record,
+            // "A" is an array and "i" is index and "x" is a variable.)
+            else if (containsArray(leftDotExp) || containsArray(rightDotExp)) {
+                VariableDotExp dotArrayExp;
+                VariableDotExp dotExp;
+                if (containsArray(leftDotExp)) {
+                    dotArrayExp = leftDotExp;
+                    dotExp = rightDotExp;
+                }
+                else {
+                    dotArrayExp = rightDotExp;
+                    dotExp = leftDotExp;
+                }
+
+                // Modify the last segment
+                VariableDotExp arrayName = (VariableDotExp) dotArrayExp.copy();
+                List<VariableExp> tempList = arrayName.getSegments();
+                int lastIndex = tempList.size() - 1;
+                VariableArrayExp arrayLastExp =
+                        (VariableArrayExp) tempList.get(lastIndex);
+                tempList.set(lastIndex, new VariableNameExp(location, null,
+                        arrayLastExp.getName()));
+                arrayName.setSegments(tempList);
+
+                // Call to Swap_Entry
+                CallStmt newStmt =
+                        createSwapEntryCall(location, arrayName, dotExp,
+                                arrayLastExp.getArgument());
+
+                // Add it to our list of statements to be replaced.
+                myReplacingStmtMap.put(stmt, newStmt);
             }
         }
     }
@@ -801,12 +906,12 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     // Error Handling
     // -----------------------------------------------------------
 
-    public void arrayMismatch(Location location, VariableArrayExp left,
-            VariableArrayExp right) {
+    public void arrayMismatch(Location location, VariableExp left,
+            VariableExp right) {
         String message =
                 "Illegal operation. Cannot swap entries between two different arrays.\n";
-        message += "Left array expression has array: " + left.getName() + "\n";
-        message += "Right array expression has array: " + right.getName();
+        message += "Left array expression has array: " + left.toString() + "\n";
+        message += "Right array expression has array: " + right.toString();
         throw new SourceErrorException(message, location);
     }
 
@@ -945,15 +1050,10 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                 newStmtList.add(funcAssignStmt);
 
                 // Create a call to Swap_Entry
-                List<ProgramExp> callArgList = new List<ProgramExp>();
-                callArgList.add(createVariableNameExp(location, "", name
-                        .getName(), ""));
-                callArgList.add(newExp);
-                callArgList.add(newIndexExp);
-
                 CallStmt swapEntryStmt =
-                        new CallStmt(null, new PosSymbol(location, Symbol
-                                .symbol("Swap_Entry")), callArgList);
+                        createSwapEntryCall(location, createVariableNameExp(
+                                location, "", name.getName(), ""), newExp,
+                                newIndexExp);
                 newCallStmtList.add(swapEntryStmt);
 
                 // Replace current with the newExp
@@ -971,6 +1071,46 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         }
 
         return argList;
+    }
+
+    /**
+     * <p>Checks if the last entry in the <code>VariableDotExp</code>
+     * contains a <code>VariableArrayExp</code> or not.</p>
+     *
+     * @param exp The variable expression to test.
+     *
+     * @return Boolean result of the test.
+     */
+    private boolean containsArray(VariableDotExp exp) {
+        // Variables
+        List<VariableExp> segs = exp.getSegments();
+        int last = segs.size() - 1;
+
+        // Check if the last entry is an array or not.
+        if (segs.get(last) instanceof VariableArrayExp)
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     * <p>Creates a call to AssignEntry.</p>
+     *
+     * @param location A given location in the AST.
+     * @param exp1 Argument #1.
+     * @param exp2 Argument #2.
+     *
+     * @return A <code>CallStmt</code>.
+     */
+    private CallStmt createAssignEntryCall(Location location, ProgramExp exp1,
+            ProgramExp exp2) {
+        // Argument list
+        List<ProgramExp> callArgList = new List<ProgramExp>();
+        callArgList.add(exp1);
+        callArgList.add(exp2);
+
+        return new CallStmt(null, new PosSymbol(location, Symbol
+                .symbol("Assign_Entry")), callArgList);
     }
 
     /**
@@ -1055,6 +1195,50 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     private Ty createIntegerTy(Location location) {
         return new NameTy(null, new PosSymbol(location, Symbol
                 .symbol("Integer")));
+    }
+
+    /**
+     * <p>Creates a call to SwapEntry.</p>
+     *
+     * @param location A given location in the AST.
+     * @param exp1 Argument #1.
+     * @param exp2 Argument #2.
+     * @param exp3 Argument #3.
+     *
+     * @return A <code>CallStmt</code>.
+     */
+    private CallStmt createSwapEntryCall(Location location, ProgramExp exp1,
+            ProgramExp exp2, ProgramExp exp3) {
+        // Argument list
+        List<ProgramExp> callArgList = new List<ProgramExp>();
+        callArgList.add(exp1);
+        callArgList.add(exp2);
+        callArgList.add(exp3);
+
+        return new CallStmt(null, new PosSymbol(location, Symbol
+                .symbol("Swap_Entry")), callArgList);
+    }
+
+    /**
+     * <p>Creates a call to SwapTwoEntries.</p>
+     *
+     * @param location A given location in the AST.
+     * @param exp1 Argument #1.
+     * @param exp2 Argument #2.
+     * @param exp3 Argument #3.
+     *
+     * @return A <code>CallStmt</code>.
+     */
+    private CallStmt createSwapTwoEntriesCall(Location location,
+            ProgramExp exp1, ProgramExp exp2, ProgramExp exp3) {
+        // Argument list
+        List<ProgramExp> callArgList = new List<ProgramExp>();
+        callArgList.add(exp1);
+        callArgList.add(exp2);
+        callArgList.add(exp3);
+
+        return new CallStmt(null, new PosSymbol(location, Symbol
+                .symbol("Swap_Two_Entries")), callArgList);
     }
 
     /**
