@@ -181,7 +181,7 @@ public class FacilityDec extends Dec {
     }
 
     /** Returns the value of the myExternallyRealizedFlag variable. */
-    public boolean getExternallyRealized() {
+    public boolean getExternallyRealizedFlag() {
         return myExternallyRealizedFlag;
     }
 
@@ -230,7 +230,7 @@ public class FacilityDec extends Dec {
     }
 
     /** Sets the myExternallyRealizedFlag variable to the specified value. */
-    public void setExternallyRealized(boolean externRealized) {
+    public void setExternallyRealizedFlag(boolean externRealized) {
         myExternallyRealizedFlag = externRealized;
     }
 

@@ -475,17 +475,18 @@ public class Controller {
             checkNameCompatibility(dec.getName().getLocation(), id, file);
             checkDirectoryCompatibility(dec, id, file);
             myInstanceEnvironment.constructRecord(id, file, dec);
-            compileImportedModules(dec, symbolTable);
 
             /* Invoke PreProcessor */
-            PreProcessor preProc = new PreProcessor(myInstanceEnvironment);
+            PreProcessor preProc = new PreProcessor();
             TreeWalker tw = new TreeWalker(preProc);
             tw.visit(dec);
 
-            /* Have compile imported modules bring in extra stuff that 
-             * the PreProcessor may have added manually.
-             */
             compileImportedModules(dec, symbolTable);
+
+            /* Invoke PostProcessor */
+            PostProcessor postProc = new PostProcessor(symbolTable);
+            TreeWalker tw2 = new TreeWalker(postProc);
+            tw2.visit(dec);
 
             if (myInstanceEnvironment.showEnv()) { // DEBUG
                 OldSymbolTable table =
@@ -601,17 +602,18 @@ public class Controller {
             //myInstanceEnvironment.getErrorHandler().setFile(file);
             //myInstanceEnvironment.setTargetFile(file);
             myInstanceEnvironment.constructRecord(id, file, dec);
-            compileImportedModules(dec, symbolTable);
 
             /* Invoke PreProcessor */
-            PreProcessor preProc = new PreProcessor(myInstanceEnvironment);
+            PreProcessor preProc = new PreProcessor();
             TreeWalker tw = new TreeWalker(preProc);
             tw.visit(dec);
 
-            /* Have compile imported modules bring in extra stuff that 
-             * the PreProcessor may have added manually.
-             */
             compileImportedModules(dec, symbolTable);
+
+            /* Invoke PostProcessor */
+            PostProcessor postProc = new PostProcessor(symbolTable);
+            TreeWalker tw2 = new TreeWalker(postProc);
+            tw2.visit(dec);
 
             if (myInstanceEnvironment.showEnv()) { // DEBUG
                 OldSymbolTable table =
@@ -829,16 +831,6 @@ public class Controller {
             myInstanceEnvironment.constructRecord(id, file, dec);
             compileImportedModules(dec, symbolTable);
 
-            // Invoke PreProcessor 
-            //PreProcessor preProc = new PreProcessor(myInstanceEnvironment);
-            //TreeWalker tw = new TreeWalker(preProc);
-            //tw.visit(dec);
-
-            // Have compile imported modules bring in extra stuff that 
-            // the PreProcessor may have added manually.
-
-            //compileImportedModules(dec);
-
             if (myInstanceEnvironment.showEnv()) { // DEBUG
                 OldSymbolTable table =
                         new OldSymbolTable(id, myInstanceEnvironment);
@@ -995,17 +987,18 @@ public class Controller {
 
             checkNameCompatibility(dec.getName().getLocation(), id, file);
             myInstanceEnvironment.constructRecord(id, file, dec);
-            compileImportedModules(dec, symbolTable);
 
             /* Invoke PreProcessor */
-            PreProcessor preProc = new PreProcessor(myInstanceEnvironment);
+            PreProcessor preProc = new PreProcessor();
             TreeWalker tw = new TreeWalker(preProc);
             tw.visit(dec);
 
-            /* Have compile imported modules bring in extra stuff that 
-             * the PreProcessor may have added manually.
-             */
             compileImportedModules(dec, symbolTable);
+
+            /* Invoke PostProcessor */
+            PostProcessor postProc = new PostProcessor(symbolTable);
+            TreeWalker tw2 = new TreeWalker(postProc);
+            tw2.visit(dec);
 
             if (myInstanceEnvironment.showEnv()) { // DEBUG
                 OldSymbolTable table =
@@ -1071,17 +1064,18 @@ public class Controller {
 
             checkNameCompatibility(dec.getName().getLocation(), id, file);
             myInstanceEnvironment.constructRecord(id, file, dec);
-            compileImportedModules(dec, symbolTable);
 
             /* Invoke PreProcessor */
-            PreProcessor preProc = new PreProcessor(myInstanceEnvironment);
+            PreProcessor preProc = new PreProcessor();
             TreeWalker tw = new TreeWalker(preProc);
             tw.visit(dec);
 
-            /* Have compile imported modules bring in extra stuff that 
-             * the PreProcessor may have added manually.
-             */
             compileImportedModules(dec, symbolTable);
+
+            /* Invoke PostProcessor */
+            PostProcessor postProc = new PostProcessor(symbolTable);
+            TreeWalker tw2 = new TreeWalker(postProc);
+            tw2.visit(dec);
 
             if (myInstanceEnvironment.showEnv()) { // DEBUG
                 OldSymbolTable table =
