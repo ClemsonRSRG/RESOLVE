@@ -15,6 +15,7 @@ package edu.clemson.cs.r2jt.parsing;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
+
 /**
  * An extension to ANTLR's AST class to store column numbers with the
  * tree nodes.
