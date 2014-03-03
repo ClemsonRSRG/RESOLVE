@@ -6,10 +6,10 @@
     <artifactId>RESOLVE</artifactId>
     <version>12.09.01a</version>
     <packaging>jar</packaging>
-<!-- this is a comment -->
+    <!-- this is a comment -->
     <name>RESOLVE</name>
     <url>http://maven.apache.org</url>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -48,6 +48,7 @@
                     <connectionType>developerConnection</connectionType>
                 </configuration>
             </plugin>
+            <!-- Plugin to compile ANTLR files. -->
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr3-maven-plugin</artifactId>
@@ -61,6 +62,36 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Plugin to add the license information. -->
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <header>${license.url}</header>
+                    <excludes>
+                        <exclude>.gitattributes</exclude>
+                        <exclude>nb-configuration.xml</exclude>
+                        <exclude>nbactions-RSRG-Global.xml</exclude>
+                        <exclude>nbactions.xml</exclude>
+                        <exclude>pom.xml</exclude>
+                        <exclude>rsrg-format.xml</exclude>
+                        <exclude>LICENSE.txt</exclude>
+                        <exclude>src/main/antlr3/**</exclude>
+                        <exclude>src/main/java/edu/clemson/cs/r2jt/parsing/.makify</exclude>
+                        <exclude>src/main/resources/**</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Plugin to format the Java code. -->
             <plugin>
                 <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
                 <artifactId>maven-java-formatter-plugin</artifactId>
@@ -79,6 +110,7 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Plugin to build a RESOLVE jar with dependencies. -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4</version>
@@ -105,82 +137,90 @@
             </plugin>
         </plugins>
         <pluginManagement>
-        	<plugins>
-        		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-        		<plugin>
-        			<groupId>org.eclipse.m2e</groupId>
-        			<artifactId>lifecycle-mapping</artifactId>
-        			<version>1.0.0</version>
-        			<configuration>
-        				<lifecycleMappingMetadata>
-        					<pluginExecutions>
-        						<pluginExecution>
-        							<pluginExecutionFilter>
-        								<groupId>
-        									org.codehaus.mojo
-        								</groupId>
-        								<artifactId>
-        									properties-maven-plugin
-        								</artifactId>
-        								<versionRange>
-        									[1.0-alpha-2,)
-        								</versionRange>
-        								<goals>
-        									<goal>
-        										read-project-properties
-        									</goal>
-        								</goals>
-        							</pluginExecutionFilter>
-        							<action>
-        								<execute/>
-        							</action>
-        						</pluginExecution>
-        						<pluginExecution>
-        							<pluginExecutionFilter>
-        								<groupId>
-        									com.googlecode.maven-java-formatter-plugin
-        								</groupId>
-        								<artifactId>
-        									maven-java-formatter-plugin
-        								</artifactId>
-        								<versionRange>
-        									[0.3.1,)
-        								</versionRange>
-        								<goals>
-        									<goal>format</goal>
-        								</goals>
-        							</pluginExecutionFilter>
-        							<action>
-        								<execute/>
-        							</action>
-        						</pluginExecution>
-        						<pluginExecution>
-        							<pluginExecutionFilter>
-        								<groupId>org.antlr</groupId>
-        								<artifactId>
-        									antlr3-maven-plugin
-        								</artifactId>
-        								<versionRange>
-        									[3.3,)
-        								</versionRange>
-        								<goals>
-        									<goal>antlr</goal>
-        								</goals>
-        							</pluginExecutionFilter>
-        							<action>
-        								<ignore></ignore>
-        							</action>
-        						</pluginExecution>
-        					</pluginExecutions>
-        				</lifecycleMappingMetadata>
-        			</configuration>
-        		</plugin>
-        	</plugins>
+            <plugins>
+                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.codehaus.mojo
+                                        </groupId>
+                                        <artifactId>
+                                            properties-maven-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [1.0-alpha-2,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>
+                                                read-project-properties
+                                            </goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <execute/>
+                                    </action>
+                                </pluginExecution>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            com.googlecode.maven-java-formatter-plugin
+                                        </groupId>
+                                        <artifactId>
+                                            maven-java-formatter-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [0.3.1,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>format</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <execute/>
+                                    </action>
+                                </pluginExecution>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.antlr</groupId>
+                                        <artifactId>
+                                            antlr3-maven-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [3.3,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>antlr</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
         </pluginManagement>
-    </build> 
+    </build>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- License related information -->
+        <license.url>src/main/resources/LICENSE-Header.txt</license.url>
     </properties>
+    <licenses>
+        <license>
+            <name>RESOLVE Custom License Header</name>
+            <url>${license.url}</url>
+        </license>
+    </licenses>
 
     <scm>
         <connection>scm:svn:http://somerepository.com/svn_repo/trunk</connection>
@@ -212,4 +252,3 @@
         </dependency>
     </dependencies>
 </project>
-

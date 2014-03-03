@@ -1,14 +1,21 @@
+/**
+ * ColsASTErrorNode.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.parsing;
 
-import org.antlr.runtime.MissingTokenException;
-import org.antlr.runtime.NoViableAltException;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
-import org.antlr.runtime.UnwantedTokenException;
 import org.antlr.runtime.tree.CommonErrorNode;
-import org.antlr.runtime.tree.Tree;
-import org.antlr.runtime.tree.TreeNodeStream;
 
 public class ColsASTErrorNode extends ColsAST {
 
