@@ -1,3 +1,15 @@
+/**
+ * ResolveCompiler.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt;
 
 import java.io.UnsupportedEncodingException;
@@ -11,8 +23,6 @@ import edu.clemson.cs.r2jt.proving.Prover;
 import edu.clemson.cs.r2jt.proving2.ProverListener;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
-
-// import webui.utils.WebSocketWriter;
 
 public class ResolveCompiler {
 

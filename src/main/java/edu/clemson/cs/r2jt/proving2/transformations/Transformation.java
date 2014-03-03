@@ -1,15 +1,20 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Transformation.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
  */
 package edu.clemson.cs.r2jt.proving2.transformations;
 
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving2.model.LocalTheorem;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 /**
