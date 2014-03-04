@@ -207,7 +207,7 @@ public class InfixExp extends AbstractFunctionExp {
                     /* And the right Exp is NOT an implication */
                     //sb.append("\n");
                     sb.append(" ");
-                    printSpace(indent + 4, sb);
+                    //printSpace(indent + 4, sb);
                     sb.append(right.toString(indent + 4) + ")");
                 }
                 else if (right instanceof InfixExp) {

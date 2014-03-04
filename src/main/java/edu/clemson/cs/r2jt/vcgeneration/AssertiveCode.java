@@ -16,6 +16,7 @@ package edu.clemson.cs.r2jt.vcgeneration;
  * Libraries
  */
 import edu.clemson.cs.r2jt.absyn.*;
+import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
@@ -34,7 +35,7 @@ public class AssertiveCode {
     private CompileEnvironment myInstanceEnvironment;
 
     // Free Variables
-    private List<VarExp> myFreeVars;
+    private List<Exp> myFreeVars;
 
     // Verification Statements
     private List<VerificationStatement> myVerificationStmtList;
@@ -49,7 +50,7 @@ public class AssertiveCode {
     public AssertiveCode(CompileEnvironment env) {
         myInstanceEnvironment = env;
         myVerificationStmtList = new ArrayList<VerificationStatement>();
-        myFreeVars = new ArrayList<VarExp>();
+        myFreeVars = new ArrayList<Exp>();
         myConfirm = Exp.getTrueVarExp(env.getTypeGraph());
     }
 
@@ -98,15 +99,24 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Add the <code>VarExp</code> containing the name of the
+     * <p>Add the <code>Exp</code> containing the name of the
      * variable.</p>
      *
      * @param var The name of the variable.
      */
-    public void addFreeVar(VarExp var) {
+    public void addFreeVar(Exp var) {
+        // Check our list looking for var
+        boolean inFreeVar = false;
+        for (Exp freeVar : myFreeVars) {
+            if (freeVar.equals(var)) {
+                inFreeVar = true;
+                break;
+            }
+        }
+
         // Adds the variable into our free variable list
         // if it isn't in our list already.
-        if (!myFreeVars.contains(var)) {
+        if (!inFreeVar) {
             myFreeVars.add(var);
         }
     }
@@ -162,9 +172,9 @@ public class AssertiveCode {
 
         // Free variables
         retStr = retStr.concat("Free Variables: \n");
-        Iterator<VarExp> freeVarIt = myFreeVars.iterator();
+        Iterator<Exp> freeVarIt = myFreeVars.iterator();
         while (freeVarIt.hasNext()) {
-            VarExp current = freeVarIt.next();
+            Exp current = freeVarIt.next();
             retStr =
                     retStr.concat(current.toString(0) + " : "
                             + current.getMathType().toString());
@@ -238,6 +248,40 @@ public class AssertiveCode {
      */
     public Exp getFinalConfirm() {
         return Exp.copy(myConfirm);
+    }
+
+    /**
+     * <p>Returns the free variable with the
+     * specified name.</p>
+     *
+     * @param name Name of the variable.
+     * @param isGlobal Check all global free variables.
+     *
+     * @return The free variable in <code>VarExp</code> form.
+     */
+    public Exp getFreeVar(PosSymbol name, boolean isGlobal) {
+        Exp exp = null;
+        for (Exp v : myFreeVars) {
+            // Global free variables
+            if (isGlobal && v instanceof DotExp) {
+                DotExp dotExp = (DotExp) v;
+                Exp lastExp =
+                        dotExp.getSegments().get(
+                                dotExp.getSegments().size() - 1);
+                if (lastExp.containsVar(name.getName(), false)) {
+                    exp = v;
+                    break;
+                }
+            }
+            // Local free variables
+            else if (v instanceof VarExp
+                    && ((VarExp) v).getName().equals(name.getName())) {
+                exp = v;
+                break;
+            }
+        }
+
+        return exp;
     }
 
     /**
