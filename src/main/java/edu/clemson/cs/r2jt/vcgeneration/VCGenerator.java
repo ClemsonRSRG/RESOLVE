@@ -60,6 +60,9 @@ public class VCGenerator extends TreeWalkerVisitor {
     // Current Operation Entry
     private OperationEntry myCurrentOperationEntry;
 
+    // Decreasing Expression (if recursive)
+    private Exp myOperationDecreasingExp;
+
     // Compile Environment
     private CompileEnvironment myInstanceEnvironment;
 
@@ -107,6 +110,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Current items
         myCurrentModuleScope = null;
         myCurrentOperationEntry = null;
+        myOperationDecreasingExp = null;
 
         // Instance Environment
         myInstanceEnvironment = env;
@@ -182,6 +186,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Verbose Mode Debug Messages
             myVCBuffer.append("\n_____________________ \n\n");
 
+            myOperationDecreasingExp = null;
             myCurrentOperationEntry = null;
             myCurrentModuleScope = null;
         }
@@ -501,43 +506,31 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @param ensures The <code>Exp</code> containing the ensures clause.
      * @param opLocation The <code>Location</code> for the operation
+     * @param parameterVarDecList The list of parameter variables for the operation.
      *
      * @return The modified ensures clause <code>Exp</code>.
      */
-    private Exp modifyEnsuresByParameter(Exp ensures, Location opLocation) {
-        // Obtain the list of parameters
-        List<ParameterVarDec> parameterVarDecList;
-        if (myCurrentOperationEntry.getDefiningElement() instanceof FacilityOperationDec) {
-            parameterVarDecList =
-                    ((FacilityOperationDec) myCurrentOperationEntry
-                            .getDefiningElement()).getParameters();
-        }
-        else {
-            parameterVarDecList =
-                    ((OperationDec) myCurrentOperationEntry
-                            .getDefiningElement()).getParameters();
-        }
-
+    private Exp modifyEnsuresByParameter(Exp ensures, Location opLocation,
+            List<ParameterVarDec> parameterVarDecList) {
         // Loop through each parameter
         for (ParameterVarDec p : parameterVarDecList) {
             // Ty is NameTy
             if (p.getTy() instanceof NameTy) {
                 NameTy pNameTy = (NameTy) p.getTy();
 
+                // Exp form of the parameter variable
+                VarExp parameterExp =
+                        new VarExp(p.getLocation(), null, p.getName().copy());
+                parameterExp.setMathType(pNameTy.getMathTypeValue());
+
+                // Create an old exp (#parameterExp)
+                OldExp oldParameterExp =
+                        new OldExp(p.getLocation(), Exp.copy(parameterExp));
+                oldParameterExp.setMathType(pNameTy.getMathTypeValue());
+
                 // Preserves or Restores mode
                 if (p.getMode() == Mode.PRESERVES
                         || p.getMode() == Mode.RESTORES) {
-                    // Exp form of the parameter variable
-                    VarExp parameterExp =
-                            new VarExp(p.getLocation(), null, p.getName()
-                                    .copy());
-                    parameterExp.setMathType(pNameTy.getMathTypeValue());
-
-                    // Create an old exp (#parameterExp)
-                    OldExp oldParameterExp =
-                            new OldExp(p.getLocation(), Exp.copy(parameterExp));
-                    oldParameterExp.setMathType(pNameTy.getMathTypeValue());
-
                     // Create an equals expression of the form "parameterExp = #parameterExp"
                     EqualsExp equalsExp =
                             new EqualsExp(opLocation, parameterExp,
@@ -569,22 +562,57 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
                 // Evaluates mode
                 else if (p.getMode() == Mode.EVALUATES) {
-                    // Exp form of the parameter variable
-                    VarExp parameterExp =
-                            new VarExp(p.getLocation(), null, p.getName()
-                                    .copy());
-                    parameterExp.setMathType(pNameTy.getMathTypeValue());
-
-                    // Create an old exp (#parameterExp)
-                    OldExp oldParameterExp =
-                            new OldExp(p.getLocation(), Exp.copy(parameterExp));
-                    oldParameterExp.setMathType(pNameTy.getMathTypeValue());
-
                     // Replace parameterExp with oldParameterExp in the
                     // ensures clause.
                     ensures = replace(ensures, parameterExp, oldParameterExp);
                 }
+                // Clears mode
+                else if (p.getMode() == Mode.CLEARS) {
+                    // Query for the type entry in the symbol table
+                    ProgramTypeEntry typeEntry =
+                            searchProgramType(pNameTy.getLocation(), pNameTy
+                                    .getName());
 
+                    // Obtain the original dec from the AST
+                    TypeDec type = (TypeDec) typeEntry.getDefiningElement();
+
+                    // Obtain the exemplar in VarExp form
+                    VarExp exemplar =
+                            new VarExp(null, null, type.getExemplar());
+                    exemplar.setMathType(pNameTy.getMathTypeValue());
+
+                    // Deep copy the original initialization ensures and the constraint
+                    Exp init = Exp.copy(type.getInitialization().getEnsures());
+
+                    // Replace the formal with the actual
+                    init = Exp.replace(init, exemplar, parameterExp);
+
+                    // Set the details for the new location
+                    if (init.getLocation() != null) {
+                        Location initLoc;
+                        if (ensures != null && ensures.getLocation() != null) {
+                            Location reqLoc = ensures.getLocation();
+                            initLoc = ((Location) reqLoc.clone());
+                        }
+                        else {
+                            initLoc = ((Location) opLocation.clone());
+                        }
+                        initLoc.setDetails("Condition from "
+                                + p.getMode().getModeName()
+                                + " parameter mode.");
+                        init.setLocation(initLoc);
+                    }
+
+                    // Create an AND infix expression with the ensures clause
+                    if (ensures != null
+                            && !ensures.equals(myTypeGraph.getTrueVarExp())) {
+                        ensures = myTypeGraph.formConjunct(ensures, init);
+                    }
+                    // Make initialization expression the ensures clause
+                    else {
+                        ensures = init;
+                    }
+                }
             }
             else {
                 // Ty not handled.
@@ -604,9 +632,24 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @return The modified ensures clause <code>Exp</code>.
      */
     private Exp modifyEnsuresClause(Exp ensures, Location opLocation) {
+        // Obtain the list of parameters for the current operation
+        List<ParameterVarDec> parameterVarDecList;
+        if (myCurrentOperationEntry.getDefiningElement() instanceof FacilityOperationDec) {
+            parameterVarDecList =
+                    ((FacilityOperationDec) myCurrentOperationEntry
+                            .getDefiningElement()).getParameters();
+        }
+        else {
+            parameterVarDecList =
+                    ((OperationDec) myCurrentOperationEntry
+                            .getDefiningElement()).getParameters();
+        }
+
         // Modifies the existing ensures clause based on
         // the parameter modes.
-        ensures = modifyEnsuresByParameter(ensures, opLocation);
+        ensures =
+                modifyEnsuresByParameter(ensures, opLocation,
+                        parameterVarDecList);
 
         return ensures;
     }
@@ -665,8 +708,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 pExp.setMathType(pNameTy.getMathTypeValue());
 
                 // Obtain the exemplar in VarExp form
-                VarExp exemplar =
-                        new VarExp(null, null, type.getExemplar());
+                VarExp exemplar = new VarExp(null, null, type.getExemplar());
                 exemplar.setMathType(pNameTy.getMathTypeValue());
 
                 // Deep copy the original initialization ensures and the constraint
@@ -1082,13 +1124,31 @@ public class VCGenerator extends TreeWalkerVisitor {
                 searchOperation(stmt.getLocation(), stmt.getQualifier(), stmt
                         .getName(), argTypes);
 
-        // TODO: Beware, it might also be a FacilityOperationDec
-        OperationDec opDec = (OperationDec) opEntry.getDefiningElement();
+        // Obtain an OperationDec from the OperationEntry
+        ResolveConceptualElement element = opEntry.getDefiningElement();
+        OperationDec opDec;
+        if (element instanceof OperationDec) {
+            opDec = (OperationDec) opEntry.getDefiningElement();
+        }
+        else {
+            FacilityOperationDec fOpDec =
+                    (FacilityOperationDec) opEntry.getDefiningElement();
+            opDec =
+                    new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
+                            fOpDec.getReturnTy(), fOpDec.getStateVars(), fOpDec
+                                    .getRequires(), fOpDec.getEnsures());
+        }
 
         // Get the ensures clause for this operation
         // Note: If there isn't an ensures clause, it is set to "True"
         if (opDec.getEnsures() != null) {
             ensures = Exp.copy(opDec.getEnsures());
+
+            // Set the location for the ensures clause
+            if (ensures.getLocation() != null) {
+                ensures.getLocation().setDetails(
+                        "Ensures Clause For " + opDec.getName());
+            }
         }
         else {
             ensures = myTypeGraph.getTrueVarExp();
@@ -1099,19 +1159,54 @@ public class VCGenerator extends TreeWalkerVisitor {
             requires = Exp.copy(opDec.getRequires());
         }
 
-        // TODO: Quantified Ensures clauses
-        //ensures =
-        //        modifyEnsuresIfCallingQuantified(ensures, opDec, assertion,
-        //                ensures);
+        // Check for recursive call of itself
+        if (myCurrentOperationEntry.getName().equals(opEntry.getName())
+                && myCurrentOperationEntry.getReturnType() != null) {
+            // Locate "N" (Natural Number)
+            MathSymbolEntry mse =
+                    searchMathSymbol(myOperationDecreasingExp.getLocation(),
+                            "N");
 
-        if (ensures.getLocation() != null) {
-            ensures.getLocation().setDetails(
-                    "Ensures Clause For " + opDec.getName());
+            // Create a new confirm statement using P_val and the decreasing clause
+            VarExp pVal;
+            try {
+                pVal =
+                        createVarExp(myOperationDecreasingExp.getLocation(),
+                                createPosSymbol("P_val"), mse.getTypeValue());
+
+                // Create a new infix expression
+                InfixExp exp =
+                        new InfixExp(stmt.getLocation(), Exp
+                                .copy(myOperationDecreasingExp),
+                                createPosSymbol("<"), pVal);
+                exp.setMathType(BOOLEAN);
+
+                // Create the new confirm statement
+                Location loc;
+                if (myOperationDecreasingExp.getLocation() != null) {
+                    loc =
+                            (Location) myOperationDecreasingExp.getLocation()
+                                    .clone();
+                }
+                else {
+                    loc = (Location) stmt.getLocation().clone();
+                }
+                loc.setDetails("Show Termination of Recursive Call");
+                setLocation(exp, loc);
+                ConfirmStmt conf = new ConfirmStmt(loc, exp);
+
+                // Add it to our list of assertions
+                myAssertion.addCode(conf);
+            }
+            catch (SymbolNotOfKindTypeException e) {
+                notAType(mse, myOperationDecreasingExp.getLocation());
+            }
         }
 
-        // TODO:  Check for  recursive call of itself
-        // TODO:  Modify ensures using the parameter modes
-        //ensures = modifyEnsuresForParameterModes(ensures, opDec, stmt);
+        // Modify ensures using the parameter modes
+        ensures =
+                modifyEnsuresByParameter(ensures, stmt.getLocation(), opDec
+                        .getParameters());
 
         // TODO :Replace PreCondition Variables
         //requires =
@@ -1473,6 +1568,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         // If yes, we will need to create an additional assume clause
         // (P_val = (decreasing clause)) in our list of assertions.
         if (decreasing != null) {
+            // Store for future use
+            myOperationDecreasingExp = decreasing;
+
             // Locate "N" (Natural Number)
             MathSymbolEntry mse =
                     searchMathSymbol(decreasing.getLocation(), "N");
