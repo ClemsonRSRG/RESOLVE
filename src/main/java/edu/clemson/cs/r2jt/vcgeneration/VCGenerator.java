@@ -660,12 +660,24 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Obtain the original dec from the AST
                 TypeDec type = (TypeDec) typeEntry.getDefiningElement();
 
+                // Convert p to a VarExp
+                VarExp pExp = new VarExp(null, null, p.getName());
+                pExp.setMathType(pNameTy.getMathTypeValue());
+
+                // Obtain the exemplar in VarExp form
+                VarExp exemplar =
+                        new VarExp(null, null, type.getExemplar());
+                exemplar.setMathType(pNameTy.getMathTypeValue());
+
                 // Deep copy the original initialization ensures and the constraint
                 Exp init = Exp.copy(type.getInitialization().getEnsures());
                 Exp constraint = Exp.copy(type.getConstraint());
 
                 // Only worry about replaces mode parameters
                 if (p.getMode() == Mode.REPLACES && init != null) {
+                    // Replace the formal with the actual
+                    init = Exp.replace(init, exemplar, pExp);
+
                     // Set the details for the new location
                     if (init.getLocation() != null) {
                         Location initLoc;
@@ -697,6 +709,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                 else {
                     if (constraint != null
                             && !constraint.equals(myTypeGraph.getTrueVarExp())) {
+                        // Replace the formal with the actual
+                        constraint = Exp.replace(constraint, exemplar, pExp);
+
                         // Set the details for the new location
                         if (constraint.getLocation() != null) {
                             Location constLoc;
