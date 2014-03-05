@@ -66,10 +66,22 @@ public class VCGenerator extends TreeWalkerVisitor {
     // Compile Environment
     private CompileEnvironment myInstanceEnvironment;
 
-    // Assertive Code
+    /**
+     * <p>The current assertion we are applying
+     * VC rules to.</p>
+     */
     private AssertiveCode myAssertion;
 
-    // This buffer holds the verbose data
+    /**
+     * <p>Section number for each section that
+     * we are generating assertive code for.</p>
+     */
+    private int mySectionID;
+
+    /**
+     * <p>This string buffer holds all the steps
+     * the VC generator takes to generate VCs.</p>
+     */
     private StringBuffer myVCBuffer;
 
     // ===========================================================
@@ -117,6 +129,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // VCs + Debugging String
         myAssertion = null;
+        mySectionID = 0;
         myVCBuffer = new StringBuffer(buildHeaderComment());
     }
 
@@ -125,17 +138,51 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
 
     // -----------------------------------------------------------
+    // ConceptBodyModuleDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void preConceptBodyModuleDec(ConceptBodyModuleDec dec) {
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\n--------------------------------------------- \n");
+        myVCBuffer.append("\n Concept Realization Name:\t");
+        myVCBuffer.append(dec.getName().getName());
+        myVCBuffer.append("\n Concept Name:\t");
+        myVCBuffer.append(dec.getConceptName().getName());
+        myVCBuffer.append("\n");
+        myVCBuffer.append("\n--------------------------------------------- \n");
+    }
+
+    // -----------------------------------------------------------
     // EnhancementBodyModuleDec
     // -----------------------------------------------------------
 
     @Override
     public void preEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
-
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\n--------------------------------------------- \n");
+        myVCBuffer.append("\n Enhancement Realization Name:\t");
+        myVCBuffer.append(dec.getName().getName());
+        myVCBuffer.append("\n Enhancement Name:\t");
+        myVCBuffer.append(dec.getEnhancementName().getName());
+        myVCBuffer.append("\n Concept Name:\t");
+        myVCBuffer.append(dec.getConceptName().getName());
+        myVCBuffer.append("\n");
+        myVCBuffer.append("\n--------------------------------------------- \n");
     }
 
-    @Override
-    public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
+    // -----------------------------------------------------------
+    // FacilityModuleDec
+    // -----------------------------------------------------------
 
+    @Override
+    public void preFacilityModuleDec(FacilityModuleDec dec) {
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\n--------------------------------------------- \n");
+        myVCBuffer.append("\n Facility Name:\t");
+        myVCBuffer.append(dec.getName().getName());
+        myVCBuffer.append("\n");
+        myVCBuffer.append("\n--------------------------------------------- \n");
     }
 
     // -----------------------------------------------------------
@@ -151,9 +198,12 @@ public class VCGenerator extends TreeWalkerVisitor {
         ModuleIdentifier id = mySymbolTable.getScope(dec).getRootModule();
         try {
             // Verbose Mode Debug Messages
-            myVCBuffer.append("\n Procedure Name:\t");
-            myVCBuffer.append(dec.getName().getSymbol().toString());
-            myVCBuffer.append("\n");
+            myVCBuffer.append("\n=========================");
+            myVCBuffer.append(" Section: ");
+            myVCBuffer.append(mySectionID);
+            myVCBuffer.append("\t Procedure Name: ");
+            myVCBuffer.append(dec.getName().getName());
+            myVCBuffer.append(" =========================\n");
 
             // Obtain the module dec and use it to obtain the global requires clause
             myCurrentModuleScope = mySymbolTable.getModuleScope(id);
@@ -183,12 +233,10 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Apply proof rules
             applyEBRules();
 
-            // Verbose Mode Debug Messages
-            myVCBuffer.append("\n_____________________ \n\n");
-
             myOperationDecreasingExp = null;
             myCurrentOperationEntry = null;
             myCurrentModuleScope = null;
+            mySectionID++;
         }
         catch (NoSuchSymbolException nsse) {
             System.err.println("Module " + id
@@ -300,11 +348,8 @@ public class VCGenerator extends TreeWalkerVisitor {
      * file is derived.</p>
      */
     private String buildHeaderComment() {
-        return "//\n"
-                + "// Generated by the RESOLVE VC Generator, February 2014 version"
-                + "\n" + "// from file:  "
-                + myInstanceEnvironment.getTargetFile().getName() + "\n"
-                + "// on:         " + new Date() + "\n" + "//\n";
+        return "VCs for " + myInstanceEnvironment.getTargetFile().getName()
+                + " generated " + new Date();
     }
 
     /**
@@ -1604,9 +1649,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                 && ((VarExp) assume.getAssertion()).equals(Exp
                         .getTrueVarExp(myTypeGraph))) {
             // Verbose Mode Debug Messages
-            myVCBuffer.append("\n_____________________ \n");
             myVCBuffer.append("\nAssume Rule Applied and Simplified: \n");
             myVCBuffer.append(myAssertion.assertionToString());
+            myVCBuffer.append("\n_____________________ \n");
         }
         else {
             // Obtain the current final confirm clause
@@ -1620,9 +1665,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             myAssertion.setFinalConfirm(newConf);
 
             // Verbose Mode Debug Messages
-            myVCBuffer.append("\n_____________________ \n");
             myVCBuffer.append("\nAssume Rule Applied: \n");
             myVCBuffer.append(myAssertion.assertionToString());
+            myVCBuffer.append("\n_____________________ \n");
         }
     }
 
@@ -1659,9 +1704,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (confirm.getAssertion() instanceof VarExp
                 && ((VarExp) confirm.getAssertion()).equals(Exp
                         .getTrueVarExp(myTypeGraph))) {
-            myVCBuffer.append("\n_____________________ \n");
             myVCBuffer.append("\nConfirm Rule Applied and Simplified: \n");
             myVCBuffer.append(myAssertion.assertionToString());
+            myVCBuffer.append("\n_____________________ \n");
         }
         else {
             // Obtain the current final confirm clause
@@ -1684,9 +1729,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             myAssertion.setFinalConfirm(newConf);
 
             // Verbose Mode Debug Messages
-            myVCBuffer.append("\n_____________________ \n");
             myVCBuffer.append("\nConfirm Rule Applied: \n");
             myVCBuffer.append(myAssertion.assertionToString());
+            myVCBuffer.append("\n_____________________ \n");
         }
     }
 
@@ -1702,9 +1747,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (assertion instanceof VarExp
                 && assertion.equals(myTypeGraph.getTrueVarExp())) {
             // Verbose Mode Debug Messages
-            myVCBuffer.append("\n_____________________ \n");
             myVCBuffer.append("\nAssume Rule Applied and Simplified: \n");
             myVCBuffer.append(myAssertion.assertionToString());
+            myVCBuffer.append("\n_____________________ \n");
 
             return;
         }
@@ -1722,9 +1767,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         myAssertion.setFinalConfirm(currentFinalConfirm);
 
         // Verbose Mode Debug Messages
-        myVCBuffer.append("\n_____________________ \n");
         myVCBuffer.append("\nAssume Rule Applied: \n");
         myVCBuffer.append(myAssertion.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
     }
 
     /**
@@ -1868,9 +1913,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Verbose Mode Debug Messages
-        myVCBuffer.append("\n_____________________ \n");
         myVCBuffer.append("\nOperation Call Rule Applied: \n");
         myVCBuffer.append(myAssertion.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
     }
 
     /**
@@ -1885,9 +1930,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (assertion instanceof VarExp
                 && assertion.equals(myTypeGraph.getTrueVarExp())) {
             // Verbose Mode Debug Messages
-            myVCBuffer.append("\n_____________________ \n");
             myVCBuffer.append("\nConfirm Rule Applied and Simplified: \n");
             myVCBuffer.append(myAssertion.assertionToString());
+            myVCBuffer.append("\n_____________________ \n");
 
             return;
         }
@@ -1910,9 +1955,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             myAssertion.setFinalConfirm(assertion);
 
             // Verbose Mode Debug Messages
-            myVCBuffer.append("\n_____________________ \n");
             myVCBuffer.append("\nConfirm Rule Applied and Simplified: \n");
             myVCBuffer.append(myAssertion.assertionToString());
+            myVCBuffer.append("\n_____________________ \n");
         }
         else {
             // Create a new and expression
@@ -1931,9 +1976,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             myAssertion.setFinalConfirm(newConf);
 
             // Verbose Mode Debug Messages
-            myVCBuffer.append("\n_____________________ \n");
             myVCBuffer.append("\nConfirm Rule Applied: \n");
             myVCBuffer.append(myAssertion.assertionToString());
+            myVCBuffer.append("\n_____________________ \n");
         }
     }
 
@@ -2074,9 +2119,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         myAssertion.setFinalConfirm(conf);
 
         // Verbose Mode Debug Messages
-        myVCBuffer.append("\n_____________________ \n");
         myVCBuffer.append("\nSwap Rule Applied: \n");
         myVCBuffer.append(myAssertion.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
     }
 
     /**
@@ -2141,9 +2186,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         myAssertion.setFinalConfirm(ensures);
 
         // Verbose Mode Debug Messages
-        myVCBuffer.append("\n_____________________ \n");
         myVCBuffer.append("\nProcedure Declaration Rule Applied: \n");
         myVCBuffer.append(myAssertion.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
     }
 
     /**
@@ -2156,9 +2201,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         myAssertion.setFinalConfirm(conf);
 
         // Verbose Mode Debug Messages
-        myVCBuffer.append("\n_____________________ \n");
         myVCBuffer.append("\nRemember Rule Applied: \n");
         myVCBuffer.append(myAssertion.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
     }
 
     /**
@@ -2223,8 +2268,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Verbose Mode Debug Messages
-        myVCBuffer.append("\n_____________________ \n");
         myVCBuffer.append("\nVariable Declaration Rule Applied: \n");
         myVCBuffer.append(myAssertion.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
     }
 }
