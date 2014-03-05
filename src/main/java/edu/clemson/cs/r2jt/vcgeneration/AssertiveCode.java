@@ -18,7 +18,6 @@ package edu.clemson.cs.r2jt.vcgeneration;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 import java.util.*;
 
@@ -31,27 +30,30 @@ public class AssertiveCode {
     // Global Variables 
     // ===========================================================
 
-    // Compile Environment
-    private CompileEnvironment myInstanceEnvironment;
+    /**
+     * <p>Our current final confirm statement.</p>
+     */
+    private Exp myConfirm;
 
-    // Free Variables
+    /**
+     * <p>The list of free variables.</p>
+     */
     private List<Exp> myFreeVars;
 
-    // Verification Statements
+    /**
+     * <p>List of verification statements that we
+     * need to apply proof rules to./p>
+     */
     private List<VerificationStatement> myVerificationStmtList;
-
-    // Final Confirm Statement
-    private Exp myConfirm;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     public AssertiveCode(CompileEnvironment env) {
-        myInstanceEnvironment = env;
-        myVerificationStmtList = new ArrayList<VerificationStatement>();
-        myFreeVars = new ArrayList<Exp>();
         myConfirm = Exp.getTrueVarExp(env.getTypeGraph());
+        myFreeVars = new ArrayList<Exp>();
+        myVerificationStmtList = new ArrayList<VerificationStatement>();
     }
 
     // ===========================================================
