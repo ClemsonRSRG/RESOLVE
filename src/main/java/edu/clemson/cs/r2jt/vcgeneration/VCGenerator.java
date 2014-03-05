@@ -2348,9 +2348,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
 
                 // Verbose Mode Debug Messages
-                myVCBuffer.append("\n_____________________ \n");
                 myVCBuffer.append("\nVariable Declaration Rule Applied: \n");
                 myVCBuffer.append(myAssertion.assertionToString());
+                myVCBuffer.append("\n_____________________ \n");
             }
         }
         else {

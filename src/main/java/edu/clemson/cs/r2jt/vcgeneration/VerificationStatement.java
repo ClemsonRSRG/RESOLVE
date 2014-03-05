@@ -78,7 +78,7 @@ public class VerificationStatement implements Cloneable {
                 if (myAssertion instanceof Exp) {
                     clone =
                             new VerificationStatement(myType,
-                                    ((Exp) myAssertion).clone());
+                                    Exp.copy((Exp) myAssertion));
                 }
                 return clone;
             }
