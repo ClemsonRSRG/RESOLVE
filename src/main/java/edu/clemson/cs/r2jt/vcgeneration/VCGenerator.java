@@ -748,8 +748,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 return true;
             }
             // Case #2: P_val
-            else if (strName.equals(createPValExp(name.getLocation()).getName()
-                    .getName())) {
+            else if (strName.equals("P_val")) {
                 return true;
             }
         }
