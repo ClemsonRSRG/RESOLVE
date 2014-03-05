@@ -487,7 +487,7 @@ public class Controller {
 
             if (myInstanceEnvironment.flags
                     .isFlagSet(VCGenerator.FLAG_ALTVERIFY_VC)) {
-                generateVCs(table, dec);
+                generateVCs(symbolTable, dec);
             }
 
             String currFileName = dec.getName().getFile().toString();
@@ -1536,13 +1536,16 @@ public class Controller {
 
     // Invoke the new VC Generator 
     // -YS
-    private void generateVCs(OldSymbolTable table, ModuleDec dec) {
+    private void generateVCs(ScopeRepository table, ModuleDec dec) {
 
         // Create a new instance of the VC Generator and invoke the
         // tree walker on it.
         VCGenerator vcgen = new VCGenerator(table, myInstanceEnvironment);
         TreeWalker tw = new TreeWalker(vcgen);
         tw.visit(dec);
+
+        // Print Debug Information
+        System.out.println(vcgen.verboseOutput());
     }
 
     private void verifyModuleDec(ScopeRepository realTable,

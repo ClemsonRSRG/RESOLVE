@@ -81,7 +81,7 @@ public class FacilityOperationDec extends Dec {
         this.variables = variables;
         this.aux_variables = aux_variables;
         this.statements = statements;
-        this.recursive = recursive;
+        this.recursive = false;
     }
 
     public FacilityOperationDec(PosSymbol name,
