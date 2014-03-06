@@ -319,6 +319,17 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             myCreatedFacDecList.clear();
         }
 
+        // TODO: UGLY! Needs to go!
+        List<UsesItem> hackUsesItem = dec.getUsesItems();
+        if (hackUsesItem == null) {
+            hackUsesItem = new List<UsesItem>();
+        }
+        hackUsesItem.add(new UsesItem(new PosSymbol(null, Symbol
+                .symbol("Static_Array_Template"))));
+        hackUsesItem.add(new UsesItem(new PosSymbol(null, Symbol
+                .symbol("Location_Linking_Template_1"))));
+        dec.setUsesItems(hackUsesItem);
+
         // Clean up myUtilities
         myUtilities.finalModuleDec();
     }
