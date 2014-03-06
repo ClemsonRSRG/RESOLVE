@@ -104,7 +104,8 @@ public class JavaTranslator extends AbstractTranslator {
     public void postFacilityModuleDec(FacilityModuleDec node) {
 
         String invocationName = null;
-
+        boolean buildingJar =
+                myInstanceEnvironment.flags.isFlagSet("createJar");
         List<OperationEntry> locals =
                 myScope.query(new EntryTypeQuery(OperationEntry.class,
                         ImportStrategy.IMPORT_NONE,
@@ -116,7 +117,7 @@ public class JavaTranslator extends AbstractTranslator {
             }
         }
 
-        if (invocationName == null) {
+        if (invocationName == null && buildingJar) {
             throw new NoSuchMethodError("Facility " + node.getName().getName()
                     + " cannot be executed in Java. Specify a main!");
         }
@@ -637,25 +638,24 @@ public class JavaTranslator extends AbstractTranslator {
         }
     }
 
-    // TODO : Figure out if this is even close to what we need.
     @Override
     public void preSwapStmt(SwapStmt node) {
 
         ST swapStmt;
-        FacilityEntry definingFacility =
-                getDefiningFacilityEntry(node.getLeft().getProgramType());
 
-        if (definingFacility != null) {
-            swapStmt =
-                    myGroup.getInstanceOf("qualified_call").add("qualifier",
-                            definingFacility.getName()).add("name", "swap");
-        }
-        else {
+        if (node.getLeft().getProgramType() instanceof PTGeneric) {
             swapStmt =
                     myGroup.getInstanceOf("unqualified_call").add("name",
                             "swap");
         }
+        else {
+            FacilityEntry definingFacility =
+                    getDefiningFacilityEntry(node.getLeft().getProgramType());
 
+            swapStmt =
+                    myGroup.getInstanceOf("qualified_call").add("qualifier",
+                            definingFacility.getName()).add("name", "swap");
+        }
         myActiveTemplates.push(swapStmt);
     }
 
