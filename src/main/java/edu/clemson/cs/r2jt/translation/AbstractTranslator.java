@@ -374,10 +374,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     @Override
     public void preVarDec(VarDec node) {
-        if (!node.getName().getName().startsWith("_")) {
-            addVariableTemplate(node.getTy().getProgramTypeValue(), node
-                    .getName().getName());
-        }
+        addVariableTemplate(node.getTy().getProgramTypeValue(), node.getName()
+                .getName());
     }
 
     @Override
