@@ -679,6 +679,58 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>Checks to see if the initialization ensures clause
+     * passed is in the simple form where one side has a
+     * <code>VarExp</code>.</p>
+     *
+     * @param initEnsures The initialization ensures clause,
+     *                    or part of it that we are currently
+     *                    checking.
+     * @param name The name of the variable we are checking.
+     *
+     * @return True/False
+     */
+    private boolean isInitEnsuresSimpleForm(Exp initEnsures, PosSymbol name) {
+        boolean isSimple = false;
+
+        // Case #1: EqualExp in initEnsures
+        if (initEnsures instanceof EqualsExp) {
+            EqualsExp exp = (EqualsExp) initEnsures;
+            // Recursively call this on the left and
+            // right hand side. Only one of the sides
+            // needs to be a VarExp.
+            if (isInitEnsuresSimpleForm(exp.getLeft(), name)
+                    || isInitEnsuresSimpleForm(exp.getRight(), name)) {
+                isSimple = true;
+            }
+        }
+        // Case #2: InfixExp in initEnsures
+        else if (initEnsures instanceof InfixExp) {
+            InfixExp exp = (InfixExp) initEnsures;
+            // Only check if we have an "and" expression
+            if (exp.getOpName().equals("and")) {
+                // Recursively call this on the left and
+                // right hand side. Both sides need to be
+                // a VarExp.
+                if (isInitEnsuresSimpleForm(exp.getLeft(), name)
+                        && isInitEnsuresSimpleForm(exp.getRight(), name)) {
+                    isSimple = true;
+                }
+            }
+        }
+        // Case #3: VarExp = initEnsures
+        else if (initEnsures instanceof VarExp) {
+            VarExp exp = (VarExp) initEnsures;
+            // Check to see if the name matches the initEnsures
+            if (exp.getName().equals(name.getName())) {
+                isSimple = true;
+            }
+        }
+
+        return isSimple;
+    }
+
+    /**
      * <p>Checks to see if the expression passed in is a
      * verification variable or not. A verification variable
      * is either "P_val" or starts with "?".</p>
@@ -696,8 +748,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 return true;
             }
             // Case #2: P_val
-            else if (strName.equals(createPValExp(name.getLocation()).getName()
-                    .getName())) {
+            else if (strName.equals("P_val")) {
                 return true;
             }
         }
@@ -2260,16 +2311,63 @@ public class VCGenerator extends TreeWalkerVisitor {
             loc.setDetails("Constraints on " + varDec.getName().getName());
             setLocation(constraint, loc);
 
-            // TODO: Finish this!
+            // Check if our initialization ensures clause is
+            // in simple form.
+            if (isInitEnsuresSimpleForm(init, varDec.getName())) {
+                // Only deal with initialization ensures of the
+                // form left = right
+                if (init instanceof EqualsExp) {
+                    EqualsExp exp = (EqualsExp) init;
+
+                    // If the initialization of the variable sets
+                    // the variable equal to a value, then we need
+                    // replace the formal with the actual.
+                    if (exp.getLeft() instanceof VarExp) {
+                        PosSymbol exemplar = type.getExemplar();
+
+                        // TODO: Figure out this evil dragon!
+                    }
+                }
+            }
+            // We must have a complex initialization ensures clause
+            else {
+                // The variable must be a variable dot expression,
+                // therefore we will need to extract the name.
+                String varName = varDec.getName().getName();
+                int dotIndex = varName.indexOf(".");
+                if (dotIndex > 0)
+                    varName = varName.substring(0, dotIndex);
+
+                // Check if our confirm clause uses this variable
+                Exp finalConfirm = myAssertion.getFinalConfirm();
+                if (finalConfirm.containsVar(varName, false)) {
+                    // We don't have any constraints, so the initialization
+                    // clause implies the final confirm statement and
+                    // set this as our new final confirm statement.
+                    if (constraint.equals(myTypeGraph.getTrueVarExp())) {
+                        myAssertion.setFinalConfirm(myTypeGraph.formImplies(
+                                init, finalConfirm));
+                    }
+                    // We actually have a constraint, so both the initialization
+                    // and constraint imply the final confirm statement.
+                    // This then becomes our new final confirm statement.
+                    else {
+                        InfixExp exp =
+                                myTypeGraph.formConjunct(constraint, init);
+                        myAssertion.setFinalConfirm(myTypeGraph.formImplies(
+                                exp, finalConfirm));
+                    }
+                }
+
+                // Verbose Mode Debug Messages
+                myVCBuffer.append("\nVariable Declaration Rule Applied: \n");
+                myVCBuffer.append(myAssertion.assertionToString());
+                myVCBuffer.append("\n_____________________ \n");
+            }
         }
         else {
             // Ty not handled.
             tyNotHandled(varDec.getTy(), varDec.getLocation());
         }
-
-        // Verbose Mode Debug Messages
-        myVCBuffer.append("\nVariable Declaration Rule Applied: \n");
-        myVCBuffer.append(myAssertion.assertionToString());
-        myVCBuffer.append("\n_____________________ \n");
     }
 }

@@ -276,7 +276,7 @@ public class Utilities {
             for (RepresentationDec d : myRepresentationDecList) {
                 // Locate a record with the record name
                 // passed in.
-                if (d.getName().equals(rName)) {
+                if (d.getName().equals(rName.getName())) {
                     RecordTy recordTy = (RecordTy) d.getRepresentation();
 
                     // Locate the variable inside the record

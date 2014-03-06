@@ -207,6 +207,8 @@ public class VariableDotExp extends VariableExp {
                         semanticExp);
 
         copy.setType(type);
+        copy.setMathType(myMathType);
+        copy.setMathTypeValue(myMathTypeValue);
 
         return copy;
     }

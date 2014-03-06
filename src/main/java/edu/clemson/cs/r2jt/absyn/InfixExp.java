@@ -176,7 +176,7 @@ public class InfixExp extends AbstractFunctionExp {
 
         if (left != null) {
             if (opName.toString().equals("implies")) {
-                printSpace(indent, sb);
+                //printSpace(indent, sb);
                 sb.append("(" + left.toString(0) + " ");
             }
             else {
