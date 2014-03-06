@@ -22,6 +22,7 @@ import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -64,6 +65,12 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     private Map<Statement, List<CallStmt>> myCreatedSwapCallMap;
 
     /**
+     * <p>List of new variable expressions that need to be
+     * added to your changing clause list.</p>
+     */
+    private List<VariableExp> myNewChangingVarExpList;
+
+    /**
      * <p>A mapping between the original statement and the
      * new statement that needs to take the place of the
      * original statement in our AST.</p>
@@ -92,6 +99,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         myCreatedFacDecList = new List<FacilityDec>();
         myCreatedStmtMap = new Map<Statement, List<Statement>>();
         myCreatedSwapCallMap = new Map<Statement, List<CallStmt>>();
+        myNewChangingVarExpList = null;
         myReplacingStmtMap = new Map<Statement, Statement>();
         myTempFacDecList = null;
         myUtilities = new Utilities();
@@ -717,7 +725,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             // Check if the dotExp contains an array or not.
             if (containsArray(dotExp)) {
                 // Obtain name of the array
-                VariableDotExp arrayName = (VariableDotExp) dotExp.copy();
+                VariableDotExp arrayName = dotExp;
 
                 // Modify the last segment
                 List<VariableExp> tempList = arrayName.getSegments();
@@ -900,7 +908,23 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     // -----------------------------------------------------------
 
     @Override
+    public void preWhileStmt(WhileStmt stmt) {
+        myNewChangingVarExpList = new List<VariableExp>();
+    }
+
+    @Override
     public void postWhileStmt(WhileStmt stmt) {
+        // Update the changing variable list if
+        // we have newly created variable expressions
+        if (!myNewChangingVarExpList.isEmpty()) {
+            List<VariableExp> changingList = stmt.getChanging();
+            for (VariableExp v : myNewChangingVarExpList) {
+                changingList.add(v);
+            }
+            stmt.setChanging(changingList);
+            myNewChangingVarExpList = null;
+        }
+
         // Update our list of statements with any
         // PreProcessor created statements.
         List<Statement> stmtList = stmt.getStatements();
@@ -981,14 +1005,19 @@ public class PreProcessor extends TreeWalkerStackVisitor {
             Location location = current.getLocation();
             PosSymbol name = null;
             NameTy arrayTy = null;
+            ProgramExp argument = null;
+            VariableExp newNameExp = null;
 
             // Check if it is a VariableArrayExp.
             if (current instanceof VariableArrayExp) {
                 isArrayExp = true;
                 name = ((VariableArrayExp) current).getName();
+                argument = ((VariableArrayExp) current).getArgument();
 
                 // Locate the type of the array.
                 VarDec arrayVarDec = myUtilities.searchVarDecLists(name);
+                newNameExp =
+                        createVariableNameExp(location, "", name.getName(), "");
                 NameTy facilityTy = (NameTy) arrayVarDec.getTy();
                 arrayTy =
                         myArrayFacilityMap.get(facilityTy.getQualifier()
@@ -1008,6 +1037,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                 if (last instanceof VariableArrayExp) {
                     isArrayExp = true;
                     name = ((VariableArrayExp) last).getName();
+                    argument = ((VariableArrayExp) last).getArgument();
 
                     // Locate the array declaration inside the record
                     VarDec recordVarDec =
@@ -1019,6 +1049,14 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                         VarDec arrayVarDec =
                                 myUtilities.searchRecords(recordTy.getName(),
                                         name);
+                        List<VariableExp> newSegList = segList;
+                        newSegList.remove(segList.size() - 1);
+                        newSegList.add(createVariableNameExp(location, "", name
+                                .getName(), ""));
+                        newNameExp =
+                                new VariableDotExp(current.getLocation(),
+                                        newSegList, ((VariableDotExp) current)
+                                                .getSemanticExp());
                         NameTy facilityTy = (NameTy) arrayVarDec.getTy();
                         arrayTy =
                                 myArrayFacilityMap.get(facilityTy
@@ -1043,6 +1081,13 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                         createVariableNameExp(location, "_ArrayIndex_", name
                                 .getName(), "_" + myCounter++);
 
+                // Add these to our list of new changing variable list
+                // if we are in a while loop
+                if (myNewChangingVarExpList != null) {
+                    myNewChangingVarExpList.add(newExp);
+                    myNewChangingVarExpList.add(newIndexExp);
+                }
+
                 // Create new variables for these two new variable
                 // expressions and add these to our list of local
                 // variables.
@@ -1053,18 +1098,27 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                 myUtilities.addNewLocalVariable(expVarDec);
                 myUtilities.addNewLocalVariable(indexVarDec);
 
+                // If our index argument list is just a variable
+                // expression, apply Replica to it
+                if (argument instanceof VariableExp) {
+                    List<ProgramExp> list = new List<ProgramExp>();
+                    list.add(argument);
+                    argument =
+                            new ProgramParamExp(location, new PosSymbol(
+                                    location, Symbol.symbol("Replica")), list,
+                                    null);
+                }
+
                 // Store the index of the array inside "newIndexExp" by
                 // creating a <code>FunctionAssignStmt</code> and add it
                 // to the list of statements to be inserted later.
                 FuncAssignStmt funcAssignStmt =
-                        new FuncAssignStmt(location, newIndexExp,
-                                ((VariableArrayExp) current).getArgument());
+                        new FuncAssignStmt(location, newIndexExp, argument);
                 newStmtList.add(funcAssignStmt);
 
                 // Create a call to Swap_Entry
                 CallStmt swapEntryStmt =
-                        createSwapEntryCall(location, createVariableNameExp(
-                                location, "", name.getName(), ""), newExp,
+                        createSwapEntryCall(location, newNameExp, newExp,
                                 newIndexExp);
                 newCallStmtList.add(swapEntryStmt);
 
@@ -1503,11 +1557,19 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         // Check to see if we have any statements we need
         // to add to the original list.
         if (!myReplacingStmtMap.isEmpty()) {
+            List<Statement> tempList = new List<Statement>();
             Set<Statement> keys = myReplacingStmtMap.keySet();
 
             // Loop through each statement
             for (Statement s : keys) {
                 stmtList = replaceStatementListWithNewStmt(s, stmtList);
+                tempList.add(s);
+            }
+
+            // Remove statements from the map
+            // Note: Can't do it in the loop above because Java
+            // throws a concurrent access error!
+            for (Statement s : tempList) {
                 myReplacingStmtMap.remove(s);
             }
         }

@@ -2314,7 +2314,20 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Check if our initialization ensures clause is
             // in simple form.
             if (isInitEnsuresSimpleForm(init, varDec.getName())) {
-                // TODO: Fill in this part
+                // Only deal with initialization ensures of the
+                // form left = right
+                if (init instanceof EqualsExp) {
+                    EqualsExp exp = (EqualsExp) init;
+
+                    // If the initialization of the variable sets
+                    // the variable equal to a value, then we need
+                    // replace the formal with the actual.
+                    if (exp.getLeft() instanceof VarExp) {
+                        PosSymbol exemplar = type.getExemplar();
+
+                        // TODO: Figure out this evil dragon!
+                    }
+                }
             }
             // We must have a complex initialization ensures clause
             else {

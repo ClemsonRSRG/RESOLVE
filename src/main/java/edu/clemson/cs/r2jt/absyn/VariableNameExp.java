@@ -191,6 +191,8 @@ public class VariableNameExp extends VariableExp {
     public Exp copy() {
         Exp result = new VariableNameExp(location, qualifier, name);
         result.setType(type);
+        result.setMathType(myMathType);
+        result.setMathTypeValue(myMathTypeValue);
 
         return result;
     }

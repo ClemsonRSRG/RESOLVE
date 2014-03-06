@@ -208,4 +208,13 @@ public class VariableArrayExp extends VariableExp {
         argument = (ProgramExp) e;
     }
 
+    public Exp copy() {
+        VariableArrayExp result =
+                new VariableArrayExp(location, qualifier, name, argument);
+        result.setType(type);
+        result.setMathType(myMathType);
+        result.setMathTypeValue(myMathTypeValue);
+
+        return result;
+    }
 }

@@ -199,4 +199,15 @@ public class VariableRecordExp extends VariableExp {
     public void setSubExpression(int index, Exp e) {
         fields.set(index, (VariableExp) e);
     }
+
+    public Exp copy() {
+        VariableRecordExp result =
+                new VariableRecordExp(location, qualifier, name, fields);
+
+        result.setType(getType());
+        result.setMathType(myMathType);
+        result.setMathTypeValue(myMathTypeValue);
+
+        return result;
+    }
 }
