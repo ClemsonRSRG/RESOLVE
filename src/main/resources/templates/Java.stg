@@ -24,8 +24,8 @@ package <directories; separator = {.}>;
 include(directories) ::= "import <directories; separator = {.}>.*;"
 
 interface_class(name, extend, classes, functions, public=true) ::= <<
-<if(public)>public interface <name> extends <extend> {
-<else>interface <name> extends <extend> {<endif>
+<if(public)>public interface <name> <if(extend)>extends <extend><endif> {
+<else>interface <name> <if(extend)>extends <extend><endif> {<endif>
 	<classes; separator = "\n">
 	
     <functions; separator = "\n">
@@ -104,6 +104,7 @@ public class <name> implements <implement; separator = ", "> {
 	<parameters : {p | <p>;}; separator = "\n">
 	<variables  : {j | <j.type> <j.name>;}; separator = "\n">
 	<first(implement)> con;
+	<classes>
 
 	public <name>(<parameters; separator = ", ">, <first(implement)> con) {
 		<parameters : {p | this.<p.name> = <p.name>;}; separator = "\n">
@@ -129,7 +130,7 @@ public class <name> implements <implement; separator = ", "> {
 			return method.invoke(this, args);
 		}
 		<rest(functions) :
-            {e | else if ("<e.name>".equals(method.getName()) {
+            {e | else if ("<e.name>".equals(method.getName())) {
 			return method.invoke(this, args);
             \} }>
         else {
@@ -157,20 +158,14 @@ public class <name> implements <implement; separator = ", "> {
 enhanced_stmt(returns, name, arguments) ::= <%
     <if(returns)>return<endif> con.<name>(<arguments; separator = ", ">);%>
 
-// You need to look up the function and see what the declared type of the
-// parameters for the actual function...
-//new BubbleSort_Realiz.Order() {
-//    public void Order(RType  parm1, RType  parm2) {
- //       Ordered((Integer_Template.Integer)p0, (Integer_Template.Integer)p1);
- //   }
-//}
-operation_argument_item(realization, actualQualifier, actualName,
-                        formalname, type, function) ::= <<
+operation_argument_item(realization, actualQualifier, actualName, type,
+function, castTypes) ::= <<
 
 new <realization>.<function.name>() {
     <function   :  {f | <function_def("public", f.type, f.name, f.parameters,
                                   f.facilities, f.variables,
-    f.parameters    : { p | <actualQualifier>.<actualName>((TYPE)<p.name>);}
+    f.parameters    : { p | <actualQualifier>.<actualName>(<castTypes : {c |
+    (<c>) <p.name>}; separator = ", ">);}
     )>}>
 }>>
 
@@ -252,6 +247,9 @@ unqualified_call(name, arguments) ::= <%
 
 qualified_call(qualifier, name, arguments) ::= <%
     <qualifier>.<name>(<arguments; separator = ", ">);%>
+
+enhanced_call(enhancementname, facilityname, name, arguments) ::= <%
+    ((<enhancementname>)<facilityname>).<name>(<arguments; separator = ", ">);%>
 
 name_exp(name) ::= <%<name>%>
 

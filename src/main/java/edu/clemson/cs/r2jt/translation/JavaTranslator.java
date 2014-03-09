@@ -66,6 +66,9 @@ public class JavaTranslator extends AbstractTranslator {
     private Map<ModuleArgumentItem, ModuleParameterDec> myFacilityBindings =
             new HashMap<ModuleArgumentItem, ModuleParameterDec>();
 
+    private Map<String, ST> myEnhancedCalls =
+            new HashMap<String, ST>();
+
     /**
      * <p>This set keeps track of the names of any <code>OperationDec</code>s
      * that parameterize the current module.</p>
@@ -106,6 +109,7 @@ public class JavaTranslator extends AbstractTranslator {
         String invocationName = null;
         boolean buildingJar =
                 myInstanceEnvironment.flags.isFlagSet("createJar");
+
         List<OperationEntry> locals =
                 myScope.query(new EntryTypeQuery(OperationEntry.class,
                         ImportStrategy.IMPORT_NONE,
@@ -427,6 +431,18 @@ public class JavaTranslator extends AbstractTranslator {
                                     .getWrappedDec(), node.getQualifier(), node
                                     .getName());
 
+            if (myCurrentEnhancement != null) {
+
+                ST enhancedCall = myGroup.getInstanceOf("enhanced_call").add
+                        ("enhancementname", myCurrentEnhancement
+                                .getModuleIdentifier().toString());
+
+                enhancedCall.add("facilityname", myCurrentFacilityEntry
+                        .getName()).add("name", node.getName().getName());
+
+                myEnhancedCalls.put(node.getName().getName(), enhancedCall);
+            }
+
             myActiveTemplates.peek().add("arguments", argItem);
         }
         else if (type instanceof PTGeneric) {
@@ -507,7 +523,7 @@ public class JavaTranslator extends AbstractTranslator {
 
             ST operationInterface =
                     myGroup.getInstanceOf("interface_class").add("name",
-                            node.getName().getName()).add("public", false);
+                            node.getName().getName());
 
             myActiveTemplates.peek().add("parameters", parameter);
             myActiveTemplates.push(operationInterface);
@@ -568,6 +584,9 @@ public class JavaTranslator extends AbstractTranslator {
                     myGroup.getInstanceOf("qualified_call").add("name",
                             node.getName().getName()).add("qualifier",
                             node.getName().getName() + "Param");
+        }
+        else if (myEnhancedCalls.containsKey(node.getName().getName())) {
+            callStmt = myEnhancedCalls.get(node.getName().getName());
         }
         else if (qualifier != null) {
             callStmt =
@@ -772,13 +791,7 @@ public class JavaTranslator extends AbstractTranslator {
         return "public";
     }
 
-    /**
-     * <p></p>
-     * @param operation
-     * @param qualifier
-     * @param name
-     * @return
-     */
+    // TODO : Refactor/rethink this method + op_arg_template. Too ugly.
     private ST getOperationArgItemTemplate(OperationDec operation,
             PosSymbol qualifier, PosSymbol name) {
 
@@ -789,6 +802,16 @@ public class JavaTranslator extends AbstractTranslator {
                         qualifier.getName());
 
         try {
+            OperationEntry o = myScope.queryForOne(new NameQuery
+                    (qualifier, name, ImportStrategy.IMPORT_NAMED,
+                    FacilityStrategy.FACILITY_INSTANTIATE,
+                    false)).toOperationEntry(name.getLocation());
+
+            for (ProgramParameterEntry p : o.getParameters()) {
+                ST cast = getVariableTypeTemplate(p.getDeclaredType());
+                result.add("castTypes", cast);
+            }
+
             String realization;
             if (myCurrentEnhancement != null) {
                 realization =
@@ -823,6 +846,12 @@ public class JavaTranslator extends AbstractTranslator {
         }
         catch (NoneProvidedException npe) {
 
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException(nsse);
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException(dse);
         }
         return result;
     }
