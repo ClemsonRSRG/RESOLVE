@@ -24,10 +24,9 @@ package <directories; separator = {.}>;
 include(directories) ::= "import <directories; separator = {.}>.*;"
 
 interface_class(name, extend, classes, functions, public=true) ::= <<
-<if(public)>public interface <name> extends <extend> {
-<else>interface <name> extends <extend> {<endif>
+<if(public)>public interface <name> <if(extend)>extends <extend><endif> {
+<else>interface <name> <if(extend)>extends <extend><endif> {<endif>
 	<classes; separator = "\n">
-	
     <functions; separator = "\n">
 }>>
 
@@ -51,7 +50,6 @@ public class <name> {
                                       f.parameters, f.facilities, f.variables,
                                       f.stmts)>}; separator = "\n\n">
     <records; separator = "\n\n">
-
     public static void main(String[] args) {
 		<name> start = new <name>();
 		start.<invoker>();
@@ -82,12 +80,11 @@ public class <name> extends RESOLVE_BASE implements <implement> {
 	}
 
 	<classes    ; separator = "\n">
-	
 	<functions  ; separator = "\n\n">
 }>>
 
 enhancement_body_class(name, implement, parameters, variables, functions,
-conceptfunctions, classes) ::= <<
+conceptfunctions, conceptname, classes) ::= <<
 public class <name> implements <implement; separator = ", "> {
 
     // These standard facilities are hardcoded into Java.stg but can be
@@ -103,33 +100,30 @@ public class <name> implements <implement; separator = ", "> {
 
 	<parameters : {p | <p>;}; separator = "\n">
 	<variables  : {j | <j.type> <j.name>;}; separator = "\n">
-	<first(implement)> con;
+	<conceptname> con;
+	<classes>
 
-	public <name>(<parameters; separator = ", ">, <first(implement)> con) {
+	public <name>(<parameters; separator = ", ">, <conceptname> con) {
 		<parameters : {p | this.<p.name> = <p.name>;}; separator = "\n">
 		<variables  : {v | <v.name> = <v.init>;}; separator = "\n">
 		this.con = con;
 	}
 
 	<functions; separator = "\n">
-
 	public void swap(RType r1, RType r2) {
 		con.swap(r1, r2);
 	}
-	
 	public void assign(RType r1, RType r2) {
 		con.assign(r1, r2);
 	}
-	
 	<conceptfunctions; separator = "\n\n">
-
 	public Object invoke(Object proxy, Method method, Object[] args) throws
 	Throwable {
 		if ("<first(functions).name>".equals(method.getName())) {
 			return method.invoke(this, args);
 		}
 		<rest(functions) :
-            {e | else if ("<e.name>".equals(method.getName()) {
+            {e | else if ("<e.name>".equals(method.getName())) {
 			return method.invoke(this, args);
             \} }>
         else {
@@ -137,8 +131,8 @@ public class <name> implements <implement; separator = ", "> {
         }
     }
 
-    public static <first(implement)> createProxy(<parameters; separator = ", ">
-        , <first(implement)> toWrap) {
+    public static <conceptname> createProxy(<parameters; separator = ", ">
+        , <conceptname> toWrap) {
 
         <name> eObj = new <name>(<parameters : {p | <p.name>}; separator =
         ", "><if(parameters)>,<endif> toWrap);
@@ -149,7 +143,7 @@ public class <name> implements <implement; separator = ", "> {
         System.arraycopy(toWrapInterfaces, 0, thisInterfaces, 1,
                                                  toWrapInterfaces.length);
 
-        return (<first(implement)>)(Proxy.newProxyInstance(<first(implement)>
+        return (<conceptname>)(Proxy.newProxyInstance(<conceptname>
             .class.getClassLoader(), thisInterfaces, eObj));
     }
 }>>
@@ -157,20 +151,14 @@ public class <name> implements <implement; separator = ", "> {
 enhanced_stmt(returns, name, arguments) ::= <%
     <if(returns)>return<endif> con.<name>(<arguments; separator = ", ">);%>
 
-// You need to look up the function and see what the declared type of the
-// parameters for the actual function...
-//new BubbleSort_Realiz.Order() {
-//    public void Order(RType  parm1, RType  parm2) {
- //       Ordered((Integer_Template.Integer)p0, (Integer_Template.Integer)p1);
- //   }
-//}
-operation_argument_item(realization, actualQualifier, actualName,
-                        formalname, type, function) ::= <<
+operation_argument_item(realization, actualQualifier, actualName, type,
+function, castTypes) ::= <<
 
 new <realization>.<function.name>() {
     <function   :  {f | <function_def("public", f.type, f.name, f.parameters,
                                   f.facilities, f.variables,
-    f.parameters    : { p | <actualQualifier>.<actualName>((TYPE)<p.name>);}
+    f.parameters    : { p | <actualQualifier>.<actualName>(<castTypes : {c |
+    (<c>) <p.name>}; separator = ", ">);}
     )>}>
 }>>
 
@@ -178,11 +166,11 @@ new <realization>.<function.name>() {
 //   facilities
 //-------------------------------------------------------------------
 
-qualified_type(concept, name) ::= <%<concept>.<name>%>
+qualified_type(concept, name) ::= "<concept>.<name>"
 
-var_decl(modifier, type, name, init) ::= <%<type> <name> = <init>;%>
+var_decl(modifier, type, name, init) ::= "<type> <name> = <init>;"
 
-rtype_init(typeName) ::= <%getType<typeName>().initialValue()%>
+rtype_init(typeName) ::= "getType<typeName>().initialValue()"
 
 var_init(type, facility, arguments) ::= <%
     <facility>.create<type.name>(<arguments; separator = ", ">)%>
@@ -190,7 +178,7 @@ var_init(type, facility, arguments) ::= <%
 enhancement_var_init(type, arguments) ::= <%
     con.create<type.name>(<arguments; separator = ", ">)%>
 
-facility_dec(type, name, rhs) ::= <%<type> <name> = <rhs>;%>
+facility_dec(type, name, rhs) ::= "<type> <name> = <rhs>;"
 
 facility_init(realization, arguments, isProxied) ::= <%
     <if(isProxied)><realization>.createProxy
@@ -252,6 +240,9 @@ unqualified_call(name, arguments) ::= <%
 
 qualified_call(qualifier, name, arguments) ::= <%
     <qualifier>.<name>(<arguments; separator = ", ">);%>
+
+enhanced_call(enhancementname, facilityname, name, arguments) ::= <%
+    ((<enhancementname>)<facilityname>).<name>(<arguments; separator = ", ">);%>
 
 name_exp(name) ::= <%<name>%>
 

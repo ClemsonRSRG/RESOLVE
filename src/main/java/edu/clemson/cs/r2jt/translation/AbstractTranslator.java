@@ -418,7 +418,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * <p>Constructs and adds a <code>parameter</code> to the currently active
      * template.</p>
      *
-     * @param type A <code>PTType</code> representing the parameter's type.
+     * @param type A <code>PTType</code> representing the 'declared type' of
+     *             the parameter.
      * @param name The name of the parameter.
      */
     protected void addParameterTemplate(PTType type, String name) {
@@ -435,7 +436,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      *
      * @param type A <code>PTType</code> representing the type of the
      *             variable
-     * @param name The variable's name.
+     * @param name The name of the variable.
      */
     protected void addVariableTemplate(PTType type, String name) {
         ST init, variable;
@@ -467,7 +468,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>Populates and returns a <code>function</code> template with the
+     * <p>Returns a <code>function</code> template 'filled in' with the
      * attributes provided.</p>
      *
      * @param returnType A <code>PTType</code> representative of the
@@ -520,12 +521,10 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p>Retrieves the <code>name</code> of a <code>PTType</code>. The
-     * <code>PTType</code> baseclass by itself doesn't provide this
-     * functionality. This method goes through the trouble of casting to the
-     * correct subclass so we can use the <code>getName</code> method.</p>
+     * <p>Returns the 'name' component of a <code>PTType</code>.
      *
      * @param type A <code>PTType</code>.
+     *
      * @return <code>type</code>'s actual name rather than the more easily
      *         accessible <code>toString</code> representation.
      */
@@ -558,14 +557,18 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     /**
-     * <p></p>
-     * @param type
-     * @return
+     * <p>Searches for the <code>FacilityEntry</code> responsible for
+     * bringing the program type referenced by, <code>type</code>, into the
+     * <code>ModuleScope</code> being translated.</p>
+     *
+     * @param type  A <code>PTType</code> that we want to know more about.
+     *
+     * @return The <code>FacilityEntry</code> that defines <code>type</code>.
      */
     protected FacilityEntry getDefiningFacilityEntry(PTType type) {
 
         FacilityEntry result = null;
-        String searchString = getTypeName(type);
+        //String searchString = getTypeName(type);
 
         try {
             ProgramTypeEntry te =
@@ -605,6 +608,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      * @param args
      * @return
      */
+    // TODO : We aren't currently search
     protected String getCallQualifier(PosSymbol qualifier, PosSymbol name,
             List<ProgramExp> args) {
 
@@ -616,7 +620,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
             return qualifier.getName();
         }
         try {
-
             for (ProgramExp arg : args) {
                 argTypes.add(arg.getProgramType());
             }
@@ -808,10 +811,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 || myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
             outputAsFile(outputFile.getAbsolutePath(), myActiveTemplates.peek()
                     .render());
-
-            //  System.out.println(Formatter.formatCode(myActiveTemplates.peek()
-            //          .render()));
-            System.out.println(myActiveTemplates.peek().render());
+           // System.out.println(myActiveTemplates.peek().render());
         }
         else {
             outputToReport(myActiveTemplates.peek().render());
