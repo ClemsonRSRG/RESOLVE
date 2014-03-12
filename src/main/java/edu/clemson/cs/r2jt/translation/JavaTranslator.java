@@ -66,8 +66,13 @@ public class JavaTranslator extends AbstractTranslator {
     private Map<ModuleArgumentItem, ModuleParameterDec> myFacilityBindings =
             new HashMap<ModuleArgumentItem, ModuleParameterDec>();
 
-    private Map<String, ST> myEnhancedCalls =
-            new HashMap<String, ST>();
+    /**
+     * <p>Any call derived from an <code>FacilityDec</code> that's enhanced
+     * with two or more capabilities needs to be 'specially' qualified.
+     * So this map keeps track of the names of such calls, linking them
+     * to a specially formed qualifier <code>ST</code>.</p>
+     */
+    private Map<String, ST> myEnhancedCalls = new HashMap<String, ST>();
 
     /**
      * <p>This set keeps track of the names of any <code>OperationDec</code>s
@@ -107,6 +112,7 @@ public class JavaTranslator extends AbstractTranslator {
     public void postFacilityModuleDec(FacilityModuleDec node) {
 
         String invocationName = null;
+
         boolean buildingJar =
                 myInstanceEnvironment.flags.isFlagSet("createJar");
 
@@ -166,10 +172,11 @@ public class JavaTranslator extends AbstractTranslator {
 
         ST enhancementBody =
                 myGroup.getInstanceOf("enhancement_body_class").add("name",
-                        node.getName().getName());
+                        node.getName().getName()).add("conceptname",
+                        node.getConceptName().getName());
 
-        enhancementBody.add("implement", node.getConceptName().getName());
         enhancementBody.add("implement", node.getEnhancementName().getName());
+        enhancementBody.add("implement", node.getConceptName().getName());
         enhancementBody.add("implement", "InvocationHandler");
 
         myActiveTemplates.push(enhancementBody);
@@ -291,7 +298,8 @@ public class JavaTranslator extends AbstractTranslator {
 
         // If we're within a function, get the appropriate scope so we
         // can find the SymbolTableEntry representing this FacilityDec.
-        // Note : This seems pretty jank for some reason..
+        // Note : I don't really like this. I'd rather use the depth of the
+        // stack I think...
         if (!myScope.equals(myBuilder.getScope(this.getAncestor(2)))) {
             scopeToSearch = myBuilder.getScope(this.getAncestor(2));
         }
@@ -391,6 +399,7 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void postFacilityDec(FacilityDec node) {
 
+        String facilityType = node.getConceptName().getName();
         List<String> pathPieces =
                 getPathList(getFile(null, node.getConceptName().getName()));
 
@@ -407,11 +416,17 @@ public class JavaTranslator extends AbstractTranslator {
             myActiveTemplates.push(myBaseEnhancement);
         }
 
+        // TODO : Figure out why the hell node.getEnhancements().size() is 0
+        //        in BPStack.fa where there is clearly one enhancement!
+        if (node.getEnhancementBodies().size() == 1) {
+            facilityType =
+                    node.getEnhancementBodies().get(0).getName().getName();
+        }
+
         ST facilityVariable =
-                myGroup.getInstanceOf("var_decl").add("type",
-                        node.getConceptName().getName()).add("name",
-                        node.getName().getName()).add("init",
-                        myActiveTemplates.pop());
+                myGroup.getInstanceOf("var_decl").add("type", facilityType)
+                        .add("name", node.getName().getName()).add("init",
+                                myActiveTemplates.pop());
 
         myActiveTemplates.peek().add("variables", facilityVariable);
 
@@ -431,14 +446,18 @@ public class JavaTranslator extends AbstractTranslator {
                                     .getWrappedDec(), node.getQualifier(), node
                                     .getName());
 
-            if (myCurrentEnhancement != null) {
+            if (myCurrentEnhancement != null
+                    && myCurrentFacilityEntry.getEnhancements().size() >= 2) {
 
-                ST enhancedCall = myGroup.getInstanceOf("enhanced_call").add
-                        ("enhancementname", myCurrentEnhancement
-                                .getModuleIdentifier().toString());
+                ST enhancedCall =
+                        myGroup.getInstanceOf("enhanced_call").add(
+                                "enhancementname",
+                                myCurrentEnhancement.getModuleIdentifier()
+                                        .toString());
 
-                enhancedCall.add("facilityname", myCurrentFacilityEntry
-                        .getName()).add("name", node.getName().getName());
+                enhancedCall.add("facilityname",
+                        myCurrentFacilityEntry.getName()).add("name",
+                        node.getName().getName());
 
                 myEnhancedCalls.put(node.getName().getName(), enhancedCall);
             }
@@ -500,7 +519,6 @@ public class JavaTranslator extends AbstractTranslator {
         }
 
         // TODO : This is going to fail on enhancementbodymoduledecs. Fix it.
-
         ST getter =
                 getOperationLikeTemplate(type, "get" + name, translatingBody);
         getter.add("stmts", myGroup.getInstanceOf("return_stmt").add("name",
@@ -661,8 +679,12 @@ public class JavaTranslator extends AbstractTranslator {
     public void preSwapStmt(SwapStmt node) {
 
         ST swapStmt;
+        boolean translatingEnhancement =
+                myScope.getDefiningElement() instanceof EnhancementBodyModuleDec;
 
-        if (node.getLeft().getProgramType() instanceof PTGeneric) {
+        if (node.getLeft().getProgramType() instanceof PTGeneric
+                || translatingEnhancement) {
+
             swapStmt =
                     myGroup.getInstanceOf("unqualified_call").add("name",
                             "swap");
@@ -714,9 +736,8 @@ public class JavaTranslator extends AbstractTranslator {
         ST completed = myActiveTemplates.pop();
 
         if (myActiveTemplates.size() != 1) {
-            throw new RuntimeException(
-                    "Wrong Template. Make sure intermediate templates are "
-                            + "popped in their respective post methods!");
+            throw new IllegalStateException("Translation template stack "
+                    + "corrupted. Check your 'post' methods.");
         }
         myActiveTemplates.peek().add("structures", completed);
     }
@@ -725,6 +746,8 @@ public class JavaTranslator extends AbstractTranslator {
     //   Helper methods
     //-------------------------------------------------------------------
 
+    // TODO : Refactor me. I don't even really even know anymore what these
+    // conditional branches mean.
     @Override
     protected ST getVariableTypeTemplate(PTType type) {
 
@@ -775,14 +798,11 @@ public class JavaTranslator extends AbstractTranslator {
 
     @Override
     protected ST getOperationTypeTemplate(PTType type) {
-        // Java function return types happen to look the same as variable
-        // return types. So this should be easy.
         return getVariableTypeTemplate(type);
     }
 
     @Override
     protected ST getParameterTypeTemplate(PTType type) {
-        // Ditto with parameters.
         return getVariableTypeTemplate(type);
     }
 
@@ -791,7 +811,7 @@ public class JavaTranslator extends AbstractTranslator {
         return "public";
     }
 
-    // TODO : Refactor/rethink this method + op_arg_template. Too ugly.
+    // TODO : Try to refactor/rethink this method + op_arg_template. Too ugly.
     private ST getOperationArgItemTemplate(OperationDec operation,
             PosSymbol qualifier, PosSymbol name) {
 
@@ -802,10 +822,13 @@ public class JavaTranslator extends AbstractTranslator {
                         qualifier.getName());
 
         try {
-            OperationEntry o = myScope.queryForOne(new NameQuery
-                    (qualifier, name, ImportStrategy.IMPORT_NAMED,
-                    FacilityStrategy.FACILITY_INSTANTIATE,
-                    false)).toOperationEntry(name.getLocation());
+            OperationEntry o =
+                    myScope.queryForOne(
+                            new NameQuery(qualifier, name,
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false))
+                            .toOperationEntry(name.getLocation());
 
             for (ProgramParameterEntry p : o.getParameters()) {
                 ST cast = getVariableTypeTemplate(p.getDeclaredType());
@@ -856,6 +879,26 @@ public class JavaTranslator extends AbstractTranslator {
         return result;
     }
 
+    /**
+     * <p>This method is only intended to be called when translating
+     * <code>enhancementBodyModuleDec</code>s. It is used to construct and add
+     * a 'dummy method' that simply uses 'con' to call the actual method.</p>
+     *
+     * <p>For example, given <code>type</code> = null,
+     * <code>name</code> = 'Pop', and <code>parameters</code> = [R,
+     * S]; is method returns :
+     * <pre>
+     *     public void Pop(RType R, Stack_Template.Stack S) {
+     *         con.Pop(R, S);
+     *     }
+     * </pre>
+     * </p>
+     * @param type A <code>PTType</code> for the function's return type.
+     * @param name The name.
+     *
+     * @param parameters A list of <code>ProgramParameterEntries</code>
+     *                   representing the function's formal parameters.
+     */
     private void addEnhancementConceptualFunction(PTType type, String name,
             ImmutableList<ProgramParameterEntry> parameters) {
 
@@ -878,10 +921,15 @@ public class JavaTranslator extends AbstractTranslator {
     }
 
     /**
-     * <p>Creates a mapping between the actual parameters of a
-     * <code>FacilityDec</code> and their formal counterparts.</p>
-     * @param spec 
-     * @param realiz
+     * <p>Binds <em>every</em> actual parameter of a <code>FacilityDec</code>
+     * to its formal counterpart, as defined in a concept, enhancement,
+     * or realization.</p>
+     *
+     * @param spec      A <code>ModuleParameterization</code> referencing a
+     *                  concept or enhancement.
+     *
+     * @param realiz    A <code>ModuleParameterization</code> referencing a
+     *                  realization (enhancementbody or conceptbody).
      */
     public void constructFacilityArgBindings(ModuleParameterization spec,
             ModuleParameterization realiz) {
