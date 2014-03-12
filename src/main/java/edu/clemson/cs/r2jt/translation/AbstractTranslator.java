@@ -811,7 +811,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 || myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
             outputAsFile(outputFile.getAbsolutePath(), myActiveTemplates.peek()
                     .render());
-           // System.out.println(myActiveTemplates.peek().render());
+            // System.out.println(myActiveTemplates.peek().render());
         }
         else {
             outputToReport(myActiveTemplates.peek().render());

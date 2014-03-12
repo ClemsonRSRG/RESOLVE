@@ -439,30 +439,37 @@ public class JavaTranslator extends AbstractTranslator {
 
         PTType type = node.getProgramTypeValue();
 
+        // TODO: Please clean this logic! - YS
         if (type instanceof PTVoid) {
-            ST argItem =
-                    getOperationArgItemTemplate(
-                            (OperationDec) myFacilityBindings.get(node)
-                                    .getWrappedDec(), node.getQualifier(), node
-                                    .getName());
+            Dec wrappedDec = myFacilityBindings.get(node).getWrappedDec();
+            if (wrappedDec instanceof OperationDec) {
+                ST argItem =
+                        getOperationArgItemTemplate(
+                                (OperationDec) myFacilityBindings.get(node)
+                                        .getWrappedDec(), node.getQualifier(),
+                                node.getName());
 
-            if (myCurrentEnhancement != null
-                    && myCurrentFacilityEntry.getEnhancements().size() >= 2) {
+                if (myCurrentEnhancement != null
+                        && myCurrentFacilityEntry.getEnhancements().size() >= 2) {
 
-                ST enhancedCall =
-                        myGroup.getInstanceOf("enhanced_call").add(
-                                "enhancementname",
-                                myCurrentEnhancement.getModuleIdentifier()
-                                        .toString());
+                    ST enhancedCall =
+                            myGroup.getInstanceOf("enhanced_call").add(
+                                    "enhancementname",
+                                    myCurrentEnhancement.getModuleIdentifier()
+                                            .toString());
 
-                enhancedCall.add("facilityname",
-                        myCurrentFacilityEntry.getName()).add("name",
-                        node.getName().getName());
+                    enhancedCall.add("facilityname",
+                            myCurrentFacilityEntry.getName()).add("name",
+                            node.getName().getName());
 
-                myEnhancedCalls.put(node.getName().getName(), enhancedCall);
+                    myEnhancedCalls.put(node.getName().getName(), enhancedCall);
+                }
+
+                myActiveTemplates.peek().add("arguments", argItem);
             }
-
-            myActiveTemplates.peek().add("arguments", argItem);
+            else if (wrappedDec instanceof ConstantParamDec) {
+                myActiveTemplates.peek().add("arguments", wrappedDec.getName());
+            }
         }
         else if (type instanceof PTGeneric) {
             myActiveTemplates.peek().add("arguments", node.getName());
