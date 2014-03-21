@@ -261,3 +261,13 @@ while(arguments, stmts) ::= <<
 while (((Std_Boolean_Realiz.Boolean)(<arguments>)).val) {
     <stmts; separator = "\n">
 }>>
+
+if(arguments, stmts) ::= <<
+if (((Std_Boolean_Realiz.Boolean)(<arguments>)).val) {
+    <stmts; separator = "\n">
+}>>
+
+else(stmts) ::= <<
+else {
+    <stmts; separator = "\n">
+}>>
