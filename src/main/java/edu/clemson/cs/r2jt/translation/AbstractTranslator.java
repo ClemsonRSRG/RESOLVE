@@ -196,18 +196,19 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     public void postIfStmt(IfStmt node) {
         ST ifStmt = myActiveTemplates.pop();
         myActiveTemplates.peek().add("stmts", ifStmt);
-
-
     }
 
+    // TODO : This is probably going to need some tweaking once else-ifs
+    //        are fixed.
     public void preIfStmtElseclause(IfStmt data) {
-        ST elseStmt = myGroup.getInstanceOf("else");
-        myActiveTemplates.push(elseStmt);
-    }
 
-    public void postIfStmtElseclause(IfStmt data) {
-        ST elseStmt = myActiveTemplates.pop();
-        myActiveTemplates.peek().add("stmts", elseStmt);
+        //IfStmtElseClauses are nested within the tree. So if we're here,
+        //add the if part to the outermost stmt block.
+        ST ifPart = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", ifPart);
+
+       ST elseStmt = myGroup.getInstanceOf("else");
+       myActiveTemplates.push(elseStmt);
     }
 
     @Override
