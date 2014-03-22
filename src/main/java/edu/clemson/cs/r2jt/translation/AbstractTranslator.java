@@ -188,6 +188,30 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     @Override
+    public void preIfStmt(IfStmt node) {
+        ST ifStmt = myGroup.getInstanceOf("if");
+        myActiveTemplates.push(ifStmt);
+    }
+
+    public void postIfStmt(IfStmt node) {
+        ST ifStmt = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", ifStmt);
+    }
+
+    // TODO : This is probably going to need some tweaking once else-ifs
+    //        are fixed.
+    public void preIfStmtElseclause(IfStmt data) {
+
+        //IfStmtElseClauses are nested within the tree. So if we're here,
+        //add the if part to the outermost stmt block.
+        ST ifPart = myActiveTemplates.pop();
+        myActiveTemplates.peek().add("stmts", ifPart);
+
+       ST elseStmt = myGroup.getInstanceOf("else");
+       myActiveTemplates.push(elseStmt);
+    }
+
+    @Override
     public void preFuncAssignStmt(FuncAssignStmt node) {
 
         String qualifier =
@@ -558,10 +582,10 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     /**
      * <p>Searches for the <code>FacilityEntry</code> responsible for
-     * bringing the program type referenced by, <code>type</code>, into the
+     * bringing the SymbolTableEntry referenced by <code>type</code> into the
      * <code>ModuleScope</code> being translated.</p>
      *
-     * @param type  A <code>PTType</code> that we want to know more about.
+     * @param type  The <code>PTType</code> we want symboltable info for.
      *
      * @return The <code>FacilityEntry</code> that defines <code>type</code>.
      */
