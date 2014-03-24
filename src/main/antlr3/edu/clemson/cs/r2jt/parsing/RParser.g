@@ -63,7 +63,7 @@ parser grammar RParser;
 options {
     k = 1;    
     output = AST;                   
-    ASTLabelType = 'ColsAST';
+    ASTLabelType = 'CommonTree';
     tokenVocab=RLexer;
 	superClass = RParserSuper;
     //language=JavaScript;
@@ -79,6 +79,7 @@ tokens {
     AUX_OPERATION;
     ARRAYFUNCTION;
     BETWEEN_EXPR;
+    C_Q_IDENTIFIER;
     CATEGORICAL_DEFINITION;
     CHOICES;
     COMMON_CONCLUSION;
@@ -109,6 +110,7 @@ tokens {
     NESTED;
     OR_RULE;
     PARAMS;
+    Q_IDENTIFIER;
     QUANTIFIER_DISTRIBUTION;
     QUANT_EXPR;
     RECURSIVE_OPERATION_PROCEDURE;
@@ -194,11 +196,11 @@ this.err = err;
 // ---------------------------------------------------------------
 
 theory_module
-    :   THEORY^ id1=ident //{ theoryModule = true; }
+    :   THEORY^ id1=ident { theoryModule = true; }
         (module_formal_param_section)? SEMICOLON!
         (uses_list)?
         (math_item_sequence)?
-        END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchModuleIdent(id2, id1); })?
         SEMICOLON!
     ;
 
@@ -223,7 +225,7 @@ conceptual_module
         (uses_list)?
         (requires_clause)?
         (concept_item_sequence)?
-        END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchModuleIdent(id2, id1); })?
         SEMICOLON!
     ;
 
@@ -250,14 +252,13 @@ concept_item
 
 performance_concept_module
     :  
-        MODULE_PROFILE id1=ident
-        { performanceCModule = true; }
+        MODULE_PROFILE id1=ident { performanceCModule = true; }
         (module_formal_param_section)? SHORT_FOR
         ident FOR ident SEMICOLON
         (uses_list)?
         (requires_clause)?
         (performance_C_item_sequence)?
-        END (id2=ident { matchModuleIdent(id2.tree, id1.tree); })?
+        END (id2=ident { matchModuleIdent(id2, id1); })?
         SEMICOLON ->
         ^(CONCEPT_PROFILE ident
         (module_formal_param_section)? 
@@ -291,14 +292,13 @@ performance_C_item
 
 performance_enhancement_module
     :  
-        MODULE_PROFILE id1=ident
-        { performanceEModule = true; }
+        MODULE_PROFILE id1=ident { performanceEModule = true; }
         (module_formal_param_section)? SHORT_FOR
         ident FOR ident FOR ident WITH_PROFILE ident SEMICOLON
         (uses_list)?
         (requires_clause)?
         (performance_E_item_sequence)?
-        END (id2=ident { matchModuleIdent(id2.tree, id1.tree); })?
+        END (id2=ident { matchModuleIdent(id2, id1); })?
         SEMICOLON ->
         ^(ENHANCEMENT_PROFILE ident
         (module_formal_param_section)?
@@ -333,7 +333,7 @@ enhancement_module
         (uses_list)?
         (requires_clause)?
         (enhancement_item_sequence)?
-        END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchModuleIdent(id2, id1); })?
         SEMICOLON!
     ;
 
@@ -363,7 +363,7 @@ realization_body_module
         (uses_list)?
         (requires_clause)?
         (body_item_sequence)?
-        END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchModuleIdent(id2, id1); })?
         SEMICOLON!
     ;
 
@@ -434,7 +434,7 @@ facility_module
     |   FACILITY^ id1=ident SEMICOLON! (uses_list)?
         (requires_clause)?
         (facility_item_sequence)?
-        END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchModuleIdent(id2, id1); })?
         SEMICOLON!
     ;
 
@@ -711,7 +711,7 @@ categorical_definition_construct
 // an error if it is not the case.
 indexed_expression
     :   LPAREN! id=ident! RPAREN! math_expression
-        { checkIndexedIdent(id.tree); }
+        { checkIndexedIdent(id); }
     ;
 
 singleton_definition_parameter
@@ -761,7 +761,7 @@ operation_procedure_declaration
         (variable_declaration)*
         (aux_variable_declaration)*
         statement_sequence
-        END! (id2=ident! { matchOperationIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchOperationIdent(id2, id1); })?
         SEMICOLON!
     ;
     
@@ -778,7 +778,7 @@ operation_recursive_procedure_declaration
         variable_declaration*
         aux_variable_declaration*
         statement_sequence
-        END (id2=ident { matchOperationIdent(id2.tree, id1.tree); })?
+        END (id2=ident { matchOperationIdent(id2, id1); })?
         SEMICOLON ->
         ^(RECURSIVE_OPERATION_PROCEDURE ident
         operation_formal_param_section
@@ -836,7 +836,7 @@ procedure_declaration
         (variable_declaration)*
         (aux_variable_declaration)*
         statement_sequence
-        END! (id2=ident! { matchOperationIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchOperationIdent(id2, id1); })?
         SEMICOLON!
     ;
     
@@ -850,7 +850,7 @@ recursive_procedure_declaration
         variable_declaration*
         aux_variable_declaration*       
         statement_sequence
-        END (id2=ident)? //{ matchOperationIdent(id2.tree, id1.tree); })?
+        END (id2=ident { matchOperationIdent(id2, id1); })?
         SEMICOLON ->
         ^(RECURSIVE_PROCEDURE ident
         operation_formal_param_section
@@ -928,7 +928,7 @@ type_declaration
         EXEMPLAR ident SEMICOLON
         constraint_clause?
         type_concept_init_declaration?
-        type_concept_final_declaration? END) ->
+        type_concept_final_declaration? END SEMICOLON) ->
         ^(TYPE_FAMILY ident math_type_expression ident
         constraint_clause?
         type_concept_init_declaration?
@@ -941,7 +941,7 @@ performance_type_declaration
         math_type_expression SEMICOLON
         constraint_clause?
         performance_type_init_declaration?
-        performance_type_final_declaration? END) ->
+        performance_type_final_declaration? END SEMICOLON) ->
         ^(TYPE_FAMILY ident math_type_expression
         constraint_clause?
         performance_type_init_declaration?
@@ -955,7 +955,7 @@ type_representation_declaration
         (correspondence_clause)?
         (type_body_init_declaration)?
         (type_body_final_declaration)?
-        END!
+        END! SEMICOLON!
     ;
 
 facility_type_declaration
@@ -964,7 +964,7 @@ facility_type_declaration
         (convention_clause)?
         (type_facility_init_declaration)? 
         (type_facility_final_declaration)?
-        END!
+        END! SEMICOLON!
     ;
 
 
@@ -1575,7 +1575,7 @@ alternative_expression
     ;
 
 alternative_expression_item
-    :   exp=adding_expression { checkOtherwiseItem((ColsAST)exp.getTree()); }
+    :   exp=adding_expression { checkOtherwiseItem(exp); }
         (   IF^ relational_expression
         |   OTHERWISE^ { otherwise = true; }
         )
@@ -1583,7 +1583,7 @@ alternative_expression_item
     ;
 
 iterated_construct
-    :   id=ident { checkIteratedIdent(id.tree); }
+    :   id=ident { checkIteratedIdent(id); }
         ident
         COLON math_type_expression 
         (where_clause)?
@@ -1767,14 +1767,14 @@ variable_array_argument_list
 // ===============================================================
 
 certain_qualified_ident
-    :   ident DOT ident -> ^(IDENTIFIER ident ident)
+    :   ident DOT ident -> ^(C_Q_IDENTIFIER ident ident)
     ;
 
 qualified_ident
-    :   ident (DOT ident)? -> ^(IDENTIFIER ident ident?)
+    :   ident (DOT ident)? -> ^(Q_IDENTIFIER ident ident?)
     ;
 
-ident //returns [ColsAST ast = null]
+ident
     :   IDENTIFIER
     ;
 
@@ -1806,17 +1806,17 @@ proof
     :   PROOF^ OF!
         math_item_reference
         COLON!
-        ( (LSQBRACK IDENTIFIER RSQBRACK LPAREN BASECASE) => base_case_statement_head
+        ( (LSQBRACK ident RSQBRACK LPAREN BASECASE) => base_case_statement_head
         | (LPAREN BASECASE) => base_case_statement_body
-        | (LSQBRACK IDENTIFIER RSQBRACK LPAREN INDUCTIVECASE) => inductive_case_statement_head
+        | (LSQBRACK ident RSQBRACK LPAREN INDUCTIVECASE) => inductive_case_statement_head
         | (LPAREN INDUCTIVECASE) => inductive_case_statement_body
-        | (LSQBRACK IDENTIFIER RSQBRACK) => headed_proof_expression
+        | (LSQBRACK ident RSQBRACK) => headed_proof_expression
         | proof_expression )*
         QED!
     ;
     
 base_case_statement_head
-    :   LSQBRACK! IDENTIFIER^ RSQBRACK! base_case_statement_body
+    :   LSQBRACK! ident^ RSQBRACK! base_case_statement_body
     ;
     
 base_case_statement_body
@@ -1824,7 +1824,7 @@ base_case_statement_body
     ;
     
 inductive_case_statement_head
-    :   LSQBRACK! IDENTIFIER^ RSQBRACK! inductive_case_statement_body
+    :   LSQBRACK! ident^ RSQBRACK! inductive_case_statement_body
     ;
     
 inductive_case_statement_body
@@ -1857,15 +1857,15 @@ corollary_name
     ;
     
 proof_expression_list
-    :   ( (LSQBRACK IDENTIFIER RSQBRACK DEDUCTION) => () { break; }
+    :   ( (LSQBRACK ident RSQBRACK DEDUCTION) => () { break; }
         | (DEDUCTION) => () { break; }
-        | (LSQBRACK IDENTIFIER RSQBRACK) => headed_proof_expression -> ^(PROOFEXPRLIST headed_proof_expression)
+        | (LSQBRACK ident RSQBRACK) => headed_proof_expression -> ^(PROOFEXPRLIST headed_proof_expression)
         | proof_expression -> ^(PROOFEXPRLIST proof_expression)
         )*
     ;
     
 headed_proof_expression
-    :   LSQBRACK! IDENTIFIER^ RSQBRACK! proof_expression
+    :   LSQBRACK! ident^ RSQBRACK! proof_expression
     ;
 
 proof_expression
@@ -1884,9 +1884,9 @@ goal_declaration
 supposition_deduction_pair
     :   supposition_declaration SEMICOLON
         proof_expression_list
-        (LSQBRACK IDENTIFIER RSQBRACK)?
+        (LSQBRACK ident RSQBRACK)?
         deduction_declaration SEMICOLON
-        -> ^(SUPDEDUC supposition_declaration proof_expression_list IDENTIFIER? deduction_declaration)
+        -> ^(SUPDEDUC supposition_declaration proof_expression_list ident? deduction_declaration)
     ;
     
 supposition_declaration
@@ -1894,7 +1894,6 @@ supposition_declaration
         (
           ((ident COLON) => (math_variable_declarations (AND! math_expression)?))
           | ((ident COMMA ident) => (math_variable_declarations (AND! math_expression)?))
-          //| (math_expression ((AND! math_variable_declarations)?))
         )
     ;
     
@@ -1918,7 +1917,6 @@ justification
       | (hyp_desig) => hyp_desig
       | simple_justification
       | (DEFINITION) => def_justification )
-      //| (LPAREN) => def_justification)  //XXX : Maybe an 'or' marker to combine these two?
     ;
 
 double_hyp_rule_justification

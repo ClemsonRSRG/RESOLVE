@@ -4,7 +4,7 @@
 
     <groupId>edu.clemson.cs.rsrg</groupId>
     <artifactId>RESOLVE</artifactId>
-    <version>12.09.01a</version>
+    <version>14.03.24a</version>
     <packaging>jar</packaging>
     <!-- this is a comment -->
     <name>RESOLVE</name>
@@ -52,7 +52,7 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr3-maven-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.5.1</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -193,7 +193,7 @@
                                             antlr3-maven-plugin
                                         </artifactId>
                                         <versionRange>
-                                            [3.3,)
+                                            [3.5.1,)
                                         </versionRange>
                                         <goals>
                                             <goal>antlr</goal>
@@ -238,7 +238,7 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr-runtime</artifactId>
-            <version>3.3</version>
+            <version>3.5.1</version>
         </dependency>
         <dependency>
             <groupId>edu.clemson.cs.resolve</groupId>

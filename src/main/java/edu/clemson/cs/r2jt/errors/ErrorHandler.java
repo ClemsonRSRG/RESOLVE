@@ -12,19 +12,18 @@
  */
 package edu.clemson.cs.r2jt.errors;
 
-import antlr.BaseAST;
-import antlr.MismatchedTokenException;
-import antlr.NoViableAltException;
-import antlr.Token;
-import antlr.collections.AST;
 import java.io.*;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.MetaFile;
 import edu.clemson.cs.r2jt.data.Pos;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.init.Environment;
-import edu.clemson.cs.r2jt.parsing.ColsAST;
 import edu.clemson.cs.r2jt.ResolveCompiler;
+import org.antlr.runtime.MismatchedTokenException;
+import org.antlr.runtime.NoViableAltException;
+import org.antlr.runtime.Token;
+import org.antlr.runtime.tree.BaseTree;
+import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.Tree;
 
 /**
  * A class through which all messages to the user pass. Contains
@@ -289,24 +288,25 @@ public class ErrorHandler {
      * situations, under the assumption that both the token
      * types and nodes contain line and column information.
      *
-     * @see antlr.MismatchedTokenException
+     * @see MismatchedTokenException
      */
     public void syntaxError(MismatchedTokenException ex) {
         assert ex != null : "ex is null";
         Token token = ex.token;
-        AST node = ex.node;
+        Tree node = (Tree) ex.node;
         String str = ex.toString();
         if (token != null) { // we are parsing
             // grab the <msg> part of the exception's message 
             String msg = str.substring(3 + str.indexOf("), "), str.length());
-            this.error(new Pos(token.getLine(), token.getColumn()), msg);
+            this.error(new Pos(token.getLine(), token.getCharPositionInLine()),
+                    msg);
         }
         else { // we are walking
             if (node == null) { // the mismatched tree node is null
                 this.error("Error at (empty_tree): " + str);
             }
-            else if (node instanceof BaseAST) {
-                ColsAST colsNode = (ColsAST) node;
+            else if (node instanceof BaseTree) {
+                CommonTree colsNode = (CommonTree) node;
                 this.error(new Pos(colsNode.getLine(), colsNode
                         .getCharPositionInLine()), str);
                 //colsNode.getColumn()), str);
@@ -329,28 +329,28 @@ public class ErrorHandler {
      * situations, under the assumption that both the token
      * types and nodes contain line and column information.
      *
-     * @see antlr.NoViableAltException
+     * @see NoViableAltException
      */
     public void syntaxError(NoViableAltException ex) {
         assert ex != null : "ex is null";
         Token token = ex.token;
-        AST node = ex.node;
+        Tree node = (Tree) ex.node;
         String str = ex.toString();
         /* Grab the message part of the string. No matter what caused
          * the exception, this starts with the string "unexpected". */
         String msg = str.substring(str.indexOf("unexpected"), str.length());
         if (token != null) { // we are parsing
-            this.error(new Pos(token.getLine(), token.getColumn()), msg);
+            this.error(new Pos(token.getLine(), token.getCharPositionInLine()),
+                    msg);
         }
         else { // we are walking
             if (node == null) {
                 this.error("Error at (empty_subtree): " + str);
             }
-            else if (node instanceof BaseAST) {
-                ColsAST colsNode = (ColsAST) node;
+            else if (node instanceof BaseTree) {
+                CommonTree colsNode = (CommonTree) node;
                 this.error(new Pos(colsNode.getLine(), colsNode
                         .getCharPositionInLine()), str);
-                //colsNode.getColumn()), str);
             }
             else { //antlr has some kind of antlr.ASTNULLType
                 this.error("Error at (empty_subtree): " + str);

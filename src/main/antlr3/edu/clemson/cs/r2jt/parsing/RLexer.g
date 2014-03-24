@@ -7,8 +7,7 @@ options {
 
 @header {
     package edu.clemson.cs.r2jt.parsing;
-    //import org.antlr.*;
-    }
+}
 
 ABS
   : 'abs'
@@ -706,20 +705,12 @@ fragment REAL
     ;
 
 NUMERIC_LITERAL
-  /*@init { paraphrase.push("a numeric literal"); }
-    options {
-        paraphrase = "a numeric literal";
-    }*/
     : ( DIGITS '..' ) => DIGITS
     | ( DIGITS '.' ~'.' ) => REAL
     | DIGITS
     ;
 
 CHARACTER_LITERAL
-  /*@init { paraphrase.push("a character"); }
-    options {
-        paraphrase = "a character";
-    }*/
     : '\'' (ESC | ~'\'') '\''
     ;
 

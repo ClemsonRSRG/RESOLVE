@@ -5,7 +5,7 @@ options {
     k = 1;
     output = AST;      
     tokenVocab=RParser;             
-    ASTLabelType = 'ColsAST';
+    ASTLabelType = 'CommonTree';
 	superClass = RBuilderSuper;
     //importVocab=RESOLVE;
     }
@@ -2133,7 +2133,7 @@ clean_function_expression returns [Exp exp = null]
     edu.clemson.cs.r2jt.collections.List<FunctionArgList> aGrps = new edu.clemson.cs.r2jt.collections.List<FunctionArgList>("FunctionArgList");
 }
     :   ps=ident
-        { $exp = new VarExp(getLocation((ColsAST)ps.getTree()), qual, $ps.ps); }
+        { $exp = new VarExp(getLocation((CommonTree)ps.getTree()), qual, $ps.ps); }
     |   ^(FUNCTION ps=ident (hat=hat_expression)?
         (aGrp=function_argument_list { aGrps.add($aGrp.list); })+)
         { $exp = new FunctionExp(getLocation($FUNCTION), qual, $ps.ps, $hat.exp, aGrps); }
@@ -2570,19 +2570,19 @@ variable_array_argument_list returns [ProgramExp exp = null]
 // ===============================================================
 
 certain_qualified_ident returns [VarExp exp = null]
-    :   ^(IDENT ps1=ident ps2=ident)
-        { $exp = new VarExp(getLocation($IDENT), $ps1.ps, $ps2.ps); }
+    :   ^(C_Q_IDENTIFIER ps1=ident ps2=ident)
+        { $exp = new VarExp(getLocation($C_Q_IDENTIFIER), $ps1.ps, $ps2.ps); }
     ;
 
 qualified_ident returns [VarExp exp = null]
 @init{
     boolean qualified = false;
 }
-    :   ^(IDENTIFIER ps1=ident (ps2=ident { qualified = true; })?)
+    :   ^(Q_IDENTIFIER ps1=ident (ps2=ident { qualified = true; })?)
         {   if (qualified) {
-                $exp = new VarExp(getLocation($IDENTIFIER), $ps1.ps, $ps2.ps);
+                $exp = new VarExp(getLocation($Q_IDENTIFIER), $ps1.ps, $ps2.ps);
             } else {
-                $exp = new VarExp(getLocation($IDENTIFIER), null, $ps1.ps);
+                $exp = new VarExp(getLocation($Q_IDENTIFIER), null, $ps1.ps);
             }
         }
     ;
@@ -2751,7 +2751,7 @@ headed_proof_expression returns [Exp exp = null]
 proof_expression returns [Exp exp = null]
 :
     ( exp1=goal_declaration { $exp = $exp1.ge; } |
-    tempDec=standard_definition_declaration { $exp = new ProofDefinitionExp(getLocation((ColsAST)tempDec.getTree()), null, (DefinitionDec)$tempDec.dec); } |
+    tempDec=standard_definition_declaration { $exp = new ProofDefinitionExp(getLocation((CommonTree)tempDec.getTree()), null, (DefinitionDec)$tempDec.dec); } |
     exp2=supposition_deduction_pair { $exp = $exp2.sde; } |
     exp3=justification_declaration { $exp = $exp3.je; } )
 ;
@@ -2819,14 +2819,14 @@ justification returns [JustificationExp je = null]
 double_hyp_rule_justification returns [JustificationExp je = null]
 :
   hypDesig1=hyp_desig hypDesig2=hyp_desig (rule=rules_set_1)?
-  { $je = new JustificationExp(getLocation((ColsAST)hypDesig1.getTree()), $hypDesig1.hde, $hypDesig2.hde, $rule.rule, false); }
+  { $je = new JustificationExp(getLocation(hypDesig1), $hypDesig1.hde, $hypDesig2.hde, $rule.rule, false); }
 ;
 
 single_hyp_rule_justification returns [JustificationExp je = null]
 :
   hypDesig1=hyp_desig
-  ( (RULE1) => rule1=rules_set_1 { $je = new JustificationExp(getLocation((ColsAST)rule1.getTree()),$hypDesig1.hde, null, $rule1.rule, false); }
-    | (RULE2) => rule2=rules_set_2 { $je = new JustificationExp(getLocation((ColsAST)rule2.getTree()),$hypDesig1.hde, null, $rule2.rule, false); }
+  ( (RULE1) => rule1=rules_set_1 { $je = new JustificationExp(getLocation(rule1),$hypDesig1.hde, null, $rule1.rule, false); }
+    | (RULE2) => rule2=rules_set_2 { $je = new JustificationExp(getLocation(rule2),$hypDesig1.hde, null, $rule2.rule, false); }
   | je1=def_justification { $je = $je1.je; $je.setHypDesig1($hypDesig1.hde); } )
 ;
 
@@ -2953,12 +2953,11 @@ reference_marker_call returns [MathRefExp mre = null]
 }
 :
     ^(REFCALL id2=ident)
-    { id = getPosSymbol((ColsAST)id2.getTree()); $mre = new MathRefExp(getLocation((ColsAST)id2.getTree()), 7, id); }
+    { id = getPosSymbol(id2); $mre = new MathRefExp(getLocation(id2), 7, id); }
 ;
 
 fn_name returns [PosSymbol name = null]
 :
   id=operator { $name=$id.ps; }
-  //| name=ident
 ;
 
