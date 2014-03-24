@@ -157,7 +157,11 @@ DECREASING
 DEDUCTION
   : 'Deduction'
   ;
-  
+
+DEFAULT
+  : 'Default'
+  ;
+
 DEFINES
   : 'Defines' | 'defines'
   ;
@@ -276,6 +280,10 @@ FOR
   
 FORGET
   : 'Forget'
+  ;
+
+GOAL
+  : 'Goal'
   ;
   
 GENERALIZATION

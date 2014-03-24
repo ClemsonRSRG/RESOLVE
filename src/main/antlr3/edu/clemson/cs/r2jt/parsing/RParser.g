@@ -102,6 +102,7 @@ tokens {
     INDUCTIVE_DEF;
     ITERATE_EXIT;
     ITERATION;
+    ITER_EXPR;
     LOCAL_MATH_TYPE;
     MATH_TYPE;
     MODUS_PONENS;
@@ -109,6 +110,7 @@ tokens {
     OR_RULE;
     PARAMS;
     QUANTIFIER_DISTRIBUTION;
+    QUANT_EXPR;
     RECURSIVE_OPERATION_PROCEDURE;
     RECURSIVE_PROCEDURE;
     REDUCTIO_AD_ABSURDUM;
@@ -121,6 +123,7 @@ tokens {
     STATEMENT_SEQUENCE;
     TUPLE;
     TYPEX;
+    TYPE_FAMILY;
     UNARY_FREE_OP;
     UNARY_MINUS;
     UNIVERSAL_GENERALIZATION;
@@ -695,7 +698,7 @@ outfix_definition_construct
     ;
 
 standard_definition_construct
-    :   (ident | prefix_symbol | quant_symbol | NUMERIC_LITERAL)
+    :   (ident | prefix_symbol | NUMERIC_LITERAL)
         (definition_formal_param_section)?
     ;
 
@@ -724,8 +727,8 @@ definition_formal_param_section
 
 infix_symbol
     : EQL | NOT_EQL | LT | GT | LT_EQL | GT_EQL | PLUS | MINUS | MULTIPLY | DIVIDE
-    | EXP | MOD | REM | DIV | IMPLIES | IFF | AND | OR | XOR
-    | ANDTHEN | ORELSE | COMPLEMENT | IN | NOT_IN | RANGE
+    | EXP | MOD | REM | DIV | IMPLIES | IFF | AND | OR
+    | IN | NOT_IN | RANGE
     | UNION | INTERSECT | WITHOUT | SUBSET | PROP_SUBSET
     | NOT_SUBSET | NOT_PROP_SUBSET | CAT | SUBSTR | NOT_SUBSTR
     ;
@@ -738,11 +741,8 @@ operator
     : infix_symbol
     | NOT
     | ABS
+    | COMPLEMENT
     ;    
-
-quant_symbol
-    : BIG_UNION | BIG_INTERSECT | BIG_SUM | BIG_PRODUCT | BIG_CONCAT
-    ;
 
 // ===============================================================
 // Operation Declarations
@@ -928,26 +928,8 @@ type_declaration
         EXEMPLAR ident SEMICOLON
         constraint_clause?
         type_concept_init_declaration?
-        type_concept_final_declaration?) ->
+        type_concept_final_declaration? END) ->
         ^(TYPE_FAMILY ident math_type_expression ident
-        constraint_clause?
-        type_concept_init_declaration?
-        type_concept_final_declaration?)
-    |   (FAMILY ident
-        (SUBSET | (IS MODELED BY))
-        math_type_expression SEMICOLON
-        EXEMPLAR ident SEMICOLON
-        constraint_clause?
-        type_concept_init_declaration?
-        type_concept_final_declaration?) ->
-        ^(TYPE_FAMILY ident math_type_expression ident
-        constraint_clause?
-        type_concept_init_declaration?
-        type_concept_final_declaration?)
-    |   (TYPE_FAMILY^ ident
-        (SUBSET! | (IS! MODELED! BY!))
-        math_type_expression SEMICOLON!
-        EXEMPLAR! ident SEMICOLON!
         constraint_clause?
         type_concept_init_declaration?
         type_concept_final_declaration?)
@@ -959,24 +941,8 @@ performance_type_declaration
         math_type_expression SEMICOLON
         constraint_clause?
         performance_type_init_declaration?
-        performance_type_final_declaration?) ->
+        performance_type_final_declaration? END) ->
         ^(TYPE_FAMILY ident math_type_expression
-        constraint_clause?
-        performance_type_init_declaration?
-        performance_type_final_declaration?)
-    |   (FAMILY ident
-        (SUBSET | (IS MODELED BY))
-        math_type_expression SEMICOLON
-        constraint_clause?
-        performance_type_init_declaration?
-        performance_type_final_declaration?) ->
-        ^(TYPE_FAMILY ident math_type_expression
-        constraint_clause?
-        performance_type_init_declaration?
-        performance_type_final_declaration?)
-    |   (TYPE_FAMILY^ ident
-        (SUBSET! | IS! MODELED! BY!)
-        math_type_expression SEMICOLON!
         constraint_clause?
         performance_type_init_declaration?
         performance_type_final_declaration?)
@@ -989,6 +955,7 @@ type_representation_declaration
         (correspondence_clause)?
         (type_body_init_declaration)?
         (type_body_final_declaration)?
+        END!
     ;
 
 facility_type_declaration
@@ -997,6 +964,7 @@ facility_type_declaration
         (convention_clause)?
         (type_facility_init_declaration)? 
         (type_facility_final_declaration)?
+        END!
     ;
 
 
@@ -1182,13 +1150,7 @@ remember_statement
 if_statement
     :   IF^ condition
         THEN! statement_sequence
-        (elsif_item)*
         (else_part)? END!
-    ;
-
-elsif_item
-    :   ELSIF^ condition
-        THEN! statement_sequence
     ;
 
 else_part
@@ -1401,8 +1363,8 @@ implicit_type_parameter_group
 // ===============================================================
 
 math_expression
-    :   (   ((ident ident COLON) => iterated_construct) -> ^(EXPR iterated_construct)
-        |   quantified_expression -> ^(EXPR quantified_expression)
+    :   (   ((ident ident COLON) => iterated_construct) -> ^(ITER_EXPR iterated_construct)
+        |   quantified_expression -> ^(QUANT_EXPR quantified_expression)
         )
     ;
 
@@ -1472,8 +1434,6 @@ relational_expression
             |   NOT_PROP_SUBSET^
             |   SUBSTR^
             |   NOT_SUBSTR^
-            |   PROP_SUBSTR^
-            |   NOT_PROP_SUBSTR^
             )
             infix_expression
         )?
@@ -1492,13 +1452,12 @@ between_expression
         -> ^(BETWEEN_EXPR infix_expression $id1 infix_expression $id2 infix_expression)
     ;
 
-infix_expression returns [ColsAST ast = null]
-    :   (type_assertion_expression
-        (   (   RANGE^
-            |   FREE_OPERATOR^
-            )
-            type_assertion_expression
-        )?);
+infix_expression
+    :   ( (type_assertion_expression (RANGE | FREE_OPERATOR)) =>
+    	  (type_assertion_expression (RANGE^ | FREE_OPERATOR^) type_assertion_expression)
+    	| type_assertion_expression
+    	)
+    ;
 
 type_assertion_expression
     : function_type_expression (COLON math_type_expression)?;
@@ -1589,11 +1548,6 @@ clean_function_expression
     :   (ident hat_expression? function_argument_list+)=> ident hat_expression? function_argument_list+ ->
         ^(FUNCTION ident hat_expression? function_argument_list+)
     |   ident
-    /*:   (ident -> ^(ident))
-        (   (hat_expression)?
-            (function_argument_list)+ -> ^(FUNCTION ident hat_expression? function_argument_list+)
-        )?*/
-        //-> ^(ident)
     |   OP  operator 
     ;
 
@@ -1836,23 +1790,18 @@ math_theorem_ident
 proof_module
     :   PROOF UNIT id1=ident SEMICOLON
         module_formal_param_section?
-        uses_list? //(proof_module_body)? END! id2=ident
+        uses_list?
         SEMICOLON ->
         ^(PROOFS_FOR ident
         module_formal_param_section?
-        uses_list? //(proof_module_body)? END! id2=ident
+        uses_list?
         )
     |   PROOFS_FOR^ id1=ident SEMICOLON!
         module_formal_param_section?
-        uses_list? //(proof_module_body)? END! id2=ident
+        uses_list?
         SEMICOLON!
     ;
-    
-proof_module_body
-    :   (math_item_sequence -> ^(PROOFBODY math_item_sequence)
-    |   proof -> ^(PROOFBODY proof))
-    ;
-    
+
 proof
     :   PROOF^ OF!
         math_item_reference
@@ -2045,9 +1994,13 @@ supposition_call
     ;
 
 definition_call
-    :   (LPAREN ident RPAREN! OF!)? 
-      DEFINITION^ fn_name (LPAREN! qualified_ident (COMMA! ident) RPAREN!)?
-      (FROM! ident)?
+    :   (LPAREN ident RPAREN OF)?
+      DEFINITION^ fn_name definition_params?
+      (FROM ident)?
+    ;
+
+definition_params
+    :  (LPAREN! qualified_ident (COMMA! ident) RPAREN!)
     ;
     
 reference_marker_call

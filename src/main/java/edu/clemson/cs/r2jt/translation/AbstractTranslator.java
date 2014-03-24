@@ -207,8 +207,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         ST ifPart = myActiveTemplates.pop();
         myActiveTemplates.peek().add("stmts", ifPart);
 
-       ST elseStmt = myGroup.getInstanceOf("else");
-       myActiveTemplates.push(elseStmt);
+        ST elseStmt = myGroup.getInstanceOf("else");
+        myActiveTemplates.push(elseStmt);
     }
 
     @Override

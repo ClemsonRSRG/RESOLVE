@@ -1029,10 +1029,10 @@ infix_symbol returns [PosSymbol ps = null]
     :   (   sym=EQL | sym=NOT_EQL | sym=LT | sym=GT | sym=LT_EQL | sym=GT_EQL
         | sym=PLUS | sym=MINUS | sym=MULTIPLY | sym=DIVIDE | sym=EXP
         | sym=MOD | sym=REM | sym=DIV | sym=IMPLIES | sym=IFF | sym=AND
-        | sym=OR | sym=XOR | sym=ANDTHEN | sym=ORELSE | sym=COMPLEMENT | sym=IN
+        | sym=OR | sym=IN
         | sym=NOT_IN | sym=RANGE | sym=UNION | sym=INTERSECT | sym=WITHOUT
         | sym=SUBSET | sym=PROP_SUBSET | sym=NOT_SUBSET | sym=NOT_PROP_SUBSET
-        | sym=CAT | sym=SUBSTR | sym=NOT_SUBSTR
+        | sym=CAT
         )
         { $ps = getPosSymbol($sym); }
     ;
@@ -1042,12 +1042,8 @@ prefix_symbol returns [PosSymbol ps = null]
     ;
     
 operator returns [PosSymbol ps = null]
-    : isym=infix_symbol { $ps = $isym.ps; }
-    |  (sym=NOT | sym=ABS | sym=COMPLEMENT) { $ps = getPosSymbol($sym); }
-    ;
-    
-quant_symbol
-    : BIG_UNION | BIG_INTERSECT | BIG_SUM | BIG_PRODUCT | BIG_CONCAT
+    : (sym=NOT | sym=ABS | sym=COMPLEMENT) { $ps = getPosSymbol($sym); }
+    | isym=infix_symbol { $ps = $isym.ps; }
     ;
 
 // ===============================================================
@@ -1878,10 +1874,8 @@ implicit_type_parameter_group returns [Ty ty = null]
 // ===============================================================
 
 math_expression returns [Exp exp = null]
-    :   ^(  EXPR
-            (   exp1=iterated_construct { $exp = $exp1.exp; }
-            |   exp2=quantified_expression { $exp = $exp2.exp; }
-            )
+    :   ( ^(  ITER_EXPR exp1=iterated_construct { $exp = $exp1.exp; }  )
+        | ^(  QUANT_EXPR exp2=quantified_expression { $exp = $exp2.exp; }  )
         )
     ;
 
@@ -2149,7 +2143,7 @@ clean_function_expression returns [Exp exp = null]
 
 hat_expression returns [Exp exp = null]
     :   ^(CARAT (exp1=qualified_ident { $exp = $exp1.exp; }
-    |   exp2=adding_expression) { $exp = $exp2.exp; })
+    |   exp2=nested_expression) { $exp = $exp2.exp; })
     ;
 
 function_argument_list returns [FunctionArgList list = null]
@@ -2607,18 +2601,14 @@ math_theorem_ident returns [PosSymbol ps = null]
 // =============================================================
 
 proof_module returns [ProofModuleDec pmd = null]
+@init{
+    edu.clemson.cs.r2jt.collections.List<Dec> decs = new edu.clemson.cs.r2jt.collections.List<Dec>("Math Items");
+}
     :   ^(PROOFS_FOR moduleName=ident
         (pars=module_formal_param_section)?
-        (uses=uses_list)? (decs=proof_module_body)? ident)
-        { $pmd = new ProofModuleDec($moduleName.ps, $pars.pars, $uses.uses, $decs.decs); }
+        (uses=uses_list)? )
+        { $pmd = new ProofModuleDec($moduleName.ps, $pars.pars, $uses.uses,decs); }
     ;
-    
-proof_module_body returns [edu.clemson.cs.r2jt.collections.List<Dec> decs = new edu.clemson.cs.r2jt.collections.List<Dec>("Math Items")]
-    :   ^(PROOFBODY
-        (mmdTemp=math_item_sequence { $decs.addAllUnique($mmdTemp.dec.getDecs()); }
-        | tempDec=proof { $decs.add($tempDec.pd); } )* )
-    ;
-
 
 proof returns [ProofDec pd = null]
 @init{
@@ -2946,8 +2936,9 @@ supposition_call returns [MathRefExp mre = null]
 
 definition_call returns [MathRefExp mre = null]
 :
-    ^(DEFINITION (LPAREN index=ident)? id=fn_name vars=definition_params
-      (sourceModule=ident)?)
+    (LPAREN index=ident RPAREN OF)?
+    DEFINITION^ id=fn_name vars=definition_params
+    (FROM sourceModule=ident)?
     { $mre = new MathRefExp(getLocation(root_0), 8, $id.name, $index.ps, $sourceModule.ps, $vars.vars); }
 ;
 
