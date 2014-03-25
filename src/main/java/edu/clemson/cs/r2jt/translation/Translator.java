@@ -48,7 +48,7 @@ import edu.clemson.cs.r2jt.archiving.Archiver;
 // and reduced significantly.
 // Error analysis needs more work.
 // - Murali Sitaraman, August 2006.
-
+@Deprecated
 public class Translator extends ResolveConceptualVisitor {
 
     private static final String FLAG_SECTION_NAME = "Translation";

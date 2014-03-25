@@ -310,12 +310,11 @@ public class ImportScanner extends ResolveConceptualVisitor {
     public void visitFacilityDec(FacilityDec dec) {
         annexConceptModule(dec.getConceptName());
         visitEnhancementItemList(dec.getEnhancements(), dec.getConceptName());
-        if (!dec.getBodyName().equals("Std_Character_Realiz")
-                && !dec.getBodyName().equals("Std_Char_Str_Realiz")
-                && !dec.getBodyName().equals("Std_Boolean_Realiz")
-                && !dec.getBodyName().equals("Std_Integer_Realiz")) {
+
+        if (dec.getExternallyRealizedFlag() == false) {
             annexConceptBodyModule(dec.getBodyName(), dec.getConceptName());
         }
+
         //if(dec.getProfileName() != null){
         //annexPerformanceProfile(dec.getProfileName());
         //}
