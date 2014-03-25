@@ -45,7 +45,7 @@ import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
  */
 public class Main {
 
-    private static final String VERSION = "June 2010";
+    private static final String VERSION = "Spring 2014";
 
     public static final String FLAG_SECTION_GENERAL = "General";
 

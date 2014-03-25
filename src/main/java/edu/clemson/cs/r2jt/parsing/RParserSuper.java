@@ -16,7 +16,6 @@ import org.antlr.runtime.*;
 import org.antlr.runtime.tree.*;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
-import edu.clemson.cs.r2jt.collections.List;
 
 /**
  *
@@ -63,19 +62,21 @@ public class RParserSuper extends Parser {
 
     protected boolean otherwise = false;
 
-    protected void checkOtherwiseItem(Tree ast) {
+    protected void checkOtherwiseItem(RuleReturnScope ast) {
+        CommonTree astTree = (CommonTree) ast.getTree();
         if (otherwise) {
             String msg =
                     "Cannot add an alternative after "
                             + "an \"otherwise\" clause.";
-            err.error(getPos(ast), msg);
+            err.error(getPos(astTree), msg);
         }
     }
 
-    protected void checkIndexedIdent(Tree ast) {
-        if (!ast.getText().equals("i") && !ast.getText().equals("ii")) {
-            String msg = "Expecting i or ii, found " + ast.getText();
-            err.error(getPos(ast), msg);
+    protected void checkIndexedIdent(RuleReturnScope ast) {
+        CommonTree astTree = (CommonTree) ast.getTree();
+        if (!astTree.getText().equals("i") && !astTree.getText().equals("ii")) {
+            String msg = "Expecting i or ii, found " + astTree.getText();
+            err.error(getPos(astTree), msg);
         }
     }
 
@@ -86,16 +87,18 @@ public class RParserSuper extends Parser {
         }
     }
 
-    protected void checkIteratedIdent(Tree ast) {
-        if (!ast.getText().equals("Sum") && !ast.getText().equals("Product")
-                && !ast.getText().equals("Concatenation")
-                && !ast.getText().equals("Intersection")
-                && !ast.getText().equals("Union")) {
+    protected void checkIteratedIdent(RuleReturnScope ast) {
+        CommonTree astTree = (CommonTree) ast.getTree();
+        if (!astTree.getText().equals("Sum")
+                && !astTree.getText().equals("Product")
+                && !astTree.getText().equals("Concatenation")
+                && !astTree.getText().equals("Intersection")
+                && !astTree.getText().equals("Union")) {
             String msg =
                     "Expecting iteration identifier "
                             + "(Sum, Product, Concatenation, Intersection, Union),"
-                            + "but found " + ast.getText();
-            err.error(getPos(ast), msg);
+                            + "but found " + astTree.getText();
+            err.error(getPos(astTree), msg);
         }
     }
 
@@ -163,9 +166,8 @@ public class RParserSuper extends Parser {
 
     /** Delegate the error handling to the error handler. */
     public void reportError(RecognitionException ex) {
-        err.error(getPos(ex.token), getErrorMessage(ex, RParser.tokenNames));
-        //System.out.println(getErrorMessage(ex, RParser.tokenNames));
-        //err.error(ex);
+        err.error(getPos(ex.token), getErrorMessage(ex,
+                edu.clemson.cs.r2jt.parsing.RParser.tokenNames));
     }
 
     /** Delegate the warning handling to the error handler. */
@@ -173,29 +175,27 @@ public class RParserSuper extends Parser {
         err.warning(s);
     }
 
-    protected void matchModuleIdent(Tree id2, Tree id1) {
-        if (!id1.getText().equals(id2.getText())) {
+    protected void matchModuleIdent(RuleReturnScope id2, RuleReturnScope id1) {
+        CommonTree id1Tree = (CommonTree) id1.getTree();
+        CommonTree id2Tree = (CommonTree) id2.getTree();
+        if (!id1Tree.getText().equals(id2Tree.getText())) {
             String msg =
-                    "End name " + id2.getText()
-                            + " does not match module name " + id1.getText();
-            err.error(getPos(id2), msg);
+                    "End name " + id2Tree.getText()
+                            + " does not match module name "
+                            + id1Tree.getText();
+            err.error(getPos(id2Tree), msg);
         }
     }
 
-    /*protected void matchModuleIdent(ColsAST id2, ColsAST id1) {
-        if (!id1.getText().equals(id2.getText())) { 
-            String msg = "End name " + id2.getText() +
-            " does not match module name " + id1.getText();
-            err.error(getPos(id2), msg);
-        }  
-    }*/
-
-    protected void matchOperationIdent(Tree id2, Tree id1) {
-        if (!id1.getText().equals(id2.getText())) {
+    protected void matchOperationIdent(RuleReturnScope id2, RuleReturnScope id1) {
+        CommonTree id1Tree = (CommonTree) id1.getTree();
+        CommonTree id2Tree = (CommonTree) id2.getTree();
+        if (!id1Tree.getText().equals(id2Tree.getText())) {
             String msg =
-                    "End name " + id2.getText()
-                            + " does not match operation name " + id1.getText();
-            err.error(getPos(id2), msg);
+                    "End name " + id2Tree.getText()
+                            + " does not match operation name "
+                            + id1Tree.getText();
+            err.error(getPos(id2Tree), msg);
         }
     }
 
@@ -217,16 +217,6 @@ public class RParserSuper extends Parser {
         //return new Pos(ast.getLine(), ast.getColumn());
         return new Pos(ast.getLine(), ast.getCharPositionInLine());
     }
-
-    /*public void recover(RecognitionException ex, BitSet bs) throws TokenStreamException {
-      try {
-          consume();
-          consumeUntil(bs);
-      }
-      catch (TokenStreamException tsex) {
-            throw tsex;
-      } 
-    }*/
 
     protected boolean isDeductionToken(String testStr) {
         if (testStr.equals("deduction") || testStr.equals("Deduction")) {

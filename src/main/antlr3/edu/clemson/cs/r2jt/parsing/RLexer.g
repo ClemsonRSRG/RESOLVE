@@ -1,3 +1,15 @@
+/**
+ * RLexer.g
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 lexer grammar RLexer;
 
 options {
@@ -7,8 +19,7 @@ options {
 
 @header {
     package edu.clemson.cs.r2jt.parsing;
-    //import org.antlr.*;
-    }
+}
 
 ABS
   : 'abs'
@@ -157,7 +168,11 @@ DECREASING
 DEDUCTION
   : 'Deduction'
   ;
-  
+
+DEFAULT
+  : 'Default'
+  ;
+
 DEFINES
   : 'Defines' | 'defines'
   ;
@@ -276,6 +291,10 @@ FOR
   
 FORGET
   : 'Forget'
+  ;
+
+GOAL
+  : 'Goal'
   ;
   
 GENERALIZATION
@@ -698,20 +717,12 @@ fragment REAL
     ;
 
 NUMERIC_LITERAL
-  /*@init { paraphrase.push("a numeric literal"); }
-    options {
-        paraphrase = "a numeric literal";
-    }*/
     : ( DIGITS '..' ) => DIGITS
     | ( DIGITS '.' ~'.' ) => REAL
     | DIGITS
     ;
 
 CHARACTER_LITERAL
-  /*@init { paraphrase.push("a character"); }
-    options {
-        paraphrase = "a character";
-    }*/
     : '\'' (ESC | ~'\'') '\''
     ;
 

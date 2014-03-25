@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.r2jt.init;
 
-import antlr.collections.AST;
 import java.io.*;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -24,14 +23,8 @@ import org.antlr.runtime.ANTLRFileStream;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RuleReturnScope;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.TokenRewriteStream;
-import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.*;
-import org.antlr.stringtemplate.StringTemplate;
-import org.antlr.stringtemplate.StringTemplateGroup;
 
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
@@ -62,8 +55,6 @@ import edu.clemson.cs.r2jt.sanitycheck.VisitorSanityCheck;
 import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.proving2.AlgebraicProver;
 import edu.clemson.cs.r2jt.proving2.VC;
-import edu.clemson.cs.r2jt.type.TypeMatcher;
-import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.verification.AssertiveCode;
 import edu.clemson.cs.r2jt.verification.Verifier;
 import edu.clemson.cs.r2jt.treewalk.*;
@@ -1059,7 +1050,7 @@ public class Controller {
         int initErrorCount = err.getErrorCount();
         RParser parser = new RParser(tokens);
 
-        ColsASTAdaptor adaptor = new ColsASTAdaptor();
+        CommonTreeAdaptor adaptor = new CommonTreeAdaptor();
         parser.setTreeAdaptor(adaptor);
         RuleReturnScope results = parser.module(err);
         if (myInstanceEnvironment.flags
@@ -1133,7 +1124,7 @@ public class Controller {
         }*/
         int initErrorCount = err.getErrorCount();
         RBuilder builder = new RBuilder(new CommonTreeNodeStream(ast));
-        ColsASTAdaptor adaptor = new ColsASTAdaptor();
+        CommonTreeAdaptor adaptor = new CommonTreeAdaptor();
         builder.setTreeAdaptor(adaptor);
         ModuleDec dec = builder.module(err).dec;
 
@@ -1753,22 +1744,24 @@ public class Controller {
      * This generates the dot file for the AST
      */
     private void genAstDotFile(RuleReturnScope results) {
-        //create dot file
-        try {
-            DOTTreeGenerator gen = new DOTTreeGenerator();
-            StringTemplate st = gen.toDOT((Tree) results.getTree());
-            File dotFile =
-                    new File(myInstanceEnvironment.getTargetFile() + "_AST.dot");
-            FileWriter fstream = new FileWriter(dotFile, false);
-            BufferedWriter out = new BufferedWriter(fstream);
-            out.write(st.toString());
-            System.out.println("Exported AST to dot file: "
-                    + dotFile.toString());
-            out.close();
-        }
-        catch (Exception ex) {
+    /* Commented out because we are using a different version of
+                StringTemplate
+    //create dot file
+    try {
+        DOTTreeGenerator gen = new DOTTreeGenerator();
+        StringTemplate st = gen.toDOT((Tree) results.getTree());
+        File dotFile =
+                new File(myInstanceEnvironment.getTargetFile() + "_AST.dot");
+        FileWriter fstream = new FileWriter(dotFile, false);
+        BufferedWriter out = new BufferedWriter(fstream);
+        out.write(st.toString());
+        System.out.println("Exported AST to dot file: "
+                + dotFile.toString());
+        out.close();
+    }
+    catch (Exception ex) {
 
-        }
+    }      */
     }
 
     /*

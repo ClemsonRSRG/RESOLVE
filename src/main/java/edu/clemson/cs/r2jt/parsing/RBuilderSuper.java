@@ -78,8 +78,6 @@ public class RBuilderSuper extends TreeParser {
     /** The error handler for this parser. */
     protected ErrorHandler err;
 
-    //protected ErrorHandler err = ErrorHandler.getInstance();
-
     /** Delegate the error handling to the error handler. */
     public void reportError(RecognitionException ex) {
         System.out.println(getErrorMessage(ex, null));
@@ -91,31 +89,16 @@ public class RBuilderSuper extends TreeParser {
         err.warning(s);
     }
 
-    //      protected PosSymbol getQualifier(edu.clemson.cs.r2jt.collections.List<PosSymbol> psyms) {
-    //          PosSymbol qual = null;
-    //          switch (psyms.size()) {
-    //          case 1: qual = null; break;
-    //          case 2: qual = psyms.get(0); break;
-    //          default: assert false : "qual is invalid";
-    //          }
-    //          return qual;
-    //      }
-
-    //      protected PosSymbol getName(edu.clemson.cs.r2jt.collections.List<PosSymbol> psyms) {
-    //          PosSymbol name = null;
-    //          switch (psyms.size()) {
-    //          case 1: name = psyms.get(0); break;
-    //          case 2: name = psyms.get(1); break;
-    //          default: assert false : "psyms is invalid";
-    //          }
-    //          return name;
-    //      }
-
-    protected Pos getPos(ColsAST ast) {
+    protected Pos getPos(Tree ast) {
         return new Pos(ast.getLine(), ast.getCharPositionInLine());
     }
 
-    protected Location getLocation(ColsAST ast) {
+    protected Location getLocation(RuleReturnScope ast) {
+        CommonTree astTree = (CommonTree) ast.getTree();
+        return getLocation(astTree);
+    }
+
+    protected Location getLocation(CommonTree ast) {
         return new Location(err.getFile(), getPos(ast));
     }
 
@@ -123,19 +106,11 @@ public class RBuilderSuper extends TreeParser {
         return new Location(err.getFile(), pos);
     }
 
-    protected Symbol getSymbol(ColsAST ast) {
+    protected Symbol getSymbol(CommonTree ast) {
         return Symbol.symbol(ast.getText());
     }
 
-    protected Pos getASTPos(ColsAST ast) {
-        return new Pos(ast.getLine(), ast.getCharPositionInLine());
-    }
-
-    protected Symbol getASTSymbol(ColsAST ast) {
-        return Symbol.symbol(ast.getText());
-    }
-
-    protected PosSymbol getOutfixPosSymbol(ColsAST ast) {
+    protected PosSymbol getOutfixPosSymbol(CommonTree ast) {
         Pos pos = new Pos(ast.getLine(), ast.getCharPositionInLine());
         Location loc = new Location(err.getFile(), pos);
         String str = ast.getText();
@@ -164,7 +139,12 @@ public class RBuilderSuper extends TreeParser {
         return new PosSymbol(loc, name);
     }
 
-    protected PosSymbol getPosSymbol(ColsAST ast) {
+    protected PosSymbol getPosSymbol(RuleReturnScope ast) {
+        CommonTree astTree = (CommonTree) ast.getTree();
+        return getPosSymbol(astTree);
+    }
+
+    protected PosSymbol getPosSymbol(CommonTree ast) {
         Pos pos = new Pos(ast.getLine(), ast.getCharPositionInLine());
         Location loc = new Location(err.getFile(), pos);
         Symbol sym = Symbol.symbol(ast.getText());

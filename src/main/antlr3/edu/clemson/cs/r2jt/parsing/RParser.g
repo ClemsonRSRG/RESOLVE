@@ -1,69 +1,21 @@
-/*
- * This software is released under the new BSD 2006 license.
- * 
- * Note the new BSD license is equivalent to the MIT License, except for the
- * no-endorsement final clause.
- * 
- * Copyright (c) 2007, Clemson University
- * 
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
- *   * Neither the name of the Clemson University nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission. 
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
- * This sofware has been developed by past and present members of the
- * Reusable Sofware Research Group (RSRG) in the School of Computing at
- * Clemson University.  Contributors to the initial version are:
- * 
- *     Steven Atkinson
- *     Greg Kulczycki
- *     Kunal Chopra
- *     John Hunt
- *     Heather Keown
- *     Ben Markle
- *     Kim Roche
- *     Murali Sitaraman
- *     Nighat Yasmin 
- */
-/*
+/**
  * RParser.g
- *
- * The Resolve Software Composition Workbench Project
- *
- * Copyright (c) 1999-2005
- * Reusable Software Research Group
- * Department of Computer Science
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
  * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
  */
-
-//class RParser extends Parser;
 parser grammar RParser;
 
 options {
     k = 1;    
     output = AST;                   
-    ASTLabelType = 'ColsAST';
+    ASTLabelType = 'CommonTree';
     tokenVocab=RLexer;
 	superClass = RParserSuper;
     //language=JavaScript;
@@ -79,6 +31,7 @@ tokens {
     AUX_OPERATION;
     ARRAYFUNCTION;
     BETWEEN_EXPR;
+    C_Q_IDENTIFIER;
     CATEGORICAL_DEFINITION;
     CHOICES;
     COMMON_CONCLUSION;
@@ -102,13 +55,16 @@ tokens {
     INDUCTIVE_DEF;
     ITERATE_EXIT;
     ITERATION;
+    ITER_EXPR;
     LOCAL_MATH_TYPE;
     MATH_TYPE;
     MODUS_PONENS;
     NESTED;
     OR_RULE;
     PARAMS;
+    Q_IDENTIFIER;
     QUANTIFIER_DISTRIBUTION;
+    QUANT_EXPR;
     RECURSIVE_OPERATION_PROCEDURE;
     RECURSIVE_PROCEDURE;
     REDUCTIO_AD_ABSURDUM;
@@ -121,6 +77,7 @@ tokens {
     STATEMENT_SEQUENCE;
     TUPLE;
     TYPEX;
+    TYPE_FAMILY;
     UNARY_FREE_OP;
     UNARY_MINUS;
     UNIVERSAL_GENERALIZATION;
@@ -191,11 +148,11 @@ this.err = err;
 // ---------------------------------------------------------------
 
 theory_module
-    :   THEORY^ id1=ident //{ theoryModule = true; }
+    :   THEORY^ id1=ident { theoryModule = true; }
         (module_formal_param_section)? SEMICOLON!
         (uses_list)?
         (math_item_sequence)?
-        END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchModuleIdent(id2, id1); })?
         SEMICOLON!
     ;
 
@@ -220,7 +177,7 @@ conceptual_module
         (uses_list)?
         (requires_clause)?
         (concept_item_sequence)?
-        END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchModuleIdent(id2, id1); })?
         SEMICOLON!
     ;
 
@@ -247,14 +204,13 @@ concept_item
 
 performance_concept_module
     :  
-        MODULE_PROFILE id1=ident
-        { performanceCModule = true; }
+        MODULE_PROFILE id1=ident { performanceCModule = true; }
         (module_formal_param_section)? SHORT_FOR
         ident FOR ident SEMICOLON
         (uses_list)?
         (requires_clause)?
         (performance_C_item_sequence)?
-        END (id2=ident { matchModuleIdent(id2.tree, id1.tree); })?
+        END (id2=ident { matchModuleIdent(id2, id1); })?
         SEMICOLON ->
         ^(CONCEPT_PROFILE ident
         (module_formal_param_section)? 
@@ -288,14 +244,13 @@ performance_C_item
 
 performance_enhancement_module
     :  
-        MODULE_PROFILE id1=ident
-        { performanceEModule = true; }
+        MODULE_PROFILE id1=ident { performanceEModule = true; }
         (module_formal_param_section)? SHORT_FOR
         ident FOR ident FOR ident WITH_PROFILE ident SEMICOLON
         (uses_list)?
         (requires_clause)?
         (performance_E_item_sequence)?
-        END (id2=ident { matchModuleIdent(id2.tree, id1.tree); })?
+        END (id2=ident { matchModuleIdent(id2, id1); })?
         SEMICOLON ->
         ^(ENHANCEMENT_PROFILE ident
         (module_formal_param_section)?
@@ -330,7 +285,7 @@ enhancement_module
         (uses_list)?
         (requires_clause)?
         (enhancement_item_sequence)?
-        END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchModuleIdent(id2, id1); })?
         SEMICOLON!
     ;
 
@@ -360,7 +315,7 @@ realization_body_module
         (uses_list)?
         (requires_clause)?
         (body_item_sequence)?
-        END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchModuleIdent(id2, id1); })?
         SEMICOLON!
     ;
 
@@ -431,7 +386,7 @@ facility_module
     |   FACILITY^ id1=ident SEMICOLON! (uses_list)?
         (requires_clause)?
         (facility_item_sequence)?
-        END! (id2=ident! { matchModuleIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchModuleIdent(id2, id1); })?
         SEMICOLON!
     ;
 
@@ -695,7 +650,7 @@ outfix_definition_construct
     ;
 
 standard_definition_construct
-    :   (ident | prefix_symbol | quant_symbol | NUMERIC_LITERAL)
+    :   (ident | prefix_symbol | NUMERIC_LITERAL)
         (definition_formal_param_section)?
     ;
 
@@ -708,7 +663,7 @@ categorical_definition_construct
 // an error if it is not the case.
 indexed_expression
     :   LPAREN! id=ident! RPAREN! math_expression
-        { checkIndexedIdent(id.tree); }
+        { checkIndexedIdent(id); }
     ;
 
 singleton_definition_parameter
@@ -724,8 +679,8 @@ definition_formal_param_section
 
 infix_symbol
     : EQL | NOT_EQL | LT | GT | LT_EQL | GT_EQL | PLUS | MINUS | MULTIPLY | DIVIDE
-    | EXP | MOD | REM | DIV | IMPLIES | IFF | AND | OR | XOR
-    | ANDTHEN | ORELSE | COMPLEMENT | IN | NOT_IN | RANGE
+    | EXP | MOD | REM | DIV | IMPLIES | IFF | AND | OR
+    | IN | NOT_IN | RANGE
     | UNION | INTERSECT | WITHOUT | SUBSET | PROP_SUBSET
     | NOT_SUBSET | NOT_PROP_SUBSET | CAT | SUBSTR | NOT_SUBSTR
     ;
@@ -738,11 +693,8 @@ operator
     : infix_symbol
     | NOT
     | ABS
+    | COMPLEMENT
     ;    
-
-quant_symbol
-    : BIG_UNION | BIG_INTERSECT | BIG_SUM | BIG_PRODUCT | BIG_CONCAT
-    ;
 
 // ===============================================================
 // Operation Declarations
@@ -761,7 +713,7 @@ operation_procedure_declaration
         (variable_declaration)*
         (aux_variable_declaration)*
         statement_sequence
-        END! (id2=ident! { matchOperationIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchOperationIdent(id2, id1); })?
         SEMICOLON!
     ;
     
@@ -778,7 +730,7 @@ operation_recursive_procedure_declaration
         variable_declaration*
         aux_variable_declaration*
         statement_sequence
-        END (id2=ident { matchOperationIdent(id2.tree, id1.tree); })?
+        END (id2=ident { matchOperationIdent(id2, id1); })?
         SEMICOLON ->
         ^(RECURSIVE_OPERATION_PROCEDURE ident
         operation_formal_param_section
@@ -836,7 +788,7 @@ procedure_declaration
         (variable_declaration)*
         (aux_variable_declaration)*
         statement_sequence
-        END! (id2=ident! { matchOperationIdent(id2.tree, id1.tree); })?
+        END! (id2=ident! { matchOperationIdent(id2, id1); })?
         SEMICOLON!
     ;
     
@@ -850,7 +802,7 @@ recursive_procedure_declaration
         variable_declaration*
         aux_variable_declaration*       
         statement_sequence
-        END (id2=ident)? //{ matchOperationIdent(id2.tree, id1.tree); })?
+        END (id2=ident { matchOperationIdent(id2, id1); })?
         SEMICOLON ->
         ^(RECURSIVE_PROCEDURE ident
         operation_formal_param_section
@@ -928,26 +880,8 @@ type_declaration
         EXEMPLAR ident SEMICOLON
         constraint_clause?
         type_concept_init_declaration?
-        type_concept_final_declaration?) ->
+        type_concept_final_declaration? END SEMICOLON) ->
         ^(TYPE_FAMILY ident math_type_expression ident
-        constraint_clause?
-        type_concept_init_declaration?
-        type_concept_final_declaration?)
-    |   (FAMILY ident
-        (SUBSET | (IS MODELED BY))
-        math_type_expression SEMICOLON
-        EXEMPLAR ident SEMICOLON
-        constraint_clause?
-        type_concept_init_declaration?
-        type_concept_final_declaration?) ->
-        ^(TYPE_FAMILY ident math_type_expression ident
-        constraint_clause?
-        type_concept_init_declaration?
-        type_concept_final_declaration?)
-    |   (TYPE_FAMILY^ ident
-        (SUBSET! | (IS! MODELED! BY!))
-        math_type_expression SEMICOLON!
-        EXEMPLAR! ident SEMICOLON!
         constraint_clause?
         type_concept_init_declaration?
         type_concept_final_declaration?)
@@ -959,24 +893,8 @@ performance_type_declaration
         math_type_expression SEMICOLON
         constraint_clause?
         performance_type_init_declaration?
-        performance_type_final_declaration?) ->
+        performance_type_final_declaration? END SEMICOLON) ->
         ^(TYPE_FAMILY ident math_type_expression
-        constraint_clause?
-        performance_type_init_declaration?
-        performance_type_final_declaration?)
-    |   (FAMILY ident
-        (SUBSET | (IS MODELED BY))
-        math_type_expression SEMICOLON
-        constraint_clause?
-        performance_type_init_declaration?
-        performance_type_final_declaration?) ->
-        ^(TYPE_FAMILY ident math_type_expression
-        constraint_clause?
-        performance_type_init_declaration?
-        performance_type_final_declaration?)
-    |   (TYPE_FAMILY^ ident
-        (SUBSET! | IS! MODELED! BY!)
-        math_type_expression SEMICOLON!
         constraint_clause?
         performance_type_init_declaration?
         performance_type_final_declaration?)
@@ -989,6 +907,7 @@ type_representation_declaration
         (correspondence_clause)?
         (type_body_init_declaration)?
         (type_body_final_declaration)?
+        END! SEMICOLON!
     ;
 
 facility_type_declaration
@@ -997,6 +916,7 @@ facility_type_declaration
         (convention_clause)?
         (type_facility_init_declaration)? 
         (type_facility_final_declaration)?
+        END! SEMICOLON!
     ;
 
 
@@ -1182,13 +1102,7 @@ remember_statement
 if_statement
     :   IF^ condition
         THEN! statement_sequence
-        (elsif_item)*
         (else_part)? END!
-    ;
-
-elsif_item
-    :   ELSIF^ condition
-        THEN! statement_sequence
     ;
 
 else_part
@@ -1401,8 +1315,8 @@ implicit_type_parameter_group
 // ===============================================================
 
 math_expression
-    :   (   ((ident ident COLON) => iterated_construct) -> ^(EXPR iterated_construct)
-        |   quantified_expression -> ^(EXPR quantified_expression)
+    :   (   ((ident ident COLON) => iterated_construct) -> ^(ITER_EXPR iterated_construct)
+        |   quantified_expression -> ^(QUANT_EXPR quantified_expression)
         )
     ;
 
@@ -1472,8 +1386,6 @@ relational_expression
             |   NOT_PROP_SUBSET^
             |   SUBSTR^
             |   NOT_SUBSTR^
-            |   PROP_SUBSTR^
-            |   NOT_PROP_SUBSTR^
             )
             infix_expression
         )?
@@ -1492,13 +1404,12 @@ between_expression
         -> ^(BETWEEN_EXPR infix_expression $id1 infix_expression $id2 infix_expression)
     ;
 
-infix_expression returns [ColsAST ast = null]
-    :   (type_assertion_expression
-        (   (   RANGE^
-            |   FREE_OPERATOR^
-            )
-            type_assertion_expression
-        )?);
+infix_expression
+    :   ( (type_assertion_expression (RANGE | FREE_OPERATOR)) =>
+    	  (type_assertion_expression (RANGE^ | FREE_OPERATOR^) type_assertion_expression)
+    	| type_assertion_expression
+    	)
+    ;
 
 type_assertion_expression
     : function_type_expression (COLON math_type_expression)?;
@@ -1589,11 +1500,6 @@ clean_function_expression
     :   (ident hat_expression? function_argument_list+)=> ident hat_expression? function_argument_list+ ->
         ^(FUNCTION ident hat_expression? function_argument_list+)
     |   ident
-    /*:   (ident -> ^(ident))
-        (   (hat_expression)?
-            (function_argument_list)+ -> ^(FUNCTION ident hat_expression? function_argument_list+)
-        )?*/
-        //-> ^(ident)
     |   OP  operator 
     ;
 
@@ -1621,7 +1527,7 @@ alternative_expression
     ;
 
 alternative_expression_item
-    :   exp=adding_expression { checkOtherwiseItem((ColsAST)exp.getTree()); }
+    :   exp=adding_expression { checkOtherwiseItem(exp); }
         (   IF^ relational_expression
         |   OTHERWISE^ { otherwise = true; }
         )
@@ -1629,7 +1535,7 @@ alternative_expression_item
     ;
 
 iterated_construct
-    :   id=ident { checkIteratedIdent(id.tree); }
+    :   id=ident { checkIteratedIdent(id); }
         ident
         COLON math_type_expression 
         (where_clause)?
@@ -1813,14 +1719,14 @@ variable_array_argument_list
 // ===============================================================
 
 certain_qualified_ident
-    :   ident DOT ident -> ^(IDENTIFIER ident ident)
+    :   ident DOT ident -> ^(C_Q_IDENTIFIER ident ident)
     ;
 
 qualified_ident
-    :   ident (DOT ident)? -> ^(IDENTIFIER ident ident?)
+    :   ident (DOT ident)? -> ^(Q_IDENTIFIER ident ident?)
     ;
 
-ident //returns [ColsAST ast = null]
+ident
     :   IDENTIFIER
     ;
 
@@ -1836,38 +1742,33 @@ math_theorem_ident
 proof_module
     :   PROOF UNIT id1=ident SEMICOLON
         module_formal_param_section?
-        uses_list? //(proof_module_body)? END! id2=ident
+        uses_list?
         SEMICOLON ->
         ^(PROOFS_FOR ident
         module_formal_param_section?
-        uses_list? //(proof_module_body)? END! id2=ident
+        uses_list?
         )
     |   PROOFS_FOR^ id1=ident SEMICOLON!
         module_formal_param_section?
-        uses_list? //(proof_module_body)? END! id2=ident
+        uses_list?
         SEMICOLON!
     ;
-    
-proof_module_body
-    :   (math_item_sequence -> ^(PROOFBODY math_item_sequence)
-    |   proof -> ^(PROOFBODY proof))
-    ;
-    
+
 proof
     :   PROOF^ OF!
         math_item_reference
         COLON!
-        ( (LSQBRACK IDENTIFIER RSQBRACK LPAREN BASECASE) => base_case_statement_head
+        ( (LSQBRACK ident RSQBRACK LPAREN BASECASE) => base_case_statement_head
         | (LPAREN BASECASE) => base_case_statement_body
-        | (LSQBRACK IDENTIFIER RSQBRACK LPAREN INDUCTIVECASE) => inductive_case_statement_head
+        | (LSQBRACK ident RSQBRACK LPAREN INDUCTIVECASE) => inductive_case_statement_head
         | (LPAREN INDUCTIVECASE) => inductive_case_statement_body
-        | (LSQBRACK IDENTIFIER RSQBRACK) => headed_proof_expression
+        | (LSQBRACK ident RSQBRACK) => headed_proof_expression
         | proof_expression )*
         QED!
     ;
     
 base_case_statement_head
-    :   LSQBRACK! IDENTIFIER^ RSQBRACK! base_case_statement_body
+    :   LSQBRACK! ident^ RSQBRACK! base_case_statement_body
     ;
     
 base_case_statement_body
@@ -1875,7 +1776,7 @@ base_case_statement_body
     ;
     
 inductive_case_statement_head
-    :   LSQBRACK! IDENTIFIER^ RSQBRACK! inductive_case_statement_body
+    :   LSQBRACK! ident^ RSQBRACK! inductive_case_statement_body
     ;
     
 inductive_case_statement_body
@@ -1908,15 +1809,15 @@ corollary_name
     ;
     
 proof_expression_list
-    :   ( (LSQBRACK IDENTIFIER RSQBRACK DEDUCTION) => () { break; }
+    :   ( (LSQBRACK ident RSQBRACK DEDUCTION) => () { break; }
         | (DEDUCTION) => () { break; }
-        | (LSQBRACK IDENTIFIER RSQBRACK) => headed_proof_expression -> ^(PROOFEXPRLIST headed_proof_expression)
+        | (LSQBRACK ident RSQBRACK) => headed_proof_expression -> ^(PROOFEXPRLIST headed_proof_expression)
         | proof_expression -> ^(PROOFEXPRLIST proof_expression)
         )*
     ;
     
 headed_proof_expression
-    :   LSQBRACK! IDENTIFIER^ RSQBRACK! proof_expression
+    :   LSQBRACK! ident^ RSQBRACK! proof_expression
     ;
 
 proof_expression
@@ -1935,9 +1836,9 @@ goal_declaration
 supposition_deduction_pair
     :   supposition_declaration SEMICOLON
         proof_expression_list
-        (LSQBRACK IDENTIFIER RSQBRACK)?
+        (LSQBRACK ident RSQBRACK)?
         deduction_declaration SEMICOLON
-        -> ^(SUPDEDUC supposition_declaration proof_expression_list IDENTIFIER? deduction_declaration)
+        -> ^(SUPDEDUC supposition_declaration proof_expression_list ident? deduction_declaration)
     ;
     
 supposition_declaration
@@ -1945,7 +1846,6 @@ supposition_declaration
         (
           ((ident COLON) => (math_variable_declarations (AND! math_expression)?))
           | ((ident COMMA ident) => (math_variable_declarations (AND! math_expression)?))
-          //| (math_expression ((AND! math_variable_declarations)?))
         )
     ;
     
@@ -1969,7 +1869,6 @@ justification
       | (hyp_desig) => hyp_desig
       | simple_justification
       | (DEFINITION) => def_justification )
-      //| (LPAREN) => def_justification)  //XXX : Maybe an 'or' marker to combine these two?
     ;
 
 double_hyp_rule_justification
@@ -2045,9 +1944,13 @@ supposition_call
     ;
 
 definition_call
-    :   (LPAREN ident RPAREN! OF!)? 
-      DEFINITION^ fn_name (LPAREN! qualified_ident (COMMA! ident) RPAREN!)?
-      (FROM! ident)?
+    :   (LPAREN ident RPAREN OF)?
+      DEFINITION^ fn_name definition_params?
+      (FROM ident)?
+    ;
+
+definition_params
+    :  (LPAREN! qualified_ident (COMMA! ident) RPAREN!)
     ;
     
 reference_marker_call
