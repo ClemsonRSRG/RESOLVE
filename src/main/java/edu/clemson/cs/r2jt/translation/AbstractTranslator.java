@@ -65,8 +65,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     /**
      * <p>The top of this <code>Stack</code> maintains a reference to the
      * template actively being built or added to, and the bottom refers to
-     * <code>module</code> - the outermost enclosing template for all target
-     * languages.</p>
+     * <code>shell</code> - the outermost enclosing template for all
+     * currently supported target languages.</p>
      *
      * <p>Proper usage should generally involve: Pushing in <tt>pre</tt>,
      * modifying top arbitrarily with <tt>pre</tt>'s children, popping in the

@@ -29,7 +29,7 @@ module(directives, includes, structures, variables, functions, eof) ::= <<
 function_decl(modifier, type, name, parameters, stmts) ::= <%
     <modifier> <type> <name>(<parameters; separator = ", ">);%>
 
-var_decl(modifier, type, name, init) ::= <%<modifier> <type> <name> = <init>;%>
+var_decl(modifier, type, name, init) ::= "<modifier> <type> <name> = <init>;"
 
 function_def(modifier, type, name, parameters, facilities, variables = [],
                                                             stmts = []) ::= <<
@@ -39,12 +39,8 @@ function_def(modifier, type, name, parameters, facilities, variables = [],
 	<stmts      ; separator = "\n">
 }>>
 
-parameter(type, name) ::= <%<type> <name>%>
+parameter(type, name) ::= "<type> <name>"
 
-unqualified_type(name) ::= <%<name>%>
+unqualified_type(name) ::= "<name>"
 
-//-------------------------------------------------------------------
-//   stmts
-//-------------------------------------------------------------------
-
-return_stmt(name) ::= <%return <name>;%>
+return_stmt(name) ::= "return <name>;"
