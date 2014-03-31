@@ -337,9 +337,16 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preEnhancementBodyItem(EnhancementBodyItem node) {
 
-        LinkedList<Object> args =
-                new LinkedList((List) myBaseInstantiation
-                        .getAttribute("arguments"));
+        if (myBaseInstantiation.getAttribute("arguments") instanceof ST) {
+            ST args = ((ST)myBaseInstantiation.getAttribute("arguments"));
+            myActiveTemplates.peek().add("arguments", args);
+        }
+        else {
+            LinkedList<Object> args =
+                    new LinkedList((List) myBaseInstantiation
+                            .getAttribute("arguments"));
+            myActiveTemplates.peek().add("arguments", args);
+        }
 
         List<ModuleParameterization> enhancements =
                 myCurrentFacilityEntry.getEnhancements();
@@ -359,9 +366,6 @@ public class JavaTranslator extends AbstractTranslator {
         myActiveTemplates.push(myGroup.getInstanceOf("facility_init"));
         myActiveTemplates.peek().add("isProxied", proxied).add("realization",
                 node.getBodyName().getName());
-
-        // This shouldn't be a problem once expressions are added.
-        myActiveTemplates.peek().add("arguments", args);
     }
 
     @Override
