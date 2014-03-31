@@ -337,15 +337,16 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preEnhancementBodyItem(EnhancementBodyItem node) {
 
+        ST singleArg = null;
+        LinkedList<Object> args = new LinkedList<Object>();
+
         if (myBaseInstantiation.getAttribute("arguments") instanceof ST) {
-            ST args = ((ST)myBaseInstantiation.getAttribute("arguments"));
-            myActiveTemplates.peek().add("arguments", args);
+            singleArg = ((ST)myBaseInstantiation.getAttribute("arguments"));
         }
         else {
-            LinkedList<Object> args =
+            args =
                     new LinkedList((List) myBaseInstantiation
                             .getAttribute("arguments"));
-            myActiveTemplates.peek().add("arguments", args);
         }
 
         List<ModuleParameterization> enhancements =
@@ -366,6 +367,13 @@ public class JavaTranslator extends AbstractTranslator {
         myActiveTemplates.push(myGroup.getInstanceOf("facility_init"));
         myActiveTemplates.peek().add("isProxied", proxied).add("realization",
                 node.getBodyName().getName());
+
+        if (myBaseInstantiation.getAttribute("arguments") instanceof ST) {
+            myActiveTemplates.peek().add("arguments", singleArg);
+        }
+        else {
+            myActiveTemplates.peek().add("arguments", args);
+        }
     }
 
     @Override
