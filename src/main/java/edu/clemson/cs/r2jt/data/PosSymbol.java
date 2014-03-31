@@ -81,14 +81,37 @@ public class PosSymbol implements AsStringCapability {
     // Public Methods
     // ===========================================================
 
+    /**
+     * Returns true if both the symbol field inside the PosSymbol
+     * matches our symbol.
+     *
+     * @param pos PosSymbol to be compared.
+     *
+     * @return True if equal, false otherwise.
+     */
+    public boolean equals(PosSymbol pos) {
+        return equals(pos.getSymbol());
+    }
+
+    /**
+     * Returns true if both the symbol field matches
+     * our symbol.
+     *
+     * @param sym Symbol to be compared.
+     *
+     * @return True if equal, false otherwise.
+     */
     public boolean equals(Symbol sym) {
-        //return symbol == sym;
         return symbol.getName().equals(sym.getName());
     }
 
     /**
      * Returns true if the symbol field matches the symbol created
      * by the specified string.
+     *
+     * @param str String to be compared.
+     *
+     * @return True if equal, false otherwise.
      */
     public boolean equals(String str) {
         return symbol == Symbol.symbol(str);
