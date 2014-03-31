@@ -845,7 +845,9 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                     VariableArrayExp rightLastExp =
                             (VariableArrayExp) rightDotList.get(lastIndex);
                     VariableDotExp arrayName =
-                            (VariableDotExp) leftDotExp.copy();
+                            new VariableDotExp(leftDotExp.getLocation(),
+                                    leftDotExp.getSegments(), leftDotExp
+                                            .getSemanticExp());
 
                     // Modify the last segment
                     List<VariableExp> tempList = arrayName.getSegments();
@@ -894,7 +896,10 @@ public class PreProcessor extends TreeWalkerStackVisitor {
                 }
 
                 // Modify the last segment
-                VariableDotExp arrayName = (VariableDotExp) dotArrayExp.copy();
+                VariableDotExp arrayName =
+                        new VariableDotExp(dotArrayExp.getLocation(),
+                                dotArrayExp.getSegments(), dotArrayExp
+                                        .getSemanticExp());
                 List<VariableExp> tempList = arrayName.getSegments();
                 int lastIndex = tempList.size() - 1;
                 VariableArrayExp arrayLastExp =
@@ -1353,7 +1358,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
 
         // Need to check deeper if they are the same size
         if (list1.size() == list2.size()) {
-            for (int i = 0; i < list1.size() - 1; i++) {
+            for (int i = 0; i < list1.size(); i++) {
                 VariableExp temp1 = list1.get(i);
                 VariableExp temp2 = list2.get(i);
 
