@@ -340,19 +340,19 @@ public class JavaTranslator extends AbstractTranslator {
         ST singleArg = null;
         LinkedList<Object> args = new LinkedList<Object>();
 
-        if (myBaseInstantiation.getAttribute("arguments") instanceof ST) {
-            singleArg = ((ST)myBaseInstantiation.getAttribute("arguments"));
-        }
-        else {
-            args =
-                    new LinkedList((List) myBaseInstantiation
-                            .getAttribute("arguments"));
-        }
-
         List<ModuleParameterization> enhancements =
                 myCurrentFacilityEntry.getEnhancements();
 
         boolean proxied = myCurrentFacilityEntry.getEnhancements().size() > 1;
+
+        if (myBaseInstantiation.getAttribute("arguments") instanceof ST) {
+            singleArg = ((ST) myBaseInstantiation.getAttribute("arguments"));
+        }
+        else if (myBaseInstantiation.getAttribute("arguments") != null) {
+            args =
+                    new LinkedList((List) myBaseInstantiation
+                            .getAttribute("arguments"));
+        }
 
         for (ModuleParameterization m : enhancements) {
             if (m.getModuleIdentifier().toString().equals(
