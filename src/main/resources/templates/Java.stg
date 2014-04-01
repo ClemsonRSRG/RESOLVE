@@ -103,7 +103,7 @@ public class <name> implements <implement; separator = ", "> {
 	<conceptname> con;
 	<classes>
 
-	public <name>(<parameters; separator = ", ">, <conceptname> con) {
+	public <name>(<param_writer([parameters, conceptname : {c | <c> con}])>) {
 		<parameters : {p | this.<p.name> = <p.name>;}; separator = "\n">
 		<variables  : {v | <v.name> = <v.init>;}; separator = "\n">
 		this.con = con;
@@ -131,11 +131,11 @@ public class <name> implements <implement; separator = ", "> {
         }
     }
 
-    public static <conceptname> createProxy(<parameters; separator = ", ">
-        , <conceptname> toWrap) {
+    public static <conceptname> createProxy(<param_writer([parameters,
+    conceptname : {c | <c> toWrap}])>) {
 
-        <name> eObj = new <name>(<parameters : {p | <p.name>}; separator =
-        ", "><if(parameters)>,<endif> toWrap);
+        <name> eObj = new <name>(<param_writer([parameters : {p | <p.name>},
+        "toWrap"])>);
         Class[] toWrapInterfaces = toWrap.getClass().getInterfaces();
         Class[] thisInterfaces = new Class[toWrapInterfaces.length+1];
         Class[] tmpInterfaces = eObj.getClass().getInterfaces();
@@ -147,6 +147,8 @@ public class <name> implements <implement; separator = ", "> {
             .class.getClassLoader(), thisInterfaces, eObj));
     }
 }>>
+
+param_writer(p) ::= <%<p; separator = ", ">%>
 
 enhanced_stmt(returns, name, arguments) ::= <%
     <if(returns)>return<endif> con.<name>(<arguments; separator = ", ">);%>

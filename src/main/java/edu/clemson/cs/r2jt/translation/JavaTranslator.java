@@ -337,14 +337,22 @@ public class JavaTranslator extends AbstractTranslator {
     @Override
     public void preEnhancementBodyItem(EnhancementBodyItem node) {
 
-        LinkedList<Object> args =
-                new LinkedList((List) myBaseInstantiation
-                        .getAttribute("arguments"));
+        ST singleArg = null;
+        LinkedList<Object> args = new LinkedList<Object>();
 
         List<ModuleParameterization> enhancements =
                 myCurrentFacilityEntry.getEnhancements();
 
         boolean proxied = myCurrentFacilityEntry.getEnhancements().size() > 1;
+
+        if (myBaseInstantiation.getAttribute("arguments") instanceof ST) {
+            singleArg = ((ST) myBaseInstantiation.getAttribute("arguments"));
+        }
+        else if (myBaseInstantiation.getAttribute("arguments") != null) {
+            args =
+                    new LinkedList((List) myBaseInstantiation
+                            .getAttribute("arguments"));
+        }
 
         for (ModuleParameterization m : enhancements) {
             if (m.getModuleIdentifier().toString().equals(
@@ -360,8 +368,12 @@ public class JavaTranslator extends AbstractTranslator {
         myActiveTemplates.peek().add("isProxied", proxied).add("realization",
                 node.getBodyName().getName());
 
-        // This shouldn't be a problem once expressions are added.
-        myActiveTemplates.peek().add("arguments", args);
+        if (myBaseInstantiation.getAttribute("arguments") instanceof ST) {
+            myActiveTemplates.peek().add("arguments", singleArg);
+        }
+        else {
+            myActiveTemplates.peek().add("arguments", args);
+        }
     }
 
     @Override
