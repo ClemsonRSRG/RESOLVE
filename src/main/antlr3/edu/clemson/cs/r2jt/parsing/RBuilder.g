@@ -521,7 +521,7 @@ facility_module returns [ModuleDec dec = null]
 @init{
     InitItem init = null;
     FinalItem fin = null;
-    edu.clemson.cs.r2jt.collections.List<Dec> decs = null;
+    edu.clemson.cs.r2jt.collections.List<Dec> decs = new edu.clemson.cs.r2jt.collections.List<Dec>("Dec");;
     FacilityDec fDec = null;
 }
     :   ^(  SHORT_FACILITY dec2=facility_declaration (uses=uses_list)?  )
@@ -538,11 +538,9 @@ facility_module returns [ModuleDec dec = null]
                 init = $dec3.dec.getFacilityInit();
                 fin = $dec3.dec.getFacilityFinal();
                 decs = $dec3.dec.getDecs();
-                $dec = new FacilityModuleDec($ps.ps,
-                    $uses.uses, $req.exp, init, fin, decs);
-            } else {
-                assert false;
             }
+             $dec = new FacilityModuleDec($ps.ps,
+                                 $uses.uses, $req.exp, init, fin, decs);
         }
     ;
 

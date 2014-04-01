@@ -107,7 +107,7 @@ public class MetaFile {
     public File getMyCustomFile() {
         String filePath = myCustomPath;
         if (myKind.equals(ModuleKind.FACILITY)) {
-            filePath += File.separator + "Facilities" + File.separator;
+            filePath += "Facilities" + File.separator;
         }
         else if (myKind.equals(ModuleKind.THEORY)) {
             filePath += File.separator + "Theories" + File.separator;
