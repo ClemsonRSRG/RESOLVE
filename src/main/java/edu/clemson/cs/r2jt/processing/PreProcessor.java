@@ -1345,6 +1345,28 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     }
 
     /**
+     * <p>This methods checks if the specified statement is in the
+     * statement list or not.</p>
+     *
+     * @param stmtList List of statements to check.
+     * @param stmt Statement that we are searching for.
+     *
+     * @return True if found, false otherwise.
+     */
+    private boolean inStmtList(List<Statement> stmtList, Statement stmt) {
+        boolean retVal = false;
+
+        // Loop and compare the statement locations.
+        for (Statement s : stmtList) {
+            if (s.getLocation().equals(stmt.getLocation())) {
+                retVal = true;
+                break;
+            }
+        }
+        return retVal;
+    }
+
+    /**
      * <p>Checks if two lists point to the same record.</p>
      *
      * @param list1 List of variable expressions 1.
@@ -1546,11 +1568,22 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         // Check to see if we have any statements we need
         // to add to the original list.
         if (!myCreatedStmtMap.isEmpty()) {
+            List<Statement> tempList = new List<Statement>();
             Set<Statement> keys = myCreatedStmtMap.keySet();
 
             // Loop through each statement
             for (Statement s : keys) {
-                stmtList = modifyStatementList(s, stmtList);
+                // Check to see if s is in stmtList.
+                if (inStmtList(stmtList, s)) {
+                    stmtList = modifyStatementList(s, stmtList);
+                    tempList.add(s);
+                }
+            }
+
+            // Remove statements from the map
+            // Note: Can't do it in the loop above because Java
+            // throws a concurrent access error!
+            for (Statement s : tempList) {
                 myCreatedStmtMap.remove(s);
             }
         }
@@ -1578,8 +1611,11 @@ public class PreProcessor extends TreeWalkerStackVisitor {
 
             // Loop through each statement
             for (Statement s : keys) {
-                stmtList = replaceStatementListWithNewStmt(s, stmtList);
-                tempList.add(s);
+                // Check to see if s is in stmtList.
+                if (inStmtList(stmtList, s)) {
+                    stmtList = replaceStatementListWithNewStmt(s, stmtList);
+                    tempList.add(s);
+                }
             }
 
             // Remove statements from the map
@@ -1607,11 +1643,22 @@ public class PreProcessor extends TreeWalkerStackVisitor {
         // Check to see if we have any statements we need
         // to add to the original list.
         if (!myCreatedSwapCallMap.isEmpty()) {
+            List<Statement> tempList = new List<Statement>();
             Set<Statement> keys = myCreatedSwapCallMap.keySet();
 
             // Loop through each statement
             for (Statement s : keys) {
-                stmtList = modifyStatementListForSwapCalls(s, stmtList);
+                // Check to see if s is in stmtList.
+                if (inStmtList(stmtList, s)) {
+                    stmtList = modifyStatementListForSwapCalls(s, stmtList);
+                    tempList.add(s);
+                }
+            }
+
+            // Remove statements from the map
+            // Note: Can't do it in the loop above because Java
+            // throws a concurrent access error!
+            for (Statement s : tempList) {
                 myCreatedSwapCallMap.remove(s);
             }
         }
