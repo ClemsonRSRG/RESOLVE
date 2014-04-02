@@ -781,16 +781,12 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
      *         of <code>source</code>.
      */
     protected List<String> getPathList(File source) {
-
-        String currentToken, path;
+        String currentToken;
         boolean rootDirectoryFound = false;
 
-        path =
-                (source.exists()) ? source.getAbsolutePath() : source
-                        .getParentFile().getAbsolutePath();
-
         List<String> result = new LinkedList<String>();
-        StringTokenizer stTok = new StringTokenizer(path, File.separator);
+        StringTokenizer stTok =
+                new StringTokenizer(source.getAbsolutePath(), File.separator);
 
         while (stTok.hasMoreTokens()) {
             currentToken = stTok.nextToken();
