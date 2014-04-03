@@ -28,8 +28,12 @@ public class Metrics {
 
     public ActionCanceller actionCanceller;
 
-    public Metrics() {
+    private long myProofDuration, myTimeout;
+
+    public Metrics(long duration, long timeout) {
         clear();
+        myProofDuration = duration;
+        myTimeout = timeout;
     }
 
     public BigInteger getNumProofsConsidered() {
@@ -45,10 +49,20 @@ public class Metrics {
         numTimesBacktracked = numTimesBacktracked.add(m.numTimesBacktracked);
     }
 
+    public long getTimeout() {
+        return myTimeout;
+    }
+
+    public long getProofDuration() {
+        return myProofDuration;
+    }
+
     public void clear() {
         numTimesBacktracked = BigInteger.ZERO;
         numProofsConsidered = BigInteger.ZERO;
         ruleCount = 0;
         rulesTried = 0;
+        myProofDuration = 0;
+        myTimeout = 0;
     }
 }
