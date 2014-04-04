@@ -1079,9 +1079,7 @@ public class Populator extends TreeWalkerVisitor {
             noSuchSymbol(null, node.getName().getName(), node.getLocation());
         }
         catch (DuplicateSymbolException dse) {
-            //This should be caught earlier, when the duplicate operation is
-            //created
-            throw new RuntimeException(dse);
+            duplicateSymbol(node.getName().getName(), node.getLocation());
         }
     }
 
