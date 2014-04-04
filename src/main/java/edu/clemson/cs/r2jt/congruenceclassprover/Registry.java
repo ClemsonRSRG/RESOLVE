@@ -24,6 +24,8 @@ public class Registry {
         m_indexToSymbol = new Vector<String>();
         m_indexToType = new Vector<MTType>();
         m_symbolIndexParentArray = new Vector<Integer>();
+        m_unusedIndices = new Stack<Integer>();
+        addSymbol("true", null);
     }
 
     public Set<String> getSetMatchingType(MTType t) {
@@ -47,7 +49,7 @@ public class Registry {
         m_symbolIndexParentArray.set(opIndexB, opIndexA);
     }
 
-    private int findAndCompress(int index) {
+    protected int findAndCompress(int index) {
         Stack<Integer> needToUpdate = new Stack<Integer>();
         int parent = m_symbolIndexParentArray.get(index);
         while (parent != index) {

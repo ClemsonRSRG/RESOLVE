@@ -1,5 +1,6 @@
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
+import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.Antecedent;
 import edu.clemson.cs.r2jt.proving2.Consequent;
@@ -11,21 +12,21 @@ import java.util.List;
 /**
  * Created by mike on 4/3/2014.
  */
-public class VerificationCondition {
+public class VerificationConditionCongruenceClosureImpl {
     private Registry m_registry;
     private String m_name;
     private Antecedent m_antecedent;
     private Consequent m_consequent;
-    private ConjuctionOfNormalizedAtomicExpressions m_conjunction;
+    private ConjunctionOfNormalizedAtomicExpressions m_conjunction;
     private List<List<String>> m_goal; // every item in each sublist is equivalent iff proved.  Disjunctions in consequent are split into seperate vc's before we see them here.
     // currently support only unchained equalities, so each sublist is size 2.
 
-    public VerificationCondition(String name, Antecedent antecedent, Consequent consequent){
-        m_name = name;
-        m_antecedent = antecedent;
-        m_consequent = consequent;
+    public VerificationConditionCongruenceClosureImpl(VC vc){
+        m_name = vc.getName();
+        m_antecedent = vc.getAntecedent();
+        m_consequent = vc.getConsequent();
         m_registry = new Registry();
-        m_conjunction = new ConjuctionOfNormalizedAtomicExpressions(m_registry);
+        m_conjunction = new ConjunctionOfNormalizedAtomicExpressions(m_registry);
         m_goal = new ArrayList<List<String>>();
 
         addPExp(m_antecedent.iterator(), true);
@@ -38,7 +39,6 @@ public class VerificationCondition {
             if(curr.isEquality()) { // f(x,y) = z and g(a,b) = c ; then z is replaced by c
                 PExp lhs = curr.getSubExpressions().get(0);
                 PExp rhs = curr.getSubExpressions().get(1);
-                System.out.println("Given entered: " + lhs + " = " + rhs);
                 int lhsIndex = (m_conjunction.addExpression(lhs));
                 int rhsIndex = (m_conjunction.addExpression(rhs));
                 if(inAntecedent) m_conjunction.mergeOperators(lhsIndex, rhsIndex);
@@ -58,6 +58,12 @@ public class VerificationCondition {
         newGoal.add(a);
         newGoal.add(b);
         m_goal.add(newGoal);
+    }
+
+    public String toString(){
+        String r = m_name + "\n" + m_conjunction;
+
+        return r;
     }
 
 }
