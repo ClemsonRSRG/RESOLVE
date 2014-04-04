@@ -221,7 +221,9 @@ public class AlgebraicProver {
 
                 boolean proved = myModels[myVCIndex].noConsequents();
                 for (ProverListener l : myProverListeners) {
-                    l.vcResult(proved, myModels[myVCIndex], null);
+                    l.vcResult(proved, myModels[myVCIndex], new Metrics(
+                            myAutomatedProvers[myVCIndex].getLastStartLength(),
+                            myTimeout));
                 }
 
                 if (myVCIndex == myVCs.size() - 1) {
