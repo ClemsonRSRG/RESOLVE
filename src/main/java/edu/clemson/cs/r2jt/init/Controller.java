@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
 import edu.clemson.cs.r2jt.translation.*;
 import org.antlr.runtime.ANTLRFileStream;
 import org.antlr.runtime.ANTLRStringStream;
@@ -1579,6 +1580,15 @@ public class Controller {
             catch (ProverException e) {
                 err.error(e.toString());
             }
+        }
+        else if (myInstanceEnvironment.flags.isFlagSet(CongruenceClassProver.FLAG_PROVE)){
+            java.util.List<VC> vcs = new LinkedList<VC>();
+            for (VerificationCondition originalVC : vcsToProve) {
+                vcs.add(edu.clemson.cs.r2jt.proving2.Utilities
+                        .convertToImmutableVC(originalVC));
+            }
+            CongruenceClassProver ccProver = new CongruenceClassProver(vcs);
+           ccProver.start();
         }
         else if (myInstanceEnvironment.flags
                 .isFlagSet(AlgebraicProver.FLAG_PROVE)) {
