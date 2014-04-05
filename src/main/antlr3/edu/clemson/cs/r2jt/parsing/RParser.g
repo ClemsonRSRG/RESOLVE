@@ -70,6 +70,7 @@ tokens {
     REDUCTIO_AD_ABSURDUM;
     RELATED_BY;
     PROGDOT;
+    PROGVARDOT;
     SET;
     SET_EXPR;
     SHORT_FACILITY;
@@ -1673,9 +1674,10 @@ program_variable_expression
     ;
 
 program_dot_expression
-    :   (ident DOT) =>
-        ident
-        (DOT program_function_expression)+ -> ^(PROGDOT ident program_function_expression+)
+    :   (ident DOT program_function_expression) =>
+            ident DOT program_function_expression -> ^(PROGDOT ident program_function_expression)
+    |   (ident DOT variable_expression) =>
+            ident DOT variable_expression -> ^(PROGVARDOT ident variable_expression)
     |   program_function_expression
     ;
 

@@ -186,11 +186,14 @@ public class Populator extends TreeWalkerVisitor {
 
     private MathSymbolEntry myExemplarEntry;
 
+    private PosSymbol myFacilityQualifier;
+
     public Populator(MathSymbolTableBuilder builder) {
         myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
 
         myTypeGraph = builder.getTypeGraph();
         myBuilder = builder;
+        myFacilityQualifier = null;
     }
 
     public void setTreeWalker(TreeWalker w) {
@@ -1099,7 +1102,8 @@ public class Populator extends TreeWalkerVisitor {
         try {
             OperationEntry op =
                     myBuilder.getInnermostActiveScope().queryForOne(
-                            new OperationQuery(null, node.getName(), argTypes));
+                            new OperationQuery(myFacilityQualifier, node
+                                    .getName(), argTypes));
 
             node.setProgramType(op.getReturnType());
             node.setMathType(op.getReturnType().toMath());
@@ -1431,6 +1435,16 @@ public class Populator extends TreeWalkerVisitor {
     public void postProgramOpExp(ProgramOpExp e) {
         e.setProgramType(e.getProgramType(myTypeGraph));
         e.setMathType(e.getProgramType().toMath());
+    }
+
+    @Override
+    public void preProgramDotExp(ProgramDotExp e) {
+        myFacilityQualifier = e.getQualifier();
+    }
+
+    @Override
+    public void postProgramDotExp(ProgramDotExp e) {
+        myFacilityQualifier = null;
     }
 
     @Override

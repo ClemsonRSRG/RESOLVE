@@ -3573,25 +3573,13 @@ public class Verifier extends ResolveConceptualVisitor {
             return exp;
         }
         else if (exp instanceof ProgramDotExp) {
-
-            DotExp tmp = new DotExp();
-            setLocation(tmp, ((ProgramDotExp) exp).getLocation());
-
-            tmp.setSemanticExp(((ProgramDotExp) exp).getSemanticExp());
-            Iterator<ProgramExp> it =
-                    ((ProgramDotExp) exp).getSegments().iterator();
-            List<Exp> lst = new List<Exp>();
-            while (it.hasNext()) {
-                ProgramExp tmpExp = it.next();
-                if (tmpExp instanceof ProgramParamExp) {
-                    return (getCorAssignPartExp(tmpExp, assertion));
-                }
-                lst.add(getCorAssignPartExp(tmpExp, assertion));
-
+            if (((ProgramDotExp) exp).getExp() instanceof ProgramParamExp) {
+                return (getCorAssignPartExp(((ProgramDotExp) exp).getExp(),
+                        assertion));
             }
-            tmp.setSegments(lst);
-
-            return tmp;
+            else {
+                return exp;
+            }
         }
         else if (exp instanceof ProgramDoubleExp) {
             return exp;
@@ -6732,7 +6720,7 @@ public class Verifier extends ResolveConceptualVisitor {
                         quesRep = (DotExp) Exp.clone(replace);
                         ((DotExp) quesRep).getSegments().remove(0);
                         ((DotExp) quesRep).getSegments().add(0,
-                                ((ProgramDotExp) realVar).getSegments().get(0));
+                                ((ProgramDotExp) realVar).getExp());
 
                         VariableNameExp undqNameRep = new VariableNameExp();
                         ((VariableNameExp) undqNameRep)
