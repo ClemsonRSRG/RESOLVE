@@ -10,7 +10,6 @@ import java.util.*;
  * Created by mike on 4/3/2014.
  */
 public class ConjunctionOfNormalizedAtomicExpressions {
-    private final byte m_maxPositions = 7;
     private Registry m_registry;
     private List<NormalizedAtomicExpressionMapImpl> m_exprList;
 
@@ -74,13 +73,13 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         int posIfFound =
                 Collections.binarySearch(m_exprList, atomicFormula);
         if (posIfFound >= 0) {
-            return m_exprList.get(posIfFound).readPosition(m_maxPositions);
+            return m_exprList.get(posIfFound).readRoot();
         }
         // no such formula exists. Note that
         int indexToInsert = -(posIfFound + 1);
         MTType typeOfFormula = m_registry.getTypeByIndex(atomicFormula.readPosition(0));
         int rhs = m_registry.makeSymbol(typeOfFormula);
-        atomicFormula.writeOnto(rhs, m_maxPositions);
+        atomicFormula.writeToRoot(rhs);
         m_exprList.add(indexToInsert, atomicFormula);
         return rhs;
     }
@@ -125,8 +124,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 m_exprList.add(indexToInsert, modifiedEntries.pop());
             } else {
                 // the expr is in the list, but are the roots different?
-                int rootA = modifiedEntries.pop().readPosition(m_maxPositions-1);
-                int rootB = m_exprList.get(indexToInsert).readPosition(m_maxPositions-1);
+                int rootA = modifiedEntries.pop().readRoot();
+                int rootB = m_exprList.get(indexToInsert).readRoot();
                 if(rootA != rootB){
                     coincidentalMergeHoldingTank.push(rootA);
                     coincidentalMergeHoldingTank.push(rootB);
@@ -142,7 +141,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     public String toString() {
         String r = "";
         for (NormalizedAtomicExpressionMapImpl cur : m_exprList) {
-            r += cur.toString() + "\n";
+            r += cur.toHumanReadableString(m_registry) + "\n";
         }
         return r;
     }

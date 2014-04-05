@@ -62,6 +62,10 @@ public class VerificationConditionCongruenceClosureImpl {
 
     public String toString(){
         String r = m_name + "\n" + m_conjunction;
+        r += "----------------------------------\n";
+        for(List<String> gl : m_goal){
+            r += gl.get(0) + "=" + gl.get(1) + "\n";
+        }
 
         return r;
     }
