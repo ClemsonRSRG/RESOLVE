@@ -1,5 +1,5 @@
 /**
- * VerificationConditionCongruenceClosureImpl.java
+ * VerificationCondition.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group

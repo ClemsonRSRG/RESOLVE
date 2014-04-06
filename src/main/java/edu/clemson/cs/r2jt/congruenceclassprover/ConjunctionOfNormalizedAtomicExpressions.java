@@ -1,3 +1,15 @@
+/**
+ * ConjunctionOfNormalizedAtomicExpressions.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
@@ -10,6 +22,7 @@ import java.util.*;
  * Created by mike on 4/3/2014.
  */
 public class ConjunctionOfNormalizedAtomicExpressions {
+
     private Registry m_registry;
     private List<NormalizedAtomicExpressionMapImpl> m_exprList;
 
@@ -21,7 +34,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         m_registry = registry;
         m_exprList = new LinkedList<NormalizedAtomicExpressionMapImpl>();
     }
-
 
     private String fromOperatorIndicesToAtomString(int[] atom) {
         String r = m_registry.getSymbolForIndex(atom[0]);
@@ -37,7 +49,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return r;
     }
 
-
     /**
      * @param formula a formula that should not contain =. Predicate symbols are treated as any other function symbol here.
      * @return current index in list of expressions.
@@ -50,7 +61,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (formula.isVariable())
             return intRepOfOp;
 
-        NormalizedAtomicExpressionMapImpl newExpr = new NormalizedAtomicExpressionMapImpl();
+        NormalizedAtomicExpressionMapImpl newExpr =
+                new NormalizedAtomicExpressionMapImpl();
         newExpr.writeOnto(intRepOfOp, 0);
         int pos = 0;
         PExpSubexpressionIterator it = formula.getSubExpressionIterator();
@@ -59,7 +71,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             pos++;
             int root = addExpression(p);
             assert newExpr != null;
-            newExpr.writeOnto(root,pos);
+            newExpr.writeOnto(root, pos);
         }
         return addAtomicFormula(newExpr);
     }
@@ -70,31 +82,32 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      * @return current integer value of root symbol that represents the input.
      */
     private int addAtomicFormula(NormalizedAtomicExpressionMapImpl atomicFormula) {
-        int posIfFound =
-                Collections.binarySearch(m_exprList, atomicFormula);
+        int posIfFound = Collections.binarySearch(m_exprList, atomicFormula);
         if (posIfFound >= 0) {
             return m_exprList.get(posIfFound).readRoot();
         }
         // no such formula exists. Note that
         int indexToInsert = -(posIfFound + 1);
-        MTType typeOfFormula = m_registry.getTypeByIndex(atomicFormula.readPosition(0));
+        MTType typeOfFormula =
+                m_registry.getTypeByIndex(atomicFormula.readPosition(0));
         int rhs = m_registry.makeSymbol(typeOfFormula);
         atomicFormula.writeToRoot(rhs);
         m_exprList.add(indexToInsert, atomicFormula);
         return rhs;
     }
 
-    protected void mergeOperators(int a, int b){
-        Stack<Integer> holdingTank = mergeOnlyArgumentOperators(a,b);
-        while(holdingTank != null && !holdingTank.empty()){
+    protected void mergeOperators(int a, int b) {
+        Stack<Integer> holdingTank = mergeOnlyArgumentOperators(a, b);
+        while (holdingTank != null && !holdingTank.empty()) {
             int opA = m_registry.findAndCompress(holdingTank.pop());
             int opB = m_registry.findAndCompress(holdingTank.pop());
-            if(opA != opB){
-                holdingTank.addAll(mergeOnlyArgumentOperators(opA,opB));
+            if (opA != opB) {
+                holdingTank.addAll(mergeOnlyArgumentOperators(opA, opB));
             }
         }
-        
+
     }
+
     // Return list of modified predicates by their position. Only these can cause new merges.
     protected Stack<Integer> mergeOnlyArgumentOperators(int a, int b) {
         if (a == b)
@@ -117,16 +130,18 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         while (!modifiedEntries.empty()) {
             int indexToInsert =
-                    Collections.binarySearch(m_exprList, modifiedEntries.peek());
+                    Collections
+                            .binarySearch(m_exprList, modifiedEntries.peek());
             // If the modified one is already there, don't put it back
             if (indexToInsert < 0) {
                 indexToInsert = -(indexToInsert + 1);
                 m_exprList.add(indexToInsert, modifiedEntries.pop());
-            } else {
+            }
+            else {
                 // the expr is in the list, but are the roots different?
                 int rootA = modifiedEntries.pop().readRoot();
                 int rootB = m_exprList.get(indexToInsert).readRoot();
-                if(rootA != rootB){
+                if (rootA != rootB) {
                     coincidentalMergeHoldingTank.push(rootA);
                     coincidentalMergeHoldingTank.push(rootB);
                 }
@@ -135,7 +150,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         m_registry.substitute(a, b);
         return coincidentalMergeHoldingTank;
     }
-
 
     @Override
     public String toString() {
