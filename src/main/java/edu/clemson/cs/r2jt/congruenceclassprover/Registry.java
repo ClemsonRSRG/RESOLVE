@@ -1,5 +1,16 @@
+/**
+ * Registry.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.congruenceclassprover;
-
 
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
@@ -9,6 +20,7 @@ import java.util.*;
  * Created by mike on 4/3/2014.
  */
 public class Registry {
+
     private final String m_ccFormat = "¢%03d";
     public TreeMap<String, Integer> m_symbolToIndex;
     public Map<MTType, TreeSet<String>> m_typeToSetOfOperators;
@@ -18,7 +30,7 @@ public class Registry {
     public Stack<Integer> m_unusedIndices;
     private int m_uniqueCounter = 0;
 
-    public Registry(){
+    public Registry() {
         m_symbolToIndex = new TreeMap<String, Integer>();
         m_typeToSetOfOperators = new HashMap<MTType, TreeSet<String>>();
         m_indexToSymbol = new Vector<String>();
@@ -67,7 +79,8 @@ public class Registry {
     public String getSymbolForIndex(int index) {
         return m_indexToSymbol.get(findAndCompress(index));
     }
-    public MTType getTypeByIndex(int index){
+
+    public MTType getTypeByIndex(int index) {
         return m_indexToType.get(findAndCompress(index));
     }
 
@@ -78,7 +91,7 @@ public class Registry {
     public int getIndexForSymbol(String symbol) {
         assert m_symbolToIndex.get(symbol) != null : symbol + " not found"
                 + m_symbolToIndex.toString();
-        int r =m_symbolToIndex.get(symbol);
+        int r = m_symbolToIndex.get(symbol);
         if (r < 0)
             System.err.println(symbol + " has no current index");
         return findAndCompress(r);
@@ -86,12 +99,13 @@ public class Registry {
 
     public int makeSymbol(MTType symbolType) {
         String symbolName = String.format(m_ccFormat, m_uniqueCounter++);
-        return addSymbol(symbolName,symbolType);
+        return addSymbol(symbolName, symbolType);
     }
 
     // if symbol is new, it adds it, otherwise, it returns current int rep
-    public int addSymbol(String symbolName, MTType symbolType){
-        if (isSymbolInTable(symbolName)) return getIndexForSymbol(symbolName);
+    public int addSymbol(String symbolName, MTType symbolType) {
+        if (isSymbolInTable(symbolName))
+            return getIndexForSymbol(symbolName);
 
         if (m_typeToSetOfOperators.containsKey(symbolType))
             m_typeToSetOfOperators.get(symbolType).add(symbolName);
@@ -112,8 +126,8 @@ public class Registry {
     }
 
     public void flushUnusedSymbols() {
-        // probably have to shift vectors
-        // maybe need to renumber things
+    // probably have to shift vectors
+    // maybe need to renumber things
 
     }
 }

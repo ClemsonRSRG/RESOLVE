@@ -1581,14 +1581,23 @@ public class Controller {
                 err.error(e.toString());
             }
         }
-        else if (myInstanceEnvironment.flags.isFlagSet(CongruenceClassProver.FLAG_PROVE)){
+        else if (myInstanceEnvironment.flags
+                .isFlagSet(CongruenceClassProver.FLAG_PROVE)) {
+            try{
             java.util.List<VC> vcs = new LinkedList<VC>();
             for (VerificationCondition originalVC : vcsToProve) {
                 vcs.add(edu.clemson.cs.r2jt.proving2.Utilities
                         .convertToImmutableVC(originalVC));
             }
-            CongruenceClassProver ccProver = new CongruenceClassProver(vcs);
-           ccProver.start();
+            ModuleScope scope =
+                        realTable.getModuleScope(new ModuleIdentifier(dec));
+            CongruenceClassProver ccProver = new CongruenceClassProver(vcs,scope);
+            ccProver.start();
+            }
+            catch (NoSuchSymbolException nsse) {
+                //Can't find the module we're in.  Shouldn't be possible.
+                throw new RuntimeException(nsse);
+            }
         }
         else if (myInstanceEnvironment.flags
                 .isFlagSet(AlgebraicProver.FLAG_PROVE)) {
