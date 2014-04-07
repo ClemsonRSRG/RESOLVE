@@ -2477,14 +2477,12 @@ program_variable_expression returns [ProgramExp exp = null]
     ;
 
 program_dot_expression returns [ProgramExp exp = null]
-@init{
-    edu.clemson.cs.r2jt.collections.List<ProgramExp> segs = new edu.clemson.cs.r2jt.collections.List<ProgramExp>("ProgramExp");
-}
-    :   exp1=program_function_expression { $exp = $exp1.exp; }
-    |   ^(PROGDOT sem1=ident { segs.add(new VariableNameExp(getLocation($sem1.tree), null, $sem1.ps)); }
-            (seg=program_function_expression { segs.add($seg.exp); })+
-          )
-        { $exp = new ProgramDotExp(getLocation($PROGDOT), segs, null); }
+    :   ^(PROGDOT qual=ident exp1=program_function_expression)
+        { $exp = new ProgramDotExp(getLocation($PROGDOT), $qual.ps, $exp1.exp, null); }
+    |   ^(PROGVARDOT qual=ident exp2=variable_expression)
+        { $exp = new ProgramDotExp(getLocation($PROGVARDOT), $qual.ps, $exp2.exp, null); }
+    |   exp3=program_function_expression
+        { $exp = $exp3.exp; }
     ;
 
 program_function_expression returns [ProgramExp exp = null]

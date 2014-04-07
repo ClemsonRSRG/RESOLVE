@@ -223,14 +223,6 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
         return getProgramFunctionExpType(func);
     }
 
-    public Type getProgramDotExpType(ProgramDotExp exp)
-            throws TypeResolutionException {
-        if (exp.getSemanticExp() == null) {
-            exp.setSemanticExp(extractSemanticExp(exp));
-        }
-        return getProgramExpType(exp.getSemanticExp());
-    }
-
     public Type getProgramParamExpType(ProgramParamExp exp)
             throws TypeResolutionException {
         /* Checks for if the function operation exists before we call it
@@ -365,14 +357,6 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
         }
     }
 
-    public Type getVariableDotExpType(VariableDotExp exp)
-            throws TypeResolutionException {
-        if (exp.getSemanticExp() == null) {
-            exp.setSemanticExp(extractSemanticExp(exp));
-        }
-        return getProgramExpType(exp.getSemanticExp());
-    }
-
     public Type getVariableNameExpType(VariableNameExp exp)
             throws TypeResolutionException {
         VariableLocator locator = new VariableLocator(table, err);
@@ -440,46 +424,6 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
     // ===========================================================
     // Private Methods - Semantic Expression Extraction
     // ===========================================================
-
-    private VariableExp extractSemanticExp(VariableDotExp exp)
-            throws TypeResolutionException {
-        List<ProgramExp> segs = new List<ProgramExp>();
-        Iterator<VariableExp> i = exp.getSegments().iterator();
-        while (i.hasNext()) {
-            segs.add((ProgramExp) i.next());
-        }
-        ProgramDotExp dexp =
-                new ProgramDotExp(exp.getLocation(), segs, exp.getSemanticExp());
-        ProgramExp pexp = extractSemanticExp(dexp);
-        return castToVariableExp(pexp);
-    }
-
-    private ProgramExp extractSemanticExp(ProgramDotExp exp)
-            throws TypeResolutionException {
-        ProgramExp exp1 = exp.getSegments().get(0);
-        ProgramExp exp2 = exp.getSegments().get(1);
-        if (isProgramQualifier(exp1)) {
-            PosSymbol qual = getProgramQualifier(exp1);
-            if (exp.getSegments().size() == 2) {
-                if (exp2 instanceof VariableNameExp) {
-                    return getQualifiedName(qual, (VariableNameExp) exp2);
-                }
-                else if (exp2 instanceof VariableArrayExp) {
-                    return getQualifiedArray(qual, (VariableArrayExp) exp2);
-                }
-                else if (exp2 instanceof ProgramParamExp) {
-                    return extractSemanticExp(qual, (ProgramParamExp) exp2);
-                }
-                else {
-                    assert false : "exp2 is an invalid expression type";
-                }
-            }
-            else { // more than 2 segments
-                return convertToRecord(qual, exp);
-            }
-        }
-        return convertToRecord(exp);
-    }
 
     private ProgramExp extractSemanticExp(ProgramParamExp exp)
             throws TypeResolutionException {
@@ -557,40 +501,6 @@ public class ProgramExpTypeResolver extends TypeResolutionVisitor {
         }
         return new VariableArrayExp(exp.getLocation(), null, exp.getName(), exp
                 .getArguments().get(0));
-    }
-
-    private VariableRecordExp convertToRecord(ProgramDotExp exp)
-            throws TypeResolutionException {
-        return convertToRecord(null, exp);
-    }
-
-    private VariableRecordExp convertToRecord(PosSymbol qual, ProgramDotExp exp)
-            throws TypeResolutionException {
-        VariableNameExp nexp = null;
-        int start = 0;
-        if (qual != null) {
-            nexp = castToVariableNameExp(exp.getSegments().get(1));
-            start = 2;
-        }
-        else {
-            nexp = castToVariableNameExp(exp.getSegments().get(0));
-            start = 1;
-        }
-        PosSymbol name = nexp.getName();
-        List<VariableExp> segs = new List<VariableExp>();
-        for (int i = start; i < exp.getSegments().size(); i++) {
-            ProgramExp pexp = exp.getSegments().get(i);
-            VariableExp vexp = null;
-            if (pexp instanceof ProgramParamExp) {
-                vexp = convertToArray((ProgramParamExp) pexp);
-            }
-            else {
-                vexp = castToVariableExp(pexp);
-            }
-            segs.add(vexp);
-        }
-        Location loc = (qual == null) ? exp.getLocation() : qual.getLocation();
-        return new VariableRecordExp(loc, qual, name, segs);
     }
 
     private boolean isProgramQualifier(ProgramExp exp) {

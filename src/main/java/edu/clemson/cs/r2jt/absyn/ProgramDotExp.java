@@ -14,6 +14,7 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
+import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
@@ -24,36 +25,42 @@ public class ProgramDotExp extends ProgramExp {
     // Variables
     // ===========================================================
 
-    /** The location member. */
-    private Location location;
+    /** <p>The location member.</p> */
+    private Location myLocation;
 
-    /** The segments member. */
-    private List<ProgramExp> segments;
+    /** <p>The facility qualifier member.</p> */
+    private PosSymbol myQualifier;
 
-    /** The semanticExp member. */
-    private ProgramExp semanticExp;
+    /** <p>The program expression member.</p> */
+    private ProgramExp myExp;
+
+    /** <p>The semanticExp member.</p> */
+    private ProgramExp mySemanticExp;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
-    public ProgramDotExp() {};
-
-    public ProgramDotExp(Location location, List<ProgramExp> segments,
-            ProgramExp semanticExp) {
-        this.location = location;
-        this.segments = segments;
-        this.semanticExp = semanticExp;
+    public ProgramDotExp(Location location, PosSymbol qualifier,
+            ProgramExp exp, ProgramExp semanticExp) {
+        myLocation = location;
+        myQualifier = qualifier;
+        myExp = exp;
+        mySemanticExp = semanticExp;
     }
 
+    /**
+     * <p>This is a method that is called to create a new ProgramDotExp
+     * that is substituted.</p>
+     *
+     * @param substitutions A mapping from <code>Exp</code>s that should be
+     *                      substituted out to the <code>Exp</code> that should
+     *                      replace them.
+     *
+     * @return A new ProgramDotExp.
+     */
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        List<ProgramExp> newSegments = new List<ProgramExp>();
-        for (ProgramExp e : segments) {
-            newSegments.add((ProgramExp) substitute(e, substitutions));
-        }
-
-        return new ProgramDotExp(location, newSegments,
-                (ProgramExp) substitute(semanticExp, substitutions));
+        return new ProgramDotExp(myLocation, myQualifier, myExp, mySemanticExp);
     }
 
     // ===========================================================
@@ -64,191 +71,238 @@ public class ProgramDotExp extends ProgramExp {
     // Get Methods
     // -----------------------------------------------------------
 
-    /** Returns the value of the location variable. */
+    /**
+     * <p>Returns the value of the location variable.</p>
+     *
+     * @return The location of the <code>ProgramDotExp</code>.
+     */
     public Location getLocation() {
-        return location;
+        return myLocation;
     }
 
-    /** Returns the value of the segments variable. */
-    public List<ProgramExp> getSegments() {
-        return segments;
+    /**
+     * <p>Returns the name of the qualifying facility.</p>
+     *
+     * @return The <code>PosSymbol</code> form of the qualifier.
+     */
+    public PosSymbol getQualifier() {
+        return myQualifier;
     }
 
-    /** Returns the value of the semanticExp variable. */
+    /**
+     * <p>Returns the expression that is being dotted.</p>
+     *
+     * @return The <code>Exp</code> form of the expression.
+     */
+    public ProgramExp getExp() {
+        return myExp;
+    }
+
+    /**
+     * <p>Returns the value of the semanticExp variable.</p>
+     *
+     * @return The semantic expression.
+     */
     public ProgramExp getSemanticExp() {
-        return semanticExp;
+        return mySemanticExp;
     }
 
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
 
-    /** Sets the location variable to the specified value. */
+    /**
+     * <p>Sets the location variable to the specified value.</p>
+     *
+     * @param location New location.
+     */
     public void setLocation(Location location) {
-        this.location = location;
+        myLocation = location;
     }
 
-    /** Sets the segments variable to the specified value. */
-    public void setSegments(List<ProgramExp> segments) {
-        this.segments = segments;
+    /**
+     * <p>Sets the qualifier variable to the specified value.</p>
+     *
+     * @param qualifier New qualifier symbol.
+     */
+    public void setQualifier(PosSymbol qualifier) {
+        myQualifier = qualifier;
     }
 
-    /** Sets the semanticExp variable to the specified value. */
+    /**
+     * <p>Sets the expression variable to the specified value.</p>
+     *
+     * @param exp New expression.
+     */
+    public void setExp(ProgramExp exp) {
+        myExp = exp;
+    }
+
+    /**
+     * <p>Sets the semanticExp variable to the specified value.</p>
+     *
+     * @param semanticExp New semantic expression.
+     */
     public void setSemanticExp(ProgramExp semanticExp) {
-        this.semanticExp = semanticExp;
+        mySemanticExp = semanticExp;
     }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
 
-    /** Accepts a ResolveConceptualVisitor. */
+    /**
+     * <p>Accepts a ResolveConceptualVisitor.</p>
+     *
+     * @param v A visitor object.
+     */
+    @Override
     public void accept(ResolveConceptualVisitor v) {
         v.visitProgramDotExp(this);
     }
 
     /** Accepts a TypeResolutionVisitor. */
+    @Override
     public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         return v.getProgramDotExpType(this);
     }
 
-    /** Returns a formatted text string of this class. */
+    /**
+     * <p>Returns a formatted text string of this class.</p>
+     *
+     * @param indent The value to be indented.
+     * @param increment The increment value.
+     *
+     * @return String form of the <code>Exp</code>.
+     */
+    @Override
     public String asString(int indent, int increment) {
-
         StringBuffer sb = new StringBuffer();
-
         printSpace(indent, sb);
         sb.append("ProgramDotExp\n");
 
-        if (segments != null) {
-            sb.append(segments.asString(indent + increment, increment));
+        // Facility qualifier
+        if (myQualifier != null) {
+            sb.append(myQualifier.asString(indent + increment, increment));
         }
 
-        if (semanticExp != null) {
-            sb.append(semanticExp.asString(indent + increment, increment));
+        // Expression
+        if (myExp != null) {
+            sb.append(myExp + "\n");
+        }
+
+        // Semantic value
+        if (mySemanticExp != null) {
+            sb.append(mySemanticExp.asString(indent + increment, increment));
         }
 
         return sb.toString();
     }
 
-    /** Returns a formatted text string of this class. */
-    public String toString(int indent) {
-
-        StringBuffer sb = new StringBuffer();
-        printSpace(indent, sb);
-
-        sb.append(segmentsToString(this.segments));
-
-        return sb.toString();
-    }
-
-    private String segmentsToString(List<ProgramExp> segments) {
-        StringBuffer sb = new StringBuffer();
-        if (segments != null) {
-            Iterator<ProgramExp> i = segments.iterator();
-
-            while (i.hasNext()) {
-                sb.append(i.next().toString(0));
-                if (i.hasNext())
-                    sb.append(".");
-            }
-        }
-        return sb.toString();
-    }
-
-    /** Returns true if the variable is found in any sub expression   
-        of this one. **/
+    /**
+     * <p>Returns true if the variable is found in any sub expression
+     * of this one.</p>
+     *
+     * @param varName Name of the variable to be checked.
+     * @param IsOldExp Check to see if this is a "#" expression.
+     *
+     * @return True if it contains the variable as a sub expression,
+     *         false otherwise.
+     */
+    @Override
     public boolean containsVar(String varName, boolean IsOldExp) {
-        if (segments != null) {
-            Iterator<ProgramExp> i = segments.iterator();
-            while (i.hasNext()) {
-                ProgramExp temp = i.next();
-                if (temp != null) {
-                    if (temp.containsVar(varName, IsOldExp)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        if (semanticExp != null) {
-            if (semanticExp.containsVar(varName, IsOldExp)) {
+        if (myExp != null) {
+            if (myExp.containsVar(varName, IsOldExp)) {
                 return true;
             }
         }
+
+        if (mySemanticExp != null) {
+            if (mySemanticExp.containsVar(varName, IsOldExp)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
-    public Object clone() {
-        ProgramDotExp clone = new ProgramDotExp();
-        clone.setSemanticExp((ProgramExp) Exp.clone(this.getSemanticExp()));
-        clone.setLocation(this.getLocation());
-        if (segments != null) {
-            Iterator<ProgramExp> i = segments.iterator();
-            List<ProgramExp> newSegments = new List<ProgramExp>();
-            while (i.hasNext()) {
-                newSegments.add((ProgramExp) Exp.clone(i.next()));
-            }
-            clone.setSegments(newSegments);
-        }
-        return clone;
+    /**
+     * <p>Creates a deep copy of the <code>ProgramDotExp</code>.</p>
+     *
+     * @return A new program expression.
+     */
+    @Override
+    protected ProgramDotExp copy() {
+        ProgramDotExp c =
+                new ProgramDotExp(myLocation, myQualifier, myExp, mySemanticExp);
+        c.bType = this.bType;
+        c.setType(this.type);
+        c.setMathType(this.myMathType);
+        c.setMathTypeValue(this.myMathTypeValue);
+        return c;
     }
 
+    /**
+     * <p>This doesn't do anything since we don't have any sub
+     * expressions. This is here because it is an abstract method.</p>
+     *
+     * @return An empty list.
+     */
+    @Override
     public List<Exp> getSubExpressions() {
-        List<Exp> list = new List<Exp>();
-        Iterator<ProgramExp> segmentsIt = segments.iterator();
-        while (segmentsIt.hasNext()) {
-            list.add((Exp) (segmentsIt.next()));
-        }
-        return list;
+        return new List<Exp>();
     }
 
-    public void setSubExpression(int index, Exp e) {
-        segments.set(index, (ProgramExp) e);
-    }
-
+    /**
+     * <p>This replaces the old expression with the new one.</p>
+     *
+     * @param old The old expression.
+     * @param replacement The replacing expression.
+     *
+     * @return The modified expression.
+     */
     public Exp replace(Exp old, Exp replacement) {
+        // Do nothing if no change is required.
         if (old instanceof ProgramDotExp) {
             if (old.equals(this)) {
                 return replacement;
             }
         }
 
+        // Check for VarExp or OldExp.
         if ((old instanceof VarExp || old instanceof OldExp)) {
-            Iterator<ProgramExp> it = segments.iterator();
-
-            if (it.hasNext()) {
-                Exp name = it.next();
-                if (old instanceof VarExp && name instanceof VarExp) {
-                    if (((VarExp) old).getName().toString().equals(
-                            ((VarExp) name).getName().toString())) {
-                        segments.remove(0);
-                        segments.add(0, (ProgramExp) (Exp.clone(replacement)));
-
-                        return this;
-                    }
-                }
-                else if (old instanceof OldExp && name instanceof OldExp) {
-                    name = Exp.replace(name, old, replacement);
-                    if (name != null) {
-                        segments.remove(0);
-                        segments.add(0, (ProgramExp) (Exp.clone(name)));
-                        return this;
-                    }
-                }
-            }
-
-            if (it.hasNext()) {
-                Exp name = it.next();
-                name = Exp.replace(name, old, replacement);
-                if (name != null) {
-                    segments.remove(1);
-                    segments.add(1, (ProgramExp) (Exp.clone(name)));
-                    return this;
-                }
+            if (myExp.equivalent(old)) {
+                Exp.replace(this, old, replacement);
             }
         }
 
         return this;
     }
 
+    /**
+     * <p>This doesn't do anything since we don't have any sub
+     * expressions. This is here because it is an abstract method.</p>
+     *
+     * @param index Index location where we need to set the expression.
+     * @param e Expression to be set.
+     */
+    @Override
+    public void setSubExpression(int index, Exp e) {}
+
+    /**
+     * <p>Returns a formatted text string of this class.</p>
+     *
+     * @param indent The value to be indented.
+     *
+     * @return A string form of the <code>Exp</code>.
+     */
+    @Override
+    public String toString(int indent) {
+        StringBuffer sb = new StringBuffer();
+        printSpace(indent, sb);
+
+        sb.append(myQualifier.toString() + "." + myExp.toString());
+
+        return sb.toString();
+    }
 }
