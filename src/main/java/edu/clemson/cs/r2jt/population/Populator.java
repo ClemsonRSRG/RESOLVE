@@ -29,13 +29,10 @@ import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScopeBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate.ParameterGenericApplyingVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.SymbolNotOfKindTypeException;
-import edu.clemson.cs.r2jt.typeandpopulate.VariableReplacingVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
@@ -71,8 +68,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Populator extends TreeWalkerVisitor {
 
@@ -222,7 +217,6 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preEnhancementModuleDec(EnhancementModuleDec enhancement) {
-
         //Enhancements implicitly import the concepts they enhance
         myCurModuleScope.addImport(new ModuleIdentifier(enhancement
                 .getConceptName().getName()));
@@ -230,23 +224,58 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preConceptBodyModuleDec(ConceptBodyModuleDec conceptBody) {
+        // Concept Module Identifier
+        ModuleIdentifier id =
+                new ModuleIdentifier(conceptBody.getConceptName().getName());
+
+        // Check if the concept realization implements all operations specified
+        // by the concept.
+        try {
+            ConceptModuleDec concept =
+                    (ConceptModuleDec) myBuilder.getModuleScope(id)
+                            .getDefiningElement();
+            implementAllOper(conceptBody.getLocation(), concept.getDecs(),
+                    conceptBody.getDecs());
+        }
+        catch (NoSuchSymbolException e) {
+            noSuchModule(conceptBody.getConceptName());
+        }
 
         //Concept realizations implicitly import the concepts they realize
-        myCurModuleScope.addImport(new ModuleIdentifier(conceptBody
-                .getConceptName().getName()));
+        myCurModuleScope.addImport(id);
     }
 
     // ys (edits)
     @Override
     public void preEnhancementBodyModuleDec(
             EnhancementBodyModuleDec enhancementRealization) {
+        // Concept Module Identifier
+        ModuleIdentifier coId =
+                new ModuleIdentifier(enhancementRealization.getConceptName()
+                        .getName());
+
+        // Enhancement Module Identifier
+        ModuleIdentifier enId =
+                new ModuleIdentifier(enhancementRealization
+                        .getEnhancementName().getName());
+
+        // Check if the enhancement realization implements all operations specified
+        // by the enhancement.
+        try {
+            EnhancementModuleDec enhancement =
+                    (EnhancementModuleDec) myBuilder.getModuleScope(enId)
+                            .getDefiningElement();
+            implementAllOper(enhancementRealization.getLocation(), enhancement
+                    .getDecs(), enhancementRealization.getDecs());
+        }
+        catch (NoSuchSymbolException e) {
+            noSuchModule(enhancementRealization.getEnhancementName());
+        }
 
         //Enhancement realizations implicitly import the concepts they enhance
         //and the enhancements they realize
-        myCurModuleScope.addImport(new ModuleIdentifier(enhancementRealization
-                .getConceptName().getName()));
-        myCurModuleScope.addImport(new ModuleIdentifier(enhancementRealization
-                .getEnhancementName().getName()));
+        myCurModuleScope.addImport(coId);
+        myCurModuleScope.addImport(enId);
 
         //Enhancement realizations implicitly import the performance profiles
         //if they are specified.
@@ -2463,6 +2492,51 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         return match;
+    }
+
+    /**
+     * <p>Checks to see if all operation specified by concept/enhancement
+     * are implemented by the corresponding realization.</p>
+     *
+     * @param location The module that called this method.
+     * @param specDecs List of decs of the Concept/Enhancement
+     * @param realizationDecs List of decs of the realization.
+     */
+    private void implementAllOper(Location location, List<Dec> specDecs,
+            List<Dec> realizationDecs) {
+        List<Dec> opDecList1 = getOperationDecs(specDecs);
+        List<Dec> opDecList2 = getOperationDecs(realizationDecs);
+
+        for (Dec d1 : opDecList1) {
+            boolean inRealization = false;
+            for (Dec d2 : opDecList2) {
+                if (d1.getName().equals(d2.getName())) {
+                    inRealization = true;
+                }
+            }
+            if (!inRealization) {
+                throw new SourceErrorException("Operation " + d1.getName()
+                        + " not implemented by the realization.", location);
+            }
+        }
+    }
+
+    /**
+     * <p>Obtains the list of all <code>OperationDec</code> and
+     * <code>ProcedureDec</code>.</p>
+     *
+     * @param decs List of all declarations.
+     *
+     * @return List containing only operations.
+     */
+    private List<Dec> getOperationDecs(List<Dec> decs) {
+        List<Dec> decList = new LinkedList<Dec>();
+        for (Dec d : decs) {
+            if (d instanceof OperationDec || d instanceof ProcedureDec) {
+                decList.add(d);
+            }
+        }
+        return decList;
     }
 
     //-------------------------------------------------------------------
