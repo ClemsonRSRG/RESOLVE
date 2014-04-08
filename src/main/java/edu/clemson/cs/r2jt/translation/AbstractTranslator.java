@@ -99,9 +99,17 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     //        list nodes are fixed. Talk to Blair about this.
     protected boolean myWhileStmtChangingClause = false;
 
+    /**
+     * <p>This stores the facility qualifier when we encounter a
+     * <code>ProgramDotExp</code>. Once we are done walking the
+     * <code>ProgramDotExp</code>, its value becomes Null again.</p>
+     */
+    private PosSymbol myFacilityQualifier;
+
     public AbstractTranslator(CompileEnvironment env, ScopeRepository repo) {
         myInstanceEnvironment = env;
         myBuilder = (MathSymbolTableBuilder) repo;
+        myFacilityQualifier = null;
     }
 
     //-------------------------------------------------------------------
@@ -238,6 +246,11 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     @Override
+    public void preProgramDotExp(ProgramDotExp node) {
+        myFacilityQualifier = node.getQualifier();
+    }
+
+    @Override
     public void preProgramIntegerExp(ProgramIntegerExp node) {
 
         ST integerExp =
@@ -270,7 +283,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         ST paramExp;
 
         String qualifier =
-                getCallQualifier(null, node.getName(), node.getArguments());
+                getCallQualifier(myFacilityQualifier, node.getName(), node
+                        .getArguments());
 
         if (qualifier != null) {
             paramExp =
@@ -285,6 +299,11 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         }
 
         myActiveTemplates.push(paramExp);
+    }
+
+    @Override
+    public void postProgramDotExp(ProgramDotExp node) {
+        myFacilityQualifier = null;
     }
 
     @Override
