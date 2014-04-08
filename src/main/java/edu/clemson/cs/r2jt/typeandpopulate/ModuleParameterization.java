@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.r2jt.typeandpopulate;
 
+import edu.clemson.cs.r2jt.absyn.EnhancementModuleDec;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
@@ -75,8 +76,36 @@ public class ModuleParameterization {
             result = originalScope;
 
             if (instantiated) {
-                Map<String, PTType> genericInstantiations =
-                        getGenericInstantiations(originalScope);
+                Map<String, PTType> genericInstantiations;
+
+                // YS Edits
+                // If the scope we are looking at is a enhancement module dec,
+                // then we will need to obtain the generic instantiations
+                // from our concept module dec.
+                //
+                // Ex: Facility Foo_Fac is Alpha_Template(Integer)
+                //           realized by ...
+                //           enhanced by Beta_Capability ...
+                //
+                // The instantiation of the type will be Integer and
+                // we need that information for our searchers to work.
+                if (originalScope.getDefiningElement() instanceof EnhancementModuleDec) {
+                    ModuleParameterization conceptParameterization =
+                            myInstantiatingFacility.getFacility()
+                                    .getSpecification();
+                    ModuleIdentifier conceptID =
+                            conceptParameterization.getModuleIdentifier();
+                    ModuleScope conceptScope =
+                            mySourceRepository.getModuleScope(conceptID);
+                    genericInstantiations =
+                            getGenericInstantiations(conceptScope,
+                                    conceptParameterization.getParameters());
+                }
+                else {
+                    genericInstantiations =
+                            getGenericInstantiations(originalScope,
+                                    myParameters);
+                }
 
                 result =
                         new InstantiatedScope(originalScope,
@@ -91,7 +120,8 @@ public class ModuleParameterization {
         return result;
     }
 
-    private Map<String, PTType> getGenericInstantiations(ModuleScope moduleScope) {
+    private Map<String, PTType> getGenericInstantiations(
+            ModuleScope moduleScope, List<ModuleArgumentItem> parameters) {
 
         Map<String, PTType> result = new HashMap<String, PTType>();
 
@@ -99,7 +129,7 @@ public class ModuleParameterization {
                 moduleScope.getFormalParameterEntries();
 
         result =
-                RCollections.foldr2(formalParams, myParameters,
+                RCollections.foldr2(formalParams, parameters,
                         BuildGenericInstantiations.INSTANCE, result);
 
         return result;

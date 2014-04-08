@@ -478,12 +478,11 @@ public class Populator extends TreeWalkerVisitor {
         }
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException("No operation found corresponding "
-                    + "to call: ", stmt.getLocation());
+                    + "the call with the specified arguments: ", stmt
+                    .getLocation());
         }
         catch (DuplicateSymbolException dse) {
-            //This should be caught earlier, when the duplicate operation is
-            //created
-            throw new RuntimeException(dse);
+            duplicateSymbol(stmt.getName().getName(), stmt.getLocation());
         }
     }
 
@@ -1137,7 +1136,8 @@ public class Populator extends TreeWalkerVisitor {
         }
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException("No operation found corresponding "
-                    + "to call: ", node.getLocation());
+                    + "the call with the specified arguments: ", node
+                    .getLocation());
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(node.getName().getName(), node.getLocation());
