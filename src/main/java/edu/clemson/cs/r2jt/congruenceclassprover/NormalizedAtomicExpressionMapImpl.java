@@ -12,6 +12,9 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
+import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -43,6 +46,11 @@ public class NormalizedAtomicExpressionMapImpl
         return 0;
     }
 
+    /**
+     * 
+     * @param position
+     * @return integer representation of operator at position or -1 if none
+     */
     public int readPosition(int position) {
         position = 1 << position;
         Set<Map.Entry<Integer, Integer>> entries = m_expression.entrySet();
@@ -106,7 +114,74 @@ public class NormalizedAtomicExpressionMapImpl
         return 0;
     }
 
+    public NormalizedAtomicExpressionMapImpl clear(){
+        m_expression.clear();
+        return this;
+    }
+    
+    public int numOperators(){
+        return m_expression.keySet().size();
+    }
+    public NormalizedAtomicExpressionMapImpl translateFromRegParam1ToRegParam2(Registry source,
+            Registry destination, HashMap<String,String> mapping){
+        NormalizedAtomicExpressionMapImpl translated = new NormalizedAtomicExpressionMapImpl();
+        Set<Integer> keys = m_expression.keySet();
+        for(Integer k : keys){
+            String sourceName = source.getSymbolForIndex(k);
+            String destName = "";
+            switch (source.getUsage(sourceName)){
+                case LITERAL:
+                    if(destination.isSymbolInTable(sourceName))
+                        destName = sourceName;
+                    else return translated.clear();
+                    break;
+                case FORALL:
+                    if(mapping.containsKey(sourceName))
+                        destName = mapping.get(sourceName);
+                    break;
+            }
+            if(!destName.equals("")){
+                int trKey = destination.getIndexForSymbol(destName);
+                int positions = m_expression.get(k);
+                translated.m_expression.put(trKey, k);
+            }
+           
+        }
+        return translated;
+    }
+    public boolean noConflicts(NormalizedAtomicExpressionMapImpl expr){
+        // return false if an op is defined here and in expr, and expr uses it in a position not used here.
+        Set<Integer> keys = m_expression.keySet();
+        for(Integer k : keys){
+            int theirPos = expr.readOperator(k); // expr has key if pos >= 0
+            int myPos = readOperator(k); 
+            assert myPos >= 0 : "Shouldn't be an unused key in NAEMI";
+            if(theirPos < 0) continue;
+            if((myPos & theirPos) == 0) return false;
+        }
+        return true;
+    }
+    public NormalizedAtomicExpressionMapImpl incrementLastKnown(){
+        NormalizedAtomicExpressionMapImpl incremented = new NormalizedAtomicExpressionMapImpl();
+        int pos = 0;
+        int op = readPosition(pos);
+        if(op < 0){ // function operator unknown, upper bound is end of list
+            incremented.writeOnto(Integer.MAX_VALUE,0);
+            incremented.writeToRoot(Integer.MAX_VALUE);
+            return incremented;
+        }
+        int opPrev = op;
+        while(op >= 0){
+            incremented.writeOnto(opPrev, pos);
+            pos++;
+            opPrev = op;
+            op = readPosition(pos);
+        }
+        incremented.writeOnto(++opPrev, pos);
+        return incremented;
+    }
     public String toHumanReadableString(Registry registry) {
+        if(m_expression.isEmpty()) return "empty expression";
         String r = "";
         int cur;
         int i = 0;
@@ -118,8 +193,15 @@ public class NormalizedAtomicExpressionMapImpl
                 r += ",";
             i++;
         }
-        r = r.substring(0, r.length() - 1);
-        r += ")=" + registry.getSymbolForIndex(readRoot());
+        // if there is an arg list
+        if(r.length() > 1){
+            r = r.substring(0, r.length() - 1);
+            r += ")" ;
+        }
+        // if there is a root
+        int root = readRoot();
+        if(root >= 0)
+            r += "=" + registry.getSymbolForIndex(root);
 
         return r;
     }

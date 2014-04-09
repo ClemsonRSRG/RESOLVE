@@ -1,19 +1,16 @@
 /**
  * ConjunctionOfNormalizedAtomicExpressions.java
- * ---------------------------------
- * Copyright (c) 2014
- * RESOLVE Software Research Group
- * School of Computing
- * Clemson University
- * All rights reserved.
- * ---------------------------------
- * This file is subject to the terms and conditions defined in
- * file 'LICENSE.txt', which is part of this source code package.
+ * --------------------------------- Copyright (c) 2014 RESOLVE Software
+ * Research Group School of Computing Clemson University All rights reserved.
+ * --------------------------------- This file is subject to the terms and
+ * conditions defined in file 'LICENSE.txt', which is part of this source code
+ * package.
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PExpSubexpressionIterator;
+import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 import java.util.*;
@@ -27,14 +24,76 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     private List<NormalizedAtomicExpressionMapImpl> m_exprList;
 
     /**
-     * @param registry the Registry symbols contained in the conjunction will reference.  This class will add entries to
-     *                 the registry if needed.
+     * @param registry the Registry symbols contained in the conjunction will
+     * reference. This class will add entries to the registry if needed.
      */
     public ConjunctionOfNormalizedAtomicExpressions(Registry registry) {
         m_registry = registry;
         m_exprList = new LinkedList<NormalizedAtomicExpressionMapImpl>();
     }
 
+    protected int size() {
+        return m_exprList.size();
+    }
+
+    protected SearchBox findNAE(NormalizedAtomicExpressionMapImpl query,
+            Registry queryRegistry,
+            HashMap<String, String> bindings,
+            SearchBox sb) {
+
+        if (sb == null) {
+            NormalizedAtomicExpressionMapImpl translated
+                    = query.translateFromRegParam1ToRegParam2(queryRegistry, m_registry, bindings);
+            // early return for impossible search (literals in theorem but not in vc (have to add definitions first))
+            if(translated.numOperators() == 0) return new SearchBox(); // meaning impossible
+            int lowerBound = Collections.binarySearch(m_exprList, translated);
+            // early return for direct match
+            if(lowerBound >= 0){
+                return new SearchBox(lowerBound,translated);
+            }
+            lowerBound = -lowerBound -1;
+            // increment last known
+            NormalizedAtomicExpressionMapImpl exprUpper = translated.incrementLastKnown();
+            int upperBound = Collections.binarySearch(m_exprList, exprUpper);
+            if(upperBound < 0){
+                upperBound = - upperBound -1;
+            }
+            sb = setUnknowns(new SearchBox(lowerBound, upperBound, translated));
+            String queryS = query.toHumanReadableString(queryRegistry);
+            String found = sb.m_expr.toHumanReadableString(m_registry);
+            return updateSearchBoxMap(sb, queryRegistry, m_registry);
+        } else {
+            sb.currentIndex++;
+            // map unknowns using this index
+            sb = setUnknowns(sb);
+            return updateSearchBoxMap(sb, queryRegistry, m_registry);
+        }
+    }
+    private SearchBox updateSearchBoxMap(SearchBox sb, Registry thReg, Registry vcReg){
+        // not sure if i need this
+        return sb;
+    }
+    /**
+     * Finds next match in this conjunction and updates the SearchBox map.
+     * @param sb
+     * @return sb with updated map and index.
+     */
+    private SearchBox setUnknowns(SearchBox sb){
+        if(!sb.inBounds()) return sb;
+        boolean matched = false;
+        while(!matched && sb.inBounds()){
+            NormalizedAtomicExpressionMapImpl inVc = m_exprList.get(sb.currentIndex);
+            // compare this to tranlated in sb.  If no conflicts, expr
+            if(inVc.noConflicts(sb.m_expr)){
+                sb.m_expr = inVc;
+                matched = true;
+            }
+            else{
+                sb.currentIndex++;
+            }
+        }
+        return sb;
+    }
     private String fromOperatorIndicesToAtomString(int[] atom) {
         String r = m_registry.getSymbolForIndex(atom[0]);
         if (atom.length > 2) {
@@ -49,27 +108,66 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return r;
     }
 
+    protected NormalizedAtomicExpressionMapImpl getExprAtPosition(int position) {
+        return m_exprList.get(position);
+    }
+
+    protected void addExpression(PExp expression) {
+        String name = expression.getTopLevelOperation();
+        MTType type = expression.getType();
+        PSymbol asPsymbol = (PSymbol) expression;
+        int intRepOfOp = addPsymbol(asPsymbol);
+        if (expression.isEquality()) {
+            int lhs = addFormula(expression.getSubExpressions().get(0));
+            int rhs = addFormula(expression.getSubExpressions().get(1));
+            mergeOperators(lhs, rhs);
+        } else if (name.equals("and")) {
+            addExpression(expression.getSubExpressions().get(0));
+            addExpression(expression.getSubExpressions().get(1));
+        } else {
+            int root = addFormula(expression);
+            if (type.isBoolean()) {
+                mergeOperators(m_registry.getIndexForSymbol("true"), root);
+            }
+        }
+    }
+
+    protected int addPsymbol(PSymbol ps) {
+        String name = ps.getTopLevelOperation();
+        MTType type = ps.getType();
+        Registry.Usage usage = Registry.Usage.SINGULAR_VARIABLE;
+        if (ps.isLiteral()) {
+            usage = Registry.Usage.LITERAL;
+        } else if (ps.isFunction()) {
+            usage = Registry.Usage.LITERAL; // making function names global in context of theorems and vc's
+        } else if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
+            usage = Registry.Usage.FORALL;
+        }
+        return m_registry.addSymbol(name, type, usage);
+    }
+
     /**
-     * @param formula a formula that should not contain =. Predicate symbols are treated as any other function symbol here.
+     * @param formula a formula that should not contain = or and. Predicate
+     * symbols are treated as any other function symbol here.
      * @return current index in list of expressions.
      */
-    protected int addExpression(PExp formula) {
-        String name = formula.getTopLevelOperation();
-        MTType type = formula.getType();
-        int intRepOfOp = m_registry.addSymbol(name, type);
+    protected int addFormula(PExp formula) {
+        PSymbol asPsymbol = (PSymbol) formula;
+        int intRepOfOp = addPsymbol(asPsymbol);
         // base case
-        if (formula.isVariable())
+        if (formula.isVariable()) {
             return intRepOfOp;
+        }
 
-        NormalizedAtomicExpressionMapImpl newExpr =
-                new NormalizedAtomicExpressionMapImpl();
+        NormalizedAtomicExpressionMapImpl newExpr
+                = new NormalizedAtomicExpressionMapImpl();
         newExpr.writeOnto(intRepOfOp, 0);
         int pos = 0;
         PExpSubexpressionIterator it = formula.getSubExpressionIterator();
         while (it.hasNext()) {
             PExp p = it.next();
             pos++;
-            int root = addExpression(p);
+            int root = addFormula(p);
             assert newExpr != null;
             newExpr.writeOnto(root, pos);
         }
@@ -77,8 +175,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     /**
-     * @param atomicFormula one sided expression. (= new root) is appended and expression is inserted if no
-     *                      match of the side is found. Otherwise current root is returned.
+     * @param atomicFormula one sided expression. (= new root) is appended and
+     * expression is inserted if no match of the side is found. Otherwise
+     * current root is returned.
      * @return current integer value of root symbol that represents the input.
      */
     private int addAtomicFormula(NormalizedAtomicExpressionMapImpl atomicFormula) {
@@ -88,8 +187,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         // no such formula exists. Note that
         int indexToInsert = -(posIfFound + 1);
-        MTType typeOfFormula =
-                m_registry.getTypeByIndex(atomicFormula.readPosition(0));
+        MTType typeOfFormula
+                = m_registry.getTypeByIndex(atomicFormula.readPosition(0));
         int rhs = m_registry.makeSymbol(typeOfFormula);
         atomicFormula.writeToRoot(rhs);
         m_exprList.add(indexToInsert, atomicFormula);
@@ -110,16 +209,17 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     // Return list of modified predicates by their position. Only these can cause new merges.
     protected Stack<Integer> mergeOnlyArgumentOperators(int a, int b) {
-        if (a == b)
+        if (a == b) {
             return null;
+        }
         if (a > b) {
             int temp = a;
             a = b;
             b = temp;
         }
         Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator();
-        Stack<NormalizedAtomicExpressionMapImpl> modifiedEntries =
-                new Stack<NormalizedAtomicExpressionMapImpl>();
+        Stack<NormalizedAtomicExpressionMapImpl> modifiedEntries
+                = new Stack<NormalizedAtomicExpressionMapImpl>();
         Stack<Integer> coincidentalMergeHoldingTank = new Stack<Integer>();
         while (it.hasNext()) {
             NormalizedAtomicExpressionMapImpl curr = it.next();
@@ -129,15 +229,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
         }
         while (!modifiedEntries.empty()) {
-            int indexToInsert =
-                    Collections
-                            .binarySearch(m_exprList, modifiedEntries.peek());
+            int indexToInsert
+                    = Collections
+                    .binarySearch(m_exprList, modifiedEntries.peek());
             // If the modified one is already there, don't put it back
             if (indexToInsert < 0) {
                 indexToInsert = -(indexToInsert + 1);
                 m_exprList.add(indexToInsert, modifiedEntries.pop());
-            }
-            else {
+            } else {
                 // the expr is in the list, but are the roots different?
                 int rootA = modifiedEntries.pop().readRoot();
                 int rootB = m_exprList.get(indexToInsert).readRoot();

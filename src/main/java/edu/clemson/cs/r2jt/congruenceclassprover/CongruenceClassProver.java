@@ -70,7 +70,15 @@ public class CongruenceClassProver {
     public void start() {
         
         for(VerificationConditionCongruenceClosureImpl vcc:m_ccVCs){
-            System.out.println(vcc);
+            //System.out.println(vcc);
+            for(TheoremCongruenceClosureImpl th:m_theorems){
+                if(vcc.isProved()) break;
+                th.applyTo(vcc);
+            //System.out.println(th);
+            }
+        }
+        for(TheoremCongruenceClosureImpl th:m_theorems){
+            //System.out.println(th);
         }
     }
 }
