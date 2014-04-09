@@ -2312,7 +2312,7 @@ set_constructor returns [SetExp exp = null]
         {   var = new MathVarDec($vnm.ps, $vty.ty);
             $exp = new SetExp(getLocation($LBRACE), var, $where.exp, $body.exp);
         }
-    |   ^(  SET (id=ident { vars.add(new VarExp(getLocation($SET), null, $id.ps)); })*)
+    |   ^(  SET (id=ident { vars.add(new VarExp(getLocation($SET), null, $id.ps)); })* )
         {   $exp = new SetExp(getLocation($SET), null, null, null, vars);   }
     ;
 

@@ -1589,7 +1589,7 @@ set_constructor
         COLON! math_type_expression
         (where_clause)? BAR!
         math_expression RBRACE!
-    |   LBRACE (math_expression (COMMA math_expression)*)? RBRACE -> ^(SET math_expression*)
+    |   LBRACE (ident (COMMA ident)*)? RBRACE -> ^(SET (ident (COMMA ident)*)?)
     ;
 
 tuple_expression
