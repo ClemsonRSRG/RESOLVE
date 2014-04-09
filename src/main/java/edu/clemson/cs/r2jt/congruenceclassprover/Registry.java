@@ -29,6 +29,9 @@ public class Registry {
     public Vector<Integer> m_symbolIndexParentArray;
     public Stack<Integer> m_unusedIndices;
     private int m_uniqueCounter = 0;
+    public static enum Usage {LITERAL, FORALL, SINGULAR_VARIABLE, CREATED};
+    private Map<String,Usage> m_symbolToUsage;
+    private Set<String> m_foralls;
 
     public Registry() {
         m_symbolToIndex = new TreeMap<String, Integer>();
@@ -37,9 +40,14 @@ public class Registry {
         m_indexToType = new Vector<MTType>();
         m_symbolIndexParentArray = new Vector<Integer>();
         m_unusedIndices = new Stack<Integer>();
-        addSymbol("true", null);
+        m_symbolToUsage = new HashMap<String,Usage>(); // entries won't change
+        m_foralls = new HashSet<String>();
+        addSymbol("true", null, Usage.LITERAL);
     }
 
+    public Usage getUsage(String symbol){
+        return m_symbolToUsage.get(symbol);
+    }
     public Set<String> getSetMatchingType(MTType t) {
         Set<String> rSet = new HashSet<String>();
         Set<MTType> allTypesInSet = m_typeToSetOfOperators.keySet();
@@ -97,13 +105,16 @@ public class Registry {
         return findAndCompress(r);
     }
 
+    public Set<String> getForAlls(){
+        return m_foralls;
+    }
     public int makeSymbol(MTType symbolType) {
         String symbolName = String.format(m_ccFormat, m_uniqueCounter++);
-        return addSymbol(symbolName, symbolType);
+        return addSymbol(symbolName, symbolType, Usage.CREATED);
     }
 
     // if symbol is new, it adds it, otherwise, it returns current int rep
-    public int addSymbol(String symbolName, MTType symbolType) {
+    public int addSymbol(String symbolName, MTType symbolType, Usage usage) {
         if (isSymbolInTable(symbolName))
             return getIndexForSymbol(symbolName);
 
@@ -115,6 +126,8 @@ public class Registry {
             m_typeToSetOfOperators.put(symbolType, t);
         }
 
+        m_symbolToUsage.put(symbolName, usage);
+        if(usage.equals(Usage.FORALL)) m_foralls.add(symbolName);
         int incomingsize = m_symbolToIndex.size();
         m_symbolToIndex.put(symbolName, m_symbolToIndex.size());
         m_indexToSymbol.add(symbolName);

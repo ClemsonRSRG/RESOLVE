@@ -12,14 +12,15 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.Antecedent;
 import edu.clemson.cs.r2jt.proving2.Consequent;
-
+import edu.clemson.cs.r2jt.proving2.VC;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by mike on 4/3/2014.
@@ -48,14 +49,32 @@ public class VerificationConditionCongruenceClosureImpl {
         addPExp(m_consequent.iterator(), false);
     }
 
+    public SearchBox findNAE(NormalizedAtomicExpressionMapImpl query, 
+            Registry queryRegistry,
+            HashMap<String,String> bindings,
+            SearchBox searchbox){
+        
+        return m_conjunction.findNAE(query,queryRegistry,bindings,searchbox);
+    }
+    
+    public boolean isProved(){
+        for(List<String> g :m_goal){
+            // check each goal has same root
+            if(!g.get(0).equals(g.get(1))) // diff symbols, same root?
+                if(m_registry.getIndexForSymbol(g.get(0))!=m_registry.getIndexForSymbol(g.get(1)))
+                    // can avoid this check by updating goal on merges
+                    return false; // not proved yet
+        }
+        return true;
+    }
     private void addPExp(Iterator<PExp> pit, boolean inAntecedent) {
         while (pit.hasNext()) {
             PExp curr = pit.next();
             if (curr.isEquality()) { // f(x,y) = z and g(a,b) = c ; then z is replaced by c
                 PExp lhs = curr.getSubExpressions().get(0);
                 PExp rhs = curr.getSubExpressions().get(1);
-                int lhsIndex = (m_conjunction.addExpression(lhs));
-                int rhsIndex = (m_conjunction.addExpression(rhs));
+                int lhsIndex = (m_conjunction.addFormula(lhs));
+                int rhsIndex = (m_conjunction.addFormula(rhs));
                 if (inAntecedent)
                     m_conjunction.mergeOperators(lhsIndex, rhsIndex);
                 else
@@ -63,7 +82,7 @@ public class VerificationConditionCongruenceClosureImpl {
                             .getSymbolForIndex(rhsIndex));
             }
             else { // P becomes P = true or P(x...) becomes P(x ...) = z and z is replaced by true
-                int intRepForExp = m_conjunction.addExpression(curr);
+                int intRepForExp = m_conjunction.addFormula(curr);
                 if (inAntecedent)
                     m_conjunction.mergeOperators(m_registry
                             .getIndexForSymbol("true"), intRepForExp);
