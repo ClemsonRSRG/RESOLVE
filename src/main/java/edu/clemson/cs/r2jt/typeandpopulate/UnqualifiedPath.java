@@ -166,6 +166,26 @@ public class UnqualifiedPath implements ScopeSearchPath {
                     facilityScope.addMatches(searcher, result, searchedScopes,
                             new HashMap<String, PTType>(), null,
                             SearchContext.FACILITY);
+
+            // YS Edits
+            // Search any enhancements in this facility declaration
+            if (!finished) {
+                List<ModuleParameterization> enhancementList =
+                        facility.getEnhancements();
+                for (ModuleParameterization facEnh : enhancementList) {
+                    // Obtain the scope for the enhancement
+                    facilityScope =
+                            facEnh
+                                    .getScope(myFacilityStrategy
+                                            .equals(FacilityStrategy.FACILITY_INSTANTIATE));
+                    // Search and add matches.
+                    finished =
+                            facilityScope.addMatches(searcher, result,
+                                    searchedScopes,
+                                    new HashMap<String, PTType>(), null,
+                                    SearchContext.FACILITY);
+                }
+            }
         }
 
         return finished;

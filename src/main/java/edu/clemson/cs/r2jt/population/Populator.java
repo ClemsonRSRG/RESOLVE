@@ -461,6 +461,32 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
+    public void postCallStmt(CallStmt stmt) {
+        PosSymbol qualifier = stmt.getQualifier();
+        PosSymbol name = stmt.getName();
+        List<ProgramExp> args = stmt.getArguments();
+
+        List<PTType> argTypes = new LinkedList<PTType>();
+        for (ProgramExp arg : args) {
+            argTypes.add(arg.getProgramType());
+        }
+
+        try {
+            OperationEntry op =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new OperationQuery(qualifier, name, argTypes));
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new SourceErrorException("No operation found corresponding "
+                    + "the call with the specified arguments: ", stmt
+                    .getLocation());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(stmt.getName().getName(), stmt.getLocation());
+        }
+    }
+
+    @Override
     public void preCrossTypeExpression(CrossTypeExpression e) {
         myTypeValueDepth++;
     }
@@ -1109,7 +1135,9 @@ public class Populator extends TreeWalkerVisitor {
             node.setMathType(op.getReturnType().toMath());
         }
         catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(null, node.getName().getName(), node.getLocation());
+            throw new SourceErrorException("No operation found corresponding "
+                    + "the call with the specified arguments: ", node
+                    .getLocation());
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(node.getName().getName(), node.getLocation());
