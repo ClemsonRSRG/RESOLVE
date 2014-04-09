@@ -49,14 +49,13 @@ public class VerificationConditionCongruenceClosureImpl {
         addPExp(m_consequent.iterator(), false);
     }
 
-    public SearchBox findNAE(NormalizedAtomicExpressionMapImpl query, 
-            Registry queryRegistry,
-            HashMap<String,String> bindings,
-            SearchBox searchbox){
-        
-        return m_conjunction.findNAE(query,queryRegistry,bindings,searchbox);
+
+    public ConjunctionOfNormalizedAtomicExpressions getConjunct(){
+        return m_conjunction;
     }
-    
+    public Registry getRegistry(){
+        return m_registry;
+    }
     public boolean isProved(){
         for(List<String> g :m_goal){
             // check each goal has same root

@@ -44,78 +44,81 @@ public class TheoremCongruenceClosureImpl {
         }
     }
 
-    public VerificationConditionCongruenceClosureImpl applyTo(VerificationConditionCongruenceClosureImpl vc){
+    public boolean applyTo(VerificationConditionCongruenceClosureImpl vc){
         // Get stack of bindings
         // find match(s) in vc
         Stack<HashMap<String, String>> allValidBindings = findValidBindings(vc);
         // convert string map to PExp map
         // get new Pexp(s) through substitution function
         // add those to vc
-        return vc;
+        if(allValidBindings==null || allValidBindings.size()==0)
+            return false;
+        
+        return true;
     }
     
+    // todo: shoot inf loop problem
     private Stack<HashMap<String, String>> findValidBindings(VerificationConditionCongruenceClosureImpl vc){
         if(m_matchConj.size()==0){
             // todo: handle definition bindings
             return null;
         }
         Stack<HashMap<String,String>> allValidBindings = new Stack<HashMap<String, String>>();
-        Stack<HashMap<String,String>> curBindingStack = new Stack<HashMap<String, String>>();
-        SearchBox[] positions = new SearchBox[m_matchConj.size()];
+        SearchBox[] boxes = new SearchBox[m_matchConj.size()];
         HashMap<String,String> curBindings = new HashMap<String,String>();
-        boolean positiveMatch = false;
-        boolean allVariablesBound = false;
         int indexInMatchConj = 0;
         while(indexInMatchConj >= 0){
-            
-            // Get candidate
-            positions[indexInMatchConj] = 
-                    vc.findNAE(m_matchConj.getExprAtPosition(indexInMatchConj),
-                            m_theoremRegistry, curBindings, positions[indexInMatchConj]);
-            int candidate = positions[indexInMatchConj].currentIndex;
-            
-            // binding works
-            if(positiveMatch){
-                HashMap<String,String> copyBindings = new HashMap<String, String>();
-                copyBindings.putAll(curBindings);
-                curBindingStack.push(copyBindings);
-                // if binding works for all expressions, save the bindings
-                if(indexInMatchConj == m_matchConj.size()-1 && allVariablesBound){
-                    allValidBindings.push(curBindingStack.pop());
-                    // other bindings may be possible
-                    positions[indexInMatchConj].currentIndex++;
-                }
-                    
-                indexInMatchConj++;
-                 
+          // Get next match given current state  
+            // create new searchbox for current expression if it hasnt been looked for
+            if(boxes[indexInMatchConj]==null){
+                boxes[indexInMatchConj] = new SearchBox(m_matchConj.getExprAtPosition(indexInMatchConj),
+                m_theoremRegistry,vc.getConjunct(),vc.getRegistry(),curBindings);
+                // getNextMatch in constructor.
             }
-            // binding doesn't work
-            else{             
-                // try binding with next vc expression in range until upper bound reached
-                positions[indexInMatchConj].currentIndex++;
-                if(!positions[indexInMatchConj].inBounds()){
-                    // search exhausted with current bindings
-                    indexInMatchConj--;
-                    if(!curBindingStack.isEmpty())
-                        curBindingStack.pop();
+            else{
+                boxes[indexInMatchConj].getNextMatch(); // searches using current bindings, 
+                //then overwrites based on result( has the effect of only adding to).
+            }
+         // if no matches with current bindings,
+            if(boxes[indexInMatchConj].impossibleToMatch){
+                // go back one, this will reset bindings according to new search at top of loop
+                indexInMatchConj--; // eventually all bindings will be impossible, causing the loop to exit.
+                // why?
+                
+                if(indexInMatchConj<0){
+                    SearchBox bc = boxes[0];
+                    String tr = bc.m_translated.toHumanReadableString(vc.getRegistry());
+                    String or = bc.m_original.toHumanReadableString(m_theoremRegistry);
+                    System.out.println("Ending search: couldn't find " + or + " as " + tr);
                 }
                 
             }
+            else{
+              // these bindings work in this expression, try the in next in list
+                indexInMatchConj++;
+                if(indexInMatchConj >= m_matchConj.size()){
+                    // you have just found bindings that work for all expressions.
+                    HashMap<String,String> bCopy = new HashMap<String, String>();
+                    bCopy.putAll(curBindings);
+                    allValidBindings.push(bCopy);
+                    // try this one again, can be many
+                    indexInMatchConj--;
+                }
+            }
+            
             
         }
         return allValidBindings;
-    }
-    private HashMap<String, String> findMatch(NormalizedAtomicExpressionMapImpl match,
-            HashMap<String, String> binding){
-        
-        
-        return binding;
     }
     
     
     // this is mostly temporary
     public static boolean canProcess(PExp p){
+        if(p.getTopLevelOperation().equals("="))
         return true;
+        if(p.getTopLevelOperation().equals("implies"))
+        return true;
+        return false;
     }
     /*
     These are apparently definitions. If blindly added they can greatly increase
