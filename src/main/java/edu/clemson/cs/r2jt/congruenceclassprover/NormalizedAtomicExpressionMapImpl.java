@@ -46,12 +46,16 @@ public class NormalizedAtomicExpressionMapImpl
         return 0;
     }
 
+    protected Set<Integer> getKeys(){
+        return m_expression.keySet();
+    }
     /**
      * 
      * @param position
      * @return integer representation of operator at position or -1 if none
      */
     public int readPosition(int position) {
+        if(position >= m_maxPositions) return -1; // needed for construction of str arrays
         position = 1 << position;
         Set<Map.Entry<Integer, Integer>> entries = m_expression.entrySet();
         for (Map.Entry<Integer, Integer> e : entries) {
@@ -100,7 +104,16 @@ public class NormalizedAtomicExpressionMapImpl
     }
 
     protected int readRoot() {
-        return readPosition(m_maxPositions);
+        int position = 1 << m_maxPositions;
+        Set<Map.Entry<Integer, Integer>> entries = m_expression.entrySet();
+        for (Map.Entry<Integer, Integer> e : entries) {
+            if ((e.getValue() & position) != 0)
+                return e.getKey();
+            /* todo: possible use for map: multiple operators in a single position.
+             for use in binding quantified variables.
+             */
+        }
+        return -1;
     }
 
     // compare left sides of 2 expressions.  If this returns 0, you must compare right hand sides afterwards.
@@ -124,6 +137,9 @@ public class NormalizedAtomicExpressionMapImpl
     }
     public NormalizedAtomicExpressionMapImpl translateFromRegParam1ToRegParam2(Registry source,
             Registry destination, HashMap<String,String> mapping){
+        // delete after working:
+        String sourceStr = toHumanReadableString(source);
+        
         NormalizedAtomicExpressionMapImpl translated = new NormalizedAtomicExpressionMapImpl();
         Set<Integer> keys = m_expression.keySet();
         for(Integer k : keys){
@@ -143,12 +159,16 @@ public class NormalizedAtomicExpressionMapImpl
             if(!destName.equals("")){
                 int trKey = destination.getIndexForSymbol(destName);
                 int positions = m_expression.get(k);
-                translated.m_expression.put(trKey, k);
+                translated.m_expression.put(trKey, positions);
             }
            
         }
+        String dest = translated.toHumanReadableString(destination);
         return translated;
     }
+    
+
+    // todo: consider using SearchBox.NAEtoStr function for this
     public boolean noConflicts(NormalizedAtomicExpressionMapImpl expr){
         // return false if an op is defined here and in expr, and expr uses it in a position not used here.
         Set<Integer> keys = m_expression.keySet();

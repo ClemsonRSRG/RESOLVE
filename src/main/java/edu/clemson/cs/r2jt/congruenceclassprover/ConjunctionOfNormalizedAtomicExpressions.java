@@ -36,64 +36,34 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return m_exprList.size();
     }
 
-    protected SearchBox findNAE(NormalizedAtomicExpressionMapImpl query,
-            Registry queryRegistry,
-            HashMap<String, String> bindings,
-            SearchBox sb) {
-
-        if (sb == null) {
-            NormalizedAtomicExpressionMapImpl translated
-                    = query.translateFromRegParam1ToRegParam2(queryRegistry, m_registry, bindings);
-            // early return for impossible search (literals in theorem but not in vc (have to add definitions first))
-            if(translated.numOperators() == 0) return new SearchBox(); // meaning impossible
-            int lowerBound = Collections.binarySearch(m_exprList, translated);
-            // early return for direct match
-            if(lowerBound >= 0){
-                return new SearchBox(lowerBound,translated);
-            }
-            lowerBound = -lowerBound -1;
-            // increment last known
-            NormalizedAtomicExpressionMapImpl exprUpper = translated.incrementLastKnown();
-            int upperBound = Collections.binarySearch(m_exprList, exprUpper);
-            if(upperBound < 0){
+    protected void findNAE(SearchBox box) {
+        NormalizedAtomicExpressionMapImpl translQuery = box.m_translated;
+        int lowerBound = Collections.binarySearch(m_exprList, translQuery);
+        // if it exists in the list...
+        if (lowerBound >= 0 && lowerBound < m_exprList.size()) {
+            box.lowerBound = lowerBound;
+            box.upperBound = lowerBound;
+            box.currentIndex = lowerBound;
+            box.directMatch = true;
+            return;
+        }
+        lowerBound = -lowerBound - 1;
+        NormalizedAtomicExpressionMapImpl ubExpr = translQuery.incrementLastKnown();
+        int upperBound = Collections.binarySearch(m_exprList, ubExpr);
+        if (!(upperBound >= 0 && upperBound < m_exprList.size())) {
+            if(upperBound >= m_exprList.size()) upperBound = m_exprList.size()-1;
+            else if (upperBound < 0) {
                 upperBound = - upperBound -1;
-            }
-            sb = setUnknowns(new SearchBox(lowerBound, upperBound, translated));
-            String queryS = query.toHumanReadableString(queryRegistry);
-            String found = sb.m_expr.toHumanReadableString(m_registry);
-            return updateSearchBoxMap(sb, queryRegistry, m_registry);
-        } else {
-            sb.currentIndex++;
-            // map unknowns using this index
-            sb = setUnknowns(sb);
-            return updateSearchBoxMap(sb, queryRegistry, m_registry);
+                if(upperBound >= m_exprList.size()) upperBound = m_exprList.size()-1;
+            }       
         }
+        box.upperBound = upperBound;
+        box.lowerBound = lowerBound;
+        box.currentIndex = lowerBound;
+        box.directMatch = false;
+        return;
     }
-    private SearchBox updateSearchBoxMap(SearchBox sb, Registry thReg, Registry vcReg){
-        // not sure if i need this
-        return sb;
-    }
-    /**
-     * Finds next match in this conjunction and updates the SearchBox map.
-     * @param sb
-     * @return sb with updated map and index.
-     */
-    private SearchBox setUnknowns(SearchBox sb){
-        if(!sb.inBounds()) return sb;
-        boolean matched = false;
-        while(!matched && sb.inBounds()){
-            NormalizedAtomicExpressionMapImpl inVc = m_exprList.get(sb.currentIndex);
-            // compare this to tranlated in sb.  If no conflicts, expr
-            if(inVc.noConflicts(sb.m_expr)){
-                sb.m_expr = inVc;
-                matched = true;
-            }
-            else{
-                sb.currentIndex++;
-            }
-        }
-        return sb;
-    }
+
     private String fromOperatorIndicesToAtomString(int[] atom) {
         String r = m_registry.getSymbolForIndex(atom[0]);
         if (atom.length > 2) {

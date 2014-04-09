@@ -63,13 +63,13 @@ public class CongruenceClassProver {
         for (TheoremEntry e : theoremEntries) {
             if(TheoremCongruenceClosureImpl.canProcess(e.getAssertion()))
             m_theorems.add(new TheoremCongruenceClosureImpl(e.getAssertion()));
-            else System.out.println("Can't process " + e.getAssertion());
+            //else System.out.println("Can't process " + e.getAssertion());
         }
     }
 
     public void start() {
         
-        for(VerificationConditionCongruenceClosureImpl vcc:m_ccVCs){
+        /*for(VerificationConditionCongruenceClosureImpl vcc:m_ccVCs){
             //System.out.println(vcc);
             for(TheoremCongruenceClosureImpl th:m_theorems){
                 if(vcc.isProved()) break;
@@ -77,8 +77,19 @@ public class CongruenceClassProver {
             //System.out.println(th);
             }
         }
-        for(TheoremCongruenceClosureImpl th:m_theorems){
+                */
+        TheoremCongruenceClosureImpl testTheorem = m_theorems.get(1);
+        VerificationConditionCongruenceClosureImpl testVc = m_ccVCs.get(0);
+       System.out.println("th: " + testTheorem);
+       System.out.println("vc: " + testVc);
+       testTheorem.applyTo(testVc);
+       
+        
+        /*for(TheoremCongruenceClosureImpl th:m_theorems){
             //System.out.println(th);
-        }
+            if(testVc.isProved())break;
+            if(th.applyTo(testVc)) System.out.println(th);
+        }*/
+        if(testVc.isProved()) System.out.println("vc: " + testVc);
     }
 }
