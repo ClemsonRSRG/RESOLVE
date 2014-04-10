@@ -104,7 +104,9 @@ public class VerificationConditionCongruenceClosureImpl {
         String r = m_name + "\n" + m_conjunction;
         r += "----------------------------------\n";
         for (List<String> gl : m_goal) {
-            r += gl.get(0) + "=" + gl.get(1) + "\n";
+            String ro0 = m_registry.getSymbolForIndex(m_registry.getIndexForSymbol(gl.get(0)));
+            String ro1 = m_registry.getSymbolForIndex(m_registry.getIndexForSymbol(gl.get(1)));
+            r += ro0 + "=" + ro1 + "\n";
         }
 
         return r;

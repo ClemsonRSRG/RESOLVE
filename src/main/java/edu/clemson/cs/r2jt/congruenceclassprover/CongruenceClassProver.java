@@ -14,8 +14,6 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.proving.Prover;
 import edu.clemson.cs.r2jt.proving2.VC;
-import edu.clemson.cs.r2jt.proving2.justifications.Library;
-import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
@@ -23,7 +21,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -69,27 +66,24 @@ public class CongruenceClassProver {
 
     public void start() {
         
-        /*for(VerificationConditionCongruenceClosureImpl vcc:m_ccVCs){
-            //System.out.println(vcc);
+        //for(VerificationConditionCongruenceClosureImpl vcc:m_ccVCs)
+        VerificationConditionCongruenceClosureImpl vcc = m_ccVCs.get(0);
+        {
+            
+            String thString = "";
             for(TheoremCongruenceClosureImpl th:m_theorems){
                 if(vcc.isProved()) break;
-                th.applyTo(vcc);
+                thString += th + " " + th.applyTo(vcc);
             //System.out.println(th);
             }
+            
+
+            if(vcc.isProved()) {
+                System.out.println(thString);
+                System.out.println("proved vc: " + vcc);
+            }
+            else System.out.println("not proved: " + vcc);
+            thString = "";
         }
-                */
-        TheoremCongruenceClosureImpl testTheorem = m_theorems.get(1);
-        VerificationConditionCongruenceClosureImpl testVc = m_ccVCs.get(0);
-       System.out.println("th: " + testTheorem);
-       System.out.println("vc: " + testVc);
-       testTheorem.applyTo(testVc);
-       
-        
-        /*for(TheoremCongruenceClosureImpl th:m_theorems){
-            //System.out.println(th);
-            if(testVc.isProved())break;
-            if(th.applyTo(testVc)) System.out.println(th);
-        }*/
-        if(testVc.isProved()) System.out.println("vc: " + testVc);
-    }
+    }          
 }

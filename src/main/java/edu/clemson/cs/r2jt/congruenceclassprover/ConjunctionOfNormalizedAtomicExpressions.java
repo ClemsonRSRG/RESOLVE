@@ -86,7 +86,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         String name = expression.getTopLevelOperation();
         MTType type = expression.getType();
         PSymbol asPsymbol = (PSymbol) expression;
-        int intRepOfOp = addPsymbol(asPsymbol);
+        int intRepOfOp = addPsymbol(asPsymbol); // this can add =
         if (expression.isEquality()) {
             int lhs = addFormula(expression.getSubExpressions().get(0));
             int rhs = addFormula(expression.getSubExpressions().get(1));
@@ -165,7 +165,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rhs;
     }
 
+    // should do find and compress before
     protected void mergeOperators(int a, int b) {
+        a = m_registry.findAndCompress(a);
+        b = m_registry.findAndCompress(b);
         Stack<Integer> holdingTank = mergeOnlyArgumentOperators(a, b);
         while (holdingTank != null && !holdingTank.empty()) {
             int opA = m_registry.findAndCompress(holdingTank.pop());
