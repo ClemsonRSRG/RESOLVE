@@ -85,10 +85,16 @@ public class NormalizedAtomicExpressionMapImpl
     }
 
     public boolean replaceOperator(int orig, int repl) {
-        int origPositions = readOperator(orig);
+        int origPositions = -1;
+        if(m_expression.containsKey(orig))
+                origPositions = m_expression.get(orig);
+        int replPositions = 0;
+        if(m_expression.containsKey(repl))
+            replPositions = m_expression.get(repl);
         if (origPositions > 0) {
             m_expression.remove(orig);
-            m_expression.put(repl, origPositions);
+            
+            m_expression.put(repl, origPositions | replPositions);
             return true;
         }
         return false;
@@ -146,10 +152,10 @@ public class NormalizedAtomicExpressionMapImpl
             String sourceName = source.getSymbolForIndex(k);
             String destName = "";
             switch (source.getUsage(sourceName)){
-                case LITERAL:
+                case LITERAL: // literals should be in both
                     if(destination.isSymbolInTable(sourceName))
                         destName = sourceName;
-                    else return translated.clear();
+                    else return translated.clear(); 
                     break;
                 case FORALL:
                     if(mapping.containsKey(sourceName))
@@ -169,6 +175,7 @@ public class NormalizedAtomicExpressionMapImpl
     
 
     // todo: consider using SearchBox.NAEtoStr function for this
+    // every key,value in expr must agree with this
     public boolean noConflicts(NormalizedAtomicExpressionMapImpl expr){
         // return false if an op is defined here and in expr, and expr uses it in a position not used here.
         Set<Integer> keys = m_expression.keySet();
@@ -203,21 +210,18 @@ public class NormalizedAtomicExpressionMapImpl
     public String toHumanReadableString(Registry registry) {
         if(m_expression.isEmpty()) return "empty expression";
         String r = "";
+        String funcSymbol = registry.getSymbolForIndex(readPosition(0));
+        String args ="";
         int cur;
-        int i = 0;
-        while (((cur = readPosition(i)) >= 0) && i < m_maxPositions) {
-            if (i == 1)
-                r += "(";
-            r += registry.getSymbolForIndex(cur);
-            if (i != 0)
-                r += ",";
+        int i = 1;
+        while ((cur = readPosition(i)) >= 0) {
+            args += registry.getSymbolForIndex(cur);
+            args += ",";
             i++;
         }
-        // if there is an arg list
-        if(r.length() > 1){
-            r = r.substring(0, r.length() - 1);
-            r += ")" ;
-        }
+        if(args.length()!=0) args = args.substring(0,args.length()-1);
+        args = "(" + args + ")";
+        r = funcSymbol + args;
         // if there is a root
         int root = readRoot();
         if(root >= 0)

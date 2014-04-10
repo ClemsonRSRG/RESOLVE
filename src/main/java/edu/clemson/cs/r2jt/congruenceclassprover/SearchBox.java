@@ -76,6 +76,7 @@ public class SearchBox {
             }
             currentIndex++;
         }
+        impossibleToMatch = true;
         return false;
     }
     
@@ -83,7 +84,7 @@ public class SearchBox {
     // post returns false or sets bindings 
     public boolean compareAndBind(){
         NormalizedAtomicExpressionMapImpl candidate = m_dataSet.getExprAtPosition(currentIndex);
-        if(candidate.noConflicts(m_translated)){
+        if(m_translated.noConflicts(candidate)){
             // 2 expressions, using same registry (one is translated)
             // there are no conflicts.
             // where there is an unfilled position

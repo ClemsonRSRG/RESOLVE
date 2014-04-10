@@ -13,7 +13,9 @@
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Stack;
 
 /**
@@ -23,7 +25,7 @@ public class TheoremCongruenceClosureImpl {
     private final boolean isEquality;
     private final Registry m_theoremRegistry;
     private final ConjunctionOfNormalizedAtomicExpressions m_matchConj;
-    private final String m_theoremString;
+    public final String m_theoremString;
     private final PExp m_insertExpr;
       
     public TheoremCongruenceClosureImpl(PExp p){
@@ -44,7 +46,7 @@ public class TheoremCongruenceClosureImpl {
         }
     }
 
-    public boolean applyTo(VerificationConditionCongruenceClosureImpl vc){
+    public String applyTo(VerificationConditionCongruenceClosureImpl vc){
         // Get stack of bindings
         // find match(s) in vc
         Stack<HashMap<String, String>> allValidBindings = findValidBindings(vc);
@@ -52,11 +54,51 @@ public class TheoremCongruenceClosureImpl {
         // get new Pexp(s) through substitution function
         // add those to vc
         if(allValidBindings==null || allValidBindings.size()==0)
-            return false;
-        
+            return "";
+        String r = "";
+        HashMap<PExp,PExp> quantToLit = new HashMap<PExp, PExp>();
+        while(!allValidBindings.empty()){
+            HashMap<String,String> curBinding = allValidBindings.pop();
+            if(!isEverythingBound(curBinding, vc)) continue; // can put this upstream
+            
+            for(String thKey : curBinding.keySet()){
+                    // todo: add types and stuff
+                    quantToLit.put(new PSymbol(null,null,thKey), 
+                            new PSymbol(null,null,curBinding.get(thKey)));
+            }
+            PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
+            quantToLit.clear();
+            if(!allVarsInPExpDefinedInVC(modifiedInsert, vc)) continue;
+            r+= ("inserting: " + modifiedInsert + curBinding + "\n");
+            vc.getConjunct().addExpression(modifiedInsert);
+            
+        }
+        return r;
+    }
+    boolean isEverythingBound(HashMap<String,String> binding, VerificationConditionCongruenceClosureImpl vc){
+        for(String k : binding.keySet()){
+            String v = binding.get(k);
+            if(v.equals("")) return false;
+            if(!vc.getRegistry().isSymbolInTable(v))
+                return false;
+        }
+        // so the map checks outtrf43r5
         return true;
     }
-    
+    boolean allVarsInPExpDefinedInVC(PExp p, VerificationConditionCongruenceClosureImpl vc){
+        for(String s : p.getSymbolNames()){
+            if( s.equals("and") ||s.equals("=")){
+                continue;
+            }
+            if(!vc.getRegistry().isSymbolInTable(s)){
+               if(m_theoremRegistry.getUsage(s)!=Registry.Usage.LITERAL){
+                   return false;
+               }
+            }
+            
+        }
+        return true;
+    }
     // todo: shoot inf loop problem
     private Stack<HashMap<String, String>> findValidBindings(VerificationConditionCongruenceClosureImpl vc){
         if(m_matchConj.size()==0){
@@ -64,6 +106,7 @@ public class TheoremCongruenceClosureImpl {
             return null;
         }
         Stack<HashMap<String,String>> allValidBindings = new Stack<HashMap<String, String>>();
+        // add keys for wildcards (anything not global) Do not allow any other keys into map.
         SearchBox[] boxes = new SearchBox[m_matchConj.size()];
         HashMap<String,String> curBindings = new HashMap<String,String>();
         int indexInMatchConj = 0;
@@ -83,15 +126,6 @@ public class TheoremCongruenceClosureImpl {
             if(boxes[indexInMatchConj].impossibleToMatch){
                 // go back one, this will reset bindings according to new search at top of loop
                 indexInMatchConj--; // eventually all bindings will be impossible, causing the loop to exit.
-                // why?
-                
-                if(indexInMatchConj<0){
-                    SearchBox bc = boxes[0];
-                    String tr = bc.m_translated.toHumanReadableString(vc.getRegistry());
-                    String or = bc.m_original.toHumanReadableString(m_theoremRegistry);
-                    System.out.println("Ending search: couldn't find " + or + " as " + tr);
-                }
-                
             }
             else{
               // these bindings work in this expression, try the in next in list
@@ -115,9 +149,9 @@ public class TheoremCongruenceClosureImpl {
     // this is mostly temporary
     public static boolean canProcess(PExp p){
         if(p.getTopLevelOperation().equals("="))
-        return true;
+            return true;
         if(p.getTopLevelOperation().equals("implies"))
-        return true;
+            return true;
         return false;
     }
     /*
