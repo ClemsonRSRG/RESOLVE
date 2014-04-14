@@ -23,14 +23,14 @@ import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.scope.*;
 import edu.clemson.cs.r2jt.entry.*;
+import edu.clemson.cs.r2jt.scope.ModuleScope;
+import edu.clemson.cs.r2jt.scope.Scope;
 import edu.clemson.cs.r2jt.type.*;
+import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.location.*;
-import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
-import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.compilereport.CompileReport;
@@ -39,7 +39,7 @@ import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.analysis.ProgramExpTypeResolver;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
+import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
 public class Verifier extends ResolveConceptualVisitor {
 
@@ -3331,108 +3331,115 @@ public class Verifier extends ResolveConceptualVisitor {
                         (ConceptModuleDec) myInstanceEnvironment
                                 .getModuleDec(cmid);
 
-                ModuleID modBodyID =
-                        ModuleID.createConceptBodyID(tmpFacDec.getBodyName(),
-                                tmpFacDec.getConceptName());
-                ConceptBodyModuleDec concBodyDec =
-                        (ConceptBodyModuleDec) myInstanceEnvironment
-                                .getModuleDec(modBodyID);
-
                 Exp myConstraints =
                         getAssumptionsFromConceptDec(assertion, concDec,
                                 (FacilityDec) tmp, true, false);
+                if (!tmpFacDec.getExternallyRealizedFlag()) {
+                    ModuleID modBodyID =
+                            ModuleID.createConceptBodyID(tmpFacDec
+                                    .getBodyName(), tmpFacDec.getConceptName());
+                    ConceptBodyModuleDec concBodyDec =
+                            (ConceptBodyModuleDec) myInstanceEnvironment
+                                    .getModuleDec(modBodyID);
 
-                ModuleDec currentModuleDec = getCurrentBodyModuleDec();
-                if (currentModuleDec == null) {
-                    currentModuleDec = concBodyDec;
-                }
-                if (currentModuleDec instanceof ConceptBodyModuleDec) {
-                    Iterator<Dec> myIt =
-                            ((ConceptBodyModuleDec) currentModuleDec).getDecs()
-                                    .iterator();
-                    while (myIt.hasNext()) {
-                        Dec myDec = myIt.next();
-                        if (myDec instanceof RepresentationDec) {
-                            Ty myType =
-                                    ((RepresentationDec) myDec)
-                                            .getRepresentation();
-                            if (myType instanceof RecordTy) {
-                                RecordTy typ = (RecordTy) myType;
-                                Iterator myit = typ.getFields().iterator();
-                                while (myit.hasNext()) {
-                                    try {
-                                        VarDec dec = (VarDec) myit.next();
-                                        if (dec.getTy() instanceof NameTy
-                                                && ((NameTy) dec.getTy())
-                                                        .getQualifier()
-                                                        .equals(
-                                                                tmpFacDec
-                                                                        .getName()
-                                                                        .toString())) {
-                                            DotExp myReplExp = new DotExp();
-                                            List<Exp> mySegments =
-                                                    new List<Exp>();
-                                            VarExp varExp = new VarExp();
+                    ModuleDec currentModuleDec = getCurrentBodyModuleDec();
+                    if (currentModuleDec == null) {
+                        currentModuleDec = concBodyDec;
+                    }
+                    if (currentModuleDec instanceof ConceptBodyModuleDec) {
+                        Iterator<Dec> myIt =
+                                ((ConceptBodyModuleDec) currentModuleDec)
+                                        .getDecs().iterator();
+                        while (myIt.hasNext()) {
+                            Dec myDec = myIt.next();
+                            if (myDec instanceof RepresentationDec) {
+                                Ty myType =
+                                        ((RepresentationDec) myDec)
+                                                .getRepresentation();
+                                if (myType instanceof RecordTy) {
+                                    RecordTy typ = (RecordTy) myType;
+                                    Iterator myit = typ.getFields().iterator();
+                                    while (myit.hasNext()) {
+                                        try {
+                                            VarDec dec = (VarDec) myit.next();
+                                            if (dec.getTy() instanceof NameTy
+                                                    && ((NameTy) dec.getTy())
+                                                            .getQualifier()
+                                                            .equals(
+                                                                    tmpFacDec
+                                                                            .getName()
+                                                                            .toString())) {
+                                                DotExp myReplExp = new DotExp();
+                                                List<Exp> mySegments =
+                                                        new List<Exp>();
+                                                VarExp varExp = new VarExp();
 
-                                            ModuleID modID =
-                                                    ModuleID
-                                                            .createConceptID(((ConceptBodyModuleDec) currentModuleDec)
-                                                                    .getConceptName());
-                                            ConceptModuleDec moduleDec =
-                                                    (ConceptModuleDec) myInstanceEnvironment
-                                                            .getModuleDec(modID);
-                                            PosSymbol exemplar =
-                                                    getExemplar(moduleDec);
-                                            if (exemplar.toString().length() > 0) {
-                                                varExp.setName(exemplar);
+                                                ModuleID modID =
+                                                        ModuleID
+                                                                .createConceptID(((ConceptBodyModuleDec) currentModuleDec)
+                                                                        .getConceptName());
+                                                ConceptModuleDec moduleDec =
+                                                        (ConceptModuleDec) myInstanceEnvironment
+                                                                .getModuleDec(modID);
+                                                PosSymbol exemplar =
+                                                        getExemplar(moduleDec);
+                                                if (exemplar.toString()
+                                                        .length() > 0) {
+                                                    varExp.setName(exemplar);
+                                                    mySegments.add((Exp) Exp
+                                                            .clone(varExp));
+                                                }
+                                                varExp.setName(dec.getName());
+
                                                 mySegments.add((Exp) Exp
                                                         .clone(varExp));
+                                                myReplExp
+                                                        .setSegments(mySegments);
+
+                                                modID =
+                                                        ModuleID
+                                                                .createConceptID(tmpFacDec
+                                                                        .getConceptName());
+                                                moduleDec =
+                                                        (ConceptModuleDec) myInstanceEnvironment
+                                                                .getModuleDec(modID);
+                                                exemplar =
+                                                        getExemplar(moduleDec);
+                                                if (exemplar.toString()
+                                                        .length() > 0) {
+                                                    varExp.setName(exemplar);
+
+                                                }
+                                                myConstraints =
+                                                        replace(myConstraints,
+                                                                varExp,
+                                                                myReplExp);
                                             }
-                                            varExp.setName(dec.getName());
-
-                                            mySegments.add((Exp) Exp
-                                                    .clone(varExp));
-                                            myReplExp.setSegments(mySegments);
-
-                                            modID =
-                                                    ModuleID
-                                                            .createConceptID(tmpFacDec
-                                                                    .getConceptName());
-                                            moduleDec =
-                                                    (ConceptModuleDec) myInstanceEnvironment
-                                                            .getModuleDec(modID);
-                                            exemplar = getExemplar(moduleDec);
-                                            if (exemplar.toString().length() > 0) {
-                                                varExp.setName(exemplar);
-
-                                            }
-                                            myConstraints =
-                                                    replace(myConstraints,
-                                                            varExp, myReplExp);
                                         }
+                                        catch (Exception ex) {}
                                     }
-                                    catch (Exception ex) {}
                                 }
                             }
                         }
-                    }
-                    if (myConstraints != null)
-                        myConstraints =
-                                replaceFacilityDeclarationVariables(
-                                        myConstraints, concDec.getParameters(),
-                                        tmpFacDec.getConceptParams());
-                }
-                else {
-                    myConstraints = null;
-                }
-                if (myConstraints != null) {
-                    if (constraints == null) {
-                        constraints = (Exp) Exp.clone(myConstraints);
+                        if (myConstraints != null)
+                            myConstraints =
+                                    replaceFacilityDeclarationVariables(
+                                            myConstraints, concDec
+                                                    .getParameters(), tmpFacDec
+                                                    .getConceptParams());
                     }
                     else {
-                        constraints =
-                                myTypeGraph.formConjunct(myConstraints,
-                                        constraints);
+                        myConstraints = null;
+                    }
+                    if (myConstraints != null) {
+                        if (constraints == null) {
+                            constraints = (Exp) Exp.clone(myConstraints);
+                        }
+                        else {
+                            constraints =
+                                    myTypeGraph.formConjunct(myConstraints,
+                                            constraints);
+                        }
                     }
                 }
             }
@@ -7249,7 +7256,7 @@ public class Verifier extends ResolveConceptualVisitor {
         if (debug) {
             System.out.println("Visiting Facility Dec:" + dec.getName());
         }
-        File file = null;
+        /*File file = null;
         try {
             curMDec = myInstanceEnvironment.getModuleDec(curCID);
             file = myInstanceEnvironment.getFile(curCID);
@@ -7257,59 +7264,63 @@ public class Verifier extends ResolveConceptualVisitor {
         catch (Exception ex) {
             curMDec = myInstanceEnvironment.getModuleDec(currentMID);
             file = myInstanceEnvironment.getFile(currentMID);
+        }                           */
+        try {
+            curMDec =
+                    myRealSymbolTable
+                            .getModuleScope(
+                                    new ModuleIdentifier(dec.getConceptName()
+                                            .getName())).getDefiningElement();
+        }
+        catch (NoSuchSymbolException e) {
+            String message =
+                    "Cannot find module: " + dec.getConceptName().getName();
+            throw new SourceErrorException(message, dec.getLocation());
         }
 
-        if (curMDec == null) {
-            // We didn't find where this facility declaration exist
-            return;
+        if (curMDec instanceof FacilityModuleDec) {
+            /* YS - Get the global requires clause and add it to our list
+               of assumes */
+            Exp gRequires = ((FacilityModuleDec) curMDec).getRequirement();
+            if (gRequires != null) {
+                if (gRequires.getLocation() != null) {
+                    Location myLoc = gRequires.getLocation();
+                    myLoc.setDetails("Requires Clause for "
+                            + ((FacilityModuleDec) curMDec).getName());
+                    setLocation(gRequires, myLoc);
+                }
+                // TODO: Need to replace formals with actuals.
+                assertion.addAssume(gRequires);
+            }
         }
-        else {
-            if (curMDec instanceof FacilityModuleDec) {
-                /* YS - Get the global requires clause and add it to our list
-                   of assumes */
-                Exp gRequires = ((FacilityModuleDec) curMDec).getRequirement();
-                if (gRequires != null) {
-                    if (gRequires.getLocation() != null) {
-                        Location myLoc = gRequires.getLocation();
-                        myLoc.setDetails("Requires Clause for "
-                                + ((FacilityModuleDec) curMDec).getName());
-                        setLocation(gRequires, myLoc);
-                    }
-                    // TODO: Need to replace formals with actuals.
-                    assertion.addAssume(gRequires);
+        else if (curMDec instanceof ConceptBodyModuleDec) {
+            /* YS - Get the global requires clause and add it to our list
+               of assumes */
+            Exp gRequires = ((ConceptBodyModuleDec) curMDec).getRequires();
+            if (gRequires != null) {
+                if (gRequires.getLocation() != null) {
+                    Location myLoc = gRequires.getLocation();
+                    myLoc.setDetails("Requires Clause for "
+                            + ((ConceptBodyModuleDec) curMDec).getName());
+                    setLocation(gRequires, myLoc);
                 }
+                // TODO: Need to replace formals with actuals.
+                assertion.addAssume(gRequires);
             }
-            else if (curMDec instanceof ConceptBodyModuleDec) {
-                /* YS - Get the global requires clause and add it to our list
-                   of assumes */
-                Exp gRequires = ((ConceptBodyModuleDec) curMDec).getRequires();
-                if (gRequires != null) {
-                    if (gRequires.getLocation() != null) {
-                        Location myLoc = gRequires.getLocation();
-                        myLoc.setDetails("Requires Clause for "
-                                + ((ConceptBodyModuleDec) curMDec).getName());
-                        setLocation(gRequires, myLoc);
-                    }
-                    // TODO: Need to replace formals with actuals.
-                    assertion.addAssume(gRequires);
+        }
+        else if (curMDec instanceof EnhancementBodyModuleDec) {
+            /* YS - Get the global requires clause and add it to our list
+               of assumes */
+            Exp gRequires = ((EnhancementBodyModuleDec) curMDec).getRequires();
+            if (gRequires != null) {
+                if (gRequires.getLocation() != null) {
+                    Location myLoc = gRequires.getLocation();
+                    myLoc.setDetails("Requires Clause for "
+                            + ((EnhancementBodyModuleDec) curMDec).getName());
+                    setLocation(gRequires, myLoc);
                 }
-            }
-            else if (curMDec instanceof EnhancementBodyModuleDec) {
-                /* YS - Get the global requires clause and add it to our list
-                   of assumes */
-                Exp gRequires =
-                        ((EnhancementBodyModuleDec) curMDec).getRequires();
-                if (gRequires != null) {
-                    if (gRequires.getLocation() != null) {
-                        Location myLoc = gRequires.getLocation();
-                        myLoc.setDetails("Requires Clause for "
-                                + ((EnhancementBodyModuleDec) curMDec)
-                                        .getName());
-                        setLocation(gRequires, myLoc);
-                    }
-                    // TODO: Need to replace formals with actuals.
-                    assertion.addAssume(gRequires);
-                }
+                // TODO: Need to replace formals with actuals.
+                assertion.addAssume(gRequires);
             }
         }
 
@@ -7324,15 +7335,32 @@ public class Verifier extends ResolveConceptualVisitor {
                 EnhancementBodyItem eBI = (EnhancementBodyItem) it.next();
                 PosSymbol enhBodyName = eBI.getBodyName();
 
-                ModuleID ehmid =
-                        ModuleID.createEnhancementID(eBI.getName(), concName);
-                ModuleDec eSpecDec = myInstanceEnvironment.getModuleDec(ehmid);
-                ModuleID eBmid =
-                        ModuleID.createEnhancementBodyID(eBI.getBodyName(), eBI
-                                .getName(), concName);
-                ModuleDec myDec = myInstanceEnvironment.getModuleDec(eBmid);
-                //    ModuleID eSpecID	= ehmid.getEnhancementID();
-                //    ModuleDec eSpecDec 	= env.getModuleDec(eSpecID);
+                ModuleDec eSpecDec, myDec;
+                // Enhancement
+                try {
+                    eSpecDec =
+                            myRealSymbolTable.getModuleScope(
+                                    new ModuleIdentifier(eBI.getName()
+                                            .getName())).getDefiningElement();
+                }
+                catch (NoSuchSymbolException e) {
+                    String message =
+                            "Cannot find module: " + eBI.getName().getName();
+                    throw new SourceErrorException(message, dec.getLocation());
+                }
+
+                // Enhancement Realization
+                try {
+                    myDec =
+                            myRealSymbolTable.getModuleScope(
+                                    new ModuleIdentifier(eBI.getBodyName()
+                                            .getName())).getDefiningElement();
+                }
+                catch (NoSuchSymbolException e) {
+                    String message =
+                            "Cannot find module: " + eBI.getName().getName();
+                    throw new SourceErrorException(message, dec.getLocation());
+                }
 
                 if (myDec instanceof EnhancementBodyModuleDec) {
 
@@ -7476,13 +7504,22 @@ public class Verifier extends ResolveConceptualVisitor {
             }
 
             /* Check for Concept Realization Requires Clause */
-            if (dec.getBodyName() != null) {
-                ModuleID bid =
-                        ModuleID.createConceptBodyID(dec.getBodyName(), dec
-                                .getConceptName());
-                ConceptBodyModuleDec bodyDec =
-                        (ConceptBodyModuleDec) myInstanceEnvironment
-                                .getModuleDec(bid);
+            if (dec.getBodyName() != null && !dec.getExternallyRealizedFlag()) {
+                ConceptBodyModuleDec bodyDec;
+                try {
+                    bodyDec =
+                            (ConceptBodyModuleDec) myRealSymbolTable
+                                    .getModuleScope(
+                                            new ModuleIdentifier(dec
+                                                    .getBodyName().getName()))
+                                    .getDefiningElement();
+                }
+                catch (NoSuchSymbolException e) {
+                    String message =
+                            "Cannot find module: "
+                                    + dec.getBodyName().getName();
+                    throw new SourceErrorException(message, dec.getLocation());
+                }
 
                 if (bodyDec != null) {
                     Exp breq = bodyDec.getRequires();
