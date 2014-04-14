@@ -10,6 +10,7 @@ Without this configuration present, some functionality in the IDE may be limited
         <configurations>
             <configuration id="RSRG-Global" profiles=""/>
             <configuration id="ccprover stack_flip" profiles=""/>
+            <configuration id="ccprover stack_flip_clone" profiles=""/>
         </configurations>
     </config-data>
 </project-shared-configuration>

@@ -22,6 +22,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     private Registry m_registry;
     private List<NormalizedAtomicExpressionMapImpl> m_exprList;
+    
 
     /**
      * @param registry the Registry symbols contained in the conjunction will
@@ -57,7 +58,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 if(upperBound >= m_exprList.size()) upperBound = m_exprList.size()-1;
             }       
         }
-        box.upperBound = upperBound;
+        box.upperBound = upperBound;  // this could be 1 more than inclusive ub in some cases, but is ok
         box.lowerBound = lowerBound;
         box.currentIndex = lowerBound;
         box.directMatch = false;
@@ -84,9 +85,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     protected void addExpression(PExp expression) {
         String name = expression.getTopLevelOperation();
-        MTType type = expression.getType();
-        PSymbol asPsymbol = (PSymbol) expression;
-        int intRepOfOp = addPsymbol(asPsymbol); // this can add =
+        
         if (expression.isEquality()) {
             int lhs = addFormula(expression.getSubExpressions().get(0));
             int rhs = addFormula(expression.getSubExpressions().get(1));
@@ -95,6 +94,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             addExpression(expression.getSubExpressions().get(0));
             addExpression(expression.getSubExpressions().get(1));
         } else {
+            MTType type = expression.getType();
+            PSymbol asPsymbol = (PSymbol) expression;
+            int intRepOfOp = addPsymbol(asPsymbol);
             int root = addFormula(expression);
             if (type.isBoolean()) {
                 mergeOperators(m_registry.getIndexForSymbol("true"), root);
@@ -109,7 +111,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (ps.isLiteral()) {
             usage = Registry.Usage.LITERAL;
         } else if (ps.isFunction()) {
-            usage = Registry.Usage.LITERAL; // making function names global in context of theorems and vc's
+            usage = Registry.Usage.HASARGS; // making function names global in context of theorems and vc's
         } else if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
             usage = Registry.Usage.FORALL;
         }
@@ -121,7 +123,30 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      * symbols are treated as any other function symbol here.
      * @return current index in list of expressions.
      */
+    
+    /* experimentally handling =
+    i.e.: (|?S| = 0) = (?S = Empty_String))
+    is broken down by addExpression so (|?S| = 0) is an argument
+    should return int for true if known to be equal, otherwise return root representative. 
+    */
     protected int addFormula(PExp formula) {
+        if(formula.isEquality()){
+            int lhs = addFormula(formula.getSubExpressions().get(0));
+            int rhs = addFormula(formula.getSubExpressions().get(1));
+            lhs = m_registry.findAndCompress(lhs);
+            rhs = m_registry.findAndCompress(rhs);
+            if(lhs == rhs)
+                return m_registry.getIndexForSymbol("true");
+            else{
+                // insert =?(lhs,rhs) = someNewRoot
+                int questEq = m_registry.getIndexForSymbol("=?");
+                NormalizedAtomicExpressionMapImpl pred = new NormalizedAtomicExpressionMapImpl();
+                pred.writeOnto(questEq, 0);
+                pred.writeOnto(lhs, 1);
+                pred.writeOnto(rhs, 2);
+                return addAtomicFormula(pred);
+            }
+        }
         PSymbol asPsymbol = (PSymbol) formula;
         int intRepOfOp = addPsymbol(asPsymbol);
         // base case
@@ -159,6 +184,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         int indexToInsert = -(posIfFound + 1);
         MTType typeOfFormula
                 = m_registry.getTypeByIndex(atomicFormula.readPosition(0));
+        String symName = m_registry.getSymbolForIndex(atomicFormula.readPosition(0));
+        assert typeOfFormula != null : symName + " has null type";
         int rhs = m_registry.makeSymbol(typeOfFormula);
         atomicFormula.writeToRoot(rhs);
         m_exprList.add(indexToInsert, atomicFormula);
@@ -177,15 +204,58 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 holdingTank.addAll(mergeOnlyArgumentOperators(opA, opB));
             }
         }
-
+        mergeArgsOfEqualityPredicateIfRootIsTrue();
     }
 
+    // look for =?(x,y)=true in list.  If found call merge(x,y).
+    //  =? will always be at top of list.
+    // These expression will not be removed by this function,
+    // but can be removed by merge().
+    protected void mergeArgsOfEqualityPredicateIfRootIsTrue(){
+       
+        // loop until end, function op is not =?, or =?(x,y)=true
+        // when found do merge, start again.
+        int eqQ = m_registry.getIndexForSymbol("=?");
+        for(int i = 0; i < m_exprList.size(); ++i){
+            NormalizedAtomicExpressionMapImpl cur = m_exprList.get(i);
+            int f = cur.readPosition(0);
+            if(f != eqQ) return;
+            int t = m_registry.getIndexForSymbol("true");
+            int root = cur.readRoot();
+            int op1 = cur.readPosition(1);
+            int op2 = cur.readPosition(2);
+            if(root==t && op1 != op2){
+                mergeOperators(cur.readPosition(1),cur.readPosition(2));
+                // mergeOperators will do any other merges that arise.
+                i=0;
+            } 
+        }
+    }
     // Return list of modified predicates by their position. Only these can cause new merges.
     protected Stack<Integer> mergeOnlyArgumentOperators(int a, int b) {
         if (a == b) {
             return null;
         }
-        if (a > b) {
+        /*if (a > b) {
+            int temp = a;
+            a = b;
+            b = temp;
+        }*/ // this is the original way, merge toward lower valued indices.
+        String aString = m_registry.getSymbolForIndex(a);
+        String bString = m_registry.getSymbolForIndex(b);
+        if(aString.compareTo(bString)>0){
+            int temp = a;
+            a = b;
+            b = temp;
+        }
+        // Favor retaining literals
+        // THIS IS CURRENTLY ABSOLUTELY NECCESSARY.  Finding could be redone to avoid this.
+        // Otherwise, proofs can fail to prove if literals are redefined.
+        aString = m_registry.getSymbolForIndex(a);
+        bString = m_registry.getSymbolForIndex(b);
+        Registry.Usage uA = m_registry.getUsage(aString);
+        Registry.Usage uB = m_registry.getUsage(bString);
+        if(uB.equals(Registry.Usage.LITERAL)){
             int temp = a;
             a = b;
             b = temp;

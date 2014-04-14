@@ -12,7 +12,9 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
+import edu.clemson.cs.r2jt.typeandpopulate.MTProper;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 import java.util.*;
 
@@ -29,11 +31,11 @@ public class Registry {
     public Vector<Integer> m_symbolIndexParentArray;
     public Stack<Integer> m_unusedIndices;
     private int m_uniqueCounter = 0;
-    public static enum Usage {LITERAL, FORALL, SINGULAR_VARIABLE, CREATED};
+    public static enum Usage {LITERAL, FORALL, SINGULAR_VARIABLE, CREATED, HASARGS};
     private Map<String,Usage> m_symbolToUsage;
     private Set<String> m_foralls;
 
-    public Registry() {
+    public Registry(TypeGraph g) {
         m_symbolToIndex = new TreeMap<String, Integer>();
         m_typeToSetOfOperators = new HashMap<MTType, TreeSet<String>>();
         m_indexToSymbol = new Vector<String>();
@@ -42,7 +44,9 @@ public class Registry {
         m_unusedIndices = new Stack<Integer>();
         m_symbolToUsage = new HashMap<String,Usage>(); // entries won't change
         m_foralls = new HashSet<String>();
-        addSymbol("true", null, Usage.LITERAL);
+        addSymbol("=?",g.BOOLEAN, Usage.LITERAL); // = as a predicate function, not as an assertion
+        addSymbol("true",g.BOOLEAN, Usage.LITERAL);
+        assert(getIndexForSymbol("=?")==0);
     }
 
     public Usage getUsage(String symbol){
@@ -51,12 +55,17 @@ public class Registry {
     public Set<String> getSetMatchingType(MTType t) {
         Set<String> rSet = new HashSet<String>();
         Set<MTType> allTypesInSet = m_typeToSetOfOperators.keySet();
+        assert m_typeToSetOfOperators.size() != 0 : "empty m_typeToSetOfOperator.keySet()";
+        assert allTypesInSet !=null : "null set in Registry.getSetMatchingType";
         // if there are subtypes of t, return those too
         for (MTType m : allTypesInSet) {
+            //if(m==null)continue;
+            assert m != null : "null entry in allTypesInSet";
             if (m.isSubtypeOf(t))
                 rSet.addAll(m_typeToSetOfOperators.get(m));
         }
-        return m_typeToSetOfOperators.get(t);
+        rSet.addAll(m_typeToSetOfOperators.get(t));
+        return rSet;
     }
 
     /**
@@ -71,6 +80,7 @@ public class Registry {
 
     protected int findAndCompress(int index) {
         Stack<Integer> needToUpdate = new Stack<Integer>();
+        assert index < m_symbolIndexParentArray.size() : "findAndCompress error";
         int parent = m_symbolIndexParentArray.get(index);
         while (parent != index) {
             needToUpdate.push(index);
@@ -123,6 +133,7 @@ public class Registry {
         else {
             TreeSet<String> t = new TreeSet<String>();
             t.add(symbolName);
+            assert symbolType != null : symbolName + " has null type";
             m_typeToSetOfOperators.put(symbolType, t);
         }
 
