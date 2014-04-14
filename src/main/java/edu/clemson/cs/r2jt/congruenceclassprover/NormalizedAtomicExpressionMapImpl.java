@@ -152,7 +152,7 @@ public class NormalizedAtomicExpressionMapImpl
             String sourceName = source.getSymbolForIndex(k);
             String destName = "";
             switch (source.getUsage(sourceName)){
-                case LITERAL: // literals should be in both
+                case LITERAL: case HASARGS:// literals and func names should be in both
                     if(destination.isSymbolInTable(sourceName))
                         destName = sourceName;
                     else return translated.clear(); 
@@ -204,7 +204,8 @@ public class NormalizedAtomicExpressionMapImpl
             opPrev = op;
             op = readPosition(pos);
         }
-        incremented.writeOnto(++opPrev, pos);
+        incremented.m_expression.remove(opPrev);
+        incremented.writeOnto(++opPrev, pos-1);
         return incremented;
     }
     public String toHumanReadableString(Registry registry) {

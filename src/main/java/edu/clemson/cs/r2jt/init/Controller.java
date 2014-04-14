@@ -1,14 +1,9 @@
 /**
- * Controller.java
- * ---------------------------------
- * Copyright (c) 2014
- * RESOLVE Software Research Group
- * School of Computing
- * Clemson University
- * All rights reserved.
- * ---------------------------------
- * This file is subject to the terms and conditions defined in
- * file 'LICENSE.txt', which is part of this source code package.
+ * Controller.java --------------------------------- Copyright (c) 2014 RESOLVE
+ * Software Research Group School of Computing Clemson University All rights
+ * reserved. --------------------------------- This file is subject to the terms
+ * and conditions defined in file 'LICENSE.txt', which is part of this source
+ * code package.
  */
 package edu.clemson.cs.r2jt.init;
 
@@ -70,7 +65,6 @@ public class Controller {
     // ===========================================================
     // Variables
     // ===========================================================
-
     //private Environment myInstanceEnvironment = Environment.getInstance();
     private final CompileEnvironment myInstanceEnvironment;
     CompileReport myCompileReport;
@@ -80,28 +74,26 @@ public class Controller {
     private ErrorHandler err;
 
     //private Archiver arc = Archiver.getInstance();
-
     private FileLocator locator = new FileLocator();
 
     private File astDumpFile = null;
 
-    private String[] noImportList =
-            { "Std_Location_Linking_Realiz.rb", "Std_Array_Realiz.rb" };
+    private String[] noImportList
+            = {"Std_Location_Linking_Realiz.rb", "Std_Array_Realiz.rb"};
 
     // ===========================================================
     // Constructors
     // ===========================================================
-
     public Controller(CompileEnvironment e) {
         myInstanceEnvironment = e;
         err = e.getErrorHandler();
         myCompileReport = e.getCompileReport();
         /*if(myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)){
-        	myArchive = new Archiver(myInstanceEnvironment);
-        }
-        else{
-        	myArchive = null;
-        }*/
+         myArchive = new Archiver(myInstanceEnvironment);
+         }
+         else{
+         myArchive = null;
+         }*/
     }
 
     // ===========================================================
@@ -117,7 +109,6 @@ public class Controller {
      * environment. New Import File - An import file that has not been seem by
      * the compilation environment.
      */
-
     /**
      * Compiles a target file. A target file is one that is specified on the
      * command line of the compiler as opposed to one that is being compiled
@@ -131,32 +122,27 @@ public class Controller {
                 if (myInstanceEnvironment.compileCompleted(file)) {
                     String msg = completeMessage(file.getName());
                     err.message(msg);
-                }
-                else if (myInstanceEnvironment.compileAborted(file)) {
+                } else if (myInstanceEnvironment.compileAborted(file)) {
                     String msg = abortMessage(file.getName());
                     err.error(msg);
-                }
-                else { // unresolved compilation
+                } else { // unresolved compilation
                     assert false : "unresolved compilation";
                 }
-            }
-            else {
+            } else {
                 if (myInstanceEnvironment.flags
                         .isFlagSet(Archiver.FLAG_ARCHIVE)) {
                     myArchive = new Archiver(myInstanceEnvironment, file, null);
-                }
-                else {
+                } else {
                     myArchive = null;
                 }
                 if (myInstanceEnvironment.flags
                         .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)
                         || myInstanceEnvironment.flags
-                                .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
+                        .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
                         || myInstanceEnvironment.flags
-                                .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
+                        .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
                     simpleTranslateNewTargetFile(file, symbolTable);
-                }
-                else {
+                } else {
                     compileNewTargetFile(file, symbolTable);
                 }
                 //compileNewTargetFile(file);
@@ -168,8 +154,7 @@ public class Controller {
                     myArchive.cleanupFiles();
                 }
             }
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             Throwable cause = e;
             while (cause != null && !(cause instanceof SourceErrorException)) {
                 cause = cause.getCause();
@@ -181,8 +166,7 @@ public class Controller {
                 }
 
                 throw new RuntimeException(e);
-            }
-            else {
+            } else {
                 SourceErrorException see = (SourceErrorException) cause;
                 err.error(see.getErrorLocation(), see.getMessage());
             }
@@ -199,43 +183,39 @@ public class Controller {
         if (myInstanceEnvironment.flags
                 .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)
                 || myInstanceEnvironment.flags
-                        .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
+                .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
                 || myInstanceEnvironment.flags
-                        .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
+                .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
             simpleTranslateNewTargetSource(inputFile, symbolTable);
-        }
-        else {
+        } else {
             //myInstanceEnvironment.setTargetFileName("Std_Unbounded_List_Realiz.rb");
             //myInstanceEnvironment.setTargetSource(myInstanceEnvironment.getUserFileFromMap("Unbounded_List_Template.Std_Unbounded_List_Realiz"));
             if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
                 //System.out.println(inputFile.getMyFile(myInstanceEnvironment.getMainDir()));
                 if (inputFile.getMyKind().equals(ModuleKind.FACILITY)) {
-                    String jarTempLoc =
-                            inputFile.getJarTempDir()
-                                    + inputFile.getMyFileName();
-                    myArchive =
-                            new Archiver(myInstanceEnvironment, inputFile
+                    String jarTempLoc
+                            = inputFile.getJarTempDir()
+                            + inputFile.getMyFileName();
+                    myArchive
+                            = new Archiver(myInstanceEnvironment, inputFile
                                     .getMyFile(myInstanceEnvironment
                                             .getMainDir()), inputFile);
                     myArchive.setOutputJar(jarTempLoc
                             + inputFile.getMyKind().getExtension());
-                }
-                else {
-                    myArchive =
-                            new Archiver(myInstanceEnvironment, inputFile
+                } else {
+                    myArchive
+                            = new Archiver(myInstanceEnvironment, inputFile
                                     .getMyFile(myInstanceEnvironment
                                             .getMainDir()), inputFile);
                 }
 
-            }
-            else {
+            } else {
                 myArchive = null;
             }
 
             try {
                 compileNewTargetSource(inputFile, symbolTable);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 Throwable cause = ex;
                 while (cause != null
                         && !(cause instanceof SourceErrorException)) {
@@ -245,8 +225,7 @@ public class Controller {
                 if (cause != null) {
                     SourceErrorException see = (SourceErrorException) cause;
                     err.error(see.getErrorLocation(), see.getMessage());
-                }
-                else {
+                } else {
                     BugReport.abortProgram(ex, myInstanceEnvironment);
                     myCompileReport.setError();
                 }
@@ -260,16 +239,16 @@ public class Controller {
             }
         }
         /*if (env.contains(file)) {
-        	if (env.compileCompleted(file)) {
-        		String msg = completeMessage(file.getName());
-        		err.message(msg);
-        	} else if (env.compileAborted(file)) {
-        		String msg = abortMessage(file.getName());
-        		err.error(msg);
-        	} else { // unresolved compilation
-        		assert false : "unresolved compilation";
-        	}
-        } else { */
+         if (env.compileCompleted(file)) {
+         String msg = completeMessage(file.getName());
+         err.message(msg);
+         } else if (env.compileAborted(file)) {
+         String msg = abortMessage(file.getName());
+         err.error(msg);
+         } else { // unresolved compilation
+         assert false : "unresolved compilation";
+         }
+         } else { */
 
         //}
     }
@@ -277,11 +256,9 @@ public class Controller {
     // ===========================================================
     // Private Methods
     // ===========================================================
-
     // -----------------------------------------------------------
     // New Target File Compilation Methods
     // -----------------------------------------------------------
-
     /**
      * The constant parameters in the head of this Concept/Enh/etc. cannot
      * appear in their initial (#) state in the ensures clause of this
@@ -293,8 +270,8 @@ public class Controller {
         Iterator<Dec> h = decs.iterator();
         Iterator<Dec> i = decs.iterator();
         if (params != null) {
-            List<ConstantParamDec> constants =
-                    new List<ConstantParamDec>("Constant Parameters");
+            List<ConstantParamDec> constants
+                    = new List<ConstantParamDec>("Constant Parameters");
             while (params.hasNext()) {
                 Dec mp = params.next().getWrappedDec();
                 if (mp instanceof ConstantParamDec) {
@@ -331,20 +308,16 @@ public class Controller {
                     if (dec instanceof ConceptModuleDec) {
                         err.error(checkStr + " (Concept Module \""
                                 + (dec.getName()).getName() + "\")");
-                    }
-                    else if (dec instanceof ConceptBodyModuleDec) {
+                    } else if (dec instanceof ConceptBodyModuleDec) {
                         err.error(checkStr + " (Concept Body Module \""
                                 + (dec.getName()).getName() + "\")");
-                    }
-                    else if (dec instanceof FacilityModuleDec) {
+                    } else if (dec instanceof FacilityModuleDec) {
                         err.error(checkStr + " (Facility Module \""
                                 + (dec.getName()).getName() + "\")");
-                    }
-                    else if (dec instanceof EnhancementModuleDec) {
+                    } else if (dec instanceof EnhancementModuleDec) {
                         err.error(checkStr + " (Enhancement Module \""
                                 + (dec.getName()).getName() + "\")");
-                    }
-                    else if (dec instanceof EnhancementBodyModuleDec) {
+                    } else if (dec instanceof EnhancementBodyModuleDec) {
                         err.error(checkStr + " (Enhancement Body Module \""
                                 + (dec.getName()).getName() + "\")");
                     }
@@ -353,47 +326,44 @@ public class Controller {
         }
     }
 
-    /***************************************************************************
+    /**
+     * *************************************************************************
      * Checks this ModuleDec for any OperationDec's contained within. If found,
      * calls the checkRequiresEnsures() of that OperationDec.
-     **************************************************************************/
+     *************************************************************************
+     */
     private void checkModeCompatibility(ModuleDec dec) {
         String checkStr = null;
         if (dec instanceof ConceptModuleDec) {
             List<Dec> decs = ((ConceptModuleDec) dec).getDecs();
-            Iterator<ModuleParameterDec> params =
-                    (((ConceptModuleDec) dec).getParameters()).iterator();
+            Iterator<ModuleParameterDec> params
+                    = (((ConceptModuleDec) dec).getParameters()).iterator();
             checkOpDecs(decs, dec, params);
-        }
-        // -- ny
+        } // -- ny
         else if (dec instanceof PerformanceEModuleDec) {
             List<Dec> decs = ((PerformanceEModuleDec) dec).getDecs();
-            Iterator<ModuleParameterDec> params =
-                    (((PerformanceEModuleDec) dec).getParameters()).iterator();
+            Iterator<ModuleParameterDec> params
+                    = (((PerformanceEModuleDec) dec).getParameters()).iterator();
             //TODO : fixup performance module parameter stuff
             //checkOpDecs(decs, dec, params);
-        }
-        else if (dec instanceof ConceptBodyModuleDec) {
+        } else if (dec instanceof ConceptBodyModuleDec) {
             List<Dec> decs = ((ConceptBodyModuleDec) dec).getDecs();
-            Iterator<ModuleParameterDec> params =
-                    (((ConceptBodyModuleDec) dec).getParameters()).iterator();
+            Iterator<ModuleParameterDec> params
+                    = (((ConceptBodyModuleDec) dec).getParameters()).iterator();
             checkOpDecs(decs, dec, params);
-        }
-        else if (dec instanceof FacilityModuleDec) {
+        } else if (dec instanceof FacilityModuleDec) {
             List<Dec> decs = ((FacilityModuleDec) dec).getDecs();
             checkOpDecs(decs, dec, null);
-        }
-        else if (dec instanceof EnhancementModuleDec) {
+        } else if (dec instanceof EnhancementModuleDec) {
             List<Dec> decs = ((EnhancementModuleDec) dec).getDecs();
-            Iterator<ModuleParameterDec> params =
-                    (((EnhancementModuleDec) dec).getParameters()).iterator();
+            Iterator<ModuleParameterDec> params
+                    = (((EnhancementModuleDec) dec).getParameters()).iterator();
             checkOpDecs(decs, dec, params);
-        }
-        else if (dec instanceof EnhancementBodyModuleDec) {
+        } else if (dec instanceof EnhancementBodyModuleDec) {
             List<Dec> decs = ((EnhancementBodyModuleDec) dec).getDecs();
-            Iterator<ModuleParameterDec> params =
-                    (((EnhancementBodyModuleDec) dec).getParameters())
-                            .iterator();
+            Iterator<ModuleParameterDec> params
+                    = (((EnhancementBodyModuleDec) dec).getParameters())
+                    .iterator();
             checkOpDecs(decs, dec, params);
         }
     }
@@ -405,14 +375,14 @@ public class Controller {
         try {
             // AST debugging file output
             /*astDumpFile = new File(myInstanceEnvironment.getTargetFile()+".ast");
-            try{
-            	FileWriter fstream = new FileWriter(astDumpFile, true);
-            	BufferedWriter out = new BufferedWriter(fstream);
-            	out.write("\nAST for: "+myInstanceEnvironment.getTargetFile()+"\n");
-            	out.close();
-            }catch(Exception ex){
+             try{
+             FileWriter fstream = new FileWriter(astDumpFile, true);
+             BufferedWriter out = new BufferedWriter(fstream);
+             out.write("\nAST for: "+myInstanceEnvironment.getTargetFile()+"\n");
+             out.close();
+             }catch(Exception ex){
             	
-            }*/
+             }*/
             myInstanceEnvironment.setCurrentTargetFileName(file.getName());
             ModuleDec dec = buildModuleDec(file);
             ModuleID id = ModuleID.createID(dec);
@@ -434,8 +404,8 @@ public class Controller {
             tw2.visit(dec);
 
             if (myInstanceEnvironment.showEnv()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
+                OldSymbolTable table
+                        = new OldSymbolTable(id, myInstanceEnvironment);
                 myInstanceEnvironment.completeRecord(id, table);
                 return;
             }
@@ -448,8 +418,8 @@ public class Controller {
             //env.setSuccess();
             if (myInstanceEnvironment.flags
                     .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
-                PrettyCTranslation prettyT =
-                        new PrettyCTranslation(myInstanceEnvironment, table,
+                PrettyCTranslation prettyT
+                        = new PrettyCTranslation(myInstanceEnvironment, table,
                                 dec, err);
                 tw = new TreeWalker(prettyT);
                 tw.visit(dec);
@@ -487,8 +457,7 @@ public class Controller {
                     .isFlagSet(ResolveCompiler.FLAG_EXPORT_AST)) {
                 genModuleDecDotFile(dec, currFileName + "_post");
             }
-        }
-        catch (CompilerException cex) {
+        } catch (CompilerException cex) {
             myInstanceEnvironment.abortCompile(file);
             myCompileReport.setError();
         }
@@ -505,33 +474,33 @@ public class Controller {
         try {
             // AST debugging file output
             /*astDumpFile = new File(myInstanceEnvironment.getTargetFile()+".ast");
-            try{
-            	FileWriter fstream = new FileWriter(astDumpFile, true);
-            	BufferedWriter out = new BufferedWriter(fstream);
-            	out.write("\nAST for: "+myInstanceEnvironment.getTargetFile()+"\n");
-            	out.close();
-            }catch(Exception ex){
+             try{
+             FileWriter fstream = new FileWriter(astDumpFile, true);
+             BufferedWriter out = new BufferedWriter(fstream);
+             out.write("\nAST for: "+myInstanceEnvironment.getTargetFile()+"\n");
+             out.close();
+             }catch(Exception ex){
             	
-            }*/
+             }*/
             String fileName = inputFile.getMyFileName();
             //String fileConcept = inputFile.getMyAssocConcept();
             //String filePkg = inputFile.getMyPkg();
             String fileSource = inputFile.getMyFileSource();
             //ModuleKind fileKind = inputFile.getMyKind();
             /*String filePath = myInstanceEnvironment.getMainDir().getAbsolutePath();
-            if(fileKind.equals(ModuleKind.FACILITY)){
-            	filePath += File.separator + "Facilities" + File.separator;
-            }
-            else{
-            	filePath += File.separator + "Concepts" + File.separator;
-            }
-            filePath += filePkg + File.separator + fileName + fileKind.getExtension();
-            file = new File(filePath);*/
+             if(fileKind.equals(ModuleKind.FACILITY)){
+             filePath += File.separator + "Facilities" + File.separator;
+             }
+             else{
+             filePath += File.separator + "Concepts" + File.separator;
+             }
+             filePath += filePkg + File.separator + fileName + fileKind.getExtension();
+             file = new File(filePath);*/
             file = inputFile.getMyFile(myInstanceEnvironment.getMainDir());
             myInstanceEnvironment.getErrorHandler().setFile(file);
             myInstanceEnvironment.setTargetFile(file);
-            CommonTokenStream tokens =
-                    getSourceTokenStream(fileName, fileSource);
+            CommonTokenStream tokens
+                    = getSourceTokenStream(fileName, fileSource);
             CommonTree ast = getParseTree(fileName, tokens);
             //myInstanceEnvironment.setCurrentTargetFileName(file.getName());
             ModuleDec dec = getModuleDec(ast);
@@ -557,8 +526,8 @@ public class Controller {
             tw2.visit(dec);
 
             if (myInstanceEnvironment.showEnv()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
+                OldSymbolTable table
+                        = new OldSymbolTable(id, myInstanceEnvironment);
                 myInstanceEnvironment.completeRecord(id, table);
                 return;
             }
@@ -597,8 +566,7 @@ public class Controller {
                 genModuleDecDotFile(dec, currFileName + "_post");
             }
 
-        }
-        catch (CompilerException cex) {
+        } catch (CompilerException cex) {
             myInstanceEnvironment.abortCompile(file);
             myCompileReport.setError();
         }
@@ -619,14 +587,14 @@ public class Controller {
         try {
             // AST debugging file output
             /*astDumpFile = new File(myInstanceEnvironment.getTargetFile()+".ast");
-            try{
-            	FileWriter fstream = new FileWriter(astDumpFile, true);
-            	BufferedWriter out = new BufferedWriter(fstream);
-            	out.write("\nAST for: "+myInstanceEnvironment.getTargetFile()+"\n");
-            	out.close();
-            }catch(Exception ex){
+             try{
+             FileWriter fstream = new FileWriter(astDumpFile, true);
+             BufferedWriter out = new BufferedWriter(fstream);
+             out.write("\nAST for: "+myInstanceEnvironment.getTargetFile()+"\n");
+             out.close();
+             }catch(Exception ex){
             	
-            }*/
+             }*/
             myInstanceEnvironment.getErrorHandler().setFile(file);
             myInstanceEnvironment.setTargetFile(file);
             //myInstanceEnvironment.setCurrentTargetFileName(file.getName());
@@ -645,15 +613,13 @@ public class Controller {
             //PreProcessor preProc = new PreProcessor(myInstanceEnvironment);
             //TreeWalker tw = new TreeWalker(preProc);
             //tw.visit(dec);
-
             // Have compile imported modules bring in extra stuff that 
             // the PreProcessor may have added manually.
-
             compileImportedModules(dec, symbolTable);
 
             if (myInstanceEnvironment.showEnv()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
+                OldSymbolTable table
+                        = new OldSymbolTable(id, myInstanceEnvironment);
                 myInstanceEnvironment.completeRecord(id, table);
                 return;
             }
@@ -666,28 +632,26 @@ public class Controller {
             if (myInstanceEnvironment.flags
                     .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)
                     || myInstanceEnvironment.flags
-                            .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
+                    .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
                     || myInstanceEnvironment.flags
-                            .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
+                    .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
                 translatePrettyModuleDec(file, table, dec);
                 //System.out.println("Translated: " + file.toString());
                 /*if(myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)){
-                	myArchive.addFileToArchive(file);
-                	if(!myCompileReport.hasError()){
-                		if(myArchive.createJar()){
-                			myCompileReport.setJarSuccess();
-                		}
-                	}
-                }*/
+                 myArchive.addFileToArchive(file);
+                 if(!myCompileReport.hasError()){
+                 if(myArchive.createJar()){
+                 myCompileReport.setJarSuccess();
+                 }
+                 }
+                 }*/
                 myInstanceEnvironment.printModules();
             }
 
-        }
-        catch (CompilerException cex) {
+        } catch (CompilerException cex) {
             myInstanceEnvironment.abortCompile(file);
             myCompileReport.setError();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             BugReport.abortProgram(ex, myInstanceEnvironment);
             myCompileReport.setError();
         }
@@ -699,47 +663,47 @@ public class Controller {
             MathSymbolTableBuilder symbolTable) {
         //long start = System.currentTimeMillis();
         /*CharStream cs = null;
-        try {
-        	String fileName = myInstanceEnvironment.getTargetFileName();
-        	String fileSource = myInstanceEnvironment.getTargetSource();
-        	CommonTokenStream tokens = getSourceTokenStream(fileName, fileSource);
-        	CommonTree ast = getParseTree(fileName, tokens);
-        	simpleTranslateTree(ast, tokens);
-        } catch (Exception ex) {
-        	BugReport.abortProgram(ex, myInstanceEnvironment);
-        	myCompileReport.setError();
-        }*/
+         try {
+         String fileName = myInstanceEnvironment.getTargetFileName();
+         String fileSource = myInstanceEnvironment.getTargetSource();
+         CommonTokenStream tokens = getSourceTokenStream(fileName, fileSource);
+         CommonTree ast = getParseTree(fileName, tokens);
+         simpleTranslateTree(ast, tokens);
+         } catch (Exception ex) {
+         BugReport.abortProgram(ex, myInstanceEnvironment);
+         myCompileReport.setError();
+         }*/
         File file = null;
         try {
             // AST debugging file output
             /*astDumpFile = new File(myInstanceEnvironment.getTargetFile()+".ast");
-            try{
-            	FileWriter fstream = new FileWriter(astDumpFile, true);
-            	BufferedWriter out = new BufferedWriter(fstream);
-            	out.write("\nAST for: "+myInstanceEnvironment.getTargetFile()+"\n");
-            	out.close();
-            }catch(Exception ex){
+             try{
+             FileWriter fstream = new FileWriter(astDumpFile, true);
+             BufferedWriter out = new BufferedWriter(fstream);
+             out.write("\nAST for: "+myInstanceEnvironment.getTargetFile()+"\n");
+             out.close();
+             }catch(Exception ex){
             	
-            }*/
+             }*/
             String fileName = inputFile.getMyFileName();
             //String fileConcept = inputFile.getMyAssocConcept();
             //String filePkg = inputFile.getMyPkg();
             String fileSource = inputFile.getMyFileSource();
             //ModuleKind fileKind = inputFile.getMyKind();
             /*String filePath = myInstanceEnvironment.getMainDir().getAbsolutePath();
-            if(fileKind.equals(ModuleKind.FACILITY)){
-            	filePath += File.separator + "Facilities" + File.separator;
-            }
-            else{
-            	filePath += File.separator + "Concepts" + File.separator;
-            }
-            filePath += filePkg + File.separator + fileName + fileKind.getExtension();
-            file = new File(filePath);*/
+             if(fileKind.equals(ModuleKind.FACILITY)){
+             filePath += File.separator + "Facilities" + File.separator;
+             }
+             else{
+             filePath += File.separator + "Concepts" + File.separator;
+             }
+             filePath += filePkg + File.separator + fileName + fileKind.getExtension();
+             file = new File(filePath);*/
             file = inputFile.getMyFile(myInstanceEnvironment.getMainDir());
             myInstanceEnvironment.getErrorHandler().setFile(file);
             myInstanceEnvironment.setTargetFile(file);
-            CommonTokenStream tokens =
-                    getSourceTokenStream(fileName, fileSource);
+            CommonTokenStream tokens
+                    = getSourceTokenStream(fileName, fileSource);
             CommonTree ast = getParseTree(fileName, tokens);
             //myInstanceEnvironment.setCurrentTargetFileName(file.getName());
             ModuleDec dec = getModuleDec(ast);
@@ -754,8 +718,8 @@ public class Controller {
             compileImportedModules(dec, symbolTable);
 
             if (myInstanceEnvironment.showEnv()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
+                OldSymbolTable table
+                        = new OldSymbolTable(id, myInstanceEnvironment);
                 myInstanceEnvironment.completeRecord(id, table);
                 return;
             }
@@ -768,31 +732,29 @@ public class Controller {
             if (myInstanceEnvironment.flags
                     .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)
                     || myInstanceEnvironment.flags
-                            .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
+                    .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
                     || myInstanceEnvironment.flags
-                            .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
+                    .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
                 if (inputFile.getIsCustomLoc()) {
                     file = inputFile.getMyCustomFile();
                 }
                 translatePrettyModuleDec(file, table, dec);
                 //System.out.println("Translated: " + file.toString());
                 /*if(myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)){
-                	myArchive.addFileToArchive(file);
-                	if(!myCompileReport.hasError()){
-                		if(myArchive.createJar()){
-                			myCompileReport.setJarSuccess();
-                		}
-                	}
-                }*/
+                 myArchive.addFileToArchive(file);
+                 if(!myCompileReport.hasError()){
+                 if(myArchive.createJar()){
+                 myCompileReport.setJarSuccess();
+                 }
+                 }
+                 }*/
                 myInstanceEnvironment.printModules();
             }
 
-        }
-        catch (CompilerException cex) {
+        } catch (CompilerException cex) {
             myInstanceEnvironment.abortCompile(file);
             myCompileReport.setError();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             BugReport.abortProgram(ex, myInstanceEnvironment);
             myCompileReport.setError();
         }
@@ -803,13 +765,12 @@ public class Controller {
     // -----------------------------------------------------------
     // Name Compatibility Methods
     // -----------------------------------------------------------
-
     private void checkNameCompatibility(Location loc, ModuleID id, File file)
             throws CompilerException {
         String idext = id.getModuleKind().getExtension();
         if (!file.getName().endsWith(idext)) {
-            String msg =
-                    incompatibleModuleTypes(id.getModuleKind().toString(),
+            String msg
+                    = incompatibleModuleTypes(id.getModuleKind().toString(),
                             extension(file.getName()));
             Location loc2 = beginOfLine(loc);
             err.error(loc2, msg);
@@ -838,7 +799,6 @@ public class Controller {
     // -----------------------------------------------------------
     // Directory Compatibility Methods
     // -----------------------------------------------------------
-
     private void checkDirectoryCompatibility(ModuleDec dec, ModuleID id,
             File file) throws CompilerException {
         if (!id.hasConcept()) {
@@ -848,11 +808,10 @@ public class Controller {
         File dir = file.getParentFile();
         try {
             locator.locateFileInDir(cName, dir);
-        }
-        catch (FileLocatorException flex) {
+        } catch (FileLocatorException flex) {
             Location loc = conceptLocation(dec);
-            String msg =
-                    incompatibleDirectories(id.toString(), cName, dir.getName());
+            String msg
+                    = incompatibleDirectories(id.toString(), cName, dir.getName());
             err.error(loc, msg);
             throw new CompilerException();
         }
@@ -862,14 +821,11 @@ public class Controller {
         PosSymbol cName = null;
         if (dec instanceof EnhancementModuleDec) {
             cName = ((EnhancementModuleDec) dec).getConceptName();
-        }
-        else if (dec instanceof ConceptBodyModuleDec) {
+        } else if (dec instanceof ConceptBodyModuleDec) {
             cName = ((ConceptBodyModuleDec) dec).getConceptName();
-        }
-        else if (dec instanceof EnhancementBodyModuleDec) {
+        } else if (dec instanceof EnhancementBodyModuleDec) {
             cName = ((EnhancementBodyModuleDec) dec).getConceptName();
-        }
-        else {
+        } else {
             assert false : "dec is an invalid type";
         }
         return cName.getLocation();
@@ -878,7 +834,6 @@ public class Controller {
     // -----------------------------------------------------------
     // Import Module Compilation Methods
     // -----------------------------------------------------------
-
     private void compileImportFile(File file, MathSymbolTableBuilder symbolTable)
             throws Exception {
         if (myInstanceEnvironment.compileCompleted(file)) {
@@ -923,8 +878,8 @@ public class Controller {
             tw2.visit(dec);
 
             if (myInstanceEnvironment.showEnv()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
+                OldSymbolTable table
+                        = new OldSymbolTable(id, myInstanceEnvironment);
                 myInstanceEnvironment.completeRecord(id, table);
                 return;
             }
@@ -932,8 +887,8 @@ public class Controller {
             //			// --ny
             //			if (myInstanceEnvironment.perf()) { // DEBUG
             if (myInstanceEnvironment.PVCs()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
+                OldSymbolTable table
+                        = new OldSymbolTable(id, myInstanceEnvironment);
                 myInstanceEnvironment.completeRecord(id, table);
                 return;
             }
@@ -961,8 +916,7 @@ public class Controller {
             if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_PERF_VC)) {
                 verifyModuleDec(symbolTable, table, dec);
             }
-        }
-        catch (CompilerException cex) {
+        } catch (CompilerException cex) {
             myInstanceEnvironment.abortCompile(file);
         }
     }
@@ -972,8 +926,8 @@ public class Controller {
         try {
             myInstanceEnvironment.setCurrentTargetFileName(name);
             String fileSource = importFile.getMyFileSource();
-            File file =
-                    importFile.getMyFile(myInstanceEnvironment.getMainDir());
+            File file
+                    = importFile.getMyFile(myInstanceEnvironment.getMainDir());
             myInstanceEnvironment.getErrorHandler().setFile(file);
             myInstanceEnvironment.setTargetFile(file);
             CommonTokenStream tokens = getSourceTokenStream(name, fileSource);
@@ -983,7 +937,6 @@ public class Controller {
 
             //System.out.println(file.toString() + " Controller(772)");
             //System.out.println(id + " Controller(773)");
-
             checkNameCompatibility(dec.getName().getLocation(), id, file);
             myInstanceEnvironment.constructRecord(id, file, dec);
 
@@ -1000,8 +953,8 @@ public class Controller {
             tw2.visit(dec);
 
             if (myInstanceEnvironment.showEnv()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
+                OldSymbolTable table
+                        = new OldSymbolTable(id, myInstanceEnvironment);
                 myInstanceEnvironment.completeRecord(id, table);
                 return;
             }
@@ -1026,8 +979,7 @@ public class Controller {
                 //verifyModuleDec(context, dec);
                 // I don't think this is necessary
             }
-        }
-        catch (CompilerException cex) {
+        } catch (CompilerException cex) {
             //myInstanceEnvironment.abortCompile(file);
         }
     }
@@ -1035,7 +987,6 @@ public class Controller {
     // -----------------------------------------------------------
     // Parsing Methods
     // -----------------------------------------------------------
-
     private ModuleDec buildModuleDec(File file) throws Exception {
         // FIX: Is this the only place we mess with this?
         //err.setFile(file);
@@ -1083,8 +1034,7 @@ public class Controller {
             if (err.countExceeds(initErrorCount)) {
                 throw new CompilerException();
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             BugReport.abortProgram(ex, myInstanceEnvironment);
             myCompileReport.setError();
         }
@@ -1105,8 +1055,7 @@ public class Controller {
             if (err.countExceeds(initErrorCount)) {
                 throw new CompilerException();
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             BugReport.abortProgram(ex, myInstanceEnvironment);
             myCompileReport.setError();
         }
@@ -1116,13 +1065,13 @@ public class Controller {
     private ModuleDec getModuleDec(CommonTree ast) throws Exception {
         // AST debugging file output
         /*try{
-        	FileWriter fstream = new FileWriter(astDumpFile, true);
-        	BufferedWriter out = new BufferedWriter(fstream);
-        	out.write("\t"+ast.toStringTree()+"\n");
-        	out.close();
-        }catch(Exception ex){
+         FileWriter fstream = new FileWriter(astDumpFile, true);
+         BufferedWriter out = new BufferedWriter(fstream);
+         out.write("\t"+ast.toStringTree()+"\n");
+         out.close();
+         }catch(Exception ex){
         	
-        }*/
+         }*/
         int initErrorCount = err.getErrorCount();
         RBuilder builder = new RBuilder(new CommonTreeNodeStream(ast));
         CommonTreeAdaptor adaptor = new CommonTreeAdaptor();
@@ -1149,7 +1098,6 @@ public class Controller {
     // -----------------------------------------------------------
     // Import Compilation Methods
     // -----------------------------------------------------------
-
     private void compileImportedModules(ModuleDec dec,
             MathSymbolTableBuilder symbolTable) throws Exception {
         int initErrorCount = err.getErrorCount();
@@ -1160,8 +1108,8 @@ public class Controller {
          * information must be added to the environment since the symbol table
          * has not been created yet.
          */
-        ModuleID id =
-                myInstanceEnvironment.getModuleID(dec.getName().getLocation()
+        ModuleID id
+                = myInstanceEnvironment.getModuleID(dec.getName().getLocation()
                         .getFile());
         List<ModuleID> theories = new List<ModuleID>();
         ImportScanner scanner = new ImportScanner(myInstanceEnvironment);
@@ -1174,8 +1122,8 @@ public class Controller {
 
             if (myInstanceEnvironment.contains(id2)
                     && myInstanceEnvironment
-                            .compileCompleted(myInstanceEnvironment
-                                    .getFile(id2))) {
+                    .compileCompleted(myInstanceEnvironment
+                            .getFile(id2))) {
                 if (id2.getModuleKind() == ModuleKind.THEORY) {
                     theories.addUnique(id2);
                 }
@@ -1223,26 +1171,23 @@ public class Controller {
                     || kind == ModuleKind.ENHANCEMENT
                     || kind == ModuleKind.ENHANCEMENT_BODY) {
                 key += mid.getConceptName().getName() + ".";
-            }
-            else {
+            } else {
                 key += mid.getName().getName() + ".";
             }
             key += mid.getName().getName();
 
             if (myInstanceEnvironment.isUserFile(key)) {
-                MetaFile importFile =
-                        myInstanceEnvironment.getUserFileFromMap(key);
+                MetaFile importFile
+                        = myInstanceEnvironment.getUserFileFromMap(key);
                 compileNewImportSource(key, importFile, symbolTable);
-            }
-            else {
+            } else {
                 File file = getPosModuleFile(pid, targetFile);
                 if (file != null) {
                     checkModuleDependencies(file, pid.getLocation());
                     compileImportFile(file, symbolTable);
                 }
             }
-        }
-        catch (CompilerException cex) {
+        } catch (CompilerException cex) {
             /*
              * This catch is here so that we do not continue if getPosModuleFile
              * or checkModuleDependencies throws an error. In both cases, the
@@ -1263,29 +1208,25 @@ public class Controller {
         try {
             if (moduleToImport.getModuleKind() == ModuleKind.USES_ITEM) {
                 file = getUsesItemFile(importLocationInCode, moduleToImport);
-            }
-            else if (moduleToImport.getModuleKind() == ModuleKind.CONCEPT) {
+            } else if (moduleToImport.getModuleKind() == ModuleKind.CONCEPT) {
                 if (myInstanceEnvironment.contains(moduleToImport)) {
                     file = myInstanceEnvironment.getFile(moduleToImport);
-                }
-                else {
-                    file =
-                            locator.locateFileInTree(moduleToImport
+                } else {
+                    file
+                            = locator.locateFileInTree(moduleToImport
                                     .getFilename(), myInstanceEnvironment
                                     .getMainDir());
                 }
-            }
-            else { // ModuleKind is body or enhancement
+            } else { // ModuleKind is body or enhancement
                 /* Check to see if this is one of the files we specified as not to be imported. */
                 if (!onNoImportList(moduleToImport.getFilename())) {
-                    file =
-                            getBodyOrEnhFile(importLocationInCode,
+                    file
+                            = getBodyOrEnhFile(importLocationInCode,
                                     moduleToImport, sourceFile);
-                }
-                else {
+                } else {
                     /* Create a dummy ConceptBodyModuleDec with just what we need */
-                    ConceptBodyModuleDec newDec =
-                            new ConceptBodyModuleDec(
+                    ConceptBodyModuleDec newDec
+                            = new ConceptBodyModuleDec(
                                     new PosSymbol(null, moduleToImport
                                             .getName()),
                                     null,
@@ -1309,8 +1250,7 @@ public class Controller {
                 }
             }
             return file;
-        }
-        catch (FileLocatorException flex) {
+        } catch (FileLocatorException flex) {
             err.error(importLocationInCode, flex.getMessage());
             throw new CompilerException();
         }
@@ -1337,26 +1277,23 @@ public class Controller {
             PosSymbol ps = new PosSymbol(loc, id.getName());
             List<File> files = getUsesFilesFromEnv(ps);
             if (files.size() == 0) {
-                file =
-                        locator.locateFileInTree(ModuleID.createConceptID(ps)
+                file
+                        = locator.locateFileInTree(ModuleID.createConceptID(ps)
                                 .getFilename(), ModuleID.createFacilityID(ps)
                                 .getFilename(), ModuleID.createTheoryID(ps)
                                 .getFilename(), myInstanceEnvironment
                                 .getMainDir());
-            }
-            else if (files.size() == 1) {
+            } else if (files.size() == 1) {
                 file = files.get(0);
-            }
-            else {
-                String msg =
-                        multiFilesMessage(ps.toString(), myInstanceEnvironment
+            } else {
+                String msg
+                        = multiFilesMessage(ps.toString(), myInstanceEnvironment
                                 .getMainDir().getName(), files.toString());
                 err.error(loc, msg);
                 throw new CompilerException();
             }
             return file;
-        }
-        catch (FileLocatorException flex) {
+        } catch (FileLocatorException flex) {
             err.error(loc, flex.getMessage());
             throw new CompilerException();
         }
@@ -1387,29 +1324,26 @@ public class Controller {
             File file = null;
             if (myInstanceEnvironment.contains(id)) {
                 file = myInstanceEnvironment.getFile(id);
-            }
-            else {
+            } else {
                 assert id.hasConcept() : "id has not concept";
                 PosSymbol cps = new PosSymbol(loc, id.getConceptName());
                 ModuleID cid = ModuleID.createConceptID(cps);
                 if (myInstanceEnvironment.contains(cid)) {
                     file = myInstanceEnvironment.getFile(cid);
-                }
-                else {
+                } else {
                     assocSearch = true;
                     // System.out.println(id.getFilename()); //DEBUG
-                    file =
-                            locator.locateFileInTree(id.getFilename(),
+                    file
+                            = locator.locateFileInTree(id.getFilename(),
                                     targetFile.getName().getLocation()
-                                            .getFile().getParentFile());
+                                    .getFile().getParentFile());
                     assocSearch = false;
                 }
                 File dir = file.getParentFile();
                 file = locator.locateFileInDir(id.getFilename(), dir);
             }
             return file;
-        }
-        catch (FileLocatorException flex) {
+        } catch (FileLocatorException flex) {
             // flex.printStackTrace(); //DEBUG
             String msg = flex.getMessage();
             if (assocSearch) {
@@ -1424,8 +1358,8 @@ public class Controller {
             throws CompilerException {
         if (myInstanceEnvironment.compileIncomplete(file)) {
             ModuleID id = myInstanceEnvironment.getModuleID(file);
-            String msg =
-                    circularDependencyMessage(id.getName().toString(),
+            String msg
+                    = circularDependencyMessage(id.getName().toString(),
                             myInstanceEnvironment.printStackPath(id));
             err.error(loc, msg);
             throw new CompilerException();
@@ -1435,7 +1369,6 @@ public class Controller {
     // -----------------------------------------------------------
     // Analysis Methods
     // -----------------------------------------------------------
-
     private OldSymbolTable analyzeModuleDec(ScopeRepository aRealSymbolTable,
             ModuleDec dec) throws CompilerException {
         OldSymbolTable table = getSymbolTable(aRealSymbolTable, dec);
@@ -1450,23 +1383,20 @@ public class Controller {
         //VisitorPrintStructure vps = new VisitorPrintStructure();
         //TreeWalker twvps = new TreeWalker(vps);
         //twvps.visit(dec);
-
-        OldSymbolTable table =
-                new OldSymbolTable(ModuleID.createID(dec),
+        OldSymbolTable table
+                = new OldSymbolTable(ModuleID.createID(dec),
                         myInstanceEnvironment);
         OldPopulator populator = new OldPopulator(table, myInstanceEnvironment);
         populator.visitModuleDec(dec);
 
         // *** This next section is for testing the new tree walker ***
-
         //SanityCheck Walker -JCK
-        VisitorSanityCheck sctwv =
-                new VisitorSanityCheck(myInstanceEnvironment);
+        VisitorSanityCheck sctwv
+                = new VisitorSanityCheck(myInstanceEnvironment);
         TreeWalker tw = new TreeWalker(sctwv);
         tw.visit(dec);
 
         // ************************************************************
-
         if (err.getErrorCount() != initErrorCount) {
             throw new CompilerException();
         }
@@ -1477,8 +1407,8 @@ public class Controller {
             throw new CompilerException();
         }
 
-        Analyzer analyzer =
-                new Analyzer(aRealSymbolTable, table, myInstanceEnvironment);
+        Analyzer analyzer
+                = new Analyzer(aRealSymbolTable, table, myInstanceEnvironment);
         analyzer.visitModuleDec(dec);
 
         if (err.getErrorCount() != initErrorCount) {
@@ -1494,12 +1424,10 @@ public class Controller {
         System.err.flush();
 
         //VisitorCodeGeneration.generateVisitorClass();
-
         //edu.clemson.cs.r2jt.treewalk.VisitorPrintStructure ps =
         //        new edu.clemson.cs.r2jt.treewalk.VisitorPrintStructure();
         //TreeWalker twps = new TreeWalker(ps);
         //twps.visit(dec);
-
         System.err.flush();
         System.out.flush();
 
@@ -1513,9 +1441,8 @@ public class Controller {
         System.out.flush();
 
         /*MathAnalyzer analyzer = new MathAnalyzer(g, populator.getSymbolTable());
-        tw = new TreeWalker(analyzer);
-        tw.visit(dec);*/
-
+         tw = new TreeWalker(analyzer);
+         tw.visit(dec);*/
         Populator.emitDebug("Type Graph:\n\n"
                 + symbolTable.getTypeGraph().toString());
 
@@ -1525,7 +1452,6 @@ public class Controller {
     // ------------------------------------------------------------
     // Verification Related Methods
     // ------------------------------------------------------------
-
     // Invoke the new VC Generator 
     // -YS
     private void generateVCs(ScopeRepository table, ModuleDec dec) {
@@ -1542,8 +1468,8 @@ public class Controller {
 
     private void verifyModuleDec(ScopeRepository realTable,
             OldSymbolTable table, ModuleDec dec) {
-        Verifier verifier =
-                new Verifier(realTable, table, myInstanceEnvironment);
+        Verifier verifier
+                = new Verifier(realTable, table, myInstanceEnvironment);
         verifier.visitModuleDec(dec);
         verifier.outputAsrt();
 
@@ -1552,15 +1478,14 @@ public class Controller {
         //most likely problem is that some Exp in one of the generated VCs got
         //through without typing information--which would cause the Prover to
         //(rightly) crash.
-        Iterable<VerificationCondition> vcsToProve =
-                getVCsToProve(verifier, dec);
+        Iterable<VerificationCondition> vcsToProve
+                = getVCsToProve(verifier, dec);
 
         try {
             for (VerificationCondition vc : vcsToProve) {
                 AlternativeProver.convertToImmutableVC(vc);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("INVARIANT FAILED: Generated VCs are "
                     + "not valid Prover input!  See 'caused by' Exception for "
                     + "details.", e);
@@ -1576,34 +1501,31 @@ public class Controller {
                 if (vcsToProve.iterator().hasNext()) {
                     new Prover(vcsToProve, myInstanceEnvironment);
                 }
-            }
-            catch (ProverException e) {
+            } catch (ProverException e) {
                 err.error(e.toString());
             }
-        }
-        else if (myInstanceEnvironment.flags
+        } else if (myInstanceEnvironment.flags
                 .isFlagSet(CongruenceClassProver.FLAG_PROVE)) {
-            try{
-            java.util.List<VC> vcs = new LinkedList<VC>();
-            for (VerificationCondition originalVC : vcsToProve) {
-                vcs.add(edu.clemson.cs.r2jt.proving2.Utilities
-                        .convertToImmutableVC(originalVC));
-            }
-            ModuleScope scope =
-                        realTable.getModuleScope(new ModuleIdentifier(dec));
-            CongruenceClassProver ccProver = new CongruenceClassProver(vcs,scope);
-            ccProver.start();
-            }
-            catch (NoSuchSymbolException nsse) {
+            try {
+                java.util.List<VC> vcs = new LinkedList<VC>();
+                for (VerificationCondition originalVC : vcsToProve) {
+                    vcs.add(edu.clemson.cs.r2jt.proving2.Utilities
+                            .convertToImmutableVC(originalVC));
+                }
+                ModuleScope scope
+                        = realTable.getModuleScope(new ModuleIdentifier(dec));
+                CongruenceClassProver ccProver
+                        = new CongruenceClassProver(realTable.getTypeGraph(), vcs, scope);
+                ccProver.start();
+            } catch (NoSuchSymbolException nsse) {
                 //Can't find the module we're in.  Shouldn't be possible.
                 throw new RuntimeException(nsse);
             }
-        }
-        else if (myInstanceEnvironment.flags
+        } else if (myInstanceEnvironment.flags
                 .isFlagSet(AlgebraicProver.FLAG_PROVE)) {
             try {
-                ModuleScope scope =
-                        realTable.getModuleScope(new ModuleIdentifier(dec));
+                ModuleScope scope
+                        = realTable.getModuleScope(new ModuleIdentifier(dec));
 
                 java.util.List<VC> vcs = new LinkedList<VC>();
                 for (VerificationCondition originalVC : vcsToProve) {
@@ -1611,24 +1533,22 @@ public class Controller {
                             .convertToImmutableVC(originalVC));
                 }
 
-                AlgebraicProver prover =
-                        new AlgebraicProver(
+                AlgebraicProver prover
+                        = new AlgebraicProver(
                                 realTable.getTypeGraph(),
                                 vcs,
                                 scope,
                                 myInstanceEnvironment.flags
-                                        .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE),
+                                .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE),
                                 myInstanceEnvironment, myInstanceEnvironment
-                                        .getProverListener());
+                                .getProverListener());
 
                 try {
                     prover.start();
-                }
-                catch (IOException ioe) {
+                } catch (IOException ioe) {
                     throw new RuntimeException(ioe);
                 }
-            }
-            catch (NoSuchSymbolException nsse) {
+            } catch (NoSuchSymbolException nsse) {
                 //Can't find the module we're in.  Shouldn't be possible.
                 throw new RuntimeException(nsse);
             }
@@ -1637,19 +1557,18 @@ public class Controller {
 
     private Iterable<VerificationCondition> getVCsToProve(Verifier verifier,
             ModuleDec verificationTarget) {
-        ModuleDec targetDec =
-                myInstanceEnvironment.getModuleDec(myInstanceEnvironment
+        ModuleDec targetDec
+                = myInstanceEnvironment.getModuleDec(myInstanceEnvironment
                         .getModuleID(myInstanceEnvironment.getTargetFile()));
 
         Iterable<VerificationCondition> vcsToProve = null;
 
         if (targetDec == verificationTarget
                 && verificationTarget instanceof MathModuleDec) {
-            vcsToProve =
-                    new TheoremToVCsConverter(
+            vcsToProve
+                    = new TheoremToVCsConverter(
                             (MathModuleDec) verificationTarget);
-        }
-        else {
+        } else {
             Collection<AssertiveCode> VCs = verifier.getFinalVCs();
 
             if (VCs == null) {
@@ -1665,12 +1584,11 @@ public class Controller {
     // ------------------------------------------------------------
     // Translation Related Methods
     // ------------------------------------------------------------
-
     private void translateModuleDec(File file, ScopeRepository realTable,
             ModuleDec dec) {
 
-        JavaTranslator translator =
-                new JavaTranslator(myInstanceEnvironment, realTable);
+        JavaTranslator translator
+                = new JavaTranslator(myInstanceEnvironment, realTable);
 
         if (myArchive != null && !translator.onNoCompileList(file)) {
             myArchive.addFileToArchive(file);
@@ -1689,30 +1607,29 @@ public class Controller {
     private void translatePrettyModuleDec(File file, OldSymbolTable table,
             ModuleDec dec) {
         /*PrettyJavaTranslator translator =
-                new PrettyJavaTranslator(myInstanceEnvironment, table, dec, err);
-        String targetFile = myInstanceEnvironment.getTargetFile().toString();
-        String thisFile = dec.getName().getFile().toString();
-        // We only translate if this is the target file or if file is stale
-        if ((thisFile.equals(targetFile)) || translator.needToTranslate(file)) {
-            //System.out.println("Starting Translation: "+dec.getName().getName());
-            translator.visitModuleDec(dec);
-            //System.out.println("Translated: "+dec.getName().getName());
-            translator.outputJavaCode(file);
-        }*/
+         new PrettyJavaTranslator(myInstanceEnvironment, table, dec, err);
+         String targetFile = myInstanceEnvironment.getTargetFile().toString();
+         String thisFile = dec.getName().getFile().toString();
+         // We only translate if this is the target file or if file is stale
+         if ((thisFile.equals(targetFile)) || translator.needToTranslate(file)) {
+         //System.out.println("Starting Translation: "+dec.getName().getName());
+         translator.visitModuleDec(dec);
+         //System.out.println("Translated: "+dec.getName().getName());
+         translator.outputJavaCode(file);
+         }*/
 
         if (myInstanceEnvironment.flags
                 .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)) {
-            PrettyJavaTranslation prettyT =
-                    new PrettyJavaTranslation(myInstanceEnvironment, table,
+            PrettyJavaTranslation prettyT
+                    = new PrettyJavaTranslation(myInstanceEnvironment, table,
                             dec, err);
             TreeWalker tw = new TreeWalker(prettyT);
             tw.visit(dec);
 
             prettyT.outputCode(file);
-        }
-        else {
-            PrettyCTranslation prettyT =
-                    new PrettyCTranslation(myInstanceEnvironment, table, dec,
+        } else {
+            PrettyCTranslation prettyT
+                    = new PrettyCTranslation(myInstanceEnvironment, table, dec,
                             err);
             TreeWalker tw = new TreeWalker(prettyT);
             tw.visit(dec);
@@ -1727,8 +1644,8 @@ public class Controller {
      */
     private void dumpTokenFile(CommonTokenStream tokens, String[] tokenNames) {
         try {
-            File tokenFile =
-                    new File(myInstanceEnvironment.getTargetFile()
+            File tokenFile
+                    = new File(myInstanceEnvironment.getTargetFile()
                             + "_TOKENS.txt");
             FileWriter fstream = new FileWriter(tokenFile, false);
             BufferedWriter out = new BufferedWriter(fstream);
@@ -1742,8 +1659,8 @@ public class Controller {
                 if (m.find()) {
                     match = m.group();
                     tokenNum = match.substring(1, match.length() - 1);
-                    line =
-                            line.replaceAll(tokenNum, tokenNames[Integer
+                    line
+                            = line.replaceAll(tokenNum, tokenNames[Integer
                                     .parseInt(tokenNum)]);
                 }
                 out.write(line);
@@ -1753,8 +1670,7 @@ public class Controller {
             System.out
                     .println("Dumped tokens to file: " + tokenFile.toString());
             out.close();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
 
         }
     }
@@ -1763,24 +1679,24 @@ public class Controller {
      * This generates the dot file for the AST
      */
     private void genAstDotFile(RuleReturnScope results) {
-    /* Commented out because we are using a different version of
-                StringTemplate
-    //create dot file
-    try {
-        DOTTreeGenerator gen = new DOTTreeGenerator();
-        StringTemplate st = gen.toDOT((Tree) results.getTree());
-        File dotFile =
-                new File(myInstanceEnvironment.getTargetFile() + "_AST.dot");
-        FileWriter fstream = new FileWriter(dotFile, false);
-        BufferedWriter out = new BufferedWriter(fstream);
-        out.write(st.toString());
-        System.out.println("Exported AST to dot file: "
-                + dotFile.toString());
-        out.close();
-    }
-    catch (Exception ex) {
+        /* Commented out because we are using a different version of
+         StringTemplate
+         //create dot file
+         try {
+         DOTTreeGenerator gen = new DOTTreeGenerator();
+         StringTemplate st = gen.toDOT((Tree) results.getTree());
+         File dotFile =
+         new File(myInstanceEnvironment.getTargetFile() + "_AST.dot");
+         FileWriter fstream = new FileWriter(dotFile, false);
+         BufferedWriter out = new BufferedWriter(fstream);
+         out.write(st.toString());
+         System.out.println("Exported AST to dot file: "
+         + dotFile.toString());
+         out.close();
+         }
+         catch (Exception ex) {
 
-    }      */
+         }      */
     }
 
     /*
@@ -1814,8 +1730,7 @@ public class Controller {
             System.out.println("Exported ModuleDec to dot file: "
                     + decDotFile.toString());
             out.close();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
 
         }
 
@@ -1854,8 +1769,7 @@ public class Controller {
             System.out.println("Exported ModuleDec to dot file: "
                     + decDotFile.toString());
             out.close();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
 
         }
 
@@ -1864,74 +1778,73 @@ public class Controller {
     // -----------------------------------------------------------
     // Error Related Methods
     // -----------------------------------------------------------
-
     private String abortMessage(String filename) {
-        String msg =
-                "Compile of target file " + filename
-                        + " already attempted and aborted due to errors.";
+        String msg
+                = "Compile of target file " + filename
+                + " already attempted and aborted due to errors.";
         return msg;
     }
 
     private String completeMessage(String filename) {
-        String msg =
-                "Target file " + filename
-                        + " has already been successfully compiled.";
+        String msg
+                = "Target file " + filename
+                + " has already been successfully compiled.";
         return msg;
     }
 
     private String importAbortMessage(String filename) {
-        String msg =
-                "Compile of import file " + filename
-                        + " already attempted and aborted due to errors.";
+        String msg
+                = "Compile of import file " + filename
+                + " already attempted and aborted due to errors.";
         return msg;
     }
 
     private String importCompleteMessage(String filename) {
-        String msg =
-                "Import file " + filename
-                        + " has already been successfully compiled.";
+        String msg
+                = "Import file " + filename
+                + " has already been successfully compiled.";
         return msg;
     }
 
     private String incompatibleNames(String idname, String basename) {
-        String msg =
-                "The module name \"" + idname
-                        + "\" does not match the file's basename \"" + basename
-                        + "\"";
+        String msg
+                = "The module name \"" + idname
+                + "\" does not match the file's basename \"" + basename
+                + "\"";
         return msg;
     }
 
     private String incompatibleModuleTypes(String idtype, String extension) {
-        String msg =
-                "The module type \"" + idtype + "\" is not compatible "
-                        + " with the file extension \"" + extension + "\"";
+        String msg
+                = "The module type \"" + idtype + "\" is not compatible "
+                + " with the file extension \"" + extension + "\"";
         return msg;
     }
 
     private String incompatibleDirectories(String modID, String cName,
             String dir) {
-        String msg =
-                "This module ("
-                        + modID
-                        + ") must reside in the same "
-                        + "directory as its associated concept, but no file with the "
-                        + "name " + cName + " was found in the direcorty "
-                        + dir + ".";
+        String msg
+                = "This module ("
+                + modID
+                + ") must reside in the same "
+                + "directory as its associated concept, but no file with the "
+                + "name " + cName + " was found in the direcorty "
+                + dir + ".";
         return msg;
     }
 
     private String circularDependencyMessage(String id, String path) {
-        String msg =
-                "Circular module dependency between this module " + " and "
-                        + id + ": " + path;
+        String msg
+                = "Circular module dependency between this module " + " and "
+                + id + ": " + path;
         return msg;
     }
 
     private String multiFilesMessage(String basename, String dir, String files) {
-        String msg =
-                "Found multiple files with the basename " + basename
-                        + " in the directory " + dir
-                        + " or its subdirectories: " + files;
+        String msg
+                = "Found multiple files with the basename " + basename
+                + " in the directory " + dir
+                + " or its subdirectories: " + files;
         return msg;
     }
 }

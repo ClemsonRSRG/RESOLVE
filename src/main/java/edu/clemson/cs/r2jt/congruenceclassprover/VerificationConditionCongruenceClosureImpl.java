@@ -16,6 +16,7 @@ import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.Antecedent;
 import edu.clemson.cs.r2jt.proving2.Consequent;
 import edu.clemson.cs.r2jt.proving2.VC;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,19 +29,19 @@ import java.util.Map;
 public class VerificationConditionCongruenceClosureImpl {
 
     private Registry m_registry;
-    private String m_name;
+    public final String m_name;
     private Antecedent m_antecedent;
     private Consequent m_consequent;
     private ConjunctionOfNormalizedAtomicExpressions m_conjunction;
     private List<List<String>> m_goal; // every item in each sublist is equivalent iff proved.  Disjunctions in consequent are split into seperate vc's before we see them here.
-
+    
     // currently support only unchained equalities, so each sublist is size 2.
 
-    public VerificationConditionCongruenceClosureImpl(VC vc) {
+    public VerificationConditionCongruenceClosureImpl(TypeGraph g, VC vc) {
         m_name = vc.getName();
         m_antecedent = vc.getAntecedent();
         m_consequent = vc.getConsequent();
-        m_registry = new Registry();
+        m_registry = new Registry(g);
         m_conjunction =
                 new ConjunctionOfNormalizedAtomicExpressions(m_registry);
         m_goal = new ArrayList<List<String>>();
