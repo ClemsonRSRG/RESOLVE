@@ -20,9 +20,8 @@ import java.util.*;
  */
 public class ConjunctionOfNormalizedAtomicExpressions {
 
-    private Registry m_registry;
-    private List<NormalizedAtomicExpressionMapImpl> m_exprList;
-    
+    private final Registry m_registry;
+    private final List<NormalizedAtomicExpressionMapImpl> m_exprList;
 
     /**
      * @param registry the Registry symbols contained in the conjunction will
@@ -52,31 +51,19 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         NormalizedAtomicExpressionMapImpl ubExpr = translQuery.incrementLastKnown();
         int upperBound = Collections.binarySearch(m_exprList, ubExpr);
         if (!(upperBound >= 0 && upperBound < m_exprList.size())) {
-            if(upperBound >= m_exprList.size()) upperBound = m_exprList.size()-1;
-            else if (upperBound < 0) {
-                upperBound = - upperBound -1;
-                if(upperBound >= m_exprList.size()) upperBound = m_exprList.size()-1;
-            }       
+            if (upperBound >= m_exprList.size()) {
+                upperBound = m_exprList.size() - 1;
+            } else if (upperBound < 0) {
+                upperBound = -upperBound - 1;
+                if (upperBound >= m_exprList.size()) {
+                    upperBound = m_exprList.size() - 1;
+                }
+            }
         }
         box.upperBound = upperBound;  // this could be 1 more than inclusive ub in some cases, but is ok
         box.lowerBound = lowerBound;
         box.currentIndex = lowerBound;
         box.directMatch = false;
-        return;
-    }
-
-    private String fromOperatorIndicesToAtomString(int[] atom) {
-        String r = m_registry.getSymbolForIndex(atom[0]);
-        if (atom.length > 2) {
-            r += "(";
-            for (int i = 1; i < atom.length - 1; ++i) {
-                r += m_registry.getSymbolForIndex(atom[i]) + ",";
-            }
-            r = r.substring(0, r.length() - 1);
-            r += ")";
-        }
-        r += "=" + m_registry.getSymbolForIndex(atom[atom.length - 1]);
-        return r;
     }
 
     protected NormalizedAtomicExpressionMapImpl getExprAtPosition(int position) {
@@ -85,7 +72,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     protected void addExpression(PExp expression) {
         String name = expression.getTopLevelOperation();
-        
+
         if (expression.isEquality()) {
             int lhs = addFormula(expression.getSubExpressions().get(0));
             int rhs = addFormula(expression.getSubExpressions().get(1));
@@ -118,26 +105,21 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return m_registry.addSymbol(name, type, usage);
     }
 
-    /**
-     * @param formula a formula that should not contain = or and. Predicate
-     * symbols are treated as any other function symbol here.
-     * @return current index in list of expressions.
-     */
-    
+
     /* experimentally handling =
-    i.e.: (|?S| = 0) = (?S = Empty_String))
-    is broken down by addExpression so (|?S| = 0) is an argument
-    should return int for true if known to be equal, otherwise return root representative. 
-    */
+     i.e.: (|?S| = 0) = (?S = Empty_String))
+     is broken down by addExpression so (|?S| = 0) is an argument
+     should return int for true if known to be equal, otherwise return root representative. 
+     */
     protected int addFormula(PExp formula) {
-        if(formula.isEquality()){
+        if (formula.isEquality()) {
             int lhs = addFormula(formula.getSubExpressions().get(0));
             int rhs = addFormula(formula.getSubExpressions().get(1));
             lhs = m_registry.findAndCompress(lhs);
             rhs = m_registry.findAndCompress(rhs);
-            if(lhs == rhs)
+            if (lhs == rhs) {
                 return m_registry.getIndexForSymbol("true");
-            else{
+            } else {
                 // insert =?(lhs,rhs) = someNewRoot
                 int questEq = m_registry.getIndexForSymbol("=?");
                 NormalizedAtomicExpressionMapImpl pred = new NormalizedAtomicExpressionMapImpl();
@@ -192,7 +174,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rhs;
     }
 
-    // should do find and compress before
     protected void mergeOperators(int a, int b) {
         a = m_registry.findAndCompress(a);
         b = m_registry.findAndCompress(b);
@@ -211,39 +192,42 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     //  =? will always be at top of list.
     // These expression will not be removed by this function,
     // but can be removed by merge().
-    protected void mergeArgsOfEqualityPredicateIfRootIsTrue(){
-       
+    protected void mergeArgsOfEqualityPredicateIfRootIsTrue() {
+
         // loop until end, function op is not =?, or =?(x,y)=true
         // when found do merge, start again.
         int eqQ = m_registry.getIndexForSymbol("=?");
-        for(int i = 0; i < m_exprList.size(); ++i){
+        for (int i = 0; i < m_exprList.size(); ++i) {
             NormalizedAtomicExpressionMapImpl cur = m_exprList.get(i);
             int f = cur.readPosition(0);
-            if(f != eqQ) return;
+            if (f != eqQ) {
+                return;
+            }
             int t = m_registry.getIndexForSymbol("true");
             int root = cur.readRoot();
             int op1 = cur.readPosition(1);
             int op2 = cur.readPosition(2);
-            if(root==t && op1 != op2){
-                mergeOperators(cur.readPosition(1),cur.readPosition(2));
+            if (root == t && op1 != op2) {
+                mergeOperators(cur.readPosition(1), cur.readPosition(2));
                 // mergeOperators will do any other merges that arise.
-                i=0;
-            } 
+                i = 0;
+            }
         }
     }
+
     // Return list of modified predicates by their position. Only these can cause new merges.
     protected Stack<Integer> mergeOnlyArgumentOperators(int a, int b) {
         if (a == b) {
             return null;
         }
         /*if (a > b) {
-            int temp = a;
-            a = b;
-            b = temp;
-        }*/ // this is the original way, merge toward lower valued indices.
+         int temp = a;
+         a = b;
+         b = temp;
+         }*/ // this is the original way, merge toward lower valued indices.
         String aString = m_registry.getSymbolForIndex(a);
         String bString = m_registry.getSymbolForIndex(b);
-        if(aString.compareTo(bString)>0){
+        if (aString.compareTo(bString) > 0) {
             int temp = a;
             a = b;
             b = temp;
@@ -255,7 +239,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         bString = m_registry.getSymbolForIndex(b);
         Registry.Usage uA = m_registry.getUsage(aString);
         Registry.Usage uB = m_registry.getUsage(bString);
-        if(uB.equals(Registry.Usage.LITERAL)){
+        if (uB.equals(Registry.Usage.LITERAL)) {
             int temp = a;
             a = b;
             b = temp;

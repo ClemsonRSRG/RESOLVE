@@ -1515,8 +1515,13 @@ public class Controller {
                 ModuleScope scope
                         = realTable.getModuleScope(new ModuleIdentifier(dec));
                 CongruenceClassProver ccProver
-                        = new CongruenceClassProver(realTable.getTypeGraph(), vcs, scope);
-                ccProver.start();
+                        = new CongruenceClassProver(realTable.getTypeGraph(),
+                                vcs, scope,myInstanceEnvironment);
+                try{
+                    ccProver.start();
+                } catch (IOException ioe){
+                    throw new RuntimeException(ioe);
+                }
             } catch (NoSuchSymbolException nsse) {
                 //Can't find the module we're in.  Shouldn't be possible.
                 throw new RuntimeException(nsse);

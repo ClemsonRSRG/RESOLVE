@@ -1,18 +1,12 @@
 /**
- * Registry.java
- * ---------------------------------
- * Copyright (c) 2014
- * RESOLVE Software Research Group
- * School of Computing
- * Clemson University
- * All rights reserved.
- * ---------------------------------
- * This file is subject to the terms and conditions defined in
- * file 'LICENSE.txt', which is part of this source code package.
+ * Registry.java --------------------------------- Copyright (c) 2014 RESOLVE
+ * Software Research Group School of Computing Clemson University All rights
+ * reserved. --------------------------------- This file is subject to the terms
+ * and conditions defined in file 'LICENSE.txt', which is part of this source
+ * code package.
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import edu.clemson.cs.r2jt.typeandpopulate.MTProper;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
@@ -26,43 +20,48 @@ public class Registry {
     private final String m_ccFormat = "¢%03d";
     public TreeMap<String, Integer> m_symbolToIndex;
     public Map<MTType, TreeSet<String>> m_typeToSetOfOperators;
-    public Vector<String> m_indexToSymbol;
-    public Vector<MTType> m_indexToType;
-    public Vector<Integer> m_symbolIndexParentArray;
+    public ArrayList<String> m_indexToSymbol;
+    public ArrayList<MTType> m_indexToType;
+    public ArrayList<Integer> m_symbolIndexParentArray;
     public Stack<Integer> m_unusedIndices;
     private int m_uniqueCounter = 0;
-    public static enum Usage {LITERAL, FORALL, SINGULAR_VARIABLE, CREATED, HASARGS};
-    private Map<String,Usage> m_symbolToUsage;
-    private Set<String> m_foralls;
+
+    public static enum Usage {
+
+        LITERAL, FORALL, SINGULAR_VARIABLE, CREATED, HASARGS
+    };
+    private final Map<String, Usage> m_symbolToUsage;
+    private final Set<String> m_foralls;
 
     public Registry(TypeGraph g) {
         m_symbolToIndex = new TreeMap<String, Integer>();
         m_typeToSetOfOperators = new HashMap<MTType, TreeSet<String>>();
-        m_indexToSymbol = new Vector<String>();
-        m_indexToType = new Vector<MTType>();
-        m_symbolIndexParentArray = new Vector<Integer>();
+        m_indexToSymbol = new ArrayList<String>();
+        m_indexToType = new ArrayList<MTType>();
+        m_symbolIndexParentArray = new ArrayList<Integer>();
         m_unusedIndices = new Stack<Integer>();
-        m_symbolToUsage = new HashMap<String,Usage>(); // entries won't change
+        m_symbolToUsage = new HashMap<String, Usage>(); // entries won't change
         m_foralls = new HashSet<String>();
-        addSymbol("=?",g.BOOLEAN, Usage.LITERAL); // = as a predicate function, not as an assertion
-        addSymbol("true",g.BOOLEAN, Usage.LITERAL);
-        assert(getIndexForSymbol("=?")==0);
+        addSymbol("=?", g.BOOLEAN, Usage.LITERAL); // = as a predicate function, not as an assertion
+        addSymbol("true", g.BOOLEAN, Usage.LITERAL);
+        assert (getIndexForSymbol("=?") == 0);
     }
 
-    public Usage getUsage(String symbol){
+    public Usage getUsage(String symbol) {
         return m_symbolToUsage.get(symbol);
     }
+
     public Set<String> getSetMatchingType(MTType t) {
         Set<String> rSet = new HashSet<String>();
         Set<MTType> allTypesInSet = m_typeToSetOfOperators.keySet();
-        assert m_typeToSetOfOperators.size() != 0 : "empty m_typeToSetOfOperator.keySet()";
-        assert allTypesInSet !=null : "null set in Registry.getSetMatchingType";
+        assert !m_typeToSetOfOperators.isEmpty() : "empty m_typeToSetOfOperator.keySet()";
+        assert allTypesInSet != null : "null set in Registry.getSetMatchingType";
         // if there are subtypes of t, return those too
         for (MTType m : allTypesInSet) {
-            //if(m==null)continue;
             assert m != null : "null entry in allTypesInSet";
-            if (m.isSubtypeOf(t))
+            if (m.isSubtypeOf(t)) {
                 rSet.addAll(m_typeToSetOfOperators.get(m));
+            }
         }
         rSet.addAll(m_typeToSetOfOperators.get(t));
         return rSet;
@@ -110,14 +109,16 @@ public class Registry {
         assert m_symbolToIndex.get(symbol) != null : symbol + " not found"
                 + m_symbolToIndex.toString();
         int r = m_symbolToIndex.get(symbol);
-        if (r < 0)
+        if (r < 0) {
             System.err.println(symbol + " has no current index");
+        }
         return findAndCompress(r);
     }
 
-    public Set<String> getForAlls(){
+    public Set<String> getForAlls() {
         return m_foralls;
     }
+
     public int makeSymbol(MTType symbolType) {
         String symbolName = String.format(m_ccFormat, m_uniqueCounter++);
         return addSymbol(symbolName, symbolType, Usage.CREATED);
@@ -125,12 +126,13 @@ public class Registry {
 
     // if symbol is new, it adds it, otherwise, it returns current int rep
     public int addSymbol(String symbolName, MTType symbolType, Usage usage) {
-        if (isSymbolInTable(symbolName))
+        if (isSymbolInTable(symbolName)) {
             return getIndexForSymbol(symbolName);
+        }
 
-        if (m_typeToSetOfOperators.containsKey(symbolType))
+        if (m_typeToSetOfOperators.containsKey(symbolType)) {
             m_typeToSetOfOperators.get(symbolType).add(symbolName);
-        else {
+        } else {
             TreeSet<String> t = new TreeSet<String>();
             t.add(symbolName);
             assert symbolType != null : symbolName + " has null type";
@@ -138,7 +140,9 @@ public class Registry {
         }
 
         m_symbolToUsage.put(symbolName, usage);
-        if(usage.equals(Usage.FORALL)) m_foralls.add(symbolName);
+        if (usage.equals(Usage.FORALL)) {
+            m_foralls.add(symbolName);
+        }
         int incomingsize = m_symbolToIndex.size();
         m_symbolToIndex.put(symbolName, m_symbolToIndex.size());
         m_indexToSymbol.add(symbolName);
@@ -150,8 +154,5 @@ public class Registry {
     }
 
     public void flushUnusedSymbols() {
-    // probably have to shift vectors
-    // maybe need to renumber things
-
     }
 }
