@@ -7,7 +7,11 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
+import edu.clemson.cs.r2jt.data.ModuleID;
+import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving.Prover;
+import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
+import edu.clemson.cs.r2jt.proving2.ProverListener;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
@@ -16,9 +20,13 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,11 +37,12 @@ public class CongruenceClassProver {
     public static final Flag FLAG_PROVE
             = new Flag(Prover.FLAG_SECTION_NAME, "ccprove",
                     "congruence closure based prover");
-    private final List<VC> m_VCs;
-    private List<VerificationConditionCongruenceClosureImpl> m_ccVCs;
-    private List<TheoremCongruenceClosureImpl> m_theorems;
-    private ModuleScope m_scope;
-    private final int MAX_ITERATIONS = 10;
+    private final List<VerificationConditionCongruenceClosureImpl> m_ccVCs;
+    private final List<TheoremCongruenceClosureImpl> m_theorems;
+    private final int MAX_ITERATIONS = 5;
+    private final CompileEnvironment m_environment;
+    private final ModuleScope m_scope;
+    private String m_results;
 
     public static void setUpFlags() {
         FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_PROVE);
@@ -41,12 +50,11 @@ public class CongruenceClassProver {
         FlagDependencies.addImplies(FLAG_PROVE, Prover.FLAG_SOME_PROVER);
     }
 
-    public CongruenceClassProver(TypeGraph g, List<VC> vcs, ModuleScope scope) {
-        m_VCs = vcs;
-        m_scope = scope;
+    public CongruenceClassProver(TypeGraph g, List<VC> vcs, ModuleScope scope,
+            CompileEnvironment environment) {
 
         m_ccVCs = new ArrayList<VerificationConditionCongruenceClosureImpl>();
-        for (VC vc : m_VCs) {
+        for (VC vc : vcs) {
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc));
         }
 
@@ -56,36 +64,50 @@ public class CongruenceClassProver {
                                 MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
                                 MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
         for (TheoremEntry e : theoremEntries) {
-            //if(TheoremCongruenceClosureImpl.canProcess(e.getAssertion()))
-            if (e.getAssertion().isEquality()) {
-                // m_theorems.add(new TheoremCongruenceClosureImpl(g, e.getAssertion().getSubExpressions().get(1),e.getAssertion()));
+            if (e.getAssertion().isEquality() && !e.getAssertion().getQuantifiedVariables().isEmpty()) {
+                // This creates a theorem like e, where if e is of the form e1 = e2, this is e2 = e1.
+                // Any quantifiers used must appear in the lhs for matching.
+                // if there are no quantifiers, this will have no effect.
+                Set<PSymbol> newMatchQuants = e.getAssertion().getSubExpressions().get(1).getQuantifiedVariables();
+                if (newMatchQuants.containsAll(e.getAssertion().getSubExpressions().get(0).getQuantifiedVariables())) {
+                    m_theorems.add(new TheoremCongruenceClosureImpl(g, e.getAssertion().getSubExpressions().get(1), e.getAssertion()));
+                }
             }
             m_theorems.add(new TheoremCongruenceClosureImpl(g, e.getAssertion()));
-            //else System.out.println("Can't process " + e.getAssertion());
         }
+        m_environment = environment;
+        m_scope = scope;
+        m_results = "";
     }
 
-    public void start() {
-        String r = "";
+    public void start() throws IOException{
+
+        String summary = "";
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
             long startTime = System.nanoTime();
             if (prove(vcc)) {
-                r += "Proved ";
+               summary += "Proved ";
             } else {
-                r += "Insufficent data to prove ";
+                summary += "Insufficent data to prove ";
             }
+
             long endTime = System.nanoTime();
             long delayNS = endTime - startTime;
             long delayMS = TimeUnit.MILLISECONDS.convert(delayNS, TimeUnit.NANOSECONDS);
-            r += vcc.m_name + "time: " + delayMS + " ms\n";
+            summary += vcc.m_name + " time: " + delayMS + " ms\n";
         }
-        System.out.println(r);
+        String div = "===================================";
+        div = div + " Summary " + div + "\n";
+        summary = div + summary + div;
+        System.out.println(m_results + summary);
+        m_results = summary + m_results;
+
+        outputProofFile();
 
     }
 
     protected boolean prove(VerificationConditionCongruenceClosureImpl vcc) {
-        //for(VerificationConditionCongruenceClosureImpl vcc:m_ccVCs)
-        System.out.println("vc before: " + vcc);
+        m_results += ("Before application of theorems: " + vcc + "\n");
         String thString = "";
         int i;
         for (i = 0; !vcc.isProved() && i < MAX_ITERATIONS; ++i) {
@@ -93,30 +115,48 @@ public class CongruenceClassProver {
             //Collections.reverse(m_theorems);
             for (TheoremCongruenceClosureImpl th : m_theorems) {
                 if (vcc.isProved()) {
+                    i ++; // for iterations count.
                     break;
                 }
-                String e = th.m_theoremString;
-
                 String ap = th.applyTo(vcc);
-
-                if (ap.length() == 0) {
-                    ap = "match not found";
-                } else {
-                    thString += th.m_theoremString + "\n\t" + ap + "\n";
-                }
-
-                //System.out.println(th);
+                if(ap.length()>0)
+                    thString += th.m_theoremString + "\n" + ap + "\n";
             }
         }
-        System.out.println(thString);
+        m_results += (thString);
         if (vcc.isProved()) {
-            System.out.println(i + 1 + " iterations. proved vc: " + vcc);
+            m_results += (i + " iterations. PROVED: VC " + vcc + "\n");
             return true;
         }
 
-        System.out.println("not proved vc: " + vcc);
+        m_results += (i + " iterations. NOT PROVED: VC " + vcc + "\n");
         return false;
 
     }
 
+    private String proofFileName() {
+        File file = m_environment.getTargetFile();
+        ModuleID cid = m_environment.getModuleID(file);
+        file = m_environment.getFile(cid);
+        String filename = file.toString();
+        int temp = filename.indexOf(".");
+        String tempfile = filename.substring(0, temp);
+        String mainFileName;
+
+        mainFileName = tempfile + ".proof";
+
+        return mainFileName;
+    }
+
+    private void outputProofFile() throws IOException {
+        FileWriter w = new FileWriter(new File(proofFileName()));
+
+        w.write("Proofs for " + m_scope.getModuleIdentifier()
+                + " generated " + new Date() + "\n\n");
+
+        w.write(m_results);
+        w.write("\n");
+        w.flush();
+        w.close();
+    }
 }

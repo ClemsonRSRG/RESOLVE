@@ -45,14 +45,11 @@ public class SearchBox {
         m_bindingsInitial = bindings;
         m_indexInList = indexInList;
 
-        // THIS IS NOT UPDATED, BUT IS ONLY USED AT CONSTRUCTION (RIGHT?)
+        // THIS IS NOT UPDATED, BUT IS ONLY USED AT CONSTRUCTION. Only for the find.
         m_translated = m_original.translateFromRegParam1ToRegParam2(m_origRegistry, m_destRegistry, m_bindings);
         // do search with empty bindings; literals (func names, 0,1 etc. will be in query)
         dataSet.findNAE(this); // lb = currindex. does find on translated, sets bounds.
         // can make this function local
-        // set up bindings
-        //getNextMatch();
-
     }
 
     public void doSearch() {
@@ -89,7 +86,6 @@ public class SearchBox {
 
     // pre: bounds are set. index is in bounds.
     // post returns false or sets bindings 
-    // this rebinds wildcards in the search expression
     public boolean compareAndBind() {
         NormalizedAtomicExpressionMapImpl candidate = m_dataSet.getExprAtPosition(currentIndex);
 
@@ -99,7 +95,7 @@ public class SearchBox {
         }
         // this loop writes to m_bindings. Must revert on fail or do collision check first.
         // this method is not only called once, it is called until upperbound is exceeded.
-       HashMap<String,String> tempMap = new HashMap<String,String>(m_bindings);
+        HashMap<String, String> tempMap = new HashMap<String, String>(m_bindings);
         for (int i = 0; i < m_origAsStrArray.size(); ++i) {
             String origOp = m_origAsStrArray.get(i);
             String boundOp = candStrArray.get(i);
