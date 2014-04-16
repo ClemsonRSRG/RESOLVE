@@ -1,10 +1,14 @@
 /**
  * ConjunctionOfNormalizedAtomicExpressions.java
- * --------------------------------- Copyright (c) 2014 RESOLVE Software
- * Research Group School of Computing Clemson University All rights reserved.
- * --------------------------------- This file is subject to the terms and
- * conditions defined in file 'LICENSE.txt', which is part of this source code
- * package.
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
@@ -48,19 +52,21 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             return;
         }
         lowerBound = -lowerBound - 1;
-        NormalizedAtomicExpressionMapImpl ubExpr = translQuery.incrementLastKnown();
+        NormalizedAtomicExpressionMapImpl ubExpr =
+                translQuery.incrementLastKnown();
         int upperBound = Collections.binarySearch(m_exprList, ubExpr);
         if (!(upperBound >= 0 && upperBound < m_exprList.size())) {
             if (upperBound >= m_exprList.size()) {
                 upperBound = m_exprList.size() - 1;
-            } else if (upperBound < 0) {
+            }
+            else if (upperBound < 0) {
                 upperBound = -upperBound - 1;
                 if (upperBound >= m_exprList.size()) {
                     upperBound = m_exprList.size() - 1;
                 }
             }
         }
-        box.upperBound = upperBound;  // this could be 1 more than inclusive ub in some cases, but is ok
+        box.upperBound = upperBound; // this could be 1 more than inclusive ub in some cases, but is ok
         box.lowerBound = lowerBound;
         box.currentIndex = lowerBound;
         box.directMatch = false;
@@ -77,10 +83,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             int lhs = addFormula(expression.getSubExpressions().get(0));
             int rhs = addFormula(expression.getSubExpressions().get(1));
             mergeOperators(lhs, rhs);
-        } else if (name.equals("and")) {
+        }
+        else if (name.equals("and")) {
             addExpression(expression.getSubExpressions().get(0));
             addExpression(expression.getSubExpressions().get(1));
-        } else {
+        }
+        else {
             MTType type = expression.getType();
             PSymbol asPsymbol = (PSymbol) expression;
             int intRepOfOp = addPsymbol(asPsymbol);
@@ -97,14 +105,15 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         Registry.Usage usage = Registry.Usage.SINGULAR_VARIABLE;
         if (ps.isLiteral()) {
             usage = Registry.Usage.LITERAL;
-        } else if (ps.isFunction()) {
+        }
+        else if (ps.isFunction()) {
             usage = Registry.Usage.HASARGS; // making function names global in context of theorems and vc's
-        } else if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
+        }
+        else if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
             usage = Registry.Usage.FORALL;
         }
         return m_registry.addSymbol(name, type, usage);
     }
-
 
     /* experimentally handling =
      i.e.: (|?S| = 0) = (?S = Empty_String))
@@ -119,10 +128,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             rhs = m_registry.findAndCompress(rhs);
             if (lhs == rhs) {
                 return m_registry.getIndexForSymbol("true");
-            } else {
+            }
+            else {
                 // insert =?(lhs,rhs) = someNewRoot
                 int questEq = m_registry.getIndexForSymbol("=?");
-                NormalizedAtomicExpressionMapImpl pred = new NormalizedAtomicExpressionMapImpl();
+                NormalizedAtomicExpressionMapImpl pred =
+                        new NormalizedAtomicExpressionMapImpl();
                 pred.writeOnto(questEq, 0);
                 pred.writeOnto(lhs, 1);
                 pred.writeOnto(rhs, 2);
@@ -136,8 +147,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             return intRepOfOp;
         }
 
-        NormalizedAtomicExpressionMapImpl newExpr
-                = new NormalizedAtomicExpressionMapImpl();
+        NormalizedAtomicExpressionMapImpl newExpr =
+                new NormalizedAtomicExpressionMapImpl();
         newExpr.writeOnto(intRepOfOp, 0);
         int pos = 0;
         PExpSubexpressionIterator it = formula.getSubExpressionIterator();
@@ -164,9 +175,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         // no such formula exists. Note that
         int indexToInsert = -(posIfFound + 1);
-        MTType typeOfFormula
-                = m_registry.getTypeByIndex(atomicFormula.readPosition(0));
-        String symName = m_registry.getSymbolForIndex(atomicFormula.readPosition(0));
+        MTType typeOfFormula =
+                m_registry.getTypeByIndex(atomicFormula.readPosition(0));
+        String symName =
+                m_registry.getSymbolForIndex(atomicFormula.readPosition(0));
         assert typeOfFormula != null : symName + " has null type";
         int rhs = m_registry.makeSymbol(typeOfFormula);
         atomicFormula.writeToRoot(rhs);
@@ -224,7 +236,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
          int temp = a;
          a = b;
          b = temp;
-         }*/ // this is the original way, merge toward lower valued indices.
+         }*/// this is the original way, merge toward lower valued indices.
         String aString = m_registry.getSymbolForIndex(a);
         String bString = m_registry.getSymbolForIndex(b);
         if (aString.compareTo(bString) > 0) {
@@ -245,8 +257,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             b = temp;
         }
         Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator();
-        Stack<NormalizedAtomicExpressionMapImpl> modifiedEntries
-                = new Stack<NormalizedAtomicExpressionMapImpl>();
+        Stack<NormalizedAtomicExpressionMapImpl> modifiedEntries =
+                new Stack<NormalizedAtomicExpressionMapImpl>();
         Stack<Integer> coincidentalMergeHoldingTank = new Stack<Integer>();
         while (it.hasNext()) {
             NormalizedAtomicExpressionMapImpl curr = it.next();
@@ -256,14 +268,15 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
         }
         while (!modifiedEntries.empty()) {
-            int indexToInsert
-                    = Collections
-                    .binarySearch(m_exprList, modifiedEntries.peek());
+            int indexToInsert =
+                    Collections
+                            .binarySearch(m_exprList, modifiedEntries.peek());
             // If the modified one is already there, don't put it back
             if (indexToInsert < 0) {
                 indexToInsert = -(indexToInsert + 1);
                 m_exprList.add(indexToInsert, modifiedEntries.pop());
-            } else {
+            }
+            else {
                 // the expr is in the list, but are the roots different?
                 int rootA = modifiedEntries.pop().readRoot();
                 int rootB = m_exprList.get(indexToInsert).readRoot();
