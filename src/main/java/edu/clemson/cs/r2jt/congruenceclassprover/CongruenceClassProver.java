@@ -16,6 +16,7 @@ import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving.Prover;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
+import edu.clemson.cs.r2jt.proving2.Metrics;
 import edu.clemson.cs.r2jt.proving2.ProverListener;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
@@ -50,13 +51,15 @@ public class CongruenceClassProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
-    
+
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
     private final List<ProverListener> myProverListeners =
             new LinkedList<ProverListener>();
+    private final long myTimeout;
+
     ///////////////////////////////////////////////////////
-    
+
     public static void setUpFlags() {
         FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_PROVE);
         FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_LEGACY_PROVE);
@@ -74,8 +77,16 @@ public class CongruenceClassProver {
         if (listener != null) {
             myProverListeners.add(listener);
         }
+        if (environment.flags.isFlagSet(Prover.FLAG_TIMEOUT)) {
+            myTimeout =
+                    Integer.parseInt(environment.flags.getFlagArgument(
+                            Prover.FLAG_TIMEOUT, Prover.FLAG_TIMEOUT_ARG_NAME));
+        }
+        else {
+            myTimeout = -1;
+        }
         ///////////////////////////////////////////////////////////////
-        
+
         m_ccVCs = new ArrayList<VerificationConditionCongruenceClosureImpl>();
         int i = 0;
         for (VC vc : vcs) {
@@ -110,8 +121,7 @@ public class CongruenceClassProver {
         m_environment = environment;
         m_scope = scope;
         m_results = "";
-        
-        
+
     }
 
     public void start() throws IOException {
@@ -120,7 +130,8 @@ public class CongruenceClassProver {
         int i = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
             long startTime = System.nanoTime();
-            if (prove(vcc,i++)) {
+            boolean proved = prove(vcc);
+            if (proved) {
                 summary += "Proved ";
             }
             else {
@@ -133,7 +144,13 @@ public class CongruenceClassProver {
                     TimeUnit.MILLISECONDS
                             .convert(delayNS, TimeUnit.NANOSECONDS);
             summary += vcc.m_name + " time: " + delayMS + " ms\n";
+
+            for (ProverListener l : myProverListeners) {
+                l.vcResult(proved, myModels[i++], new Metrics(delayMS,
+                        myTimeout));
+            }
         }
+
         String div = "===================================";
         div = div + " Summary " + div + "\n";
         summary = div + summary + div;
@@ -144,7 +161,7 @@ public class CongruenceClassProver {
 
     }
 
-    protected boolean prove(VerificationConditionCongruenceClosureImpl vcc, int id) {
+    protected boolean prove(VerificationConditionCongruenceClosureImpl vcc) {
         m_results += ("Before application of theorems: " + vcc + "\n");
         String thString = "";
         int i;
@@ -162,11 +179,9 @@ public class CongruenceClassProver {
             }
         }
         m_results += (thString);
-        
+
         boolean proved = vcc.isProved();
-        for (ProverListener l : myProverListeners) {
-                    l.vcResult(proved, myModels[id], null);
-                }
+
         if (proved) {
             m_results += (i + " iterations. PROVED: VC " + vcc + "\n");
             return true;
@@ -202,7 +217,7 @@ public class CongruenceClassProver {
         w.flush();
         w.close();
     }
-    
+
     public void addProverListener(ProverListener l) {
         myProverListeners.add(l);
     }

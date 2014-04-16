@@ -1572,8 +1572,8 @@ public class Controller {
                         realTable.getModuleScope(new ModuleIdentifier(dec));
                 CongruenceClassProver ccProver =
                         new CongruenceClassProver(realTable.getTypeGraph(),
-                                vcs, scope, myInstanceEnvironment,myInstanceEnvironment
-                                        .getProverListener());
+                                vcs, scope, myInstanceEnvironment,
+                                myInstanceEnvironment.getProverListener());
                 try {
                     ccProver.start();
                 }
