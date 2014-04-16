@@ -26,7 +26,7 @@ import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
  * form of a mathematical implication.</p>
  * 
  * <p>This class is intended to supersede and eventually replace
- * <code>VerificationCondition</code>.</p>
+ * <code>VerificationConditionCongruenceClosureImpl</code>.</p>
  */
 public class VC {
 
