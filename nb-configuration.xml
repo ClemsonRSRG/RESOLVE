@@ -9,8 +9,6 @@ Without this configuration present, some functionality in the IDE may be limited
     <config-data xmlns="http://www.netbeans.org/ns/maven-config-data/1">
         <configurations>
             <configuration id="RSRG-Global" profiles=""/>
-            <configuration id="ccprover stack_flip" profiles=""/>
-            <configuration id="ccprover stack_flip_clone" profiles=""/>
         </configurations>
     </config-data>
 </project-shared-configuration>

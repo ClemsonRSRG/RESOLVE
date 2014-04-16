@@ -1,9 +1,14 @@
 /**
- * Registry.java --------------------------------- Copyright (c) 2014 RESOLVE
- * Software Research Group School of Computing Clemson University All rights
- * reserved. --------------------------------- This file is subject to the terms
- * and conditions defined in file 'LICENSE.txt', which is part of this source
- * code package.
+ * Registry.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
@@ -30,6 +35,7 @@ public class Registry {
 
         LITERAL, FORALL, SINGULAR_VARIABLE, CREATED, HASARGS
     };
+
     private final Map<String, Usage> m_symbolToUsage;
     private final Set<String> m_foralls;
 
@@ -132,7 +138,8 @@ public class Registry {
 
         if (m_typeToSetOfOperators.containsKey(symbolType)) {
             m_typeToSetOfOperators.get(symbolType).add(symbolName);
-        } else {
+        }
+        else {
             TreeSet<String> t = new TreeSet<String>();
             t.add(symbolName);
             assert symbolType != null : symbolName + " has null type";
@@ -153,6 +160,5 @@ public class Registry {
         return m_symbolToIndex.size() - 1;
     }
 
-    public void flushUnusedSymbols() {
-    }
+    public void flushUnusedSymbols() {}
 }

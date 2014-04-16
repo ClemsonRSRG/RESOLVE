@@ -1,10 +1,14 @@
 /**
  * VerificationConditionCongruenceClosureImpl.java
- * --------------------------------- Copyright (c) 2014 RESOLVE Software
- * Research Group School of Computing Clemson University All rights reserved.
- * --------------------------------- This file is subject to the terms and
- * conditions defined in file 'LICENSE.txt', which is part of this source code
- * package.
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
@@ -35,8 +39,8 @@ public class VerificationConditionCongruenceClosureImpl {
         m_antecedent = vc.getAntecedent();
         m_consequent = vc.getConsequent();
         m_registry = new Registry(g);
-        m_conjunction
-                = new ConjunctionOfNormalizedAtomicExpressions(m_registry);
+        m_conjunction =
+                new ConjunctionOfNormalizedAtomicExpressions(m_registry);
         m_goal = new ArrayList<List<String>>();
 
         addPExp(m_antecedent.iterator(), true);
@@ -56,7 +60,8 @@ public class VerificationConditionCongruenceClosureImpl {
             // check each goal has same root
             if (!g.get(0).equals(g.get(1))) // diff symbols, same root?
             {
-                if (m_registry.getIndexForSymbol(g.get(0)) != m_registry.getIndexForSymbol(g.get(1))) // can avoid this check by updating goal on merges
+                if (m_registry.getIndexForSymbol(g.get(0)) != m_registry
+                        .getIndexForSymbol(g.get(1))) // can avoid this check by updating goal on merges
                 {
                     return false; // not proved yet
                 }
@@ -75,16 +80,19 @@ public class VerificationConditionCongruenceClosureImpl {
                 int rhsIndex = (m_conjunction.addFormula(rhs));
                 if (inAntecedent) {
                     m_conjunction.mergeOperators(lhsIndex, rhsIndex);
-                } else {
+                }
+                else {
                     addGoal(m_registry.getSymbolForIndex(lhsIndex), m_registry
                             .getSymbolForIndex(rhsIndex));
                 }
-            } else { // P becomes P = true or P(x...) becomes P(x ...) = z and z is replaced by true
+            }
+            else { // P becomes P = true or P(x...) becomes P(x ...) = z and z is replaced by true
                 int intRepForExp = m_conjunction.addFormula(curr);
                 if (inAntecedent) {
                     m_conjunction.mergeOperators(m_registry
                             .getIndexForSymbol("true"), intRepForExp);
-                } else {
+                }
+                else {
                     addGoal(m_registry.getSymbolForIndex(intRepForExp), "true");
                 }
             }
@@ -105,8 +113,12 @@ public class VerificationConditionCongruenceClosureImpl {
         String r = m_name + "\n" + m_conjunction;
         r += "----------------------------------\n";
         for (List<String> gl : m_goal) {
-            String ro0 = m_registry.getSymbolForIndex(m_registry.getIndexForSymbol(gl.get(0)));
-            String ro1 = m_registry.getSymbolForIndex(m_registry.getIndexForSymbol(gl.get(1)));
+            String ro0 =
+                    m_registry.getSymbolForIndex(m_registry
+                            .getIndexForSymbol(gl.get(0)));
+            String ro1 =
+                    m_registry.getSymbolForIndex(m_registry
+                            .getIndexForSymbol(gl.get(1)));
             r += ro0 + "=" + ro1 + "\n";
         }
 

@@ -1,3 +1,15 @@
+/**
+ * SearchBox.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -32,7 +44,8 @@ public class SearchBox {
     public final int m_indexInList;
     public int m_lastGoodMatchIndex;
 
-    public SearchBox(NormalizedAtomicExpressionMapImpl query, Registry queryReg,
+    public SearchBox(NormalizedAtomicExpressionMapImpl query,
+            Registry queryReg,
             ConjunctionOfNormalizedAtomicExpressions dataSet, Registry dataReg,
             HashMap<String, String> bindings, int indexInList) {
         m_original = query; // this is the search expr directly from the theorem
@@ -46,18 +59,23 @@ public class SearchBox {
         m_indexInList = indexInList;
 
         // THIS IS NOT UPDATED, BUT IS ONLY USED AT CONSTRUCTION. Only for the find.
-        m_translated = m_original.translateFromRegParam1ToRegParam2(m_origRegistry, m_destRegistry, m_bindings);
+        m_translated =
+                m_original.translateFromRegParam1ToRegParam2(m_origRegistry,
+                        m_destRegistry, m_bindings);
         // do search with empty bindings; literals (func names, 0,1 etc. will be in query)
         dataSet.findNAE(this); // lb = currindex. does find on translated, sets bounds.
         // can make this function local
     }
 
     public void doSearch() {
-        m_translated = m_original.translateFromRegParam1ToRegParam2(m_origRegistry, m_destRegistry, m_bindings);
+        m_translated =
+                m_original.translateFromRegParam1ToRegParam2(m_origRegistry,
+                        m_destRegistry, m_bindings);
         m_dataSet.findNAE(this);
     }
 
-    public static List<String> NAEtoList(NormalizedAtomicExpressionMapImpl atom, Registry atomReg) {
+    public static List<String> NAEtoList(
+            NormalizedAtomicExpressionMapImpl atom, Registry atomReg) {
         ArrayList<String> atomAsStrArray = new ArrayList<String>();
         int op = atom.readPosition(0);
         int i = 1;
@@ -87,7 +105,8 @@ public class SearchBox {
     // pre: bounds are set. index is in bounds.
     // post returns false or sets bindings 
     public boolean compareAndBind() {
-        NormalizedAtomicExpressionMapImpl candidate = m_dataSet.getExprAtPosition(currentIndex);
+        NormalizedAtomicExpressionMapImpl candidate =
+                m_dataSet.getExprAtPosition(currentIndex);
 
         List<String> candStrArray = NAEtoList(candidate, m_destRegistry);
         if (candStrArray.size() != m_origAsStrArray.size()) {
@@ -95,7 +114,8 @@ public class SearchBox {
         }
         // this loop writes to m_bindings. Must revert on fail or do collision check first.
         // this method is not only called once, it is called until upperbound is exceeded.
-        HashMap<String, String> tempMap = new HashMap<String, String>(m_bindings);
+        HashMap<String, String> tempMap =
+                new HashMap<String, String>(m_bindings);
         for (int i = 0; i < m_origAsStrArray.size(); ++i) {
             String origOp = m_origAsStrArray.get(i);
             String boundOp = candStrArray.get(i);
@@ -118,10 +138,12 @@ public class SearchBox {
                 if (tempMap.get(origOp).equals("")) {
                     tempMap.put(origOp, boundOp);
                     continue;
-                } else {
+                }
+                else {
                     origValForComp = tempMap.get(origOp);
                 }
-            } else {
+            }
+            else {
                 origValForComp = m_origAsStrArray.get(i);
             }
             if (!origValForComp.equals(boundOp)) { // not a wildcard, if not the same, ret false
@@ -135,8 +157,7 @@ public class SearchBox {
     }
 
     public boolean inBounds() {
-        if (currentIndex >= lowerBound
-                && currentIndex <= upperBound) {
+        if (currentIndex >= lowerBound && currentIndex <= upperBound) {
             return true;
         }
         return false;

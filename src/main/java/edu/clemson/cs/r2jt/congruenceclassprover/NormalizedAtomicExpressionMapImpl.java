@@ -1,9 +1,14 @@
 /**
- * NormalizedAtomicExpressionMapImpl.java ---------------------------------
- * Copyright (c) 2014 RESOLVE Software Research Group School of Computing
- * Clemson University All rights reserved. ---------------------------------
- * This file is subject to the terms and conditions defined in file
- * 'LICENSE.txt', which is part of this source code package.
+ * NormalizedAtomicExpressionMapImpl.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
@@ -20,7 +25,7 @@ import java.util.TreeMap;
  */
 public class NormalizedAtomicExpressionMapImpl
         implements
-        Comparable<NormalizedAtomicExpressionMapImpl> {
+            Comparable<NormalizedAtomicExpressionMapImpl> {
 
     private static final int m_maxPositions = 6;
     private Map<Integer, Integer> m_expression;
@@ -145,28 +150,31 @@ public class NormalizedAtomicExpressionMapImpl
         return m_expression.keySet().size();
     }
 
-    public NormalizedAtomicExpressionMapImpl translateFromRegParam1ToRegParam2(Registry source,
-            Registry destination, HashMap<String, String> mapping) {
- 
-        NormalizedAtomicExpressionMapImpl translated = new NormalizedAtomicExpressionMapImpl();
+    public NormalizedAtomicExpressionMapImpl translateFromRegParam1ToRegParam2(
+            Registry source, Registry destination,
+            HashMap<String, String> mapping) {
+
+        NormalizedAtomicExpressionMapImpl translated =
+                new NormalizedAtomicExpressionMapImpl();
         Set<Integer> keys = m_expression.keySet();
         for (Integer k : keys) {
             String sourceName = source.getSymbolForIndex(k);
             String destName = "";
             switch (source.getUsage(sourceName)) {
-                case LITERAL:
-                case HASARGS:// literals and func names should be in both
-                    if (destination.isSymbolInTable(sourceName)) {
-                        destName = sourceName;
-                    } else {
-                        return translated.clear();
-                    }
-                    break;
-                case FORALL:
-                    if (mapping.containsKey(sourceName)) {
-                        destName = mapping.get(sourceName);
-                    }
-                    break;
+            case LITERAL:
+            case HASARGS:// literals and func names should be in both
+                if (destination.isSymbolInTable(sourceName)) {
+                    destName = sourceName;
+                }
+                else {
+                    return translated.clear();
+                }
+                break;
+            case FORALL:
+                if (mapping.containsKey(sourceName)) {
+                    destName = mapping.get(sourceName);
+                }
+                break;
             }
             if (!destName.equals("")) {
                 int trKey = destination.getIndexForSymbol(destName);
@@ -179,7 +187,8 @@ public class NormalizedAtomicExpressionMapImpl
     }
 
     public NormalizedAtomicExpressionMapImpl incrementLastKnown() {
-        NormalizedAtomicExpressionMapImpl incremented = new NormalizedAtomicExpressionMapImpl();
+        NormalizedAtomicExpressionMapImpl incremented =
+                new NormalizedAtomicExpressionMapImpl();
         int pos = 0;
         int op = readPosition(pos);
         if (op < 0) { // function operator unknown, upper bound is end of list
