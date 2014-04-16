@@ -146,9 +146,11 @@ public class CongruenceClassProver {
             summary += vcc.m_name + " time: " + delayMS + " ms\n";
 
             for (ProverListener l : myProverListeners) {
-                l.vcResult(proved, myModels[i++], new Metrics(delayMS,
-                        myTimeout));
+                l
+                        .vcResult(proved, myModels[i], new Metrics(delayMS,
+                                myTimeout));
             }
+            i++;
         }
 
         String div = "===================================";
