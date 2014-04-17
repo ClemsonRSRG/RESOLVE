@@ -52,6 +52,8 @@ public class CongruenceClassProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
+    private final boolean EQSWAP = false;
+    private final long DEFAULTTIMEOUT = 2000;
 
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
@@ -71,9 +73,6 @@ public class CongruenceClassProver {
             CompileEnvironment environment, ProverListener listener) {
 
         // Only for web ide //////////////////////////////////////////
-        if (listener != null) {
-            myProverListeners.add(listener);
-        }
         myModels = new PerVCProverModel[vcs.size()];
         if (listener != null) {
             myProverListeners.add(listener);
@@ -84,7 +83,7 @@ public class CongruenceClassProver {
                             Prover.FLAG_TIMEOUT, Prover.FLAG_TIMEOUT_ARG_NAME));
         }
         else {
-            myTimeout = -1;
+            myTimeout = DEFAULTTIMEOUT;
         }
         ///////////////////////////////////////////////////////////////
 
@@ -100,8 +99,8 @@ public class CongruenceClassProver {
                 scope.query(new EntryTypeQuery(TheoremEntry.class,
                         MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
                         MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
-        for (TheoremEntry e : theoremEntries) {
-            if (e.getAssertion().isEquality()
+        for (TheoremEntry e : theoremEntries) { //if(e.getAssertion().containsName("i"))continue;
+            if (EQSWAP && e.getAssertion().isEquality()
                     && !e.getAssertion().getQuantifiedVariables().isEmpty()) {
                 // This creates a theorem like e, where if e is of the form e1 = e2, this is e2 = e1.
                 // Any quantifiers used must appear in the lhs for matching.
@@ -136,7 +135,7 @@ public class CongruenceClassProver {
                 summary += "Proved ";
             }
             else {
-                summary += "Insufficent data to prove ";
+                summary += "Insufficient data to prove ";
             }
 
             long endTime = System.nanoTime();
@@ -147,8 +146,7 @@ public class CongruenceClassProver {
             summary += vcc.m_name + " time: " + delayMS + " ms\n";
 
             for (ProverListener l : myProverListeners) {
-                l
-                        .vcResult(proved, myModels[i], new Metrics(delayMS,
+                l.vcResult(proved, myModels[i], new Metrics(delayMS,
                                 myTimeout));
             }
             i++;
@@ -175,24 +173,26 @@ public class CongruenceClassProver {
         }
         return new String(div) + "\n";
     }
+    
     protected boolean prove(VerificationConditionCongruenceClosureImpl vcc) {
         String div = divLine(vcc.m_name);
         m_results += div + ("Before application of theorems: " + vcc + "\n");
         String thString = "";
         int i;
-        for (i = 0; !vcc.isProved() && i < MAX_ITERATIONS; ++i) {
+        long startTime = System.currentTimeMillis();
+        long endTime = myTimeout + startTime;
+        for (i = 0; i < MAX_ITERATIONS && !vcc.isProved() ; ++i) {
 
-            //Collections.reverse(m_theorems);
             for (TheoremCongruenceClosureImpl th : m_theorems) {
-                if (vcc.isProved()) {
+                if (vcc.isProved() || System.currentTimeMillis() > endTime) {
                     i++; // for iterations count.
                     break;
                 }
                 String ap = th.applyTo(vcc);
                 if (ap.length() > 0)
                     thString += th.m_theoremString + "\n" + ap + "\n";
+                }
             }
-        }
         m_results += (thString);
 
         boolean proved = vcc.isProved();
