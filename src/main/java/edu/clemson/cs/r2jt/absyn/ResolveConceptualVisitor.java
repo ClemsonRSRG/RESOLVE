@@ -112,6 +112,8 @@ public class ResolveConceptualVisitor {
 
     public void visitSetExp(SetExp data) {}
 
+    public void visitSetCollectionExp(SetCollectionExp data) {}
+
     public void visitMathVarDec(MathVarDec data) {}
 
     public void visitVariableNameExp(VariableNameExp data) {}
