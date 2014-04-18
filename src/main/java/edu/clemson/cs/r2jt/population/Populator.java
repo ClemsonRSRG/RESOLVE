@@ -1441,6 +1441,11 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
+    public void postSetCollectionExp(SetCollectionExp e) {
+        
+    }
+
+    @Override
     public void postIntegerExp(IntegerExp e) {
         postSymbolExp(e.getQualifier(), "" + e.getValue(), e);
     }

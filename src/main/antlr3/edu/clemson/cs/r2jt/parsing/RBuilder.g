@@ -2301,7 +2301,7 @@ parenthesized_expression returns [Exp exp = null]
     :   exp1=math_expression { $exp = $exp1.exp;  }
     ;
 
-set_constructor returns [SetExp exp = null]
+set_constructor returns [Exp exp = null]
 @init{
     MathVarDec var = null;
     edu.clemson.cs.r2jt.collections.List<VarExp> vars = new edu.clemson.cs.r2jt.collections.List<VarExp>("VarExp");
@@ -2313,7 +2313,7 @@ set_constructor returns [SetExp exp = null]
             $exp = new SetExp(getLocation($LBRACE), var, $where.exp, $body.exp);
         }
     |   ^(  SET (id=ident { vars.add(new VarExp(getLocation($SET), null, $id.ps)); })* )
-        {   $exp = new SetExp(getLocation($SET), null, null, null, vars);   }
+        {   $exp = new SetCollectionExp(getLocation($SET), vars);   }
     ;
 
 tuple_expression returns [TupleExp exp = null]

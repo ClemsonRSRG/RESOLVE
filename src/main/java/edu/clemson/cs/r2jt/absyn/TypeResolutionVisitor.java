@@ -168,7 +168,8 @@ public class TypeResolutionVisitor {
         return null;
     }
 
-    public Type getSetCollectionExpType(SetCollectionExp data) throws TypeResolutionException {
+    public Type getSetCollectionExpType(SetCollectionExp data)
+            throws TypeResolutionException {
         assert false : "This method should not be called.";
         return null;
     }

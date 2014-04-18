@@ -35,9 +35,6 @@ public class SetExp extends Exp {
     /** The body member. */
     private Exp body;
 
-    /** List of variables */
-    private List<VarExp> vars;
-
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -51,18 +48,9 @@ public class SetExp extends Exp {
         this.body = body;
     }
 
-    public SetExp(Location location, MathVarDec var, Exp where, Exp body,
-            List<VarExp> vars) {
-        this.location = location;
-        this.var = var;
-        this.where = where;
-        this.body = body;
-        this.vars = vars;
-    }
-
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
         return new SetExp(location, var, substitute(where, substitutions),
-                substitute(body, substitutions), vars);
+                substitute(body, substitutions));
     }
 
     // ===========================================================
@@ -91,11 +79,6 @@ public class SetExp extends Exp {
     /** Returns the value of the body variable. */
     public Exp getBody() {
         return body;
-    }
-
-    /** Returns the list of the variables. */
-    public List<VarExp> getVars() {
-        return vars;
     }
 
     // -----------------------------------------------------------
@@ -213,15 +196,11 @@ public class SetExp extends Exp {
         MathVarDec newVar = var.copy();
         List<VarExp> newVars = new List<VarExp>();
 
-        for (VarExp v : vars) {
-            newVars.add((VarExp) Exp.copy(v));
-        }
-
         Exp newWhere = null;
         if (where != null)
             newWhere = Exp.copy(where);
         Exp newBody = Exp.copy(body);
-        return new SetExp(null, newVar, newWhere, newBody, newVars);
+        return new SetExp(null, newVar, newWhere, newBody);
     }
 
 }
