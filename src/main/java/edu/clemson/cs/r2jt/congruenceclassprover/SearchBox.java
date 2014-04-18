@@ -152,6 +152,7 @@ public class SearchBox {
             }
         }
         m_bindings = tempMap;
+        m_lastGoodMatchIndex = currentIndex;
         return true;
 
     }

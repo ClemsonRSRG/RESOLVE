@@ -122,8 +122,9 @@ public class TheoremCongruenceClosureImpl {
 
         if (p.isEquality() && p.equals(m_theorem)) {
             m_matchConj.addExpression(p);
-            if (m_matchConj.size() != 0)
+            if (m_matchConj.size() != 0) {
                 return findValidBindings(vc);
+            }
         }
         if (p.getTopLevelOperation().equals("implies")) {
             return findPExp(p.getSubExpressions().get(0), vc);
@@ -228,15 +229,16 @@ public class TheoremCongruenceClosureImpl {
                     else if (!curBox.m_bindings.equals(allValidBindings.peek())) {
                         allValidBindings.push(curBox.m_bindings);
                     }
-                    boxStack.pop();
-                    if (!boxStack.isEmpty()) {
-                        boxStack.peek().currentIndex =
-                                boxStack.peek().m_lastGoodMatchIndex;
-                        boxStack.peek().currentIndex++;
+                    // If there is only one left, do not pop it when good match
+                    // is found.
+                    if (boxStack.size() > 1) {
+                        boxStack.pop();
                     }
+
+                    boxStack.peek().currentIndex++;
+
                 }
                 else {
-                    curBox.m_lastGoodMatchIndex = curBox.currentIndex;
                     pushNewSearchBox(boxStack);
                 }
             }

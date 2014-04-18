@@ -55,17 +55,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         NormalizedAtomicExpressionMapImpl ubExpr =
                 translQuery.incrementLastKnown();
         int upperBound = Collections.binarySearch(m_exprList, ubExpr);
-        if (!(upperBound >= 0 && upperBound < m_exprList.size())) {
-            if (upperBound >= m_exprList.size()) {
-                upperBound = m_exprList.size() - 1;
-            }
-            else if (upperBound < 0) {
-                upperBound = -upperBound - 1;
-                if (upperBound >= m_exprList.size()) {
-                    upperBound = m_exprList.size() - 1;
-                }
-            }
+        if (upperBound < 0) {
+            upperBound = -upperBound - 1;
         }
+        upperBound = Integer.min(upperBound, m_exprList.size() - 1);
         box.upperBound = upperBound; // this could be 1 more than inclusive ub in some cases, but is ok
         box.lowerBound = lowerBound;
         box.currentIndex = lowerBound;

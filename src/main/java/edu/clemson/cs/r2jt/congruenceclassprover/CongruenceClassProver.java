@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,6 +52,8 @@ public class CongruenceClassProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
+    private final boolean EQSWAP = false;
+    private final long DEFAULTTIMEOUT = 2000;
 
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
@@ -70,9 +73,6 @@ public class CongruenceClassProver {
             CompileEnvironment environment, ProverListener listener) {
 
         // Only for web ide //////////////////////////////////////////
-        if (listener != null) {
-            myProverListeners.add(listener);
-        }
         myModels = new PerVCProverModel[vcs.size()];
         if (listener != null) {
             myProverListeners.add(listener);
@@ -83,7 +83,7 @@ public class CongruenceClassProver {
                             Prover.FLAG_TIMEOUT, Prover.FLAG_TIMEOUT_ARG_NAME));
         }
         else {
-            myTimeout = -1;
+            myTimeout = DEFAULTTIMEOUT;
         }
         ///////////////////////////////////////////////////////////////
 
@@ -99,8 +99,8 @@ public class CongruenceClassProver {
                 scope.query(new EntryTypeQuery(TheoremEntry.class,
                         MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
                         MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
-        for (TheoremEntry e : theoremEntries) {
-            if (e.getAssertion().isEquality()
+        for (TheoremEntry e : theoremEntries) { //if(e.getAssertion().containsName("i"))continue;
+            if (EQSWAP && e.getAssertion().isEquality()
                     && !e.getAssertion().getQuantifiedVariables().isEmpty()) {
                 // This creates a theorem like e, where if e is of the form e1 = e2, this is e2 = e1.
                 // Any quantifiers used must appear in the lhs for matching.
@@ -135,7 +135,7 @@ public class CongruenceClassProver {
                 summary += "Proved ";
             }
             else {
-                summary += "Insufficent data to prove ";
+                summary += "Insufficient data to prove ";
             }
 
             long endTime = System.nanoTime();
@@ -153,8 +153,7 @@ public class CongruenceClassProver {
             i++;
         }
 
-        String div = "===================================";
-        div = div + " Summary " + div + "\n";
+        String div = divLine("Summary");
         summary = div + summary + div;
         System.out.println(m_results + summary);
         m_results = summary + m_results;
@@ -163,15 +162,30 @@ public class CongruenceClassProver {
 
     }
 
+    private String divLine(String label) {
+        if (label.length() > 78)
+            label = label.substring(0, 77);
+        label = " " + label + " ";
+        char[] div = new char[80];
+        Arrays.fill(div, '=');
+        int start = 40 - label.length() / 2;
+        for (int i = start, j = 0; j < label.length(); ++i, ++j) {
+            div[i] = label.charAt(j);
+        }
+        return new String(div) + "\n";
+    }
+
     protected boolean prove(VerificationConditionCongruenceClosureImpl vcc) {
-        m_results += ("Before application of theorems: " + vcc + "\n");
+        String div = divLine(vcc.m_name);
+        m_results += div + ("Before application of theorems: " + vcc + "\n");
         String thString = "";
         int i;
-        for (i = 0; !vcc.isProved() && i < MAX_ITERATIONS; ++i) {
+        long startTime = System.currentTimeMillis();
+        long endTime = myTimeout + startTime;
+        for (i = 0; i < MAX_ITERATIONS && !vcc.isProved(); ++i) {
 
-            //Collections.reverse(m_theorems);
             for (TheoremCongruenceClosureImpl th : m_theorems) {
-                if (vcc.isProved()) {
+                if (vcc.isProved() || System.currentTimeMillis() > endTime) {
                     i++; // for iterations count.
                     break;
                 }
@@ -185,11 +199,11 @@ public class CongruenceClassProver {
         boolean proved = vcc.isProved();
 
         if (proved) {
-            m_results += (i + " iterations. PROVED: VC " + vcc + "\n");
+            m_results += (i + " iterations. PROVED: VC " + vcc + "\n") + div;
             return true;
         }
 
-        m_results += (i + " iterations. NOT PROVED: VC " + vcc + "\n");
+        m_results += (i + " iterations. NOT PROVED: VC " + vcc + "\n") + div;
         return false;
 
     }
