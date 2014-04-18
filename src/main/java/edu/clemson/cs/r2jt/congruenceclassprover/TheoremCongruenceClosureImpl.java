@@ -1,9 +1,14 @@
 /**
- * TheoremCongruenceClosureImpl.java --------------------------------- Copyright
- * (c) 2014 RESOLVE Software Research Group School of Computing Clemson
- * University All rights reserved. --------------------------------- This file
- * is subject to the terms and conditions defined in file 'LICENSE.txt', which
- * is part of this source code package.
+ * TheoremCongruenceClosureImpl.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
@@ -33,16 +38,18 @@ public class TheoremCongruenceClosureImpl {
         m_theoremString = p.toString();
         isEquality = p.getTopLevelOperation().equals("=");
         m_theoremRegistry = new Registry(g);
-        m_matchConj
-                = new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry);
+        m_matchConj =
+                new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry);
 
         if (isEquality) {
             m_matchConj.addExpression(p.getSubExpressions().get(0));
             m_insertExpr = p;
-        } else if (p.getTopLevelOperation().equals("implies")) {
+        }
+        else if (p.getTopLevelOperation().equals("implies")) {
             m_matchConj.addExpression(p.getSubExpressions().get(0));
             m_insertExpr = p.getSubExpressions().get(1);
-        } else {
+        }
+        else {
             m_matchConj.addExpression(p);
             m_insertExpr = p;
         }
@@ -54,8 +61,8 @@ public class TheoremCongruenceClosureImpl {
         m_theoremString = toInsert.toString();
         isEquality = true;
         m_theoremRegistry = new Registry(g);
-        m_matchConj
-                = new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry);
+        m_matchConj =
+                new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry);
         m_matchConj.addExpression(toMatchAndBind);
         m_insertExpr = toInsert;
     }
@@ -78,8 +85,8 @@ public class TheoremCongruenceClosureImpl {
         while (!allValidBindings.empty()) {
             HashMap<String, String> curBinding = allValidBindings.pop();
             for (String thKey : curBinding.keySet()) {
-                MTType quanType
-                        = m_theoremRegistry.getTypeByIndex(m_theoremRegistry
+                MTType quanType =
+                        m_theoremRegistry.getTypeByIndex(m_theoremRegistry
                                 .getIndexForSymbol(thKey));
                 quantToLit.put(new PSymbol(quanType, quanType, thKey),
                         new PSymbol(quanType, quanType, curBinding.get(thKey)));
@@ -122,8 +129,8 @@ public class TheoremCongruenceClosureImpl {
         if (p.getTopLevelOperation().equals("implies")) {
             return findPExp(p.getSubExpressions().get(0), vc);
         }
-        Stack<HashMap<String, String>> allValidBindings
-                = new Stack<HashMap<String, String>>();
+        Stack<HashMap<String, String>> allValidBindings =
+                new Stack<HashMap<String, String>>();
         HashMap<String, String> curBindings = getInitBindings();
         MTType t;
         if (p.isEquality()) {
@@ -135,7 +142,8 @@ public class TheoremCongruenceClosureImpl {
             // and it wont matter which you use, since they will have the same type.
             t = rhs.getType();
 
-        } else {
+        }
+        else {
             t = p.getType();
         }
         Set<String> actuals = vc.getRegistry().getSetMatchingType(t);
@@ -149,8 +157,8 @@ public class TheoremCongruenceClosureImpl {
             actuals.remove(tor);
         }
 
-        String[] virtualsArr
-                = curBindings.keySet().toArray(
+        String[] virtualsArr =
+                curBindings.keySet().toArray(
                         new String[curBindings.keySet().size()]);
         String[] actualsArr = actuals.toArray(new String[actuals.size()]);
 
@@ -191,8 +199,8 @@ public class TheoremCongruenceClosureImpl {
 
             return findPExp(m_theorem, vc);
         }
-        Stack<HashMap<String, String>> allValidBindings
-                = new Stack<HashMap<String, String>>();
+        Stack<HashMap<String, String>> allValidBindings =
+                new Stack<HashMap<String, String>>();
         Stack<SearchBox> boxStack = new Stack<SearchBox>();
         boxStack.push(new SearchBox(m_matchConj.getExprAtPosition(0),
                 m_theoremRegistry, vc.getConjunct(), vc.getRegistry(),
@@ -201,22 +209,24 @@ public class TheoremCongruenceClosureImpl {
         while (!boxStack.isEmpty()) {
             SearchBox curBox = boxStack.peek();
             // rollBack
-            curBox.m_bindings
-                    = new HashMap<String, String>(curBox.m_bindingsInitial);
+            curBox.m_bindings =
+                    new HashMap<String, String>(curBox.m_bindingsInitial);
             curBox.getNextMatch();
             if (curBox.impossibleToMatch) {
                 boxStack.pop();
                 if (!boxStack.isEmpty()) {
-                    boxStack.peek().currentIndex
-                            = boxStack.peek().m_lastGoodMatchIndex;
+                    boxStack.peek().currentIndex =
+                            boxStack.peek().m_lastGoodMatchIndex;
                     boxStack.peek().currentIndex++;
                 }
-            } else {
+            }
+            else {
                 // save bindings if for last index, then pop
                 if (curBox.m_indexInList + 1 == m_matchConj.size()) {
                     if (allValidBindings.isEmpty()) {
                         allValidBindings.push(curBox.m_bindings);
-                    } else if (!curBox.m_bindings.equals(allValidBindings.peek())) {
+                    }
+                    else if (!curBox.m_bindings.equals(allValidBindings.peek())) {
                         allValidBindings.push(curBox.m_bindings);
                     }
                     // If there is only one left, do not pop it when good match
@@ -227,7 +237,8 @@ public class TheoremCongruenceClosureImpl {
 
                     boxStack.peek().currentIndex++;
 
-                } else {
+                }
+                else {
                     pushNewSearchBox(boxStack);
                 }
             }

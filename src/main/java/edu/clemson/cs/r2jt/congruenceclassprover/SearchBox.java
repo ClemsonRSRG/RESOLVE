@@ -147,7 +147,7 @@ public class SearchBox {
                 origValForComp = m_origAsStrArray.get(i);
             }
             if (!origValForComp.equals(boundOp)) { // not a wildcard, if not the same, ret false
-            
+
                 return false; // problem, need to roll back m_bindings
             }
         }

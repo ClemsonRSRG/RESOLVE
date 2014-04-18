@@ -146,13 +146,13 @@ public class CongruenceClassProver {
             summary += vcc.m_name + " time: " + delayMS + " ms\n";
 
             for (ProverListener l : myProverListeners) {
-                l.vcResult(proved, myModels[i], new Metrics(delayMS,
+                l
+                        .vcResult(proved, myModels[i], new Metrics(delayMS,
                                 myTimeout));
             }
             i++;
         }
 
-        
         String div = divLine("Summary");
         summary = div + summary + div;
         System.out.println(m_results + summary);
@@ -162,18 +162,19 @@ public class CongruenceClassProver {
 
     }
 
-    private String divLine(String label){
-        if(label.length() > 78) label=label.substring(0,77);
+    private String divLine(String label) {
+        if (label.length() > 78)
+            label = label.substring(0, 77);
         label = " " + label + " ";
         char[] div = new char[80];
-        Arrays.fill(div,'=');
+        Arrays.fill(div, '=');
         int start = 40 - label.length() / 2;
-        for(int i = start, j = 0; j < label.length(); ++i, ++j){
+        for (int i = start, j = 0; j < label.length(); ++i, ++j) {
             div[i] = label.charAt(j);
         }
         return new String(div) + "\n";
     }
-    
+
     protected boolean prove(VerificationConditionCongruenceClosureImpl vcc) {
         String div = divLine(vcc.m_name);
         m_results += div + ("Before application of theorems: " + vcc + "\n");
@@ -181,7 +182,7 @@ public class CongruenceClassProver {
         int i;
         long startTime = System.currentTimeMillis();
         long endTime = myTimeout + startTime;
-        for (i = 0; i < MAX_ITERATIONS && !vcc.isProved() ; ++i) {
+        for (i = 0; i < MAX_ITERATIONS && !vcc.isProved(); ++i) {
 
             for (TheoremCongruenceClosureImpl th : m_theorems) {
                 if (vcc.isProved() || System.currentTimeMillis() > endTime) {
@@ -191,8 +192,8 @@ public class CongruenceClassProver {
                 String ap = th.applyTo(vcc);
                 if (ap.length() > 0)
                     thString += th.m_theoremString + "\n" + ap + "\n";
-                }
             }
+        }
         m_results += (thString);
 
         boolean proved = vcc.isProved();
