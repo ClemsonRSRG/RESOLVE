@@ -22,7 +22,7 @@ import java.util.*;
  */
 public class Registry {
 
-    private final String m_ccFormat = "¢%03d";
+    public final String m_ccFormat = "¢%03d";
     public TreeMap<String, Integer> m_symbolToIndex;
     public Map<MTType, TreeSet<String>> m_typeToSetOfOperators;
     public ArrayList<String> m_indexToSymbol;

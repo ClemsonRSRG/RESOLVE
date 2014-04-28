@@ -27,6 +27,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
+import edu.clemson.cs.r2jt.utilities.FlagManager;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -52,8 +53,8 @@ public class CongruenceClassProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
-    private final boolean EQSWAP = false;
-    private final long DEFAULTTIMEOUT = 2000;
+    private final boolean EQSWAP = true;
+    private final long DEFAULTTIMEOUT = 2000; // plenty of time on an i7
 
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
@@ -155,11 +156,12 @@ public class CongruenceClassProver {
 
         String div = divLine("Summary");
         summary = div + summary + div;
-        System.out.println(m_results + summary);
+        if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+            System.out.println(m_results + summary);
+        }
         m_results = summary + m_results;
 
         outputProofFile();
-
     }
 
     private String divLine(String label) {
@@ -177,7 +179,8 @@ public class CongruenceClassProver {
 
     protected boolean prove(VerificationConditionCongruenceClosureImpl vcc) {
         String div = divLine(vcc.m_name);
-        m_results += div + ("Before application of theorems: " + vcc + "\n");
+        String theseResults =
+                div + ("Before application of theorems: " + vcc + "\n");
         String thString = "";
         int i;
         long startTime = System.currentTimeMillis();
@@ -189,21 +192,28 @@ public class CongruenceClassProver {
                     i++; // for iterations count.
                     break;
                 }
-                String ap = th.applyTo(vcc);
-                if (ap.length() > 0)
-                    thString += th.m_theoremString + "\n" + ap + "\n";
+                String ap = th.applyTo(vcc, endTime, i < 1);
+                if (ap.length() > 0) {
+                    String result = th.m_theoremString + "\n" + ap + "\n";
+                    if (!thString.contains(result)) {
+                        thString += result;
+                    }
+                }
             }
         }
-        m_results += (thString);
+        theseResults += (thString);
 
         boolean proved = vcc.isProved();
 
         if (proved) {
-            m_results += (i + " iterations. PROVED: VC " + vcc + "\n") + div;
+            theseResults += (i + " iterations. PROVED: VC " + vcc + "\n") + div;
+            m_results += theseResults;
             return true;
         }
 
-        m_results += (i + " iterations. NOT PROVED: VC " + vcc + "\n") + div;
+        m_results +=
+                div + (i + " iterations. NOT PROVED: VC " + vcc.m_name + "\n")
+                        + div;
         return false;
 
     }

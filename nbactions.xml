@@ -35,7 +35,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2:exec</goal>
             </goals>
             <properties>
-                <exec.args>-ea -classpath %classpath edu.clemson.cs.r2jt.Main -ccprove -nogui  Concepts\Queue_Template\Inject_Front_Realiz.rb</exec.args>
+                <exec.args>-ea -classpath %classpath edu.clemson.cs.r2jt.Main -ccprove -nogui -nodebug Concepts\Queue_Template\Inject_Front_Realiz.rb</exec.args>
                 <exec.executable>java</exec.executable>
                 <exec.classpathScope>runtime</exec.classpathScope>
                 <exec.workingdir>C:\Users\mike\Documents\RESOLVE-Workspace-master\RESOLVE-Workspace-master\RESOLVE\Main</exec.workingdir>
@@ -48,7 +48,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -ea -classpath %classpath edu.clemson.cs.r2jt.Main -ccprove -nogui  Concepts\Queue_Template\Inject_Front_Realiz.rb</exec.args>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -ea -classpath %classpath edu.clemson.cs.r2jt.Main -ccprove -nogui -nodebug Concepts\Queue_Template\Inject_Front_Realiz.rb</exec.args>
                 <exec.executable>java</exec.executable>
                 <exec.classpathScope>runtime</exec.classpathScope>
                 <jpda.listen>true</jpda.listen>
@@ -62,7 +62,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2:exec</goal>
             </goals>
             <properties>
-                <exec.args>-ea -classpath %classpath edu.clemson.cs.r2jt.Main -ccprove -nogui  Concepts\Queue_Template\Inject_Front_Realiz.rb</exec.args>
+                <exec.args>-ea -classpath %classpath edu.clemson.cs.r2jt.Main -ccprove -nogui -nodebug Concepts\Queue_Template\Inject_Front_Realiz.rb</exec.args>
                 <exec.executable>${profiler.java}</exec.executable>
                 <exec.workingdir>C:\Users\mike\Documents\RESOLVE-Workspace-master\RESOLVE-Workspace-master\RESOLVE\Main</exec.workingdir>
             </properties>

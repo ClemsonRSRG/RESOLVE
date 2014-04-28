@@ -14,6 +14,7 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +49,18 @@ public class NormalizedAtomicExpressionMapImpl
 
     protected Set<Integer> getKeys() {
         return m_expression.keySet();
+    }
+
+    protected Set<String> getArgumentsAsStrings(Registry reg) {
+        HashSet<String> rSet = new HashSet<String>();
+        for (int i = 1; i < m_maxPositions; ++i) {
+            int index = readPosition(i);
+            if (index < 0)
+                break;
+            String op = reg.getSymbolForIndex(index);
+            rSet.add(op);
+        }
+        return rSet;
     }
 
     /**

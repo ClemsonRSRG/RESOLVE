@@ -18,8 +18,10 @@ import edu.clemson.cs.r2jt.proving2.Consequent;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by mike on 4/3/2014.
@@ -53,6 +55,20 @@ public class VerificationConditionCongruenceClosureImpl {
 
     public Registry getRegistry() {
         return m_registry;
+    }
+
+    public Set<String> getGoal() {
+        HashSet<String> r = new HashSet<String>();
+        for (List<String> agoalList : m_goal) {
+            for (String agoal : agoalList) {
+                // excluding constants such as true and false
+                if (agoal.equals("true") || agoal.equals("false"))
+                    continue;
+                r.addAll(m_conjunction.getArgsInExpressionsEqualTo(agoal,
+                        new HashSet<String>()));
+            }
+        }
+        return r;
     }
 
     public boolean isProved() {
