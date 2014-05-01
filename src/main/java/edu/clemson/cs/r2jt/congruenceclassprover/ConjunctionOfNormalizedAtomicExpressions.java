@@ -58,7 +58,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (upperBound < 0) {
             upperBound = -upperBound - 1;
         }
-        upperBound = Integer.min(upperBound, m_exprList.size() - 1);
+        upperBound =
+                upperBound < (m_exprList.size() - 1) ? upperBound : m_exprList
+                        .size() - 1;
         box.upperBound = upperBound; // this could be 1 more than inclusive ub in some cases, but is ok
         box.lowerBound = lowerBound;
         box.currentIndex = lowerBound;
