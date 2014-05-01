@@ -58,7 +58,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (upperBound < 0) {
             upperBound = -upperBound - 1;
         }
-        upperBound = Integer.min(upperBound, m_exprList.size() - 1);
+        upperBound =
+                upperBound < (m_exprList.size() - 1) ? upperBound : m_exprList
+                        .size() - 1;
         box.upperBound = upperBound; // this could be 1 more than inclusive ub in some cases, but is ok
         box.lowerBound = lowerBound;
         box.currentIndex = lowerBound;
@@ -69,6 +71,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return m_exprList.get(position);
     }
 
+    // Top level
     protected void addExpression(PExp expression) {
         String name = expression.getTopLevelOperation();
 
@@ -92,6 +95,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
     }
 
+    // adds a particular sumbol to the registry
     protected int addPsymbol(PSymbol ps) {
         String name = ps.getTopLevelOperation();
         MTType type = ps.getType();
@@ -281,6 +285,26 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         m_registry.substitute(a, b);
         return coincidentalMergeHoldingTank;
+    }
+
+    public Set<String> getArgsInExpressionsEqualTo(String rhs, Set<String> seen) {
+
+        int root = m_registry.getIndexForSymbol(rhs);
+        HashSet<String> rSet = new HashSet<String>();
+        for (NormalizedAtomicExpressionMapImpl exp : m_exprList) {
+            if (exp.readRoot() == root) {
+                rSet.addAll(exp.getArgumentsAsStrings(m_registry));
+            }
+        }
+        seen.add(rhs);
+        HashSet<String> argsOfArgs = new HashSet<String>();
+        for (String arg : rSet) {
+            if (!seen.contains(arg)) {
+                argsOfArgs.addAll(getArgsInExpressionsEqualTo(arg, seen));
+            }
+        }
+        rSet.addAll(argsOfArgs);
+        return rSet;
     }
 
     @Override

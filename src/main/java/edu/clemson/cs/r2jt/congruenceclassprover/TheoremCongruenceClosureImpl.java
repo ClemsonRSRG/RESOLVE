@@ -18,6 +18,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
@@ -67,8 +68,16 @@ public class TheoremCongruenceClosureImpl {
         m_insertExpr = toInsert;
     }
 
-    public String applyTo(VerificationConditionCongruenceClosureImpl vc) {
+    public String applyTo(VerificationConditionCongruenceClosureImpl vc,
+            long endTime, boolean goalOnly) {
+        Set<String> setOfGoalArgs;
+        if (goalOnly)
+            setOfGoalArgs = vc.getGoal();
+        else
+            setOfGoalArgs = new HashSet<String>();
         if (m_insertExpr.getQuantifiedVariables().isEmpty()) {
+            if (goalOnly && isIntersectionEmpty(setOfGoalArgs, m_insertExpr))
+                return "";
             String r = "\tinserting: " + m_insertExpr + "\n";
             vc.getConjunct().addExpression(m_insertExpr);
             return r;
@@ -82,7 +91,8 @@ public class TheoremCongruenceClosureImpl {
         }
 
         HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
-        while (!allValidBindings.empty()) {
+        while (!allValidBindings.empty()
+                && System.currentTimeMillis() < endTime) {
             HashMap<String, String> curBinding = allValidBindings.pop();
             for (String thKey : curBinding.keySet()) {
                 MTType quanType =
@@ -95,11 +105,23 @@ public class TheoremCongruenceClosureImpl {
             assert modifiedInsert != m_insertExpr : this.toString()
                     + m_matchConj;
             quantToLit.clear();
+            if (goalOnly && isIntersectionEmpty(setOfGoalArgs, modifiedInsert)) {
+                // r += "\texcluding because " + setOfGoalArgs + " not in " + modifiedInsert + "\n";
+                continue;
+            }
             r += ("\tinserting: " + modifiedInsert + "\n");
             vc.getConjunct().addExpression(modifiedInsert);
 
         }
         return r;
+    }
+
+    private boolean isIntersectionEmpty(Set<String> goalArgs, PExp insertExp) {
+        for (String g : goalArgs) {
+            if (insertExp.containsName(g))
+                return false;
+        }
+        return true;
     }
 
     private HashMap<String, String> getInitBindings() {
