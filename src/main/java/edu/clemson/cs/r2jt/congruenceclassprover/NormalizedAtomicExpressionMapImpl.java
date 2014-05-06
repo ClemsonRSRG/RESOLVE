@@ -12,10 +12,8 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -29,7 +27,7 @@ public class NormalizedAtomicExpressionMapImpl
             Comparable<NormalizedAtomicExpressionMapImpl> {
 
     private static final int m_maxPositions = 6;
-    private Map<Integer, Integer> m_expression;
+    private final Map<Integer, Integer> m_expression;
 
     public NormalizedAtomicExpressionMapImpl() {
         m_expression = new TreeMap<Integer, Integer>();
@@ -88,17 +86,14 @@ public class NormalizedAtomicExpressionMapImpl
     /**
      * @param operator integer value of operator
      * @param position 0 denotes first position.
-     * @return post operation value of position;
      */
     public void writeOnto(int operator, int position) {
-        int porig = position;
         position = 1 << position;
         Integer curValue = m_expression.get(operator);
         if (curValue != null) {
             position = position | curValue;
         }
         m_expression.put(operator, position);
-        return;
     }
 
     public boolean replaceOperator(int orig, int repl) {
@@ -175,7 +170,7 @@ public class NormalizedAtomicExpressionMapImpl
             String destName = "";
             switch (source.getUsage(sourceName)) {
             case LITERAL:
-            case HASARGS:// literals and func names should be in both
+            case HASARGS_SINGULAR:// literals and func names should be in both
                 if (destination.isSymbolInTable(sourceName)) {
                     destName = sourceName;
                 }
@@ -183,6 +178,7 @@ public class NormalizedAtomicExpressionMapImpl
                     return translated.clear();
                 }
                 break;
+            case HASARGS_FORALL:
             case FORALL:
                 if (mapping.containsKey(sourceName)) {
                     destName = mapping.get(sourceName);
@@ -249,6 +245,7 @@ public class NormalizedAtomicExpressionMapImpl
         return r;
     }
 
+    @Override
     public String toString() {
         return m_expression.toString();
     }

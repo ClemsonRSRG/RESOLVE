@@ -18,7 +18,7 @@ import edu.clemson.cs.r2jt.proving2.Consequent;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -57,18 +57,32 @@ public class VerificationConditionCongruenceClosureImpl {
         return m_registry;
     }
 
-    public Set<String> getGoal() {
-        HashSet<String> r = new HashSet<String>();
+    public Set<String> getFunctionNames() {
+        return m_registry.getFunctionNames();
+    }
+
+    public HashMap<String, Integer> getGoalSymbolCount() {
+        HashMap<String, Integer> rMap = new HashMap<String, Integer>();
         for (List<String> agoalList : m_goal) {
             for (String agoal : agoalList) {
-                // excluding constants such as true and false
-                if (agoal.equals("true") || agoal.equals("false"))
+                // true is the root of many expressions
+                if (agoal.equals("true"))
                     continue;
-                r.addAll(m_conjunction.getArgsInExpressionsEqualTo(agoal,
-                        new HashSet<String>()));
+                HashMap<String, Integer> cur =
+                        m_conjunction.getSymbolCount(agoal);
+                for (String s : cur.keySet()) {
+                    int count = 0;
+                    if (rMap.containsKey(s))
+                        count = rMap.get(s);
+                    int isFuncMultiplier = 1;
+                    if (m_registry.getUsage(s) == Registry.Usage.HASARGS_SINGULAR)
+                        isFuncMultiplier = 2;
+                    rMap.put(s, count + cur.get(s) * isFuncMultiplier);
+                }
+
             }
         }
-        return r;
+        return rMap;
     }
 
     public boolean isProved() {

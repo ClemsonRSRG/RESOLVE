@@ -14,6 +14,7 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
+import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.ArrayList;
@@ -33,8 +34,10 @@ public class TheoremCongruenceClosureImpl {
     public final String m_theoremString;
     private final PExp m_insertExpr;
     private final PExp m_theorem;
+    private final TypeGraph m_typeGraph;
 
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp p) {
+        m_typeGraph = g;
         m_theorem = p;
         m_theoremString = p.toString();
         isEquality = p.getTopLevelOperation().equals("=");
@@ -43,7 +46,7 @@ public class TheoremCongruenceClosureImpl {
                 new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry);
 
         if (isEquality) {
-            m_matchConj.addExpression(p.getSubExpressions().get(0));
+            m_matchConj.addFormula(p.getSubExpressions().get(0));
             m_insertExpr = p;
         }
         else if (p.getTopLevelOperation().equals("implies")) {
@@ -51,13 +54,23 @@ public class TheoremCongruenceClosureImpl {
             m_insertExpr = p.getSubExpressions().get(1);
         }
         else {
-            m_matchConj.addExpression(p);
-            m_insertExpr = p;
+            /* experimental
+            
+            Is_Permutation((S o T), (T o S)) for example,
+            should go into matchConj as itself, but equal to a boolean variable.
+            .
+             */
+            m_matchConj.addFormula(p);
+            m_insertExpr = p; // this will add "= true"
         }
+        //System.out.println(m_theoremString +"\nbefore: \n\t" + m_matchConj);
+        m_matchConj.orderByGreatestNumberOfDefinedSymbolsFirst();
+        //System.out.println("after: \n\t" + m_matchConj);
     }
 
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp toMatchAndBind,
             PExp toInsert) {
+        m_typeGraph = g;
         m_theorem = toInsert;
         m_theoremString = toInsert.toString();
         isEquality = true;
@@ -68,26 +81,36 @@ public class TheoremCongruenceClosureImpl {
         m_insertExpr = toInsert;
     }
 
-    public String applyTo(VerificationConditionCongruenceClosureImpl vc,
-            long endTime, boolean goalOnly) {
-        Set<String> setOfGoalArgs;
-        if (goalOnly)
-            setOfGoalArgs = vc.getGoal();
-        else
-            setOfGoalArgs = new HashSet<String>();
+    public Set<String> getFunctionNames() {
+        Registry tReg = new Registry(m_typeGraph);
+        ConjunctionOfNormalizedAtomicExpressions temp =
+                new ConjunctionOfNormalizedAtomicExpressions(tReg);
+        ImmutableList<PExp> pit = m_theorem.getSubExpressions();
+        temp.addExpression(m_theorem);
+
+        Set<String> rSet = tReg.getFunctionNames();
+        rSet.remove("=");
+        rSet.remove("implies");
+        rSet.remove("and");
+        rSet.remove("or");
+        return rSet;
+    }
+
+    public ArrayList<InsertExpWithJustification> applyTo(
+            VerificationConditionCongruenceClosureImpl vc, long endTime) {
+        ArrayList<InsertExpWithJustification> rList =
+                new ArrayList<InsertExpWithJustification>();
+
         if (m_insertExpr.getQuantifiedVariables().isEmpty()) {
-            if (goalOnly && isIntersectionEmpty(setOfGoalArgs, m_insertExpr))
-                return "";
             String r = "\tinserting: " + m_insertExpr + "\n";
-            vc.getConjunct().addExpression(m_insertExpr);
-            return r;
+            rList.add(new InsertExpWithJustification(m_insertExpr,
+                    m_theoremString));
+            return rList;
         }
-        String r = "";
 
         Stack<HashMap<String, String>> allValidBindings = findValidBindings(vc);
-
         if (allValidBindings == null || allValidBindings.size() == 0) {
-            return "";
+            return null;
         }
 
         HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
@@ -102,26 +125,11 @@ public class TheoremCongruenceClosureImpl {
                         new PSymbol(quanType, quanType, curBinding.get(thKey)));
             }
             PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
-            assert modifiedInsert != m_insertExpr : this.toString()
-                    + m_matchConj;
             quantToLit.clear();
-            if (goalOnly && isIntersectionEmpty(setOfGoalArgs, modifiedInsert)) {
-                // r += "\texcluding because " + setOfGoalArgs + " not in " + modifiedInsert + "\n";
-                continue;
-            }
-            r += ("\tinserting: " + modifiedInsert + "\n");
-            vc.getConjunct().addExpression(modifiedInsert);
-
+            rList.add(new InsertExpWithJustification(modifiedInsert,
+                    m_theoremString));
         }
-        return r;
-    }
-
-    private boolean isIntersectionEmpty(Set<String> goalArgs, PExp insertExp) {
-        for (String g : goalArgs) {
-            if (insertExp.containsName(g))
-                return false;
-        }
-        return true;
+        return rList;
     }
 
     private HashMap<String, String> getInitBindings() {
@@ -129,7 +137,8 @@ public class TheoremCongruenceClosureImpl {
         for (int i = 0; i < m_theoremRegistry.m_indexToSymbol.size(); ++i) {
             String curSym = m_theoremRegistry.m_indexToSymbol.get(i);
             Registry.Usage us = m_theoremRegistry.getUsage(curSym);
-            if (us == Registry.Usage.CREATED || us == Registry.Usage.FORALL) {
+            if (us == Registry.Usage.CREATED || us == Registry.Usage.FORALL
+                    || us == Registry.Usage.HASARGS_FORALL) {
                 initBindings.put(curSym, "");
 
             }
@@ -142,8 +151,8 @@ public class TheoremCongruenceClosureImpl {
             VerificationConditionCongruenceClosureImpl vc) {
         assert m_matchConj.size() == 0;
 
-        if (p.isEquality() && p.equals(m_theorem)) {
-            m_matchConj.addExpression(p);
+        if (p.isEquality()) {
+            m_matchConj.addFormula(p);
             if (m_matchConj.size() != 0) {
                 return findValidBindings(vc);
             }
@@ -171,7 +180,8 @@ public class TheoremCongruenceClosureImpl {
         Set<String> actuals = vc.getRegistry().getSetMatchingType(t);
         ArrayList<String> toRemove = new ArrayList<String>();
         for (String a : actuals) {
-            if (vc.getRegistry().getUsage(a).equals(Registry.Usage.HASARGS)) {
+            if (vc.getRegistry().getUsage(a).equals(
+                    Registry.Usage.HASARGS_SINGULAR)) {
                 toRemove.add(a);
             }
         }
@@ -179,9 +189,6 @@ public class TheoremCongruenceClosureImpl {
             actuals.remove(tor);
         }
 
-        String[] virtualsArr =
-                curBindings.keySet().toArray(
-                        new String[curBindings.keySet().size()]);
         String[] actualsArr = actuals.toArray(new String[actuals.size()]);
 
         for (int i = 0; i < actualsArr.length; ++i) {
@@ -216,11 +223,16 @@ public class TheoremCongruenceClosureImpl {
 
     private Stack<HashMap<String, String>> findValidBindings(
             VerificationConditionCongruenceClosureImpl vc) {
-
         if (m_matchConj.size() == 0) {
 
             return findPExp(m_theorem, vc);
         }
+        boolean extraOutput = false;
+        /*if(m_theoremString.equals("(Is_Permutation(S, T) implies (|S| = |T|))")
+                && vc.m_name.equals("2_4")){
+            extraOutput = true;
+            System.out.println("looking for: \n" + m_matchConj + "in " + vc);
+        }*/
         Stack<HashMap<String, String>> allValidBindings =
                 new Stack<HashMap<String, String>>();
         Stack<SearchBox> boxStack = new Stack<SearchBox>();
@@ -235,6 +247,8 @@ public class TheoremCongruenceClosureImpl {
                     new HashMap<String, String>(curBox.m_bindingsInitial);
             curBox.getNextMatch();
             if (curBox.impossibleToMatch) {
+                if (extraOutput)
+                    System.out.println("rejecting " + curBox);
                 boxStack.pop();
                 if (!boxStack.isEmpty()) {
                     boxStack.peek().currentIndex =
@@ -243,22 +257,20 @@ public class TheoremCongruenceClosureImpl {
                 }
             }
             else {
-                // save bindings if for last index, then pop
+                if (extraOutput) {
+                    System.out.println("matched " + curBox.toString());
+                }
+                // save bindings if for last index, then try and find more
                 if (curBox.m_indexInList + 1 == m_matchConj.size()) {
                     if (allValidBindings.isEmpty()) {
                         allValidBindings.push(curBox.m_bindings);
+                        if (extraOutput)
+                            System.out.println("saved " + curBox.m_bindings);
                     }
                     else if (!curBox.m_bindings.equals(allValidBindings.peek())) {
                         allValidBindings.push(curBox.m_bindings);
                     }
-                    // If there is only one left, do not pop it when good match
-                    // is found.
-                    if (boxStack.size() > 1) {
-                        boxStack.pop();
-                    }
-
                     boxStack.peek().currentIndex++;
-
                 }
                 else {
                     pushNewSearchBox(boxStack);

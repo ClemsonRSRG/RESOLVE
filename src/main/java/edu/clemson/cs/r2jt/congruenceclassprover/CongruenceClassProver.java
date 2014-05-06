@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -49,12 +51,13 @@ public class CongruenceClassProver {
                     "congruence closure based prover");
     private final List<VerificationConditionCongruenceClosureImpl> m_ccVCs;
     private final List<TheoremCongruenceClosureImpl> m_theorems;
-    private final int MAX_ITERATIONS = 5;
+    private final int MAX_ITERATIONS = 500;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
     private final boolean EQSWAP = true;
     private final long DEFAULTTIMEOUT = 2000; // plenty of time on an i7
+    private final boolean SHOWRESULTSIFNOTPROVED = true;
 
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
@@ -63,7 +66,6 @@ public class CongruenceClassProver {
     private final long myTimeout;
 
     ///////////////////////////////////////////////////////
-
     public static void setUpFlags() {
         FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_PROVE);
         FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_LEGACY_PROVE);
@@ -116,8 +118,9 @@ public class CongruenceClassProver {
                             .getAssertion()));
                 }
             }
-            m_theorems
-                    .add(new TheoremCongruenceClosureImpl(g, e.getAssertion()));
+            TheoremCongruenceClosureImpl t =
+                    new TheoremCongruenceClosureImpl(g, e.getAssertion());
+            m_theorems.add(t);
         }
         m_environment = environment;
         m_scope = scope;
@@ -165,8 +168,9 @@ public class CongruenceClassProver {
     }
 
     private String divLine(String label) {
-        if (label.length() > 78)
+        if (label.length() > 78) {
             label = label.substring(0, 77);
+        }
         label = " " + label + " ";
         char[] div = new char[80];
         Arrays.fill(div, '=');
@@ -178,6 +182,25 @@ public class CongruenceClassProver {
     }
 
     protected boolean prove(VerificationConditionCongruenceClosureImpl vcc) {
+        ArrayList<TheoremCongruenceClosureImpl> allFuncNamesInVC =
+                new ArrayList<TheoremCongruenceClosureImpl>();
+
+        if (!vcc.isProved()) {
+            Set<String> vcFunctionNames = vcc.getFunctionNames();
+            if (vcFunctionNames.contains("-")) {
+                vcFunctionNames.add("+");
+            }
+            if (vcFunctionNames.contains("+")) {
+                vcFunctionNames.add("-");
+            }
+            for (TheoremCongruenceClosureImpl th : m_theorems) {
+                Set<String> theoremfunctionNames = th.getFunctionNames();
+                if (vcFunctionNames.containsAll(theoremfunctionNames)) {
+                    allFuncNamesInVC.add(th);
+                }
+            }
+        }
+
         String div = divLine(vcc.m_name);
         String theseResults =
                 div + ("Before application of theorems: " + vcc + "\n");
@@ -185,35 +208,67 @@ public class CongruenceClassProver {
         int i;
         long startTime = System.currentTimeMillis();
         long endTime = myTimeout + startTime;
-        for (i = 0; i < MAX_ITERATIONS && !vcc.isProved(); ++i) {
+        HashSet<String> applied = new HashSet<String>();
 
-            for (TheoremCongruenceClosureImpl th : m_theorems) {
-                if (vcc.isProved() || System.currentTimeMillis() > endTime) {
-                    i++; // for iterations count.
-                    break;
-                }
-                String ap = th.applyTo(vcc, endTime, i < 1);
-                if (ap.length() > 0) {
-                    String result = th.m_theoremString + "\n" + ap + "\n";
-                    if (!thString.contains(result)) {
-                        thString += result;
+        for (i = 0; i < MAX_ITERATIONS && !vcc.isProved()
+                && System.currentTimeMillis() <= endTime; ++i) {
+            ArrayList<InsertExpWithJustification> insertExp =
+                    new ArrayList<InsertExpWithJustification>();
+            for (TheoremCongruenceClosureImpl th : allFuncNamesInVC) {
+                ArrayList<InsertExpWithJustification> thResult =
+                        th.applyTo(vcc, endTime);
+                if (thResult != null) {
+                    for (InsertExpWithJustification ins : thResult) {
+                        if (!applied.contains(ins.m_PExp.toString())
+                                && !insertExp.contains(ins)) {
+                            insertExp.add(ins);
+                        }
                     }
                 }
             }
+            HashMap<String, Integer> vcGoalSymbolCount =
+                    vcc.getGoalSymbolCount();
+            InstantiatedTheoremPrioritizer pQ =
+                    new InstantiatedTheoremPrioritizer(insertExp,
+                            vcGoalSymbolCount);
+            int MAXTOADD = pQ.m_pQueue.size();
+            int numAdded = 0;
+            InstantiatedTheoremPrioritizer.PExpWithScore curP =
+                    pQ.m_pQueue.poll();
+            //int numGoalUniqueSymbols = vcGoalSymbolCount.keySet().size();
+            while (curP != null && !vcc.isProved() && numAdded <= MAXTOADD) {
+                if (curP.m_score > 0 && !applied.contains(curP.toString())) {
+                    vcc.getConjunct().addExpression(curP.m_theorem);
+                    thString += curP.toString();
+                    numAdded++;
+                    applied.add(curP.toString());
+                }
+                curP = pQ.m_pQueue.poll();
+            }
+
         }
         theseResults += (thString);
 
         boolean proved = vcc.isProved();
 
         if (proved) {
-            theseResults += (i + " iterations. PROVED: VC " + vcc + "\n") + div;
+            theseResults +=
+                    (i + " iterations. PROVED: VC " + vcc.m_name + "\n") + div;
             m_results += theseResults;
             return true;
         }
 
-        m_results +=
-                div + (i + " iterations. NOT PROVED: VC " + vcc.m_name + "\n")
-                        + div;
+        if (SHOWRESULTSIFNOTPROVED) {
+            theseResults +=
+                    (i + " iterations. NOT PROVED: VC " + vcc + "\n") + div;
+            m_results += theseResults;
+        }
+        else {
+            m_results +=
+                    div
+                            + (i + " iterations. NOT PROVED: VC " + vcc.m_name + "\n")
+                            + div;
+        }
         return false;
 
     }
@@ -226,9 +281,7 @@ public class CongruenceClassProver {
         int temp = filename.indexOf(".");
         String tempfile = filename.substring(0, temp);
         String mainFileName;
-
-        mainFileName = tempfile + ".proof";
-
+        mainFileName = tempfile + ".cc.proof";
         return mainFileName;
     }
 
