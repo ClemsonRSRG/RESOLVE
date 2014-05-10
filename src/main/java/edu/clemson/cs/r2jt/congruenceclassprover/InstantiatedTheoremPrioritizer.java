@@ -10,14 +10,14 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PExpSubexpressionIterator;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 
 /**
@@ -30,11 +30,14 @@ public class InstantiatedTheoremPrioritizer {
 
     public InstantiatedTheoremPrioritizer(
             List<InsertExpWithJustification> theoremList,
-            HashMap<String, Integer> vcSymbolCount) {
+            Map<String, Integer> vcSymbols, int threshold) {
+        System.out.println(theoremList.size());
         m_pQueue = new PriorityQueue<PExpWithScore>(theoremList.size());
         for (InsertExpWithJustification p : theoremList) {
-            m_pQueue.add(new PExpWithScore(p.m_PExp, vcSymbolCount,
-                    p.m_Justification));
+            PExpWithScore pes =
+                    new PExpWithScore(p.m_PExp, vcSymbols, p.m_Justification);
+            if (pes.m_score < threshold)
+                m_pQueue.add(pes);
         }
     }
 
@@ -46,33 +49,37 @@ public class InstantiatedTheoremPrioritizer {
 
         protected PExp m_theorem;
         protected String m_theoremDefinitionString;
-        protected Integer m_score = 0;
+        protected Integer m_score = 1;
         protected HashMap<String, Integer> m_symbol_count;
 
-        public PExpWithScore(PExp theorem,
-                HashMap<String, Integer> vcSymbolCount, String justification) {
+        public PExpWithScore(PExp theorem, Map<String, Integer> vcSymbols,
+                String justification) {
             m_theorem = theorem;
             m_theoremDefinitionString = justification;
-            ArrayList<String> symList = getListOfSymbolsInPExp(theorem);
-            // todo get collection of symbols in theorem
-            for (String s : symList) {
-                if (s.equals("and") || s.equals("=") || s.equals("implies"))
-                    continue;
-                if (vcSymbolCount.containsKey(s)) {
-                    m_score += vcSymbolCount.get(s);
+            HashSet<String> thSet = getSetOfSymbolsInPExp(theorem);
+            for (String s : thSet) {
+                if (vcSymbols.containsKey(s)) {
+                    m_score *= vcSymbols.get(s);
+                }
+                else {
+                    m_score *= vcSymbols.keySet().size();
                 }
             }
 
         }
 
-        private ArrayList<String> getListOfSymbolsInPExp(PExp p) {
-            ArrayList<String> sList = new ArrayList<String>();
-            sList.add(p.getTopLevelOperation());
+        private HashSet<String> getSetOfSymbolsInPExp(PExp p) {
+            HashSet<String> rSet = new HashSet<String>();
+            if (!p.isLiteral()) {
+                rSet.add(p.getTopLevelOperation());
+            }
             PExpSubexpressionIterator pit = p.getSubExpressionIterator();
             while (pit.hasNext()) {
-                sList.addAll(getListOfSymbolsInPExp(pit.next()));
+                rSet.addAll(getSetOfSymbolsInPExp(pit.next()));
             }
-            return sList;
+            rSet.remove("=");
+
+            return rSet;
         }
 
         @Override
@@ -83,7 +90,7 @@ public class InstantiatedTheoremPrioritizer {
 
         @Override
         public int compareTo(PExpWithScore o) {
-            return o.m_score - m_score;
+            return m_score - o.m_score;
         }
     }
 }

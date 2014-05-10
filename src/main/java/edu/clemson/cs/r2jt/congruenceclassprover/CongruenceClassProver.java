@@ -15,6 +15,7 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving.Prover;
+import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving2.Metrics;
 import edu.clemson.cs.r2jt.proving2.ProverListener;
@@ -34,10 +35,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -51,13 +52,13 @@ public class CongruenceClassProver {
                     "congruence closure based prover");
     private final List<VerificationConditionCongruenceClosureImpl> m_ccVCs;
     private final List<TheoremCongruenceClosureImpl> m_theorems;
-    private final int MAX_ITERATIONS = 500;
+    private final int MAX_ITERATIONS = 256;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
-    private final boolean EQSWAP = true;
-    private final long DEFAULTTIMEOUT = 2000; // plenty of time on an i7
+    private final long DEFAULTTIMEOUT = 5000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
+    private final TypeGraph m_typeGraph;
 
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
@@ -90,6 +91,7 @@ public class CongruenceClassProver {
         }
         ///////////////////////////////////////////////////////////////
 
+        m_typeGraph = g;
         m_ccVCs = new ArrayList<VerificationConditionCongruenceClosureImpl>();
         int i = 0;
         for (VC vc : vcs) {
@@ -102,30 +104,59 @@ public class CongruenceClassProver {
                 scope.query(new EntryTypeQuery(TheoremEntry.class,
                         MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
                         MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
-        for (TheoremEntry e : theoremEntries) { //if(e.getAssertion().containsName("i"))continue;
-            if (EQSWAP && e.getAssertion().isEquality()
-                    && !e.getAssertion().getQuantifiedVariables().isEmpty()) {
-                // This creates a theorem like e, where if e is of the form e1 = e2, this is e2 = e1.
-                // Any quantifiers used must appear in the lhs for matching.
-                // if there are no quantifiers, this will have no effect.
-                Set<PSymbol> newMatchQuants =
-                        e.getAssertion().getSubExpressions().get(1)
-                                .getQuantifiedVariables();
-                if (newMatchQuants.containsAll(e.getAssertion()
-                        .getSubExpressions().get(0).getQuantifiedVariables())) {
-                    m_theorems.add(new TheoremCongruenceClosureImpl(g, e
-                            .getAssertion().getSubExpressions().get(1), e
-                            .getAssertion()));
+        for (TheoremEntry e : theoremEntries) {
+            PExp assertion = e.getAssertion();
+            if (assertion.isEquality()) {
+                addEqualityTheorem(true, assertion);
+                addEqualityTheorem(false, assertion);
+            }
+            else {
+                TheoremCongruenceClosureImpl t =
+                        new TheoremCongruenceClosureImpl(g, assertion);
+                if (!t.m_unneeded) {
+                    m_theorems.add(t);
                 }
             }
-            TheoremCongruenceClosureImpl t =
-                    new TheoremCongruenceClosureImpl(g, e.getAssertion());
-            m_theorems.add(t);
         }
         m_environment = environment;
         m_scope = scope;
         m_results = "";
 
+    }
+
+    private void addEqualityTheorem(boolean matchLeft, PExp theorem) {
+        PExp lhs, rhs;
+
+        if (matchLeft) {
+            lhs = theorem.getSubExpressions().get(0);
+            rhs = theorem.getSubExpressions().get(1);
+        }
+        else {
+            lhs = theorem.getSubExpressions().get(1);
+            rhs = theorem.getSubExpressions().get(0);
+        }
+        // Because only lhs is matched, all quantified variables used must be in lhs
+        Set<PSymbol> lhsQuants = lhs.getQuantifiedVariables();
+        Set<PSymbol> rhsQuants = rhs.getQuantifiedVariables();
+        if (!lhsQuants.containsAll(rhsQuants)) {
+            return;
+        }
+
+        TheoremCongruenceClosureImpl t =
+                new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
+                        false);
+        if (!t.m_unneeded) {
+            m_theorems.add(t);
+        }
+
+        if (lhs.isEquality()) {
+            t =
+                    new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
+                            true);
+            if (!t.m_unneeded) {
+                m_theorems.add(t);
+            }
+        }
     }
 
     public void start() throws IOException {
@@ -185,6 +216,7 @@ public class CongruenceClassProver {
         ArrayList<TheoremCongruenceClosureImpl> allFuncNamesInVC =
                 new ArrayList<TheoremCongruenceClosureImpl>();
 
+        // Remove theorems with no function names in the vc.
         if (!vcc.isProved()) {
             Set<String> vcFunctionNames = vcc.getFunctionNames();
             if (vcFunctionNames.contains("-")) {
@@ -226,24 +258,29 @@ public class CongruenceClassProver {
                     }
                 }
             }
-            HashMap<String, Integer> vcGoalSymbolCount =
-                    vcc.getGoalSymbolCount();
+            if (insertExp.isEmpty()) {
+                break; // nothing else to try
+            }
+            Map<String, Integer> vcGoalSymbolCount = vcc.getGoalSymbols();
+            int threshold = 16 * vcGoalSymbolCount.size() + 1;
             InstantiatedTheoremPrioritizer pQ =
                     new InstantiatedTheoremPrioritizer(insertExp,
-                            vcGoalSymbolCount);
-            int MAXTOADD = pQ.m_pQueue.size();
-            int numAdded = 0;
+                            vcGoalSymbolCount, threshold);
             InstantiatedTheoremPrioritizer.PExpWithScore curP =
                     pQ.m_pQueue.poll();
-            //int numGoalUniqueSymbols = vcGoalSymbolCount.keySet().size();
-            while (curP != null && !vcc.isProved() && numAdded <= MAXTOADD) {
-                if (curP.m_score > 0 && !applied.contains(curP.toString())) {
-                    vcc.getConjunct().addExpression(curP.m_theorem);
+            int maxToAdd = pQ.m_pQueue.size() * 3 / 4 + 1;
+            int numAdded = 0;
+            while (curP != null && !vcc.isProved()
+                    && System.currentTimeMillis() <= endTime) {
+                if (!applied.contains(curP.m_theorem.toString())) {
+                    vcc.getConjunct().addExpression(curP.m_theorem, endTime);
                     thString += curP.toString();
+                    applied.add(curP.m_theorem.toString());
                     numAdded++;
-                    applied.add(curP.toString());
+
                 }
                 curP = pQ.m_pQueue.poll();
+
             }
 
         }
@@ -260,7 +297,8 @@ public class CongruenceClassProver {
 
         if (SHOWRESULTSIFNOTPROVED) {
             theseResults +=
-                    (i + " iterations. NOT PROVED: VC " + vcc + "\n") + div;
+                    ("\n" + i + " iterations. NOT PROVED: VC " + vcc + "\n")
+                            + div;
             m_results += theseResults;
         }
         else {

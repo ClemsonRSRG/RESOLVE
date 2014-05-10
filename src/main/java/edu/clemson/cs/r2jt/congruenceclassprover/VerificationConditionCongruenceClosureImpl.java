@@ -19,8 +19,10 @@ import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -49,7 +51,7 @@ public class VerificationConditionCongruenceClosureImpl {
         addPExp(m_consequent.iterator(), false);
     }
 
-    public ConjunctionOfNormalizedAtomicExpressions getConjunct() {
+    protected ConjunctionOfNormalizedAtomicExpressions getConjunct() {
         return m_conjunction;
     }
 
@@ -57,32 +59,21 @@ public class VerificationConditionCongruenceClosureImpl {
         return m_registry;
     }
 
-    public Set<String> getFunctionNames() {
+    protected Set<String> getFunctionNames() {
         return m_registry.getFunctionNames();
     }
 
-    public HashMap<String, Integer> getGoalSymbolCount() {
-        HashMap<String, Integer> rMap = new HashMap<String, Integer>();
+    protected Map<String, Integer> getGoalSymbols() {
+        HashSet<String> goalSymbolSet = new HashSet<String>();
         for (List<String> agoalList : m_goal) {
             for (String agoal : agoalList) {
                 // true is the root of many expressions
                 if (agoal.equals("true"))
                     continue;
-                HashMap<String, Integer> cur =
-                        m_conjunction.getSymbolCount(agoal);
-                for (String s : cur.keySet()) {
-                    int count = 0;
-                    if (rMap.containsKey(s))
-                        count = rMap.get(s);
-                    int isFuncMultiplier = 1;
-                    if (m_registry.getUsage(s) == Registry.Usage.HASARGS_SINGULAR)
-                        isFuncMultiplier = 2;
-                    rMap.put(s, count + cur.get(s) * isFuncMultiplier);
-                }
-
+                goalSymbolSet.add(agoal);
             }
         }
-        return rMap;
+        return m_conjunction.getSymbolProximity(goalSymbolSet);
     }
 
     public boolean isProved() {

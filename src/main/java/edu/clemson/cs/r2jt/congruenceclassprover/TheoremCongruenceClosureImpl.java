@@ -19,7 +19,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
@@ -35,6 +34,7 @@ public class TheoremCongruenceClosureImpl {
     private final PExp m_insertExpr;
     private final PExp m_theorem;
     private final TypeGraph m_typeGraph;
+    protected boolean m_unneeded = false;
 
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp p) {
         m_typeGraph = g;
@@ -63,13 +63,15 @@ public class TheoremCongruenceClosureImpl {
             m_matchConj.addFormula(p);
             m_insertExpr = p; // this will add "= true"
         }
-        //System.out.println(m_theoremString +"\nbefore: \n\t" + m_matchConj);
-        m_matchConj.orderByGreatestNumberOfDefinedSymbolsFirst();
-        //System.out.println("after: \n\t" + m_matchConj);
+
+        if (m_matchConj.size() == 0) {
+            m_unneeded = true;
+        }
+
     }
 
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp toMatchAndBind,
-            PExp toInsert) {
+            PExp toInsert, boolean enterToMatchAndBindAsEquivalentToTrue) {
         m_typeGraph = g;
         m_theorem = toInsert;
         m_theoremString = toInsert.toString();
@@ -77,8 +79,14 @@ public class TheoremCongruenceClosureImpl {
         m_theoremRegistry = new Registry(g);
         m_matchConj =
                 new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry);
-        m_matchConj.addExpression(toMatchAndBind);
+        if (enterToMatchAndBindAsEquivalentToTrue)
+            m_matchConj.addExpression(toMatchAndBind);
+        else
+            m_matchConj.addFormula(toMatchAndBind);
         m_insertExpr = toInsert;
+        if (m_matchConj.size() == 0) {
+            m_unneeded = true;
+        }
     }
 
     public Set<String> getFunctionNames() {
@@ -108,8 +116,10 @@ public class TheoremCongruenceClosureImpl {
             return rList;
         }
 
-        Stack<HashMap<String, String>> allValidBindings = findValidBindings(vc);
+        Stack<HashMap<String, String>> allValidBindings =
+                findValidBindings(vc, endTime);
         if (allValidBindings == null || allValidBindings.size() == 0) {
+            m_unneeded = true;
             return null;
         }
 
@@ -146,62 +156,6 @@ public class TheoremCongruenceClosureImpl {
         return initBindings;
     }
 
-    // for those PExp that did not tranlate into a Conj list( their information is only in the registry)
-    private Stack<HashMap<String, String>> findPExp(PExp p,
-            VerificationConditionCongruenceClosureImpl vc) {
-        assert m_matchConj.size() == 0;
-
-        if (p.isEquality()) {
-            m_matchConj.addFormula(p);
-            if (m_matchConj.size() != 0) {
-                return findValidBindings(vc);
-            }
-        }
-        if (p.getTopLevelOperation().equals("implies")) {
-            return findPExp(p.getSubExpressions().get(0), vc);
-        }
-        Stack<HashMap<String, String>> allValidBindings =
-                new Stack<HashMap<String, String>>();
-        HashMap<String, String> curBindings = getInitBindings();
-        MTType t;
-        if (p.isEquality()) {
-            PExp lhs = p.getSubExpressions().get(0);
-            PExp rhs = p.getSubExpressions().get(1);
-            assert lhs.isVariable() || rhs.isVariable() : "neither " + lhs
-                    + "or" + rhs + "is variable";
-            // if s = t, then you only need to find one or the other (one actual symbol for each known equality class)
-            // and it wont matter which you use, since they will have the same type.
-            t = rhs.getType();
-
-        }
-        else {
-            t = p.getType();
-        }
-        Set<String> actuals = vc.getRegistry().getSetMatchingType(t);
-        ArrayList<String> toRemove = new ArrayList<String>();
-        for (String a : actuals) {
-            if (vc.getRegistry().getUsage(a).equals(
-                    Registry.Usage.HASARGS_SINGULAR)) {
-                toRemove.add(a);
-            }
-        }
-        for (String tor : toRemove) {
-            actuals.remove(tor);
-        }
-
-        String[] actualsArr = actuals.toArray(new String[actuals.size()]);
-
-        for (int i = 0; i < actualsArr.length; ++i) {
-            for (String k : curBindings.keySet()) {
-                curBindings.put(k, actualsArr[i]);
-            }
-            allValidBindings.push(curBindings);
-            curBindings = getInitBindings();
-        }
-        // inequalities are functions in this system and would have produced a conj list
-        return allValidBindings;
-    }
-
     private boolean pushNewSearchBox(Stack<SearchBox> boxStack) {
         SearchBox top = boxStack.peek();
         int index = top.m_indexInList + 1;
@@ -222,14 +176,13 @@ public class TheoremCongruenceClosureImpl {
     }
 
     private Stack<HashMap<String, String>> findValidBindings(
-            VerificationConditionCongruenceClosureImpl vc) {
+            VerificationConditionCongruenceClosureImpl vc, long endTime) {
         if (m_matchConj.size() == 0) {
-
-            return findPExp(m_theorem, vc);
+            return null;
         }
         boolean extraOutput = false;
-        /*if(m_theoremString.equals("(Is_Permutation(S, T) implies (|S| = |T|))")
-                && vc.m_name.equals("2_4")){
+        /*if(m_theoremString.equals("((S o Empty_String) = S)")
+                && vc.m_name.equals("1_1")){
             extraOutput = true;
             System.out.println("looking for: \n" + m_matchConj + "in " + vc);
         }*/
@@ -240,7 +193,7 @@ public class TheoremCongruenceClosureImpl {
                 m_theoremRegistry, vc.getConjunct(), vc.getRegistry(),
                 getInitBindings(), 0));
 
-        while (!boxStack.isEmpty()) {
+        while (!boxStack.isEmpty() && System.currentTimeMillis() < endTime) {
             SearchBox curBox = boxStack.peek();
             // rollBack
             curBox.m_bindings =
@@ -280,6 +233,7 @@ public class TheoremCongruenceClosureImpl {
         return allValidBindings;
     }
 
+    @Override
     public String toString() {
         String r = "\n--------------------------------------\n";
         r += m_theoremString;

@@ -25,7 +25,9 @@ import java.util.*;
 public class ConjunctionOfNormalizedAtomicExpressions {
 
     private final Registry m_registry;
-    private List<NormalizedAtomicExpressionMapImpl> m_exprList;
+    private final List<NormalizedAtomicExpressionMapImpl> m_exprList;
+    protected long m_timeToEnd = -1;
+    private final List<NormalizedAtomicExpressionMapImpl> m_removedExprList;
 
     /**
      * @param registry the Registry symbols contained in the conjunction will
@@ -34,6 +36,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     public ConjunctionOfNormalizedAtomicExpressions(Registry registry) {
         m_registry = registry;
         m_exprList = new LinkedList<NormalizedAtomicExpressionMapImpl>();
+        m_removedExprList = new LinkedList<NormalizedAtomicExpressionMapImpl>();
     }
 
     protected int size() {
@@ -65,8 +68,16 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return m_exprList.get(position);
     }
 
+    protected void addExpression(PExp expression, long timeToEnd) {
+        m_timeToEnd = timeToEnd;
+        addExpression(expression);
+    }
+
     // Top level
     protected void addExpression(PExp expression) {
+        if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
+            return;
+        }
         String name = expression.getTopLevelOperation();
 
         if (expression.isEquality()) {
@@ -98,10 +109,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             usage = Registry.Usage.LITERAL;
         }
         else if (ps.isFunction()) {
-            if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL))
+            if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
                 usage = Registry.Usage.HASARGS_FORALL;
-            else
+            }
+            else {
                 usage = Registry.Usage.HASARGS_SINGULAR;
+            }
         }
         else if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
             usage = Registry.Usage.FORALL;
@@ -168,7 +181,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (posIfFound >= 0) {
             return m_exprList.get(posIfFound).readRoot();
         }
-        // no such formula exists. Note that
+        // no such formula exists
         int indexToInsert = -(posIfFound + 1);
         MTType typeOfFormula =
                 m_registry.getTypeByIndex(atomicFormula.readPosition(0));
@@ -182,10 +195,16 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     protected void mergeOperators(int a, int b) {
+        if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
+            return;
+        }
         a = m_registry.findAndCompress(a);
         b = m_registry.findAndCompress(b);
         Stack<Integer> holdingTank = mergeOnlyArgumentOperators(a, b);
         while (holdingTank != null && !holdingTank.empty()) {
+            if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
+                return;
+            }
             int opA = m_registry.findAndCompress(holdingTank.pop());
             int opB = m_registry.findAndCompress(holdingTank.pop());
             if (opA != opB) {
@@ -200,7 +219,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // These expression will not be removed by this function,
     // but can be removed by merge().
     protected void mergeArgsOfEqualityPredicateIfRootIsTrue() {
-
+        if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
+            return;
+        }
         // loop until end, function op is not =, or =(x,y)=true
         // when found do merge, start again.
         int eqQ = m_registry.getIndexForSymbol("=");
@@ -224,6 +245,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     // Return list of modified predicates by their position. Only these can cause new merges.
     protected Stack<Integer> mergeOnlyArgumentOperators(int a, int b) {
+        if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
+            return null;
+        }
         if (a == b) {
             return null;
         }
@@ -242,7 +266,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         // Favor retaining literals
         // THIS IS CURRENTLY ABSOLUTELY NECCESSARY.  Finding could be redone to avoid this.
         // Otherwise, proofs can fail to prove if literals are redefined.
-        aString = m_registry.getSymbolForIndex(a);
         bString = m_registry.getSymbolForIndex(b);
         Registry.Usage uB = m_registry.getUsage(bString);
         if (uB.equals(Registry.Usage.LITERAL)) {
@@ -284,61 +307,60 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return coincidentalMergeHoldingTank;
     }
 
-    public Set<String> getArgsInExpressionsEqualTo(String rhs, Set<String> seen) {
+    protected Map<String, Integer> getSymbolProximity(Set<String> symbols) {
+        boolean done = false;
+        Map<Integer, Integer> relatedKeys = new HashMap<Integer, Integer>();
+        for (String s : symbols) {
+            relatedKeys.put(m_registry.getIndexForSymbol(s), 0);
+        }
+        int closeness = 0;
+        Set<Integer> relatedSet = new HashSet<Integer>();
 
-        int root = m_registry.getIndexForSymbol(rhs);
-        HashSet<String> rSet = new HashSet<String>();
-        for (NormalizedAtomicExpressionMapImpl exp : m_exprList) {
-            if (exp.readRoot() == root) {
-                rSet.addAll(exp.getArgumentsAsStrings(m_registry));
+        while (!done) {
+            closeness++;
+            int startSize = relatedKeys.size();
+            HashMap<Integer, Integer> relatedKeys2 =
+                    new HashMap<Integer, Integer>();
+            for (int i = 0; i < m_exprList.size(); ++i) {
+                if (relatedSet.contains(i))
+                    continue;
+                Set<Integer> intersection =
+                        new HashSet<Integer>(m_exprList.get(i).getKeys());
+                intersection.retainAll(relatedKeys.keySet());
+                if (!intersection.isEmpty()) {
+                    relatedSet.add(i);
+                    for (Integer k : m_exprList.get(i).getKeys()) {
+                        if (!relatedKeys.containsKey(k)) {
+                            relatedKeys2.put(k, closeness);
+                        }
+                    }
+                }
+            }
+            relatedKeys.putAll(relatedKeys2);
+            if (startSize == relatedKeys.size()) {
+                done = true;
             }
         }
-        seen.add(rhs);
-        HashSet<String> argsOfArgs = new HashSet<String>();
-        for (String arg : rSet) {
-            if (!seen.contains(arg)) {
-                argsOfArgs.addAll(getArgsInExpressionsEqualTo(arg, seen));
-            }
-        }
-        rSet.addAll(argsOfArgs);
-        return rSet;
-    }
 
-    public ArrayList<String> getListOfSymbolsInExpressionsEqualTo(String rhs,
-            Set<String> seen) {
-
-        int root = m_registry.getIndexForSymbol(rhs);
-        ArrayList<String> rList = new ArrayList<String>();
-        for (NormalizedAtomicExpressionMapImpl exp : m_exprList) {
-            if (exp.readRoot() == root) {
-                rList.addAll(exp.getArgumentsAsStrings(m_registry));
-                rList.add(m_registry.getSymbolForIndex(exp.readPosition(0)));
-            }
+        HashSet<Integer> toRemove = new HashSet<Integer>();
+        for (int i = 0; i < m_exprList.size(); ++i) {
+            toRemove.add(i);
         }
-        seen.add(rhs);
-        ArrayList<String> argsOfArgs = new ArrayList<String>();
-        for (String arg : rList) {
-            if (!seen.contains(arg)) {
-                argsOfArgs.addAll(getListOfSymbolsInExpressionsEqualTo(arg,
-                        seen));
-            }
-        }
-        rList.addAll(argsOfArgs);
-        return rList;
-    }
+        toRemove.removeAll(relatedSet);
 
-    public HashMap<String, Integer> getSymbolCount(String rhs) {
-        ArrayList<String> symbolList =
-                getListOfSymbolsInExpressionsEqualTo(rhs, new HashSet<String>());
-        HashMap<String, Integer> rMap =
-                new HashMap<String, Integer>(symbolList.size());
-        for (String s : symbolList) {
-            int count = 1;
-            if (rMap.containsKey(s))
-                count = rMap.get(s) + 1;
-            rMap.put(s, count);
+        for (Integer i : toRemove) {
+            m_removedExprList.add(m_exprList.get(i));
         }
 
+        for (NormalizedAtomicExpressionMapImpl r : m_removedExprList) {
+            m_exprList.remove(r);
+        }
+
+        Map<String, Integer> rMap =
+                new HashMap<String, Integer>(relatedKeys.size());
+        for (Integer i : relatedKeys.keySet()) {
+            rMap.put(m_registry.getSymbolForIndex(i), relatedKeys.get(i));
+        }
         return rMap;
     }
 
@@ -351,48 +373,4 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return r;
     }
 
-    // For theorems only
-    protected void orderByGreatestNumberOfDefinedSymbolsFirst() {
-        int[] numQuantScore = new int[m_exprList.size()];
-        for (int i = 0; i < m_exprList.size(); ++i) {
-            NormalizedAtomicExpressionMapImpl curExpr = m_exprList.get(i);
-            numQuantScore[i] = 0;
-            Integer kI = curExpr.readPosition(0);
-            int j = 0;
-            while (kI >= 0) {
-                String kS = m_registry.getSymbolForIndex(kI);
-                Registry.Usage kU = m_registry.getUsage(kS);
-                if (kU == Registry.Usage.CREATED || kU == Registry.Usage.FORALL
-                        || kU == Registry.Usage.HASARGS_FORALL)
-                    numQuantScore[i] += (6 - j) * (6 - j);
-                kI = curExpr.readPosition(++j);
-            }
-            kI = curExpr.readRoot();
-            String kS = m_registry.getSymbolForIndex(kI);
-            Registry.Usage kU = m_registry.getUsage(kS);
-            if (kU == Registry.Usage.CREATED || kU == Registry.Usage.FORALL
-                    || kU == Registry.Usage.HASARGS_FORALL)
-                numQuantScore[i] += 1;
-        }
-        LinkedList<NormalizedAtomicExpressionMapImpl> repl =
-                new LinkedList<NormalizedAtomicExpressionMapImpl>();
-        for (int i = 0; i < numQuantScore.length; ++i) {
-            int minIndex = findMin(numQuantScore);
-            repl.add(m_exprList.get(minIndex));
-            numQuantScore[minIndex] = Integer.MAX_VALUE;
-        }
-        m_exprList = repl;
-    }
-
-    private int findMin(int[] ar) {
-        int min = Integer.MAX_VALUE;
-        int minIndex = 0;
-        for (int i = 0; i < ar.length; ++i) {
-            if (ar[i] <= min) {
-                min = ar[i];
-                minIndex = i;
-            }
-        }
-        return minIndex;
-    }
 }
