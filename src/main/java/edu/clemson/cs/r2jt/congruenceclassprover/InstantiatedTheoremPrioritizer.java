@@ -31,7 +31,6 @@ public class InstantiatedTheoremPrioritizer {
     public InstantiatedTheoremPrioritizer(
             List<InsertExpWithJustification> theoremList,
             Map<String, Integer> vcSymbols, int threshold) {
-        System.out.println(theoremList.size());
         m_pQueue = new PriorityQueue<PExpWithScore>(theoremList.size());
         for (InsertExpWithJustification p : theoremList) {
             PExpWithScore pes =
