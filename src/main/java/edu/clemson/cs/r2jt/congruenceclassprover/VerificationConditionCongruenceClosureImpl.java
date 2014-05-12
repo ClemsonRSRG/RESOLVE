@@ -18,9 +18,11 @@ import edu.clemson.cs.r2jt.proving2.Consequent;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -49,7 +51,7 @@ public class VerificationConditionCongruenceClosureImpl {
         addPExp(m_consequent.iterator(), false);
     }
 
-    public ConjunctionOfNormalizedAtomicExpressions getConjunct() {
+    protected ConjunctionOfNormalizedAtomicExpressions getConjunct() {
         return m_conjunction;
     }
 
@@ -57,18 +59,21 @@ public class VerificationConditionCongruenceClosureImpl {
         return m_registry;
     }
 
-    public Set<String> getGoal() {
-        HashSet<String> r = new HashSet<String>();
+    protected Set<String> getFunctionNames() {
+        return m_registry.getFunctionNames();
+    }
+
+    protected Map<String, Integer> getGoalSymbols() {
+        HashSet<String> goalSymbolSet = new HashSet<String>();
         for (List<String> agoalList : m_goal) {
             for (String agoal : agoalList) {
-                // excluding constants such as true and false
-                if (agoal.equals("true") || agoal.equals("false"))
+                // true is the root of many expressions
+                if (agoal.equals("true"))
                     continue;
-                r.addAll(m_conjunction.getArgsInExpressionsEqualTo(agoal,
-                        new HashSet<String>()));
+                goalSymbolSet.add(agoal);
             }
         }
-        return r;
+        return m_conjunction.getSymbolProximity(goalSymbolSet);
     }
 
     public boolean isProved() {

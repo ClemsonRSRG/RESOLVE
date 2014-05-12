@@ -16,6 +16,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Created by mike on 4/3/2014.
@@ -33,7 +34,8 @@ public class Registry {
 
     public static enum Usage {
 
-        LITERAL, FORALL, SINGULAR_VARIABLE, CREATED, HASARGS
+        LITERAL, FORALL, SINGULAR_VARIABLE, CREATED, HASARGS_SINGULAR,
+        HASARGS_FORALL
     };
 
     private final Map<String, Usage> m_symbolToUsage;
@@ -48,9 +50,9 @@ public class Registry {
         m_unusedIndices = new Stack<Integer>();
         m_symbolToUsage = new HashMap<String, Usage>(); // entries won't change
         m_foralls = new HashSet<String>();
-        addSymbol("=?", g.BOOLEAN, Usage.LITERAL); // = as a predicate function, not as an assertion
+        addSymbol("=", g.BOOLEAN, Usage.LITERAL); // = as a predicate function, not as an assertion
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
-        assert (getIndexForSymbol("=?") == 0);
+        assert (getIndexForSymbol("=") == 0);
     }
 
     public Usage getUsage(String symbol) {
@@ -161,4 +163,14 @@ public class Registry {
     }
 
     public void flushUnusedSymbols() {}
+
+    public Set<String> getFunctionNames() {
+        HashSet<String> rSet = new HashSet<String>();
+        for (Entry<String, Usage> e : m_symbolToUsage.entrySet()) {
+            if (e.getValue().equals(Usage.HASARGS_SINGULAR)) {
+                rSet.add(e.getKey());
+            }
+        }
+        return rSet;
+    }
 }
