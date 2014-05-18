@@ -205,11 +205,13 @@ public class VCGenerator extends TreeWalkerVisitor {
             myVCBuffer.append(dec.getName().getName());
             myVCBuffer.append(" =========================\n");
 
-            // Obtain the module dec and use it to obtain the global requires clause
+            // Obtain the module dec and use it to obtain the global
+            // requires clause and all the import module constraints
             myCurrentModuleScope = mySymbolTable.getModuleScope(id);
             ModuleDec mDec = myCurrentModuleScope.getDefiningElement();
             Location loc = dec.getLocation();
             Exp gRequires = getRequiresClause(mDec);
+            Exp gConstraints = getImportedModuleConstraints();
 
             // Keep the current operation dec
             List<PTType> argTypes = new LinkedList<PTType>();
@@ -587,6 +589,31 @@ public class VCGenerator extends TreeWalkerVisitor {
                 Location myLoc = retExp.getLocation();
                 myLoc.setDetails("Ensures Clause of " + name);
                 setLocation(retExp, myLoc);
+            }
+        }
+
+        return retExp;
+    }
+
+    /**
+     * <p>Returns a conjunct of all the imported module constraints.</p>
+     *
+     * @return The constraint in <code>Exp</code> form.
+     */
+    private Exp getImportedModuleConstraints() {
+        Exp retExp = null;
+
+        // Obtain a list of all our imported modules
+        List<ModuleIdentifier> importList = myCurrentModuleScope.getImports();
+        for (ModuleIdentifier m : importList) {
+            try {
+                ModuleDec moduleDec =
+                        mySymbolTable.getModuleScope(m).getDefiningElement();
+            }
+            catch (NoSuchSymbolException e) {
+                System.err.println("Module " + m
+                        + " does not exist or is not in scope.");
+                noSuchModule(new PosSymbol(null, Symbol.symbol(m.toString())));
             }
         }
 
