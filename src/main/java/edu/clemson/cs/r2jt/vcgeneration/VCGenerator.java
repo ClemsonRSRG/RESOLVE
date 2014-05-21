@@ -151,6 +151,23 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append(dec.getConceptName().getName());
         myVCBuffer.append("\n");
         myVCBuffer.append("\n--------------------------------------------- \n");
+
+        // Set the current module scope
+        try {
+            myCurrentModuleScope =
+                    mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
+        }
+        catch (NoSuchSymbolException e) {
+            System.err.println("Module " + dec.getName()
+                    + " does not exist or is not in scope.");
+            noSuchModule(dec.getLocation());
+        }
+    }
+
+    @Override
+    public void postConceptBodyModuleDec(ConceptBodyModuleDec dec) {
+        // Set the current module scope to null
+        myCurrentModuleScope = null;
     }
 
     // -----------------------------------------------------------
@@ -169,6 +186,23 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append(dec.getConceptName().getName());
         myVCBuffer.append("\n");
         myVCBuffer.append("\n--------------------------------------------- \n");
+
+        // Set the current module scope
+        try {
+            myCurrentModuleScope =
+                    mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
+        }
+        catch (NoSuchSymbolException e) {
+            System.err.println("Module " + dec.getName()
+                    + " does not exist or is not in scope.");
+            noSuchModule(dec.getLocation());
+        }
+    }
+
+    @Override
+    public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
+        // Set the current module scope to null
+        myCurrentModuleScope = null;
     }
 
     // -----------------------------------------------------------
@@ -183,6 +217,23 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append(dec.getName().getName());
         myVCBuffer.append("\n");
         myVCBuffer.append("\n--------------------------------------------- \n");
+
+        // Set the current module scope
+        try {
+            myCurrentModuleScope =
+                    mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
+        }
+        catch (NoSuchSymbolException e) {
+            System.err.println("Module " + dec.getName()
+                    + " does not exist or is not in scope.");
+            noSuchModule(dec.getLocation());
+        }
+    }
+
+    @Override
+    public void postFacilityModuleDec(FacilityModuleDec dec) {
+        // Set the current module scope to null
+        myCurrentModuleScope = null;
     }
 
     // -----------------------------------------------------------
