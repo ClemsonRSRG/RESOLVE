@@ -161,6 +161,12 @@ public class VCGenerator extends TreeWalkerVisitor {
             myCurrentModuleScope =
                     mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
 
+            // From the list of imports, obtain the global constraints
+            // of the imported modules.
+            myGlobalConstraintExp =
+                    getConstraints(dec.getLocation(), myCurrentModuleScope
+                            .getImports());
+
             // Store the global requires clause
             myGlobalRequiresExp = getRequiresClause(dec);
         }
@@ -201,6 +207,12 @@ public class VCGenerator extends TreeWalkerVisitor {
             myCurrentModuleScope =
                     mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
 
+            // From the list of imports, obtain the global constraints
+            // of the imported modules.
+            myGlobalConstraintExp =
+                    getConstraints(dec.getLocation(), myCurrentModuleScope
+                            .getImports());
+
             // Store the global requires clause
             myGlobalRequiresExp = getRequiresClause(dec);
         }
@@ -220,20 +232,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
-    // FacilityDec
-    // -----------------------------------------------------------
-
-    @Override
-    public void preFacilityDec(FacilityDec dec) {
-
-    }
-
-    @Override
-    public void postFacilityDec(FacilityDec dec) {
-
-    }
-
-    // -----------------------------------------------------------
     // FacilityModuleDec
     // -----------------------------------------------------------
 
@@ -250,6 +248,12 @@ public class VCGenerator extends TreeWalkerVisitor {
         try {
             myCurrentModuleScope =
                     mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
+
+            // From the list of imports, obtain the global constraints
+            // of the imported modules.
+            myGlobalConstraintExp =
+                    getConstraints(dec.getLocation(), myCurrentModuleScope
+                            .getImports());
 
             // Store the global requires clause
             myGlobalRequiresExp = getRequiresClause(dec);
@@ -630,6 +634,73 @@ public class VCGenerator extends TreeWalkerVisitor {
         VarExp exp = new VarExp(loc, null, name);
         exp.setMathType(type);
         return exp;
+    }
+
+    /**
+     * <p>Returns all the constraint clauses combined together for the
+     * for the current <code>ModuleDec</code>.</p>
+     *
+     * @param loc The location of the <code>ModuleDec</code>.
+     * @param imports The list of imported modules.
+     *
+     * @return The constraint clause <code>Exp</code>.
+     */
+    private Exp getConstraints(Location loc, List<ModuleIdentifier> imports) {
+        Exp retExp = null;
+
+        // Loop
+        for (ModuleIdentifier mi : imports) {
+            try {
+                ModuleDec dec =
+                        mySymbolTable.getModuleScope(mi).getDefiningElement();
+                List<Exp> contraintExpList = null;
+
+                // Handling for facility imports
+                if (dec instanceof ShortFacilityModuleDec) {
+                    FacilityDec facDec =
+                            ((ShortFacilityModuleDec) dec).getDec();
+                    dec =
+                            mySymbolTable.getModuleScope(
+                                    new ModuleIdentifier(facDec
+                                            .getConceptName().getName()))
+                                    .getDefiningElement();
+                }
+
+                if (dec instanceof ConceptModuleDec) {
+                    contraintExpList =
+                            ((ConceptModuleDec) dec).getConstraints();
+
+                    // Copy all the constraints
+                    for (Exp e : contraintExpList) {
+                        // Deep copy and set the location detail
+                        Exp constraint = Exp.copy(e);
+                        if (constraint.getLocation() != null) {
+                            Location theLoc = constraint.getLocation();
+                            theLoc.setDetails("Constraint of Module: "
+                                    + dec.getName());
+                            setLocation(constraint, theLoc);
+                        }
+
+                        // Form conjunct if needed.
+                        if (retExp == null) {
+                            retExp = Exp.copy(e);
+                        }
+                        else {
+                            retExp =
+                                    myTypeGraph.formConjunct(retExp, Exp
+                                            .copy(e));
+                        }
+                    }
+                }
+            }
+            catch (NoSuchSymbolException e) {
+                System.err.println("Module " + mi.toString()
+                        + " does not exist or is not in scope.");
+                noSuchModule(loc);
+            }
+        }
+
+        return retExp;
     }
 
     /**
@@ -2262,6 +2333,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add the global requires clause
         if (myGlobalRequiresExp != null) {
             myAssertion.addAssume(myGlobalRequiresExp);
+        }
+
+        // Add the global constraints
+        if (myGlobalConstraintExp != null) {
+            myAssertion.addAssume(myGlobalConstraintExp);
         }
 
         // Add the requires clause
