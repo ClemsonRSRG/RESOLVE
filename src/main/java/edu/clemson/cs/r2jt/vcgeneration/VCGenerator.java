@@ -57,10 +57,12 @@ public class VCGenerator extends TreeWalkerVisitor {
     private final MTType Z;
     private ModuleScope myCurrentModuleScope;
 
-    // Current Operation Entry
-    private OperationEntry myCurrentOperationEntry;
+    // Module level global variables
+    private Exp myGlobalRequiresExp;
+    private Exp myGlobalConstraintExp;
 
-    // Decreasing Expression (if recursive)
+    // Operation/Procedure level global variables
+    private OperationEntry myCurrentOperationEntry;
     private Exp myOperationDecreasingExp;
 
     // Compile Environment
@@ -121,6 +123,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Current items
         myCurrentModuleScope = null;
+        myGlobalConstraintExp = null;
+        myGlobalRequiresExp = null;
         myCurrentOperationEntry = null;
         myOperationDecreasingExp = null;
 
@@ -151,6 +155,34 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append(dec.getConceptName().getName());
         myVCBuffer.append("\n");
         myVCBuffer.append("\n--------------------------------------------- \n");
+
+        // Set the current module scope
+        try {
+            myCurrentModuleScope =
+                    mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
+
+            // From the list of imports, obtain the global constraints
+            // of the imported modules.
+            myGlobalConstraintExp =
+                    getConstraints(dec.getLocation(), myCurrentModuleScope
+                            .getImports());
+
+            // Store the global requires clause
+            myGlobalRequiresExp = getRequiresClause(dec);
+        }
+        catch (NoSuchSymbolException e) {
+            System.err.println("Module " + dec.getName()
+                    + " does not exist or is not in scope.");
+            noSuchModule(dec.getLocation());
+        }
+    }
+
+    @Override
+    public void postConceptBodyModuleDec(ConceptBodyModuleDec dec) {
+        // Set the module level global variables to null
+        myCurrentModuleScope = null;
+        myGlobalConstraintExp = null;
+        myGlobalRequiresExp = null;
     }
 
     // -----------------------------------------------------------
@@ -169,6 +201,34 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append(dec.getConceptName().getName());
         myVCBuffer.append("\n");
         myVCBuffer.append("\n--------------------------------------------- \n");
+
+        // Set the current module scope
+        try {
+            myCurrentModuleScope =
+                    mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
+
+            // From the list of imports, obtain the global constraints
+            // of the imported modules.
+            myGlobalConstraintExp =
+                    getConstraints(dec.getLocation(), myCurrentModuleScope
+                            .getImports());
+
+            // Store the global requires clause
+            myGlobalRequiresExp = getRequiresClause(dec);
+        }
+        catch (NoSuchSymbolException e) {
+            System.err.println("Module " + dec.getName()
+                    + " does not exist or is not in scope.");
+            noSuchModule(dec.getLocation());
+        }
+    }
+
+    @Override
+    public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
+        // Set the module level global variables to null
+        myCurrentModuleScope = null;
+        myGlobalConstraintExp = null;
+        myGlobalRequiresExp = null;
     }
 
     // -----------------------------------------------------------
@@ -183,6 +243,34 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append(dec.getName().getName());
         myVCBuffer.append("\n");
         myVCBuffer.append("\n--------------------------------------------- \n");
+
+        // Set the current module scope
+        try {
+            myCurrentModuleScope =
+                    mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
+
+            // From the list of imports, obtain the global constraints
+            // of the imported modules.
+            myGlobalConstraintExp =
+                    getConstraints(dec.getLocation(), myCurrentModuleScope
+                            .getImports());
+
+            // Store the global requires clause
+            myGlobalRequiresExp = getRequiresClause(dec);
+        }
+        catch (NoSuchSymbolException e) {
+            System.err.println("Module " + dec.getName()
+                    + " does not exist or is not in scope.");
+            noSuchModule(dec.getLocation());
+        }
+    }
+
+    @Override
+    public void postFacilityModuleDec(FacilityModuleDec dec) {
+        // Set the module level global variables to null
+        myCurrentModuleScope = null;
+        myGlobalConstraintExp = null;
+        myGlobalRequiresExp = null;
     }
 
     // -----------------------------------------------------------
@@ -190,60 +278,48 @@ public class VCGenerator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     @Override
+    public void preFacilityOperationDec(FacilityOperationDec dec) {
+        // Keep the current operation dec
+        List<PTType> argTypes = new LinkedList<PTType>();
+        for (ParameterVarDec p : dec.getParameters()) {
+            argTypes.add(p.getTy().getProgramTypeValue());
+        }
+        myCurrentOperationEntry =
+                searchOperation(dec.getLocation(), null, dec.getName(),
+                        argTypes);
+    }
+
+    @Override
     public void postFacilityOperationDec(FacilityOperationDec dec) {
         // Create assertive code
         myAssertion = new AssertiveCode(myInstanceEnvironment);
 
-        // Obtain the id for the module we are in.
-        ModuleIdentifier id = mySymbolTable.getScope(dec).getRootModule();
-        try {
-            // Verbose Mode Debug Messages
-            myVCBuffer.append("\n=========================");
-            myVCBuffer.append(" Section: ");
-            myVCBuffer.append(mySectionID);
-            myVCBuffer.append("\t Procedure Name: ");
-            myVCBuffer.append(dec.getName().getName());
-            myVCBuffer.append(" =========================\n");
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\n=========================");
+        myVCBuffer.append(" Section: ");
+        myVCBuffer.append(mySectionID);
+        myVCBuffer.append("\t Procedure Name: ");
+        myVCBuffer.append(dec.getName().getName());
+        myVCBuffer.append(" =========================\n");
 
-            // Obtain the module dec and use it to obtain the global requires clause
-            myCurrentModuleScope = mySymbolTable.getModuleScope(id);
-            ModuleDec mDec = myCurrentModuleScope.getDefiningElement();
-            Location loc = dec.getLocation();
-            Exp gRequires = getRequiresClause(mDec);
+        // Obtains items from the current operation
+        Location loc = dec.getLocation();
+        Exp requires = modifyRequiresClause(getRequiresClause(dec), loc);
+        Exp ensures = modifyEnsuresClause(getEnsuresClause(dec), loc);
+        List<Statement> statementList = dec.getStatements();
+        List<VarDec> variableList = dec.getAllVariables();
+        Exp decreasing = dec.getDecreasing();
 
-            // Keep the current operation dec
-            List<PTType> argTypes = new LinkedList<PTType>();
-            for (ParameterVarDec p : dec.getParameters()) {
-                argTypes.add(p.getTy().getProgramTypeValue());
-            }
-            myCurrentOperationEntry =
-                    searchOperation(loc, null, dec.getName(), argTypes);
+        // Apply the procedure declaration rule
+        applyProcedureDeclRule(requires, ensures, decreasing, variableList,
+                statementList);
 
-            // Obtains items from the current operation
-            Exp requires = modifyRequiresClause(getRequiresClause(dec), loc);
-            Exp ensures = modifyEnsuresClause(getEnsuresClause(dec), loc);
-            List<Statement> statementList = dec.getStatements();
-            List<VarDec> variableList = dec.getAllVariables();
-            Exp decreasing = dec.getDecreasing();
+        // Apply proof rules
+        applyEBRules();
 
-            // Apply the procedure declaration rule
-            applyProcedureDeclRule(gRequires, requires, ensures, decreasing,
-                    variableList, statementList);
-
-            // Apply proof rules
-            applyEBRules();
-
-            myOperationDecreasingExp = null;
-            myCurrentOperationEntry = null;
-            myCurrentModuleScope = null;
-            mySectionID++;
-        }
-        catch (NoSuchSymbolException nsse) {
-            System.err.println("Module " + id
-                    + " does not exist or is not in scope.");
-            noSuchModule(dec.getLocation());
-        }
-
+        myOperationDecreasingExp = null;
+        myCurrentOperationEntry = null;
+        mySectionID++;
         myAssertion = null;
     }
 
@@ -558,6 +634,73 @@ public class VCGenerator extends TreeWalkerVisitor {
         VarExp exp = new VarExp(loc, null, name);
         exp.setMathType(type);
         return exp;
+    }
+
+    /**
+     * <p>Returns all the constraint clauses combined together for the
+     * for the current <code>ModuleDec</code>.</p>
+     *
+     * @param loc The location of the <code>ModuleDec</code>.
+     * @param imports The list of imported modules.
+     *
+     * @return The constraint clause <code>Exp</code>.
+     */
+    private Exp getConstraints(Location loc, List<ModuleIdentifier> imports) {
+        Exp retExp = null;
+
+        // Loop
+        for (ModuleIdentifier mi : imports) {
+            try {
+                ModuleDec dec =
+                        mySymbolTable.getModuleScope(mi).getDefiningElement();
+                List<Exp> contraintExpList = null;
+
+                // Handling for facility imports
+                if (dec instanceof ShortFacilityModuleDec) {
+                    FacilityDec facDec =
+                            ((ShortFacilityModuleDec) dec).getDec();
+                    dec =
+                            mySymbolTable.getModuleScope(
+                                    new ModuleIdentifier(facDec
+                                            .getConceptName().getName()))
+                                    .getDefiningElement();
+                }
+
+                if (dec instanceof ConceptModuleDec) {
+                    contraintExpList =
+                            ((ConceptModuleDec) dec).getConstraints();
+
+                    // Copy all the constraints
+                    for (Exp e : contraintExpList) {
+                        // Deep copy and set the location detail
+                        Exp constraint = Exp.copy(e);
+                        if (constraint.getLocation() != null) {
+                            Location theLoc = constraint.getLocation();
+                            theLoc.setDetails("Constraint of Module: "
+                                    + dec.getName());
+                            setLocation(constraint, theLoc);
+                        }
+
+                        // Form conjunct if needed.
+                        if (retExp == null) {
+                            retExp = Exp.copy(e);
+                        }
+                        else {
+                            retExp =
+                                    myTypeGraph.formConjunct(retExp, Exp
+                                            .copy(e));
+                        }
+                    }
+                }
+            }
+            catch (NoSuchSymbolException e) {
+                System.err.println("Module " + mi.toString()
+                        + " does not exist or is not in scope.");
+                noSuchModule(loc);
+            }
+        }
+
+        return retExp;
     }
 
     /**
@@ -2178,19 +2321,23 @@ public class VCGenerator extends TreeWalkerVisitor {
     /**
      * <p>Applies the procedure declaration rule.</p>
      *
-     * @param gRequires Global requires clause
      * @param requires Requires clause
      * @param ensures Ensures clause
      * @param decreasing Decreasing clause (if any)
      * @param variableList List of all variables for this procedure
      * @param statementList List of statements for this procedure
      */
-    private void applyProcedureDeclRule(Exp gRequires, Exp requires,
-            Exp ensures, Exp decreasing, List<VarDec> variableList,
+    private void applyProcedureDeclRule(Exp requires, Exp ensures,
+            Exp decreasing, List<VarDec> variableList,
             List<Statement> statementList) {
         // Add the global requires clause
-        if (gRequires != null) {
-            myAssertion.addAssume(gRequires);
+        if (myGlobalRequiresExp != null) {
+            myAssertion.addAssume(myGlobalRequiresExp);
+        }
+
+        // Add the global constraints
+        if (myGlobalConstraintExp != null) {
+            myAssertion.addAssume(myGlobalConstraintExp);
         }
 
         // Add the requires clause
