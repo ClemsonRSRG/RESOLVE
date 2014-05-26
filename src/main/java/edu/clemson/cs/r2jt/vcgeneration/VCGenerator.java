@@ -21,6 +21,11 @@ import edu.clemson.cs.r2jt.data.Mode;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
+import edu.clemson.cs.r2jt.proving.Conjuncts;
+import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving2.Antecedent;
+import edu.clemson.cs.r2jt.proving2.Consequent;
+import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
@@ -34,11 +39,10 @@ import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
+import edu.clemson.cs.r2jt.vcgeneration.vcs.VCCollector;
+import edu.clemson.cs.r2jt.vcgeneration.vcs.VerificationCondition;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * TODO: Write a description of this module
@@ -73,6 +77,18 @@ public class VCGenerator extends TreeWalkerVisitor {
      * VC rules to.</p>
      */
     private AssertiveCode myAssertion;
+
+    /**
+     * <p>A list that will be built up with <code>AssertiveCode</code>
+     * objects, each representing a VC or group of VCs that must be
+     * satisfied to verify a parsed program.</p>
+     */
+    private Collection<AssertiveCode> myFinalAssertiveCode;
+
+    /**
+     * <p>A list of final immutable VCs for this module.</p>
+     */
+    private Collection<VC> myFinalImmutableVCs;
 
     /**
      * <p>Section number for each section that
@@ -133,6 +149,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // VCs + Debugging String
         myAssertion = null;
+        myFinalAssertiveCode = new LinkedList<AssertiveCode>();
+        myFinalImmutableVCs = null;
         mySectionID = 0;
         myVCBuffer = new StringBuffer(buildHeaderComment());
     }
@@ -320,7 +338,18 @@ public class VCGenerator extends TreeWalkerVisitor {
         myOperationDecreasingExp = null;
         myCurrentOperationEntry = null;
         mySectionID++;
+        myFinalAssertiveCode.add(myAssertion);
         myAssertion = null;
+    }
+
+    // -----------------------------------------------------------
+    // ModuleDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void postModuleDec(ModuleDec dec) {
+        // Finalize and generate the final set of VCs
+        finalizeVCs();
     }
 
     // -----------------------------------------------------------
@@ -391,9 +420,28 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // Prover Mode
+    // -----------------------------------------------------------
+
+    /**
+     * <p>The set of immmutable VCs that the in house provers can use.</p>
+     *
+     * @return VCs to be proved.
+     */
+    public Collection<VC> proverOutput() {
+        return myFinalImmutableVCs;
+    }
+
+    // -----------------------------------------------------------
     // Debugging/Verbose Mode
     // -----------------------------------------------------------
 
+    /**
+     * <p>Outputs all the steps the VC generator took to generate
+     * the set of VCs.</p>
+     *
+     * @return String containing all the steps.
+     */
     public String verboseOutput() {
         return myVCBuffer.toString();
     }
@@ -487,6 +535,36 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         return oldExp;
+    }
+
+    /**
+     * <p>Method to convert each VC to its immutable format.</p>
+     *
+     * @param vc The original VC.
+     *
+     * @return The immutable form of the VC.
+     */
+    private VC convertToImmutableVC(VerificationCondition vc) {
+
+        java.util.List<PExp> newAntecedents = new LinkedList<PExp>();
+
+        Conjuncts oldAntecedents = vc.getAntecedents();
+        for (Exp a : oldAntecedents) {
+            newAntecedents.add(PExp.buildPExp(a));
+        }
+
+        java.util.List<PExp> newConsequents = new LinkedList<PExp>();
+
+        Conjuncts oldConsequents = vc.getConsequents();
+        for (Exp c : oldConsequents) {
+            newConsequents.add(PExp.buildPExp(c));
+        }
+
+        VC retval =
+                new VC(vc.getName(), new Antecedent(newAntecedents),
+                        new Consequent(newConsequents));
+
+        return retval;
     }
 
     /**
@@ -634,6 +712,22 @@ public class VCGenerator extends TreeWalkerVisitor {
         VarExp exp = new VarExp(loc, null, name);
         exp.setMathType(type);
         return exp;
+    }
+
+    /**
+     * <p>This method converts all <code>AssertiveCode</code> into
+     * the format used by the output handler and our in house provers.</p>
+     */
+    private void finalizeVCs() {
+        // Convert to an iterable list of <code>VerificationCondition</code>
+        Iterable<VerificationCondition> vcsToProve =
+                new VCCollector(myFinalAssertiveCode);
+
+        // Make the VCs immutable
+        myFinalImmutableVCs = new LinkedList<VC>();
+        for (VerificationCondition originalVC : vcsToProve) {
+            myFinalImmutableVCs.add(convertToImmutableVC(originalVC));
+        }
     }
 
     /**
