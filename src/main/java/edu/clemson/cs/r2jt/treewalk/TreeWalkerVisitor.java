@@ -2151,18 +2151,6 @@ public abstract class TreeWalkerVisitor {
 
     public void postProgramDotExp(ProgramDotExp data) {}
 
-    // ProgramDotExpSegments
-    public boolean walkProgramDotExpSegments(ProgramDotExp data) {
-        return false;
-    }
-
-    public void preProgramDotExpSegments(ProgramDotExp data) {}
-
-    public void midProgramDotExpSegments(ProgramDotExp node,
-            ProgramExp previous, ProgramExp next) {}
-
-    public void postProgramDotExpSegments(ProgramDotExp data) {}
-
     // ProgramDoubleExp
     public boolean walkProgramDoubleExp(ProgramDoubleExp data) {
         return false;
@@ -2495,6 +2483,30 @@ public abstract class TreeWalkerVisitor {
 
     public void postSelectionStmtDefaultclause(SelectionStmt data) {}
 
+    // SetCollectionExp
+    public boolean walkSetCollectionExp(SetCollectionExp data) {
+        return false;
+    }
+
+    public void preSetCollectionExp(SetCollectionExp data) {}
+
+    public void midSetCollectionExp(SetCollectionExp node,
+            ResolveConceptualElement previous, ResolveConceptualElement next) {}
+
+    public void postSetCollectionExp(SetCollectionExp data) {}
+
+    // SetCollectionExpMyVars
+    public boolean walkSetCollectionExpMyVars(SetCollectionExp data) {
+        return false;
+    }
+
+    public void preSetCollectionExpMyVars(SetCollectionExp data) {}
+
+    public void midSetCollectionExpMyVars(SetCollectionExp node,
+            VarExp previous, VarExp next) {}
+
+    public void postSetCollectionExpMyVars(SetCollectionExp data) {}
+
     // SetExp
     public boolean walkSetExp(SetExp data) {
         return false;
@@ -2506,17 +2518,6 @@ public abstract class TreeWalkerVisitor {
             ResolveConceptualElement next) {}
 
     public void postSetExp(SetExp data) {}
-
-    // SetExpVars
-    public boolean walkSetExpVars(SetExp data) {
-        return false;
-    }
-
-    public void preSetExpVars(SetExp data) {}
-
-    public void midSetExpVars(SetExp node, VarExp previous, VarExp next) {}
-
-    public void postSetExpVars(SetExp data) {}
 
     // ShortFacilityModuleDec
     public boolean walkShortFacilityModuleDec(ShortFacilityModuleDec data) {
