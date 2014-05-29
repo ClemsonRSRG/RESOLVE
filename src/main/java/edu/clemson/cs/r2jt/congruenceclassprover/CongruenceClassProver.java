@@ -106,6 +106,8 @@ public class CongruenceClassProver {
                         MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
         for (TheoremEntry e : theoremEntries) {
             PExp assertion = e.getAssertion();
+            if (assertion.getSymbolNames().contains("lambda"))
+                continue;
             if (assertion.isEquality()) {
                 addEqualityTheorem(true, assertion);
                 addEqualityTheorem(false, assertion);
