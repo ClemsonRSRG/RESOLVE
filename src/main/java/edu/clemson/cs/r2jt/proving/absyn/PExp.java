@@ -502,11 +502,6 @@ public abstract class PExp {
 
             retval = new PAlternatives(eAsAlternativeExp);
         }
-        else if (e instanceof AlternativeExp) {
-            AlternativeExp eAsAlternativeExp = (AlternativeExp) e;
-
-            retval = new PAlternatives(eAsAlternativeExp);
-        }
         else {
             throw new RuntimeException("Expressions of type " + e.getClass()
                     + " are not accepted by the prover.");
