@@ -88,7 +88,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     /**
      * <p>A list of final immutable VCs for this module.</p>
      */
-    private Collection<VC> myFinalImmutableVCs;
+    private List<VC> myFinalImmutableVCs;
 
     /**
      * <p>Section number for each section that
@@ -428,7 +428,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @return VCs to be proved.
      */
-    public Collection<VC> proverOutput() {
+    public List<VC> proverOutput() {
         return myFinalImmutableVCs;
     }
 
