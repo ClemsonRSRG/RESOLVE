@@ -86,9 +86,9 @@ public class VCGenerator extends TreeWalkerVisitor {
     private Collection<AssertiveCode> myFinalAssertiveCode;
 
     /**
-     * <p>A list of final immutable VCs for this module.</p>
+     * <p>This object creates the different VC outputs.</p>
      */
-    private List<VC> myFinalImmutableVCs;
+    private OutputVCs myOutputGenerator;
 
     /**
      * <p>Section number for each section that
@@ -150,7 +150,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // VCs + Debugging String
         myAssertion = null;
         myFinalAssertiveCode = new LinkedList<AssertiveCode>();
-        myFinalImmutableVCs = null;
+        myOutputGenerator = null;
         mySectionID = 0;
         myVCBuffer = new StringBuffer(buildHeaderComment());
     }
@@ -348,8 +348,19 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     @Override
     public void postModuleDec(ModuleDec dec) {
-        // Finalize and generate the final set of VCs
-        finalizeVCs();
+        // Create the output generator and finalize output
+        myOutputGenerator = new OutputVCs(myFinalAssertiveCode, myVCBuffer);
+
+        // Print to file if we are in debug mode
+        // TODO: Add debug flag here
+        /*
+        String filename;
+        if (myInstanceEnvironment.getOutputFilename() != null) {
+            filename = myInstanceEnvironment.getOutputFilename();
+        } else {
+            filename = myInstanceEnvironment.getTargetFileName();
+        }
+        myOutputGenerator.outputToFile(filename);*/
     }
 
     // -----------------------------------------------------------
@@ -429,21 +440,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @return VCs to be proved.
      */
     public List<VC> proverOutput() {
-        return myFinalImmutableVCs;
-    }
-
-    // -----------------------------------------------------------
-    // Debugging/Verbose Mode
-    // -----------------------------------------------------------
-
-    /**
-     * <p>Outputs all the steps the VC generator took to generate
-     * the set of VCs.</p>
-     *
-     * @return String containing all the steps.
-     */
-    public String verboseOutput() {
-        return myVCBuffer.toString();
+        return myOutputGenerator.getProverOutput();
     }
 
     // ===========================================================
@@ -535,36 +532,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         return oldExp;
-    }
-
-    /**
-     * <p>Method to convert each VC to its immutable format.</p>
-     *
-     * @param vc The original VC.
-     *
-     * @return The immutable form of the VC.
-     */
-    private VC convertToImmutableVC(VerificationCondition vc) {
-
-        java.util.List<PExp> newAntecedents = new LinkedList<PExp>();
-
-        Conjuncts oldAntecedents = vc.getAntecedents();
-        for (Exp a : oldAntecedents) {
-            newAntecedents.add(PExp.buildPExp(a));
-        }
-
-        java.util.List<PExp> newConsequents = new LinkedList<PExp>();
-
-        Conjuncts oldConsequents = vc.getConsequents();
-        for (Exp c : oldConsequents) {
-            newConsequents.add(PExp.buildPExp(c));
-        }
-
-        VC retval =
-                new VC(vc.getName(), new Antecedent(newAntecedents),
-                        new Consequent(newConsequents));
-
-        return retval;
     }
 
     /**
@@ -712,22 +679,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         VarExp exp = new VarExp(loc, null, name);
         exp.setMathType(type);
         return exp;
-    }
-
-    /**
-     * <p>This method converts all <code>AssertiveCode</code> into
-     * the format used by the output handler and our in house provers.</p>
-     */
-    private void finalizeVCs() {
-        // Convert to an iterable list of <code>VerificationCondition</code>
-        Iterable<VerificationCondition> vcsToProve =
-                new VCCollector(myFinalAssertiveCode);
-
-        // Make the VCs immutable
-        myFinalImmutableVCs = new LinkedList<VC>();
-        for (VerificationCondition originalVC : vcsToProve) {
-            myFinalImmutableVCs.add(convertToImmutableVC(originalVC));
-        }
     }
 
     /**
