@@ -62,16 +62,22 @@ public class VCGenerator extends TreeWalkerVisitor {
     private Exp myOperationDecreasingExp;
 
     /**
-     * <p>The current compile environment used throughout
-     * the compiler.</p>
-     */
-    private CompileEnvironment myInstanceEnvironment;
-
-    /**
      * <p>The current assertion we are applying
      * VC rules to.</p>
      */
     private AssertiveCode myAssertion;
+
+    /**
+     * <p>A stack to keep track of the RESOLVE Conceptual Elements
+     * we are still visiting and generating VCs for.</p>
+     */
+    private Stack<ResolveConceptualElement> myCurrentVisitingStack;
+
+    /**
+     * <p>The current compile environment used throughout
+     * the compiler.</p>
+     */
+    private CompileEnvironment myInstanceEnvironment;
 
     /**
      * <p>A list that will be built up with <code>AssertiveCode</code>
@@ -134,9 +140,10 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Current items
         myCurrentModuleScope = null;
+        myCurrentOperationEntry = null;
+        myCurrentVisitingStack = new Stack<ResolveConceptualElement>();
         myGlobalConstraintExp = null;
         myGlobalRequiresExp = null;
-        myCurrentOperationEntry = null;
         myOperationDecreasingExp = null;
 
         // Instance Environment
@@ -178,6 +185,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             myCurrentModuleScope =
                     mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
 
+            // Store the current visiting item into the stack
+            myCurrentVisitingStack.push(dec);
+
             // From the list of imports, obtain the global constraints
             // of the imported modules.
             myGlobalConstraintExp =
@@ -200,6 +210,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentModuleScope = null;
         myGlobalConstraintExp = null;
         myGlobalRequiresExp = null;
+
+        // Pop the top most item from the Stack
+        // Note: Must be us since we always push in a pre and
+        // pop in a post.
+        myCurrentVisitingStack.pop();
     }
 
     // -----------------------------------------------------------
@@ -228,6 +243,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             myCurrentModuleScope =
                     mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
 
+            // Store the current visiting item into the stack
+            myCurrentVisitingStack.push(dec);
+
             // From the list of imports, obtain the global constraints
             // of the imported modules.
             myGlobalConstraintExp =
@@ -250,6 +268,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentModuleScope = null;
         myGlobalConstraintExp = null;
         myGlobalRequiresExp = null;
+
+        // Pop the top most item from the Stack
+        // Note: Must be us since we always push in a pre and
+        // pop in a post.
+        myCurrentVisitingStack.pop();
     }
 
     // -----------------------------------------------------------
@@ -274,6 +297,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             myCurrentModuleScope =
                     mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
 
+            // Store the current visiting item into the stack
+            myCurrentVisitingStack.push(dec);
+
             // From the list of imports, obtain the global constraints
             // of the imported modules.
             myGlobalConstraintExp =
@@ -296,6 +322,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentModuleScope = null;
         myGlobalConstraintExp = null;
         myGlobalRequiresExp = null;
+
+        // Pop the top most item from the Stack
+        // Note: Must be us since we always push in a pre and
+        // pop in a post.
+        myCurrentVisitingStack.pop();
     }
 
     // -----------------------------------------------------------
@@ -312,6 +343,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentOperationEntry =
                 searchOperation(dec.getLocation(), null, dec.getName(),
                         argTypes);
+
+        // Store the current visiting item into the stack
+        myCurrentVisitingStack.push(dec);
     }
 
     @Override
@@ -348,6 +382,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         mySectionID++;
         myFinalAssertiveCode.add(myAssertion);
         myAssertion = null;
+
+        // Pop the top most item from the Stack
+        // Note: Must be us since we always push in a pre and
+        // pop in a post.
+        myCurrentVisitingStack.pop();
     }
 
     // -----------------------------------------------------------
@@ -356,21 +395,27 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     @Override
     public void postModuleDec(ModuleDec dec) {
-        // Create the output generator and finalize output
-        myOutputGenerator =
-                new OutputVCs(myInstanceEnvironment, myFinalAssertiveCode,
-                        myVCBuffer);
+        // Make sure that our stack of visiting items is 0.
+        if (myCurrentVisitingStack.isEmpty()) {
+            // Create the output generator and finalize output
+            myOutputGenerator =
+                    new OutputVCs(myInstanceEnvironment, myFinalAssertiveCode,
+                            myVCBuffer);
 
-        // Print to file if we are in debug mode
-        // TODO: Add debug flag here
-        String filename;
-        if (myInstanceEnvironment.getOutputFilename() != null) {
-            filename = myInstanceEnvironment.getOutputFilename();
+            // Print to file if we are in debug mode
+            // TODO: Add debug flag here
+            String filename;
+            if (myInstanceEnvironment.getOutputFilename() != null) {
+                filename = myInstanceEnvironment.getOutputFilename();
+            }
+            else {
+                filename = createVCFileName();
+            }
+            myOutputGenerator.outputToFile(filename);
         }
         else {
-            filename = createVCFileName();
+            incorrectVisit(dec.getName(), dec.getLocation());
         }
-        myOutputGenerator.outputToFile(filename);
     }
 
     // -----------------------------------------------------------
@@ -393,6 +438,13 @@ public class VCGenerator extends TreeWalkerVisitor {
         throw new SourceErrorException(message, l);
     }
 
+    public void incorrectVisit(PosSymbol name, Location l) {
+        String message =
+                "After visiting all elements in ModuleDec: " + name
+                        + ", our stack of visiting items is not empty!";
+        throw new SourceErrorException(message, l);
+    }
+
     public void notAType(SymbolTableEntry entry, Location l) {
         throw new SourceErrorException(entry.getSourceModuleIdentifier()
                 .fullyQualifiedRepresentation(entry.getName())
@@ -408,15 +460,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     public void noSuchModule(Location location) {
         throw new SourceErrorException(
                 "Module does not exist or is not in scope.", location);
-    }
-
-    public void noSuchModule(PosSymbol qualifier) {
-        throw new SourceErrorException(
-                "Module does not exist or is not in scope.", qualifier);
-    }
-
-    public void noSuchSymbol(PosSymbol qualifier, PosSymbol symbol) {
-        noSuchSymbol(qualifier, symbol.getName(), symbol.getLocation());
     }
 
     public void noSuchSymbol(PosSymbol qualifier, String symbolName, Location l) {
