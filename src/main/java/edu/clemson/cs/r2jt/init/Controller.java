@@ -1505,7 +1505,8 @@ public class Controller {
     // ------------------------------------------------------------
     // Verification Related Methods
     // ------------------------------------------------------------
-    // Invoke the new VC Generator 
+
+    // Invoke the new VC Generator
     // -YS
     private void generateVCs(ScopeRepository table, ModuleDec dec) {
 
@@ -1516,7 +1517,54 @@ public class Controller {
         tw.visit(dec);
 
         // Print Debug Information
-        System.out.println(vcgen.verboseOutput());
+        //System.out.println(vcgen.verboseOutput());
+
+        // Obtain VCs for Prover
+        java.util.List<VC> vcs = vcgen.proverOutput();
+
+        // If specified, invoke one of our in house provers
+        try {
+            ModuleScope scope = table.getModuleScope(new ModuleIdentifier(dec));
+
+            // Congruence Class Prover
+            if (myInstanceEnvironment.flags
+                    .isFlagSet(CongruenceClassProver.FLAG_PROVE)) {
+                CongruenceClassProver ccProver =
+                        new CongruenceClassProver(table.getTypeGraph(), vcs,
+                                scope, myInstanceEnvironment,
+                                myInstanceEnvironment.getProverListener());
+                try {
+                    ccProver.start();
+                }
+                catch (IOException ioe) {
+                    throw new RuntimeException(ioe);
+                }
+            }
+            // Algebraic Prover
+            else if (myInstanceEnvironment.flags
+                    .isFlagSet(AlgebraicProver.FLAG_PROVE)) {
+                AlgebraicProver prover =
+                        new AlgebraicProver(
+                                table.getTypeGraph(),
+                                vcs,
+                                scope,
+                                myInstanceEnvironment.flags
+                                        .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE),
+                                myInstanceEnvironment, myInstanceEnvironment
+                                        .getProverListener());
+
+                try {
+                    prover.start();
+                }
+                catch (IOException ioe) {
+                    throw new RuntimeException(ioe);
+                }
+            }
+        }
+        catch (NoSuchSymbolException nsse) {
+            //Can't find the module we're in.  Shouldn't be possible.
+            throw new RuntimeException(nsse);
+        }
     }
 
     private void verifyModuleDec(ScopeRepository realTable,
