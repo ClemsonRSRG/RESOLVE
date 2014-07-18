@@ -16,6 +16,8 @@ package edu.clemson.cs.r2jt.vcgeneration;
  * Libraries
  */
 import edu.clemson.cs.r2jt.absyn.Exp;
+import edu.clemson.cs.r2jt.data.Location;
+import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving.Conjuncts;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.Antecedent;
@@ -24,11 +26,10 @@ import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.vcgeneration.vcs.VCCollector;
 import edu.clemson.cs.r2jt.vcgeneration.vcs.VerificationCondition;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * TODO: Write a description of this module
@@ -38,6 +39,12 @@ public class OutputVCs {
     // ===========================================================
     // Global Variables
     // ===========================================================
+
+    /**
+     * <p>The current compile environment used throughout
+     * the compiler.</p>
+     */
+    private CompileEnvironment myInstanceEnvironment;
 
     /**
      * <p>A list that will be built up with <code>AssertiveCode</code>
@@ -52,6 +59,11 @@ public class OutputVCs {
     private List<VC> myFinalImmutableVCs;
 
     /**
+     * <p>A map that stores vc names. </p>
+     */
+    private Map<String, List<Location>> myVCDetails;
+
+    /**
      * <p>This string buffer holds all the steps
      * the VC generator takes to generate VCs.</p>
      */
@@ -61,8 +73,11 @@ public class OutputVCs {
     // Constructors
     // ===========================================================
 
-    public OutputVCs(Collection<AssertiveCode> assertiveCode, StringBuffer steps) {
+    public OutputVCs(final CompileEnvironment env,
+            Collection<AssertiveCode> assertiveCode, StringBuffer steps) {
+        myInstanceEnvironment = env;
         myFinalAssertiveCode = assertiveCode;
+        myVCDetails = new HashMap<String, List<Location>>();
         myVCSteps = steps;
 
         // Convert to each format
@@ -89,11 +104,16 @@ public class OutputVCs {
      */
     public void outputToFile(String filename) {
         try {
-            FileWriter outFile = new FileWriter(filename);
-            outFile.write("");
-            outFile.append(myVCSteps);
-            outFile.append(humanReadableVCs());
-            outFile.flush();
+            FileWriter w = new FileWriter(new File(filename));
+            w.write(buildHeaderComment());
+            w.write("\n=================================");
+            w.write(" VC(s): ");
+            w.write("=================================\n");
+            w.write("\n");
+            w.write(humanReadableVCs());
+            w.write(myVCSteps.toString());
+            w.flush();
+            w.close();
         }
         catch (IOException ex) {
             System.err.println("File I/O error when writing: " + filename);
@@ -105,6 +125,16 @@ public class OutputVCs {
     // ===========================================================
 
     /**
+     * <p>Builds a comment header to identify VC files generated
+     * by the compiler and from which RESOLVE source file the generated
+     * file is derived.</p>
+     */
+    private String buildHeaderComment() {
+        return "VCs for " + myInstanceEnvironment.getTargetFile().getName()
+                + " generated " + new Date() + "\n";
+    }
+
+    /**
      * <p>Method to convert each VC to its immutable format.</p>
      *
      * @param vc The original VC.
@@ -112,24 +142,30 @@ public class OutputVCs {
      * @return The immutable form of the VC.
      */
     private VC convertToImmutableVC(VerificationCondition vc) {
+        List<PExp> newAntecedents = new LinkedList<PExp>();
+        List<PExp> newConsequents = new LinkedList<PExp>();
+        List<Location> locationList = new LinkedList<Location>();
 
-        java.util.List<PExp> newAntecedents = new LinkedList<PExp>();
-
+        // Antecedents (Givens)
         Conjuncts oldAntecedents = vc.getAntecedents();
         for (Exp a : oldAntecedents) {
             newAntecedents.add(PExp.buildPExp(a));
         }
 
-        java.util.List<PExp> newConsequents = new LinkedList<PExp>();
-
+        // Consequents (Goals)
         Conjuncts oldConsequents = vc.getConsequents();
         for (Exp c : oldConsequents) {
             newConsequents.add(PExp.buildPExp(c));
+            locationList.add(c.getLocation());
         }
 
+        // Immutable VC
         VC retval =
                 new VC(vc.getName(), new Antecedent(newAntecedents),
                         new Consequent(newConsequents));
+
+        // Stores the location details in our Map
+        myVCDetails.put(retval.getName(), locationList);
 
         return retval;
     }
@@ -141,7 +177,31 @@ public class OutputVCs {
     private String humanReadableVCs() {
         String finalVCs = "";
 
-        // TODO: Convert to human readable format
+        // Convert to human readable format
+        for (VC vc : myFinalImmutableVCs) {
+            List<Location> locationList = myVCDetails.get(vc.getName());
+            Antecedent antecedent = vc.getAntecedent();
+            Consequent consequent = vc.getConsequent();
+
+            // Add vc details to string
+            finalVCs += ("VC " + vc.getName() + "\n\n");
+
+            // Location details
+            Location loc = locationList.get(0);
+            finalVCs += (loc.getDetails() + ": " + loc.toString() + "\n\n");
+
+            // Goals
+            finalVCs += ("Goal(s):\n\n" + consequent.toString() + "\n");
+
+            // Givens
+            finalVCs += "Given(s):\n\n";
+            int numAntecedent = antecedent.size();
+            for (int i = 0; i < numAntecedent; i++) {
+                finalVCs +=
+                        ((i + 1) + ". " + antecedent.get(i).toString() + "\n");
+            }
+            finalVCs += "\n";
+        }
 
         return finalVCs;
     }
