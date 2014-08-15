@@ -35,6 +35,8 @@ import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
 import java.io.File;
 import java.util.*;
+import java.util.List;
+import java.util.Stack;
 
 /**
  * TODO: Write a description of this module
@@ -2354,36 +2356,199 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param stmt Our current <code>FuncAssignStmt</code>.
      */
     private void applyEBFuncAssignStmtRule(FuncAssignStmt stmt) {
-    /*ProgramExp assignExp = stmt.getAssign();
+        OperationDec opDec;
+        PosSymbol qualifier = null;
+        ProgramExp assignExp = stmt.getAssign();
+        ProgramParamExp assignParamExp = null;
 
-    // Check to see what kind of expression is on the right hand side
-    if (assignExp instanceof ProgramParamExp) {
-        // Cast to a ProgramParamExp
-        ProgramParamExp assignParamExp = (ProgramParamExp) assignExp;
+        // Check to see what kind of expression is on the right hand side
+        if (assignExp instanceof ProgramParamExp) {
+            // Cast to a ProgramParamExp
+            assignParamExp = (ProgramParamExp) assignExp;
+        }
+        else if (assignExp instanceof ProgramDotExp) {
+            // Cast to a ProgramParamExp
+            ProgramDotExp dotExp = (ProgramDotExp) assignExp;
+            assignParamExp = (ProgramParamExp) dotExp.getExp();
+            qualifier = dotExp.getQualifier();
+        }
+        else {
+            // TODO: ERROR!
+        }
 
-        // Items needed to use the query
-        List<ProgramExp> args = assignParamExp.getArguments();
+        // Obtain the corresponding OperationEntry and OperationDec
         List<PTType> argTypes = new LinkedList<PTType>();
-        for (ProgramExp arg : args) {
+        for (ProgramExp arg : assignParamExp.getArguments()) {
             argTypes.add(arg.getProgramType());
         }
+        OperationEntry opEntry =
+                searchOperation(stmt.getLocation(), qualifier, assignParamExp
+                        .getName(), argTypes);
 
-        // Query for the corresponding operation
-        try {
-            OperationEntry op =
-                    myCurrentModuleScope.queryForOne(
-                            new OperationQuery(null, assignParamExp.getName(), argTypes));
-            System.out.println(op.getName());
+        // Obtain an OperationDec from the OperationEntry
+        ResolveConceptualElement element = opEntry.getDefiningElement();
+        if (element instanceof OperationDec) {
+            opDec = (OperationDec) opEntry.getDefiningElement();
         }
-        catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(null, assignParamExp.getName().getName(), assignParamExp.getLocation());
+        else {
+            FacilityOperationDec fOpDec =
+                    (FacilityOperationDec) opEntry.getDefiningElement();
+            opDec =
+                    new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
+                            fOpDec.getReturnTy(), fOpDec.getStateVars(), fOpDec
+                                    .getRequires(), fOpDec.getEnsures());
         }
-        catch (DuplicateSymbolException dse) {
-            //This should be caught earlier, when the duplicate operation is
-            //created
-            throw new RuntimeException(dse);
+
+        // Get the ensures clause for this operation
+        // Note: If there isn't an ensures clause, it is set to "True"
+        Exp ensures;
+        if (opDec.getEnsures() != null) {
+            ensures = Exp.copy(opDec.getEnsures());
+
+            // Set the location for the ensures clause
+            if (ensures.getLocation() != null) {
+                Location newLoc = ensures.getLocation();
+                newLoc.setDetails("Ensures Clause For " + opDec.getName());
+                ensures.setLocation(newLoc);
+            }
         }
-    }            */
+        else {
+            ensures = myTypeGraph.getTrueVarExp();
+        }
+
+        // Get the requires clause for this operation
+        Exp requires;
+        if (opDec.getRequires() != null) {
+            requires = Exp.copy(opDec.getRequires());
+        }
+        else {
+            requires = myTypeGraph.getTrueVarExp();
+        }
+
+        // Check for recursive call of itself
+        if (myCurrentOperationEntry.getName().equals(opEntry.getName())
+                && myCurrentOperationEntry.getReturnType() != null) {
+            // Create a new confirm statement using P_val and the decreasing clause
+            VarExp pVal = createPValExp(myOperationDecreasingExp.getLocation());
+
+            // Create a new infix expression
+            InfixExp exp =
+                    new InfixExp(stmt.getLocation(), Exp
+                            .copy(myOperationDecreasingExp),
+                            createPosSymbol("<"), pVal);
+            exp.setMathType(BOOLEAN);
+
+            // Create the new confirm statement
+            Location loc;
+            if (myOperationDecreasingExp.getLocation() != null) {
+                loc = (Location) myOperationDecreasingExp.getLocation().clone();
+            }
+            else {
+                loc = (Location) stmt.getLocation().clone();
+            }
+            loc.setDetails("Show Termination of Recursive Call");
+            setLocation(exp, loc);
+            ConfirmStmt conf = new ConfirmStmt(loc, exp);
+
+            // Add it to our list of assertions
+            myAssertion.addCode(conf);
+        }
+
+        // Replace PreCondition variables in the requires clause
+        requires =
+                replaceFormalWithActualReq(requires, opDec.getParameters(),
+                        assignParamExp.getArguments());
+
+        // Replace PostCondition variables in the ensures clause
+        ensures =
+                replaceFormalWithActualEns(ensures, opDec.getParameters(),
+                        opDec.getStateVars(), assignParamExp.getArguments(),
+                        false);
+
+        // Modify the location of the requires clause and add it to myAssertion
+        if (requires != null) {
+            // Obtain the current location
+            // Note: If we don't have a location, we create one
+            Location loc;
+            if (assignParamExp.getName().getLocation() != null) {
+                loc = (Location) assignParamExp.getName().getLocation().clone();
+            }
+            else {
+                loc = new Location(null, null);
+            }
+
+            // Append the name of the current procedure
+            String details = "";
+            if (myCurrentOperationEntry != null) {
+                details = " in Procedure " + myCurrentOperationEntry.getName();
+            }
+
+            // Set the details of the current location
+            loc.setDetails("Requires Clause of " + opDec.getName() + details);
+            setLocation(requires, loc);
+
+            // Add this to our list of things to confirm
+            myAssertion.addConfirm(requires);
+        }
+
+        // Modify the location of the ensures clause and add it to myAssertion
+        if (ensures != null) {
+            // Obtain the current location
+            if (assignParamExp.getName().getLocation() != null) {
+                // Set the details of the current location
+                Location loc =
+                        (Location) assignParamExp.getName().getLocation()
+                                .clone();
+                loc.setDetails("Ensures Clause of " + opDec.getName());
+                setLocation(ensures, loc);
+            }
+
+            // Replace all instances of the variable on the left hand side
+            // in the ensures clause with the expression on the right.
+            Exp leftVariable;
+
+            // We have a variable inside a record as the variable being assigned.
+            if (stmt.getVar() instanceof VariableDotExp) {
+                VariableDotExp v = (VariableDotExp) stmt.getVar();
+                List<VariableExp> vList = v.getSegments();
+                edu.clemson.cs.r2jt.collections.List<Exp> newSegments =
+                        new edu.clemson.cs.r2jt.collections.List<Exp>();
+
+                // Loot through each variable expression and add it to our dot list
+                for (VariableExp vr : vList) {
+                    VarExp varExp = new VarExp();
+                    if (vr instanceof VariableNameExp) {
+                        varExp.setName(((VariableNameExp) vr).getName());
+                        varExp.setMathType(vr.getMathType());
+                        varExp.setMathTypeValue(vr.getMathTypeValue());
+                        newSegments.add(varExp);
+                    }
+                }
+
+                // Expression to be replaced
+                leftVariable = new DotExp(v.getLocation(), newSegments, null);
+                leftVariable.setMathType(v.getMathType());
+                leftVariable.setMathTypeValue(v.getMathTypeValue());
+            }
+            // We have a regular variable being assigned.
+            else {
+                // Expression to be replaced
+                VariableNameExp v = (VariableNameExp) stmt.getVar();
+                leftVariable = new VarExp(v.getLocation(), null, v.getName());
+                leftVariable.setMathType(v.getMathType());
+                leftVariable.setMathTypeValue(v.getMathTypeValue());
+            }
+
+            // Replace and set as our new confirm statement
+            Exp newConf = myAssertion.getFinalConfirm();
+            newConf = replace(newConf, leftVariable, ensures);
+            myAssertion.setFinalConfirm(newConf);
+        }
+
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\nFunction Rule Applied: \n");
+        myVCBuffer.append(myAssertion.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
     }
 
     /**
