@@ -2473,20 +2473,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add this to our list of things to confirm
         myAssertion.addConfirm(requires);
 
-        // Check parameter modes for additional givens
-        Exp paramEnsures = myTypeGraph.getTrueVarExp();
-        paramEnsures =
-                modifyEnsuresByParameter(paramEnsures, stmt.getLocation(),
-                        opDec.getName().getName(), opDec.getParameters());
-        paramEnsures =
-                replaceFormalWithActualEns(paramEnsures, opDec.getParameters(),
-                        opDec.getStateVars(), assignParamExp.getArguments(),
-                        false);
-
-        if (!paramEnsures.isLiteralTrue()) {
-            myAssertion.addAssume(paramEnsures);
-        }
-
         // Get the ensures clause for this operation
         // Note: If there isn't an ensures clause, it is set to "True"
         Exp ensures, opEnsures;
