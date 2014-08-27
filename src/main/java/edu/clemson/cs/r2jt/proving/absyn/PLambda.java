@@ -12,23 +12,19 @@
  */
 package edu.clemson.cs.r2jt.proving.absyn;
 
+import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.SingletonImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+
+import java.util.*;
 
 public class PLambda extends PExp {
 
     public final ImmutableList<Parameter> parameters;
     private final PExp myBody;
+    private static int f_num = 0;
 
     public PLambda(ImmutableList<Parameter> parameters, PExp body) {
         super(body.structureHash * 34, parameterHash(parameters),
@@ -256,7 +252,32 @@ public class PLambda extends PExp {
             this.name = name;
             this.type = type;
         }
+        public PSymbol toPSymbol(PLambda lamb){
 
+            // Make new function symbol
+            String fname = "_lambda" + f_num++;
+            // Make new parameters
+            ArrayList<PSymbol> paramsAL = new ArrayList<PSymbol>();
+            Iterator<PLambda.Parameter> pit = lamb.parameters.iterator();
+            PExp[] emptyArr = new PExp[0];
+            ArrayBackedImmutableList<PExp> emptyList = new ArrayBackedImmutableList<PExp>(emptyArr);
+            while(pit.hasNext()){
+                PLambda.Parameter p = pit.next();
+                paramsAL.add(new PSymbol(p.type,p.type, p.name, p.name, new ArrayBackedImmutableList<PExp>(emptyList), PSymbol.Quantification.FOR_ALL, PSymbol.DisplayType.PREFIX));
+            }
+            ImmutableList<PExp> argList = new ArrayBackedImmutableList<PExp>(paramsAL.toArray(new PExp[paramsAL.size()]));
+            PSymbol func = new PSymbol(lamb.getType(),lamb.getTypeValue(),fname,fname,argList, PSymbol.Quantification.NONE, PSymbol.DisplayType.PREFIX);
+            // Enter new expression, replacing parameter name with the fresh one
+            PExp body = lamb.getSubExpressions().get(0);
+            PExp[] argsForEq = new PExp[2];
+            argsForEq[0] = func;
+            argsForEq[1] = body;
+            // Equate formula with expression
+            PSymbol asPsymbol = new PSymbol(body.getType().getTypeGraph().BOOLEAN, body.getType().getTypeGraph().BOOLEAN,
+                    "=", "=" , new ArrayBackedImmutableList<PExp>(argsForEq), PSymbol.Quantification.NONE, PSymbol.DisplayType.INFIX);
+
+            return asPsymbol;
+        }
         @Override
         public String toString() {
             return name + " : " + type;

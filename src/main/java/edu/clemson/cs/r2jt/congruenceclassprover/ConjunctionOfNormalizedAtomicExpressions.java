@@ -14,8 +14,13 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PExpSubexpressionIterator;
+import edu.clemson.cs.r2jt.proving.absyn.PLambda;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
+import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
+import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 import java.util.*;
 
@@ -28,6 +33,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     private final List<NormalizedAtomicExpressionMapImpl> m_exprList;
     protected long m_timeToEnd = -1;
     private final List<NormalizedAtomicExpressionMapImpl> m_removedExprList;
+    protected boolean m_evaluates_to_false = false;
+    private int f_num = 0;
+    public List<TheoremCongruenceClosureImpl> m_lambdasAsTheorems;
+    public HashMap<String, String> m_lambdas;
 
     /**
      * @param registry the Registry symbols contained in the conjunction will
@@ -37,6 +46,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         m_registry = registry;
         m_exprList = new LinkedList<NormalizedAtomicExpressionMapImpl>();
         m_removedExprList = new LinkedList<NormalizedAtomicExpressionMapImpl>();
+        m_lambdasAsTheorems = new ArrayList<TheoremCongruenceClosureImpl>();
+        m_lambdas = new HashMap<String, String>();
     }
 
     protected int size() {
@@ -100,15 +111,57 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
     }
 
-    // adds a particular sumbol to the registry
+    // add a lambda formula
+    /*
+
+    public PSymbol(MTType type, MTType typeValue, String leftPrint,
+            String rightPrint, ImmutableList<PExp> arguments,
+            Quantification quantification, DisplayType display)
+     */
+    protected int addLambda(PLambda lamb){
+    //todo: check lambda list for duplicate before adding.  VC's will want to create multiple copies of the same lambda
+        if (m_lambdas.containsKey(lamb.toString())) return m_registry.m_symbolToIndex.get((m_lambdas.get(lamb.toString())));
+        // Make new function symbol
+        String fname = "_lambda" + f_num++;
+        // Make new parameters
+        ArrayList<PSymbol> paramsAL = new ArrayList<PSymbol>();
+        Iterator<PLambda.Parameter> pit = lamb.parameters.iterator();
+        PExp[] emptyArr = new PExp[0];
+        ArrayBackedImmutableList<PExp> emptyList = new ArrayBackedImmutableList<PExp>(emptyArr);
+        //int pnum = 0;
+        //HashMap<PExp,PExp> subsP = new HashMap<PExp, PExp>();
+        //HashMap<String,String> subsS = new HashMap<String, String>();
+        while(pit.hasNext()){
+            PLambda.Parameter p = pit.next();
+            //String pname = p.type.toString().toLowerCase() + pnum++;
+            paramsAL.add(new PSymbol(p.type, p.type, p.name, p.name, new ArrayBackedImmutableList<PExp>(emptyList), PSymbol.Quantification.FOR_ALL, PSymbol.DisplayType.PREFIX));
+            
+        }
+        ImmutableList<PExp> argList = new ArrayBackedImmutableList<PExp>(paramsAL.toArray(new PExp[paramsAL.size()]));
+        PSymbol func = new PSymbol(lamb.getType(),lamb.getTypeValue(),fname,fname,argList, PSymbol.Quantification.NONE, PSymbol.DisplayType.PREFIX);
+        // Enter new expression, replacing parameter name with the fresh one
+        PExp body = lamb.getSubExpressions().get(0);
+        PExp[] argsForEq = new PExp[2];
+        argsForEq[0] = func;
+        argsForEq[1] = body;
+        // Equate formula with expression
+        PSymbol asPsymbol = new PSymbol(m_registry.m_typeGraph.BOOLEAN, m_registry.m_typeGraph.BOOLEAN, "=", "=" , new ArrayBackedImmutableList<PExp>(argsForEq), PSymbol.Quantification.NONE, PSymbol.DisplayType.INFIX);
+        m_lambdasAsTheorems.add(new TheoremCongruenceClosureImpl(m_registry.m_typeGraph,asPsymbol));
+        m_lambdas.put(lamb.toString(),fname);
+        // Return int rep of fname.
+        return addPsymbol(func);
+    }
+    // adds a particular symbol to the registry
     protected int addPsymbol(PSymbol ps) {
         String name = ps.getTopLevelOperation();
         MTType type = ps.getType();
+
         Registry.Usage usage = Registry.Usage.SINGULAR_VARIABLE;
         if (ps.isLiteral()) {
             usage = Registry.Usage.LITERAL;
         }
-        else if (ps.isFunction()) {
+
+        else if (ps.isFunction() || ps.getType().getClass().getSimpleName().contains("MTFunction")){
             if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
                 usage = Registry.Usage.HASARGS_FORALL;
             }
@@ -134,10 +187,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             int rhs = addFormula(r);
             lhs = m_registry.findAndCompress(lhs);
             rhs = m_registry.findAndCompress(rhs);
-            if (lhs == rhs) {
+            // This prevents matching of (i=i)=true, which is not built in
+            /*if (lhs == rhs) {
                 return m_registry.getIndexForSymbol("true");
             }
-            else {
+            else {*/
                 // insert =(lhs,rhs) = someNewRoot
                 int questEq = m_registry.getIndexForSymbol("=");
                 NormalizedAtomicExpressionMapImpl pred =
@@ -146,9 +200,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 pred.writeOnto(lhs, 1);
                 pred.writeOnto(rhs, 2);
                 return addAtomicFormula(pred);
-            }
+           // }
         }
-        PSymbol asPsymbol = (PSymbol) formula;
+        PSymbol asPsymbol;
+        if (formula instanceof PLambda){
+            return addLambda((PLambda)formula);
+        }
+        else
+            asPsymbol = (PSymbol) formula;
         int intRepOfOp = addPsymbol(asPsymbol);
         // base case
         if (formula.isVariable()) {
@@ -211,7 +270,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 holdingTank.addAll(mergeOnlyArgumentOperators(opA, opB));
             }
         }
-        mergeArgsOfEqualityPredicateIfRootIsTrue();
+        //mergeArgsOfEqualityPredicateIfRootIsTrue();
     }
 
     // look for =(x,y)=true in list.  If found call merge(x,y).
@@ -260,14 +319,29 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         String bString = m_registry.getSymbolForIndex(b);
         if (aString.compareTo(bString) > 0) {
             int temp = a;
+            String tempS = aString;
             a = b;
+            aString = bString;
             b = temp;
+            bString = tempS;
         }
         // Favor retaining literals
         // THIS IS CURRENTLY ABSOLUTELY NECCESSARY.  Finding could be redone to avoid this.
         // Otherwise, proofs can fail to prove if literals are redefined.
-        bString = m_registry.getSymbolForIndex(b);
+
+        if(aString.equals("false") && bString.equals("true")){
+            m_evaluates_to_false = true;
+            return null;
+        }
+        // TODO: find out why when aString == bString here, a !=b.  Child probably merged.
         Registry.Usage uB = m_registry.getUsage(bString);
+        Registry.Usage uA = m_registry.getUsage((aString));
+        // Can't rely on literal property being set.  false is not set to be a literal.
+        if(uA.equals(Registry.Usage.LITERAL) && uB.equals(Registry.Usage.LITERAL)){
+            System.err.println("Literal redefinition: " + aString + a + " -> " + bString + b);
+            System.err.println(m_registry.m_symbolToIndex);
+            System.err.println(m_registry.m_indexToSymbol);
+        }
         if (uB.equals(Registry.Usage.LITERAL)) {
             int temp = a;
             a = b;
@@ -367,8 +441,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     @Override
     public String toString() {
         String r = "";
+        if(m_evaluates_to_false)
+               r += "Conjunction evaluates to false" + "\n";
+
         for (NormalizedAtomicExpressionMapImpl cur : m_exprList) {
             r += cur.toHumanReadableString(m_registry) + "\n";
+        }
+        for(TheoremCongruenceClosureImpl th : m_lambdasAsTheorems){
+            r += th.m_theoremString + "\n";
         }
         return r;
     }

@@ -324,7 +324,9 @@ public class PSymbol extends PExp {
     }
 
     public boolean isFunction() {
+        // Function symbols do not always have arguments
         return myArgumentsSize > 0;
+        //return (myType.getClass().getSimpleName().contains("MTFunction"));
     }
 
     @Override
@@ -722,6 +724,6 @@ public class PSymbol extends PExp {
         //      are indistinguishable except for their names.  Until this
         //      situation is resolved, literals should be hard coded here.
         return (name.equalsIgnoreCase("empty_string"))
-                || (name.equals("0") || name.equals("1"));
+                || (name.equals("0") || name.equals("1") || name.equals("true") || name.equals("false"));
     }
 }

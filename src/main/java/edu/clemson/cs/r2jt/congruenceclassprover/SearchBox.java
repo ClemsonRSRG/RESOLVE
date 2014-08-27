@@ -19,12 +19,12 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 /**
- *
  * @author mike
  */
 public class SearchBox {
@@ -38,7 +38,7 @@ public class SearchBox {
     protected Registry m_destRegistry;
     protected HashMap<String, String> m_bindings; // Wildcard to actual. meant to be only for foralls
     protected final HashMap<String, String> m_bindingsInitial; // bindings sent to constructor
-    private HashMap<String, String> m_failedBindings; // for troubleshooting
+    protected HashMap<String, String> m_failedBindings; // for troubleshooting
     // set m_bindings to this before nextMatch
     protected final ConjunctionOfNormalizedAtomicExpressions m_dataSet;
     public boolean directMatch = false;
@@ -48,9 +48,9 @@ public class SearchBox {
     public int m_lastGoodMatchIndex;
 
     public SearchBox(NormalizedAtomicExpressionMapImpl query,
-            Registry queryReg,
-            ConjunctionOfNormalizedAtomicExpressions dataSet, Registry dataReg,
-            HashMap<String, String> bindings, int indexInList) {
+                     Registry queryReg,
+                     ConjunctionOfNormalizedAtomicExpressions dataSet, Registry dataReg,
+                     HashMap<String, String> bindings, int indexInList) {
         m_original = query; // this is the search expr directly from the theorem
         m_origRegistry = queryReg;
         m_dataSet = dataSet;
@@ -139,41 +139,13 @@ public class SearchBox {
              */
             if (tempMap.containsKey(origOp)) { // only unwritten wildcards
                 if (tempMap.get(origOp).equals("")) {
-                    // Type checking is not needed, unless perhaps for quantified functions
-                    if (m_origRegistry.getUsage(origOp) == Registry.Usage.HASARGS_FORALL) {
+                    tempMap.put(origOp, boundOp);
+                    continue;
 
-                        MTType origType =
-                                m_origRegistry.getTypeByIndex(m_origRegistry
-                                        .getIndexForSymbol(origOp));
-                        MTType boundType =
-                                m_destRegistry.getTypeByIndex(m_destRegistry
-                                        .getIndexForSymbol(boundOp));
-                        Class bClass = boundType.getClass();
-                        if (bClass.getSimpleName().contains("MTFunction")) {
-                            MTFunction boundTypeF = (MTFunction) boundType;
-                            boundType = boundTypeF.getRange();
-                        }
-                        // Not quite this condition works the way it should.  
-                        if (boundType.alphaEquivalentTo(origType)) {
-                            //System.out.println("matched forall " + origOp + " " + boundOp);
-                            tempMap.put(origOp, boundOp);
-                            continue;
-                        }
-                        else {
-                            m_failedBindings = tempMap;
-                            return false;
-                        }
-                    }
-                    else {
-                        tempMap.put(origOp, boundOp);
-                        continue;
-                    }
-                }
-                else {
+                } else {
                     origValForComp = tempMap.get(origOp);
                 }
-            }
-            else {
+            } else {
                 origValForComp = m_origAsStrArray.get(i);
             }
             if (!origValForComp.equals(boundOp)) { // not a wildcard, if not the same, ret false
@@ -181,6 +153,7 @@ public class SearchBox {
                 return false; // problem, need to roll back m_bindings
             }
         }
+
         m_bindings = tempMap;
         m_lastGoodMatchIndex = currentIndex;
         return true;

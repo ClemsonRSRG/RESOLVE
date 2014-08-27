@@ -296,7 +296,8 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
     public void setMathType(MTType mathType) {
         if (mathType == null) {
             System.out.println(this.asString(0, 0));
-            throw new RuntimeException("Null Math Type on: " + this.getClass());
+            //throw new RuntimeException("Null Math Type on: " + this.getClass());
+
         }
 
         myMathType = mathType;

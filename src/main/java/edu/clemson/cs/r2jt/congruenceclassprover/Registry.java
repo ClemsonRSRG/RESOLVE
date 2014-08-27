@@ -31,6 +31,7 @@ public class Registry {
     public ArrayList<Integer> m_symbolIndexParentArray;
     public Stack<Integer> m_unusedIndices;
     private int m_uniqueCounter = 0;
+    protected TypeGraph m_typeGraph;
 
     public static enum Usage {
 
@@ -40,6 +41,7 @@ public class Registry {
 
     private final Map<String, Usage> m_symbolToUsage;
     private final Set<String> m_foralls;
+    protected Map<String,MTType> m_typeDictionary;
 
     public Registry(TypeGraph g) {
         m_symbolToIndex = new TreeMap<String, Integer>();
@@ -50,9 +52,12 @@ public class Registry {
         m_unusedIndices = new Stack<Integer>();
         m_symbolToUsage = new HashMap<String, Usage>(); // entries won't change
         m_foralls = new HashSet<String>();
+        m_typeGraph = g;
+        m_typeDictionary = new TreeMap<String, MTType>();
         addSymbol("=", g.BOOLEAN, Usage.LITERAL); // = as a predicate function, not as an assertion
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
         assert (getIndexForSymbol("=") == 0);
+
     }
 
     public Usage getUsage(String symbol) {
@@ -145,7 +150,10 @@ public class Registry {
             TreeSet<String> t = new TreeSet<String>();
             t.add(symbolName);
             assert symbolType != null : symbolName + " has null type";
-            m_typeToSetOfOperators.put(symbolType, t);
+            if(symbolType!=null) {
+                m_typeToSetOfOperators.put(symbolType, t);
+                m_typeDictionary.put(symbolType.toString().replace("'",""), symbolType);
+            }
         }
 
         m_symbolToUsage.put(symbolName, usage);
