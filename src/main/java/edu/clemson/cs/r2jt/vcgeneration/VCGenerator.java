@@ -1086,12 +1086,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                         ensures = equalsExp;
                     }
                 }
-                // Evaluates mode
-                else if (p.getMode() == Mode.EVALUATES) {
-                    // Replace parameterExp with oldParameterExp in the
-                    // ensures clause.
-                    ensures = replace(ensures, parameterExp, oldParameterExp);
-                }
                 // Clears mode
                 else if (p.getMode() == Mode.CLEARS) {
                     // Query for the type entry in the symbol table
