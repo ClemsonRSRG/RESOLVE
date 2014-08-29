@@ -191,19 +191,86 @@ public class OutputVCs {
             finalVCs += (loc.getDetails() + ": " + loc.toString() + "\n\n");
 
             // Goals
-            finalVCs += ("Goal(s):\n\n" + consequent.toString() + "\n");
+            finalVCs += ("Goal(s):\n\n" + reformatOutputString(consequent.toString()) + "\n\n");
 
             // Givens
             finalVCs += "Given(s):\n\n";
             int numAntecedent = antecedent.size();
             for (int i = 0; i < numAntecedent; i++) {
                 finalVCs +=
-                        ((i + 1) + ". " + antecedent.get(i).toString() + "\n");
+                        ((i + 1) + ". " + reformatOutputString(antecedent.get(i).toString()) + "\n");
             }
             finalVCs += "\n";
         }
 
         return finalVCs;
+    }
+
+    /**
+     * <p>This method converts all the question mark variables
+     * into human readable prime variables and converts all the
+     * "Conc_" variables to "Conc.".</p>
+     *
+     * @param str String form of <code>Antecedent</code> or
+     *            <code>Consequent</code>.
+     *
+     * @return Properly converted text in string format.
+     */
+    private String reformatOutputString(String str) {
+        // Return value
+        String retStr = "";
+
+        // Split the string by spaces
+        String[] splitStr = str.split("\\s+");
+
+        for (String s : splitStr) {
+            // Add the left parenthesis if there are any
+            int index = 0;
+            while (s.indexOf('(', index) != -1) {
+                retStr += "(";
+                index++;
+            }
+
+            // Convert output of conceptual variables.
+            if (s.startsWith("Conc_", index)) {
+                retStr += s.replace("Conc_", "Conc.");
+            }
+            else {
+                // Question mark variables
+                int numQuestionMark = 0;;
+                while (s.indexOf('?', index) != -1) {
+                    numQuestionMark++;
+                    index++;
+                }
+
+                // Look for right hand side parenthesis if any
+                int stopIndex = s.indexOf(")");
+                if (stopIndex == -1) {
+                    // Name of the variable
+                    retStr += s.substring(index);
+                }
+                else {
+                    // Name of the variable
+                    retStr += s.substring(index, stopIndex);
+                }
+
+                // Replace the question marks with primes
+                for (int i = 0; i < numQuestionMark; i++) {
+                    retStr += "'";
+                }
+
+                // Add the right parenthesis if needed.
+                if (stopIndex != -1) {
+                    while (s.indexOf(')', stopIndex) != -1) {
+                        retStr += ")";
+                        stopIndex++;
+                    }
+                }
+                retStr += " ";
+            }
+        }
+
+        return retStr;
     }
 
     /**

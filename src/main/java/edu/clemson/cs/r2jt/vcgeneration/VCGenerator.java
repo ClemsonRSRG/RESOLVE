@@ -747,7 +747,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         String tempfile = filename.substring(0, temp);
         String mainFileName;
 
-        mainFileName = tempfile + ".asrt";
+        mainFileName = tempfile + ".asrt_new";
 
         return mainFileName;
     }
