@@ -36,7 +36,6 @@ import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 import java.io.File;
 import java.util.*;
 import java.util.List;
-import java.util.Stack;
 
 /**
  * TODO: Write a description of this module
@@ -80,7 +79,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      * objects, each representing a VC or group of VCs that must be
      * satisfied to verify a parsed program.</p>
      */
-    private Collection<AssertiveCode> myFinalAssertiveCode;
+    private Collection<AssertiveCode> myFinalAssertiveCodeList;
 
     /**
      * <p>This object creates the different VC outputs.</p>
@@ -140,7 +139,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // VCs + Debugging String
         myCurrentAssertiveCode = null;
-        myFinalAssertiveCode = new LinkedList<AssertiveCode>();
+        myFinalAssertiveCodeList = new LinkedList<AssertiveCode>();
         myOutputGenerator = null;
         myVCBuffer = new StringBuffer();
     }
@@ -338,7 +337,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         myOperationDecreasingExp = null;
         myCurrentOperationEntry = null;
-        myFinalAssertiveCode.add(myCurrentAssertiveCode);
+        myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
         myCurrentAssertiveCode = null;
     }
 
@@ -350,7 +349,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     public void postModuleDec(ModuleDec dec) {
             // Create the output generator and finalize output
             myOutputGenerator =
-                    new OutputVCs(myInstanceEnvironment, myFinalAssertiveCode,
+                    new OutputVCs(myInstanceEnvironment, myFinalAssertiveCodeList,
                             myVCBuffer);
 
             // Print to file if we are in debug mode
