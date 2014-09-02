@@ -16,11 +16,9 @@ package edu.clemson.cs.r2jt.vcgeneration;
  * Libraries
  */
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.data.Mode;
-import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.data.Symbol;
+import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
+import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
@@ -35,10 +33,8 @@ import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.io.File;
+import java.util.*;
 
 /**
  * TODO: Write a description of this module
@@ -65,7 +61,10 @@ public class VCGenerator extends TreeWalkerVisitor {
     private OperationEntry myCurrentOperationEntry;
     private Exp myOperationDecreasingExp;
 
-    // Compile Environment
+    /**
+     * <p>The current compile environment used throughout
+     * the compiler.</p>
+     */
     private CompileEnvironment myInstanceEnvironment;
 
     /**
@@ -73,6 +72,18 @@ public class VCGenerator extends TreeWalkerVisitor {
      * VC rules to.</p>
      */
     private AssertiveCode myAssertion;
+
+    /**
+     * <p>A list that will be built up with <code>AssertiveCode</code>
+     * objects, each representing a VC or group of VCs that must be
+     * satisfied to verify a parsed program.</p>
+     */
+    private Collection<AssertiveCode> myFinalAssertiveCode;
+
+    /**
+     * <p>This object creates the different VC outputs.</p>
+     */
+    private OutputVCs myOutputGenerator;
 
     /**
      * <p>Section number for each section that
@@ -133,8 +144,10 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // VCs + Debugging String
         myAssertion = null;
+        myFinalAssertiveCode = new LinkedList<AssertiveCode>();
+        myOutputGenerator = null;
         mySectionID = 0;
-        myVCBuffer = new StringBuffer(buildHeaderComment());
+        myVCBuffer = new StringBuffer();
     }
 
     // ===========================================================
@@ -148,13 +161,17 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public void preConceptBodyModuleDec(ConceptBodyModuleDec dec) {
         // Verbose Mode Debug Messages
-        myVCBuffer.append("\n--------------------------------------------- \n");
+        myVCBuffer.append("\n=========================");
+        myVCBuffer.append(" VC Generation Details ");
+        myVCBuffer.append(" =========================\n");
         myVCBuffer.append("\n Concept Realization Name:\t");
         myVCBuffer.append(dec.getName().getName());
         myVCBuffer.append("\n Concept Name:\t");
         myVCBuffer.append(dec.getConceptName().getName());
         myVCBuffer.append("\n");
-        myVCBuffer.append("\n--------------------------------------------- \n");
+        myVCBuffer.append("\n====================================");
+        myVCBuffer.append("======================================\n");
+        myVCBuffer.append("\n");
 
         // Set the current module scope
         try {
@@ -192,7 +209,9 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public void preEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
         // Verbose Mode Debug Messages
-        myVCBuffer.append("\n--------------------------------------------- \n");
+        myVCBuffer.append("\n=========================");
+        myVCBuffer.append(" VC Generation Details ");
+        myVCBuffer.append(" =========================\n");
         myVCBuffer.append("\n Enhancement Realization Name:\t");
         myVCBuffer.append(dec.getName().getName());
         myVCBuffer.append("\n Enhancement Name:\t");
@@ -200,7 +219,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append("\n Concept Name:\t");
         myVCBuffer.append(dec.getConceptName().getName());
         myVCBuffer.append("\n");
-        myVCBuffer.append("\n--------------------------------------------- \n");
+        myVCBuffer.append("\n====================================");
+        myVCBuffer.append("======================================\n");
+        myVCBuffer.append("\n");
 
         // Set the current module scope
         try {
@@ -238,11 +259,15 @@ public class VCGenerator extends TreeWalkerVisitor {
     @Override
     public void preFacilityModuleDec(FacilityModuleDec dec) {
         // Verbose Mode Debug Messages
-        myVCBuffer.append("\n--------------------------------------------- \n");
+        myVCBuffer.append("\n=========================");
+        myVCBuffer.append(" VC Generation Details ");
+        myVCBuffer.append(" =========================\n");
         myVCBuffer.append("\n Facility Name:\t");
         myVCBuffer.append(dec.getName().getName());
         myVCBuffer.append("\n");
-        myVCBuffer.append("\n--------------------------------------------- \n");
+        myVCBuffer.append("\n====================================");
+        myVCBuffer.append("======================================\n");
+        myVCBuffer.append("\n");
 
         // Set the current module scope
         try {
@@ -298,14 +323,15 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append("\n=========================");
         myVCBuffer.append(" Section: ");
         myVCBuffer.append(mySectionID);
-        myVCBuffer.append("\t Procedure Name: ");
+        myVCBuffer.append("\t Procedure: ");
         myVCBuffer.append(dec.getName().getName());
         myVCBuffer.append(" =========================\n");
 
         // Obtains items from the current operation
         Location loc = dec.getLocation();
-        Exp requires = modifyRequiresClause(getRequiresClause(dec), loc);
-        Exp ensures = modifyEnsuresClause(getEnsuresClause(dec), loc);
+        String name = dec.getName().getName();
+        Exp requires = modifyRequiresClause(getRequiresClause(dec), loc, name);
+        Exp ensures = modifyEnsuresClause(getEnsuresClause(dec), loc, name);
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
@@ -320,7 +346,31 @@ public class VCGenerator extends TreeWalkerVisitor {
         myOperationDecreasingExp = null;
         myCurrentOperationEntry = null;
         mySectionID++;
+        myFinalAssertiveCode.add(myAssertion);
         myAssertion = null;
+    }
+
+    // -----------------------------------------------------------
+    // ModuleDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void postModuleDec(ModuleDec dec) {
+        // Create the output generator and finalize output
+        myOutputGenerator =
+                new OutputVCs(myInstanceEnvironment, myFinalAssertiveCode,
+                        myVCBuffer);
+
+        // Print to file if we are in debug mode
+        // TODO: Add debug flag here
+        String filename;
+        if (myInstanceEnvironment.getOutputFilename() != null) {
+            filename = myInstanceEnvironment.getOutputFilename();
+        }
+        else {
+            filename = createVCFileName();
+        }
+        myOutputGenerator.outputToFile(filename);
     }
 
     // -----------------------------------------------------------
@@ -391,11 +441,16 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
-    // Debugging/Verbose Mode
+    // Prover Mode
     // -----------------------------------------------------------
 
-    public String verboseOutput() {
-        return myVCBuffer.toString();
+    /**
+     * <p>The set of immmutable VCs that the in house provers can use.</p>
+     *
+     * @return VCs to be proved.
+     */
+    public List<VC> proverOutput() {
+        return myOutputGenerator.getProverOutput();
     }
 
     // ===========================================================
@@ -416,16 +471,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             myAssertion.addFreeVar(createVarExp(v.getLocation(), v.getName(), v
                     .getTy().getMathTypeValue()));
         }
-    }
-
-    /**
-     * <p>Builds a comment header to identify VC files generated
-     * by the compiler and from which RESOLVE source file the generated
-     * file is derived.</p>
-     */
-    private String buildHeaderComment() {
-        return "VCs for " + myInstanceEnvironment.getTargetFile().getName()
-                + " generated " + new Date();
     }
 
     /**
@@ -634,6 +679,25 @@ public class VCGenerator extends TreeWalkerVisitor {
         VarExp exp = new VarExp(loc, null, name);
         exp.setMathType(type);
         return exp;
+    }
+
+    /**
+     * <p>Creates the name of the output file.</p>
+     *
+     * @return Name of the file
+     */
+    private String createVCFileName() {
+        File file = myInstanceEnvironment.getTargetFile();
+        ModuleID cid = myInstanceEnvironment.getModuleID(file);
+        file = myInstanceEnvironment.getFile(cid);
+        String filename = file.toString();
+        int temp = filename.indexOf(".");
+        String tempfile = filename.substring(0, temp);
+        String mainFileName;
+
+        mainFileName = tempfile + ".asrt";
+
+        return mainFileName;
     }
 
     /**
@@ -912,12 +976,13 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @param ensures The <code>Exp</code> containing the ensures clause.
      * @param opLocation The <code>Location</code> for the operation
+     * @param opName The name of the operation.
      * @param parameterVarDecList The list of parameter variables for the operation.
      *
      * @return The modified ensures clause <code>Exp</code>.
      */
     private Exp modifyEnsuresByParameter(Exp ensures, Location opLocation,
-            List<ParameterVarDec> parameterVarDecList) {
+            String opName, List<ParameterVarDec> parameterVarDecList) {
         // Loop through each parameter
         for (ParameterVarDec p : parameterVarDecList) {
             // Ty is NameTy
@@ -951,9 +1016,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
                     else {
                         equalLoc = ((Location) opLocation.clone());
+                        equalLoc.setDetails("Ensures Clause of " + opName);
                     }
-                    equalLoc.setDetails("Condition from "
-                            + p.getMode().getModeName() + " parameter mode.");
+                    equalLoc.setDetails(equalLoc.getDetails()
+                            + " (Condition from \""
+                            + p.getMode().getModeName().toUpperCase()
+                            + "\" parameter mode)");
                     equalsExp.setLocation(equalLoc);
 
                     // Create an AND infix expression with the ensures clause
@@ -1002,10 +1070,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                         }
                         else {
                             initLoc = ((Location) opLocation.clone());
+                            initLoc.setDetails("Ensures Clause of " + opName);
                         }
-                        initLoc.setDetails("Condition from "
-                                + p.getMode().getModeName()
-                                + " parameter mode.");
+                        initLoc.setDetails(initLoc.getDetails()
+                                + " (Condition from \""
+                                + p.getMode().getModeName().toUpperCase()
+                                + "\" parameter mode)");
                         init.setLocation(initLoc);
                     }
 
@@ -1033,11 +1103,13 @@ public class VCGenerator extends TreeWalkerVisitor {
      * <p>Returns the ensures clause.</p>
      *
      * @param ensures The <code>Exp</code> containing the ensures clause.
-     * @param opLocation The <code>Location</code> for the operation
+     * @param opLocation The <code>Location</code> for the operation.
+     * @param opName The name for the operation.
      *
      * @return The modified ensures clause <code>Exp</code>.
      */
-    private Exp modifyEnsuresClause(Exp ensures, Location opLocation) {
+    private Exp modifyEnsuresClause(Exp ensures, Location opLocation,
+            String opName) {
         // Obtain the list of parameters for the current operation
         List<ParameterVarDec> parameterVarDecList;
         if (myCurrentOperationEntry.getDefiningElement() instanceof FacilityOperationDec) {
@@ -1054,7 +1126,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Modifies the existing ensures clause based on
         // the parameter modes.
         ensures =
-                modifyEnsuresByParameter(ensures, opLocation,
+                modifyEnsuresByParameter(ensures, opLocation, opName,
                         parameterVarDecList);
 
         return ensures;
@@ -1075,11 +1147,13 @@ public class VCGenerator extends TreeWalkerVisitor {
      * <p>Modifies the requires clause based on the parameter mode.</p>
      *
      * @param requires The <code>Exp</code> containing the requires clause.
-     * @param opLocation The <code>Location</code> for the operation
+     * @param opLocation The <code>Location</code> for the operation.
+     * @param opName The name for the operation.
      *
      * @return The modified requires clause <code>Exp</code>.
      */
-    private Exp modifyRequiresByParameter(Exp requires, Location opLocation) {
+    private Exp modifyRequiresByParameter(Exp requires, Location opLocation,
+            String opName) {
         // Obtain the list of parameters
         List<ParameterVarDec> parameterVarDecList;
         if (myCurrentOperationEntry.getDefiningElement() instanceof FacilityOperationDec) {
@@ -1134,11 +1208,24 @@ public class VCGenerator extends TreeWalkerVisitor {
                             initLoc = ((Location) reqLoc.clone());
                         }
                         else {
+                            // Append the name of the current procedure
+                            String details = "";
+                            if (myCurrentOperationEntry != null) {
+                                details =
+                                        " in Procedure "
+                                                + myCurrentOperationEntry
+                                                        .getName();
+                            }
+
+                            // Set the details of the current location
                             initLoc = ((Location) opLocation.clone());
+                            initLoc.setDetails("Requires Clause of " + opName
+                                    + details);
                         }
-                        initLoc.setDetails("Assumption from "
-                                + p.getMode().getModeName()
-                                + " parameter mode.");
+                        initLoc.setDetails(initLoc.getDetails()
+                                + " (Assumption from \""
+                                + p.getMode().getModeName().toUpperCase()
+                                + "\" parameter mode)");
                         init.setLocation(initLoc);
                     }
 
@@ -1169,11 +1256,23 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 constLoc = ((Location) reqLoc.clone());
                             }
                             else {
+                                // Append the name of the current procedure
+                                String details = "";
+                                if (myCurrentOperationEntry != null) {
+                                    details =
+                                            " in Procedure "
+                                                    + myCurrentOperationEntry
+                                                            .getName();
+                                }
+
                                 constLoc = ((Location) opLocation.clone());
+                                constLoc.setDetails("Requires Clause of "
+                                        + opName + details);
                             }
-                            constLoc.setDetails("Constraint from "
-                                    + p.getMode().getModeName()
-                                    + " parameter mode.");
+                            constLoc.setDetails(constLoc.getDetails()
+                                    + " (Constraint from \""
+                                    + p.getMode().getModeName().toUpperCase()
+                                    + "\" parameter mode)");
                             constraint.setLocation(constLoc);
                         }
 
@@ -1210,13 +1309,15 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @param requires The <code>Exp</code> containing the requires clause.
      * @param opLocation The <code>Location</code> for the operation.
+     * @param opName The name of the operation.
      *
      * @return The modified requires clause <code>Exp</code>.
      */
-    private Exp modifyRequiresClause(Exp requires, Location opLocation) {
+    private Exp modifyRequiresClause(Exp requires, Location opLocation,
+            String opName) {
         // Modifies the existing requires clause based on
         // the parameter modes.
-        requires = modifyRequiresByParameter(requires, opLocation);
+        requires = modifyRequiresByParameter(requires, opLocation, opName);
 
         // Modifies the existing requires clause based on
         // the parameter modes.
@@ -1911,14 +2012,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                     myTypeGraph
                             .formConjunct((Exp) confirm.getAssertion(), conf);
 
-            // Obtain the current location
-            if (conf.getLocation() != null) {
-                // Set the details of the current location
-                Location loc = (Location) conf.getLocation().clone();
-                loc.setDetails("Confirm Clause");
-                setLocation(newConf, loc);
-            }
-
             // Set this new expression as the new final confirm
             myAssertion.setFinalConfirm(newConf);
 
@@ -2005,8 +2098,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Set the location for the ensures clause
             if (ensures.getLocation() != null) {
-                ensures.getLocation().setDetails(
-                        "Ensures Clause For " + opDec.getName());
+                Location newLoc = ensures.getLocation();
+                newLoc.setDetails("Ensures Clause For " + opDec.getName());
+                ensures.setLocation(newLoc);
             }
         }
         else {
@@ -2054,7 +2148,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Modify ensures using the parameter modes
         ensures =
                 modifyEnsuresByParameter(ensures, stmt.getLocation(), opDec
-                        .getParameters());
+                        .getName().getName(), opDec.getParameters());
 
         // Replace PreCondition variables in the requires clause
         requires =
@@ -2142,7 +2236,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             if (assertion.getLocation() != null) {
                 // Set the details of the current location
                 Location loc = (Location) assertion.getLocation().clone();
-                loc.setDetails("Confirm Clause");
                 setLocation(assertion, loc);
             }
 
@@ -2157,14 +2250,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Create a new and expression
             InfixExp newConf =
                     myTypeGraph.formConjunct(assertion, currentFinalConfirm);
-
-            // Obtain the current location
-            if (assertion.getLocation() != null) {
-                // Set the details of the current location
-                Location loc = (Location) assertion.getLocation().clone();
-                loc.setDetails("Confirm Clause");
-                setLocation(newConf, loc);
-            }
 
             // Set this new expression as the new final confirm
             myAssertion.setFinalConfirm(newConf);
