@@ -94,12 +94,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     private OutputVCs myOutputGenerator;
 
     /**
-     * <p>Section number for each section that
-     * we are generating assertive code for.</p>
-     */
-    private int mySectionID;
-
-    /**
      * <p>This string buffer holds all the steps
      * the VC generator takes to generate VCs.</p>
      */
@@ -155,7 +149,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         myAssertion = null;
         myFinalAssertiveCode = new LinkedList<AssertiveCode>();
         myOutputGenerator = null;
-        mySectionID = 0;
         myVCBuffer = new StringBuffer();
     }
 
@@ -357,9 +350,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\n=========================");
-        myVCBuffer.append(" Section: ");
-        myVCBuffer.append(mySectionID);
-        myVCBuffer.append("\t Procedure: ");
+        myVCBuffer.append(" Procedure: ");
         myVCBuffer.append(dec.getName().getName());
         myVCBuffer.append(" =========================\n");
 
@@ -381,7 +372,6 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         myOperationDecreasingExp = null;
         myCurrentOperationEntry = null;
-        mySectionID++;
         myFinalAssertiveCode.add(myAssertion);
         myAssertion = null;
 
