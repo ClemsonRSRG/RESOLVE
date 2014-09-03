@@ -347,21 +347,21 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     @Override
     public void postModuleDec(ModuleDec dec) {
-            // Create the output generator and finalize output
-            myOutputGenerator =
-                    new OutputVCs(myInstanceEnvironment, myFinalAssertiveCodeList,
-                            myVCBuffer);
+        // Create the output generator and finalize output
+        myOutputGenerator =
+                new OutputVCs(myInstanceEnvironment, myFinalAssertiveCodeList,
+                        myVCBuffer);
 
-            // Print to file if we are in debug mode
-            // TODO: Add debug flag here
-            String filename;
-            if (myInstanceEnvironment.getOutputFilename() != null) {
-                filename = myInstanceEnvironment.getOutputFilename();
-            }
-            else {
-                filename = createVCFileName();
-            }
-            myOutputGenerator.outputToFile(filename);
+        // Print to file if we are in debug mode
+        // TODO: Add debug flag here
+        String filename;
+        if (myInstanceEnvironment.getOutputFilename() != null) {
+            filename = myInstanceEnvironment.getOutputFilename();
+        }
+        else {
+            filename = createVCFileName();
+        }
+        myOutputGenerator.outputToFile(filename);
     }
 
     // -----------------------------------------------------------
@@ -457,8 +457,8 @@ public class VCGenerator extends TreeWalkerVisitor {
     public void addVarDecsAsFreeVars(List<VarDec> variableList) {
         // Loop through the variable list
         for (VarDec v : variableList) {
-            myCurrentAssertiveCode.addFreeVar(createVarExp(v.getLocation(), v.getName(), v
-                    .getTy().getMathTypeValue()));
+            myCurrentAssertiveCode.addFreeVar(createVarExp(v.getLocation(), v
+                    .getName(), v.getTy().getMathTypeValue()));
         }
     }
 
@@ -1275,8 +1275,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
 
                 // Add the current variable to our list of free variables
-                myCurrentAssertiveCode.addFreeVar(createVarExp(p.getLocation(), p
-                        .getName(), pNameTy.getMathTypeValue()));
+                myCurrentAssertiveCode.addFreeVar(createVarExp(p.getLocation(),
+                        p.getName(), pNameTy.getMathTypeValue()));
             }
             else {
                 // Ty not handled.
@@ -1366,14 +1366,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                     || stateVar.getMode() == Mode.UPDATES) {
                 // Obtain the variable from our free variable list
                 Exp globalFreeVar =
-                        myCurrentAssertiveCode.getFreeVar(stateVar.getName(), true);
+                        myCurrentAssertiveCode.getFreeVar(stateVar.getName(),
+                                true);
                 if (globalFreeVar != null) {
                     VarExp oldNamesVar = new VarExp();
                     oldNamesVar.setName(stateVar.getName());
 
                     // Create a local free variable if it is not there
                     Exp localFreeVar =
-                            myCurrentAssertiveCode.getFreeVar(stateVar.getName(), false);
+                            myCurrentAssertiveCode.getFreeVar(stateVar
+                                    .getName(), false);
                     if (localFreeVar == null) {
                         // TODO: Don't have a type for state variables?
                         localFreeVar =
@@ -2026,7 +2028,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Apply simplification
         Exp currentFinalConfirm =
-                simplifyAssumeRule(stmt, myCurrentAssertiveCode.getFinalConfirm());
+                simplifyAssumeRule(stmt, myCurrentAssertiveCode
+                        .getFinalConfirm());
         if (stmt.getAssertion() != null) {
             // Create a new implies expression
             currentFinalConfirm =
@@ -2253,7 +2256,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Apply a proof rule to each of the assertions
         while (myCurrentAssertiveCode.hasAnotherAssertion()) {
             // Work our way from the last assertion
-            VerificationStatement curAssertion = myCurrentAssertiveCode.getLastAssertion();
+            VerificationStatement curAssertion =
+                    myCurrentAssertiveCode.getLastAssertion();
 
             switch (curAssertion.getType()) {
             // Assume Assertion
@@ -2741,8 +2745,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     // clause implies the final confirm statement and
                     // set this as our new final confirm statement.
                     if (constraint.equals(myTypeGraph.getTrueVarExp())) {
-                        myCurrentAssertiveCode.setFinalConfirm(myTypeGraph.formImplies(
-                                init, finalConfirm));
+                        myCurrentAssertiveCode.setFinalConfirm(myTypeGraph
+                                .formImplies(init, finalConfirm));
                     }
                     // We actually have a constraint, so both the initialization
                     // and constraint imply the final confirm statement.
@@ -2750,8 +2754,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     else {
                         InfixExp exp =
                                 myTypeGraph.formConjunct(constraint, init);
-                        myCurrentAssertiveCode.setFinalConfirm(myTypeGraph.formImplies(
-                                exp, finalConfirm));
+                        myCurrentAssertiveCode.setFinalConfirm(myTypeGraph
+                                .formImplies(exp, finalConfirm));
                     }
                 }
 

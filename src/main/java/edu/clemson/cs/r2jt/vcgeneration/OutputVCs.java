@@ -191,14 +191,19 @@ public class OutputVCs {
             finalVCs += (loc.getDetails() + ": " + loc.toString() + "\n\n");
 
             // Goals
-            finalVCs += ("Goal(s):\n\n" + reformatOutputString(consequent.toString()) + "\n\n");
+            finalVCs +=
+                    ("Goal(s):\n\n"
+                            + reformatOutputString(consequent.toString()) + "\n\n");
 
             // Givens
             finalVCs += "Given(s):\n\n";
             int numAntecedent = antecedent.size();
             for (int i = 0; i < numAntecedent; i++) {
                 finalVCs +=
-                        ((i + 1) + ". " + reformatOutputString(antecedent.get(i).toString()) + "\n");
+                        ((i + 1)
+                                + ". "
+                                + reformatOutputString(antecedent.get(i)
+                                        .toString()) + "\n");
             }
             finalVCs += "\n";
         }
@@ -237,7 +242,7 @@ public class OutputVCs {
             }
             else {
                 // Question mark variables
-                int numQuestionMark = 0;;
+                int numQuestionMark = 0;
                 while (s.indexOf('?', index) != -1) {
                     numQuestionMark++;
                     index++;
