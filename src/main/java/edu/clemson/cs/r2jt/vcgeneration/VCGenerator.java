@@ -17,6 +17,7 @@ package edu.clemson.cs.r2jt.vcgeneration;
  */
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
+import edu.clemson.cs.r2jt.errors.Assert;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
@@ -87,6 +88,12 @@ public class VCGenerator extends TreeWalkerVisitor {
     private OutputVCs myOutputGenerator;
 
     /**
+     * <p>A stack that is used to keep track of the <code>AssertiveCode</code>
+     * that we still need to apply proof rules to.</p>
+     */
+    private Stack<AssertiveCode> myIncAssertiveCodeStack;
+
+    /**
      * <p>This string buffer holds all the steps
      * the VC generator takes to generate VCs.</p>
      */
@@ -141,6 +148,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentAssertiveCode = null;
         myFinalAssertiveCodeList = new LinkedList<AssertiveCode>();
         myOutputGenerator = null;
+        myIncAssertiveCodeStack = new Stack<AssertiveCode>();
         myVCBuffer = new StringBuffer();
     }
 
@@ -310,14 +318,14 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     @Override
     public void postFacilityOperationDec(FacilityOperationDec dec) {
-        // Create assertive code
-        myCurrentAssertiveCode = new AssertiveCode(myInstanceEnvironment);
-
         // Verbose Mode Debug Messages
         myVCBuffer.append("\n=========================");
         myVCBuffer.append(" Procedure: ");
         myVCBuffer.append(dec.getName().getName());
         myVCBuffer.append(" =========================\n");
+
+        // The current assertive code
+        myCurrentAssertiveCode = new AssertiveCode(myInstanceEnvironment);
 
         // Obtains items from the current operation
         Location loc = dec.getLocation();
@@ -332,13 +340,33 @@ public class VCGenerator extends TreeWalkerVisitor {
         applyProcedureDeclRule(requires, ensures, decreasing, variableList,
                 statementList);
 
-        // Apply proof rules
-        applyEBRules();
+        // Add this to our stack of to be processed assertive codes.
+        myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
+
+        // Set the current assertive code to null
+        // YS: (We the modify requires and ensures clause needs to have
+        // and current assertive code to work. Not very clean way to
+        // solve the problem, but should work.)
+        myCurrentAssertiveCode = null;
+
+        // Loop until our to process assertive code stack is empty
+        while (!myIncAssertiveCodeStack.empty()) {
+            // Set the incoming assertive code as our current assertive
+            // code we are working on.
+            myCurrentAssertiveCode = myIncAssertiveCodeStack.pop();
+
+            // Apply proof rules
+            applyEBRules();
+
+            // Add it to our list of final assertive codes
+            myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
+
+            // Set the current assertive code to null
+            myCurrentAssertiveCode = null;
+        }
 
         myOperationDecreasingExp = null;
         myCurrentOperationEntry = null;
-        myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
-        myCurrentAssertiveCode = null;
     }
 
     // -----------------------------------------------------------
@@ -2274,10 +2302,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Code
             case VerificationStatement.CODE:
                 applyCodeRules((Statement) curAssertion.getAssertion());
-                if (curAssertion.getAssertion() instanceof WhileStmt
-                        || curAssertion.getAssertion() instanceof IfStmt) {
-                    return;
-                }
                 break;
             // Remember Assertion
             case VerificationStatement.REMEMBER:
