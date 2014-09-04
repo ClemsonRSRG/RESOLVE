@@ -491,6 +491,39 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>Append VC Generator step details to the expression's
+     * location.</p>
+     *
+     * @param exp The current expression we are dealing with.
+     * @param text VC Generator step details.
+     *
+     * @return The modified expression.
+     */
+    private Exp appendToLocation(Exp exp, String text) {
+        // Check if the expression is empty or not
+        // and it must have a valid location.
+        if (exp != null && exp.getLocation() != null) {
+            // Recursively apply to infix expressions.
+            if (exp instanceof InfixExp) {
+                appendToLocation(((InfixExp) exp).getLeft(), text);
+                appendToLocation(((InfixExp) exp).getRight(), text);
+            }
+            else {
+                Location loc = exp.getLocation();
+                if (loc.getDetails() == null) {
+                    loc.setDetails(text);
+                }
+                else {
+                    String details = loc.getDetails().concat(text);
+                    loc.setDetails(details);
+                }
+            }
+        }
+
+        return exp;
+    }
+
+    /**
      * <p>Converts the different types of <code>Exp</code> to the
      * ones used by the VC Generator.</p>
      *
@@ -1998,6 +2031,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         else if (statement instanceof FuncAssignStmt) {
             applyEBFuncAssignStmtRule((FuncAssignStmt) statement);
         }
+        else if (statement instanceof IfStmt) {
+            applyEBIfStmtRule((IfStmt) statement);
+        }
         else if (statement instanceof SwapStmt) {
             applyEBSwapStmtRule((SwapStmt) statement);
         }
@@ -2532,6 +2568,74 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nFunction Rule Applied: \n");
         myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
+    }
+
+    /**
+     * <p>Applies the if statement rule to the
+     * <code>Statement</code>.</p>
+     *
+     * @param stmt Our current <code>IfStmt</code>.
+     */
+    private void applyEBIfStmtRule(IfStmt stmt) {
+        // Note: In the If Rule, we will have two instances of the assertive code.
+        // One for when the if condition is true and one for the else condition.
+        // The current global assertive code variable is going to be used for the if path,
+        // and we are going to create a new assertive code for the else path (this includes
+        // the case when there is no else clause).
+        ProgramExp ifCondition = stmt.getTest();
+
+        // Negation of If (Need to make a copy before we start modifying
+        // the current assertive code for the if part)
+        AssertiveCode negIfAssertiveCode =
+                new AssertiveCode(myCurrentAssertiveCode);
+
+        // Confirm the invoking condition
+        // TODO
+
+        // Add the if condition as the assume clause
+        // TODO
+
+        // Add any statements inside the then clause
+        if (stmt.getThenclause() != null) {
+            myCurrentAssertiveCode.addStatements(stmt.getThenclause());
+        }
+
+        // Modify the confirm details
+        Exp ifConfirm = myCurrentAssertiveCode.getFinalConfirm();
+        String ifDetail =
+                " , If \"if\" condition at "
+                        + ifCondition.getLocation().toString() + " is true";
+        ifConfirm = appendToLocation(ifConfirm, ifDetail);
+        myCurrentAssertiveCode.setFinalConfirm(ifConfirm);
+
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\nIf Part Rule Applied: \n");
+        myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
+
+        // Add the negation of the if condition as the assume clause
+        // TODO
+
+        // Add any statements inside the else clause
+        if (stmt.getElseclause() != null) {
+            negIfAssertiveCode.addStatements(stmt.getElseclause());
+        }
+
+        // Modify the confirm details
+        Exp negIfConfirm = negIfAssertiveCode.getFinalConfirm();
+        String negIfDetail =
+                " , If \"if\" condition at "
+                        + ifCondition.getLocation().toString() + " is false";
+        negIfConfirm = appendToLocation(negIfConfirm, negIfDetail);
+        negIfAssertiveCode.setFinalConfirm(negIfConfirm);
+
+        // Add this new assertive code to our incomplete assertive code stack
+        myIncAssertiveCodeStack.push(negIfAssertiveCode);
+
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\nNegation of If Part Rule Applied: \n");
+        myVCBuffer.append(negIfAssertiveCode.assertionToString());
         myVCBuffer.append("\n_____________________ \n");
     }
 

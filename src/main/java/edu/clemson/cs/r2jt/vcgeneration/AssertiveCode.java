@@ -56,6 +56,18 @@ public class AssertiveCode {
         myVerificationStmtList = new ArrayList<VerificationStatement>();
     }
 
+    public AssertiveCode(AssertiveCode old) {
+        myConfirm = old.getFinalConfirm();
+        myFreeVars = new ArrayList<Exp>();
+        for (Exp exp : old.myFreeVars) {
+            myFreeVars.add(Exp.copy(exp));
+        }
+        myVerificationStmtList = new ArrayList<VerificationStatement>();
+        for (VerificationStatement stmt : old.myVerificationStmtList) {
+            myVerificationStmtList.add(stmt);
+        }
+    }
+
     // ===========================================================
     // Public Methods
     // ===========================================================
