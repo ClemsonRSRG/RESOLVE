@@ -325,6 +325,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append(" =========================\n");
 
         // The current assertive code
+        int curAssertiveCodeNum = 1;
         myCurrentAssertiveCode = new AssertiveCode(myInstanceEnvironment);
 
         // Obtains items from the current operation
@@ -356,7 +357,16 @@ public class VCGenerator extends TreeWalkerVisitor {
             myCurrentAssertiveCode = myIncAssertiveCodeStack.pop();
 
             // Apply proof rules
+            myVCBuffer.append("\n***********************");
+            myVCBuffer.append(" Begin Path: ");
+            myVCBuffer.append(curAssertiveCodeNum);
+            myVCBuffer.append(" ***********************\n");
             applyEBRules();
+            myVCBuffer.append("\n***********************");
+            myVCBuffer.append(" End Path: ");
+            myVCBuffer.append(curAssertiveCodeNum);
+            myVCBuffer.append(" ***********************\n");
+            curAssertiveCodeNum++;
 
             // Add it to our list of final assertive codes
             myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
@@ -848,6 +858,44 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         return retExp;
+    }
+
+    /**
+     * <p>Locate and return the corresponding operation dec based on the qualifier,
+     * name, and arguments.</p>
+     *
+     * @param loc Location of the calling statement.
+     * @param qual Qualifier of the operation
+     * @param name Name of the operation.
+     * @param args List of arguments for the operation.
+     *
+     * @return The operation corresponding to the calling statement in <code>OperationDec</code> form.
+     */
+    private OperationDec getOperationDec(Location loc, PosSymbol qual,
+            PosSymbol name, List<ProgramExp> args) {
+        // Obtain the corresponding OperationEntry and OperationDec
+        List<PTType> argTypes = new LinkedList<PTType>();
+        for (ProgramExp arg : args) {
+            argTypes.add(arg.getProgramType());
+        }
+        OperationEntry opEntry = searchOperation(loc, qual, name, argTypes);
+
+        // Obtain an OperationDec from the OperationEntry
+        ResolveConceptualElement element = opEntry.getDefiningElement();
+        OperationDec opDec;
+        if (element instanceof OperationDec) {
+            opDec = (OperationDec) opEntry.getDefiningElement();
+        }
+        else {
+            FacilityOperationDec fOpDec =
+                    (FacilityOperationDec) opEntry.getDefiningElement();
+            opDec =
+                    new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
+                            fOpDec.getReturnTy(), fOpDec.getStateVars(), fOpDec
+                                    .getRequires(), fOpDec.getEnsures());
+        }
+
+        return opDec;
     }
 
     /**
@@ -1369,6 +1417,38 @@ public class VCGenerator extends TreeWalkerVisitor {
         requires = modifyRequiresByGlobalMode(requires);
 
         return requires;
+    }
+
+    /**
+     * <p>Negate the incoming expression.</p>
+     *
+     * @param exp Expression to be negated.
+     *
+     * @return Negated expression.
+     */
+    private Exp negateExp(Exp exp) {
+        Exp retExp = Exp.copy(exp);
+        if (exp instanceof EqualsExp) {
+            if (((EqualsExp) exp).getOperator() == EqualsExp.EQUAL)
+                ((EqualsExp) retExp).setOperator(EqualsExp.NOT_EQUAL);
+            else
+                ((EqualsExp) retExp).setOperator(EqualsExp.EQUAL);
+        }
+        else if (exp instanceof PrefixExp) {
+            if (((PrefixExp) exp).getSymbol().getName().toString()
+                    .equals("not")) {
+                retExp = ((PrefixExp) exp).getArgument();
+            }
+        }
+        else {
+            PrefixExp tmp = new PrefixExp();
+            setLocation(tmp, exp.getLocation());
+            tmp.setArgument(exp);
+            tmp.setSymbol(createPosSymbol("not"));
+            tmp.setMathType(BOOLEAN);
+            retExp = tmp;
+        }
+        return retExp;
     }
 
     /**
@@ -2116,42 +2196,16 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param stmt Our current <code>CallStmt</code>.
      */
     private void applyEBCallStmtRule(CallStmt stmt) {
-        // Obtain the corresponding OperationEntry and OperationDec
-        List<PTType> argTypes = new LinkedList<PTType>();
-        for (ProgramExp arg : stmt.getArguments()) {
-            argTypes.add(arg.getProgramType());
-        }
-        OperationEntry opEntry =
-                searchOperation(stmt.getLocation(), stmt.getQualifier(), stmt
-                        .getName(), argTypes);
-
-        // Obtain an OperationDec from the OperationEntry
-        ResolveConceptualElement element = opEntry.getDefiningElement();
-        OperationDec opDec;
-        if (element instanceof OperationDec) {
-            opDec = (OperationDec) opEntry.getDefiningElement();
-        }
-        else {
-            FacilityOperationDec fOpDec =
-                    (FacilityOperationDec) opEntry.getDefiningElement();
-            opDec =
-                    new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
-                            fOpDec.getReturnTy(), fOpDec.getStateVars(), fOpDec
-                                    .getRequires(), fOpDec.getEnsures());
-        }
+        // Call a method to locate the operation dec for this call
+        OperationDec opDec =
+                getOperationDec(stmt.getLocation(), stmt.getQualifier(), stmt
+                        .getName(), stmt.getArguments());
 
         // Get the ensures clause for this operation
         // Note: If there isn't an ensures clause, it is set to "True"
         Exp ensures;
         if (opDec.getEnsures() != null) {
             ensures = Exp.copy(opDec.getEnsures());
-
-            // Set the location for the ensures clause
-            if (ensures.getLocation() != null) {
-                Location newLoc = ensures.getLocation();
-                newLoc.setDetails("Ensures Clause For " + opDec.getName());
-                ensures.setLocation(newLoc);
-            }
         }
         else {
             ensures = myTypeGraph.getTrueVarExp();
@@ -2167,7 +2221,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Check for recursive call of itself
-        if (myCurrentOperationEntry.getName().equals(opEntry.getName())
+        if (myCurrentOperationEntry.getName().equals(opDec.getName())
                 && myCurrentOperationEntry.getReturnType() != null) {
             // Create a new confirm statement using P_val and the decreasing clause
             VarExp pVal = createPValExp(myOperationDecreasingExp.getLocation());
@@ -2358,7 +2412,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param stmt Our current <code>FuncAssignStmt</code>.
      */
     private void applyEBFuncAssignStmtRule(FuncAssignStmt stmt) {
-        OperationDec opDec;
         PosSymbol qualifier = null;
         ProgramExp assignExp = stmt.getAssign();
         ProgramParamExp assignParamExp = null;
@@ -2378,31 +2431,13 @@ public class VCGenerator extends TreeWalkerVisitor {
             // TODO: ERROR!
         }
 
-        // Obtain the corresponding OperationEntry and OperationDec
-        List<PTType> argTypes = new LinkedList<PTType>();
-        for (ProgramExp arg : assignParamExp.getArguments()) {
-            argTypes.add(arg.getProgramType());
-        }
-        OperationEntry opEntry =
-                searchOperation(stmt.getLocation(), qualifier, assignParamExp
-                        .getName(), argTypes);
-
-        // Obtain an OperationDec from the OperationEntry
-        ResolveConceptualElement element = opEntry.getDefiningElement();
-        if (element instanceof OperationDec) {
-            opDec = (OperationDec) opEntry.getDefiningElement();
-        }
-        else {
-            FacilityOperationDec fOpDec =
-                    (FacilityOperationDec) opEntry.getDefiningElement();
-            opDec =
-                    new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
-                            fOpDec.getReturnTy(), fOpDec.getStateVars(), fOpDec
-                                    .getRequires(), fOpDec.getEnsures());
-        }
+        // Call a method to locate the operation dec for this call
+        OperationDec opDec =
+                getOperationDec(stmt.getLocation(), qualifier, assignParamExp
+                        .getName(), assignParamExp.getArguments());
 
         // Check for recursive call of itself
-        if (myCurrentOperationEntry.getName().equals(opEntry.getName())
+        if (myCurrentOperationEntry.getName().equals(opDec.getName())
                 && myCurrentOperationEntry.getReturnType() != null) {
             // Create a new confirm statement using P_val and the decreasing clause
             VarExp pVal = createPValExp(myOperationDecreasingExp.getLocation());
@@ -2590,11 +2625,115 @@ public class VCGenerator extends TreeWalkerVisitor {
         AssertiveCode negIfAssertiveCode =
                 new AssertiveCode(myCurrentAssertiveCode);
 
+        // TODO: Might need to take this out when we figure out the evaluates mode business
+        // Call a method to locate the operation dec for this call
+        PosSymbol qualifier = null;
+        ProgramParamExp testParamExp = null;
+
+        // Check to see what kind of expression is on the right hand side
+        if (ifCondition instanceof ProgramParamExp) {
+            // Cast to a ProgramParamExp
+            testParamExp = (ProgramParamExp) ifCondition;
+        }
+        else if (ifCondition instanceof ProgramDotExp) {
+            // Cast to a ProgramParamExp
+            ProgramDotExp dotExp = (ProgramDotExp) ifCondition;
+            testParamExp = (ProgramParamExp) dotExp.getExp();
+            qualifier = dotExp.getQualifier();
+        }
+        else {
+            // TODO: ERROR!
+        }
+        OperationDec opDec =
+                getOperationDec(ifCondition.getLocation(), qualifier,
+                        testParamExp.getName(), testParamExp.getArguments());
+
         // Confirm the invoking condition
-        // TODO
+        // Get the requires clause for this operation
+        Exp requires;
+        if (opDec.getRequires() != null) {
+            requires = Exp.copy(opDec.getRequires());
+        }
+        else {
+            requires = myTypeGraph.getTrueVarExp();
+        }
+
+        // Replace PreCondition variables in the requires clause
+        requires =
+                replaceFormalWithActualReq(requires, opDec.getParameters(),
+                        testParamExp.getArguments());
+
+        // Modify the location of the requires clause and add it to myCurrentAssertiveCode
+        // Obtain the current location
+        // Note: If we don't have a location, we create one
+        Location reqloc;
+        if (testParamExp.getName().getLocation() != null) {
+            reqloc = (Location) testParamExp.getName().getLocation().clone();
+        }
+        else {
+            reqloc = new Location(null, null);
+        }
+
+        // Append the name of the current procedure
+        String details = " from If Statement Condition";
+
+        // Set the details of the current location
+        reqloc.setDetails("Requires Clause of " + opDec.getName() + details);
+        setLocation(requires, reqloc);
+
+        // Add this to our list of things to confirm
+        myCurrentAssertiveCode.addConfirm(requires);
 
         // Add the if condition as the assume clause
-        // TODO
+        // Get the ensures clause for this operation
+        // Note: If there isn't an ensures clause, it is set to "True"
+        Exp ensures, negEnsures = null, opEnsures;
+        if (opDec.getEnsures() != null) {
+            opEnsures = Exp.copy(opDec.getEnsures());
+
+            // Make sure we have an EqualsExp, else it is an error.
+            if (opEnsures instanceof EqualsExp) {
+                // Has to be a VarExp on the left hand side (containing the name
+                // of the function operation)
+                if (((EqualsExp) opEnsures).getLeft() instanceof VarExp) {
+                    VarExp leftExp = (VarExp) ((EqualsExp) opEnsures).getLeft();
+
+                    // Check if it has the name of the operation
+                    if (leftExp.getName().equals(opDec.getName())) {
+                        ensures = ((EqualsExp) opEnsures).getRight();
+
+                        // Obtain the current location
+                        if (testParamExp.getName().getLocation() != null) {
+                            // Set the details of the current location
+                            Location loc =
+                                    (Location) testParamExp.getName()
+                                            .getLocation().clone();
+                            loc.setDetails("If Statement Condition");
+                            setLocation(ensures, loc);
+                        }
+
+                        // Replace the formals with the actuals.
+                        ensures =
+                                replaceFormalWithActualEns(ensures, opDec
+                                        .getParameters(), opDec.getStateVars(),
+                                        testParamExp.getArguments(), false);
+                        myCurrentAssertiveCode.addAssume(ensures);
+
+                        // Negation of the condition
+                        negEnsures = negateExp(ensures);
+                    }
+                    else {
+                        illegalOperationEnsures(opDec.getLocation());
+                    }
+                }
+                else {
+                    illegalOperationEnsures(opDec.getLocation());
+                }
+            }
+            else {
+                illegalOperationEnsures(opDec.getLocation());
+            }
+        }
 
         // Add any statements inside the then clause
         if (stmt.getThenclause() != null) {
@@ -2615,7 +2754,12 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append("\n_____________________ \n");
 
         // Add the negation of the if condition as the assume clause
-        // TODO
+        if (negEnsures != null) {
+            negIfAssertiveCode.addAssume(negEnsures);
+        }
+        else {
+            illegalOperationEnsures(opDec.getLocation());
+        }
 
         // Add any statements inside the else clause
         if (stmt.getElseclause() != null) {
