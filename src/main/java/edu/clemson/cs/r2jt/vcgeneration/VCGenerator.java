@@ -407,7 +407,79 @@ public class VCGenerator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     @Override
-    public void postProcedureDec(ProcedureDec dec) {}
+    public void preProcedureDec(ProcedureDec dec) {
+        // Keep the current operation dec
+        List<PTType> argTypes = new LinkedList<PTType>();
+        for (ParameterVarDec p : dec.getParameters()) {
+            argTypes.add(p.getTy().getProgramTypeValue());
+        }
+        myCurrentOperationEntry =
+                searchOperation(dec.getLocation(), null, dec.getName(),
+                        argTypes);
+    }
+
+    @Override
+    public void postProcedureDec(ProcedureDec dec) {
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\n=========================");
+        myVCBuffer.append(" Procedure: ");
+        myVCBuffer.append(dec.getName().getName());
+        myVCBuffer.append(" =========================\n");
+
+        // The current assertive code
+        int curAssertiveCodeNum = 1;
+        myCurrentAssertiveCode = new AssertiveCode(myInstanceEnvironment);
+
+        // Obtains items from the current operation
+        Location loc = dec.getLocation();
+        String name = dec.getName().getName();
+        Exp requires = modifyRequiresClause(getRequiresClause(dec), loc, name);
+        Exp ensures = modifyEnsuresClause(getEnsuresClause(dec), loc, name);
+        List<Statement> statementList = dec.getStatements();
+        List<VarDec> variableList = dec.getAllVariables();
+        Exp decreasing = dec.getDecreasing();
+
+        // Apply the procedure declaration rule
+        applyProcedureDeclRule(requires, ensures, decreasing, variableList,
+                statementList);
+
+        // Add this to our stack of to be processed assertive codes.
+        myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
+
+        // Set the current assertive code to null
+        // YS: (We the modify requires and ensures clause needs to have
+        // and current assertive code to work. Not very clean way to
+        // solve the problem, but should work.)
+        myCurrentAssertiveCode = null;
+
+        // Loop until our to process assertive code stack is empty
+        while (!myIncAssertiveCodeStack.empty()) {
+            // Set the incoming assertive code as our current assertive
+            // code we are working on.
+            myCurrentAssertiveCode = myIncAssertiveCodeStack.pop();
+
+            // Apply proof rules
+            myVCBuffer.append("\n***********************");
+            myVCBuffer.append(" Begin Path: ");
+            myVCBuffer.append(curAssertiveCodeNum);
+            myVCBuffer.append(" ***********************\n");
+            applyEBRules();
+            myVCBuffer.append("\n***********************");
+            myVCBuffer.append(" End Path: ");
+            myVCBuffer.append(curAssertiveCodeNum);
+            myVCBuffer.append(" ***********************\n");
+            curAssertiveCodeNum++;
+
+            // Add it to our list of final assertive codes
+            myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
+
+            // Set the current assertive code to null
+            myCurrentAssertiveCode = null;
+        }
+
+        myOperationDecreasingExp = null;
+        myCurrentOperationEntry = null;
+    }
 
     // ===========================================================
     // Public Methods
