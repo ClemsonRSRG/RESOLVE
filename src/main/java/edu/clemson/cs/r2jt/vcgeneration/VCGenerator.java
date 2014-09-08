@@ -93,6 +93,13 @@ public class VCGenerator extends TreeWalkerVisitor {
     private Stack<AssertiveCode> myIncAssertiveCodeStack;
 
     /**
+     * <p>A stack that is used to keep track of the information that we
+     * haven't printed for the <code>AssertiveCode</code>
+     * that we still need to apply proof rules to.</p>
+     */
+    private Stack<String> myIncAssertiveCodeStackInfo;
+
+    /**
      * <p>This string buffer holds all the steps
      * the VC generator takes to generate VCs.</p>
      */
@@ -148,6 +155,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myFinalAssertiveCodeList = new LinkedList<AssertiveCode>();
         myOutputGenerator = null;
         myIncAssertiveCodeStack = new Stack<AssertiveCode>();
+        myIncAssertiveCodeStackInfo = new Stack<String>();
         myVCBuffer = new StringBuffer();
     }
 
@@ -342,6 +350,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
+        myIncAssertiveCodeStackInfo.push("");
 
         // Set the current assertive code to null
         // YS: (We the modify requires and ensures clause needs to have
@@ -355,12 +364,18 @@ public class VCGenerator extends TreeWalkerVisitor {
             // code we are working on.
             myCurrentAssertiveCode = myIncAssertiveCodeStack.pop();
 
-            // Apply proof rules
             myVCBuffer.append("\n***********************");
             myVCBuffer.append(" Begin Path: ");
             myVCBuffer.append(curAssertiveCodeNum);
             myVCBuffer.append(" ***********************\n");
+
+            // Append any information that still needs to be added to our
+            // Debug VC Buffer
+            myVCBuffer.append(myIncAssertiveCodeStackInfo.pop());
+
+            // Apply proof rules
             applyEBRules();
+
             myVCBuffer.append("\n***********************");
             myVCBuffer.append(" End Path: ");
             myVCBuffer.append(curAssertiveCodeNum);
@@ -444,6 +459,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
+        myIncAssertiveCodeStackInfo.push("");
 
         // Set the current assertive code to null
         // YS: (We the modify requires and ensures clause needs to have
@@ -457,12 +473,18 @@ public class VCGenerator extends TreeWalkerVisitor {
             // code we are working on.
             myCurrentAssertiveCode = myIncAssertiveCodeStack.pop();
 
-            // Apply proof rules
             myVCBuffer.append("\n***********************");
             myVCBuffer.append(" Begin Path: ");
             myVCBuffer.append(curAssertiveCodeNum);
             myVCBuffer.append(" ***********************\n");
+
+            // Append any information that still needs to be added to our
+            // Debug VC Buffer
+            myVCBuffer.append(myIncAssertiveCodeStackInfo.pop());
+
+            // Apply proof rules
             applyEBRules();
+
             myVCBuffer.append("\n***********************");
             myVCBuffer.append(" End Path: ");
             myVCBuffer.append(curAssertiveCodeNum);
@@ -2869,9 +2891,10 @@ public class VCGenerator extends TreeWalkerVisitor {
         myIncAssertiveCodeStack.push(negIfAssertiveCode);
 
         // Verbose Mode Debug Messages
-        myVCBuffer.append("\nNegation of If Part Rule Applied: \n");
-        myVCBuffer.append(negIfAssertiveCode.assertionToString());
-        myVCBuffer.append("\n_____________________ \n");
+        String newString = "\nNegation of If Part Rule Applied: \n";
+        newString += negIfAssertiveCode.assertionToString();
+        newString += "\n_____________________ \n";
+        myIncAssertiveCodeStackInfo.push(newString);
     }
 
     /**
