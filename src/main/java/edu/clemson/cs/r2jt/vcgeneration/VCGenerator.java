@@ -685,11 +685,10 @@ public class VCGenerator extends TreeWalkerVisitor {
      * and its initialization ensures clause.</p>
      *
      * @param var The declared variable.
-     * @param initExp The initialization ensures of the variable.
      *
      * @return The new <code>DotExp</code>.
      */
-    private DotExp createInitExp(VarDec var, Exp initExp) {
+    private DotExp createInitExp(VarDec var) {
         // Convert the declared variable into a VarExp
         VarExp varExp =
                 createVarExp(var.getLocation(), var.getName(), var.getTy()
@@ -1210,36 +1209,57 @@ public class VCGenerator extends TreeWalkerVisitor {
                             searchProgramType(pNameTy.getLocation(), pNameTy
                                     .getName());
 
-                    // Obtain the original dec from the AST
-                    TypeDec type = (TypeDec) typeEntry.getDefiningElement();
+                    Exp init;
+                    if (typeEntry.getDefiningElement() instanceof TypeDec) {
+                        // Obtain the original dec from the AST
+                        TypeDec type = (TypeDec) typeEntry.getDefiningElement();
 
-                    // Obtain the exemplar in VarExp form
-                    VarExp exemplar =
-                            new VarExp(null, null, type.getExemplar());
-                    exemplar.setMathType(pNameTy.getMathTypeValue());
+                        // Obtain the exemplar in VarExp form
+                        VarExp exemplar =
+                                new VarExp(null, null, type.getExemplar());
+                        exemplar.setMathType(pNameTy.getMathTypeValue());
 
-                    // Deep copy the original initialization ensures and the constraint
-                    Exp init = Exp.copy(type.getInitialization().getEnsures());
+                        // Deep copy the original initialization ensures and the constraint
+                        init = Exp.copy(type.getInitialization().getEnsures());
 
-                    // Replace the formal with the actual
-                    init = replace(init, exemplar, parameterExp);
+                        // Replace the formal with the actual
+                        init = replace(init, exemplar, parameterExp);
 
-                    // Set the details for the new location
-                    if (init.getLocation() != null) {
-                        Location initLoc;
-                        if (ensures != null && ensures.getLocation() != null) {
-                            Location reqLoc = ensures.getLocation();
-                            initLoc = ((Location) reqLoc.clone());
+                        // Set the details for the new location
+                        if (init.getLocation() != null) {
+                            Location initLoc;
+                            if (ensures != null
+                                    && ensures.getLocation() != null) {
+                                Location reqLoc = ensures.getLocation();
+                                initLoc = ((Location) reqLoc.clone());
+                            }
+                            else {
+                                initLoc = ((Location) opLocation.clone());
+                                initLoc.setDetails("Ensures Clause of "
+                                        + opName);
+                            }
+                            initLoc.setDetails(initLoc.getDetails()
+                                    + " (Condition from \""
+                                    + p.getMode().getModeName().toUpperCase()
+                                    + "\" parameter mode)");
+                            init.setLocation(initLoc);
                         }
-                        else {
-                            initLoc = ((Location) opLocation.clone());
-                            initLoc.setDetails("Ensures Clause of " + opName);
+                    }
+                    // Since the type is generic, we can only use the is_initial predicate
+                    // to ensure that the value is initial value.
+                    else {
+                        // Obtain the original dec from the AST
+                        Location varLoc = p.getLocation();
+
+                        // Create an is_initial dot expression
+                        init =
+                                createInitExp(new VarDec(p.getName(), p.getTy()));
+                        if (varLoc != null) {
+                            Location loc = (Location) varLoc.clone();
+                            loc.setDetails("Initial Value for "
+                                    + p.getName().getName());
+                            setLocation(init, loc);
                         }
-                        initLoc.setDetails(initLoc.getDetails()
-                                + " (Condition from \""
-                                + p.getMode().getModeName().toUpperCase()
-                                + "\" parameter mode)");
-                        init.setLocation(initLoc);
                     }
 
                     // Create an AND infix expression with the ensures clause
@@ -3027,15 +3047,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Deep copy the original initialization ensures
                 Exp init = Exp.copy(type.getInitialization().getEnsures());
 
-                // Create an is_initial dot expression
-                DotExp isInitialExp = createInitExp(varDec, init);
-                if (init.getLocation() != null) {
-                    Location loc = (Location) init.getLocation().clone();
-                    loc.setDetails("Initial Value for "
-                            + varDec.getName().getName());
-                    setLocation(isInitialExp, loc);
-                }
-
                 // Make sure we have a constraint
                 Exp constraint;
                 if (type.getConstraint() == null) {
@@ -3109,41 +3120,19 @@ public class VCGenerator extends TreeWalkerVisitor {
             // to ensure that the value is initial value.
             else {
                 // Obtain the original dec from the AST
-                ConceptTypeParamDec type =
-                        (ConceptTypeParamDec) typeEntry.getDefiningElement();
                 Location varLoc = varDec.getLocation();
 
-                // "<var_name>"
-                VarExp param = new VarExp(varLoc, null, varDec.getName());
-                param.setMathType(varDec.getTy().getMathTypeValue());
-                edu.clemson.cs.r2jt.collections.List<Exp> params =
-                        new edu.clemson.cs.r2jt.collections.List<Exp>();
-                params.add(param);
-
-                // "is_initial"
-                FunctionArgList fAL = new FunctionArgList(params);
-                edu.clemson.cs.r2jt.collections.List<FunctionArgList> faList =
-                        new edu.clemson.cs.r2jt.collections.List<FunctionArgList>();
-                faList.add(fAL);
-                FunctionExp isInitialExp =
-                        new FunctionExp(varLoc, null,
-                                createPosSymbol("is_initial"), null, faList);
-                isInitialExp.setMathType(BOOLEAN);
-
-                // "<type>"
-                VarExp typeExp = new VarExp(varLoc, null, type.getName());
-                typeExp.setMathType(MTYPE);
-
-                // Create a "<type>.is_initial(<var_name>)"
-                edu.clemson.cs.r2jt.collections.List<Exp> dotExpList =
-                        new edu.clemson.cs.r2jt.collections.List<Exp>();
-                dotExpList.add(typeExp);
-                dotExpList.add(isInitialExp);
-                DotExp dotExp = new DotExp(varLoc, dotExpList, null);
-                dotExp.setMathType(BOOLEAN);
+                // Create an is_initial dot expression
+                DotExp isInitialExp = createInitExp(varDec);
+                if (varLoc != null) {
+                    Location loc = (Location) varLoc.clone();
+                    loc.setDetails("Initial Value for "
+                            + varDec.getName().getName());
+                    setLocation(isInitialExp, loc);
+                }
 
                 // Add to our assertive code as an assume
-                myCurrentAssertiveCode.addAssume(dotExp);
+                myCurrentAssertiveCode.addAssume(isInitialExp);
             }
 
             // Verbose Mode Debug Messages
