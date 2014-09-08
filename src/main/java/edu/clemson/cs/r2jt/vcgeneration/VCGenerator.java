@@ -17,7 +17,6 @@ package edu.clemson.cs.r2jt.vcgeneration;
  */
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
-import edu.clemson.cs.r2jt.errors.Assert;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
@@ -3020,94 +3019,137 @@ public class VCGenerator extends TreeWalkerVisitor {
             typeEntry =
                     searchProgramType(pNameTy.getLocation(), pNameTy.getName());
 
-            // Obtain the original dec from the AST
-            TypeDec type = (TypeDec) typeEntry.getDefiningElement();
+            // Make sure we don't have a generic type
+            if (typeEntry.getDefiningElement() instanceof TypeDec) {
+                // Obtain the original dec from the AST
+                TypeDec type = (TypeDec) typeEntry.getDefiningElement();
 
-            // Deep copy the original initialization ensures
-            Exp init = Exp.copy(type.getInitialization().getEnsures());
+                // Deep copy the original initialization ensures
+                Exp init = Exp.copy(type.getInitialization().getEnsures());
 
-            // Create an is_initial dot expression
-            DotExp isInitialExp = createInitExp(varDec, init);
-            if (init.getLocation() != null) {
-                Location loc = (Location) init.getLocation().clone();
-                loc.setDetails("Initial Value for "
-                        + varDec.getName().getName());
-                setLocation(isInitialExp, loc);
-            }
+                // Create an is_initial dot expression
+                DotExp isInitialExp = createInitExp(varDec, init);
+                if (init.getLocation() != null) {
+                    Location loc = (Location) init.getLocation().clone();
+                    loc.setDetails("Initial Value for "
+                            + varDec.getName().getName());
+                    setLocation(isInitialExp, loc);
+                }
 
-            // Make sure we have a constraint
-            Exp constraint;
-            if (type.getConstraint() == null) {
-                constraint = myTypeGraph.getTrueVarExp();
-            }
-            else {
-                constraint = Exp.copy(type.getConstraint());
-            }
+                // Make sure we have a constraint
+                Exp constraint;
+                if (type.getConstraint() == null) {
+                    constraint = myTypeGraph.getTrueVarExp();
+                }
+                else {
+                    constraint = Exp.copy(type.getConstraint());
+                }
 
-            // Set the location for the constraint
-            Location loc;
-            if (constraint.getLocation() != null) {
-                loc = (Location) constraint.getLocation().clone();
-            }
-            else {
-                loc = (Location) type.getLocation().clone();
-            }
-            loc.setDetails("Constraints on " + varDec.getName().getName());
-            setLocation(constraint, loc);
+                // Set the location for the constraint
+                Location loc;
+                if (constraint.getLocation() != null) {
+                    loc = (Location) constraint.getLocation().clone();
+                }
+                else {
+                    loc = (Location) type.getLocation().clone();
+                }
+                loc.setDetails("Constraints on " + varDec.getName().getName());
+                setLocation(constraint, loc);
 
-            // Check if our initialization ensures clause is
-            // in simple form.
-            if (isInitEnsuresSimpleForm(init, varDec.getName())) {
-                // Only deal with initialization ensures of the
-                // form left = right
-                if (init instanceof EqualsExp) {
-                    EqualsExp exp = (EqualsExp) init;
+                // Check if our initialization ensures clause is
+                // in simple form.
+                if (isInitEnsuresSimpleForm(init, varDec.getName())) {
+                    // Only deal with initialization ensures of the
+                    // form left = right
+                    if (init instanceof EqualsExp) {
+                        EqualsExp exp = (EqualsExp) init;
 
-                    // If the initialization of the variable sets
-                    // the variable equal to a value, then we need
-                    // replace the formal with the actual.
-                    if (exp.getLeft() instanceof VarExp) {
-                        PosSymbol exemplar = type.getExemplar();
+                        // If the initialization of the variable sets
+                        // the variable equal to a value, then we need
+                        // replace the formal with the actual.
+                        if (exp.getLeft() instanceof VarExp) {
+                            PosSymbol exemplar = type.getExemplar();
 
-                        // TODO: Figure out this evil dragon!
+                            // TODO: Figure out this evil dragon!
+                        }
+                    }
+                }
+                // We must have a complex initialization ensures clause
+                else {
+                    // The variable must be a variable dot expression,
+                    // therefore we will need to extract the name.
+                    String varName = varDec.getName().getName();
+                    int dotIndex = varName.indexOf(".");
+                    if (dotIndex > 0)
+                        varName = varName.substring(0, dotIndex);
+
+                    // Check if our confirm clause uses this variable
+                    Exp finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
+                    if (finalConfirm.containsVar(varName, false)) {
+                        // We don't have any constraints, so the initialization
+                        // clause implies the final confirm statement and
+                        // set this as our new final confirm statement.
+                        if (constraint.equals(myTypeGraph.getTrueVarExp())) {
+                            myCurrentAssertiveCode.setFinalConfirm(myTypeGraph
+                                    .formImplies(init, finalConfirm));
+                        }
+                        // We actually have a constraint, so both the initialization
+                        // and constraint imply the final confirm statement.
+                        // This then becomes our new final confirm statement.
+                        else {
+                            InfixExp exp =
+                                    myTypeGraph.formConjunct(constraint, init);
+                            myCurrentAssertiveCode.setFinalConfirm(myTypeGraph
+                                    .formImplies(exp, finalConfirm));
+                        }
                     }
                 }
             }
-            // We must have a complex initialization ensures clause
+            // Since the type is generic, we can only use the is_initial predicate
+            // to ensure that the value is initial value.
             else {
-                // The variable must be a variable dot expression,
-                // therefore we will need to extract the name.
-                String varName = varDec.getName().getName();
-                int dotIndex = varName.indexOf(".");
-                if (dotIndex > 0)
-                    varName = varName.substring(0, dotIndex);
+                // Obtain the original dec from the AST
+                ConceptTypeParamDec type =
+                        (ConceptTypeParamDec) typeEntry.getDefiningElement();
+                Location varLoc = varDec.getLocation();
 
-                // Check if our confirm clause uses this variable
-                Exp finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
-                if (finalConfirm.containsVar(varName, false)) {
-                    // We don't have any constraints, so the initialization
-                    // clause implies the final confirm statement and
-                    // set this as our new final confirm statement.
-                    if (constraint.equals(myTypeGraph.getTrueVarExp())) {
-                        myCurrentAssertiveCode.setFinalConfirm(myTypeGraph
-                                .formImplies(init, finalConfirm));
-                    }
-                    // We actually have a constraint, so both the initialization
-                    // and constraint imply the final confirm statement.
-                    // This then becomes our new final confirm statement.
-                    else {
-                        InfixExp exp =
-                                myTypeGraph.formConjunct(constraint, init);
-                        myCurrentAssertiveCode.setFinalConfirm(myTypeGraph
-                                .formImplies(exp, finalConfirm));
-                    }
-                }
+                // "<var_name>"
+                VarExp param = new VarExp(varLoc, null, varDec.getName());
+                param.setMathType(varDec.getTy().getMathTypeValue());
+                edu.clemson.cs.r2jt.collections.List<Exp> params =
+                        new edu.clemson.cs.r2jt.collections.List<Exp>();
+                params.add(param);
 
-                // Verbose Mode Debug Messages
-                myVCBuffer.append("\nVariable Declaration Rule Applied: \n");
-                myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-                myVCBuffer.append("\n_____________________ \n");
+                // "is_initial"
+                FunctionArgList fAL = new FunctionArgList(params);
+                edu.clemson.cs.r2jt.collections.List<FunctionArgList> faList =
+                        new edu.clemson.cs.r2jt.collections.List<FunctionArgList>();
+                faList.add(fAL);
+                FunctionExp isInitialExp =
+                        new FunctionExp(varLoc, null,
+                                createPosSymbol("is_initial"), null, faList);
+                isInitialExp.setMathType(BOOLEAN);
+
+                // "<type>"
+                VarExp typeExp = new VarExp(varLoc, null, type.getName());
+                typeExp.setMathType(MTYPE);
+
+                // Create a "<type>.is_initial(<var_name>)"
+                edu.clemson.cs.r2jt.collections.List<Exp> dotExpList =
+                        new edu.clemson.cs.r2jt.collections.List<Exp>();
+                dotExpList.add(typeExp);
+                dotExpList.add(isInitialExp);
+                DotExp dotExp = new DotExp(varLoc, dotExpList, null);
+                dotExp.setMathType(BOOLEAN);
+
+                // Add to our assertive code as an assume
+                myCurrentAssertiveCode.addAssume(dotExp);
             }
+
+            // Verbose Mode Debug Messages
+            myVCBuffer.append("\nVariable Declaration Rule Applied: \n");
+            myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+            myVCBuffer.append("\n_____________________ \n");
         }
         else {
             // Ty not handled.
