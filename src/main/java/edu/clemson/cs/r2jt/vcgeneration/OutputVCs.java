@@ -229,8 +229,15 @@ public class OutputVCs {
         String[] splitStr = str.split("\\s+");
 
         for (String s : splitStr) {
-            // Add the left parenthesis if there are any
+            // Add any text before the parenthesis
             int index = 0;
+            int firstParenIndex = s.indexOf('(', index);
+            if (firstParenIndex != -1 && firstParenIndex != 0) {
+                retStr = s.substring(index, firstParenIndex);
+                index = firstParenIndex;
+            }
+
+            // Add the left parenthesis if there are any
             while (s.indexOf('(', index) != -1) {
                 retStr += "(";
                 index++;
