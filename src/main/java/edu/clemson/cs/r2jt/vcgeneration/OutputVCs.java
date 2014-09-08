@@ -190,20 +190,15 @@ public class OutputVCs {
             Location loc = locationList.get(0);
             finalVCs += (loc.getDetails() + ": " + loc.toString() + "\n\n");
 
-            // Goals
-            finalVCs +=
-                    ("Goal(s):\n\n"
-                            + reformatOutputString(consequent.toString()) + "\n\n");
+            // Goals (Reformat not working)
+            finalVCs += ("Goal(s):\n\n" + consequent.toString() + "\n\n");
 
             // Givens
             finalVCs += "Given(s):\n\n";
             int numAntecedent = antecedent.size();
             for (int i = 0; i < numAntecedent; i++) {
                 finalVCs +=
-                        ((i + 1)
-                                + ". "
-                                + reformatOutputString(antecedent.get(i)
-                                        .toString()) + "\n");
+                        ((i + 1) + ". " + antecedent.get(i).toString() + "\n");
             }
             finalVCs += "\n";
         }
@@ -251,33 +246,67 @@ public class OutputVCs {
                 // Question mark variables
                 int numQuestionMark = 0;
                 while (s.indexOf('?', index) != -1) {
-                    numQuestionMark++;
+                    String val = s.substring(index, index + 1);
+                    if (val.equals("?")) {
+                        numQuestionMark++;
+                    }
+                    else {
+                        retStr += val;
+                    }
                     index++;
                 }
 
-                // Look for right hand side parenthesis if any
-                int stopIndex = s.indexOf(")");
-                if (stopIndex == -1) {
-                    // Name of the variable
-                    retStr += s.substring(index);
-                }
-                else {
-                    // Name of the variable
-                    retStr += s.substring(index, stopIndex);
-                }
+                if (numQuestionMark > 0) {
+                    // Append the variable name
+                    int barIndex = s.indexOf("|", index);
+                    int stopIndex = s.indexOf(")", index);
+                    int angleIndex = s.indexOf(">", index);
+                    if (angleIndex != -1) {
+                        retStr += s.substring(index, angleIndex);
+                    }
+                    else if (barIndex != -1) {
+                        retStr += s.substring(index, barIndex);
+                    }
+                    else if (stopIndex != -1) {
+                        retStr += s.substring(index, stopIndex);
+                    }
+                    else {
+                        retStr += s.substring(index);
+                    }
 
-                // Replace the question marks with primes
-                for (int i = 0; i < numQuestionMark; i++) {
-                    retStr += "'";
-                }
+                    // Replace the question marks with primes
+                    for (int i = 0; i < numQuestionMark; i++) {
+                        retStr += "'";
+                    }
 
-                // Add the right parenthesis if needed.
-                if (stopIndex != -1) {
-                    while (s.indexOf(')', stopIndex) != -1) {
-                        retStr += ")";
-                        stopIndex++;
+                    // Add the angle if needed.
+                    if (angleIndex != -1) {
+                        while (s.indexOf('>', angleIndex) != -1) {
+                            retStr += ">";
+                            angleIndex++;
+                        }
+                    }
+
+                    // Add the bar if needed.
+                    if (barIndex != -1) {
+                        while (s.indexOf('|', barIndex) != -1) {
+                            retStr += "|";
+                            barIndex++;
+                        }
+                    }
+
+                    // Add the right parenthesis if needed.
+                    if (stopIndex != -1) {
+                        while (s.indexOf(')', stopIndex) != -1) {
+                            retStr += ")";
+                            stopIndex++;
+                        }
                     }
                 }
+                else {
+                    retStr += s.substring(index);
+                }
+
                 retStr += " ";
             }
         }
