@@ -2329,7 +2329,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (stmt.getAssertion() != null) {
             // Create a new implies expression
             currentFinalConfirm =
-                    myTypeGraph.formImplies(assertion, currentFinalConfirm);
+                    myTypeGraph.formImplies(stmt.getAssertion(),
+                            currentFinalConfirm);
         }
 
         // Set this as our new final confirm
