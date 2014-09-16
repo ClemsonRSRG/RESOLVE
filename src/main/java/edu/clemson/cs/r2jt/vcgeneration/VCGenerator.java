@@ -3013,12 +3013,26 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Create an if statement from the loop
         Exp ifConfirm;
         if (decreasingExp != null) {
+            Location decreasingLoc =
+                    (Location) decreasingExp.getLocation().clone();
+            if (decreasingLoc != null) {
+                decreasingLoc.setDetails("Termination of While Statement");
+            }
+
+            Exp maintainingInv = Exp.copy(invariant);
+            Location maintainingLoc =
+                    (Location) invariant.getLocation().clone();
+            if (maintainingLoc != null) {
+                maintainingLoc
+                        .setDetails("Inductive Case of Invariant of While Statement");
+                maintainingInv.setLocation(maintainingLoc);
+            }
+
             Exp infixExp =
-                    new InfixExp((Location) whileLoc.clone(), Exp
-                            .copy(decreasingExp), createPosSymbol("<"), Exp
-                            .copy(nqv));
+                    new InfixExp(decreasingLoc, Exp.copy(decreasingExp),
+                            createPosSymbol("<"), Exp.copy(nqv));
             infixExp.setMathType(BOOLEAN);
-            ifConfirm = myTypeGraph.formConjunct(Exp.copy(invariant), infixExp);
+            ifConfirm = myTypeGraph.formConjunct(maintainingInv, infixExp);
         }
         else {
             ifConfirm = myTypeGraph.getTrueVarExp();
@@ -3026,14 +3040,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // if statement body
         Location ifConfirmLoc = (Location) whileLoc.clone();
-        if (ifConfirm.getLocation() != null) {
-            ifConfirmLoc
-                    .setDetails("Inductive Case of Invariant of While Statement");
-            ifConfirm.setLocation(ifConfirmLoc);
-        }
         edu.clemson.cs.r2jt.collections.List<Statement> ifStmtList =
                 stmt.getStatements();
-        ifStmtList.add(new ConfirmStmt((Location) whileLoc.clone(), ifConfirm));
+        ifStmtList.add(new ConfirmStmt(ifConfirmLoc, ifConfirm));
 
         // empty elseif pair
         edu.clemson.cs.r2jt.collections.List<ConditionItem> elseIfPairList =
@@ -3042,8 +3051,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         // else body
         edu.clemson.cs.r2jt.collections.List<Statement> elseStmtList =
                 new edu.clemson.cs.r2jt.collections.List<Statement>();
-        elseStmtList.add(new ConfirmStmt((Location) whileLoc.clone(), Exp
-                .copy(finalConfirm)));
+        elseStmtList.add(new ConfirmStmt((Location) finalConfirm.getLocation()
+                .clone(), Exp.copy(finalConfirm)));
 
         // condition
         ProgramExp condition = (ProgramExp) Exp.copy(stmt.getTest());
