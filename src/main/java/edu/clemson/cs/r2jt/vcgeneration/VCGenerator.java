@@ -742,7 +742,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Right hand side of the expression
         FunctionExp right =
                 new FunctionExp(var.getLocation(), null,
-                        createPosSymbol("is_initial"), null, functionArgLists);
+                        createPosSymbol("Is_Initial"), null, functionArgLists);
         right.setMathType(BOOLEAN);
 
         // Create the DotExp
@@ -1083,11 +1083,10 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param initEnsures The initialization ensures clause,
      *                    or part of it that we are currently
      *                    checking.
-     * @param name The name of the variable we are checking.
      *
      * @return True/False
      */
-    private boolean isInitEnsuresSimpleForm(Exp initEnsures, PosSymbol name) {
+    private boolean isInitEnsuresSimpleForm(Exp initEnsures) {
         boolean isSimple = false;
 
         // Case #1: EqualExp in initEnsures
@@ -1096,8 +1095,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Recursively call this on the left and
             // right hand side. Only one of the sides
             // needs to be a VarExp.
-            if (isInitEnsuresSimpleForm(exp.getLeft(), name)
-                    || isInitEnsuresSimpleForm(exp.getRight(), name)) {
+            if (isInitEnsuresSimpleForm(exp.getLeft())
+                    || isInitEnsuresSimpleForm(exp.getRight())) {
                 isSimple = true;
             }
         }
@@ -1109,19 +1108,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Recursively call this on the left and
                 // right hand side. Both sides need to be
                 // a VarExp.
-                if (isInitEnsuresSimpleForm(exp.getLeft(), name)
-                        && isInitEnsuresSimpleForm(exp.getRight(), name)) {
+                if (isInitEnsuresSimpleForm(exp.getLeft())
+                        && isInitEnsuresSimpleForm(exp.getRight())) {
                     isSimple = true;
                 }
             }
         }
         // Case #3: VarExp = initEnsures
         else if (initEnsures instanceof VarExp) {
-            VarExp exp = (VarExp) initEnsures;
-            // Check to see if the name matches the initEnsures
-            if (exp.getName().equals(name.getName())) {
-                isSimple = true;
-            }
+            isSimple = true;
         }
 
         return isSimple;
@@ -3205,22 +3200,27 @@ public class VCGenerator extends TreeWalkerVisitor {
                 loc.setDetails("Constraints on " + varDec.getName().getName());
                 setLocation(constraint, loc);
 
+                // Final confirm clause
+                Exp finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
+
                 // Check if our initialization ensures clause is
                 // in simple form.
-                if (isInitEnsuresSimpleForm(init, varDec.getName())) {
+                if (isInitEnsuresSimpleForm(init)) {
                     // Only deal with initialization ensures of the
                     // form left = right
                     if (init instanceof EqualsExp) {
                         EqualsExp exp = (EqualsExp) init;
+                        VarExp varDecExp =
+                                createVarExp(varDec.getLocation(), varDec
+                                        .getName(), typeEntry.getModelType());
 
-                        // If the initialization of the variable sets
-                        // the variable equal to a value, then we need
-                        // replace the formal with the actual.
-                        if (exp.getLeft() instanceof VarExp) {
-                            PosSymbol exemplar = type.getExemplar();
+                        // Replace all instances of this variable with initialization
+                        // ensures clause of the variable type.
+                        finalConfirm =
+                                replace(finalConfirm, varDecExp, exp.getRight());
 
-                            // TODO: Figure out this evil dragon!
-                        }
+                        // Set that as our new final confirm
+                        myCurrentAssertiveCode.setFinalConfirm(finalConfirm);
                     }
                 }
                 // We must have a complex initialization ensures clause
@@ -3233,7 +3233,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                         varName = varName.substring(0, dotIndex);
 
                     // Check if our confirm clause uses this variable
-                    Exp finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
                     if (finalConfirm.containsVar(varName, false)) {
                         // We don't have any constraints, so the initialization
                         // clause implies the final confirm statement and
