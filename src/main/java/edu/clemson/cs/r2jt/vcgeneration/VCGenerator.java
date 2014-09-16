@@ -2230,6 +2230,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         else if (statement instanceof SwapStmt) {
             applyEBSwapStmtRule((SwapStmt) statement);
         }
+        else if (statement instanceof WhileStmt) {
+            applyEBWhileStmtRule((WhileStmt) statement);
+        }
     }
 
     /**
@@ -2953,6 +2956,118 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nSwap Rule Applied: \n");
+        myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
+    }
+
+    /**
+     * <p>Applies the while statement rule.</p>
+     *
+     * @param stmt Our current <code>WhileStmt</code>.
+     */
+    private void applyEBWhileStmtRule(WhileStmt stmt) {
+        // Obtain the loop invariant
+        Exp invariant;
+        if (stmt.getMaintaining() != null) {
+            invariant = Exp.copy(stmt.getMaintaining());
+            invariant.setMathType(stmt.getMaintaining().getMathType());
+
+            if (invariant.getLocation() != null) {
+                Location loc = (Location) (invariant.getLocation().clone());
+                loc.setDetails("Base Case of the Invariant of While Statement");
+                setLocation(invariant, loc);
+            }
+        }
+        else {
+            invariant = myTypeGraph.getTrueVarExp();
+        }
+
+        // Confirm the invariant
+        myCurrentAssertiveCode.addConfirm(invariant);
+
+        // Add the change rule
+        if (stmt.getChanging() != null) {
+            myCurrentAssertiveCode.addChange(stmt.getChanging());
+        }
+
+        // Assume the invariant and NQV(RP, P_Val) = P_Exp
+        Location whileLoc = stmt.getLocation();
+        Exp assume;
+        Exp finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
+        Exp decreasingExp = stmt.getDecreasing();
+        Exp nqv;
+
+        if (decreasingExp != null) {
+            VarExp pval = createPValExp((Location) whileLoc.clone());
+            nqv = createQuestionMarkVariable(finalConfirm, pval);
+            nqv.setMathType(pval.getMathType());
+            Exp equalPExp =
+                    new EqualsExp((Location) whileLoc.clone(), Exp.copy(nqv),
+                            1, Exp.copy(decreasingExp));
+            equalPExp.setMathType(BOOLEAN);
+            assume = myTypeGraph.formConjunct(Exp.copy(invariant), equalPExp);
+        }
+        else {
+            decreasingExp = myTypeGraph.getTrueVarExp();
+            nqv = myTypeGraph.getTrueVarExp();
+            assume = Exp.copy(invariant);
+        }
+
+        myCurrentAssertiveCode.addAssume(assume);
+
+        // Create an if statement from the loop
+        Exp ifConfirm;
+        if (decreasingExp != null) {
+            Exp infixExp =
+                    new InfixExp((Location) whileLoc.clone(), Exp
+                            .copy(decreasingExp), createPosSymbol("<"), Exp
+                            .copy(nqv));
+            infixExp.setMathType(BOOLEAN);
+            ifConfirm = myTypeGraph.formConjunct(Exp.copy(invariant), infixExp);
+        }
+        else {
+            ifConfirm = myTypeGraph.getTrueVarExp();
+        }
+
+        // if statement body
+        Location ifConfirmLoc = (Location) whileLoc.clone();
+        if (ifConfirm.getLocation() != null) {
+            ifConfirmLoc
+                    .setDetails("Inductive Case of Invariant of While Statement");
+            ifConfirm.setLocation(ifConfirmLoc);
+        }
+        edu.clemson.cs.r2jt.collections.List<Statement> ifStmtList =
+                stmt.getStatements();
+        ifStmtList.add(new ConfirmStmt((Location) whileLoc.clone(), ifConfirm));
+
+        // empty elseif pair
+        edu.clemson.cs.r2jt.collections.List<ConditionItem> elseIfPairList =
+                new edu.clemson.cs.r2jt.collections.List<ConditionItem>();
+
+        // else body
+        edu.clemson.cs.r2jt.collections.List<Statement> elseStmtList =
+                new edu.clemson.cs.r2jt.collections.List<Statement>();
+        elseStmtList.add(new ConfirmStmt((Location) whileLoc.clone(), Exp
+                .copy(finalConfirm)));
+
+        // condition
+        ProgramExp condition = (ProgramExp) Exp.copy(stmt.getTest());
+        if (condition.getLocation() != null) {
+            Location loc = (Location) condition.getLocation().clone();
+            loc.setDetails("While Loop Condition");
+            setLocation(condition, loc);
+        }
+
+        // add it back to your assertive code
+        IfStmt newIfStmt =
+                new IfStmt(condition, ifStmtList, elseIfPairList, elseStmtList);
+        myCurrentAssertiveCode.addCode(newIfStmt);
+
+        // Change our final confirm to "True"
+        myCurrentAssertiveCode.setFinalConfirm(myTypeGraph.getTrueVarExp());
+
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\nWhile Rule Applied: \n");
         myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
         myVCBuffer.append("\n_____________________ \n");
     }

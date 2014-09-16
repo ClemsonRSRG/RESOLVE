@@ -88,6 +88,14 @@ public class AssertiveCode {
     }
 
     /**
+     * <p>Add the changing clause to the list</p>
+     */
+    public void addChange(List<VariableExp> changeList) {
+        myVerificationStmtList.add(new VerificationStatement(
+                VerificationStatement.CHANGE, changeList));
+    }
+
+    /**
      * <p>Add a new <code>VerificationStatement</code> to the list</p>
      *
      * @param stmt The corresponding <code>Statement</code>.
@@ -331,8 +339,4 @@ public class AssertiveCode {
             myConfirm = confirm;
         }
     }
-
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
 }

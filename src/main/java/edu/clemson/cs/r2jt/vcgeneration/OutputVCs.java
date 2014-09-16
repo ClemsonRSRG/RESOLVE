@@ -191,7 +191,7 @@ public class OutputVCs {
             finalVCs += (loc.getDetails() + ": " + loc.toString() + "\n\n");
 
             // Goals (Reformat not working)
-            finalVCs += ("Goal(s):\n\n" + consequent.toString() + "\n\n");
+            finalVCs += ("Goal(s):\n\n" + consequent.toString() + "\n");
 
             // Givens
             finalVCs += "Given(s):\n\n";
