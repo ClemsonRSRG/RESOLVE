@@ -2201,6 +2201,47 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
+     *  <p>Applies the change rule.</p>
+     *
+     * @param change The change clause
+     */
+    private void applyChangeRule(VerificationStatement change) {
+        List<VariableExp> changeList =
+                (List<VariableExp>) change.getAssertion();
+        Exp finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
+
+        // Loop through each variable
+        for (VariableExp v : changeList) {
+            // v is an instance of VariableNameExp
+            if (v instanceof VariableNameExp) {
+                VariableNameExp vNameExp = (VariableNameExp) v;
+
+                // Create VarExp for vNameExp
+                VarExp vExp =
+                        createVarExp(vNameExp.getLocation(),
+                                vNameExp.getName(), vNameExp.getMathType());
+
+                // Create a new question mark variable
+                VarExp newV = createQuestionMarkVariable(finalConfirm, vExp);
+
+                // Add this new variable to our list of free variables
+                myCurrentAssertiveCode.addFreeVar(newV);
+
+                // Replace all instances of vExp with newV
+                finalConfirm = replace(finalConfirm, vExp, newV);
+            }
+        }
+
+        // Set the modified statement as our new final confirm
+        myCurrentAssertiveCode.setFinalConfirm(finalConfirm);
+
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\nChange Rule Applied: \n");
+        myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
+    }
+
+    /**
      * <p>Applies different rules to code statements.</p>
      *
      * @param statement The different statements.
@@ -2493,8 +2534,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             case VerificationStatement.ASSUME:
                 applyAssumeRule(curAssertion);
                 break;
+            // Change Assertion
             case VerificationStatement.CHANGE:
-                // TODO:  Add when we have change rule implemented.
+                applyChangeRule(curAssertion);
                 break;
             // Confirm Assertion
             case VerificationStatement.CONFIRM:

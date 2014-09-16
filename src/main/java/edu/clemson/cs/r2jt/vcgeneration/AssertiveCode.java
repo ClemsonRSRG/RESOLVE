@@ -224,7 +224,15 @@ public class AssertiveCode {
                 break;
             // Change Verification Statements
             case VerificationStatement.CHANGE:
-                // TODO:  Add when we have change rule implemented.
+                retStr = retStr.concat("      Change ");
+                List<VariableExp> varList =
+                        (List<VariableExp>) current.getAssertion();
+                for (int i = 0; i < varList.size(); i++) {
+                    retStr = retStr.concat(varList.get(i).toString(0));
+                    if (i != varList.size() - 1) {
+                        retStr = retStr.concat(", ");
+                    }
+                }
                 break;
             // Code Verification Statements
             case VerificationStatement.CODE:
