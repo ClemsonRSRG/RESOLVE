@@ -3009,16 +3009,20 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (stmt.getMaintaining() != null) {
             invariant = Exp.copy(stmt.getMaintaining());
             invariant.setMathType(stmt.getMaintaining().getMathType());
-
-            if (invariant.getLocation() != null) {
-                Location loc = (Location) (invariant.getLocation().clone());
-                loc.setDetails("Base Case of the Invariant of While Statement");
-                setLocation(invariant, loc);
-            }
         }
         else {
             invariant = myTypeGraph.getTrueVarExp();
         }
+
+        Location loc;
+        if (invariant.getLocation() != null) {
+            loc = (Location) invariant.getLocation().clone();
+        }
+        else {
+            loc = (Location) stmt.getLocation().clone();
+        }
+        loc.setDetails("Base Case of the Invariant of While Statement");
+        setLocation(invariant, loc);
 
         // Confirm the invariant
         myCurrentAssertiveCode.addConfirm(invariant);
@@ -3092,17 +3096,24 @@ public class VCGenerator extends TreeWalkerVisitor {
                 new edu.clemson.cs.r2jt.collections.List<ConditionItem>();
 
         // else body
+        Location elseConfirmLoc;
+        if (finalConfirm.getLocation() != null) {
+            elseConfirmLoc = (Location) finalConfirm.getLocation().clone();
+        }
+        else {
+            elseConfirmLoc = (Location) whileLoc.clone();
+        }
         edu.clemson.cs.r2jt.collections.List<Statement> elseStmtList =
                 new edu.clemson.cs.r2jt.collections.List<Statement>();
-        elseStmtList.add(new ConfirmStmt((Location) finalConfirm.getLocation()
-                .clone(), Exp.copy(finalConfirm)));
+        elseStmtList
+                .add(new ConfirmStmt(elseConfirmLoc, Exp.copy(finalConfirm)));
 
         // condition
         ProgramExp condition = (ProgramExp) Exp.copy(stmt.getTest());
         if (condition.getLocation() != null) {
-            Location loc = (Location) condition.getLocation().clone();
-            loc.setDetails("While Loop Condition");
-            setLocation(condition, loc);
+            Location condLoc = (Location) condition.getLocation().clone();
+            condLoc.setDetails("While Loop Condition");
+            setLocation(condition, condLoc);
         }
 
         // add it back to your assertive code
@@ -3111,7 +3122,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentAssertiveCode.addCode(newIfStmt);
 
         // Change our final confirm to "True"
-        myCurrentAssertiveCode.setFinalConfirm(myTypeGraph.getTrueVarExp());
+        Exp trueVarExp = myTypeGraph.getTrueVarExp();
+        trueVarExp.setLocation((Location) whileLoc.clone());
+        myCurrentAssertiveCode.setFinalConfirm(trueVarExp);
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nWhile Rule Applied: \n");
