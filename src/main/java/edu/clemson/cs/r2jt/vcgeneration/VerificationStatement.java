@@ -107,7 +107,7 @@ public class VerificationStatement implements Cloneable {
                     clone =
                             new VerificationStatement(myType,
                                     ((List<?>) myAssertion).clone());
-                    return clone();
+                    return clone;
                 }
                 else {
                     return super.clone();

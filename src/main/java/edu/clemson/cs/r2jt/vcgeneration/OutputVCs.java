@@ -190,7 +190,7 @@ public class OutputVCs {
             Location loc = locationList.get(0);
             finalVCs += (loc.getDetails() + ": " + loc.toString() + "\n\n");
 
-            // Goals
+            // Goals (Reformat not working)
             finalVCs += ("Goal(s):\n\n" + consequent.toString() + "\n");
 
             // Givens
@@ -204,6 +204,114 @@ public class OutputVCs {
         }
 
         return finalVCs;
+    }
+
+    /**
+     * <p>This method converts all the question mark variables
+     * into human readable prime variables and converts all the
+     * "Conc_" variables to "Conc.".</p>
+     *
+     * @param str String form of <code>Antecedent</code> or
+     *            <code>Consequent</code>.
+     *
+     * @return Properly converted text in string format.
+     */
+    private String reformatOutputString(String str) {
+        // Return value
+        String retStr = "";
+
+        // Split the string by spaces
+        String[] splitStr = str.split("\\s+");
+
+        for (String s : splitStr) {
+            // Add any text before the parenthesis
+            int index = 0;
+            int firstParenIndex = s.indexOf('(', index);
+            if (firstParenIndex != -1 && firstParenIndex != 0) {
+                retStr = s.substring(index, firstParenIndex);
+                index = firstParenIndex;
+            }
+
+            // Add the left parenthesis if there are any
+            while (s.indexOf('(', index) != -1) {
+                retStr += "(";
+                index++;
+            }
+
+            // Convert output of conceptual variables.
+            if (s.startsWith("Conc_", index)) {
+                retStr += s.replace("Conc_", "Conc.");
+            }
+            else {
+                // Question mark variables
+                int numQuestionMark = 0;
+                while (s.indexOf('?', index) != -1) {
+                    String val = s.substring(index, index + 1);
+                    if (val.equals("?")) {
+                        numQuestionMark++;
+                    }
+                    else {
+                        retStr += val;
+                    }
+                    index++;
+                }
+
+                if (numQuestionMark > 0) {
+                    // Append the variable name
+                    int barIndex = s.indexOf("|", index);
+                    int stopIndex = s.indexOf(")", index);
+                    int angleIndex = s.indexOf(">", index);
+                    if (angleIndex != -1) {
+                        retStr += s.substring(index, angleIndex);
+                    }
+                    else if (barIndex != -1) {
+                        retStr += s.substring(index, barIndex);
+                    }
+                    else if (stopIndex != -1) {
+                        retStr += s.substring(index, stopIndex);
+                    }
+                    else {
+                        retStr += s.substring(index);
+                    }
+
+                    // Replace the question marks with primes
+                    for (int i = 0; i < numQuestionMark; i++) {
+                        retStr += "'";
+                    }
+
+                    // Add the angle if needed.
+                    if (angleIndex != -1) {
+                        while (s.indexOf('>', angleIndex) != -1) {
+                            retStr += ">";
+                            angleIndex++;
+                        }
+                    }
+
+                    // Add the bar if needed.
+                    if (barIndex != -1) {
+                        while (s.indexOf('|', barIndex) != -1) {
+                            retStr += "|";
+                            barIndex++;
+                        }
+                    }
+
+                    // Add the right parenthesis if needed.
+                    if (stopIndex != -1) {
+                        while (s.indexOf(')', stopIndex) != -1) {
+                            retStr += ")";
+                            stopIndex++;
+                        }
+                    }
+                }
+                else {
+                    retStr += s.substring(index);
+                }
+
+                retStr += " ";
+            }
+        }
+
+        return retStr;
     }
 
     /**
