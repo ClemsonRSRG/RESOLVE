@@ -15,6 +15,7 @@ package edu.clemson.cs.r2jt.vcgeneration;
 /*
  * Libraries
  */
+import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
@@ -404,16 +405,22 @@ public class VCGenerator extends TreeWalkerVisitor {
                 new OutputVCs(myInstanceEnvironment, myFinalAssertiveCodeList,
                         myVCBuffer);
 
-        // Print to file if we are in debug mode
-        // TODO: Add debug flag here
-        String filename;
-        if (myInstanceEnvironment.getOutputFilename() != null) {
-            filename = myInstanceEnvironment.getOutputFilename();
+        // Check if it is generating VCs for WebIDE or not.
+        if (myInstanceEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_XML_OUT)) {
+            myOutputGenerator.outputToJSON();
         }
         else {
-            filename = createVCFileName();
+            // Print to file if we are in debug mode
+            // TODO: Add debug flag here
+            String filename;
+            if (myInstanceEnvironment.getOutputFilename() != null) {
+                filename = myInstanceEnvironment.getOutputFilename();
+            }
+            else {
+                filename = createVCFileName();
+            }
+            myOutputGenerator.outputToFile(filename);
         }
-        myOutputGenerator.outputToFile(filename);
     }
 
     // -----------------------------------------------------------

@@ -15,7 +15,9 @@ package edu.clemson.cs.r2jt.vcgeneration;
 /*
  * Libraries
  */
+import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.Exp;
+import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving.Conjuncts;
@@ -25,6 +27,8 @@ import edu.clemson.cs.r2jt.proving2.Consequent;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.vcgeneration.vcs.VCCollector;
 import edu.clemson.cs.r2jt.vcgeneration.vcs.VerificationCondition;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -120,6 +124,17 @@ public class OutputVCs {
         }
     }
 
+    public void outputToJSON() {
+        JSONObject jsonObject = jsonVCs();
+        CompileReport report = myInstanceEnvironment.getCompileReport();
+        StringBuffer outBuffer = new StringBuffer();
+        outBuffer.append("<vcFile>");
+        outBuffer.append(jsonObject.toString());
+        outBuffer.append("</vcFile>");
+        report.setVcSuccess();
+        report.setOutput(outBuffer.toString());
+    }
+
     // ===========================================================
     // Private Methods
     // ===========================================================
@@ -171,8 +186,10 @@ public class OutputVCs {
     }
 
     /**
-     * <p>This method converts all <code>AssertiveCode</code> into
-     * the format used by the output handler and our in house provers.</p>
+     * <p>This method takes all the VCs (in Immutable form) and outputs a human
+     * readable String.</p>
+     *
+     * @return Human readable vcs as a String.
      */
     private String humanReadableVCs() {
         String finalVCs = "";
@@ -204,6 +221,55 @@ public class OutputVCs {
         }
 
         return finalVCs;
+    }
+
+    /**
+     * <p>This method takes all the VCs (in Immutable form) and outputs in
+     * jSON format for the WebIDE.</p>
+     *
+     * @return The created JSON VC Object.
+     */
+    private JSONObject jsonVCs() {
+        JSONObject jsonOutput = new JSONObject();
+        JSONArray vcArray = new JSONArray();
+
+        for (VC vc : myFinalImmutableVCs) {
+            JSONObject newVC = new JSONObject();
+            List<Location> locationList = myVCDetails.get(vc.getName());
+            Antecedent antecedent = vc.getAntecedent();
+            Consequent consequent = vc.getConsequent();
+
+            // Location details
+            Location loc = locationList.get(0);
+            newVC.put("lineNum", "" + loc.getPos().getLine());
+            newVC.put("sourceFile", loc.getFilename());
+
+            // VC Number
+            newVC.put("vc", vc.getName());
+
+            // Givens
+            int numAntecedent = antecedent.size();
+            String givens = "";
+            for (int i = 0; i < numAntecedent; i++) {
+                givens +=
+                        ((i + 1) + ": " + antecedent.get(i).toString() + "\n");
+            }
+            newVC.put("vcGivens", ResolveCompiler.webEncode(givens));
+
+            // Goal(s)
+            newVC.put("vcGoal", ResolveCompiler
+                    .webEncode(consequent.toString()));
+
+            // VC Details
+            newVC.put("vcInfo", ResolveCompiler.webEncode(loc.getDetails()
+                    + ": " + loc.toString()));
+
+            // Store this VC inside the array
+            vcArray.put(newVC);
+        }
+        jsonOutput.put("vcs", vcArray);
+
+        return jsonOutput;
     }
 
     /**

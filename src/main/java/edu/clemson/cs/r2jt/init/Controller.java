@@ -586,6 +586,10 @@ public class Controller {
             if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_VERIFY_VC)) {
                 verifyModuleDec(symbolTable, table, dec);
             }
+            if (myInstanceEnvironment.flags
+                    .isFlagSet(VCGenerator.FLAG_ALTVERIFY_VC)) {
+                generateVCs(symbolTable, dec);
+            }
             String currFileName = dec.getName().getFile().toString();
             if (myInstanceEnvironment.flags
                     .isFlagSet(ResolveCompiler.FLAG_EXPORT_AST)) {
