@@ -1381,6 +1381,7 @@ public class Populator extends TreeWalkerVisitor {
         //TODO : Currently, the parser permits the else clause to be optional.
         //       That is nonsense in a functional context and should be fixed.
         if (exp.getElseclause() == null) {
+
             throw new RuntimeException("IfExp has no else clause.  The "
                     + "parser should be changed to disallow this and this "
                     + "error should be removed.");

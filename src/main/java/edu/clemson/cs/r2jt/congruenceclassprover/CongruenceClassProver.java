@@ -61,7 +61,7 @@ public class CongruenceClassProver {
     private final long DEFAULTTIMEOUT = 5000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
-    private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = true;
+    private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = false;
 
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
@@ -114,13 +114,7 @@ public class CongruenceClassProver {
 
         for (TheoremEntry e : theoremEntries) {
             PExp assertion = e.getAssertion();
-            if (assertion.getSymbolNames().contains("lambda"))
-                continue;
-            // skip if lambda expression is not only in consequent of theorem
-            if(assertion.getSymbolNames().contains("lambda") && (
-                    !assertion.getTopLevelOperation().equals("implies")
-                    || assertion.getSubExpressions().get(0).getSymbolNames().contains("lambda")))
-                continue;
+
             if (assertion.isEquality()) {
                 addEqualityTheorem(true, assertion);
                 addEqualityTheorem(false, assertion);
@@ -268,7 +262,6 @@ public class CongruenceClassProver {
             } else {
                 allFuncNamesInVC.addAll(m_theorems);
             }
-            allFuncNamesInVC.addAll(vcc.getConjunct().m_lambdasAsTheorems);
         }
 
         String div = divLine(vcc.m_name);
@@ -284,8 +277,6 @@ public class CongruenceClassProver {
                 && System.currentTimeMillis() <= endTime; ++i) {
             ArrayList<InsertExpWithJustification> insertExp =
                     new ArrayList<InsertExpWithJustification>();
-            // Pick up new lambdas
-            allFuncNamesInVC.addAll(vcc.getConjunct().m_lambdasAsTheorems);
             for (TheoremCongruenceClosureImpl th : allFuncNamesInVC) {
                 ArrayList<InsertExpWithJustification> thResult =
                         th.applyTo(vcc, endTime);

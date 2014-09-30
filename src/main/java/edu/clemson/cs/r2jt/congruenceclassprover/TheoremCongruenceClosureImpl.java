@@ -120,16 +120,19 @@ public class TheoremCongruenceClosureImpl {
 
         Stack<HashMap<String, String>> allValidBindings =
                 findValidBindings(vc, endTime);
-        if (allValidBindings == null || allValidBindings.size() == 0) {
+        // temporary: exclude inserting lambdas (causes a hang -- probably in prioritization system)
+        if (allValidBindings == null || allValidBindings.size() == 0 ) {
             m_unneeded = true;
             return null;
         }
 
         HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
+        outerBindingLoop:
         while (!allValidBindings.empty()
                 && System.currentTimeMillis() < endTime) {
             HashMap<String, String> curBinding = allValidBindings.pop();
             for (String thKey : curBinding.keySet()) {
+
                 MTType quanType =
                         m_theoremRegistry.getTypeByIndex(m_theoremRegistry
                                 .getIndexForSymbol(thKey));
@@ -137,16 +140,18 @@ public class TheoremCongruenceClosureImpl {
                 quantToLit.put(new PSymbol(quanType, null, thKey),
                         new PSymbol(quanType, null, curBinding.get(thKey)));
             }
+            // todo: replace lambda param types if they are type variables
             PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
             if(m_insertExpr.getSymbolNames().contains("lambda")){
-                System.err.println(modifiedInsert + "\n\t" + curBinding);
-                if(modifiedInsert.toString().equals("(¢014 = CF(Z, Entry, ¢012, _lambda0, lambda (k : 'D').not(c(k))))")){
-                    int b = 0;
-                }
+                System.err.println(m_theoremString + "\n\t" + modifiedInsert + "\n\t\t" + curBinding);
+
             }
             quantToLit.clear();
             rList.add(new InsertExpWithJustification(modifiedInsert,
                     m_theoremString));
+            if(curBinding.containsKey("_lambda0")){
+                System.err.println(m_theoremString + "===>>>" + modifiedInsert);
+            }
         }
         return rList;
     }
@@ -190,11 +195,11 @@ public class TheoremCongruenceClosureImpl {
             return null;
         }
         boolean extraOutput = false;
-        /*if(m_theoremString.contains("CF")
-                && vc.m_name.equals("0_5")){
+        if(m_theoremString.contains("f_dr")
+                && vc.m_name.equals("1_3")){
             extraOutput = true;
             System.out.println("looking for: \n" + m_matchConj + "in " + vc);
-        }*/
+        }
         Stack<HashMap<String, String>> allValidBindings =
                 new Stack<HashMap<String, String>>();
         Stack<SearchBox> boxStack = new Stack<SearchBox>();
@@ -243,6 +248,20 @@ public class TheoremCongruenceClosureImpl {
         return allValidBindings;
     }
 
+    boolean allBound(SearchBox box){
+        for (String oSymbol : box.m_bindings.keySet()) {
+            String dSymbol = box.m_bindings.get(oSymbol);
+            if (!box.m_destRegistry.isSymbolInTable(dSymbol)) {
+                if (!oSymbol.contains("¢")) {
+                    System.err.println("Unbound: " + oSymbol + ": " + dSymbol + " in " + m_theoremString);
+                    box.m_failedBindings = box.m_bindings;
+                    return false;
+                }
+                continue;
+            }
+        }
+        return true;
+    }
     boolean typeCheck(SearchBox box) {
         // type check here
         for (String oSymbol : box.m_bindings.keySet()) {
@@ -264,33 +283,48 @@ public class TheoremCongruenceClosureImpl {
                 dType = (MTFunction) dType;
                 MTType oRange = ((MTFunction) oType).getRange();
                 MTType oDomain = ((MTFunction) oType).getDomain();
+                MTType dRange = ((MTFunction) dType).getRange();
+                MTType dDomain = ((MTFunction) dType). getDomain();
+                if(oRange == null || oDomain == null || dRange == null || dDomain == null){
+                    System.err.println("null type error");
+                    return false;
+                }
                 // Check if these are type variables
 
                 String bDomain, bRange;
                 if(box.m_bindings.containsKey(oRange.toString().replace("'",""))){
                     bRange = box.m_bindings.get(oRange.toString().replace("'",""));
                     oRange = box.m_destRegistry.m_typeDictionary.get(bRange);
+                    if(oRange == null){
+                        System.err.println("null type for: " + bRange);
+                        return false;
+                    }
                 }
                 if(box.m_bindings.containsKey(oDomain.toString().replace("'",""))){
                    bDomain = box.m_bindings.get(oDomain.toString().replace("'",""));
                     oDomain = box.m_destRegistry.m_typeDictionary.get(bDomain);
+                    if(oDomain == null){
+                        System.err.println("null type for:" + bDomain);
+                        return false;
+                    }
                 }
 
-                if ( (oDomain.alphaEquivalentTo(((MTFunction) dType).getDomain()) ||
-                        ((MTFunction) dType).getDomain().isSubtypeOf(oDomain)) &&
-                        (oRange.alphaEquivalentTo(((MTFunction) dType).getRange()) ||
-                                ((MTFunction) dType).getRange().isSubtypeOf(oRange))) {
-                    System.out.println("Type match: " + oType + " maps to " + dType);
+
+                if ( (oDomain.alphaEquivalentTo(dDomain) || (dDomain.isSubtypeOf(oDomain))) &&
+                        (oRange.alphaEquivalentTo(dRange) || (dRange.isSubtypeOf(oRange)))) {
+                    System.out.println("Type match: " + oSymbol + ":" + oType + " maps to " + dSymbol + ":" + dType);
                     continue;
                 }
                 System.err.println("Type Mismatch: orig: " + oDomain + "->" + oRange + " dest: " + dType);
             }
             System.err.println("Failed type check: " + oSymbol + ": " + oType + " " + dSymbol + ": " + dType);
+
             box.m_failedBindings = box.m_bindings;
             return false;
 
         }
         //System.out.println(box.m_bindings);
+
         return true;
     }
 

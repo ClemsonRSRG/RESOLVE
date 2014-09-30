@@ -88,7 +88,7 @@ public class VerificationConditionCongruenceClosureImpl {
                     String g0 = m_registry.getSymbolForIndex(m_registry.getIndexForSymbol(g.get(0)));
                     String g1 = m_registry.getSymbolForIndex(m_registry.getIndexForSymbol(g.get(1)));
 
-                    if((g0.equals("true") && g1.equals("false")) || (g0.equals("false") && g1.equals("true"))) return STATUS.UNPROVABLE;
+                    //if((g0.equals("true") && g1.equals("false")) || (g0.equals("false") && g1.equals("true"))) return STATUS.UNPROVABLE;
                     return STATUS.STILL_EVALUATING; // not proved yet
                 }
             }

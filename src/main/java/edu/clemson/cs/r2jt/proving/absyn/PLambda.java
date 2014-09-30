@@ -150,7 +150,8 @@ public class PLambda extends PExp {
             retval = substitutions.get(this);
         }
         else {
-            retval = this;
+
+            retval = new PLambda(parameters,myBody.substitute(substitutions));
         }
 
         return retval;
