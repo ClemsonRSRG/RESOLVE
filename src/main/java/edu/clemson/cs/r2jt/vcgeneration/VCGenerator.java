@@ -1211,8 +1211,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                         equalLoc.setDetails("Ensures Clause of " + opName);
                     }
                     equalLoc.setDetails(equalLoc.getDetails()
-                            + " (Condition from \""
-                            + p.getMode().getModeName().toUpperCase()
+                            + " (Condition from \"" + p.getMode().getModeName()
                             + "\" parameter mode)");
                     equalsExp.setLocation(equalLoc);
 
@@ -1264,7 +1263,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             }
                             initLoc.setDetails(initLoc.getDetails()
                                     + " (Condition from \""
-                                    + p.getMode().getModeName().toUpperCase()
+                                    + p.getMode().getModeName()
                                     + "\" parameter mode)");
                             init.setLocation(initLoc);
                         }
@@ -1431,7 +1430,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                         }
                         initLoc.setDetails(initLoc.getDetails()
                                 + " (Assumption from \""
-                                + p.getMode().getModeName().toUpperCase()
+                                + p.getMode().getModeName()
                                 + "\" parameter mode)");
                         init.setLocation(initLoc);
                     }
@@ -1478,7 +1477,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             }
                             constLoc.setDetails(constLoc.getDetails()
                                     + " (Constraint from \""
-                                    + p.getMode().getModeName().toUpperCase()
+                                    + p.getMode().getModeName()
                                     + "\" parameter mode)");
                             constraint.setLocation(constLoc);
                         }
