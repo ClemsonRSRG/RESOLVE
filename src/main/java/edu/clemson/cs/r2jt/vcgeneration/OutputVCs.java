@@ -15,7 +15,9 @@ package edu.clemson.cs.r2jt.vcgeneration;
 /*
  * Libraries
  */
+import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.Exp;
+import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.proving.Conjuncts;
@@ -25,6 +27,8 @@ import edu.clemson.cs.r2jt.proving2.Consequent;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.vcgeneration.vcs.VCCollector;
 import edu.clemson.cs.r2jt.vcgeneration.vcs.VerificationCondition;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -120,6 +124,17 @@ public class OutputVCs {
         }
     }
 
+    public void outputToJSON() {
+        JSONObject jsonObject = jsonVCs();
+        CompileReport report = myInstanceEnvironment.getCompileReport();
+        StringBuffer outBuffer = new StringBuffer();
+        outBuffer.append("<vcFile>");
+        outBuffer.append(jsonObject.toString());
+        outBuffer.append("</vcFile>");
+        report.setVcSuccess();
+        report.setOutput(outBuffer.toString());
+    }
+
     // ===========================================================
     // Private Methods
     // ===========================================================
@@ -151,6 +166,7 @@ public class OutputVCs {
         for (Exp a : oldAntecedents) {
             newAntecedents.add(PExp.buildPExp(a));
         }
+        Collections.reverse(newAntecedents);
 
         // Consequents (Goals)
         Conjuncts oldConsequents = vc.getConsequents();
@@ -171,8 +187,10 @@ public class OutputVCs {
     }
 
     /**
-     * <p>This method converts all <code>AssertiveCode</code> into
-     * the format used by the output handler and our in house provers.</p>
+     * <p>This method takes all the VCs (in Immutable form) and outputs a human
+     * readable String.</p>
+     *
+     * @return Human readable vcs as a String.
      */
     private String humanReadableVCs() {
         String finalVCs = "";
@@ -207,111 +225,52 @@ public class OutputVCs {
     }
 
     /**
-     * <p>This method converts all the question mark variables
-     * into human readable prime variables and converts all the
-     * "Conc_" variables to "Conc.".</p>
+     * <p>This method takes all the VCs (in Immutable form) and outputs in
+     * jSON format for the WebIDE.</p>
      *
-     * @param str String form of <code>Antecedent</code> or
-     *            <code>Consequent</code>.
-     *
-     * @return Properly converted text in string format.
+     * @return The created JSON VC Object.
      */
-    private String reformatOutputString(String str) {
-        // Return value
-        String retStr = "";
+    private JSONObject jsonVCs() {
+        JSONObject jsonOutput = new JSONObject();
+        JSONArray vcArray = new JSONArray();
 
-        // Split the string by spaces
-        String[] splitStr = str.split("\\s+");
+        for (VC vc : myFinalImmutableVCs) {
+            JSONObject newVC = new JSONObject();
+            List<Location> locationList = myVCDetails.get(vc.getName());
+            Antecedent antecedent = vc.getAntecedent();
+            Consequent consequent = vc.getConsequent();
 
-        for (String s : splitStr) {
-            // Add any text before the parenthesis
-            int index = 0;
-            int firstParenIndex = s.indexOf('(', index);
-            if (firstParenIndex != -1 && firstParenIndex != 0) {
-                retStr = s.substring(index, firstParenIndex);
-                index = firstParenIndex;
+            // Location details
+            Location loc = locationList.get(0);
+            newVC.put("lineNum", "" + loc.getPos().getLine());
+            newVC.put("sourceFile", loc.getFilename());
+
+            // VC Number
+            newVC.put("vc", vc.getName());
+
+            // Givens
+            int numAntecedent = antecedent.size();
+            String givens = "";
+            for (int i = 0; i < numAntecedent; i++) {
+                givens +=
+                        ((i + 1) + ": " + antecedent.get(i).toString() + "\n");
             }
+            newVC.put("vcGivens", ResolveCompiler.webEncode(givens));
 
-            // Add the left parenthesis if there are any
-            while (s.indexOf('(', index) != -1) {
-                retStr += "(";
-                index++;
-            }
+            // Goal(s)
+            newVC.put("vcGoal", ResolveCompiler
+                    .webEncode(consequent.toString()));
 
-            // Convert output of conceptual variables.
-            if (s.startsWith("Conc_", index)) {
-                retStr += s.replace("Conc_", "Conc.");
-            }
-            else {
-                // Question mark variables
-                int numQuestionMark = 0;
-                while (s.indexOf('?', index) != -1) {
-                    String val = s.substring(index, index + 1);
-                    if (val.equals("?")) {
-                        numQuestionMark++;
-                    }
-                    else {
-                        retStr += val;
-                    }
-                    index++;
-                }
+            // VC Details
+            newVC.put("vcInfo", ResolveCompiler.webEncode(loc.getDetails()
+                    + ": " + loc.toString()));
 
-                if (numQuestionMark > 0) {
-                    // Append the variable name
-                    int barIndex = s.indexOf("|", index);
-                    int stopIndex = s.indexOf(")", index);
-                    int angleIndex = s.indexOf(">", index);
-                    if (angleIndex != -1) {
-                        retStr += s.substring(index, angleIndex);
-                    }
-                    else if (barIndex != -1) {
-                        retStr += s.substring(index, barIndex);
-                    }
-                    else if (stopIndex != -1) {
-                        retStr += s.substring(index, stopIndex);
-                    }
-                    else {
-                        retStr += s.substring(index);
-                    }
-
-                    // Replace the question marks with primes
-                    for (int i = 0; i < numQuestionMark; i++) {
-                        retStr += "'";
-                    }
-
-                    // Add the angle if needed.
-                    if (angleIndex != -1) {
-                        while (s.indexOf('>', angleIndex) != -1) {
-                            retStr += ">";
-                            angleIndex++;
-                        }
-                    }
-
-                    // Add the bar if needed.
-                    if (barIndex != -1) {
-                        while (s.indexOf('|', barIndex) != -1) {
-                            retStr += "|";
-                            barIndex++;
-                        }
-                    }
-
-                    // Add the right parenthesis if needed.
-                    if (stopIndex != -1) {
-                        while (s.indexOf(')', stopIndex) != -1) {
-                            retStr += ")";
-                            stopIndex++;
-                        }
-                    }
-                }
-                else {
-                    retStr += s.substring(index);
-                }
-
-                retStr += " ";
-            }
+            // Store this VC inside the array
+            vcArray.put(newVC);
         }
+        jsonOutput.put("vcs", vcArray);
 
-        return retStr;
+        return jsonOutput;
     }
 
     /**
