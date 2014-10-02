@@ -2175,38 +2175,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
-     * <p>Applies the assume rule.</p>
-     *
-     * @param assume The assume clause
-     */
-    private void applyAssumeRule(VerificationStatement assume) {
-        if (assume.getAssertion() instanceof VarExp
-                && ((VarExp) assume.getAssertion()).equals(Exp
-                        .getTrueVarExp(myTypeGraph))) {
-            // Verbose Mode Debug Messages
-            myVCBuffer.append("\nAssume Rule Applied and Simplified: \n");
-            myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-            myVCBuffer.append("\n_____________________ \n");
-        }
-        else {
-            // Obtain the current final confirm clause
-            Exp conf = myCurrentAssertiveCode.getFinalConfirm();
-
-            // Create a new implies expression
-            InfixExp newConf =
-                    myTypeGraph.formImplies((Exp) assume.getAssertion(), conf);
-
-            // Set this new expression as the new final confirm
-            myCurrentAssertiveCode.setFinalConfirm(newConf);
-
-            // Verbose Mode Debug Messages
-            myVCBuffer.append("\nAssume Rule Applied: \n");
-            myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-            myVCBuffer.append("\n_____________________ \n");
-        }
-    }
-
-    /**
      *  <p>Applies the change rule.</p>
      *
      * @param change The change clause
@@ -2274,38 +2242,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         else if (statement instanceof WhileStmt) {
             applyEBWhileStmtRule((WhileStmt) statement);
-        }
-    }
-
-    /**
-     * <p>Applies the confirm rule.</p>
-     *
-     * @param confirm The confirm clause
-     */
-    private void applyConfirmRule(VerificationStatement confirm) {
-        if (confirm.getAssertion() instanceof VarExp
-                && ((VarExp) confirm.getAssertion()).equals(Exp
-                        .getTrueVarExp(myTypeGraph))) {
-            myVCBuffer.append("\nConfirm Rule Applied and Simplified: \n");
-            myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-            myVCBuffer.append("\n_____________________ \n");
-        }
-        else {
-            // Obtain the current final confirm clause
-            Exp conf = myCurrentAssertiveCode.getFinalConfirm();
-
-            // Create a new and expression
-            InfixExp newConf =
-                    myTypeGraph
-                            .formConjunct((Exp) confirm.getAssertion(), conf);
-
-            // Set this new expression as the new final confirm
-            myCurrentAssertiveCode.setFinalConfirm(newConf);
-
-            // Verbose Mode Debug Messages
-            myVCBuffer.append("\nConfirm Rule Applied: \n");
-            myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-            myVCBuffer.append("\n_____________________ \n");
         }
     }
 
@@ -2537,17 +2473,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                     myCurrentAssertiveCode.getLastAssertion();
 
             switch (curAssertion.getType()) {
-            // Assume Assertion
-            case VerificationStatement.ASSUME:
-                applyAssumeRule(curAssertion);
-                break;
             // Change Assertion
             case VerificationStatement.CHANGE:
                 applyChangeRule(curAssertion);
-                break;
-            // Confirm Assertion
-            case VerificationStatement.CONFIRM:
-                applyConfirmRule(curAssertion);
                 break;
             // Code
             case VerificationStatement.CODE:
