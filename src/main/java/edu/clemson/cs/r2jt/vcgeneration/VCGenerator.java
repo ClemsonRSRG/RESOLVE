@@ -3214,13 +3214,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 createVarExp(varDec.getLocation(), varDec
                                         .getName(), typeEntry.getModelType());
 
-                        // Replace all instances of this variable with initialization
-                        // ensures clause of the variable type.
-                        finalConfirm =
-                                replace(finalConfirm, varDecExp, exp.getRight());
-
-                        // Set that as our new final confirm
-                        myCurrentAssertiveCode.setFinalConfirm(finalConfirm);
+                        // Replace the conceptual variable name with the actual variable
+                        // name and add it as an additional assume clause
+                        exp.setLeft(varDecExp);
+                        myCurrentAssertiveCode.addAssume(exp);
                     }
                 }
                 // We must have a complex initialization ensures clause
@@ -3234,22 +3231,20 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                     // Check if our confirm clause uses this variable
                     if (finalConfirm.containsVar(varName, false)) {
-                        // We don't have any constraints, so the initialization
-                        // clause implies the final confirm statement and
-                        // set this as our new final confirm statement.
+                        Exp exp;
+                        // We don't have any constraints, so add the initialization
+                        // clause as a new assume clause.
                         if (constraint.equals(myTypeGraph.getTrueVarExp())) {
-                            myCurrentAssertiveCode.setFinalConfirm(myTypeGraph
-                                    .formImplies(init, finalConfirm));
+                            exp = init;
                         }
-                        // We actually have a constraint, so both the initialization
-                        // and constraint imply the final confirm statement.
-                        // This then becomes our new final confirm statement.
+                        // We actually have a constraint, so add both the initialization
+                        // and constraint as a new assume clause.
                         else {
-                            InfixExp exp =
-                                    myTypeGraph.formConjunct(constraint, init);
-                            myCurrentAssertiveCode.setFinalConfirm(myTypeGraph
-                                    .formImplies(exp, finalConfirm));
+                            exp = myTypeGraph.formConjunct(constraint, init);
                         }
+
+                        // Add the new assume clause to our assertive code.
+                        myCurrentAssertiveCode.addAssume(exp);
                     }
                 }
             }
