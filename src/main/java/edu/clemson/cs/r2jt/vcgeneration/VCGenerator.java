@@ -1601,7 +1601,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             List<ParameterVarDec> paramList, List<AffectsItem> stateVarList,
             List<ProgramExp> argList, boolean isSimple) {
         // Current final confirm
-        Exp newConfirm = myCurrentAssertiveCode.getFinalConfirm();
+        Exp newConfirm;
 
         // List to hold temp and real values of variables in case
         // of duplicate spec and real variables
@@ -1680,6 +1680,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             ParameterVarDec varDec = paramList.get(i);
             ProgramExp pExp = argList.get(i);
             PosSymbol VDName = varDec.getName();
+            newConfirm = myCurrentAssertiveCode.getFinalConfirm();
 
             // VarExp form of the parameter variable
             VarExp oldExp = new VarExp(null, null, VDName);
