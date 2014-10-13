@@ -894,7 +894,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     private Exp getEnsuresClause(Dec dec) {
         PosSymbol name = dec.getName();
         Exp ensures = null;
-        Exp retExp = null;
+        Exp retExp;
 
         // Check for each kind of ModuleDec possible
         if (dec instanceof FacilityOperationDec) {
@@ -907,16 +907,17 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Deep copy and fill in the details of this location
         if (ensures != null) {
             retExp = Exp.copy(ensures);
-            if (retExp.getLocation() != null) {
-                Location myLoc = retExp.getLocation();
-                myLoc.setDetails("Ensures Clause of " + name);
-                setLocation(retExp, myLoc);
-            }
         }
-        // TODO: This shouldn't be null! Somewhere before us, should have changed to true.
         else {
+            Location loc = (Location) dec.getLocation().clone();
             retExp = myTypeGraph.getTrueVarExp();
-            setLocation(retExp, dec.getLocation());
+            setLocation(retExp, loc);
+        }
+
+        if (retExp.getLocation() != null) {
+            Location loc = retExp.getLocation();
+            loc.setDetails("Ensures Clause of " + name);
+            setLocation(retExp, loc);
         }
 
         return retExp;
@@ -970,7 +971,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     private Exp getRequiresClause(Dec dec) {
         PosSymbol name = dec.getName();
         Exp requires = null;
-        Exp retExp = null;
+        Exp retExp;
 
         // Check for each kind of ModuleDec possible
         if (dec instanceof FacilityOperationDec) {
@@ -998,16 +999,17 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Deep copy and fill in the details of this location
         if (requires != null) {
             retExp = Exp.copy(requires);
-            if (retExp.getLocation() != null) {
-                Location myLoc = retExp.getLocation();
-                myLoc.setDetails("Requires Clause for " + name);
-                setLocation(retExp, myLoc);
-            }
         }
-        // TODO: This shouldn't be null! Somewhere before us, should have changed to true.
         else {
+            Location loc = (Location) dec.getLocation().clone();
             retExp = myTypeGraph.getTrueVarExp();
-            setLocation(retExp, dec.getLocation());
+            setLocation(retExp, loc);
+        }
+
+        if (retExp.getLocation() != null) {
+            Location loc = retExp.getLocation();
+            loc.setDetails("Requires Clause for " + name);
+            setLocation(retExp, loc);
         }
 
         return retExp;
@@ -1048,53 +1050,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         return name;
-    }
-
-    /**
-     * <p>Checks to see if the initialization ensures clause
-     * passed is in the simple form where one side has a
-     * <code>VarExp</code>.</p>
-     *
-     * @param initEnsures The initialization ensures clause,
-     *                    or part of it that we are currently
-     *                    checking.
-     *
-     * @return True/False
-     */
-    private boolean isInitEnsuresSimpleForm(Exp initEnsures) {
-        boolean isSimple = false;
-
-        // Case #1: EqualExp in initEnsures
-        if (initEnsures instanceof EqualsExp) {
-            EqualsExp exp = (EqualsExp) initEnsures;
-            // Recursively call this on the left and
-            // right hand side. Only one of the sides
-            // needs to be a VarExp.
-            if (isInitEnsuresSimpleForm(exp.getLeft())
-                    || isInitEnsuresSimpleForm(exp.getRight())) {
-                isSimple = true;
-            }
-        }
-        // Case #2: InfixExp in initEnsures
-        else if (initEnsures instanceof InfixExp) {
-            InfixExp exp = (InfixExp) initEnsures;
-            // Only check if we have an "and" expression
-            if (exp.getOpName().equals("and")) {
-                // Recursively call this on the left and
-                // right hand side. Both sides need to be
-                // a VarExp.
-                if (isInitEnsuresSimpleForm(exp.getLeft())
-                        && isInitEnsuresSimpleForm(exp.getRight())) {
-                    isSimple = true;
-                }
-            }
-        }
-        // Case #3: VarExp = initEnsures
-        else if (initEnsures instanceof VarExp) {
-            isSimple = true;
-        }
-
-        return isSimple;
     }
 
     /**
