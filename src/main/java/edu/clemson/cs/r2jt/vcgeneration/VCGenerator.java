@@ -270,6 +270,9 @@ public class VCGenerator extends TreeWalkerVisitor {
     public void postFacilityDec(FacilityDec dec) {
         // Applies the facility declaration rule
         applyFacilityDeclRule(dec);
+
+        // Loop through assertive code stack
+        loopAssertiveCodeStack();
     }
 
     // -----------------------------------------------------------
@@ -343,14 +346,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append(" =========================\n");
 
         // The current assertive code
-        int curAssertiveCodeNum = 1;
         myCurrentAssertiveCode = new AssertiveCode(myInstanceEnvironment);
 
         // Obtains items from the current operation
+        OperationDec opDec =
+                (OperationDec) myCurrentOperationEntry.getDefiningElement();
         Location loc = dec.getLocation();
         String name = dec.getName().getName();
-        Exp requires = modifyRequiresClause(getRequiresClause(dec), loc, name);
-        Exp ensures = modifyEnsuresClause(getEnsuresClause(dec), loc, name);
+        Exp requires =
+                modifyRequiresClause(getRequiresClause(opDec), loc, name);
+        Exp ensures = modifyEnsuresClause(getEnsuresClause(opDec), loc, name);
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
@@ -369,36 +374,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         // solve the problem, but should work.)
         myCurrentAssertiveCode = null;
 
-        // Loop until our to process assertive code stack is empty
-        while (!myIncAssertiveCodeStack.empty()) {
-            // Set the incoming assertive code as our current assertive
-            // code we are working on.
-            myCurrentAssertiveCode = myIncAssertiveCodeStack.pop();
-
-            myVCBuffer.append("\n***********************");
-            myVCBuffer.append(" Begin Path: ");
-            myVCBuffer.append(curAssertiveCodeNum);
-            myVCBuffer.append(" ***********************\n");
-
-            // Append any information that still needs to be added to our
-            // Debug VC Buffer
-            myVCBuffer.append(myIncAssertiveCodeStackInfo.pop());
-
-            // Apply proof rules
-            applyEBRules();
-
-            myVCBuffer.append("\n***********************");
-            myVCBuffer.append(" End Path: ");
-            myVCBuffer.append(curAssertiveCodeNum);
-            myVCBuffer.append(" ***********************\n");
-            curAssertiveCodeNum++;
-
-            // Add it to our list of final assertive codes
-            myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
-
-            // Set the current assertive code to null
-            myCurrentAssertiveCode = null;
-        }
+        // Loop through assertive code stack
+        loopAssertiveCodeStack();
 
         myOperationDecreasingExp = null;
         myCurrentOperationEntry = null;
@@ -458,14 +435,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append(" =========================\n");
 
         // The current assertive code
-        int curAssertiveCodeNum = 1;
         myCurrentAssertiveCode = new AssertiveCode(myInstanceEnvironment);
 
         // Obtains items from the current operation
+        OperationDec opDec =
+                (OperationDec) myCurrentOperationEntry.getDefiningElement();
         Location loc = dec.getLocation();
         String name = dec.getName().getName();
-        Exp requires = modifyRequiresClause(getRequiresClause(dec), loc, name);
-        Exp ensures = modifyEnsuresClause(getEnsuresClause(dec), loc, name);
+        Exp requires =
+                modifyRequiresClause(getRequiresClause(opDec), loc, name);
+        Exp ensures = modifyEnsuresClause(getEnsuresClause(opDec), loc, name);
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
@@ -484,36 +463,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         // solve the problem, but should work.)
         myCurrentAssertiveCode = null;
 
-        // Loop until our to process assertive code stack is empty
-        while (!myIncAssertiveCodeStack.empty()) {
-            // Set the incoming assertive code as our current assertive
-            // code we are working on.
-            myCurrentAssertiveCode = myIncAssertiveCodeStack.pop();
-
-            myVCBuffer.append("\n***********************");
-            myVCBuffer.append(" Begin Path: ");
-            myVCBuffer.append(curAssertiveCodeNum);
-            myVCBuffer.append(" ***********************\n");
-
-            // Append any information that still needs to be added to our
-            // Debug VC Buffer
-            myVCBuffer.append(myIncAssertiveCodeStackInfo.pop());
-
-            // Apply proof rules
-            applyEBRules();
-
-            myVCBuffer.append("\n***********************");
-            myVCBuffer.append(" End Path: ");
-            myVCBuffer.append(curAssertiveCodeNum);
-            myVCBuffer.append(" ***********************\n");
-            curAssertiveCodeNum++;
-
-            // Add it to our list of final assertive codes
-            myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
-
-            // Set the current assertive code to null
-            myCurrentAssertiveCode = null;
-        }
+        // Loop through assertive code stack
+        loopAssertiveCodeStack();
 
         myOperationDecreasingExp = null;
         myCurrentOperationEntry = null;
@@ -1181,6 +1132,37 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Definitely not a verification variable.
         return false;
+    }
+
+    /**
+     * <p>Loop through our stack of incomplete assertive codes.</p>
+     */
+    private void loopAssertiveCodeStack() {
+        // Loop until our to process assertive code stack is empty
+        while (!myIncAssertiveCodeStack.empty()) {
+            // Set the incoming assertive code as our current assertive
+            // code we are working on.
+            myCurrentAssertiveCode = myIncAssertiveCodeStack.pop();
+
+            myVCBuffer.append("\n***********************");
+            myVCBuffer.append(" ***********************\n");
+
+            // Append any information that still needs to be added to our
+            // Debug VC Buffer
+            myVCBuffer.append(myIncAssertiveCodeStackInfo.pop());
+
+            // Apply proof rules
+            applyEBRules();
+
+            myVCBuffer.append("\n***********************");
+            myVCBuffer.append(" ***********************\n");
+
+            // Add it to our list of final assertive codes
+            myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
+
+            // Set the current assertive code to null
+            myCurrentAssertiveCode = null;
+        }
     }
 
     /**
