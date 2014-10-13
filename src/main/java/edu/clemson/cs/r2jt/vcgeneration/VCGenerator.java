@@ -955,6 +955,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                 setLocation(retExp, myLoc);
             }
         }
+        // TODO: This shouldn't be null! Somewhere before us, should have changed to true.
+        else {
+            retExp = myTypeGraph.getTrueVarExp();
+            setLocation(retExp, dec.getLocation());
+        }
 
         return retExp;
     }
@@ -1040,6 +1045,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                 myLoc.setDetails("Requires Clause for " + name);
                 setLocation(retExp, myLoc);
             }
+        }
+        // TODO: This shouldn't be null! Somewhere before us, should have changed to true.
+        else {
+            retExp = myTypeGraph.getTrueVarExp();
+            setLocation(retExp, dec.getLocation());
         }
 
         return retExp;
