@@ -263,6 +263,16 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     // -----------------------------------------------------------
+    // FacilityDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void postFacilityDec(FacilityDec dec) {
+        // Applies the facility declaration rule
+        applyFacilityDeclRule(dec);
+    }
+
+    // -----------------------------------------------------------
     // FacilityModuleDec
     // -----------------------------------------------------------
 
@@ -3074,6 +3084,15 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append("\nWhile Rule Applied: \n");
         myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
         myVCBuffer.append("\n_____________________ \n");
+    }
+
+    /**
+     * <p>Applies the facility declaration rule.</p>
+     *
+     * @param dec Facility declaration object.
+     */
+    private void applyFacilityDeclRule(FacilityDec dec) {
+
     }
 
     /**
