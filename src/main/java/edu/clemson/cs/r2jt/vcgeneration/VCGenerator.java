@@ -349,13 +349,10 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentAssertiveCode = new AssertiveCode(myInstanceEnvironment);
 
         // Obtains items from the current operation
-        OperationDec opDec =
-                (OperationDec) myCurrentOperationEntry.getDefiningElement();
         Location loc = dec.getLocation();
         String name = dec.getName().getName();
-        Exp requires =
-                modifyRequiresClause(getRequiresClause(opDec), loc, name);
-        Exp ensures = modifyEnsuresClause(getEnsuresClause(opDec), loc, name);
+        Exp requires = modifyRequiresClause(getRequiresClause(dec), loc, name);
+        Exp ensures = modifyEnsuresClause(getEnsuresClause(dec), loc, name);
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
@@ -1145,7 +1142,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             myCurrentAssertiveCode = myIncAssertiveCodeStack.pop();
 
             myVCBuffer.append("\n***********************");
-            myVCBuffer.append(" ***********************\n");
+            myVCBuffer.append("***********************\n");
 
             // Append any information that still needs to be added to our
             // Debug VC Buffer
@@ -1155,7 +1152,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             applyEBRules();
 
             myVCBuffer.append("\n***********************");
-            myVCBuffer.append(" ***********************\n");
+            myVCBuffer.append("***********************\n");
 
             // Add it to our list of final assertive codes
             myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
@@ -1585,6 +1582,99 @@ public class VCGenerator extends TreeWalkerVisitor {
             return tmp;
         else
             return exp;
+    }
+
+    /**
+     * <p>Replace the formal with the actual variables
+     * from the facility declaration rule.</p>
+     *
+     * @param exp The expression to be replaced.
+     * @param facParam The list of facility declaration parameter variables.
+     * @param concParam The list of concept parameter variables.
+     *
+     * @return The modified expression.
+     */
+    private Exp replaceFacilityDeclarationVariables(Exp exp, List facParam,
+            List concParam) {
+        for (int i = 0; i < facParam.size(); i++) {
+            if (facParam.get(i) instanceof Dec
+                    && (concParam.get(i) instanceof Dec)) {
+                // Both are instances of Dec
+                Dec facDec = (Dec) facParam.get(i);
+                Dec concDec = (Dec) concParam.get(i);
+
+                // Variable to be replaced
+                VarExp expToReplace =
+                        createVarExp(facDec.getLocation(), facDec.getName(),
+                                facDec.getMathType());
+
+                // Concept variable
+                VarExp expToUse =
+                        createVarExp(concDec.getLocation(), concDec.getName(),
+                                concDec.getMathType());
+
+                // Temporary replacement to avoid formal and actuals being the same
+                exp = replace(exp, expToReplace, expToUse);
+
+                // Create a old exp from expToReplace
+                OldExp r = new OldExp(null, expToReplace);
+                r.setMathType(expToReplace.getMathType());
+
+                // Create a old exp from expToUse
+                OldExp u = new OldExp(null, expToUse);
+                u.setMathType(expToUse.getMathType());
+
+                // Actually perform the desired replacement
+                exp = replace(exp, r, u);
+            }
+            else if (facParam.get(i) instanceof Dec
+                    && concParam.get(i) instanceof ModuleArgumentItem) {
+                // We have a ModuleArgumentItem
+                Dec facDec = (Dec) facParam.get(i);
+                ModuleArgumentItem concItem =
+                        (ModuleArgumentItem) concParam.get(i);
+
+                // Variable to be replaced
+                VarExp expToReplace =
+                        createVarExp(facDec.getLocation(), facDec.getName(),
+                                facDec.getMathType());
+
+                // Concept variable
+                VarExp expToUse = new VarExp();
+                if (concItem.getName() != null) {
+                    expToUse.setName(concItem.getName());
+                }
+                else {
+                    expToUse.setName(createPosSymbol(concItem.getEvalExp()
+                            .toString()));
+                }
+
+                // Set the math type for the concept variable
+                if (concItem.getProgramTypeValue() != null) {
+                    expToUse.setMathType(concItem.getProgramTypeValue()
+                            .toMath());
+                }
+                else {
+                    expToUse.setMathType(concItem.getMathType());
+                }
+
+                // Temporary replacement to avoid formal and actuals being the same
+                exp = replace(exp, expToReplace, expToUse);
+
+                // Create a old exp from expToReplace
+                OldExp r = new OldExp(null, expToReplace);
+                r.setMathType(expToReplace.getMathType());
+
+                // Create a old exp from expToUse
+                OldExp u = new OldExp(null, expToUse);
+                u.setMathType(expToUse.getMathType());
+
+                // Actually perform the desired replacement
+                exp = replace(exp, r, u);
+            }
+        }
+
+        return exp;
     }
 
     /**
@@ -2119,10 +2209,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
                 }
 
-                // We clear our assertion for this assumes if
-                // we have a verification variable and we don't have to
+                // We clear our assertion for this assumes if this is a
+                // verification variable or if we don't have to
                 // keep this assumption.
-                if (verificationVariable && !keepAssumption) {
+                if (verificationVariable || !keepAssumption) {
                     assertion = null;
                 }
 
@@ -2263,28 +2353,27 @@ public class VCGenerator extends TreeWalkerVisitor {
             myVCBuffer.append("\nAssume Rule Applied and Simplified: \n");
             myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
             myVCBuffer.append("\n_____________________ \n");
-
-            return;
         }
+        else {
+            // Apply simplification
+            Exp currentFinalConfirm =
+                    simplifyAssumeRule(stmt, myCurrentAssertiveCode
+                            .getFinalConfirm());
+            if (stmt.getAssertion() != null) {
+                // Create a new implies expression
+                currentFinalConfirm =
+                        myTypeGraph.formImplies(stmt.getAssertion(),
+                                currentFinalConfirm);
+            }
 
-        // Apply simplification
-        Exp currentFinalConfirm =
-                simplifyAssumeRule(stmt, myCurrentAssertiveCode
-                        .getFinalConfirm());
-        if (stmt.getAssertion() != null) {
-            // Create a new implies expression
-            currentFinalConfirm =
-                    myTypeGraph.formImplies(stmt.getAssertion(),
-                            currentFinalConfirm);
+            // Set this as our new final confirm
+            myCurrentAssertiveCode.setFinalConfirm(currentFinalConfirm);
+
+            // Verbose Mode Debug Messages
+            myVCBuffer.append("\nAssume Rule Applied: \n");
+            myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+            myVCBuffer.append("\n_____________________ \n");
         }
-
-        // Set this as our new final confirm
-        myCurrentAssertiveCode.setFinalConfirm(currentFinalConfirm);
-
-        // Verbose Mode Debug Messages
-        myVCBuffer.append("\nAssume Rule Applied: \n");
-        myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-        myVCBuffer.append("\n_____________________ \n");
     }
 
     /**
@@ -2423,43 +2512,43 @@ public class VCGenerator extends TreeWalkerVisitor {
             myVCBuffer.append("\nConfirm Rule Applied and Simplified: \n");
             myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
             myVCBuffer.append("\n_____________________ \n");
-
-            return;
-        }
-
-        // Obtain the current final confirm statement
-        Exp currentFinalConfirm = myCurrentAssertiveCode.getFinalConfirm();
-
-        // Check to see if we have a final confirm of "True"
-        if (currentFinalConfirm instanceof VarExp
-                && currentFinalConfirm.equals(myTypeGraph.getTrueVarExp())) {
-
-            // Obtain the current location
-            if (assertion.getLocation() != null) {
-                // Set the details of the current location
-                Location loc = (Location) assertion.getLocation().clone();
-                setLocation(assertion, loc);
-            }
-
-            myCurrentAssertiveCode.setFinalConfirm(assertion);
-
-            // Verbose Mode Debug Messages
-            myVCBuffer.append("\nConfirm Rule Applied and Simplified: \n");
-            myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-            myVCBuffer.append("\n_____________________ \n");
         }
         else {
-            // Create a new and expression
-            InfixExp newConf =
-                    myTypeGraph.formConjunct(assertion, currentFinalConfirm);
+            // Obtain the current final confirm statement
+            Exp currentFinalConfirm = myCurrentAssertiveCode.getFinalConfirm();
 
-            // Set this new expression as the new final confirm
-            myCurrentAssertiveCode.setFinalConfirm(newConf);
+            // Check to see if we have a final confirm of "True"
+            if (currentFinalConfirm instanceof VarExp
+                    && currentFinalConfirm.equals(myTypeGraph.getTrueVarExp())) {
 
-            // Verbose Mode Debug Messages
-            myVCBuffer.append("\nConfirm Rule Applied: \n");
-            myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-            myVCBuffer.append("\n_____________________ \n");
+                // Obtain the current location
+                if (assertion.getLocation() != null) {
+                    // Set the details of the current location
+                    Location loc = (Location) assertion.getLocation().clone();
+                    setLocation(assertion, loc);
+                }
+
+                myCurrentAssertiveCode.setFinalConfirm(assertion);
+
+                // Verbose Mode Debug Messages
+                myVCBuffer.append("\nConfirm Rule Applied and Simplified: \n");
+                myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+                myVCBuffer.append("\n_____________________ \n");
+            }
+            else {
+                // Create a new and expression
+                InfixExp newConf =
+                        myTypeGraph
+                                .formConjunct(assertion, currentFinalConfirm);
+
+                // Set this new expression as the new final confirm
+                myCurrentAssertiveCode.setFinalConfirm(newConf);
+
+                // Verbose Mode Debug Messages
+                myVCBuffer.append("\nConfirm Rule Applied: \n");
+                myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+                myVCBuffer.append("\n_____________________ \n");
+            }
         }
     }
 
@@ -3074,7 +3163,66 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param dec Facility declaration object.
      */
     private void applyFacilityDeclRule(FacilityDec dec) {
+        // Create a new assertive code to hold the facility declaration VCs
+        AssertiveCode assertiveCode = new AssertiveCode(myInstanceEnvironment);
 
+        // Add the global constraints as given
+        assertiveCode.addAssume(myGlobalConstraintExp);
+
+        // Add the global require clause as given
+        assertiveCode.addAssume(myGlobalRequiresExp);
+
+        // Loop through every enhancement/enhancement realization declaration,
+        // if any.
+        /*if (dec.getEnhancementBodies() != null) {
+            for (EnhancementBodyItem e : dec.getEnhancementBodies()) {
+
+            }
+        }*/
+
+        // Obtain the concept module for the facility
+        try {
+            ConceptModuleDec facConceptDec =
+                    (ConceptModuleDec) mySymbolTable
+                            .getModuleScope(
+                                    new ModuleIdentifier(dec.getConceptName()
+                                            .getName())).getDefiningElement();
+
+            // Concept requires clause
+            Exp req = getRequiresClause(facConceptDec);
+            Location loc;
+            if (req.getLocation() == null) {
+                loc = (Location) (dec.getBodyName().getLocation().clone());
+            }
+            else {
+                loc = (Location) req.getLocation().clone();
+            }
+
+            req =
+                    replaceFacilityDeclarationVariables(req, facConceptDec
+                            .getParameters(), dec.getConceptParams());
+            loc.setDetails("Facility Declaration Rule");
+            assertiveCode.setFinalConfirm(req);
+
+            // Add the parameters to the facility concept to the
+            // free variable list
+        }
+        catch (NoSuchSymbolException e) {
+            noSuchModule(dec.getLocation());
+        }
+
+        // Add this new assertive code to our incomplete assertive code stack
+        myIncAssertiveCodeStack.push(assertiveCode);
+
+        // Verbose Mode Debug Messages
+        String newString =
+                "\n========================= Facility Dec Name:\t"
+                        + dec.getName().getName()
+                        + " =========================\n";
+        newString += "\nFacility Declaration Rule Applied: \n";
+        newString += assertiveCode.assertionToString();
+        newString += "\n_____________________ \n";
+        myIncAssertiveCodeStackInfo.push(newString);
     }
 
     /**
@@ -3187,8 +3335,19 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Obtain the original dec from the AST
                 TypeDec type = (TypeDec) typeEntry.getDefiningElement();
 
+                // Create a variable expression from the declared variable
+                VarExp varDecExp =
+                        createVarExp(varDec.getLocation(), varDec.getName(),
+                                typeEntry.getModelType());
+
+                // Create a variable expression from the type exemplar
+                VarExp exemplar =
+                        createVarExp(type.getLocation(), type.getExemplar(),
+                                typeEntry.getModelType());
+
                 // Deep copy the original initialization ensures
                 Exp init = Exp.copy(type.getInitialization().getEnsures());
+                init = replace(init, exemplar, varDecExp);
 
                 // Make sure we have a constraint
                 Exp constraint;
@@ -3198,6 +3357,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 else {
                     constraint = Exp.copy(type.getConstraint());
                 }
+                constraint = replace(constraint, exemplar, varDecExp);
 
                 // Set the location for the constraint
                 Location loc;
@@ -3213,49 +3373,32 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Final confirm clause
                 Exp finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
 
-                // Check if our initialization ensures clause is
-                // in simple form.
-                if (isInitEnsuresSimpleForm(init)) {
-                    // Only deal with initialization ensures of the
-                    // form left = right
-                    if (init instanceof EqualsExp) {
-                        EqualsExp exp = (EqualsExp) init;
-                        VarExp varDecExp =
-                                createVarExp(varDec.getLocation(), varDec
-                                        .getName(), typeEntry.getModelType());
+                // Obtain the string form of the variable
+                String varName = varDec.getName().getName();
 
-                        // Replace the conceptual variable name with the actual variable
-                        // name and add it as an additional assume clause
-                        exp.setLeft(varDecExp);
-                        myCurrentAssertiveCode.addAssume(exp);
-                    }
+                // Check to see if we have a variable dot expression.
+                // If we do, we will need to extract the name.
+                int dotIndex = varName.indexOf(".");
+                if (dotIndex > 0) {
+                    varName = varName.substring(0, dotIndex);
                 }
-                // We must have a complex initialization ensures clause
-                else {
-                    // The variable must be a variable dot expression,
-                    // therefore we will need to extract the name.
-                    String varName = varDec.getName().getName();
-                    int dotIndex = varName.indexOf(".");
-                    if (dotIndex > 0)
-                        varName = varName.substring(0, dotIndex);
 
-                    // Check if our confirm clause uses this variable
-                    if (finalConfirm.containsVar(varName, false)) {
-                        Exp exp;
-                        // We don't have any constraints, so add the initialization
-                        // clause as a new assume clause.
-                        if (constraint.equals(myTypeGraph.getTrueVarExp())) {
-                            exp = init;
-                        }
-                        // We actually have a constraint, so add both the initialization
-                        // and constraint as a new assume clause.
-                        else {
-                            exp = myTypeGraph.formConjunct(constraint, init);
-                        }
-
-                        // Add the new assume clause to our assertive code.
-                        myCurrentAssertiveCode.addAssume(exp);
+                // Check if our confirm clause uses this variable
+                if (finalConfirm.containsVar(varName, false)) {
+                    Exp exp;
+                    // We don't have any constraints, so add the initialization
+                    // clause as a new assume clause.
+                    if (constraint.equals(myTypeGraph.getTrueVarExp())) {
+                        exp = init;
                     }
+                    // We actually have a constraint, so add both the initialization
+                    // and constraint as a new assume clause.
+                    else {
+                        exp = myTypeGraph.formConjunct(constraint, init);
+                    }
+
+                    // Add the new assume clause to our assertive code.
+                    myCurrentAssertiveCode.addAssume(exp);
                 }
             }
             // Since the type is generic, we can only use the is_initial predicate
