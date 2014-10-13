@@ -2949,18 +2949,18 @@ public class VCGenerator extends TreeWalkerVisitor {
             invariant = myTypeGraph.getTrueVarExp();
         }
 
-        Location loc;
+        // Confirm the base case of invariant
+        Exp baseCase = Exp.copy(invariant);
+        Location baseLoc;
         if (invariant.getLocation() != null) {
-            loc = (Location) invariant.getLocation().clone();
+            baseLoc = (Location) invariant.getLocation().clone();
         }
         else {
-            loc = (Location) stmt.getLocation().clone();
+            baseLoc = (Location) stmt.getLocation().clone();
         }
-        loc.setDetails("Base Case of the Invariant of While Statement");
-        setLocation(invariant, loc);
-
-        // Confirm the invariant
-        myCurrentAssertiveCode.addConfirm(invariant);
+        baseLoc.setDetails("Base Case of the Invariant of While Statement");
+        setLocation(baseCase, baseLoc);
+        myCurrentAssertiveCode.addConfirm(baseCase);
 
         // Add the change rule
         if (stmt.getChanging() != null) {
@@ -2992,8 +2992,25 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         myCurrentAssertiveCode.addAssume(assume);
 
-        // Create an if statement from the loop
-        Exp ifConfirm;
+        // if statement body
+        edu.clemson.cs.r2jt.collections.List<Statement> ifStmtList =
+                stmt.getStatements();
+
+        // Confirm the inductive case of invariant
+        Exp inductiveCase = Exp.copy(invariant);
+        Location inductiveLoc;
+        if (invariant.getLocation() != null) {
+            inductiveLoc = (Location) invariant.getLocation().clone();
+        }
+        else {
+            inductiveLoc = (Location) stmt.getLocation().clone();
+        }
+        inductiveLoc
+                .setDetails("Inductive Case of Invariant of While Statement");
+        setLocation(inductiveCase, inductiveLoc);
+        ifStmtList.add(new ConfirmStmt(inductiveLoc, inductiveCase));
+
+        // Confirm the termination of the loop.
         if (decreasingExp != null) {
             Location decreasingLoc =
                     (Location) decreasingExp.getLocation().clone();
@@ -3001,30 +3018,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                 decreasingLoc.setDetails("Termination of While Statement");
             }
 
-            Exp maintainingInv = Exp.copy(invariant);
-            Location maintainingLoc =
-                    (Location) invariant.getLocation().clone();
-            if (maintainingLoc != null) {
-                maintainingLoc
-                        .setDetails("Inductive Case of Invariant of While Statement");
-                maintainingInv.setLocation(maintainingLoc);
-            }
-
             Exp infixExp =
                     new InfixExp(decreasingLoc, Exp.copy(decreasingExp),
                             createPosSymbol("<"), Exp.copy(nqv));
             infixExp.setMathType(BOOLEAN);
-            ifConfirm = myTypeGraph.formConjunct(maintainingInv, infixExp);
+            ifStmtList.add(new ConfirmStmt(decreasingLoc, infixExp));
         }
-        else {
-            ifConfirm = myTypeGraph.getTrueVarExp();
-        }
-
-        // if statement body
-        Location ifConfirmLoc = (Location) whileLoc.clone();
-        edu.clemson.cs.r2jt.collections.List<Statement> ifStmtList =
-                stmt.getStatements();
-        ifStmtList.add(new ConfirmStmt(ifConfirmLoc, ifConfirm));
 
         // empty elseif pair
         edu.clemson.cs.r2jt.collections.List<ConditionItem> elseIfPairList =
