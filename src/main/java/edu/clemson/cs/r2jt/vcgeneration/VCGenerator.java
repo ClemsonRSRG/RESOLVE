@@ -3145,22 +3145,17 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Concept requires clause
             Exp req = getRequiresClause(facConceptDec);
-            Location loc;
-            if (req.getLocation() == null) {
-                loc = (Location) (dec.getBodyName().getLocation().clone());
-            }
-            else {
-                loc = (Location) req.getLocation().clone();
-            }
+            Location loc =
+                    (Location) dec.getConceptName().getLocation().clone();
+            loc.setDetails("Facility Declaration Rule");
 
             req =
                     replaceFacilityDeclarationVariables(req, facConceptDec
                             .getParameters(), dec.getConceptParams());
-            loc.setDetails("Facility Declaration Rule");
+            req.setLocation(loc);
             assertiveCode.setFinalConfirm(req);
 
-            // Add the parameters to the facility concept to the
-            // free variable list
+            // TODO: Add the parameters to the facility concept to the free variable list
         }
         catch (NoSuchSymbolException e) {
             noSuchModule(dec.getLocation());
