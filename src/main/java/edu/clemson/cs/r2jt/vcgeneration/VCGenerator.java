@@ -828,6 +828,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private Exp getConstraints(Location loc, List<ModuleIdentifier> imports) {
         Exp retExp = null;
+        List<String> importedConceptName = new LinkedList<String>();
 
         // Loop
         for (ModuleIdentifier mi : imports) {
@@ -847,7 +848,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     .getDefiningElement();
                 }
 
-                if (dec instanceof ConceptModuleDec) {
+                if (dec instanceof ConceptModuleDec
+                        && !importedConceptName.contains(dec.getName()
+                                .getName())) {
                     contraintExpList =
                             ((ConceptModuleDec) dec).getConstraints();
 
@@ -872,6 +875,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                                             .copy(e));
                         }
                     }
+
+                    // Avoid importing constraints for the same concept twice
+                    importedConceptName.add(dec.getName().getName());
                 }
             }
             catch (NoSuchSymbolException e) {
@@ -2167,7 +2173,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // We clear our assertion for this assumes if this is a
                 // verification variable or if we don't have to
                 // keep this assumption.
-                if (verificationVariable || !keepAssumption) {
+                if (verificationVariable && !keepAssumption) {
                     assertion = null;
                 }
 
