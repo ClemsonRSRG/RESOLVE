@@ -56,6 +56,18 @@ public class AssertiveCode {
         myVerificationStmtList = new ArrayList<VerificationStatement>();
     }
 
+    public AssertiveCode(AssertiveCode old) {
+        myConfirm = old.getFinalConfirm();
+        myFreeVars = new ArrayList<Exp>();
+        for (Exp exp : old.myFreeVars) {
+            myFreeVars.add(Exp.copy(exp));
+        }
+        myVerificationStmtList = new ArrayList<VerificationStatement>();
+        for (VerificationStatement stmt : old.myVerificationStmtList) {
+            myVerificationStmtList.add(stmt);
+        }
+    }
+
     // ===========================================================
     // Public Methods
     // ===========================================================
@@ -73,6 +85,14 @@ public class AssertiveCode {
 
         // Adds the assume to our list of verification statements
         addCode(assume);
+    }
+
+    /**
+     * <p>Add the changing clause to the list</p>
+     */
+    public void addChange(List<VariableExp> changeList) {
+        myVerificationStmtList.add(new VerificationStatement(
+                VerificationStatement.CHANGE, changeList));
     }
 
     /**
@@ -204,7 +224,15 @@ public class AssertiveCode {
                 break;
             // Change Verification Statements
             case VerificationStatement.CHANGE:
-                // TODO:  Add when we have change rule implemented.
+                retStr = retStr.concat("      Change ");
+                List<VariableExp> varList =
+                        (List<VariableExp>) current.getAssertion();
+                for (int i = 0; i < varList.size(); i++) {
+                    retStr = retStr.concat(varList.get(i).toString(0));
+                    if (i != varList.size() - 1) {
+                        retStr = retStr.concat(", ");
+                    }
+                }
                 break;
             // Code Verification Statements
             case VerificationStatement.CODE:
@@ -319,8 +347,4 @@ public class AssertiveCode {
             myConfirm = confirm;
         }
     }
-
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
 }
