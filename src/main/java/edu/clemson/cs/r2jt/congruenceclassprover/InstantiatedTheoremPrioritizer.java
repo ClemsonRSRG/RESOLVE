@@ -14,6 +14,8 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PExpSubexpressionIterator;
+import edu.clemson.cs.r2jt.proving.absyn.PLambda;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -68,7 +70,11 @@ public class InstantiatedTheoremPrioritizer {
         }
 
         private HashSet<String> getSetOfSymbolsInPExp(PExp p) {
+
             HashSet<String> rSet = new HashSet<String>();
+            if(p.getClass().getSimpleName().equals("PLambda")){
+                return rSet;
+            }
             if (!p.isLiteral()) {
                 rSet.add(p.getTopLevelOperation());
             }

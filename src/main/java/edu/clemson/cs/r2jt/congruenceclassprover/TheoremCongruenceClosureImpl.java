@@ -142,16 +142,11 @@ public class TheoremCongruenceClosureImpl {
             }
             // todo: replace lambda param types if they are type variables
             PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
-            if(m_insertExpr.getSymbolNames().contains("lambda")){
-                System.err.println(m_theoremString + "\n\t" + modifiedInsert + "\n\t\t" + curBinding);
 
-            }
-            quantToLit.clear();
             rList.add(new InsertExpWithJustification(modifiedInsert,
                     m_theoremString));
-            if(curBinding.containsKey("_lambda0")){
-                System.err.println(m_theoremString + "===>>>" + modifiedInsert);
-            }
+            quantToLit.clear();
+
         }
         return rList;
     }
@@ -195,11 +190,11 @@ public class TheoremCongruenceClosureImpl {
             return null;
         }
         boolean extraOutput = false;
-        if(m_theoremString.contains("f_dr")
-                && vc.m_name.equals("1_3")){
+       /*if(m_theoremString.contains("cn")
+                && vc.m_name.equals("1_10")){
             extraOutput = true;
             System.out.println("looking for: \n" + m_matchConj + "in " + vc);
-        }
+        }*/
         Stack<HashMap<String, String>> allValidBindings =
                 new Stack<HashMap<String, String>>();
         Stack<SearchBox> boxStack = new Stack<SearchBox>();
@@ -229,7 +224,8 @@ public class TheoremCongruenceClosureImpl {
                 // save bindings if for last index, then try and find more
                 if (curBox.m_indexInList + 1 == m_matchConj.size()) {
                     if (allValidBindings.isEmpty() || !curBox.m_bindings.equals(allValidBindings.peek())) {
-                        if (typeCheck(curBox)) {
+                        // use allBound to disable type checks, otherwise just use typeCheck
+                        if (allBound(curBox)) {
                             allValidBindings.push(curBox.m_bindings);
                             if (extraOutput)
                                 System.out.println("saved " + curBox.m_bindings);
@@ -268,7 +264,7 @@ public class TheoremCongruenceClosureImpl {
             String dSymbol = box.m_bindings.get(oSymbol);
             if (!box.m_destRegistry.isSymbolInTable(dSymbol)) {
                 if (!oSymbol.contains("¢")) {
-                    System.err.println("Unbound: " + oSymbol + ": " + dSymbol + " in " + m_theoremString);
+                    System.err.println("Unbound: " + oSymbol + ":'" + dSymbol + "' in " + m_theoremString);
                     box.m_failedBindings = box.m_bindings;
                     return false;
                 }

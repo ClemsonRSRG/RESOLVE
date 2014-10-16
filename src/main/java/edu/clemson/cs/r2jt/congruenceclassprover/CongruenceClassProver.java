@@ -15,9 +15,12 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
+import edu.clemson.cs.r2jt.proving.Antecedent;
 import edu.clemson.cs.r2jt.proving.Prover;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving.absyn.PLambda;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
+import edu.clemson.cs.r2jt.proving2.Consequent;
 import edu.clemson.cs.r2jt.proving2.Metrics;
 import edu.clemson.cs.r2jt.proving2.ProverListener;
 import edu.clemson.cs.r2jt.proving2.VC;
@@ -34,14 +37,7 @@ import edu.clemson.cs.r2jt.utilities.FlagManager;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -61,7 +57,7 @@ public class CongruenceClassProver {
     private final long DEFAULTTIMEOUT = 5000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
-    private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = false;
+    private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = true;
 
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
@@ -97,18 +93,14 @@ public class CongruenceClassProver {
         m_typeGraph = g;
         m_ccVCs = new ArrayList<VerificationConditionCongruenceClosureImpl>();
         int i = 0;
+
         for (VC vc : vcs) {
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc));
             myModels[i++] = (new PerVCProverModel(g, vc.getName(), vc, null));
         }
-
         m_theorems = new ArrayList<TheoremCongruenceClosureImpl>();
         List<TheoremEntry> theoremEntries =
                 scope.query(new EntryTypeQuery(TheoremEntry.class,
-                        MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
-                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
-        List<Exp> theoremEntries2 =
-                scope.query(new EntryTypeQuery(Exp.class,
                         MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
                         MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
 
@@ -239,13 +231,15 @@ public class CongruenceClassProver {
                 vcFunctionNames.add("or");
                 vcFunctionNames.add("not");
 
-                if (vcFunctionNames.contains(">") || vcFunctionNames.contains("<") || vcFunctionNames.contains(">=") || vcFunctionNames.contains("<=")) {
+                // want to add all order operators and +/- if any of these are used
+                if (vcFunctionNames.contains(">") || vcFunctionNames.contains("<") || vcFunctionNames.contains(">=") || vcFunctionNames.contains("<=")
+                        || vcFunctionNames.contains("+") || vcFunctionNames.contains("-")) {
                     vcFunctionNames.add("-");
-                }
-                if (vcFunctionNames.contains("-")) {
+                    vcFunctionNames.add(">");
+                    vcFunctionNames.add("<");
+                    vcFunctionNames.add(">=");
+                    vcFunctionNames.add("<=");
                     vcFunctionNames.add("+");
-                }
-                if (vcFunctionNames.contains("+")) {
                     vcFunctionNames.add("-");
                 }
                 if (vcFunctionNames.contains("CF")) {
@@ -263,7 +257,14 @@ public class CongruenceClassProver {
                 allFuncNamesInVC.addAll(m_theorems);
             }
         }
-
+        // add quantified expressions local to the vc to allFuncNamesInVC. allFuncNamesInVC is a filtered list of all available theorems
+        // it resets for each vc
+        for(PExp p : vcc.forAllQuantifiedPExps){
+            TheoremCongruenceClosureImpl t = new TheoremCongruenceClosureImpl(m_typeGraph,p);
+            if(!t.m_unneeded){
+                allFuncNamesInVC.add(t);
+            }
+        }
         String div = divLine(vcc.m_name);
         String theseResults =
                 div + ("Before application of theorems: " + vcc + "\n");
@@ -295,7 +296,7 @@ public class CongruenceClassProver {
             }
             Map<String, Integer> vcGoalSymbolCount = vcc.getGoalSymbols();
             int threshold = 16 * vcGoalSymbolCount.size() + 1;
-            // hangs here with lambdas
+            // lower thresholds: less output, more time in prioritizer
             InstantiatedTheoremPrioritizer pQ =
                     new InstantiatedTheoremPrioritizer(insertExp,
                             vcGoalSymbolCount, threshold);
@@ -305,7 +306,7 @@ public class CongruenceClassProver {
             int numAdded = 0;
             while (curP != null && vcc.isProved().equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                     && System.currentTimeMillis() <= endTime) {
-                if (!applied.contains(curP.m_theorem.toString())) {
+                if (!applied.contains(curP.m_theorem.toString()) ) {
                     vcc.getConjunct().addExpression(curP.m_theorem, endTime);
                     thString += curP.toString();
                     applied.add(curP.m_theorem.toString());
@@ -373,6 +374,37 @@ public class CongruenceClassProver {
         w.close();
     }
 
+   // Wherever PLambda is used replace it with "lambda_x" and append  "lambda_x(y:z) = body"
+    protected VC removeLambdas(TypeGraph g, VC vc){
+        if(!(vc.getAntecedent().getFunctionApplications().contains("lambda") || vc.getConsequent().getFunctionApplications().contains("lambda"))) return vc;
+        List<PExp> antList = vc.getAntecedent().getMutableCopy();
+        List<PExp> consqList = vc.getConsequent().getMutableCopy();
+
+        return new VC(vc.getName(),new edu.clemson.cs.r2jt.proving2.Antecedent(antList),new Consequent(consqList));
+    }
+
+    // this replaces PLambda with func name and returns PExp to append
+    protected PExp replacePLambdasWithPSymbols(PExp p){
+       // base case
+        if(p.getClass().getSimpleName().equals("PLambda")){
+            PLambda pl = (PLambda)p;
+            return PLambda.toPSymbol(pl);
+        }
+
+        Iterator<PExp> pit = p.getSubExpressions().iterator();
+        boolean hasPLambda = false;
+        PLambda lam = null;
+        int i = 0;
+        while(pit.hasNext()){
+            PExp cur = pit.next();
+            if(cur.getClass().getSimpleName().equals("PLambda")){
+                hasPLambda = true;
+                lam = (PLambda)cur;
+            }
+            ++i;
+        }
+        return p.withSubExpressionReplaced(i,PLambda.toPSymbol(lam));
+    }
     public void addProverListener(ProverListener l) {
         myProverListeners.add(l);
     }

@@ -23,7 +23,8 @@ import java.util.Map.Entry;
  */
 public class Registry {
 
-    public final String m_ccFormat = "¢%03d";
+    public final String m_ccFormat = "¢c%03d";
+    public final String m_cvFormat = "¢v%03d";
     public TreeMap<String, Integer> m_symbolToIndex;
     public Map<MTType, TreeSet<String>> m_typeToSetOfOperators;
     public ArrayList<String> m_indexToSymbol;
@@ -132,13 +133,17 @@ public class Registry {
         return m_foralls;
     }
 
-    public int makeSymbol(MTType symbolType) {
-        String symbolName = String.format(m_ccFormat, m_uniqueCounter++);
+    public int makeSymbol(MTType symbolType, boolean isVariable) {
+        String symbolName = "";
+        if(isVariable) symbolName = String.format(m_cvFormat, m_uniqueCounter++);
+        else symbolName = String.format(m_ccFormat, m_uniqueCounter++);
         return addSymbol(symbolName, symbolType, Usage.CREATED);
     }
 
     // if symbol is new, it adds it, otherwise, it returns current int rep
     public int addSymbol(String symbolName, MTType symbolType, Usage usage) {
+        // temporary until type system is fixed
+        if(symbolName.equals("Integer")) symbolName = "Z";
         if (isSymbolInTable(symbolName)) {
             return getIndexForSymbol(symbolName);
         }

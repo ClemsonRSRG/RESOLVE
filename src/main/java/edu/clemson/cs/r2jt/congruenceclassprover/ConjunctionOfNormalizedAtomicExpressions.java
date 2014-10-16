@@ -126,7 +126,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
         //if (m_lambdas.containsKey(lamb.toString())) return m_registry.m_symbolToIndex.get((m_lambdas.get(lamb.toString())));
         // Make new function symbol
-        String fname = "_lambda" + f_num++;
+        String fname = "lambda" + f_num++;
         // Make new parameters
         ArrayList<PSymbol> paramsAL = new ArrayList<PSymbol>();
         Iterator<PLambda.Parameter> pit = lamb.parameters.iterator();
@@ -135,21 +135,60 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         //int pnum = 0;
         //HashMap<PExp,PExp> subsP = new HashMap<PExp, PExp>();
         //HashMap<String,String> subsS = new HashMap<String, String>();
+        int pnum = 0;
+        HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
         while(pit.hasNext()){
             PLambda.Parameter p = pit.next();
-            //String pname = p.type.toString().toLowerCase() + pnum++;
-            paramsAL.add(new PSymbol(p.type, p.type, p.name, p.name, new ArrayBackedImmutableList<PExp>(emptyList), PSymbol.Quantification.FOR_ALL, PSymbol.DisplayType.PREFIX));
-            
+            String pname = p.type.toString().toLowerCase() + pnum++;
+            // temporary hack until I can get lambda param types substituted
+            if(pname.startsWith("'d'")){
+                pname = "z" + (pnum-1);
+            }
+            paramsAL.add(new PSymbol(p.type, p.type, pname, pname, new ArrayBackedImmutableList<PExp>(emptyList), PSymbol.Quantification.FOR_ALL, PSymbol.DisplayType.PREFIX));
+            // map original name to new name to substitute in body
+            quantToLit.put(new PSymbol(p.type, null, p.name),
+                    new PSymbol(p.type, null, pname));
         }
         ImmutableList<PExp> argList = new ArrayBackedImmutableList<PExp>(paramsAL.toArray(new PExp[paramsAL.size()]));
         PSymbol func = new PSymbol(lamb.getType(),lamb.getTypeValue(),fname,fname,argList, PSymbol.Quantification.FOR_ALL, PSymbol.DisplayType.PREFIX);
         // Enter new expression, replacing parameter name with the fresh one
-        PExp body = lamb.getSubExpressions().get(0); // this is the body, its a single element list
+        PExp body = lamb.getSubExpressions().get(0).substitute(quantToLit); // this is the body, its a single element list
         int bodyRep = addFormula(body);
         int funcRep = addFormula(func);
         mergeOperators(bodyRep, funcRep);
+        mergeMatchingLambdas();
         return m_registry.getIndexForSymbol(fname);
 
+    }
+
+    // could be optimized with bin search if expressions were in alpha order.
+    protected void mergeMatchingLambdas(){
+        int i = 0;
+        loopStart:
+        while(i < m_exprList.size()){
+            int p0_i = m_exprList.get(i).readPosition(0);
+            String p0_i_name = m_registry.getSymbolForIndex(p0_i);
+            if(!p0_i_name.startsWith("lambda")){
+                ++i;
+                continue;
+            }
+            int pLast = m_exprList.get(i).readRoot();
+            int j = i+1;
+            while(j < m_exprList.size()){
+                int p0_j = m_exprList.get(j).readPosition(0);
+                String p0_j_name = m_registry.getSymbolForIndex(p0_j);
+                // compare rest of expressions, if the same, merge func names
+                if(p0_j_name.startsWith("lambda") && m_exprList.get(j).readRoot() == pLast && !p0_i_name.equals(p0_j_name)){
+                    // suppose lambda1(k) = c0, lambda2(j) = c0
+                    // merge makes this: lambda1(k) = c0, lambda1(j) = c0;
+                    mergeOperators(p0_i,p0_j);
+                    i = 0;
+                    continue loopStart;
+                }
+                ++j;
+            }
+            ++i;
+        }
     }
     // adds a particular symbol to the registry
     protected int addPsymbol(PSymbol ps) {
@@ -161,7 +200,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             usage = Registry.Usage.LITERAL;
         }
 
-        else if (ps.isFunction() || ps.getType().getClass().getSimpleName().contains("MTFunction")){
+        else if (name.startsWith("lambda") || ps.isFunction() || ps.getType().getClass().getSimpleName().contains("MTFunction")){
             if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
                 usage = Registry.Usage.HASARGS_FORALL;
             }
@@ -247,7 +286,21 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         String symName =
                 m_registry.getSymbolForIndex(atomicFormula.readPosition(0));
         assert typeOfFormula != null : symName + " has null type";
-        int rhs = m_registry.makeSymbol(typeOfFormula);
+        // if any of the symbols in atomicFormula are variables (FORALL) make created symbol a variable
+        boolean isVar = false;
+        for(Integer is: atomicFormula.getKeys()){
+            String s = m_registry.getSymbolForIndex(is);
+            if(s.startsWith("¢v")){
+                isVar = true;
+                break;
+            }
+            Registry.Usage us = m_registry.getUsage(s);
+            if(us == Registry.Usage.FORALL || us == Registry.Usage.HASARGS_FORALL){
+                isVar = true;
+                break;
+            }
+        }
+        int rhs = m_registry.makeSymbol(typeOfFormula, isVar);
         atomicFormula.writeToRoot(rhs);
         m_exprList.add(indexToInsert, atomicFormula);
         return rhs;
@@ -272,6 +325,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
         }
         //mergeArgsOfEqualityPredicateIfRootIsTrue();
+         mergeMatchingLambdas();
     }
 
     // look for =(x,y)=true in list.  If found call merge(x,y).
@@ -304,6 +358,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     // Return list of modified predicates by their position. Only these can cause new merges.
+    // b is replaced by a
     protected Stack<Integer> mergeOnlyArgumentOperators(int a, int b) {
         if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
             return null;
@@ -318,6 +373,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
          }*/// this is the original way, merge toward lower valued indices.
         String aString = m_registry.getSymbolForIndex(a);
         String bString = m_registry.getSymbolForIndex(b);
+        // replace a if a is alphabetically higher than b
         if (aString.compareTo(bString) > 0) {
             int temp = a;
             String tempS = aString;
@@ -326,8 +382,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             b = temp;
             bString = tempS;
         }
+
         // Favor retaining literals
-        // THIS IS CURRENTLY ABSOLUTELY NECCESSARY.  Finding could be redone to avoid this.
+        // THIS IS CURRENTLY ABSOLUTELY NECESSARY.  Finding could be redone to avoid this.
         // Otherwise, proofs can fail to prove if literals are redefined.
 
         if(aString.equals("false") && bString.equals("true")){
@@ -337,8 +394,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         // TODO: find out why when aString == bString here, a !=b.  Child probably merged.
         Registry.Usage uB = m_registry.getUsage(bString);
         Registry.Usage uA = m_registry.getUsage((aString));
+        // puts created in b
+        if(uA.equals(Registry.Usage.CREATED) && !uB.equals(Registry.Usage.CREATED)){
+            int temp = a;
+            a = b;
+            b = temp;
+        }
         // Can't rely on literal property being set.  false is not set to be a literal.
-        if(uA.equals(Registry.Usage.LITERAL) && uB.equals(Registry.Usage.LITERAL)){
+        else if(uA.equals(Registry.Usage.LITERAL) && uB.equals(Registry.Usage.LITERAL)){
             System.err.println("Literal redefinition: " + aString + "." + a + " -> " + bString + "." + b);
             System.err.println(m_registry.m_symbolToIndex);
             System.err.println(m_registry.m_indexToSymbol);
@@ -348,9 +411,16 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             a = b;
             b = temp;
         }
-
-        if((uA == Registry.Usage.FORALL || uB == Registry.Usage.FORALL) && uA != uB) return null;
-        if((uA == Registry.Usage.HASARGS_FORALL || uB == Registry.Usage.HASARGS_FORALL) && uA != uB) return null;
+        // prevent constant replacement by variable
+        if(uA != uB) {
+            boolean aIsVar = (uA == Registry.Usage.FORALL || uA == Registry.Usage.HASARGS_FORALL || aString.startsWith("¢v"));
+            boolean bIsVar = (uB == Registry.Usage.FORALL || uB == Registry.Usage.HASARGS_FORALL || bString.startsWith("¢v"));
+            if((aIsVar || bIsVar) && ! (aIsVar == bIsVar) && (aIsVar)) {
+                int temp = a;
+                a = b;
+                b = temp;
+            }
+        }
         Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator();
         Stack<NormalizedAtomicExpressionMapImpl> modifiedEntries =
                 new Stack<NormalizedAtomicExpressionMapImpl>();

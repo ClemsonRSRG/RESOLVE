@@ -457,7 +457,10 @@ public class PSymbol extends PExp {
                                 displayType);
             }
             else {
-                retval = this;
+                // changed this to handle case where func name changes but args don't -- mike
+                retval = new PSymbol(myType, myTypeValue, newLeft, newRight,
+                        arguments, newQuantification,
+                        displayType);
             }
         }
 

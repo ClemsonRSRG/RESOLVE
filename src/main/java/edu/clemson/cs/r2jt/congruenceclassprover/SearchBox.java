@@ -77,7 +77,7 @@ public class SearchBox {
         m_dataSet.findNAE(this);
     }
 
-    public static List<String> NAEtoList(
+    public List<String> NAEtoList(
             NormalizedAtomicExpressionMapImpl atom, Registry atomReg) {
         ArrayList<String> atomAsStrArray = new ArrayList<String>();
         int op = atom.readPosition(0);
