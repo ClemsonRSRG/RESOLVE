@@ -2750,16 +2750,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                             leftVariable.setMathTypeValue(v.getMathTypeValue());
                         }
 
+                        // Replace the formal with the actual
+                        ensures =
+                                replaceFormalWithActualEns(ensures, opDec
+                                        .getParameters(), opDec.getStateVars(),
+                                        assignParamExp.getArguments(), true);
+
                         // Replace all instances of the left hand side
                         // variable in the current final confirm statement.
                         Exp newConf = myCurrentAssertiveCode.getFinalConfirm();
                         newConf = replace(newConf, leftVariable, ensures);
-
-                        // Replace the formals with the actuals.
-                        newConf =
-                                replaceFormalWithActualEns(newConf, opDec
-                                        .getParameters(), opDec.getStateVars(),
-                                        assignParamExp.getArguments(), false);
 
                         // Set this as our new final confirm statement.
                         myCurrentAssertiveCode.setFinalConfirm(newConf);
