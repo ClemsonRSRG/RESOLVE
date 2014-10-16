@@ -2815,11 +2815,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             reqloc = new Location(null, null);
         }
 
-        // Append the name of the current procedure
-        String details = " from If Statement Condition";
-
         // Set the details of the current location
-        reqloc.setDetails("Requires Clause of " + opDec.getName() + details);
+        reqloc.setDetails("Requires Clause of " + opDec.getName());
         setLocation(requires, reqloc);
 
         // Add this to our list of things to confirm
@@ -2883,10 +2880,10 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Modify the confirm details
         Exp ifConfirm = myCurrentAssertiveCode.getFinalConfirm();
-        String ifDetail =
-                " , If \"if\" condition at "
-                        + ifCondition.getLocation().toString() + " is true";
-        ifConfirm = appendToLocation(ifConfirm, ifDetail);
+        Location ifLocation = (Location) ifConfirm.getLocation().clone();
+        String ifDetail = "Condition at " + ifLocation.toString() + " is true";
+        ifLocation.setDetails(ifDetail);
+        ifConfirm.setLocation(ifLocation);
         myCurrentAssertiveCode.setFinalConfirm(ifConfirm);
 
         // Verbose Mode Debug Messages
@@ -2909,10 +2906,11 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Modify the confirm details
         Exp negIfConfirm = negIfAssertiveCode.getFinalConfirm();
+        Location negIfLocation = (Location) ifConfirm.getLocation().clone();
         String negIfDetail =
-                " , If \"if\" condition at "
-                        + ifCondition.getLocation().toString() + " is false";
-        negIfConfirm = appendToLocation(negIfConfirm, negIfDetail);
+                "Condition at " + negIfLocation.toString() + " is false";
+        negIfLocation.setDetails(negIfDetail);
+        negIfConfirm.setLocation(negIfLocation);
         negIfAssertiveCode.setFinalConfirm(negIfConfirm);
 
         // Add this new assertive code to our incomplete assertive code stack
