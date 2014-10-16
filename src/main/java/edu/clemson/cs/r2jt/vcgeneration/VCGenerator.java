@@ -70,10 +70,11 @@ public class VCGenerator extends TreeWalkerVisitor {
     private AssertiveCode myCurrentAssertiveCode;
 
     /**
-     * <p>The current compile environment used throughout
-     * the compiler.</p>
+     * <p>A map of facility declarations to <code>Exp</code>, where the expression
+     * contains the things we can assume from the facility declaration. This includes
+     * formal to actuals and constaints.</p>
      */
-    private CompileEnvironment myInstanceEnvironment;
+    private Map<FacilityDec, Exp> myFacilityDeclarationMap;
 
     /**
      * <p>A list that will be built up with <code>AssertiveCode</code>
@@ -81,11 +82,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      * satisfied to verify a parsed program.</p>
      */
     private Collection<AssertiveCode> myFinalAssertiveCodeList;
-
-    /**
-     * <p>This object creates the different VC outputs.</p>
-     */
-    private OutputVCs myOutputGenerator;
 
     /**
      * <p>A stack that is used to keep track of the <code>AssertiveCode</code>
@@ -99,6 +95,17 @@ public class VCGenerator extends TreeWalkerVisitor {
      * that we still need to apply proof rules to.</p>
      */
     private Stack<String> myIncAssertiveCodeStackInfo;
+
+    /**
+     * <p>The current compile environment used throughout
+     * the compiler.</p>
+     */
+    private CompileEnvironment myInstanceEnvironment;
+
+    /**
+     * <p>This object creates the different VC outputs.</p>
+     */
+    private OutputVCs myOutputGenerator;
 
     /**
      * <p>This string buffer holds all the steps
@@ -153,10 +160,11 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // VCs + Debugging String
         myCurrentAssertiveCode = null;
+        myFacilityDeclarationMap = new HashMap<FacilityDec, Exp>();
         myFinalAssertiveCodeList = new LinkedList<AssertiveCode>();
-        myOutputGenerator = null;
         myIncAssertiveCodeStack = new Stack<AssertiveCode>();
         myIncAssertiveCodeStackInfo = new Stack<String>();
+        myOutputGenerator = null;
         myVCBuffer = new StringBuffer();
     }
 
@@ -357,9 +365,23 @@ public class VCGenerator extends TreeWalkerVisitor {
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
 
+        // Obtain type constrains from parameter
+        // TODO: Only add type constraints if they use the facility;
+        Exp typeConstraint = null;
+        for (FacilityDec fDec : myFacilityDeclarationMap.keySet()) {
+            Exp temp = Exp.copy(myFacilityDeclarationMap.get(fDec));
+
+            if (typeConstraint == null) {
+                typeConstraint = temp;
+            }
+            else {
+                typeConstraint = myTypeGraph.formConjunct(typeConstraint, temp);
+            }
+        }
+
         // Apply the procedure declaration rule
-        applyProcedureDeclRule(requires, ensures, decreasing, variableList,
-                statementList);
+        applyProcedureDeclRule(requires, ensures, decreasing, typeConstraint,
+                variableList, statementList);
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
@@ -446,9 +468,23 @@ public class VCGenerator extends TreeWalkerVisitor {
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
 
+        // Obtain type constrains from parameter
+        // TODO: Only add type constraints if they use the facility;
+        Exp typeConstraint = null;
+        for (FacilityDec fDec : myFacilityDeclarationMap.keySet()) {
+            Exp temp = Exp.copy(myFacilityDeclarationMap.get(fDec));
+
+            if (typeConstraint == null) {
+                typeConstraint = temp;
+            }
+            else {
+                typeConstraint = myTypeGraph.formConjunct(typeConstraint, temp);
+            }
+        }
+
         // Apply the procedure declaration rule
-        applyProcedureDeclRule(requires, ensures, decreasing, variableList,
-                statementList);
+        applyProcedureDeclRule(requires, ensures, decreasing, typeConstraint,
+                variableList, statementList);
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
@@ -3131,13 +3167,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add the global require clause as given
         assertiveCode.addAssume(myGlobalRequiresExp);
 
-        // Loop through every enhancement/enhancement realization declaration,
-        // if any.
-        /*if (dec.getEnhancementBodies() != null) {
-            for (EnhancementBodyItem e : dec.getEnhancementBodies()) {
-
-            }
-        }*/
+        // TODO: Loop through every enhancement/enhancement realization declaration, if any.
 
         // Obtain the concept module for the facility
         try {
@@ -3147,6 +3177,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     new ModuleIdentifier(dec.getConceptName()
                                             .getName())).getDefiningElement();
 
+            // Concept parameters
+            List<ModuleArgumentItem> conceptParams = dec.getConceptParams();
+
             // Concept requires clause
             Exp req = getRequiresClause(facConceptDec);
             Location loc =
@@ -3155,11 +3188,115 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             req =
                     replaceFacilityDeclarationVariables(req, facConceptDec
-                            .getParameters(), dec.getConceptParams());
+                            .getParameters(), conceptParams);
             req.setLocation(loc);
             assertiveCode.setFinalConfirm(req);
 
-            // TODO: Add the parameters to the facility concept to the free variable list
+            // Obtain the constraint of the concept type
+            Exp assumeExp = null;
+
+            //
+            List<ModuleParameterDec> moduleParameterList =
+                    facConceptDec.getParameters();
+            for (int i = 0; i < moduleParameterList.size(); i++) {
+                ModuleParameterDec m = moduleParameterList.get(i);
+                if (m.getWrappedDec() instanceof ConstantParamDec) {
+                    ConstantParamDec constantParamDec =
+                            (ConstantParamDec) m.getWrappedDec();
+                    VarDec tempDec =
+                            new VarDec(constantParamDec.getName(),
+                                    constantParamDec.getTy());
+
+                    // Search for the ProgramTypeEntry
+                    // Ty is NameTy
+                    if (tempDec.getTy() instanceof NameTy) {
+                        NameTy pNameTy = (NameTy) tempDec.getTy();
+
+                        // Query for the type entry in the symbol table
+                        ProgramTypeEntry typeEntry =
+                                searchProgramType(pNameTy.getLocation(),
+                                        pNameTy.getName());
+
+                        // Obtain the original dec from the AST
+                        TypeDec type = (TypeDec) typeEntry.getDefiningElement();
+
+                        // Create a variable expression from the declared variable
+                        VarExp varDecExp =
+                                createVarExp(tempDec.getLocation(), tempDec
+                                        .getName(), typeEntry.getModelType());
+
+                        // Create a variable expression from the type exemplar
+                        VarExp exemplar =
+                                createVarExp(type.getLocation(), type
+                                        .getExemplar(), typeEntry
+                                        .getModelType());
+
+                        // Make sure we have a constraint
+                        Exp constraint;
+                        if (type.getConstraint() == null) {
+                            constraint = myTypeGraph.getTrueVarExp();
+                        }
+                        else {
+                            constraint = Exp.copy(type.getConstraint());
+                        }
+                        constraint = replace(constraint, exemplar, varDecExp);
+
+                        // Set the location for the constraint
+                        Location constraintLoc;
+                        if (constraint.getLocation() != null) {
+                            constraintLoc =
+                                    (Location) constraint.getLocation().clone();
+                        }
+                        else {
+                            constraintLoc =
+                                    (Location) type.getLocation().clone();
+                        }
+                        constraintLoc.setDetails("Constraints on "
+                                + tempDec.getName().getName());
+                        setLocation(constraint, constraintLoc);
+
+                        // Replace with facility declaration variables
+                        constraint =
+                                replaceFacilityDeclarationVariables(constraint,
+                                        facConceptDec.getParameters(),
+                                        conceptParams);
+
+                        // Create an equals expression from formal to actual
+                        ProgramIntegerExp programIntExp =
+                                (ProgramIntegerExp) conceptParams.get(i)
+                                        .getEvalExp();
+                        VarExp actualExp =
+                                createVarExp(dec.getLocation(),
+                                        createPosSymbol(String
+                                                .valueOf(programIntExp
+                                                        .getValue())),
+                                        typeEntry.getModelType());
+
+                        actualExp.setMathType(typeEntry.getModelType());
+                        EqualsExp formalEq =
+                                new EqualsExp(dec.getLocation(), varDecExp, 1,
+                                        actualExp);
+                        formalEq.setMathType(BOOLEAN);
+                        Exp typeAssume =
+                                myTypeGraph.formConjunct(formalEq, constraint);
+
+                        if (assumeExp == null) {
+                            assumeExp = typeAssume;
+                        }
+                        else {
+                            assumeExp =
+                                    myTypeGraph.formConjunct(assumeExp,
+                                            typeAssume);
+                        }
+                    }
+                    else {
+                        // Ty not handled.
+                        tyNotHandled(tempDec.getTy(), tempDec.getLocation());
+                    }
+                }
+            }
+
+            myFacilityDeclarationMap.put(dec, assumeExp);
         }
         catch (NoSuchSymbolException e) {
             noSuchModule(dec.getLocation());
@@ -3185,11 +3322,12 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param requires Requires clause
      * @param ensures Ensures clause
      * @param decreasing Decreasing clause (if any)
+     * @param typeConstraint Facility type constraints (if any)
      * @param variableList List of all variables for this procedure
      * @param statementList List of statements for this procedure
      */
     private void applyProcedureDeclRule(Exp requires, Exp ensures,
-            Exp decreasing, List<VarDec> variableList,
+            Exp decreasing, Exp typeConstraint, List<VarDec> variableList,
             List<Statement> statementList) {
         // Add the global requires clause
         if (myGlobalRequiresExp != null) {
@@ -3204,6 +3342,10 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add the requires clause
         if (requires != null) {
             myCurrentAssertiveCode.addAssume(requires);
+        }
+
+        if (typeConstraint != null) {
+            myCurrentAssertiveCode.addAssume(typeConstraint);
         }
 
         // Add the remember rule
