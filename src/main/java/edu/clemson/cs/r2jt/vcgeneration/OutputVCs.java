@@ -208,15 +208,20 @@ public class OutputVCs {
             Location loc = locationList.get(0);
             finalVCs += (loc.getDetails() + ": " + loc.toString() + "\n\n");
 
-            // Goals (Reformat not working)
-            finalVCs += ("Goal(s):\n\n" + consequent.toString() + "\n");
+            // Goals
+            finalVCs +=
+                    ("Goal(s):\n\n"
+                            + reformatOutputString(consequent.toString()) + "\n");
 
             // Givens
             finalVCs += "Given(s):\n\n";
             int numAntecedent = antecedent.size();
             for (int i = 0; i < numAntecedent; i++) {
                 finalVCs +=
-                        ((i + 1) + ". " + antecedent.get(i).toString() + "\n");
+                        ((i + 1)
+                                + ". "
+                                + reformatOutputString(antecedent.get(i)
+                                        .toString()) + "\n");
             }
             finalVCs += "\n";
         }
@@ -253,13 +258,16 @@ public class OutputVCs {
             String givens = "";
             for (int i = 0; i < numAntecedent; i++) {
                 givens +=
-                        ((i + 1) + ": " + antecedent.get(i).toString() + "\n");
+                        ((i + 1)
+                                + ": "
+                                + reformatOutputString(antecedent.get(i)
+                                        .toString()) + "\n");
             }
             newVC.put("vcGivens", ResolveCompiler.webEncode(givens));
 
             // Goal(s)
             newVC.put("vcGoal", ResolveCompiler
-                    .webEncode(consequent.toString()));
+                    .webEncode(reformatOutputString(consequent.toString())));
 
             // VC Details
             newVC.put("vcInfo", ResolveCompiler.webEncode(loc.getDetails()
@@ -271,6 +279,64 @@ public class OutputVCs {
         jsonOutput.put("vcs", vcArray);
 
         return jsonOutput;
+    }
+
+    /**
+     * <p>This method converts all the question mark variables
+     * into human readable prime variables and converts all the
+     * "Conc_" variables to "Conc.".</p>
+     *
+     * @param str String form of <code>Antecedent</code> or
+     *            <code>Consequent</code>.
+     *
+     * @return Properly converted text in string format.
+     */
+    private String reformatOutputString(String str) {
+        // Return Value
+        StringBuffer stringBuffer = new StringBuffer();
+
+        // Replace all instances of Conc_ with Conc.
+        String temp = str.replaceAll("Conc_", "Conc.");
+
+        // Convert the string to a character array
+        char[] tempArray = temp.toCharArray();
+
+        // Loop through looking for question marks
+        int i = 0;
+        while (i < tempArray.length) {
+            if (tempArray[i] != '?') {
+                stringBuffer.append(tempArray[i]);
+                i++;
+            }
+            else {
+                int questionCount = 1;
+                i++;
+                while (i < tempArray.length && tempArray[i] == '?') {
+                    questionCount++;
+                    i++;
+                }
+
+                boolean stop = false;
+                while (i < tempArray.length && !stop) {
+                    if ((tempArray[i] > 47 && tempArray[i] < 58)
+                            || (tempArray[i] > 64 && tempArray[i] < 91)
+                            || (tempArray[i] > 96 && tempArray[i] < 123)
+                            || (tempArray[i] == 95)) {
+                        stringBuffer.append(tempArray[i]);
+                        i++;
+                    }
+                    else {
+                        stop = true;
+                    }
+                }
+
+                for (int j = 0; j < questionCount; j++) {
+                    stringBuffer.append('\'');
+                }
+            }
+        }
+
+        return stringBuffer.toString();
     }
 
     /**
