@@ -36,12 +36,10 @@ public class VerificationStatement implements Cloneable {
     private Object myAssertion;
 
     // Code for each type of Verification Statement
-    public static final int ASSUME = 1;
-    public static final int CODE = 2;
-    public static final int VARIABLE = 3;
-    public static final int CONFIRM = 4;
-    public static final int REMEMBER = 5;
-    public static final int CHANGE = 6;
+    public static final int CODE = 1;
+    public static final int VARIABLE = 2;
+    public static final int REMEMBER = 3;
+    public static final int CHANGE = 4;
 
     // ===========================================================
     // Constructors
@@ -52,8 +50,7 @@ public class VerificationStatement implements Cloneable {
 
     // Our defined constructor
     public VerificationStatement(int type, Object assertion) {
-        if (((type == ASSUME || type == CONFIRM) && (assertion instanceof Exp))
-                || ((type == CODE) && (assertion instanceof Statement))
+        if (((type == CODE) && (assertion instanceof Statement))
                 || (type == VARIABLE && assertion instanceof VarDec)
                 || (type == CHANGE)) {
             myType = type;
@@ -74,15 +71,7 @@ public class VerificationStatement implements Cloneable {
     public Object clone() {
         try {
             VerificationStatement clone = new VerificationStatement();
-            if ((myType == ASSUME) || (myType == CONFIRM)) {
-                if (myAssertion instanceof Exp) {
-                    clone =
-                            new VerificationStatement(myType, Exp
-                                    .copy((Exp) myAssertion));
-                }
-                return clone;
-            }
-            else if (myType == CODE) {
+            if (myType == CODE) {
                 if (myAssertion instanceof Statement) {
                     clone =
                             new VerificationStatement(myType,
@@ -176,21 +165,15 @@ public class VerificationStatement implements Cloneable {
         String str = new String();
         switch (myType) {
         case 1:
-            str = "Assume";
-            break;
-        case 2:
             str = "Code";
             break;
-        case 3:
+        case 2:
             str = "Variable";
             break;
-        case 4:
-            str = "Confirm";
-            break;
-        case 5:
+        case 3:
             str = "Remember";
             break;
-        case 6:
+        case 4:
             str = "Change";
             break;
         default:
