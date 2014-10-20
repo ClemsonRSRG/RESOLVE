@@ -74,7 +74,7 @@ public class CongruenceClassProver {
     }
 
     public CongruenceClassProver(TypeGraph g, List<VC> vcs, ModuleScope scope,
-                                 CompileEnvironment environment, ProverListener listener) {
+            CompileEnvironment environment, ProverListener listener) {
 
         // Only for web ide //////////////////////////////////////////
         myModels = new PerVCProverModel[vcs.size()];
@@ -85,7 +85,8 @@ public class CongruenceClassProver {
             myTimeout =
                     Integer.parseInt(environment.flags.getFlagArgument(
                             Prover.FLAG_TIMEOUT, Prover.FLAG_TIMEOUT_ARG_NAME));
-        } else {
+        }
+        else {
             myTimeout = DEFAULTTIMEOUT;
         }
         ///////////////////////////////////////////////////////////////
@@ -131,7 +132,8 @@ public class CongruenceClassProver {
         if (matchLeft) {
             lhs = theorem.getSubExpressions().get(0);
             rhs = theorem.getSubExpressions().get(1);
-        } else {
+        }
+        else {
             lhs = theorem.getSubExpressions().get(1);
             rhs = theorem.getSubExpressions().get(0);
         }
@@ -166,14 +168,22 @@ public class CongruenceClassProver {
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
             long startTime = System.nanoTime();
             String whyQuit = "";
-            VerificationConditionCongruenceClosureImpl.STATUS proved = prove(vcc);
-            if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
+            VerificationConditionCongruenceClosureImpl.STATUS proved =
+                    prove(vcc);
+            if (proved
+                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
                 whyQuit += " Proved ";
-            } else if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
+            }
+            else if (proved
+                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
                 whyQuit += " Proved (Assumption(s) false) ";
-            } else if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
+            }
+            else if (proved
+                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
                 whyQuit += " Out of theorems, or timed out ";
-            } else whyQuit += " Goal false ";
+            }
+            else
+                whyQuit += " Goal false ";
 
             long endTime = System.nanoTime();
             long delayNS = endTime - startTime;
@@ -184,15 +194,15 @@ public class CongruenceClassProver {
 
             for (ProverListener l : myProverListeners) {
                 l
-                        .vcResult((proved == (VerificationConditionCongruenceClosureImpl.STATUS.PROVED) || (proved ==
-                                        VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)),
-                                myModels[i], new Metrics(delayMS,
-                                        myTimeout));
+                        .vcResult(
+                                (proved == (VerificationConditionCongruenceClosureImpl.STATUS.PROVED) || (proved == VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)),
+                                myModels[i], new Metrics(delayMS, myTimeout));
             }
             i++;
         }
         totalTime = System.currentTimeMillis() - totalTime;
-        summary += "Elapsed time from construction: " + totalTime + " ms" + "\n";
+        summary +=
+                "Elapsed time from construction: " + totalTime + " ms" + "\n";
         String div = divLine("Summary");
         summary = div + summary + div;
         if (!FlagManager.getInstance().isFlagSet("nodebug")) {
@@ -217,11 +227,16 @@ public class CongruenceClassProver {
         return new String(div) + "\n";
     }
 
-    protected VerificationConditionCongruenceClosureImpl.STATUS prove(VerificationConditionCongruenceClosureImpl vcc) {
-        List<TheoremCongruenceClosureImpl> allFuncNamesInVC = new ArrayList<TheoremCongruenceClosureImpl>();
+    protected VerificationConditionCongruenceClosureImpl.STATUS prove(
+            VerificationConditionCongruenceClosureImpl vcc) {
+        List<TheoremCongruenceClosureImpl> allFuncNamesInVC =
+                new ArrayList<TheoremCongruenceClosureImpl>();
 
         // Remove theorems with no function names in the vc.
-        if (vcc.isProved().equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
+        if (vcc
+                .isProved()
+                .equals(
+                        VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
             if (DO_NOT_INTRODUCE_NEW_OPERATORS) {
 
                 Set<String> vcFunctionNames = vcc.getFunctionNames();
@@ -232,8 +247,12 @@ public class CongruenceClassProver {
                 vcFunctionNames.add("not");
 
                 // want to add all order operators and +/- if any of these are used
-                if (vcFunctionNames.contains(">") || vcFunctionNames.contains("<") || vcFunctionNames.contains(">=") || vcFunctionNames.contains("<=")
-                        || vcFunctionNames.contains("+") || vcFunctionNames.contains("-")) {
+                if (vcFunctionNames.contains(">")
+                        || vcFunctionNames.contains("<")
+                        || vcFunctionNames.contains(">=")
+                        || vcFunctionNames.contains("<=")
+                        || vcFunctionNames.contains("+")
+                        || vcFunctionNames.contains("-")) {
                     vcFunctionNames.add("-");
                     vcFunctionNames.add(">");
                     vcFunctionNames.add("<");
@@ -253,15 +272,17 @@ public class CongruenceClassProver {
                     }
                 }
 
-            } else {
+            }
+            else {
                 allFuncNamesInVC.addAll(m_theorems);
             }
         }
         // add quantified expressions local to the vc to allFuncNamesInVC. allFuncNamesInVC is a filtered list of all available theorems
         // it resets for each vc
-        for(PExp p : vcc.forAllQuantifiedPExps){
-            TheoremCongruenceClosureImpl t = new TheoremCongruenceClosureImpl(m_typeGraph,p);
-            if(!t.m_unneeded){
+        for (PExp p : vcc.forAllQuantifiedPExps) {
+            TheoremCongruenceClosureImpl t =
+                    new TheoremCongruenceClosureImpl(m_typeGraph, p);
+            if (!t.m_unneeded) {
                 allFuncNamesInVC.add(t);
             }
         }
@@ -274,7 +295,11 @@ public class CongruenceClassProver {
         long endTime = myTimeout + startTime;
         HashSet<String> applied = new HashSet<String>();
 
-        for (i = 0; i < MAX_ITERATIONS && vcc.isProved().equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
+        for (i = 0; i < MAX_ITERATIONS
+                && vcc
+                        .isProved()
+                        .equals(
+                                VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                 && System.currentTimeMillis() <= endTime; ++i) {
             ArrayList<InsertExpWithJustification> insertExp =
                     new ArrayList<InsertExpWithJustification>();
@@ -291,7 +316,8 @@ public class CongruenceClassProver {
                 }
             }
             if (insertExp.isEmpty()) {
-                System.err.println(vcc.m_name + ". oops: no unique instantiated theorems.");
+                System.err.println(vcc.m_name
+                        + ". oops: no unique instantiated theorems.");
                 break; // nothing else to try
             }
             Map<String, Integer> vcGoalSymbolCount = vcc.getGoalSymbols();
@@ -304,9 +330,13 @@ public class CongruenceClassProver {
                     pQ.m_pQueue.poll();
             int maxToAdd = pQ.m_pQueue.size() * 3 / 4 + 1;
             int numAdded = 0;
-            while (curP != null && vcc.isProved().equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
+            while (curP != null
+                    && vcc
+                            .isProved()
+                            .equals(
+                                    VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                     && System.currentTimeMillis() <= endTime) {
-                if (!applied.contains(curP.m_theorem.toString()) ) {
+                if (!applied.contains(curP.m_theorem.toString())) {
                     vcc.getConjunct().addExpression(curP.m_theorem, endTime);
                     thString += curP.toString();
                     applied.add(curP.m_theorem.toString());
@@ -320,9 +350,11 @@ public class CongruenceClassProver {
         }
         theseResults += (thString);
 
-        VerificationConditionCongruenceClosureImpl.STATUS proved = vcc.isProved();
+        VerificationConditionCongruenceClosureImpl.STATUS proved =
+                vcc.isProved();
 
-        if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
+        if (proved
+                .equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
             theseResults +=
                     (i + " iterations. PROVED: VC " + vcc.m_name + "\n") + div;
             m_results += theseResults;
@@ -330,21 +362,26 @@ public class CongruenceClassProver {
         }
 
         String whyNotProved = "";
-        if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION))
+        if (proved
+                .equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION))
             whyNotProved = "Assumptions evaluate to false";
-        else if (proved.equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING))
+        else if (proved
+                .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING))
             whyNotProved = "Out of time or theorems";
-        else whyNotProved = "Goal evaluates to false."; // not implemented
+        else
+            whyNotProved = "Goal evaluates to false."; // not implemented
         if (SHOWRESULTSIFNOTPROVED) {
             theseResults +=
-                    ("\n" + i + " iterations. NOT PROVED: " + whyNotProved + " " + vcc + "\n")
+                    ("\n" + i + " iterations. NOT PROVED: " + whyNotProved
+                            + " " + vcc + "\n")
                             + div;
             m_results += theseResults;
-        } else {
+        }
+        else {
             m_results +=
                     div
-                            + (i + " iterations. NOT PROVED: " + whyNotProved + " " + vcc.m_name + "\n")
-                            + div;
+                            + (i + " iterations. NOT PROVED: " + whyNotProved
+                                    + " " + vcc.m_name + "\n") + div;
         }
         return proved;
 
@@ -374,20 +411,24 @@ public class CongruenceClassProver {
         w.close();
     }
 
-   // Wherever PLambda is used replace it with "lambda_x" and append  "lambda_x(y:z) = body"
-    protected VC removeLambdas(TypeGraph g, VC vc){
-        if(!(vc.getAntecedent().getFunctionApplications().contains("lambda") || vc.getConsequent().getFunctionApplications().contains("lambda"))) return vc;
+    // Wherever PLambda is used replace it with "lambda_x" and append  "lambda_x(y:z) = body"
+    protected VC removeLambdas(TypeGraph g, VC vc) {
+        if (!(vc.getAntecedent().getFunctionApplications().contains("lambda") || vc
+                .getConsequent().getFunctionApplications().contains("lambda")))
+            return vc;
         List<PExp> antList = vc.getAntecedent().getMutableCopy();
         List<PExp> consqList = vc.getConsequent().getMutableCopy();
 
-        return new VC(vc.getName(),new edu.clemson.cs.r2jt.proving2.Antecedent(antList),new Consequent(consqList));
+        return new VC(vc.getName(),
+                new edu.clemson.cs.r2jt.proving2.Antecedent(antList),
+                new Consequent(consqList));
     }
 
     // this replaces PLambda with func name and returns PExp to append
-    protected PExp replacePLambdasWithPSymbols(PExp p){
-       // base case
-        if(p.getClass().getSimpleName().equals("PLambda")){
-            PLambda pl = (PLambda)p;
+    protected PExp replacePLambdasWithPSymbols(PExp p) {
+        // base case
+        if (p.getClass().getSimpleName().equals("PLambda")) {
+            PLambda pl = (PLambda) p;
             return PLambda.toPSymbol(pl);
         }
 
@@ -395,16 +436,17 @@ public class CongruenceClassProver {
         boolean hasPLambda = false;
         PLambda lam = null;
         int i = 0;
-        while(pit.hasNext()){
+        while (pit.hasNext()) {
             PExp cur = pit.next();
-            if(cur.getClass().getSimpleName().equals("PLambda")){
+            if (cur.getClass().getSimpleName().equals("PLambda")) {
                 hasPLambda = true;
-                lam = (PLambda)cur;
+                lam = (PLambda) cur;
             }
             ++i;
         }
-        return p.withSubExpressionReplaced(i,PLambda.toPSymbol(lam));
+        return p.withSubExpressionReplaced(i, PLambda.toPSymbol(lam));
     }
+
     public void addProverListener(ProverListener l) {
         myProverListeners.add(l);
     }

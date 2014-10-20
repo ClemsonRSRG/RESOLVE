@@ -48,9 +48,9 @@ public class SearchBox {
     public int m_lastGoodMatchIndex;
 
     public SearchBox(NormalizedAtomicExpressionMapImpl query,
-                     Registry queryReg,
-                     ConjunctionOfNormalizedAtomicExpressions dataSet, Registry dataReg,
-                     HashMap<String, String> bindings, int indexInList) {
+            Registry queryReg,
+            ConjunctionOfNormalizedAtomicExpressions dataSet, Registry dataReg,
+            HashMap<String, String> bindings, int indexInList) {
         m_original = query; // this is the search expr directly from the theorem
         m_origRegistry = queryReg;
         m_dataSet = dataSet;
@@ -77,8 +77,8 @@ public class SearchBox {
         m_dataSet.findNAE(this);
     }
 
-    public List<String> NAEtoList(
-            NormalizedAtomicExpressionMapImpl atom, Registry atomReg) {
+    public List<String> NAEtoList(NormalizedAtomicExpressionMapImpl atom,
+            Registry atomReg) {
         ArrayList<String> atomAsStrArray = new ArrayList<String>();
         int op = atom.readPosition(0);
         int i = 1;
@@ -142,10 +142,12 @@ public class SearchBox {
                     tempMap.put(origOp, boundOp);
                     continue;
 
-                } else {
+                }
+                else {
                     origValForComp = tempMap.get(origOp);
                 }
-            } else {
+            }
+            else {
                 origValForComp = m_origAsStrArray.get(i);
             }
             if (!origValForComp.equals(boundOp)) { // not a wildcard, if not the same, ret false

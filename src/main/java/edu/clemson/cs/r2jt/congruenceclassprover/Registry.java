@@ -42,7 +42,7 @@ public class Registry {
 
     private final Map<String, Usage> m_symbolToUsage;
     private final Set<String> m_foralls;
-    protected Map<String,MTType> m_typeDictionary;
+    protected Map<String, MTType> m_typeDictionary;
 
     public Registry(TypeGraph g) {
         m_symbolToIndex = new TreeMap<String, Integer>();
@@ -135,15 +135,18 @@ public class Registry {
 
     public int makeSymbol(MTType symbolType, boolean isVariable) {
         String symbolName = "";
-        if(isVariable) symbolName = String.format(m_cvFormat, m_uniqueCounter++);
-        else symbolName = String.format(m_ccFormat, m_uniqueCounter++);
+        if (isVariable)
+            symbolName = String.format(m_cvFormat, m_uniqueCounter++);
+        else
+            symbolName = String.format(m_ccFormat, m_uniqueCounter++);
         return addSymbol(symbolName, symbolType, Usage.CREATED);
     }
 
     // if symbol is new, it adds it, otherwise, it returns current int rep
     public int addSymbol(String symbolName, MTType symbolType, Usage usage) {
         // temporary until type system is fixed
-        if(symbolName.equals("Integer")) symbolName = "Z";
+        if (symbolName.equals("Integer"))
+            symbolName = "Z";
         if (isSymbolInTable(symbolName)) {
             return getIndexForSymbol(symbolName);
         }
@@ -155,9 +158,10 @@ public class Registry {
             TreeSet<String> t = new TreeSet<String>();
             t.add(symbolName);
             assert symbolType != null : symbolName + " has null type";
-            if(symbolType!=null) {
+            if (symbolType != null) {
                 m_typeToSetOfOperators.put(symbolType, t);
-                m_typeDictionary.put(symbolType.toString().replace("'",""), symbolType);
+                m_typeDictionary.put(symbolType.toString().replace("'", ""),
+                        symbolType);
             }
         }
 

@@ -36,8 +36,13 @@ public class VerificationConditionCongruenceClosureImpl {
     private final Consequent m_consequent;
     private final ConjunctionOfNormalizedAtomicExpressions m_conjunction;
     private final List<List<String>> m_goal; // every item in each sublist is equivalent iff proved.  Disjunctions in consequent are split into seperate vc's before we see them here.
-    public static enum STATUS {FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE}
+
+    public static enum STATUS {
+        FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE
+    }
+
     public List<PExp> forAllQuantifiedPExps; // trap constraints, can create Theorems externally from this
+
     // currently support only unchained equalities, so each sublist is size 2.
     public VerificationConditionCongruenceClosureImpl(TypeGraph g, VC vc) {
         m_name = vc.getName();
@@ -78,7 +83,8 @@ public class VerificationConditionCongruenceClosureImpl {
     }
 
     public STATUS isProved() {
-        if(m_conjunction.m_evaluates_to_false) return STATUS.FALSE_ASSUMPTION;
+        if (m_conjunction.m_evaluates_to_false)
+            return STATUS.FALSE_ASSUMPTION;
         for (List<String> g : m_goal) {
             // check each goal has same root
             if (!g.get(0).equals(g.get(1))) // diff symbols, same root?
@@ -86,8 +92,12 @@ public class VerificationConditionCongruenceClosureImpl {
                 if (m_registry.getIndexForSymbol(g.get(0)) != m_registry
                         .getIndexForSymbol(g.get(1))) // can avoid this check by updating goal on merges
                 {
-                    String g0 = m_registry.getSymbolForIndex(m_registry.getIndexForSymbol(g.get(0)));
-                    String g1 = m_registry.getSymbolForIndex(m_registry.getIndexForSymbol(g.get(1)));
+                    String g0 =
+                            m_registry.getSymbolForIndex(m_registry
+                                    .getIndexForSymbol(g.get(0)));
+                    String g1 =
+                            m_registry.getSymbolForIndex(m_registry
+                                    .getIndexForSymbol(g.get(1)));
 
                     //if((g0.equals("true") && g1.equals("false")) || (g0.equals("false") && g1.equals("true"))) return STATUS.UNPROVABLE;
                     return STATUS.STILL_EVALUATING; // not proved yet
@@ -100,7 +110,8 @@ public class VerificationConditionCongruenceClosureImpl {
     private void addPExp(Iterator<PExp> pit, boolean inAntecedent) {
         while (pit.hasNext()) {
             PExp curr = pit.next();
-            if(!curr.getQuantifiedVariables().isEmpty() && !curr.getSymbolNames().contains("lambda")){
+            if (!curr.getQuantifiedVariables().isEmpty()
+                    && !curr.getSymbolNames().contains("lambda")) {
                 forAllQuantifiedPExps.add(curr);
             }
             else if (curr.isEquality()) { // f(x,y) = z and g(a,b) = c ; then z is replaced by c

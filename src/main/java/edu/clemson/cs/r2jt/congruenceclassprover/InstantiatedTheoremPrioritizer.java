@@ -72,7 +72,7 @@ public class InstantiatedTheoremPrioritizer {
         private HashSet<String> getSetOfSymbolsInPExp(PExp p) {
 
             HashSet<String> rSet = new HashSet<String>();
-            if(p.getClass().getSimpleName().equals("PLambda")){
+            if (p.getClass().getSimpleName().equals("PLambda")) {
                 return rSet;
             }
             if (!p.isLiteral()) {

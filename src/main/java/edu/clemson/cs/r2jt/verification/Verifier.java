@@ -846,7 +846,7 @@ public class Verifier extends ResolveConceptualVisitor {
 
         // temporary fix.  numbers in code have null types at the moment.
         String repStr = replacement.toString();
-        if(repStr.matches("-?\\d+?") && replacement.getMathType()==null){
+        if (repStr.matches("-?\\d+?") && replacement.getMathType() == null) {
             replacement.setMathType(Z);
         }
         conf = Exp.replace(conf, var, replacement);

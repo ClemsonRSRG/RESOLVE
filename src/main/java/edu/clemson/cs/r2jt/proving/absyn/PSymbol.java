@@ -458,9 +458,9 @@ public class PSymbol extends PExp {
             }
             else {
                 // changed this to handle case where func name changes but args don't -- mike
-                retval = new PSymbol(myType, myTypeValue, newLeft, newRight,
-                        arguments, newQuantification,
-                        displayType);
+                retval =
+                        new PSymbol(myType, myTypeValue, newLeft, newRight,
+                                arguments, newQuantification, displayType);
             }
         }
 
@@ -727,6 +727,7 @@ public class PSymbol extends PExp {
         //      are indistinguishable except for their names.  Until this
         //      situation is resolved, literals should be hard coded here.
         return (name.equalsIgnoreCase("empty_string"))
-                || (name.equals("0") || name.equals("1") || name.equals("true") || name.equals("false"));
+                || (name.equals("0") || name.equals("1") || name.equals("true") || name
+                        .equals("false"));
     }
 }

@@ -153,7 +153,7 @@ public class PLambda extends PExp {
 
             // make new parameters if substitutions contains type variables
 
-            retval = new PLambda(parameters,myBody.substitute(substitutions));
+            retval = new PLambda(parameters, myBody.substitute(substitutions));
         }
 
         return retval;
@@ -212,7 +212,8 @@ public class PLambda extends PExp {
     public boolean isVariable() {
         return false;
     }
-    public static PSymbol toPSymbol(PLambda lamb){
+
+    public static PSymbol toPSymbol(PLambda lamb) {
 
         // Make new function symbol
         String fname = "_lambda" + f_num++;
@@ -220,24 +221,38 @@ public class PLambda extends PExp {
         ArrayList<PSymbol> paramsAL = new ArrayList<PSymbol>();
         Iterator<PLambda.Parameter> pit = lamb.parameters.iterator();
         PExp[] emptyArr = new PExp[0];
-        ArrayBackedImmutableList<PExp> emptyList = new ArrayBackedImmutableList<PExp>(emptyArr);
-        while(pit.hasNext()){
+        ArrayBackedImmutableList<PExp> emptyList =
+                new ArrayBackedImmutableList<PExp>(emptyArr);
+        while (pit.hasNext()) {
             PLambda.Parameter p = pit.next();
-            paramsAL.add(new PSymbol(p.type,p.type, p.name, p.name, new ArrayBackedImmutableList<PExp>(emptyList), PSymbol.Quantification.FOR_ALL, PSymbol.DisplayType.PREFIX));
+            paramsAL
+                    .add(new PSymbol(p.type, p.type, p.name, p.name,
+                            new ArrayBackedImmutableList<PExp>(emptyList),
+                            PSymbol.Quantification.FOR_ALL,
+                            PSymbol.DisplayType.PREFIX));
         }
-        ImmutableList<PExp> argList = new ArrayBackedImmutableList<PExp>(paramsAL.toArray(new PExp[paramsAL.size()]));
-        PSymbol func = new PSymbol(lamb.getType(),lamb.getTypeValue(),fname,fname,argList, PSymbol.Quantification.FOR_ALL, PSymbol.DisplayType.PREFIX);
+        ImmutableList<PExp> argList =
+                new ArrayBackedImmutableList<PExp>(paramsAL
+                        .toArray(new PExp[paramsAL.size()]));
+        PSymbol func =
+                new PSymbol(lamb.getType(), lamb.getTypeValue(), fname, fname,
+                        argList, PSymbol.Quantification.FOR_ALL,
+                        PSymbol.DisplayType.PREFIX);
         // Enter new expression, replacing parameter name with the fresh one
         PExp body = lamb.getSubExpressions().get(0);
         PExp[] argsForEq = new PExp[2];
         argsForEq[0] = func;
         argsForEq[1] = body;
         // Equate formula with expression
-        PSymbol asPsymbol = new PSymbol(body.getType().getTypeGraph().BOOLEAN, body.getType().getTypeGraph().BOOLEAN,
-                "=", "=" , new ArrayBackedImmutableList<PExp>(argsForEq), PSymbol.Quantification.NONE, PSymbol.DisplayType.INFIX);
+        PSymbol asPsymbol =
+                new PSymbol(body.getType().getTypeGraph().BOOLEAN, body
+                        .getType().getTypeGraph().BOOLEAN, "=", "=",
+                        new ArrayBackedImmutableList<PExp>(argsForEq),
+                        PSymbol.Quantification.NONE, PSymbol.DisplayType.INFIX);
 
         return asPsymbol;
     }
+
     private class PLambdaBodyIterator implements PExpSubexpressionIterator {
 
         private boolean myReturnedBodyFlag = false;
