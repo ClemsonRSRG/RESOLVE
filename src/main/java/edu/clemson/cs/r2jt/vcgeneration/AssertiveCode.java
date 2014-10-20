@@ -216,12 +216,6 @@ public class AssertiveCode {
 
             // All possible types of verification statements
             switch (current.getType()) {
-            // Assume Verification Statements
-            case VerificationStatement.ASSUME:
-                retStr =
-                        retStr.concat("Assume "
-                                + ((Exp) current.getAssertion()).toString(0));
-                break;
             // Change Verification Statements
             case VerificationStatement.CHANGE:
                 retStr = retStr.concat("      Change ");
@@ -239,12 +233,6 @@ public class AssertiveCode {
                 retStr =
                         retStr.concat(((Statement) current.getAssertion())
                                 .toString(6));
-                break;
-            // Confirm Verification Statements
-            case VerificationStatement.CONFIRM:
-                retStr =
-                        retStr.concat("Confirm "
-                                + ((Exp) current.getAssertion()).toString(0));
                 break;
             // Remember Verification Statements
             case VerificationStatement.REMEMBER:
