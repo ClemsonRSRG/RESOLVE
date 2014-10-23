@@ -27,11 +27,11 @@ import java.util.Map;
  */
 public class RepresentationTypeEntry extends SymbolTableEntry {
 
-    private final ProgramTypeDefinitionEntry myDefinition;
-    private final PTType myRepresentation;
-    private final Exp myConvention;
-    private final Exp myCorrespondence;
-    private final TypeGraph myTypeGraph;
+    protected final ProgramTypeDefinitionEntry myDefinition;
+    protected final PTType myRepresentation;
+    protected final Exp myConvention;
+    protected final Exp myCorrespondence;
+    protected final TypeGraph myTypeGraph;
 
     public RepresentationTypeEntry(TypeGraph g, String name,
             ResolveConceptualElement definingElement,
@@ -53,6 +53,10 @@ public class RepresentationTypeEntry extends SymbolTableEntry {
         myConvention = convention;
         myCorrespondence = correspondence;
         myTypeGraph = g;
+    }
+
+    public PTType getRepresentationType() {
+        return myRepresentation;
     }
 
     @Override

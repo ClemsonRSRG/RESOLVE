@@ -42,11 +42,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry.Quantification;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTElement;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRecord;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTVoid;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.*;
 import edu.clemson.cs.r2jt.typeandpopulate.query.MathFunctionNamedQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.MathSymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameAndEntryTypeQuery;
@@ -829,6 +825,26 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         dec.setMathType(dec.getTy().getMathTypeValue());
+    }
+
+    @Override
+    public void preFacilityTypeDec(FacilityTypeDec e) {
+        myBuilder.startScope(e);
+    }
+
+    @Override
+    public void postFacilityTypeDec(FacilityTypeDec e) {
+        myBuilder.endScope();
+
+        try {
+            myBuilder.getInnermostActiveScope().addFacilityRepresentationEntry(
+                    e.getName().getName(), e,
+                    e.getRepresentation().getProgramTypeValue(),
+                    e.getConvention());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(e.getName());
+        }
     }
 
     @Override
@@ -1774,6 +1790,11 @@ public class Populator extends TreeWalkerVisitor {
                     pt = ste.toOperationEntry(i.getLocation()).getReturnType();
 
                 }
+                else if (rce instanceof FacilityTypeDec) {
+                    pt =
+                            ste.toFacilityTypeRepresentationEntry(
+                                    i.getLocation()).getRepresentationType();
+                }
                 else {
                     pt =
                             ste.toProgramVariableEntry(i.getLocation())
@@ -1832,6 +1853,10 @@ public class Populator extends TreeWalkerVisitor {
                 eType = ((PTRepresentation) eType).getBaseType();
             }
 
+            if (eType instanceof PTFacilityRepresentation) {
+                eType = ((PTFacilityRepresentation) eType).getBaseType();
+            }
+
             PTRecord recordType = (PTRecord) eType;
 
             String fieldName =
@@ -1839,6 +1864,14 @@ public class Populator extends TreeWalkerVisitor {
                             .getName();
 
             PTType fieldType = recordType.getFieldType(fieldName);
+
+            if (fieldType == null) {
+                throw new RuntimeException("Could not retrieve type of "
+                        + " field '" + fieldName
+                        + "'. Either it doesn't exist "
+                        + "in the record or it's missing a type.");
+            }
+
             e.getSegments().get(1).setProgramType(fieldType);
             e.setProgramType(fieldType);
 

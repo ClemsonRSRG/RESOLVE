@@ -103,6 +103,13 @@ public abstract class SymbolTableEntry {
         return myDefiningElement;
     }
 
+    public FacilityTypeRepresentationEntry toFacilityTypeRepresentationEntry(
+            Location l) {
+        throw new SourceErrorException("Expecting a facility type "
+                + "representation.  Found " + getEntryTypeDescription() + ".",
+                l);
+    }
+
     public RepresentationTypeEntry toRepresentationTypeEntry(Location l) {
         throw new SourceErrorException("Expecting a program type "
                 + "representation.  Found " + getEntryTypeDescription() + ".",

@@ -489,6 +489,11 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                     myGroup.getInstanceOf("rtype_init").add("typeName",
                             getTypeName(type));
         }
+        else if (type instanceof PTFacilityRepresentation) {
+            init =
+                    myGroup.getInstanceOf("facility_type_var_init").add("name",
+                            getTypeName(type));
+        }
         else if (getDefiningFacilityEntry(type) != null) {
             init =
                     myGroup.getInstanceOf("var_init").add("type",
@@ -587,6 +592,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         }
         else if (type instanceof PTRepresentation) {
             result = ((PTRepresentation) type).getFamily().getName();
+        }
+        else if (type instanceof PTFacilityRepresentation) {
+            result = ((PTFacilityRepresentation) type).getName();
         }
         else if (type instanceof PTFamily) {
             result = ((PTFamily) type).getName();

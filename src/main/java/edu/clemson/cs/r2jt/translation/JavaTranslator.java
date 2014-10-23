@@ -195,6 +195,22 @@ public class JavaTranslator extends AbstractTranslator {
         myActiveTemplates.firstElement().add("includes", imp);
     }
 
+    @Override
+    public void preFacilityTypeDec(FacilityTypeDec e) {
+        ST record =
+                myGroup.getInstanceOf("record_class").add("name",
+                        e.getName().getName()).add("facility", true);
+
+        myActiveTemplates.push(record);
+    }
+
+    @Override
+    public void postFacilityTypeDec(FacilityTypeDec e) {
+        ST result = myActiveTemplates.pop();
+
+        myActiveTemplates.peek().add("records", result);
+    }
+
     /**
      * <p>This is where we give the enhancement body all the functionality
      * defined in the base concept. This is done via a set of functions
@@ -485,6 +501,10 @@ public class JavaTranslator extends AbstractTranslator {
         }
         else if (type instanceof PTGeneric) {
             myActiveTemplates.peek().add("arguments", node.getName());
+        }
+        else if (type instanceof PTFacilityRepresentation) {
+            myActiveTemplates.peek().add("arguments",
+                    "new " + getTypeName(type) + "()");
         }
         else if (node.getEvalExp() == null) {
 
@@ -787,6 +807,11 @@ public class JavaTranslator extends AbstractTranslator {
 
             result.add("concept", ((ConceptBodyModuleDec) currentModule)
                     .getConceptName().getName());
+        }
+        else if (type instanceof PTFacilityRepresentation) {
+            result =
+                    myGroup.getInstanceOf("unqualified_type").add("name",
+                            getTypeName(type));
         }
         else { // PTFamily, etc.
             result =
