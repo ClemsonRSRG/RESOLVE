@@ -1202,6 +1202,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     if (ensures != null
                             && !ensures.equals(myTypeGraph.getTrueVarExp())) {
                         ensures = myTypeGraph.formConjunct(ensures, equalsExp);
+                        ensures.setLocation((Location) opLocation.clone());
                     }
                     // Make new expression the ensures clause
                     else {
@@ -1272,6 +1273,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     if (ensures != null
                             && !ensures.equals(myTypeGraph.getTrueVarExp())) {
                         ensures = myTypeGraph.formConjunct(ensures, init);
+                        ensures.setLocation((Location) opLocation.clone());
                     }
                     // Make initialization expression the ensures clause
                     else {
@@ -1422,6 +1424,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     if (requires != null
                             && !requires.equals(myTypeGraph.getTrueVarExp())) {
                         requires = myTypeGraph.formConjunct(requires, init);
+                        requires.setLocation((Location) opLocation.clone());
                     }
                     // Make initialization expression the requires clause
                     else {
@@ -1472,6 +1475,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             requires =
                                     myTypeGraph.formConjunct(requires,
                                             constraint);
+                            requires.setLocation((Location) opLocation.clone());
                         }
                         // Make constraint expression the requires clause
                         else {
@@ -3087,7 +3091,13 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Modify the confirm details
         Exp ifConfirm = myCurrentAssertiveCode.getFinalConfirm();
-        Location ifLocation = (Location) ifConfirm.getLocation().clone();
+        Location ifLocation;
+        if (ifConfirm.getLocation() != null) {
+            ifLocation = (Location) ifConfirm.getLocation().clone();
+        }
+        else {
+            ifLocation = (Location) stmt.getLocation().clone();
+        }
         String ifDetail = "Condition at " + ifLocation.toString() + " is true";
         ifLocation.setDetails(ifDetail);
         ifConfirm.setLocation(ifLocation);
