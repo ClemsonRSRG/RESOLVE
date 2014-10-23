@@ -12,37 +12,19 @@
  */
 package edu.clemson.cs.r2jt.typeandpopulate;
 
+import edu.clemson.cs.r2jt.absyn.*;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFacilityRepresentation;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramVariableEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProcedureEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
-import java.util.LinkedList;
-import java.util.List;
-
-import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.absyn.FacilityDec;
-import edu.clemson.cs.r2jt.absyn.FinalItem;
-import edu.clemson.cs.r2jt.absyn.InitItem;
-import edu.clemson.cs.r2jt.absyn.MathAssertionDec;
-import edu.clemson.cs.r2jt.absyn.RepresentationDec;
-import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
-import edu.clemson.cs.r2jt.absyn.TypeDec;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationProfileEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.RepresentationTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTRepresentation;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * <p>A <code>ScopeBuilder</code> is a working, mutable realization of 
@@ -167,6 +149,24 @@ public class ScopeBuilder extends SyntacticScope {
         return entry;
     }
 
+    public FacilityTypeRepresentationEntry addFacilityRepresentationEntry(
+            String name, FacilityTypeDec definingElement,
+            PTType representationType, Exp convention)
+            throws DuplicateSymbolException {
+
+        sanityCheckBindArguments(name, definingElement, "");
+
+        FacilityTypeRepresentationEntry result =
+                new FacilityTypeRepresentationEntry(myTypeGraph, name,
+                        definingElement, myRootModule,
+                        new PTFacilityRepresentation(myTypeGraph,
+                                representationType, name), convention);
+
+        myBindings.put(name, result);
+
+        return result;
+    }
+
     public RepresentationTypeEntry addRepresentationTypeEntry(String name,
             RepresentationDec definingElement,
             ProgramTypeDefinitionEntry definition, PTType representationType,
@@ -256,10 +256,6 @@ public class ScopeBuilder extends SyntacticScope {
      * @param definingElement The AST Node that introduced the symbol.
      * @param type The declared type of the symbol.
      * @param typeValue The type assigned to the symbol (can be null).
-     * @param schematictypes A map from the names of any implicit type 
-     *             parameters to their bounding types.  May be 
-     *             <code>null</code>, which will be interpreted as the empty
-     *             map.
      * 
      * @throws DuplicateSymbolException If such a symbol is already defined 
      *             directly in the scope represented by this 
