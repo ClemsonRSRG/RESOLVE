@@ -2401,7 +2401,14 @@ public class VCGenerator extends TreeWalkerVisitor {
         boolean simplify;
         if (opDec.getRequires() != null) {
             requires = Exp.copy(opDec.getRequires());
-            simplify = false;
+
+            // Simplify if we just have true
+            if (requires.isLiteralTrue()) {
+                simplify = true;
+            }
+            else {
+                simplify = false;
+            }
         }
         else {
             requires = myTypeGraph.getTrueVarExp();
@@ -2864,7 +2871,14 @@ public class VCGenerator extends TreeWalkerVisitor {
             boolean simplify;
             if (opDec.getRequires() != null) {
                 requires = Exp.copy(opDec.getRequires());
-                simplify = false;
+
+                // Simplify if we just have true
+                if (requires.isLiteralTrue()) {
+                    simplify = true;
+                }
+                else {
+                    simplify = false;
+                }
             }
             else {
                 requires = myTypeGraph.getTrueVarExp();
@@ -3020,7 +3034,14 @@ public class VCGenerator extends TreeWalkerVisitor {
         boolean simplify;
         if (opDec.getRequires() != null) {
             requires = Exp.copy(opDec.getRequires());
-            simplify = false;
+
+            // Simplify if we just have true
+            if (requires.isLiteralTrue()) {
+                simplify = true;
+            }
+            else {
+                simplify = false;
+            }
         }
         else {
             requires = myTypeGraph.getTrueVarExp();
