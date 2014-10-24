@@ -16,6 +16,7 @@ package edu.clemson.cs.r2jt.vcgeneration;
  * Libraries
  */
 import edu.clemson.cs.r2jt.absyn.*;
+import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 
@@ -33,7 +34,7 @@ public class AssertiveCode {
     /**
      * <p>Our current final confirm statement.</p>
      */
-    private Exp myConfirm;
+    private ConfirmStmt myConfirm;
 
     /**
      * <p>The list of free variables.</p>
@@ -51,13 +52,15 @@ public class AssertiveCode {
     // ===========================================================
 
     public AssertiveCode(CompileEnvironment env) {
-        myConfirm = Exp.getTrueVarExp(env.getTypeGraph());
+        myConfirm =
+                new ConfirmStmt(null, Exp.getTrueVarExp(env.getTypeGraph()),
+                        true);
         myFreeVars = new ArrayList<Exp>();
         myVerificationStmtList = new ArrayList<VerificationStatement>();
     }
 
     public AssertiveCode(AssertiveCode old) {
-        myConfirm = old.getFinalConfirm();
+        myConfirm = old.myConfirm.clone();
         myFreeVars = new ArrayList<Exp>();
         for (Exp exp : old.myFreeVars) {
             myFreeVars.add(Exp.copy(exp));
@@ -109,12 +112,14 @@ public class AssertiveCode {
      * <p>Add the <code>Exp</code> containing a new confirm
      * clause.</p>
      *
+     * @param l The location for this confirm clause.
      * @param e The corresponding confirm <code>Exp</code>.
+     * @param b Boolean to determine if we simplify this confirm clause
+     *          or not.
      */
-    public void addConfirm(Exp e) {
+    public void addConfirm(Location l, Exp e, boolean b) {
         // Creates a new ConfirmStmt
-        ConfirmStmt confirm = new ConfirmStmt();
-        confirm.setAssertion(e);
+        ConfirmStmt confirm = new ConfirmStmt(l, e, b);
 
         // Adds the confirm to our list of verification statements
         addCode(confirm);
@@ -262,10 +267,10 @@ public class AssertiveCode {
      * <p>Returns a deep copy of the final confirm
      * statement.</p>
      *
-     * @return <code>Exp</code> confirm clause.
+     * @return <code>ConfirmStmt</code> confirm clause.
      */
-    public Exp getFinalConfirm() {
-        return Exp.copy(myConfirm);
+    public ConfirmStmt getFinalConfirm() {
+        return myConfirm.clone();
     }
 
     /**
@@ -328,11 +333,13 @@ public class AssertiveCode {
      * <p>Set the final confirm clause</p>
      *
      * @param confirm <code>Exp</code> containing the final confirm clause.
+     * @param simplify True if we can simplify the confirm, false otherwise.
      */
-    public void setFinalConfirm(Exp confirm) {
+    public void setFinalConfirm(Exp confirm, boolean simplify) {
         // By default it is already TrueVarExp
         if (confirm != null) {
-            myConfirm = confirm;
+            myConfirm =
+                    new ConfirmStmt(confirm.getLocation(), confirm, simplify);
         }
     }
 }

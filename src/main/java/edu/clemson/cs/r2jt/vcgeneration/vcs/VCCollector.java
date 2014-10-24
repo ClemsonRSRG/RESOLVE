@@ -88,7 +88,7 @@ public class VCCollector implements Iterable<VerificationCondition> {
     private void addVCsInContext(final AssertiveCode batch,
             final int sectionNumber) {
 
-        List<InfixExp> vCs = batch.getFinalConfirm().split();
+        List<InfixExp> vCs = batch.getFinalConfirm().getAssertion().split();
 
         int vcIndex = 1;
 

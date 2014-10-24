@@ -26,6 +26,9 @@ public class ConfirmStmt extends Statement {
     /** The left member. */
     private Exp assertion;
 
+    /** The simplify flag */
+    private boolean simplify;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -33,8 +36,13 @@ public class ConfirmStmt extends Statement {
     public ConfirmStmt() {};
 
     public ConfirmStmt(Location location, Exp assertion) {
+        this(location, assertion, false);
+    }
+
+    public ConfirmStmt(Location location, Exp assertion, boolean simplify) {
         this.location = location;
         this.assertion = assertion;
+        this.simplify = simplify;
     }
 
     // ===========================================================
@@ -55,6 +63,11 @@ public class ConfirmStmt extends Statement {
         return assertion;
     }
 
+    /** Returns whether we simplify the Expression or not */
+    public boolean getSimplify() {
+        return simplify;
+    }
+
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
@@ -67,6 +80,11 @@ public class ConfirmStmt extends Statement {
     /** Sets the right variable to the specified value. */
     public void setAssertion(Exp assertion) {
         this.assertion = assertion;
+    }
+
+    /** Sets whether we simplify the Expression or not */
+    public void setSimplify(boolean simplify) {
+        this.simplify = simplify;
     }
 
     // ===========================================================
@@ -111,6 +129,6 @@ public class ConfirmStmt extends Statement {
     }
 
     public ConfirmStmt clone() {
-        return new ConfirmStmt(location, (Exp) Exp.clone(assertion));
+        return new ConfirmStmt(location, (Exp) Exp.clone(assertion), simplify);
     }
 }
