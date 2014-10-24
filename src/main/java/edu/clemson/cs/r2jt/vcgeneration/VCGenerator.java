@@ -1136,8 +1136,12 @@ public class VCGenerator extends TreeWalkerVisitor {
             myVCBuffer.append("\n***********************");
             myVCBuffer.append("***********************\n");
 
-            // Add it to our list of final assertive codes
-            myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
+            // Add it to our list of final assertive codes if we don't have confirm true
+            // as our goal.
+            if (!myCurrentAssertiveCode.getFinalConfirm().getAssertion()
+                    .isLiteralTrue()) {
+                myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
+            }
 
             // Set the current assertive code to null
             myCurrentAssertiveCode = null;
@@ -1693,8 +1697,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Replace state variables in the ensures clause
         // and create new confirm statements if needed.
         for (int i = 0; i < stateVarList.size(); i++) {
-            newConfirm =
-                    myCurrentAssertiveCode.getFinalConfirm().getAssertion();
+            ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+            newConfirm = confirmStmt.getAssertion();
             AffectsItem stateVar = stateVarList.get(i);
 
             // Only deal with Alters/Reassigns/Replaces/Updates modes
@@ -1749,7 +1753,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
 
                     // Set newConfirm as our new final confirm statement
-                    myCurrentAssertiveCode.setFinalConfirm(newConfirm, false);
+                    myCurrentAssertiveCode.setFinalConfirm(newConfirm,
+                            confirmStmt.getSimplify());
                 }
                 // Error: Why isn't it a free variable.
                 else {
@@ -1763,8 +1768,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             ParameterVarDec varDec = paramList.get(i);
             ProgramExp pExp = argList.get(i);
             PosSymbol VDName = varDec.getName();
-            newConfirm =
-                    myCurrentAssertiveCode.getFinalConfirm().getAssertion();
+            ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+            newConfirm = confirmStmt.getAssertion();
 
             // VarExp form of the parameter variable
             VarExp oldExp = new VarExp(null, null, VDName);
@@ -1979,7 +1984,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                     // Update our final confirm with the parameter argument
                     newConfirm = replace(newConfirm, repl, quesVar);
-                    myCurrentAssertiveCode.setFinalConfirm(newConfirm, false);
+                    myCurrentAssertiveCode.setFinalConfirm(newConfirm,
+                            confirmStmt.getSimplify());
                 }
                 // All other modes
                 else {
@@ -2312,18 +2318,24 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         else {
             // Apply simplification
+            ConfirmStmt finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
+            boolean simplify = finalConfirm.getSimplify();
             Exp currentFinalConfirm =
-                    simplifyAssumeRule(stmt, myCurrentAssertiveCode
-                            .getFinalConfirm().getAssertion());
-            if (stmt.getAssertion() != null) {
+                    simplifyAssumeRule(stmt, finalConfirm.getAssertion());
+
+            // Only create an implies expression if the goal is not just "true".
+            // If the goal is "true", then simplify should be true as well.
+            if (stmt.getAssertion() != null && !simplify) {
                 // Create a new implies expression
                 currentFinalConfirm =
                         myTypeGraph.formImplies(stmt.getAssertion(),
                                 currentFinalConfirm);
+                simplify = false;
             }
 
             // Set this as our new final confirm
-            myCurrentAssertiveCode.setFinalConfirm(currentFinalConfirm, false);
+            myCurrentAssertiveCode.setFinalConfirm(currentFinalConfirm,
+                    simplify);
 
             // Verbose Mode Debug Messages
             myVCBuffer.append("\nAssume Rule Applied: \n");
@@ -2340,8 +2352,8 @@ public class VCGenerator extends TreeWalkerVisitor {
     private void applyChangeRule(VerificationStatement change) {
         List<VariableExp> changeList =
                 (List<VariableExp>) change.getAssertion();
-        Exp finalConfirm =
-                myCurrentAssertiveCode.getFinalConfirm().getAssertion();
+        ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+        Exp finalConfirm = confirmStmt.getAssertion();
 
         // Loop through each variable
         for (VariableExp v : changeList) {
@@ -2366,7 +2378,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Set the modified statement as our new final confirm
-        myCurrentAssertiveCode.setFinalConfirm(finalConfirm, false);
+        myCurrentAssertiveCode.setFinalConfirm(finalConfirm, confirmStmt
+                .getSimplify());
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nChange Rule Applied: \n");
@@ -2398,16 +2411,13 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Get the requires clause for this operation
         Exp requires;
-        boolean simplify;
+        boolean simplify = false;
         if (opDec.getRequires() != null) {
             requires = Exp.copy(opDec.getRequires());
 
             // Simplify if we just have true
             if (requires.isLiteralTrue()) {
                 simplify = true;
-            }
-            else {
-                simplify = false;
             }
         }
         else {
@@ -2438,7 +2448,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             loc.setDetails("Show Termination of Recursive Call");
             setLocation(exp, loc);
-            ConfirmStmt conf = new ConfirmStmt(loc, exp);
+            ConfirmStmt conf = new ConfirmStmt(loc, exp, false);
 
             // Add it to our list of assertions
             myCurrentAssertiveCode.addCode(conf);
@@ -2565,7 +2575,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     setLocation(assertion, loc);
                 }
 
-                myCurrentAssertiveCode.setFinalConfirm(assertion, false);
+                myCurrentAssertiveCode.setFinalConfirm(assertion, stmt
+                        .getSimplify());
 
                 // Verbose Mode Debug Messages
                 myVCBuffer.append("\nConfirm Rule Applied and Simplified: \n");
@@ -2627,7 +2638,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                     replaceFacilityDeclarationVariables(req, facConceptDec
                             .getParameters(), conceptParams);
             req.setLocation(loc);
-            assertiveCode.setFinalConfirm(req, false);
+
+            boolean simplify = false;
+            // Simplify if we just have true
+            if (req.isLiteralTrue()) {
+                simplify = true;
+            }
+            assertiveCode.setFinalConfirm(req, simplify);
 
             // Obtain the constraint of the concept type
             Exp assumeExp = null;
@@ -2808,12 +2825,13 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Replace all instances of the left hand side
             // variable in the current final confirm statement.
-            Exp newConf =
-                    myCurrentAssertiveCode.getFinalConfirm().getAssertion();
+            ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+            Exp newConf = confirmStmt.getAssertion();
             newConf = replace(newConf, leftVariable, replaceExp);
 
             // Set this as our new final confirm statement.
-            myCurrentAssertiveCode.setFinalConfirm(newConf, false);
+            myCurrentAssertiveCode.setFinalConfirm(newConf, confirmStmt
+                    .getSimplify());
         }
         else {
             // Check to see what kind of expression is on the right hand side
@@ -2860,7 +2878,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
                 loc.setDetails("Show Termination of Recursive Call");
                 setLocation(exp, loc);
-                ConfirmStmt conf = new ConfirmStmt(loc, exp);
+                ConfirmStmt conf = new ConfirmStmt(loc, exp, false);
 
                 // Add it to our list of assertions
                 myCurrentAssertiveCode.addCode(conf);
@@ -2868,16 +2886,13 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Get the requires clause for this operation
             Exp requires;
-            boolean simplify;
+            boolean simplify = false;
             if (opDec.getRequires() != null) {
                 requires = Exp.copy(opDec.getRequires());
 
                 // Simplify if we just have true
                 if (requires.isLiteralTrue()) {
                     simplify = true;
-                }
-                else {
-                    simplify = false;
                 }
             }
             else {
@@ -2957,14 +2972,14 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                             // Replace all instances of the left hand side
                             // variable in the current final confirm statement.
-                            Exp newConf =
-                                    myCurrentAssertiveCode.getFinalConfirm()
-                                            .getAssertion();
+                            ConfirmStmt confirmStmt =
+                                    myCurrentAssertiveCode.getFinalConfirm();
+                            Exp newConf = confirmStmt.getAssertion();
                             newConf = replace(newConf, leftVariable, ensures);
 
                             // Set this as our new final confirm statement.
                             myCurrentAssertiveCode.setFinalConfirm(newConf,
-                                    false);
+                                    confirmStmt.getSimplify());
                         }
                         else {
                             illegalOperationEnsures(opDec.getLocation());
@@ -3031,16 +3046,13 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Confirm the invoking condition
         // Get the requires clause for this operation
         Exp requires;
-        boolean simplify;
+        boolean simplify = false;
         if (opDec.getRequires() != null) {
             requires = Exp.copy(opDec.getRequires());
 
             // Simplify if we just have true
             if (requires.isLiteralTrue()) {
                 simplify = true;
-            }
-            else {
-                simplify = false;
             }
         }
         else {
@@ -3140,7 +3152,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         String ifDetail = "Condition at " + ifLocation.toString() + " is true";
         ifLocation.setDetails(ifDetail);
         ifConfirm.setLocation(ifLocation);
-        myCurrentAssertiveCode.setFinalConfirm(ifConfirm.getAssertion(), false);
+        myCurrentAssertiveCode.setFinalConfirm(ifConfirm.getAssertion(),
+                ifConfirm.getSimplify());
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nIf Part Rule Applied: \n");
@@ -3167,7 +3180,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 "Condition at " + negIfLocation.toString() + " is false";
         negIfLocation.setDetails(negIfDetail);
         negIfConfirm.setLocation(negIfLocation);
-        negIfAssertiveCode.setFinalConfirm(negIfConfirm.getAssertion(), false);
+        negIfAssertiveCode.setFinalConfirm(negIfConfirm.getAssertion(),
+                negIfConfirm.getSimplify());
 
         // Add this new assertive code to our incomplete assertive code stack
         myIncAssertiveCodeStack.push(negIfAssertiveCode);
@@ -3246,8 +3260,13 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add the list of statements
         myCurrentAssertiveCode.addStatements(statementList);
 
+        // Simplify if we just have true
+        boolean simplify = false;
+        if (ensures.isLiteralTrue()) {
+            simplify = true;
+        }
         // Add the final confirms clause
-        myCurrentAssertiveCode.setFinalConfirm(ensures, false);
+        myCurrentAssertiveCode.setFinalConfirm(ensures, simplify);
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nProcedure Declaration Rule Applied: \n");
@@ -3260,9 +3279,10 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private void applyRememberRule() {
         // Obtain the final confirm and apply the remember method for Exp
-        Exp conf = myCurrentAssertiveCode.getFinalConfirm().getAssertion();
+        ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+        Exp conf = confirmStmt.getAssertion();
         conf = conf.remember();
-        myCurrentAssertiveCode.setFinalConfirm(conf, false);
+        myCurrentAssertiveCode.setFinalConfirm(conf, confirmStmt.getSimplify());
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nRemember Rule Applied: \n");
@@ -3311,7 +3331,8 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private void applySwapStmtRule(SwapStmt stmt) {
         // Obtain the current final confirm clause
-        Exp conf = myCurrentAssertiveCode.getFinalConfirm().getAssertion();
+        ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+        Exp conf = confirmStmt.getAssertion();
 
         // Create a copy of the left and right hand side
         VariableExp stmtLeft = (VariableExp) Exp.copy(stmt.getLeft());
@@ -3355,7 +3376,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         conf = replace(conf, tmp, newLeft);
 
         // Set this new expression as the new final confirm
-        myCurrentAssertiveCode.setFinalConfirm(conf, false);
+        myCurrentAssertiveCode.setFinalConfirm(conf, confirmStmt.getSimplify());
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nSwap Rule Applied: \n");
@@ -3492,22 +3513,19 @@ public class VCGenerator extends TreeWalkerVisitor {
     private void applyWhileStmtRule(WhileStmt stmt) {
         // Obtain the loop invariant
         Exp invariant;
-        boolean simplify;
+        boolean simplifyInvariant = false;
         if (stmt.getMaintaining() != null) {
             invariant = Exp.copy(stmt.getMaintaining());
             invariant.setMathType(stmt.getMaintaining().getMathType());
 
             // Simplify if we just have true
             if (invariant.isLiteralTrue()) {
-                simplify = true;
-            }
-            else {
-                simplify = false;
+                simplifyInvariant = true;
             }
         }
         else {
             invariant = myTypeGraph.getTrueVarExp();
-            simplify = true;
+            simplifyInvariant = true;
         }
 
         // Confirm the base case of invariant
@@ -3522,7 +3540,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         baseLoc.setDetails("Base Case of the Invariant of While Statement");
         setLocation(baseCase, baseLoc);
         myCurrentAssertiveCode.addConfirm((Location) baseLoc.clone(), baseCase,
-                simplify);
+                simplifyInvariant);
 
         // Add the change rule
         if (stmt.getChanging() != null) {
@@ -3534,6 +3552,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         Exp assume;
         Exp finalConfirm =
                 myCurrentAssertiveCode.getFinalConfirm().getAssertion();
+        boolean simplifyFinalConfirm =
+                myCurrentAssertiveCode.getFinalConfirm().getSimplify();
         Exp decreasingExp = stmt.getDecreasing();
         Exp nqv;
 
@@ -3571,7 +3591,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         inductiveLoc
                 .setDetails("Inductive Case of Invariant of While Statement");
         setLocation(inductiveCase, inductiveLoc);
-        ifStmtList.add(new ConfirmStmt(inductiveLoc, inductiveCase));
+        ifStmtList.add(new ConfirmStmt(inductiveLoc, inductiveCase,
+                simplifyInvariant));
 
         // Confirm the termination of the loop.
         if (decreasingExp != null) {
@@ -3585,7 +3606,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     new InfixExp(decreasingLoc, Exp.copy(decreasingExp),
                             createPosSymbol("<"), Exp.copy(nqv));
             infixExp.setMathType(BOOLEAN);
-            ifStmtList.add(new ConfirmStmt(decreasingLoc, infixExp));
+            ifStmtList.add(new ConfirmStmt(decreasingLoc, infixExp, false));
         }
 
         // empty elseif pair
@@ -3602,8 +3623,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         edu.clemson.cs.r2jt.collections.List<Statement> elseStmtList =
                 new edu.clemson.cs.r2jt.collections.List<Statement>();
-        elseStmtList
-                .add(new ConfirmStmt(elseConfirmLoc, Exp.copy(finalConfirm)));
+        elseStmtList.add(new ConfirmStmt(elseConfirmLoc,
+                Exp.copy(finalConfirm), simplifyFinalConfirm));
 
         // condition
         ProgramExp condition = (ProgramExp) Exp.copy(stmt.getTest());

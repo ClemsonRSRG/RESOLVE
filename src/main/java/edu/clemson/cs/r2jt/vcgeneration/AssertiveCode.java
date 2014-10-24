@@ -258,7 +258,7 @@ public class AssertiveCode {
             retStr = retStr.concat(";\n");
         }
 
-        retStr = retStr.concat("      Confirm " + myConfirm.toString(0) + ";");
+        retStr = retStr.concat(myConfirm.toString(6) + ";");
 
         return retStr;
     }
