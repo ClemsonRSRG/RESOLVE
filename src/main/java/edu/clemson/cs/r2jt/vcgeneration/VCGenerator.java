@@ -52,7 +52,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     private final TypeGraph myTypeGraph;
     private final MTType BOOLEAN;
     private final MTType MTYPE;
-    private final MTType Z;
     private ModuleScope myCurrentModuleScope;
 
     // Module level global variables
@@ -146,7 +145,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         myTypeGraph = mySymbolTable.getTypeGraph();
         BOOLEAN = myTypeGraph.BOOLEAN;
         MTYPE = myTypeGraph.MTYPE;
-        Z = myTypeGraph.Z;
 
         // Current items
         myCurrentModuleScope = null;
@@ -595,39 +593,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Append VC Generator step details to the expression's
-     * location.</p>
-     *
-     * @param exp The current expression we are dealing with.
-     * @param text VC Generator step details.
-     *
-     * @return The modified expression.
-     */
-    private Exp appendToLocation(Exp exp, String text) {
-        // Check if the expression is empty or not
-        // and it must have a valid location.
-        if (exp != null && exp.getLocation() != null) {
-            // Recursively apply to infix expressions.
-            if (exp instanceof InfixExp) {
-                appendToLocation(((InfixExp) exp).getLeft(), text);
-                appendToLocation(((InfixExp) exp).getRight(), text);
-            }
-            else {
-                Location loc = exp.getLocation();
-                if (loc.getDetails() == null) {
-                    loc.setDetails(text);
-                }
-                else {
-                    String details = loc.getDetails().concat(text);
-                    loc.setDetails(details);
-                }
-            }
-        }
-
-        return exp;
-    }
-
-    /**
      * <p>Converts the different types of <code>Exp</code> to the
      * ones used by the VC Generator.</p>
      *
@@ -636,14 +601,30 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @return An <code>Exp</code>.
      */
     private Exp convertExp(Exp oldExp) {
+        Exp retExp;
+
         // Case #1: ProgramIntegerExp
         if (oldExp instanceof ProgramIntegerExp) {
             IntegerExp exp = new IntegerExp();
             exp.setValue(((ProgramIntegerExp) oldExp).getValue());
-            exp.setMathType(Z);
-            return exp;
+            exp.setMathType(oldExp.getMathType());
+            retExp = exp;
         }
-        // Case #2: VariableDotExp
+        // Case #2: ProgramCharacterExp
+        else if (oldExp instanceof ProgramCharExp) {
+            CharExp exp = new CharExp();
+            exp.setValue(((ProgramCharExp) oldExp).getValue());
+            exp.setMathType(oldExp.getMathType());
+            retExp = exp;
+        }
+        // Case #3: ProgramStringExp
+        else if (oldExp instanceof ProgramStringExp) {
+            StringExp exp = new StringExp();
+            exp.setValue(((ProgramStringExp) oldExp).getValue());
+            exp.setMathType(oldExp.getMathType());
+            retExp = exp;
+        }
+        // Case #4: VariableDotExp
         else if (oldExp instanceof VariableDotExp) {
             DotExp exp = new DotExp();
             List<VariableExp> segments =
@@ -674,18 +655,22 @@ public class VCGenerator extends TreeWalkerVisitor {
             exp.setSegments(newSegments);
             exp.setMathType(lastMathType);
             exp.setMathTypeValue(lastMathTypeValue);
-            return exp;
+            retExp = exp;
         }
-        // Case #3: VariableNameExp
+        // Case #5: VariableNameExp
         else if (oldExp instanceof VariableNameExp) {
             VarExp exp = new VarExp();
             exp.setName(((VariableNameExp) oldExp).getName());
             exp.setMathType(oldExp.getMathType());
             exp.setMathTypeValue(oldExp.getMathTypeValue());
-            return exp;
+            retExp = exp;
+        }
+        // Else simply return oldExp
+        else {
+            retExp = oldExp;
         }
 
-        return oldExp;
+        return retExp;
     }
 
     /**
@@ -1146,13 +1131,17 @@ public class VCGenerator extends TreeWalkerVisitor {
             myVCBuffer.append(myIncAssertiveCodeStackInfo.pop());
 
             // Apply proof rules
-            applyEBRules();
+            applyRules();
 
             myVCBuffer.append("\n***********************");
             myVCBuffer.append("***********************\n");
 
-            // Add it to our list of final assertive codes
-            myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
+            // Add it to our list of final assertive codes if we don't have confirm true
+            // as our goal.
+            if (!myCurrentAssertiveCode.getFinalConfirm().getAssertion()
+                    .isLiteralTrue()) {
+                myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
+            }
 
             // Set the current assertive code to null
             myCurrentAssertiveCode = null;
@@ -1214,7 +1203,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                     // Create an AND infix expression with the ensures clause
                     if (ensures != null
                             && !ensures.equals(myTypeGraph.getTrueVarExp())) {
+                        Location newEnsuresLoc =
+                                (Location) ensures.getLocation().clone();
                         ensures = myTypeGraph.formConjunct(ensures, equalsExp);
+                        ensures.setLocation(newEnsuresLoc);
                     }
                     // Make new expression the ensures clause
                     else {
@@ -1284,7 +1276,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                     // Create an AND infix expression with the ensures clause
                     if (ensures != null
                             && !ensures.equals(myTypeGraph.getTrueVarExp())) {
+                        Location newEnsuresLoc =
+                                (Location) ensures.getLocation().clone();
                         ensures = myTypeGraph.formConjunct(ensures, init);
+                        ensures.setLocation(newEnsuresLoc);
                     }
                     // Make initialization expression the ensures clause
                     else {
@@ -1435,6 +1430,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     if (requires != null
                             && !requires.equals(myTypeGraph.getTrueVarExp())) {
                         requires = myTypeGraph.formConjunct(requires, init);
+                        requires.setLocation((Location) opLocation.clone());
                     }
                     // Make initialization expression the requires clause
                     else {
@@ -1485,6 +1481,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             requires =
                                     myTypeGraph.formConjunct(requires,
                                             constraint);
+                            requires.setLocation((Location) opLocation.clone());
                         }
                         // Make constraint expression the requires clause
                         else {
@@ -1700,7 +1697,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Replace state variables in the ensures clause
         // and create new confirm statements if needed.
         for (int i = 0; i < stateVarList.size(); i++) {
-            newConfirm = myCurrentAssertiveCode.getFinalConfirm();
+            ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+            newConfirm = confirmStmt.getAssertion();
             AffectsItem stateVar = stateVarList.get(i);
 
             // Only deal with Alters/Reassigns/Replaces/Updates modes
@@ -1755,7 +1753,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
 
                     // Set newConfirm as our new final confirm statement
-                    myCurrentAssertiveCode.setFinalConfirm(newConfirm);
+                    myCurrentAssertiveCode.setFinalConfirm(newConfirm,
+                            confirmStmt.getSimplify());
                 }
                 // Error: Why isn't it a free variable.
                 else {
@@ -1769,7 +1768,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             ParameterVarDec varDec = paramList.get(i);
             ProgramExp pExp = argList.get(i);
             PosSymbol VDName = varDec.getName();
-            newConfirm = myCurrentAssertiveCode.getFinalConfirm();
+            ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+            newConfirm = confirmStmt.getAssertion();
 
             // VarExp form of the parameter variable
             VarExp oldExp = new VarExp(null, null, VDName);
@@ -1784,8 +1784,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Case #1: ProgramIntegerExp
             if (pExp instanceof ProgramIntegerExp) {
+                Exp integerExp = convertExp(pExp);
                 replName =
-                        Integer.toString(((ProgramIntegerExp) repl).getValue());
+                        Integer.toString(((IntegerExp) integerExp).getValue());
 
                 // Create a variable expression of the form "_?[Argument Name]"
                 undqRep =
@@ -1799,7 +1800,41 @@ public class VCGenerator extends TreeWalkerVisitor {
                 quesRep.setMathType(pExp.getMathType());
                 quesRep.setMathTypeValue(pExp.getMathTypeValue());
             }
-            // Case #2: VariableDotExp
+            // Case #2: ProgramCharExp
+            else if (pExp instanceof ProgramCharExp) {
+                Exp charExp = convertExp(pExp);
+                replName = Character.toString(((CharExp) charExp).getValue());
+
+                // Create a variable expression of the form "_?[Argument Name]"
+                undqRep =
+                        new VarExp(null, null, createPosSymbol("_?" + replName));
+                undqRep.setMathType(pExp.getMathType());
+                undqRep.setMathTypeValue(pExp.getMathTypeValue());
+
+                // Create a variable expression of the form "?[Argument Name]"
+                quesRep =
+                        new VarExp(null, null, createPosSymbol("?" + replName));
+                quesRep.setMathType(pExp.getMathType());
+                quesRep.setMathTypeValue(pExp.getMathTypeValue());
+            }
+            // Case #3: ProgramStringExp
+            else if (pExp instanceof ProgramStringExp) {
+                Exp stringExp = convertExp(pExp);
+                replName = ((StringExp) stringExp).getValue();
+
+                // Create a variable expression of the form "_?[Argument Name]"
+                undqRep =
+                        new VarExp(null, null, createPosSymbol("_?" + replName));
+                undqRep.setMathType(pExp.getMathType());
+                undqRep.setMathTypeValue(pExp.getMathTypeValue());
+
+                // Create a variable expression of the form "?[Argument Name]"
+                quesRep =
+                        new VarExp(null, null, createPosSymbol("?" + replName));
+                quesRep.setMathType(pExp.getMathType());
+                quesRep.setMathTypeValue(pExp.getMathTypeValue());
+            }
+            // Case #4: VariableDotExp
             else if (pExp instanceof VariableDotExp) {
                 if (repl instanceof DotExp) {
                     Exp pE = ((DotExp) repl).getSegments().get(0);
@@ -1852,7 +1887,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     expNotHandled(pExp, pExp.getLocation());
                 }
             }
-            // Case #3: VariableNameExp
+            // Case #5: VariableNameExp
             else if (pExp instanceof VariableNameExp) {
                 // Name of repl in string form
                 replName = ((VariableNameExp) pExp).getName().getName();
@@ -1949,7 +1984,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                     // Update our final confirm with the parameter argument
                     newConfirm = replace(newConfirm, repl, quesVar);
-                    myCurrentAssertiveCode.setFinalConfirm(newConfirm);
+                    myCurrentAssertiveCode.setFinalConfirm(newConfirm,
+                            confirmStmt.getSimplify());
                 }
                 // All other modes
                 else {
@@ -2265,6 +2301,50 @@ public class VCGenerator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     /**
+     * <p>Applies the assume rule to the
+     * <code>Statement</code>.</p>
+     *
+     * @param stmt Our current <code>AssumeStmt</code>.
+     */
+    private void applyAssumeStmtRule(AssumeStmt stmt) {
+        // Check to see if our assertion just has "True"
+        Exp assertion = stmt.getAssertion();
+        if (assertion instanceof VarExp
+                && assertion.equals(myTypeGraph.getTrueVarExp())) {
+            // Verbose Mode Debug Messages
+            myVCBuffer.append("\nAssume Rule Applied and Simplified: \n");
+            myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+            myVCBuffer.append("\n_____________________ \n");
+        }
+        else {
+            // Apply simplification
+            ConfirmStmt finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
+            boolean simplify = finalConfirm.getSimplify();
+            Exp currentFinalConfirm =
+                    simplifyAssumeRule(stmt, finalConfirm.getAssertion());
+
+            // Only create an implies expression if the goal is not just "true".
+            // If the goal is "true", then simplify should be true as well.
+            if (stmt.getAssertion() != null && !simplify) {
+                // Create a new implies expression
+                currentFinalConfirm =
+                        myTypeGraph.formImplies(stmt.getAssertion(),
+                                currentFinalConfirm);
+                simplify = false;
+            }
+
+            // Set this as our new final confirm
+            myCurrentAssertiveCode.setFinalConfirm(currentFinalConfirm,
+                    simplify);
+
+            // Verbose Mode Debug Messages
+            myVCBuffer.append("\nAssume Rule Applied: \n");
+            myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+            myVCBuffer.append("\n_____________________ \n");
+        }
+    }
+
+    /**
      *  <p>Applies the change rule.</p>
      *
      * @param change The change clause
@@ -2272,7 +2352,8 @@ public class VCGenerator extends TreeWalkerVisitor {
     private void applyChangeRule(VerificationStatement change) {
         List<VariableExp> changeList =
                 (List<VariableExp>) change.getAssertion();
-        Exp finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
+        ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+        Exp finalConfirm = confirmStmt.getAssertion();
 
         // Loop through each variable
         for (VariableExp v : changeList) {
@@ -2297,7 +2378,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Set the modified statement as our new final confirm
-        myCurrentAssertiveCode.setFinalConfirm(finalConfirm);
+        myCurrentAssertiveCode.setFinalConfirm(finalConfirm, confirmStmt
+                .getSimplify());
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nChange Rule Applied: \n");
@@ -2306,80 +2388,12 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Applies different rules to code statements.</p>
-     *
-     * @param statement The different statements.
-     */
-    private void applyCodeRules(Statement statement) {
-        // Apply each statement rule here.
-        if (statement instanceof AssumeStmt) {
-            applyEBAssumeStmtRule((AssumeStmt) statement);
-        }
-        else if (statement instanceof CallStmt) {
-            applyEBCallStmtRule((CallStmt) statement);
-        }
-        else if (statement instanceof ConfirmStmt) {
-            applyEBConfirmStmtRule((ConfirmStmt) statement);
-        }
-        else if (statement instanceof FuncAssignStmt) {
-            applyEBFuncAssignStmtRule((FuncAssignStmt) statement);
-        }
-        else if (statement instanceof IfStmt) {
-            applyEBIfStmtRule((IfStmt) statement);
-        }
-        else if (statement instanceof SwapStmt) {
-            applyEBSwapStmtRule((SwapStmt) statement);
-        }
-        else if (statement instanceof WhileStmt) {
-            applyEBWhileStmtRule((WhileStmt) statement);
-        }
-    }
-
-    /**
-     * <p>Applies the assume rule to the
-     * <code>Statement</code>.</p>
-     *
-     * @param stmt Our current <code>AssumeStmt</code>.
-     */
-    private void applyEBAssumeStmtRule(AssumeStmt stmt) {
-        // Check to see if our assertion just has "True"
-        Exp assertion = stmt.getAssertion();
-        if (assertion instanceof VarExp
-                && assertion.equals(myTypeGraph.getTrueVarExp())) {
-            // Verbose Mode Debug Messages
-            myVCBuffer.append("\nAssume Rule Applied and Simplified: \n");
-            myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-            myVCBuffer.append("\n_____________________ \n");
-        }
-        else {
-            // Apply simplification
-            Exp currentFinalConfirm =
-                    simplifyAssumeRule(stmt, myCurrentAssertiveCode
-                            .getFinalConfirm());
-            if (stmt.getAssertion() != null) {
-                // Create a new implies expression
-                currentFinalConfirm =
-                        myTypeGraph.formImplies(stmt.getAssertion(),
-                                currentFinalConfirm);
-            }
-
-            // Set this as our new final confirm
-            myCurrentAssertiveCode.setFinalConfirm(currentFinalConfirm);
-
-            // Verbose Mode Debug Messages
-            myVCBuffer.append("\nAssume Rule Applied: \n");
-            myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-            myVCBuffer.append("\n_____________________ \n");
-        }
-    }
-
-    /**
      * <p>Applies the call statement rule to the
      * <code>Statement</code>.</p>
      *
      * @param stmt Our current <code>CallStmt</code>.
      */
-    private void applyEBCallStmtRule(CallStmt stmt) {
+    private void applyCallStmtRule(CallStmt stmt) {
         // Call a method to locate the operation dec for this call
         OperationDec opDec =
                 getOperationDec(stmt.getLocation(), stmt.getQualifier(), stmt
@@ -2397,11 +2411,18 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Get the requires clause for this operation
         Exp requires;
+        boolean simplify = false;
         if (opDec.getRequires() != null) {
             requires = Exp.copy(opDec.getRequires());
+
+            // Simplify if we just have true
+            if (requires.isLiteralTrue()) {
+                simplify = true;
+            }
         }
         else {
             requires = myTypeGraph.getTrueVarExp();
+            simplify = true;
         }
 
         // Check for recursive call of itself
@@ -2427,7 +2448,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             loc.setDetails("Show Termination of Recursive Call");
             setLocation(exp, loc);
-            ConfirmStmt conf = new ConfirmStmt(loc, exp);
+            ConfirmStmt conf = new ConfirmStmt(loc, exp, false);
 
             // Add it to our list of assertions
             myCurrentAssertiveCode.addCode(conf);
@@ -2471,7 +2492,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             setLocation(requires, loc);
 
             // Add this to our list of things to confirm
-            myCurrentAssertiveCode.addConfirm(requires);
+            myCurrentAssertiveCode.addConfirm((Location) loc.clone(), requires,
+                    simplify);
         }
 
         // Modify the location of the requires clause and add it to myCurrentAssertiveCode
@@ -2495,16 +2517,45 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>Applies different rules to code statements.</p>
+     *
+     * @param statement The different statements.
+     */
+    private void applyCodeRules(Statement statement) {
+        // Apply each statement rule here.
+        if (statement instanceof AssumeStmt) {
+            applyAssumeStmtRule((AssumeStmt) statement);
+        }
+        else if (statement instanceof CallStmt) {
+            applyCallStmtRule((CallStmt) statement);
+        }
+        else if (statement instanceof ConfirmStmt) {
+            applyConfirmStmtRule((ConfirmStmt) statement);
+        }
+        else if (statement instanceof FuncAssignStmt) {
+            applyFuncAssignStmtRule((FuncAssignStmt) statement);
+        }
+        else if (statement instanceof IfStmt) {
+            applyIfStmtRule((IfStmt) statement);
+        }
+        else if (statement instanceof SwapStmt) {
+            applySwapStmtRule((SwapStmt) statement);
+        }
+        else if (statement instanceof WhileStmt) {
+            applyWhileStmtRule((WhileStmt) statement);
+        }
+    }
+
+    /**
      * <p>Applies the confirm rule to the
      * <code>Statement</code>.</p>
      *
      * @param stmt Our current <code>ConfirmStmt</code>.
      */
-    private void applyEBConfirmStmtRule(ConfirmStmt stmt) {
-        // Check to see if our assertion just has "True"
+    private void applyConfirmStmtRule(ConfirmStmt stmt) {
+        // Check to see if our assertion can be simplified
         Exp assertion = stmt.getAssertion();
-        if (assertion instanceof VarExp
-                && assertion.equals(myTypeGraph.getTrueVarExp())) {
+        if (stmt.getSimplify()) {
             // Verbose Mode Debug Messages
             myVCBuffer.append("\nConfirm Rule Applied and Simplified: \n");
             myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
@@ -2512,12 +2563,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         else {
             // Obtain the current final confirm statement
-            Exp currentFinalConfirm = myCurrentAssertiveCode.getFinalConfirm();
+            ConfirmStmt currentFinalConfirm =
+                    myCurrentAssertiveCode.getFinalConfirm();
 
-            // Check to see if we have a final confirm of "True"
-            if (currentFinalConfirm instanceof VarExp
-                    && currentFinalConfirm.equals(myTypeGraph.getTrueVarExp())) {
-
+            // Check to see if we can simplify the final confirm
+            if (currentFinalConfirm.getSimplify()) {
                 // Obtain the current location
                 if (assertion.getLocation() != null) {
                     // Set the details of the current location
@@ -2525,7 +2575,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     setLocation(assertion, loc);
                 }
 
-                myCurrentAssertiveCode.setFinalConfirm(assertion);
+                myCurrentAssertiveCode.setFinalConfirm(assertion, stmt
+                        .getSimplify());
 
                 // Verbose Mode Debug Messages
                 myVCBuffer.append("\nConfirm Rule Applied and Simplified: \n");
@@ -2535,11 +2586,11 @@ public class VCGenerator extends TreeWalkerVisitor {
             else {
                 // Create a new and expression
                 InfixExp newConf =
-                        myTypeGraph
-                                .formConjunct(assertion, currentFinalConfirm);
+                        myTypeGraph.formConjunct(assertion, currentFinalConfirm
+                                .getAssertion());
 
                 // Set this new expression as the new final confirm
-                myCurrentAssertiveCode.setFinalConfirm(newConf);
+                myCurrentAssertiveCode.setFinalConfirm(newConf, false);
 
                 // Verbose Mode Debug Messages
                 myVCBuffer.append("\nConfirm Rule Applied: \n");
@@ -2547,609 +2598,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                 myVCBuffer.append("\n_____________________ \n");
             }
         }
-    }
-
-    /**
-     * <p>Applies each of the proof rules. This <code>AssertiveCode</code> will be
-     * stored for later use and therefore should be considered immutable after
-     * a call to this method.</p>
-     */
-    private void applyEBRules() {
-        // Apply a proof rule to each of the assertions
-        while (myCurrentAssertiveCode.hasAnotherAssertion()) {
-            // Work our way from the last assertion
-            VerificationStatement curAssertion =
-                    myCurrentAssertiveCode.getLastAssertion();
-
-            switch (curAssertion.getType()) {
-            // Change Assertion
-            case VerificationStatement.CHANGE:
-                applyChangeRule(curAssertion);
-                break;
-            // Code
-            case VerificationStatement.CODE:
-                applyCodeRules((Statement) curAssertion.getAssertion());
-                break;
-            // Remember Assertion
-            case VerificationStatement.REMEMBER:
-                applyRememberRule();
-                break;
-            // Variable Declaration Assertion
-            case VerificationStatement.VARIABLE:
-                applyVarDeclRule(curAssertion);
-                break;
-            }
-        }
-    }
-
-    /**
-     * <p>Applies the function assignment rule to the
-     * <code>Statement</code>.</p>
-     *
-     * @param stmt Our current <code>FuncAssignStmt</code>.
-     */
-    private void applyEBFuncAssignStmtRule(FuncAssignStmt stmt) {
-        PosSymbol qualifier = null;
-        ProgramExp assignExp = stmt.getAssign();
-        ProgramParamExp assignParamExp = null;
-
-        // Check to see what kind of expression is on the right hand side
-        if (assignExp instanceof ProgramParamExp) {
-            // Cast to a ProgramParamExp
-            assignParamExp = (ProgramParamExp) assignExp;
-        }
-        else if (assignExp instanceof ProgramDotExp) {
-            // Cast to a ProgramParamExp
-            ProgramDotExp dotExp = (ProgramDotExp) assignExp;
-            assignParamExp = (ProgramParamExp) dotExp.getExp();
-            qualifier = dotExp.getQualifier();
-        }
-        else {
-            // TODO: ERROR!
-        }
-
-        // Call a method to locate the operation dec for this call
-        OperationDec opDec =
-                getOperationDec(stmt.getLocation(), qualifier, assignParamExp
-                        .getName(), assignParamExp.getArguments());
-
-        // Check for recursive call of itself
-        if (myCurrentOperationEntry.getName().equals(opDec.getName())
-                && myCurrentOperationEntry.getReturnType() != null) {
-            // Create a new confirm statement using P_val and the decreasing clause
-            VarExp pVal = createPValExp(myOperationDecreasingExp.getLocation());
-
-            // Create a new infix expression
-            InfixExp exp =
-                    new InfixExp(stmt.getLocation(), Exp
-                            .copy(myOperationDecreasingExp),
-                            createPosSymbol("<"), pVal);
-            exp.setMathType(BOOLEAN);
-
-            // Create the new confirm statement
-            Location loc;
-            if (myOperationDecreasingExp.getLocation() != null) {
-                loc = (Location) myOperationDecreasingExp.getLocation().clone();
-            }
-            else {
-                loc = (Location) stmt.getLocation().clone();
-            }
-            loc.setDetails("Show Termination of Recursive Call");
-            setLocation(exp, loc);
-            ConfirmStmt conf = new ConfirmStmt(loc, exp);
-
-            // Add it to our list of assertions
-            myCurrentAssertiveCode.addCode(conf);
-        }
-
-        // Get the requires clause for this operation
-        Exp requires;
-        if (opDec.getRequires() != null) {
-            requires = Exp.copy(opDec.getRequires());
-        }
-        else {
-            requires = myTypeGraph.getTrueVarExp();
-        }
-
-        // Replace PreCondition variables in the requires clause
-        requires =
-                replaceFormalWithActualReq(requires, opDec.getParameters(),
-                        assignParamExp.getArguments());
-
-        // Modify the location of the requires clause and add it to myCurrentAssertiveCode
-        // Obtain the current location
-        // Note: If we don't have a location, we create one
-        Location reqloc;
-        if (assignParamExp.getName().getLocation() != null) {
-            reqloc = (Location) assignParamExp.getName().getLocation().clone();
-        }
-        else {
-            reqloc = new Location(null, null);
-        }
-
-        // Append the name of the current procedure
-        String details = "";
-        if (myCurrentOperationEntry != null) {
-            details = " in Procedure " + myCurrentOperationEntry.getName();
-        }
-
-        // Set the details of the current location
-        reqloc.setDetails("Requires Clause of " + opDec.getName() + details);
-        setLocation(requires, reqloc);
-
-        // Add this to our list of things to confirm
-        myCurrentAssertiveCode.addConfirm(requires);
-
-        // Get the ensures clause for this operation
-        // Note: If there isn't an ensures clause, it is set to "True"
-        Exp ensures, opEnsures;
-        if (opDec.getEnsures() != null) {
-            opEnsures = Exp.copy(opDec.getEnsures());
-
-            // Make sure we have an EqualsExp, else it is an error.
-            if (opEnsures instanceof EqualsExp) {
-                // Has to be a VarExp on the left hand side (containing the name
-                // of the function operation)
-                if (((EqualsExp) opEnsures).getLeft() instanceof VarExp) {
-                    VarExp leftExp = (VarExp) ((EqualsExp) opEnsures).getLeft();
-
-                    // Check if it has the name of the operation
-                    if (leftExp.getName().equals(opDec.getName())) {
-                        ensures = ((EqualsExp) opEnsures).getRight();
-
-                        // Obtain the current location
-                        if (assignParamExp.getName().getLocation() != null) {
-                            // Set the details of the current location
-                            Location loc =
-                                    (Location) assignParamExp.getName()
-                                            .getLocation().clone();
-                            loc.setDetails("Ensures Clause of "
-                                    + opDec.getName());
-                            setLocation(ensures, loc);
-                        }
-
-                        // Replace all instances of the variable on the left hand side
-                        // in the ensures clause with the expression on the right.
-                        Exp leftVariable;
-
-                        // We have a variable inside a record as the variable being assigned.
-                        if (stmt.getVar() instanceof VariableDotExp) {
-                            VariableDotExp v = (VariableDotExp) stmt.getVar();
-                            List<VariableExp> vList = v.getSegments();
-                            edu.clemson.cs.r2jt.collections.List<Exp> newSegments =
-                                    new edu.clemson.cs.r2jt.collections.List<Exp>();
-
-                            // Loot through each variable expression and add it to our dot list
-                            for (VariableExp vr : vList) {
-                                VarExp varExp = new VarExp();
-                                if (vr instanceof VariableNameExp) {
-                                    varExp.setName(((VariableNameExp) vr)
-                                            .getName());
-                                    varExp.setMathType(vr.getMathType());
-                                    varExp.setMathTypeValue(vr
-                                            .getMathTypeValue());
-                                    newSegments.add(varExp);
-                                }
-                            }
-
-                            // Expression to be replaced
-                            leftVariable =
-                                    new DotExp(v.getLocation(), newSegments,
-                                            null);
-                            leftVariable.setMathType(v.getMathType());
-                            leftVariable.setMathTypeValue(v.getMathTypeValue());
-                        }
-                        // We have a regular variable being assigned.
-                        else {
-                            // Expression to be replaced
-                            VariableNameExp v = (VariableNameExp) stmt.getVar();
-                            leftVariable =
-                                    new VarExp(v.getLocation(), null, v
-                                            .getName());
-                            leftVariable.setMathType(v.getMathType());
-                            leftVariable.setMathTypeValue(v.getMathTypeValue());
-                        }
-
-                        // Replace the formal with the actual
-                        ensures =
-                                replaceFormalWithActualEns(ensures, opDec
-                                        .getParameters(), opDec.getStateVars(),
-                                        assignParamExp.getArguments(), true);
-
-                        // Replace all instances of the left hand side
-                        // variable in the current final confirm statement.
-                        Exp newConf = myCurrentAssertiveCode.getFinalConfirm();
-                        newConf = replace(newConf, leftVariable, ensures);
-
-                        // Set this as our new final confirm statement.
-                        myCurrentAssertiveCode.setFinalConfirm(newConf);
-                    }
-                    else {
-                        illegalOperationEnsures(opDec.getLocation());
-                    }
-                }
-                else {
-                    illegalOperationEnsures(opDec.getLocation());
-                }
-            }
-            else {
-                illegalOperationEnsures(opDec.getLocation());
-            }
-        }
-
-        // Verbose Mode Debug Messages
-        myVCBuffer.append("\nFunction Rule Applied: \n");
-        myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-        myVCBuffer.append("\n_____________________ \n");
-    }
-
-    /**
-     * <p>Applies the if statement rule to the
-     * <code>Statement</code>.</p>
-     *
-     * @param stmt Our current <code>IfStmt</code>.
-     */
-    private void applyEBIfStmtRule(IfStmt stmt) {
-        // Note: In the If Rule, we will have two instances of the assertive code.
-        // One for when the if condition is true and one for the else condition.
-        // The current global assertive code variable is going to be used for the if path,
-        // and we are going to create a new assertive code for the else path (this includes
-        // the case when there is no else clause).
-        ProgramExp ifCondition = stmt.getTest();
-
-        // Negation of If (Need to make a copy before we start modifying
-        // the current assertive code for the if part)
-        AssertiveCode negIfAssertiveCode =
-                new AssertiveCode(myCurrentAssertiveCode);
-
-        // TODO: Might need to take this out when we figure out the evaluates mode business
-        // Call a method to locate the operation dec for this call
-        PosSymbol qualifier = null;
-        ProgramParamExp testParamExp = null;
-
-        // Check to see what kind of expression is on the right hand side
-        if (ifCondition instanceof ProgramParamExp) {
-            // Cast to a ProgramParamExp
-            testParamExp = (ProgramParamExp) ifCondition;
-        }
-        else if (ifCondition instanceof ProgramDotExp) {
-            // Cast to a ProgramParamExp
-            ProgramDotExp dotExp = (ProgramDotExp) ifCondition;
-            testParamExp = (ProgramParamExp) dotExp.getExp();
-            qualifier = dotExp.getQualifier();
-        }
-        else {
-            // TODO: ERROR!
-        }
-        OperationDec opDec =
-                getOperationDec(ifCondition.getLocation(), qualifier,
-                        testParamExp.getName(), testParamExp.getArguments());
-
-        // Confirm the invoking condition
-        // Get the requires clause for this operation
-        Exp requires;
-        if (opDec.getRequires() != null) {
-            requires = Exp.copy(opDec.getRequires());
-        }
-        else {
-            requires = myTypeGraph.getTrueVarExp();
-        }
-
-        // Replace PreCondition variables in the requires clause
-        requires =
-                replaceFormalWithActualReq(requires, opDec.getParameters(),
-                        testParamExp.getArguments());
-
-        // Modify the location of the requires clause and add it to myCurrentAssertiveCode
-        // Obtain the current location
-        // Note: If we don't have a location, we create one
-        Location reqloc;
-        if (testParamExp.getName().getLocation() != null) {
-            reqloc = (Location) testParamExp.getName().getLocation().clone();
-        }
-        else {
-            reqloc = new Location(null, null);
-        }
-
-        // Set the details of the current location
-        reqloc.setDetails("Requires Clause of " + opDec.getName());
-        setLocation(requires, reqloc);
-
-        // Add this to our list of things to confirm
-        myCurrentAssertiveCode.addConfirm(requires);
-
-        // Add the if condition as the assume clause
-        // Get the ensures clause for this operation
-        // Note: If there isn't an ensures clause, it is set to "True"
-        Exp ensures, negEnsures = null, opEnsures;
-        if (opDec.getEnsures() != null) {
-            opEnsures = Exp.copy(opDec.getEnsures());
-
-            // Make sure we have an EqualsExp, else it is an error.
-            if (opEnsures instanceof EqualsExp) {
-                // Has to be a VarExp on the left hand side (containing the name
-                // of the function operation)
-                if (((EqualsExp) opEnsures).getLeft() instanceof VarExp) {
-                    VarExp leftExp = (VarExp) ((EqualsExp) opEnsures).getLeft();
-
-                    // Check if it has the name of the operation
-                    if (leftExp.getName().equals(opDec.getName())) {
-                        ensures = ((EqualsExp) opEnsures).getRight();
-
-                        // Obtain the current location
-                        if (testParamExp.getName().getLocation() != null) {
-                            // Set the details of the current location
-                            Location loc =
-                                    (Location) testParamExp.getName()
-                                            .getLocation().clone();
-                            loc.setDetails("If Statement Condition");
-                            setLocation(ensures, loc);
-                        }
-
-                        // Replace the formals with the actuals.
-                        ensures =
-                                replaceFormalWithActualEns(ensures, opDec
-                                        .getParameters(), opDec.getStateVars(),
-                                        testParamExp.getArguments(), false);
-                        myCurrentAssertiveCode.addAssume(ensures);
-
-                        // Negation of the condition
-                        negEnsures = negateExp(ensures);
-                    }
-                    else {
-                        illegalOperationEnsures(opDec.getLocation());
-                    }
-                }
-                else {
-                    illegalOperationEnsures(opDec.getLocation());
-                }
-            }
-            else {
-                illegalOperationEnsures(opDec.getLocation());
-            }
-        }
-
-        // Add any statements inside the then clause
-        if (stmt.getThenclause() != null) {
-            myCurrentAssertiveCode.addStatements(stmt.getThenclause());
-        }
-
-        // Modify the confirm details
-        Exp ifConfirm = myCurrentAssertiveCode.getFinalConfirm();
-        Location ifLocation = (Location) ifConfirm.getLocation().clone();
-        String ifDetail = "Condition at " + ifLocation.toString() + " is true";
-        ifLocation.setDetails(ifDetail);
-        ifConfirm.setLocation(ifLocation);
-        myCurrentAssertiveCode.setFinalConfirm(ifConfirm);
-
-        // Verbose Mode Debug Messages
-        myVCBuffer.append("\nIf Part Rule Applied: \n");
-        myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-        myVCBuffer.append("\n_____________________ \n");
-
-        // Add the negation of the if condition as the assume clause
-        if (negEnsures != null) {
-            negIfAssertiveCode.addAssume(negEnsures);
-        }
-        else {
-            illegalOperationEnsures(opDec.getLocation());
-        }
-
-        // Add any statements inside the else clause
-        if (stmt.getElseclause() != null) {
-            negIfAssertiveCode.addStatements(stmt.getElseclause());
-        }
-
-        // Modify the confirm details
-        Exp negIfConfirm = negIfAssertiveCode.getFinalConfirm();
-        Location negIfLocation = (Location) ifConfirm.getLocation().clone();
-        String negIfDetail =
-                "Condition at " + negIfLocation.toString() + " is false";
-        negIfLocation.setDetails(negIfDetail);
-        negIfConfirm.setLocation(negIfLocation);
-        negIfAssertiveCode.setFinalConfirm(negIfConfirm);
-
-        // Add this new assertive code to our incomplete assertive code stack
-        myIncAssertiveCodeStack.push(negIfAssertiveCode);
-
-        // Verbose Mode Debug Messages
-        String newString = "\nNegation of If Part Rule Applied: \n";
-        newString += negIfAssertiveCode.assertionToString();
-        newString += "\n_____________________ \n";
-        myIncAssertiveCodeStackInfo.push(newString);
-    }
-
-    /**
-     * <p>Applies the swap statement rule to the
-     * <code>Statement</code>.</p>
-     *
-     * @param stmt Our current <code>SwapStmt</code>.
-     */
-    private void applyEBSwapStmtRule(SwapStmt stmt) {
-        // Obtain the current final confirm clause
-        Exp conf = myCurrentAssertiveCode.getFinalConfirm();
-
-        // Create a copy of the left and right hand side
-        VariableExp stmtLeft = (VariableExp) Exp.copy(stmt.getLeft());
-        VariableExp stmtRight = (VariableExp) Exp.copy(stmt.getRight());
-
-        // New left and right
-        Exp newLeft = convertExp(stmtLeft);
-        Exp newRight = convertExp(stmtRight);
-
-        // Use our final confirm to obtain the math types
-        List lst = conf.getSubExpressions();
-        for (int i = 0; i < lst.size(); i++) {
-            if (lst.get(i) instanceof VarExp) {
-                VarExp thisExp = (VarExp) lst.get(i);
-                if (newRight instanceof VarExp) {
-                    if (thisExp.getName().equals(
-                            ((VarExp) newRight).getName().getName())) {
-                        newRight.setMathType(thisExp.getMathType());
-                        newRight.setMathTypeValue(thisExp.getMathTypeValue());
-                    }
-                }
-                if (newLeft instanceof VarExp) {
-                    if (thisExp.getName().equals(
-                            ((VarExp) newLeft).getName().getName())) {
-                        newLeft.setMathType(thisExp.getMathType());
-                        newLeft.setMathTypeValue(thisExp.getMathTypeValue());
-                    }
-                }
-            }
-        }
-
-        // Temp variable
-        VarExp tmp = new VarExp();
-        tmp.setName(createPosSymbol("_" + getVarName(stmtLeft).getName()));
-        tmp.setMathType(stmtLeft.getMathType());
-        tmp.setMathTypeValue(stmtLeft.getMathTypeValue());
-
-        // Replace according to the swap rule
-        conf = replace(conf, newRight, tmp);
-        conf = replace(conf, newLeft, newRight);
-        conf = replace(conf, tmp, newLeft);
-
-        // Set this new expression as the new final confirm
-        myCurrentAssertiveCode.setFinalConfirm(conf);
-
-        // Verbose Mode Debug Messages
-        myVCBuffer.append("\nSwap Rule Applied: \n");
-        myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-        myVCBuffer.append("\n_____________________ \n");
-    }
-
-    /**
-     * <p>Applies the while statement rule.</p>
-     *
-     * @param stmt Our current <code>WhileStmt</code>.
-     */
-    private void applyEBWhileStmtRule(WhileStmt stmt) {
-        // Obtain the loop invariant
-        Exp invariant;
-        if (stmt.getMaintaining() != null) {
-            invariant = Exp.copy(stmt.getMaintaining());
-            invariant.setMathType(stmt.getMaintaining().getMathType());
-        }
-        else {
-            invariant = myTypeGraph.getTrueVarExp();
-        }
-
-        // Confirm the base case of invariant
-        Exp baseCase = Exp.copy(invariant);
-        Location baseLoc;
-        if (invariant.getLocation() != null) {
-            baseLoc = (Location) invariant.getLocation().clone();
-        }
-        else {
-            baseLoc = (Location) stmt.getLocation().clone();
-        }
-        baseLoc.setDetails("Base Case of the Invariant of While Statement");
-        setLocation(baseCase, baseLoc);
-        myCurrentAssertiveCode.addConfirm(baseCase);
-
-        // Add the change rule
-        if (stmt.getChanging() != null) {
-            myCurrentAssertiveCode.addChange(stmt.getChanging());
-        }
-
-        // Assume the invariant and NQV(RP, P_Val) = P_Exp
-        Location whileLoc = stmt.getLocation();
-        Exp assume;
-        Exp finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
-        Exp decreasingExp = stmt.getDecreasing();
-        Exp nqv;
-
-        if (decreasingExp != null) {
-            VarExp pval = createPValExp((Location) whileLoc.clone());
-            nqv = createQuestionMarkVariable(finalConfirm, pval);
-            nqv.setMathType(pval.getMathType());
-            Exp equalPExp =
-                    new EqualsExp((Location) whileLoc.clone(), Exp.copy(nqv),
-                            1, Exp.copy(decreasingExp));
-            equalPExp.setMathType(BOOLEAN);
-            assume = myTypeGraph.formConjunct(Exp.copy(invariant), equalPExp);
-        }
-        else {
-            decreasingExp = myTypeGraph.getTrueVarExp();
-            nqv = myTypeGraph.getTrueVarExp();
-            assume = Exp.copy(invariant);
-        }
-
-        myCurrentAssertiveCode.addAssume(assume);
-
-        // if statement body
-        edu.clemson.cs.r2jt.collections.List<Statement> ifStmtList =
-                stmt.getStatements();
-
-        // Confirm the inductive case of invariant
-        Exp inductiveCase = Exp.copy(invariant);
-        Location inductiveLoc;
-        if (invariant.getLocation() != null) {
-            inductiveLoc = (Location) invariant.getLocation().clone();
-        }
-        else {
-            inductiveLoc = (Location) stmt.getLocation().clone();
-        }
-        inductiveLoc
-                .setDetails("Inductive Case of Invariant of While Statement");
-        setLocation(inductiveCase, inductiveLoc);
-        ifStmtList.add(new ConfirmStmt(inductiveLoc, inductiveCase));
-
-        // Confirm the termination of the loop.
-        if (decreasingExp != null) {
-            Location decreasingLoc =
-                    (Location) decreasingExp.getLocation().clone();
-            if (decreasingLoc != null) {
-                decreasingLoc.setDetails("Termination of While Statement");
-            }
-
-            Exp infixExp =
-                    new InfixExp(decreasingLoc, Exp.copy(decreasingExp),
-                            createPosSymbol("<"), Exp.copy(nqv));
-            infixExp.setMathType(BOOLEAN);
-            ifStmtList.add(new ConfirmStmt(decreasingLoc, infixExp));
-        }
-
-        // empty elseif pair
-        edu.clemson.cs.r2jt.collections.List<ConditionItem> elseIfPairList =
-                new edu.clemson.cs.r2jt.collections.List<ConditionItem>();
-
-        // else body
-        Location elseConfirmLoc;
-        if (finalConfirm.getLocation() != null) {
-            elseConfirmLoc = (Location) finalConfirm.getLocation().clone();
-        }
-        else {
-            elseConfirmLoc = (Location) whileLoc.clone();
-        }
-        edu.clemson.cs.r2jt.collections.List<Statement> elseStmtList =
-                new edu.clemson.cs.r2jt.collections.List<Statement>();
-        elseStmtList
-                .add(new ConfirmStmt(elseConfirmLoc, Exp.copy(finalConfirm)));
-
-        // condition
-        ProgramExp condition = (ProgramExp) Exp.copy(stmt.getTest());
-        if (condition.getLocation() != null) {
-            Location condLoc = (Location) condition.getLocation().clone();
-            condLoc.setDetails("While Loop Condition");
-            setLocation(condition, condLoc);
-        }
-
-        // add it back to your assertive code
-        IfStmt newIfStmt =
-                new IfStmt(condition, ifStmtList, elseIfPairList, elseStmtList);
-        myCurrentAssertiveCode.addCode(newIfStmt);
-
-        // Change our final confirm to "True"
-        Exp trueVarExp = myTypeGraph.getTrueVarExp();
-        trueVarExp.setLocation((Location) whileLoc.clone());
-        myCurrentAssertiveCode.setFinalConfirm(trueVarExp);
-
-        // Verbose Mode Debug Messages
-        myVCBuffer.append("\nWhile Rule Applied: \n");
-        myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
-        myVCBuffer.append("\n_____________________ \n");
     }
 
     /**
@@ -3190,7 +2638,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                     replaceFacilityDeclarationVariables(req, facConceptDec
                             .getParameters(), conceptParams);
             req.setLocation(loc);
-            assertiveCode.setFinalConfirm(req);
+
+            boolean simplify = false;
+            // Simplify if we just have true
+            if (req.isLiteralTrue()) {
+                simplify = true;
+            }
+            assertiveCode.setFinalConfirm(req, simplify);
 
             // Obtain the constraint of the concept type
             Exp assumeExp = null;
@@ -3317,6 +2771,429 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>Applies the function assignment rule to the
+     * <code>Statement</code>.</p>
+     *
+     * @param stmt Our current <code>FuncAssignStmt</code>.
+     */
+    private void applyFuncAssignStmtRule(FuncAssignStmt stmt) {
+        PosSymbol qualifier = null;
+        ProgramExp assignExp = stmt.getAssign();
+        ProgramParamExp assignParamExp = null;
+
+        // Replace all instances of the variable on the left hand side
+        // in the ensures clause with the expression on the right.
+        Exp leftVariable;
+
+        // We have a variable inside a record as the variable being assigned.
+        if (stmt.getVar() instanceof VariableDotExp) {
+            VariableDotExp v = (VariableDotExp) stmt.getVar();
+            List<VariableExp> vList = v.getSegments();
+            edu.clemson.cs.r2jt.collections.List<Exp> newSegments =
+                    new edu.clemson.cs.r2jt.collections.List<Exp>();
+
+            // Loot through each variable expression and add it to our dot list
+            for (VariableExp vr : vList) {
+                VarExp varExp = new VarExp();
+                if (vr instanceof VariableNameExp) {
+                    varExp.setName(((VariableNameExp) vr).getName());
+                    varExp.setMathType(vr.getMathType());
+                    varExp.setMathTypeValue(vr.getMathTypeValue());
+                    newSegments.add(varExp);
+                }
+            }
+
+            // Expression to be replaced
+            leftVariable = new DotExp(v.getLocation(), newSegments, null);
+            leftVariable.setMathType(v.getMathType());
+            leftVariable.setMathTypeValue(v.getMathTypeValue());
+        }
+        // We have a regular variable being assigned.
+        else {
+            // Expression to be replaced
+            VariableNameExp v = (VariableNameExp) stmt.getVar();
+            leftVariable = new VarExp(v.getLocation(), null, v.getName());
+            leftVariable.setMathType(v.getMathType());
+            leftVariable.setMathTypeValue(v.getMathTypeValue());
+        }
+
+        // Simply replace the numbers/characters/strings
+        if (assignExp instanceof ProgramIntegerExp
+                || assignExp instanceof ProgramCharExp
+                || assignExp instanceof ProgramStringExp) {
+            Exp replaceExp = convertExp(assignExp);
+
+            // Replace all instances of the left hand side
+            // variable in the current final confirm statement.
+            ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+            Exp newConf = confirmStmt.getAssertion();
+            newConf = replace(newConf, leftVariable, replaceExp);
+
+            // Set this as our new final confirm statement.
+            myCurrentAssertiveCode.setFinalConfirm(newConf, confirmStmt
+                    .getSimplify());
+        }
+        else {
+            // Check to see what kind of expression is on the right hand side
+            if (assignExp instanceof ProgramParamExp) {
+                // Cast to a ProgramParamExp
+                assignParamExp = (ProgramParamExp) assignExp;
+            }
+            else if (assignExp instanceof ProgramDotExp) {
+                // Cast to a ProgramParamExp
+                ProgramDotExp dotExp = (ProgramDotExp) assignExp;
+                assignParamExp = (ProgramParamExp) dotExp.getExp();
+                qualifier = dotExp.getQualifier();
+            }
+
+            // Call a method to locate the operation dec for this call
+            OperationDec opDec =
+                    getOperationDec(stmt.getLocation(), qualifier,
+                            assignParamExp.getName(), assignParamExp
+                                    .getArguments());
+
+            // Check for recursive call of itself
+            if (myCurrentOperationEntry.getName().equals(opDec.getName())
+                    && myCurrentOperationEntry.getReturnType() != null) {
+                // Create a new confirm statement using P_val and the decreasing clause
+                VarExp pVal =
+                        createPValExp(myOperationDecreasingExp.getLocation());
+
+                // Create a new infix expression
+                InfixExp exp =
+                        new InfixExp(stmt.getLocation(), Exp
+                                .copy(myOperationDecreasingExp),
+                                createPosSymbol("<"), pVal);
+                exp.setMathType(BOOLEAN);
+
+                // Create the new confirm statement
+                Location loc;
+                if (myOperationDecreasingExp.getLocation() != null) {
+                    loc =
+                            (Location) myOperationDecreasingExp.getLocation()
+                                    .clone();
+                }
+                else {
+                    loc = (Location) stmt.getLocation().clone();
+                }
+                loc.setDetails("Show Termination of Recursive Call");
+                setLocation(exp, loc);
+                ConfirmStmt conf = new ConfirmStmt(loc, exp, false);
+
+                // Add it to our list of assertions
+                myCurrentAssertiveCode.addCode(conf);
+            }
+
+            // Get the requires clause for this operation
+            Exp requires;
+            boolean simplify = false;
+            if (opDec.getRequires() != null) {
+                requires = Exp.copy(opDec.getRequires());
+
+                // Simplify if we just have true
+                if (requires.isLiteralTrue()) {
+                    simplify = true;
+                }
+            }
+            else {
+                requires = myTypeGraph.getTrueVarExp();
+                simplify = true;
+            }
+
+            // Replace PreCondition variables in the requires clause
+            requires =
+                    replaceFormalWithActualReq(requires, opDec.getParameters(),
+                            assignParamExp.getArguments());
+
+            // Modify the location of the requires clause and add it to myCurrentAssertiveCode
+            // Obtain the current location
+            // Note: If we don't have a location, we create one
+            Location reqloc;
+            if (assignParamExp.getName().getLocation() != null) {
+                reqloc =
+                        (Location) assignParamExp.getName().getLocation()
+                                .clone();
+            }
+            else {
+                reqloc = new Location(null, null);
+            }
+
+            // Append the name of the current procedure
+            String details = "";
+            if (myCurrentOperationEntry != null) {
+                details = " in Procedure " + myCurrentOperationEntry.getName();
+            }
+
+            // Set the details of the current location
+            reqloc
+                    .setDetails("Requires Clause of " + opDec.getName()
+                            + details);
+            setLocation(requires, reqloc);
+
+            // Add this to our list of things to confirm
+            myCurrentAssertiveCode.addConfirm((Location) reqloc.clone(),
+                    requires, simplify);
+
+            // Get the ensures clause for this operation
+            // Note: If there isn't an ensures clause, it is set to "True"
+            Exp ensures, opEnsures;
+            if (opDec.getEnsures() != null) {
+                opEnsures = Exp.copy(opDec.getEnsures());
+
+                // Make sure we have an EqualsExp, else it is an error.
+                if (opEnsures instanceof EqualsExp) {
+                    // Has to be a VarExp on the left hand side (containing the name
+                    // of the function operation)
+                    if (((EqualsExp) opEnsures).getLeft() instanceof VarExp) {
+                        VarExp leftExp =
+                                (VarExp) ((EqualsExp) opEnsures).getLeft();
+
+                        // Check if it has the name of the operation
+                        if (leftExp.getName().equals(opDec.getName())) {
+                            ensures = ((EqualsExp) opEnsures).getRight();
+
+                            // Obtain the current location
+                            if (assignParamExp.getName().getLocation() != null) {
+                                // Set the details of the current location
+                                Location loc =
+                                        (Location) assignParamExp.getName()
+                                                .getLocation().clone();
+                                loc.setDetails("Ensures Clause of "
+                                        + opDec.getName());
+                                setLocation(ensures, loc);
+                            }
+
+                            // Replace the formal with the actual
+                            ensures =
+                                    replaceFormalWithActualEns(ensures, opDec
+                                            .getParameters(), opDec
+                                            .getStateVars(), assignParamExp
+                                            .getArguments(), true);
+
+                            // Replace all instances of the left hand side
+                            // variable in the current final confirm statement.
+                            ConfirmStmt confirmStmt =
+                                    myCurrentAssertiveCode.getFinalConfirm();
+                            Exp newConf = confirmStmt.getAssertion();
+                            newConf = replace(newConf, leftVariable, ensures);
+
+                            // Set this as our new final confirm statement.
+                            myCurrentAssertiveCode.setFinalConfirm(newConf,
+                                    confirmStmt.getSimplify());
+                        }
+                        else {
+                            illegalOperationEnsures(opDec.getLocation());
+                        }
+                    }
+                    else {
+                        illegalOperationEnsures(opDec.getLocation());
+                    }
+                }
+                else {
+                    illegalOperationEnsures(opDec.getLocation());
+                }
+            }
+        }
+
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\nFunction Rule Applied: \n");
+        myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
+    }
+
+    /**
+     * <p>Applies the if statement rule to the
+     * <code>Statement</code>.</p>
+     *
+     * @param stmt Our current <code>IfStmt</code>.
+     */
+    private void applyIfStmtRule(IfStmt stmt) {
+        // Note: In the If Rule, we will have two instances of the assertive code.
+        // One for when the if condition is true and one for the else condition.
+        // The current global assertive code variable is going to be used for the if path,
+        // and we are going to create a new assertive code for the else path (this includes
+        // the case when there is no else clause).
+        ProgramExp ifCondition = stmt.getTest();
+
+        // Negation of If (Need to make a copy before we start modifying
+        // the current assertive code for the if part)
+        AssertiveCode negIfAssertiveCode =
+                new AssertiveCode(myCurrentAssertiveCode);
+
+        // TODO: Might need to take this out when we figure out the evaluates mode business
+        // Call a method to locate the operation dec for this call
+        PosSymbol qualifier = null;
+        ProgramParamExp testParamExp = null;
+
+        // Check to see what kind of expression is on the right hand side
+        if (ifCondition instanceof ProgramParamExp) {
+            // Cast to a ProgramParamExp
+            testParamExp = (ProgramParamExp) ifCondition;
+        }
+        else if (ifCondition instanceof ProgramDotExp) {
+            // Cast to a ProgramParamExp
+            ProgramDotExp dotExp = (ProgramDotExp) ifCondition;
+            testParamExp = (ProgramParamExp) dotExp.getExp();
+            qualifier = dotExp.getQualifier();
+        }
+        else {
+            // TODO: ERROR!
+        }
+        OperationDec opDec =
+                getOperationDec(ifCondition.getLocation(), qualifier,
+                        testParamExp.getName(), testParamExp.getArguments());
+
+        // Confirm the invoking condition
+        // Get the requires clause for this operation
+        Exp requires;
+        boolean simplify = false;
+        if (opDec.getRequires() != null) {
+            requires = Exp.copy(opDec.getRequires());
+
+            // Simplify if we just have true
+            if (requires.isLiteralTrue()) {
+                simplify = true;
+            }
+        }
+        else {
+            requires = myTypeGraph.getTrueVarExp();
+            simplify = true;
+        }
+
+        // Replace PreCondition variables in the requires clause
+        requires =
+                replaceFormalWithActualReq(requires, opDec.getParameters(),
+                        testParamExp.getArguments());
+
+        // Modify the location of the requires clause and add it to myCurrentAssertiveCode
+        // Obtain the current location
+        // Note: If we don't have a location, we create one
+        Location reqloc;
+        if (testParamExp.getName().getLocation() != null) {
+            reqloc = (Location) testParamExp.getName().getLocation().clone();
+        }
+        else {
+            reqloc = new Location(null, null);
+        }
+
+        // Set the details of the current location
+        reqloc.setDetails("Requires Clause of " + opDec.getName());
+        setLocation(requires, reqloc);
+
+        // Add this to our list of things to confirm
+        myCurrentAssertiveCode.addConfirm((Location) reqloc.clone(), requires,
+                simplify);
+
+        // Add the if condition as the assume clause
+        // Get the ensures clause for this operation
+        // Note: If there isn't an ensures clause, it is set to "True"
+        Exp ensures, negEnsures = null, opEnsures;
+        if (opDec.getEnsures() != null) {
+            opEnsures = Exp.copy(opDec.getEnsures());
+
+            // Make sure we have an EqualsExp, else it is an error.
+            if (opEnsures instanceof EqualsExp) {
+                // Has to be a VarExp on the left hand side (containing the name
+                // of the function operation)
+                if (((EqualsExp) opEnsures).getLeft() instanceof VarExp) {
+                    VarExp leftExp = (VarExp) ((EqualsExp) opEnsures).getLeft();
+
+                    // Check if it has the name of the operation
+                    if (leftExp.getName().equals(opDec.getName())) {
+                        ensures = ((EqualsExp) opEnsures).getRight();
+
+                        // Obtain the current location
+                        if (testParamExp.getName().getLocation() != null) {
+                            // Set the details of the current location
+                            Location loc =
+                                    (Location) testParamExp.getName()
+                                            .getLocation().clone();
+                            loc.setDetails("If Statement Condition");
+                            setLocation(ensures, loc);
+                        }
+
+                        // Replace the formals with the actuals.
+                        ensures =
+                                replaceFormalWithActualEns(ensures, opDec
+                                        .getParameters(), opDec.getStateVars(),
+                                        testParamExp.getArguments(), false);
+                        myCurrentAssertiveCode.addAssume(ensures);
+
+                        // Negation of the condition
+                        negEnsures = negateExp(ensures);
+                    }
+                    else {
+                        illegalOperationEnsures(opDec.getLocation());
+                    }
+                }
+                else {
+                    illegalOperationEnsures(opDec.getLocation());
+                }
+            }
+            else {
+                illegalOperationEnsures(opDec.getLocation());
+            }
+        }
+
+        // Add any statements inside the then clause
+        if (stmt.getThenclause() != null) {
+            myCurrentAssertiveCode.addStatements(stmt.getThenclause());
+        }
+
+        // Modify the confirm details
+        ConfirmStmt ifConfirm = myCurrentAssertiveCode.getFinalConfirm();
+        Location ifLocation;
+        if (ifConfirm.getLocation() != null) {
+            ifLocation = (Location) ifConfirm.getLocation().clone();
+        }
+        else {
+            ifLocation = (Location) stmt.getLocation().clone();
+        }
+        String ifDetail = "Condition at " + ifLocation.toString() + " is true";
+        ifLocation.setDetails(ifDetail);
+        ifConfirm.setLocation(ifLocation);
+        myCurrentAssertiveCode.setFinalConfirm(ifConfirm.getAssertion(),
+                ifConfirm.getSimplify());
+
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\nIf Part Rule Applied: \n");
+        myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
+
+        // Add the negation of the if condition as the assume clause
+        if (negEnsures != null) {
+            negIfAssertiveCode.addAssume(negEnsures);
+        }
+        else {
+            illegalOperationEnsures(opDec.getLocation());
+        }
+
+        // Add any statements inside the else clause
+        if (stmt.getElseclause() != null) {
+            negIfAssertiveCode.addStatements(stmt.getElseclause());
+        }
+
+        // Modify the confirm details
+        ConfirmStmt negIfConfirm = negIfAssertiveCode.getFinalConfirm();
+        Location negIfLocation = (Location) ifConfirm.getLocation().clone();
+        String negIfDetail =
+                "Condition at " + negIfLocation.toString() + " is false";
+        negIfLocation.setDetails(negIfDetail);
+        negIfConfirm.setLocation(negIfLocation);
+        negIfAssertiveCode.setFinalConfirm(negIfConfirm.getAssertion(),
+                negIfConfirm.getSimplify());
+
+        // Add this new assertive code to our incomplete assertive code stack
+        myIncAssertiveCodeStack.push(negIfAssertiveCode);
+
+        // Verbose Mode Debug Messages
+        String newString = "\nNegation of If Part Rule Applied: \n";
+        newString += negIfAssertiveCode.assertionToString();
+        newString += "\n_____________________ \n";
+        myIncAssertiveCodeStackInfo.push(newString);
+    }
+
+    /**
      * <p>Applies the procedure declaration rule.</p>
      *
      * @param requires Requires clause
@@ -3383,8 +3260,13 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add the list of statements
         myCurrentAssertiveCode.addStatements(statementList);
 
+        // Simplify if we just have true
+        boolean simplify = false;
+        if (ensures.isLiteralTrue()) {
+            simplify = true;
+        }
         // Add the final confirms clause
-        myCurrentAssertiveCode.setFinalConfirm(ensures);
+        myCurrentAssertiveCode.setFinalConfirm(ensures, simplify);
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nProcedure Declaration Rule Applied: \n");
@@ -3397,12 +3279,107 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private void applyRememberRule() {
         // Obtain the final confirm and apply the remember method for Exp
-        Exp conf = myCurrentAssertiveCode.getFinalConfirm();
+        ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+        Exp conf = confirmStmt.getAssertion();
         conf = conf.remember();
-        myCurrentAssertiveCode.setFinalConfirm(conf);
+        myCurrentAssertiveCode.setFinalConfirm(conf, confirmStmt.getSimplify());
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nRemember Rule Applied: \n");
+        myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
+    }
+
+    /**
+     * <p>Applies each of the proof rules. This <code>AssertiveCode</code> will be
+     * stored for later use and therefore should be considered immutable after
+     * a call to this method.</p>
+     */
+    private void applyRules() {
+        // Apply a proof rule to each of the assertions
+        while (myCurrentAssertiveCode.hasAnotherAssertion()) {
+            // Work our way from the last assertion
+            VerificationStatement curAssertion =
+                    myCurrentAssertiveCode.getLastAssertion();
+
+            switch (curAssertion.getType()) {
+            // Change Assertion
+            case VerificationStatement.CHANGE:
+                applyChangeRule(curAssertion);
+                break;
+            // Code
+            case VerificationStatement.CODE:
+                applyCodeRules((Statement) curAssertion.getAssertion());
+                break;
+            // Remember Assertion
+            case VerificationStatement.REMEMBER:
+                applyRememberRule();
+                break;
+            // Variable Declaration Assertion
+            case VerificationStatement.VARIABLE:
+                applyVarDeclRule(curAssertion);
+                break;
+            }
+        }
+    }
+
+    /**
+     * <p>Applies the swap statement rule to the
+     * <code>Statement</code>.</p>
+     *
+     * @param stmt Our current <code>SwapStmt</code>.
+     */
+    private void applySwapStmtRule(SwapStmt stmt) {
+        // Obtain the current final confirm clause
+        ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+        Exp conf = confirmStmt.getAssertion();
+
+        // Create a copy of the left and right hand side
+        VariableExp stmtLeft = (VariableExp) Exp.copy(stmt.getLeft());
+        VariableExp stmtRight = (VariableExp) Exp.copy(stmt.getRight());
+
+        // New left and right
+        Exp newLeft = convertExp(stmtLeft);
+        Exp newRight = convertExp(stmtRight);
+
+        // Use our final confirm to obtain the math types
+        List lst = conf.getSubExpressions();
+        for (int i = 0; i < lst.size(); i++) {
+            if (lst.get(i) instanceof VarExp) {
+                VarExp thisExp = (VarExp) lst.get(i);
+                if (newRight instanceof VarExp) {
+                    if (thisExp.getName().equals(
+                            ((VarExp) newRight).getName().getName())) {
+                        newRight.setMathType(thisExp.getMathType());
+                        newRight.setMathTypeValue(thisExp.getMathTypeValue());
+                    }
+                }
+                if (newLeft instanceof VarExp) {
+                    if (thisExp.getName().equals(
+                            ((VarExp) newLeft).getName().getName())) {
+                        newLeft.setMathType(thisExp.getMathType());
+                        newLeft.setMathTypeValue(thisExp.getMathTypeValue());
+                    }
+                }
+            }
+        }
+
+        // Temp variable
+        VarExp tmp = new VarExp();
+        tmp.setName(createPosSymbol("_" + getVarName(stmtLeft).getName()));
+        tmp.setMathType(stmtLeft.getMathType());
+        tmp.setMathTypeValue(stmtLeft.getMathTypeValue());
+
+        // Replace according to the swap rule
+        conf = replace(conf, newRight, tmp);
+        conf = replace(conf, newLeft, newRight);
+        conf = replace(conf, tmp, newLeft);
+
+        // Set this new expression as the new final confirm
+        myCurrentAssertiveCode.setFinalConfirm(conf, confirmStmt.getSimplify());
+
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\nSwap Rule Applied: \n");
         myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
         myVCBuffer.append("\n_____________________ \n");
     }
@@ -3467,7 +3444,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 setLocation(constraint, loc);
 
                 // Final confirm clause
-                Exp finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
+                Exp finalConfirm =
+                        myCurrentAssertiveCode.getFinalConfirm().getAssertion();
 
                 // Obtain the string form of the variable
                 String varName = varDec.getName().getName();
@@ -3525,5 +3503,150 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Ty not handled.
             tyNotHandled(varDec.getTy(), varDec.getLocation());
         }
+    }
+
+    /**
+     * <p>Applies the while statement rule.</p>
+     *
+     * @param stmt Our current <code>WhileStmt</code>.
+     */
+    private void applyWhileStmtRule(WhileStmt stmt) {
+        // Obtain the loop invariant
+        Exp invariant;
+        boolean simplifyInvariant = false;
+        if (stmt.getMaintaining() != null) {
+            invariant = Exp.copy(stmt.getMaintaining());
+            invariant.setMathType(stmt.getMaintaining().getMathType());
+
+            // Simplify if we just have true
+            if (invariant.isLiteralTrue()) {
+                simplifyInvariant = true;
+            }
+        }
+        else {
+            invariant = myTypeGraph.getTrueVarExp();
+            simplifyInvariant = true;
+        }
+
+        // Confirm the base case of invariant
+        Exp baseCase = Exp.copy(invariant);
+        Location baseLoc;
+        if (invariant.getLocation() != null) {
+            baseLoc = (Location) invariant.getLocation().clone();
+        }
+        else {
+            baseLoc = (Location) stmt.getLocation().clone();
+        }
+        baseLoc.setDetails("Base Case of the Invariant of While Statement");
+        setLocation(baseCase, baseLoc);
+        myCurrentAssertiveCode.addConfirm((Location) baseLoc.clone(), baseCase,
+                simplifyInvariant);
+
+        // Add the change rule
+        if (stmt.getChanging() != null) {
+            myCurrentAssertiveCode.addChange(stmt.getChanging());
+        }
+
+        // Assume the invariant and NQV(RP, P_Val) = P_Exp
+        Location whileLoc = stmt.getLocation();
+        Exp assume;
+        Exp finalConfirm =
+                myCurrentAssertiveCode.getFinalConfirm().getAssertion();
+        boolean simplifyFinalConfirm =
+                myCurrentAssertiveCode.getFinalConfirm().getSimplify();
+        Exp decreasingExp = stmt.getDecreasing();
+        Exp nqv;
+
+        if (decreasingExp != null) {
+            VarExp pval = createPValExp((Location) whileLoc.clone());
+            nqv = createQuestionMarkVariable(finalConfirm, pval);
+            nqv.setMathType(pval.getMathType());
+            Exp equalPExp =
+                    new EqualsExp((Location) whileLoc.clone(), Exp.copy(nqv),
+                            1, Exp.copy(decreasingExp));
+            equalPExp.setMathType(BOOLEAN);
+            assume = myTypeGraph.formConjunct(Exp.copy(invariant), equalPExp);
+        }
+        else {
+            decreasingExp = myTypeGraph.getTrueVarExp();
+            nqv = myTypeGraph.getTrueVarExp();
+            assume = Exp.copy(invariant);
+        }
+
+        myCurrentAssertiveCode.addAssume(assume);
+
+        // if statement body
+        edu.clemson.cs.r2jt.collections.List<Statement> ifStmtList =
+                stmt.getStatements();
+
+        // Confirm the inductive case of invariant
+        Exp inductiveCase = Exp.copy(invariant);
+        Location inductiveLoc;
+        if (invariant.getLocation() != null) {
+            inductiveLoc = (Location) invariant.getLocation().clone();
+        }
+        else {
+            inductiveLoc = (Location) stmt.getLocation().clone();
+        }
+        inductiveLoc
+                .setDetails("Inductive Case of Invariant of While Statement");
+        setLocation(inductiveCase, inductiveLoc);
+        ifStmtList.add(new ConfirmStmt(inductiveLoc, inductiveCase,
+                simplifyInvariant));
+
+        // Confirm the termination of the loop.
+        if (decreasingExp != null) {
+            Location decreasingLoc =
+                    (Location) decreasingExp.getLocation().clone();
+            if (decreasingLoc != null) {
+                decreasingLoc.setDetails("Termination of While Statement");
+            }
+
+            Exp infixExp =
+                    new InfixExp(decreasingLoc, Exp.copy(decreasingExp),
+                            createPosSymbol("<"), Exp.copy(nqv));
+            infixExp.setMathType(BOOLEAN);
+            ifStmtList.add(new ConfirmStmt(decreasingLoc, infixExp, false));
+        }
+
+        // empty elseif pair
+        edu.clemson.cs.r2jt.collections.List<ConditionItem> elseIfPairList =
+                new edu.clemson.cs.r2jt.collections.List<ConditionItem>();
+
+        // else body
+        Location elseConfirmLoc;
+        if (finalConfirm.getLocation() != null) {
+            elseConfirmLoc = (Location) finalConfirm.getLocation().clone();
+        }
+        else {
+            elseConfirmLoc = (Location) whileLoc.clone();
+        }
+        edu.clemson.cs.r2jt.collections.List<Statement> elseStmtList =
+                new edu.clemson.cs.r2jt.collections.List<Statement>();
+        elseStmtList.add(new ConfirmStmt(elseConfirmLoc,
+                Exp.copy(finalConfirm), simplifyFinalConfirm));
+
+        // condition
+        ProgramExp condition = (ProgramExp) Exp.copy(stmt.getTest());
+        if (condition.getLocation() != null) {
+            Location condLoc = (Location) condition.getLocation().clone();
+            condLoc.setDetails("While Loop Condition");
+            setLocation(condition, condLoc);
+        }
+
+        // add it back to your assertive code
+        IfStmt newIfStmt =
+                new IfStmt(condition, ifStmtList, elseIfPairList, elseStmtList);
+        myCurrentAssertiveCode.addCode(newIfStmt);
+
+        // Change our final confirm to "True"
+        Exp trueVarExp = myTypeGraph.getTrueVarExp();
+        trueVarExp.setLocation((Location) whileLoc.clone());
+        myCurrentAssertiveCode.setFinalConfirm(trueVarExp, true);
+
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\nWhile Rule Applied: \n");
+        myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
+        myVCBuffer.append("\n_____________________ \n");
     }
 }
