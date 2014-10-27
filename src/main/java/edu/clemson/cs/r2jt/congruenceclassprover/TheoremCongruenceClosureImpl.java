@@ -229,7 +229,7 @@ public class TheoremCongruenceClosureImpl {
                             || !curBox.m_bindings.equals(allValidBindings
                                     .peek())) {
                         // use allBound to disable type checks, otherwise just use typeCheck
-                        if (allBound(curBox)) {
+                        if (typeCheck(curBox)) {
                             allValidBindings.push(curBox.m_bindings);
                             if (extraOutput)
                                 System.out
