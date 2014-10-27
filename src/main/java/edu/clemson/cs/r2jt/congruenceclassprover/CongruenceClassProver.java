@@ -361,11 +361,16 @@ public class CongruenceClassProver {
             return proved;
         }
 
+        if (proved
+                .equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
+            theseResults +=
+                    (i + " iterations. PROVED (false assumption): VC " + vcc.m_name + "\n") + div;
+            m_results += theseResults;
+            return proved;
+        }
+
         String whyNotProved = "";
         if (proved
-                .equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION))
-            whyNotProved = "Assumptions evaluate to false";
-        else if (proved
                 .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING))
             whyNotProved = "Out of time or theorems";
         else
@@ -411,41 +416,6 @@ public class CongruenceClassProver {
         w.close();
     }
 
-    // Wherever PLambda is used replace it with "lambda_x" and append  "lambda_x(y:z) = body"
-    protected VC removeLambdas(TypeGraph g, VC vc) {
-        if (!(vc.getAntecedent().getFunctionApplications().contains("lambda") || vc
-                .getConsequent().getFunctionApplications().contains("lambda")))
-            return vc;
-        List<PExp> antList = vc.getAntecedent().getMutableCopy();
-        List<PExp> consqList = vc.getConsequent().getMutableCopy();
-
-        return new VC(vc.getName(),
-                new edu.clemson.cs.r2jt.proving2.Antecedent(antList),
-                new Consequent(consqList));
-    }
-
-    // this replaces PLambda with func name and returns PExp to append
-    protected PExp replacePLambdasWithPSymbols(PExp p) {
-        // base case
-        if (p.getClass().getSimpleName().equals("PLambda")) {
-            PLambda pl = (PLambda) p;
-            return PLambda.toPSymbol(pl);
-        }
-
-        Iterator<PExp> pit = p.getSubExpressions().iterator();
-        boolean hasPLambda = false;
-        PLambda lam = null;
-        int i = 0;
-        while (pit.hasNext()) {
-            PExp cur = pit.next();
-            if (cur.getClass().getSimpleName().equals("PLambda")) {
-                hasPLambda = true;
-                lam = (PLambda) cur;
-            }
-            ++i;
-        }
-        return p.withSubExpressionReplaced(i, PLambda.toPSymbol(lam));
-    }
 
     public void addProverListener(ProverListener l) {
         myProverListeners.add(l);

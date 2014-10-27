@@ -121,9 +121,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // if an identical formula already exists, this should return the int rep for it and should not
     // create a new formula.
     protected int removeLambda(PLambda lamb) {
-        //todo: check lambda list for duplicate before adding.  VC's will want to create multiple copies of the same lambda
 
-        //if (m_lambdas.containsKey(lamb.toString())) return m_registry.m_symbolToIndex.get((m_lambdas.get(lamb.toString())));
         // Make new function symbol
         String fname = "lambda" + f_num++;
         // Make new parameters
@@ -132,9 +130,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         PExp[] emptyArr = new PExp[0];
         ArrayBackedImmutableList<PExp> emptyList =
                 new ArrayBackedImmutableList<PExp>(emptyArr);
-        //int pnum = 0;
-        //HashMap<PExp,PExp> subsP = new HashMap<PExp, PExp>();
-        //HashMap<String,String> subsS = new HashMap<String, String>();
+
         int pnum = 0;
         HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
         while (pit.hasNext()) {
@@ -344,6 +340,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         mergeMatchingLambdas();
     }
 
+    // This has been replaced by a theorem in my Boolean_Theory - mike
     // look for =(x,y)=true in list.  If found call merge(x,y).
     //  = will always be at top of list.
     // These expression will not be removed by this function,

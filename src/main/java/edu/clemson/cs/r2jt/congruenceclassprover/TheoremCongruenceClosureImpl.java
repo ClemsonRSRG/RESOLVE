@@ -273,8 +273,8 @@ public class TheoremCongruenceClosureImpl {
             String dSymbol = box.m_bindings.get(oSymbol);
             if (!box.m_destRegistry.isSymbolInTable(dSymbol)) {
                 if (!oSymbol.contains("¢")) {
-                    System.err.println("Unbound: " + oSymbol + ":'" + dSymbol
-                            + "' in " + m_theoremString);
+                    /*System.err.println("Unbound: " + oSymbol + ":'" + dSymbol
+                            + "' in " + m_theoremString);*/
                     box.m_failedBindings = box.m_bindings;
                     return false;
                 }
@@ -300,7 +300,7 @@ public class TheoremCongruenceClosureImpl {
                 MTType dDomain = ((MTFunction) dType).getDomain();
                 if (oRange == null || oDomain == null || dRange == null
                         || dDomain == null) {
-                    System.err.println("null type error");
+                    //System.err.println("null type error");
                     return false;
                 }
                 // Check if these are type variables
@@ -313,7 +313,7 @@ public class TheoremCongruenceClosureImpl {
                                     ""));
                     oRange = box.m_destRegistry.m_typeDictionary.get(bRange);
                     if (oRange == null) {
-                        System.err.println("null type for: " + bRange);
+                        //System.err.println("null type for: " + bRange);
                         return false;
                     }
                 }
@@ -324,7 +324,7 @@ public class TheoremCongruenceClosureImpl {
                                     ""));
                     oDomain = box.m_destRegistry.m_typeDictionary.get(bDomain);
                     if (oDomain == null) {
-                        System.err.println("null type for:" + bDomain);
+                        //System.err.println("null type for:" + bDomain);
                         return false;
                     }
                 }
@@ -333,16 +333,16 @@ public class TheoremCongruenceClosureImpl {
                         .isSubtypeOf(oDomain)))
                         && (oRange.alphaEquivalentTo(dRange) || (dRange
                                 .isSubtypeOf(oRange)))) {
-                    System.out.println("Type match: " + oSymbol + ":" + oType
-                            + " maps to " + dSymbol + ":" + dType);
+                    /*System.out.println("Type match: " + oSymbol + ":" + oType
+                            + " maps to " + dSymbol + ":" + dType); */
                     continue;
                 }
-                System.err.println("Type Mismatch: orig: " + oDomain + "->"
-                        + oRange + " dest: " + dType);
+                /*System.err.println("Type Mismatch: orig: " + oDomain + "->"
+                        + oRange + " dest: " + dType); */
             }
-            System.err.println("Failed type check: " + oSymbol + ": " + oType
+            /*System.err.println("Failed type check: " + oSymbol + ": " + oType
                     + " " + dSymbol + ": " + dType);
-
+            */
             box.m_failedBindings = box.m_bindings;
             return false;
 
