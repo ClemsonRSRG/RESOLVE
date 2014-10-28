@@ -1786,9 +1786,9 @@ public class Populator extends TreeWalkerVisitor {
                             ste.toProgramTypeEntry(i.getLocation())
                                     .getProgramType();
                 }
-                else if (rce instanceof OperationDec) {
+                else if (rce instanceof OperationDec
+                        || rce instanceof FacilityOperationDec) {
                     pt = ste.toOperationEntry(i.getLocation()).getReturnType();
-
                 }
                 else if (rce instanceof FacilityTypeDec) {
                     pt =
