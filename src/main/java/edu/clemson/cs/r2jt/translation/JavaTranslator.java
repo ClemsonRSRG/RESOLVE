@@ -862,8 +862,11 @@ public class JavaTranslator extends AbstractTranslator {
         int parameterNum = 0;
         ST result =
                 myGroup.getInstanceOf("operation_argument_item").add(
-                        "actualName", name.getName()).add("actualQualifier",
-                        qualifier.getName());
+                        "actualName", name.getName());
+
+        if (qualifier != null) {
+            result.add("actualQualifier", qualifier.getName());
+        }
 
         try {
             OperationEntry o =
@@ -875,9 +878,14 @@ public class JavaTranslator extends AbstractTranslator {
                             .toOperationEntry(name.getLocation());
 
             for (ProgramParameterEntry p : o.getParameters()) {
-                ST cast = getVariableTypeTemplate(p.getDeclaredType());
-                result.add("castTypes", cast);
+                ST castedType = getVariableTypeTemplate(p.getDeclaredType());
+                ST castedArg =
+                        myGroup.getInstanceOf("parameter").add("type",
+                                castedType).add("name", "p" + parameterNum);
+                result.add("castedArguments", castedArg);
+                parameterNum++;
             }
+            parameterNum = 0;
 
             String realization;
             if (myCurrentEnhancement != null) {
