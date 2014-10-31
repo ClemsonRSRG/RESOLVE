@@ -477,22 +477,6 @@ public class JavaTranslator extends AbstractTranslator {
                                         .getWrappedDec(), node.getQualifier(),
                                 node.getName());
 
-                if (myCurrentEnhancement != null
-                        && myCurrentFacilityEntry.getEnhancements().size() >= 2) {
-
-                    ST enhancedCall =
-                            myGroup.getInstanceOf("enhanced_call").add(
-                                    "enhancementname",
-                                    myCurrentEnhancement.getModuleIdentifier()
-                                            .toString());
-
-                    enhancedCall.add("facilityname",
-                            myCurrentFacilityEntry.getName()).add("name",
-                            node.getName().getName());
-
-                    myEnhancedCalls.put(node.getName().getName(), enhancedCall);
-                }
-
                 myActiveTemplates.peek().add("arguments", argItem);
             }
             else if (wrappedDec instanceof ConstantParamDec) {
@@ -630,8 +614,9 @@ public class JavaTranslator extends AbstractTranslator {
     public void preCallStmt(CallStmt node) {
 
         ST callStmt;
-        String qualifier = getCallQualifier(node.getQualifier(),
-                node.getName(), node.getArguments());
+        String qualifier =
+                getCallQualifier(node.getQualifier(), node.getName(), node
+                        .getArguments());
 
         // If the call references an operation passed as a parameter, we need
         // to specially qualify it.

@@ -653,7 +653,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     }
 
     protected String getCallQualifier(PosSymbol qualifier, PosSymbol name,
-                                            List<ProgramExp> args) {
+            List<ProgramExp> args) {
 
         String result = null;
         List<PTType> argTypes = new LinkedList<PTType>();
@@ -669,9 +669,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                             new OperationQuery(null, name, argTypes))
                             .toOperationEntry(null);
 
-            // We're dealing with local facility, no qualification necessary.
-            if (myScope.getModuleIdentifier().equals(oe
-                    .getSourceModuleIdentifier())) {
+            // We're dealing with local operation, then no qualifier.
+            if (myScope.getModuleIdentifier().equals(
+                    oe.getSourceModuleIdentifier())) {
                 return null;
             }
             // Grab FacilityEntries in scope whose specification matches
@@ -685,8 +685,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
             for (FacilityEntry f : facilities) {
 
-                if (qualifier != null && f.getName().equals(qualifier
-                        .getName())) {
+                if (qualifier != null
+                        && f.getName().equals(qualifier.getName())) {
                     definingFacility = f;
                     break;
                 }
@@ -697,36 +697,42 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                     definingFacility = f;
                 }
 
-                System.out.println("HERERER: " + name.getName());
                 for (ModuleParameterization p : f.getEnhancements()) {
-                    if (oe.getSourceModuleIdentifier().equals(p
-                            .getModuleIdentifier())) {
+                    if (oe.getSourceModuleIdentifier().equals(
+                            p.getModuleIdentifier())) {
                         definingFacility = f;
                         comesFromEnhancement = true;
                     }
                 }
             }
 
-            // Jesus christ.
+            // If we're in an enhancement realization, some calls rightly won't
+            // have a facility, and hence no qualifier should be returned.
             if (definingFacility == null) {
                 return null;
             }
 
-            if (definingFacility.getEnhancements().size() >= 2 &&
-                    comesFromEnhancement) {
-                result = "((" + oe.getSourceModuleIdentifier() + ")" +
-                        definingFacility.getName() + ")";
+            // This is the idiotic part, really this is mixing the model and
+            // view (since I've put the '(' .. ')' cast parens in but it was
+            // mostly so I wouldn't have to write yet another super specific
+            // template -- there is likely a more elegant way.
+            if (definingFacility.getEnhancements().size() >= 2
+                    && comesFromEnhancement) {
+                result =
+                        "((" + oe.getSourceModuleIdentifier() + ")"
+                                + definingFacility.getName() + ")";
             }
             else {
                 result = definingFacility.getName();
             }
         }
         catch (NoSuchSymbolException nsse) {
-            throw new RuntimeException();   // Should've been caught a long
+            throw new RuntimeException(); // Should've been caught a long
             // time ago.
         }
         catch (DuplicateSymbolException dse) {
-            throw new RuntimeException();
+            throw new RuntimeException(); // Should've been caught a long
+            // time ago.
         }
         return result;
     }
