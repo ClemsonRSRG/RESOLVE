@@ -652,24 +652,13 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         return result;
     }
 
-    /**
-     *
-     * @param qualifier
-     * @param name
-     * @param args
-     * @return
-     */
-    // TODO : We aren't currently search
     protected String getCallQualifier(PosSymbol qualifier, PosSymbol name,
-            List<ProgramExp> args) {
+                                            List<ProgramExp> args) {
 
         String result = null;
         List<PTType> argTypes = new LinkedList<PTType>();
-        List<FacilityEntry> matches = new LinkedList<FacilityEntry>();
+        FacilityEntry definingFacility = null;
 
-        if (qualifier != null) {
-            return qualifier.getName();
-        }
         try {
             for (ProgramExp arg : args) {
                 argTypes.add(arg.getProgramType());
@@ -680,6 +669,11 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                             new OperationQuery(null, name, argTypes))
                             .toOperationEntry(null);
 
+            // We're dealing with local facility, no qualification necessary.
+            if (myScope.getModuleIdentifier().equals(oe
+                    .getSourceModuleIdentifier())) {
+                return null;
+            }
             // Grab FacilityEntries in scope whose specification matches
             // oe's SourceModuleIdentifier.
             List<FacilityEntry> facilities =
@@ -687,39 +681,52 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                             MathSymbolTable.ImportStrategy.IMPORT_NAMED,
                             MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
 
+            boolean comesFromEnhancement = false;
+
             for (FacilityEntry f : facilities) {
+
+                if (qualifier != null && f.getName().equals(qualifier
+                        .getName())) {
+                    definingFacility = f;
+                    break;
+                }
+
                 if (oe.getSourceModuleIdentifier().equals(
                         f.getFacility().getSpecification()
                                 .getModuleIdentifier())) {
-                    matches.add(f);
+                    definingFacility = f;
+                }
+
+                System.out.println("HERERER: " + name.getName());
+                for (ModuleParameterization p : f.getEnhancements()) {
+                    if (oe.getSourceModuleIdentifier().equals(p
+                            .getModuleIdentifier())) {
+                        definingFacility = f;
+                        comesFromEnhancement = true;
+                    }
                 }
             }
 
-            // There should only be two cases:
-            // 1. Size == 1 => a unique facility is instantiated
-            //          in scope whose specification matches oe's. So the
-            //          appropriate qualifier is that facility's name.
-            if (matches.size() == 1) {
-                result = matches.get(0).getName();
+            // Jesus christ.
+            if (definingFacility == null) {
+                return null;
             }
-            // 2. Size > 1 => multiple facilities instantiated use
-            //          oe's SourceModuleIdentifier as a specification.
-            //          Which facility's name to use as a qualifier is
-            //          ambiguous -- so off to argument examination we go.
-            if (matches.size() > 1) {
-                result = "TEMP";
-                //    result = findQualifyingArgument(oe, args);
+
+            if (definingFacility.getEnhancements().size() >= 2 &&
+                    comesFromEnhancement) {
+                result = "((" + oe.getSourceModuleIdentifier() + ")" +
+                        definingFacility.getName() + ")";
             }
-            // 3. Size == 0 => the operation owning the call is
-            //          defined locally. So no need to qualify.
+            else {
+                result = definingFacility.getName();
+            }
         }
         catch (NoSuchSymbolException nsse) {
-            // FOR NOW.
-            return "TEMP_QUALIFIER";
-            // noSuchSymbol(qualifier, name);
+            throw new RuntimeException();   // Should've been caught a long
+            // time ago.
         }
         catch (DuplicateSymbolException dse) {
-            throw new RuntimeException(dse);
+            throw new RuntimeException();
         }
         return result;
     }
@@ -858,7 +865,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 || myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
             outputAsFile(outputFile.getAbsolutePath(), myActiveTemplates.peek()
                     .render());
-            // System.out.println(myActiveTemplates.peek().render());
+            System.out.println(myActiveTemplates.peek().render());
         }
         else {
             outputToReport(myActiveTemplates.peek().render());

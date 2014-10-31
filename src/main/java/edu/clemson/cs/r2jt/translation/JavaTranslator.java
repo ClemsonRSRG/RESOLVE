@@ -630,9 +630,8 @@ public class JavaTranslator extends AbstractTranslator {
     public void preCallStmt(CallStmt node) {
 
         ST callStmt;
-        String qualifier =
-                getCallQualifier(node.getQualifier(), node.getName(), node
-                        .getArguments());
+        String qualifier = getCallQualifier(node.getQualifier(),
+                node.getName(), node.getArguments());
 
         // If the call references an operation passed as a parameter, we need
         // to specially qualify it.
@@ -641,9 +640,6 @@ public class JavaTranslator extends AbstractTranslator {
                     myGroup.getInstanceOf("qualified_call").add("name",
                             node.getName().getName()).add("qualifier",
                             node.getName().getName() + "Param");
-        }
-        else if (myEnhancedCalls.containsKey(node.getName().getName())) {
-            callStmt = myEnhancedCalls.get(node.getName().getName());
         }
         else if (qualifier != null) {
             callStmt =
