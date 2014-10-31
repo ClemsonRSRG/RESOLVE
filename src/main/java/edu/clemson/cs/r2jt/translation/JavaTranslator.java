@@ -63,16 +63,9 @@ public class JavaTranslator extends AbstractTranslator {
      * representing the actual arguments of a <code>FacilityDec</code> and
      * their formal <code>ModuleParameterDec</code> bound counterparts.</p>
      */
+    //TODO: This needs to go.. but how?
     private Map<ModuleArgumentItem, ModuleParameterDec> myFacilityBindings =
             new HashMap<ModuleArgumentItem, ModuleParameterDec>();
-
-    /**
-     * <p>Any call derived from an <code>FacilityDec</code> that's enhanced
-     * with two or more capabilities needs to be 'specially' qualified.
-     * So this map keeps track of the names of such calls, linking them
-     * to a specially formed qualifier <code>ST</code>.</p>
-     */
-    private Map<String, ST> myEnhancedCalls = new HashMap<String, ST>();
 
     /**
      * <p>This set keeps track of the names of any <code>OperationDec</code>s
