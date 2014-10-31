@@ -139,4 +139,14 @@ public class StringExp extends Exp {
         return new StringExp(null, newValue);
     }
 
+    public Exp replace(Exp old, Exp replace) {
+        if (!(old instanceof StringExp)) {
+            return null;
+        }
+        else if (((StringExp) old).getValue().equals(value))
+            return replace;
+        else
+            return null;
+    }
+
 }

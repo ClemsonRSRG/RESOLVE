@@ -21,20 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.clemson.cs.r2jt.absyn.AlternativeExp;
-import edu.clemson.cs.r2jt.absyn.DotExp;
-import edu.clemson.cs.r2jt.absyn.EqualsExp;
-import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.absyn.FunctionExp;
-import edu.clemson.cs.r2jt.absyn.InfixExp;
-import edu.clemson.cs.r2jt.absyn.IntegerExp;
-import edu.clemson.cs.r2jt.absyn.IsInExp;
-import edu.clemson.cs.r2jt.absyn.LambdaExp;
-import edu.clemson.cs.r2jt.absyn.MathVarDec;
-import edu.clemson.cs.r2jt.absyn.OutfixExp;
-import edu.clemson.cs.r2jt.absyn.PrefixExp;
-import edu.clemson.cs.r2jt.absyn.VarExp;
-import edu.clemson.cs.r2jt.absyn.VariableDotExp;
+import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
@@ -414,12 +401,26 @@ public abstract class PExp {
                             eAsEqualsExp.getOperatorAsString(), arguments,
                             PSymbol.DisplayType.INFIX);
         }
+        else if (e instanceof CharExp) {
+            CharExp eAsCharExp = (CharExp) e;
+
+            String symbol = "" + eAsCharExp.getValue();
+
+            retval = new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol);
+        }
         else if (e instanceof IntegerExp) {
             IntegerExp eAsIntegerExp = (IntegerExp) e;
 
             String symbol = "" + eAsIntegerExp.getValue();
 
             retval = new PSymbol(e.getMathType(), e.getMathTypeValue(), symbol);
+        }
+        else if (e instanceof StringExp) {
+            StringExp eAsStringExp = (StringExp) e;
+
+            retval =
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                            eAsStringExp.getValue());
         }
         else if (e instanceof DotExp) {
             DotExp eAsDotExp = (DotExp) e;
