@@ -203,7 +203,14 @@ public class ResolveCompiler {
     public static String webEncode(String s) {
         String encoded = null;
         try {
-            encoded = URLEncoder.encode(s.replaceAll(" ", "%20"), "UTF-8");
+            // Replace all instances of escaped quotes with the HTML equivalent
+            s = s.replaceAll("\"", "&quot;");
+
+            // Replace all spaces with the HTML equivalent
+            s = s.replaceAll(" ", "%20");
+
+            // Encode the string for WebIDE
+            encoded = URLEncoder.encode(s, "UTF-8");
         }
         catch (UnsupportedEncodingException ex) {
 
