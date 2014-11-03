@@ -246,6 +246,9 @@ qualified_call(qualifier, name, arguments) ::= <%
 enhanced_call(enhancementname, facilityname, name, arguments) ::= <%
     ((<enhancementname>)<facilityname>).<name>(<arguments; separator = ", ">);%>
 
+call_stmt(qualifier, name, arguments) ::= <%
+<if(qualifier)><qualifier>.<endif><name>(<arguments; separator = ", ">);%>
+
 name_exp(name) ::= <%<name>%>
 
 variable_dot_exp(modulename, typename, name, field, arguments) ::= <%

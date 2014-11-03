@@ -468,9 +468,13 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         try {
+            // TODO: really a qualifier SHOULD be passed to this query, but if
+            // we do so hoping that it will search the enhancements of the
+            // facility qualifier you passed you've thought wrong -- it won't
+            // find it. My guess is it's something with the qualifiedSearchPath.
             OperationEntry op =
                     myBuilder.getInnermostActiveScope().queryForOne(
-                            new OperationQuery(qualifier, name, argTypes));
+                            new OperationQuery(null, name, argTypes));
         }
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException("No operation found corresponding "
