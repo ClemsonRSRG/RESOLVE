@@ -1741,7 +1741,7 @@ assume_statement returns [AssumeStmt stmt = null]
 
 while_loop_statement returns [WhileStmt stmt = null]
     :   ^(  WHILE test=condition (chans=changing_clause)?    
-            (main=maintaining_clause)? (decr=decreasing_clause)?
+            (main=maintaining_clause)? (decr=decreasing_clause)
             (elasptime=elapsed_time_clause)?
             stmts=statement_sequence
         )
