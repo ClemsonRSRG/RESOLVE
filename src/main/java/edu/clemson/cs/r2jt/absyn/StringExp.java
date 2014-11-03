@@ -106,6 +106,16 @@ public class StringExp extends Exp {
         return sb.toString();
     }
 
+    /** Returns a formatted text string of this class. */
+    public String toString(int indent) {
+        StringBuffer sb = new StringBuffer();
+        printSpace(indent, sb);
+        if (value != null) {
+            sb.append(value.toString());
+        }
+        return sb.toString();
+    }
+
     /** Returns true if the variable is found in any sub expression
         of this one. **/
     public boolean containsVar(String varName, boolean IsOldExp) {

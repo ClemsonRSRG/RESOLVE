@@ -106,15 +106,11 @@ public class ProgramCharExp extends ProgramExp {
 
     /** Returns a formatted text string of this class. */
     public String toString(int indent) {
-
         StringBuffer sb = new StringBuffer();
-        /*
-         printSpace(indent, sb);
-         sb.append("ProgramCharExp\n");
-
-         printSpace(indent+increment, sb);
-         sb.append(value+"\n");
-         */
+        printSpace(indent, sb);
+        if (value != null) {
+            sb.append(value.toString());
+        }
         return sb.toString();
     }
 
