@@ -1377,81 +1377,37 @@ public class VCGenerator extends TreeWalkerVisitor {
                         searchProgramType(pNameTy.getLocation(), pNameTy
                                 .getName());
 
-                // Obtain the original dec from the AST
-                TypeDec type = (TypeDec) typeEntry.getDefiningElement();
+                // Only deal with actual types and don't deal
+                // with entry types passed in to the concept realization
+                if (typeEntry.getDefiningElement() instanceof TypeDec) {
+                    // Obtain the original dec from the AST
+                    TypeDec type = (TypeDec) typeEntry.getDefiningElement();
 
-                // Convert p to a VarExp
-                VarExp pExp = new VarExp(null, null, p.getName());
-                pExp.setMathType(pNameTy.getMathTypeValue());
+                    // Convert p to a VarExp
+                    VarExp pExp = new VarExp(null, null, p.getName());
+                    pExp.setMathType(pNameTy.getMathTypeValue());
 
-                // Obtain the exemplar in VarExp form
-                VarExp exemplar = new VarExp(null, null, type.getExemplar());
-                exemplar.setMathType(pNameTy.getMathTypeValue());
+                    // Obtain the exemplar in VarExp form
+                    VarExp exemplar =
+                            new VarExp(null, null, type.getExemplar());
+                    exemplar.setMathType(pNameTy.getMathTypeValue());
 
-                // Deep copy the original initialization ensures and the constraint
-                Exp init = Exp.copy(type.getInitialization().getEnsures());
-                Exp constraint = Exp.copy(type.getConstraint());
+                    // Deep copy the original initialization ensures and the constraint
+                    Exp init = Exp.copy(type.getInitialization().getEnsures());
+                    Exp constraint = Exp.copy(type.getConstraint());
 
-                // Only worry about replaces mode parameters
-                if (p.getMode() == Mode.REPLACES && init != null) {
-                    // Replace the formal with the actual
-                    init = replace(init, exemplar, pExp);
-
-                    // Set the details for the new location
-                    if (init.getLocation() != null) {
-                        Location initLoc;
-                        if (requires != null && requires.getLocation() != null) {
-                            Location reqLoc = requires.getLocation();
-                            initLoc = ((Location) reqLoc.clone());
-                        }
-                        else {
-                            // Append the name of the current procedure
-                            String details = "";
-                            if (myCurrentOperationEntry != null) {
-                                details =
-                                        " in Procedure "
-                                                + myCurrentOperationEntry
-                                                        .getName();
-                            }
-
-                            // Set the details of the current location
-                            initLoc = ((Location) opLocation.clone());
-                            initLoc.setDetails("Requires Clause of " + opName
-                                    + details);
-                        }
-                        initLoc.setDetails(initLoc.getDetails()
-                                + " (Assumption from \""
-                                + p.getMode().getModeName()
-                                + "\" parameter mode)");
-                        init.setLocation(initLoc);
-                    }
-
-                    // Create an AND infix expression with the requires clause
-                    if (requires != null
-                            && !requires.equals(myTypeGraph.getTrueVarExp())) {
-                        requires = myTypeGraph.formConjunct(requires, init);
-                        requires.setLocation((Location) opLocation.clone());
-                    }
-                    // Make initialization expression the requires clause
-                    else {
-                        requires = init;
-                    }
-                }
-                // Constraints for the other parameter modes needs to be added
-                // to the requires clause as conjuncts.
-                else {
-                    if (constraint != null
-                            && !constraint.equals(myTypeGraph.getTrueVarExp())) {
+                    // Only worry about replaces mode parameters
+                    if (p.getMode() == Mode.REPLACES && init != null) {
                         // Replace the formal with the actual
-                        constraint = replace(constraint, exemplar, pExp);
+                        init = replace(init, exemplar, pExp);
 
                         // Set the details for the new location
-                        if (constraint.getLocation() != null) {
-                            Location constLoc;
+                        if (init.getLocation() != null) {
+                            Location initLoc;
                             if (requires != null
                                     && requires.getLocation() != null) {
                                 Location reqLoc = requires.getLocation();
-                                constLoc = ((Location) reqLoc.clone());
+                                initLoc = ((Location) reqLoc.clone());
                             }
                             else {
                                 // Append the name of the current procedure
@@ -1463,29 +1419,82 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                             .getName();
                                 }
 
-                                constLoc = ((Location) opLocation.clone());
-                                constLoc.setDetails("Requires Clause of "
+                                // Set the details of the current location
+                                initLoc = ((Location) opLocation.clone());
+                                initLoc.setDetails("Requires Clause of "
                                         + opName + details);
                             }
-                            constLoc.setDetails(constLoc.getDetails()
-                                    + " (Constraint from \""
+                            initLoc.setDetails(initLoc.getDetails()
+                                    + " (Assumption from \""
                                     + p.getMode().getModeName()
                                     + "\" parameter mode)");
-                            constraint.setLocation(constLoc);
+                            init.setLocation(initLoc);
                         }
 
                         // Create an AND infix expression with the requires clause
                         if (requires != null
                                 && !requires
                                         .equals(myTypeGraph.getTrueVarExp())) {
-                            requires =
-                                    myTypeGraph.formConjunct(requires,
-                                            constraint);
+                            requires = myTypeGraph.formConjunct(requires, init);
                             requires.setLocation((Location) opLocation.clone());
                         }
-                        // Make constraint expression the requires clause
+                        // Make initialization expression the requires clause
                         else {
-                            requires = constraint;
+                            requires = init;
+                        }
+                    }
+                    // Constraints for the other parameter modes needs to be added
+                    // to the requires clause as conjuncts.
+                    else {
+                        if (constraint != null
+                                && !constraint.equals(myTypeGraph
+                                        .getTrueVarExp())) {
+                            // Replace the formal with the actual
+                            constraint = replace(constraint, exemplar, pExp);
+
+                            // Set the details for the new location
+                            if (constraint.getLocation() != null) {
+                                Location constLoc;
+                                if (requires != null
+                                        && requires.getLocation() != null) {
+                                    Location reqLoc = requires.getLocation();
+                                    constLoc = ((Location) reqLoc.clone());
+                                }
+                                else {
+                                    // Append the name of the current procedure
+                                    String details = "";
+                                    if (myCurrentOperationEntry != null) {
+                                        details =
+                                                " in Procedure "
+                                                        + myCurrentOperationEntry
+                                                                .getName();
+                                    }
+
+                                    constLoc = ((Location) opLocation.clone());
+                                    constLoc.setDetails("Requires Clause of "
+                                            + opName + details);
+                                }
+                                constLoc.setDetails(constLoc.getDetails()
+                                        + " (Constraint from \""
+                                        + p.getMode().getModeName()
+                                        + "\" parameter mode)");
+                                constraint.setLocation(constLoc);
+                            }
+
+                            // Create an AND infix expression with the requires clause
+                            if (requires != null
+                                    && !requires.equals(myTypeGraph
+                                            .getTrueVarExp())) {
+                                requires =
+                                        myTypeGraph.formConjunct(requires,
+                                                constraint);
+                                requires.setLocation((Location) opLocation
+                                        .clone());
+                            }
+                            // Make constraint expression the requires clause
+                            else {
+                                requires = constraint;
+                            }
                         }
                     }
                 }
