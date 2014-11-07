@@ -502,6 +502,19 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentOperationEntry = null;
     }
 
+    // -----------------------------------------------------------
+    // RepresentationDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void postRepresentationDec(RepresentationDec dec) {
+        // Applies the correspondence rule
+        applyCorrespondenceRule(dec);
+
+        // Loop through assertive code stack
+        loopAssertiveCodeStack();
+    }
+
     // ===========================================================
     // Public Methods
     // ===========================================================
@@ -2613,6 +2626,96 @@ public class VCGenerator extends TreeWalkerVisitor {
                 myVCBuffer.append("\n_____________________ \n");
             }
         }
+    }
+
+    /**
+     * <p>Applies the correspondence rule.</p>
+     *
+     * @param dec Representation declaration object.
+     */
+    private void applyCorrespondenceRule(RepresentationDec dec) {
+        // Create a new assertive code to hold the correspondence VCs
+        AssertiveCode assertiveCode = new AssertiveCode(myInstanceEnvironment);
+
+        // Add the global constraints as given
+        assertiveCode.addAssume(myGlobalConstraintExp);
+
+        // Add the global require clause as given
+        assertiveCode.addAssume(myGlobalRequiresExp);
+
+        // Add the convention as given
+        assertiveCode.addAssume(dec.getConvention());
+
+        // Add the correspondence as given
+        assertiveCode.addAssume(dec.getCorrespondence());
+
+        // Search for the type we are implementing
+        ProgramTypeEntry typeEntry =
+                searchProgramType(dec.getLocation(), null, dec.getName());
+
+        // Make sure we don't have a generic type
+        if (typeEntry.getDefiningElement() instanceof TypeDec) {
+            // Obtain the original dec from the AST
+            TypeDec type = (TypeDec) typeEntry.getDefiningElement();
+
+            // Create a variable expression from the type exemplar
+            VarExp exemplar =
+                    createVarExp(type.getLocation(), type.getExemplar(),
+                            typeEntry.getModelType());
+
+            // Create a variable that refers to the conceptual exemplar
+            DotExp conceptualVar = new DotExp();
+            VarExp cName = new VarExp();
+            cName.setMathType(myTypeGraph.BOOLEAN);
+            cName.setName(createPosSymbol("Conc"));
+
+            edu.clemson.cs.r2jt.collections.List<Exp> myList =
+                    new edu.clemson.cs.r2jt.collections.List<Exp>();
+            myList.add(cName);
+            myList.add(exemplar);
+
+            conceptualVar.setSegments(myList);
+            conceptualVar.setMathType(typeEntry.getModelType());
+
+            // Make sure we have a constraint
+            Exp constraint;
+            if (type.getConstraint() == null) {
+                constraint = myTypeGraph.getTrueVarExp();
+            }
+            else {
+                constraint = Exp.copy(type.getConstraint());
+            }
+            constraint = replace(constraint, exemplar, conceptualVar);
+
+            // Set the location for the constraint
+            Location loc;
+            if (constraint.getLocation() != null) {
+                loc = (Location) constraint.getLocation().clone();
+            }
+            else {
+                loc = (Location) type.getLocation().clone();
+            }
+            loc.setDetails("Correspondence for " + dec.getName().getName());
+            setLocation(constraint, loc);
+
+            // We need to make sure the constraints for the type we are
+            // implementing is met.
+            boolean simplify = false;
+            // Simplify if we just have true
+            if (constraint.isLiteralTrue()) {
+                simplify = true;
+            }
+            assertiveCode.setFinalConfirm(constraint, simplify);
+        }
+
+        // Add this new assertive code to our incomplete assertive code stack
+        myIncAssertiveCodeStack.push(assertiveCode);
+
+        // Verbose Mode Debug Messages
+        String newString = "\nCorrespondence Rule Applied: \n";
+        newString += assertiveCode.assertionToString();
+        newString += "\n_____________________ \n";
+        myIncAssertiveCodeStackInfo.push(newString);
     }
 
     /**
