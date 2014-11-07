@@ -25,6 +25,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
@@ -642,6 +643,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // is a case we have not handled.
                 if (v instanceof VariableNameExp) {
                     varExp.setName(((VariableNameExp) v).getName());
+                    varExp.setMathType(v.getMathType());
+                    varExp.setMathTypeValue(v.getMathTypeValue());
                     lastMathType = v.getMathType();
                     lastMathTypeValue = v.getMathTypeValue();
                     newSegments.add(varExp);
@@ -1218,7 +1221,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     // Query for the type entry in the symbol table
                     ProgramTypeEntry typeEntry =
                             searchProgramType(pNameTy.getLocation(), pNameTy
-                                    .getName());
+                                    .getQualifier(), pNameTy.getName());
 
                     Exp init;
                     if (typeEntry.getDefiningElement() instanceof TypeDec) {
@@ -1371,15 +1374,16 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Ty is NameTy
             if (p.getTy() instanceof NameTy) {
                 NameTy pNameTy = (NameTy) p.getTy();
-
-                // Query for the type entry in the symbol table
-                typeEntry =
-                        searchProgramType(pNameTy.getLocation(), pNameTy
-                                .getName());
+                PTType ptType = pNameTy.getProgramTypeValue();
 
                 // Only deal with actual types and don't deal
                 // with entry types passed in to the concept realization
-                if (typeEntry.getDefiningElement() instanceof TypeDec) {
+                if (!(ptType instanceof PTGeneric)) {
+                    // Query for the type entry in the symbol table
+                    typeEntry =
+                            searchProgramType(pNameTy.getLocation(), pNameTy
+                                    .getQualifier(), pNameTy.getName());
+
                     // Obtain the original dec from the AST
                     TypeDec type = (TypeDec) typeEntry.getDefiningElement();
 
@@ -2156,29 +2160,31 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @param loc The location in the AST that we are
      *            currently visiting.
+     * @param qualifier The qualifier of the type.
      * @param name The name of the type.
      *
      * @return An <code>ProgramTypeEntry</code> from the
      *         symbol table.
      */
-    private ProgramTypeEntry searchProgramType(Location loc, PosSymbol name) {
+    private ProgramTypeEntry searchProgramType(Location loc,
+            PosSymbol qualifier, PosSymbol name) {
         // Query for the corresponding operation
         ProgramTypeEntry pt = null;
-        try {
-            pt =
-                    myCurrentModuleScope.queryForOne(
-                            new NameQuery(null, name,
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_INSTANTIATE,
-                                    false)).toProgramTypeEntry(loc);
-        }
-        catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(null, name.getName(), loc);
-        }
-        catch (DuplicateSymbolException dse) {
-            //This should be caught earlier, when the duplicate type is
-            //created
-            throw new RuntimeException(dse);
+
+        List<SymbolTableEntry> entries =
+                myCurrentModuleScope.query(new NameQuery(qualifier, name,
+                        ImportStrategy.IMPORT_NAMED,
+                        FacilityStrategy.FACILITY_INSTANTIATE, false));
+
+        for (SymbolTableEntry ste : entries) {
+            if (ste instanceof ProgramTypeEntry) {
+                if (pt == null) {
+                    pt = ste.toProgramTypeEntry(loc);
+                }
+                else {
+                    throw new RuntimeException();
+                }
+            }
         }
 
         return pt;
@@ -2678,7 +2684,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                         // Query for the type entry in the symbol table
                         ProgramTypeEntry typeEntry =
                                 searchProgramType(pNameTy.getLocation(),
-                                        pNameTy.getName());
+                                        pNameTy.getQualifier(), pNameTy
+                                                .getName());
 
                         // Obtain the original dec from the AST
                         TypeDec type = (TypeDec) typeEntry.getDefiningElement();
@@ -3463,7 +3470,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Query for the type entry in the symbol table
             typeEntry =
-                    searchProgramType(pNameTy.getLocation(), pNameTy.getName());
+                    searchProgramType(pNameTy.getLocation(), pNameTy
+                            .getQualifier(), pNameTy.getName());
 
             // Make sure we don't have a generic type
             if (typeEntry.getDefiningElement() instanceof TypeDec) {
