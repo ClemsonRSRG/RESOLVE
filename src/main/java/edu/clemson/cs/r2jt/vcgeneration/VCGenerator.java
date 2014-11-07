@@ -2732,70 +2732,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                         conceptParams);
 
                         // Create an equals expression from formal to actual
-                        Exp evalExp = conceptParams.get(i).getEvalExp();
-                        Exp actualExp;
-                        String name;
-                        // Simply replace the numbers/characters/strings
-                        if (evalExp instanceof ProgramIntegerExp) {
-                            name =
-                                    String
-                                            .valueOf(((ProgramIntegerExp) evalExp)
-                                                    .getValue());
-                            actualExp =
-                                    createVarExp(dec.getLocation(),
-                                            createPosSymbol(name), typeEntry
-                                                    .getModelType());
-                        }
-                        else if (evalExp instanceof ProgramCharExp) {
-                            name =
-                                    String.valueOf(((ProgramCharExp) evalExp)
-                                            .getValue());
-                            actualExp =
-                                    createVarExp(dec.getLocation(),
-                                            createPosSymbol(name), typeEntry
-                                                    .getModelType());
-                        }
-                        else if (evalExp instanceof ProgramStringExp) {
-                            name = ((ProgramStringExp) evalExp).getValue();
-                            actualExp =
-                                    createVarExp(dec.getLocation(),
-                                            createPosSymbol(name), typeEntry
-                                                    .getModelType());
-                        }
-                        else if (evalExp instanceof VariableNameExp) {
-                            name =
-                                    ((VariableNameExp) evalExp).getName()
-                                            .getName();
-                            actualExp =
-                                    createVarExp(dec.getLocation(),
-                                            createPosSymbol(name), typeEntry
-                                                    .getModelType());
-                        }
-                        else {
-                            VariableDotExp v = (VariableDotExp) evalExp;
-                            List<VariableExp> vList = v.getSegments();
-                            edu.clemson.cs.r2jt.collections.List<Exp> newSegments =
-                                    new edu.clemson.cs.r2jt.collections.List<Exp>();
-
-                            // Loot through each variable expression and add it to our dot list
-                            for (VariableExp vr : vList) {
-                                VarExp varExp = new VarExp();
-                                if (vr instanceof VariableNameExp) {
-                                    varExp.setName(((VariableNameExp) vr)
-                                            .getName());
-                                    varExp.setMathType(vr.getMathType());
-                                    varExp.setMathTypeValue(vr
-                                            .getMathTypeValue());
-                                    newSegments.add(varExp);
-                                }
-                            }
-
-                            // Expression to be replaced
-                            actualExp =
-                                    new DotExp(v.getLocation(), newSegments,
-                                            null);
-                        }
-                        actualExp.setMathType(typeEntry.getModelType());
+                        Exp actualExp =
+                                convertExp(conceptParams.get(i).getEvalExp());
                         EqualsExp formalEq =
                                 new EqualsExp(dec.getLocation(), varDecExp, 1,
                                         actualExp);
