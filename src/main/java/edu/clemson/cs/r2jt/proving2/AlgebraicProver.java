@@ -29,7 +29,7 @@ import edu.clemson.cs.r2jt.proving2.transformations.NoOpLabel;
 import edu.clemson.cs.r2jt.proving2.transformations.ReplaceSymmetricEqualityWithTrueInConsequent;
 import edu.clemson.cs.r2jt.proving2.transformations.ReplaceTheoremInConsequentWithTrue;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
-import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
