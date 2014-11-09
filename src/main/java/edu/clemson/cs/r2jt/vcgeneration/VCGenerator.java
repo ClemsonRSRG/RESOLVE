@@ -23,13 +23,8 @@ import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
-import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
@@ -233,7 +228,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         catch (NoSuchSymbolException e) {
             System.err.println("Module " + dec.getName()
                     + " does not exist or is not in scope.");
-            noSuchModule(dec.getLocation());
+            Utilities.noSuchModule(dec.getLocation());
         }
     }
 
@@ -283,7 +278,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         catch (NoSuchSymbolException e) {
             System.err.println("Module " + dec.getName()
                     + " does not exist or is not in scope.");
-            noSuchModule(dec.getLocation());
+            Utilities.noSuchModule(dec.getLocation());
         }
     }
 
@@ -342,7 +337,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         catch (NoSuchSymbolException e) {
             System.err.println("Module " + dec.getName()
                     + " does not exist or is not in scope.");
-            noSuchModule(dec.getLocation());
+            Utilities.noSuchModule(dec.getLocation());
         }
     }
 
@@ -366,8 +361,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             argTypes.add(p.getTy().getProgramTypeValue());
         }
         myCurrentOperationEntry =
-                searchOperation(dec.getLocation(), null, dec.getName(),
-                        argTypes);
+                Utilities.searchOperation(dec.getLocation(), null, dec
+                        .getName(), argTypes, myCurrentModuleScope);
     }
 
     @Override
@@ -466,8 +461,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             argTypes.add(p.getTy().getProgramTypeValue());
         }
         myCurrentOperationEntry =
-                searchOperation(dec.getLocation(), null, dec.getName(),
-                        argTypes);
+                Utilities.searchOperation(dec.getLocation(), null, dec
+                        .getName(), argTypes, myCurrentModuleScope);
     }
 
     @Override
@@ -549,60 +544,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
 
     // -----------------------------------------------------------
-    // Error Handling
-    // -----------------------------------------------------------
-
-    public void expNotHandled(Exp exp, Location l) {
-        String message = "Exp not handled: " + exp.toString();
-        throw new SourceErrorException(message, l);
-    }
-
-    public void illegalOperationEnsures(Location l) {
-        // TODO: Move this to sanity check.
-        String message =
-                "Ensures clauses of operations that return a value should be of the form <OperationName> = <value>";
-        throw new SourceErrorException(message, l);
-    }
-
-    public void notAType(SymbolTableEntry entry, Location l) {
-        throw new SourceErrorException(entry.getSourceModuleIdentifier()
-                .fullyQualifiedRepresentation(entry.getName())
-                + " is not known to be a type.", l);
-    }
-
-    public void notInFreeVarList(PosSymbol name, Location l) {
-        String message =
-                "State variable " + name + " not in free variable list";
-        throw new SourceErrorException(message, l);
-    }
-
-    public void noSuchModule(Location location) {
-        throw new SourceErrorException(
-                "Module does not exist or is not in scope.", location);
-    }
-
-    public void noSuchSymbol(PosSymbol qualifier, String symbolName, Location l) {
-
-        String message;
-
-        if (qualifier == null) {
-            message = "No such symbol: " + symbolName;
-        }
-        else {
-            message =
-                    "No such symbol in module: " + qualifier.getName() + "."
-                            + symbolName;
-        }
-
-        throw new SourceErrorException(message, l);
-    }
-
-    public void tyNotHandled(Ty ty, Location location) {
-        String message = "Ty not handled: " + ty.toString();
-        throw new SourceErrorException(message, location);
-    }
-
-    // -----------------------------------------------------------
     // Prover Mode
     // -----------------------------------------------------------
 
@@ -627,241 +568,13 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param variableList List of the all variables as
      *                     <code>VarDec</code>.
      */
-    public void addVarDecsAsFreeVars(List<VarDec> variableList) {
+    private void addVarDecsAsFreeVars(List<VarDec> variableList) {
         // Loop through the variable list
         for (VarDec v : variableList) {
-            myCurrentAssertiveCode.addFreeVar(createVarExp(v.getLocation(), v
-                    .getName(), v.getTy().getMathTypeValue()));
+            myCurrentAssertiveCode.addFreeVar(Utilities.createVarExp(v
+                    .getLocation(), null, v.getName(), v.getTy()
+                    .getMathTypeValue(), null));
         }
-    }
-
-    /**
-     * <p>Converts the different types of <code>Exp</code> to the
-     * ones used by the VC Generator.</p>
-     *
-     * @param oldExp The expression to be converted.
-     *
-     * @return An <code>Exp</code>.
-     */
-    private Exp convertExp(Exp oldExp) {
-        Exp retExp;
-
-        // Case #1: ProgramIntegerExp
-        if (oldExp instanceof ProgramIntegerExp) {
-            IntegerExp exp = new IntegerExp();
-            exp.setValue(((ProgramIntegerExp) oldExp).getValue());
-            exp.setMathType(oldExp.getMathType());
-            retExp = exp;
-        }
-        // Case #2: ProgramCharacterExp
-        else if (oldExp instanceof ProgramCharExp) {
-            CharExp exp = new CharExp();
-            exp.setValue(((ProgramCharExp) oldExp).getValue());
-            exp.setMathType(oldExp.getMathType());
-            retExp = exp;
-        }
-        // Case #3: ProgramStringExp
-        else if (oldExp instanceof ProgramStringExp) {
-            StringExp exp = new StringExp();
-            exp.setValue(((ProgramStringExp) oldExp).getValue());
-            exp.setMathType(oldExp.getMathType());
-            retExp = exp;
-        }
-        // Case #4: VariableDotExp
-        else if (oldExp instanceof VariableDotExp) {
-            DotExp exp = new DotExp();
-            List<VariableExp> segments =
-                    ((VariableDotExp) oldExp).getSegments();
-            edu.clemson.cs.r2jt.collections.List<Exp> newSegments =
-                    new edu.clemson.cs.r2jt.collections.List<Exp>();
-
-            // Need to replace each of the segments in a dot expression
-            MTType lastMathType = null;
-            MTType lastMathTypeValue = null;
-            for (VariableExp v : segments) {
-                VarExp varExp = new VarExp();
-
-                // Can only be a VariableNameExp. Anything else
-                // is a case we have not handled.
-                if (v instanceof VariableNameExp) {
-                    varExp.setName(((VariableNameExp) v).getName());
-                    varExp.setMathType(v.getMathType());
-                    varExp.setMathTypeValue(v.getMathTypeValue());
-                    lastMathType = v.getMathType();
-                    lastMathTypeValue = v.getMathTypeValue();
-                    newSegments.add(varExp);
-                }
-                else {
-                    expNotHandled(v, v.getLocation());
-                }
-            }
-
-            // Set the segments and the type information.
-            exp.setSegments(newSegments);
-            exp.setMathType(lastMathType);
-            exp.setMathTypeValue(lastMathTypeValue);
-            retExp = exp;
-        }
-        // Case #5: VariableNameExp
-        else if (oldExp instanceof VariableNameExp) {
-            VarExp exp = new VarExp();
-            exp.setName(((VariableNameExp) oldExp).getName());
-            exp.setMathType(oldExp.getMathType());
-            exp.setMathTypeValue(oldExp.getMathTypeValue());
-            retExp = exp;
-        }
-        // Else simply return oldExp
-        else {
-            retExp = oldExp;
-        }
-
-        return retExp;
-    }
-
-    /**
-     * <p>Returns a newly created <code>PosSymbol</code>
-     * with the string provided.</p>
-     *
-     * @param name String of the new <code>PosSymbol</code>.
-     *
-     * @return The new <code>PosSymbol</code>.
-     */
-    private PosSymbol createPosSymbol(String name) {
-        // Create the PosSymbol
-        PosSymbol posSym = new PosSymbol();
-        posSym.setSymbol(Symbol.symbol(name));
-        return posSym;
-    }
-
-    /**
-     * <p>Returns an <code>DotExp</code> with the <code>VarDec</code>
-     * and its initialization ensures clause.</p>
-     *
-     * @param var The declared variable.
-     *
-     * @return The new <code>DotExp</code>.
-     */
-    private DotExp createInitExp(VarDec var) {
-        // Convert the declared variable into a VarExp
-        VarExp varExp =
-                createVarExp(var.getLocation(), var.getName(), var.getTy()
-                        .getMathTypeValue());
-
-        // Left hand side of the expression
-        VarExp left = null;
-
-        // NameTy
-        if (var.getTy() instanceof NameTy) {
-            NameTy ty = (NameTy) var.getTy();
-            left = createVarExp(ty.getLocation(), ty.getName(), MTYPE);
-        }
-        else {
-            tyNotHandled(var.getTy(), var.getTy().getLocation());
-        }
-
-        // Complicated steps to construct the argument list
-        // YS: No idea why it is so complicated!
-        edu.clemson.cs.r2jt.collections.List<Exp> expList =
-                new edu.clemson.cs.r2jt.collections.List<Exp>();
-        expList.add(varExp);
-        FunctionArgList argList = new FunctionArgList();
-        argList.setArguments(expList);
-        edu.clemson.cs.r2jt.collections.List<FunctionArgList> functionArgLists =
-                new edu.clemson.cs.r2jt.collections.List<FunctionArgList>();
-        functionArgLists.add(argList);
-
-        // Right hand side of the expression
-        FunctionExp right =
-                new FunctionExp(var.getLocation(), null,
-                        createPosSymbol("Is_Initial"), null, functionArgLists);
-        right.setMathType(BOOLEAN);
-
-        // Create the DotExp
-        edu.clemson.cs.r2jt.collections.List<Exp> exps =
-                new edu.clemson.cs.r2jt.collections.List<Exp>();
-        exps.add(left);
-        exps.add(right);
-        DotExp exp = new DotExp(var.getLocation(), exps, null);
-        exp.setMathType(BOOLEAN);
-
-        return exp;
-    }
-
-    /**
-     * <p>Creates a variable expression with the name
-     * "P_val" and has type "N".</p>
-     *
-     * @param location Location that wants to create
-     *                 this variable.
-     *
-     * @return The created <code>VarExp</code>.
-     */
-    private VarExp createPValExp(Location location) {
-        // Locate "N" (Natural Number)
-        MathSymbolEntry mse = searchMathSymbol(location, "N");
-        try {
-            // Create a variable with the name P_val
-            return createVarExp(location, createPosSymbol("P_val"), mse
-                    .getTypeValue());
-        }
-        catch (SymbolNotOfKindTypeException e) {
-            notAType(mse, location);
-        }
-
-        return null;
-    }
-
-    /**
-     * <p>Create a question mark variable with the oldVar
-     * passed in.</p>
-     *
-     * @param exp The full expression clause.
-     * @param oldVar The old variable expression.
-     *
-     * @return A new variable with the question mark in <code>VarExp</code> form.
-     */
-    private VarExp createQuestionMarkVariable(Exp exp, VarExp oldVar) {
-        // Add an extra question mark to the front of oldVar
-        VarExp newOldVar =
-                new VarExp(null, null, createPosSymbol("?"
-                        + oldVar.getName().getName()));
-        newOldVar.setMathType(oldVar.getMathType());
-        newOldVar.setMathTypeValue(oldVar.getMathTypeValue());
-
-        // Applies the question mark to oldVar if it is our first time visiting.
-        if (exp.containsVar(oldVar.getName().getName(), false)) {
-            return createQuestionMarkVariable(exp, newOldVar);
-        }
-        // Don't need to apply the question mark here.
-        else if (exp.containsVar(newOldVar.getName().toString(), false)) {
-            return createQuestionMarkVariable(exp, newOldVar);
-        }
-        else {
-            // Return the new variable expression with the question mark
-            if (oldVar.getName().getName().charAt(0) != '?') {
-                return newOldVar;
-            }
-        }
-
-        // Return our old self.
-        return oldVar;
-    }
-
-    /**
-     * <p>Returns a newly created <code>VarExp</code>
-     * with the <code>PosSymbol</code> and math type provided.</p>
-     *
-     * @param loc Location of the new <code>VarExp</code>
-     * @param name <code>PosSymbol</code> of the new <code>VarExp</code>.
-     * @param type Math type of the new <code>VarExp</code>.
-     *
-     * @return The new <code>VarExp</code>.
-     */
-    private VarExp createVarExp(Location loc, PosSymbol name, MTType type) {
-        // Create the VarExp
-        VarExp exp = new VarExp(loc, null, name);
-        exp.setMathType(type);
-        return exp;
     }
 
     /**
@@ -928,7 +641,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             Location theLoc = constraint.getLocation();
                             theLoc.setDetails("Constraint of Module: "
                                     + dec.getName());
-                            setLocation(constraint, theLoc);
+                            Utilities.setLocation(constraint, theLoc);
                         }
 
                         // Form conjunct if needed.
@@ -949,7 +662,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             catch (NoSuchSymbolException e) {
                 System.err.println("Module " + mi.toString()
                         + " does not exist or is not in scope.");
-                noSuchModule(loc);
+                Utilities.noSuchModule(loc);
             }
         }
 
@@ -983,13 +696,13 @@ public class VCGenerator extends TreeWalkerVisitor {
         else {
             Location loc = (Location) dec.getLocation().clone();
             retExp = myTypeGraph.getTrueVarExp();
-            setLocation(retExp, loc);
+            Utilities.setLocation(retExp, loc);
         }
 
         if (retExp.getLocation() != null) {
             Location loc = retExp.getLocation();
             loc.setDetails("Ensures Clause of " + name);
-            setLocation(retExp, loc);
+            Utilities.setLocation(retExp, loc);
         }
 
         return retExp;
@@ -1013,7 +726,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         for (ProgramExp arg : args) {
             argTypes.add(arg.getProgramType());
         }
-        OperationEntry opEntry = searchOperation(loc, qual, name, argTypes);
+        OperationEntry opEntry =
+                Utilities.searchOperation(loc, qual, name, argTypes,
+                        myCurrentModuleScope);
 
         // Obtain an OperationDec from the OperationEntry
         ResolveConceptualElement element = opEntry.getDefiningElement();
@@ -1075,87 +790,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         else {
             Location loc = (Location) dec.getLocation().clone();
             retExp = myTypeGraph.getTrueVarExp();
-            setLocation(retExp, loc);
+            Utilities.setLocation(retExp, loc);
         }
 
         if (retExp.getLocation() != null) {
             Location loc = retExp.getLocation();
             loc.setDetails("Requires Clause for " + name);
-            setLocation(retExp, loc);
+            Utilities.setLocation(retExp, loc);
         }
 
         return retExp;
-    }
-
-    /**
-     * <p>Get the <code>PosSymbol</code> associated with the
-     * <code>VariableExp</code> left.</p>
-     *
-     * @param left The variable expression.
-     *
-     * @return The <code>PosSymbol</code> of left.
-     */
-    private PosSymbol getVarName(VariableExp left) {
-        // Return value
-        PosSymbol name;
-
-        // Variable Name Expression
-        if (left instanceof VariableNameExp) {
-            name = ((VariableNameExp) left).getName();
-        }
-        // Variable Dot Expression
-        else if (left instanceof VariableDotExp) {
-            VariableRecordExp varRecExp =
-                    (VariableRecordExp) ((VariableDotExp) left)
-                            .getSemanticExp();
-            name = varRecExp.getName();
-        }
-        // Variable Record Expression
-        else if (left instanceof VariableRecordExp) {
-            VariableRecordExp varRecExp = (VariableRecordExp) left;
-            name = varRecExp.getName();
-        }
-        //
-        // Creates an expression with "false" as its name
-        else {
-            name = createPosSymbol("false");
-        }
-
-        return name;
-    }
-
-    /**
-     * <p>Checks to see if the expression passed in is a
-     * verification variable or not. A verification variable
-     * is either "P_val" or starts with "?".</p>
-     *
-     * @param name Expression that we want to check
-     *
-     * @return True/False
-     */
-    private boolean isVerificationVar(Exp name) {
-        // VarExp
-        if (name instanceof VarExp) {
-            String strName = ((VarExp) name).getName().getName();
-            // Case #1: Question mark variables
-            if (strName.charAt(0) == '?') {
-                return true;
-            }
-            // Case #2: P_val
-            else if (strName.equals("P_val")) {
-                return true;
-            }
-        }
-        // DotExp
-        else if (name instanceof DotExp) {
-            // Recursively call this method until we get
-            // either true or false.
-            List<Exp> names = ((DotExp) name).getSegments();
-            return isVerificationVar(names.get(0));
-        }
-
-        // Definitely not a verification variable.
-        return false;
     }
 
     /**
@@ -1262,8 +906,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                 else if (p.getMode() == Mode.CLEARS) {
                     // Query for the type entry in the symbol table
                     ProgramTypeEntry typeEntry =
-                            searchProgramType(pNameTy.getLocation(), pNameTy
-                                    .getQualifier(), pNameTy.getName());
+                            Utilities.searchProgramType(pNameTy.getLocation(),
+                                    pNameTy.getQualifier(), pNameTy.getName(),
+                                    myCurrentModuleScope);
 
                     Exp init;
                     if (typeEntry.getDefiningElement() instanceof TypeDec) {
@@ -1279,7 +924,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                         init = Exp.copy(type.getInitialization().getEnsures());
 
                         // Replace the formal with the actual
-                        init = replace(init, exemplar, parameterExp);
+                        init = Utilities.replace(init, exemplar, parameterExp);
 
                         // Set the details for the new location
                         if (init.getLocation() != null) {
@@ -1309,12 +954,13 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                         // Create an is_initial dot expression
                         init =
-                                createInitExp(new VarDec(p.getName(), p.getTy()));
+                                Utilities.createInitExp(new VarDec(p.getName(),
+                                        p.getTy()), MTYPE, BOOLEAN);
                         if (varLoc != null) {
                             Location loc = (Location) varLoc.clone();
                             loc.setDetails("Initial Value for "
                                     + p.getName().getName());
-                            setLocation(init, loc);
+                            Utilities.setLocation(init, loc);
                         }
                     }
 
@@ -1334,7 +980,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             else {
                 // Ty not handled.
-                tyNotHandled(p.getTy(), p.getLocation());
+                Utilities.tyNotHandled(p.getTy(), p.getLocation());
             }
         }
 
@@ -1423,8 +1069,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                 if (!(ptType instanceof PTGeneric)) {
                     // Query for the type entry in the symbol table
                     typeEntry =
-                            searchProgramType(pNameTy.getLocation(), pNameTy
-                                    .getQualifier(), pNameTy.getName());
+                            Utilities.searchProgramType(pNameTy.getLocation(),
+                                    pNameTy.getQualifier(), pNameTy.getName(),
+                                    myCurrentModuleScope);
 
                     // Obtain the original dec from the AST
                     TypeDec type = (TypeDec) typeEntry.getDefiningElement();
@@ -1445,7 +1092,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     // Only worry about replaces mode parameters
                     if (p.getMode() == Mode.REPLACES && init != null) {
                         // Replace the formal with the actual
-                        init = replace(init, exemplar, pExp);
+                        init = Utilities.replace(init, exemplar, pExp);
 
                         // Set the details for the new location
                         if (init.getLocation() != null) {
@@ -1496,7 +1143,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 && !constraint.equals(myTypeGraph
                                         .getTrueVarExp())) {
                             // Replace the formal with the actual
-                            constraint = replace(constraint, exemplar, pExp);
+                            constraint =
+                                    Utilities.replace(constraint, exemplar,
+                                            pExp);
 
                             // Set the details for the new location
                             if (constraint.getLocation() != null) {
@@ -1546,12 +1195,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
 
                 // Add the current variable to our list of free variables
-                myCurrentAssertiveCode.addFreeVar(createVarExp(p.getLocation(),
-                        p.getName(), pNameTy.getMathTypeValue()));
+                myCurrentAssertiveCode.addFreeVar(Utilities.createVarExp(p
+                        .getLocation(), null, p.getName(), pNameTy
+                        .getMathTypeValue(), null));
             }
             else {
                 // Ty not handled.
-                tyNotHandled(p.getTy(), p.getLocation());
+                Utilities.tyNotHandled(p.getTy(), p.getLocation());
             }
         }
 
@@ -1579,151 +1229,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         requires = modifyRequiresByGlobalMode(requires);
 
         return requires;
-    }
-
-    /**
-     * <p>Negate the incoming expression.</p>
-     *
-     * @param exp Expression to be negated.
-     *
-     * @return Negated expression.
-     */
-    private Exp negateExp(Exp exp) {
-        Exp retExp = Exp.copy(exp);
-        if (exp instanceof EqualsExp) {
-            if (((EqualsExp) exp).getOperator() == EqualsExp.EQUAL)
-                ((EqualsExp) retExp).setOperator(EqualsExp.NOT_EQUAL);
-            else
-                ((EqualsExp) retExp).setOperator(EqualsExp.EQUAL);
-        }
-        else if (exp instanceof PrefixExp) {
-            if (((PrefixExp) exp).getSymbol().getName().toString()
-                    .equals("not")) {
-                retExp = ((PrefixExp) exp).getArgument();
-            }
-        }
-        else {
-            PrefixExp tmp = new PrefixExp();
-            setLocation(tmp, exp.getLocation());
-            tmp.setArgument(exp);
-            tmp.setSymbol(createPosSymbol("not"));
-            tmp.setMathType(BOOLEAN);
-            retExp = tmp;
-        }
-        return retExp;
-    }
-
-    /**
-     * <p>Copy and replace the old <code>Exp</code>.</p>
-     *
-     * @param exp The <code>Exp</code> to be replaced.
-     * @param old The old sub-expression of <code>exp</code>.
-     * @param repl The new sub-expression of <code>exp</code>.
-     *
-     * @return The new <code>Exp</code>.
-     */
-    private Exp replace(Exp exp, Exp old, Exp repl) {
-        // Clone old and repl and use the Exp replace to do all its work
-        Exp tmp = Exp.replace(exp, Exp.copy(old), Exp.copy(repl));
-
-        // Return the corresponding Exp
-        if (tmp != null)
-            return tmp;
-        else
-            return exp;
-    }
-
-    /**
-     * <p>Replace the formal with the actual variables
-     * from the facility declaration rule.</p>
-     *
-     * @param exp The expression to be replaced.
-     * @param facParam The list of facility declaration parameter variables.
-     * @param concParam The list of concept parameter variables.
-     *
-     * @return The modified expression.
-     */
-    private Exp replaceFacilityDeclarationVariables(Exp exp, List facParam,
-            List concParam) {
-        for (int i = 0; i < facParam.size(); i++) {
-            if (facParam.get(i) instanceof Dec
-                    && (concParam.get(i) instanceof Dec)) {
-                // Both are instances of Dec
-                Dec facDec = (Dec) facParam.get(i);
-                Dec concDec = (Dec) concParam.get(i);
-
-                // Variable to be replaced
-                VarExp expToReplace =
-                        createVarExp(facDec.getLocation(), facDec.getName(),
-                                facDec.getMathType());
-
-                // Concept variable
-                VarExp expToUse =
-                        createVarExp(concDec.getLocation(), concDec.getName(),
-                                concDec.getMathType());
-
-                // Temporary replacement to avoid formal and actuals being the same
-                exp = replace(exp, expToReplace, expToUse);
-
-                // Create a old exp from expToReplace
-                OldExp r = new OldExp(null, expToReplace);
-                r.setMathType(expToReplace.getMathType());
-
-                // Create a old exp from expToUse
-                OldExp u = new OldExp(null, expToUse);
-                u.setMathType(expToUse.getMathType());
-
-                // Actually perform the desired replacement
-                exp = replace(exp, r, u);
-            }
-            else if (facParam.get(i) instanceof Dec
-                    && concParam.get(i) instanceof ModuleArgumentItem) {
-                // We have a ModuleArgumentItem
-                Dec facDec = (Dec) facParam.get(i);
-                ModuleArgumentItem concItem =
-                        (ModuleArgumentItem) concParam.get(i);
-
-                // Variable to be replaced
-                VarExp expToReplace =
-                        createVarExp(facDec.getLocation(), facDec.getName(),
-                                facDec.getMathType());
-
-                // Concept variable
-                VarExp expToUse = new VarExp();
-                if (concItem.getName() != null) {
-                    expToUse.setName(concItem.getName());
-                }
-                else {
-                    expToUse.setName(createPosSymbol(concItem.getEvalExp()
-                            .toString()));
-                }
-
-                // Set the math type for the concept variable
-                if (concItem.getProgramTypeValue() != null) {
-                    expToUse.setMathType(concItem.getProgramTypeValue()
-                            .toMath());
-                }
-                else {
-                    expToUse.setMathType(concItem.getMathType());
-                }
-
-                // Temporary replacement to avoid formal and actuals being the same
-                exp = replace(exp, expToReplace, expToUse);
-
-                // Create a old exp from expToReplace
-                OldExp r = new OldExp(null, expToReplace);
-                r.setMathType(expToReplace.getMathType());
-
-                // Create a old exp from expToUse
-                OldExp u = new OldExp(null, expToUse);
-                u.setMathType(expToUse.getMathType());
-
-                // Actually perform the desired replacement
-                exp = replace(exp, r, u);
-            }
-        }
-
-        return exp;
     }
 
     /**
@@ -1778,15 +1283,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                         localFreeVar =
                                 new VarExp(null, null, stateVar.getName());
                         localFreeVar =
-                                createQuestionMarkVariable(myTypeGraph
-                                        .formConjunct(ensures, newConfirm),
+                                Utilities.createQuestionMarkVariable(
+                                        myTypeGraph.formConjunct(ensures,
+                                                newConfirm),
                                         (VarExp) localFreeVar);
                         myCurrentAssertiveCode.addFreeVar(localFreeVar);
                     }
                     else {
                         localFreeVar =
-                                createQuestionMarkVariable(myTypeGraph
-                                        .formConjunct(ensures, newConfirm),
+                                Utilities.createQuestionMarkVariable(
+                                        myTypeGraph.formConjunct(ensures,
+                                                newConfirm),
                                         (VarExp) localFreeVar);
                     }
 
@@ -1795,16 +1302,23 @@ public class VCGenerator extends TreeWalkerVisitor {
                     OldExp osVar = new OldExp(null, Exp.copy(globalFreeVar));
                     OldExp oldNameOSVar =
                             new OldExp(null, Exp.copy(oldNamesVar));
-                    ensures = replace(ensures, oldNamesVar, globalFreeVar);
-                    ensures = replace(ensures, oldNameOSVar, osVar);
+                    ensures =
+                            Utilities.replace(ensures, oldNamesVar,
+                                    globalFreeVar);
+                    ensures = Utilities.replace(ensures, oldNameOSVar, osVar);
 
                     // If it is not simple replacement, replace all ensures clauses
                     // with the appropriate expressions.
                     if (!isSimple) {
-                        ensures = replace(ensures, globalFreeVar, localFreeVar);
-                        ensures = replace(ensures, osVar, globalFreeVar);
+                        ensures =
+                                Utilities.replace(ensures, globalFreeVar,
+                                        localFreeVar);
+                        ensures =
+                                Utilities
+                                        .replace(ensures, osVar, globalFreeVar);
                         newConfirm =
-                                replace(newConfirm, globalFreeVar, localFreeVar);
+                                Utilities.replace(newConfirm, globalFreeVar,
+                                        localFreeVar);
                     }
 
                     // Set newConfirm as our new final confirm statement
@@ -1813,7 +1327,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
                 // Error: Why isn't it a free variable.
                 else {
-                    notInFreeVarList(stateVar.getName(), stateVar.getLocation());
+                    Utilities.notInFreeVarList(stateVar.getName(), stateVar
+                            .getLocation());
                 }
             }
         }
@@ -1832,62 +1347,43 @@ public class VCGenerator extends TreeWalkerVisitor {
             oldExp.setMathTypeValue(pExp.getMathTypeValue());
 
             // Convert the pExp into a something we can use
-            Exp repl = convertExp(pExp);
+            Exp repl = Utilities.convertExp(pExp);
             Exp undqRep = null, quesRep = null;
             OldExp oSpecVar, oRealVar;
             String replName = null;
 
             // Case #1: ProgramIntegerExp
-            if (pExp instanceof ProgramIntegerExp) {
-                Exp integerExp = convertExp(pExp);
-                replName =
-                        Integer.toString(((IntegerExp) integerExp).getValue());
-
-                // Create a variable expression of the form "_?[Argument Name]"
-                undqRep =
-                        new VarExp(null, null, createPosSymbol("_?" + replName));
-                undqRep.setMathType(pExp.getMathType());
-                undqRep.setMathTypeValue(pExp.getMathTypeValue());
-
-                // Create a variable expression of the form "?[Argument Name]"
-                quesRep =
-                        new VarExp(null, null, createPosSymbol("?" + replName));
-                quesRep.setMathType(pExp.getMathType());
-                quesRep.setMathTypeValue(pExp.getMathTypeValue());
-            }
             // Case #2: ProgramCharExp
-            else if (pExp instanceof ProgramCharExp) {
-                Exp charExp = convertExp(pExp);
-                replName = Character.toString(((CharExp) charExp).getValue());
-
-                // Create a variable expression of the form "_?[Argument Name]"
-                undqRep =
-                        new VarExp(null, null, createPosSymbol("_?" + replName));
-                undqRep.setMathType(pExp.getMathType());
-                undqRep.setMathTypeValue(pExp.getMathTypeValue());
-
-                // Create a variable expression of the form "?[Argument Name]"
-                quesRep =
-                        new VarExp(null, null, createPosSymbol("?" + replName));
-                quesRep.setMathType(pExp.getMathType());
-                quesRep.setMathTypeValue(pExp.getMathTypeValue());
-            }
             // Case #3: ProgramStringExp
-            else if (pExp instanceof ProgramStringExp) {
-                Exp stringExp = convertExp(pExp);
-                replName = ((StringExp) stringExp).getValue();
+            if (pExp instanceof ProgramIntegerExp
+                    || pExp instanceof ProgramCharExp
+                    || pExp instanceof ProgramStringExp) {
+                Exp convertExp = Utilities.convertExp(pExp);
+                if (pExp instanceof ProgramIntegerExp) {
+                    replName =
+                            Integer.toString(((IntegerExp) convertExp)
+                                    .getValue());
+                }
+                else if (pExp instanceof ProgramCharExp) {
+                    replName =
+                            Character.toString(((CharExp) convertExp)
+                                    .getValue());
+                }
+                else {
+                    replName = ((StringExp) convertExp).getValue();
+                }
 
                 // Create a variable expression of the form "_?[Argument Name]"
                 undqRep =
-                        new VarExp(null, null, createPosSymbol("_?" + replName));
-                undqRep.setMathType(pExp.getMathType());
-                undqRep.setMathTypeValue(pExp.getMathTypeValue());
+                        Utilities.createVarExp(null, null, Utilities
+                                .createPosSymbol("_?" + replName), pExp
+                                .getMathType(), pExp.getMathTypeValue());
 
                 // Create a variable expression of the form "?[Argument Name]"
                 quesRep =
-                        new VarExp(null, null, createPosSymbol("?" + replName));
-                quesRep.setMathType(pExp.getMathType());
-                quesRep.setMathTypeValue(pExp.getMathTypeValue());
+                        Utilities.createVarExp(null, null, Utilities
+                                .createPosSymbol("?" + replName), pExp
+                                .getMathType(), pExp.getMathTypeValue());
             }
             // Case #4: VariableDotExp
             else if (pExp instanceof VariableDotExp) {
@@ -1900,8 +1396,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     edu.clemson.cs.r2jt.collections.List<Exp> segList =
                             ((DotExp) undqRep).getSegments();
                     VariableNameExp undqNameRep =
-                            new VariableNameExp(null, null,
-                                    createPosSymbol("_?" + replName));
+                            new VariableNameExp(null, null, Utilities
+                                    .createPosSymbol("_?" + replName));
                     undqNameRep.setMathType(pE.getMathType());
                     segList.set(0, undqNameRep);
                     ((DotExp) undqRep).setSegments(segList);
@@ -1923,8 +1419,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     edu.clemson.cs.r2jt.collections.List<VariableExp> segList =
                             ((VariableDotExp) undqRep).getSegments();
                     VariableNameExp undqNameRep =
-                            new VariableNameExp(null, null,
-                                    createPosSymbol("_?" + replName));
+                            new VariableNameExp(null, null, Utilities
+                                    .createPosSymbol("_?" + replName));
                     undqNameRep.setMathType(pE.getMathType());
                     segList.set(0, undqNameRep);
                     ((VariableDotExp) undqRep).setSegments(segList);
@@ -1939,7 +1435,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
                 // Error: Case not handled!
                 else {
-                    expNotHandled(pExp, pExp.getLocation());
+                    Utilities.expNotHandled(pExp, pExp.getLocation());
                 }
             }
             // Case #5: VariableNameExp
@@ -1949,19 +1445,19 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                 // Create a variable expression of the form "_?[Argument Name]"
                 undqRep =
-                        new VarExp(null, null, createPosSymbol("_?" + replName));
-                undqRep.setMathType(pExp.getMathType());
-                undqRep.setMathTypeValue(pExp.getMathTypeValue());
+                        Utilities.createVarExp(null, null, Utilities
+                                .createPosSymbol("_?" + replName), pExp
+                                .getMathType(), pExp.getMathTypeValue());
 
                 // Create a variable expression of the form "?[Argument Name]"
                 quesRep =
-                        new VarExp(null, null, createPosSymbol("?" + replName));
-                quesRep.setMathType(pExp.getMathType());
-                quesRep.setMathTypeValue(pExp.getMathTypeValue());
+                        Utilities.createVarExp(null, null, Utilities
+                                .createPosSymbol("?" + replName), pExp
+                                .getMathType(), pExp.getMathTypeValue());
             }
             // Error: Case not handled!
             else {
-                expNotHandled(pExp, pExp.getLocation());
+                Utilities.expNotHandled(pExp, pExp.getLocation());
             }
 
             // "#" versions of oldExp and repl
@@ -1982,18 +1478,26 @@ public class VCGenerator extends TreeWalkerVisitor {
                     // Obtain the free variable
                     VarExp freeVar =
                             (VarExp) myCurrentAssertiveCode.getFreeVar(
-                                    createPosSymbol(replName), false);
+                                    Utilities.createPosSymbol(replName), false);
                     if (freeVar == null) {
                         freeVar =
-                                createVarExp(varDec.getLocation(),
-                                        createPosSymbol(replName), varDec
-                                                .getTy().getMathTypeValue());
+                                Utilities
+                                        .createVarExp(
+                                                varDec.getLocation(),
+                                                null,
+                                                Utilities
+                                                        .createPosSymbol(replName),
+                                                varDec.getTy()
+                                                        .getMathTypeValue(),
+                                                null);
                     }
 
                     // Apply the question mark to the free variable
                     freeVar =
-                            createQuestionMarkVariable(myTypeGraph
-                                    .formConjunct(ensures, newConfirm), freeVar);
+                            Utilities
+                                    .createQuestionMarkVariable(myTypeGraph
+                                            .formConjunct(ensures, newConfirm),
+                                            freeVar);
 
                     if (pExp instanceof ProgramDotExp
                             || pExp instanceof VariableDotExp) {
@@ -2024,8 +1528,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     if (ensures.containsVar(VDName.getName(), true)
                             || ensures.containsVar(VDName.getName(), false)) {
                         // Replace the ensures clause
-                        ensures = replace(ensures, oldExp, undqRep);
-                        ensures = replace(ensures, oSpecVar, repl);
+                        ensures = Utilities.replace(ensures, oldExp, undqRep);
+                        ensures = Utilities.replace(ensures, oSpecVar, repl);
 
                         // Add it to our list of variables to be replaced later
                         undRepList.add(undqRep);
@@ -2033,12 +1537,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
                     else {
                         // Replace the ensures clause
-                        ensures = replace(ensures, oldExp, quesRep);
-                        ensures = replace(ensures, oSpecVar, repl);
+                        ensures = Utilities.replace(ensures, oldExp, quesRep);
+                        ensures = Utilities.replace(ensures, oSpecVar, repl);
                     }
 
                     // Update our final confirm with the parameter argument
-                    newConfirm = replace(newConfirm, repl, quesVar);
+                    newConfirm = Utilities.replace(newConfirm, repl, quesVar);
                     myCurrentAssertiveCode.setFinalConfirm(newConfirm,
                             confirmStmt.getSimplify());
                 }
@@ -2048,8 +1552,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     if (ensures.containsVar(VDName.getName(), true)
                             || ensures.containsVar(VDName.getName(), false)) {
                         // Replace the ensures clause
-                        ensures = replace(ensures, oldExp, undqRep);
-                        ensures = replace(ensures, oSpecVar, undqRep);
+                        ensures = Utilities.replace(ensures, oldExp, undqRep);
+                        ensures = Utilities.replace(ensures, oSpecVar, undqRep);
 
                         // Add it to our list of variables to be replaced later
                         undRepList.add(undqRep);
@@ -2057,8 +1561,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
                     else {
                         // Replace the ensures clause
-                        ensures = replace(ensures, oldExp, repl);
-                        ensures = replace(ensures, oSpecVar, repl);
+                        ensures = Utilities.replace(ensures, oldExp, repl);
+                        ensures = Utilities.replace(ensures, oSpecVar, repl);
                     }
                 }
             }
@@ -2066,7 +1570,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Replace the temp values with the actual values
         for (int i = 0; i < undRepList.size(); i++) {
-            ensures = replace(ensures, undRepList.get(i), replList.get(i));
+            ensures =
+                    Utilities.replace(ensures, undRepList.get(i), replList
+                            .get(i));
         }
 
         return ensures;
@@ -2095,22 +1601,21 @@ public class VCGenerator extends TreeWalkerVisitor {
             ProgramExp pExp = argList.get(i);
 
             // Convert the pExp into a something we can use
-            Exp repl = convertExp(pExp);
+            Exp repl = Utilities.convertExp(pExp);
 
             // VarExp form of the parameter variable
-            VarExp oldExp = new VarExp(null, null, varDec.getName());
-            oldExp.setMathType(pExp.getMathType());
-            oldExp.setMathTypeValue(pExp.getMathTypeValue());
+            VarExp oldExp =
+                    Utilities.createVarExp(null, null, varDec.getName(), pExp
+                            .getMathType(), pExp.getMathTypeValue());
 
             // New VarExp
             VarExp newExp =
-                    new VarExp(null, null, createPosSymbol("_"
-                            + varDec.getName().getName()));
-            newExp.setMathType(repl.getMathType());
-            newExp.setMathTypeValue(repl.getMathTypeValue());
+                    Utilities.createVarExp(null, null, Utilities
+                            .createPosSymbol("_" + varDec.getName().getName()),
+                            repl.getMathType(), repl.getMathTypeValue());
 
             // Replace the old with the new in the requires clause
-            requires = replace(requires, oldExp, newExp);
+            requires = Utilities.replace(requires, oldExp, newExp);
 
             // Add it to our list
             undRepList.add(newExp);
@@ -2119,134 +1624,12 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Replace the temp values with the actual values
         for (int i = 0; i < undRepList.size(); i++) {
-            requires = replace(requires, undRepList.get(i), replList.get(i));
+            requires =
+                    Utilities.replace(requires, undRepList.get(i), replList
+                            .get(i));
         }
 
         return requires;
-    }
-
-    /**
-     * <p>Given a math symbol name, locate and return
-     * the <code>MathSymbolEntry</code> stored in the
-     * symbol table.</p>
-     *
-     * @param loc The location in the AST that we are
-     *            currently visiting.
-     * @param name The string name of the math symbol.
-     *
-     * @return An <code>MathSymbolEntry</code> from the
-     *         symbol table.
-     */
-    private MathSymbolEntry searchMathSymbol(Location loc, String name) {
-        // Query for the corresponding math symbol
-        MathSymbolEntry ms = null;
-        try {
-            ms =
-                    myCurrentModuleScope.queryForOne(
-                            new UnqualifiedNameQuery(name,
-                                    ImportStrategy.IMPORT_RECURSIVE,
-                                    FacilityStrategy.FACILITY_IGNORE, true,
-                                    true)).toMathSymbolEntry(loc);
-        }
-        catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(null, name, loc);
-        }
-        catch (DuplicateSymbolException dse) {
-            //This should be caught earlier, when the duplicate symbol is
-            //created
-            throw new RuntimeException(dse);
-        }
-
-        return ms;
-    }
-
-    /**
-     * <p>Given the qualifier, name and the list of argument
-     * types, locate and return the <code>OperationEntry</code>
-     * stored in the symbol table.</p>
-     *
-     * @param loc The location in the AST that we are
-     *            currently visiting.
-     * @param qualifier The qualifier of the operation.
-     * @param name The name of the operation.
-     * @param argTypes The list of argument types.
-     *
-     * @return An <code>OperationEntry</code> from the
-     *         symbol table.
-     */
-    private OperationEntry searchOperation(Location loc, PosSymbol qualifier,
-            PosSymbol name, List<PTType> argTypes) {
-        // Query for the corresponding operation
-        OperationEntry op = null;
-        try {
-            op =
-                    myCurrentModuleScope.queryForOne(new OperationQuery(
-                            qualifier, name, argTypes));
-        }
-        catch (NoSuchSymbolException nsse) {
-            noSuchSymbol(null, name.getName(), loc);
-        }
-        catch (DuplicateSymbolException dse) {
-            //This should be caught earlier, when the duplicate operation is
-            //created
-            throw new RuntimeException(dse);
-        }
-
-        return op;
-    }
-
-    /**
-     * <p>Given the name of the type locate and return
-     * the <code>ProgramTypeEntry</code> stored in the
-     * symbol table.</p>
-     *
-     * @param loc The location in the AST that we are
-     *            currently visiting.
-     * @param qualifier The qualifier of the type.
-     * @param name The name of the type.
-     *
-     * @return An <code>ProgramTypeEntry</code> from the
-     *         symbol table.
-     */
-    private ProgramTypeEntry searchProgramType(Location loc,
-            PosSymbol qualifier, PosSymbol name) {
-        // Query for the corresponding operation
-        ProgramTypeEntry pt = null;
-
-        List<SymbolTableEntry> entries =
-                myCurrentModuleScope.query(new NameQuery(qualifier, name,
-                        ImportStrategy.IMPORT_NAMED,
-                        FacilityStrategy.FACILITY_INSTANTIATE, false));
-
-        for (SymbolTableEntry ste : entries) {
-            if (ste instanceof ProgramTypeEntry) {
-                if (pt == null) {
-                    pt = ste.toProgramTypeEntry(loc);
-                }
-                else {
-                    throw new RuntimeException();
-                }
-            }
-        }
-
-        return pt;
-    }
-
-    /**
-     * <p>Changes the <code>Exp</code> with the new
-     * <code>Location</code>.</p>
-     *
-     * @param exp The <code>Exp</code> that needs to be modified.
-     * @param loc The new <code>Location</code>.
-     */
-    private void setLocation(Exp exp, Location loc) {
-        // Special handling for InfixExp
-        if (exp instanceof InfixExp) {
-            ((InfixExp) exp).setAllLocations(loc);
-        }
-        else {
-            exp.setLocation(loc);
-        }
     }
 
     /**
@@ -2269,11 +1652,12 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Only do simplifications if we have an equals
             if (equalsExp.getOperator() == EqualsExp.EQUAL) {
                 boolean verificationVariable =
-                        isVerificationVar(equalsExp.getLeft());
+                        Utilities.isVerificationVar(equalsExp.getLeft());
 
                 // Create a temp expression where left is replaced with the right
                 Exp tmp =
-                        replace(exp, equalsExp.getLeft(), equalsExp.getRight());
+                        Utilities.replace(exp, equalsExp.getLeft(), equalsExp
+                                .getRight());
                 if (equalsExp.getLeft() instanceof VarExp) {
                     // If left is still part of confirm
                     VarExp left = (VarExp) equalsExp.getLeft();
@@ -2286,10 +1670,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                 if (tmp == null) {
                     // Create a temp expression where right is replaced with the left
                     verificationVariable =
-                            isVerificationVar(equalsExp.getRight());
+                            Utilities.isVerificationVar(equalsExp.getRight());
                     tmp =
-                            replace(exp, equalsExp.getRight(), equalsExp
-                                    .getLeft());
+                            Utilities.replace(exp, equalsExp.getRight(),
+                                    equalsExp.getLeft());
                     if (equalsExp.getRight() instanceof VarExp) {
                         // If right is still part of confirm
                         VarExp right = (VarExp) equalsExp.getRight();
@@ -2420,17 +1804,20 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                 // Create VarExp for vNameExp
                 VarExp vExp =
-                        createVarExp(vNameExp.getLocation(),
-                                vNameExp.getName(), vNameExp.getMathType());
+                        Utilities.createVarExp(vNameExp.getLocation(), vNameExp
+                                .getQualifier(), vNameExp.getName(), vNameExp
+                                .getMathType(), vNameExp.getMathTypeValue());
 
                 // Create a new question mark variable
-                VarExp newV = createQuestionMarkVariable(finalConfirm, vExp);
+                VarExp newV =
+                        Utilities
+                                .createQuestionMarkVariable(finalConfirm, vExp);
 
                 // Add this new variable to our list of free variables
                 myCurrentAssertiveCode.addFreeVar(newV);
 
                 // Replace all instances of vExp with newV
-                finalConfirm = replace(finalConfirm, vExp, newV);
+                finalConfirm = Utilities.replace(finalConfirm, vExp, newV);
             }
         }
 
@@ -2486,14 +1873,14 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (myCurrentOperationEntry.getName().equals(opDec.getName())
                 && myCurrentOperationEntry.getReturnType() != null) {
             // Create a new confirm statement using P_val and the decreasing clause
-            VarExp pVal = createPValExp(myOperationDecreasingExp.getLocation());
+            VarExp pVal =
+                    Utilities.createPValExp(myOperationDecreasingExp
+                            .getLocation(), myCurrentModuleScope);
 
             // Create a new infix expression
             InfixExp exp =
-                    new InfixExp(stmt.getLocation(), Exp
-                            .copy(myOperationDecreasingExp),
-                            createPosSymbol("<"), pVal);
-            exp.setMathType(BOOLEAN);
+                    Utilities.createLessThanExp(stmt.getLocation(), Exp
+                            .copy(myOperationDecreasingExp), pVal, BOOLEAN);
 
             // Create the new confirm statement
             Location loc;
@@ -2504,7 +1891,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 loc = (Location) stmt.getLocation().clone();
             }
             loc.setDetails("Show Termination of Recursive Call");
-            setLocation(exp, loc);
+            Utilities.setLocation(exp, loc);
             ConfirmStmt conf = new ConfirmStmt(loc, exp, false);
 
             // Add it to our list of assertions
@@ -2546,7 +1933,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Set the details of the current location
             loc.setDetails("Requires Clause of " + opDec.getName() + details);
-            setLocation(requires, loc);
+            Utilities.setLocation(requires, loc);
 
             // Add this to our list of things to confirm
             myCurrentAssertiveCode.addConfirm((Location) loc.clone(), requires,
@@ -2560,7 +1947,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Set the details of the current location
                 Location loc = (Location) stmt.getName().getLocation().clone();
                 loc.setDetails("Ensures Clause of " + opDec.getName());
-                setLocation(ensures, loc);
+                Utilities.setLocation(ensures, loc);
             }
 
             // Add this to our list of things to assume
@@ -2629,7 +2016,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 if (assertion.getLocation() != null) {
                     // Set the details of the current location
                     Location loc = (Location) assertion.getLocation().clone();
-                    setLocation(assertion, loc);
+                    Utilities.setLocation(assertion, loc);
                 }
 
                 myCurrentAssertiveCode.setFinalConfirm(assertion, stmt
@@ -2681,7 +2068,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Search for the type we are implementing
         ProgramTypeEntry typeEntry =
-                searchProgramType(dec.getLocation(), null, dec.getName());
+                Utilities.searchProgramType(dec.getLocation(), null, dec
+                        .getName(), myCurrentModuleScope);
 
         // Make sure we don't have a generic type
         if (typeEntry.getDefiningElement() instanceof TypeDec) {
@@ -2690,22 +2078,12 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Create a variable expression from the type exemplar
             VarExp exemplar =
-                    createVarExp(type.getLocation(), type.getExemplar(),
-                            typeEntry.getModelType());
+                    Utilities.createVarExp(type.getLocation(), null, type
+                            .getExemplar(), typeEntry.getModelType(), null);
 
-            // Create a variable that refers to the conceptual exemplar
-            DotExp conceptualVar = new DotExp();
-            VarExp cName = new VarExp();
-            cName.setMathType(myTypeGraph.BOOLEAN);
-            cName.setName(createPosSymbol("Conc"));
-
-            edu.clemson.cs.r2jt.collections.List<Exp> myList =
-                    new edu.clemson.cs.r2jt.collections.List<Exp>();
-            myList.add(cName);
-            myList.add(exemplar);
-
-            conceptualVar.setSegments(myList);
-            conceptualVar.setMathType(typeEntry.getModelType());
+            DotExp conceptualVar =
+                    Utilities.createConcVarExp(null, exemplar, typeEntry
+                            .getModelType(), BOOLEAN);
 
             // Make sure we have a constraint
             Exp constraint;
@@ -2715,7 +2093,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             else {
                 constraint = Exp.copy(type.getConstraint());
             }
-            constraint = replace(constraint, exemplar, conceptualVar);
+            constraint = Utilities.replace(constraint, exemplar, conceptualVar);
 
             // Set the location for the constraint
             Location loc;
@@ -2727,7 +2105,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             loc.setDetails("Well Defined Correspondence for "
                     + dec.getName().getName());
-            setLocation(constraint, loc);
+            Utilities.setLocation(constraint, loc);
 
             // We need to make sure the constraints for the type we are
             // implementing is met.
@@ -2796,8 +2174,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             loc.setDetails("Facility Declaration Rule");
 
             req =
-                    replaceFacilityDeclarationVariables(req, facConceptDec
-                            .getParameters(), conceptParams);
+                    Utilities.replaceFacilityDeclarationVariables(req,
+                            facConceptDec.getParameters(), conceptParams);
             req.setLocation(loc);
 
             boolean simplify = false;
@@ -2829,23 +2207,27 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                         // Query for the type entry in the symbol table
                         ProgramTypeEntry typeEntry =
-                                searchProgramType(pNameTy.getLocation(),
-                                        pNameTy.getQualifier(), pNameTy
-                                                .getName());
+                                Utilities
+                                        .searchProgramType(pNameTy
+                                                .getLocation(), pNameTy
+                                                .getQualifier(), pNameTy
+                                                .getName(),
+                                                myCurrentModuleScope);
 
                         // Obtain the original dec from the AST
                         TypeDec type = (TypeDec) typeEntry.getDefiningElement();
 
                         // Create a variable expression from the declared variable
                         VarExp varDecExp =
-                                createVarExp(tempDec.getLocation(), tempDec
-                                        .getName(), typeEntry.getModelType());
+                                Utilities.createVarExp(tempDec.getLocation(),
+                                        null, tempDec.getName(), typeEntry
+                                                .getModelType(), null);
 
                         // Create a variable expression from the type exemplar
                         VarExp exemplar =
-                                createVarExp(type.getLocation(), type
-                                        .getExemplar(), typeEntry
-                                        .getModelType());
+                                Utilities.createVarExp(type.getLocation(),
+                                        null, type.getExemplar(), typeEntry
+                                                .getModelType(), null);
 
                         // Make sure we have a constraint
                         Exp constraint;
@@ -2855,7 +2237,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                         else {
                             constraint = Exp.copy(type.getConstraint());
                         }
-                        constraint = replace(constraint, exemplar, varDecExp);
+                        constraint =
+                                Utilities.replace(constraint, exemplar,
+                                        varDecExp);
 
                         // Set the location for the constraint
                         Location constraintLoc;
@@ -2869,17 +2253,20 @@ public class VCGenerator extends TreeWalkerVisitor {
                         }
                         constraintLoc.setDetails("Constraints on "
                                 + tempDec.getName().getName());
-                        setLocation(constraint, constraintLoc);
+                        Utilities.setLocation(constraint, constraintLoc);
 
                         // Replace with facility declaration variables
                         constraint =
-                                replaceFacilityDeclarationVariables(constraint,
-                                        facConceptDec.getParameters(),
-                                        conceptParams);
+                                Utilities
+                                        .replaceFacilityDeclarationVariables(
+                                                constraint, facConceptDec
+                                                        .getParameters(),
+                                                conceptParams);
 
                         // Create an equals expression from formal to actual
                         Exp actualExp =
-                                convertExp(conceptParams.get(i).getEvalExp());
+                                Utilities.convertExp(conceptParams.get(i)
+                                        .getEvalExp());
                         EqualsExp formalEq =
                                 new EqualsExp(dec.getLocation(), varDecExp, 1,
                                         actualExp);
@@ -2898,7 +2285,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
                     else {
                         // Ty not handled.
-                        tyNotHandled(tempDec.getTy(), tempDec.getLocation());
+                        Utilities.tyNotHandled(tempDec.getTy(), tempDec
+                                .getLocation());
                     }
                 }
             }
@@ -2906,7 +2294,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             myFacilityDeclarationMap.put(dec, assumeExp);
         }
         catch (NoSuchSymbolException e) {
-            noSuchModule(dec.getLocation());
+            Utilities.noSuchModule(dec.getLocation());
         }
 
         // Add this new assertive code to our incomplete assertive code stack
@@ -2974,13 +2362,13 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (assignExp instanceof ProgramIntegerExp
                 || assignExp instanceof ProgramCharExp
                 || assignExp instanceof ProgramStringExp) {
-            Exp replaceExp = convertExp(assignExp);
+            Exp replaceExp = Utilities.convertExp(assignExp);
 
             // Replace all instances of the left hand side
             // variable in the current final confirm statement.
             ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
             Exp newConf = confirmStmt.getAssertion();
-            newConf = replace(newConf, leftVariable, replaceExp);
+            newConf = Utilities.replace(newConf, leftVariable, replaceExp);
 
             // Set this as our new final confirm statement.
             myCurrentAssertiveCode.setFinalConfirm(newConf, confirmStmt
@@ -3010,14 +2398,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                     && myCurrentOperationEntry.getReturnType() != null) {
                 // Create a new confirm statement using P_val and the decreasing clause
                 VarExp pVal =
-                        createPValExp(myOperationDecreasingExp.getLocation());
+                        Utilities.createPValExp(myOperationDecreasingExp
+                                .getLocation(), myCurrentModuleScope);
 
                 // Create a new infix expression
                 InfixExp exp =
-                        new InfixExp(stmt.getLocation(), Exp
-                                .copy(myOperationDecreasingExp),
-                                createPosSymbol("<"), pVal);
-                exp.setMathType(BOOLEAN);
+                        Utilities.createLessThanExp(stmt.getLocation(), Exp
+                                .copy(myOperationDecreasingExp), pVal, BOOLEAN);
 
                 // Create the new confirm statement
                 Location loc;
@@ -3030,7 +2417,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     loc = (Location) stmt.getLocation().clone();
                 }
                 loc.setDetails("Show Termination of Recursive Call");
-                setLocation(exp, loc);
+                Utilities.setLocation(exp, loc);
                 ConfirmStmt conf = new ConfirmStmt(loc, exp, false);
 
                 // Add it to our list of assertions
@@ -3081,7 +2468,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             reqloc
                     .setDetails("Requires Clause of " + opDec.getName()
                             + details);
-            setLocation(requires, reqloc);
+            Utilities.setLocation(requires, reqloc);
 
             // Add this to our list of things to confirm
             myCurrentAssertiveCode.addConfirm((Location) reqloc.clone(),
@@ -3113,7 +2500,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                 .getLocation().clone();
                                 loc.setDetails("Ensures Clause of "
                                         + opDec.getName());
-                                setLocation(ensures, loc);
+                                Utilities.setLocation(ensures, loc);
                             }
 
                             // Replace the formal with the actual
@@ -3128,22 +2515,25 @@ public class VCGenerator extends TreeWalkerVisitor {
                             ConfirmStmt confirmStmt =
                                     myCurrentAssertiveCode.getFinalConfirm();
                             Exp newConf = confirmStmt.getAssertion();
-                            newConf = replace(newConf, leftVariable, ensures);
+                            newConf =
+                                    Utilities.replace(newConf, leftVariable,
+                                            ensures);
 
                             // Set this as our new final confirm statement.
                             myCurrentAssertiveCode.setFinalConfirm(newConf,
                                     confirmStmt.getSimplify());
                         }
                         else {
-                            illegalOperationEnsures(opDec.getLocation());
+                            Utilities.illegalOperationEnsures(opDec
+                                    .getLocation());
                         }
                     }
                     else {
-                        illegalOperationEnsures(opDec.getLocation());
+                        Utilities.illegalOperationEnsures(opDec.getLocation());
                     }
                 }
                 else {
-                    illegalOperationEnsures(opDec.getLocation());
+                    Utilities.illegalOperationEnsures(opDec.getLocation());
                 }
             }
         }
@@ -3231,7 +2621,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Set the details of the current location
         reqloc.setDetails("Requires Clause of " + opDec.getName());
-        setLocation(requires, reqloc);
+        Utilities.setLocation(requires, reqloc);
 
         // Add this to our list of things to confirm
         myCurrentAssertiveCode.addConfirm((Location) reqloc.clone(), requires,
@@ -3262,7 +2652,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     (Location) testParamExp.getName()
                                             .getLocation().clone();
                             loc.setDetails("If Statement Condition");
-                            setLocation(ensures, loc);
+                            Utilities.setLocation(ensures, loc);
                         }
 
                         // Replace the formals with the actuals.
@@ -3273,18 +2663,18 @@ public class VCGenerator extends TreeWalkerVisitor {
                         myCurrentAssertiveCode.addAssume(ensures);
 
                         // Negation of the condition
-                        negEnsures = negateExp(ensures);
+                        negEnsures = Utilities.negateExp(ensures, BOOLEAN);
                     }
                     else {
-                        illegalOperationEnsures(opDec.getLocation());
+                        Utilities.illegalOperationEnsures(opDec.getLocation());
                     }
                 }
                 else {
-                    illegalOperationEnsures(opDec.getLocation());
+                    Utilities.illegalOperationEnsures(opDec.getLocation());
                 }
             }
             else {
-                illegalOperationEnsures(opDec.getLocation());
+                Utilities.illegalOperationEnsures(opDec.getLocation());
             }
         }
 
@@ -3318,7 +2708,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             negIfAssertiveCode.addAssume(negEnsures);
         }
         else {
-            illegalOperationEnsures(opDec.getLocation());
+            Utilities.illegalOperationEnsures(opDec.getLocation());
         }
 
         // Add any statements inside the else clause
@@ -3363,7 +2753,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Search for the type we are implementing
         ProgramTypeEntry typeEntry =
-                searchProgramType(dec.getLocation(), null, dec.getName());
+                Utilities.searchProgramType(dec.getLocation(), null, dec
+                        .getName(), myCurrentModuleScope);
 
         // Make sure we don't have a generic type
         if (typeEntry.getDefiningElement() instanceof TypeDec) {
@@ -3372,8 +2763,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Create a variable expression from the type exemplar
             VarExp exemplar =
-                    createVarExp(type.getLocation(), type.getExemplar(),
-                            typeEntry.getModelType());
+                    Utilities.createVarExp(type.getLocation(), null, type
+                            .getExemplar(), typeEntry.getModelType(), null);
 
             // Obtain the initialized variables
             // TODO: Only dealing with Records now, need to worry about NameTy
@@ -3385,8 +2776,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                 for (VarDec v : decList) {
                     NameTy nameTy = (NameTy) v.getTy();
                     ProgramTypeEntry pte =
-                            searchProgramType(nameTy.getLocation(), nameTy
-                                    .getQualifier(), nameTy.getName());
+                            Utilities.searchProgramType(nameTy.getLocation(),
+                                    nameTy.getQualifier(), nameTy.getName(),
+                                    myCurrentModuleScope);
 
                     // Create a variable that refers to the conceptual exemplar
                     DotExp recordNameDotVarName = new DotExp();
@@ -3407,9 +2799,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                         Exp varInit =
                                 Exp.copy(typeDec.getInitialization()
                                         .getEnsures());
-                        assertiveCode.addAssume(replace(varInit, createVarExp(
-                                dec.getLocation(), typeDec.getExemplar(), vName
-                                        .getMathType()), recordNameDotVarName));
+                        assertiveCode.addAssume(Utilities.replace(varInit,
+                                Utilities.createVarExp(dec.getLocation(), null,
+                                        typeDec.getExemplar(), vName
+                                                .getMathType(), null),
+                                recordNameDotVarName));
                     }
                 }
             }
@@ -3435,7 +2829,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             loc.setDetails("Convention for " + dec.getName().getName()
                     + " generated by Initialization Rule");
-            setLocation(myConventionExp, loc);
+            Utilities.setLocation(myConventionExp, loc);
 
             // Add the convention as something we need to confirm
             boolean simplify = false;
@@ -3446,18 +2840,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             assertiveCode.addConfirm(loc, myConventionExp, simplify);
 
             // Create a variable that refers to the conceptual exemplar
-            DotExp conceptualVar = new DotExp();
-            VarExp cName = new VarExp();
-            cName.setMathType(myTypeGraph.BOOLEAN);
-            cName.setName(createPosSymbol("Conc"));
-
-            edu.clemson.cs.r2jt.collections.List<Exp> myList =
-                    new edu.clemson.cs.r2jt.collections.List<Exp>();
-            myList.add(cName);
-            myList.add(exemplar);
-
-            conceptualVar.setSegments(myList);
-            conceptualVar.setMathType(typeEntry.getModelType());
+            DotExp conceptualVar =
+                    Utilities.createConcVarExp(null, exemplar, typeEntry
+                            .getModelType(), BOOLEAN);
 
             // Make sure we have a constraint
             Exp init;
@@ -3467,7 +2852,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             else {
                 init = Exp.copy(type.getInitialization().getEnsures());
             }
-            init = replace(init, exemplar, conceptualVar);
+            init = Utilities.replace(init, exemplar, conceptualVar);
 
             // Set the location for the constraint
             Location initLoc;
@@ -3479,7 +2864,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             initLoc.setDetails("Initialization Rule for "
                     + dec.getName().getName());
-            setLocation(init, initLoc);
+            Utilities.setLocation(init, initLoc);
 
             // Add the initialization as something we need to confirm
             simplify = false;
@@ -3548,7 +2933,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             myOperationDecreasingExp = decreasing;
 
             // Add P_val as a free variable
-            VarExp pVal = createPValExp(decreasing.getLocation());
+            VarExp pVal =
+                    Utilities.createPValExp(decreasing.getLocation(),
+                            myCurrentModuleScope);
             myCurrentAssertiveCode.addFreeVar(pVal);
 
             // Create an equals expression
@@ -3558,7 +2945,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             equalsExp.setMathType(BOOLEAN);
             Location eqLoc = (Location) decreasing.getLocation().clone();
             eqLoc.setDetails("Progress Metric for Recursive Procedure");
-            setLocation(equalsExp, eqLoc);
+            Utilities.setLocation(equalsExp, eqLoc);
 
             // Add it to our things to assume
             myCurrentAssertiveCode.addAssume(equalsExp);
@@ -3646,8 +3033,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         VariableExp stmtRight = (VariableExp) Exp.copy(stmt.getRight());
 
         // New left and right
-        Exp newLeft = convertExp(stmtLeft);
-        Exp newRight = convertExp(stmtRight);
+        Exp newLeft = Utilities.convertExp(stmtLeft);
+        Exp newRight = Utilities.convertExp(stmtRight);
 
         // Use our final confirm to obtain the math types
         List lst = conf.getSubExpressions();
@@ -3673,14 +3060,15 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Temp variable
         VarExp tmp = new VarExp();
-        tmp.setName(createPosSymbol("_" + getVarName(stmtLeft).getName()));
+        tmp.setName(Utilities.createPosSymbol("_"
+                + Utilities.getVarName(stmtLeft).getName()));
         tmp.setMathType(stmtLeft.getMathType());
         tmp.setMathTypeValue(stmtLeft.getMathTypeValue());
 
         // Replace according to the swap rule
-        conf = replace(conf, newRight, tmp);
-        conf = replace(conf, newLeft, newRight);
-        conf = replace(conf, tmp, newLeft);
+        conf = Utilities.replace(conf, newRight, tmp);
+        conf = Utilities.replace(conf, newLeft, newRight);
+        conf = Utilities.replace(conf, tmp, newLeft);
 
         // Set this new expression as the new final confirm
         myCurrentAssertiveCode.setFinalConfirm(conf, confirmStmt.getSimplify());
@@ -3708,8 +3096,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Query for the type entry in the symbol table
             typeEntry =
-                    searchProgramType(pNameTy.getLocation(), pNameTy
-                            .getQualifier(), pNameTy.getName());
+                    Utilities.searchProgramType(pNameTy.getLocation(), pNameTy
+                            .getQualifier(), pNameTy.getName(),
+                            myCurrentModuleScope);
 
             // Make sure we don't have a generic type
             if (typeEntry.getDefiningElement() instanceof TypeDec) {
@@ -3718,17 +3107,18 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                 // Create a variable expression from the declared variable
                 VarExp varDecExp =
-                        createVarExp(varDec.getLocation(), varDec.getName(),
-                                typeEntry.getModelType());
+                        Utilities.createVarExp(varDec.getLocation(), null,
+                                varDec.getName(), typeEntry.getModelType(),
+                                null);
 
                 // Create a variable expression from the type exemplar
                 VarExp exemplar =
-                        createVarExp(type.getLocation(), type.getExemplar(),
-                                typeEntry.getModelType());
+                        Utilities.createVarExp(type.getLocation(), null, type
+                                .getExemplar(), typeEntry.getModelType(), null);
 
                 // Deep copy the original initialization ensures
                 Exp init = Exp.copy(type.getInitialization().getEnsures());
-                init = replace(init, exemplar, varDecExp);
+                init = Utilities.replace(init, exemplar, varDecExp);
 
                 // Make sure we have a constraint
                 Exp constraint;
@@ -3738,7 +3128,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 else {
                     constraint = Exp.copy(type.getConstraint());
                 }
-                constraint = replace(constraint, exemplar, varDecExp);
+                constraint = Utilities.replace(constraint, exemplar, varDecExp);
 
                 // Set the location for the constraint
                 Location loc;
@@ -3749,7 +3139,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     loc = (Location) type.getLocation().clone();
                 }
                 loc.setDetails("Constraints on " + varDec.getName().getName());
-                setLocation(constraint, loc);
+                Utilities.setLocation(constraint, loc);
 
                 // Final confirm clause
                 Exp finalConfirm =
@@ -3790,12 +3180,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                 Location varLoc = varDec.getLocation();
 
                 // Create an is_initial dot expression
-                DotExp isInitialExp = createInitExp(varDec);
+                DotExp isInitialExp =
+                        Utilities.createInitExp(varDec, MTYPE, BOOLEAN);
                 if (varLoc != null) {
                     Location loc = (Location) varLoc.clone();
                     loc.setDetails("Initial Value for "
                             + varDec.getName().getName());
-                    setLocation(isInitialExp, loc);
+                    Utilities.setLocation(isInitialExp, loc);
                 }
 
                 // Add to our assertive code as an assume
@@ -3809,7 +3200,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         else {
             // Ty not handled.
-            tyNotHandled(varDec.getTy(), varDec.getLocation());
+            Utilities.tyNotHandled(varDec.getTy(), varDec.getLocation());
         }
     }
 
@@ -3846,7 +3237,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             baseLoc = (Location) stmt.getLocation().clone();
         }
         baseLoc.setDetails("Base Case of the Invariant of While Statement");
-        setLocation(baseCase, baseLoc);
+        Utilities.setLocation(baseCase, baseLoc);
         myCurrentAssertiveCode.addConfirm((Location) baseLoc.clone(), baseCase,
                 simplifyInvariant);
 
@@ -3866,8 +3257,10 @@ public class VCGenerator extends TreeWalkerVisitor {
         Exp nqv;
 
         if (decreasingExp != null) {
-            VarExp pval = createPValExp((Location) whileLoc.clone());
-            nqv = createQuestionMarkVariable(finalConfirm, pval);
+            VarExp pval =
+                    Utilities.createPValExp((Location) whileLoc.clone(),
+                            myCurrentModuleScope);
+            nqv = Utilities.createQuestionMarkVariable(finalConfirm, pval);
             nqv.setMathType(pval.getMathType());
             Exp equalPExp =
                     new EqualsExp((Location) whileLoc.clone(), Exp.copy(nqv),
@@ -3898,7 +3291,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         inductiveLoc
                 .setDetails("Inductive Case of Invariant of While Statement");
-        setLocation(inductiveCase, inductiveLoc);
+        Utilities.setLocation(inductiveCase, inductiveLoc);
         ifStmtList.add(new ConfirmStmt(inductiveLoc, inductiveCase,
                 simplifyInvariant));
 
@@ -3911,9 +3304,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
 
             Exp infixExp =
-                    new InfixExp(decreasingLoc, Exp.copy(decreasingExp),
-                            createPosSymbol("<"), Exp.copy(nqv));
-            infixExp.setMathType(BOOLEAN);
+                    Utilities.createLessThanExp(decreasingLoc, Exp
+                            .copy(decreasingExp), Exp.copy(nqv), BOOLEAN);
             ifStmtList.add(new ConfirmStmt(decreasingLoc, infixExp, false));
         }
 
@@ -3939,7 +3331,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (condition.getLocation() != null) {
             Location condLoc = (Location) condition.getLocation().clone();
             condLoc.setDetails("While Loop Condition");
-            setLocation(condition, condLoc);
+            Utilities.setLocation(condition, condLoc);
         }
 
         // add it back to your assertive code
