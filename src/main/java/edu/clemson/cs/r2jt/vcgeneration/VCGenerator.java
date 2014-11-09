@@ -28,7 +28,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
-import edu.clemson.cs.r2jt.utilities.SourceErrorException;
 
 import java.io.File;
 import java.util.*;
@@ -55,9 +54,8 @@ public class VCGenerator extends TreeWalkerVisitor {
     private Exp myGlobalConstraintExp;
 
     // Conventions/Correspondence
-    private Exp myCorrespondenceExp;
     private Exp myConventionExp;
-    private Exp myCorrTypeConstraintExp;
+    private Exp myCorrespondenceExp;
 
     // Operation/Procedure level global variables
     private OperationEntry myCurrentOperationEntry;
@@ -150,7 +148,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Current items
         myConventionExp = null;
         myCorrespondenceExp = null;
-        myCorrTypeConstraintExp = null;
         myCurrentModuleScope = null;
         myCurrentOperationEntry = null;
         myGlobalConstraintExp = null;
@@ -525,21 +522,22 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Obtain type constrains from parameter
         // TODO: Only add type constraints if they use the facility;
-        Exp typeConstraint = null;
+        Exp facTypeConstraint = null;
         for (FacilityDec fDec : myFacilityDeclarationMap.keySet()) {
             Exp temp = Exp.copy(myFacilityDeclarationMap.get(fDec));
 
-            if (typeConstraint == null) {
-                typeConstraint = temp;
+            if (facTypeConstraint == null) {
+                facTypeConstraint = temp;
             }
             else {
-                typeConstraint = myTypeGraph.formConjunct(typeConstraint, temp);
+                facTypeConstraint =
+                        myTypeGraph.formConjunct(facTypeConstraint, temp);
             }
         }
 
         // Apply the procedure declaration rule
-        applyProcedureDeclRule(requires, ensures, decreasing, typeConstraint,
-                variableList, statementList);
+        applyProcedureDeclRule(requires, ensures, decreasing,
+                facTypeConstraint, variableList, statementList);
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
@@ -900,6 +898,24 @@ public class VCGenerator extends TreeWalkerVisitor {
                         new OldExp(p.getLocation(), Exp.copy(parameterExp));
                 oldParameterExp.setMathType(pNameTy.getMathTypeValue());
 
+                // Query for the type entry in the symbol table
+                SymbolTableEntry ste =
+                        Utilities.searchProgramType(pNameTy.getLocation(),
+                                pNameTy.getQualifier(), pNameTy.getName(),
+                                myCurrentModuleScope);
+
+                ProgramTypeEntry typeEntry;
+                if (ste instanceof ProgramTypeEntry) {
+                    typeEntry = ste.toProgramTypeEntry(pNameTy.getLocation());
+                }
+                else {
+                    typeEntry =
+                            ste
+                                    .toRepresentationTypeEntry(
+                                            pNameTy.getLocation())
+                                    .getDefiningTypeEntry();
+                }
+
                 // Preserves or Restores mode
                 if (p.getMode() == Mode.PRESERVES
                         || p.getMode() == Mode.RESTORES) {
@@ -939,12 +955,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
                 // Clears mode
                 else if (p.getMode() == Mode.CLEARS) {
-                    // Query for the type entry in the symbol table
-                    ProgramTypeEntry typeEntry =
-                            Utilities.searchProgramType(pNameTy.getLocation(),
-                                    pNameTy.getQualifier(), pNameTy.getName(),
-                                    myCurrentModuleScope);
-
                     Exp init;
                     if (typeEntry.getDefiningElement() instanceof TypeDec) {
                         // Obtain the original dec from the AST
@@ -980,6 +990,19 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     + "\" parameter mode)");
                             init.setLocation(initLoc);
                         }
+
+                        // If our type is a representation, our initialization clause
+                        // should say something about Conc.[variable name] and not
+                        // variable
+                        if (ste instanceof RepresentationTypeEntry) {
+                            // Replace the variable with the Conc.[variable name]
+                            init =
+                                    Utilities.replace(init, parameterExp,
+                                            Utilities.createConcVarExp(
+                                                    opLocation, parameterExp,
+                                                    parameterExp.getMathType(),
+                                                    BOOLEAN));
+                        }
                     }
                     // Since the type is generic, we can only use the is_initial predicate
                     // to ensure that the value is initial value.
@@ -1011,6 +1034,36 @@ public class VCGenerator extends TreeWalkerVisitor {
                     else {
                         ensures = init;
                     }
+                }
+
+                // If the type is a type representation, then our requires clause
+                // should really say something about the conceptual type and not
+                // the variable
+                if (ste instanceof RepresentationTypeEntry) {
+                    RepresentationDec rDec =
+                            (RepresentationDec) ste.getDefiningElement();
+                    Exp conceptualExp = null;
+
+                    if (rDec.getCorrespondence() instanceof EqualsExp) {
+                        conceptualExp =
+                                ((EqualsExp) rDec.getCorrespondence())
+                                        .getRight();
+                    }
+                    else {
+                        Utilities.expNotHandled(rDec.getCorrespondence(),
+                                opLocation);
+                    }
+
+                    OldExp oldConceptualExp =
+                            new OldExp(opLocation, Utilities.createConcVarExp(
+                                    opLocation, parameterExp, parameterExp
+                                            .getMathType(), BOOLEAN));
+                    ensures =
+                            Utilities.replace(ensures, parameterExp,
+                                    conceptualExp);
+                    ensures =
+                            Utilities.replace(ensures, oldParameterExp,
+                                    oldConceptualExp);
                 }
             }
             else {
@@ -1103,31 +1156,48 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // with entry types passed in to the concept realization
                 if (!(ptType instanceof PTGeneric)) {
                     // Query for the type entry in the symbol table
-                    typeEntry =
+                    SymbolTableEntry ste =
                             Utilities.searchProgramType(pNameTy.getLocation(),
                                     pNameTy.getQualifier(), pNameTy.getName(),
                                     myCurrentModuleScope);
+
+                    if (ste instanceof ProgramTypeEntry) {
+                        typeEntry =
+                                ste.toProgramTypeEntry(pNameTy.getLocation());
+                    }
+                    else {
+                        typeEntry =
+                                ste.toRepresentationTypeEntry(
+                                        pNameTy.getLocation())
+                                        .getDefiningTypeEntry();
+                    }
 
                     // Obtain the original dec from the AST
                     TypeDec type = (TypeDec) typeEntry.getDefiningElement();
 
                     // Convert p to a VarExp
-                    VarExp pExp = new VarExp(null, null, p.getName());
-                    pExp.setMathType(pNameTy.getMathTypeValue());
+                    VarExp parameterExp = new VarExp(null, null, p.getName());
+                    parameterExp.setMathType(pNameTy.getMathTypeValue());
 
                     // Obtain the exemplar in VarExp form
                     VarExp exemplar =
                             new VarExp(null, null, type.getExemplar());
                     exemplar.setMathType(pNameTy.getMathTypeValue());
 
-                    // Deep copy the original initialization ensures and the constraint
-                    Exp init = Exp.copy(type.getInitialization().getEnsures());
-                    Exp constraint = Exp.copy(type.getConstraint());
+                    // If we have a type representation, then there are no initialization
+                    // or constraint clauses.
+                    Exp init = null;
+                    Exp constraint = null;
+                    if (ste instanceof ProgramTypeEntry) {
+                        // Deep copy the original initialization ensures and the constraint
+                        init = Exp.copy(type.getInitialization().getEnsures());
+                        constraint = Exp.copy(type.getConstraint());
+                    }
 
                     // Only worry about replaces mode parameters
                     if (p.getMode() == Mode.REPLACES && init != null) {
                         // Replace the formal with the actual
-                        init = Utilities.replace(init, exemplar, pExp);
+                        init = Utilities.replace(init, exemplar, parameterExp);
 
                         // Set the details for the new location
                         if (init.getLocation() != null) {
@@ -1180,7 +1250,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             // Replace the formal with the actual
                             constraint =
                                     Utilities.replace(constraint, exemplar,
-                                            pExp);
+                                            parameterExp);
 
                             // Set the details for the new location
                             if (constraint.getLocation() != null) {
@@ -1226,6 +1296,20 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 requires = constraint;
                             }
                         }
+                    }
+
+                    // If the type is a type representation, then our requires clause
+                    // should really say something about the conceptual type and not
+                    // the variable
+                    if (ste instanceof RepresentationTypeEntry) {
+                        requires =
+                                Utilities.replace(requires, parameterExp,
+                                        Utilities
+                                                .createConcVarExp(opLocation,
+                                                        parameterExp,
+                                                        parameterExp
+                                                                .getMathType(),
+                                                        BOOLEAN));
                     }
                 }
 
@@ -1686,43 +1770,16 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Only do simplifications if we have an equals
             if (equalsExp.getOperator() == EqualsExp.EQUAL) {
-                boolean verificationVariable =
-                        Utilities.isVerificationVar(equalsExp.getLeft());
-
                 // Create a temp expression where left is replaced with the right
                 Exp tmp =
                         Utilities.replace(exp, equalsExp.getLeft(), equalsExp
                                 .getRight());
-                if (equalsExp.getLeft() instanceof VarExp) {
-                    // If left is still part of confirm
-                    VarExp left = (VarExp) equalsExp.getLeft();
-                    if (tmp.containsVar(left.getName().getName(), false)) {
-                        keepAssumption = true;
-                    }
-                }
 
                 // If tmp is not null, then it means we have to check the right
                 if (tmp == null) {
-                    // Create a temp expression where right is replaced with the left
-                    verificationVariable =
-                            Utilities.isVerificationVar(equalsExp.getRight());
                     tmp =
                             Utilities.replace(exp, equalsExp.getRight(),
                                     equalsExp.getLeft());
-                    if (equalsExp.getRight() instanceof VarExp) {
-                        // If right is still part of confirm
-                        VarExp right = (VarExp) equalsExp.getRight();
-                        if (tmp.containsVar(right.getName().getName(), false)) {
-                            keepAssumption = true;
-                        }
-                    }
-                }
-
-                // We clear our assertion for this assumes if this is a
-                // verification variable or if we don't have to
-                // keep this assumption.
-                if (verificationVariable && !keepAssumption) {
-                    assertion = null;
                 }
 
                 // Update exp
@@ -2103,9 +2160,19 @@ public class VCGenerator extends TreeWalkerVisitor {
         assertiveCode.addAssume(myCorrespondenceExp);
 
         // Search for the type we are implementing
-        ProgramTypeEntry typeEntry =
+        SymbolTableEntry ste =
                 Utilities.searchProgramType(dec.getLocation(), null, dec
                         .getName(), myCurrentModuleScope);
+
+        ProgramTypeEntry typeEntry;
+        if (ste instanceof ProgramTypeEntry) {
+            typeEntry = ste.toProgramTypeEntry(dec.getLocation());
+        }
+        else {
+            typeEntry =
+                    ste.toRepresentationTypeEntry(dec.getLocation())
+                            .getDefiningTypeEntry();
+        }
 
         // Make sure we don't have a generic type
         if (typeEntry.getDefiningElement() instanceof TypeDec) {
@@ -2151,18 +2218,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                 simplify = true;
             }
             assertiveCode.setFinalConfirm(constraint, simplify);
-
-            // Store the correspondence for future use
-            if (!constraint.isLiteralTrue()) {
-                if (myCorrTypeConstraintExp == null) {
-                    myCorrTypeConstraintExp = constraint;
-                }
-                else {
-                    myCorrTypeConstraintExp =
-                            myTypeGraph.formConjunct(myCorrTypeConstraintExp,
-                                    constraint);
-                }
-            }
         }
 
         // Add this new assertive code to our incomplete assertive code stack
@@ -2247,13 +2302,26 @@ public class VCGenerator extends TreeWalkerVisitor {
                         NameTy pNameTy = (NameTy) tempDec.getTy();
 
                         // Query for the type entry in the symbol table
-                        ProgramTypeEntry typeEntry =
+                        SymbolTableEntry ste =
                                 Utilities
                                         .searchProgramType(pNameTy
                                                 .getLocation(), pNameTy
                                                 .getQualifier(), pNameTy
                                                 .getName(),
                                                 myCurrentModuleScope);
+
+                        ProgramTypeEntry typeEntry;
+                        if (ste instanceof ProgramTypeEntry) {
+                            typeEntry =
+                                    ste.toProgramTypeEntry(pNameTy
+                                            .getLocation());
+                        }
+                        else {
+                            typeEntry =
+                                    ste.toRepresentationTypeEntry(
+                                            pNameTy.getLocation())
+                                            .getDefiningTypeEntry();
+                        }
 
                         // Obtain the original dec from the AST
                         TypeDec type = (TypeDec) typeEntry.getDefiningElement();
@@ -2799,9 +2867,19 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Search for the type we are implementing
-        ProgramTypeEntry typeEntry =
+        SymbolTableEntry ste =
                 Utilities.searchProgramType(dec.getLocation(), null, dec
                         .getName(), myCurrentModuleScope);
+
+        ProgramTypeEntry typeEntry;
+        if (ste instanceof ProgramTypeEntry) {
+            typeEntry = ste.toProgramTypeEntry(dec.getLocation());
+        }
+        else {
+            typeEntry =
+                    ste.toRepresentationTypeEntry(dec.getLocation())
+                            .getDefiningTypeEntry();
+        }
 
         // Make sure we don't have a generic type
         if (typeEntry.getDefiningElement() instanceof TypeDec) {
@@ -2832,8 +2910,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             else {
                 loc = (Location) dec.getLocation().clone();
             }
-            loc.setDetails("Convention for " + dec.getName().getName()
-                    + " generated by Initialization Rule");
+            loc.setDetails("Convention for " + dec.getName().getName());
             Utilities.setLocation(myConventionExp, loc);
 
             // Add the convention as something we need to confirm
@@ -2917,6 +2994,18 @@ public class VCGenerator extends TreeWalkerVisitor {
             myCurrentAssertiveCode.addAssume(myGlobalConstraintExp);
         }
 
+        // Add the convention as something we need to ensure
+        if (myConventionExp != null) {
+            Exp convention = Exp.copy(myConventionExp);
+            myCurrentAssertiveCode.addAssume(convention);
+        }
+
+        // Add the correspondence as a given
+        if (myCorrespondenceExp != null) {
+            Exp correspondence = Exp.copy(myCorrespondenceExp);
+            myCurrentAssertiveCode.addAssume(correspondence);
+        }
+
         // Add the requires clause
         if (requires != null) {
             myCurrentAssertiveCode.addAssume(requires);
@@ -2962,6 +3051,22 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Add the list of statements
         myCurrentAssertiveCode.addStatements(statementList);
+
+        // Add the convention as something we need to ensure
+        if (myConventionExp != null) {
+            Exp convention = Exp.copy(myConventionExp);
+            Location conventionLoc = (Location) ensures.getLocation().clone();
+            conventionLoc.setDetails(convention.getLocation().getDetails());
+            Utilities.setLocation(convention, conventionLoc);
+
+            // Simplify if we just have true
+            boolean simplify = false;
+            if (myConventionExp.isLiteralTrue()) {
+                simplify = true;
+            }
+            myCurrentAssertiveCode.addConfirm(conventionLoc, convention,
+                    simplify);
+        }
 
         // Simplify if we just have true
         boolean simplify = false;
@@ -3104,10 +3209,19 @@ public class VCGenerator extends TreeWalkerVisitor {
             NameTy pNameTy = (NameTy) varDec.getTy();
 
             // Query for the type entry in the symbol table
-            typeEntry =
+            SymbolTableEntry ste =
                     Utilities.searchProgramType(pNameTy.getLocation(), pNameTy
                             .getQualifier(), pNameTy.getName(),
                             myCurrentModuleScope);
+
+            if (ste instanceof ProgramTypeEntry) {
+                typeEntry = ste.toProgramTypeEntry(pNameTy.getLocation());
+            }
+            else {
+                typeEntry =
+                        ste.toRepresentationTypeEntry(pNameTy.getLocation())
+                                .getDefiningTypeEntry();
+            }
 
             // Make sure we don't have a generic type
             if (typeEntry.getDefiningElement() instanceof TypeDec) {
@@ -3171,41 +3285,44 @@ public class VCGenerator extends TreeWalkerVisitor {
                     RepresentationDec dec = (RepresentationDec) element;
 
                     if (dec.getRepresentation() instanceof RecordTy) {
-                        ProgramTypeEntry representationTypeEntry =
+                        SymbolTableEntry repSte =
                                 Utilities.searchProgramType(dec.getLocation(),
                                         null, dec.getName(),
                                         myCurrentModuleScope);
 
-                        // Make sure we don't have a generic type
-                        if (representationTypeEntry.getDefiningElement() instanceof TypeDec) {
-                            // Obtain the original dec from the AST
-                            TypeDec representationType =
-                                    (TypeDec) representationTypeEntry
-                                            .getDefiningElement();
+                        ProgramTypeDefinitionEntry representationTypeEntry =
+                                repSte.toRepresentationTypeEntry(
+                                        pNameTy.getLocation())
+                                        .getDefiningTypeEntry();
 
-                            // Create a variable expression from the type exemplar
-                            VarExp representationExemplar =
-                                    Utilities.createVarExp(representationType
-                                            .getLocation(), null,
-                                            representationType.getExemplar(),
-                                            representationTypeEntry
-                                                    .getModelType(), null);
+                        // Create a variable expression from the type exemplar
+                        VarExp representationExemplar =
+                                Utilities
+                                        .createVarExp(
+                                                varDec.getLocation(),
+                                                null,
+                                                Utilities
+                                                        .createPosSymbol(representationTypeEntry
+                                                                .getExemplar()
+                                                                .getName()),
+                                                representationTypeEntry
+                                                        .getModelType(), null);
 
-                            // Create a dotted expression
-                            edu.clemson.cs.r2jt.collections.List<Exp> expList =
-                                    new edu.clemson.cs.r2jt.collections.List<Exp>();
-                            expList.add(representationExemplar);
-                            expList.add(varDecExp);
-                            DotExp dotExp =
-                                    Utilities.createDotExp(loc, expList,
-                                            varDecExp.getMathType());
+                        // Create a dotted expression
+                        edu.clemson.cs.r2jt.collections.List<Exp> expList =
+                                new edu.clemson.cs.r2jt.collections.List<Exp>();
+                        expList.add(representationExemplar);
+                        expList.add(varDecExp);
+                        DotExp dotExp =
+                                Utilities.createDotExp(loc, expList, varDecExp
+                                        .getMathType());
 
-                            // Replace both the initialization and constraint clauses appropriately
-                            init = Utilities.replace(init, varDecExp, dotExp);
-                            constraint =
-                                    Utilities.replace(constraint, varDecExp,
-                                            dotExp);
-                        }
+                        // Replace both the initialization and constraint clauses appropriately
+                        init = Utilities.replace(init, varDecExp, dotExp);
+                        constraint =
+                                Utilities
+                                        .replace(constraint, varDecExp, dotExp);
+
                     }
                 }
 

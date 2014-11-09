@@ -18,10 +18,7 @@ package edu.clemson.cs.r2jt.vcgeneration;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
@@ -726,7 +723,7 @@ public class Utilities {
 
     /**
      * <p>Given the name of the type locate and return
-     * the <code>ProgramTypeEntry</code> stored in the
+     * the <code>SymbolTableEntry</code> stored in the
      * symbol table.</p>
      *
      * @param loc The location in the AST that we are
@@ -735,13 +732,12 @@ public class Utilities {
      * @param name The name of the type.
      * @param scope The module scope to start our search.
      *
-     * @return An <code>ProgramTypeEntry</code> from the
+     * @return A <code>SymbolTableEntry</code> from the
      *         symbol table.
      */
-    protected static ProgramTypeEntry searchProgramType(Location loc,
+    protected static SymbolTableEntry searchProgramType(Location loc,
             PosSymbol qualifier, PosSymbol name, ModuleScope scope) {
-        // Query for the corresponding operation
-        ProgramTypeEntry pt = null;
+        SymbolTableEntry retEntry = null;
 
         List<SymbolTableEntry> entries =
                 scope.query(new NameQuery(qualifier, name,
@@ -749,18 +745,33 @@ public class Utilities {
                         MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
                         false));
 
-        for (SymbolTableEntry ste : entries) {
-            if (ste instanceof ProgramTypeEntry) {
-                if (pt == null) {
-                    pt = ste.toProgramTypeEntry(loc);
+        if (entries.size() == 0) {
+            noSuchSymbol(qualifier, name.getName(), loc);
+        }
+        else if (entries.size() == 1) {
+            retEntry = entries.get(0).toProgramTypeEntry(loc);
+        }
+        else {
+            // When we have more than one, it means that we have a
+            // type representation. In that case, we just need the
+            // type representation.
+            for (int i = 0; i < entries.size() && retEntry == null; i++) {
+                SymbolTableEntry ste = entries.get(i);
+                if (ste instanceof RepresentationTypeEntry) {
+                    retEntry = ste.toRepresentationTypeEntry(loc);
                 }
-                else {
-                    throw new RuntimeException();
-                }
+            }
+
+            // Throw duplicate symbol error if we don't have a type
+            // representation
+            if (retEntry == null) {
+                //This should be caught earlier, when the duplicate type is
+                //created
+                throw new RuntimeException();
             }
         }
 
-        return pt;
+        return retEntry;
     }
 
     /**
