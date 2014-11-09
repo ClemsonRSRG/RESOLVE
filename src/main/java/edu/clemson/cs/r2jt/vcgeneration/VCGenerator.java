@@ -374,7 +374,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append(" =========================\n");
 
         // The current assertive code
-        myCurrentAssertiveCode = new AssertiveCode(myInstanceEnvironment);
+        myCurrentAssertiveCode = new AssertiveCode(myInstanceEnvironment, dec);
 
         // Obtains items from the current operation
         Location loc = dec.getLocation();
@@ -474,7 +474,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append(" =========================\n");
 
         // The current assertive code
-        myCurrentAssertiveCode = new AssertiveCode(myInstanceEnvironment);
+        myCurrentAssertiveCode = new AssertiveCode(myInstanceEnvironment, dec);
 
         // Obtains items from the current operation
         OperationDec opDec =
@@ -2051,7 +2051,8 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private void applyCorrespondenceRule(RepresentationDec dec) {
         // Create a new assertive code to hold the correspondence VCs
-        AssertiveCode assertiveCode = new AssertiveCode(myInstanceEnvironment);
+        AssertiveCode assertiveCode =
+                new AssertiveCode(myInstanceEnvironment, dec);
 
         // Add the global constraints as given
         assertiveCode.addAssume(myGlobalConstraintExp);
@@ -2146,7 +2147,8 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private void applyFacilityDeclRule(FacilityDec dec) {
         // Create a new assertive code to hold the facility declaration VCs
-        AssertiveCode assertiveCode = new AssertiveCode(myInstanceEnvironment);
+        AssertiveCode assertiveCode =
+                new AssertiveCode(myInstanceEnvironment, dec);
 
         // Add the global constraints as given
         assertiveCode.addAssume(myGlobalConstraintExp);
@@ -2743,13 +2745,19 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private void applyInitializationRule(RepresentationDec dec) {
         // Create a new assertive code to hold the correspondence VCs
-        AssertiveCode assertiveCode = new AssertiveCode(myInstanceEnvironment);
+        AssertiveCode assertiveCode =
+                new AssertiveCode(myInstanceEnvironment, dec);
 
         // Add the global constraints as given
         assertiveCode.addAssume(myGlobalConstraintExp);
 
         // Add the global require clause as given
         assertiveCode.addAssume(myGlobalRequiresExp);
+
+        if (dec.getRepresentation() instanceof RecordTy) {
+            RecordTy ty = (RecordTy) dec.getRepresentation();
+            assertiveCode.addVariableDecs(ty.getFields());
+        }
 
         // Search for the type we are implementing
         ProgramTypeEntry typeEntry =
@@ -2765,48 +2773,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             VarExp exemplar =
                     Utilities.createVarExp(type.getLocation(), null, type
                             .getExemplar(), typeEntry.getModelType(), null);
-
-            // Obtain the initialized variables
-            // TODO: Only dealing with Records now, need to worry about NameTy
-            // TODO: Might have to change the VariableDec Rule
-            // TODO: Create a createDotExp
-            if (dec.getRepresentation() instanceof RecordTy) {
-                RecordTy ty = (RecordTy) dec.getRepresentation();
-                List<VarDec> decList = ty.getFields();
-                for (VarDec v : decList) {
-                    NameTy nameTy = (NameTy) v.getTy();
-                    ProgramTypeEntry pte =
-                            Utilities.searchProgramType(nameTy.getLocation(),
-                                    nameTy.getQualifier(), nameTy.getName(),
-                                    myCurrentModuleScope);
-
-                    // Create a variable that refers to the conceptual exemplar
-                    DotExp recordNameDotVarName = new DotExp();
-                    VarExp vName = new VarExp();
-                    vName.setMathType(v.getMathType());
-                    vName.setName(v.getName());
-
-                    edu.clemson.cs.r2jt.collections.List<Exp> recordList =
-                            new edu.clemson.cs.r2jt.collections.List<Exp>();
-                    recordList.add(exemplar);
-                    recordList.add(vName);
-
-                    recordNameDotVarName.setSegments(recordList);
-                    recordNameDotVarName.setMathType(typeEntry.getModelType());
-
-                    if (pte.getDefiningElement() instanceof TypeDec) {
-                        TypeDec typeDec = (TypeDec) pte.getDefiningElement();
-                        Exp varInit =
-                                Exp.copy(typeDec.getInitialization()
-                                        .getEnsures());
-                        assertiveCode.addAssume(Utilities.replace(varInit,
-                                Utilities.createVarExp(dec.getLocation(), null,
-                                        typeDec.getExemplar(), vName
-                                                .getMathType(), null),
-                                recordNameDotVarName));
-                    }
-                }
-            }
 
             // Add the correspondence as given
             assertiveCode.addAssume(dec.getCorrespondence());
@@ -3153,6 +3119,51 @@ public class VCGenerator extends TreeWalkerVisitor {
                 int dotIndex = varName.indexOf(".");
                 if (dotIndex > 0) {
                     varName = varName.substring(0, dotIndex);
+                }
+
+                // Check to see if this variable was declared inside a record
+                ResolveConceptualElement element =
+                        myCurrentAssertiveCode.getInstantiatingElement();
+                if (element instanceof RepresentationDec) {
+                    RepresentationDec dec = (RepresentationDec) element;
+
+                    if (dec.getRepresentation() instanceof RecordTy) {
+                        ProgramTypeEntry representationTypeEntry =
+                                Utilities.searchProgramType(dec.getLocation(),
+                                        null, dec.getName(),
+                                        myCurrentModuleScope);
+
+                        // Make sure we don't have a generic type
+                        if (representationTypeEntry.getDefiningElement() instanceof TypeDec) {
+                            // Obtain the original dec from the AST
+                            TypeDec representationType =
+                                    (TypeDec) representationTypeEntry
+                                            .getDefiningElement();
+
+                            // Create a variable expression from the type exemplar
+                            VarExp representationExemplar =
+                                    Utilities.createVarExp(representationType
+                                            .getLocation(), null,
+                                            representationType.getExemplar(),
+                                            representationTypeEntry
+                                                    .getModelType(), null);
+
+                            // Create a dotted expression
+                            edu.clemson.cs.r2jt.collections.List<Exp> expList =
+                                    new edu.clemson.cs.r2jt.collections.List<Exp>();
+                            expList.add(representationExemplar);
+                            expList.add(varDecExp);
+                            DotExp dotExp =
+                                    Utilities.createDotExp(loc, expList,
+                                            varDecExp.getMathType());
+
+                            // Replace both the initialization and constraint clauses appropriately
+                            init = Utilities.replace(init, varDecExp, dotExp);
+                            constraint =
+                                    Utilities.replace(constraint, varDecExp,
+                                            dotExp);
+                        }
+                    }
                 }
 
                 // Check if our confirm clause uses this variable
