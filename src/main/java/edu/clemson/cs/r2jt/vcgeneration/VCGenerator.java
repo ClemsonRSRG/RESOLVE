@@ -202,7 +202,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             .getImports());
 
             // Store the global requires clause
-            myGlobalRequiresExp = getRequiresClause(dec);
+            myGlobalRequiresExp = getRequiresClause(dec.getLocation(), dec);
 
             // Obtain the global requires clause from the Concept
             ConceptModuleDec conceptModuleDec =
@@ -210,7 +210,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                             .getModuleScope(
                                     new ModuleIdentifier(dec.getConceptName()
                                             .getName())).getDefiningElement();
-            Exp conceptRequires = getRequiresClause(conceptModuleDec);
+            Exp conceptRequires =
+                    getRequiresClause(conceptModuleDec.getLocation(),
+                            conceptModuleDec);
             if (!conceptRequires.isLiteralTrue()) {
                 if (myGlobalRequiresExp.isLiteralTrue()) {
                     myGlobalRequiresExp = conceptRequires;
@@ -270,7 +272,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             .getImports());
 
             // Store the global requires clause
-            myGlobalRequiresExp = getRequiresClause(dec);
+            myGlobalRequiresExp = getRequiresClause(dec.getLocation(), dec);
 
             // Obtain the global requires clause from the Concept
             ConceptModuleDec conceptModuleDec =
@@ -278,7 +280,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                             .getModuleScope(
                                     new ModuleIdentifier(dec.getConceptName()
                                             .getName())).getDefiningElement();
-            Exp conceptRequires = getRequiresClause(conceptModuleDec);
+            Exp conceptRequires =
+                    getRequiresClause(conceptModuleDec.getLocation(),
+                            conceptModuleDec);
             if (!conceptRequires.isLiteralTrue()) {
                 if (myGlobalRequiresExp.isLiteralTrue()) {
                     myGlobalRequiresExp = conceptRequires;
@@ -295,7 +299,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                     (EnhancementModuleDec) mySymbolTable.getModuleScope(
                             new ModuleIdentifier(dec.getEnhancementName()
                                     .getName())).getDefiningElement();
-            Exp enhancementRequires = getRequiresClause(enhancementModuleDec);
+            Exp enhancementRequires =
+                    getRequiresClause(enhancementModuleDec.getLocation(),
+                            enhancementModuleDec);
             if (!enhancementRequires.isLiteralTrue()) {
                 if (myGlobalRequiresExp.isLiteralTrue()) {
                     myGlobalRequiresExp = enhancementRequires;
@@ -364,7 +370,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             .getImports());
 
             // Store the global requires clause
-            myGlobalRequiresExp = getRequiresClause(dec);
+            myGlobalRequiresExp = getRequiresClause(dec.getLocation(), dec);
         }
         catch (NoSuchSymbolException e) {
             System.err.println("Module " + dec.getName()
@@ -411,8 +417,10 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Obtains items from the current operation
         Location loc = dec.getLocation();
         String name = dec.getName().getName();
-        Exp requires = modifyRequiresClause(getRequiresClause(dec), loc, name);
-        Exp ensures = modifyEnsuresClause(getEnsuresClause(dec), loc, name);
+        Exp requires =
+                modifyRequiresClause(getRequiresClause(loc, dec), loc, name);
+        Exp ensures =
+                modifyEnsuresClause(getEnsuresClause(loc, dec), loc, name);
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
@@ -432,8 +440,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Apply the procedure declaration rule
-        applyProcedureDeclRule(requires, ensures, decreasing, typeConstraint,
-                variableList, statementList);
+        applyProcedureDeclRule(loc, requires, ensures, decreasing,
+                typeConstraint, variableList, statementList);
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
@@ -514,8 +522,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         Location loc = dec.getLocation();
         String name = dec.getName().getName();
         Exp requires =
-                modifyRequiresClause(getRequiresClause(opDec), loc, name);
-        Exp ensures = modifyEnsuresClause(getEnsuresClause(opDec), loc, name);
+                modifyRequiresClause(getRequiresClause(loc, opDec), loc, name);
+        Exp ensures =
+                modifyEnsuresClause(getEnsuresClause(loc, opDec), loc, name);
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
@@ -536,7 +545,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Apply the procedure declaration rule
-        applyProcedureDeclRule(requires, ensures, decreasing,
+        applyProcedureDeclRule(loc, requires, ensures, decreasing,
                 facTypeConstraint, variableList, statementList);
 
         // Add this to our stack of to be processed assertive codes.
@@ -705,11 +714,12 @@ public class VCGenerator extends TreeWalkerVisitor {
     /**
      * <p>Returns the ensures clause for the current <code>Dec</code>.</p>
      *
+     * @param location The location of the ensures clause.
      * @param dec The corresponding <code>Dec</code>.
      *
      * @return The ensures clause <code>Exp</code>.
      */
-    private Exp getEnsuresClause(Dec dec) {
+    private Exp getEnsuresClause(Location location, Dec dec) {
         PosSymbol name = dec.getName();
         Exp ensures = null;
         Exp retExp;
@@ -727,13 +737,11 @@ public class VCGenerator extends TreeWalkerVisitor {
             retExp = Exp.copy(ensures);
         }
         else {
-            Location loc = (Location) dec.getLocation().clone();
             retExp = myTypeGraph.getTrueVarExp();
-            Utilities.setLocation(retExp, loc);
         }
 
         if (retExp.getLocation() != null) {
-            Location loc = retExp.getLocation();
+            Location loc = (Location) location.clone();
             loc.setDetails("Ensures Clause of " + name);
             Utilities.setLocation(retExp, loc);
         }
@@ -784,11 +792,12 @@ public class VCGenerator extends TreeWalkerVisitor {
     /**
      * <p>Returns the requires clause for the current <code>Dec</code>.</p>
      *
+     * @param location The location of the requires clause.
      * @param dec The corresponding <code>Dec</code>.
      *
      * @return The requires clause <code>Exp</code>.
      */
-    private Exp getRequiresClause(Dec dec) {
+    private Exp getRequiresClause(Location location, Dec dec) {
         PosSymbol name = dec.getName();
         Exp requires = null;
         Exp retExp;
@@ -821,13 +830,11 @@ public class VCGenerator extends TreeWalkerVisitor {
             retExp = Exp.copy(requires);
         }
         else {
-            Location loc = (Location) dec.getLocation().clone();
             retExp = myTypeGraph.getTrueVarExp();
-            Utilities.setLocation(retExp, loc);
         }
 
-        if (retExp.getLocation() != null) {
-            Location loc = retExp.getLocation();
+        if (location != null) {
+            Location loc = (Location) location.clone();
             loc.setDetails("Requires Clause for " + name);
             Utilities.setLocation(retExp, loc);
         }
@@ -1762,7 +1769,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     private Exp simplifyAssumeRule(AssumeStmt stmt, Exp exp) {
         // Variables
         Exp assertion = stmt.getAssertion();
-        boolean keepAssumption = false;
 
         // EqualsExp
         if (assertion instanceof EqualsExp) {
@@ -2200,8 +2206,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Set the location for the constraint
             Location loc;
-            if (constraint.getLocation() != null) {
-                loc = (Location) constraint.getLocation().clone();
+            if (myCorrespondenceExp.getLocation() != null) {
+                loc = (Location) myCorrespondenceExp.getLocation().clone();
             }
             else {
                 loc = (Location) type.getLocation().clone();
@@ -2264,9 +2270,10 @@ public class VCGenerator extends TreeWalkerVisitor {
             List<ModuleArgumentItem> conceptParams = dec.getConceptParams();
 
             // Concept requires clause
-            Exp req = getRequiresClause(facConceptDec);
-            Location loc =
-                    (Location) dec.getConceptName().getLocation().clone();
+            Exp req =
+                    getRequiresClause(facConceptDec.getLocation(),
+                            facConceptDec);
+            Location loc = (Location) dec.getName().getLocation().clone();
             loc.setDetails("Facility Declaration Rule");
 
             req =
@@ -2938,12 +2945,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Set the location for the constraint
             Location initLoc;
-            if (init.getLocation() != null) {
-                initLoc = (Location) init.getLocation().clone();
-            }
-            else {
-                initLoc = (Location) type.getLocation().clone();
-            }
+            initLoc = (Location) dec.getLocation().clone();
             initLoc.setDetails("Initialization Rule for "
                     + dec.getName().getName());
             Utilities.setLocation(init, initLoc);
@@ -2974,6 +2976,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     /**
      * <p>Applies the procedure declaration rule.</p>
      *
+     * @param opLoc Location of the procedure declaration.
      * @param requires Requires clause
      * @param ensures Ensures clause
      * @param decreasing Decreasing clause (if any)
@@ -2981,9 +2984,9 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param variableList List of all variables for this procedure
      * @param statementList List of statements for this procedure
      */
-    private void applyProcedureDeclRule(Exp requires, Exp ensures,
-            Exp decreasing, Exp typeConstraint, List<VarDec> variableList,
-            List<Statement> statementList) {
+    private void applyProcedureDeclRule(Location opLoc, Exp requires,
+            Exp ensures, Exp decreasing, Exp typeConstraint,
+            List<VarDec> variableList, List<Statement> statementList) {
         // Add the global requires clause
         if (myGlobalRequiresExp != null) {
             myCurrentAssertiveCode.addAssume(myGlobalRequiresExp);
@@ -3055,7 +3058,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add the convention as something we need to ensure
         if (myConventionExp != null) {
             Exp convention = Exp.copy(myConventionExp);
-            Location conventionLoc = (Location) ensures.getLocation().clone();
+            Location conventionLoc = (Location) opLoc.clone();
             conventionLoc.setDetails(convention.getLocation().getDetails());
             Utilities.setLocation(convention, conventionLoc);
 
