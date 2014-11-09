@@ -274,6 +274,41 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Store the global requires clause
             myGlobalRequiresExp = getRequiresClause(dec);
+
+            // Obtain the global requires clause from the Concept
+            ConceptModuleDec conceptModuleDec =
+                    (ConceptModuleDec) mySymbolTable
+                            .getModuleScope(
+                                    new ModuleIdentifier(dec.getConceptName()
+                                            .getName())).getDefiningElement();
+            Exp conceptRequires = getRequiresClause(conceptModuleDec);
+            if (!conceptRequires.isLiteralTrue()) {
+                if (myGlobalRequiresExp.isLiteralTrue()) {
+                    myGlobalRequiresExp = conceptRequires;
+                }
+                else {
+                    myGlobalRequiresExp =
+                            myTypeGraph.formConjunct(myGlobalRequiresExp,
+                                    conceptRequires);
+                }
+            }
+
+            // Obtain the global requires clause from the Enhancement
+            EnhancementModuleDec enhancementModuleDec =
+                    (EnhancementModuleDec) mySymbolTable.getModuleScope(
+                            new ModuleIdentifier(dec.getEnhancementName()
+                                    .getName())).getDefiningElement();
+            Exp enhancementRequires = getRequiresClause(enhancementModuleDec);
+            if (!enhancementRequires.isLiteralTrue()) {
+                if (myGlobalRequiresExp.isLiteralTrue()) {
+                    myGlobalRequiresExp = enhancementRequires;
+                }
+                else {
+                    myGlobalRequiresExp =
+                            myTypeGraph.formConjunct(myGlobalRequiresExp,
+                                    enhancementRequires);
+                }
+            }
         }
         catch (NoSuchSymbolException e) {
             System.err.println("Module " + dec.getName()
