@@ -2169,7 +2169,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         myIncAssertiveCodeStack.push(assertiveCode);
 
         // Verbose Mode Debug Messages
-        String newString = "\nCorrespondence Rule Applied: \n";
+        String newString =
+                "\n========================= Type Representation Name:\t"
+                        + dec.getName().getName()
+                        + " =========================\n";
+        newString += "\nCorrespondence Rule Applied: \n";
         newString += assertiveCode.assertionToString();
         newString += "\n_____________________ \n";
         myIncAssertiveCodeStackInfo.push(newString);
@@ -2880,7 +2884,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         myIncAssertiveCodeStack.push(assertiveCode);
 
         // Verbose Mode Debug Messages
-        String newString = "\nInitialization Rule Applied: \n";
+        String newString =
+                "\n========================= Type Representation Name:\t"
+                        + dec.getName().getName()
+                        + " =========================\n";
+        newString += "\nInitialization Rule Applied: \n";
         newString += assertiveCode.assertionToString();
         newString += "\n_____________________ \n";
         myIncAssertiveCodeStackInfo.push(newString);
