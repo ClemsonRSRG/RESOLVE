@@ -417,10 +417,15 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Obtains items from the current operation
         Location loc = dec.getLocation();
         String name = dec.getName().getName();
+        boolean isLocal =
+                Utilities.isLocationOperation(dec.getName().getName(),
+                        myCurrentModuleScope);
         Exp requires =
-                modifyRequiresClause(getRequiresClause(loc, dec), loc, name);
+                modifyRequiresClause(getRequiresClause(loc, dec), loc, name,
+                        isLocal);
         Exp ensures =
-                modifyEnsuresClause(getEnsuresClause(loc, dec), loc, name);
+                modifyEnsuresClause(getEnsuresClause(loc, dec), loc, name,
+                        isLocal);
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
@@ -440,8 +445,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Apply the procedure declaration rule
-        applyProcedureDeclRule(loc, requires, ensures, decreasing,
-                typeConstraint, variableList, statementList);
+        applyProcedureDeclRule(loc, name, requires, ensures, decreasing,
+                typeConstraint, variableList, statementList, isLocal);
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
@@ -521,10 +526,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                 (OperationDec) myCurrentOperationEntry.getDefiningElement();
         Location loc = dec.getLocation();
         String name = dec.getName().getName();
+        boolean isLocal =
+                Utilities.isLocationOperation(dec.getName().getName(),
+                        myCurrentModuleScope);
         Exp requires =
-                modifyRequiresClause(getRequiresClause(loc, opDec), loc, name);
+                modifyRequiresClause(getRequiresClause(loc, opDec), loc, name,
+                        isLocal);
         Exp ensures =
-                modifyEnsuresClause(getEnsuresClause(loc, opDec), loc, name);
+                modifyEnsuresClause(getEnsuresClause(loc, opDec), loc, name,
+                        isLocal);
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
@@ -545,8 +555,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Apply the procedure declaration rule
-        applyProcedureDeclRule(loc, requires, ensures, decreasing,
-                facTypeConstraint, variableList, statementList);
+        applyProcedureDeclRule(loc, name, requires, ensures, decreasing,
+                facTypeConstraint, variableList, statementList, isLocal);
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
@@ -884,11 +894,13 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param opLocation The <code>Location</code> for the operation
      * @param opName The name of the operation.
      * @param parameterVarDecList The list of parameter variables for the operation.
+     * @param isLocal True if it is a local operation, false otherwise.
      *
      * @return The modified ensures clause <code>Exp</code>.
      */
     private Exp modifyEnsuresByParameter(Exp ensures, Location opLocation,
-            String opName, List<ParameterVarDec> parameterVarDecList) {
+            String opName, List<ParameterVarDec> parameterVarDecList,
+            boolean isLocal) {
         // Loop through each parameter
         for (ParameterVarDec p : parameterVarDecList) {
             // Ty is NameTy
@@ -997,19 +1009,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     + "\" parameter mode)");
                             init.setLocation(initLoc);
                         }
-
-                        // If our type is a representation, our initialization clause
-                        // should say something about Conc.[variable name] and not
-                        // variable
-                        if (ste instanceof RepresentationTypeEntry) {
-                            // Replace the variable with the Conc.[variable name]
-                            init =
-                                    Utilities.replace(init, parameterExp,
-                                            Utilities.createConcVarExp(
-                                                    opLocation, parameterExp,
-                                                    parameterExp.getMathType(),
-                                                    BOOLEAN));
-                        }
                     }
                     // Since the type is generic, we can only use the is_initial predicate
                     // to ensure that the value is initial value.
@@ -1046,25 +1045,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // If the type is a type representation, then our requires clause
                 // should really say something about the conceptual type and not
                 // the variable
-                if (ste instanceof RepresentationTypeEntry) {
-                    RepresentationDec rDec =
-                            (RepresentationDec) ste.getDefiningElement();
-                    Exp conceptualExp = null;
-
-                    if (rDec.getCorrespondence() instanceof EqualsExp) {
-                        conceptualExp =
-                                ((EqualsExp) rDec.getCorrespondence())
-                                        .getRight();
-                    }
-                    else {
-                        Utilities.expNotHandled(rDec.getCorrespondence(),
-                                opLocation);
-                    }
-
+                if (ste instanceof RepresentationTypeEntry && !isLocal) {
+                    Exp conceptualExp =
+                            Utilities.createConcVarExp(opLocation,
+                                    parameterExp, parameterExp.getMathType(),
+                                    BOOLEAN);
                     OldExp oldConceptualExp =
-                            new OldExp(opLocation, Utilities.createConcVarExp(
-                                    opLocation, parameterExp, parameterExp
-                                            .getMathType(), BOOLEAN));
+                            new OldExp(opLocation, Exp.copy(conceptualExp));
                     ensures =
                             Utilities.replace(ensures, parameterExp,
                                     conceptualExp);
@@ -1088,11 +1075,12 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param ensures The <code>Exp</code> containing the ensures clause.
      * @param opLocation The <code>Location</code> for the operation.
      * @param opName The name for the operation.
+     * @param isLocal True if it is a local operation, false otherwise.
      *
      * @return The modified ensures clause <code>Exp</code>.
      */
     private Exp modifyEnsuresClause(Exp ensures, Location opLocation,
-            String opName) {
+            String opName, boolean isLocal) {
         // Obtain the list of parameters for the current operation
         List<ParameterVarDec> parameterVarDecList;
         if (myCurrentOperationEntry.getDefiningElement() instanceof FacilityOperationDec) {
@@ -1110,7 +1098,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // the parameter modes.
         ensures =
                 modifyEnsuresByParameter(ensures, opLocation, opName,
-                        parameterVarDecList);
+                        parameterVarDecList, isLocal);
 
         return ensures;
     }
@@ -1132,11 +1120,12 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param requires The <code>Exp</code> containing the requires clause.
      * @param opLocation The <code>Location</code> for the operation.
      * @param opName The name for the operation.
+     * @param isLocal True if it is a local operation, false otherwise.
      *
      * @return The modified requires clause <code>Exp</code>.
      */
     private Exp modifyRequiresByParameter(Exp requires, Location opLocation,
-            String opName) {
+            String opName, boolean isLocal) {
         // Obtain the list of parameters
         List<ParameterVarDec> parameterVarDecList;
         if (myCurrentOperationEntry.getDefiningElement() instanceof FacilityOperationDec) {
@@ -1308,7 +1297,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     // If the type is a type representation, then our requires clause
                     // should really say something about the conceptual type and not
                     // the variable
-                    if (ste instanceof RepresentationTypeEntry) {
+                    if (ste instanceof RepresentationTypeEntry && !isLocal) {
                         requires =
                                 Utilities.replace(requires, parameterExp,
                                         Utilities
@@ -1340,14 +1329,16 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param requires The <code>Exp</code> containing the requires clause.
      * @param opLocation The <code>Location</code> for the operation.
      * @param opName The name of the operation.
+     * @param isLocal True if it is a local operation, false otherwise.
      *
      * @return The modified requires clause <code>Exp</code>.
      */
     private Exp modifyRequiresClause(Exp requires, Location opLocation,
-            String opName) {
+            String opName, boolean isLocal) {
         // Modifies the existing requires clause based on
         // the parameter modes.
-        requires = modifyRequiresByParameter(requires, opLocation, opName);
+        requires =
+                modifyRequiresByParameter(requires, opLocation, opName, isLocal);
 
         // Modifies the existing requires clause based on
         // the parameter modes.
@@ -1940,6 +1931,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         OperationDec opDec =
                 getOperationDec(stmt.getLocation(), stmt.getQualifier(), stmt
                         .getName(), stmt.getArguments());
+        boolean isLocal =
+                Utilities.isLocationOperation(stmt.getName().getName(),
+                        myCurrentModuleScope);
 
         // Get the ensures clause for this operation
         // Note: If there isn't an ensures clause, it is set to "True"
@@ -1999,7 +1993,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Modify ensures using the parameter modes
         ensures =
                 modifyEnsuresByParameter(ensures, stmt.getLocation(), opDec
-                        .getName().getName(), opDec.getParameters());
+                        .getName().getName(), opDec.getParameters(), isLocal);
 
         // Replace PreCondition variables in the requires clause
         requires =
@@ -2926,7 +2920,13 @@ public class VCGenerator extends TreeWalkerVisitor {
             if (dec.getConvention().isLiteralTrue()) {
                 simplify = true;
             }
-            assertiveCode.addConfirm(loc, myConventionExp, simplify);
+            Exp convention = Exp.copy(myConventionExp);
+            Location conventionLoc =
+                    (Location) convention.getLocation().clone();
+            conventionLoc.setDetails(conventionLoc.getDetails()
+                    + " generated by Initialization Rule");
+            Utilities.setLocation(convention, conventionLoc);
+            assertiveCode.addConfirm(loc, convention, simplify);
 
             // Create a variable that refers to the conceptual exemplar
             DotExp conceptualVar =
@@ -2977,16 +2977,19 @@ public class VCGenerator extends TreeWalkerVisitor {
      * <p>Applies the procedure declaration rule.</p>
      *
      * @param opLoc Location of the procedure declaration.
+     * @param name Name of the procedure.
      * @param requires Requires clause
      * @param ensures Ensures clause
      * @param decreasing Decreasing clause (if any)
      * @param typeConstraint Facility type constraints (if any)
      * @param variableList List of all variables for this procedure
      * @param statementList List of statements for this procedure
+     * @param isLocal True if the it is a local operation. False otherwise.
      */
-    private void applyProcedureDeclRule(Location opLoc, Exp requires,
-            Exp ensures, Exp decreasing, Exp typeConstraint,
-            List<VarDec> variableList, List<Statement> statementList) {
+    private void applyProcedureDeclRule(Location opLoc, String name,
+            Exp requires, Exp ensures, Exp decreasing, Exp typeConstraint,
+            List<VarDec> variableList, List<Statement> statementList,
+            boolean isLocal) {
         // Add the global requires clause
         if (myGlobalRequiresExp != null) {
             myCurrentAssertiveCode.addAssume(myGlobalRequiresExp);
@@ -2998,13 +3001,13 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Add the convention as something we need to ensure
-        if (myConventionExp != null) {
+        if (myConventionExp != null && !isLocal) {
             Exp convention = Exp.copy(myConventionExp);
             myCurrentAssertiveCode.addAssume(convention);
         }
 
         // Add the correspondence as a given
-        if (myCorrespondenceExp != null) {
+        if (myCorrespondenceExp != null && !isLocal) {
             Exp correspondence = Exp.copy(myCorrespondenceExp);
             myCurrentAssertiveCode.addAssume(correspondence);
         }
@@ -3055,11 +3058,18 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add the list of statements
         myCurrentAssertiveCode.addStatements(statementList);
 
+        // Add the correspondence as a given again
+        if (myCorrespondenceExp != null && !isLocal) {
+            Exp correspondence = Exp.copy(myCorrespondenceExp);
+            myCurrentAssertiveCode.addAssume(correspondence);
+        }
+
         // Add the convention as something we need to ensure
-        if (myConventionExp != null) {
+        if (myConventionExp != null && !isLocal) {
             Exp convention = Exp.copy(myConventionExp);
             Location conventionLoc = (Location) opLoc.clone();
-            conventionLoc.setDetails(convention.getLocation().getDetails());
+            conventionLoc.setDetails(convention.getLocation().getDetails()
+                    + " generated by " + name);
             Utilities.setLocation(convention, conventionLoc);
 
             // Simplify if we just have true

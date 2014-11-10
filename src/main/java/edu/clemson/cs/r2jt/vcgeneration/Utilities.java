@@ -466,6 +466,53 @@ public class Utilities {
     }
 
     /**
+     * <p>Given the name of an operation check to see if it is a
+     * local operation</p>
+     *
+     * @param name The name of the operation.
+     * @param scope The module scope we are searching.
+     *
+     * @return True if it is a local operation, false otherwise.
+     */
+    protected static boolean isLocationOperation(String name, ModuleScope scope) {
+        boolean isIn;
+
+        // Query for the corresponding operation
+        List<SymbolTableEntry> entries =
+                scope
+                        .query(new NameQuery(
+                                null,
+                                name,
+                                MathSymbolTable.ImportStrategy.IMPORT_NONE,
+                                MathSymbolTable.FacilityStrategy.FACILITY_IGNORE,
+                                true));
+
+        // Not found
+        if (entries.size() == 0) {
+            isIn = false;
+        }
+        // Found one
+        else if (entries.size() == 1) {
+            // If the operation is declared here, then it will be an OperationEntry.
+            // Thus it is a local operation.
+            if (entries.get(0) instanceof OperationEntry) {
+                isIn = true;
+            }
+            else {
+                isIn = false;
+            }
+        }
+        // Found more than one
+        else {
+            //This should be caught earlier, when the duplicate symbol is
+            //created
+            throw new RuntimeException();
+        }
+
+        return isIn;
+    }
+
+    /**
      * <p>Checks to see if the expression passed in is a
      * verification variable or not. A verification variable
      * is either "P_val" or starts with "?".</p>
