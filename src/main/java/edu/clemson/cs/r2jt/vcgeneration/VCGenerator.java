@@ -2373,24 +2373,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                         .getParameters(),
                                                 conceptParams);
 
-                        // Create an equals expression from formal to actual
-                        Exp actualExp =
-                                Utilities.convertExp(conceptParams.get(i)
-                                        .getEvalExp());
-                        EqualsExp formalEq =
-                                new EqualsExp(dec.getLocation(), varDecExp, 1,
-                                        actualExp);
-                        formalEq.setMathType(BOOLEAN);
-                        Exp typeAssume =
-                                myTypeGraph.formConjunct(formalEq, constraint);
-
                         if (assumeExp == null) {
-                            assumeExp = typeAssume;
+                            assumeExp = constraint;
                         }
                         else {
                             assumeExp =
                                     myTypeGraph.formConjunct(assumeExp,
-                                            typeAssume);
+                                            constraint);
                         }
                     }
                     else {
