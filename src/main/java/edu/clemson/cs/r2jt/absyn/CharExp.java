@@ -146,4 +146,13 @@ public class CharExp extends Exp {
         return new CharExp(null, newC);
     }
 
+    public Exp replace(Exp old, Exp replace) {
+        if (!(old instanceof CharExp)) {
+            return null;
+        }
+        else if (((CharExp) old).getValue().equals(c))
+            return replace;
+        else
+            return null;
+    }
 }

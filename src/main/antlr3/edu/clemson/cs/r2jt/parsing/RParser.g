@@ -1213,7 +1213,7 @@ while_loop_statement
     :   WHILE^ condition
         changing_clause?    
         maintaining_clause?
-        decreasing_clause?
+        decreasing_clause
         elapsed_time_clause?
         DO! statement_sequence END!
     ;

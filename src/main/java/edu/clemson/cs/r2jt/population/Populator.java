@@ -468,9 +468,13 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         try {
+            // TODO: really a qualifier SHOULD be passed to this query, but if
+            // we do so hoping that it will search the enhancements of the
+            // facility qualifier you passed you've thought wrong -- it won't
+            // find it. My guess is it's something with the qualifiedSearchPath.
             OperationEntry op =
                     myBuilder.getInnermostActiveScope().queryForOne(
-                            new OperationQuery(qualifier, name, argTypes));
+                            new OperationQuery(null, name, argTypes));
         }
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException("No operation found corresponding "
@@ -1474,11 +1478,25 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
+    public void postProgramCharExp(ProgramCharExp e) {
+        // YS: We need to set the PTType to Character
+        // and the MathType to N. Not sure if this the right fix,
+        // but I simply got the the math type of the PTType (Character),
+        // which has N as its math type.
+        PTType ptType = getCharProgramType();
+        e.setProgramType(ptType);
+        e.setMathType(ptType.toMath());
+    }
+
+    @Override
     public void postProgramStringExp(ProgramStringExp e) {
-        e.setProgramType(getStringProgramType());
-        e.setMathType(new MTProper(myTypeGraph));
-        //TODO : Figure out how to get Str(N) here, given that Str() is not 
-        //built in
+        // YS: Hampton wanted Str(N) to be the math type.
+        // Not sure if this the right fix, but I simply got the
+        // the math type of the PTType (Char_Str), which has
+        // Str(N) as its math type.
+        PTType ptType = getStringProgramType();
+        e.setProgramType(ptType);
+        e.setMathType(ptType.toMath());
     }
 
     @Override
@@ -1787,9 +1805,9 @@ public class Populator extends TreeWalkerVisitor {
                             ste.toProgramTypeEntry(i.getLocation())
                                     .getProgramType();
                 }
-                else if (rce instanceof OperationDec) {
+                else if (rce instanceof OperationDec
+                        || rce instanceof FacilityOperationDec) {
                     pt = ste.toOperationEntry(i.getLocation()).getReturnType();
-
                 }
                 else if (rce instanceof FacilityTypeDec) {
                     pt =
@@ -2262,6 +2280,30 @@ public class Populator extends TreeWalkerVisitor {
     //-------------------------------------------------------------------
     //   Helper functions
     //-------------------------------------------------------------------
+
+    private PTType getCharProgramType() {
+        PTType result;
+
+        try {
+            ProgramTypeEntry type =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameQuery(null, "Character",
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false)).toProgramTypeEntry(null);
+
+            result = type.getProgramType();
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException("No program Character type in scope???");
+        }
+        catch (DuplicateSymbolException dse) {
+            //Shouldn't be possible--NameQuery can't throw this
+            throw new RuntimeException(dse);
+        }
+
+        return result;
+    }
 
     private PTType getStringProgramType() {
         PTType result;

@@ -63,16 +63,9 @@ public class JavaTranslator extends AbstractTranslator {
      * representing the actual arguments of a <code>FacilityDec</code> and
      * their formal <code>ModuleParameterDec</code> bound counterparts.</p>
      */
+    //TODO: This needs to go.. but how?
     private Map<ModuleArgumentItem, ModuleParameterDec> myFacilityBindings =
             new HashMap<ModuleArgumentItem, ModuleParameterDec>();
-
-    /**
-     * <p>Any call derived from an <code>FacilityDec</code> that's enhanced
-     * with two or more capabilities needs to be 'specially' qualified.
-     * So this map keeps track of the names of such calls, linking them
-     * to a specially formed qualifier <code>ST</code>.</p>
-     */
-    private Map<String, ST> myEnhancedCalls = new HashMap<String, ST>();
 
     /**
      * <p>This set keeps track of the names of any <code>OperationDec</code>s
@@ -477,22 +470,6 @@ public class JavaTranslator extends AbstractTranslator {
                                         .getWrappedDec(), node.getQualifier(),
                                 node.getName());
 
-                if (myCurrentEnhancement != null
-                        && myCurrentFacilityEntry.getEnhancements().size() >= 2) {
-
-                    ST enhancedCall =
-                            myGroup.getInstanceOf("enhanced_call").add(
-                                    "enhancementname",
-                                    myCurrentEnhancement.getModuleIdentifier()
-                                            .toString());
-
-                    enhancedCall.add("facilityname",
-                            myCurrentFacilityEntry.getName()).add("name",
-                            node.getName().getName());
-
-                    myEnhancedCalls.put(node.getName().getName(), enhancedCall);
-                }
-
                 myActiveTemplates.peek().add("arguments", argItem);
             }
             else if (wrappedDec instanceof ConstantParamDec) {
@@ -641,9 +618,6 @@ public class JavaTranslator extends AbstractTranslator {
                     myGroup.getInstanceOf("qualified_call").add("name",
                             node.getName().getName()).add("qualifier",
                             node.getName().getName() + "Param");
-        }
-        else if (myEnhancedCalls.containsKey(node.getName().getName())) {
-            callStmt = myEnhancedCalls.get(node.getName().getName());
         }
         else if (qualifier != null) {
             callStmt =
@@ -862,8 +836,11 @@ public class JavaTranslator extends AbstractTranslator {
         int parameterNum = 0;
         ST result =
                 myGroup.getInstanceOf("operation_argument_item").add(
-                        "actualName", name.getName()).add("actualQualifier",
-                        qualifier.getName());
+                        "actualName", name.getName());
+
+        if (qualifier != null) {
+            result.add("actualQualifier", qualifier.getName());
+        }
 
         try {
             OperationEntry o =
@@ -875,9 +852,14 @@ public class JavaTranslator extends AbstractTranslator {
                             .toOperationEntry(name.getLocation());
 
             for (ProgramParameterEntry p : o.getParameters()) {
-                ST cast = getVariableTypeTemplate(p.getDeclaredType());
-                result.add("castTypes", cast);
+                ST castedType = getVariableTypeTemplate(p.getDeclaredType());
+                ST castedArg =
+                        myGroup.getInstanceOf("parameter").add("type",
+                                castedType).add("name", "p" + parameterNum);
+                result.add("castedArguments", castedArg);
+                parameterNum++;
             }
+            parameterNum = 0;
 
             String realization;
             if (myCurrentEnhancement != null) {

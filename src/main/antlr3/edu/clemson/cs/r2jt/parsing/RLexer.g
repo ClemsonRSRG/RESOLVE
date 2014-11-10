@@ -774,7 +774,7 @@ TILDE     : '~'  ;
 
 
 STRING_LITERAL
-    : '"' (ESC|~('"'|'\\'))* '"'
+    : '\"' (ESC|~('\"'|'\\'))* '\"'
     ;
 
 FREE_OPERATOR
