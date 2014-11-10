@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
+import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
@@ -150,7 +151,9 @@ public class Registry {
         if (isSymbolInTable(symbolName)) {
             return getIndexForSymbol(symbolName);
         }
-
+        if (symbolName.equals("Az")){
+            symbolType = new MTFunction(m_typeGraph,m_typeGraph.Z, m_typeGraph.Z);
+        }
         if (m_typeToSetOfOperators.containsKey(symbolType)) {
             m_typeToSetOfOperators.get(symbolType).add(symbolName);
         }

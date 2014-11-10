@@ -143,7 +143,9 @@ public class TheoremCongruenceClosureImpl {
             }
             // todo: replace lambda param types if they are type variables
             PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
-
+            if(modifiedInsert.containsName("lambda")){
+                System.err.println(modifiedInsert);
+            }
             rList.add(new InsertExpWithJustification(modifiedInsert,
                     m_theoremString));
             quantToLit.clear();
@@ -191,11 +193,11 @@ public class TheoremCongruenceClosureImpl {
             return null;
         }
         boolean extraOutput = false;
-        /*if(m_theoremString.contains("cn")
-                 && vc.m_name.equals("1_10")){
+        if(m_theoremString.contains("g_z_e_6")
+                 && vc.m_name.equals("1_3")){
              extraOutput = true;
              System.out.println("looking for: \n" + m_matchConj + "in " + vc);
-         }*/
+         }
         Stack<HashMap<String, String>> allValidBindings =
                 new Stack<HashMap<String, String>>();
         Stack<SearchBox> boxStack = new Stack<SearchBox>();
@@ -269,12 +271,13 @@ public class TheoremCongruenceClosureImpl {
 
     boolean typeCheck(SearchBox box) {
         // type check here
+        // oSymbols: Theorem symbols
         for (String oSymbol : box.m_bindings.keySet()) {
             String dSymbol = box.m_bindings.get(oSymbol);
             if (!box.m_destRegistry.isSymbolInTable(dSymbol)) {
                 if (!oSymbol.contains("¢")) {
-                    /*System.err.println("Unbound: " + oSymbol + ":'" + dSymbol
-                            + "' in " + m_theoremString);*/
+                    System.err.println("Unbound: " + oSymbol + ":'" + dSymbol
+                            + "' in " + m_theoremString);
                     box.m_failedBindings = box.m_bindings;
                     return false;
                 }
@@ -340,8 +343,9 @@ public class TheoremCongruenceClosureImpl {
                 /*System.err.println("Type Mismatch: orig: " + oDomain + "->"
                         + oRange + " dest: " + dType); */
             }
-            /*System.err.println("Failed type check: " + oSymbol + ": " + oType
+            /*System.err.println("Failed type check: " + oSymbol + "(from theorem): " + oType
                     + " " + dSymbol + ": " + dType);
+            System.err.println(m_theoremString);
             */
             box.m_failedBindings = box.m_bindings;
             return false;

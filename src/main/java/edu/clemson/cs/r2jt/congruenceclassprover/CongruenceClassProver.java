@@ -33,6 +33,8 @@ import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.FlagManager;
+import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
+import edu.clemson.cs.r2jt.verification.Verifier;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -50,14 +52,14 @@ public class CongruenceClassProver {
                     "congruence closure based prover");
     private final List<VerificationConditionCongruenceClosureImpl> m_ccVCs;
     private final List<TheoremCongruenceClosureImpl> m_theorems;
-    private final int MAX_ITERATIONS = 256;
+    private final int MAX_ITERATIONS = 1024;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
-    private final long DEFAULTTIMEOUT = 15000;
+    private final long DEFAULTTIMEOUT = 30000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
-    private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = true;
+    private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = false; // make false for the new Integer_Theory
 
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
@@ -68,9 +70,13 @@ public class CongruenceClassProver {
 
     ///////////////////////////////////////////////////////
     public static void setUpFlags() {
-        FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_PROVE);
+        /*FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_PROVE);
         FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_LEGACY_PROVE);
         FlagDependencies.addImplies(FLAG_PROVE, Prover.FLAG_SOME_PROVER);
+        */
+
+        // for new vc gen
+        FlagDependencies.addImplies(FLAG_PROVE, VCGenerator.FLAG_ALTVERIFY_VC);
     }
 
     public CongruenceClassProver(TypeGraph g, List<VC> vcs, ModuleScope scope,
@@ -247,19 +253,22 @@ public class CongruenceClassProver {
                 vcFunctionNames.add("not");
 
                 // want to add all order operators and +/- if any of these are used
-                if (vcFunctionNames.contains(">")
-                        || vcFunctionNames.contains("<")
-                        || vcFunctionNames.contains(">=")
-                        || vcFunctionNames.contains("<=")
-                        || vcFunctionNames.contains("+")
-                        || vcFunctionNames.contains("-")) {
-                    vcFunctionNames.add("-");
-                    vcFunctionNames.add(">");
-                    vcFunctionNames.add("<");
-                    vcFunctionNames.add(">=");
-                    vcFunctionNames.add("<=");
-                    vcFunctionNames.add("+");
-                    vcFunctionNames.add("-");
+                HashSet<String> intTheoryNames = new HashSet<String>();
+                intTheoryNames.add(">");
+                intTheoryNames.add("<");
+                intTheoryNames.add(">=");
+                intTheoryNames.add("<=");
+                intTheoryNames.add("+");
+                intTheoryNames.add("-");
+                intTheoryNames.add("suc");
+                intTheoryNames.add("neg");
+                intTheoryNames.add("NB");
+                intTheoryNames.add("Is_Neg");
+                HashSet<String> intersect = new HashSet<String>(intTheoryNames);
+
+                intersect.retainAll(vcFunctionNames);
+                if(!intersect.isEmpty()){
+                    vcFunctionNames.addAll(intTheoryNames);
                 }
                 if (vcFunctionNames.contains("CF")) {
                     vcFunctionNames.add("DR");

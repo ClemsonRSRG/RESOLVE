@@ -12,10 +12,7 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving.absyn.PExpSubexpressionIterator;
-import edu.clemson.cs.r2jt.proving.absyn.PLambda;
-import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
+import edu.clemson.cs.r2jt.proving.absyn.*;
 import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.model.Theorem;
@@ -196,12 +193,19 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             ++i;
         }
     }
-
+    protected int addPAlternative(PExp formula){
+        return 0;
+    }
     // adds a particular symbol to the registry
     protected int addPsymbol(PSymbol ps) {
         String name = ps.getTopLevelOperation();
-        MTType type = ps.getType();
-
+        MTType type = ps.getTypeValue();
+        if(type == null || ps.isFunction()){
+            type = ps.getType();
+        }
+        if(ps.name.equals("Az")){
+            int j = 0;
+        }
         Registry.Usage usage = Registry.Usage.SINGULAR_VARIABLE;
         if (ps.isLiteral()) {
             usage = Registry.Usage.LITERAL;
@@ -254,6 +258,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         PSymbol asPsymbol;
         if (formula instanceof PLambda) {
             return removeLambda((PLambda) formula);
+        }
+        else if (formula instanceof PAlternatives){
+            return addPAlternative(formula);
         }
         else
             asPsymbol = (PSymbol) formula;
@@ -442,6 +449,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 a = b;
                 b = temp;
             }
+        }
+        // prefer true or false
+        if(bString.equals("true") || bString.equals("false")){
+            int temp = a;
+            a = b;
+            b = temp;
         }
         Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator();
         Stack<NormalizedAtomicExpressionMapImpl> modifiedEntries =
