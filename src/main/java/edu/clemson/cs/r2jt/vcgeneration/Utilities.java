@@ -203,7 +203,7 @@ public class Utilities {
         dotExpList.add(cName);
         dotExpList.add(name);
         DotExp conceptualVar =
-                Utilities.createDotExp(null, dotExpList, concType);
+                Utilities.createDotExp(location, dotExpList, concType);
         return conceptualVar;
     }
 
