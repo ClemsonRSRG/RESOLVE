@@ -881,12 +881,20 @@ public class Populator extends TreeWalkerVisitor {
 
         if (prevChild instanceof Ty) {
             //We've finished the representation and are about to parse 
-            //conventions, etc.  We introduce the exemplar with the appropriate
-            //type
-            addBinding(
-                    myTypeDefinitionEntry.getProgramType().getExemplarName(), r
-                            .getName().getLocation(), r, r.getRepresentation()
-                            .getMathTypeValue(), myGenericTypes);
+            //conventions, etc.  We introduce the exemplar gets added as
+            //a program variable with the appropriate type.
+            try {
+                myBuilder.getInnermostActiveScope().addProgramVariable(
+                        myTypeDefinitionEntry.getProgramType()
+                                .getExemplarName(), r,
+                        ((Ty) prevChild).getProgramTypeValue());
+            }
+            catch (DuplicateSymbolException dse) {
+                //This shouldn't be possible--the type declaration has a
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                throw new RuntimeException(dse);
+            }
         }
     }
 

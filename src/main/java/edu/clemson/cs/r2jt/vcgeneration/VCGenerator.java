@@ -1968,7 +1968,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Check for recursive call of itself
-        if (myCurrentOperationEntry.getName().equals(opDec.getName())
+        if (myCurrentOperationEntry != null && myCurrentOperationEntry.getName().equals(opDec.getName())
                 && myCurrentOperationEntry.getReturnType() != null) {
             // Create a new confirm statement using P_val and the decreasing clause
             VarExp pVal =
@@ -2517,7 +2517,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     .getArguments());
 
             // Check for recursive call of itself
-            if (myCurrentOperationEntry.getName().equals(opDec.getName())
+            if (myCurrentOperationEntry != null && myCurrentOperationEntry.getName().equals(opDec.getName())
                     && myCurrentOperationEntry.getReturnType() != null) {
                 // Create a new confirm statement using P_val and the decreasing clause
                 VarExp pVal =
@@ -2875,9 +2875,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add the global require clause as given
         assertiveCode.addAssume(myGlobalRequiresExp);
 
+        // Add any variable declarations for records
         if (dec.getRepresentation() instanceof RecordTy) {
             RecordTy ty = (RecordTy) dec.getRepresentation();
             assertiveCode.addVariableDecs(ty.getFields());
+        }
+
+        // Add any statements in the initialization block
+        if (dec.getInitialization() != null) {
+            InitItem initItem = dec.getInitialization();
+            assertiveCode.addStatements(initItem.getStatements());
         }
 
         // Search for the type we are implementing
