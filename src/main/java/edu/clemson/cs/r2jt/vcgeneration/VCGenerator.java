@@ -69,10 +69,15 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     /**
      * <p>A map of facility declarations to <code>Exp</code>, where the expression
-     * contains the things we can assume from the facility declaration. This includes
-     * formal to actuals and constaints.</p>
+     * contains the things we can assume from the facility declaration.</p>
      */
     private Map<FacilityDec, Exp> myFacilityDeclarationMap;
+
+    // TODO: Change this!
+    /**
+     * <p>A map of facility declarations to a list of formal and actual constraints.</p>
+     */
+    private Map<FacilityDec, List<EqualsExp>> myFacilityFormalActualMap;
 
     /**
      * <p>A list that will be built up with <code>AssertiveCode</code>
@@ -160,6 +165,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // VCs + Debugging String
         myCurrentAssertiveCode = null;
         myFacilityDeclarationMap = new HashMap<FacilityDec, Exp>();
+        myFacilityFormalActualMap = new HashMap<FacilityDec, List<EqualsExp>>();
         myFinalAssertiveCodeList = new LinkedList<AssertiveCode>();
         myIncAssertiveCodeStack = new Stack<AssertiveCode>();
         myIncAssertiveCodeStackInfo = new Stack<String>();
@@ -2288,6 +2294,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             // TODO: This is ugly! Need to clean this up!
             List<ModuleParameterDec> moduleParameterList =
                     facConceptDec.getParameters();
+            List<EqualsExp> formalToActualList = new LinkedList<EqualsExp>();
             for (int i = 0; i < moduleParameterList.size(); i++) {
                 ModuleParameterDec m = moduleParameterList.get(i);
                 if (m.getWrappedDec() instanceof ConstantParamDec) {
@@ -2381,6 +2388,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     myTypeGraph.formConjunct(assumeExp,
                                             constraint);
                         }
+
+                        // TODO: Change this! This is such a hack!
+                        // Create an equals expression from formal to actual
+                        Exp actualExp =
+                                Utilities.convertExp(conceptParams.get(i)
+                                        .getEvalExp());
+                        EqualsExp formalEq =
+                                new EqualsExp(dec.getLocation(), varDecExp, 1,
+                                        actualExp);
+                        formalEq.setMathType(BOOLEAN);
+                        formalToActualList.add(formalEq);
                     }
                     else {
                         // Ty not handled.
@@ -2390,7 +2408,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
             }
 
+            // Make sure it is not null
+            if (assumeExp == null) {
+                assumeExp = myTypeGraph.getTrueVarExp();
+            }
+
             myFacilityDeclarationMap.put(dec, assumeExp);
+            myFacilityFormalActualMap.put(dec, formalToActualList);
         }
         catch (NoSuchSymbolException e) {
             Utilities.noSuchModule(dec.getLocation());
@@ -3006,6 +3030,41 @@ public class VCGenerator extends TreeWalkerVisitor {
             myCurrentAssertiveCode.addAssume(requires);
         }
 
+        // Add the facility formal to actuals
+        Exp formalActualExp = myTypeGraph.getTrueVarExp();
+        for (FacilityDec fDec : myFacilityFormalActualMap.keySet()) {
+            List<EqualsExp> eList = myFacilityFormalActualMap.get(fDec);
+            for (EqualsExp e : eList) {
+                EqualsExp newEquals = (EqualsExp) Exp.copy(e);
+                VarExp oldLeft = (VarExp) Exp.copy(newEquals.getLeft());
+                VarExp newLeft;
+                if (formalActualExp.containsVar(oldLeft.getName().getName(),
+                        false)) {
+                    newLeft =
+                            Utilities.createQuestionMarkVariable(
+                                    formalActualExp, oldLeft);
+                }
+                else {
+                    newLeft = oldLeft;
+                }
+                newEquals.setLeft(newLeft);
+
+                // Get rid of true
+                if (formalActualExp.isLiteralTrue()) {
+                    formalActualExp = newEquals;
+                }
+                else {
+                    formalActualExp =
+                            myTypeGraph
+                                    .formConjunct(formalActualExp, newEquals);
+                }
+            }
+        }
+        if (!formalActualExp.isLiteralTrue()) {
+            myCurrentAssertiveCode.addAssume(formalActualExp);
+        }
+
+        // Add the facility type constraints
         if (typeConstraint != null) {
             myCurrentAssertiveCode.addAssume(typeConstraint);
         }
