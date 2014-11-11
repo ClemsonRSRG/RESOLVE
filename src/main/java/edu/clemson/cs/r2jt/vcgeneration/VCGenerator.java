@@ -1968,7 +1968,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Check for recursive call of itself
-        if (myCurrentOperationEntry != null && myCurrentOperationEntry.getName().equals(opDec.getName())
+        if (myCurrentOperationEntry != null
+                && myCurrentOperationEntry.getName().equals(opDec.getName())
                 && myCurrentOperationEntry.getReturnType() != null) {
             // Create a new confirm statement using P_val and the decreasing clause
             VarExp pVal =
@@ -2517,7 +2518,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     .getArguments());
 
             // Check for recursive call of itself
-            if (myCurrentOperationEntry != null && myCurrentOperationEntry.getName().equals(opDec.getName())
+            if (myCurrentOperationEntry != null
+                    && myCurrentOperationEntry.getName()
+                            .equals(opDec.getName())
                     && myCurrentOperationEntry.getReturnType() != null) {
                 // Create a new confirm statement using P_val and the decreasing clause
                 VarExp pVal =
