@@ -1523,6 +1523,8 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postProgramDotExp(ProgramDotExp e) {
+        e.setProgramType(e.getExp().getProgramType());
+        e.setMathType(e.getExp().getMathType());
         myFacilityQualifier = null;
     }
 
