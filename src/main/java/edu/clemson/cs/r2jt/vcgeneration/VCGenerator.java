@@ -2392,9 +2392,15 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                         // TODO: Change this! This is such a hack!
                         // Create an equals expression from formal to actual
-                        Exp actualExp =
-                                Utilities.convertExp(conceptParams.get(i)
-                                        .getEvalExp());
+                        Exp actualExp;
+                        if (conceptParams.get(i).getEvalExp() != null) {
+                            actualExp =
+                                    Utilities.convertExp(conceptParams.get(i)
+                                            .getEvalExp());
+                        }
+                        else {
+                            actualExp = Exp.copy(varDecExp);
+                        }
                         EqualsExp formalEq =
                                 new EqualsExp(dec.getLocation(), varDecExp, 1,
                                         actualExp);
@@ -2940,7 +2946,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Add the convention as something we need to confirm
             boolean simplify = false;
             // Simplify if we just have true
-            if (dec.getConvention().isLiteralTrue()) {
+            if (myConventionExp.isLiteralTrue()) {
                 simplify = true;
             }
             Exp convention = Exp.copy(myConventionExp);
