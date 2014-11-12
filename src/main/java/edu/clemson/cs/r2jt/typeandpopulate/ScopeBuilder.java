@@ -176,8 +176,7 @@ public class ScopeBuilder extends SyntacticScope {
 
         RepresentationTypeEntry result =
                 new RepresentationTypeEntry(myTypeGraph, name, definingElement,
-                        myRootModule, definition, new PTRepresentation(
-                                myTypeGraph, representationType, definition),
+                        myRootModule, definition, representationType,
                         convention, correspondence);
 
         myBindings.put(name, result);

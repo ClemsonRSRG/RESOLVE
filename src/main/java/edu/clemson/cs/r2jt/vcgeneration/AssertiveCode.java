@@ -42,6 +42,12 @@ public class AssertiveCode {
     private List<Exp> myFreeVars;
 
     /**
+     * <p>The <code>ResolveConceptualElement</code> that created
+     * this object.</p>
+     */
+    private ResolveConceptualElement myInstantiatingElement;
+
+    /**
      * <p>List of verification statements that we
      * need to apply proof rules to./p>
      */
@@ -51,12 +57,14 @@ public class AssertiveCode {
     // Constructors
     // ===========================================================
 
-    public AssertiveCode(CompileEnvironment env) {
+    public AssertiveCode(CompileEnvironment env,
+            ResolveConceptualElement instantiatingElement) {
         myConfirm =
                 new ConfirmStmt(null, Exp.getTrueVarExp(env.getTypeGraph()),
                         true);
         myFreeVars = new ArrayList<Exp>();
         myVerificationStmtList = new ArrayList<VerificationStatement>();
+        myInstantiatingElement = instantiatingElement;
     }
 
     public AssertiveCode(AssertiveCode old) {
@@ -69,6 +77,7 @@ public class AssertiveCode {
         for (VerificationStatement stmt : old.myVerificationStmtList) {
             myVerificationStmtList.add(stmt);
         }
+        myInstantiatingElement = old.myInstantiatingElement;
     }
 
     // ===========================================================
@@ -271,6 +280,15 @@ public class AssertiveCode {
      */
     public ConfirmStmt getFinalConfirm() {
         return myConfirm.clone();
+    }
+
+    /**
+     * <p>Returns the instantiating element that created this object.</p>
+     *
+     * @return <code>ResolveConceptualElement</code>
+     */
+    public ResolveConceptualElement getInstantiatingElement() {
+        return myInstantiatingElement;
     }
 
     /**

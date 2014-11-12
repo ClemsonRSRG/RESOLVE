@@ -59,6 +59,10 @@ public class RepresentationTypeEntry extends SymbolTableEntry {
         return myRepresentation;
     }
 
+    public ProgramTypeDefinitionEntry getDefiningTypeEntry() {
+        return myDefinition;
+    }
+
     @Override
     public String getEntryTypeDescription() {
         return "a program type representation definition";
