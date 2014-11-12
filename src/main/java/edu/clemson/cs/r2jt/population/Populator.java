@@ -179,6 +179,7 @@ public class Populator extends TreeWalkerVisitor {
      * not inside such a declaration, this will be null.</p>
      */
     private ProgramTypeDefinitionEntry myTypeDefinitionEntry;
+    private PTRepresentation myPTRepresentationType;
 
     private MathSymbolEntry myExemplarEntry;
 
@@ -883,11 +884,13 @@ public class Populator extends TreeWalkerVisitor {
             //We've finished the representation and are about to parse 
             //conventions, etc.  We introduce the exemplar gets added as
             //a program variable with the appropriate type.
+            myPTRepresentationType =
+                    new PTRepresentation(myTypeGraph, ((Ty) prevChild)
+                            .getProgramTypeValue(), myTypeDefinitionEntry);
             try {
                 myBuilder.getInnermostActiveScope().addProgramVariable(
                         myTypeDefinitionEntry.getProgramType()
-                                .getExemplarName(), r,
-                        ((Ty) prevChild).getProgramTypeValue());
+                                .getExemplarName(), r, myPTRepresentationType);
             }
             catch (DuplicateSymbolException dse) {
                 //This shouldn't be possible--the type declaration has a
@@ -905,13 +908,14 @@ public class Populator extends TreeWalkerVisitor {
         try {
             myBuilder.getInnermostActiveScope().addRepresentationTypeEntry(
                     r.getName().getName(), r, myTypeDefinitionEntry,
-                    r.getRepresentation().getProgramTypeValue(),
-                    r.getConvention(), r.getCorrespondence());
+                    myPTRepresentationType, r.getConvention(),
+                    r.getCorrespondence());
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(r.getName());
         }
 
+        myPTRepresentationType = null;
         myTypeDefinitionEntry = null;
     }
 
