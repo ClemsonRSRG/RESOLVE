@@ -3491,6 +3491,25 @@ public class VCGenerator extends TreeWalkerVisitor {
         conf = Utilities.replace(conf, newLeft, newRight);
         conf = Utilities.replace(conf, tmp, newLeft);
 
+        // NY YS
+        // Duration for swap statements
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            Location loc = stmt.getLocation();
+            VarExp cumDur =
+                    Utilities.createCumDurExp((Location) loc.clone(),
+                            myCurrentModuleScope);
+            Exp swapDur =
+                    Utilities.createVarExp((Location) loc.clone(), null,
+                            Utilities.createPosSymbol("DurSwap"),
+                            myTypeGraph.R, null);
+            InfixExp sumSwapDur =
+                    new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                            Utilities.createPosSymbol("+"), swapDur);
+            sumSwapDur.setMathType(myTypeGraph.R);
+
+            conf = Utilities.replace(conf, cumDur, sumSwapDur);
+        }
+
         // Set this new expression as the new final confirm
         myCurrentAssertiveCode.setFinalConfirm(conf, confirmStmt.getSimplify());
 
