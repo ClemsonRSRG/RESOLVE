@@ -3671,6 +3671,29 @@ public class VCGenerator extends TreeWalkerVisitor {
                 myCurrentAssertiveCode.addAssume(isInitialExp);
             }
 
+            // NY YS
+            // Initialization duration for this variable
+            if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+                Location loc =
+                        ((NameTy) varDec.getTy()).getName().getLocation();
+                VarExp cumDur =
+                        Utilities.createCumDurExp((Location) loc.clone(),
+                                myCurrentModuleScope);
+                Exp initDur = Utilities.createInitAnyDur(varDec, BOOLEAN);
+                InfixExp sumInitDur =
+                        new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                                Utilities.createPosSymbol("+"), initDur);
+                sumInitDur.setMathType(myTypeGraph.R);
+
+                ConfirmStmt finalConfirmStmt =
+                        myCurrentAssertiveCode.getFinalConfirm();
+                Exp finalConfirm = finalConfirmStmt.getAssertion();
+                finalConfirm =
+                        Utilities.replace(finalConfirm, cumDur, sumInitDur);
+                myCurrentAssertiveCode.setFinalConfirm(finalConfirm,
+                        finalConfirmStmt.getSimplify());
+            }
+
             // Verbose Mode Debug Messages
             myVCBuffer.append("\nVariable Declaration Rule Applied: \n");
             myVCBuffer.append(myCurrentAssertiveCode.assertionToString());

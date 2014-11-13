@@ -267,12 +267,12 @@ public class Utilities {
         Ty varTy = var.getTy();
         NameTy varNameTy = (NameTy) varTy;
         VarExp param =
-                createVarExp(var.getLocation(), null, var.getName(), varNameTy
-                        .getMathType(), null);
+                createVarExp(var.getLocation(), null, var.getName(), var
+                        .getTy().getMathTypeValue(), null);
         VarExp param1 =
                 createVarExp(varNameTy.getLocation(), null,
-                        createPosSymbol(varNameTy.getName().getName()),
-                        varNameTy.getMathType(), null);
+                        createPosSymbol(varNameTy.getName().getName()), var
+                                .getTy().getMathTypeValue(), null);
 
         // Create the list of arguments to the function
         edu.clemson.cs.r2jt.collections.List<Exp> params =
@@ -320,6 +320,36 @@ public class Utilities {
         exp.setMathType(funcType);
 
         return exp;
+    }
+
+    /**
+     * <p>Creates function expression "I_Dur" for a specified
+     * variable.</p>
+     *
+     * @param var Local Variable.
+     * @param booleanType Mathematical boolean type.
+     *
+     * @return The created <code>FunctionExp</code>.
+     */
+    protected static FunctionExp createInitAnyDur(VarDec var, MTType booleanType) {
+        // Obtain the necessary information from the variable
+        VarExp param =
+                createVarExp(var.getLocation(), null,
+                        createPosSymbol(((NameTy) var.getTy()).getName()
+                                .getName()), var.getTy().getMathTypeValue(),
+                        null);
+
+        // Create the list of arguments to the function
+        edu.clemson.cs.r2jt.collections.List<Exp> params =
+                new edu.clemson.cs.r2jt.collections.List<Exp>();
+        params.add(param);
+
+        // Create the final duration
+        FunctionExp initDurExp =
+                createFunctionExp(var.getLocation(), null,
+                        createPosSymbol("I_Dur"), params, booleanType);
+
+        return initDurExp;
     }
 
     /**
