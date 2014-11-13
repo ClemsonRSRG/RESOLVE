@@ -443,6 +443,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
+        Exp procDur = null;
+        Exp varFinalDur = null;
 
         // Obtain type constrains from parameter
         // TODO: Only add type constraints if they use the facility;
@@ -458,9 +460,55 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
         }
 
+        // NY YS
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            procDur = myCurrentOperationProfileEntry.getDurationClause();
+
+            // Loop through local variables to get their finalization duration
+            for (VarDec v : dec.getVariables()) {
+                Exp finalVarDur = Utilities.createFinalizAnyDur(v, BOOLEAN);
+
+                // Create/Add the duration expression
+                if (varFinalDur == null) {
+                    varFinalDur = finalVarDur;
+                }
+                else {
+                    varFinalDur =
+                            new InfixExp((Location) loc.clone(), varFinalDur,
+                                    Utilities.createPosSymbol("+"), finalVarDur);
+                }
+                varFinalDur.setMathType(myTypeGraph.R);
+            }
+
+            // Loop through parameter variables to get their finalization duration
+            // (if they are evaluates mode)
+            for (ParameterVarDec p : dec.getParameters()) {
+                if (p.getMode() == Mode.EVALUATES) {
+                    VarDec varDec = new VarDec(p.getName(), p.getTy());
+                    varDec.setMathType(p.getMathType());
+                    Exp finalVarDur =
+                            Utilities.createFinalizAnyDur(varDec, BOOLEAN);
+
+                    // Create/Add the duration expression
+                    if (varFinalDur == null) {
+                        varFinalDur = finalVarDur;
+                    }
+                    else {
+                        varFinalDur =
+                                new InfixExp((Location) loc.clone(),
+                                        varFinalDur, Utilities
+                                                .createPosSymbol("+"),
+                                        finalVarDur);
+                    }
+                    varFinalDur.setMathType(myTypeGraph.R);
+                }
+            }
+        }
+
         // Apply the procedure declaration rule
         applyProcedureDeclRule(loc, name, requires, ensures, decreasing,
-                typeConstraint, variableList, statementList, isLocal);
+                procDur, varFinalDur, typeConstraint, variableList,
+                statementList, isLocal);
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
@@ -559,6 +607,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
+        Exp procDur = null;
+        Exp varFinalDur = null;
 
         // Obtain type constrains from parameter
         // TODO: Only add type constraints if they use the facility;
@@ -575,9 +625,55 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
         }
 
+        // NY YS
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            procDur = myCurrentOperationProfileEntry.getDurationClause();
+
+            // Loop through local variables to get their finalization duration
+            for (VarDec v : dec.getVariables()) {
+                Exp finalVarDur = Utilities.createFinalizAnyDur(v, BOOLEAN);
+
+                // Create/Add the duration expression
+                if (varFinalDur == null) {
+                    varFinalDur = finalVarDur;
+                }
+                else {
+                    varFinalDur =
+                            new InfixExp((Location) loc.clone(), varFinalDur,
+                                    Utilities.createPosSymbol("+"), finalVarDur);
+                }
+                varFinalDur.setMathType(myTypeGraph.R);
+            }
+
+            // Loop through parameter variables to get their finalization duration
+            // (if they are evaluates mode)
+            for (ParameterVarDec p : dec.getParameters()) {
+                if (p.getMode() == Mode.EVALUATES) {
+                    VarDec varDec = new VarDec(p.getName(), p.getTy());
+                    varDec.setMathType(p.getMathType());
+                    Exp finalVarDur =
+                            Utilities.createFinalizAnyDur(varDec, BOOLEAN);
+
+                    // Create/Add the duration expression
+                    if (varFinalDur == null) {
+                        varFinalDur = finalVarDur;
+                    }
+                    else {
+                        varFinalDur =
+                                new InfixExp((Location) loc.clone(),
+                                        varFinalDur, Utilities
+                                                .createPosSymbol("+"),
+                                        finalVarDur);
+                    }
+                    varFinalDur.setMathType(myTypeGraph.R);
+                }
+            }
+        }
+
         // Apply the procedure declaration rule
         applyProcedureDeclRule(loc, name, requires, ensures, decreasing,
-                facTypeConstraint, variableList, statementList, isLocal);
+                procDur, varFinalDur, facTypeConstraint, variableList,
+                statementList, isLocal);
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
@@ -3088,15 +3184,17 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param requires Requires clause
      * @param ensures Ensures clause
      * @param decreasing Decreasing clause (if any)
+     * @param procDur Procedure duration clause (if in performance mode)
+     * @param varFinalDur Local variable finalization duration clause (if in performance mode)
      * @param typeConstraint Facility type constraints (if any)
      * @param variableList List of all variables for this procedure
      * @param statementList List of statements for this procedure
      * @param isLocal True if the it is a local operation. False otherwise.
      */
     private void applyProcedureDeclRule(Location opLoc, String name,
-            Exp requires, Exp ensures, Exp decreasing, Exp typeConstraint,
-            List<VarDec> variableList, List<Statement> statementList,
-            boolean isLocal) {
+            Exp requires, Exp ensures, Exp decreasing, Exp procDur,
+            Exp varFinalDur, Exp typeConstraint, List<VarDec> variableList,
+            List<Statement> statementList, boolean isLocal) {
         // Add the global requires clause
         if (myGlobalRequiresExp != null) {
             myCurrentAssertiveCode.addAssume(myGlobalRequiresExp);
@@ -3156,6 +3254,60 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         if (!formalActualExp.isLiteralTrue()) {
             myCurrentAssertiveCode.addAssume(formalActualExp);
+        }
+
+        // NY - Add any procedure duration clauses
+        if (procDur != null) {
+            // Add Cum_Dur as a free variable
+            VarExp cumDur =
+                    Utilities.createCumDurExp((Location) opLoc.clone(),
+                            myCurrentModuleScope);
+            myCurrentAssertiveCode.addFreeVar(cumDur);
+
+            // Create 0.0
+            VarExp zeroPtZero =
+                    Utilities.createVarExp(opLoc, null, Utilities
+                            .createPosSymbol("0.0"), myTypeGraph.R, null);
+
+            // Create an equals expression (Cum_Dur = 0.0)
+            EqualsExp equalsExp =
+                    new EqualsExp(null, Exp.copy(cumDur), EqualsExp.EQUAL,
+                            zeroPtZero);
+            equalsExp.setMathType(BOOLEAN);
+            Location eqLoc = (Location) opLoc.clone();
+            eqLoc.setDetails("Initialization of Cum_Dur for Procedure " + name);
+            Utilities.setLocation(equalsExp, eqLoc);
+
+            // Add it to our things to assume
+            myCurrentAssertiveCode.addAssume(equalsExp);
+
+            // Create the duration expression
+            Exp durationExp;
+            if (varFinalDur != null) {
+                durationExp =
+                        new InfixExp(null, Exp.copy(cumDur), Utilities
+                                .createPosSymbol("+"), varFinalDur);
+            }
+            else {
+                durationExp = Exp.copy(cumDur);
+            }
+            durationExp.setMathType(myTypeGraph.R);
+            Location sumLoc = (Location) opLoc.clone();
+            sumLoc
+                    .setDetails("Summation of Finalization Duration for Procedure "
+                            + name);
+            Utilities.setLocation(durationExp, sumLoc);
+
+            InfixExp greaterEqExp =
+                    new InfixExp(null, durationExp, Utilities
+                            .createPosSymbol("<="), procDur);
+            greaterEqExp.setMathType(BOOLEAN);
+            Location andLoc = (Location) opLoc.clone();
+            andLoc.setDetails("Duration Clause of " + name);
+            Utilities.setLocation(greaterEqExp, andLoc);
+
+            // Append the duration to the ensures clause
+            ensures = myTypeGraph.formConjunct(ensures, greaterEqExp);
         }
 
         // Add the facility type constraints

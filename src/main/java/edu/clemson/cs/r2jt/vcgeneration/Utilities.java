@@ -209,6 +209,30 @@ public class Utilities {
     }
 
     /**
+     * <p>Creates a variable expression with the name
+     * "Cum_Dur" and has type "R".</p>
+     *
+     * @param location Location that wants to create
+     *                 this variable.
+     *
+     * @return The created <code>VarExp</code>.
+     */
+    protected static VarExp createCumDurExp(Location location, ModuleScope scope) {
+        // Locate "R" (Real Number)
+        MathSymbolEntry mse = searchMathSymbol(location, "R", scope);
+        try {
+            // Create a variable with the name P_val
+            return createVarExp(location, null, createPosSymbol("Cum_Dur"), mse
+                    .getTypeValue(), null);
+        }
+        catch (SymbolNotOfKindTypeException e) {
+            notAType(mse, location);
+        }
+
+        return null;
+    }
+
+    /**
      * <p>Creates dotted expression with the specified list of
      * expressions.</p>
      *
@@ -226,6 +250,42 @@ public class Utilities {
         DotExp exp = new DotExp(location, dotExpList, null);
         exp.setMathType(dotType);
         return exp;
+    }
+
+    /**
+     * <p>Creates function expression "F_Dur" for a specified
+     * variable.</p>
+     *
+     * @param var Local Variable.
+     * @param booleanType Mathematical boolean type.
+     *
+     * @return The created <code>FunctionExp</code>.
+     */
+    protected static FunctionExp createFinalizAnyDur(VarDec var,
+            MTType booleanType) {
+        // Obtain the necessary information from the variable
+        Ty varTy = var.getTy();
+        NameTy varNameTy = (NameTy) varTy;
+        VarExp param =
+                createVarExp(var.getLocation(), null, var.getName(), varNameTy
+                        .getMathType(), null);
+        VarExp param1 =
+                createVarExp(varNameTy.getLocation(), null,
+                        createPosSymbol(varNameTy.getName().getName()),
+                        varNameTy.getMathType(), null);
+
+        // Create the list of arguments to the function
+        edu.clemson.cs.r2jt.collections.List<Exp> params =
+                new edu.clemson.cs.r2jt.collections.List<Exp>();
+        params.add(param1);
+        params.add(param);
+
+        // Create the final duration
+        FunctionExp finalDurAnyExp =
+                createFunctionExp(var.getLocation(), null,
+                        createPosSymbol("F_Dur"), params, booleanType);
+
+        return finalDurAnyExp;
     }
 
     /**
