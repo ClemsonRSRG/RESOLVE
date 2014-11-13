@@ -64,13 +64,15 @@ public class FileLocator {
      * found, a multi-files-found exception is thrown.
      */
     public File locateFileInTree(String name1, String name2, String name3,
-            File dir) throws FileLocatorException {
+            String name4, File dir) throws FileLocatorException {
         List<File> files = new List<File>();
         files.addAll(recursivelyLocateFiles(name1, dir));
         files.addAll(recursivelyLocateFiles(name2, dir));
         files.addAll(recursivelyLocateFiles(name3, dir));
+        files.addAll(recursivelyLocateFiles(name4, dir));
         if (files.size() == 0) {
-            String msg = noFileMessage3(name1, name2, name3, dir.getName());
+            String msg =
+                    noFileMessage4(name1, name2, name3, name4, dir.getName());
             throw new FileLocatorException(msg);
         }
         else if (files.size() == 1) {
@@ -78,8 +80,8 @@ public class FileLocator {
         }
         else { // files.size() > 1
             String msg =
-                    multiFilesMessage3(name1, name2, name3, dir.getName(),
-                            files.toString());
+                    multiFilesMessage4(name1, name2, name3, name4, dir
+                            .getName(), files.toString());
             throw new FileLocatorException(msg);
         }
     }
@@ -168,20 +170,22 @@ public class FileLocator {
         return msg;
     }
 
-    private String noFileMessage3(String name1, String name2, String name3,
-            String dir) {
+    private String noFileMessage4(String name1, String name2, String name3,
+            String name4, String dir) {
         String msg =
                 "Could not find a file with name " + name1 + " or " + name2
-                        + " or " + name3 + " in the directory " + dir
+                        + " or " + name3 + " or " + name4
+                        + " in the directory " + dir
                         + " or any of its subdirectories.";
         return msg;
     }
 
-    private String multiFilesMessage3(String name1, String name2, String name3,
-            String dir, String files) {
+    private String multiFilesMessage4(String name1, String name2, String name3,
+            String name4, String dir, String files) {
         String msg =
                 "Found multiple files with name " + name1 + " or " + name2
-                        + " or " + name3 + " in the directory " + dir
+                        + " or " + name3 + " or " + name4
+                        + " in the directory " + dir
                         + " or its subdirectories: " + files;
         return msg;
     }
