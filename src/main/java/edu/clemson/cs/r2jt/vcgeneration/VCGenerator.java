@@ -1900,8 +1900,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                         Utilities.replace(exp, equalsExp.getLeft(), equalsExp
                                 .getRight());
 
-                // If tmp is not null, then it means we have to check the right
-                if (tmp == null) {
+                // If tmp hasn't changed, then it means we have to check the right
+                if (tmp.equals(exp)) {
                     tmp =
                             Utilities.replace(exp, equalsExp.getRight(),
                                     equalsExp.getLeft());
