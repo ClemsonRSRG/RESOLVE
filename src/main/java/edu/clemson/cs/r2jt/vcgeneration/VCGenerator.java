@@ -122,7 +122,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     private static final String FLAG_ALTSECTION_NAME = "GenerateVCs";
     private static final String FLAG_DESC_ATLVERIFY_VC = "Generate VCs.";
-    private static final String FLAG_DESC_ATTLISTVCS_VC = "";
+    private static final String FLAG_DESC_ATTPVCS_VC =
+            "Generate Performance VCs";
 
     // ===========================================================
     // Flags
@@ -131,12 +132,11 @@ public class VCGenerator extends TreeWalkerVisitor {
     public static final Flag FLAG_ALTVERIFY_VC =
             new Flag(FLAG_ALTSECTION_NAME, "altVCs", FLAG_DESC_ATLVERIFY_VC);
 
-    public static final Flag FLAG_ALTLISTVCS_VC =
-            new Flag(FLAG_ALTSECTION_NAME, "altListVCs",
-                    FLAG_DESC_ATTLISTVCS_VC, Flag.Type.HIDDEN);
+    public static final Flag FLAG_ALTPVCS_VC =
+            new Flag(FLAG_ALTSECTION_NAME, "PVCs", FLAG_DESC_ATTPVCS_VC);
 
     public static final void setUpFlags() {
-        FlagDependencies.addImplies(FLAG_ALTVERIFY_VC, FLAG_ALTLISTVCS_VC);
+        FlagDependencies.addImplies(FLAG_ALTPVCS_VC, FLAG_ALTVERIFY_VC);
     }
 
     // ===========================================================
