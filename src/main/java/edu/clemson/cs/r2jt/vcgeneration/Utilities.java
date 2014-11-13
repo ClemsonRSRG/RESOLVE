@@ -253,6 +253,36 @@ public class Utilities {
     }
 
     /**
+     * <p>Creates function expression "Dur_Call" with a specified number
+     * of parameters</p>
+     *
+     * @param loc The location where we are creating this expression.
+     * @param numArg Number of Arguments.
+     * @param realType Mathematical real type.
+     * @param booleanType Mathematical boolean type.
+     *
+     * @return The created <code>FunctionExp</code>.
+     */
+    protected static FunctionExp createDurCallExp(Location loc, String numArg,
+            MTType realType, MTType booleanType) {
+        // Obtain the necessary information from the variable
+        VarExp param =
+                createVarExp(loc, null, createPosSymbol(numArg), realType, null);
+
+        // Create the list of arguments to the function
+        edu.clemson.cs.r2jt.collections.List<Exp> params =
+                new edu.clemson.cs.r2jt.collections.List<Exp>();
+        params.add(param);
+
+        // Create the duration call exp
+        FunctionExp durCallExp =
+                createFunctionExp(loc, null, createPosSymbol("Dur_Call"),
+                        params, booleanType);
+
+        return durCallExp;
+    }
+
+    /**
      * <p>Creates function expression "F_Dur" for a specified
      * variable.</p>
      *
