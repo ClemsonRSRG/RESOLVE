@@ -59,6 +59,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     // Operation/Procedure level global variables
     private OperationEntry myCurrentOperationEntry;
+    private OperationProfileEntry myCurrentOperationProfileEntry;
     private Exp myOperationDecreasingExp;
 
     /**
@@ -155,6 +156,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCorrespondenceExp = null;
         myCurrentModuleScope = null;
         myCurrentOperationEntry = null;
+        myCurrentOperationProfileEntry = null;
         myGlobalConstraintExp = null;
         myGlobalRequiresExp = null;
         myOperationDecreasingExp = null;
@@ -407,6 +409,12 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentOperationEntry =
                 Utilities.searchOperation(dec.getLocation(), null, dec
                         .getName(), argTypes, myCurrentModuleScope);
+        // Obtain the performance duration clause
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            myCurrentOperationProfileEntry =
+                    Utilities.searchOperationProfile(dec.getLocation(), null,
+                            dec.getName(), argTypes, myCurrentModuleScope);
+        }
     }
 
     @Override
@@ -469,6 +477,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         myOperationDecreasingExp = null;
         myCurrentOperationEntry = null;
+        myCurrentOperationProfileEntry = null;
     }
 
     // -----------------------------------------------------------
@@ -514,6 +523,12 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentOperationEntry =
                 Utilities.searchOperation(dec.getLocation(), null, dec
                         .getName(), argTypes, myCurrentModuleScope);
+        // Obtain the performance duration clause
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            myCurrentOperationProfileEntry =
+                    Utilities.searchOperationProfile(dec.getLocation(), null,
+                            dec.getName(), argTypes, myCurrentModuleScope);
+        }
     }
 
     @Override
@@ -579,6 +594,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         myOperationDecreasingExp = null;
         myCurrentOperationEntry = null;
+        myCurrentOperationProfileEntry = null;
     }
 
     // -----------------------------------------------------------

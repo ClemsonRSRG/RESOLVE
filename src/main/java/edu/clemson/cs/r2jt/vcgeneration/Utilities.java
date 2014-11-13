@@ -21,6 +21,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.OperationProfileQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.r2jt.misc.SourceErrorException;
@@ -816,6 +817,43 @@ public class Utilities {
         }
 
         return op;
+    }
+
+    /**
+     * <p>Given the qualifier, name and the list of argument
+     * types, locate and return the <code>OperationProfileEntry</code>
+     * stored in the symbol table.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param qualifier The qualifier of the operation.
+     * @param name The name of the operation.
+     * @param argTypes The list of argument types.
+     * @param scope The module scope to start our search.
+     *
+     * @return An <code>OperationProfileEntry</code> from the
+     *         symbol table.
+     */
+    protected static OperationProfileEntry searchOperationProfile(Location loc,
+            PosSymbol qualifier, PosSymbol name, List<PTType> argTypes,
+            ModuleScope scope) {
+        // Query for the corresponding operation profile
+        OperationProfileEntry ope = null;
+        try {
+            ope =
+                    scope.queryForOne(new OperationProfileQuery(qualifier,
+                            name, argTypes));
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchModule(loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            // This should have been caught earlier, when the duplicate operation is
+            // created.
+            throw new RuntimeException(dse);
+        }
+
+        return ope;
     }
 
     /**
