@@ -193,8 +193,8 @@ public class TheoremCongruenceClosureImpl {
             return null;
         }
         boolean extraOutput = false;
-        if(m_theoremString.contains("g_z_e_6")
-                 && vc.m_name.equals("1_3")){
+        if(m_theoremString.contains("i_n_2")
+                 ){
              extraOutput = true;
              System.out.println("looking for: \n" + m_matchConj + "in " + vc);
          }

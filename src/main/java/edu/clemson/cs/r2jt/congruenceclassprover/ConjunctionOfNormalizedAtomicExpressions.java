@@ -72,22 +72,22 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return m_exprList.get(position);
     }
 
-    protected void addExpression(PExp expression, long timeToEnd) {
+    protected String addExpression(PExp expression, long timeToEnd) {
         m_timeToEnd = timeToEnd;
-        addExpression(expression);
+        return addExpression(expression);
     }
 
     // Top level
-    protected void addExpression(PExp expression) {
+    protected String addExpression(PExp expression) {
         if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
-            return;
+            return "";
         }
         String name = expression.getTopLevelOperation();
 
         if (expression.isEquality()) {
             int lhs = addFormula(expression.getSubExpressions().get(0));
             int rhs = addFormula(expression.getSubExpressions().get(1));
-            mergeOperators(lhs, rhs);
+            return mergeOperators(lhs, rhs);
         }
         else if (name.equals("and")) {
             addExpression(expression.getSubExpressions().get(0));
@@ -99,9 +99,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             int intRepOfOp = addPsymbol(asPsymbol);
             int root = addFormula(expression);
             if (type.isBoolean()) {
-                mergeOperators(m_registry.getIndexForSymbol("true"), root);
+                return mergeOperators(m_registry.getIndexForSymbol("true"), root);
             }
         }
+        return "";
     }
 
     /*
@@ -164,8 +165,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     // could be optimized with bin search if expressions were in alpha order.
-    protected void mergeMatchingLambdas() {
+    protected String mergeMatchingLambdas() {
         int i = 0;
+        String rString = "";
         loopStart: while (i < m_exprList.size()) {
             int p0_i = m_exprList.get(i).readPosition(0);
             String p0_i_name = m_registry.getSymbolForIndex(p0_i);
@@ -184,7 +186,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                         && !p0_i_name.equals(p0_j_name)) {
                     // suppose lambda1(k) = c0, lambda2(j) = c0
                     // merge makes this: lambda1(k) = c0, lambda1(j) = c0;
-                    mergeOperators(p0_i, p0_j);
+                    rString += mergeOperators(p0_i, p0_j);
+                    //System.err.println("mergeMatchingLambdas: merging " + p0_i_name + " " + p0_j_name);
                     i = 0;
                     continue loopStart;
                 }
@@ -192,6 +195,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
             ++i;
         }
+        return rString;
     }
     protected int addPAlternative(PExp formula){
         return 0;
@@ -324,27 +328,33 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rhs;
     }
 
-    protected void mergeOperators(int a, int b) {
+    protected String mergeOperators(int a, int b) {
+        String rString = "";
         if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
-            return;
+            return rString;
         }
         a = m_registry.findAndCompress(a);
         b = m_registry.findAndCompress(b);
+        rString += m_registry.getSymbolForIndex(a) + "/" + m_registry.getSymbolForIndex(b) + ",";
         Stack<Integer> holdingTank = mergeOnlyArgumentOperators(a, b);
+
         while (holdingTank != null && !holdingTank.empty()) {
             if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
-                return;
+                return rString;
             }
             int opA = m_registry.findAndCompress(holdingTank.pop());
             int opB = m_registry.findAndCompress(holdingTank.pop());
             if (opA != opB) {
+                rString += m_registry.getSymbolForIndex(opA) + "/" + m_registry.getSymbolForIndex(opB) + ",";
                 Stack<Integer> mResult = mergeOnlyArgumentOperators(opA, opB);
+
                 if (mResult != null)
                     holdingTank.addAll(mResult);
             }
         }
         //mergeArgsOfEqualityPredicateIfRootIsTrue();
-        mergeMatchingLambdas();
+        rString += mergeMatchingLambdas();
+        return rString;
     }
 
     // This has been replaced by a theorem in my Boolean_Theory - mike
@@ -426,8 +436,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 && uB.equals(Registry.Usage.LITERAL)) {
             System.err.println("Literal redefinition: " + aString + "." + a
                     + " -> " + bString + "." + b);
-            System.err.println(m_registry.m_symbolToIndex);
-            System.err.println(m_registry.m_indexToSymbol);
+            //System.err.println(m_registry.m_symbolToIndex);
+            //System.err.println(m_registry.m_indexToSymbol);
         }
         else if (uB.equals(Registry.Usage.LITERAL)) {
             int temp = a;
@@ -486,6 +496,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 }
             }
         }
+        //System.err.println(m_registry.getSymbolForIndex(a) + "/" + m_registry.getSymbolForIndex(b));
         m_registry.substitute(a, b);
         return coincidentalMergeHoldingTank;
     }

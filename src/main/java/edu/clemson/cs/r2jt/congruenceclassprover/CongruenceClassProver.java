@@ -56,7 +56,7 @@ public class CongruenceClassProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
-    private final long DEFAULTTIMEOUT = 30000;
+    private final long DEFAULTTIMEOUT = 10000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = false; // make false for the new Integer_Theory
@@ -346,8 +346,9 @@ public class CongruenceClassProver {
                                     VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                     && System.currentTimeMillis() <= endTime) {
                 if (!applied.contains(curP.m_theorem.toString())) {
-                    vcc.getConjunct().addExpression(curP.m_theorem, endTime);
+
                     thString += curP.toString();
+                    thString += vcc.getConjunct().addExpression(curP.m_theorem, endTime) + "\n";
                     applied.add(curP.m_theorem.toString());
                     numAdded++;
 
