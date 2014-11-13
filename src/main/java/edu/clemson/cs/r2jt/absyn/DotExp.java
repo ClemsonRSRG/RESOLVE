@@ -229,6 +229,8 @@ public class DotExp extends Exp {
 
         retval = new DotExp(null, newSegments, newSemanticExp);
         retval.setType(type);
+        retval.setMathType(myMathType);
+        retval.setMathTypeValue(myMathTypeValue);
 
         return retval;
     }

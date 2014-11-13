@@ -25,7 +25,7 @@ import edu.clemson.cs.r2jt.proving2.Metrics;
 import edu.clemson.cs.r2jt.proving2.ProverListener;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
-import edu.clemson.cs.r2jt.typeandpopulate.EntryTypeQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;

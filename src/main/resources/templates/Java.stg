@@ -193,7 +193,7 @@ facility_proxied_init(realization, arguments) ::= <%
 //   classes
 //-------------------------------------------------------------------
 
-record_class(name, implement, declaration, variables, facility) ::= <<
+record_class(name, implement, declaration, variables, facility, stmts) ::= <<
 <if(facility)>class <name> extends RESOLVE_BASE implements RType
 <else>class <name> implements <implement><endif> {
     <name>_Rep rep;
@@ -224,6 +224,7 @@ class <name>_Rep {
     
     <name>_Rep() {
         <variables : {v | <v.name> = <v.init>;}; separator = "\n">
+        <stmts; separator = "\n">
     }
     
     public String toString() {
