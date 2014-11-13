@@ -3747,6 +3747,16 @@ public class VCGenerator extends TreeWalkerVisitor {
             simplifyInvariant = true;
         }
 
+        // NY YS
+        // Obtain the elapsed time duration of loop
+        Exp elapsedTimeDur = null;
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            if (stmt.getElapsed_Time() != null) {
+                elapsedTimeDur = Exp.copy(stmt.getElapsed_Time());
+                elapsedTimeDur.setMathType(myTypeGraph.R);
+            }
+        }
+
         // Confirm the base case of invariant
         Exp baseCase = Exp.copy(invariant);
         Location baseLoc;
@@ -3758,6 +3768,31 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         baseLoc.setDetails("Base Case of the Invariant of While Statement");
         Utilities.setLocation(baseCase, baseLoc);
+
+        // NY YS
+        // Confirm that elapsed time is 0.0
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)
+                && elapsedTimeDur != null) {
+            Exp initElapseDurExp = Exp.copy(elapsedTimeDur);
+            Location initElapseLoc;
+            if (elapsedTimeDur != null && elapsedTimeDur.getLocation() != null) {
+                initElapseLoc = (Location) elapsedTimeDur.getLocation().clone();
+            }
+            else {
+                initElapseLoc = (Location) elapsedTimeDur.getLocation().clone();
+            }
+            initElapseLoc
+                    .setDetails("Base Case of Elapsed Time Duration of While Statement");
+            Utilities.setLocation(initElapseDurExp, initElapseLoc);
+            Exp zeroEqualExp =
+                    new EqualsExp((Location) initElapseLoc.clone(),
+                            initElapseDurExp, 1, Utilities.createVarExp(
+                                    (Location) initElapseLoc.clone(), null,
+                                    Utilities.createPosSymbol("0.0"),
+                                    myTypeGraph.R, null));
+            zeroEqualExp.setMathType(BOOLEAN);
+            baseCase = myTypeGraph.formConjunct(baseCase, zeroEqualExp);
+        }
         myCurrentAssertiveCode.addConfirm((Location) baseLoc.clone(), baseCase,
                 simplifyInvariant);
 
@@ -3794,6 +3829,25 @@ public class VCGenerator extends TreeWalkerVisitor {
             assume = Exp.copy(invariant);
         }
 
+        // NY YS
+        // Also assume NQV(RP, Cum_Dur) = El_Dur_Exp
+        Exp nqv2 = null;
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)
+                & elapsedTimeDur != null) {
+            VarExp cumDurExp =
+                    Utilities.createCumDurExp((Location) whileLoc.clone(),
+                            myCurrentModuleScope);
+            nqv2 =
+                    Utilities.createQuestionMarkVariable(finalConfirm,
+                            cumDurExp);
+            nqv2.setMathType(cumDurExp.getMathType());
+            Exp equalPExp =
+                    new EqualsExp((Location) whileLoc.clone(), Exp.copy(nqv2),
+                            1, Exp.copy(elapsedTimeDur));
+            equalPExp.setMathType(BOOLEAN);
+            assume = myTypeGraph.formConjunct(assume, equalPExp);
+        }
+
         myCurrentAssertiveCode.addAssume(assume);
 
         // if statement body
@@ -3826,6 +3880,23 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp infixExp =
                     Utilities.createLessThanExp(decreasingLoc, Exp
                             .copy(decreasingExp), Exp.copy(nqv), BOOLEAN);
+
+            // Confirm NQV(RP, Cum_Dur) <= El_Dur_Exp
+            if (nqv2 != null) {
+                Location elapsedTimeLoc =
+                        (Location) elapsedTimeDur.getLocation().clone();
+                if (elapsedTimeLoc != null) {
+                    elapsedTimeLoc.setDetails("Termination of While Statement");
+                }
+
+                Exp infixExp2 =
+                        Utilities.createLessThanEqExp(elapsedTimeLoc, Exp
+                                .copy(nqv2), Exp.copy(elapsedTimeDur), BOOLEAN);
+
+                infixExp = myTypeGraph.formConjunct(infixExp, infixExp2);
+                infixExp.setLocation(decreasingLoc);
+            }
+
             ifStmtList.add(new ConfirmStmt(decreasingLoc, infixExp, false));
         }
 
@@ -3843,8 +3914,27 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         edu.clemson.cs.r2jt.collections.List<Statement> elseStmtList =
                 new edu.clemson.cs.r2jt.collections.List<Statement>();
-        elseStmtList.add(new ConfirmStmt(elseConfirmLoc,
-                Exp.copy(finalConfirm), simplifyFinalConfirm));
+
+        // NY YS
+        // Form the confirm clause for the else
+        Exp elseConfirm = Exp.copy(finalConfirm);
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)
+                & elapsedTimeDur != null) {
+            Location loc = stmt.getLocation();
+            VarExp cumDur =
+                    Utilities.createCumDurExp((Location) loc.clone(),
+                            myCurrentModuleScope);
+            InfixExp sumWhileDur =
+                    new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                            Utilities.createPosSymbol("+"), Exp
+                                    .copy(elapsedTimeDur));
+            sumWhileDur.setMathType(myTypeGraph.R);
+
+            elseConfirm = Utilities.replace(elseConfirm, cumDur, sumWhileDur);
+        }
+
+        elseStmtList.add(new ConfirmStmt(elseConfirmLoc, elseConfirm,
+                simplifyFinalConfirm));
 
         // condition
         ProgramExp condition = (ProgramExp) Exp.copy(stmt.getTest());

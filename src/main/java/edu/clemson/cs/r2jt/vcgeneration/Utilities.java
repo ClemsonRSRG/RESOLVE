@@ -402,6 +402,26 @@ public class Utilities {
     }
 
     /**
+     * <p>Creates a less than equal infix expression.</p>
+     *
+     * @param location Location for the new infix expression.
+     * @param left The left hand side of the less than equal expression.
+     * @param right The right hand side of the less than equal expression.
+     * @param booleanType Mathematical boolean type.
+     *
+     * @return The new <code>InfixExp</code>.
+     */
+    protected static InfixExp createLessThanEqExp(Location location, Exp left,
+            Exp right, MTType booleanType) {
+        // Create the "Less Than Equal" InfixExp
+        InfixExp exp =
+                new InfixExp(location, left, Utilities.createPosSymbol("<="),
+                        right);
+        exp.setMathType(booleanType);
+        return exp;
+    }
+
+    /**
      * <p>Creates a less than infix expression.</p>
      *
      * @param location Location for the new infix expression.
