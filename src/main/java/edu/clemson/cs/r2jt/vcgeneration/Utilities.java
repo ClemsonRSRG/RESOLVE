@@ -258,16 +258,17 @@ public class Utilities {
      *
      * @param loc The location where we are creating this expression.
      * @param numArg Number of Arguments.
+     * @param integerType Mathematical integer type.
      * @param realType Mathematical real type.
-     * @param booleanType Mathematical boolean type.
      *
      * @return The created <code>FunctionExp</code>.
      */
     protected static FunctionExp createDurCallExp(Location loc, String numArg,
-            MTType realType, MTType booleanType) {
+            MTType integerType, MTType realType) {
         // Obtain the necessary information from the variable
         VarExp param =
-                createVarExp(loc, null, createPosSymbol(numArg), realType, null);
+                createVarExp(loc, null, createPosSymbol(numArg), integerType,
+                        null);
 
         // Create the list of arguments to the function
         edu.clemson.cs.r2jt.collections.List<Exp> params =
@@ -277,7 +278,7 @@ public class Utilities {
         // Create the duration call exp
         FunctionExp durCallExp =
                 createFunctionExp(loc, null, createPosSymbol("Dur_Call"),
-                        params, booleanType);
+                        params, realType);
 
         return durCallExp;
     }
@@ -287,12 +288,11 @@ public class Utilities {
      * variable.</p>
      *
      * @param var Local Variable.
-     * @param booleanType Mathematical boolean type.
+     * @param realType Mathematical real type.
      *
      * @return The created <code>FunctionExp</code>.
      */
-    protected static FunctionExp createFinalizAnyDur(VarDec var,
-            MTType booleanType) {
+    protected static FunctionExp createFinalizAnyDur(VarDec var, MTType realType) {
         // Obtain the necessary information from the variable
         Ty varTy = var.getTy();
         NameTy varNameTy = (NameTy) varTy;
@@ -313,7 +313,7 @@ public class Utilities {
         // Create the final duration
         FunctionExp finalDurAnyExp =
                 createFunctionExp(var.getLocation(), null,
-                        createPosSymbol("F_Dur"), params, booleanType);
+                        createPosSymbol("F_Dur"), params, realType);
 
         return finalDurAnyExp;
     }
@@ -357,11 +357,11 @@ public class Utilities {
      * variable.</p>
      *
      * @param var Local Variable.
-     * @param booleanType Mathematical boolean type.
+     * @param realType Mathematical real type.
      *
      * @return The created <code>FunctionExp</code>.
      */
-    protected static FunctionExp createInitAnyDur(VarDec var, MTType booleanType) {
+    protected static FunctionExp createInitAnyDur(VarDec var, MTType realType) {
         // Obtain the necessary information from the variable
         VarExp param =
                 createVarExp(var.getLocation(), null,
@@ -377,7 +377,7 @@ public class Utilities {
         // Create the final duration
         FunctionExp initDurExp =
                 createFunctionExp(var.getLocation(), null,
-                        createPosSymbol("I_Dur"), params, booleanType);
+                        createPosSymbol("I_Dur"), params, realType);
 
         return initDurExp;
     }

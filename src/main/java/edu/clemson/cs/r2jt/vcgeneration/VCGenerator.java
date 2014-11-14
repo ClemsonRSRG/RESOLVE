@@ -466,7 +466,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Loop through local variables to get their finalization duration
             for (VarDec v : dec.getVariables()) {
-                Exp finalVarDur = Utilities.createFinalizAnyDur(v, BOOLEAN);
+                Exp finalVarDur =
+                        Utilities.createFinalizAnyDur(v, myTypeGraph.R);
 
                 // Create/Add the duration expression
                 if (varFinalDur == null) {
@@ -487,7 +488,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     VarDec varDec = new VarDec(p.getName(), p.getTy());
                     varDec.setMathType(p.getMathType());
                     Exp finalVarDur =
-                            Utilities.createFinalizAnyDur(varDec, BOOLEAN);
+                            Utilities
+                                    .createFinalizAnyDur(varDec, myTypeGraph.R);
 
                     // Create/Add the duration expression
                     if (varFinalDur == null) {
@@ -2991,6 +2993,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Modify the confirm details
         ConfirmStmt ifConfirm = myCurrentAssertiveCode.getFinalConfirm();
+        Exp ifConfirmExp = ifConfirm.getAssertion();
         Location ifLocation;
         if (ifConfirm.getLocation() != null) {
             ifLocation = (Location) ifConfirm.getLocation().clone();
@@ -3001,8 +3004,50 @@ public class VCGenerator extends TreeWalkerVisitor {
         String ifDetail = "Condition at " + ifLocation.toString() + " is true";
         ifLocation.setDetails(ifDetail);
         ifConfirm.setLocation(ifLocation);
-        myCurrentAssertiveCode.setFinalConfirm(ifConfirm.getAssertion(),
-                ifConfirm.getSimplify());
+
+        // NY YS
+        // Duration for If Part
+        InfixExp sumEvalDur = null;
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            Location loc = (Location) ifLocation.clone();
+            VarExp cumDur =
+                    Utilities.createCumDurExp((Location) loc.clone(),
+                            myCurrentModuleScope);
+
+            // Search for operation profile
+            List<PTType> argTypes = new LinkedList<PTType>();
+            List<ProgramExp> argsList = testParamExp.getArguments();
+            for (ProgramExp arg : argsList) {
+                argTypes.add(arg.getProgramType());
+            }
+            OperationProfileEntry ope =
+                    Utilities.searchOperationProfile(loc, qualifier,
+                            testParamExp.getName(), argTypes,
+                            myCurrentModuleScope);
+            Exp opDur = Exp.copy(ope.getDurationClause());
+
+            sumEvalDur =
+                    new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                            Utilities.createPosSymbol("+"), opDur);
+            sumEvalDur.setMathType(myTypeGraph.R);
+
+            Exp durCallExp =
+                    Utilities.createDurCallExp(loc, Integer.toString(opDec
+                            .getParameters().size()), myTypeGraph.Z,
+                            myTypeGraph.R);
+            sumEvalDur =
+                    new InfixExp((Location) loc.clone(), sumEvalDur, Utilities
+                            .createPosSymbol("+"), durCallExp);
+            sumEvalDur.setMathType(myTypeGraph.R);
+
+            // Replace "Cum_Dur" with "Cum_Dur + Dur_Call(<num of args>) + <duration of call>"
+            ifConfirmExp =
+                    Utilities.replace(ifConfirmExp, cumDur, Exp
+                            .copy(sumEvalDur));
+        }
+
+        myCurrentAssertiveCode.setFinalConfirm(ifConfirmExp, ifConfirm
+                .getSimplify());
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nIf Part Rule Applied: \n");
@@ -3024,13 +3069,29 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Modify the confirm details
         ConfirmStmt negIfConfirm = negIfAssertiveCode.getFinalConfirm();
+        Exp negIfConfirmExp = negIfConfirm.getAssertion();
         Location negIfLocation = (Location) ifConfirm.getLocation().clone();
         String negIfDetail =
                 "Condition at " + negIfLocation.toString() + " is false";
         negIfLocation.setDetails(negIfDetail);
         negIfConfirm.setLocation(negIfLocation);
-        negIfAssertiveCode.setFinalConfirm(negIfConfirm.getAssertion(),
-                negIfConfirm.getSimplify());
+
+        // NY YS
+        // Duration for Else Part
+        if (sumEvalDur != null) {
+            Location loc = (Location) negIfLocation.clone();
+            VarExp cumDur =
+                    Utilities.createCumDurExp((Location) loc.clone(),
+                            myCurrentModuleScope);
+
+            // Replace "Cum_Dur" with "Cum_Dur + Dur_Call(<num of args>) + <duration of call>"
+            negIfConfirmExp =
+                    Utilities.replace(negIfConfirmExp, cumDur, Exp
+                            .copy(sumEvalDur));
+        }
+
+        negIfAssertiveCode.setFinalConfirm(negIfConfirmExp, negIfConfirm
+                .getSimplify());
 
         // Add this new assertive code to our incomplete assertive code stack
         myIncAssertiveCodeStack.push(negIfAssertiveCode);
@@ -3698,7 +3759,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 VarExp cumDur =
                         Utilities.createCumDurExp((Location) loc.clone(),
                                 myCurrentModuleScope);
-                Exp initDur = Utilities.createInitAnyDur(varDec, BOOLEAN);
+                Exp initDur = Utilities.createInitAnyDur(varDec, myTypeGraph.R);
                 InfixExp sumInitDur =
                         new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
                                 Utilities.createPosSymbol("+"), initDur);
