@@ -371,7 +371,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
         PTType type = node.getSegments().get(0).getProgramType();
 
-        ST dotExp = myGroup.getInstanceOf("variable_dot_exp").add("modulename",
+        ST dotExp =
+                myGroup.getInstanceOf("variable_dot_exp").add("modulename",
                         myScope.getDefiningElement().getName().getName()).add(
                         "typename", getTypeName(type));
 
@@ -919,7 +920,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 || myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
             outputAsFile(outputFile.getAbsolutePath(), myActiveTemplates.peek()
                     .render());
-            System.out.println(myActiveTemplates.peek().render());
+            // System.out.println(myActiveTemplates.peek().render());
         }
         else {
             outputToReport(myActiveTemplates.peek().render());
