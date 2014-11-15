@@ -198,7 +198,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rString;
     }
     protected int addPAlternative(PExp formula){
-        return 0;
+        return -1;
     }
     // adds a particular symbol to the registry
     protected int addPsymbol(PSymbol ps) {

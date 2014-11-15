@@ -59,7 +59,7 @@ public class CongruenceClassProver {
     private final long DEFAULTTIMEOUT = 10000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
-    private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = false; // make false for the new Integer_Theory
+    private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = true; // make false for the new Integer_Theory
 
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;

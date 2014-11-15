@@ -69,9 +69,6 @@ public class TheoremCongruenceClosureImpl {
             m_insertExpr = p; // this will add "= true"
         }
 
-        if (m_matchConj.size() == 0) {
-            m_unneeded = true;
-        }
 
     }
 
@@ -89,9 +86,6 @@ public class TheoremCongruenceClosureImpl {
         else
             m_matchConj.addFormula(toMatchAndBind);
         m_insertExpr = toInsert;
-        if (m_matchConj.size() == 0) {
-            m_unneeded = true;
-        }
     }
 
     public Set<String> getFunctionNames() {
@@ -143,7 +137,7 @@ public class TheoremCongruenceClosureImpl {
             }
             // todo: replace lambda param types if they are type variables
             PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
-            if(modifiedInsert.containsName("lambda")){
+            if(modifiedInsert.containsName("Empty_String")){
                 System.err.println(modifiedInsert);
             }
             rList.add(new InsertExpWithJustification(modifiedInsert,
@@ -189,17 +183,30 @@ public class TheoremCongruenceClosureImpl {
 
     private Stack<HashMap<String, String>> findValidBindings(
             VerificationConditionCongruenceClosureImpl vc, long endTime) {
-        if (m_matchConj.size() == 0) {
-            return null;
-        }
+
         boolean extraOutput = false;
-        if(m_theoremString.contains("i_n_2")
+        /*if(m_theoremString.contains("Empty_String")
                  ){
              extraOutput = true;
              System.out.println("looking for: \n" + m_matchConj + "in " + vc);
-         }
+         }*/
         Stack<HashMap<String, String>> allValidBindings =
                 new Stack<HashMap<String, String>>();
+
+        // Case where no match conj. is produced.
+        // Example: S = Empty_String. Relevant info is only in registry.
+        if (m_matchConj.size() == 0){
+            HashMap<String,String> wildToActual = new HashMap<String, String>();
+            for (String wild: m_theoremRegistry.getForAlls()){
+                // go through parent array to get value for wildcard
+                String actual = m_theoremRegistry.getSymbolForIndex(m_theoremRegistry.getIndexForSymbol(wild));
+                if (actual.equals(wild) || m_theoremRegistry.getForAlls().contains(actual)) return null;
+                wildToActual.put(wild,actual);
+            }
+            allValidBindings.push(wildToActual);
+            return allValidBindings;
+
+        }
         Stack<SearchBox> boxStack = new Stack<SearchBox>();
         boxStack.push(new SearchBox(m_matchConj.getExprAtPosition(0),
                 m_theoremRegistry, vc.getConjunct(), vc.getRegistry(),
