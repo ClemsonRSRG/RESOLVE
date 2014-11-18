@@ -1157,6 +1157,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Only deal with actual types and don't deal
                 // with entry types passed in to the concept realization
                 if (!(ptType instanceof PTGeneric)) {
+                    // Convert p to a VarExp
+                    VarExp parameterExp = new VarExp(null, null, p.getName());
+                    parameterExp.setMathType(pNameTy.getMathTypeValue());
+
                     // Query for the type entry in the symbol table
                     SymbolTableEntry ste =
                             Utilities.searchProgramType(pNameTy.getLocation(),
@@ -1175,31 +1179,35 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
 
                     // Obtain the original dec from the AST
-                    TypeDec type = (TypeDec) typeEntry.getDefiningElement();
-
-                    // Convert p to a VarExp
-                    VarExp parameterExp = new VarExp(null, null, p.getName());
-                    parameterExp.setMathType(pNameTy.getMathTypeValue());
-
-                    // Obtain the exemplar in VarExp form
-                    VarExp exemplar =
-                            new VarExp(null, null, type.getExemplar());
-                    exemplar.setMathType(pNameTy.getMathTypeValue());
-
-                    // If we have a type representation, then there are no initialization
-                    // or constraint clauses.
+                    VarExp exemplar = null;
                     Exp init = null;
                     Exp constraint = null;
-                    if (ste instanceof ProgramTypeEntry) {
-                        // Deep copy the original initialization ensures and the constraint
-                        init = Exp.copy(type.getInitialization().getEnsures());
-                        constraint = Exp.copy(type.getConstraint());
+                    if (typeEntry.getDefiningElement() instanceof TypeDec) {
+                        TypeDec type = (TypeDec) typeEntry.getDefiningElement();
+
+                        // Obtain the exemplar in VarExp form
+                        exemplar = new VarExp(null, null, type.getExemplar());
+                        exemplar.setMathType(pNameTy.getMathTypeValue());
+
+                        // If we have a type representation, then there are no initialization
+                        // or constraint clauses.
+                        if (ste instanceof ProgramTypeEntry) {
+                            // Deep copy the original initialization ensures and the constraint
+                            init =
+                                    Exp.copy(type.getInitialization()
+                                            .getEnsures());
+                            constraint = Exp.copy(type.getConstraint());
+                        }
                     }
 
                     // Only worry about replaces mode parameters
                     if (p.getMode() == Mode.REPLACES && init != null) {
                         // Replace the formal with the actual
-                        init = Utilities.replace(init, exemplar, parameterExp);
+                        if (exemplar != null) {
+                            init =
+                                    Utilities.replace(init, exemplar,
+                                            parameterExp);
+                        }
 
                         // Set the details for the new location
                         if (init.getLocation() != null) {
@@ -1250,9 +1258,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 && !constraint.equals(myTypeGraph
                                         .getTrueVarExp())) {
                             // Replace the formal with the actual
-                            constraint =
-                                    Utilities.replace(constraint, exemplar,
-                                            parameterExp);
+                            if (exemplar != null) {
+                                constraint =
+                                        Utilities.replace(constraint, exemplar,
+                                                parameterExp);
+                            }
 
                             // Set the details for the new location
                             if (constraint.getLocation() != null) {
