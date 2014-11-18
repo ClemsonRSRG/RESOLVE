@@ -33,6 +33,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     protected boolean m_evaluates_to_false = false;
     private int f_num = 0;
 
+
     /**
      * @param registry the Registry symbols contained in the conjunction will
      * reference. This class will add entries to the registry if needed.
@@ -335,8 +336,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         a = m_registry.findAndCompress(a);
         b = m_registry.findAndCompress(b);
-        rString += m_registry.getSymbolForIndex(a) + "/" + m_registry.getSymbolForIndex(b) + ",";
-        Stack<Integer> holdingTank = mergeOnlyArgumentOperators(a, b);
+        if(a==b) return "";
+        Stack<Integer> holdingTank = new Stack<Integer>();
+        holdingTank.push(a);
+        holdingTank.push(b);
 
         while (holdingTank != null && !holdingTank.empty()) {
             if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
@@ -344,13 +347,84 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
             int opA = m_registry.findAndCompress(holdingTank.pop());
             int opB = m_registry.findAndCompress(holdingTank.pop());
-            if (opA != opB) {
+            // Rules that determine which symbol becomes root go here
+            if(opA == opB) continue;
+            String aString = m_registry.getSymbolForIndex(opA);
+            String bString = m_registry.getSymbolForIndex(opB);
+
+            if (aString.compareTo(bString) > 0) {
+                int temp = opA;
+                opA = opB;
+                opB = temp;
+            }
+
+            // Favor retaining literals
+            // THIS IS CURRENTLY ABSOLUTELY NECESSARY.  Finding could be redone to avoid this.
+            // Otherwise, proofs can fail to prove if literals are redefined.
+            aString = m_registry.getSymbolForIndex(opA);
+            bString = m_registry.getSymbolForIndex(opB);
+            Registry.Usage uB = m_registry.getUsage(bString);
+            Registry.Usage uA = m_registry.getUsage((aString));
+            // puts created in b
+            if (uA.equals(Registry.Usage.CREATED)
+                    && !uB.equals(Registry.Usage.CREATED)) {
+                int temp = opA;
+                opA = opB;
+                opB = temp;
+            }
+            // Can't rely on literal property being set.  false is not set to be a literal.
+            else if (uA.equals(Registry.Usage.LITERAL)
+                    && uB.equals(Registry.Usage.LITERAL)) {
+                System.err.println("Literal redefinition: " + aString + "." + opA
+                        + " -> " + bString + "." + opB);
+                //System.err.println(m_registry.m_symbolToIndex);
+                //System.err.println(m_registry.m_indexToSymbol);
+            }
+            else if (uB.equals(Registry.Usage.LITERAL)) {
+                int temp = opA;
+                opA = opB;
+                opB = temp;
+            }
+            aString = m_registry.getSymbolForIndex(opA);
+            bString = m_registry.getSymbolForIndex(opB);
+            uA = m_registry.getUsage((aString));
+            uB = m_registry.getUsage(bString);
+            // prevent constant replacement by variable
+            if (uA != uB) {
+                boolean aIsVar =
+                        (uA == Registry.Usage.FORALL
+                                || uA == Registry.Usage.HASARGS_FORALL || aString
+                                .startsWith("¢v"));
+                boolean bIsVar =
+                        (uB == Registry.Usage.FORALL
+                                || uB == Registry.Usage.HASARGS_FORALL || bString
+                                .startsWith("¢v"));
+                if ((aIsVar || bIsVar) && !(aIsVar == bIsVar) && (aIsVar)) {
+                    int temp = opA;
+                    opA = opB;
+                    opB = temp;
+                }
+            }
+            aString = m_registry.getSymbolForIndex(opA);
+            bString = m_registry.getSymbolForIndex(opB);
+            // prefer true or false
+            if(bString.equals("true") || bString.equals("false")){
+                int temp = opA;
+                opA = opB;
+                opB = temp;
+            }
+
+            if (aString.equals("false") && bString.equals("true") ||
+                    (aString.equals("true") && bString.equals("false"))) {
+                m_evaluates_to_false = true;
+            }
+
                 rString += m_registry.getSymbolForIndex(opA) + "/" + m_registry.getSymbolForIndex(opB) + ",";
                 Stack<Integer> mResult = mergeOnlyArgumentOperators(opA, opB);
 
                 if (mResult != null)
                     holdingTank.addAll(mResult);
-            }
+
         }
         //mergeArgsOfEqualityPredicateIfRootIsTrue();
         rString += mergeMatchingLambdas();
@@ -393,79 +467,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
             return null;
         }
-        if (a == b) {
-            return null;
-        }
-        /*if (a > b) {
-         int temp = a;
-         a = b;
-         b = temp;
-         }*/// this is the original way, merge toward lower valued indices.
-        String aString = m_registry.getSymbolForIndex(a);
-        String bString = m_registry.getSymbolForIndex(b);
-        // replace a if a is alphabetically higher than b
-        if (aString.compareTo(bString) > 0) {
-            int temp = a;
-            String tempS = aString;
-            a = b;
-            aString = bString;
-            b = temp;
-            bString = tempS;
-        }
 
-        // Favor retaining literals
-        // THIS IS CURRENTLY ABSOLUTELY NECESSARY.  Finding could be redone to avoid this.
-        // Otherwise, proofs can fail to prove if literals are redefined.
-
-        if (aString.equals("false") && bString.equals("true")) {
-            m_evaluates_to_false = true;
-            return null;
-        }
-        // TODO: find out why when aString == bString here, a !=b.  Child probably merged.
-        Registry.Usage uB = m_registry.getUsage(bString);
-        Registry.Usage uA = m_registry.getUsage((aString));
-        // puts created in b
-        if (uA.equals(Registry.Usage.CREATED)
-                && !uB.equals(Registry.Usage.CREATED)) {
-            int temp = a;
-            a = b;
-            b = temp;
-        }
-        // Can't rely on literal property being set.  false is not set to be a literal.
-        else if (uA.equals(Registry.Usage.LITERAL)
-                && uB.equals(Registry.Usage.LITERAL)) {
-            System.err.println("Literal redefinition: " + aString + "." + a
-                    + " -> " + bString + "." + b);
-            //System.err.println(m_registry.m_symbolToIndex);
-            //System.err.println(m_registry.m_indexToSymbol);
-        }
-        else if (uB.equals(Registry.Usage.LITERAL)) {
-            int temp = a;
-            a = b;
-            b = temp;
-        }
-        // prevent constant replacement by variable
-        if (uA != uB) {
-            boolean aIsVar =
-                    (uA == Registry.Usage.FORALL
-                            || uA == Registry.Usage.HASARGS_FORALL || aString
-                            .startsWith("¢v"));
-            boolean bIsVar =
-                    (uB == Registry.Usage.FORALL
-                            || uB == Registry.Usage.HASARGS_FORALL || bString
-                            .startsWith("¢v"));
-            if ((aIsVar || bIsVar) && !(aIsVar == bIsVar) && (aIsVar)) {
-                int temp = a;
-                a = b;
-                b = temp;
-            }
-        }
-        // prefer true or false
-        if(bString.equals("true") || bString.equals("false")){
-            int temp = a;
-            a = b;
-            b = temp;
-        }
         Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator();
         Stack<NormalizedAtomicExpressionMapImpl> modifiedEntries =
                 new Stack<NormalizedAtomicExpressionMapImpl>();

@@ -137,9 +137,6 @@ public class TheoremCongruenceClosureImpl {
             }
             // todo: replace lambda param types if they are type variables
             PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
-            if(modifiedInsert.containsName("Empty_String")){
-                System.err.println(modifiedInsert);
-            }
             rList.add(new InsertExpWithJustification(modifiedInsert,
                     m_theoremString));
             quantToLit.clear();
@@ -185,7 +182,7 @@ public class TheoremCongruenceClosureImpl {
             VerificationConditionCongruenceClosureImpl vc, long endTime) {
 
         boolean extraOutput = false;
-        /*if(m_theoremString.contains("Empty_String")
+        /*if(m_theoremString.contains("alpha_hack")
                  ){
              extraOutput = true;
              System.out.println("looking for: \n" + m_matchConj + "in " + vc);

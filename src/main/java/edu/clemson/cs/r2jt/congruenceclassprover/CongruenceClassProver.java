@@ -59,7 +59,7 @@ public class CongruenceClassProver {
     private final long DEFAULTTIMEOUT = 10000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
-    private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = true; // make false for the new Integer_Theory
+    private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = true;
 
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
@@ -254,9 +254,9 @@ public class CongruenceClassProver {
 
                 // want to add all order operators and +/- if any of these are used
                 HashSet<String> intTheoryNames = new HashSet<String>();
-                intTheoryNames.add(">");
+                /*intTheoryNames.add(">");
                 intTheoryNames.add("<");
-                intTheoryNames.add(">=");
+                intTheoryNames.add(">=");*/
                 intTheoryNames.add("<=");
                 intTheoryNames.add("+");
                 intTheoryNames.add("-");
@@ -347,8 +347,11 @@ public class CongruenceClassProver {
                     && System.currentTimeMillis() <= endTime) {
                 if (!applied.contains(curP.m_theorem.toString())) {
 
-                    thString += curP.toString();
-                    thString += vcc.getConjunct().addExpression(curP.m_theorem, endTime) + "\n";
+                    String substitutionsMade = vcc.getConjunct().addExpression(curP.m_theorem, endTime) + "\n";
+                    if(!substitutionsMade.equals("\n")){
+                        thString += curP.toString();
+                        thString += substitutionsMade;
+                    }
                     applied.add(curP.m_theorem.toString());
                     numAdded++;
 
