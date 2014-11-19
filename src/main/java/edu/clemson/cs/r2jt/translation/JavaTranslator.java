@@ -637,7 +637,6 @@ public class JavaTranslator extends AbstractTranslator {
 
     @Override
     public void preRepresentationDec(RepresentationDec node) {
-
         List<SymbolTableEntry> types =
                 myScope.query(new NameQuery(null, node.getName()));
 
@@ -655,7 +654,6 @@ public class JavaTranslator extends AbstractTranslator {
 
     @Override
     public void postRepresentationDec(RepresentationDec node) {
-
         ST instance =
                 myGroup.getInstanceOf("facility_init").add("realization",
                         node.getName().getName());

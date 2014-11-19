@@ -99,7 +99,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     // TODO : This global can be safely removed once walk methods for virtual
     //        list nodes are fixed. Talk to Blair about this.
     protected boolean myWhileStmtChangingClause = false;
-
+    protected boolean myWalkingInitFinalItemFlag = false;
     /**
      * <p>This stores the facility qualifier when we encounter a
      * <code>ProgramDotExp</code>. Once we are done walking the
@@ -265,6 +265,26 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         myActiveTemplates.peek().add("arguments", integerExp);
     }
 
+    @Override
+    public void preInitItem(InitItem e) {
+        myWalkingInitFinalItemFlag = true;
+    }
+
+    @Override
+    public void postInitItem(InitItem e) {
+        myWalkingInitFinalItemFlag = false;
+    }
+
+    @Override
+    public void preFinalItem(FinalItem e) {
+        myWalkingInitFinalItemFlag = true;
+    }
+
+    @Override
+    public void postFinalItem(FinalItem e) {
+        myWalkingInitFinalItemFlag = false;
+    }
+
     public void preProgramStringExp(ProgramStringExp node) {
 
         ST stringExp =
@@ -316,6 +336,34 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public boolean walkVariableRecordExp(VariableRecordExp node) {
         return true;
+    }
+
+    @Override
+    public boolean walkVariableDotExp(VariableDotExp e) {
+
+        //If we encounter a dot expression in an initialization clause,
+        //we to basically pretend that its a normal name expression. This is not
+        //ideal, but for now, our model of java code requires/expects this.
+
+        //TODO: Think about cases in which the java will actually need a
+        //variableDotExp, and the RESOLVE source that will elicit this.
+        if (myWalkingInitFinalItemFlag) {
+            preAny(e);
+            preExp(e);
+            preProgramExp(e);
+            preVariableExp(e);
+
+            //For now we assume we're dealing with a name, since we need to
+            //initialize just the name.
+            preVariableNameExp((VariableNameExp) e.getSegments().get(1));
+            postVariableNameExp((VariableNameExp) e.getSegments().get(1));
+
+            postVariableExp(e);
+            postProgramExp(e);
+            postExp(e);
+            postAny(e);
+        }
+        return myWalkingInitFinalItemFlag;
     }
 
     @Override
