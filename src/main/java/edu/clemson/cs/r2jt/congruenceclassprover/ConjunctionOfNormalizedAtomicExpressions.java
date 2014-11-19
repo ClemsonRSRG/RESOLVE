@@ -33,7 +33,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     protected boolean m_evaluates_to_false = false;
     private int f_num = 0;
 
-
     /**
      * @param registry the Registry symbols contained in the conjunction will
      * reference. This class will add entries to the registry if needed.
@@ -100,7 +99,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             int intRepOfOp = addPsymbol(asPsymbol);
             int root = addFormula(expression);
             if (type.isBoolean()) {
-                return mergeOperators(m_registry.getIndexForSymbol("true"), root);
+                return mergeOperators(m_registry.getIndexForSymbol("true"),
+                        root);
             }
         }
         return "";
@@ -198,17 +198,19 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         return rString;
     }
-    protected int addPAlternative(PExp formula){
+
+    protected int addPAlternative(PExp formula) {
         return -1;
     }
+
     // adds a particular symbol to the registry
     protected int addPsymbol(PSymbol ps) {
         String name = ps.getTopLevelOperation();
         MTType type = ps.getTypeValue();
-        if(type == null || ps.isFunction()){
+        if (type == null || ps.isFunction()) {
             type = ps.getType();
         }
-        if(ps.name.equals("Az")){
+        if (ps.name.equals("Az")) {
             int j = 0;
         }
         Registry.Usage usage = Registry.Usage.SINGULAR_VARIABLE;
@@ -264,7 +266,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (formula instanceof PLambda) {
             return removeLambda((PLambda) formula);
         }
-        else if (formula instanceof PAlternatives){
+        else if (formula instanceof PAlternatives) {
             return addPAlternative(formula);
         }
         else
@@ -336,7 +338,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         a = m_registry.findAndCompress(a);
         b = m_registry.findAndCompress(b);
-        if(a==b) return "";
+        if (a == b)
+            return "";
         Stack<Integer> holdingTank = new Stack<Integer>();
         holdingTank.push(a);
         holdingTank.push(b);
@@ -348,7 +351,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             int opA = m_registry.findAndCompress(holdingTank.pop());
             int opB = m_registry.findAndCompress(holdingTank.pop());
             // Rules that determine which symbol becomes root go here
-            if(opA == opB) continue;
+            if (opA == opB)
+                continue;
             String aString = m_registry.getSymbolForIndex(opA);
             String bString = m_registry.getSymbolForIndex(opB);
 
@@ -375,8 +379,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             // Can't rely on literal property being set.  false is not set to be a literal.
             else if (uA.equals(Registry.Usage.LITERAL)
                     && uB.equals(Registry.Usage.LITERAL)) {
-                System.err.println("Literal redefinition: " + aString + "." + opA
-                        + " -> " + bString + "." + opB);
+                System.err.println("Literal redefinition: " + aString + "."
+                        + opA + " -> " + bString + "." + opB);
                 //System.err.println(m_registry.m_symbolToIndex);
                 //System.err.println(m_registry.m_indexToSymbol);
             }
@@ -408,22 +412,24 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             aString = m_registry.getSymbolForIndex(opA);
             bString = m_registry.getSymbolForIndex(opB);
             // prefer true or false
-            if(bString.equals("true") || bString.equals("false")){
+            if (bString.equals("true") || bString.equals("false")) {
                 int temp = opA;
                 opA = opB;
                 opB = temp;
             }
 
-            if (aString.equals("false") && bString.equals("true") ||
-                    (aString.equals("true") && bString.equals("false"))) {
+            if (aString.equals("false") && bString.equals("true")
+                    || (aString.equals("true") && bString.equals("false"))) {
                 m_evaluates_to_false = true;
             }
 
-                rString += m_registry.getSymbolForIndex(opA) + "/" + m_registry.getSymbolForIndex(opB) + ",";
-                Stack<Integer> mResult = mergeOnlyArgumentOperators(opA, opB);
+            rString +=
+                    m_registry.getSymbolForIndex(opA) + "/"
+                            + m_registry.getSymbolForIndex(opB) + ",";
+            Stack<Integer> mResult = mergeOnlyArgumentOperators(opA, opB);
 
-                if (mResult != null)
-                    holdingTank.addAll(mResult);
+            if (mResult != null)
+                holdingTank.addAll(mResult);
 
         }
         //mergeArgsOfEqualityPredicateIfRootIsTrue();

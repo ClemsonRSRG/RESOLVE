@@ -73,7 +73,7 @@ public class CongruenceClassProver {
         /*FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_PROVE);
         FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_LEGACY_PROVE);
         FlagDependencies.addImplies(FLAG_PROVE, Prover.FLAG_SOME_PROVER);
-        */
+         */
 
         // for new vc gen
         FlagDependencies.addImplies(FLAG_PROVE, VCGenerator.FLAG_ALTVERIFY_VC);
@@ -267,7 +267,7 @@ public class CongruenceClassProver {
                 HashSet<String> intersect = new HashSet<String>(intTheoryNames);
 
                 intersect.retainAll(vcFunctionNames);
-                if(!intersect.isEmpty()){
+                if (!intersect.isEmpty()) {
                     vcFunctionNames.addAll(intTheoryNames);
                 }
                 if (vcFunctionNames.contains("CF")) {
@@ -347,8 +347,11 @@ public class CongruenceClassProver {
                     && System.currentTimeMillis() <= endTime) {
                 if (!applied.contains(curP.m_theorem.toString())) {
 
-                    String substitutionsMade = vcc.getConjunct().addExpression(curP.m_theorem, endTime) + "\n";
-                    if(!substitutionsMade.equals("\n")){
+                    String substitutionsMade =
+                            vcc.getConjunct().addExpression(curP.m_theorem,
+                                    endTime)
+                                    + "\n";
+                    if (!substitutionsMade.equals("\n")) {
                         thString += curP.toString();
                         thString += substitutionsMade;
                     }
@@ -377,7 +380,9 @@ public class CongruenceClassProver {
         if (proved
                 .equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
             theseResults +=
-                    (i + " iterations. PROVED (false assumption): VC " + vcc.m_name + "\n") + div;
+                    (i + " iterations. PROVED (false assumption): VC "
+                            + vcc.m_name + "\n")
+                            + div;
             m_results += theseResults;
             return proved;
         }
@@ -428,7 +433,6 @@ public class CongruenceClassProver {
         w.flush();
         w.close();
     }
-
 
     public void addProverListener(ProverListener l) {
         myProverListeners.add(l);

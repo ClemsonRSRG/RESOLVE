@@ -69,7 +69,6 @@ public class TheoremCongruenceClosureImpl {
             m_insertExpr = p; // this will add "= true"
         }
 
-
     }
 
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp toMatchAndBind,
@@ -192,13 +191,18 @@ public class TheoremCongruenceClosureImpl {
 
         // Case where no match conj. is produced.
         // Example: S = Empty_String. Relevant info is only in registry.
-        if (m_matchConj.size() == 0){
-            HashMap<String,String> wildToActual = new HashMap<String, String>();
-            for (String wild: m_theoremRegistry.getForAlls()){
+        if (m_matchConj.size() == 0) {
+            HashMap<String, String> wildToActual =
+                    new HashMap<String, String>();
+            for (String wild : m_theoremRegistry.getForAlls()) {
                 // go through parent array to get value for wildcard
-                String actual = m_theoremRegistry.getSymbolForIndex(m_theoremRegistry.getIndexForSymbol(wild));
-                if (actual.equals(wild) || m_theoremRegistry.getForAlls().contains(actual)) return null;
-                wildToActual.put(wild,actual);
+                String actual =
+                        m_theoremRegistry.getSymbolForIndex(m_theoremRegistry
+                                .getIndexForSymbol(wild));
+                if (actual.equals(wild)
+                        || m_theoremRegistry.getForAlls().contains(actual))
+                    return null;
+                wildToActual.put(wild, actual);
             }
             allValidBindings.push(wildToActual);
             return allValidBindings;
@@ -350,7 +354,7 @@ public class TheoremCongruenceClosureImpl {
             /*System.err.println("Failed type check: " + oSymbol + "(from theorem): " + oType
                     + " " + dSymbol + ": " + dType);
             System.err.println(m_theoremString);
-            */
+             */
             box.m_failedBindings = box.m_bindings;
             return false;
 
