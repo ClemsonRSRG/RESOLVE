@@ -12,23 +12,19 @@
  */
 package edu.clemson.cs.r2jt.proving.absyn;
 
+import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.SingletonImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+
+import java.util.*;
 
 public class PLambda extends PExp {
 
     public final ImmutableList<Parameter> parameters;
     private final PExp myBody;
+    private static int f_num = 0;
 
     public PLambda(ImmutableList<Parameter> parameters, PExp body) {
         super(body.structureHash * 34, parameterHash(parameters),
@@ -154,7 +150,10 @@ public class PLambda extends PExp {
             retval = substitutions.get(this);
         }
         else {
-            retval = this;
+
+            // make new parameters if substitutions contains type variables
+
+            retval = new PLambda(parameters, myBody.substitute(substitutions));
         }
 
         return retval;

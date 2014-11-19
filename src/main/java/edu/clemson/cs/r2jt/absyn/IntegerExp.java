@@ -17,6 +17,7 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.type.Type;
 import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 public class IntegerExp extends Exp {
 

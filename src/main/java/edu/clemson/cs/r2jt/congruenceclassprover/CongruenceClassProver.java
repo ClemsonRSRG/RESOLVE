@@ -12,11 +12,15 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
+import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
+import edu.clemson.cs.r2jt.proving.Antecedent;
 import edu.clemson.cs.r2jt.proving.Prover;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.proving.absyn.PLambda;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
+import edu.clemson.cs.r2jt.proving2.Consequent;
 import edu.clemson.cs.r2jt.proving2.Metrics;
 import edu.clemson.cs.r2jt.proving2.ProverListener;
 import edu.clemson.cs.r2jt.proving2.VC;
@@ -29,17 +33,13 @@ import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.FlagManager;
+import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
+import edu.clemson.cs.r2jt.verification.Verifier;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -52,25 +52,31 @@ public class CongruenceClassProver {
                     "congruence closure based prover");
     private final List<VerificationConditionCongruenceClosureImpl> m_ccVCs;
     private final List<TheoremCongruenceClosureImpl> m_theorems;
-    private final int MAX_ITERATIONS = 256;
+    private final int MAX_ITERATIONS = 1024;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
-    private final long DEFAULTTIMEOUT = 5000;
+    private final long DEFAULTTIMEOUT = 10000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
+    private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = true;
 
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
     private final List<ProverListener> myProverListeners =
             new LinkedList<ProverListener>();
     private final long myTimeout;
+    private long totalTime = 0;
 
     ///////////////////////////////////////////////////////
     public static void setUpFlags() {
-        FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_PROVE);
+        /*FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_PROVE);
         FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_LEGACY_PROVE);
         FlagDependencies.addImplies(FLAG_PROVE, Prover.FLAG_SOME_PROVER);
+         */
+
+        // for new vc gen
+        FlagDependencies.addImplies(FLAG_PROVE, VCGenerator.FLAG_ALTVERIFY_VC);
     }
 
     public CongruenceClassProver(TypeGraph g, List<VC> vcs, ModuleScope scope,
@@ -90,24 +96,24 @@ public class CongruenceClassProver {
             myTimeout = DEFAULTTIMEOUT;
         }
         ///////////////////////////////////////////////////////////////
-
+        totalTime = System.currentTimeMillis();
         m_typeGraph = g;
         m_ccVCs = new ArrayList<VerificationConditionCongruenceClosureImpl>();
         int i = 0;
+
         for (VC vc : vcs) {
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc));
             myModels[i++] = (new PerVCProverModel(g, vc.getName(), vc, null));
         }
-
         m_theorems = new ArrayList<TheoremCongruenceClosureImpl>();
         List<TheoremEntry> theoremEntries =
                 scope.query(new EntryTypeQuery(TheoremEntry.class,
                         MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
                         MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
+
         for (TheoremEntry e : theoremEntries) {
             PExp assertion = e.getAssertion();
-            if (assertion.getSymbolNames().contains("lambda"))
-                continue;
+
             if (assertion.isEquality()) {
                 addEqualityTheorem(true, assertion);
                 addEqualityTheorem(false, assertion);
@@ -167,29 +173,42 @@ public class CongruenceClassProver {
         int i = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
             long startTime = System.nanoTime();
-            boolean proved = prove(vcc);
-            if (proved) {
-                summary += "Proved ";
+            String whyQuit = "";
+            VerificationConditionCongruenceClosureImpl.STATUS proved =
+                    prove(vcc);
+            if (proved
+                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
+                whyQuit += " Proved ";
             }
-            else {
-                summary += "Insufficient data to prove ";
+            else if (proved
+                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
+                whyQuit += " Proved (Assumption(s) false) ";
             }
+            else if (proved
+                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
+                whyQuit += " Out of theorems, or timed out ";
+            }
+            else
+                whyQuit += " Goal false ";
 
             long endTime = System.nanoTime();
             long delayNS = endTime - startTime;
             long delayMS =
                     TimeUnit.MILLISECONDS
                             .convert(delayNS, TimeUnit.NANOSECONDS);
-            summary += vcc.m_name + " time: " + delayMS + " ms\n";
+            summary += vcc.m_name + whyQuit + " time: " + delayMS + " ms\n";
 
             for (ProverListener l : myProverListeners) {
                 l
-                        .vcResult(proved, myModels[i], new Metrics(delayMS,
-                                myTimeout));
+                        .vcResult(
+                                (proved == (VerificationConditionCongruenceClosureImpl.STATUS.PROVED) || (proved == VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)),
+                                myModels[i], new Metrics(delayMS, myTimeout));
             }
             i++;
         }
-
+        totalTime = System.currentTimeMillis() - totalTime;
+        summary +=
+                "Elapsed time from construction: " + totalTime + " ms" + "\n";
         String div = divLine("Summary");
         summary = div + summary + div;
         if (!FlagManager.getInstance().isFlagSet("nodebug")) {
@@ -214,27 +233,68 @@ public class CongruenceClassProver {
         return new String(div) + "\n";
     }
 
-    protected boolean prove(VerificationConditionCongruenceClosureImpl vcc) {
-        ArrayList<TheoremCongruenceClosureImpl> allFuncNamesInVC =
+    protected VerificationConditionCongruenceClosureImpl.STATUS prove(
+            VerificationConditionCongruenceClosureImpl vcc) {
+        List<TheoremCongruenceClosureImpl> allFuncNamesInVC =
                 new ArrayList<TheoremCongruenceClosureImpl>();
 
         // Remove theorems with no function names in the vc.
-        if (!vcc.isProved()) {
-            Set<String> vcFunctionNames = vcc.getFunctionNames();
-            if (vcFunctionNames.contains("-")) {
-                vcFunctionNames.add("+");
-            }
-            if (vcFunctionNames.contains("+")) {
-                vcFunctionNames.add("-");
-            }
-            for (TheoremCongruenceClosureImpl th : m_theorems) {
-                Set<String> theoremfunctionNames = th.getFunctionNames();
-                if (vcFunctionNames.containsAll(theoremfunctionNames)) {
-                    allFuncNamesInVC.add(th);
+        if (vcc
+                .isProved()
+                .equals(
+                        VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
+            if (DO_NOT_INTRODUCE_NEW_OPERATORS) {
+
+                Set<String> vcFunctionNames = vcc.getFunctionNames();
+                // adding "=" since it is needed for the application of some theorems.
+                vcFunctionNames.add("=");
+                vcFunctionNames.add("true");
+                vcFunctionNames.add("or");
+                vcFunctionNames.add("not");
+
+                // want to add all order operators and +/- if any of these are used
+                HashSet<String> intTheoryNames = new HashSet<String>();
+                /*intTheoryNames.add(">");
+                intTheoryNames.add("<");
+                intTheoryNames.add(">=");*/
+                intTheoryNames.add("<=");
+                intTheoryNames.add("+");
+                intTheoryNames.add("-");
+                intTheoryNames.add("suc");
+                intTheoryNames.add("neg");
+                intTheoryNames.add("NB");
+                intTheoryNames.add("Is_Neg");
+                HashSet<String> intersect = new HashSet<String>(intTheoryNames);
+
+                intersect.retainAll(vcFunctionNames);
+                if (!intersect.isEmpty()) {
+                    vcFunctionNames.addAll(intTheoryNames);
                 }
+                if (vcFunctionNames.contains("CF")) {
+                    vcFunctionNames.add("DR");
+                }
+                for (TheoremCongruenceClosureImpl th : m_theorems) {
+                    Set<String> theoremfunctionNames = th.getFunctionNames();
+                    if (vcFunctionNames.containsAll(theoremfunctionNames)) {
+                        allFuncNamesInVC.add(th);
+
+                    }
+                }
+
+            }
+            else {
+                allFuncNamesInVC.addAll(m_theorems);
             }
         }
-
+        // add quantified expressions local to the vc to allFuncNamesInVC. allFuncNamesInVC is a filtered list of all available theorems
+        // it resets for each vc
+        for (PExp p : vcc.forAllQuantifiedPExps) {
+            TheoremCongruenceClosureImpl t =
+                    new TheoremCongruenceClosureImpl(m_typeGraph, p);
+            if (!t.m_unneeded) {
+                allFuncNamesInVC.add(t);
+            }
+        }
         String div = divLine(vcc.m_name);
         String theseResults =
                 div + ("Before application of theorems: " + vcc + "\n");
@@ -244,7 +304,11 @@ public class CongruenceClassProver {
         long endTime = myTimeout + startTime;
         HashSet<String> applied = new HashSet<String>();
 
-        for (i = 0; i < MAX_ITERATIONS && !vcc.isProved()
+        for (i = 0; i < MAX_ITERATIONS
+                && vcc
+                        .isProved()
+                        .equals(
+                                VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                 && System.currentTimeMillis() <= endTime; ++i) {
             ArrayList<InsertExpWithJustification> insertExp =
                     new ArrayList<InsertExpWithJustification>();
@@ -261,10 +325,13 @@ public class CongruenceClassProver {
                 }
             }
             if (insertExp.isEmpty()) {
+                System.err.println(vcc.m_name
+                        + ". oops: no unique instantiated theorems.");
                 break; // nothing else to try
             }
             Map<String, Integer> vcGoalSymbolCount = vcc.getGoalSymbols();
             int threshold = 16 * vcGoalSymbolCount.size() + 1;
+            // lower thresholds: less output, more time in prioritizer
             InstantiatedTheoremPrioritizer pQ =
                     new InstantiatedTheoremPrioritizer(insertExp,
                             vcGoalSymbolCount, threshold);
@@ -272,11 +339,22 @@ public class CongruenceClassProver {
                     pQ.m_pQueue.poll();
             int maxToAdd = pQ.m_pQueue.size() * 3 / 4 + 1;
             int numAdded = 0;
-            while (curP != null && !vcc.isProved()
+            while (curP != null
+                    && vcc
+                            .isProved()
+                            .equals(
+                                    VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                     && System.currentTimeMillis() <= endTime) {
                 if (!applied.contains(curP.m_theorem.toString())) {
-                    vcc.getConjunct().addExpression(curP.m_theorem, endTime);
-                    thString += curP.toString();
+
+                    String substitutionsMade =
+                            vcc.getConjunct().addExpression(curP.m_theorem,
+                                    endTime)
+                                    + "\n";
+                    if (!substitutionsMade.equals("\n")) {
+                        thString += curP.toString();
+                        thString += substitutionsMade;
+                    }
                     applied.add(curP.m_theorem.toString());
                     numAdded++;
 
@@ -288,28 +366,47 @@ public class CongruenceClassProver {
         }
         theseResults += (thString);
 
-        boolean proved = vcc.isProved();
+        VerificationConditionCongruenceClosureImpl.STATUS proved =
+                vcc.isProved();
 
-        if (proved) {
+        if (proved
+                .equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
             theseResults +=
                     (i + " iterations. PROVED: VC " + vcc.m_name + "\n") + div;
             m_results += theseResults;
-            return true;
+            return proved;
         }
 
+        if (proved
+                .equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
+            theseResults +=
+                    (i + " iterations. PROVED (false assumption): VC "
+                            + vcc.m_name + "\n")
+                            + div;
+            m_results += theseResults;
+            return proved;
+        }
+
+        String whyNotProved = "";
+        if (proved
+                .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING))
+            whyNotProved = "Out of time or theorems";
+        else
+            whyNotProved = "Goal evaluates to false."; // not implemented
         if (SHOWRESULTSIFNOTPROVED) {
             theseResults +=
-                    ("\n" + i + " iterations. NOT PROVED: VC " + vcc + "\n")
+                    ("\n" + i + " iterations. NOT PROVED: " + whyNotProved
+                            + " " + vcc + "\n")
                             + div;
             m_results += theseResults;
         }
         else {
             m_results +=
                     div
-                            + (i + " iterations. NOT PROVED: VC " + vcc.m_name + "\n")
-                            + div;
+                            + (i + " iterations. NOT PROVED: " + whyNotProved
+                                    + " " + vcc.m_name + "\n") + div;
         }
-        return false;
+        return proved;
 
     }
 

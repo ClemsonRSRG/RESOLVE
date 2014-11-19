@@ -72,6 +72,7 @@ public class NormalizedAtomicExpressionMapImpl
         }
         position = 1 << position;
         Set<Map.Entry<Integer, Integer>> entries = m_expression.entrySet();
+        // hangs here with some lambda formulae
         for (Map.Entry<Integer, Integer> e : entries) {
             if ((e.getValue() & position) != 0) {
                 return e.getKey();
