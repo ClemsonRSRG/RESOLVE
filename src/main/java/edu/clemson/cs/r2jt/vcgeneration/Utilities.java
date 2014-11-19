@@ -699,12 +699,13 @@ public class Utilities {
      * @param location Location for the searching type.
      * @param qualifier Qualifier for the programming type.
      * @param name Name for the programming type.
+     * @param varName Name of the variable of this type.
      * @param scope The module scope to start our search.
      *
      * @return The constraint in <code>Exp</code> form if found, null otherwise.
      */
     protected static Exp retrieveConstraint(Location location,
-            PosSymbol qualifier, PosSymbol name, ModuleScope scope) {
+            PosSymbol qualifier, PosSymbol name, Exp varName, ModuleScope scope) {
         Exp constraint = null;
 
         // Query for the type entry in the symbol table
@@ -726,7 +727,13 @@ public class Utilities {
             // Obtain the original dec from the AST
             TypeDec type = (TypeDec) typeEntry.getDefiningElement();
 
-            constraint = Exp.copy(type.getConstraint());
+            // Create a variable expression from the type exemplar
+            VarExp exemplar =
+                    Utilities.createVarExp(type.getLocation(), null, type
+                            .getExemplar(), typeEntry.getModelType(), null);
+
+            constraint =
+                    replace(Exp.copy(type.getConstraint()), exemplar, varName);
         }
         else {
             notAType(typeEntry, location);
