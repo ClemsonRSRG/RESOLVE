@@ -200,8 +200,8 @@ public class IntegerExp extends Exp {
     public Exp copy() {
         Exp retval = new IntegerExp(null, qualifier, value);
         retval.setType(type);
-        retval.setMathType(myMathType);
-        retval.setMathTypeValue(myMathTypeValue);
+        retval.setMathType(getMathType());
+        retval.setMathTypeValue(getMathTypeValue());
         return retval;
     }
 

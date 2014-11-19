@@ -843,12 +843,6 @@ public class Verifier extends ResolveConceptualVisitor {
 
         Exp conf = assertion.getFinalConfirm();
         //String str = conf.toString(0);
-
-        // temporary fix.  numbers in code have null types at the moment.
-        String repStr = replacement.toString();
-        if (repStr.matches("-?\\d+?") && replacement.getMathType() == null) {
-            replacement.setMathType(Z);
-        }
         conf = Exp.replace(conf, var, replacement);
 
         assertion.setFinalConfirm(conf);

@@ -377,13 +377,13 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 opB = temp;
             }
             // Can't rely on literal property being set.  false is not set to be a literal.
-            else if (uA.equals(Registry.Usage.LITERAL)
+            /*else if (uA.equals(Registry.Usage.LITERAL)
                     && uB.equals(Registry.Usage.LITERAL)) {
                 System.err.println("Literal redefinition: " + aString + "."
                         + opA + " -> " + bString + "." + opB);
                 //System.err.println(m_registry.m_symbolToIndex);
                 //System.err.println(m_registry.m_indexToSymbol);
-            }
+            }*/
             else if (uB.equals(Registry.Usage.LITERAL)) {
                 int temp = opA;
                 opA = opB;
