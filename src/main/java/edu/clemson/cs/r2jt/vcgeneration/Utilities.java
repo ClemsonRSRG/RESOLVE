@@ -209,30 +209,6 @@ public class Utilities {
     }
 
     /**
-     * <p>Creates a variable expression with the name
-     * "Cum_Dur" and has type "R".</p>
-     *
-     * @param location Location that wants to create
-     *                 this variable.
-     *
-     * @return The created <code>VarExp</code>.
-     */
-    protected static VarExp createCumDurExp(Location location, ModuleScope scope) {
-        // Locate "R" (Real Number)
-        MathSymbolEntry mse = searchMathSymbol(location, "R", scope);
-        try {
-            // Create a variable with the name P_val
-            return createVarExp(location, null, createPosSymbol("Cum_Dur"), mse
-                    .getTypeValue(), null);
-        }
-        catch (SymbolNotOfKindTypeException e) {
-            notAType(mse, location);
-        }
-
-        return null;
-    }
-
-    /**
      * <p>Creates dotted expression with the specified list of
      * expressions.</p>
      *
@@ -567,6 +543,25 @@ public class Utilities {
         exp.setMathType(type);
         exp.setMathTypeValue(typeValue);
         return exp;
+    }
+
+    /**
+     * <p>Gets the current "Cum_Dur" expression. We should only have one in
+     * the current scope.</p>
+     *
+     * @param searchingExp The expression we are searching for "Cum_Dur"
+     *
+     * @return The current "Cum_Dur".
+     */
+    protected static String getCumDur(Exp searchingExp) {
+        String cumDur = "Cum_Dur";
+
+        // Loop until we find one
+        while (!searchingExp.containsVar(cumDur, false)) {
+            cumDur = "?" + cumDur;
+        }
+
+        return cumDur;
     }
 
     /**

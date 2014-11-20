@@ -2986,9 +2986,14 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
         }
 
-        // Add any statements inside the then clause
+        // Create a list for the then clause
+        edu.clemson.cs.r2jt.collections.List<Statement> thenStmtList;
         if (stmt.getThenclause() != null) {
-            myCurrentAssertiveCode.addStatements(stmt.getThenclause());
+            thenStmtList = stmt.getThenclause();
+        }
+        else {
+            thenStmtList =
+                    new edu.clemson.cs.r2jt.collections.List<Statement>();
         }
 
         // Modify the confirm details
@@ -3010,9 +3015,34 @@ public class VCGenerator extends TreeWalkerVisitor {
         InfixExp sumEvalDur = null;
         if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
             Location loc = (Location) ifLocation.clone();
-            VarExp cumDur =
-                    Utilities.createCumDurExp((Location) loc.clone(),
-                            myCurrentModuleScope);
+            VarExp cumDur;
+            boolean trueConfirm = false;
+
+            // Our previous rule must have been a while rule
+            ConfirmStmt conf = null;
+            if (ifConfirmExp.isLiteralTrue() && thenStmtList.size() != 0) {
+                Statement st = thenStmtList.get(thenStmtList.size() - 1);
+                if (st instanceof ConfirmStmt) {
+                    conf = (ConfirmStmt) st;
+                    cumDur =
+                            Utilities.createVarExp((Location) loc.clone(),
+                                    null, Utilities.createPosSymbol(Utilities
+                                            .getCumDur(conf.getAssertion())),
+                                    myTypeGraph.R, null);
+                    trueConfirm = true;
+                }
+                else {
+                    cumDur = null;
+                    Utilities.noSuchSymbol(null, "Cum_Dur", loc);
+                }
+            }
+            else {
+                cumDur =
+                        Utilities.createVarExp((Location) loc.clone(), null,
+                                Utilities.createPosSymbol(Utilities
+                                        .getCumDur(ifConfirmExp)),
+                                myTypeGraph.R, null);
+            }
 
             // Search for operation profile
             List<PTType> argTypes = new LinkedList<PTType>();
@@ -3026,26 +3056,42 @@ public class VCGenerator extends TreeWalkerVisitor {
                             myCurrentModuleScope);
             Exp opDur = Exp.copy(ope.getDurationClause());
 
-            sumEvalDur =
-                    new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
-                            Utilities.createPosSymbol("+"), opDur);
-            sumEvalDur.setMathType(myTypeGraph.R);
-
             Exp durCallExp =
                     Utilities.createDurCallExp(loc, Integer.toString(opDec
                             .getParameters().size()), myTypeGraph.Z,
                             myTypeGraph.R);
             sumEvalDur =
-                    new InfixExp((Location) loc.clone(), sumEvalDur, Utilities
+                    new InfixExp((Location) loc.clone(), opDur, Utilities
                             .createPosSymbol("+"), durCallExp);
             sumEvalDur.setMathType(myTypeGraph.R);
 
-            // Replace "Cum_Dur" with "Cum_Dur + Dur_Call(<num of args>) + <duration of call>"
-            ifConfirmExp =
-                    Utilities.replace(ifConfirmExp, cumDur, Exp
-                            .copy(sumEvalDur));
+            Exp sumPlusCumDur =
+                    new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                            Utilities.createPosSymbol("+"), Exp
+                                    .copy(sumEvalDur));
+            sumPlusCumDur.setMathType(myTypeGraph.R);
+
+            if (trueConfirm && conf != null) {
+                // Replace "Cum_Dur" with "Cum_Dur + Dur_Call(<num of args>) + <duration of call>"
+                Exp confirm = conf.getAssertion();
+                confirm =
+                        Utilities.replace(confirm, cumDur, Exp
+                                .copy(sumPlusCumDur));
+                conf.setAssertion(confirm);
+                thenStmtList.set(thenStmtList.size() - 1, conf);
+            }
+            else {
+                // Replace "Cum_Dur" with "Cum_Dur + Dur_Call(<num of args>) + <duration of call>"
+                ifConfirmExp =
+                        Utilities.replace(ifConfirmExp, cumDur, Exp
+                                .copy(sumPlusCumDur));
+            }
         }
 
+        // Add the statements inside the if to the assertive code
+        myCurrentAssertiveCode.addStatements(thenStmtList);
+
+        // Set the final if confirm
         myCurrentAssertiveCode.setFinalConfirm(ifConfirmExp, ifConfirm
                 .getSimplify());
 
@@ -3062,9 +3108,14 @@ public class VCGenerator extends TreeWalkerVisitor {
             Utilities.illegalOperationEnsures(opDec.getLocation());
         }
 
-        // Add any statements inside the else clause
+        // Create a list for the then clause
+        edu.clemson.cs.r2jt.collections.List<Statement> elseStmtList;
         if (stmt.getElseclause() != null) {
-            negIfAssertiveCode.addStatements(stmt.getElseclause());
+            elseStmtList = stmt.getElseclause();
+        }
+        else {
+            elseStmtList =
+                    new edu.clemson.cs.r2jt.collections.List<Statement>();
         }
 
         // Modify the confirm details
@@ -3080,16 +3131,62 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Duration for Else Part
         if (sumEvalDur != null) {
             Location loc = (Location) negIfLocation.clone();
-            VarExp cumDur =
-                    Utilities.createCumDurExp((Location) loc.clone(),
-                            myCurrentModuleScope);
+            VarExp cumDur;
+            boolean trueConfirm = false;
 
-            // Replace "Cum_Dur" with "Cum_Dur + Dur_Call(<num of args>) + <duration of call>"
-            negIfConfirmExp =
-                    Utilities.replace(negIfConfirmExp, cumDur, Exp
-                            .copy(sumEvalDur));
+            // Our previous rule must have been a while rule
+            ConfirmStmt conf = null;
+            if (negIfConfirmExp.isLiteralTrue() && elseStmtList.size() != 0) {
+                Statement st = elseStmtList.get(elseStmtList.size() - 1);
+                if (st instanceof ConfirmStmt) {
+                    conf = (ConfirmStmt) st;
+                    cumDur =
+                            Utilities.createVarExp((Location) loc.clone(),
+                                    null, Utilities.createPosSymbol(Utilities
+                                            .getCumDur(conf.getAssertion())),
+                                    myTypeGraph.R, null);
+                    trueConfirm = true;
+                }
+                else {
+                    cumDur = null;
+                    Utilities.noSuchSymbol(null, "Cum_Dur", loc);
+                }
+            }
+            else {
+                cumDur =
+                        Utilities.createVarExp((Location) loc.clone(), null,
+                                Utilities.createPosSymbol(Utilities
+                                        .getCumDur(negIfConfirmExp)),
+                                myTypeGraph.R, null);
+            }
+
+            Exp sumPlusCumDur =
+                    new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                            Utilities.createPosSymbol("+"), Exp
+                                    .copy(sumEvalDur));
+            sumPlusCumDur.setMathType(myTypeGraph.R);
+
+            if (trueConfirm && conf != null) {
+                // Replace "Cum_Dur" with "Cum_Dur + Dur_Call(<num of args>) + <duration of call>"
+                Exp confirm = conf.getAssertion();
+                confirm =
+                        Utilities.replace(confirm, cumDur, Exp
+                                .copy(sumPlusCumDur));
+                conf.setAssertion(confirm);
+                elseStmtList.set(elseStmtList.size() - 1, conf);
+            }
+            else {
+                // Replace "Cum_Dur" with "Cum_Dur + Dur_Call(<num of args>) + <duration of call>"
+                negIfConfirmExp =
+                        Utilities.replace(negIfConfirmExp, cumDur, Exp
+                                .copy(sumPlusCumDur));
+            }
         }
 
+        // Add the statements inside the else to the assertive code
+        negIfAssertiveCode.addStatements(elseStmtList);
+
+        // Set the final else confirm
         negIfAssertiveCode.setFinalConfirm(negIfConfirmExp, negIfConfirm
                 .getSimplify());
 
@@ -3321,8 +3418,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (procDur != null) {
             // Add Cum_Dur as a free variable
             VarExp cumDur =
-                    Utilities.createCumDurExp((Location) opLoc.clone(),
-                            myCurrentModuleScope);
+                    Utilities.createVarExp((Location) opLoc.clone(), null,
+                            Utilities.createPosSymbol("Cum_Dur"),
+                            myTypeGraph.R, null);
             myCurrentAssertiveCode.addFreeVar(cumDur);
 
             // Create 0.0
@@ -3557,8 +3655,12 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
             Location loc = stmt.getLocation();
             VarExp cumDur =
-                    Utilities.createCumDurExp((Location) loc.clone(),
-                            myCurrentModuleScope);
+                    Utilities
+                            .createVarExp((Location) loc.clone(), null,
+                                    Utilities.createPosSymbol(Utilities
+                                            .getCumDur(conf)), myTypeGraph.R,
+                                    null);
+
             Exp swapDur =
                     Utilities.createVarExp((Location) loc.clone(), null,
                             Utilities.createPosSymbol("DurSwap"),
@@ -3754,20 +3856,23 @@ public class VCGenerator extends TreeWalkerVisitor {
             // NY YS
             // Initialization duration for this variable
             if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+                ConfirmStmt finalConfirmStmt =
+                        myCurrentAssertiveCode.getFinalConfirm();
+                Exp finalConfirm = finalConfirmStmt.getAssertion();
+
                 Location loc =
                         ((NameTy) varDec.getTy()).getName().getLocation();
                 VarExp cumDur =
-                        Utilities.createCumDurExp((Location) loc.clone(),
-                                myCurrentModuleScope);
+                        Utilities.createVarExp((Location) loc.clone(), null,
+                                Utilities.createPosSymbol(Utilities
+                                        .getCumDur(finalConfirm)),
+                                myTypeGraph.R, null);
                 Exp initDur = Utilities.createInitAnyDur(varDec, myTypeGraph.R);
                 InfixExp sumInitDur =
                         new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
                                 Utilities.createPosSymbol("+"), initDur);
                 sumInitDur.setMathType(myTypeGraph.R);
 
-                ConfirmStmt finalConfirmStmt =
-                        myCurrentAssertiveCode.getFinalConfirm();
-                Exp finalConfirm = finalConfirmStmt.getAssertion();
                 finalConfirm =
                         Utilities.replace(finalConfirm, cumDur, sumInitDur);
                 myCurrentAssertiveCode.setFinalConfirm(finalConfirm,
@@ -3896,8 +4001,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)
                 & elapsedTimeDur != null) {
             VarExp cumDurExp =
-                    Utilities.createCumDurExp((Location) whileLoc.clone(),
-                            myCurrentModuleScope);
+                    Utilities.createVarExp((Location) whileLoc.clone(), null,
+                            Utilities.createPosSymbol("Cum_Dur"),
+                            myTypeGraph.R, null);
             nqv2 =
                     Utilities.createQuestionMarkVariable(finalConfirm,
                             cumDurExp);
@@ -3983,8 +4089,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                 & elapsedTimeDur != null) {
             Location loc = stmt.getLocation();
             VarExp cumDur =
-                    Utilities.createCumDurExp((Location) loc.clone(),
-                            myCurrentModuleScope);
+                    Utilities.createVarExp((Location) loc.clone(), null,
+                            Utilities.createPosSymbol(Utilities
+                                    .getCumDur(elseConfirm)), myTypeGraph.R,
+                            null);
             InfixExp sumWhileDur =
                     new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
                             Utilities.createPosSymbol("+"), Exp
