@@ -1615,12 +1615,20 @@ remember_statement returns [MemoryStmt stmt = null]
 if_statement returns [IfStmt stmt = null]
 @init{
     edu.clemson.cs.r2jt.collections.List<ConditionItem> condItems = new edu.clemson.cs.r2jt.collections.List<ConditionItem>("ConditionItem");
+    edu.clemson.cs.r2jt.collections.List<Statement> stmts = new edu.clemson.cs.r2jt.collections.List<Statement>("Statement");
 }
     :   ^(  IF cond=condition thenStmts=statement_sequence
             (condItem=elsif_item { condItems.add($condItem.item); })*
             (elseStmts=else_part)?
         )
-        { $stmt = new IfStmt($cond.exp, $thenStmts.stmts, condItems, $elseStmts.stmts); }
+        {
+            if (elseStmts == null) {
+                $stmt = new IfStmt($cond.exp, $thenStmts.stmts, condItems, stmts);
+            }
+            else {
+                $stmt = new IfStmt($cond.exp, $thenStmts.stmts, condItems, $elseStmts.stmts);
+            }
+        }
     ;
 
 elsif_item returns [ConditionItem item = null]

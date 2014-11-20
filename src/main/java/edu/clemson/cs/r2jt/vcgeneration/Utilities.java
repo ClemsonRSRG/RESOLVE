@@ -693,6 +693,56 @@ public class Utilities {
     }
 
     /**
+     * <p>Given a programming type, locate its constraint from the
+     * Symbol Table.</p>
+     *
+     * @param location Location for the searching type.
+     * @param qualifier Qualifier for the programming type.
+     * @param name Name for the programming type.
+     * @param varName Name of the variable of this type.
+     * @param scope The module scope to start our search.
+     *
+     * @return The constraint in <code>Exp</code> form if found, null otherwise.
+     */
+    protected static Exp retrieveConstraint(Location location,
+            PosSymbol qualifier, PosSymbol name, Exp varName, ModuleScope scope) {
+        Exp constraint = null;
+
+        // Query for the type entry in the symbol table
+        SymbolTableEntry ste =
+                Utilities.searchProgramType(location, qualifier, name, scope);
+
+        ProgramTypeEntry typeEntry;
+        if (ste instanceof ProgramTypeEntry) {
+            typeEntry = ste.toProgramTypeEntry(location);
+        }
+        else {
+            typeEntry =
+                    ste.toRepresentationTypeEntry(location)
+                            .getDefiningTypeEntry();
+        }
+
+        // Make sure we don't have a generic type
+        if (typeEntry.getDefiningElement() instanceof TypeDec) {
+            // Obtain the original dec from the AST
+            TypeDec type = (TypeDec) typeEntry.getDefiningElement();
+
+            // Create a variable expression from the type exemplar
+            VarExp exemplar =
+                    Utilities.createVarExp(type.getLocation(), null, type
+                            .getExemplar(), typeEntry.getModelType(), null);
+
+            constraint =
+                    replace(Exp.copy(type.getConstraint()), exemplar, varName);
+        }
+        else {
+            notAType(typeEntry, location);
+        }
+
+        return constraint;
+    }
+
+    /**
      * <p>Given a math symbol name, locate and return
      * the <code>MathSymbolEntry</code> stored in the
      * symbol table.</p>

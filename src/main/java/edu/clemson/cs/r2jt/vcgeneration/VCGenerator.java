@@ -2235,6 +2235,58 @@ public class VCGenerator extends TreeWalkerVisitor {
                 simplify = true;
             }
             assertiveCode.setFinalConfirm(constraint, simplify);
+
+            // Add the constraints for the implementing facility
+            // or for each of the fields inside the record.
+            Exp fieldConstraints = myTypeGraph.getTrueVarExp();
+            if (dec.getRepresentation() instanceof NameTy) {
+                NameTy ty = (NameTy) dec.getRepresentation();
+                fieldConstraints =
+                        Utilities.retrieveConstraint(ty.getLocation(), ty
+                                .getQualifier(), ty.getName(), exemplar,
+                                myCurrentModuleScope);
+            }
+            else {
+                RecordTy ty = (RecordTy) dec.getRepresentation();
+
+                // Find the constraints for each field inside the record.
+                for (VarDec v : ty.getFields()) {
+                    NameTy vTy = (NameTy) v.getTy();
+
+                    // Create the name of the variable
+                    VarExp vName =
+                            Utilities.createVarExp(null, null, v.getName(), vTy
+                                    .getMathType(), vTy.getMathTypeValue());
+
+                    // Create [Exemplar].[v] dotted expression
+                    edu.clemson.cs.r2jt.collections.List<Exp> dotExpList =
+                            new edu.clemson.cs.r2jt.collections.List<Exp>();
+                    dotExpList.add(exemplar);
+                    dotExpList.add(vName);
+                    DotExp varNameExp =
+                            Utilities.createDotExp(v.getLocation(), dotExpList,
+                                    v.getMathType());
+
+                    Exp vConstraint =
+                            Utilities.retrieveConstraint(vTy.getLocation(), vTy
+                                    .getQualifier(), vTy.getName(), varNameExp,
+                                    myCurrentModuleScope);
+
+                    if (fieldConstraints.isLiteralTrue()) {
+                        fieldConstraints = vConstraint;
+                    }
+                    else {
+                        fieldConstraints =
+                                myTypeGraph.formConjunct(fieldConstraints,
+                                        vConstraint);
+                    }
+                }
+            }
+
+            // Only add the field constraints if we don't have true
+            if (!fieldConstraints.isLiteralTrue()) {
+                assertiveCode.addAssume(fieldConstraints);
+            }
         }
 
         // Add this new assertive code to our incomplete assertive code stack
