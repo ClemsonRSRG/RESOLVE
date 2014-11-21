@@ -2136,6 +2136,89 @@ public class VCGenerator extends TreeWalkerVisitor {
                 replaceFormalWithActualEns(ensures, opDec.getParameters(),
                         opDec.getStateVars(), stmt.getArguments(), false);
 
+        // NY YS
+        // Duration for CallStmt
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            Location loc = (Location) stmt.getLocation().clone();
+            ConfirmStmt finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
+            Exp finalConfirmExp = finalConfirm.getAssertion();
+
+            // Obtain the corresponding OperationProfileEntry
+            List<PTType> argTypes = new LinkedList<PTType>();
+            for (ProgramExp arg : stmt.getArguments()) {
+                argTypes.add(arg.getProgramType());
+            }
+
+            OperationProfileEntry ope =
+                    Utilities.searchOperationProfile(loc, stmt.getQualifier(),
+                            stmt.getName(), argTypes, myCurrentModuleScope);
+
+            // Add the profile ensures as additional assume
+            Exp profileEnsures = ope.getEnsuresClause();
+            if (profileEnsures != null) {
+                profileEnsures =
+                        replaceFormalWithActualEns(profileEnsures, opDec
+                                .getParameters(), opDec.getStateVars(), stmt
+                                .getArguments(), false);
+
+                // Obtain the current location
+                if (stmt.getName().getLocation() != null) {
+                    // Set the details of the current location
+                    Location ensuresLoc = (Location) loc.clone();
+                    ensuresLoc.setDetails("Ensures Clause of "
+                            + opDec.getName() + " from Profile "
+                            + ope.getName());
+                    Utilities.setLocation(profileEnsures, ensuresLoc);
+                }
+
+                ensures = myTypeGraph.formConjunct(ensures, profileEnsures);
+            }
+
+            // Construct the Duration Clause
+            Exp opDur = Exp.copy(ope.getDurationClause());
+            VarExp cumDur =
+                    Utilities.createVarExp((Location) loc.clone(), null,
+                            Utilities.createPosSymbol(Utilities
+                                    .getCumDur(finalConfirmExp)),
+                            myTypeGraph.R, null);
+            Exp durCallExp =
+                    Utilities.createDurCallExp((Location) loc.clone(), Integer
+                            .toString(opDec.getParameters().size()),
+                            myTypeGraph.Z, myTypeGraph.R);
+            InfixExp sumEvalDur =
+                    new InfixExp((Location) loc.clone(), opDur, Utilities
+                            .createPosSymbol("+"), durCallExp);
+            sumEvalDur.setMathType(myTypeGraph.R);
+            sumEvalDur =
+                    new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                            Utilities.createPosSymbol("+"), sumEvalDur);
+            sumEvalDur.setMathType(myTypeGraph.R);
+
+            // For any evaluates mode expression, we need to finalize the variable
+            edu.clemson.cs.r2jt.collections.List<ProgramExp> assignExpList =
+                    stmt.getArguments();
+            for (int i = 0; i < assignExpList.size(); i++) {
+                ParameterVarDec p = opDec.getParameters().get(i);
+                VariableExp pExp = (VariableExp) assignExpList.get(i);
+                if (p.getMode() == Mode.EVALUATES) {
+                    VarDec v =
+                            new VarDec(Utilities.getVarName(pExp), p.getTy());
+                    FunctionExp finalDur =
+                            Utilities.createFinalizAnyDur(v, myTypeGraph.R);
+                    sumEvalDur =
+                            new InfixExp((Location) loc.clone(), sumEvalDur,
+                                    Utilities.createPosSymbol("+"), finalDur);
+                    sumEvalDur.setMathType(myTypeGraph.R);
+                }
+            }
+
+            // Replace Cum_Dur in our final ensures clause
+            finalConfirmExp =
+                    Utilities.replace(finalConfirmExp, cumDur, sumEvalDur);
+            myCurrentAssertiveCode.setFinalConfirm(finalConfirmExp,
+                    finalConfirm.getSimplify());
+        }
+
         // Modify the location of the requires clause and add it to myCurrentAssertiveCode
         if (requires != null) {
             // Obtain the current location
@@ -2817,6 +2900,146 @@ public class VCGenerator extends TreeWalkerVisitor {
                                             .getParameters(), opDec
                                             .getStateVars(), assignParamExp
                                             .getArguments(), true);
+
+                            // NY YS
+                            // Duration for CallStmt
+                            if (myInstanceEnvironment.flags
+                                    .isFlagSet(FLAG_ALTPVCS_VC)) {
+                                Location loc =
+                                        (Location) stmt.getLocation().clone();
+                                ConfirmStmt finalConfirm =
+                                        myCurrentAssertiveCode
+                                                .getFinalConfirm();
+                                Exp finalConfirmExp =
+                                        finalConfirm.getAssertion();
+
+                                // Obtain the corresponding OperationProfileEntry
+                                List<PTType> argTypes =
+                                        new LinkedList<PTType>();
+                                for (ProgramExp arg : assignParamExp
+                                        .getArguments()) {
+                                    argTypes.add(arg.getProgramType());
+                                }
+
+                                OperationProfileEntry ope =
+                                        Utilities.searchOperationProfile(loc,
+                                                qualifier, assignParamExp
+                                                        .getName(), argTypes,
+                                                myCurrentModuleScope);
+
+                                // Add the profile ensures as additional assume
+                                Exp profileEnsures = ope.getEnsuresClause();
+                                if (profileEnsures != null) {
+                                    profileEnsures =
+                                            replaceFormalWithActualEns(
+                                                    profileEnsures, opDec
+                                                            .getParameters(),
+                                                    opDec.getStateVars(),
+                                                    assignParamExp
+                                                            .getArguments(),
+                                                    false);
+
+                                    // Obtain the current location
+                                    if (assignParamExp.getLocation() != null) {
+                                        // Set the details of the current location
+                                        Location ensuresLoc =
+                                                (Location) loc.clone();
+                                        ensuresLoc
+                                                .setDetails("Ensures Clause of "
+                                                        + opDec.getName()
+                                                        + " from Profile "
+                                                        + ope.getName());
+                                        Utilities.setLocation(profileEnsures,
+                                                ensuresLoc);
+                                    }
+
+                                    ensures =
+                                            myTypeGraph.formConjunct(ensures,
+                                                    profileEnsures);
+                                }
+
+                                // Construct the Duration Clause
+                                Exp opDur = Exp.copy(ope.getDurationClause());
+                                VarExp cumDur =
+                                        Utilities
+                                                .createVarExp(
+                                                        (Location) loc.clone(),
+                                                        null,
+                                                        Utilities
+                                                                .createPosSymbol(Utilities
+                                                                        .getCumDur(finalConfirmExp)),
+                                                        myTypeGraph.R, null);
+                                Exp durCallExp =
+                                        Utilities
+                                                .createDurCallExp(
+                                                        (Location) loc.clone(),
+                                                        Integer
+                                                                .toString(opDec
+                                                                        .getParameters()
+                                                                        .size()),
+                                                        myTypeGraph.Z,
+                                                        myTypeGraph.R);
+                                InfixExp sumEvalDur =
+                                        new InfixExp((Location) loc.clone(),
+                                                opDur, Utilities
+                                                        .createPosSymbol("+"),
+                                                durCallExp);
+                                sumEvalDur.setMathType(myTypeGraph.R);
+                                sumEvalDur =
+                                        new InfixExp((Location) loc.clone(),
+                                                Exp.copy(cumDur), Utilities
+                                                        .createPosSymbol("+"),
+                                                sumEvalDur);
+                                sumEvalDur.setMathType(myTypeGraph.R);
+
+                                // For any evaluates mode expression, we need to finalize the variable
+                                edu.clemson.cs.r2jt.collections.List<ProgramExp> assignExpList =
+                                        assignParamExp.getArguments();
+                                for (int i = 0; i < assignExpList.size(); i++) {
+                                    ParameterVarDec p =
+                                            opDec.getParameters().get(i);
+                                    VariableExp pExp =
+                                            (VariableExp) assignExpList.get(i);
+                                    if (p.getMode() == Mode.EVALUATES) {
+                                        VarDec v =
+                                                new VarDec(Utilities
+                                                        .getVarName(pExp), p
+                                                        .getTy());
+                                        FunctionExp finalDur =
+                                                Utilities.createFinalizAnyDur(
+                                                        v, myTypeGraph.R);
+                                        sumEvalDur =
+                                                new InfixExp(
+                                                        (Location) loc.clone(),
+                                                        sumEvalDur,
+                                                        Utilities
+                                                                .createPosSymbol("+"),
+                                                        finalDur);
+                                        sumEvalDur.setMathType(myTypeGraph.R);
+                                    }
+                                }
+
+                                // Add duration of assignment and finalize the temporary variable
+                                Exp assignDur =
+                                        Utilities.createVarExp((Location) loc
+                                                .clone(), null, Utilities
+                                                .createPosSymbol("Dur_Assgn"),
+                                                myTypeGraph.R, null);
+                                sumEvalDur =
+                                        new InfixExp((Location) loc.clone(),
+                                                sumEvalDur, Utilities
+                                                        .createPosSymbol("+"),
+                                                assignDur);
+                                sumEvalDur.setMathType(myTypeGraph.R);
+
+                                // Replace Cum_Dur in our final ensures clause
+                                finalConfirmExp =
+                                        Utilities.replace(finalConfirmExp,
+                                                cumDur, sumEvalDur);
+                                myCurrentAssertiveCode.setFinalConfirm(
+                                        finalConfirmExp, finalConfirm
+                                                .getSimplify());
+                            }
 
                             // Replace all instances of the left hand side
                             // variable in the current final confirm statement.
@@ -3663,7 +3886,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             Exp swapDur =
                     Utilities.createVarExp((Location) loc.clone(), null,
-                            Utilities.createPosSymbol("DurSwap"),
+                            Utilities.createPosSymbol("Dur_Swap"),
                             myTypeGraph.R, null);
             InfixExp sumSwapDur =
                     new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
