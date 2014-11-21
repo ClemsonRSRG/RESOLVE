@@ -19,11 +19,9 @@ import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
-import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.query.OperationProfileQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.*;
 import edu.clemson.cs.r2jt.misc.SourceErrorException;
 
 import java.util.List;
@@ -292,6 +290,43 @@ public class Utilities {
                         createPosSymbol("F_Dur"), params, realType);
 
         return finalDurAnyExp;
+    }
+
+    /**
+     * <p>Creates function expression "F_Dur" for a specified
+     * variable expression.</p>
+     *
+     * @param varExp A Variable Expression.
+     * @param realType Mathematical real type.
+     *
+     * @return The created <code>FunctionExp</code>.
+     */
+    protected static FunctionExp createFinalizAnyDurExp(VariableExp varExp,
+            MTType realType) {
+        if (varExp.getProgramType() instanceof PTFamily) {
+            PTFamily type = (PTFamily) varExp.getProgramType();
+            Exp param = convertExp(varExp);
+            VarExp param1 =
+                    createVarExp(varExp.getLocation(), null,
+                            createPosSymbol(type.getName()), varExp
+                                    .getMathType(), varExp.getMathTypeValue());
+
+            // Create the list of arguments to the function
+            edu.clemson.cs.r2jt.collections.List<Exp> params =
+                    new edu.clemson.cs.r2jt.collections.List<Exp>();
+            params.add(param1);
+            params.add(param);
+
+            // Create the final duration
+            FunctionExp finalDurAnyExp =
+                    createFunctionExp(varExp.getLocation(), null,
+                            createPosSymbol("F_Dur"), params, realType);
+
+            return finalDurAnyExp;
+        }
+        else {
+            throw new RuntimeException();
+        }
     }
 
     /**

@@ -3032,6 +3032,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                 assignDur);
                                 sumEvalDur.setMathType(myTypeGraph.R);
 
+                                Exp finalExpDur =
+                                        Utilities.createFinalizAnyDurExp(stmt
+                                                .getVar(), myTypeGraph.R);
+                                sumEvalDur =
+                                        new InfixExp((Location) loc.clone(),
+                                                sumEvalDur, Utilities
+                                                        .createPosSymbol("+"),
+                                                finalExpDur);
+                                sumEvalDur.setMathType(myTypeGraph.R);
+
                                 // Replace Cum_Dur in our final ensures clause
                                 finalConfirmExp =
                                         Utilities.replace(finalConfirmExp,
