@@ -1889,7 +1889,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private Exp simplifyAssumeRule(AssumeStmt stmt, Exp exp) {
         // Variables
-        Exp assertion = stmt.getAssertion();
+        /*Exp assertion = stmt.getAssertion();
 
         // EqualsExp
         if (assertion instanceof EqualsExp) {
@@ -1951,7 +1951,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Store the new assertion
-        stmt.setAssertion(assertion);
+        stmt.setAssertion(assertion);*/
 
         return exp;
     }
