@@ -381,8 +381,7 @@ public class MTFunction extends MTAbstract<MTFunction> {
             List<MTType> original) {
 
         List<String> names = new LinkedList<String>();
-        for (@SuppressWarnings("unused")
-        MTType t : original) {
+        for (@SuppressWarnings("unused") MTType t : original) {
             names.add(null);
         }
 
