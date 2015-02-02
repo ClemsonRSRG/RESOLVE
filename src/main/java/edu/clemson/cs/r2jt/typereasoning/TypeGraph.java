@@ -876,8 +876,7 @@ public class TypeGraph {
     public static <T extends Exp> T getCopyWithVariablesSubstituted(T original,
             Map<String, MTType> substitutions) {
 
-        @SuppressWarnings("unchecked")
-        T result = (T) Exp.copy(original);
+        @SuppressWarnings("unchecked") T result = (T) Exp.copy(original);
         result.setMathType(result.getMathType()
                 .getCopyWithVariablesSubstituted(substitutions));
 

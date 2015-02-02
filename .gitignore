@@ -1,55 +1,27 @@
-###################
-# Compiled source #
-###################
+# Maven build folders
 target/
-*.class
 
+# Ant build folders
+build/
+dist/
+lib/
+user.build.properties
 
-###################
-# Temporary Files #
-###################
-
-#gedit
-*~
-
-
-###################
-# Other VCS Files #
-###################
-
-#subversion
-.svn/
-
-
-###########################
-# Per-developer IDE Files #
-###########################
-
-# Netbeans
+# NetBeans user configuration files
 nbactions*.xml
-!nbactions-RSRG-Global.xml
+/nbproject/private/
+*/nbproject/private/
 
-# IntelliJ
+# IntelliJ projects
 *.iml
 *.ipr
 *.iws
 .idea/
 
+# Eclipse projects
+.classpath
+.project
+.settings/
 
-#######################
-# Per-Developer Files #
-#######################
-developer.properties
-
-
-######################
-# OS generated files #
-######################
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-Icon?
-ehthumbs.db
-Thumbs.db
+# Profiler results
+*.hprof

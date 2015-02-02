@@ -118,8 +118,7 @@ public class PTFamily extends PTType {
         Map<String, MTType> stringToMathType =
                 SymbolTableEntry.buildMathTypeGenerics(genericInstantiations);
 
-        @SuppressWarnings("unchecked")
-        Map<MTType, MTType> mathTypeToMathType =
+        @SuppressWarnings("unchecked") Map<MTType, MTType> mathTypeToMathType =
                 (Map<MTType, MTType>) (Map<?, MTType>) MTNamed.toMTNamedMap(
                         getTypeGraph(), stringToMathType);
 

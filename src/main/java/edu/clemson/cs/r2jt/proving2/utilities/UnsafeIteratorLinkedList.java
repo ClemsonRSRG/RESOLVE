@@ -373,8 +373,7 @@ public class UnsafeIteratorLinkedList<E> extends AbstractSequentialList<E>
         }
 
         for (Object o : a) {
-            @SuppressWarnings("unchecked")
-            E e = (E) o;
+            @SuppressWarnings("unchecked") E e = (E) o;
             Node<E> newNode = new Node<E>(pred, e, null);
             if (pred == null)
                 first = newNode;

@@ -2,13 +2,99 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>edu.clemson.cs.rsrg</groupId>
     <artifactId>RESOLVE</artifactId>
+    <groupId>edu.clemson.cs.rsrg</groupId>
     <version>14.03.25a</version>
     <packaging>jar</packaging>
-    <!-- this is a comment -->
+
     <name>RESOLVE</name>
-    <url>http://maven.apache.org</url>
+    <description>The RESOLVE compiler.</description>
+    <inceptionYear>2002</inceptionYear>
+    <organization>
+        <name>Reusable Software Research Group</name>
+        <url>http://www.cs.clemson.edu/resolve/</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>The BSD License</name>
+            <url>http://www.antlr.org/license.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <developers>
+
+        <developer>
+            <name>YuShan Sun</name>
+            <roles>
+                <role>Project lead - RESOLVE</role>
+            </roles>
+        </developer>
+
+        <developer>
+            <name>Dan Welch</name>
+            <email>dtw.welch@gmail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
+
+        <developer>
+            <name>Mike Kabanni</name>
+            <email>jimi@idle.ws</email>
+            <url>http://www.linkedin.com/in/jimidle</url>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
+
+    </developers>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/ClemsonRSRG/RESOLVE/issues</url>
+    </issueManagement>
+
+    <scm>
+        <url>https://github.com/ClemsonRSRG/RESOLVE</url>
+        <connection>scm:git:git://github.com/ClemsonRSRG/RESOLVE.git</connection>
+        <developerConnection>scm:git:[fetch=]git://github.com/ClemsonRSRG/RESOLVE.git[push=]https://github.com/ClemsonRSRG/RESOLVE.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-maven-plugin</artifactId>
+            <version>4.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr-runtime</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>ST4</artifactId>
+            <version>4.0.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20140107</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -17,38 +103,24 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <!--Uncomment below for better (many more!) compiler warnings-->
+                    <!--<compilerArgument>-Xlint:unchecked</compilerArgument>-->
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-2</version>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.5</version>
                 <executions>
                     <execution>
-                        <phase>initialize</phase>
                         <goals>
-                            <goal>read-project-properties</goal>
+                            <goal>antlr4</goal>
                         </goals>
-                        <configuration>
-                            <files>
-                                <file>developer.properties</file>
-                            </files>
-                            <quiet>true</quiet>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-scm-plugin</artifactId>
-                <version>1.9</version>
-                <configuration>
-                    <connectionType>developerConnection</connectionType>
-                </configuration>
-            </plugin>
-            <!-- Plugin to compile ANTLR files. -->
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr3-maven-plugin</artifactId>
@@ -62,36 +134,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Plugin to add the license information. -->
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>2.6</version>
-                <configuration>
-                    <header>${license.url}</header>
-                    <excludes>
-                        <exclude>.gitattributes</exclude>
-                        <exclude>nb-configuration.xml</exclude>
-                        <exclude>nbactions-RSRG-Global.xml</exclude>
-                        <exclude>nbactions.xml</exclude>
-                        <exclude>pom.xml</exclude>
-                        <exclude>rsrg-format.xml</exclude>
-                        <exclude>LICENSE.txt</exclude>
-                        <exclude>src/main/antlr3/**</exclude>
-                        <exclude>src/main/java/edu/clemson/cs/r2jt/parsing/.makify</exclude>
-                        <exclude>src/main/resources/**</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>format</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- Plugin to format the Java code. -->
             <plugin>
                 <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
                 <artifactId>maven-java-formatter-plugin</artifactId>
@@ -110,7 +152,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Plugin to build a RESOLVE jar with dependencies. -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4</version>
@@ -136,124 +177,6 @@
                 </executions>
             </plugin>
         </plugins>
-        <pluginManagement>
-            <plugins>
-                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            org.codehaus.mojo
-                                        </groupId>
-                                        <artifactId>
-                                            properties-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [1.0-alpha-2,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>
-                                                read-project-properties
-                                            </goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <execute/>
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            com.googlecode.maven-java-formatter-plugin
-                                        </groupId>
-                                        <artifactId>
-                                            maven-java-formatter-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [0.3.1,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>format</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <execute/>
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.antlr</groupId>
-                                        <artifactId>
-                                            antlr3-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [3.5.2,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>antlr</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore></ignore>
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- License related information -->
-        <license.url>src/main/resources/LICENSE-Header.txt</license.url>
-    </properties>
-    <licenses>
-        <license>
-            <name>RESOLVE Custom License Header</name>
-            <url>${license.url}</url>
-        </license>
-    </licenses>
 
-    <scm>
-        <connection>scm:svn:http://somerepository.com/svn_repo/trunk</connection>
-        <developerConnection>scm:git:[fetch=]git://github.com/ClemsonRSRG/RESOLVE.git[push=]https://github.com/ClemsonRSRG/RESOLVE.git</developerConnection>
-        <url>http://somerepository.com/view.cvs</url>
-    </scm>
-
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr-runtime</artifactId>
-            <version>3.5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.clemson.cs.resolve</groupId>
-            <artifactId>git-plugin</artifactId>
-            <version>0.0.1-alpha3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>ST4</artifactId>
-            <version>4.0.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20140107</version>
-        </dependency>
-    </dependencies>
 </project>
