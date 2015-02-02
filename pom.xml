@@ -72,13 +72,13 @@
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
-            <artifactId>antlr-runtime</artifactId>
-            <version>3.5.2</version>
+            <artifactId>antlr4-maven-plugin</artifactId>
+            <version>4.5</version>
         </dependency>
         <dependency>
-            <groupId>edu.clemson.cs.resolve</groupId>
-            <artifactId>git-plugin</artifactId>
-            <version>0.0.1-alpha3</version>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr-runtime</artifactId>
+            <version>3.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
@@ -99,38 +99,24 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <!--Uncomment below for better (many more!) compiler warnings-->
+                    <!--<compilerArgument>-Xlint:unchecked</compilerArgument>-->
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-2</version>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.5</version>
                 <executions>
                     <execution>
-                        <phase>initialize</phase>
                         <goals>
-                            <goal>read-project-properties</goal>
+                            <goal>antlr4</goal>
                         </goals>
-                        <configuration>
-                            <files>
-                                <file>developer.properties</file>
-                            </files>
-                            <quiet>true</quiet>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-scm-plugin</artifactId>
-                <version>1.9</version>
-                <configuration>
-                    <connectionType>developerConnection</connectionType>
-                </configuration>
-            </plugin>
-            <!-- Plugin to compile ANTLR files. -->
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr3-maven-plugin</artifactId>
@@ -144,7 +130,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Plugin to format the Java code. -->
             <plugin>
                 <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
                 <artifactId>maven-java-formatter-plugin</artifactId>
@@ -163,7 +148,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Plugin to build a RESOLVE jar with dependencies. -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4</version>
