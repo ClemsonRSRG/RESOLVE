@@ -14,13 +14,10 @@ package edu.clemson.cs.r2jt.typeandpopulate;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.absyn.IterativeExp;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.ArrayList;
 
@@ -115,7 +112,7 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
 
         if (myQuantifiedVariables == null) {
             for (int i = 0; i < myUniqueQuantifiedVariableCount; i++) {
-                myTypeGraph.MTYPE.accept(v);
+                myTypeGraph.CLS.accept(v);
             }
         }
         else {
@@ -146,7 +143,7 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
                         new ArrayList<MTType>(myUniqueQuantifiedVariableCount);
 
                 for (int i = 0; i < myUniqueQuantifiedVariableCount; i++) {
-                    myComponents.add(myTypeGraph.MTYPE);
+                    myComponents.add(myTypeGraph.CLS);
                 }
             }
             else {
@@ -228,7 +225,7 @@ public class MTBigUnion extends MTAbstract<MTBigUnion> {
             myQuantifiedVariables = new TreeMap<String, MTType>();
 
             for (int i = 0; i < myUniqueQuantifiedVariableCount; i++) {
-                myQuantifiedVariables.put("*" + i, myTypeGraph.MTYPE);
+                myQuantifiedVariables.put("*" + i, myTypeGraph.CLS);
             }
         }
     }

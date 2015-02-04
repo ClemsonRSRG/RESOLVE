@@ -162,7 +162,7 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
         if (!t1.name.equals(t2.name)) {
 
             if (getInnermostBinding2(((MTNamed) t2).name).equals(
-                    myTypeGraph.MTYPE)) {
+                    myTypeGraph.CLS)) {
                 bind(((MTNamed) t2).name, t1);
             }
             else {
@@ -247,7 +247,7 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
         }
         else if (t2 instanceof MTNamed
                 && getInnermostBinding2(((MTNamed) t2).name).equals(
-                        myTypeGraph.MTYPE)) {
+                        myTypeGraph.CLS)) {
 
             bind(((MTNamed) t2).name, t1);
         }
@@ -266,10 +266,10 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
             MTType supertype) {
 
         //Respectively, here:  EMPTY_SET is a subtype of everything, everything
-        //is a subtype of MTYPE, and everything is a subtype of ENTITY.
+        //is a subtype of CLS, and everything is a subtype of ENTITY.
 
         return subtype.equals(myTypeGraph.EMPTY_SET)
-                || supertype.equals(myTypeGraph.MTYPE)
+                || supertype.equals(myTypeGraph.CLS)
                 || supertype.equals(myTypeGraph.ENTITY);
     }
 }

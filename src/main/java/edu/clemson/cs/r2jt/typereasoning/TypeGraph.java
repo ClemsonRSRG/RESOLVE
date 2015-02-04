@@ -32,7 +32,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTPowertypeApplication;
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
 import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.absyn.InfixExp;
-import edu.clemson.cs.r2jt.absyn.TupleExp;
 import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
@@ -62,16 +61,16 @@ public class TypeGraph {
 
     public final MTType ELEMENT = new MTProper(this, "Element");
     public final MTType ENTITY = new MTProper(this, "Entity");
-    public final MTProper MTYPE = new MTProper(this, null, true, "MType");
+    public final MTProper CLS = new MTProper(this, null, true, "MType");
 
-    public final MTProper SET = new MTProper(this, MTYPE, true, "SSet");
-    public final MTProper BOOLEAN = new MTProper(this, MTYPE, false, "B");
-    public final MTProper Z = new MTProper(this, MTYPE, false, "Z");
-    public final MTProper R = new MTProper(this, MTYPE, false, "R");
-    public final MTProper ATOM = new MTProper(this, MTYPE, false, "Atom");
-    public final MTProper VOID = new MTProper(this, MTYPE, false, "Void");
+    public final MTProper SET = new MTProper(this, CLS, true, "SSet");
+    public final MTProper BOOLEAN = new MTProper(this, CLS, false, "B");
+    public final MTProper Z = new MTProper(this, CLS, false, "Z");
+    public final MTProper R = new MTProper(this, CLS, false, "R");
+    public final MTProper ATOM = new MTProper(this, CLS, false, "Atom");
+    public final MTProper VOID = new MTProper(this, CLS, false, "Void");
     public final MTProper EMPTY_SET =
-            new MTProper(this, MTYPE, false, "Empty_Set");
+            new MTProper(this, CLS, false, "Empty_Set");
 
     private final static FunctionApplicationFactory POWERTYPE_APPLICATION =
             new PowertypeApplicationFactory();
@@ -85,17 +84,19 @@ public class TypeGraph {
             new CartesianProductApplicationFactory();
 
     public final MTFunction POWERTYPE =
-            new MTFunction(this, true, POWERTYPE_APPLICATION, MTYPE, MTYPE);
+            new MTFunction(this, true, POWERTYPE_APPLICATION, CLS, CLS);
+    public final MTFunction POWERCLASS =
+            new MTFunction(this, true, POWERTYPE_APPLICATION, CLS, CLS);
     public final MTFunction UNION =
-            new MTFunction(this, UNION_APPLICATION, MTYPE, MTYPE, MTYPE);
+            new MTFunction(this, UNION_APPLICATION, CLS, CLS, CLS);
     public final MTFunction INTERSECT =
-            new MTFunction(this, INTERSECT_APPLICATION, MTYPE, MTYPE, MTYPE);
+            new MTFunction(this, INTERSECT_APPLICATION, CLS, CLS, CLS);
     public final MTFunction FUNCTION =
-            new MTFunction(this, FUNCTION_CONSTRUCTOR_APPLICATION, MTYPE,
-                    MTYPE, MTYPE);
+            new MTFunction(this, FUNCTION_CONSTRUCTOR_APPLICATION, CLS,
+                    CLS, CLS);
     public final MTFunction CROSS =
-            new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, MTYPE, MTYPE,
-                    MTYPE);
+            new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, CLS, CLS,
+                    CLS);
 
     public final MTFunction AND =
             new MTFunction(this, BOOLEAN, BOOLEAN, BOOLEAN);
@@ -151,7 +152,7 @@ public class TypeGraph {
 
         try {
             result =
-                    supertype == ENTITY || supertype == MTYPE
+                    supertype == ENTITY || supertype == CLS
                             || myEstablishedSubtypes.contains(r)
                             || subtype.equals(supertype)
                             || subtype.isSyntacticSubtypeOf(supertype);
@@ -238,9 +239,9 @@ public class TypeGraph {
 
         //If the type of the given value is a subtype of the expected type, then
         //its value must necessarily be in the expected type.  Note we can't
-        //reason about the type of MTYPE, so we exclude it
+        //reason about the type of CLS, so we exclude it
         result =
-                myEstablishedElements.contains(r) || (value != MTYPE)
+                myEstablishedElements.contains(r) || (value != CLS)
                         && (value != ENTITY)
                         && isSubtype(value.getType(), expected);
 
@@ -296,7 +297,7 @@ public class TypeGraph {
 
         Exp result = getFalseVarExp();
 
-        if (expected == MTYPE) {
+        if (expected == CLS) {
             //Every MTType is in MType except for Entity and MType, itself
             result = getTrueVarExp();
         }
@@ -328,7 +329,7 @@ public class TypeGraph {
 
             //At this stage, we've done everything safe and sensible that we can 
             //do if the value we're looking at exists outside Entity
-            if (value == MTYPE || value == ENTITY) {
+            if (value == CLS || value == ENTITY) {
                 throw TypeMismatchException.INSTANCE;
             }
 
@@ -387,14 +388,14 @@ public class TypeGraph {
         Exp result;
 
         MTType valueTypeValue = value.getMathTypeValue();
-        if (expected == ENTITY && valueTypeValue != MTYPE
+        if (expected == ENTITY && valueTypeValue != CLS
                 && valueTypeValue != ENTITY) {
             //Every RESOLVE value is in Entity.  The only things we could get
             //passed that are "special" and not "RESOLVE values" are MType and
             //Entity itself
             result = getTrueVarExp();
         }
-        else if (valueTypeValue == MTYPE || valueTypeValue == ENTITY) {
+        else if (valueTypeValue == CLS || valueTypeValue == ENTITY) {
             //MType and Entity aren't in anything
             throw TypeMismatchException.INSTANCE;
         }

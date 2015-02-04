@@ -148,7 +148,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         mySymbolTable = (MathSymbolTableBuilder) table;
         myTypeGraph = mySymbolTable.getTypeGraph();
         BOOLEAN = myTypeGraph.BOOLEAN;
-        MTYPE = myTypeGraph.MTYPE;
+        MTYPE = myTypeGraph.CLS;
 
         // Current items
         myConventionExp = null;

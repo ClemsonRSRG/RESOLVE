@@ -266,7 +266,7 @@ public class Utilities {
      * and its initialization ensures clause.</p>
      *
      * @param var The declared variable.
-     * @param mType MTYPE type.
+     * @param mType CLS type.
      * @param booleanType Mathematical boolean type.
      *
      * @return The new <code>DotExp</code>.

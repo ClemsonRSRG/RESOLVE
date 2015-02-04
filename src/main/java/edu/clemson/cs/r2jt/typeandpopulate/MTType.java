@@ -15,11 +15,6 @@ package edu.clemson.cs.r2jt.typeandpopulate;
 import java.util.List;
 import java.util.Map;
 
-import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.data.ModuleID;
-import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.type.ConcType;
 import edu.clemson.cs.r2jt.type.FormalType;
 import edu.clemson.cs.r2jt.type.NewMathType;
@@ -276,7 +271,7 @@ public abstract class MTType {
         //       of type Set someplace.  That's not currently available, so for
         //       the moment we say that all types are of type MType, the parent
         //       type of all types.
-        return myTypeGraph.MTYPE;
+        return myTypeGraph.CLS;
     }
 
     /**

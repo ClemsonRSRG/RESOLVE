@@ -52,8 +52,8 @@ public class HardCoded {
             v.setName(ntv);
             ScopeBuilder s = b.startModuleScope(module);
 
-            s.addBinding("D1", Quantification.UNIVERSAL, v, g.MTYPE);
-            s.addBinding("R1", Quantification.UNIVERSAL, v, g.MTYPE);
+            s.addBinding("D1", Quantification.UNIVERSAL, v, g.CLS);
+            s.addBinding("R1", Quantification.UNIVERSAL, v, g.CLS);
 
             s.addBinding("D2", Quantification.UNIVERSAL, v,
                     new MTPowertypeApplication(g, new MTNamed(g, "D1")));
@@ -89,17 +89,20 @@ public class HardCoded {
         v.setName(new PosSymbol(null, Symbol.symbol("native")));
 
         try {
-            b.addBinding("Entity", v, g.MTYPE, g.ENTITY);
-            b.addBinding("MType", v, g.MTYPE, g.MTYPE);
+            b.addBinding("Entity", v, g.CLS, g.ENTITY);
+            b.addBinding("MType", v, g.CLS, g.CLS);
+            b.addBinding("Cls", v, g.CLS, g.CLS);
+
 
             b.addBinding("Instance_Of", v, new MTFunction(g, g.BOOLEAN,
-                    g.MTYPE, g.ENTITY));
+                    g.CLS, g.ENTITY));
 
-            b.addBinding("SSet", v, g.MTYPE, g.SET);
-            b.addBinding("B", v, g.MTYPE, g.BOOLEAN);
+            b.addBinding("SSet", v, g.CLS, g.SET);
+            b.addBinding("B", v, g.CLS, g.BOOLEAN);
 
-            b.addBinding("Empty_Set", v, g.MTYPE, g.EMPTY_SET);
+            b.addBinding("Empty_Set", v, g.CLS, g.EMPTY_SET);
             b.addBinding("Powerset", v, g.POWERTYPE);
+            b.addBinding("Powerclass", v, g.POWERCLASS);
             b.addBinding("true", v, g.BOOLEAN);
             b.addBinding("false", v, g.BOOLEAN);
             b.addBinding("union", v, g.UNION);
@@ -116,7 +119,7 @@ public class HardCoded {
             b.addBinding("or", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
                     g.BOOLEAN));
 
-            b.addBinding("Z", v, g.MTYPE, g.Z);
+            b.addBinding("Z", v, g.CLS, g.Z);
             b.addBinding("-", v, new MTFunction(g, g.Z, g.Z));
         }
         catch (DuplicateSymbolException dse) {
