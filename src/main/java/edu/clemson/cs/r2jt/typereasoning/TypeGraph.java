@@ -45,12 +45,10 @@ import java.util.*;
 public class TypeGraph {
 
     /**
-     * <p>
-     * A set of non-thread-safe resources to be used during general type
+     * <p>A set of non-thread-safe resources to be used during general type
      * reasoning. This really doesn't belong here, but anything that's reasoning
      * about types should already have access to a type graph, and only one type
-     * graph is created per thread, so this is a convenient place to put it.
-     * </p>
+     * graph is created per thread, so this is a convenient place to put it.</p>
      */
     public final PerThreadReasoningResources threadResources =
             new PerThreadReasoningResources();
@@ -70,8 +68,8 @@ public class TypeGraph {
     public final MTProper R = new MTProper(this, CLS, false, "R");
     public final MTProper ATOM = new MTProper(this, CLS, false, "Atom");
     public final MTProper VOID = new MTProper(this, CLS, false, "Void");
-    public final MTProper EMPTY_SET = new MTProper(this, CLS, false,
-            "Empty_Set");
+    public final MTProper EMPTY_SET =
+            new MTProper(this, CLS, false, "Empty_Set");
 
     private final static FunctionApplicationFactory POWERTYPE_APPLICATION =
             new PowertypeApplicationFactory();
@@ -84,21 +82,22 @@ public class TypeGraph {
     private final static FunctionApplicationFactory CARTESIAN_PRODUCT_APPLICATION =
             new CartesianProductApplicationFactory();
 
-    public final MTFunction POWERTYPE = new MTFunction(this, true,
-            POWERTYPE_APPLICATION, CLS, CLS);
-    public final MTFunction POWERCLASS = new MTFunction(this, true,
-            POWERTYPE_APPLICATION, CLS, CLS);
-    public final MTFunction UNION = new MTFunction(this, UNION_APPLICATION,
-            CLS, CLS, CLS);
-    public final MTFunction INTERSECT = new MTFunction(this,
-            INTERSECT_APPLICATION, CLS, CLS, CLS);
-    public final MTFunction FUNCTION = new MTFunction(this,
-            FUNCTION_CONSTRUCTOR_APPLICATION, CLS, CLS, CLS);
-    public final MTFunction CROSS = new MTFunction(this,
-            CARTESIAN_PRODUCT_APPLICATION, CLS, CLS, CLS);
+    public final MTFunction POWERTYPE =
+            new MTFunction(this, true, POWERTYPE_APPLICATION, CLS, CLS);
+    public final MTFunction POWERCLASS =
+            new MTFunction(this, true, POWERTYPE_APPLICATION, CLS, CLS);
+    public final MTFunction UNION =
+            new MTFunction(this, UNION_APPLICATION, CLS, CLS, CLS);
+    public final MTFunction INTERSECT =
+            new MTFunction(this, INTERSECT_APPLICATION, CLS, CLS, CLS);
+    public final MTFunction FUNCTION =
+            new MTFunction(this, FUNCTION_CONSTRUCTOR_APPLICATION, CLS, CLS,
+                    CLS);
+    public final MTFunction CROSS =
+            new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, CLS, CLS, CLS);
 
-    public final MTFunction AND = new MTFunction(this, BOOLEAN, BOOLEAN,
-            BOOLEAN);
+    public final MTFunction AND =
+            new MTFunction(this, BOOLEAN, BOOLEAN, BOOLEAN);
     public final MTFunction NOT = new MTFunction(this, BOOLEAN, BOOLEAN);
 
     private final HashMap<MTType, TypeNode> myTypeNodes;
@@ -113,8 +112,8 @@ public class TypeGraph {
         this.myTypeNodes = new HashMap<MTType, TypeNode>();
     }
 
-    private Map<MTType, Map<String, MTType>>
-            getSyntacticSubtypesWithRelationships(MTType query) {
+    private Map<MTType, Map<String, MTType>> getSyntacticSubtypesWithRelationships(
+            MTType query) {
 
         Map<MTType, Map<String, MTType>> result =
                 new HashMap<MTType, Map<String, MTType>>();
@@ -330,8 +329,8 @@ public class TypeGraph {
 
                 DummyExp memberOfValue = new DummyExp(value);
 
-                if (isKnownToBeIn(memberOfValue,
-                        expectedAsPowertypeApplication.getArgument(0))) {
+                if (isKnownToBeIn(memberOfValue, expectedAsPowertypeApplication
+                        .getArgument(0))) {
 
                     result = getTrueVarExp();
                 }
@@ -671,11 +670,9 @@ public class TypeGraph {
         for (Map.Entry<String, String> entry : environmentalToExemplar
                 .entrySet()) {
 
-            replacements.put(
-                    new VarExp(null, null, new PosSymbol(null, Symbol
-                            .symbol(entry.getKey()))),
-                    new VarExp(null, null, new PosSymbol(null, Symbol
-                            .symbol(entry.getValue()))));
+            replacements.put(new VarExp(null, null, new PosSymbol(null, Symbol
+                    .symbol(entry.getKey()))), new VarExp(null, null,
+                    new PosSymbol(null, Symbol.symbol(entry.getValue()))));
         }
         bindingExpression =
                 safeVariableNameUpdate(bindingExpression, replacements,
@@ -887,8 +884,7 @@ public class TypeGraph {
         List<Exp> children = result.getSubExpressions();
         int childCount = children.size();
         for (int childIndex = 0; childIndex < childCount; childIndex++) {
-            result.setSubExpression(
-                    childIndex,
+            result.setSubExpression(childIndex,
                     getCopyWithVariableNamesChanged(children.get(childIndex),
                             substitutions));
         }
@@ -923,10 +919,9 @@ public class TypeGraph {
         List<Exp> children = result.getSubExpressions();
         int childCount = children.size();
         for (int childIndex = 0; childIndex < childCount; childIndex++) {
-            result.setSubExpression(
-                    childIndex,
-                    TypeGraph.getCopyWithVariablesSubstituted(
-                            children.get(childIndex), substitutions));
+            result.setSubExpression(childIndex, TypeGraph
+                    .getCopyWithVariablesSubstituted(children.get(childIndex),
+                            substitutions));
         }
 
         return result;
@@ -1000,8 +995,8 @@ public class TypeGraph {
         t.accept(canonicalizer);
 
         return new CanonicalizationResult(canonicalizer.getFinalExpression(),
-                canonicalizer.getTypePredicates(),
-                canonicalizer.getCanonicalToEnvironmentOriginalMapping());
+                canonicalizer.getTypePredicates(), canonicalizer
+                        .getCanonicalToEnvironmentOriginalMapping());
     }
 
     public VarExp getNothingExp() {

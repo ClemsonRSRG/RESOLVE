@@ -82,9 +82,7 @@ public class HardCoded {
     }
 
     /**
-     * <p>
-     * This method establishes all built-in symbols of the symbol table.
-     * </p>
+     * <p>This method establishes all built-in symbols of the symbol table.</p>
      */
     public static void addBuiltInSymbols(TypeGraph g, ScopeBuilder b) {
         VarExp v = new VarExp();
@@ -129,8 +127,7 @@ public class HardCoded {
         }
     }
 
-    public static MTType
-            getMetaFieldType(TypeGraph g, Exp e, String metaSegment) {
+    public static MTType getMetaFieldType(TypeGraph g, Exp e, String metaSegment) {
 
         MTType result = null;
 
