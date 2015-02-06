@@ -1,3 +1,15 @@
+/**
+ * MathSymbolAST.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
 import edu.clemson.cs.r2jt.absynnew.AbstractNodeBuilder;
@@ -6,10 +18,7 @@ import edu.clemson.cs.r2jt.parsing.ResolveLexer;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>A <code>MathSymbolAST</code> represents a reference to a named element such
@@ -31,7 +40,6 @@ public class MathSymbolAST extends ExprAST {
         myArguments.addAll(builder.arguments);
         myLiteralFlag = builder.literal;
         myIncomingFlag = builder.incoming;
-
         //Todo: Add quantification.
     }
 
@@ -52,8 +60,106 @@ public class MathSymbolAST extends ExprAST {
     }
 
     @Override
+    public List<ExprAST> getSubExpressions() {
+        return myArguments;
+    }
+
+    @Override
+    public void setSubExpression(int index, ExprAST e) {
+        myArguments.set(index, e);
+    }
+
+    @Override
     public boolean isLiteral() {
         return myLiteralFlag;
+    }
+
+    @Override
+    protected ExprAST substituteChildren(Map<ExprAST, ExprAST> substitutions) {
+        List<ExprAST> newArguments = new ArrayList<ExprAST>();
+
+        for (ExprAST e : myArguments) {
+            newArguments.add(substitute(e, substitutions));
+        }
+
+        MathSymbolAST newName =
+                new MathSymbolExprBuilder(getStart(), getStop(), myName, null)
+                        .arguments(myArguments).literal(myLiteralFlag)
+                        //.quantification(myQuantification)
+                        .incoming(myIncomingFlag).build();
+
+        if (substitutions.containsKey(newName)) {
+            //Note that there's no particular mathematical justification why
+            //we can only replace a function with a different function NAME (as
+            //opposed to a function-valued expression), but we have no way of
+            //representing such a thing.  It doesn't tend to come up, but if it
+            //ever did, this would throw a ClassCastException.
+            newName =
+                    new MathSymbolExprBuilder(getStart(), getStop(),
+                            ((MathSymbolAST) substitutions.get(newName))
+                                    .getName(), null).arguments(myArguments)
+                            .literal(myLiteralFlag)
+                            //.quantification(myQuantification)
+                            .incoming(myIncomingFlag).build();
+        }
+
+        MathSymbolAST result =
+                new MathSymbolExprBuilder(getStart(), getStop(), newName
+                        .getName(), null).arguments(myArguments).literal(
+                        myLiteralFlag)
+                //.quantification(myQuantification)
+                        .incoming(myIncomingFlag).build();
+
+        result.setMathType(myMathType);
+        result.setMathTypeValue(myMathTypeValue);
+        return result;
+    }
+
+    @Override
+    public boolean equivalent(ExprAST e) {
+        boolean result = (e instanceof MathSymbolAST);
+
+        if (result) {
+            MathSymbolAST eAsSymbol = (MathSymbolAST) e;
+
+            result =
+                    myName.equals(((MathSymbolAST) e).myName)
+                            && argumentsEquivalent(myArguments,
+                                    eAsSymbol.myArguments);
+            //  && myQuantification == eAsSymbol.myQuantification;
+        }
+        return result;
+    }
+
+    private boolean argumentsEquivalent(List<ExprAST> original,
+            List<ExprAST> compare) {
+        boolean result = true;
+
+        Iterator<ExprAST> args1 = original.iterator();
+        Iterator<ExprAST> args2 = compare.iterator();
+
+        while (result && args1.hasNext() && args2.hasNext()) {
+            result = args1.next().equivalent(args2.next());
+        }
+        return result;
+    }
+
+    @Override
+    public ExprAST copy() {
+
+        Token newName = new ResolveToken(myName.getText());
+        List<ExprAST> newArgs = new ArrayList<ExprAST>(myArguments);
+
+        MathSymbolAST result =
+                new MathSymbolExprBuilder(getStart(), getStop(), newName, null)
+                        .arguments(newArgs)
+                        //.quantification(myQuantification)
+                        .literal(myLiteralFlag).incoming(myIncomingFlag)
+                        .build();
+
+        result.setMathType(myMathType);
+        result.setMathTypeValue(myMathTypeValue);
+        return result;
     }
 
     /**
@@ -64,7 +170,7 @@ public class MathSymbolAST extends ExprAST {
      */
     public static class MathSymbolExprBuilder
             extends
-            AbstractNodeBuilder<MathSymbolAST> {
+                AbstractNodeBuilder<MathSymbolAST> {
 
         protected final Token name, lprint, rprint;
 
@@ -92,8 +198,9 @@ public class MathSymbolAST extends ExprAST {
             }
             else {
                 this.name =
-                        new ResolveToken(ResolveLexer.Identifier,
-                                lprint.getText() + "..." + rprint.getText());
+                        new ResolveToken(ResolveLexer.Identifier, lprint
+                                .getText()
+                                + "..." + rprint.getText());
             }
             this.lprint = lprint;
             this.rprint = rprint;

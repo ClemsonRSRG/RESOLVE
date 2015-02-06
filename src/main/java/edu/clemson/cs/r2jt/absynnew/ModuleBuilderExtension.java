@@ -1,3 +1,15 @@
+/**
+ * ModuleBuilderExtension.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.absynnew;
 
 import edu.clemson.cs.r2jt.absynnew.decl.ModuleParameterAST;
@@ -18,7 +30,7 @@ import java.util.List;
  */
 public abstract class ModuleBuilderExtension<E extends ModuleBuilderExtension<E>>
         extends
-        AbstractNodeBuilder<ModuleAST> {
+            AbstractNodeBuilder<ModuleAST> {
 
     public ModuleBlockAST block;
     public ExprAST requires = null;

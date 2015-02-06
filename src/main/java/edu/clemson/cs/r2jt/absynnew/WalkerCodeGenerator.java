@@ -1,3 +1,15 @@
+/**
+ * WalkerCodeGenerator.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.absynnew;
 
 import org.reflections.Reflections;
@@ -60,10 +72,10 @@ public class WalkerCodeGenerator {
         for (Class<?> e : absynClasses) {
 
             ST defaultImplementations =
-                    GROUP.getInstanceOf("walkerMethods")
-                            .add("name", e.getSimpleName())
-                            .add("qualName", e.getCanonicalName())
-                            .add("isMember", e.isMemberClass());
+                    GROUP.getInstanceOf("walkerMethods").add("name",
+                            e.getSimpleName()).add("qualName",
+                            e.getCanonicalName()).add("isMember",
+                            e.isMemberClass());
 
             walkerClass.add("methods", defaultImplementations);
         }

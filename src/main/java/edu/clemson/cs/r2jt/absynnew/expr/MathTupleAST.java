@@ -1,3 +1,15 @@
+/**
+ * MathTupleAST.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
 import org.antlr.v4.runtime.Token;
@@ -115,8 +127,7 @@ public class MathTupleAST extends ExprAST {
     }
 
     @Override
-    public ExprAST substituteChildren(
-            Map<ExprAST, ExprAST> substitutions) {
+    public ExprAST substituteChildren(Map<ExprAST, ExprAST> substitutions) {
         List<ExprAST> newFields = new ArrayList<ExprAST>();
 
         for (ExprAST f : myFields) {
@@ -136,8 +147,7 @@ public class MathTupleAST extends ExprAST {
         for (ExprAST e : myFields) {
             newFields.add(copy(e));
         }
-        ExprAST result =
-                new MathTupleAST(getStart(), getStop(), newFields);
+        ExprAST result = new MathTupleAST(getStart(), getStop(), newFields);
 
         result.setMathType(getMathType());
         result.setMathTypeValue(getMathTypeValue());

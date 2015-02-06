@@ -1,3 +1,15 @@
+/**
+ * TextRenderingVisitor.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.absynnew;
 
 import edu.clemson.cs.r2jt.absynnew.decl.*;
@@ -38,32 +50,27 @@ public class TextRenderingVisitor extends TreeWalkerVisitor {
 
     private final Map<ResolveAST, ST> myVisited = new HashMap<ResolveAST, ST>();
 
-    private final STGroup myTemplates = new STGroupFile(
-            "edu/clemson/cs/r2jt/templates/Resolve.stg");
+    private final STGroup myTemplates =
+            new STGroupFile("edu/clemson/cs/r2jt/templates/Resolve.stg");
 
     @Override
     public void postFacilityAST(ModuleAST.FacilityAST e) {
-        setST(e,
-                getTemplate(e).add("block", getST(e.getBodyBlock()))
-                        .add("uses", getST(e.getImportBlock()))
-                        .add("facility", e)
-                        .add("requires", getST(e.getRequires())));
+        setST(e, getTemplate(e).add("block", getST(e.getBodyBlock())).add(
+                "uses", getST(e.getImportBlock())).add("facility", e).add(
+                "requires", getST(e.getRequires())));
     }
 
     @Override
     public void postImportBlockAST(ImportBlockAST e) {
-        setST(e,
-                getTemplate(e).add("explicits",
-                        e.getImportsOfType(ImportBlockAST.ImportType.EXPLICIT)));
+        setST(e, getTemplate(e).add("explicits",
+                e.getImportsOfType(ImportBlockAST.ImportType.EXPLICIT)));
     }
 
     @Override
     public void postConceptAST(ModuleAST.ConceptAST e) {
-        setST(e,
-                getTemplate(e).add("parameters", collect(e.getParameters()))
-                        .add("uses", getST(e.getImportBlock()))
-                        .add("concept", e)
-                        .add("block", getST(e.getBodyBlock())));
+        setST(e, getTemplate(e).add("parameters", collect(e.getParameters()))
+                .add("uses", getST(e.getImportBlock())).add("concept", e).add(
+                        "block", getST(e.getBodyBlock())));
     }
 
     @Override
@@ -75,9 +82,8 @@ public class TextRenderingVisitor extends TreeWalkerVisitor {
     public void postOperationSigAST(OperationSigAST e) {
         ST operation =
                 getTemplate(e).add("parameters", collect(e.getParameters()))
-                        .add("requires", getST(e.getRequires()))
-                        .add("ensures", getST(e.getEnsures()))
-                        .add("operation", e);
+                        .add("requires", getST(e.getRequires())).add("ensures",
+                                getST(e.getEnsures())).add("operation", e);
         setST(e, operation);
     }
 
@@ -86,8 +92,8 @@ public class TextRenderingVisitor extends TreeWalkerVisitor {
         ST operation =
                 getTemplate(e).add("parameters", collect(e.getParameters()))
                         .add("requires", e.getRequires()).add("operation", e)
-                        .add("ensures", e.getEnsures())
-                        .add("variables", e.getVariables());
+                        .add("ensures", e.getEnsures()).add("variables",
+                                e.getVariables());
         setST(e, operation);
     }
 
@@ -112,26 +118,23 @@ public class TextRenderingVisitor extends TreeWalkerVisitor {
     @Override
     public void postTypeModelAST(TypeModelAST e) {
         ST family =
-                getTemplate(e).add("model", getST(e.getModel()))
-                        .add("constraint", getST(e.getConstraint()))
-                        .add("init", getST(e.getInitialization()))
-                        .add("final", getST(e.getFinalization()))
-                        .add("type", e);
+                getTemplate(e).add("model", getST(e.getModel())).add(
+                        "constraint", getST(e.getConstraint())).add("init",
+                        getST(e.getInitialization())).add("final",
+                        getST(e.getFinalization())).add("type", e);
         setST(e, family);
     }
 
     @Override
     public void postTypeInitAST(InitFinalAST.TypeInitAST e) {
-        setST(e,
-                getTemplate(e).add("requires", getST(e.getRequires())).add(
-                        "ensures", getST(e.getEnsures())));
+        setST(e, getTemplate(e).add("requires", getST(e.getRequires())).add(
+                "ensures", getST(e.getEnsures())));
     }
 
     @Override
     public void postTypeFinalAST(InitFinalAST.TypeFinalAST e) {
-        setST(e,
-                getTemplate(e).add("requires", getST(e.getRequires())).add(
-                        "ensures", getST(e.getEnsures())));
+        setST(e, getTemplate(e).add("requires", getST(e.getRequires())).add(
+                "ensures", getST(e.getEnsures())));
     }
 
     @Override
@@ -212,8 +215,7 @@ public class TextRenderingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public void
-            postProgCharacterRefAST(ProgLiteralRefAST.ProgCharacterRefAST e) {
+    public void postProgCharacterRefAST(ProgLiteralRefAST.ProgCharacterRefAST e) {
         setST(e, getTemplate(e).add("characterRef", e));
     }
 

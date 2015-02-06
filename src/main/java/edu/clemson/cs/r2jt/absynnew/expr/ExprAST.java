@@ -1,3 +1,15 @@
+/**
+ * ExprAST.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
 import edu.clemson.cs.r2jt.absynnew.ResolveAST;
@@ -15,7 +27,7 @@ public abstract class ExprAST extends ResolveAST {
         super(start, stop);
     }
 
-    public abstract List<ExprAST> getSubExpressions();
+    public abstract List<? extends ExprAST> getSubExpressions();
 
     public abstract void setSubExpression(int index, ExprAST e);
 

@@ -1,3 +1,15 @@
+/**
+ * ModuleBlockAST.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.absynnew;
 
 import org.antlr.v4.runtime.Token;
@@ -13,8 +25,8 @@ import java.util.*;
  */
 public class ModuleBlockAST extends ResolveAST {
 
-    public static final ModuleBlockAST EMPTY_BLOCK = new ModuleBlockBuilder(
-            null, null).build();
+    public static final ModuleBlockAST EMPTY_BLOCK =
+            new ModuleBlockBuilder(null, null).build();
 
     /**
      * <p>This is the key field we need the walker to traverse; it contains all
@@ -60,7 +72,7 @@ public class ModuleBlockAST extends ResolveAST {
      */
     public static class ModuleBlockBuilder
             extends
-            AbstractNodeBuilder<ModuleBlockAST> {
+                AbstractNodeBuilder<ModuleBlockAST> {
 
         protected List<ResolveAST> elements = new ArrayList<ResolveAST>();
 

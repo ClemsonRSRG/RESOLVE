@@ -1,9 +1,22 @@
+/**
+ * ProgExprAST.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import org.antlr.v4.runtime.Token;
 
 public abstract class ProgExprAST extends ExprAST {
+
     private PTType myProgramType;
 
     public ProgExprAST(Token start, Token stop) {

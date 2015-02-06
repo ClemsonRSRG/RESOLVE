@@ -1,3 +1,15 @@
+/**
+ * ASTBuildingVisitor.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.absynnew;
 
 import edu.clemson.cs.r2jt.absynnew.ImportBlockAST.ImportCollectionBuilder;
@@ -61,7 +73,7 @@ public class ASTBuildingVisitor<T extends ResolveAST>
     public T build() {
         ResolveAST result = get(ResolveAST.class, myRootTree);
         if (result == null) {
-            throw new IllegalStateException("builder resulting tree is null");
+            throw new IllegalStateException("ast builder result-tree is null");
         }
         return (T) result;
     }
@@ -102,12 +114,11 @@ public class ASTBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void
-            exitConceptItems(@NotNull ResolveParser.ConceptItemsContext ctx) {
+    public void exitConceptItems(@NotNull ResolveParser.ConceptItemsContext ctx) {
         ModuleBlockAST.ModuleBlockBuilder blockBuilder =
                 new ModuleBlockBuilder(ctx.getStart(), ctx.getStop())
-                        .generalElements(getAll(ResolveAST.class,
-                                ctx.conceptItem()));
+                        .generalElements(getAll(ResolveAST.class, ctx
+                                .conceptItem()));
         put(ctx, blockBuilder.build());
     }
 
@@ -157,12 +168,12 @@ public class ASTBuildingVisitor<T extends ResolveAST>
             @NotNull ResolveParser.OperationDeclContext ctx) {
 
         OperationSigAST.OperationDeclBuilder builder =
-                new OperationSigAST.OperationDeclBuilder(ctx)
-                        .type(get(NamedTypeAST.class, ctx.type()))
-                        .requires(get(ExprAST.class, ctx.requiresClause()))
-                        .ensures(get(ExprAST.class, ctx.ensuresClause()))
-                        .params(getAll(ParameterAST.class, ctx
-                                .operationParameterList().parameterDecl()));
+                new OperationSigAST.OperationDeclBuilder(ctx).type(
+                        get(NamedTypeAST.class, ctx.type())).requires(
+                        get(ExprAST.class, ctx.requiresClause())).ensures(
+                        get(ExprAST.class, ctx.ensuresClause())).params(
+                        getAll(ParameterAST.class, ctx.operationParameterList()
+                                .parameterDecl()));
 
         put(ctx, builder.build());
     }
@@ -201,10 +212,9 @@ public class ASTBuildingVisitor<T extends ResolveAST>
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
         OperationImplBuilder builder =
                 new OperationImplBuilder(ctx.getStart(), ctx.getStop(),
-                        ctx.name)
-                        .returnType(get(NamedTypeAST.class, ctx.type()))
-                        .recursive(ctx.recursive != null)
-                        .implementsContract(true)
+                        ctx.name).returnType(
+                        get(NamedTypeAST.class, ctx.type())).recursive(
+                        ctx.recursive != null).implementsContract(true)
                         .parameters(
                                 getAll(ParameterAST.class, ctx
                                         .operationParameterList()
@@ -235,10 +245,10 @@ public class ASTBuildingVisitor<T extends ResolveAST>
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
 
         TypeDeclBuilder builder =
-                new TypeDeclBuilder(ctx)
-                        .model(get(MathTypeAST.class, ctx.mathTypeExp()))
-                        .init(get(TypeInitAST.class, ctx.specTypeInit()))
-                        .finalize(get(TypeFinalAST.class, ctx.specTypeFinal()))
+                new TypeDeclBuilder(ctx).model(
+                        get(MathTypeAST.class, ctx.mathTypeExp())).init(
+                        get(TypeInitAST.class, ctx.specTypeInit())).finalize(
+                        get(TypeFinalAST.class, ctx.specTypeFinal()))
                         .constraint(get(ExprAST.class, ctx.constraintClause()));
 
         put(ctx, builder.build());
@@ -337,8 +347,7 @@ public class ASTBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void
-            exitSpecTypeInit(@NotNull ResolveParser.SpecTypeInitContext ctx) {
+    public void exitSpecTypeInit(@NotNull ResolveParser.SpecTypeInitContext ctx) {
         TypeInitAST initialization =
                 new TypeInitAST(ctx.getStart(), ctx.getStop(), get(
                         ExprAST.class, ctx.requiresClause()), get(
@@ -390,12 +399,11 @@ public class ASTBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void
-            exitProgParamExp(@NotNull ResolveParser.ProgParamExpContext ctx) {
+    public void exitProgParamExp(@NotNull ResolveParser.ProgParamExpContext ctx) {
         ProgOperationRefAST param =
                 new ProgOperationRefAST(ctx.getStart(), ctx.getStop(),
-                        ctx.qualifier, ctx.name, getAll(ProgExprAST.class,
-                                ctx.progExp()));
+                        ctx.qualifier, ctx.name, getAll(ProgExprAST.class, ctx
+                                .progExp()));
         put(ctx, param);
     }
 
@@ -407,8 +415,7 @@ public class ASTBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void
-            exitProgNamedExp(@NotNull ResolveParser.ProgNamedExpContext ctx) {
+    public void exitProgNamedExp(@NotNull ResolveParser.ProgNamedExpContext ctx) {
         put(ctx, get(ProgExprAST.class, ctx.progNamedVarExp()));
     }
 
@@ -422,19 +429,15 @@ public class ASTBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitProgIntegerExp(
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
-        put(ctx,
-                new ProgLiteralRefAST.ProgIntegerRefAST(ctx.getStart(), ctx
-                        .getStop(), Integer.valueOf(ctx.IntegerLiteral()
-                        .getText())));
+        put(ctx, new ProgLiteralRefAST.ProgIntegerRefAST(ctx.getStart(), ctx
+                .getStop(), Integer.valueOf(ctx.IntegerLiteral().getText())));
     }
 
     @Override
     public void exitProgStringExp(
             @NotNull ResolveParser.ProgStringExpContext ctx) {
-        put(ctx,
-                new ProgLiteralRefAST.ProgStringRefAST(ctx.getStart(), ctx
-                        .getStop(), String.valueOf(ctx.StringLiteral()
-                        .getText())));
+        put(ctx, new ProgLiteralRefAST.ProgStringRefAST(ctx.getStart(), ctx
+                .getStop(), String.valueOf(ctx.StringLiteral().getText())));
     }
 
     @Override
@@ -461,8 +464,7 @@ public class ASTBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void
-            exitMathPrimeExp(@NotNull ResolveParser.MathPrimeExpContext ctx) {
+    public void exitMathPrimeExp(@NotNull ResolveParser.MathPrimeExpContext ctx) {
         put(ctx, get(ExprAST.class, ctx.mathPrimaryExp()));
     }
 
@@ -481,17 +483,15 @@ public class ASTBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitMathBooleanExp(
             @NotNull ResolveParser.MathBooleanExpContext ctx) {
-        put(ctx,
-                buildFunctionApplication(ctx.BooleanLiteral(), ctx).literal(
-                        true).build());
+        put(ctx, buildFunctionApplication(ctx.BooleanLiteral(), ctx).literal(
+                true).build());
     }
 
     @Override
     public void exitMathIntegerExp(
             @NotNull ResolveParser.MathIntegerExpContext ctx) {
-        put(ctx,
-                buildFunctionApplication(ctx.IntegerLiteral(), ctx).literal(
-                        true).build());
+        put(ctx, buildFunctionApplication(ctx.IntegerLiteral(), ctx).literal(
+                true).build());
     }
 
     @Override
@@ -511,23 +511,18 @@ public class ASTBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitMathVariableExp(
             @NotNull ResolveParser.MathVariableExpContext ctx) {
-        put(ctx,
-                buildFunctionApplication(ctx.name, ctx).incoming(
-                        ctx.getParent().getStart().getText().equals("#"))
-                        .build());
+        put(ctx, buildFunctionApplication(ctx.name, ctx).incoming(
+                ctx.getParent().getStart().getText().equals("#")).build());
     }
 
     @Override
-    public void
-            exitMathInfixExp(@NotNull ResolveParser.MathInfixExpContext ctx) {
-        put(ctx,
-                buildFunctionApplication(ctx.op, ctx, ctx.mathExp(0),
-                        ctx.mathExp(1)).build());
+    public void exitMathInfixExp(@NotNull ResolveParser.MathInfixExpContext ctx) {
+        put(ctx, buildFunctionApplication(ctx.op, ctx, ctx.mathExp(0),
+                ctx.mathExp(1)).build());
     }
 
     @Override
-    public void
-            exitMathUnaryExp(@NotNull ResolveParser.MathUnaryExpContext ctx) {
+    public void exitMathUnaryExp(@NotNull ResolveParser.MathUnaryExpContext ctx) {
         put(ctx, buildFunctionApplication(ctx.op, ctx, ctx.mathExp()).build());
     }
 
@@ -570,11 +565,9 @@ public class ASTBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void
-            exitMathTupleExp(@NotNull ResolveParser.MathTupleExpContext ctx) {
-        put(ctx,
-                new MathTupleAST(ctx.getStart(), ctx.getStop(), getAll(
-                        ExprAST.class, ctx.mathExp())));
+    public void exitMathTupleExp(@NotNull ResolveParser.MathTupleExpContext ctx) {
+        put(ctx, new MathTupleAST(ctx.getStart(), ctx.getStop(), getAll(
+                ExprAST.class, ctx.mathExp())));
     }
 
     private void put(ParseTree parseTree, ResolveAST ast) {
