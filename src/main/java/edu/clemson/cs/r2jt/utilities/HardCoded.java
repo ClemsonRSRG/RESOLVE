@@ -96,7 +96,7 @@ public class HardCoded {
             b.addBinding("Instance_Of", v, new MTFunction(g, g.BOOLEAN, g.CLS,
                     g.ENTITY));
 
-            b.addBinding("SSet", v, g.CLS, g.SET);
+            b.addBinding("SSet", v, g.CLS, g.CLS);
             b.addBinding("B", v, g.CLS, g.BOOLEAN);
 
             b.addBinding("Empty_Set", v, g.CLS, g.EMPTY_SET);
