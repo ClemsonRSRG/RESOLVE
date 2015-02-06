@@ -20,7 +20,6 @@ import java.util.StringTokenizer;
 
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.scope.*;
 import edu.clemson.cs.r2jt.entry.*;
 import edu.clemson.cs.r2jt.type.*;
@@ -30,7 +29,6 @@ import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.location.*;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.compilereport.CompileReport;
@@ -209,7 +207,7 @@ public class Verifier extends ResolveConceptualVisitor {
         myRealSymbolTable = (MathSymbolTableBuilder) realSymbolTable;
         myTypeGraph = myRealSymbolTable.getTypeGraph();
         BOOLEAN = myTypeGraph.BOOLEAN;
-        MTYPE = myTypeGraph.MTYPE;
+        MTYPE = myTypeGraph.CLS;
         Z = myTypeGraph.Z;
 
         myInstanceEnvironment = instanceEnvironment;

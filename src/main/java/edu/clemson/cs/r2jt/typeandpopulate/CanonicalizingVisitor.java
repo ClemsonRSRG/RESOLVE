@@ -85,11 +85,11 @@ public class CanonicalizingVisitor extends MutatingVisitor {
                     new HashMap<String, MTType>();
 
             for (int i = 1; i < myQuantifiedVariableCount; i++) {
-                quantifiedVariables.put("c" + i, myTypeGraph.MTYPE);
+                quantifiedVariables.put("c" + i, myTypeGraph.CLS);
             }
 
             if (quantifiedVariables.isEmpty()) {
-                quantifiedVariables.put("", myTypeGraph.MTYPE);
+                quantifiedVariables.put("", myTypeGraph.CLS);
             }
 
             myFinalExpression =

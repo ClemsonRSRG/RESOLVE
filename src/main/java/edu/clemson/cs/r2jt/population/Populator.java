@@ -22,7 +22,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
 import edu.clemson.cs.r2jt.typeandpopulate.MTPowertypeApplication;
-import edu.clemson.cs.r2jt.typeandpopulate.MTProper;
 import edu.clemson.cs.r2jt.typeandpopulate.MTSetRestriction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
@@ -391,8 +390,8 @@ public class Populator extends TreeWalkerVisitor {
             myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
                     param, ParameterMode.TYPE, new PTElement(myTypeGraph));
 
-            myGenericTypes.put(paramName, myTypeGraph.MTYPE);
-            param.setMathType(myTypeGraph.MTYPE);
+            myGenericTypes.put(paramName, myTypeGraph.CLS);
+            param.setMathType(myTypeGraph.CLS);
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(param.getName().getName(), param.getName()
@@ -514,7 +513,7 @@ public class Populator extends TreeWalkerVisitor {
                     .getMathTypeValue()));
         }
 
-        e.setMathType(myTypeGraph.MTYPE);
+        e.setMathType(myTypeGraph.CLS);
         e.setMathTypeValue(new MTCartesian(myTypeGraph, fieldTypes));
 
         myTypeValueDepth--;
@@ -986,7 +985,7 @@ public class Populator extends TreeWalkerVisitor {
         PTRecord record = new PTRecord(myTypeGraph, fieldMap);
 
         ty.setProgramTypeValue(record);
-        ty.setMathType(myTypeGraph.MTYPE);
+        ty.setMathType(myTypeGraph.CLS);
         ty.setMathTypeValue(record.toMath());
     }
 
@@ -1018,7 +1017,7 @@ public class Populator extends TreeWalkerVisitor {
                         tyQualifier.getName());
             }
             ty.setProgramTypeValue(type.getProgramType());
-            ty.setMathType(myTypeGraph.MTYPE);
+            ty.setMathType(myTypeGraph.CLS);
             ty.setMathTypeValue(type.getModelType());
 
         }
