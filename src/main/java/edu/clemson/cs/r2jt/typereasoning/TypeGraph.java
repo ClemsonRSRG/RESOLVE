@@ -92,11 +92,10 @@ public class TypeGraph {
     public final MTFunction INTERSECT =
             new MTFunction(this, INTERSECT_APPLICATION, CLS, CLS, CLS);
     public final MTFunction FUNCTION =
-            new MTFunction(this, FUNCTION_CONSTRUCTOR_APPLICATION, CLS,
-                    CLS, CLS);
-    public final MTFunction CROSS =
-            new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, CLS, CLS,
+            new MTFunction(this, FUNCTION_CONSTRUCTOR_APPLICATION, CLS, CLS,
                     CLS);
+    public final MTFunction CROSS =
+            new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, CLS, CLS, CLS);
 
     public final MTFunction AND =
             new MTFunction(this, BOOLEAN, BOOLEAN, BOOLEAN);
