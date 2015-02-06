@@ -1,5 +1,5 @@
 /**
- * ASTBuildingVisitor.java
+ * TreeBuildingVisitor.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group
@@ -50,7 +50,7 @@ import java.util.List;
  * <p>References to the completed, AST can be acquired through
  * calls to {@link #build()}.</p>
  */
-public class ASTBuildingVisitor<T extends ResolveAST>
+public class TreeBuildingVisitor<T extends ResolveAST>
         extends
             ResolveBaseListener implements Builder<T> {
 
@@ -65,7 +65,7 @@ public class ASTBuildingVisitor<T extends ResolveAST>
 
     private final ParseTree myRootTree;
 
-    public ASTBuildingVisitor(ParseTree tree) {
+    public TreeBuildingVisitor(ParseTree tree) {
         myRootTree = tree;
     }
 

@@ -65,7 +65,7 @@ public class ProgOperationRefAST extends ProgExprAST {
 
     @Override
     public void setSubExpression(int index, ExprAST e) {
-        myArguments.set(index, (ProgExprAST)e);
+        myArguments.set(index, (ProgExprAST) e);
     }
 
     @Override

@@ -165,7 +165,7 @@ public class MathSymbolAST extends ExprAST {
     /**
      * <p>A builder for {@link MathSymbolAST}s intended to ease construction of
      * math symbols needed on-the-fly in both
-     * {@link edu.clemson.cs.r2jt.absynnew.ASTBuildingVisitor} and
+     * {@link edu.clemson.cs.r2jt.absynnew.TreeBuildingVisitor} and
      * {@link edu.clemson.cs.r2jt.typereasoning.TypeGraph}.</p>
      */
     public static class MathSymbolExprBuilder
