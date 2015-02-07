@@ -24,8 +24,7 @@ import org.antlr.v4.runtime.Token;
  * users to abstractly model and specify their own types. Instances of this
  * class are permitted within the following modules:</p>
  *
- * {@link edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptAST} or
- * {@link edu.clemson.cs.r2jt.absyn.EnhancementModule}.
+ * {@link edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptAST} or .
  */
 public class TypeModelAST extends DeclAST {
 

@@ -38,8 +38,8 @@ public class ImportBlockAST extends ResolveAST {
     /**
      * <p>Retrieves a set of all imports except those of <code>type</code>.</p>
      * 
-     * @param type The
-     * @return
+     * @param type Any types we would like to filter/exclude.
+     * @return A set of {@link Token} filtered by <code>type</code>.
      */
     public Set<Token> getImportsExcluding(ImportType... type) {
         Set<Token> result = new HashSet<Token>();
@@ -121,7 +121,7 @@ public class ImportBlockAST extends ResolveAST {
         }
 
         private void addTokenSet(ImportType type,
-                Collection<? extends Token> newToks) {
+                                 Collection<? extends Token> newToks) {
             Set<Token> tokSet = usesItems.get(type);
             if (tokSet == null) {
                 tokSet = new HashSet<Token>();

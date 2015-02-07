@@ -22,8 +22,7 @@ import java.util.Map;
  * <p>This class represents a program literal such as a <code>String</code>,
  * <code>Character</code>, or <code>Integer</code>.</p>
  *
- * @param <T>
- * @author dtwelch <dtw.welch@gmail.com>
+ * @param <T> The type of the literal (Character, Integer, etc).
  */
 public class ProgLiteralRefAST<T> extends ProgExprAST {
 

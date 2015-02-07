@@ -175,9 +175,10 @@ public abstract class ExprAST extends ResolveAST {
 
     /**
      * <p>Shallow compare is too weak for many things, and {@link #equals} is
-     * too strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
+     * too strict. This method returns <code>true</code> <strong>iff</strong>
+     * this expression and the provided expression, <code>e</code>, are
+     * equivalent with respect to structure and all function and variable
+     * names.</p>
      *
      * @param e The expression to compare this one to.
      * @return True <strong>iff</strong> this expression and the provided

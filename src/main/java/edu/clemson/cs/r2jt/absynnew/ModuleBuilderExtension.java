@@ -22,11 +22,13 @@ import java.util.List;
 /**
  * <p>I don't really know yet how much I like the smell of this abstract module
  * builder class. Though for now if it works I'll use it since it lets me avoid
- * re-writing three methods the exact same way four times over.</p>
+ * re-writing some common builder methods the exact same way five times
+ * over for each module subclass.</p>
  * 
- * @param <E> The module builder. (weird, I know.)
- * 
- * @see <href>http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern</href>
+ * @param <E> The concrete module builder (weird, I know).
+ *
+ * @see <a href="http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern">
+ *     http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern</a>.
  */
 public abstract class ModuleBuilderExtension<E extends ModuleBuilderExtension<E>>
         extends

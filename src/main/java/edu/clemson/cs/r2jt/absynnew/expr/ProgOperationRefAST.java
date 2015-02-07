@@ -14,19 +14,21 @@ package edu.clemson.cs.r2jt.absynnew.expr;
 
 import org.antlr.v4.runtime.Token;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * <p>A <code>ProgOperationRefAST</code> represents a reference within a
- * subexpression to some operation.</p>
+ * <p>A <code>ProgOperationRefAST</code> represents a reference within an
+ * expression (or subexpression) to some operation.</p>
  *
  * <p>Every call in the ast, including the 'official'
  * {@link edu.clemson.cs.r2jt.absynnew.stmt.CallAST}s should ultimately reference
- * this class. Even the primitive operations <pre>+, -, *</pre> should all
- * get converted into <code>ProgOperationRefAST</code>s with a name
- * appropriate for referencing their corresponding, formally specified
- * template operations.</p>
+ * this class. Even the primitive operations <code>+, -, *</code> in
+ * get converted into <code>ProgOperationRefAST</code>s
+ * (by {@link edu.clemson.cs.r2jt.absynnew.TreeBuildingVisitor}) with names
+ * appropriate for referencing their corresponding, formally specified template
+ * operations.</p>
  */
 public class ProgOperationRefAST extends ProgExprAST {
 
@@ -69,7 +71,24 @@ public class ProgOperationRefAST extends ProgExprAST {
     }
 
     @Override
-    protected ExprAST substituteChildren(Map<ExprAST, ExprAST> substitutions) {
-        return null;
+    public ProgOperationRefAST copy() {
+        ProgOperationRefAST result =
+                new ProgOperationRefAST(getStart(), getStop(), myQualifier,
+                        myName, myArguments);
+
+        result.setMathType(myMathType);
+        result.setMathTypeValue(myMathTypeValue);
+        return result;
+    }
+
+    @Override
+    public ExprAST substituteChildren(Map<ExprAST, ExprAST> substitutions) {
+        List<ProgExprAST> newArguments = new ArrayList<ProgExprAST>();
+
+        for (ProgExprAST a : myArguments) {
+            newArguments.add((ProgExprAST) substitute(a, substitutions));
+        }
+        return new ProgOperationRefAST(getStart(), getStop(), myQualifier,
+                myName, newArguments);
     }
 }

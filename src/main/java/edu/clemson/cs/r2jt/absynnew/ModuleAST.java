@@ -120,4 +120,28 @@ public abstract class ModuleAST extends ResolveAST {
             }
         }
     }
+
+    public static class PrecisAST extends ModuleAST {
+
+        private PrecisAST(PrecisBuilder builder) {
+            super(builder.getStart(), builder.getStop(), builder.getName(),
+                    builder.usesBlock, Collections
+                            .<ModuleParameterAST> emptyList(), null,
+                    builder.block);
+        }
+
+        public static class PrecisBuilder
+                extends
+                ModuleBuilderExtension<PrecisBuilder> {
+
+            public PrecisBuilder(Token start, Token stop, Token name) {
+                super(start, stop, name);
+            }
+
+            @Override
+            public PrecisAST build() {
+                return new PrecisAST(this);
+            }
+        }
+    }
 }

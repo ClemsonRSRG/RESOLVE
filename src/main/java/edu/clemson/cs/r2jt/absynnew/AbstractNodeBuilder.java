@@ -22,7 +22,7 @@ import java.util.Collection;
  * <p>Factors out some common logic for <code>Builder</code>s that construct
  * <code>ResolveAST</code> node classes.</p>
  *
- * <strong>Note:</strong> this class is <em>not</em> intended to hold any
+ * <p><strong>Note:</strong> this class is <em>not</em> intended to hold any
  * adder methods, no matter how common they might be -- as this breaks the
  * pattern being used here.</p>
  *

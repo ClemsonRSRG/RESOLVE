@@ -16,8 +16,9 @@ import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import org.antlr.v4.runtime.Token;
 
 /**
- * <p>Represents a mathematical theorem or corollary,
- * as would be found within {@link edu.clemson.cs.r2jt.absyn.PrecisModule}</p>
+ * <p>Represents a mathematical theorem or corollary, as would be found within
+ * the body of an
+ * {@link edu.clemson.cs.r2jt.absynnew.ModuleAST.PrecisAST}.</p>
  */
 public class MathTheoremAST extends DeclAST {
 
