@@ -587,12 +587,11 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
     /**
      * <p>Returns <code>true</code> <strong>iff</strong> the string text within
-     * <code>topName</code> <em>equals</em> the string within
-     * <code>bottomName</code></p>.
+     * <code>topName</code> equals <code>bottomName</code></p>.
      *
-     * @param topName    The name {@link Token} introducing a op, module, etc.
-     * @param bottomName The {@link Token} following the <tt>end</tt> of a
-     *                   scoped block of RESOLVE code.
+     * @param topName    An {@link ResolveToken} introducing a block.
+     * @param bottomName The {@link ResolveToken} following the <tt>end</tt>
+     *                   of a named block.
      *
      * @throws SourceErrorException If the provided top and bottom names don't
      *      match.
