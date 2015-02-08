@@ -388,21 +388,6 @@ public abstract class TreeWalkerVisitor {
 
     public void postMathVariableAST(MathVariableAST e) {}
 
-    public boolean walkMathVariableDeclAST(
-            edu.clemson.cs.r2jt.absynnew.decl.VariableAST.MathVariableDeclAST e) {
-        return false;
-    }
-
-    public void preMathVariableDeclAST(
-            edu.clemson.cs.r2jt.absynnew.decl.VariableAST.MathVariableDeclAST e) {}
-
-    public void midMathVariableDeclAST(
-            edu.clemson.cs.r2jt.absynnew.decl.VariableAST.MathVariableDeclAST e,
-            ResolveAST previous, ResolveAST next) {}
-
-    public void postMathVariableDeclAST(
-            edu.clemson.cs.r2jt.absynnew.decl.VariableAST.MathVariableDeclAST e) {}
-
     public boolean walkConceptAST(
             edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptAST e) {
         return false;

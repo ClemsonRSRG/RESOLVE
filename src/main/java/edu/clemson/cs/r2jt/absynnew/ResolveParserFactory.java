@@ -26,7 +26,7 @@ public class ResolveParserFactory {
 
     /**
      * <p>Returns an {@link ResolveParser} that recognizes
-     * <code>inputAsString</code></p>.
+     * <code>inputAsString</code>.</p>
      *
      * @param inputAsString The string we want to parse.
      * @return A {@link ResolveParser}.
@@ -37,7 +37,7 @@ public class ResolveParserFactory {
 
     /**
      * <p>Returns an {@link ResolveParser} that feeds off of the
-     * {@link ANTLRInputStream} passed.</p>.
+     * {@link ANTLRInputStream} passed.</p>
      *
      * @throws IllegalArgumentException If <code>input</code> is
      *                                              <code>null</code>

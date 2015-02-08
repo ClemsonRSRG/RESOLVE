@@ -121,7 +121,7 @@ public class ImportBlockAST extends ResolveAST {
         }
 
         private void addTokenSet(ImportType type,
-                                 Collection<? extends Token> newToks) {
+                Collection<? extends Token> newToks) {
             Set<Token> tokSet = usesItems.get(type);
             if (tokSet == null) {
                 tokSet = new HashSet<Token>();

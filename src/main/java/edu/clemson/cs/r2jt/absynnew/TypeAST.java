@@ -69,7 +69,7 @@ public abstract class TypeAST extends ResolveAST {
     }
 
     protected TypeAST copy() {
-        throw new RuntimeException("shouldn't be calling TypeAST.copy(); type: "
-                + this.getClass());
+        throw new RuntimeException(
+                "shouldn't be calling TypeAST.copy(); type: " + this.getClass());
     }
 }

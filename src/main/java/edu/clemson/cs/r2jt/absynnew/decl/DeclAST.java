@@ -26,6 +26,10 @@ public abstract class DeclAST extends ResolveAST {
         myName = name;
     }
 
+    /**
+     * <p>Returns the {@link MTType} for this <code>DeclAST</code>.</p>
+     * @return
+     */
     public MTType getMathType() {
         return myMathType;
     }
@@ -38,6 +42,11 @@ public abstract class DeclAST extends ResolveAST {
         myMathType = mt;
     }
 
+    /**
+     * <p>Returns the name of this <code>DeclAST</code>.</p>
+     *
+     * @return The {@link Token} containing the name of this construct.
+     */
     public Token getName() {
         return myName;
     }
