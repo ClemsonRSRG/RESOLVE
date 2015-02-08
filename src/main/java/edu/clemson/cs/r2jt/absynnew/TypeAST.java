@@ -12,6 +12,8 @@
  */
 package edu.clemson.cs.r2jt.absynnew;
 
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import org.antlr.v4.runtime.Token;
 
 /**
@@ -23,7 +25,51 @@ import org.antlr.v4.runtime.Token;
  */
 public abstract class TypeAST extends ResolveAST {
 
+    protected MTType myMathType = null;
+    protected MTType myMathTypeValue = null;
+    protected PTType myProgramTypeValue = null;
+
     public TypeAST(Token start, Token stop) {
         super(start, stop);
+    }
+
+    public MTType getMathType() {
+        return myMathType;
+    }
+
+    public void setMathType(MTType t) {
+        myMathType = t;
+    }
+
+    public MTType getMathTypeValue() {
+        return myMathTypeValue;
+    }
+
+    public void setMathTypeValue(MTType mathTypeValue) {
+        myMathTypeValue = mathTypeValue;
+    }
+
+    public PTType getProgramTypeValue() {
+        return myProgramTypeValue;
+    }
+
+    public void setProgramTypeValue(PTType programTypeValue) {
+        myProgramTypeValue = programTypeValue;
+    }
+
+    public static TypeAST copy(TypeAST t) {
+        MTType mathType = t.getMathType();
+        MTType mathTypeValue = t.getMathTypeValue();
+
+        TypeAST result = t.copy();
+
+        result.setMathType(mathType);
+        result.setMathTypeValue(mathTypeValue);
+        return result;
+    }
+
+    protected TypeAST copy() {
+        throw new RuntimeException("shouldn't be calling TypeAST.copy(); type: "
+                + this.getClass());
     }
 }

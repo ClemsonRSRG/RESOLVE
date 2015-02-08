@@ -26,7 +26,7 @@ import java.util.List;
  * (operation). This includes specifications in the form of <tt>requires</tt>
  * and <tt>ensures</tt> clauses, as well as a set of formal, mode-preceded
  * {@link ParameterAST}s.</p>
- * 
+ *
  * <p>This class should only appear within the context of
  * {@link edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptAST}s or
  * ....</p>

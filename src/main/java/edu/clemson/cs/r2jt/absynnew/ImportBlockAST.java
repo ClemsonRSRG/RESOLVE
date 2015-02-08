@@ -18,7 +18,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.*;
 
 /**
- * <p>A <code>ImportBlockAST</code> classifies and maintains a complete
+ * <p>An <code>ImportBlockAST</code> classifies and maintains a complete
  * collection of module imports ranging from implicitly referenced/imported
  * modules, to those explicitly requested via the <tt>uses</tt> list.</p>
  */
