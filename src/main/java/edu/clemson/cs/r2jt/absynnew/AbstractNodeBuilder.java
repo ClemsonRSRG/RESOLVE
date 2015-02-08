@@ -39,11 +39,6 @@ public abstract class AbstractNodeBuilder<T extends ResolveAST>
         this.stop = stop;
     }
 
-    //Todo: this should probably go.
-    public AbstractNodeBuilder(ParserRuleContext ctx) {
-        this(ctx.getStart(), ctx.getStop());
-    }
-
     @Override
     public abstract T build();
 

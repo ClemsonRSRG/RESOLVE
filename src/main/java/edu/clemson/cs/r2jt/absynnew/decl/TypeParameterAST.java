@@ -16,9 +16,8 @@ import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import org.antlr.v4.runtime.Token;
 
 /**
- * <p>Certain modules can be parameterized by some generic; e.g. <tt>T</tt>,
- * <tt>Entry</tt>, etc. These generics would, ideally, be stored as a list
- * of <code>PosSymbol</code>s in the enclosing module,</p>
+ * <p>A <code>TypeParameterAST</code> represents some generic type
+ * parameterizing a module (e.g. <code>T</code>, <code>Entry</code>, etc)</p>.
  */
 public class TypeParameterAST extends DeclAST {
 

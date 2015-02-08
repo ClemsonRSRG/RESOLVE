@@ -19,9 +19,9 @@ import org.antlr.v4.runtime.Token;
 import java.util.List;
 
 /**
- * <p>The base class for all 'operation-like-constructs' in <tt>RESOLVE</tt>.
- * For operations arising in more specific contexts,</p>
- * 
+ * <p>A general base class for all 'operation-like-thing' that might ever
+ * appear in RESOLVE sourcecode.</p>
+ *
  * @see edu.clemson.cs.r2jt.absynnew.decl.OperationImplAST
  * @see edu.clemson.cs.r2jt.absynnew.decl.OperationSigAST
  */
