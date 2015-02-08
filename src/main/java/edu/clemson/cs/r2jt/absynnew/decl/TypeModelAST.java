@@ -89,7 +89,8 @@ public class TypeModelAST extends DeclAST {
         public InitFinalAST.TypeInitAST initialization;
         public InitFinalAST.TypeFinalAST finalization;
 
-        public TypeDeclBuilder(Token start, Token stop, Token name, Token exemplar) {
+        public TypeDeclBuilder(Token start, Token stop, Token name,
+                Token exemplar) {
             super(start, stop);
             this.name = name;
             this.exemplar = exemplar;

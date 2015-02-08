@@ -65,10 +65,6 @@ public class OperationImplAST extends OperationAST {
         return myVariables;
     }
 
-    /**
-     * <p>An {@link edu.clemson.cs.r2jt.utilities.Builder} specializing in
-     * <code>OperationImplAST</code> nodes.</p>
-     */
     public static class OperationImplBuilder
             extends
                 AbstractNodeBuilder<OperationImplAST> {

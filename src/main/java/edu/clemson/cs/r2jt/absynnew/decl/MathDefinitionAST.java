@@ -83,7 +83,7 @@ public class MathDefinitionAST extends DeclAST {
             return this;
         }
 
-        public DefinitionBuilder parameters(MathVariableAST ... e) {
+        public DefinitionBuilder parameters(MathVariableAST... e) {
             parameters(Arrays.asList(e));
             return this;
         }

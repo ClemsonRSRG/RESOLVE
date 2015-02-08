@@ -17,8 +17,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * <p>A <code>NamedTypeAST</code> refers to any type represented by a
- * possibly qualified identifier/name (which is most -- if not all
- * presently).</p>
+ * possibly qualified identifier/name.</p>
  */
 public final class NamedTypeAST extends TypeAST {
 
