@@ -48,7 +48,7 @@ public class TreeUtil {
      */
     public static <T extends ResolveAST> T createASTNodeFrom(
             ParserRuleContext startRule) {
-        TreeBuildingVisitor<T> builder = new TreeBuildingVisitor(startRule);
+        TreeBuildingVisitor<T> builder = new TreeBuildingVisitor<T>(startRule);
         ParseTreeWalker.DEFAULT.walk(builder, startRule);
 
         return builder.build();
