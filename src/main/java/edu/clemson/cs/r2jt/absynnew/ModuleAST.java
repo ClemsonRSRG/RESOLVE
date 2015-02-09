@@ -132,7 +132,7 @@ public abstract class ModuleAST extends ResolveAST {
 
         public static class PrecisBuilder
                 extends
-                ModuleBuilderExtension<PrecisBuilder> {
+                    ModuleBuilderExtension<PrecisBuilder> {
 
             public PrecisBuilder(Token start, Token stop, Token name) {
                 super(start, stop, name);
