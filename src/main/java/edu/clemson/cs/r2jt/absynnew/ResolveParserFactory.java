@@ -25,8 +25,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 public class ResolveParserFactory {
 
     /**
-     * <p>Returns an {@link ResolveParser} that recognizes
-     * <code>inputAsString</code>.</p>
+     * <p>Returns an {@link ResolveParser} that feeds specifically off of a
+     * string as input.</p>
      *
      * @param inputAsString The string we want to parse.
      * @return A {@link ResolveParser}.
