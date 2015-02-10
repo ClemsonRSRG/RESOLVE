@@ -20,11 +20,12 @@ import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import org.antlr.v4.runtime.Token;
 
 /**
- * <p>A <code>TypeModelAST</code> is <tt>RESOLVE</tt>'s mechanism of allowing
- * users to abstractly model and specify their own types. Instances of this
- * class are permitted within the following modules:</p>
+ * <p>A <code>TypeModelAST</code> is RESOLVE's mechanism of allowing users to
+ * abstractly model and specify their own types. Instances of this class are
+ * permitted within the following modules:</p>
  *
- * {@link edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptAST} or .
+ * {@link edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptAST} or
+ * {@link edu.clemson.cs.r2jt.absynnew.ModuleAST.PrecisAST}.
  */
 public class TypeModelAST extends DeclAST {
 
@@ -76,11 +77,6 @@ public class TypeModelAST extends DeclAST {
         return myFinalization;
     }
 
-    /**
-     * <p>Allows for building-up the component pieces of a {@link
-     * TypeModelAST} one by one, thus avoiding the need to for a large,
-     * unwieldy constructor.</p>
-     */
     public static class TypeDeclBuilder
             extends
                 AbstractNodeBuilder<TypeModelAST> {
@@ -93,10 +89,11 @@ public class TypeModelAST extends DeclAST {
         public InitFinalAST.TypeInitAST initialization;
         public InitFinalAST.TypeFinalAST finalization;
 
-        public TypeDeclBuilder(ResolveParser.TypeModelDeclContext ctx) {
-            super(ctx);
-            name = ctx.name;
-            exemplar = ctx.exemplar;
+        public TypeDeclBuilder(Token start, Token stop, Token name,
+                Token exemplar) {
+            super(start, stop);
+            this.name = name;
+            this.exemplar = exemplar;
         }
 
         public TypeDeclBuilder model(MathTypeAST e) {

@@ -54,7 +54,7 @@ public class MathDefinitionAST extends DeclAST {
         public abstract String getTemplateName();
     }
 
-    private final List<VariableAST.MathVariableDeclAST> myParameters;
+    private final List<MathVariableAST> myParameters;
     private final MathTypeAST myReturnType;
 
     private MathDefinitionAST(DefinitionBuilder builder) {
@@ -70,8 +70,8 @@ public class MathDefinitionAST extends DeclAST {
         protected final Token name;
         protected MathTypeAST returnType;
 
-        protected final List<VariableAST.MathVariableDeclAST> parameters =
-                new ArrayList<VariableAST.MathVariableDeclAST>();
+        protected final List<MathVariableAST> parameters =
+                new ArrayList<MathVariableAST>();
 
         public DefinitionBuilder(Token start, Token stop, Token name) {
             super(start, stop);
@@ -83,14 +83,12 @@ public class MathDefinitionAST extends DeclAST {
             return this;
         }
 
-        public DefinitionBuilder parameters(
-                VariableAST.MathVariableDeclAST... e) {
+        public DefinitionBuilder parameters(MathVariableAST... e) {
             parameters(Arrays.asList(e));
             return this;
         }
 
-        public DefinitionBuilder parameters(
-                List<VariableAST.MathVariableDeclAST> e) {
+        public DefinitionBuilder parameters(List<MathVariableAST> e) {
             sanityCheckAdditions(e);
             parameters.addAll(e);
             return this;

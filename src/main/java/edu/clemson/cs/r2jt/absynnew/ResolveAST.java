@@ -38,10 +38,6 @@ public abstract class ResolveAST {
         return myStop;
     }
 
-    /**
-     * <p>Prints out this whole subtree, not just a particular node. Print just a
-     * node if this is a leaf.</p>
-     */
     @Override
     public String toString() {
         TextRenderingVisitor renderer = new TextRenderingVisitor();

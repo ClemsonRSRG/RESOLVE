@@ -20,12 +20,12 @@ import java.util.Map;
 
 /**
  * <p>A <code>ProgOperationRefAST</code> represents a reference within an
- * expression (or subexpression) to some operation.</p>
+ * expression or subexpression to some operation.</p>
  *
- * <p>Every call in the ast, including the 'official'
- * {@link edu.clemson.cs.r2jt.absynnew.stmt.CallAST}s should ultimately reference
- * this class. Even the primitive operations <code>+, -, *</code> in
- * get converted into <code>ProgOperationRefAST</code>s
+ * <p>Realize that every call in the ast, including the 'official'
+ * {@link edu.clemson.cs.r2jt.absynnew.stmt.CallAST}s should reference this
+ * class. Ultimately even the primitive operations <code>+, -, *</code> get
+ * converted into <code>ProgOperationRefAST</code>s
  * (by {@link edu.clemson.cs.r2jt.absynnew.TreeBuildingVisitor}) with names
  * appropriate for referencing their corresponding, formally specified template
  * operations.</p>

@@ -77,8 +77,12 @@ public class ModuleBlockAST extends ResolveAST {
         protected List<ResolveAST> elements = new ArrayList<ResolveAST>();
 
         /**
-         * <p>These flags enable us to perform a simple error check as to
-         * whether or not</p>
+         * <p>These flags enable allow a simple sanity check. Specifically, they
+         * ensure there is only one module-level initialization or finalization.
+         * This check being here is a consequence of the fact that we allow
+         * module level inits and finals to be interleaved between any number of
+         * other constructs. So this is a convenient place to perform this
+         * check.</p>
          */
         private boolean seenModuleLevelInitialization = false;
         private boolean seenModuleLevelFinalization = false;
@@ -92,6 +96,8 @@ public class ModuleBlockAST extends ResolveAST {
             return this;
         }
 
+        //Todo: perform module level init/final sanity check. Enforce at most
+        //one of each; throw sourceErrorException otherwise.
         public ModuleBlockBuilder generalElements(
                 Collection<? extends ResolveAST> e) {
             sanityCheckAdditions(e);

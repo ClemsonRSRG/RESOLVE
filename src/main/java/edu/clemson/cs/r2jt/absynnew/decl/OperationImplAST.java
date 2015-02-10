@@ -26,17 +26,16 @@ import java.util.List;
  * {@link OperationSigAST}. This means that both private facility operations and
  * procedures implementing a conceptual contract are represented by this
  * class.</p>
- * 
- * <p>In order to differentiate between the two, refer to the
- * <code>implementsContract</code> flag.</p>
+ *
+ * <p>In case one needs to differentiate between the two, refer to the
+ * <code>{@link #implementsContract()}</code> method.</p>
  */
 public class OperationImplAST extends OperationAST {
 
     /**
      * <p>If <code>true</code>, then we represent a procedure in a realization
      * implementing an {@link OperationSigAST}; otherwise we're a private
-     * <em>facility operation</em>
-     * </p>
+     * operation within some facility module.</p>
      */
     private final boolean implementsContract;
 
@@ -66,10 +65,6 @@ public class OperationImplAST extends OperationAST {
         return myVariables;
     }
 
-    /**
-     * <p>An {@link edu.clemson.cs.r2jt.utilities.Builder} specializing in
-     * <code>OperationImplAST</code> nodes.</p>
-     */
     public static class OperationImplBuilder
             extends
                 AbstractNodeBuilder<OperationImplAST> {

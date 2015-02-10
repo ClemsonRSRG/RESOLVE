@@ -18,6 +18,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * <p>A <code>ProgNameRefAST</code> represents a reference to some named element
+ * within an expression or subexpression.</p>
+ */
 public class ProgNameRefAST extends ProgExprAST {
 
     private final Token myQualifier, myName;

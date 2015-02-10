@@ -33,22 +33,22 @@ public class TreeUtil {
      * <tt>EOF</tt>, this method should reliably work for the purpose of
      * generating modules.</p>
      *
-     * @param <T> The expected raw type of the ast produced from
-     *           <code>startRule</code>.
+     * @param <T>       The expected raw type of the ast produced from
+     *                  <code>startRule</code>.
      * @param startRule The rule context to begin parsing on. Note that the ast
      *                  type requested via <code>T</code> should play nice with
      *                  the passed rule. For instance, don't list ExprAST as the
      *                  expected type, then pass a variable declaration as
      *                  <code>startRule</code> (since the expected type of a
      *                  variable is DeclAST -- not ExprAST).
-     * @return The <code>ResolveAST</code> representation of parse tree rooted
-     *         at <code>startRule</code>.
+     * @return          The <code>ResolveAST</code> representation of parse tree
+     *                  rooted at <code>startRule</code>.
      *
      * @see <a href="https://github.com/antlr/antlr4/issues/118">issue-118</a>.
      */
     public static <T extends ResolveAST> T createASTNodeFrom(
             ParserRuleContext startRule) {
-        TreeBuildingVisitor<T> builder = new TreeBuildingVisitor(startRule);
+        TreeBuildingVisitor<T> builder = new TreeBuildingVisitor<T>(startRule);
         ParseTreeWalker.DEFAULT.walk(builder, startRule);
 
         return builder.build();

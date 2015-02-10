@@ -40,12 +40,17 @@ import java.util.List;
 /**
  * <p>Constructs an ast representation of <tt>RESOLVE</tt> sourcecode from the
  * concrete syntax tree produced by <tt>Antlr v4.x</tt>.</p>
- * 
+ *
  * <p>The ast is built over the course of a pre-post traversal of the concrete
  * syntax tree. Automatically generated <tt>Antlr v4.x</tt> nodes are annotated
  * with their custom abstract-syntax counterparts via an instance of
  * {@link TreeDecorator}, resulting in a tree with a similar, but sparser
  * structure.</p>
+ *
+ * <p>Note that this class is parameterized by <code>T</code> to indicate that
+ * it can handle building of specific subtrees when used in combination with
+ * {@link ResolveParserFactory} and the {@link TreeUtil#createASTNodeFrom}
+ * method.</p>
  *
  * <p>References to the completed, AST can be acquired through
  * calls to {@link #build()}.</p>
@@ -168,12 +173,14 @@ public class TreeBuildingVisitor<T extends ResolveAST>
             @NotNull ResolveParser.OperationDeclContext ctx) {
 
         OperationSigAST.OperationDeclBuilder builder =
-                new OperationSigAST.OperationDeclBuilder(ctx).type(
-                        get(NamedTypeAST.class, ctx.type())).requires(
-                        get(ExprAST.class, ctx.requiresClause())).ensures(
-                        get(ExprAST.class, ctx.ensuresClause())).params(
-                        getAll(ParameterAST.class, ctx.operationParameterList()
-                                .parameterDecl()));
+                new OperationSigAST.OperationDeclBuilder(ctx) //
+                        .type(get(NamedTypeAST.class, ctx.type())) //
+                        .requires(get(ExprAST.class, ctx.requiresClause())) //
+                        .ensures(get(ExprAST.class, ctx.ensuresClause())) //
+                        .params(
+                                getAll(ParameterAST.class, ctx
+                                        .operationParameterList()
+                                        .parameterDecl()));
 
         put(ctx, builder.build());
     }
@@ -190,9 +197,12 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
         OperationImplBuilder builder =
                 new OperationImplBuilder(ctx.getStart(), ctx.getStop(),
-                        ctx.name).recursive(ctx.recursive != null).parameters(
-                        getAll(ParameterAST.class, ctx.operationParameterList()
-                                .parameterDecl()));
+                        ctx.name) //
+                        .recursive(ctx.recursive != null) //
+                        .parameters(
+                                getAll(ParameterAST.class, ctx
+                                        .operationParameterList()
+                                        .parameterDecl()));
 
         for (ResolveParser.VariableDeclGroupContext grp : ctx
                 .variableDeclGroup()) {
@@ -212,9 +222,10 @@ public class TreeBuildingVisitor<T extends ResolveAST>
             @NotNull ResolveParser.ProcedureDeclContext ctx) {
         OperationImplBuilder builder =
                 new OperationImplBuilder(ctx.getStart(), ctx.getStop(),
-                        ctx.name).returnType(
-                        get(NamedTypeAST.class, ctx.type())).recursive(
-                        ctx.recursive != null).implementsContract(true)
+                        ctx.name) //
+                        .returnType(get(NamedTypeAST.class, ctx.type())) //
+                        .recursive(ctx.recursive != null) //
+                        .implementsContract(true) //
                         .parameters(
                                 getAll(ParameterAST.class, ctx
                                         .operationParameterList()
@@ -243,12 +254,12 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitTypeModelDecl(
             @NotNull ResolveParser.TypeModelDeclContext ctx) {
-
         TypeDeclBuilder builder =
-                new TypeDeclBuilder(ctx).model(
-                        get(MathTypeAST.class, ctx.mathTypeExp())).init(
-                        get(TypeInitAST.class, ctx.specTypeInit())).finalize(
-                        get(TypeFinalAST.class, ctx.specTypeFinal()))
+                new TypeDeclBuilder(ctx.getStart(), ctx.getStop(), ctx.name,
+                        ctx.exemplar)//
+                        .model(get(MathTypeAST.class, ctx.mathTypeExp()))//
+                        .init(get(TypeInitAST.class, ctx.specTypeInit()))//
+                        .finalize(get(TypeFinalAST.class, ctx.specTypeFinal()))//
                         .constraint(get(ExprAST.class, ctx.constraintClause()));
 
         put(ctx, builder.build());
@@ -574,14 +585,21 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         myDecorator.putProp(parseTree, ast);
     }
 
-    //Todo: SourceErrorException needs to change once this class becomes the
-    //norm and the populator is made compliant with the new way of doing things.
-    //simply comment out the source error exception below.
+    /**
+     * <p>Returns <code>true</code> <strong>iff</strong> the string text within
+     * <code>topName</code> equals <code>bottomName</code></p>.
+     *
+     * @param topName    An {@link ResolveToken} introducing a block.
+     * @param bottomName The {@link ResolveToken} following the <tt>end</tt>
+     *                   of a named block.
+     *
+     * @throws SourceErrorException If the provided top and bottom names don't
+     *      match.
+     */
     private void sanityCheckBlockEnds(Token topName, Token bottomName) {
         if (!topName.equals(bottomName)) {
             throw new RuntimeException("block names do not match");
-            //   throw new SourceErrorException("opening name '" + topName.getText()
-            //           + "' doesn't match closing name.", bottomName);
+            //Todo: Use a sourceErrorException here -- once it uses Tokens.
         }
     }
 
@@ -589,6 +607,13 @@ public class TreeBuildingVisitor<T extends ResolveAST>
      * <p>Shortcut methods to ease interaction with <code>TreeDecorator</code>;
      * for example it's somewhat shorter to say <pre>get(x.class, t)</pre>
      * than <pre>myDecorator.getProp(x.class, t)</pre>.</p>
+     *
+     * @param type A class within the {@link ResolveAST} hierarchy indicating
+     *             expected-type.
+     * @param t    A {@link ParseTree} indicating which subtree to draw the
+     *             annotation from.
+     * @param <T>  A type.
+     * @return
      */
     private <T extends ResolveAST> T get(Class<T> type, ParseTree t) {
         return myDecorator.getProp(type, t);
@@ -599,7 +624,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         return myDecorator.collect(type, t);
     }
 
-    public static class TreeDecorator {
+    private static class TreeDecorator {
 
         private final ParseTreeProperty<ResolveAST> visitedCtxs =
                 new ParseTreeProperty<ResolveAST>();
