@@ -93,7 +93,6 @@ public class OldExp extends Exp {
     /** Sets the exp variable to the specified value. */
     public void setExp(Exp exp) {
         this.exp = exp;
-        setType(exp.getType());
         setMathType(exp.getMathType());
         setMathTypeValue(exp.getMathTypeValue());
     }
@@ -154,7 +153,6 @@ public class OldExp extends Exp {
         OldExp clone = new OldExp();
         clone.setExp((Exp) Exp.clone(this.getExp()));
         clone.setLocation(this.getLocation());
-        clone.setType(getType());
         return clone;
     }
 
@@ -231,7 +229,6 @@ public class OldExp extends Exp {
     public Exp copy() {
         Exp newExp = Exp.copy(exp);
         newExp = new OldExp(getLocation(), newExp);
-        newExp.setType(getType());
         return newExp;
     }
 }

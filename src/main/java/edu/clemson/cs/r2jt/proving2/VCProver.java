@@ -22,16 +22,6 @@ public interface VCProver {
      * 
      * @param vC The verification condition to be proved.  May not be 
      *           <code>null</code>.
-     * @param theorems A list of theorems that may be applied as part of the
-     *                 proof.  May not be <code>null</code>.
-     * @param maxDepth The maximum number of steps the prover should attempt 
-     *                 before giving up on a proof.
-     * @param metrics A reference to the metrics the prover should keep on the
-     *                proof in progress.  May not be <code>null</code>.
-     *            
-     * @throws UnableToProveException If the VC cannot be proved in a
-     *                                reasonable amount of time.
-     * @throws VCInconsistentException If the VC can be proved inconsistent.
      * @throws NullPointerException If <code>vC</code>, <code>theorems</code>,
      *                              or <code>metrics</code> is 
      *                              <code>null</code>.

@@ -33,12 +33,11 @@ import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.proving.Conjuncts;
-import edu.clemson.cs.r2jt.proving.VerificationCondition;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 
 /**
  * <p>A variety of useful general-purpose methods.</p>
- * 
+ *
  * @author H. Smith
  */
 public class Utilities {
@@ -68,29 +67,6 @@ public class Utilities {
         return "" + b;
     }
 
-    public static VC convertToImmutableVC(VerificationCondition vc) {
-
-        java.util.List<PExp> newAntecedents = new LinkedList<PExp>();
-
-        Conjuncts oldAntecedents = vc.getAntecedents();
-        for (Exp a : oldAntecedents) {
-            newAntecedents.add(PExp.buildPExp(a));
-        }
-
-        java.util.List<PExp> newConsequents = new LinkedList<PExp>();
-
-        Conjuncts oldConsequents = vc.getConsequents();
-        for (Exp c : oldConsequents) {
-            newConsequents.add(PExp.buildPExp(c));
-        }
-
-        VC retval =
-                new VC(vc.getName(), new Antecedent(newAntecedents),
-                        new Consequent(newConsequents));
-
-        return retval;
-    }
-
     public static void buildExpMapFromPosSymbolMap(
             Map<PosSymbol, Exp> original, Map<Exp, Exp> newMap) {
         Set<Map.Entry<PosSymbol, Exp>> entrySet = original.entrySet();
@@ -109,108 +85,6 @@ public class Utilities {
         }
 
         return newMap;
-    }
-
-    /**
-     * <p>Attempts to find a binding for the universally quantified variables in
-     * the antecedent of an implication against a concrete set of assumptions,
-     * given a set of assumed bindings.  The set of antecedents to bind start
-     * at index <code>curAntecedentIndex</code> in <code>antecedents</code> and
-     * continue until the end.  <code>assumptions</code> is the set of 
-     * assumptions to bind against.  <code>bindings</code> is a set of assumed
-     * bindings.</p>
-     * 
-     * <p>If a binding is found, the <code>Exp</code>s in 
-     * <code>consequent</code> are added to <code>accumulator</code> with the
-     * bindings applied.</p>
-     * 
-     * <p>As an example, given the implication:</p>
-     * 
-     * <p><code>For all i, j, k : Z, i &gt; 0 and i + j &lt;= k --&gt; 
-     * 		j &lt; k</code></p>
-     * 
-     * <p>And the concrete set of assumptions:</p>
-     * 
-     * <ul>
-     * <li>a &gt; 0</li>
-     * <li>b &gt; 0</li>
-     * <li>a + b &lt;= c</li>
-     * </ul>
-     * 
-     * <p>The only possible binding is:</p>
-     * 
-     * <ul>
-     * <li>i --&gt; a</li>
-     * <li>j --&gt; b</li>
-     * <li>k --&gt; c</li>
-     * </ul>
-     * 
-     * <p>And the final value of <code>accumulator</code> will be:</p>
-     * 
-     * <ul>
-     * <li>b < c</li>
-     * </ul>
-     * 
-     * <p>If there is no such binding, nothing is added to the accumulator.</p>
-     * 
-     * @param assumptions A concrete set of assumptions against which to match.
-     * @param antecedents A list of universally quantified antecedents to match
-     *                    against the assumptions.
-     * @param curAntecedentIndex The index of the first antecedent not already
-     *                           matched and reflected in the set of assumed
-     *                           bindings.
-     * @param bindings A set of assumed bindings, reflected match choices for
-     *                 antecedents before <code>curAntecedentIndex</code>.
-     * @param typer A <code>MathExpTypeResolve</code> to aid in matching types.
-     * @param consequent The set of consequents in the universally quantified
-     *                   implication, in which we would like to make 
-     *                   replacements based on our binding.
-     * @param accumulator A list to hold the result of our matching.
-     */
-    public static void satisfy(Iterable<Exp> assumptions,
-            List<Exp> antecedents, int curAntecedentIndex,
-            Map<Exp, Exp> bindings, List<Exp> consequent, List<Exp> accumulator) {
-
-        if (curAntecedentIndex >= antecedents.size()) {
-            for (Exp c : consequent) {
-                accumulator.add(c.substitute(bindings));
-            }
-        }
-        else {
-            Map<PosSymbol, Exp> subBinding = null;
-            Iterator<Exp> assumptionsIter = assumptions.iterator();
-            Exp assumption;
-
-            Exp curAntecedent = antecedents.get(curAntecedentIndex);
-
-            Type beforeType = curAntecedent.getType();
-            Exp antecedent = curAntecedent.substitute(bindings);
-            Type afterType = antecedent.getType();
-
-            if (beforeType != null && afterType == null) {
-                throw new UnsupportedOperationException("Substitution failed "
-                        + "to set Type for "
-                        + antecedents.get(curAntecedentIndex).getClass() + ". "
-                        + "Be certain it's copy() and substituteChildren() "
-                        + "methods set a type on the returned value. \n\n"
-                        + "Before: " + antecedents.get(curAntecedentIndex)
-                        + "  (" + beforeType + ")\nAfter: " + antecedent
-                        + "  (" + afterType + ")");
-            }
-
-            while (assumptionsIter.hasNext()) {
-                assumption = assumptionsIter.next();
-
-                subBinding = bind(antecedent, assumption);
-
-                if (subBinding != null) {
-                    Map<Exp, Exp> workingBindings = shallowCopyMap(bindings);
-                    buildExpMapFromPosSymbolMap(subBinding, workingBindings);
-                    satisfy(assumptions, antecedents, curAntecedentIndex + 1,
-                            workingBindings, consequent, accumulator);
-                }
-            }
-        }
     }
 
     public static List<Exp> splitIntoConjuncts(List<Exp> c) {
@@ -267,7 +141,7 @@ public class Utilities {
     /**
      * <p>Returns <code>true</code> <strong>iff</strong> the given expression is
      * an equality with both sides precisely equal.</p>
-     * 
+     *
      * @param expression The expression to test.
      * @return <code>true</code> <strong>iff</strong> <code>e</code> is an
      *         equality with both sides precisely equal.
@@ -291,7 +165,7 @@ public class Utilities {
     /**
      * <p>Returns <code>true</code> <strong>iff</strong> the provided
      * <code>Exp</code> repesents the Resolve boolean value "true".</p>
-     * 
+     *
      * @param e The <code>Exp</code> to check.
      * @return <code>true</code> <strong>iff</strong> <code>e</code> represents
      *         the boolean value "true".
@@ -304,7 +178,7 @@ public class Utilities {
     /**
      * <p>Returns <code>true</code> <strong>iff</strong> the provided
      * <code>InfixExp</code> represents Resolve boolean function "and".</p>
-     * 
+     *
      * @param e The <code>InfixExp</code> to check.
      * @return <code>true</code> <strong>iff</strong> <code>e</code> represents
      *         boolean "and".
@@ -316,527 +190,13 @@ public class Utilities {
     /**
      * <p>Returns <code>true</code> <strong>iff</strong> the provided
      * <code>InfixExp</code> represents Resolve boolean function "and".</p>
-     * 
+     *
      * @param e The <code>InfixExp</code> to check.
      * @return <code>true</code> <strong>iff</strong> <code>e</code> represents
      *         boolean "and".
      */
     public static boolean isOrExp(InfixExp e) {
         return ((InfixExp) e).getOpName().getName().equals("or");
-    }
-
-    /**
-     * <p>Attempts to bind <code>pattern</code> to a concrete expression,
-     * <code>e</code>, returning a mapping from the quantified symbols in 
-     * <code>pattern</code> to the concrete subexpressions they were bound to.  
-     * If a binding is not possible, returns <code>null</code>.</p>
-     * 
-     * <p>Neither <code>pattern</code> nor <code>e</code> is changed.</p>
-     * 
-     * <p>This method is extremely long and messy, reflecting the messiness of
-     * the type system and the AST.  As a result, it tries to fail well in
-     * unexpected circumstances by throwing an UnsupportedOperationException in
-     * cases where it encounters something it is not equipped to handle.</p>
-     * 
-     * <p>If myBindDebugFlag is on, this will print some informative messages in
-     * certain cases where it is unable to bind.</p>
-     * 
-     * @param pattern The pattern to attempt to bind.
-     * @param e The concrete expression to attempt to bind to.
-     * @param typer Provides typing information.
-     * 
-     * @return A <code>Map</code> from <code>PosSymbol</code>s in the pattern
-     *         to concrete <code>Exp</code>s from the expression.
-     *         
-     * @throws NullPointerException If <code>pattern</code> or <code>e</code> is
-     *                              null.
-     */
-    public static Map<PosSymbol, Exp> bind(Exp pattern, Exp e) {
-
-        //We need typing information to do our job, however the Analyzer doesn't
-        //work consistently.  Fail well if we can't do our job.
-        if (pattern.getType() == null || e.getType() == null) {
-            if (!(e instanceof InfixExp || e instanceof BetweenExp
-                    || e instanceof PrefixExp || e instanceof EqualsExp || e instanceof DotExp)) {
-                //if (!(e instanceof InfixExp || e instanceof BetweenExp)) {
-                throw new UnsupportedOperationException(
-                        "Pattern or expression has null type.\n\n"
-                                + "Pattern: " + pattern + "  ("
-                                + pattern.getType() + ") " + pattern.getClass()
-                                + "\nExpression: " + e + "  (" + e.getType()
-                                + ") " + e.getClass());
-            }
-        }
-
-        Map<PosSymbol, Exp> retval = null;
-
-        if (pattern instanceof VarExp) {
-            VarExp patternVar = (VarExp) pattern;
-
-            if (patternVar.getQuantification() == QuantExp.FORALL) {
-                if (pattern.getType() != null && e.getType() != null
-                        && e.getMathType().isSubtypeOf(pattern.getMathType())) {
-
-                    retval = new HashMap<PosSymbol, Exp>();
-                    retval.put(patternVar.getName(), e);
-                }
-
-                if (retval == null && myBindDebugFlag) {
-                    System.out.println("Prover.Utilities.bind() reports: "
-                            + "Cannot bind " + patternVar + " with " + e
-                            + " because:");
-
-                    if (pattern.getType() == null || e.getType() == null) {
-                        if (pattern.getType() == null) {
-                            System.out.println("\t" + patternVar
-                                    + "'s type is null.");
-                        }
-                        if (e.getType() == null) {
-                            System.out.println("\t" + e + "'s type is null.");
-                        }
-                    }
-                    else if (!e.getMathType()
-                            .isSubtypeOf(pattern.getMathType())) {
-                        System.out.println("\tType " + pattern.getType()
-                                + " does not match type " + e.getType() + ".");
-                    }
-                }
-            }
-            else if (patternVar.getQuantification() == QuantExp.EXISTS) {
-                if (e instanceof VarExp) {
-                    System.out.println("Utilities.bind");
-                }
-
-                if (pattern.getType() != null && e.getType() != null
-                        && e.getMathType().isSubtypeOf(pattern.getMathType())) {
-
-                    if (e instanceof VarExp) {
-                        VarExp eAsVarExp = (VarExp) e;
-                        if (eAsVarExp.getQuantification() == QuantExp.NONE) {
-                            retval = new HashMap<PosSymbol, Exp>();
-                            retval.put(patternVar.getName(), e);
-                        }
-                    }
-                    else {
-                        retval = new HashMap<PosSymbol, Exp>();
-                        retval.put(patternVar.getName(), e);
-                    }
-                }
-            }
-            else {
-                if (pattern.equals(e)) {
-                    retval = new HashMap<PosSymbol, Exp>();
-                }
-            }
-        }
-        else if (pattern instanceof FunctionExp) {
-            FunctionExp patternFunction = (FunctionExp) pattern;
-
-            if (e instanceof FunctionExp) {
-                FunctionExp eFunction = (FunctionExp) e;
-
-                if (patternFunction.getQuantification() == QuantExp.FORALL) {
-                    if (pattern.getType() != null
-                            && e.getType() != null
-                            && e.getMathType().isSubtypeOf(
-                                    pattern.getMathType())) {
-
-                        retval = bindSubExpressions(pattern, e);
-
-                        if (retval != null) {
-
-                            VarExp functionName =
-                                    new VarExp(eFunction.getLocation(),
-                                            eFunction.getQualifier(), eFunction
-                                                    .getName());
-                            functionName.setType(eFunction.getType());
-
-                            retval.put(patternFunction.getName(), functionName);
-                        }
-                    }
-                }
-                else {
-                    if (Exp.posSymbolEquivalent(patternFunction.getName(),
-                            eFunction.getName())) {
-
-                        retval = bindSubExpressions(pattern, e);
-                    }
-                }
-            }
-        }
-        else if (pattern instanceof InfixExp) {
-            InfixExp patternInfix = (InfixExp) pattern;
-
-            if (e instanceof InfixExp) {
-
-                InfixExp eInfix = (InfixExp) e;
-
-                if (Exp.posSymbolEquivalent(patternInfix.getOpName(), eInfix
-                        .getOpName())) {
-
-                    retval = bindSubExpressions(pattern, e);
-                }
-            }
-        }
-        else if (pattern instanceof OutfixExp) {
-            OutfixExp patternOutfix = (OutfixExp) pattern;
-
-            if (e instanceof OutfixExp) {
-                OutfixExp eOutfix = (OutfixExp) e;
-
-                if (patternOutfix.getOperator() == eOutfix.getOperator()) {
-                    retval = bindSubExpressions(pattern, e);
-                }
-            }
-        }
-        else if (pattern instanceof PrefixExp) {
-            PrefixExp patternPrefix = (PrefixExp) pattern;
-
-            if (e instanceof PrefixExp) {
-                PrefixExp ePrefix = (PrefixExp) e;
-
-                if (Exp.posSymbolEquivalent(patternPrefix.getSymbol(), ePrefix
-                        .getSymbol())) {
-
-                    retval = bindSubExpressions(pattern, e);
-                }
-            }
-        }
-        else if (pattern instanceof EqualsExp) {
-            EqualsExp patternAsEqualsExp = (EqualsExp) pattern;
-
-            if (e instanceof EqualsExp) {
-                EqualsExp eAsEqualsExp = (EqualsExp) e;
-
-                if (eAsEqualsExp.getOperator() == patternAsEqualsExp
-                        .getOperator()) {
-
-                    retval = bindSubExpressions(pattern, e);
-                }
-            }
-        }
-        else if (pattern instanceof IntegerExp) {
-            IntegerExp patternAsInteger = (IntegerExp) pattern;
-
-            if (e instanceof IntegerExp) {
-                IntegerExp eAsInteger = (IntegerExp) e;
-
-                if (patternAsInteger.getValue() == eAsInteger.getValue()) {
-                    retval = bindSubExpressions(pattern, e);
-                }
-            }
-        }
-        else if (pattern instanceof DotExp) {
-            retval = bindSubExpressions(pattern, e);
-        }
-        else {
-
-            if (!genericBindWarningPrinted) {
-                System.out.println("WARNING: Binding generic class "
-                        + pattern.getClass() + " by subexpressions only in "
-                        + "proving.Utilities.bind.");
-                genericBindWarningPrinted = true;
-            }
-
-            if (pattern.getClass().equals(e.getClass())) {
-                retval = bindSubExpressions(pattern, e);
-            }
-        }
-
-        return retval;
-    }
-
-    /**
-     * <p>The original bind mapped from PosSymbols to Exp, which required the
-     * PosSymbol keys to be wrapped BACK into Exps before they could be sent to
-     * substitute.  This one goes from Exp to Exp.  The original bind should
-     * eventually be deleted (and this one renamed) once the new prover is ready
-     * for production. (TODO) Apr 26 2010</p>
-     * 
-     * <p>Attempts to bind <code>pattern</code> to a concrete expression,
-     * <code>e</code>, returning a mapping from the quantified symbols in 
-     * <code>pattern</code> to the concrete subexpressions they were bound to.  
-     * If a binding is not possible, returns <code>null</code>.</p>
-     * 
-     * <p>Neither <code>pattern</code> nor <code>e</code> is changed.</p>
-     * 
-     * <p>This method is extremely long and messy, reflecting the messiness of
-     * the type system and the AST.  As a result, it tries to fail well in
-     * unexpected circumstances by throwing an UnsupportedOperationException in
-     * cases where it encounters something it is not equipped to handle.</p>
-     * 
-     * <p>If myBindDebugFlag is on, this will print some informative messages in
-     * certain cases where it is unable to bind.</p>
-     * 
-     * @param pattern The pattern to attempt to bind.
-     * @param e The concrete expression to attempt to bind to.
-     * @param typer Provides typing information.
-     * 
-     * @return A <code>Map</code> from <code>PosSymbol</code>s in the pattern
-     *         to concrete <code>Exp</code>s from the expression.
-     *         
-     * @throws NullPointerException If <code>pattern</code> or <code>e</code> is
-     *                              null.
-     */
-    public static Map<Exp, Exp> newBind(Exp pattern, Exp e) {
-
-        //We need typing information to do our job, however the Analyzer doesn't
-        //work consistently.  Fail well if we can't do our job.
-        if (pattern.getType() == null || e.getType() == null) {
-            if (!(e instanceof InfixExp || e instanceof BetweenExp
-                    || e instanceof PrefixExp || e instanceof EqualsExp || e instanceof EqualsExp)) {
-                //if (!(e instanceof InfixExp || e instanceof BetweenExp)) {
-                throw new UnsupportedOperationException(
-                        "Pattern or expression has null type.\n\n"
-                                + "Pattern: " + pattern + "  ("
-                                + pattern.getType() + ") " + pattern.getClass()
-                                + "\nExpression: " + e + "  (" + e.getType()
-                                + ") " + e.getClass());
-            }
-        }
-
-        Map<Exp, Exp> retval = null;
-
-        if (pattern instanceof VarExp) {
-            VarExp patternVar = (VarExp) pattern;
-
-            if (patternVar.getQuantification() == QuantExp.FORALL) {
-                if (pattern.getType() != null && e.getType() != null
-                        && e.getMathType().isSubtypeOf(pattern.getMathType())) {
-
-                    retval = new HashMap<Exp, Exp>();
-                    retval.put(patternVar, e);
-                }
-
-                if (retval == null && myBindDebugFlag) {
-                    System.out.println("Prover.Utilities.bind() reports: "
-                            + "Cannot bind " + patternVar + " with " + e
-                            + " because:");
-
-                    if (pattern.getType() == null || e.getType() == null) {
-                        if (pattern.getType() == null) {
-                            System.out.println("\t" + patternVar
-                                    + "'s type is null.");
-                        }
-                        if (e.getType() == null) {
-                            System.out.println("\t" + e + "'s type is null.");
-                        }
-                    }
-                    else if (!e.getMathType()
-                            .isSubtypeOf(pattern.getMathType())) {
-                        System.out.println("\tType " + pattern.getType()
-                                + " does not match type " + e.getType() + ".");
-                    }
-                }
-            }
-            else if (patternVar.getQuantification() == QuantExp.EXISTS) {
-                if (e instanceof VarExp) {
-                    System.out.println("Utilities.bind");
-                }
-
-                if (pattern.getType() != null && e.getType() != null
-                        && e.getMathType().isSubtypeOf(pattern.getMathType())) {
-
-                    if (e instanceof VarExp) {
-                        VarExp eAsVarExp = (VarExp) e;
-                        if (eAsVarExp.getQuantification() == QuantExp.NONE) {
-                            retval = new HashMap<Exp, Exp>();
-                            retval.put(patternVar, e);
-                        }
-                    }
-                    else {
-                        retval = new HashMap<Exp, Exp>();
-                        retval.put(patternVar, e);
-                    }
-                }
-            }
-            else {
-                if (pattern.equals(e)) {
-                    retval = new HashMap<Exp, Exp>();
-                }
-            }
-        }
-        else if (pattern instanceof FunctionExp) {
-            FunctionExp patternFunction = (FunctionExp) pattern;
-
-            if (e instanceof FunctionExp) {
-                FunctionExp eFunction = (FunctionExp) e;
-
-                if (patternFunction.getQuantification() == QuantExp.FORALL) {
-                    if (pattern.getType() != null
-                            && e.getType() != null
-                            && e.getMathType().isSubtypeOf(
-                                    pattern.getMathType())) {
-
-                        retval = newBindSubExpressions(pattern, e);
-
-                        if (retval != null) {
-
-                            VarExp functionName =
-                                    new VarExp(eFunction.getLocation(),
-                                            eFunction.getQualifier(), eFunction
-                                                    .getName());
-                            functionName.setType(eFunction.getType());
-
-                            retval.put(patternFunction, functionName);
-                        }
-                    }
-                }
-                else {
-                    if (Exp.posSymbolEquivalent(patternFunction.getName(),
-                            eFunction.getName())) {
-
-                        retval = newBindSubExpressions(pattern, e);
-                    }
-                }
-            }
-        }
-        else if (pattern instanceof InfixExp) {
-            InfixExp patternInfix = (InfixExp) pattern;
-
-            if (e instanceof InfixExp) {
-
-                InfixExp eInfix = (InfixExp) e;
-
-                if (Exp.posSymbolEquivalent(patternInfix.getOpName(), eInfix
-                        .getOpName())) {
-
-                    retval = newBindSubExpressions(pattern, e);
-                }
-            }
-        }
-        else if (pattern instanceof OutfixExp) {
-            OutfixExp patternOutfix = (OutfixExp) pattern;
-
-            if (e instanceof OutfixExp) {
-                OutfixExp eOutfix = (OutfixExp) e;
-
-                if (patternOutfix.getOperator() == eOutfix.getOperator()) {
-
-                    retval = newBindSubExpressions(pattern, e);
-                }
-            }
-        }
-        else if (pattern instanceof PrefixExp) {
-            PrefixExp patternPrefix = (PrefixExp) pattern;
-
-            if (e instanceof PrefixExp) {
-                PrefixExp ePrefix = (PrefixExp) e;
-
-                if (Exp.posSymbolEquivalent(patternPrefix.getSymbol(), ePrefix
-                        .getSymbol())) {
-
-                    retval = newBindSubExpressions(pattern, e);
-                }
-            }
-        }
-        else if (pattern instanceof EqualsExp) {
-            EqualsExp patternAsEqualsExp = (EqualsExp) pattern;
-
-            if (e instanceof EqualsExp) {
-                EqualsExp eAsEqualsExp = (EqualsExp) e;
-
-                if (eAsEqualsExp.getOperator() == patternAsEqualsExp
-                        .getOperator()) {
-
-                    retval = newBindSubExpressions(pattern, e);
-                }
-            }
-        }
-        else if (pattern instanceof IntegerExp) {
-            IntegerExp patternAsInteger = (IntegerExp) pattern;
-
-            if (e instanceof IntegerExp) {
-                IntegerExp eAsInteger = (IntegerExp) e;
-
-                if (patternAsInteger.getValue() == eAsInteger.getValue()) {
-
-                    retval = newBindSubExpressions(pattern, e);
-                }
-            }
-        }
-        else if (pattern instanceof DotExp) {
-
-            retval = newBindSubExpressions(pattern, e);
-        }
-        else {
-
-            if (!genericBindWarningPrinted) {
-                System.out.println("WARNING: Binding generic class "
-                        + pattern.getClass() + " by subexpressions only in "
-                        + "proving.Utilities.bind.");
-                genericBindWarningPrinted = true;
-            }
-
-            if (pattern.getClass().equals(e.getClass())) {
-
-                retval = newBindSubExpressions(pattern, e);
-            }
-        }
-
-        return retval;
-    }
-
-    private static Map<PosSymbol, Exp> bindSubExpressions(Exp pattern, Exp e) {
-        Map<PosSymbol, Exp> retval = new HashMap<PosSymbol, Exp>();
-
-        Iterator<Exp> patternSubExpressions =
-                pattern.getSubExpressions().iterator();
-        Iterator<Exp> eSubExpressions = e.getSubExpressions().iterator();
-        Map<PosSymbol, Exp> subBinding;
-        while (retval != null && eSubExpressions.hasNext()
-                && patternSubExpressions.hasNext()) {
-            subBinding =
-                    bind(patternSubExpressions.next(), eSubExpressions.next());
-
-            if (subBinding == null) {
-                retval = null;
-            }
-            else {
-                retval = unifyMaps(retval, subBinding);
-            }
-        }
-
-        if (patternSubExpressions.hasNext() || eSubExpressions.hasNext()) {
-            retval = null;
-        }
-
-        return retval;
-    }
-
-    /**
-     * <p>(TODO) See note at newBind.</p>
-     * @param pattern
-     * @param e
-     * @param typer
-     * @return
-     */
-    private static Map<Exp, Exp> newBindSubExpressions(Exp pattern, Exp e) {
-        Map<Exp, Exp> retval = new HashMap<Exp, Exp>();
-
-        Iterator<Exp> patternSubExpressions =
-                pattern.getSubExpressions().iterator();
-        Iterator<Exp> eSubExpressions = e.getSubExpressions().iterator();
-        Map<Exp, Exp> subBinding;
-        while (retval != null && eSubExpressions.hasNext()
-                && patternSubExpressions.hasNext()) {
-            subBinding =
-                    newBind(patternSubExpressions.next(), eSubExpressions
-                            .next());
-
-            if (subBinding == null) {
-                retval = null;
-            }
-            else {
-                retval = newUnifyMaps(retval, subBinding);
-            }
-        }
-
-        if (patternSubExpressions.hasNext() || eSubExpressions.hasNext()) {
-            retval = null;
-        }
-
-        return retval;
     }
 
     private static Map<PosSymbol, Exp> unifyMaps(Map<PosSymbol, Exp> m1,
@@ -942,12 +302,12 @@ public class Utilities {
      * clause (that is, they must be total).  If a <code>for all</code> with a
      * "where" clause is detected, an <code>IllegalArgumentException</code>
      * will be thrown.</p>
-     * 
+     *
      * @param e The expression for whom quantifiers should be distributed
      *          downward.  This will largely be modified in place.
-     *          
+     *
      * @return The root of the new expression.
-     * 
+     *
      * @throw IllegalArgumentException If <code>e</code> contains a
      *    <code>for all</code> expression with a "where" clause.
      */
@@ -964,7 +324,7 @@ public class Utilities {
      * expression <code>For all x, x = y</code>, the variable <code>x</code>
      * in the equals expression would be marked internaly as a "for all"
      * variable and the expression <code>x = y</code> would be returned.)</p>
-     * 
+     *
      * <p>Quantified expressiong with "where" clauses will be normalized to
      * remove the where clause.  In the case of "for all" statements, the
      * where clause will be added as the antecedent to an implication, so that
@@ -972,13 +332,13 @@ public class Utilities {
      * Q(x) implies P(x)</code> and <code>There exists x, where Q(x), such that
      * P(x)</code> will become <code>There exists x such that Q(x) and P(x)
      * </code>.</p>
-     * 
+     *
      * @param e The expression for whom quantifiers should be distributed
      *          downward.  This will largely be modified in place.
      * @param quantifiedVariables A map of variable names that should be 
      *          considered quantified mapped to the quantifiers that apply to
      *          them. 
-     *          
+     *
      * @return The root of the new expression. 
      */
     private static Exp applyQuantification(Exp e,

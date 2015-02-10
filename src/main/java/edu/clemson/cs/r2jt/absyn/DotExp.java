@@ -145,7 +145,6 @@ public class DotExp extends Exp {
         while (i.hasNext()) {
             curSegment = i.next();
             clonedSegment = (Exp) Exp.clone(curSegment);
-            clonedSegment.setType(curSegment.getType());
             newSegments.add(clonedSegment);
         }
         clone.setSegments(newSegments);
