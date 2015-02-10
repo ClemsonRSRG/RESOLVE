@@ -554,14 +554,12 @@ public class CompileEnvironment {
         return map.get(id).getTheories();
     }
 
-
     /**
      * Returns the map of symbol tables.
      */
     public Map<ModuleID, ModuleRecord> getMap() {
         return map;
     }
-
 
     /**
      * Constructs a record containing the module id, the file, and the module

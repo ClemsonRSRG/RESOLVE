@@ -30,7 +30,6 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.MetaFile;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.translation.JavaTranslator;
-import edu.clemson.cs.r2jt.translation.Translator;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 

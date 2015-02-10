@@ -14,10 +14,8 @@ package edu.clemson.cs.r2jt.absyn;
 
 import java.util.Map;
 
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.Type;
 
 /**
  * <p>A <code>FunctionValueExp</code> represents </p>
@@ -28,12 +26,6 @@ public class FunctionValueExp extends Exp {
     public void accept(ResolveConceptualVisitor v) {
     // TODO Auto-generated method stub
 
-    }
-
-    @Override
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override

@@ -30,13 +30,11 @@ import edu.clemson.cs.r2jt.absyn.OutfixExp;
 import edu.clemson.cs.r2jt.absyn.PrefixExp;
 import edu.clemson.cs.r2jt.absyn.QuantExp;
 import edu.clemson.cs.r2jt.absyn.VarExp;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.proving.Conjuncts;
 import edu.clemson.cs.r2jt.proving.VerificationCondition;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.type.Type;
 
 /**
  * <p>A variety of useful general-purpose methods.</p>

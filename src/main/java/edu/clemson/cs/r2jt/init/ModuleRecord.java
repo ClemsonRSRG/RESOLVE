@@ -19,7 +19,6 @@ import edu.clemson.cs.r2jt.absyn.ModuleDec;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.data.Symbol;
-import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 
 /**
  * A record of a module's compilation history. It consists of two main
@@ -45,8 +44,6 @@ public class ModuleRecord {
     private ModuleDec dec = null;
 
     private List<ModuleID> theories = new List<ModuleID>();
-
-    private OldSymbolTable table = null;
 
     private boolean errors = false;
 
@@ -83,10 +80,6 @@ public class ModuleRecord {
         return theories;
     }
 
-    public OldSymbolTable getSymbolTable() {
-        return table;
-    }
-
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
@@ -102,7 +95,6 @@ public class ModuleRecord {
 
     public void setTheories(List<ModuleID> theories) {
         assert dec != null : "dec is null";
-        assert table == null : "table is not null";
         Iterator<ModuleID> it = theories.iterator();
         while (it.hasNext()) {
             ModuleID temp = it.next();
@@ -112,18 +104,12 @@ public class ModuleRecord {
         }
     }
 
-    public void setSymbolTable(OldSymbolTable table) {
-        assert dec != null : "dec is null";
-        assert table != null : "table is null";
-        this.table = table;
-    }
-
     // -----------------------------------------------------------
     // Query Methods
     // -----------------------------------------------------------
 
     public boolean isComplete() {
-        return (!errors && dec != null && table != null);
+        return (!errors && dec != null);
     }
 
     public boolean containsErrors() {
