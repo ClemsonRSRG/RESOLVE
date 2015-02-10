@@ -19,6 +19,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
+import edu.clemson.cs.r2jt.parsing.RBuilder;
+import edu.clemson.cs.r2jt.parsing.RLexer;
+import edu.clemson.cs.r2jt.parsing.RParser;
 import edu.clemson.cs.r2jt.translation.*;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import org.antlr.runtime.ANTLRFileStream;
