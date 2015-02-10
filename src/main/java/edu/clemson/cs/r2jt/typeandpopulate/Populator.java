@@ -10,28 +10,15 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.population;
+package edu.clemson.cs.r2jt.typeandpopulate;
 
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.treewalk.*;
-import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian;
-import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
-import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
-import edu.clemson.cs.r2jt.typeandpopulate.MTPowertypeApplication;
-import edu.clemson.cs.r2jt.typeandpopulate.MTSetRestriction;
-import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleScopeBuilder;
-import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
-import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
-import edu.clemson.cs.r2jt.typeandpopulate.SymbolNotOfKindTypeException;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
