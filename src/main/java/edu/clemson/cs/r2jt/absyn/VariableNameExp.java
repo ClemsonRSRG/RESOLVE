@@ -16,8 +16,6 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public class VariableNameExp extends VariableExp {
 
@@ -104,11 +102,6 @@ public class VariableNameExp extends VariableExp {
         v.visitVariableNameExp(this);
     }
 
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getVariableNameExpType(this);
-    }
-
     /** Returns a formatted text string of this class. */
     public String asString(int indent, int increment) {
 
@@ -190,7 +183,6 @@ public class VariableNameExp extends VariableExp {
 
     public Exp copy() {
         Exp result = new VariableNameExp(location, qualifier, name);
-        result.setType(type);
         result.setMathType(myMathType);
         result.setMathTypeValue(myMathTypeValue);
 

@@ -14,8 +14,6 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
 
 public class AlternativeExp extends Exp {
@@ -117,11 +115,6 @@ public class AlternativeExp extends Exp {
         v.visitAlternativeExp(this);
     }
 
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getAlternativeExpType(this);
-    }
-
     /** Returns a formatted text string of this class. */
     public String asString(int indent, int increment) {
 
@@ -215,7 +208,6 @@ public class AlternativeExp extends Exp {
         }
 
         Exp result = new AlternativeExp(null, newAlternatives);
-        result.setType(type);
 
         return result;
     }
@@ -228,7 +220,6 @@ public class AlternativeExp extends Exp {
         }
 
         Exp result = new AlternativeExp(null, newAlternatives);
-        result.setType(type);
 
         return result;
     }

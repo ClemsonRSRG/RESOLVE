@@ -16,7 +16,6 @@ import java.io.*;
 
 import edu.clemson.cs.r2jt.absyn.EqualsExp;
 import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.init.Environment;
 
 public class Location {
 

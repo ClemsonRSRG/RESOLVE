@@ -19,9 +19,6 @@ import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.collections.Iterator;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.type.IsInType;
-import edu.clemson.cs.r2jt.type.BooleanType;
 import edu.clemson.cs.r2jt.collections.List;
 
 /**

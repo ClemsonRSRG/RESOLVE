@@ -16,8 +16,6 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public class OutfixExp extends AbstractFunctionExp {
 
@@ -79,7 +77,6 @@ public class OutfixExp extends AbstractFunctionExp {
         Exp retval =
                 new OutfixExp(location, operator, substitute(argument,
                         substitutions));
-        retval.setType(type);
         return retval;
     }
 
@@ -138,11 +135,6 @@ public class OutfixExp extends AbstractFunctionExp {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitOutfixExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getOutfixExpType(this);
     }
 
     /** Returns a formatted text string of this class. */
@@ -274,7 +266,6 @@ public class OutfixExp extends AbstractFunctionExp {
         clone.setOperator(this.operator);
         clone.setLocation(this.getLocation());
         clone.setArgument((Exp) Exp.clone(this.getArgument()));
-        clone.setType(type);
         return clone;
     }
 
@@ -400,7 +391,6 @@ public class OutfixExp extends AbstractFunctionExp {
         int newOperator = operator;
         Exp newArgument = Exp.copy(argument);
         retval = new OutfixExp(null, newOperator, newArgument);
-        retval.setType(type);
         return retval;
     }
 

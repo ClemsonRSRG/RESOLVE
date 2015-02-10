@@ -16,8 +16,6 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public class VarExp extends Exp {
 
@@ -65,17 +63,6 @@ public class VarExp extends Exp {
         this.quantification = quantifier;
     }
 
-    // special constructor to use when we can determine the statement return 
-    // type while building the symbol table in RBuilder.g
-    public VarExp(Location location, PosSymbol qualifier, PosSymbol name,
-            Type bType) {
-        this.location = location;
-        this.qualifier = qualifier;
-        this.name = name;
-        local = false;
-        super.bType = bType;
-    }
-
     public boolean equivalent(Exp e) {
         boolean retval;
 
@@ -94,7 +81,6 @@ public class VarExp extends Exp {
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
         Exp retval = new VarExp(location, qualifier, name, quantification);
-        retval.setType(type);
         retval.setMathType(getMathType());
         retval.setMathTypeValue(getMathTypeValue());
 
@@ -166,11 +152,6 @@ public class VarExp extends Exp {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitVarExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getVarExpType(this);
     }
 
     /** Returns a formatted text string of this class. */
@@ -307,7 +288,6 @@ public class VarExp extends Exp {
 
         VarExp clone = new VarExp(location, qualifier, newName);
         clone.setQuantification(this.quantification);
-        clone.setType(this.type);
         clone.setMathType(getMathType());
         clone.setMathTypeValue(getMathTypeValue());
         return clone;
@@ -381,7 +361,6 @@ public class VarExp extends Exp {
             newQualifier = qualifier.copy();
         PosSymbol newName = name.copy();
         retval = new VarExp(location, newQualifier, newName, quantification);
-        retval.setType(type);
         retval.setIsLocal(local);
         retval.setMathType(myMathType);
         retval.setMathTypeValue(myMathTypeValue);

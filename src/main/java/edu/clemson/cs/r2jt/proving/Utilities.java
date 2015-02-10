@@ -34,7 +34,6 @@ import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import edu.clemson.cs.r2jt.type.Type;
 
 /**
  * <p>A variety of useful general-purpose methods.</p>
@@ -607,8 +606,7 @@ public class Utilities {
      * 
      * @param pattern The pattern to attempt to bind.
      * @param e The concrete expression to attempt to bind to.
-     * @param typer Provides typing information.
-     * 
+     *
      * @return A <code>Map</code> from <code>PosSymbol</code>s in the pattern
      *         to concrete <code>Exp</code>s from the expression.
      *         

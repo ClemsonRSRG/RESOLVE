@@ -12,9 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absyn;
 
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.Type;
 
 /**
  * <p>A syntactic type based on an arbitrary mathematical <code>Exp</code>.  All
@@ -38,11 +36,6 @@ public class ArbitraryExpTy extends Ty {
     @Override
     public void accept(ResolveConceptualVisitor v) {
         v.visitArbitraryExpTy(this);
-    }
-
-    @Override
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getArbitraryExpType(this);
     }
 
     @Override

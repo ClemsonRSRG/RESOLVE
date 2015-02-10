@@ -16,8 +16,6 @@ import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import java.util.LinkedList;
 
@@ -107,11 +105,6 @@ public class LambdaExp extends Exp {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitLambdaExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getLambdaExpType(this);
     }
 
     /** Returns a formatted text string of this class. */
@@ -260,7 +253,6 @@ public class LambdaExp extends Exp {
 
         Exp newBody = Exp.copy(body);
         Exp result = new LambdaExp(null, newParams, newBody);
-        result.setType(type);
 
         return result;
     }

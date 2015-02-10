@@ -15,8 +15,6 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 public class IntegerExp extends Exp {
@@ -47,7 +45,6 @@ public class IntegerExp extends Exp {
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
         Exp retval = new IntegerExp(location, qualifier, value);
-        retval.setType(type);
         retval.setMathType(getMathType());
         retval.setMathTypeValue(getMathTypeValue());
         return retval;
@@ -102,11 +99,6 @@ public class IntegerExp extends Exp {
         v.visitIntegerExp(this);
     }
 
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getIntegerExpType(this);
-    }
-
     /** Returns a formatted text string of this class. */
     public String asString(int indent, int increment) {
 
@@ -151,7 +143,6 @@ public class IntegerExp extends Exp {
         clone.setQualifier(this.qualifier);
         clone.setValue(this.value);
         clone.setLocation(this.getLocation());
-        clone.setType(type);
         clone.setMathType(getMathType());
         clone.setMathTypeValue(getMathTypeValue());
         return clone;
@@ -199,7 +190,6 @@ public class IntegerExp extends Exp {
 
     public Exp copy() {
         Exp retval = new IntegerExp(null, qualifier, value);
-        retval.setType(type);
         retval.setMathType(getMathType());
         retval.setMathTypeValue(getMathTypeValue());
         return retval;

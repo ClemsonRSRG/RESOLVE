@@ -14,9 +14,6 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.verification.AssertiveCode;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
 
 public class BetweenExp extends Exp {
@@ -94,11 +91,6 @@ public class BetweenExp extends Exp {
         v.visitBetweenExp(this);
     }
 
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getBetweenExpType(this);
-    }
-
     public Object clone() {
         BetweenExp clone = new BetweenExp();
 
@@ -112,7 +104,6 @@ public class BetweenExp extends Exp {
         }
 
         clone.setLocation(this.getLocation());
-        clone.setType(type);
         return clone;
     }
 
@@ -168,10 +159,7 @@ public class BetweenExp extends Exp {
         while (i.hasNext()) {
             sb.append(i.next().toString(0));
             if (i.hasNext()) {
-                if (!AssertiveCode.isProvePart())
-                    sb.append(";\n");
-                else
-                    sb.append(" & ");
+                sb.append(" & ");
             }
 
         }
@@ -284,7 +272,6 @@ public class BetweenExp extends Exp {
             newLessExps.add(Exp.copy(it.next()));
         }
         Exp result = new BetweenExp(null, newLessExps);
-        result.setType(type);
         return result;
     }
 

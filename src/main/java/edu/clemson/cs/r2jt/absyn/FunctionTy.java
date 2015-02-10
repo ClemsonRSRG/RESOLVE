@@ -12,8 +12,6 @@
  */
 package edu.clemson.cs.r2jt.absyn;
 
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.data.Location;
 
 public class FunctionTy extends Ty {
@@ -82,11 +80,6 @@ public class FunctionTy extends Ty {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitFunctionTy(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getFunctionTyType(this);
     }
 
     /** Returns a formatted text string of this class. */

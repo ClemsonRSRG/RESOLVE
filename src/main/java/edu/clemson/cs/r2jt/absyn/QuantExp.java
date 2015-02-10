@@ -15,8 +15,6 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public class QuantExp extends Exp {
 
@@ -137,11 +135,6 @@ public class QuantExp extends Exp {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitQuantExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getQuantExpType(this);
     }
 
     /** Returns a formatted text string of this class. */
@@ -421,9 +414,6 @@ public class QuantExp extends Exp {
         Exp newBody = Exp.copy(body);
         Exp retval =
                 new QuantExp(null, newOperator, newVars, newWhere, newBody);
-
-        retval.setType(type);
-
         return retval;
     }
 

@@ -34,7 +34,6 @@ import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.FlagManager;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
-import edu.clemson.cs.r2jt.verification.Verifier;
 
 import java.io.File;
 import java.io.FileWriter;

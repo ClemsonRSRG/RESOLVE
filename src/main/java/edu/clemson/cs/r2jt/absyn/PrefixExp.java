@@ -15,8 +15,6 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public class PrefixExp extends AbstractFunctionExp {
 
@@ -45,16 +43,6 @@ public class PrefixExp extends AbstractFunctionExp {
         this.argument = argument;
     }
 
-    // special constructor to use when we can determine the statement return 
-    // type while building the symbol table in RBuilder.g
-    public PrefixExp(Location location, PosSymbol symbol, Exp argument,
-            Type bType) {
-        this.location = location;
-        this.symbol = symbol;
-        this.argument = argument;
-        super.bType = bType;
-    }
-
     public Object clone() {
         PrefixExp clone = new PrefixExp();
         clone.setLocation(this.getLocation());
@@ -62,8 +50,6 @@ public class PrefixExp extends AbstractFunctionExp {
         if (this.argument != null) {
             clone.argument = (Exp) Exp.clone(this.argument);
         }
-
-        clone.setType(this.bType);
         return clone;
     }
 
@@ -71,9 +57,6 @@ public class PrefixExp extends AbstractFunctionExp {
         PrefixExp retval =
                 new PrefixExp(location, symbol, substitute(argument,
                         substitutions));
-
-        retval.setType(type);
-
         return retval;
     }
 
@@ -132,11 +115,6 @@ public class PrefixExp extends AbstractFunctionExp {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitPrefixExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getPrefixExpType(this);
     }
 
     /** Returns a formatted text string of this class. */
@@ -233,7 +211,6 @@ public class PrefixExp extends AbstractFunctionExp {
         Exp newArgument = Exp.copy(argument);
 
         retval = new PrefixExp(null, newSymbol, newArgument);
-        retval.setType(type);
         return retval;
     }
 

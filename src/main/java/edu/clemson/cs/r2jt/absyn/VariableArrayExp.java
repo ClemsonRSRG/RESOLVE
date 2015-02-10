@@ -15,8 +15,6 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public class VariableArrayExp extends VariableExp {
 
@@ -116,11 +114,6 @@ public class VariableArrayExp extends VariableExp {
         v.visitVariableArrayExp(this);
     }
 
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getVariableArrayExpType(this);
-    }
-
     /** Returns a formatted text string of this class. */
     public String asString(int indent, int increment) {
 
@@ -211,7 +204,6 @@ public class VariableArrayExp extends VariableExp {
     public Exp copy() {
         VariableArrayExp result =
                 new VariableArrayExp(location, qualifier, name, argument);
-        result.setType(type);
         result.setMathType(myMathType);
         result.setMathTypeValue(myMathTypeValue);
 
