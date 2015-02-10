@@ -260,7 +260,6 @@ public class QuantExp extends Exp {
         if (body != null)
             clone.setBody(Exp.copy(this.getBody()));
         clone.setLocation(this.getLocation());
-        clone.setType(getType());
         return clone;
     }
 
