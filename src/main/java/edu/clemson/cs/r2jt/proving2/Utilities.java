@@ -32,7 +32,6 @@ import edu.clemson.cs.r2jt.absyn.QuantExp;
 import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.proving.Conjuncts;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 
 /**
