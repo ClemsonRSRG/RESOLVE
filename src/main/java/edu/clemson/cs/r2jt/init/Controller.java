@@ -184,47 +184,32 @@ public class Controller {
                                 .getMyFile(myInstanceEnvironment.getMainDir()),
                                 inputFile);
             }
-
-            try {
-                compileNewTargetSource(inputFile, symbolTable);
+        }
+        try {
+            compileNewTargetSource(inputFile, symbolTable);
+        }
+        catch (Exception ex) {
+            Throwable cause = ex;
+            while (cause != null && !(cause instanceof SourceErrorException)) {
+                cause = cause.getCause();
             }
-            catch (Exception ex) {
-                Throwable cause = ex;
-                while (cause != null
-                        && !(cause instanceof SourceErrorException)) {
-                    cause = cause.getCause();
-                }
 
-                if (cause != null) {
-                    SourceErrorException see = (SourceErrorException) cause;
-                    err.error(see.getErrorLocation(), see.getMessage());
-                }
-                else {
-                    BugReport.abortProgram(ex, myInstanceEnvironment);
-                    myCompileReport.setError();
-                }
+            if (cause != null) {
+                SourceErrorException see = (SourceErrorException) cause;
+                err.error(see.getErrorLocation(), see.getMessage());
             }
-            //compileNewTargetFile(file);
-            if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-                //arc.printArchiveList();
-                //arc.prepArchiver(file);
-
-                myArchive.cleanupFiles();
+            else {
+                BugReport.abortProgram(ex, myInstanceEnvironment);
+                myCompileReport.setError();
             }
         }
-        /*if (env.contains(file)) {
-         if (env.compileCompleted(file)) {
-         String msg = completeMessage(file.getName());
-         err.message(msg);
-         } else if (env.compileAborted(file)) {
-         String msg = abortMessage(file.getName());
-         err.error(msg);
-         } else { // unresolved compilation
-         assert false : "unresolved compilation";
-         }
-         } else { */
+        //compileNewTargetFile(file);
+        if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
+            //arc.printArchiveList();
+            //arc.prepArchiver(file);
 
-        //}
+            myArchive.cleanupFiles();
+        }
     }
 
     // ===========================================================
