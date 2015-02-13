@@ -19,7 +19,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
+import edu.clemson.cs.r2jt.parsing.RBuilder;
+import edu.clemson.cs.r2jt.parsing.RLexer;
+import edu.clemson.cs.r2jt.parsing.RParser;
 import edu.clemson.cs.r2jt.translation.*;
+import edu.clemson.cs.r2jt.typeandpopulate.*;
 import org.antlr.runtime.ANTLRFileStream;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;
@@ -29,7 +33,6 @@ import org.antlr.runtime.tree.*;
 
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.analysis.Analyzer;
 import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
@@ -37,27 +40,10 @@ import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.errors.BugReport;
-import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
-import edu.clemson.cs.r2jt.typeandpopulate.NoSuchSymbolException;
-import edu.clemson.cs.r2jt.parsing.*;
-import edu.clemson.cs.r2jt.population.*;
 import edu.clemson.cs.r2jt.processing.*;
-import edu.clemson.cs.r2jt.proving.AlternativeProver;
 import edu.clemson.cs.r2jt.proving.Prover;
-import edu.clemson.cs.r2jt.proving.ProverException;
-import edu.clemson.cs.r2jt.proving.TheoremToVCsConverter;
-import edu.clemson.cs.r2jt.proving.VCCollector;
-import edu.clemson.cs.r2jt.proving.VerificationCondition;
-import edu.clemson.cs.r2jt.sanitycheck.VisitorSanityCheck;
-import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.proving2.AlgebraicProver;
 import edu.clemson.cs.r2jt.proving2.VC;
-import edu.clemson.cs.r2jt.verification.AssertiveCode;
-import edu.clemson.cs.r2jt.verification.Verifier;
 import edu.clemson.cs.r2jt.treewalk.*;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 import edu.clemson.cs.r2jt.utilities.SourceErrorException;
@@ -144,23 +130,10 @@ public class Controller {
                 else {
                     myArchive = null;
                 }
-                if (myInstanceEnvironment.flags
-                        .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)
-                        || myInstanceEnvironment.flags
-                                .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
-                        || myInstanceEnvironment.flags
-                                .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
-                    simpleTranslateNewTargetFile(file, symbolTable);
-                }
-                else {
-                    compileNewTargetFile(file, symbolTable);
-                }
-                //compileNewTargetFile(file);
+                compileNewTargetFile(file, symbolTable);
+
                 if (myInstanceEnvironment.flags
                         .isFlagSet(Archiver.FLAG_ARCHIVE)) {
-                    //arc.printArchiveList();
-                    //arc.prepArchiver(file);
-
                     myArchive.cleanupFiles();
                 }
             }
@@ -192,82 +165,51 @@ public class Controller {
             MathSymbolTableBuilder symbolTable) {
         err.resetCounts();
         err.setIgnore(false);
-        if (myInstanceEnvironment.flags
-                .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)
-                || myInstanceEnvironment.flags
-                        .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
-                || myInstanceEnvironment.flags
-                        .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
-            simpleTranslateNewTargetSource(inputFile, symbolTable);
-        }
-        else {
-            //myInstanceEnvironment.setTargetFileName("Std_Unbounded_List_Realiz.rb");
-            //myInstanceEnvironment.setTargetSource(myInstanceEnvironment.getUserFileFromMap("Unbounded_List_Template.Std_Unbounded_List_Realiz"));
-            if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-                //System.out.println(inputFile.getMyFile(myInstanceEnvironment.getMainDir()));
-                if (inputFile.getMyKind().equals(ModuleKind.FACILITY)) {
-                    String jarTempLoc =
-                            inputFile.getJarTempDir()
-                                    + inputFile.getMyFileName();
-                    myArchive =
-                            new Archiver(myInstanceEnvironment, inputFile
-                                    .getMyFile(myInstanceEnvironment
-                                            .getMainDir()), inputFile);
-                    myArchive.setOutputJar(jarTempLoc
-                            + inputFile.getMyKind().getExtension());
-                }
-                else {
-                    myArchive =
-                            new Archiver(myInstanceEnvironment, inputFile
-                                    .getMyFile(myInstanceEnvironment
-                                            .getMainDir()), inputFile);
-                }
 
+        if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
+            //System.out.println(inputFile.getMyFile(myInstanceEnvironment.getMainDir()));
+            if (inputFile.getMyKind().equals(ModuleKind.FACILITY)) {
+                String jarTempLoc =
+                        inputFile.getJarTempDir() + inputFile.getMyFileName();
+                myArchive =
+                        new Archiver(myInstanceEnvironment, inputFile
+                                .getMyFile(myInstanceEnvironment.getMainDir()),
+                                inputFile);
+                myArchive.setOutputJar(jarTempLoc
+                        + inputFile.getMyKind().getExtension());
             }
             else {
-                myArchive = null;
-            }
-
-            try {
-                compileNewTargetSource(inputFile, symbolTable);
-            }
-            catch (Exception ex) {
-                Throwable cause = ex;
-                while (cause != null
-                        && !(cause instanceof SourceErrorException)) {
-                    cause = cause.getCause();
-                }
-
-                if (cause != null) {
-                    SourceErrorException see = (SourceErrorException) cause;
-                    err.error(see.getErrorLocation(), see.getMessage());
-                }
-                else {
-                    BugReport.abortProgram(ex, myInstanceEnvironment);
-                    myCompileReport.setError();
-                }
-            }
-            //compileNewTargetFile(file);
-            if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
-                //arc.printArchiveList();
-                //arc.prepArchiver(file);
-
-                myArchive.cleanupFiles();
+                myArchive =
+                        new Archiver(myInstanceEnvironment, inputFile
+                                .getMyFile(myInstanceEnvironment.getMainDir()),
+                                inputFile);
             }
         }
-        /*if (env.contains(file)) {
-         if (env.compileCompleted(file)) {
-         String msg = completeMessage(file.getName());
-         err.message(msg);
-         } else if (env.compileAborted(file)) {
-         String msg = abortMessage(file.getName());
-         err.error(msg);
-         } else { // unresolved compilation
-         assert false : "unresolved compilation";
-         }
-         } else { */
+        try {
+            compileNewTargetSource(inputFile, symbolTable);
+        }
+        catch (Exception ex) {
+            Throwable cause = ex;
+            while (cause != null && !(cause instanceof SourceErrorException)) {
+                cause = cause.getCause();
+            }
 
-        //}
+            if (cause != null) {
+                SourceErrorException see = (SourceErrorException) cause;
+                err.error(see.getErrorLocation(), see.getMessage());
+            }
+            else {
+                BugReport.abortProgram(ex, myInstanceEnvironment);
+                myCompileReport.setError();
+            }
+        }
+        //compileNewTargetFile(file);
+        if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
+            //arc.printArchiveList();
+            //arc.prepArchiver(file);
+
+            myArchive.cleanupFiles();
+        }
     }
 
     // ===========================================================
@@ -395,19 +337,7 @@ public class Controller {
 
     private void compileNewTargetFile(File file,
             MathSymbolTableBuilder symbolTable) throws Exception {
-        //private File compileNewTargetFile(File file) {
-        //long start = System.currentTimeMillis();
         try {
-            // AST debugging file output
-            /*astDumpFile = new File(myInstanceEnvironment.getTargetFile()+".ast");
-             try{
-             FileWriter fstream = new FileWriter(astDumpFile, true);
-             BufferedWriter out = new BufferedWriter(fstream);
-             out.write("\nAST for: "+myInstanceEnvironment.getTargetFile()+"\n");
-             out.close();
-             }catch(Exception ex){
-            	
-             }*/
             myInstanceEnvironment.setCurrentTargetFileName(file.getName());
             ModuleDec dec = buildModuleDec(file);
             ModuleID id = ModuleID.createID(dec);
@@ -428,28 +358,8 @@ public class Controller {
             TreeWalker tw2 = new TreeWalker(postProc);
             tw2.visit(dec);
 
-            if (myInstanceEnvironment.showEnv()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
-                myInstanceEnvironment.completeRecord(id, table);
-                return;
-            }
             myInstanceEnvironment.setCurrentTargetFileName(file.getName());
             MathSymbolTable mathSymTab = getMathSymbolTable(dec, symbolTable);
-            OldSymbolTable table = analyzeModuleDec(symbolTable, dec);
-
-            // checkModeCompatibility(dec);
-            myInstanceEnvironment.completeRecord(id, table);
-            //env.setSuccess();
-            if (myInstanceEnvironment.flags
-                    .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
-                PrettyCTranslation prettyT =
-                        new PrettyCTranslation(myInstanceEnvironment, table,
-                                dec, err);
-                tw = new TreeWalker(prettyT);
-                tw.visit(dec);
-                System.out.println("");
-            }
 
             if (myInstanceEnvironment.flags
                     .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
@@ -466,10 +376,6 @@ public class Controller {
                     //arc.printArchiveList();
                 }
                 myInstanceEnvironment.printModules();
-            }
-
-            if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_VERIFY_VC)) {
-                verifyModuleDec(symbolTable, table, dec);
             }
 
             if (myInstanceEnvironment.flags
@@ -551,19 +457,8 @@ public class Controller {
             TreeWalker tw2 = new TreeWalker(postProc);
             tw2.visit(dec);
 
-            if (myInstanceEnvironment.showEnv()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
-                myInstanceEnvironment.completeRecord(id, table);
-                return;
-            }
             myInstanceEnvironment.setCurrentTargetFileName(file.getName());
             MathSymbolTable mathSymTab = getMathSymbolTable(dec, symbolTable);
-            OldSymbolTable table = analyzeModuleDec(symbolTable, dec);
-
-            // checkModeCompatibility(dec);
-            myInstanceEnvironment.completeRecord(id, table);
-            //env.setSuccess();
 
             if (myInstanceEnvironment.flags
                     .isFlagSet(JavaTranslator.JAVA_FLAG_TRANSLATE)) {
@@ -583,9 +478,7 @@ public class Controller {
                 }
                 myInstanceEnvironment.printModules();
             }
-            if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_VERIFY_VC)) {
-                //verifyModuleDec(symbolTable, table, dec);
-            }
+
             if (myInstanceEnvironment.flags
                     .isFlagSet(VCGenerator.FLAG_ALTVERIFY_VC)) {
                 generateVCs(symbolTable, dec);
@@ -609,87 +502,6 @@ public class Controller {
     private File createFileFromSource(ModuleID id, String fileName) {
         String ext = id.getModuleKind().getExtension();
         return new File(fileName + ext);
-    }
-
-    private void simpleTranslateNewTargetFile(File file,
-            MathSymbolTableBuilder symbolTable) {
-        //long start = System.currentTimeMillis();
-        //File file = null;
-        try {
-            // AST debugging file output
-            /*astDumpFile = new File(myInstanceEnvironment.getTargetFile()+".ast");
-             try{
-             FileWriter fstream = new FileWriter(astDumpFile, true);
-             BufferedWriter out = new BufferedWriter(fstream);
-             out.write("\nAST for: "+myInstanceEnvironment.getTargetFile()+"\n");
-             out.close();
-             }catch(Exception ex){
-            	
-             }*/
-            myInstanceEnvironment.getErrorHandler().setFile(file);
-            myInstanceEnvironment.setTargetFile(file);
-            //myInstanceEnvironment.setCurrentTargetFileName(file.getName());
-            ModuleDec dec = buildModuleDec(file);
-            ModuleID id = ModuleID.createID(dec);
-
-            checkNameCompatibility(dec.getName().getLocation(), id, file);
-            //checkDirectoryCompatibility(dec, id, file);
-            //file = createFileFromSource(id, fileName);
-            //myInstanceEnvironment.getErrorHandler().setFile(file);
-            //myInstanceEnvironment.setTargetFile(file);
-            myInstanceEnvironment.constructRecord(id, file, dec);
-            compileImportedModules(dec, symbolTable);
-
-            // Invoke PreProcessor 
-            //PreProcessor preProc = new PreProcessor(myInstanceEnvironment);
-            //TreeWalker tw = new TreeWalker(preProc);
-            //tw.visit(dec);
-            // Have compile imported modules bring in extra stuff that 
-            // the PreProcessor may have added manually.
-            compileImportedModules(dec, symbolTable);
-
-            if (myInstanceEnvironment.showEnv()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
-                myInstanceEnvironment.completeRecord(id, table);
-                return;
-            }
-            myInstanceEnvironment.setCurrentTargetFileName(file.getName());
-            OldSymbolTable table = analyzeModuleDec(symbolTable, dec);
-
-            // checkModeCompatibility(dec);
-            myInstanceEnvironment.completeRecord(id, table);
-            //env.setSuccess();
-            if (myInstanceEnvironment.flags
-                    .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)
-                    || myInstanceEnvironment.flags
-                            .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
-                    || myInstanceEnvironment.flags
-                            .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
-                translatePrettyModuleDec(file, table, dec);
-                //System.out.println("Translated: " + file.toString());
-                /*if(myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)){
-                 myArchive.addFileToArchive(file);
-                 if(!myCompileReport.hasError()){
-                 if(myArchive.createJar()){
-                 myCompileReport.setJarSuccess();
-                 }
-                 }
-                 }*/
-                myInstanceEnvironment.printModules();
-            }
-
-        }
-        catch (CompilerException cex) {
-            myInstanceEnvironment.abortCompile(file);
-            myCompileReport.setError();
-        }
-        catch (Exception ex) {
-            BugReport.abortProgram(ex, myInstanceEnvironment);
-            myCompileReport.setError();
-        }
-        //long end = System.currentTimeMillis();
-        //System.out.println("Execution time: " + (end - start) + " ms");
     }
 
     private void simpleTranslateNewTargetSource(MetaFile inputFile,
@@ -750,39 +562,7 @@ public class Controller {
             myInstanceEnvironment.constructRecord(id, file, dec);
             compileImportedModules(dec, symbolTable);
 
-            if (myInstanceEnvironment.showEnv()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
-                myInstanceEnvironment.completeRecord(id, table);
-                return;
-            }
             myInstanceEnvironment.setCurrentTargetFileName(file.getName());
-            OldSymbolTable table = analyzeModuleDec(symbolTable, dec);
-
-            // checkModeCompatibility(dec);
-            myInstanceEnvironment.completeRecord(id, table);
-            //env.setSuccess();
-            if (myInstanceEnvironment.flags
-                    .isFlagSet(PrettyJavaTranslator.FLAG_TRANSLATE)
-                    || myInstanceEnvironment.flags
-                            .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)
-                    || myInstanceEnvironment.flags
-                            .isFlagSet(PrettyCTranslation.FLAG_PRETTY_C_TRANSLATE)) {
-                if (inputFile.getIsCustomLoc()) {
-                    file = inputFile.getMyCustomFile();
-                }
-                translatePrettyModuleDec(file, table, dec);
-                //System.out.println("Translated: " + file.toString());
-                /*if(myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)){
-                 myArchive.addFileToArchive(file);
-                 if(!myCompileReport.hasError()){
-                 if(myArchive.createJar()){
-                 myCompileReport.setJarSuccess();
-                 }
-                 }
-                 }*/
-                myInstanceEnvironment.printModules();
-            }
 
         }
         catch (CompilerException cex) {
@@ -915,45 +695,12 @@ public class Controller {
             PostProcessor postProc = new PostProcessor(symbolTable);
             TreeWalker tw2 = new TreeWalker(postProc);
             tw2.visit(dec);
-
-            if (myInstanceEnvironment.showEnv()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
-                myInstanceEnvironment.completeRecord(id, table);
-                return;
-            }
-
-            //			// --ny
-            //			if (myInstanceEnvironment.perf()) { // DEBUG
-            if (myInstanceEnvironment.PVCs()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
-                myInstanceEnvironment.completeRecord(id, table);
-                return;
-            }
-
             MathSymbolTable mathSymTab = getMathSymbolTable(dec, symbolTable);
-            OldSymbolTable table = analyzeModuleDec(symbolTable, dec);
 
-            myInstanceEnvironment.completeRecord(id, table);
-            // System.out.println(dec.asString(0,2));
-            //if (myInstanceEnvironment.flags.isFlagSet(Translator.FLAG_TRANSLATE)) {
-            //if(arc.needToTranslate(file)) translateModuleDec(table, dec);
-            //if(env.createJarOn() && arc.needToTranslate(file)){
             if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
                 translateModuleDec(file, symbolTable, dec);
                 //arc.addFiletoArchive(file);
                 //arc.printArchiveList();
-            }
-            //}
-            if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_VERIFY_VC)) {
-                //verifyModuleDec(context, dec);
-                // I don't think this is necessary
-            }
-
-            // --ny
-            if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_PERF_VC)) {
-                verifyModuleDec(symbolTable, table, dec);
             }
         }
         catch (CompilerException cex) {
@@ -975,8 +722,6 @@ public class Controller {
             ModuleDec dec = getModuleDec(ast);
             ModuleID id = ModuleID.createID(dec);
 
-            //System.out.println(file.toString() + " Controller(772)");
-            //System.out.println(id + " Controller(773)");
             checkNameCompatibility(dec.getName().getLocation(), id, file);
             myInstanceEnvironment.constructRecord(id, file, dec);
 
@@ -992,32 +737,13 @@ public class Controller {
             TreeWalker tw2 = new TreeWalker(postProc);
             tw2.visit(dec);
 
-            if (myInstanceEnvironment.showEnv()) { // DEBUG
-                OldSymbolTable table =
-                        new OldSymbolTable(id, myInstanceEnvironment);
-                myInstanceEnvironment.completeRecord(id, table);
-                return;
-            }
             MathSymbolTable mathSymTab = getMathSymbolTable(dec, symbolTable);
-            OldSymbolTable table = analyzeModuleDec(symbolTable, dec);
 
-            myInstanceEnvironment.completeRecord(id, table);
-            // System.out.println(dec.asString(0,2));
-            //if (myInstanceEnvironment.flags.isFlagSet(Translator.FLAG_TRANSLATE)) {
-            //if(arc.needToTranslate(file)) translateModuleDec(table, dec);
-            //if(env.createJarOn() && arc.needToTranslate(file)){
             if (myInstanceEnvironment.flags.isFlagSet(Archiver.FLAG_ARCHIVE)) {
                 if (importFile.getIsCustomLoc()) {
                     file = importFile.getMyCustomFile();
                 }
                 translateModuleDec(file, symbolTable, dec);
-                //arc.addFiletoArchive(file);
-                //arc.printArchiveList();
-            }
-            //}
-            if (myInstanceEnvironment.flags.isFlagSet(Verifier.FLAG_VERIFY_VC)) {
-                //verifyModuleDec(context, dec);
-                // I don't think this is necessary
             }
         }
         catch (CompilerException cex) {
@@ -1426,54 +1152,6 @@ public class Controller {
     // -----------------------------------------------------------
     // Analysis Methods
     // -----------------------------------------------------------
-    private OldSymbolTable analyzeModuleDec(ScopeRepository aRealSymbolTable,
-            ModuleDec dec) throws CompilerException {
-        OldSymbolTable table = getSymbolTable(aRealSymbolTable, dec);
-        return table;
-    }
-
-    private OldSymbolTable getSymbolTable(ScopeRepository aRealSymbolTable,
-            ModuleDec dec) throws CompilerException {
-        int initErrorCount = err.getErrorCount();
-
-        // change to whatever visitor logic you want to use
-        //VisitorPrintStructure vps = new VisitorPrintStructure();
-        //TreeWalker twvps = new TreeWalker(vps);
-        //twvps.visit(dec);
-        OldSymbolTable table =
-                new OldSymbolTable(ModuleID.createID(dec),
-                        myInstanceEnvironment);
-        OldPopulator populator = new OldPopulator(table, myInstanceEnvironment);
-        populator.visitModuleDec(dec);
-
-        // *** This next section is for testing the new tree walker ***
-        //SanityCheck Walker -JCK
-        VisitorSanityCheck sctwv =
-                new VisitorSanityCheck(myInstanceEnvironment);
-        TreeWalker tw = new TreeWalker(sctwv);
-        tw.visit(dec);
-
-        // ************************************************************
-        if (err.getErrorCount() != initErrorCount) {
-            throw new CompilerException();
-        }
-
-        table.bindTypeNames();
-
-        if (err.getErrorCount() != initErrorCount) {
-            throw new CompilerException();
-        }
-
-        Analyzer analyzer =
-                new Analyzer(aRealSymbolTable, table, myInstanceEnvironment);
-        analyzer.visitModuleDec(dec);
-
-        if (err.getErrorCount() != initErrorCount) {
-            throw new CompilerException();
-        }
-
-        return table;
-    }
 
     private MathSymbolTable getMathSymbolTable(ModuleDec dec,
             MathSymbolTableBuilder symbolTable) {
@@ -1571,136 +1249,6 @@ public class Controller {
         }
     }
 
-    private void verifyModuleDec(ScopeRepository realTable,
-            OldSymbolTable table, ModuleDec dec) {
-        Verifier verifier =
-                new Verifier(realTable, table, myInstanceEnvironment);
-        verifier.visitModuleDec(dec);
-        verifier.outputAsrt();
-
-        //Regardless of whether or not we intend to do any proving, we sanity
-        //check resulting VCs so that we fail early if there's a problem.  The
-        //most likely problem is that some Exp in one of the generated VCs got
-        //through without typing information--which would cause the Prover to
-        //(rightly) crash.
-        Iterable<VerificationCondition> vcsToProve =
-                getVCsToProve(verifier, dec);
-
-        try {
-            for (VerificationCondition vc : vcsToProve) {
-                AlternativeProver.convertToImmutableVC(vc);
-            }
-        }
-        catch (Exception e) {
-            throw new RuntimeException("INVARIANT FAILED: Generated VCs are "
-                    + "not valid Prover input!  See 'caused by' Exception for "
-                    + "details.", e);
-        }
-        //End sanity check
-
-        if (myInstanceEnvironment.flags.isFlagSet(Prover.FLAG_LEGACY_PROVE)
-                || myInstanceEnvironment.flags.isFlagSet(Prover.FLAG_PROVE)) {
-
-            try {
-                //Make sure we've got at least one VC to prove so that we don't
-                //waste time and clutter output "proving" sets of zero VCs
-                if (vcsToProve.iterator().hasNext()) {
-                    new Prover(vcsToProve, myInstanceEnvironment);
-                }
-            }
-            catch (ProverException e) {
-                err.error(e.toString());
-            }
-        }
-        else if (myInstanceEnvironment.flags
-                .isFlagSet(CongruenceClassProver.FLAG_PROVE)) {
-            try {
-                java.util.List<VC> vcs = new LinkedList<VC>();
-                for (VerificationCondition originalVC : vcsToProve) {
-                    vcs.add(edu.clemson.cs.r2jt.proving2.Utilities
-                            .convertToImmutableVC(originalVC));
-                }
-                ModuleScope scope =
-                        realTable.getModuleScope(new ModuleIdentifier(dec));
-                CongruenceClassProver ccProver =
-                        new CongruenceClassProver(realTable.getTypeGraph(),
-                                vcs, scope, myInstanceEnvironment,
-                                myInstanceEnvironment.getProverListener());
-                try {
-                    ccProver.start();
-                }
-                catch (IOException ioe) {
-                    throw new RuntimeException(ioe);
-                }
-            }
-            catch (NoSuchSymbolException nsse) {
-                //Can't find the module we're in.  Shouldn't be possible.
-                throw new RuntimeException(nsse);
-            }
-        }
-        else if (myInstanceEnvironment.flags
-                .isFlagSet(AlgebraicProver.FLAG_PROVE)) {
-            try {
-                ModuleScope scope =
-                        realTable.getModuleScope(new ModuleIdentifier(dec));
-
-                java.util.List<VC> vcs = new LinkedList<VC>();
-                for (VerificationCondition originalVC : vcsToProve) {
-                    vcs.add(edu.clemson.cs.r2jt.proving2.Utilities
-                            .convertToImmutableVC(originalVC));
-                }
-
-                AlgebraicProver prover =
-                        new AlgebraicProver(
-                                realTable.getTypeGraph(),
-                                vcs,
-                                scope,
-                                myInstanceEnvironment.flags
-                                        .isFlagSet(AlgebraicProver.FLAG_INTERACTIVE),
-                                myInstanceEnvironment, myInstanceEnvironment
-                                        .getProverListener());
-
-                try {
-                    prover.start();
-                }
-                catch (IOException ioe) {
-                    throw new RuntimeException(ioe);
-                }
-            }
-            catch (NoSuchSymbolException nsse) {
-                //Can't find the module we're in.  Shouldn't be possible.
-                throw new RuntimeException(nsse);
-            }
-        }
-    }
-
-    private Iterable<VerificationCondition> getVCsToProve(Verifier verifier,
-            ModuleDec verificationTarget) {
-        ModuleDec targetDec =
-                myInstanceEnvironment.getModuleDec(myInstanceEnvironment
-                        .getModuleID(myInstanceEnvironment.getTargetFile()));
-
-        Iterable<VerificationCondition> vcsToProve = null;
-
-        if (targetDec == verificationTarget
-                && verificationTarget instanceof MathModuleDec) {
-            vcsToProve =
-                    new TheoremToVCsConverter(
-                            (MathModuleDec) verificationTarget);
-        }
-        else {
-            Collection<AssertiveCode> VCs = verifier.getFinalVCs();
-
-            if (VCs == null) {
-                VCs = new LinkedList<AssertiveCode>();
-            }
-
-            vcsToProve = new VCCollector(VCs);
-        }
-
-        return vcsToProve;
-    }
-
     // ------------------------------------------------------------
     // Translation Related Methods
     // ------------------------------------------------------------
@@ -1722,42 +1270,6 @@ public class Controller {
             tw.visit(dec);
             translator.outputCode(file);
         }
-    }
-
-    private void translatePrettyModuleDec(File file, OldSymbolTable table,
-            ModuleDec dec) {
-        /*PrettyJavaTranslator translator =
-         new PrettyJavaTranslator(myInstanceEnvironment, table, dec, err);
-         String targetFile = myInstanceEnvironment.getTargetFile().toString();
-         String thisFile = dec.getName().getFile().toString();
-         // We only translate if this is the target file or if file is stale
-         if ((thisFile.equals(targetFile)) || translator.needToTranslate(file)) {
-         //System.out.println("Starting Translation: "+dec.getName().getName());
-         translator.visitModuleDec(dec);
-         //System.out.println("Translated: "+dec.getName().getName());
-         translator.outputJavaCode(file);
-         }*/
-
-        if (myInstanceEnvironment.flags
-                .isFlagSet(PrettyJavaTranslation.FLAG_PRETTY_JAVA_TRANSLATE)) {
-            PrettyJavaTranslation prettyT =
-                    new PrettyJavaTranslation(myInstanceEnvironment, table,
-                            dec, err);
-            TreeWalker tw = new TreeWalker(prettyT);
-            tw.visit(dec);
-
-            prettyT.outputCode(file);
-        }
-        else {
-            PrettyCTranslation prettyT =
-                    new PrettyCTranslation(myInstanceEnvironment, table, dec,
-                            err);
-            TreeWalker tw = new TreeWalker(prettyT);
-            tw.visit(dec);
-
-            prettyT.outputCode(file);
-        }
-
     }
 
     /*

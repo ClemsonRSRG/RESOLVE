@@ -15,8 +15,6 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public class DeductionExp extends LineNumberedExp {
 
@@ -90,11 +88,6 @@ public class DeductionExp extends LineNumberedExp {
         v.visitDeductionExp(this);
     }
 
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getDeductionExpType(this);
-    }
-
     /** Returns a formatted text string of this class. */
     public String asString(int indent, int increment) {
 
@@ -103,7 +96,7 @@ public class DeductionExp extends LineNumberedExp {
         printSpace(indent, sb);
         sb.append("DeductionExp\n");
 
-        sb.append(super.proofCheckInfoToString());
+        sb.append("");
 
         if (myLineNumber != null) {
             printSpace(indent + increment, sb);

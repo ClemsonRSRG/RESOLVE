@@ -14,8 +14,6 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
 
 public class VariableDotExp extends VariableExp {
@@ -105,11 +103,6 @@ public class VariableDotExp extends VariableExp {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitVariableDotExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getVariableDotExpType(this);
     }
 
     /** Returns a formatted text string of this class. */
@@ -206,7 +199,6 @@ public class VariableDotExp extends VariableExp {
                 new VariableDotExp(location, new List<VariableExp>(segments),
                         semanticExp);
 
-        copy.setType(type);
         copy.setMathType(myMathType);
         copy.setMathTypeValue(myMathTypeValue);
 

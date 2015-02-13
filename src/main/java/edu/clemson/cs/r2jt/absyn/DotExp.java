@@ -16,8 +16,6 @@ import java.util.ListIterator;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
 
 public class DotExp extends Exp {
@@ -96,19 +94,12 @@ public class DotExp extends Exp {
         retval =
                 new DotExp(location, newSegments, substitute(semanticExp,
                         substitutions));
-        retval.setType(type);
-
         return retval;
     }
 
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitDotExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getDotExpType(this);
     }
 
     /** Returns a formatted text string of this class. */
@@ -154,11 +145,9 @@ public class DotExp extends Exp {
         while (i.hasNext()) {
             curSegment = i.next();
             clonedSegment = (Exp) Exp.clone(curSegment);
-            clonedSegment.setType(curSegment.getType());
             newSegments.add(clonedSegment);
         }
         clone.setSegments(newSegments);
-        clone.setType(type);
         return clone;
     }
 
@@ -228,7 +217,6 @@ public class DotExp extends Exp {
         }
 
         retval = new DotExp(null, newSegments, newSemanticExp);
-        retval.setType(type);
         retval.setMathType(myMathType);
         retval.setMathTypeValue(myMathTypeValue);
 

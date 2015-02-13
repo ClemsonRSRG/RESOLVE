@@ -12,12 +12,12 @@
  */
 package edu.clemson.cs.r2jt.proving;
 
-import java.util.Iterator;
-
 import edu.clemson.cs.r2jt.absyn.BetweenExp;
 import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.absyn.InfixExp;
+import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
+import edu.clemson.cs.r2jt.proving2.Utilities;
 
 public class Conjuncts extends List<Exp> {
 
@@ -36,7 +36,7 @@ public class Conjuncts extends List<Exp> {
     /**
      * <p>Splits <code>e</code> into conjuncts (X <em>and</em> Y <em>and</em>
      * Z <em>and</em> ...) by adding each conjunct to this list.</p>
-     * 
+     *
      * @param e The expression to split into conjuncts.
      */
     private void splitIntoConjuncts(Exp e) {
@@ -62,7 +62,7 @@ public class Conjuncts extends List<Exp> {
      * <p>Eliminates expressions from <code>expressions</code> that are very
      * obviously <code>true</code>.  Examples are the actual "true" value and
      * equalities with the same thing on the left and right side.</p>
-     *  
+     *
      * @param expressions The expressions to process.
      */
     public void eliminateObviousConjunctsInPlace() {

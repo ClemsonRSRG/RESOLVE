@@ -18,8 +18,6 @@ import edu.clemson.cs.r2jt.data.Mode;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian;
 import edu.clemson.cs.r2jt.typeandpopulate.MTCartesian.Element;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
 
 /**
@@ -202,11 +200,6 @@ public class TupleExp extends Exp {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitTupleExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getTupleExpType(this);
     }
 
     /** Returns a formatted text string of this class. */

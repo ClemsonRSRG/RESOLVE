@@ -12,11 +12,8 @@
  */
 package edu.clemson.cs.r2jt.absyn;
 
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.type.BooleanType;
-import edu.clemson.cs.r2jt.type.Type;
 
 public class BooleanTy extends Ty {
 
@@ -29,8 +26,6 @@ public class BooleanTy extends Ty {
 
     /** The name member. */
     private PosSymbol name;
-
-    private Type retType = BooleanType.INSTANCE;
 
     // ===========================================================
     // Constructors
@@ -86,12 +81,6 @@ public class BooleanTy extends Ty {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitBooleanTy(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return retType;
-        //return v.getNameTyType(this);
     }
 
     /** Returns a formatted text string of this class. */

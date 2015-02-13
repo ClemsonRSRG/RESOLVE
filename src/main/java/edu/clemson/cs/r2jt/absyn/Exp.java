@@ -20,12 +20,8 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
-import edu.clemson.cs.r2jt.type.BooleanType;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.type.TypeMatcher;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.typeandpopulate.MTProper;
 
 public abstract class Exp extends ResolveConceptualElement implements Cloneable {
@@ -36,20 +32,13 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
      *  Addendum HwS: But type should ultimately be set always!  And it is now
      *  set if you turn on -prove as well!
      */
-    protected Type type = null;
     protected MTType myMathType = null;
     protected MTType myMathTypeValue = null;
-
-    /** If the type can be determined in the builder we set it here.  */
-    protected Type bType = null;
 
     //private boolean isLocal = false;
     private int marker = 0;
 
     public abstract void accept(ResolveConceptualVisitor v);
-
-    public abstract Type accept(TypeResolutionVisitor v)
-            throws TypeResolutionException;
 
     public abstract String asString(int indent, int increment);
 
@@ -70,8 +59,6 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
     public String toString(int indent) {
         String exp = "";
         //return this.toString();
-        if (type != null)
-            exp.concat(exp);
         return exp;
     }
 
@@ -257,9 +244,6 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
         }
     }
 
-    /**
-     * @deprecated Use {@link copy copy()} instead.
-     */
     @Deprecated
     public Object clone() {
         try {
@@ -281,21 +265,13 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
         System.out.println("Shouldn't be calling Exp.prettyPrint()!");
     }
 
-    public Type getType() {
-        return type;
-    }
-
-    public void setType(Type t) {
-        type = t;
-    }
-
     public MTType getMathType() {
         return myMathType;
     }
 
     public void setMathType(MTType mathType) {
         if (mathType == null) {
-            System.err.println(this.toString() + this.proofCheckInfoToString());
+            System.err.println(this.toString());
             throw new RuntimeException("Null Math Type on: " + this.getClass());
 
         }
@@ -321,18 +297,6 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
 
     public void setMarker(int i) {
         marker = i;
-    }
-
-    public String proofCheckInfoToString() {
-        String s = "";
-        if (type == null) {
-            s += " >>> TYPE: null\n";
-        }
-        else {
-            s += " >>> TYPE: " + type.toString() + "\n";
-        }
-        s += " >>> Marker: " + marker + "\n";
-        return s;
     }
 
     /**
@@ -450,13 +414,12 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
     public static InfixExp buildImplication(Exp antecedent, Exp consequent) {
         return new InfixExp(antecedent.getLocation(), antecedent,
                 new PosSymbol(antecedent.getLocation(), Symbol
-                        .symbol("implies")), consequent, BooleanType.INSTANCE);
+                        .symbol("implies")), consequent);
     }
 
     public static InfixExp buildConjunction(Exp left, Exp right) {
         return new InfixExp(left.getLocation(), left, new PosSymbol(left
-                .getLocation(), Symbol.symbol("and")), right,
-                BooleanType.INSTANCE);
+                .getLocation(), Symbol.symbol("and")), right);
     }
 
     public static VarExp getTrueVarExp(TypeGraph tg) {
@@ -464,7 +427,6 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
         PosSymbol truePosSym = new PosSymbol();
         truePosSym.setSymbol(trueSym);
         VarExp trueExp = new VarExp(null, null, truePosSym);
-        trueExp.setType(BooleanType.INSTANCE);
         trueExp.setMathType(tg.BOOLEAN);
 
         return trueExp;
@@ -554,9 +516,5 @@ public abstract class Exp extends ResolveConceptualElement implements Cloneable 
 
     public void setLocation(Location locatoin) {
 
-    }
-
-    public Type getBType() {
-        return bType;
     }
 }

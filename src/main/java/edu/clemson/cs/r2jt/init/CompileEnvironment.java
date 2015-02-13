@@ -30,8 +30,6 @@ import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.proving2.ProverListener;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
-import edu.clemson.cs.r2jt.scope.ModuleScope;
-import edu.clemson.cs.r2jt.scope.OldSymbolTable;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
 import edu.clemson.cs.r2jt.utilities.FlagManager;
@@ -270,19 +268,6 @@ public class CompileEnvironment {
      */
     public void setStdUsesDepends(List<List<UsesItem>> list) {
         stdUsesDepends = list;
-    }
-
-    /**
-     * Sets the <code>stdUsesDepends</code> lists to the provided updated list
-     * @param list The <code>List</code> of <code>List</code> of <code>UsesItem</code> which will be assigned to the global <code>stdUsesDepends</code>
-     */
-    public List<OldSymbolTable> getSymbolTables() {
-        List<OldSymbolTable> stList = new List<OldSymbolTable>();
-        //Map<ModuleID, ModuleRecord> map = myOldEnvironment.getMap();
-        for (java.util.Map.Entry<ModuleID, ModuleRecord> st : map.entrySet()) {
-            stList.add(st.getValue().getSymbolTable());
-        }
-        return stList;
     }
 
     /*public static void newInstance() {
@@ -570,25 +555,10 @@ public class CompileEnvironment {
     }
 
     /**
-     * Returns the symbol table associated with the specified module.
-     */
-    public OldSymbolTable getSymbolTable(ModuleID id) {
-        return map.get(id).getSymbolTable();
-    }
-
-    /**
      * Returns the map of symbol tables.
      */
     public Map<ModuleID, ModuleRecord> getMap() {
         return map;
-    }
-
-    /**
-     * Returns the module scope associated with the specified module.
-     */
-    public ModuleScope getModuleScope(ModuleID id) {
-        assert map.get(id).getSymbolTable() != null : "symbol table for id is null";
-        return map.get(id).getSymbolTable().getModuleScope();
     }
 
     /**
@@ -619,22 +589,6 @@ public class CompileEnvironment {
     public void setTheories(ModuleID id, List<ModuleID> theories) {
         ModuleRecord record = map.get(id);
         record.setTheories(theories);
-    }
-
-    /**
-     * Places the symbol table for an associated module into the environment and
-     * pops the module from the compilation stack, indicating that compilation
-     * has been completed for this module.
-     */
-    public void completeRecord(ModuleID id, OldSymbolTable table) {
-        ModuleRecord record = map.get(id);
-        record.setSymbolTable(table);
-        ModuleID id2 = stack.pop();
-        assert id == id2 : "id != id2";
-
-        if (!debugOff) {
-            err.message("Complete record: " + id.toString()); //DEBUG
-        }
     }
 
     /**

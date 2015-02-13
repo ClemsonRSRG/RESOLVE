@@ -15,7 +15,6 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.proving.Antecedent;
 import edu.clemson.cs.r2jt.proving.Prover;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PLambda;
@@ -34,7 +33,6 @@ import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 import edu.clemson.cs.r2jt.utilities.FlagManager;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
-import edu.clemson.cs.r2jt.verification.Verifier;
 
 import java.io.File;
 import java.io.FileWriter;

@@ -14,8 +14,6 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public class IfExp extends Exp {
 
@@ -115,11 +113,6 @@ public class IfExp extends Exp {
         v.visitIfExp(this);
     }
 
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getIfExpType(this);
-    }
-
     /** Returns a formatted text string of this class. */
     public String asString(int indent, int increment) {
 
@@ -209,7 +202,6 @@ public class IfExp extends Exp {
         if (thenclause != null)
             clone.setThenclause((Exp) Exp.clone(this.getThenclause()));
         clone.setLocation(this.getLocation());
-        clone.setType(getType());
         return clone;
     }
 
@@ -308,7 +300,6 @@ public class IfExp extends Exp {
         }
 
         Exp result = new IfExp(null, newTest, newThenclause, newElseclause);
-        result.setType(getType());
         return result;
     }
 

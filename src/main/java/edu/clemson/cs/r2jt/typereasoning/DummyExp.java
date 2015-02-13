@@ -17,12 +17,9 @@ import java.util.Map;
 
 import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualVisitor;
-import edu.clemson.cs.r2jt.absyn.TypeResolutionVisitor;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import edu.clemson.cs.r2jt.type.Type;
 
 /**
  * <p>A <code>DummyExp</code> is an <code>Exp</code> guaranteed not to arise
@@ -47,11 +44,6 @@ public class DummyExp extends Exp {
 
     @Override
     public void accept(ResolveConceptualVisitor v) {
-        throw new UnsupportedOperationException("Cannot visit a DummyExp.");
-    }
-
-    @Override
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
         throw new UnsupportedOperationException("Cannot visit a DummyExp.");
     }
 

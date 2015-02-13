@@ -15,8 +15,6 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
 
 public class ProgramDotExp extends ProgramExp {
@@ -161,12 +159,6 @@ public class ProgramDotExp extends ProgramExp {
         v.visitProgramDotExp(this);
     }
 
-    /** Accepts a TypeResolutionVisitor. */
-    @Override
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getProgramDotExpType(this);
-    }
-
     /**
      * <p>Returns a formatted text string of this class.</p>
      *
@@ -235,8 +227,6 @@ public class ProgramDotExp extends ProgramExp {
     protected ProgramDotExp copy() {
         ProgramDotExp c =
                 new ProgramDotExp(myLocation, myQualifier, myExp, mySemanticExp);
-        c.bType = this.bType;
-        c.setType(this.type);
         c.setMathType(this.myMathType);
         c.setMathTypeValue(this.myMathTypeValue);
         return c;

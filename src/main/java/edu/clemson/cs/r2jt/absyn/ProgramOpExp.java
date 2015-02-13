@@ -14,8 +14,6 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTBoolean;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTInteger;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTPrimitive;
@@ -171,11 +169,6 @@ public class ProgramOpExp extends ProgramExp {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitProgramOpExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getProgramOpExpType(this);
     }
 
     /** Returns a formatted text string of this class. */

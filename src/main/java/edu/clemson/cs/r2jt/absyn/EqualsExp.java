@@ -14,9 +14,6 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.BooleanType;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 
@@ -56,7 +53,6 @@ public class EqualsExp extends AbstractFunctionExp {
         this.left = left;
         this.operator = operator;
         this.right = right;
-        super.bType = BooleanType.INSTANCE;
     }
 
     public boolean equivalent(Exp e) {
@@ -161,20 +157,12 @@ public class EqualsExp extends AbstractFunctionExp {
         Exp retval =
                 new EqualsExp(location, substitute(left, substitutions),
                         operator, substitute(right, substitutions));
-
-        retval.setType(type);
-
         return retval;
     }
 
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitEqualsExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getEqualsExpType(this);
     }
 
     /** Returns a formatted text string of this class. */
@@ -254,7 +242,6 @@ public class EqualsExp extends AbstractFunctionExp {
             newExp.setLeft((Exp) Exp.clone(left));
             newExp.setRight((Exp) Exp.clone(right));
             newExp.setOperator(this.operator);
-            newExp.setType(type);
             newExp.setLocation(this.location);
             Exp lft = Exp.replace(left, old, replacement);
             Exp rgt = Exp.replace(right, old, replacement);
@@ -304,7 +291,6 @@ public class EqualsExp extends AbstractFunctionExp {
         if (this.location != null)
             clone.setLocation((Location) this.getLocation().clone());
         clone.setOperator(this.getOperator());
-        clone.setType(type);
         return clone;
     }
 
@@ -365,7 +351,6 @@ public class EqualsExp extends AbstractFunctionExp {
         Exp newRight = Exp.copy(right);
         int newOperator = operator;
         retval = new EqualsExp(null, newLeft, newOperator, newRight);
-        retval.setType(type);
 
         return retval;
     }

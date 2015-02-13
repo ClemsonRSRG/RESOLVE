@@ -14,8 +14,6 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 public class OldExp extends Exp {
@@ -95,7 +93,6 @@ public class OldExp extends Exp {
     /** Sets the exp variable to the specified value. */
     public void setExp(Exp exp) {
         this.exp = exp;
-        setType(exp.getType());
         setMathType(exp.getMathType());
         setMathTypeValue(exp.getMathTypeValue());
     }
@@ -107,11 +104,6 @@ public class OldExp extends Exp {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitOldExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getOldExpType(this);
     }
 
     /** Returns a formatted text string of this class. */
@@ -161,7 +153,6 @@ public class OldExp extends Exp {
         OldExp clone = new OldExp();
         clone.setExp((Exp) Exp.clone(this.getExp()));
         clone.setLocation(this.getLocation());
-        clone.setType(getType());
         return clone;
     }
 
@@ -238,7 +229,6 @@ public class OldExp extends Exp {
     public Exp copy() {
         Exp newExp = Exp.copy(exp);
         newExp = new OldExp(getLocation(), newExp);
-        newExp.setType(getType());
         return newExp;
     }
 }

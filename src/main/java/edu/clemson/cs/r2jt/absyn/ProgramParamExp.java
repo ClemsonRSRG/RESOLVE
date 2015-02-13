@@ -15,8 +15,6 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
 
 public class ProgramParamExp extends ProgramExp {
@@ -63,7 +61,6 @@ public class ProgramParamExp extends ProgramExp {
                 new ProgramParamExp(location, name, newArguments,
                         (ProgramExp) substitute(semanticExp, substitutions));
 
-        retval.setType(type);
         return retval;
     }
 
@@ -126,11 +123,6 @@ public class ProgramParamExp extends ProgramExp {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitProgramParamExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getProgramParamExpType(this);
     }
 
     /** Returns a formatted text string of this class. */
@@ -233,7 +225,6 @@ public class ProgramParamExp extends ProgramExp {
         ProgramParamExp result =
                 new ProgramParamExp(location, name, arguments, semanticExp);
 
-        result.setType(getType());
         result.setMathType(myMathType);
         result.setMathTypeValue(myMathTypeValue);
 

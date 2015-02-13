@@ -35,7 +35,7 @@ import edu.clemson.cs.r2jt.absyn.InfixExp;
 import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
-import edu.clemson.cs.r2jt.population.Populator;
+import edu.clemson.cs.r2jt.typeandpopulate.Populator;
 import java.util.*;
 
 /**

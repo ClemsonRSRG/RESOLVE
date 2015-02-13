@@ -12,17 +12,11 @@
  */
 package edu.clemson.cs.r2jt.absyn;
 
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
-import edu.clemson.cs.r2jt.init.Environment;
-import edu.clemson.cs.r2jt.type.BooleanType;
-import edu.clemson.cs.r2jt.type.ConstructedType;
-import edu.clemson.cs.r2jt.type.IndirectType;
-import edu.clemson.cs.r2jt.type.Type;
 
 public class IsInExp extends AbstractFunctionExp {
 
@@ -48,8 +42,6 @@ public class IsInExp extends AbstractFunctionExp {
 
     /** The right member. */
     private Exp right;
-
-    private Type retType = BooleanType.INSTANCE;
 
     // ===========================================================
     // Constructors
@@ -153,56 +145,12 @@ public class IsInExp extends AbstractFunctionExp {
         Exp retval =
                 new EqualsExp(location, substitute(left, substitutions),
                         operator, substitute(right, substitutions));
-
-        retval.setType(type);
-
         return retval;
     }
 
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitIsInExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return getKnownType(v);
-        //return v.getEqualsExpType(this);
-    }
-
-    /** Returns the known type for this class. */
-    private Type getKnownType(TypeResolutionVisitor v)
-            throws TypeResolutionException {
-
-        v.getMathExpType(this.getLeft());
-
-        //System.out.println("IS_IN type check here");
-        //Type t1 = v.getMathExpType(this.getLeft());
-        Type t2 = v.getMathExpType(this.getRight());
-
-        // if t2 made using powerset_expression, need to convert it
-        // to the math type (ConstructedType)
-        if (t2 instanceof IndirectType) {
-            t2 = t2.toMath();
-        }
-
-        // if t2 made using set_constructor
-        if (t2 instanceof ConstructedType) {
-            if (((ConstructedType) t2).getName().getName().equalsIgnoreCase(
-                    "Set")
-                    || ((ConstructedType) t2).getArgs().size() != 1) {
-                // Manually set the return type of is_in statement
-                Type b = retType;
-                this.setType(b);
-                return b;
-            }
-        }
-        // t2 is not a set at all
-        else {
-            //String msg = "The second parameter to is_in must be a set, found: " + this.getRight().toString();
-            //err.error(this.getLocation(), msg);
-        }
-        return retType;
     }
 
     /** Returns a formatted text string of this class. */
@@ -282,7 +230,6 @@ public class IsInExp extends AbstractFunctionExp {
             newExp.setLeft((Exp) Exp.clone(left));
             newExp.setRight((Exp) Exp.clone(right));
             newExp.setOperator(this.operator);
-            newExp.setType(type);
             newExp.setLocation(this.location);
             Exp lft = Exp.replace(left, old, replacement);
             Exp rgt = Exp.replace(right, old, replacement);
@@ -332,7 +279,6 @@ public class IsInExp extends AbstractFunctionExp {
         if (this.location != null)
             clone.setLocation((Location) this.getLocation().clone());
         clone.setOperator(this.getOperator());
-        clone.setType(type);
         return clone;
     }
 
