@@ -20,7 +20,7 @@ import edu.clemson.cs.r2jt.rewriteprover.model.Conjunct;
 import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.rewriteprover.model.Site;
 import edu.clemson.cs.r2jt.rewriteprover.proofsteps.ModifyConsequentStep;
-import edu.clemson.cs.r2jt.misc.Mapping;
+import edu.clemson.cs.r2jt.misc.Utils.Mapping;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;

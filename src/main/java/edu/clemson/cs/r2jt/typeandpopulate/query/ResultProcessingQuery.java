@@ -19,7 +19,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.clemson.cs.r2jt.misc.Mapping;
+import edu.clemson.cs.r2jt.misc.Utils.Mapping;
 
 /**
  * <p>An implementation of {@link SymbolQuery SymbolQuery} that decorates an

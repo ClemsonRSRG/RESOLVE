@@ -37,7 +37,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.ProgramVariableQuery;
 import edu.clemson.cs.r2jt.typereasoning.*;
 import edu.clemson.cs.r2jt.misc.HardCoded;
-import edu.clemson.cs.r2jt.misc.Indirect;
+import edu.clemson.cs.r2jt.misc.Utils.Indirect;
 import edu.clemson.cs.r2jt.misc.SourceErrorException;
 import java.util.Arrays;
 import java.util.Comparator;

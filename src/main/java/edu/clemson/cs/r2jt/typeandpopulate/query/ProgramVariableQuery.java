@@ -19,7 +19,7 @@ import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.searchers.NameSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.PossiblyQualifiedPath;
-import edu.clemson.cs.r2jt.misc.Mapping;
+import edu.clemson.cs.r2jt.misc.Utils.Mapping;
 
 /**
  * <p>The type of query used when looking for a variable name as found in

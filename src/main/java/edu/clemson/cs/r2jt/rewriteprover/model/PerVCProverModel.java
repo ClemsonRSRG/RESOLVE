@@ -35,7 +35,7 @@ import edu.clemson.cs.r2jt.rewriteprover.utilities.SimpleArrayList;
 import edu.clemson.cs.r2jt.rewriteprover.utilities.UnsafeIteratorLinkedList;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.misc.FlagManager;
-import edu.clemson.cs.r2jt.misc.Mapping;
+import edu.clemson.cs.r2jt.misc.Utils.Mapping;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
@@ -272,7 +272,7 @@ public final class PerVCProverModel {
      * will be alerted before change events go out so that it can stop modifying
      * the model.</p>
      *
-     * @param l
+     * @param p
      */
     public void setAutomatedProver(AutomatedProver p) {
         myAutomatedProver = p;
@@ -333,7 +333,7 @@ public final class PerVCProverModel {
      * requisite facts are available at each step (but even if the model is not
      * otherwise exactly the same as when each step was first enacted.)</p>
      *
-     * @param steps
+     * @param step
      */
     public void mimic(ProofStep step) {
 

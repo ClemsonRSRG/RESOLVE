@@ -25,7 +25,7 @@ import edu.clemson.cs.r2jt.absyn.AlternativeExp;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.misc.Mapping;
+import edu.clemson.cs.r2jt.misc.Utils.Mapping;
 import edu.clemson.cs.r2jt.misc.RCollections;
 
 public class PAlternatives extends PExp {

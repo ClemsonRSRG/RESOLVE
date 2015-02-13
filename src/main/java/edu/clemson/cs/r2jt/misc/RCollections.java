@@ -12,6 +12,9 @@
  */
 package edu.clemson.cs.r2jt.misc;
 
+import edu.clemson.cs.r2jt.misc.Utils.Mapping;
+import edu.clemson.cs.r2jt.misc.Utils.Mapping3;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;

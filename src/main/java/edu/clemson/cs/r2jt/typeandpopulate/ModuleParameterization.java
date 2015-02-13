@@ -24,7 +24,7 @@ import java.util.Map;
 
 import edu.clemson.cs.r2jt.absyn.ModuleArgumentItem;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry.ParameterMode;
-import edu.clemson.cs.r2jt.misc.Mapping3;
+import edu.clemson.cs.r2jt.misc.Utils.Mapping3;
 import edu.clemson.cs.r2jt.misc.RCollections;
 
 public class ModuleParameterization {

@@ -28,7 +28,7 @@ import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.rewriteprover.model.Site;
 import edu.clemson.cs.r2jt.rewriteprover.model.Theorem;
 import edu.clemson.cs.r2jt.rewriteprover.proofsteps.ExistentialInstantiationStep;
-import edu.clemson.cs.r2jt.misc.Mapping;
+import edu.clemson.cs.r2jt.misc.Utils.Mapping;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;

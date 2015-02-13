@@ -14,7 +14,7 @@ package edu.clemson.cs.r2jt.rewriteprover.model;
 
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.r2jt.rewriteprover.justifications.Justification;
-import edu.clemson.cs.r2jt.misc.Mapping;
+import edu.clemson.cs.r2jt.misc.Utils.Mapping;
 
 /**
  *
