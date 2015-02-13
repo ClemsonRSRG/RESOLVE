@@ -10,14 +10,13 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.proving;
+package edu.clemson.cs.r2jt.proving2;
 
 import edu.clemson.cs.r2jt.absyn.BetweenExp;
 import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.absyn.InfixExp;
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
-import edu.clemson.cs.r2jt.proving2.Utilities;
 
 public class Conjuncts extends List<Exp> {
 

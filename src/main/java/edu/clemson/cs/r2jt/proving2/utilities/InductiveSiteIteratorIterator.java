@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.r2jt.proving2.utilities;
 
-import edu.clemson.cs.r2jt.proving.DummyIterator;
+import edu.clemson.cs.r2jt.proving2.iterators.DummyIterator;
 import edu.clemson.cs.r2jt.proving2.model.Site;
 import java.util.Iterator;
 import java.util.NoSuchElementException;

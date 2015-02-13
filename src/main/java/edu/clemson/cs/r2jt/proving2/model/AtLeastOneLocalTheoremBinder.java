@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.r2jt.proving2.model;
 
-import edu.clemson.cs.r2jt.proving.ChainingIterator;
+import edu.clemson.cs.r2jt.proving2.iterators.ChainingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel.AbstractBinder;
 import java.util.Iterator;

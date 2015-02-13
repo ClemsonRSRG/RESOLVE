@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.r2jt.proving2.automators;
 
-import edu.clemson.cs.r2jt.proving.ChainingIterator;
-import edu.clemson.cs.r2jt.proving.DummyIterator;
+import edu.clemson.cs.r2jt.proving2.iterators.ChainingIterator;
+import edu.clemson.cs.r2jt.proving2.iterators.DummyIterator;
 import edu.clemson.cs.r2jt.proving2.AutomatedProver;
 import edu.clemson.cs.r2jt.proving2.model.Theorem;
 import edu.clemson.cs.r2jt.proving2.applications.Application;

@@ -13,8 +13,8 @@
 package edu.clemson.cs.r2jt.proving2.model;
 
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.immutableadts.ArrayBackedImmutableList;
+import edu.clemson.cs.r2jt.proving2.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException;
 import java.util.Collections;
 import java.util.Iterator;

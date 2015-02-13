@@ -20,7 +20,7 @@ import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.proving.Conjuncts;
+import edu.clemson.cs.r2jt.proving2.Conjuncts;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving2.Antecedent;
 import edu.clemson.cs.r2jt.proving2.Consequent;

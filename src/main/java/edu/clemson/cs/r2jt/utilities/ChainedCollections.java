@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import edu.clemson.cs.r2jt.proving.ChainingIterator;
+import edu.clemson.cs.r2jt.proving2.iterators.ChainingIterator;
 
 public class ChainedCollections<T> extends AbstractCollection<T> {
 

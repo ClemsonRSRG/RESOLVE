@@ -10,11 +10,11 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.proving.immutableadts;
+package edu.clemson.cs.r2jt.proving2.immutableadts;
 
 import java.util.Iterator;
 
-import edu.clemson.cs.r2jt.proving.DummyIterator;
+import edu.clemson.cs.r2jt.proving2.iterators.DummyIterator;
 
 public class EmptyImmutableList<E> extends AbstractImmutableList<E> {
 

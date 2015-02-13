@@ -13,7 +13,6 @@
 package edu.clemson.cs.r2jt.proving.absyn;
 
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -27,10 +26,9 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol.DisplayType;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol.Quantification;
-import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.immutableadts.ArrayBackedImmutableList;
+import edu.clemson.cs.r2jt.proving2.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.Utilities;
-import edu.clemson.cs.r2jt.proving2.model.Site;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.Arrays;
 import java.util.Collections;

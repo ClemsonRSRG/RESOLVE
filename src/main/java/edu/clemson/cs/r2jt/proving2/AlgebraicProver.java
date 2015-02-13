@@ -14,9 +14,8 @@ package edu.clemson.cs.r2jt.proving2;
 
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.proving.Prover;
-import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.immutableadts.ArrayBackedImmutableList;
+import edu.clemson.cs.r2jt.proving2.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.gui.JProverFrame;
 import edu.clemson.cs.r2jt.proving2.justifications.Library;

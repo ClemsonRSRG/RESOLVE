@@ -12,14 +12,14 @@
  */
 package edu.clemson.cs.r2jt.proving2.model;
 
-import edu.clemson.cs.r2jt.proving.ChainingIterator;
-import edu.clemson.cs.r2jt.proving.DummyIterator;
-import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
+import edu.clemson.cs.r2jt.proving2.iterators.ChainingIterator;
+import edu.clemson.cs.r2jt.proving2.iterators.DummyIterator;
+import edu.clemson.cs.r2jt.proving2.iterators.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving.absyn.BindingException;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol.Quantification;
-import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.AutomatedProver;
 import edu.clemson.cs.r2jt.proving2.VC;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
@@ -28,7 +28,6 @@ import edu.clemson.cs.r2jt.proving2.justifications.Justification;
 import edu.clemson.cs.r2jt.proving2.proofsteps.LabelStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ModifyConsequentStep;
 import edu.clemson.cs.r2jt.proving2.proofsteps.ProofStep;
-import edu.clemson.cs.r2jt.proving2.transformations.ExistentialInstantiation.ConsequentBasedBinder;
 import edu.clemson.cs.r2jt.proving2.transformations.ReplaceTheoremInConsequentWithTrue;
 import edu.clemson.cs.r2jt.proving2.transformations.Transformation;
 import edu.clemson.cs.r2jt.proving2.utilities.InductiveSiteIteratorIterator;

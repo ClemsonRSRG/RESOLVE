@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.r2jt.proving2.transformations;
 
-import edu.clemson.cs.r2jt.proving.LazyMappingIterator;
+import edu.clemson.cs.r2jt.proving2.iterators.LazyMappingIterator;
 import edu.clemson.cs.r2jt.proving2.applications.Application;
 import edu.clemson.cs.r2jt.proving2.model.Conjunct;
 import edu.clemson.cs.r2jt.proving2.model.Consequent;

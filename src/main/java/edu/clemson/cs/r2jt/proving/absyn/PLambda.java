@@ -12,9 +12,8 @@
  */
 package edu.clemson.cs.r2jt.proving.absyn;
 
-import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.SingletonImmutableList;
+import edu.clemson.cs.r2jt.proving2.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.immutableadts.SingletonImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 

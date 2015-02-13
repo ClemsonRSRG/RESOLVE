@@ -10,14 +10,14 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.proving.immutableadts;
+package edu.clemson.cs.r2jt.proving2.immutableadts;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import edu.clemson.cs.r2jt.proving.ArrayIterator;
+import edu.clemson.cs.r2jt.proving2.iterators.ArrayIterator;
 
 public class ArrayBackedImmutableList<E> extends AbstractImmutableList<E> {
 

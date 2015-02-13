@@ -25,9 +25,9 @@ import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.proving.absyn.PExp;
 import edu.clemson.cs.r2jt.proving.absyn.PExpVisitor;
 import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
-import edu.clemson.cs.r2jt.proving.immutableadts.EmptyImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.proving2.immutableadts.EmptyImmutableList;
+import edu.clemson.cs.r2jt.proving2.immutableadts.ArrayBackedImmutableList;
+import edu.clemson.cs.r2jt.proving2.immutableadts.ImmutableList;
 
 public class ImmutableConjuncts implements Iterable<PExp> {
 
