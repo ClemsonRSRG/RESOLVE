@@ -12,8 +12,10 @@
  */
 package edu.clemson.cs.r2jt.proving.absyn;
 
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
-import edu.clemson.cs.r2jt.proving.absyn.PSymbol.Quantification;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol.Quantification;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.Iterator;
 import org.junit.Test;

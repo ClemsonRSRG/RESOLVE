@@ -14,9 +14,9 @@ package edu.clemson.cs.r2jt.typeandpopulate.entry;
 
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.proving2.immutableadts.ArrayBackedImmutableList;
-import edu.clemson.cs.r2jt.proving2.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.proving2.immutableadts.LazilyMappedImmutableList;
+import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ArrayBackedImmutableList;
+import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.rewriteprover.immutableadts.LazilyMappedImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.utilities.Mapping;

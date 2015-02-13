@@ -17,8 +17,8 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import java.util.Map;
 
 import edu.clemson.cs.r2jt.absyn.Exp;
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving2.Utilities;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
+import edu.clemson.cs.r2jt.rewriteprover.Utilities;
 import edu.clemson.cs.r2jt.typeandpopulate.MTNamed;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;

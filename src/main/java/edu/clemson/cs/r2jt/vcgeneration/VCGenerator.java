@@ -19,7 +19,7 @@ import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.proving2.VC;
+import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;

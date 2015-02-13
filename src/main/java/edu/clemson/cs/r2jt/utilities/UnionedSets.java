@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import edu.clemson.cs.r2jt.proving2.iterators.ChainingIterator;
+import edu.clemson.cs.r2jt.rewriteprover.iterators.ChainingIterator;
 
 public class UnionedSets<T> extends AbstractSet<T> {
 

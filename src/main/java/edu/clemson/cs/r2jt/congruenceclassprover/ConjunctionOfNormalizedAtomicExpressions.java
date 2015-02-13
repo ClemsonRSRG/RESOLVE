@@ -12,9 +12,9 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import edu.clemson.cs.r2jt.proving.absyn.*;
-import edu.clemson.cs.r2jt.proving2.immutableadts.ArrayBackedImmutableList;
-import edu.clemson.cs.r2jt.proving2.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.*;
+import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ArrayBackedImmutableList;
+import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 import java.util.*;

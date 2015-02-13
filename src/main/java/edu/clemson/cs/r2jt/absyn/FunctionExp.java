@@ -20,8 +20,8 @@ import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
-import edu.clemson.cs.r2jt.proving2.iterators.ChainingIterator;
-import edu.clemson.cs.r2jt.proving2.iterators.DummyIterator;
+import edu.clemson.cs.r2jt.rewriteprover.iterators.ChainingIterator;
+import edu.clemson.cs.r2jt.rewriteprover.iterators.DummyIterator;
 
 import edu.clemson.cs.r2jt.collections.Iterator;
 

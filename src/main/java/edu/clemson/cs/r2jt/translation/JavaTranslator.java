@@ -15,7 +15,7 @@ package edu.clemson.cs.r2jt.translation;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.proving2.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.*;

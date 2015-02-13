@@ -13,7 +13,7 @@
 package edu.clemson.cs.r2jt.typeandpopulate;
 
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
-import edu.clemson.cs.r2jt.proving2.iterators.LazyMappingIterator;
+import edu.clemson.cs.r2jt.rewriteprover.iterators.LazyMappingIterator;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.FacilityEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.utilities.Mapping;

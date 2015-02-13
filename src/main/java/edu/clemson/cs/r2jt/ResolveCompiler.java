@@ -19,8 +19,8 @@ import java.util.HashMap;
 import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.MetaFile;
 import edu.clemson.cs.r2jt.data.ModuleKind;
-import edu.clemson.cs.r2jt.proving2.Prover;
-import edu.clemson.cs.r2jt.proving2.ProverListener;
+import edu.clemson.cs.r2jt.rewriteprover.Prover;
+import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.r2jt.utilities.Flag;
 import edu.clemson.cs.r2jt.utilities.FlagDependencies;
 
