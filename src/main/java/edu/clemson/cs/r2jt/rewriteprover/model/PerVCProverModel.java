@@ -34,8 +34,8 @@ import edu.clemson.cs.r2jt.rewriteprover.utilities.InductiveSiteIteratorIterator
 import edu.clemson.cs.r2jt.rewriteprover.utilities.SimpleArrayList;
 import edu.clemson.cs.r2jt.rewriteprover.utilities.UnsafeIteratorLinkedList;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import edu.clemson.cs.r2jt.utilities.FlagManager;
-import edu.clemson.cs.r2jt.utilities.Mapping;
+import edu.clemson.cs.r2jt.misc.FlagManager;
+import edu.clemson.cs.r2jt.misc.Mapping;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;

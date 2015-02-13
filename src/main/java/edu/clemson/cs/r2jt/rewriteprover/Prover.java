@@ -13,9 +13,9 @@
 package edu.clemson.cs.r2jt.rewriteprover;
 
 import edu.clemson.cs.r2jt.Main;
-import edu.clemson.cs.r2jt.utilities.Flag;
-import edu.clemson.cs.r2jt.utilities.FlagDependencies;
-import edu.clemson.cs.r2jt.utilities.FlagManager;
+import edu.clemson.cs.r2jt.misc.Flag;
+import edu.clemson.cs.r2jt.misc.FlagDependencies;
+import edu.clemson.cs.r2jt.misc.FlagManager;
 
 /**
  * <p>The <code>Prover</code> accepts as its input <em>verification conditions</em>

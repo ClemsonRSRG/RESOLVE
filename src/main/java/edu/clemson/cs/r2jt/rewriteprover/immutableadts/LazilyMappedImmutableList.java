@@ -14,8 +14,8 @@ package edu.clemson.cs.r2jt.rewriteprover.immutableadts;
 
 import java.util.Iterator;
 
-import edu.clemson.cs.r2jt.utilities.ImmutableIterator;
-import edu.clemson.cs.r2jt.utilities.Mapping;
+import edu.clemson.cs.r2jt.misc.ImmutableIterator;
+import edu.clemson.cs.r2jt.misc.Mapping;
 
 public class LazilyMappedImmutableList<T, R> extends AbstractImmutableList<R> {
 

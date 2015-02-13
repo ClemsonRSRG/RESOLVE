@@ -14,7 +14,7 @@ package edu.clemson.cs.r2jt.rewriteprover.gui;
 
 import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.rewriteprover.proofsteps.ProofStep;
-import edu.clemson.cs.r2jt.utilities.FlagManager;
+import edu.clemson.cs.r2jt.misc.FlagManager;
 import java.awt.BorderLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;

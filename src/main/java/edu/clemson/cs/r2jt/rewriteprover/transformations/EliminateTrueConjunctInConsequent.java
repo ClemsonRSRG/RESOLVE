@@ -22,7 +22,7 @@ import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel.Binder;
 import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel.TopLevelConsequentBinder;
 import edu.clemson.cs.r2jt.rewriteprover.model.Site;
 import edu.clemson.cs.r2jt.rewriteprover.proofsteps.RemoveConsequentStep;
-import edu.clemson.cs.r2jt.utilities.Mapping;
+import edu.clemson.cs.r2jt.misc.Mapping;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;

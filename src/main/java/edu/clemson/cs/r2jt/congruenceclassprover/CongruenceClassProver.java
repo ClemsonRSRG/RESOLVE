@@ -26,9 +26,9 @@ import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import edu.clemson.cs.r2jt.utilities.Flag;
-import edu.clemson.cs.r2jt.utilities.FlagDependencies;
-import edu.clemson.cs.r2jt.utilities.FlagManager;
+import edu.clemson.cs.r2jt.misc.Flag;
+import edu.clemson.cs.r2jt.misc.FlagDependencies;
+import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 
 import java.io.File;

@@ -19,7 +19,7 @@ import edu.clemson.cs.r2jt.rewriteprover.transformations.ExpandAntecedentByImpli
 import edu.clemson.cs.r2jt.rewriteprover.transformations.ExpandAntecedentBySubstitution;
 import edu.clemson.cs.r2jt.rewriteprover.transformations.Transformation;
 import edu.clemson.cs.r2jt.rewriteprover.utilities.AddsSomethingNewPredicate;
-import edu.clemson.cs.r2jt.utilities.FlagManager;
+import edu.clemson.cs.r2jt.misc.FlagManager;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;

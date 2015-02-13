@@ -1,5 +1,5 @@
 /**
- * Mapping.java
+ * NoSuchEntryException.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group
@@ -10,9 +10,15 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.utilities;
+package edu.clemson.cs.r2jt.misc;
 
-public interface Mapping<I, O> {
+public class NoSuchEntryException extends RuntimeException {
 
-    public O map(I input);
+    private static final long serialVersionUID = -6696070520373901964L;
+
+    public final Object entry;
+
+    public NoSuchEntryException(Object entry) {
+        this.entry = entry;
+    }
 }

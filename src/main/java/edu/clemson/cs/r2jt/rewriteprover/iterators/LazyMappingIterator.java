@@ -14,7 +14,7 @@ package edu.clemson.cs.r2jt.rewriteprover.iterators;
 
 import java.util.Iterator;
 
-import edu.clemson.cs.r2jt.utilities.Mapping;
+import edu.clemson.cs.r2jt.misc.Mapping;
 import java.util.ConcurrentModificationException;
 
 /**

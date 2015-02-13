@@ -14,12 +14,11 @@ package edu.clemson.cs.r2jt.processing;
 
 // Libraries
 import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.collections.Map;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.utilities.SourceErrorException;
+import edu.clemson.cs.r2jt.misc.SourceErrorException;
 
 /**
  * TODO: Write a description of this module

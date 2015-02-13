@@ -23,7 +23,7 @@ import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel.InductiveConsequ
 import edu.clemson.cs.r2jt.rewriteprover.model.Site;
 import edu.clemson.cs.r2jt.rewriteprover.model.Theorem;
 import edu.clemson.cs.r2jt.rewriteprover.proofsteps.ModifyConsequentStep;
-import edu.clemson.cs.r2jt.utilities.Mapping;
+import edu.clemson.cs.r2jt.misc.Mapping;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;

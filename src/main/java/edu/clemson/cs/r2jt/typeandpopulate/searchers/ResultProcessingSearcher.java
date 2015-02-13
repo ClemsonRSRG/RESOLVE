@@ -18,7 +18,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.clemson.cs.r2jt.utilities.Mapping;
+import edu.clemson.cs.r2jt.misc.Mapping;
 
 public class ResultProcessingSearcher<T extends SymbolTableEntry, R extends SymbolTableEntry>
         implements

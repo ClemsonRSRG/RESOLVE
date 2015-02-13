@@ -16,7 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.clemson.cs.r2jt.utilities.ImmutableIterator;
+import edu.clemson.cs.r2jt.misc.ImmutableIterator;
 
 /**
  * <p><code>PExp</code>s are an inductive data structure and the same 

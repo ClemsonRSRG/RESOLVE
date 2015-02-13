@@ -20,7 +20,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.FacilityStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable.ImportStrategy;
 import edu.clemson.cs.r2jt.typeandpopulate.searchers.NameSearcher;
 import edu.clemson.cs.r2jt.typeandpopulate.PossiblyQualifiedPath;
-import edu.clemson.cs.r2jt.utilities.Mapping;
+import edu.clemson.cs.r2jt.misc.Mapping;
 
 public class MathSymbolQuery
         extends

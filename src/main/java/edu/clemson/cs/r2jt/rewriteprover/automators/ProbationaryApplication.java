@@ -16,7 +16,7 @@ import edu.clemson.cs.r2jt.rewriteprover.applications.Application;
 import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.rewriteprover.proofsteps.ProofStep;
 import edu.clemson.cs.r2jt.rewriteprover.utilities.Predicate;
-import edu.clemson.cs.r2jt.utilities.FlagManager;
+import edu.clemson.cs.r2jt.misc.FlagManager;
 import java.util.Deque;
 
 /**

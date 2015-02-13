@@ -21,7 +21,7 @@ import edu.clemson.cs.r2jt.rewriteprover.transformations.ReplaceTheoremInConsequ
 import edu.clemson.cs.r2jt.rewriteprover.transformations.StrengthenConsequent;
 import edu.clemson.cs.r2jt.rewriteprover.transformations.SubstituteInPlaceInConsequent;
 import edu.clemson.cs.r2jt.rewriteprover.transformations.Transformation;
-import edu.clemson.cs.r2jt.utilities.Mapping;
+import edu.clemson.cs.r2jt.misc.Mapping;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;

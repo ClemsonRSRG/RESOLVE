@@ -1,5 +1,5 @@
 /**
- * Indirect.java
+ * Builder.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group
@@ -10,13 +10,9 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.utilities;
+package edu.clemson.cs.r2jt.misc;
 
-/**
- *
- * @author hamptos
- */
-public class Indirect<T> {
+public interface Builder<T> {
 
-    public T data;
+    T build();
 }
