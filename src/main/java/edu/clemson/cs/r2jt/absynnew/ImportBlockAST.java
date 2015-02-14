@@ -58,6 +58,20 @@ public class ImportBlockAST extends ResolveAST {
     }
 
     /**
+     * <p>Returns <code>true</code> <strong>iff</strong> the set of
+     * <code>type</code> imports contains <code>t</code>; <code>false</code>
+     * otherwise.</p>
+     * @param type  A {@link ImportType}.
+     * @param t     A name token.
+     *
+     * @return      <code>true</code> if <code>t</code> is in the set of
+     *              <code>type</code>, <code>false</code> otherwise.
+     */
+    public boolean inCategory(ImportType type, Token t) {
+        return myImports.get(type).contains(t);
+    }
+
+    /**
      * <p>Returns all imports, regardless of their <code>ImportType</code>, in a
      * single set.</p>
      * 

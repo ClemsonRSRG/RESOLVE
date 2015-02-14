@@ -23,6 +23,7 @@ import edu.clemson.cs.r2jt.absynnew.decl.OperationImplAST.OperationImplBuilder;
 import edu.clemson.cs.r2jt.absynnew.decl.TypeModelAST.TypeDeclBuilder;
 import edu.clemson.cs.r2jt.absynnew.expr.*;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.MathSymbolExprBuilder;
+import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.parsing.ResolveBaseListener;
 import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import edu.clemson.cs.r2jt.misc.Utils.Builder;
@@ -589,17 +590,17 @@ public class TreeBuildingVisitor<T extends ResolveAST>
      * <p>Returns <code>true</code> <strong>iff</strong> the string text within
      * <code>topName</code> equals <code>bottomName</code></p>.
      *
-     * @param topName    An {@link ResolveToken} introducing a block.
-     * @param bottomName The {@link ResolveToken} following the <tt>end</tt>
-     *                   of a named block.
+     * @param topName The name at the top of a block.
+     * @param endName The {@link ResolveToken} following the <tt>end</tt>
+     *                of a named block.
      *
-     * @throws SourceErrorException If the provided top and bottom names don't
+     * @throws SrcErrorException If the provided top and bottom names don't
      *      match.
      */
-    private void sanityCheckBlockEnds(Token topName, Token bottomName) {
-        if (!topName.equals(bottomName)) {
-            throw new RuntimeException("block names do not match");
-            //Todo: Use a sourceErrorException here -- once it uses Tokens.
+    private void sanityCheckBlockEnds(Token topName, Token endName) {
+        if (!topName.equals(endName)) {
+            throw new SrcErrorException("block end name " + endName
+                    + " != " + topName, endName);
         }
     }
 
