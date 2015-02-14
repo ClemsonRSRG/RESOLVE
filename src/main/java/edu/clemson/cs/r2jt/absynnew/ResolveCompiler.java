@@ -1,3 +1,15 @@
+/**
+ * ResolveCompiler.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.absynnew;
 
 import edu.clemson.cs.r2jt.misc.*;
@@ -46,7 +58,7 @@ public class ResolveCompiler {
     public static final Flag FLAG_LIB_DIR =
             new Flag(FLAG_SECTION_NAME, "lib", FLAG_DESC_LIB_DIR,
                     new String[] { "libDir" }, new String[] { System
-                    .getProperty("user.dir") });
+                            .getProperty("user.dir") });
 
     public static final ResolveParserFactory PARSER_FACTORY =
             new ResolveParserFactory();

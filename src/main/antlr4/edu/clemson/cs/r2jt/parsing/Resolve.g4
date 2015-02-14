@@ -1,7 +1,34 @@
 grammar Resolve;
 
 module
-    :   conceptModule
+    :   precisModule
+    |   facilityModule
+    |   conceptModule
+    ;
+
+// precis module
+
+precisModule
+    :   'Precis' name=Identifier ';'
+         (usesList)?
+         //(precisItems)?
+        'end' closename=Identifier ';'
+    ;
+
+/*precisItems
+    :   (facilityItem)+
+    ;
+precisItem
+    :   'nothing yet'
+    ;
+*/
+
+// facility module
+
+facilityModule
+    :   'Facility' name=Identifier ';'
+
+        'end' closename=Identifier ';'
     ;
 
 // concept module

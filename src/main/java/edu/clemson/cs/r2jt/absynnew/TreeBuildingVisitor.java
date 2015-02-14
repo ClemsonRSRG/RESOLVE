@@ -17,6 +17,7 @@ import edu.clemson.cs.r2jt.absynnew.ImportBlockAST.ImportType;
 import edu.clemson.cs.r2jt.absynnew.InitFinalAST.TypeFinalAST;
 import edu.clemson.cs.r2jt.absynnew.InitFinalAST.TypeInitAST;
 import edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptAST.ConceptBuilder;
+import edu.clemson.cs.r2jt.absynnew.ModuleAST.PrecisAST.PrecisBuilder;
 import edu.clemson.cs.r2jt.absynnew.ModuleBlockAST.ModuleBlockBuilder;
 import edu.clemson.cs.r2jt.absynnew.decl.*;
 import edu.clemson.cs.r2jt.absynnew.decl.OperationImplAST.OperationImplBuilder;
@@ -131,6 +132,20 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitConceptItem(@NotNull ResolveParser.ConceptItemContext ctx) {
         put(ctx, get(ResolveAST.class, ctx.getChild(0)));
+    }
+
+    @Override
+    public void enterPrecisModule(@NotNull ResolveParser.PrecisModuleContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
+    }
+
+    @Override
+    public void exitPrecisModule(@NotNull ResolveParser.PrecisModuleContext ctx) {
+        PrecisBuilder builder =
+                new PrecisBuilder(ctx.getStart(), ctx.getStop(), ctx.name)
+                        .imports(myImportBuilder.build());
+
+        put(ctx, builder.build());
     }
 
     /*
@@ -599,8 +614,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
      */
     private void sanityCheckBlockEnds(Token topName, Token endName) {
         if (!topName.equals(endName)) {
-            throw new SrcErrorException("block end name " + endName
-                    + " != " + topName, endName);
+            throw new SrcErrorException("block end name " + endName + " != "
+                    + topName, endName);
         }
     }
 
