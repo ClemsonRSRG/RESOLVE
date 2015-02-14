@@ -17,7 +17,7 @@ package edu.clemson.cs.r2jt.vcgeneration.vcs;
  */
 import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.collections.List;
-import edu.clemson.cs.r2jt.proving.Conjuncts;
+import edu.clemson.cs.r2jt.rewriteprover.Conjuncts;
 
 public class VerificationCondition {
 

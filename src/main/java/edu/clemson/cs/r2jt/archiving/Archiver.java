@@ -30,8 +30,8 @@ import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.MetaFile;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.translation.JavaTranslator;
-import edu.clemson.cs.r2jt.utilities.Flag;
-import edu.clemson.cs.r2jt.utilities.FlagDependencies;
+import edu.clemson.cs.r2jt.misc.Flag;
+import edu.clemson.cs.r2jt.misc.FlagDependencies;
 
 public class Archiver {
 
@@ -43,7 +43,7 @@ public class Archiver {
     private static final String FLAG_DESC_VERBOSE_ARCHIVE =
             "Create an executable jar from a RESOLVE Facility, "
                     + "while printing the output from the Java compiler "
-                    + "and jar utilities.";
+                    + "and jar misc.";
 
     /**
      * <p>The main archiver flag.  Tells the compiler to attempt to
@@ -54,7 +54,7 @@ public class Archiver {
 
     /**
      * <p>The alternate archiver flag.  Can be used to print the
-     * output from the javac and jar utilities when there is a 
+     * output from the javac and jar misc when there is a
      * problem creating the executable jar.</p>
      */
     public static final Flag FLAG_VERBOSE_ARCHIVE =

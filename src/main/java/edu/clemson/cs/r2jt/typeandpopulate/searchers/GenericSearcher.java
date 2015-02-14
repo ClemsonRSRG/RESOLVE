@@ -15,7 +15,7 @@ package edu.clemson.cs.r2jt.typeandpopulate.searchers;
 import edu.clemson.cs.r2jt.typeandpopulate.SymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeEntry;
-import edu.clemson.cs.r2jt.utilities.SourceErrorException;
+
 import java.util.Iterator;
 import java.util.List;
 

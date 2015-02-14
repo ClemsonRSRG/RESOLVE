@@ -12,13 +12,12 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving2.Antecedent;
-import edu.clemson.cs.r2jt.proving2.Consequent;
-import edu.clemson.cs.r2jt.proving2.VC;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
+import edu.clemson.cs.r2jt.rewriteprover.Antecedent;
+import edu.clemson.cs.r2jt.rewriteprover.Consequent;
+import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;

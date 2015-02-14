@@ -13,8 +13,6 @@
 package edu.clemson.cs.r2jt.init;
 
 import java.io.*;
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,12 +39,11 @@ import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
 import edu.clemson.cs.r2jt.errors.BugReport;
 import edu.clemson.cs.r2jt.processing.*;
-import edu.clemson.cs.r2jt.proving.Prover;
-import edu.clemson.cs.r2jt.proving2.AlgebraicProver;
-import edu.clemson.cs.r2jt.proving2.VC;
+import edu.clemson.cs.r2jt.rewriteprover.AlgebraicProver;
+import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.treewalk.*;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
-import edu.clemson.cs.r2jt.utilities.SourceErrorException;
+import edu.clemson.cs.r2jt.misc.SourceErrorException;
 
 /**
  * A manager for the target file of a compilation.

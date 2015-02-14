@@ -12,8 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absynnew;
 
-import edu.clemson.cs.r2jt.utilities.Builder;
-import org.antlr.v4.runtime.ParserRuleContext;
+import edu.clemson.cs.r2jt.misc.Utils.Builder;
 import org.antlr.v4.runtime.Token;
 
 import java.util.Collection;

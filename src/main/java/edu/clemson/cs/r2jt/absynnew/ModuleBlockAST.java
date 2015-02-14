@@ -66,7 +66,7 @@ public class ModuleBlockAST extends ResolveAST {
 
     /**
      * <p>Constructs an {@link ModuleBlockAST}. The key to this particular
-     * {@link edu.clemson.cs.r2jt.utilities.Builder} is that it allows users to
+     * {@link edu.clemson.cs.r2jt.misc.Builder} is that it allows users to
      * add various elements over the course a traversal when needed -- for
      * example, over the course of a parsetree traversal.</p>
      */

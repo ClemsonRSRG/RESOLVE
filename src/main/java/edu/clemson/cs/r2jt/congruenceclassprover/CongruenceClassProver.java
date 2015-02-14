@@ -12,26 +12,23 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.proving.Prover;
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving.absyn.PLambda;
-import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
-import edu.clemson.cs.r2jt.proving2.Consequent;
-import edu.clemson.cs.r2jt.proving2.Metrics;
-import edu.clemson.cs.r2jt.proving2.ProverListener;
-import edu.clemson.cs.r2jt.proving2.VC;
-import edu.clemson.cs.r2jt.proving2.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.rewriteprover.Prover;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
+import edu.clemson.cs.r2jt.rewriteprover.Metrics;
+import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
+import edu.clemson.cs.r2jt.rewriteprover.VC;
+import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import edu.clemson.cs.r2jt.utilities.Flag;
-import edu.clemson.cs.r2jt.utilities.FlagDependencies;
-import edu.clemson.cs.r2jt.utilities.FlagManager;
+import edu.clemson.cs.r2jt.misc.Flag;
+import edu.clemson.cs.r2jt.misc.FlagDependencies;
+import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 
 import java.io.File;

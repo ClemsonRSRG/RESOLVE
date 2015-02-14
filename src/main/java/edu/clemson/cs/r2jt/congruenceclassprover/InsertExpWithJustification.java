@@ -13,7 +13,7 @@
 
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 
 /**
  *

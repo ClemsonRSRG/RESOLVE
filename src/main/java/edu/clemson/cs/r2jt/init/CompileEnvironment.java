@@ -27,12 +27,11 @@ import edu.clemson.cs.r2jt.compilereport.CompileReport;
 import edu.clemson.cs.r2jt.data.MetaFile;
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.errors.ErrorHandler;
-import edu.clemson.cs.r2jt.proving2.ProverListener;
+import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
-import edu.clemson.cs.r2jt.utilities.FlagManager;
+import edu.clemson.cs.r2jt.misc.FlagDependencyException;
+import edu.clemson.cs.r2jt.misc.FlagManager;
 
 /**
  * <p>
