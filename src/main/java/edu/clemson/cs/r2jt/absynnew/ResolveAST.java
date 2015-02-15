@@ -38,13 +38,6 @@ public abstract class ResolveAST {
         return myStop;
     }
 
-    @Override
-    public String toString() {
-        TextRenderingVisitor renderer = new TextRenderingVisitor();
-        TreeWalker.walk(renderer, this);
-        return renderer.getTemplates().get(this).render();
-    }
-
     public List<ResolveAST> getChildren() {
         Deque<Class<?>> hierarchy = new LinkedList<Class<?>>();
         Class<?> curClass = this.getClass();
@@ -64,7 +57,6 @@ public abstract class ResolveAST {
             for (int i = 0; i < curFields.length; ++i) {
                 fields.add(curFields[i]);
             }
-            curClass = curClass.getSuperclass();
         }
 
         for (Field fi : fields) {
@@ -95,5 +87,15 @@ public abstract class ResolveAST {
             }
         }
         return children;
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@"
+                + getStart().getLine() + ":"
+                + getStart().getCharPositionInLine() + "{"
+                + "start=" + getStart().getText()
+                + ", stop=" + getStop().getText()
+                + "}";
     }
 }

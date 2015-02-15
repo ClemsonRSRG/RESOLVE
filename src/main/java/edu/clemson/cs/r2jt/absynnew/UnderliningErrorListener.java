@@ -76,7 +76,7 @@ public class UnderliningErrorListener extends BaseErrorListener {
         System.exit(1);
     }
 
-    private String groomFileName(String fileName) {
+    protected static String groomFileName(String fileName) {
         int start = fileName.lastIndexOf("/");
         if (start == -1) {
             return fileName;
