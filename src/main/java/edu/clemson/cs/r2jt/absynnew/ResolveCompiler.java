@@ -76,6 +76,9 @@ public class ResolveCompiler {
 
     public final FlagManager myFlagManager;
 
+    public final UnderliningErrorListener myErrListener =
+            new UnderliningErrorListener().INSTANCE;
+
     //public final MathSymbolTableBuilder mySymbolTable =
     //        new MathSymbolTableBuilder();
 
@@ -101,6 +104,9 @@ public class ResolveCompiler {
             help();
             exit(0);
         }
+        else {
+            version();
+        }
         for (String s : myFlagManager.getRemainingArgs()) {
             if (s.charAt(0) != '-') { // filename
                 if (!myTargetFiles.contains(s)) {
@@ -108,7 +114,7 @@ public class ResolveCompiler {
                 }
             }
             else {
-                System.err.println("unrecognized flag " + s);
+                myErrListener.compilerError("unrecognized flag " + s);
             }
         }
         //Todo: Sanity check lib directory (make sure it's valid, exists, etc)
@@ -153,7 +159,7 @@ public class ResolveCompiler {
             }
             else {
                 SrcErrorException see = (SrcErrorException) cause;
-                UnderliningErrorListener.INSTANCE.reportError(see
+                UnderliningErrorListener.INSTANCE.semanticError(see
                         .getOffendingToken(), e.getMessage());
             }
         }
@@ -252,7 +258,6 @@ public class ResolveCompiler {
 
     public static void main(String[] args) {
         ResolveCompiler resolve = new ResolveCompiler(args);
-        resolve.version();
         resolve.compile();
     }
 

@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absynnew;
 
+import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import org.antlr.v4.runtime.*;
 
 /**
@@ -23,28 +24,39 @@ public class UnderliningErrorListener extends BaseErrorListener {
     public static final UnderliningErrorListener INSTANCE =
             new UnderliningErrorListener();
 
-    /**
-     * <p>This automatically gets called everytime <tt>Antlr</tt> detects a
-     * syntax or <em>recognition error</em>.</p>
-     */
     public void syntaxError(Recognizer<?, ?> recognizer,
             Object offendingSymbol, int line, int charPositionInLine,
             String msg, RecognitionException e) {
         String fileName =
                 ((Token) offendingSymbol).getTokenSource().getSourceName();
-        System.err.println(groomFileName(fileName) + ":" + line + ":"
-                + charPositionInLine + ": " + msg);
+        System.err.println(groomFileName(fileName).toLowerCase() + ":"
+                + line + ":" + charPositionInLine + ": " + msg);
         underlineError(recognizer, (Token) offendingSymbol, line,
                 charPositionInLine);
     }
 
-    public void reportError(Token offendingSymbol, String msg) {
+    /**
+     * <p>Internal compiler errors for which there is no line or location
+     * information available.</p>
+     * @param msg The error message.
+     */
+    public void compilerError(String msg) {
+        System.err.println("error: " + msg);
+    }
+
+    /**
+     * <p>This is called mainly when an {@link SrcErrorException} is raised
+     * or caught.</p>
+     * @param offendingSymbol The token indicating a problem site
+     * @param msg The error message.
+     */
+    public void semanticError(Token offendingSymbol, String msg) {
         if (offendingSymbol.getTokenSource() == null || offendingSymbol == null) {
             System.err.println("-1:-1:-1: " + msg);
         }
         else {
             String fileName = offendingSymbol.getTokenSource().getSourceName();
-            System.err.println(groomFileName(fileName) + ":"
+            System.err.println(groomFileName(fileName).toLowerCase() + ":"
                     + offendingSymbol.getLine() + ":"
                     + offendingSymbol.getCharPositionInLine() + ": " + msg);
 
