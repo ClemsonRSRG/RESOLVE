@@ -24,6 +24,7 @@ import edu.clemson.cs.r2jt.absynnew.decl.OperationImplAST.OperationImplBuilder;
 import edu.clemson.cs.r2jt.absynnew.decl.TypeModelAST.TypeDeclBuilder;
 import edu.clemson.cs.r2jt.absynnew.expr.*;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.MathSymbolExprBuilder;
+import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.DisplayStyle;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.parsing.ResolveBaseListener;
 import edu.clemson.cs.r2jt.parsing.ResolveParser;
@@ -545,7 +546,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitMathInfixExp(@NotNull ResolveParser.MathInfixExpContext ctx) {
         put(ctx, buildFunctionApplication(ctx.op, ctx, ctx.mathExp(0),
-                ctx.mathExp(1)).build());
+                ctx.mathExp(1)).style(DisplayStyle.INFIX).build());
     }
 
     @Override
@@ -557,7 +558,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     public void exitMathOutfixExp(
             @NotNull ResolveParser.MathOutfixExpContext ctx) {
         put(ctx, buildFunctionApplication(ctx.lop, ctx.rop, ctx, ctx.mathExp())
-                .build());
+                 .style(DisplayStyle.OUTFIX).build());
     }
 
     private MathSymbolExprBuilder buildFunctionApplication(Token lname,
@@ -603,9 +604,10 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
     /**
      * <p>Returns <code>true</code> <strong>iff</strong> the string text within
-     * <code>topName</code> equals <code>bottomName</code></p>.
+     * <code>topName</code> equals <code>endName</code></p>.
      *
      * @param topName The name at the top of a block.
+     *
      * @param endName The {@link ResolveToken} following the <tt>end</tt>
      *                of a named block.
      *
@@ -628,6 +630,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
      *             expected-type.
      * @param t    A {@link ParseTree} indicating which subtree to draw the
      *             annotation from.
+     *
      * @param <T>  A type.
      * @return
      */

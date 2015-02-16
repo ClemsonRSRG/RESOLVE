@@ -166,9 +166,9 @@ public class TypeGraph {
 
         MathSymbolAST result =
                 new MathSymbolAST.MathSymbolExprBuilder(null, null,
-                        new ResolveToken("or"), null)
-                        .style(MathSymbolAST.DisplayStyle.INFIX)
-                        .arguments(d1, d2).build();
+                        new ResolveToken("or"), null).style(
+                        MathSymbolAST.DisplayStyle.INFIX).arguments(d1, d2)
+                        .build();
 
         result.setMathType(BOOLEAN);
         return result;
@@ -178,9 +178,8 @@ public class TypeGraph {
 
         MathSymbolAST result =
                 new MathSymbolAST.MathSymbolExprBuilder(null, null,
-                        new ResolveToken("and"), null)
-                        .style(MathSymbolAST.DisplayStyle.INFIX)
-                        .arguments(d1, d2)
+                        new ResolveToken("and"), null).style(
+                        MathSymbolAST.DisplayStyle.INFIX).arguments(d1, d2)
                         .build();
 
         result.setMathType(BOOLEAN);
@@ -190,9 +189,8 @@ public class TypeGraph {
     public MathSymbolAST formImplies(ExprAST d1, ExprAST d2) {
         MathSymbolAST result =
                 new MathSymbolAST.MathSymbolExprBuilder(null, null,
-                        new ResolveToken("implies"), null)
-                        .style(MathSymbolAST.DisplayStyle.INFIX)
-                        .arguments(d1, d2)
+                        new ResolveToken("implies"), null).style(
+                        MathSymbolAST.DisplayStyle.INFIX).arguments(d1, d2)
                         .build();
 
         result.setMathType(BOOLEAN);

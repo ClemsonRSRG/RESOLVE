@@ -101,8 +101,8 @@ public class MathSymbolAST extends ExprAST {
         MathSymbolAST newName =
                 new MathSymbolExprBuilder(getStart(), getStop(), myName, null)
                         .arguments(myArguments).literal(myLiteralFlag)
-                        .quantification(myQuantification)
-                        .incoming(myIncomingFlag).build();
+                        .quantification(myQuantification).incoming(
+                                myIncomingFlag).build();
 
         if (substitutions.containsKey(newName)) {
             //Note that there's no particular mathematical justification why
@@ -114,16 +114,15 @@ public class MathSymbolAST extends ExprAST {
                     new MathSymbolExprBuilder(getStart(), getStop(),
                             ((MathSymbolAST) substitutions.get(newName))
                                     .getName(), null).arguments(myArguments)
-                            .literal(myLiteralFlag)
-                            .quantification(myQuantification)
-                            .incoming(myIncomingFlag).build();
+                            .literal(myLiteralFlag).quantification(
+                                    myQuantification).incoming(myIncomingFlag)
+                            .build();
         }
 
         MathSymbolAST result =
                 new MathSymbolExprBuilder(getStart(), getStop(), newName
                         .getName(), null).arguments(myArguments).literal(
-                        myLiteralFlag)
-                        .quantification(myQuantification)
+                        myLiteralFlag).quantification(myQuantification)
                         .incoming(myIncomingFlag).build();
 
         result.setMathType(myMathType);
@@ -142,7 +141,7 @@ public class MathSymbolAST extends ExprAST {
                     myName.equals(((MathSymbolAST) e).myName)
                             && argumentsEquivalent(myArguments,
                                     eAsSymbol.myArguments)
-            && myQuantification == eAsSymbol.myQuantification;
+                            && myQuantification == eAsSymbol.myQuantification;
         }
         return result;
     }
@@ -168,11 +167,9 @@ public class MathSymbolAST extends ExprAST {
 
         MathSymbolAST result =
                 new MathSymbolExprBuilder(getStart(), getStop(), newName, null)
-                        .arguments(newArgs)
-                        .quantification(myQuantification)
-                        .style(myDisplayStyle)
-                        .literal(myLiteralFlag).incoming(myIncomingFlag)
-                        .build();
+                        .arguments(newArgs).quantification(myQuantification)
+                        .style(myDisplayStyle).literal(myLiteralFlag).incoming(
+                                myIncomingFlag).build();
 
         result.setMathType(myMathType);
         result.setMathTypeValue(myMathTypeValue);
@@ -196,7 +193,8 @@ public class MathSymbolAST extends ExprAST {
                 }
             }
             result.append(")");
-        } else {
+        }
+        else {
             result.append(myName.getText());
         }
         return result.toString();
