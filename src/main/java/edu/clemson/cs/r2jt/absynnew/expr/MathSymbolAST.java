@@ -105,7 +105,7 @@ public class MathSymbolAST extends ExprAST {
                 new MathSymbolExprBuilder(getStart(), getStop(), myName, null)
                         .arguments(myArguments).literal(myLiteralFlag)
                         .quantification(myQuantification).incoming(
-                        myIncomingFlag).build();
+                                myIncomingFlag).build();
 
         if (substitutions.containsKey(newName)) {
             //Note that there's no particular mathematical justification why
@@ -118,7 +118,7 @@ public class MathSymbolAST extends ExprAST {
                             ((MathSymbolAST) substitutions.get(newName))
                                     .getName(), null).arguments(myArguments)
                             .literal(myLiteralFlag).quantification(
-                            myQuantification).incoming(myIncomingFlag)
+                                    myQuantification).incoming(myIncomingFlag)
                             .build();
         }
 
@@ -190,8 +190,8 @@ public class MathSymbolAST extends ExprAST {
                         .append(myArguments.get(1));
             }
             else if (myDisplayStyle == DisplayStyle.OUTFIX) {
-                result.append(myLeftPrint).append(myArguments.get(0))
-                        .append(myRightPrint);
+                result.append(myLeftPrint).append(myArguments.get(0)).append(
+                        myRightPrint);
             }
             else {
                 result.append(myName.getText()).append("(");

@@ -400,7 +400,6 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         put(ctx, call);
     }
 
-
     @Override
     public void exitMathTypeAssertExp(
             @NotNull ResolveParser.MathTypeAssertExpContext ctx) {
