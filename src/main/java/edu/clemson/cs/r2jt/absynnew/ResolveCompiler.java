@@ -76,9 +76,6 @@ public class ResolveCompiler {
 
     public final FlagManager myFlagManager;
 
-    public final UnderliningErrorListener myErrListener =
-            new UnderliningErrorListener().INSTANCE;
-
     //public final MathSymbolTableBuilder mySymbolTable =
     //        new MathSymbolTableBuilder();
 
@@ -114,7 +111,8 @@ public class ResolveCompiler {
                 }
             }
             else {
-                myErrListener.compilerError("unrecognized flag " + s);
+                UnderliningErrorListener.INSTANCE
+                        .compilerError("unrecognized flag " + s);
             }
         }
         //Todo: Sanity check lib directory (make sure it's valid, exists, etc)
@@ -142,7 +140,7 @@ public class ResolveCompiler {
 
                 //Todo: We're going to have pipelines here in the future.
                 for (ModuleIdentifier m : getCompileOrder(g)) {
-                    System.out.println("Populating: " + m);
+                    System.out.println("populating: " + m);
                 }
             }
         }
@@ -185,15 +183,16 @@ public class ResolveCompiler {
             if (root.getImportBlock().inCategory(
                     ImportCollectionAST.ImportType.IMPLICIT, importRequest)) {
                 if (!module.appropriateForImport()) {
-                    throw new IllegalArgumentException("Invalid import: "
-                            + module.getName() + ". Cannot import module of "
-                            + "type: " + module.getClass() + ".");
+                    throw new IllegalArgumentException("invalid import "
+                            + module.getName() + "; cannot import module of "
+                            + "type: " + module.getClass());
                 }
             }
             // If there exists a path from the dependent (module referenced) to
             // the root (source node), then adding the edge will cause a cycle.
             if (conn.pathExists(id(root), id(module))) {
-                throw new CircularDependencyException("Circular dependency!");
+                throw new CircularDependencyException(
+                        "circular dependency detected");
             }
             Graphs.addEdgeWithVertices(g, id(root), id(module));
             findDependencies(g, module);

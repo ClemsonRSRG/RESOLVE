@@ -24,13 +24,16 @@ public class UnderliningErrorListener extends BaseErrorListener {
     public static final UnderliningErrorListener INSTANCE =
             new UnderliningErrorListener();
 
+    private UnderliningErrorListener() {}
+
+    @Override
     public void syntaxError(Recognizer<?, ?> recognizer,
             Object offendingSymbol, int line, int charPositionInLine,
             String msg, RecognitionException e) {
         String fileName =
                 ((Token) offendingSymbol).getTokenSource().getSourceName();
-        System.err.println(groomFileName(fileName).toLowerCase() + ":"
-                + line + ":" + charPositionInLine + ": " + msg);
+        System.err.println(groomFileName(fileName).toLowerCase() + ":" + line
+                + ":" + charPositionInLine + ": " + msg);
         underlineError(recognizer, (Token) offendingSymbol, line,
                 charPositionInLine);
     }
@@ -51,7 +54,7 @@ public class UnderliningErrorListener extends BaseErrorListener {
      * @param msg The error message.
      */
     public void semanticError(Token offendingSymbol, String msg) {
-        if (offendingSymbol.getTokenSource() == null || offendingSymbol == null) {
+        if (offendingSymbol == null) {
             System.err.println("-1:-1:-1: " + msg);
         }
         else {

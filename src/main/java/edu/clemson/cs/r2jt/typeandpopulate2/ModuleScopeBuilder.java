@@ -31,7 +31,7 @@ public class ModuleScopeBuilder extends ScopeBuilder implements ModuleScope {
             new LinkedList<ModuleIdentifier>();
 
     ModuleScopeBuilder(TypeGraph g, ModuleAST definingElement, Scope parent,
-                       MathSymbolTableBuilder symbolTable) {
+            MathSymbolTableBuilder symbolTable) {
         super(symbolTable, g, definingElement, parent, new ModuleIdentifier(
                 definingElement));
 

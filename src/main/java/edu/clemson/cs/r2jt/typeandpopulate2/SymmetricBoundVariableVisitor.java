@@ -41,11 +41,11 @@ public class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     }
 
     public SymmetricBoundVariableVisitor(Map<String, MTType> context1) {
-        myBoundVariables1.push(new HashMap<String,  MTType>(context1));
+        myBoundVariables1.push(new HashMap<String, MTType>(context1));
     }
 
     public SymmetricBoundVariableVisitor(Map<String, MTType> context1,
-                                         Map<String, MTType> context2) {
+            Map<String, MTType> context2) {
         this(context1);
         myBoundVariables2.push(new HashMap<String, MTType>(context2));
     }

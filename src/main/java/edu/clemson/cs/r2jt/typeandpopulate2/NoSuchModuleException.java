@@ -21,7 +21,7 @@ public class NoSuchModuleException extends SymbolTableException {
     public final ModuleIdentifier requestedModule;
 
     public NoSuchModuleException(ModuleIdentifier source,
-                                 ModuleIdentifier requested) {
+            ModuleIdentifier requested) {
 
         sourceModule = source;
         requestedModule = requested;

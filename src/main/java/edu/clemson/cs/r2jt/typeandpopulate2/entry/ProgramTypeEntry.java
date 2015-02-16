@@ -1,3 +1,15 @@
+/**
+ * ProgramTypeEntry.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.typeandpopulate2.entry;
 
 import edu.clemson.cs.r2jt.absynnew.ResolveAST;
@@ -22,8 +34,8 @@ public class ProgramTypeEntry extends SymbolTableEntry {
     private final MathSymbolEntry myMathTypeAlterEgo;
 
     public ProgramTypeEntry(TypeGraph g, String name,
-                            ResolveAST definingElement,
-                            ModuleIdentifier sourceModule, MTType modelType, PTType programType) {
+            ResolveAST definingElement, ModuleIdentifier sourceModule,
+            MTType modelType, PTType programType) {
         super(name, definingElement, sourceModule);
 
         myModelType = modelType;

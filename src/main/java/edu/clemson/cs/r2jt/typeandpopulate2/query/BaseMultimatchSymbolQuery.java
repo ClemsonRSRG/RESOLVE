@@ -32,7 +32,7 @@ public class BaseMultimatchSymbolQuery<E extends SymbolTableEntry>
             BaseSymbolQuery<E> {
 
     public BaseMultimatchSymbolQuery(ScopeSearchPath path,
-                                     MultimatchTableSearcher<E> searcher) {
+            MultimatchTableSearcher<E> searcher) {
         super(path, searcher);
     }
 

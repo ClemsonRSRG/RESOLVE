@@ -26,7 +26,7 @@ public class MTSetRestriction extends MTAbstract<MTSetRestriction> {
     private ExprAST myRestriction;
 
     public MTSetRestriction(TypeGraph g, MTType baseType, String setVar,
-                            ExprAST restriction) {
+            ExprAST restriction) {
         super(g);
         myBaseType = baseType;
         mySetVar = setVar;

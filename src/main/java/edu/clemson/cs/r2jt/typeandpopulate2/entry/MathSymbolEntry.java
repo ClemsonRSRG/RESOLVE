@@ -57,10 +57,10 @@ public class MathSymbolEntry extends SymbolTableEntry {
      * @param sourceModule
      */
     public MathSymbolEntry(TypeGraph g, String name, Quantification q,
-                           ResolveAST definingElement, MTType type,
-                           MTType typeValue, Map<String, MTType> schematicTypes,
-                           Map<String, MTType> genericsInDefiningContext,
-                           ModuleIdentifier sourceModule) {
+            ResolveAST definingElement, MTType type, MTType typeValue,
+            Map<String, MTType> schematicTypes,
+            Map<String, MTType> genericsInDefiningContext,
+            ModuleIdentifier sourceModule) {
         super(name, definingElement, sourceModule);
 
         if (genericsInDefiningContext != null) {

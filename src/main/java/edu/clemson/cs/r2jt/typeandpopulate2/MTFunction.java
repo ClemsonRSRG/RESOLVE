@@ -190,7 +190,8 @@ public class MTFunction extends MTAbstract<MTFunction> {
             concreteValues = new HashMap<String, MTType>();
 
             if (myDomain instanceof edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian) {
-                edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian domainAsMTCartesian = (edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian) myDomain;
+                edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian domainAsMTCartesian =
+                        (edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian) myDomain;
 
                 int domainSize = domainAsMTCartesian.size();
                 int parametersSize = parameters.size();
@@ -278,7 +279,8 @@ public class MTFunction extends MTAbstract<MTFunction> {
         }
         else {
             if (myDomain instanceof edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian) {
-                edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian domainAsMTCartesian = (edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian) myDomain;
+                edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian domainAsMTCartesian =
+                        (edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian) myDomain;
 
                 int domainSize = domainAsMTCartesian.size();
                 int parametersSize = parameters.size();
@@ -320,10 +322,12 @@ public class MTFunction extends MTAbstract<MTFunction> {
         boolean result;
 
         if (myDomain instanceof edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian) {
-            result = otherDomain instanceof edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian;
+            result =
+                    otherDomain instanceof edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian;
 
             if (result) {
-                MTCartesian domainAsMTCartesian = (edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian) myDomain;
+                MTCartesian domainAsMTCartesian =
+                        (edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian) myDomain;
                 edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian otherDomainAsMTCartesian =
                         (edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian) otherDomain;
 
@@ -374,7 +378,8 @@ public class MTFunction extends MTAbstract<MTFunction> {
             List<MTType> original) {
         List<String> names = new LinkedList<String>();
 
-        for (@SuppressWarnings("unused")MTType t : original) {
+        for (@SuppressWarnings("unused")
+        MTType t : original) {
             names.add(null);
         }
         return names;

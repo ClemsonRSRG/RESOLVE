@@ -56,9 +56,8 @@ public abstract class SyntacticScope extends AbstractScope {
     private final ScopeRepository mySource;
 
     /*package private*/SyntacticScope(ScopeRepository source,
-                                      ResolveAST definingElement, Scope parent,
-                                      ModuleIdentifier enclosingModule,
-                                      BaseSymbolTable bindings) {
+            ResolveAST definingElement, Scope parent,
+            ModuleIdentifier enclosingModule, BaseSymbolTable bindings) {
 
         mySource = source;
         myDefiningElement = definingElement;

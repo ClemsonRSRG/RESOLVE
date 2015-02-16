@@ -64,5 +64,5 @@ public interface TableSearcher<E extends SymbolTableEntry> {
      *         <code>entries</code> where no more than one was expected.
      */
     public boolean addMatches(SymbolTable entries, List<E> matches,
-                              SearchContext l) throws DuplicateSymbolException;
+            SearchContext l) throws DuplicateSymbolException;
 }

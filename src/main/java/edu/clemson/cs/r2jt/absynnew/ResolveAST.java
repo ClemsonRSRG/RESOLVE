@@ -91,11 +91,8 @@ public abstract class ResolveAST {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "@"
-                + getStart().getLine() + ":"
-                + getStart().getCharPositionInLine() + "{"
-                + "start=" + getStart().getText()
-                + ", stop=" + getStop().getText()
-                + "}";
+        return this.getClass().getSimpleName() + "@" + getStart().getLine()
+                + ":" + getStart().getCharPositionInLine() + "{" + "start="
+                + getStart().getText() + ", stop=" + getStop().getText() + "}";
     }
 }

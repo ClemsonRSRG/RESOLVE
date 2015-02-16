@@ -40,6 +40,7 @@ import java.util.Map;
  * to {@link MathSymbolTableBuilder#seal()}.</p>
  */
 public class MathSymbolTable extends ScopeRepository {
+
     /**
      * <p>When starting a search from a particular scope, specifies how any
      * available facilities should be searched.</p>
@@ -166,8 +167,8 @@ public class MathSymbolTable extends ScopeRepository {
     private final TypeGraph myTypeGraph;
 
     /*package private*/MathSymbolTable(TypeGraph typeGraph,
-                                       Map<ResolveAST, ScopeBuilder> scopes,
-                                       ScopeBuilder root) throws NoSuchModuleException {
+            Map<ResolveAST, ScopeBuilder> scopes, ScopeBuilder root)
+            throws NoSuchModuleException {
 
         myTypeGraph = typeGraph;
 

@@ -25,6 +25,7 @@ import java.util.List;
 public interface MultimatchTableSearcher<E extends SymbolTableEntry>
         extends
             TableSearcher<E> {
+
     /**
      * <p>Refines {@link TableSearcher#addMatches} to guarantee that it will not
      * throw a {@link DuplicateSymbolException}.  Otherwise, behaves
@@ -32,5 +33,5 @@ public interface MultimatchTableSearcher<E extends SymbolTableEntry>
      */
     @Override
     public boolean addMatches(SymbolTable entries, List<E> matches,
-                              SearchContext l);
+            SearchContext l);
 }

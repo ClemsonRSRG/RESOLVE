@@ -23,7 +23,7 @@ public class VariableReplacingVisitor extends MutatingVisitor {
     private final Map<String, MTType> mySubstitutions;
 
     public VariableReplacingVisitor(Map<String, String> substitutions,
-                                    TypeGraph g) {
+            TypeGraph g) {
 
         mySubstitutions = convertToMTNamedMap(substitutions, g);
     }

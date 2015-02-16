@@ -40,8 +40,8 @@ public class ScopeBuilder extends SyntacticScope {
     private final TypeGraph myTypeGraph;
 
     ScopeBuilder(MathSymbolTableBuilder b, TypeGraph g,
-                 ResolveAST definingElement, Scope parent,
-                 ModuleIdentifier enclosingModule) {
+            ResolveAST definingElement, Scope parent,
+            ModuleIdentifier enclosingModule) {
 
         super(b, definingElement, parent, enclosingModule,
                 new BaseSymbolTable());
@@ -98,9 +98,8 @@ public class ScopeBuilder extends SyntacticScope {
      *             imported module.
      */
     public MathSymbolEntry addBinding(String name,
-            SymbolTableEntry.Quantification q,
-            ResolveAST definingElement, MTType type,
-            MTType typeValue, Map<String, MTType> schematicTypes,
+            SymbolTableEntry.Quantification q, ResolveAST definingElement,
+            MTType type, MTType typeValue, Map<String, MTType> schematicTypes,
             Map<String, MTType> genericsInDefiningContext)
             throws DuplicateSymbolException {
 
@@ -117,23 +116,20 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public MathSymbolEntry addBinding(String name,
-            SymbolTableEntry.Quantification q,
-            ResolveAST definingElement, MTType type)
-            throws DuplicateSymbolException {
+            SymbolTableEntry.Quantification q, ResolveAST definingElement,
+            MTType type) throws DuplicateSymbolException {
         return addBinding(name, q, definingElement, type, null, null, null);
     }
 
-    public MathSymbolEntry addBinding(String name,
-                                      ResolveAST definingElement, MTType type,
-            MTType typeValue) throws DuplicateSymbolException {
+    public MathSymbolEntry addBinding(String name, ResolveAST definingElement,
+            MTType type, MTType typeValue) throws DuplicateSymbolException {
 
         return addBinding(name, SymbolTableEntry.Quantification.NONE,
                 definingElement, type, typeValue, null, null);
     }
 
-    public MathSymbolEntry addBinding(String name,
-            ResolveAST definingElement, MTType type)
-            throws DuplicateSymbolException {
+    public MathSymbolEntry addBinding(String name, ResolveAST definingElement,
+            MTType type) throws DuplicateSymbolException {
 
         return addBinding(name, SymbolTableEntry.Quantification.NONE,
                 definingElement, type);

@@ -1,5 +1,5 @@
 /**
- * ImportBlockAST.java
+ * ImportCollectionAST.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group

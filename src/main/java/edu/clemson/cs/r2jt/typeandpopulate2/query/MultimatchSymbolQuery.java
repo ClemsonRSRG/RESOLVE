@@ -1,3 +1,15 @@
+/**
+ * MultimatchSymbolQuery.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.typeandpopulate2.query;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.DuplicateSymbolException;
@@ -15,6 +27,7 @@ import java.util.List;
 public interface MultimatchSymbolQuery<E extends SymbolTableEntry>
         extends
             SymbolQuery<E> {
+
     /**
      * <p>Behaves just as
      * {@link SymbolQuery#searchFromContext(Scope, ScopeRepository)

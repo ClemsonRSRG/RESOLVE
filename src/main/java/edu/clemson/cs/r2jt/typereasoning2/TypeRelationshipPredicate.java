@@ -23,6 +23,6 @@ public interface TypeRelationshipPredicate {
             Map<String, String> substitions);
 
     public boolean canBeDemonstratedStatically(MTType canonical1,
-                                               MTType canonical2, Map<String, MTType> typeBindings,
-                                               Map<String, ExprAST> expressionBindings);
+            MTType canonical2, Map<String, MTType> typeBindings,
+            Map<String, ExprAST> expressionBindings);
 }

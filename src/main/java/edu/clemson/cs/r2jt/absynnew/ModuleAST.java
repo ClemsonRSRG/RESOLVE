@@ -30,8 +30,9 @@ public abstract class ModuleAST extends ResolveAST {
     private final ExprAST myRequires;
     private final ModuleBlockAST myBodyBlock;
 
-    public ModuleAST(Token start, Token stop, Token name, ImportCollectionAST uses,
-            List<ModuleParameterAST> params, ExprAST req, ModuleBlockAST block) {
+    public ModuleAST(Token start, Token stop, Token name,
+            ImportCollectionAST uses, List<ModuleParameterAST> params,
+            ExprAST req, ModuleBlockAST block) {
         super(start, stop);
         myName = name;
 

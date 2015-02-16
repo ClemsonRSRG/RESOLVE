@@ -1,3 +1,15 @@
+/**
+ * SymbolTableEntry.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.typeandpopulate2.entry;
 
 import edu.clemson.cs.r2jt.absynnew.ResolveAST;
@@ -40,10 +52,8 @@ public abstract class SymbolTableEntry {
     private final ResolveAST myDefiningElement;
     private final ModuleIdentifier mySourceModuleIdentifier;
 
-    public SymbolTableEntry(String name,
-                            ResolveAST definingElement,
-                            ModuleIdentifier sourceModule) {
-
+    public SymbolTableEntry(String name, ResolveAST definingElement,
+            ModuleIdentifier sourceModule) {
         myName = name;
         myDefiningElement = definingElement;
         mySourceModuleIdentifier = sourceModule;
@@ -61,18 +71,18 @@ public abstract class SymbolTableEntry {
         return myDefiningElement;
     }
 
- /*   public FacilityTypeRepresentationEntry toFacilityTypeRepresentationEntry(
-            Location l) {
-        throw new SourceErrorException("Expecting a facility type "
-                + "representation.  Found " + getEntryTypeDescription() + ".",
-                l);
-    }
+    /*   public FacilityTypeRepresentationEntry toFacilityTypeRepresentationEntry(
+               Location l) {
+           throw new SourceErrorException("Expecting a facility type "
+                   + "representation.  Found " + getEntryTypeDescription() + ".",
+                   l);
+       }
 
-    public RepresentationTypeEntry toRepresentationTypeEntry(Location l) {
-        throw new SourceErrorException("Expecting a program type "
-                + "representation.  Found " + getEntryTypeDescription() + ".",
-                l);
-    }*/
+       public RepresentationTypeEntry toRepresentationTypeEntry(Location l) {
+           throw new SourceErrorException("Expecting a program type "
+                   + "representation.  Found " + getEntryTypeDescription() + ".",
+                   l);
+       }*/
 
     public MathSymbolEntry toMathSymbolEntry(Token l) {
         throw new SrcErrorException("expecting a math symbol; found "
@@ -99,12 +109,12 @@ public abstract class SymbolTableEntry {
                 + "found " + getEntryTypeDescription(), l);
     }
 
-    /*public OperationEntry toOperationEntry(Location l) {
-        throw new SourceErrorException("Expecting an operation.  Found "
+    public OperationEntry toOperationEntry(Token l) {
+        throw new SrcErrorException("expecting an operation; found "
                 + getEntryTypeDescription(), l);
     }
 
-    public OperationProfileEntry toOperationProfileEntry(Location l) {
+    /*public OperationProfileEntry toOperationProfileEntry(Location l) {
         throw new SourceErrorException("Expecting a operation profile.  Found "
                 + getEntryTypeDescription(), l);
     }

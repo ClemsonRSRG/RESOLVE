@@ -1,3 +1,15 @@
+/**
+ * ProgramParameterEntry.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.typeandpopulate2.entry;
 
 import edu.clemson.cs.r2jt.absynnew.ResolveAST;
@@ -100,8 +112,8 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     private final ProgramVariableEntry myProgramVariableAlterEgo;
 
     public ProgramParameterEntry(TypeGraph g, String name,
-                                 ResolveAST definingElement,
-                                 ModuleIdentifier sourceModule, PTType type, ParameterMode mode) {
+            ResolveAST definingElement, ModuleIdentifier sourceModule,
+            PTType type, ParameterMode mode) {
         super(name, definingElement, sourceModule);
 
         myTypeGraph = g;
@@ -153,7 +165,7 @@ public class ProgramParameterEntry extends SymbolTableEntry {
                     new ProgramTypeEntry(myTypeGraph, getName(),
                             getDefiningElement(), getSourceModuleIdentifier(),
                             new MTNamed(myTypeGraph, getName()), new PTGeneric(
-                            myTypeGraph, getName()));
+                                    myTypeGraph, getName()));
         }
 
         return result;

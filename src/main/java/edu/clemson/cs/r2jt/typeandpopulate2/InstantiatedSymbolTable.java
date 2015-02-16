@@ -32,8 +32,8 @@ public class InstantiatedSymbolTable implements SymbolTable {
     private final FacilityEntry myInstantiatingFacility;
 
     public InstantiatedSymbolTable(SymbolTable base,
-                                   Map<String, PTType> genericInstantiations,
-                                   FacilityEntry instantiatingFacility) {
+            Map<String, PTType> genericInstantiations,
+            FacilityEntry instantiatingFacility) {
         myBaseTable = base;
         myGenericInstantiations = genericInstantiations;
         myInstantiatingFacility = instantiatingFacility;
