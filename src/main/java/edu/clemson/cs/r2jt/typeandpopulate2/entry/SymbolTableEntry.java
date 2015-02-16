@@ -71,13 +71,7 @@ public abstract class SymbolTableEntry {
         return myDefiningElement;
     }
 
-    /*   public FacilityTypeRepresentationEntry toFacilityTypeRepresentationEntry(
-               Location l) {
-           throw new SourceErrorException("Expecting a facility type "
-                   + "representation.  Found " + getEntryTypeDescription() + ".",
-                   l);
-       }
-
+    /*
        public RepresentationTypeEntry toRepresentationTypeEntry(Location l) {
            throw new SourceErrorException("Expecting a program type "
                    + "representation.  Found " + getEntryTypeDescription() + ".",
@@ -114,6 +108,11 @@ public abstract class SymbolTableEntry {
                 + getEntryTypeDescription(), l);
     }
 
+    public ProgramTypeDefinitionEntry toProgramTypeDefinitionEntry(Token l) {
+        throw new SrcErrorException("expecting a program type definition; "
+                + "found " + getEntryTypeDescription(), l);
+    }
+
     /*public OperationProfileEntry toOperationProfileEntry(Location l) {
         throw new SourceErrorException("Expecting a operation profile.  Found "
                 + getEntryTypeDescription(), l);
@@ -126,11 +125,6 @@ public abstract class SymbolTableEntry {
 
     public ShortFacilityEntry toShortFacilityEntry(Location l) {
         throw new SourceErrorException("Expecting a short facility module.  "
-                + "Found " + getEntryTypeDescription(), l);
-    }
-
-    public ProgramTypeDefinitionEntry toProgramTypeDefinitionEntry(Location l) {
-        throw new SourceErrorException("Expecting a program type definition.  "
                 + "Found " + getEntryTypeDescription(), l);
     }
 

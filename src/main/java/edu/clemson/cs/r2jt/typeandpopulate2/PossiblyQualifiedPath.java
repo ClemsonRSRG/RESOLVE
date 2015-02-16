@@ -25,9 +25,8 @@ public class PossiblyQualifiedPath implements ScopeSearchPath {
     private final ScopeSearchPath myActualSearchPath;
 
     public PossiblyQualifiedPath(Token qualifier,
-                                 ImportStrategy importStrategy,
-                                 FacilityStrategy facilityStrategy,
-                                 boolean localPriority) {
+            ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
+            boolean localPriority) {
         myActualSearchPath =
                 getAppropriatePath(qualifier, importStrategy, facilityStrategy,
                         localPriority);

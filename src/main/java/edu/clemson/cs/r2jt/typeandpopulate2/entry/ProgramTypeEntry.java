@@ -15,6 +15,7 @@ package edu.clemson.cs.r2jt.typeandpopulate2.entry;
 import edu.clemson.cs.r2jt.absynnew.ResolveAST;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.VariableReplacingVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import org.antlr.v4.runtime.Token;
@@ -43,9 +44,9 @@ public class ProgramTypeEntry extends SymbolTableEntry {
         //TODO: Probably need to recajigger this to correctly account for any
         //      generics in the defining context
         myMathTypeAlterEgo =
-                new MathSymbolEntry(g, name,
-                        SymbolTableEntry.Quantification.NONE, definingElement,
-                        g.CLS, modelType, null, null, sourceModule);
+                new MathSymbolEntry(g, name, Quantification.NONE,
+                        definingElement, g.CLS, modelType, null, null,
+                        sourceModule);
         myProgramType = programType;
     }
 
@@ -77,7 +78,7 @@ public class ProgramTypeEntry extends SymbolTableEntry {
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
 
-        /*Map<String, MTType> genericMathematicalInstantiations =
+        Map<String, MTType> genericMathematicalInstantiations =
                 SymbolTableEntry.buildMathTypeGenerics(genericInstantiations);
 
         VariableReplacingVisitor typeSubstitutor =
@@ -87,8 +88,8 @@ public class ProgramTypeEntry extends SymbolTableEntry {
         return new ProgramTypeEntry(myModelType.getTypeGraph(), getName(),
                 getDefiningElement(), getSourceModuleIdentifier(),
                 typeSubstitutor.getFinalExpression(), myProgramType
-                .instantiateGenerics(genericInstantiations,
-                        instantiatingFacility));*/
-        return null;
+                        .instantiateGenerics(genericInstantiations,
+                                instantiatingFacility));
     }
+
 }

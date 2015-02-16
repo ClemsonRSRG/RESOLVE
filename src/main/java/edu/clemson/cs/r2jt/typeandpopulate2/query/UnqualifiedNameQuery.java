@@ -20,11 +20,11 @@ import edu.clemson.cs.r2jt.typeandpopulate2.searchers.NameSearcher;
 
 public class UnqualifiedNameQuery
         extends
-        BaseMultimatchSymbolQuery<SymbolTableEntry> {
+            BaseMultimatchSymbolQuery<SymbolTableEntry> {
 
     public UnqualifiedNameQuery(String searchString,
-                                ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
-                                boolean stopAfterFirst, boolean localPriority) {
+            ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
+            boolean stopAfterFirst, boolean localPriority) {
 
         super(new UnqualifiedPath(importStrategy, facilityStrategy,
                 localPriority), new NameSearcher(searchString, stopAfterFirst));

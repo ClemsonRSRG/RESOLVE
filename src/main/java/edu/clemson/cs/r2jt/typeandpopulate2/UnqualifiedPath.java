@@ -55,7 +55,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
     private final boolean myLocalPriorityFlag;
 
     public UnqualifiedPath(ImportStrategy imports, FacilityStrategy facilities,
-                           boolean localPriority) {
+            boolean localPriority) {
 
         myImportStrategy = imports;
         myFacilityStrategy = facilities;

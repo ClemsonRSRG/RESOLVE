@@ -1,0 +1,74 @@
+/**
+ * PTRecord.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+package edu.clemson.cs.r2jt.typeandpopulate2.programtypes;
+
+import edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.FacilityEntry;
+import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ *
+ * @author hamptos
+ */
+public class PTRecord extends PTType {
+
+    private final Map<String, PTType> myFields = new HashMap<String, PTType>();
+
+    private final MTType myMathTypeAlterEgo;
+
+    public PTRecord(TypeGraph g, Map<String, PTType> types) {
+        super(g);
+        myFields.putAll(types);
+
+        MTCartesian.Element[] elements = new MTCartesian.Element[types.size()];
+        int index = 0;
+        for (Map.Entry<String, PTType> field : types.entrySet()) {
+            elements[index] =
+                    new MTCartesian.Element(field.getKey(), field.getValue()
+                            .toMath());
+            index++;
+        }
+        myMathTypeAlterEgo = new MTCartesian(g, elements);
+    }
+
+    public PTType getFieldType(String name) {
+        return myFields.get(name);
+    }
+
+    @Override
+    public MTType toMath() {
+        return myMathTypeAlterEgo;
+    }
+
+    @Override
+    public PTType instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilityEntry instantiatingFacility) {
+
+        Map<String, PTType> newFields = new HashMap<String, PTType>();
+        for (Map.Entry<String, PTType> type : myFields.entrySet()) {
+            newFields.put(type.getKey(), type.getValue().instantiateGenerics(
+                    genericInstantiations, instantiatingFacility));
+        }
+        return new PTRecord(getTypeGraph(), newFields);
+    }
+
+    @Override
+    public String toString() {
+        return "Record " + myFields;
+    }
+}

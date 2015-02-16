@@ -26,6 +26,8 @@ import edu.clemson.cs.r2jt.absyn.InfixExp;
 import edu.clemson.cs.r2jt.absyn.MathVarDec;
 import edu.clemson.cs.r2jt.absyn.QuantExp;
 import edu.clemson.cs.r2jt.absyn.VarExp;
+import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
+import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
@@ -311,6 +313,102 @@ public class Utilities {
                 new HashMap<String, Integer>();
 
         return applyQuantification(e, quantifiedVariables);
+    }
+
+    //Todo!
+    public static ExprAST applyQuantification(ExprAST e) {
+        Map<String, Integer> quantifiedVariables =
+                new HashMap<String, Integer>();
+
+        return applyQuantification(e, quantifiedVariables);
+    }
+
+    private static ExprAST applyQuantification(ExprAST e,
+            Map<String, Integer> quantifiedVariables) {
+
+        ExprAST retval = null;
+
+        /* if (e instanceof QuantExp) {
+             QuantExp eAsQuantifier = (QuantExp) e;
+
+             //Normalize our eAsQuantifier so that it doesn't have a "where"
+             //clause by appropriately transferring the "where" clause into
+             //the body using logical connectives
+             if (eAsQuantifier.getWhere() != null) {
+                 switch (eAsQuantifier.getOperator()) {
+                     case QuantExp.FORALL:
+                         eAsQuantifier =
+                                 new QuantExp(eAsQuantifier.getLocation(),
+                                         eAsQuantifier.getOperator(), eAsQuantifier
+                                         .getVars(), null, Exp
+                                         .buildImplication(eAsQuantifier
+                                                 .getWhere(), eAsQuantifier
+                                                 .getBody()));
+                         break;
+                     case QuantExp.EXISTS:
+                         eAsQuantifier =
+                                 new QuantExp(eAsQuantifier.getLocation(),
+                                         eAsQuantifier.getOperator(), eAsQuantifier
+                                         .getVars(), null, Exp
+                                         .buildConjunction(eAsQuantifier
+                                                 .getWhere(), eAsQuantifier
+                                                 .getBody()));
+                         break;
+                     default:
+                         throw new RuntimeException("Don't know how to normalize "
+                                 + "this kind of quantified expression.");
+                 }
+             }
+
+             List<MathVarDec> variableNames = eAsQuantifier.getVars();
+
+             for (MathVarDec v : variableNames) {
+                 quantifiedVariables.put(v.getName().getName(), eAsQuantifier
+                         .getOperator());
+             }
+
+             retval =
+                     applyQuantification(eAsQuantifier.getBody(),
+                             quantifiedVariables);
+
+             for (MathVarDec v : variableNames) {
+                 quantifiedVariables.remove((v.getName().getName()));
+             }
+         }
+         else {
+             if (e instanceof MathSymbolAST) {
+                 MathSymbolAST eAsVar = (MathSymbolAST) e;
+                 String varName = eAsVar.getName().getText();
+
+                 if (quantifiedVariables.containsKey(varName)) {
+                     eAsVar.setQuantification(quantifiedVariables.get(varName));
+                 }
+             }
+             else {
+                 if (e instanceof FunctionExp) {
+                     FunctionExp eAsFunctionExp = (FunctionExp) e;
+                     String functionName = eAsFunctionExp.getName().getName();
+                     if (quantifiedVariables.containsKey(functionName)) {
+                         eAsFunctionExp.setQuantification(quantifiedVariables
+                                 .get(functionName));
+                     }
+                 }
+
+                 List<Exp> subExpressions = e.getSubExpressions();
+                 int numSubExpressions = subExpressions.size();
+                 Exp curSubExpression;
+                 for (int curIndex = 0; curIndex < numSubExpressions; curIndex++) {
+
+                     curSubExpression = subExpressions.get(curIndex);
+                     e.setSubExpression(curIndex, applyQuantification(
+                             curSubExpression, quantifiedVariables));
+                 }
+             }
+
+             retval = e;
+         }*/
+
+        return retval;
     }
 
     /**

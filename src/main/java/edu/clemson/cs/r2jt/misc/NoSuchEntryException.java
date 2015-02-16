@@ -12,10 +12,10 @@
  */
 package edu.clemson.cs.r2jt.misc;
 
-
-//Todo: Delete this and use java utils builtin NoSuchElementException instead.
+// Todo: Delete this and use java utils builtin NoSuchElementException instead.
 @Deprecated
 public class NoSuchEntryException extends RuntimeException {
+
     private static final long serialVersionUID = -6696070520373901964L;
 
     public final Object entry;

@@ -29,15 +29,15 @@ import java.util.List;
  * @param <T> The return type of the base <code>SymbolQuery</code>.
  * @param <R> The return type of the resultant, processed entries.
  */
-public class ResultProcessingQuery<T extends SymbolTableEntry,
-        R extends SymbolTableEntry>
-            implements SymbolQuery<R> {
+public class ResultProcessingQuery<T extends SymbolTableEntry, R extends SymbolTableEntry>
+        implements
+            SymbolQuery<R> {
 
     private final SymbolQuery<T> myBaseQuery;
     private final Mapping<T, R> myMapping;
 
     public ResultProcessingQuery(SymbolQuery<T> baseQuery,
-                                 Mapping<T, R> processing) {
+            Mapping<T, R> processing) {
         myBaseQuery = baseQuery;
         myMapping = processing;
     }

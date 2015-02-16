@@ -100,6 +100,5 @@ public class OperationEntry extends SymbolTableEntry {
             return (ProgramParameterEntry) input.instantiateGenerics(
                     myGenericInstantiations, myInstantiatingFacility);
         }
-
     }
 }

@@ -30,36 +30,33 @@ import org.antlr.v4.runtime.Token;
  */
 public class NameAndEntryTypeQuery
         extends
-        BaseMultimatchSymbolQuery<SymbolTableEntry> {
+            BaseMultimatchSymbolQuery<SymbolTableEntry> {
 
     public NameAndEntryTypeQuery(Token qualifier, String name,
-                                 Class<? extends SymbolTableEntry> entryType,
-                                 ImportStrategy importStrategy,
-                                 FacilityStrategy facilityStrategy,
-                                 boolean localPriority) {
+            Class<? extends SymbolTableEntry> entryType,
+            ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
+            boolean localPriority) {
         super(new PossiblyQualifiedPath(qualifier, importStrategy,
                 facilityStrategy, localPriority), new NameAndEntryTypeSearcher(
                 name, entryType, false));
     }
 
     public NameAndEntryTypeQuery(Token qualifier, Token name,
-                                 Class<? extends SymbolTableEntry> entryType,
-                                 ImportStrategy importStrategy,
-                                 FacilityStrategy facilityStrategy,
-                                 boolean localPriority) {
+            Class<? extends SymbolTableEntry> entryType,
+            ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
+            boolean localPriority) {
         this(qualifier, name.getText(), entryType, importStrategy,
                 facilityStrategy, localPriority);
     }
 
     public NameAndEntryTypeQuery(Token qualifier, String name,
-                                 Class<? extends SymbolTableEntry> entryType) {
-        this(qualifier, name, entryType,
-                ImportStrategy.IMPORT_NONE, FacilityStrategy.FACILITY_IGNORE,
-                false);
+            Class<? extends SymbolTableEntry> entryType) {
+        this(qualifier, name, entryType, ImportStrategy.IMPORT_NONE,
+                FacilityStrategy.FACILITY_IGNORE, false);
     }
 
     public NameAndEntryTypeQuery(Token qualifier, Token name,
-                                 Class<? extends SymbolTableEntry> entryType) {
+            Class<? extends SymbolTableEntry> entryType) {
         this(qualifier, name, entryType, ImportStrategy.IMPORT_NONE,
                 FacilityStrategy.FACILITY_IGNORE, false);
     }

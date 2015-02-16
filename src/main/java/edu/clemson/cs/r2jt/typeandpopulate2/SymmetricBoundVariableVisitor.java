@@ -13,6 +13,7 @@
 package edu.clemson.cs.r2jt.typeandpopulate2;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.MathSymbolEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.query.UniversalVariableQuery;
 
 import java.util.*;
 

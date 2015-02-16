@@ -31,17 +31,15 @@ public class NameQuery extends BaseMultimatchSymbolQuery<SymbolTableEntry>
             MultimatchSymbolQuery<SymbolTableEntry> {
 
     public NameQuery(Token qualifier, String name,
-                     ImportStrategy importStrategy,
-                     FacilityStrategy facilityStrategy,
-                     boolean localPriority) {
+            ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
+            boolean localPriority) {
         super(new PossiblyQualifiedPath(qualifier, importStrategy,
                 facilityStrategy, localPriority), new NameSearcher(name, false));
     }
 
     public NameQuery(Token qualifier, Token name,
-                     ImportStrategy importStrategy,
-                     FacilityStrategy facilityStrategy,
-                     boolean localPriority) {
+            ImportStrategy importStrategy, FacilityStrategy facilityStrategy,
+            boolean localPriority) {
         this(qualifier, name.getText(), importStrategy, facilityStrategy,
                 localPriority);
     }

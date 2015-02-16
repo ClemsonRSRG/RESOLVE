@@ -27,8 +27,7 @@ public class EntryTypeQuery<T extends SymbolTableEntry>
             BaseMultimatchSymbolQuery<T> implements MultimatchSymbolQuery<T> {
 
     public EntryTypeQuery(Class<? extends SymbolTableEntry> entryType,
-                          ImportStrategy importStrategy,
-                          FacilityStrategy facilityStrategy) {
+            ImportStrategy importStrategy, FacilityStrategy facilityStrategy) {
         super(new UnqualifiedPath(importStrategy, facilityStrategy, false),
                 new EntryTypeSearcher(entryType));
     }

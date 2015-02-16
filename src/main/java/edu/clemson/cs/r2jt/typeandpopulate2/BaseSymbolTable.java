@@ -118,10 +118,8 @@ class BaseSymbolTable implements SymbolTable {
             else {
                 result.append(", ");
             }
-
             result.append(entry.getKey());
         }
-
         return result.toString();
     }
 }

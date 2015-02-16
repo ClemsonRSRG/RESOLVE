@@ -17,6 +17,7 @@ import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.*;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.query.GenericQuery;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import org.antlr.v4.runtime.Token;
 
@@ -120,7 +121,7 @@ public class MathSymbolEntry extends SymbolTableEntry {
      * </p>
      *
      * <p>If the provided arguments will not deschematize against the formal
-     * parameter types, this method will throw a {@link edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException
+     * parameter types, this method will throw a {@link NoSolutionException
      *   NoSolutionException}.  This may occur because the argument count is not
      * correct, because an actual argument corresponding to a formal parameter
      * that expects an explicit type parameter is not a type, because the type
@@ -132,7 +133,7 @@ public class MathSymbolEntry extends SymbolTableEntry {
      *
      * @param arguments
      * @return
-     * @throws edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException
+     * @throws NoSolutionException
      */
     public MathSymbolEntry deschematize(List<ExprAST> arguments,
             Scope callingContext, Map<String, MTType> definitionSchematicTypes)

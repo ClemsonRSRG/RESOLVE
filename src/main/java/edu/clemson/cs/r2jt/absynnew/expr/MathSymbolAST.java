@@ -15,6 +15,7 @@ package edu.clemson.cs.r2jt.absynnew.expr;
 import edu.clemson.cs.r2jt.absynnew.AbstractNodeBuilder;
 import edu.clemson.cs.r2jt.absynnew.ResolveToken;
 import edu.clemson.cs.r2jt.parsing.ResolveLexer;
+import edu.clemson.cs.r2jt.rewriteprover.absyn2.PSymbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
@@ -57,6 +58,10 @@ public class MathSymbolAST extends ExprAST {
 
     public boolean isFunction() {
         return myArguments.size() > 0;
+    }
+
+    public PSymbol.Quantification getQuantification() {
+        return null;//Todo
     }
 
     @Override

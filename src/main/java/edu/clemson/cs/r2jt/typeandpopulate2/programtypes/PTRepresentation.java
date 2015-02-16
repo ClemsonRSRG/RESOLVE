@@ -1,0 +1,79 @@
+/**
+ * PTRepresentation.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
+package edu.clemson.cs.r2jt.typeandpopulate2.programtypes;
+
+import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.FacilityEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramTypeDefinitionEntry;
+import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
+
+import java.util.Map;
+
+/**
+ * <p>A <code>PTRepresentation</code> wraps an existing {@link PTType}
+ * with additional information about a {@link PTFamily} this type
+ * represents.  An instance of <code>PTRepresentation</code> is thus a special
+ * case of its wrapped type that happens to be functioning as a representation
+ * type.</p>
+ */
+public class PTRepresentation extends PTType {
+
+    private final PTType myBaseType;
+    private final ProgramTypeDefinitionEntry myFamily;
+
+    public PTRepresentation(TypeGraph g, PTType baseType,
+            ProgramTypeDefinitionEntry family) {
+        super(g);
+
+        myBaseType = baseType;
+        myFamily = family;
+    }
+
+    public PTType getBaseType() {
+        return myBaseType;
+    }
+
+    public ProgramTypeDefinitionEntry getFamily() {
+        return myFamily;
+    }
+
+    @Override
+    public MTType toMath() {
+        return myBaseType.toMath();
+    }
+
+    @Override
+    public PTType instantiateGenerics(
+            Map<String, PTType> genericInstantiations,
+            FacilityEntry instantiatingFacility) {
+
+        throw new UnsupportedOperationException(this.getClass() + " cannot "
+                + "be instantiated.");
+    }
+
+    @Override
+    public boolean acceptableFor(PTType t) {
+        boolean result = super.acceptableFor(t);
+
+        if (!result) {
+            result = myFamily.getProgramType().acceptableFor(t);
+        }
+
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return myFamily.getName() + " as " + myBaseType;
+    }
+}

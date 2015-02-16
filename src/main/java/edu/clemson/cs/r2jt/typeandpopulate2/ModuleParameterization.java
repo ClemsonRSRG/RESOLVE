@@ -33,16 +33,16 @@ public class ModuleParameterization {
     private final FacilityEntry myInstantiatingFacility;
 
     public ModuleParameterization(ModuleIdentifier module,
-                                  FacilityEntry instantiatingFacility,
-                                  ScopeRepository sourceRepository) {
+            FacilityEntry instantiatingFacility,
+            ScopeRepository sourceRepository) {
         this(module, new LinkedList<ModuleArgumentAST>(),
                 instantiatingFacility, sourceRepository);
     }
 
     public ModuleParameterization(ModuleIdentifier module,
-                                  List<ModuleArgumentAST> parameters,
-                                  FacilityEntry instantiatingFacility,
-                                  ScopeRepository sourceRepository) {
+            List<ModuleArgumentAST> parameters,
+            FacilityEntry instantiatingFacility,
+            ScopeRepository sourceRepository) {
 
         myInstantiatingFacility = instantiatingFacility;
         mySourceRepository = sourceRepository;
@@ -84,27 +84,27 @@ public class ModuleParameterization {
                 //
                 // The instantiation of the type will be Integer and
                 // we need that information for our searchers to work.
-               /* if (originalScope.getDefiningElement() instanceof EnhancementModuleDec) {
-                    ModuleParameterization conceptParameterization =
-                            myInstantiatingFacility.getFacility()
-                                    .getSpecification();
-                    ModuleIdentifier conceptID =
-                            conceptParameterization.getModuleIdentifier();
-                    ModuleScope conceptScope =
-                            mySourceRepository.getModuleScope(conceptID);
-                    genericInstantiations =
-                            getGenericInstantiations(conceptScope,
-                                    conceptParameterization.getParameters());
-                }
-                else {
-                    genericInstantiations =
-                            getGenericInstantiations(originalScope,
-                                    myParameters);
-                }
+                /* if (originalScope.getDefiningElement() instanceof EnhancementModuleDec) {
+                     ModuleParameterization conceptParameterization =
+                             myInstantiatingFacility.getFacility()
+                                     .getSpecification();
+                     ModuleIdentifier conceptID =
+                             conceptParameterization.getModuleIdentifier();
+                     ModuleScope conceptScope =
+                             mySourceRepository.getModuleScope(conceptID);
+                     genericInstantiations =
+                             getGenericInstantiations(conceptScope,
+                                     conceptParameterization.getParameters());
+                 }
+                 else {
+                     genericInstantiations =
+                             getGenericInstantiations(originalScope,
+                                     myParameters);
+                 }
 
-                result =
-                        new InstantiatedScope(originalScope,
-                                genericInstantiations, myInstantiatingFacility);*/
+                 result =
+                         new InstantiatedScope(originalScope,
+                                 genericInstantiations, myInstantiatingFacility);*/
             }
         }
         catch (NoSuchSymbolException nsse) {
@@ -130,15 +130,14 @@ public class ModuleParameterization {
 
     private static class BuildGenericInstantiations
             implements
-            Utils.Mapping3<ProgramParameterEntry, ModuleArgumentAST,
-                                    Map<String, PTType>, Map<String, PTType>> {
+                Utils.Mapping3<ProgramParameterEntry, ModuleArgumentAST, Map<String, PTType>, Map<String, PTType>> {
 
         public static final BuildGenericInstantiations INSTANCE =
                 new BuildGenericInstantiations();
 
         @Override
         public Map<String, PTType> map(ProgramParameterEntry p1,
-                                       ModuleArgumentAST p2, Map<String, PTType> p3) {
+                ModuleArgumentAST p2, Map<String, PTType> p3) {
 
             if (p1.getParameterMode().equals(ParameterMode.TYPE)) {
                 if (p2.getProgramTypeValue() == null) {
