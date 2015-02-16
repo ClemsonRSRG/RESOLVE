@@ -40,7 +40,7 @@ public abstract class ModuleBuilderExtension<E extends ModuleBuilderExtension<E>
     public final List<ModuleParameterAST> moduleParameters =
             new ArrayList<ModuleParameterAST>();
 
-    public ImportBlockAST usesBlock = null;
+    public ImportCollectionAST usesBlock = null;
     public final Token name;
 
     public ModuleBuilderExtension(Token start, Token stop, Token name) {
@@ -60,7 +60,7 @@ public abstract class ModuleBuilderExtension<E extends ModuleBuilderExtension<E>
     }
 
     @SuppressWarnings("unchecked")
-    public E imports(ImportBlockAST e) {
+    public E imports(ImportCollectionAST e) {
         usesBlock = e;
         return (E) this;
     }
@@ -72,7 +72,7 @@ public abstract class ModuleBuilderExtension<E extends ModuleBuilderExtension<E>
     }
 
     @SuppressWarnings("unchecked")
-    public E usesBlock(ImportBlockAST e) {
+    public E usesBlock(ImportCollectionAST e) {
         usesBlock = e;
         return (E) this;
     }

@@ -167,7 +167,7 @@ public class ResolveCompiler {
 
     private void findDependencies(DefaultDirectedGraph g, ModuleAST root) {
         for (Token importRequest : root.getImportBlock().getImportsExcluding(
-                ImportBlockAST.ImportType.EXTERNAL)) {
+                ImportCollectionAST.ImportType.EXTERNAL)) {
 
             ConnectivityInspector<ModuleIdentifier, DefaultEdge> conn =
                     new ConnectivityInspector<ModuleIdentifier, DefaultEdge>(g);
@@ -183,7 +183,7 @@ public class ResolveCompiler {
             }
 
             if (root.getImportBlock().inCategory(
-                    ImportBlockAST.ImportType.IMPLICIT, importRequest)) {
+                    ImportCollectionAST.ImportType.IMPLICIT, importRequest)) {
                 if (!module.appropriateForImport()) {
                     throw new IllegalArgumentException("Invalid import: "
                             + module.getName() + ". Cannot import module of "
@@ -223,7 +223,7 @@ public class ResolveCompiler {
     private void addFilesForExternalImports(ModuleAST m) {
         Set<Token> externals =
                 m.getImportBlock().getImportsOfType(
-                        ImportBlockAST.ImportType.EXTERNAL);
+                        ImportCollectionAST.ImportType.EXTERNAL);
 
         for (Token externalImport : externals) {
             File file =

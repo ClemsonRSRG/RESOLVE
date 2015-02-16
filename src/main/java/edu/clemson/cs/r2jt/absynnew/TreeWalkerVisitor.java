@@ -180,16 +180,16 @@ public abstract class TreeWalkerVisitor {
     public void postTypeInitAST(
             edu.clemson.cs.r2jt.absynnew.InitFinalAST.TypeInitAST e) {}
 
-    public boolean walkImportBlockAST(ImportBlockAST e) {
+    public boolean walkImportBlockAST(ImportCollectionAST e) {
         return false;
     }
 
-    public void preImportBlockAST(ImportBlockAST e) {}
+    public void preImportBlockAST(ImportCollectionAST e) {}
 
-    public void midImportBlockAST(ImportBlockAST e, ResolveAST previous,
+    public void midImportBlockAST(ImportCollectionAST e, ResolveAST previous,
             ResolveAST next) {}
 
-    public void postImportBlockAST(ImportBlockAST e) {}
+    public void postImportBlockAST(ImportCollectionAST e) {}
 
     public boolean walkProgLiteralRefAST(ProgLiteralRefAST e) {
         return false;

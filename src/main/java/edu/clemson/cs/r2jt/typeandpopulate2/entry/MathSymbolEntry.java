@@ -18,6 +18,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.*;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
+import org.antlr.v4.runtime.Token;
 
 import java.util.*;
 
@@ -234,7 +235,7 @@ public class MathSymbolEntry extends SymbolTableEntry {
         return result;
     }
 
-    private static List<MTType> getArgumentTypes(List<Exp> arguments) {
+    private static List<MTType> getArgumentTypes(List<ExprAST> arguments) {
         List<MTType> result;
 
         if (arguments.size() == 1) {
@@ -242,7 +243,7 @@ public class MathSymbolEntry extends SymbolTableEntry {
         }
         else {
             result = new LinkedList<MTType>();
-            for (Exp e : arguments) {
+            for (ExprAST e : arguments) {
                 result.add(e.getMathType());
             }
         }
@@ -290,7 +291,7 @@ public class MathSymbolEntry extends SymbolTableEntry {
     }
 
     @Override
-    public MathSymbolEntry toMathSymbolEntry(Location l) {
+    public MathSymbolEntry toMathSymbolEntry(Token l) {
         return this;
     }
 

@@ -1,5 +1,5 @@
 /**
- * NoSuchSymbolException.java
+ * NoSuchScopeException.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group
@@ -12,18 +12,14 @@
  */
 package edu.clemson.cs.r2jt.typeandpopulate2;
 
+import edu.clemson.cs.r2jt.absynnew.ResolveAST;
+
 @SuppressWarnings("serial")
-public class NoSuchSymbolException extends SymbolTableException {
+public class NoSuchScopeException extends RuntimeException {
 
-    public NoSuchSymbolException() {
-        super();
-    }
+    public final ResolveAST requestedScope;
 
-    public NoSuchSymbolException(String msg) {
-        super(msg);
-    }
-
-    public NoSuchSymbolException(Exception causedBy) {
-        super(causedBy);
+    public NoSuchScopeException(ResolveAST e) {
+        requestedScope = e;
     }
 }

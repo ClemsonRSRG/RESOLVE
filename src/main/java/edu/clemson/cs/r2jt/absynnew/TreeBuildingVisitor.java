@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.r2jt.absynnew;
 
-import edu.clemson.cs.r2jt.absynnew.ImportBlockAST.ImportCollectionBuilder;
-import edu.clemson.cs.r2jt.absynnew.ImportBlockAST.ImportType;
+import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportCollectionBuilder;
+import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportType;
 import edu.clemson.cs.r2jt.absynnew.InitFinalAST.TypeFinalAST;
 import edu.clemson.cs.r2jt.absynnew.InitFinalAST.TypeInitAST;
 import edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptAST.ConceptBuilder;
@@ -67,7 +67,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
      * <p>Collects all imports. This builder must be global as it is added to by
      * various contexts encountered throughout the parsetree.</p>
      */
-    private ImportBlockAST.ImportCollectionBuilder myImportBuilder =
+    private ImportCollectionAST.ImportCollectionBuilder myImportBuilder =
             new ImportCollectionBuilder();
 
     private final ParseTree myRootTree;

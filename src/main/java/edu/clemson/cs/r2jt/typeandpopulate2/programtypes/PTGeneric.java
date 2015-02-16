@@ -8,6 +8,7 @@ import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import java.util.Map;
 
 public class PTGeneric extends PTType {
+
     private final String myName;
 
     public PTGeneric(TypeGraph g, String name) {

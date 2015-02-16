@@ -225,7 +225,6 @@ public class SyntacticSubtypeChecker extends SymmetricBoundVariableVisitor {
         if (!(t1 == t2 || haveAxiomaticSubtypeRelationship(t1, t2))) {
             throw MISMATCH;
         }
-
         return true;
     }
 
