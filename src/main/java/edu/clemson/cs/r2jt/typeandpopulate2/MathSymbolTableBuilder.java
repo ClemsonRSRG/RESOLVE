@@ -14,6 +14,7 @@ package edu.clemson.cs.r2jt.typeandpopulate2;
 
 import edu.clemson.cs.r2jt.absynnew.ModuleAST;
 import edu.clemson.cs.r2jt.absynnew.ResolveAST;
+import edu.clemson.cs.r2jt.misc.HardCoded2;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 
@@ -63,7 +64,7 @@ public class MathSymbolTableBuilder extends ScopeRepository {
                 new ScopeBuilder(this, myTypeGraph, null, DUMMY_RESOLVER,
                         ModuleIdentifier.GLOBAL);
 
-        //HardCoded.addBuiltInSymbols(myTypeGraph, globalScope);
+        HardCoded2.addBuiltInSymbols(myTypeGraph, globalScope);
 
         myLexicalScopeStack.push(globalScope);
 

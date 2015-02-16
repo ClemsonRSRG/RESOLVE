@@ -11,23 +11,22 @@ module
 precisModule
     :   'Precis' name=Identifier ';'
          (usesList)?
-         //(precisItems)?
+         (precisItems)?
         'end' closename=Identifier ';'
     ;
 
-/*precisItems
-    :   (facilityItem)+
+precisItems
+    :   (precisItem)+
     ;
+
 precisItem
-    :   'nothing yet'
+    :   mathTypeTheoremDecl
     ;
-*/
 
 // facility module
 
 facilityModule
     :   'Facility' name=Identifier ';'
-
         'end' closename=Identifier ';'
     ;
 
@@ -60,7 +59,7 @@ usesList
 // parameter related rules
 
 moduleParameterList
-    : '(' moduleParameterDecl (';' moduleParameterDecl)* ')'
+    :   '(' moduleParameterDecl (';' moduleParameterDecl)* ')'
     ;
 
 moduleParameterDecl
@@ -69,7 +68,7 @@ moduleParameterDecl
     ;
 
 typeParameterDecl
-    : 'type' name=Identifier
+    :   'type' name=Identifier
     ;
 
 parameterList
@@ -113,11 +112,11 @@ specTypeFinal
     ;
 
 moduleInit
-    :   'facility' 'initialization'
+    :   'Facility_Initialization'
     ;
 
 moduleFinal
-    :   'facility' 'finalization'
+    :   'Facility_Finalization'
     ;
 
 // functions
@@ -164,7 +163,14 @@ variableDeclGroup
     :   'Var' Identifier (',' Identifier)* ':' type ';'
     ;
 
-// Mathematical clauses
+// type theorems
+
+mathTypeTheoremDecl
+    :   'Type' 'Theorem' name=Identifier ':'
+        ('For' 'all' mathVariableDeclGroup ',')+ mathExp ';'
+    ;
+
+// mathematical clauses
 
 affectsClause
     :   parameterMode Identifier (',' Identifier)*

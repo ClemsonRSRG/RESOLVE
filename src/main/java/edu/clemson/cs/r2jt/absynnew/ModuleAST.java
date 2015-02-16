@@ -25,8 +25,8 @@ import java.util.List;
 public abstract class ModuleAST extends ResolveAST {
 
     private final Token myName;
-    private final List<ModuleParameterAST> myModuleParams;
     private final ImportCollectionAST myImportBlock;
+    private final List<ModuleParameterAST> myModuleParams;
     private final ExprAST myRequires;
     private final ModuleBlockAST myBodyBlock;
 

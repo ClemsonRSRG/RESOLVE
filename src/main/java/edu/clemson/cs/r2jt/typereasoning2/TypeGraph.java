@@ -15,7 +15,15 @@ package edu.clemson.cs.r2jt.typereasoning2;
 import edu.clemson.cs.r2jt.absynnew.ResolveToken;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST;
+import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate2.*;
+import edu.clemson.cs.r2jt.typeandpopulate2.FunctionApplicationFactory;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTFunction;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTPowertypeApplication;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTProper;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTUnion;
 
 import java.util.List;
 
@@ -67,6 +75,10 @@ public class TypeGraph {
                     CLS);
     public final MTFunction CROSS =
             new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, CLS, CLS, CLS);
+
+    public final MTFunction AND =
+            new MTFunction(this, BOOLEAN, BOOLEAN, BOOLEAN);
+    public final MTFunction NOT = new MTFunction(this, BOOLEAN, BOOLEAN);
 
     public boolean isSubtype(MTType subtype, MTType supertype) {
         return false;

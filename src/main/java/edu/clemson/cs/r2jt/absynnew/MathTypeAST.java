@@ -35,7 +35,7 @@ public final class MathTypeAST extends TypeAST {
         myArbitraryTypeExpr = type;
     }
 
-    public ExprAST getArbitraryTypeExpr() {
+    public ExprAST getUnderlyingExpr() {
         return myArbitraryTypeExpr;
     }
 

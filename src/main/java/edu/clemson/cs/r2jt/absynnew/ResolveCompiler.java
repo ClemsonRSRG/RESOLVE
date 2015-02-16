@@ -15,6 +15,8 @@ package edu.clemson.cs.r2jt.absynnew;
 import edu.clemson.cs.r2jt.misc.*;
 import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.r2jt.typeandpopulate2.AnalysisPipeline;
+import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -76,8 +78,8 @@ public class ResolveCompiler {
 
     public final FlagManager myFlagManager;
 
-    //public final MathSymbolTableBuilder mySymbolTable =
-    //        new MathSymbolTableBuilder();
+    public final MathSymbolTableBuilder mySymbolTable =
+            new MathSymbolTableBuilder();
 
     public final Map<ModuleIdentifier, File> myFiles =
             new HashMap<ModuleIdentifier, File>();
@@ -120,6 +122,7 @@ public class ResolveCompiler {
 
     public void compile() {
         try {
+
             for (String target : myTargetFiles) {
                 File currentFile = new File(target);
                 if (!currentFile.isAbsolute()) {
@@ -138,9 +141,15 @@ public class ResolveCompiler {
                 g.addVertex(id);
                 findDependencies(g, targetModule);
 
-                //Todo: We're going to have pipelines here in the future.
+                AnalysisPipeline analysisPipe =
+                        new AnalysisPipeline(this, mySymbolTable);
+                //CodeGenPipeline codegenPipe =
+                //        new CodeGenPipeline(this, )
+
                 for (ModuleIdentifier m : getCompileOrder(g)) {
-                    System.out.println("populating: " + m);
+                    analysisPipe.process(m);
+                    //codegenPipe.process(m);
+                    //verificationPipe.process(m);
                 }
             }
         }

@@ -106,6 +106,17 @@ public abstract class TreeWalkerVisitor {
 
     public void postTypeAST(TypeAST e) {}
 
+    public void prePrecisAST(ModuleAST.PrecisAST e) {}
+
+    public void midPrecisAST(ModuleAST.PrecisAST e, ResolveAST previous,
+            ResolveAST next) {}
+
+    public void postPrecisAST(ModuleAST.PrecisAST e) {}
+
+    public boolean walkPrecisAST(ModuleAST.PrecisAST e) {
+        return false;
+    }
+
     public boolean walkTypeParameterAST(TypeParameterAST e) {
         return false;
     }
@@ -180,16 +191,16 @@ public abstract class TreeWalkerVisitor {
     public void postTypeInitAST(
             edu.clemson.cs.r2jt.absynnew.InitFinalAST.TypeInitAST e) {}
 
-    public boolean walkImportBlockAST(ImportCollectionAST e) {
+    public boolean walkImportCollectionAST(ImportCollectionAST e) {
         return false;
     }
 
-    public void preImportBlockAST(ImportCollectionAST e) {}
+    public void preImportCollectionAST(ImportCollectionAST e) {}
 
-    public void midImportBlockAST(ImportCollectionAST e, ResolveAST previous,
-            ResolveAST next) {}
+    public void midImportCollectionAST(ImportCollectionAST e,
+            ResolveAST previous, ResolveAST next) {}
 
-    public void postImportBlockAST(ImportCollectionAST e) {}
+    public void postImportCollectionAST(ImportCollectionAST e) {}
 
     public boolean walkProgLiteralRefAST(ProgLiteralRefAST e) {
         return false;

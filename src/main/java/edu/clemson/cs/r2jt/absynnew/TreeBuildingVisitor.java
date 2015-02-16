@@ -97,6 +97,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         myImportBuilder =
                 new ImportCollectionBuilder(ctx.getStart(), ctx.getStop())
                         .imports(ImportType.EXPLICIT, ctx.Identifier());
+        //Add em to the decorator nevertheless.
+        put(ctx, myImportBuilder.build());
     }
 
     @Override
@@ -148,42 +150,6 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
         put(ctx, builder.build());
     }
-
-    /*
-     * @Override public void enterFacilityModule(
-     * 
-     * @NotNull ResolveParser.FacilityModuleContext ctx) {
-     * sanityCheckBlockEnds(ctx.name, ctx.closename);
-     * }
-     * 
-     * @Override public void exitFacilityModule(
-     * 
-     * @NotNull ResolveParser.FacilityModuleContext ctx) {
-     * FacilityBuilder builder =
-     * new FacilityBuilder(ctx.getStart(), ctx.getStop(), ctx.name)
-     * .requires(get(ExprAST.class, ctx.requiresClause()))
-     * .block(get(ModuleBlockAST.class, ctx.facilityItems()))
-     * .imports(myImportBuilder.build());
-     * 
-     * myFinalBuilder = builder;
-     * }
-     * 
-     * @Override public void exitFacilityItems(
-     * 
-     * @NotNull ResolveParser.FacilityItemsContext ctx) {
-     * ModuleBlockBuilder blockBuilder =
-     * new ModuleBlockBuilder(ctx.getStart(), ctx.getStop())
-     * .generalElements(getAll(ResolveAST.class,
-     * ctx.facilityItem()));
-     * put(ctx, blockBuilder.build());
-     * }
-     * 
-     * @Override public void exitFacilityItem(
-     * 
-     * @NotNull ResolveParser.FacilityItemContext ctx) {
-     * put(ctx, get(ResolveAST.class, ctx.getChild(0)));
-     * }
-     */
 
     @Override
     public void exitOperationDecl(
@@ -280,6 +246,32 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                         .constraint(get(ExprAST.class, ctx.constraintClause()));
 
         put(ctx, builder.build());
+    }
+
+    @Override
+    public void exitMathTypeTheoremDecl(
+            @NotNull ResolveParser.MathTypeTheoremDeclContext ctx) {
+        List<MathVariableAST> universals = new ArrayList<MathVariableAST>();
+
+        for (ResolveParser.MathVariableDeclGroupContext grp : ctx
+                .mathVariableDeclGroup()) {
+            universals.addAll(getAll(MathVariableAST.class, grp.Identifier()));
+        }
+        MathTypeTheoremAST theorem =
+                new MathTypeTheoremAST(ctx.getStart(), ctx.getStop(), ctx.name,
+                        universals, get(ExprAST.class, ctx.mathExp()));
+        put(ctx, theorem);
+    }
+
+    @Override
+    public void exitMathVariableDeclGroup(
+            @NotNull ResolveParser.MathVariableDeclGroupContext ctx) {
+        MathTypeAST groupType = get(MathTypeAST.class, ctx.mathTypeExp());
+
+        for (TerminalNode t : ctx.Identifier()) {
+            put(t, new MathVariableAST(ctx.getStart(), ctx.getStop(), t
+                    .getSymbol(), groupType));
+        }
     }
 
     /*
@@ -407,6 +399,19 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                 new ProgOperationRefAST(ctx.getStart(), ctx.getStop(), null,
                         ctx.op, getAll(ProgExprAST.class, ctx.progExp()));
         put(ctx, call);
+    }
+
+
+    @Override
+    public void exitMathTypeAssertExp(
+            @NotNull ResolveParser.MathTypeAssertExpContext ctx) {
+        ExprAST lhs = get(ExprAST.class, ctx.mathExp(0));
+        ExprAST rhs = get(ExprAST.class, ctx.mathExp(1));
+
+        MathTypeAssertionAST typeAssertion =
+                new MathTypeAssertionAST(ctx.getStart(), ctx.getStop(), lhs,
+                        new MathTypeAST(rhs));
+        put(ctx, typeAssertion);
     }
 
     @Override
@@ -558,7 +563,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     public void exitMathOutfixExp(
             @NotNull ResolveParser.MathOutfixExpContext ctx) {
         put(ctx, buildFunctionApplication(ctx.lop, ctx.rop, ctx, ctx.mathExp())
-                 .style(DisplayStyle.OUTFIX).build());
+                .style(DisplayStyle.OUTFIX).build());
     }
 
     private MathSymbolExprBuilder buildFunctionApplication(Token lname,
