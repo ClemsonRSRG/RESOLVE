@@ -14,6 +14,7 @@ package edu.clemson.cs.r2jt.absynnew.decl;
 
 import edu.clemson.cs.r2jt.absynnew.AbstractNodeBuilder;
 import edu.clemson.cs.r2jt.absynnew.MathTypeAST;
+import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
@@ -28,39 +29,35 @@ import java.util.List;
 public class MathDefinitionAST extends DeclAST {
 
     public static enum DefinitionType {
-
-        INDUCTIVE {
-
-            @Override
-            public String getTemplateName() {
-                return "InductiveDefAST";
-            }
-        },
-        STANDARD {
-
-            @Override
-            public String getTemplateName() {
-                return "StandardDefAST";
-            }
-        },
-        DEFINES {
-
-            @Override
-            public String getTemplateName() {
-                return "DefinesDefAST";
-            }
-        };
-
-        public abstract String getTemplateName();
+        INDUCTIVE, STANDARD, DEFINES
     }
 
     private final List<MathVariableAST> myParameters;
     private final MathTypeAST myReturnType;
+    private final DefinitionType myDefinitionType;
 
     private MathDefinitionAST(DefinitionBuilder builder) {
         super(builder.getStart(), builder.getStop(), builder.name);
         myReturnType = builder.returnType;
         myParameters = builder.parameters;
+        myDefinitionType = builder.type;
+    }
+
+    public DefinitionType getDefinitionType() {
+        return myDefinitionType;
+    }
+
+    public MathTypeAST getReturnType() {
+        return myReturnType;
+    }
+
+    public List<MathVariableAST> getParameters() {
+        return myParameters;
+    }
+
+    //Todo: Add an (currently optional) rhs to definitions.
+    public ExprAST getDefinitionRightHandSide() {
+        return null;
     }
 
     public static class DefinitionBuilder
@@ -69,6 +66,7 @@ public class MathDefinitionAST extends DeclAST {
 
         protected final Token name;
         protected MathTypeAST returnType;
+        protected DefinitionType type;
 
         protected final List<MathVariableAST> parameters =
                 new ArrayList<MathVariableAST>();
@@ -80,6 +78,11 @@ public class MathDefinitionAST extends DeclAST {
 
         public DefinitionBuilder returnType(MathTypeAST e) {
             returnType = e;
+            return this;
+        }
+
+        public DefinitionBuilder type(DefinitionType e) {
+            type = e;
             return this;
         }
 

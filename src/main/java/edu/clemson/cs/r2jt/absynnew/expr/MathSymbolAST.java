@@ -16,6 +16,10 @@ import edu.clemson.cs.r2jt.absynnew.AbstractNodeBuilder;
 import edu.clemson.cs.r2jt.absynnew.ResolveToken;
 import edu.clemson.cs.r2jt.parsing.ResolveLexer;
 import edu.clemson.cs.r2jt.rewriteprover.absyn2.PSymbol;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTFunction;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
@@ -37,7 +41,7 @@ public class MathSymbolAST extends ExprAST {
 
     private final List<ExprAST> myArguments = new ArrayList<ExprAST>();
     private final boolean myLiteralFlag, myIncomingFlag;
-    private final PSymbol.Quantification myQuantification;
+    private SymbolTableEntry.Quantification myQuantification;
     private final DisplayStyle myDisplayStyle;
 
     private MathSymbolAST(MathSymbolExprBuilder builder) {
@@ -52,6 +56,34 @@ public class MathSymbolAST extends ExprAST {
         myIncomingFlag = builder.incoming;
         myDisplayStyle = builder.style;
         myQuantification = builder.quantification;
+    }
+
+    /**
+     * <p>This class represents function <em>applications</em>.  The type of a
+     * function application is the type of the range of the function.  Often
+     * we'd like to think about the type of the <em>function itself</em>, not
+     * the type of the result of its application.  Unfortunately our AST does
+     * not consider that the 'function' part of a FunctionExp (as distinct from
+     * its parameters) might be a first-class citizen with a type of its own.
+     * This method emulates retrieving the (not actually extant) first-class
+     * function part and guessing its type.  In this case, the guess is
+     * "conservative", in that we guess the smallest set that can't be
+     * contradicted by the available information.  For nodes without a true,
+     * first-class function to consult (which, at the moment, is all of them),
+     * this means that for the formal parameter types, we'll guess the types of
+     * the actual parameters, and for the return type we'll guess
+     * <strong>Empty_Set</strong> (since we have no information about how the
+     * return value is used.)  This guarantees that the type we return will be
+     * a subset of the actual type of the function the RESOLVE programmer
+     * intends (assuming she has called it correctly.)</p>
+     */
+    public MTFunction getConservativePreApplicationType(TypeGraph g) {
+        List<MTType> subTypes = new LinkedList<MTType>();
+
+        for (ExprAST arg : myArguments) {
+            subTypes.add(arg.getMathType());
+        }
+        return new MTFunction(g, g.EMPTY_SET, subTypes);
     }
 
     public Token getName() {
@@ -74,7 +106,17 @@ public class MathSymbolAST extends ExprAST {
         return myDisplayStyle;
     }
 
-    public PSymbol.Quantification getQuantification() {
+    public void setQuantification(SymbolTableEntry.Quantification q) {
+        myQuantification = q;
+    }
+
+    //Todo: Figure out what qualifiers are going to look like in a
+    //mathematical setting.
+    public Token getQualifier() {
+        return null;
+    }
+
+    public SymbolTableEntry.Quantification getQuantification() {
         return myQuantification;
     }
 
@@ -231,8 +273,8 @@ public class MathSymbolAST extends ExprAST {
         protected boolean literal = false;
 
         protected DisplayStyle style = DisplayStyle.PREFIX;
-        protected PSymbol.Quantification quantification =
-                PSymbol.Quantification.NONE;
+        protected SymbolTableEntry.Quantification quantification =
+                SymbolTableEntry.Quantification.NONE;
 
         protected final List<ExprAST> arguments = new ArrayList<ExprAST>();
 
@@ -273,7 +315,8 @@ public class MathSymbolAST extends ExprAST {
             return this;
         }
 
-        public MathSymbolExprBuilder quantification(PSymbol.Quantification q) {
+        public MathSymbolExprBuilder quantification(
+                SymbolTableEntry.Quantification q) {
             quantification = q;
             return this;
         }

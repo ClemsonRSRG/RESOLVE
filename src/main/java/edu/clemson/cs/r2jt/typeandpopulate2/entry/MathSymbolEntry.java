@@ -264,7 +264,6 @@ public class MathSymbolEntry extends SymbolTableEntry {
                 new ContainsNamedTypeChecker(mySchematicTypes.keySet());
 
         t.accept(checker);
-
         return checker.getResult();
     }
 

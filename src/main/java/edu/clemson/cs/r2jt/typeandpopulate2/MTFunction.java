@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.r2jt.typeandpopulate2;
 
+import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST;
 import edu.clemson.cs.r2jt.absynnew.decl.MathVariableAST;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import edu.clemson.cs.r2jt.typereasoning2.TypeComparison;
@@ -67,13 +68,13 @@ public class MTFunction extends MTAbstract<MTFunction> {
     /**
      * This assumes that d has some parameters in its .getParams().
      */
-    /*public MTFunction(TypeGraph g, DefinitionDec d) {
-        this(g, false, DEFAULT_FACTORY, d.getReturnTy().getMathTypeValue(),
+    public MTFunction(TypeGraph g, MathDefinitionAST d) {
+        this(g, false, DEFAULT_FACTORY, d.getReturnType().getMathTypeValue(),
                 getParamNames(d.getParameters()), getParamTypes(d
                         .getParameters()));
     }
 
-    public MTFunction(TypeGraph g, LambdaExp l) {
+    /*public MTFunction(TypeGraph g, LambdaExp l) {
         this(g, false, DEFAULT_FACTORY, l.getMathType(), getParamNames(l
                 .getParameters()), getParamTypes(l.getParameters()));
     }*/
