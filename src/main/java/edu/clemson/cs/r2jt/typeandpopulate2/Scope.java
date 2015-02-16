@@ -1,6 +1,7 @@
 package edu.clemson.cs.r2jt.typeandpopulate2;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.FacilityEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate2.query.MultimatchSymbolQuery;
@@ -122,4 +123,29 @@ public interface Scope {
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility, SearchContext l)
             throws DuplicateSymbolException;
+
+    /**
+     * <p>A simple variation on {@link #addMatches}() that creates
+     * and returns a new list rather than requiring an accumulator and starts
+     * with an empty set of searched scopes and instantiations.</p>
+     *
+     * @param searcher
+     * @return
+     */
+    public <E extends SymbolTableEntry> List<E> getMatches(
+            TableSearcher<E> searcher, SearchContext l)
+            throws DuplicateSymbolException;
+
+    /**
+     * <p>Returns a list of {@link ProgramParameterEntry}s
+     * contained directly in this scope.  These correspond to the formal
+     * parameters defined by the syntactic element that introduced the
+     * scope.</p>
+     *
+     * <p>If there are no parameters, or the syntactic element is not of the
+     * sort that can define parameters, returns an empty list.</p>
+     *
+     * @return Entries for the parameters of the current scope.
+     */
+    public List<ProgramParameterEntry> getFormalParameterEntries();
 }

@@ -13,7 +13,7 @@
 package edu.clemson.cs.r2jt.absynnew.expr;
 
 import edu.clemson.cs.r2jt.absynnew.ResolveAST;
-import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import org.antlr.v4.runtime.Token;
 
 import java.util.*;

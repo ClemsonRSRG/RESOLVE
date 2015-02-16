@@ -1,5 +1,5 @@
 /**
- * MTNamed.java
+ * MTGeneric.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group
@@ -15,30 +15,23 @@ package edu.clemson.cs.r2jt.typeandpopulate2;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-/**
- * <p>Represents a type that is simply a named reference to some bound variable.
- * For example, in BigUnion{t : MType}{t}, the second "t" is a named type.</p>
- */
-public class MTNamed extends MTType {
+public class MTGeneric extends MTAbstract<MTGeneric> {
 
-    private final static int BASE_HASH = "MTNamed".hashCode();
+    private static final int BASE_HASH = "MTGeneric".hashCode();
 
-    public final String name;
+    private final String myName;
 
-    public MTNamed(TypeGraph g, String name) {
+    public MTGeneric(TypeGraph g, String name) {
         super(g);
-
-        this.name = name;
+        myName = name;
     }
 
     @Override
     public void acceptOpen(TypeVisitor v) {
         v.beginMTType(this);
-        v.beginMTNamed(this);
+        v.beginMTAbstract(this);
     }
 
     @Override
@@ -53,7 +46,7 @@ public class MTNamed extends MTType {
 
     @Override
     public void acceptClose(TypeVisitor v) {
-        v.endMTNamed(this);
+        v.endMTAbstract(this);
         v.endMTType(this);
     }
 
@@ -65,28 +58,15 @@ public class MTNamed extends MTType {
 
     @Override
     public MTType withComponentReplaced(int index, MTType newType) {
-        throw new IndexOutOfBoundsException();
+        throw new IndexOutOfBoundsException("" + index);
     }
 
     @Override
     public int getHashCode() {
-        return BASE_HASH;
+        return BASE_HASH + myName.hashCode();
     }
 
-    @Override
-    public String toString() {
-        return "'" + name + "'";
-    }
-
-    public static Map<MTNamed, MTType> toMTNamedMap(TypeGraph source,
-            Map<String, MTType> original) {
-
-        Map<MTNamed, MTType> result = new HashMap<MTNamed, MTType>();
-
-        for (Map.Entry<String, MTType> e : original.entrySet()) {
-            result.put(new MTNamed(source, e.getKey()), e.getValue());
-        }
-
-        return result;
+    public String getName() {
+        return myName;
     }
 }
