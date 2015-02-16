@@ -97,7 +97,6 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         myImportBuilder =
                 new ImportCollectionBuilder(ctx.getStart(), ctx.getStop())
                         .imports(ImportType.EXPLICIT, ctx.Identifier());
-        //Add em to the decorator nevertheless.
         put(ctx, myImportBuilder.build());
     }
 

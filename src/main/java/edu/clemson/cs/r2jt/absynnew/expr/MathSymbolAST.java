@@ -33,7 +33,7 @@ public class MathSymbolAST extends ExprAST {
         INFIX, OUTFIX, PREFIX
     }
 
-    private final Token myName;
+    private final Token myLeftPrint, myRightPrint, myName;
 
     private final List<ExprAST> myArguments = new ArrayList<ExprAST>();
     private final boolean myLiteralFlag, myIncomingFlag;
@@ -44,6 +44,9 @@ public class MathSymbolAST extends ExprAST {
         super(builder.getStart(), builder.getStop());
 
         myName = builder.name;
+        myLeftPrint = builder.lprint;
+        myRightPrint = builder.rprint;
+
         myArguments.addAll(builder.arguments);
         myLiteralFlag = builder.literal;
         myIncomingFlag = builder.incoming;
@@ -185,6 +188,10 @@ public class MathSymbolAST extends ExprAST {
             if (myDisplayStyle == DisplayStyle.INFIX) {
                 result.append(myArguments.get(0)).append(" " + myName + " ")
                         .append(myArguments.get(1));
+            }
+            else if (myDisplayStyle == DisplayStyle.OUTFIX) {
+                result.append(myLeftPrint).append(myArguments.get(0))
+                        .append(myRightPrint);
             }
             else {
                 result.append(myName.getText()).append("(");
