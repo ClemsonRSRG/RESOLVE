@@ -29,7 +29,7 @@ public class SymmetricBoundVariableVisitor extends SymmetricVisitor {
     }
 
     public SymmetricBoundVariableVisitor(FinalizedScope context1) {
-        Map<String, edu.clemson.cs.r2jt.typeandpopulate.MTType> topLevel = new HashMap<String, edu.clemson.cs.r2jt.typeandpopulate.MTType>();
+        Map<String, MTType> topLevel = new HashMap<String, MTType>();
 
         List<MathSymbolEntry> quantifiedVariables =
                 context1.query(UniversalVariableQuery.INSTANCE);

@@ -1,13 +1,23 @@
+/**
+ * MathSymbolEntry.java
+ * ---------------------------------
+ * Copyright (c) 2014
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.typeandpopulate2.entry;
 
 import edu.clemson.cs.r2jt.absynnew.ResolveAST;
+import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate2.MTProper;
-import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
-import edu.clemson.cs.r2jt.typeandpopulate2.SymbolNotOfKindTypeException;
+import edu.clemson.cs.r2jt.typeandpopulate2.*;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
-import org.antlr.v4.runtime.Token;
 
 import java.util.*;
 
@@ -88,6 +98,174 @@ public class MathSymbolEntry extends SymbolTableEntry {
         return mySchematicTypes.get(name);
     }
 
+    /**
+     * <p>Assuming this symbol represents a symbol with function type, returns
+     * a new entry representing a "version" of this function in which all
+     * <code>MTNamed</code> types that are components of its type have been
+     * filled in based on the provided arguments.  This is accomplished in two
+     * phases: first, any explicit type parameters are filled in (i.e., if the
+     * function takes a type as a parameter and then that type is used later,
+     * later usages will be correctly substituted with whatever type was
+     * passed); then, implicit type parameters are filled in by binding the
+     * types of each actual argument to the expected type of the formal
+     * parameter, then performing replacements in the remaining argument types.
+     * Any formal parameter that is <em>not</em> schematized (i.e., does not
+     * contain an <code>MTNamed</code>) will not attempt to bind to its
+     * argument (thus permitting later type flexibility via type theorem).  As a
+     * result, simply because a call to this method succeeds <em>does not
+     * mean</em> the arguments are valid for the types of the parameters of
+     * this function: the types of arguments corresponding to non-schematized
+     * formal parameters may not match even if a call to this method succeeds.
+     * </p>
+     *
+     * <p>If the provided arguments will not deschematize against the formal
+     * parameter types, this method will throw a {@link edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException
+     *   NoSolutionException}.  This may occur because the argument count is not
+     * correct, because an actual argument corresponding to a formal parameter
+     * that expects an explicit type parameter is not a type, because the type
+     * of an actual argument does not bind against its corresponding formal
+     * parameter, or because one of the types inferred during that binding is
+     * not within its bounds.  If a call to this method yields a
+     * <code>NoSolutionException</code>, the provided arguments are definitely
+     * unacceptable for a call to this function.</p>
+     *
+     * @param arguments
+     * @return
+     * @throws edu.clemson.cs.r2jt.typeandpopulate.NoSolutionException
+     */
+    public MathSymbolEntry deschematize(List<ExprAST> arguments,
+            Scope callingContext, Map<String, MTType> definitionSchematicTypes)
+            throws NoSolutionException {
+
+        if (!(myType instanceof MTFunction)) {
+            throw NoSolutionException.INSTANCE;
+        }
+
+        List<MTType> formalParameterTypes =
+                getParameterTypes(((MTFunction) myType));
+        List<MTType> actualArgumentTypes = getArgumentTypes(arguments);
+
+        if (formalParameterTypes.size() != actualArgumentTypes.size()) {
+            throw NoSolutionException.INSTANCE;
+        }
+
+        List<ProgramTypeEntry> callingContextProgramGenerics =
+                callingContext.query(GenericQuery.INSTANCE);
+        Map<String, MTType> callingContextMathGenerics =
+                new HashMap<String, MTType>(definitionSchematicTypes);
+
+        MathSymbolEntry mathGeneric;
+        for (ProgramTypeEntry e : callingContextProgramGenerics) {
+            //This is guaranteed not to fail--all program types can be coerced 
+            //to math types, so the passed location is irrelevant
+            mathGeneric = e.toMathSymbolEntry(null);
+
+            callingContextMathGenerics.put(mathGeneric.getName(),
+                    mathGeneric.myType);
+        }
+
+        Iterator<MTType> argumentTypeIter = actualArgumentTypes.iterator();
+        Map<String, MTType> bindingsSoFar = new HashMap<String, MTType>();
+        Map<String, MTType> iterationBindings;
+        MTType argumentType;
+        try {
+            for (MTType formalParameterType : formalParameterTypes) {
+                formalParameterType =
+                        formalParameterType
+                                .getCopyWithVariablesSubstituted(bindingsSoFar);
+
+                //We know arguments and formalParameterTypes are the same 
+                //length, see above
+                argumentType = argumentTypeIter.next();
+
+                if (containsSchematicType(formalParameterType)) {
+                    //try{
+                    iterationBindings =
+                            argumentType.bindTo(formalParameterType,
+                                    callingContextMathGenerics,
+                                    mySchematicTypes);
+
+                    bindingsSoFar.putAll(iterationBindings);
+                    /*}
+                    catch (NoSuchElementException nsee) {
+                        int i = 0;
+                    }*/
+                }
+            }
+        }
+        catch (BindingException be) {
+            throw NoSolutionException.INSTANCE;
+        }
+
+        MTType newTypeValue = null;
+
+        if (myTypeValue != null) {
+            newTypeValue =
+                    myTypeValue.getCopyWithVariablesSubstituted(bindingsSoFar);
+        }
+
+        MTType newType =
+                ((MTFunction) myType
+                        .getCopyWithVariablesSubstituted(bindingsSoFar))
+                        .deschematize(arguments);
+
+        return new MathSymbolEntry(myType.getTypeGraph(), getName(),
+                myQuantification, getDefiningElement(), newType, newTypeValue,
+                null, myGenericsInDefiningContext, getSourceModuleIdentifier());
+    }
+
+    private static List<MTType> expandAsNeeded(MTType t) {
+        List<MTType> result = new LinkedList<MTType>();
+
+        if (t instanceof MTCartesian) {
+            MTCartesian domainAsMTCartesian = (MTCartesian) t;
+
+            int size = domainAsMTCartesian.size();
+            for (int i = 0; i < size; i++) {
+                result.add(domainAsMTCartesian.getFactor(i));
+            }
+        }
+        else {
+            if (!t.equals(t.getTypeGraph().VOID)) {
+                result.add(t);
+            }
+        }
+
+        return result;
+    }
+
+    private static List<MTType> getArgumentTypes(List<Exp> arguments) {
+        List<MTType> result;
+
+        if (arguments.size() == 1) {
+            result = expandAsNeeded(arguments.get(0).getMathType());
+        }
+        else {
+            result = new LinkedList<MTType>();
+            for (Exp e : arguments) {
+                result.add(e.getMathType());
+            }
+        }
+
+        return result;
+    }
+
+    private static List<MTType> getParameterTypes(MTFunction source) {
+        MTType domain = source.getDomain();
+        List<MTType> result = expandAsNeeded(domain);
+
+        return result;
+    }
+
+    private boolean containsSchematicType(MTType t) {
+        ContainsNamedTypeChecker checker =
+                new ContainsNamedTypeChecker(mySchematicTypes.keySet());
+
+        t.accept(checker);
+
+        return checker.getResult();
+    }
+
     public MTType getType() {
         return myType;
     }
@@ -112,7 +290,7 @@ public class MathSymbolEntry extends SymbolTableEntry {
     }
 
     @Override
-    public MathSymbolEntry toMathSymbolEntry(Token l) {
+    public MathSymbolEntry toMathSymbolEntry(Location l) {
         return this;
     }
 
@@ -126,10 +304,10 @@ public class MathSymbolEntry extends SymbolTableEntry {
             Map<String, PTType> genericInstantiations,
             FacilityEntry instantiatingFacility) {
 
-        //Any type that appears in our list of schematic types shadows any
+        //Any type that appears in our list of schematic types shadows any 
         //possible reference to a generic type
-    /*     genericInstantiations =
-               new HashMap<String, PTType>(genericInstantiations);
+        genericInstantiations =
+                new HashMap<String, PTType>(genericInstantiations);
         for (String schematicType : mySchematicTypes.keySet()) {
             genericInstantiations.remove(schematicType);
         }
@@ -157,9 +335,8 @@ public class MathSymbolEntry extends SymbolTableEntry {
 
         return new MathSymbolEntry(myType.getTypeGraph(), getName(),
                 getQuantification(), getDefiningElement(), typeSubstitutor
-                .getFinalExpression(), instantiatedTypeValue,
+                        .getFinalExpression(), instantiatedTypeValue,
                 mySchematicTypes, newGenericsInDefiningContext,
-                getSourceModuleIdentifier());*/
-        return null;
+                getSourceModuleIdentifier());
     }
 }

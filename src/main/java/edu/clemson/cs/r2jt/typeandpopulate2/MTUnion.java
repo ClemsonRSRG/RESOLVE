@@ -12,17 +12,15 @@
  */
 package edu.clemson.cs.r2jt.typeandpopulate2;
 
+import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import edu.clemson.cs.r2jt.typeandpopulate.TypeVisitor;
-import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-
-public class MTUnion extends edu.clemson.cs.r2jt.typeandpopulate2.MTAbstract<MTUnion> {
+public class MTUnion extends MTAbstract<MTUnion> {
 
     private final static int BASE_HASH = "MTUnion".hashCode();
 
