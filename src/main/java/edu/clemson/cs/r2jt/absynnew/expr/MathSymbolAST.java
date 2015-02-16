@@ -29,10 +29,16 @@ import java.util.*;
  */
 public class MathSymbolAST extends ExprAST {
 
+    public static enum DisplayStyle {
+        INFIX, OUTFIX, PREFIX
+    }
+
     private final Token myName;
 
     private final List<ExprAST> myArguments = new ArrayList<ExprAST>();
     private final boolean myLiteralFlag, myIncomingFlag;
+    private final PSymbol.Quantification myQuantification;
+    private final DisplayStyle myDisplayStyle;
 
     private MathSymbolAST(MathSymbolExprBuilder builder) {
         super(builder.getStart(), builder.getStop());
@@ -41,7 +47,8 @@ public class MathSymbolAST extends ExprAST {
         myArguments.addAll(builder.arguments);
         myLiteralFlag = builder.literal;
         myIncomingFlag = builder.incoming;
-        //Todo: Add quantification.
+        myDisplayStyle = builder.style;
+        myQuantification = builder.quantification;
     }
 
     public Token getName() {
@@ -60,8 +67,12 @@ public class MathSymbolAST extends ExprAST {
         return myArguments.size() > 0;
     }
 
+    public DisplayStyle getStyle() {
+        return myDisplayStyle;
+    }
+
     public PSymbol.Quantification getQuantification() {
-        return null;//Todo
+        return myQuantification;
     }
 
     @Override
@@ -90,7 +101,7 @@ public class MathSymbolAST extends ExprAST {
         MathSymbolAST newName =
                 new MathSymbolExprBuilder(getStart(), getStop(), myName, null)
                         .arguments(myArguments).literal(myLiteralFlag)
-                        //.quantification(myQuantification)
+                        .quantification(myQuantification)
                         .incoming(myIncomingFlag).build();
 
         if (substitutions.containsKey(newName)) {
@@ -104,7 +115,7 @@ public class MathSymbolAST extends ExprAST {
                             ((MathSymbolAST) substitutions.get(newName))
                                     .getName(), null).arguments(myArguments)
                             .literal(myLiteralFlag)
-                            //.quantification(myQuantification)
+                            .quantification(myQuantification)
                             .incoming(myIncomingFlag).build();
         }
 
@@ -112,7 +123,7 @@ public class MathSymbolAST extends ExprAST {
                 new MathSymbolExprBuilder(getStart(), getStop(), newName
                         .getName(), null).arguments(myArguments).literal(
                         myLiteralFlag)
-                //.quantification(myQuantification)
+                        .quantification(myQuantification)
                         .incoming(myIncomingFlag).build();
 
         result.setMathType(myMathType);
@@ -130,8 +141,8 @@ public class MathSymbolAST extends ExprAST {
             result =
                     myName.equals(((MathSymbolAST) e).myName)
                             && argumentsEquivalent(myArguments,
-                                    eAsSymbol.myArguments);
-            //  && myQuantification == eAsSymbol.myQuantification;
+                                    eAsSymbol.myArguments)
+            && myQuantification == eAsSymbol.myQuantification;
         }
         return result;
     }
@@ -158,13 +169,37 @@ public class MathSymbolAST extends ExprAST {
         MathSymbolAST result =
                 new MathSymbolExprBuilder(getStart(), getStop(), newName, null)
                         .arguments(newArgs)
-                        //.quantification(myQuantification)
+                        .quantification(myQuantification)
+                        .style(myDisplayStyle)
                         .literal(myLiteralFlag).incoming(myIncomingFlag)
                         .build();
 
         result.setMathType(myMathType);
         result.setMathTypeValue(myMathTypeValue);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        if (isFunction()) {
+            result.append(myName.getText()).append("(");
+
+            for (ExprAST arg : myArguments) {
+                if (first) {
+                    result.append(arg);
+                    first = false;
+                }
+                else {
+                    result.append(", ").append(arg);
+                }
+            }
+            result.append(")");
+        } else {
+            result.append(myName.getText());
+        }
+        return result.toString();
     }
 
     /**
@@ -181,6 +216,10 @@ public class MathSymbolAST extends ExprAST {
 
         protected boolean incoming = false;
         protected boolean literal = false;
+
+        protected DisplayStyle style = DisplayStyle.PREFIX;
+        protected PSymbol.Quantification quantification =
+                PSymbol.Quantification.NONE;
 
         protected final List<ExprAST> arguments = new ArrayList<ExprAST>();
 
@@ -218,6 +257,16 @@ public class MathSymbolAST extends ExprAST {
 
         public MathSymbolExprBuilder literal(boolean e) {
             literal = e;
+            return this;
+        }
+
+        public MathSymbolExprBuilder quantification(PSymbol.Quantification q) {
+            quantification = q;
+            return this;
+        }
+
+        public MathSymbolExprBuilder style(DisplayStyle e) {
+            style = e;
             return this;
         }
 
