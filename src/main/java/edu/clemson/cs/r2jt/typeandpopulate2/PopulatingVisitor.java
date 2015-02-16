@@ -425,7 +425,6 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                     throw new SrcErrorException("no such function ", e
                             .getStart());
                 }
-
                 throw new SrcErrorException(errorMessage, e.getStart());
             }
         }
@@ -466,7 +465,6 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
     private MathSymbolEntry getIntendedEntry(Token qualifier, Token symbolName,
             ExprAST node) {
-
         MathSymbolEntry result;
 
         try {

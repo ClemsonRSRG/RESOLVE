@@ -18,6 +18,7 @@ import edu.clemson.cs.r2jt.rewriteprover.Utilities;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate2.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import org.antlr.v4.runtime.Token;
 
@@ -331,7 +332,8 @@ public abstract class PExpr {
             retval =
                     new PSymbol(e.getMathType(), e.getMathTypeValue(),
                             fullName(null, eAsFunctionExp.getName().getText()),
-                            arguments, eAsFunctionExp.getQuantification());
+                            arguments, convertExpQuantification(eAsFunctionExp
+                                    .getQuantification()));
         }
         /*else if (e instanceof DotExp) {
             DotExp eAsDotExp = (DotExp) e;
@@ -423,6 +425,24 @@ public abstract class PExpr {
             throw new UnsupportedOperationException(
                     "Expression has null type.\n\n" + e + " (" + e.getClass()
                             + ")" + varExpAdditional);
+        }
+        return retval;
+    }
+
+    //Todo: I don't really see why we can't all use one quantification enum...
+    private final static PSymbol.Quantification convertExpQuantification(
+            SymbolTableEntry.Quantification q) {
+
+        PSymbol.Quantification retval;
+
+        if (q == SymbolTableEntry.Quantification.EXISTENTIAL) {
+            retval = PSymbol.Quantification.THERE_EXISTS;
+        }
+        else if (q == SymbolTableEntry.Quantification.UNIVERSAL) {
+            retval = PSymbol.Quantification.FOR_ALL;
+        }
+        else {
+            retval = PSymbol.Quantification.NONE;
         }
         return retval;
     }
