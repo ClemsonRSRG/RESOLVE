@@ -19,6 +19,7 @@ import edu.clemson.cs.r2jt.absynnew.decl.MathVariableAST;
 import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST.DefinitionType;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST;
+import edu.clemson.cs.r2jt.absynnew.expr.MathTupleAST;
 import edu.clemson.cs.r2jt.absynnew.expr.ProgExprAST;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
@@ -117,15 +118,14 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
     @Override
     public void preModuleAST(ModuleAST e) {
-        PopulatingVisitor.emitDebug("----------------------\nModule: "
+        PopulatingVisitor.emitDebug("----------------------\nodule "
                 + e.getName().getText() + "\n----------------------");
         myCurModuleScope = myBuilder.startModuleScope(e);
     }
 
     @Override
     public void postImportCollectionAST(ImportCollectionAST e) {
-        for (Token importRequest : e
-                .getImportsExcluding(ImportType.EXTERNAL)) {
+        for (Token importRequest : e.getImportsExcluding(ImportType.EXTERNAL)) {
             myCurModuleScope.addImport(new ModuleIdentifier(importRequest));
         }
     }
@@ -137,7 +137,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         if (!(e.getDefinitionType() == DefinitionType.INDUCTIVE)) {
             myCurrentDirectDefinition = e;
         }
-        myCurrentDefinition = e;    // Keep track of the current def.
+        // Keep track also of any definition (inductive or direct)
+        myCurrentDefinition = e;
         myDefinitionSchematicTypes.clear();
         myDefinitionNamedTypes.clear();
     }
@@ -152,8 +153,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             expectType(e.getDefinitionRightHandSide(), declaredType);
         }
         else if (e.getDefinitionType() == DefinitionType.INDUCTIVE) {
-           // expectType(node.getBase(), myTypeGraph.BOOLEAN);
-           // expectType(node.getHypothesis(), myTypeGraph.BOOLEAN);
+            // expectType(node.getBase(), myTypeGraph.BOOLEAN);
+            // expectType(node.getHypothesis(), myTypeGraph.BOOLEAN);
         }
 
         List<MathVariableAST> parameters = e.getParameters();
@@ -169,11 +170,11 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         //Note that, even if typeValue is null at this point, if declaredType
         //returns true from knownToContainOnlyMTypes(), a new type value will
         //still be created by the symbol table
-        addBinding(e.getName(), e,
-                declaredType, typeValue, myDefinitionSchematicTypes);
+        addBinding(e.getName(), e, declaredType, typeValue,
+                myDefinitionSchematicTypes);
 
-        PopulatingVisitor.emitDebug("New definition: "
-                + e.getName().getText() + " of type " + declaredType
+        PopulatingVisitor.emitDebug("new definition " + e.getName().getText()
+                + " of type " + declaredType
                 + ((typeValue != null) ? " with type value " + typeValue : ""));
 
         myCurrentDirectDefinition = null;
@@ -185,15 +186,69 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     public void postMathVariableAST(MathVariableAST e) {
         MTType mathTypeValue = e.getSyntaxType().getMathTypeValue();
         String varName = e.getName().getText();
-        e.setMathType(mathTypeValue);
-        SymbolTableEntry.Quantification q;
 
+        if (myCurrentDirectDefinition != null
+                && mathTypeValue.isKnownToContainOnlyMTypes()
+                && myDefinitionNamedTypes.contains(varName)) {
+
+            throw new SrcErrorException("introduction of type "
+                    + "parameter must precede any use of that variable "
+                    + "name", e.getStart());
+        }
+
+        if ((withinDefinitionParameters(e) || (myActiveQuantifications.size() > 0 && myActiveQuantifications
+                .peek() != SymbolTableEntry.Quantification.NONE))
+                && mathTypeValue.isKnownToContainOnlyMTypes()) {
+
+            myDefinitionSchematicTypes.put(varName, mathTypeValue);
+        }
+
+        /*if (myDefinitionParameterSectionFlag
+                && mathTypeValue.isKnownToContainOnlyMTypes()) {
+            myDefinitionSchematicTypes.put(varName, mathTypeValue);
+        }*/
+
+        e.setMathType(mathTypeValue);
+
+        SymbolTableEntry.Quantification q;
         if (withinDefinitionParameters(e) && myTypeValueDepth == 0) {
             q = SymbolTableEntry.Quantification.UNIVERSAL;
         }
         else {
             q = myActiveQuantifications.peek();
         }
+
+        addBinding(e.getName(), q, e, mathTypeValue, null);
+
+        PopulatingVisitor.emitDebug("  new variable " + varName + " of type "
+                + mathTypeValue.toString() + " with quantification " + q);
+    }
+
+    @Override
+    public void postMathTupleAST(MathTupleAST e) {
+        //See the note in MathTupleAST on why it isn't a MathSymbolAST
+        List<MTCartesian.Element> fieldTypes =
+                new LinkedList<MTCartesian.Element>();
+
+        for (ExprAST field : e.getFields()) {
+            fieldTypes.add(new MTCartesian.Element(field.getMathType()));
+        }
+        e.setMathType(new MTCartesian(myTypeGraph, fieldTypes));
+    }
+
+    @Override
+    public void postMathTypeAST(MathTypeAST e) {
+        myTypeValueDepth--;
+
+        ExprAST typeExp = e.getUnderlyingExpr();
+        MTType mathType = typeExp.getMathType();
+        MTType mathTypeValue = typeExp.getMathTypeValue();
+
+        if (mathTypeValue == null) {
+            notAType(typeExp);
+        }
+        e.setMathType(mathType);
+        e.setMathTypeValue(mathTypeValue);
     }
 
     @Override
@@ -210,8 +265,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         }
         if (e instanceof ProgExprAST
                 && ((ProgExprAST) e).getProgramType() == null) {
-            throw new RuntimeException("program expression " + e
-                    + " (" + e.getClass() + ") has left population without "
+            throw new RuntimeException("program expression " + e + " ("
+                    + e.getClass() + ") has left population without "
                     + "a program type");
         }
         myExpressionDepth--;
@@ -222,15 +277,15 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         if (e instanceof TypeAST) {
             TypeAST eAsTypeNode = (TypeAST) e;
             if (eAsTypeNode.getMathTypeValue() == null) {
-                throw new RuntimeException(
-                        "TypeAST node " + e + "(" + e.getClass() + ") "
-                                + "got through the populator with no "
-                                + "math type value");
+                throw new RuntimeException("TypeAST node " + e + "("
+                        + e.getClass() + ") "
+                        + "got through the populator with no "
+                        + "math type value");
             }
             if (!(e instanceof MathTypeAST)
                     && eAsTypeNode.getProgramTypeValue() == null) {
-                throw new RuntimeException("MathTypeAST node " + e
-                        + " (" + e.getClass() + ") got through the "
+                throw new RuntimeException("MathTypeAST node " + e + " ("
+                        + e.getClass() + ") got through the "
                         + "populator with no program type value");
             }
         }
@@ -238,7 +293,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
     @Override
     public void postMathSymbolAST(MathSymbolAST e) {
-        if (!e.isFunction()) {  // constant, variable, or literal.
+        if (!e.isFunction()) { // constant, variable, or literal.
             MathSymbolEntry intendedEntry =
                     postSymbolExp(e.getQualifier(), e.getName(), e);
 
@@ -253,13 +308,12 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             }
             e.setQuantification(intendedEntry.getQuantification());
         }
-        else {  // if MathSymbolAST is a function (Powerset(.), Str(Entry), etc)
+        else { // if MathSymbolAST is a function (Powerset(.), Str(Entry), etc)
             MTFunction foundExpType;
-            foundExpType =
-                    e.getConservativePreApplicationType(myTypeGraph);
+            foundExpType = e.getConservativePreApplicationType(myTypeGraph);
 
-            PopulatingVisitor
-                    .emitDebug("expression: " + e + " of type " + foundExpType);
+            PopulatingVisitor.emitDebug("expression: " + e + " of type "
+                    + foundExpType);
 
             MathSymbolEntry intendedEntry = getIntendedFunction(e);
 
@@ -285,14 +339,14 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                     arguments.add(argTypeValue);
                 }
 
-                e.setMathTypeValue(entryType.getApplicationType(
-                        intendedEntry.getName(), arguments));
+                e.setMathTypeValue(entryType.getApplicationType(intendedEntry
+                        .getName(), arguments));
             }
         }
     }
 
     private MathSymbolEntry postSymbolExp(Token qualifier, Token symbolName,
-                                          ExprAST node) {
+            ExprAST node) {
         MathSymbolEntry intendedEntry =
                 getIntendedEntry(qualifier, symbolName, node);
         node.setMathType(intendedEntry.getType());
@@ -331,9 +385,10 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         String eOperatorString = eOperator.getText();
 
         List<MathSymbolEntry> sameNameFunctions =
-                myBuilder.getInnermostActiveScope().query(
-                        new MathFunctionNamedQuery(e.getQualifier(),
-                                eOperator));
+                myBuilder.getInnermostActiveScope()
+                        .query(
+                                new MathFunctionNamedQuery(e.getQualifier(),
+                                        eOperator));
 
         if (sameNameFunctions.isEmpty()) {
             throw new SrcErrorException("no such function ", e.getStart());
@@ -389,11 +444,10 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     private void setSymbolTypeValue(ExprAST node, String symbolName,
-                                    MathSymbolEntry intendedEntry) {
+            MathSymbolEntry intendedEntry) {
 
         try {
-            if (intendedEntry.getQuantification() ==
-                    SymbolTableEntry.Quantification.NONE) {
+            if (intendedEntry.getQuantification() == SymbolTableEntry.Quantification.NONE) {
                 node.setMathTypeValue(intendedEntry.getTypeValue());
             }
             else {
@@ -411,7 +465,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     private MathSymbolEntry getIntendedEntry(Token qualifier, Token symbolName,
-                                             ExprAST node) {
+            ExprAST node) {
 
         MathSymbolEntry result;
 
@@ -441,8 +495,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     @Override
     public void postModuleAST(ModuleAST e) {
         myBuilder.endScope();
-        PopulatingVisitor
-                .emitDebug("END MATH POPULATOR\n----------------------\n");
+        PopulatingVisitor.emitDebug("end populator\n----------------------\n");
     }
 
     //-------------------------------------------------------------------
@@ -470,7 +523,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     public <T extends SymbolTableEntry> void ambiguousSymbol(Token symbol,
-                                                             List<T> candidates) {
+            List<T> candidates) {
         String message = "ambiguous symbol;  candidates: ";
 
         boolean first = true;
@@ -500,8 +553,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     public void expected(ExprAST e, MTType expectedType) {
-        throw new SrcErrorException("Expected: " + expectedType
-                + "\nFound: " + e.getMathType(), e.getStart());
+        throw new SrcErrorException("Expected: " + expectedType + "\nFound: "
+                + e.getMathType(), e.getStart());
     }
 
     public void duplicateSymbol(Token symbol) {
@@ -516,10 +569,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     private SymbolTableEntry addBinding(Token name,
-                                        SymbolTableEntry.Quantification q,
-                                        ResolveAST definingElement, MTType type,
-                                        MTType typeValue,
-                                        Map<String, MTType> schematicTypes) {
+            SymbolTableEntry.Quantification q, ResolveAST definingElement,
+            MTType type, MTType typeValue, Map<String, MTType> schematicTypes) {
         if (type == null) {
             throw new NullPointerException();
         }
@@ -536,44 +587,37 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         }
     }
 
-    private SymbolTableEntry addBinding(Token name,
-                                        ResolveAST definingElement, MTType type,
-                                        MTType typeValue,
-                                        Map<String, MTType> schematicTypes) {
+    private SymbolTableEntry addBinding(Token name, ResolveAST definingElement,
+            MTType type, MTType typeValue, Map<String, MTType> schematicTypes) {
         return addBinding(name, SymbolTableEntry.Quantification.NONE,
                 definingElement, type, typeValue, schematicTypes);
     }
 
     private SymbolTableEntry addBinding(Token name,
-                                        SymbolTableEntry.Quantification q,
-                                        ResolveAST definingElement, MTType type,
-                                        Map<String, MTType> schematicTypes) {
+            SymbolTableEntry.Quantification q, ResolveAST definingElement,
+            MTType type, Map<String, MTType> schematicTypes) {
         return addBinding(name, q, definingElement, type, null, schematicTypes);
     }
 
-    private SymbolTableEntry addBinding(Token name,
-                                        ResolveAST definingElement, MTType type,
-                                        Map<String, MTType> schematicTypes) {
+    private SymbolTableEntry addBinding(Token name, ResolveAST definingElement,
+            MTType type, Map<String, MTType> schematicTypes) {
         return addBinding(name, SymbolTableEntry.Quantification.NONE,
                 definingElement, type, null, schematicTypes);
     }
 
     private MathSymbolEntry getExactDomainTypeMatch(MathSymbolAST e,
-                                                    List<MathSymbolEntry> candidates)
-            throws NoSolutionException {
+            List<MathSymbolEntry> candidates) throws NoSolutionException {
         return getDomainTypeMatch(e, candidates, EXACT_DOMAIN_MATCH);
     }
 
     private MathSymbolEntry getInexactDomainTypeMatch(MathSymbolAST e,
-                                                      List<MathSymbolEntry> candidates)
-            throws NoSolutionException {
+            List<MathSymbolEntry> candidates) throws NoSolutionException {
         return getDomainTypeMatch(e, candidates, INEXACT_DOMAIN_MATCH);
     }
 
     private MathSymbolEntry getDomainTypeMatch(MathSymbolAST e,
-                                               List<MathSymbolEntry> candidates,
-                                               TypeComparison<MathSymbolAST,
-                                                       MTFunction> comparison)
+            List<MathSymbolEntry> candidates,
+            TypeComparison<MathSymbolAST, MTFunction> comparison)
             throws NoSolutionException {
         MTFunction eType = e.getConservativePreApplicationType(myTypeGraph);
 
@@ -586,7 +630,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                 try {
                     candidate =
                             candidate.deschematize(e.getArguments(), myBuilder
-                                            .getInnermostActiveScope(),
+                                    .getInnermostActiveScope(),
                                     myDefinitionSchematicTypes);
                     candidateType = (MTFunction) candidate.getType();
                     emitDebug(candidate.getType() + " deschematizes to "
@@ -636,8 +680,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                 TypeComparison<MathSymbolAST, MTFunction> {
 
         @Override
-        public boolean compare(MathSymbolAST foundValue,
-                               MTFunction foundType, MTFunction expectedType) {
+        public boolean compare(MathSymbolAST foundValue, MTFunction foundType,
+                MTFunction expectedType) {
 
             return foundType.parameterTypesMatch(expectedType,
                     EXACT_PARAMETER_MATCH);
@@ -651,11 +695,11 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
     private class InexactDomainMatch
             implements
-            TypeComparison<MathSymbolAST, MTFunction> {
+                TypeComparison<MathSymbolAST, MTFunction> {
 
         @Override
-        public boolean compare(MathSymbolAST foundValue,
-                               MTFunction foundType, MTFunction expectedType) {
+        public boolean compare(MathSymbolAST foundValue, MTFunction foundType,
+                MTFunction expectedType) {
 
             return expectedType.parametersMatch(foundValue.getArguments(),
                     INEXACT_PARAMETER_MATCH);
@@ -689,7 +733,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
         @Override
         public boolean compare(ExprAST foundValue, MTType foundType,
-                               MTType expectedType) {
+                MTType expectedType) {
 
             boolean result =
                     myTypeGraph.isKnownToBeIn(foundValue, expectedType);
