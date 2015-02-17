@@ -163,8 +163,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             throw new SrcErrorException(
                     "implicit types are not permitted inside "
                             + "quantified variable declarations; "
-                            + "quantify the type explicitly instead.",
-                    e.getStart());
+                            + "quantify the type explicitly instead.", e
+                            .getStart());
         }
         //Note that postTypeTheoremDec() checks the "form" of a type theorem at
         //the top two levels.  So all we're checking for here is that the type
@@ -204,8 +204,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                         //before the parameter is declared
                         throw new SrcErrorException("introduction of "
                                 + "implicit type parameter must precede any "
-                                + "use of that variable name",
-                                nodeExp.getStart());
+                                + "use of that variable name", nodeExp
+                                .getStart());
                     }
 
                     //Note that a redudantly named type parameter would be
@@ -292,7 +292,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
     @Override
     public void midMathTypeTheoremAST(MathTypeTheoremAST e,
-                                      ResolveAST previous, ResolveAST next) {
+            ResolveAST previous, ResolveAST next) {
         //We've just processed all universal variables for this type theorem,
         // so we pop a level of quantification off the stack
         if (next == e.getAssertion()) {
@@ -317,8 +317,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
                 if (operator.equals("implies")) {
                     if (assertionAsMathSym.getArguments().size() != 2) {
-                        throw new RuntimeException("implies function without" +
-                                "arguments??");
+                        throw new RuntimeException("implies function without"
+                                + "arguments??");
                     }
                     condition = assertionAsMathSym.getArguments().get(0);
                     assertion = assertionAsMathSym.getArguments().get(1);
@@ -348,8 +348,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         }
         catch (ClassCastException cse) {
             throw new SrcErrorException("top level of type theorem "
-                    + "assertion must be 'implies' or ':'",
-                    assertion.getStart());
+                    + "assertion must be 'implies' or ':'", assertion
+                    .getStart());
         }
         myBuilder.endScope();
     }
@@ -373,7 +373,6 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         if ((withinDefinitionParameters(e) || (myActiveQuantifications.size() > 0 && myActiveQuantifications
                 .peek() != SymbolTableEntry.Quantification.NONE))
                 && mathTypeValue.isKnownToContainOnlyMTypes()) {
-
             myDefinitionSchematicTypes.put(varName, mathTypeValue);
         }
 

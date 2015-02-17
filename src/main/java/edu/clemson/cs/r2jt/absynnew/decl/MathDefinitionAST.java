@@ -35,12 +35,14 @@ public class MathDefinitionAST extends DeclAST {
     private final List<MathVariableAST> myParameters;
     private final MathTypeAST myReturnType;
     private final DefinitionType myDefinitionType;
+    private final ExprAST myBody;
 
     private MathDefinitionAST(DefinitionBuilder builder) {
         super(builder.getStart(), builder.getStop(), builder.name);
         myReturnType = builder.returnType;
         myParameters = builder.parameters;
         myDefinitionType = builder.type;
+        myBody = builder.body;
     }
 
     public DefinitionType getDefinitionType() {
@@ -64,16 +66,21 @@ public class MathDefinitionAST extends DeclAST {
             extends
                 AbstractNodeBuilder<MathDefinitionAST> {
 
-        protected final Token name;
+        protected Token name;
         protected MathTypeAST returnType;
         protected DefinitionType type;
+        protected ExprAST body;
 
         protected final List<MathVariableAST> parameters =
                 new ArrayList<MathVariableAST>();
 
-        public DefinitionBuilder(Token start, Token stop, Token name) {
+        public DefinitionBuilder(Token start, Token stop) {
             super(start, stop);
-            this.name = name;
+        }
+
+        public DefinitionBuilder name(Token e) {
+            name = e;
+            return this;
         }
 
         public DefinitionBuilder returnType(MathTypeAST e) {
@@ -83,6 +90,11 @@ public class MathDefinitionAST extends DeclAST {
 
         public DefinitionBuilder type(DefinitionType e) {
             type = e;
+            return this;
+        }
+
+        public DefinitionBuilder body(ExprAST e) {
+            body = e;
             return this;
         }
 

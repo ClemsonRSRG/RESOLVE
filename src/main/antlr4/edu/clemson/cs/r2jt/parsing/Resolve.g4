@@ -21,6 +21,7 @@ precisItems
 
 precisItem
     :   mathTypeTheoremDecl
+    |   mathDefinitionDecl
     ;
 
 // facility module
@@ -163,11 +164,66 @@ variableDeclGroup
     :   'Var' Identifier (',' Identifier)* ':' type ';'
     ;
 
-// type theorems
+// mathematical type theorems
 
 mathTypeTheoremDecl
     :   'Type' 'Theorem' name=Identifier ':'
         ('For' 'all' mathVariableDeclGroup ',')+ mathExp ';'
+    ;
+
+// mathematical theorems, corollaries, etc
+
+mathTheoremDecl
+    :   ('Theorem'|'Lemma'|'Corollary') name=Identifier
+        ':' mathAssertionExp ';'
+    ;
+
+// mathematical definitions
+
+mathDefinitionDecl
+    :   mathStandardDefinitionDecl
+    ;
+
+mathStandardDefinitionDecl
+    :   'Definition' definitionSignature ('is' mathAssertionExp)? ';'
+    ;
+
+definitionSignature
+    :   standardInfixSignature
+    |   standardOutfixSignature
+    |   standardPrefixSignature
+    ;
+
+standardInfixSignature
+    :   '(' mathVariableDecl ')'
+        infixOp
+        '(' mathVariableDecl ')' ':' mathTypeExp
+    ;
+
+standardOutfixSignature
+    :   ( lOp='|'  '(' mathVariableDecl ')' rOp='|'
+    |     lOp='||' '(' mathVariableDecl ')' rOp='||'
+    |     lOp='<'  '(' mathVariableDecl ')' rOp='>') ':' mathTypeExp
+    ;
+
+standardPrefixSignature
+    :   prefixOp (definitionParameterList)? ':' mathTypeExp
+    ;
+
+prefixOp
+    :   ('+'|'-'|'not'|'~')
+    |   IntegerLiteral
+    |   Identifier
+    ;
+
+infixOp
+    :   ('implies'|'+'|'o'|'-'|'/'|'*'|'..'|'and'|'or')
+    |   ('union'|'intersect'|'is_in'|'is_not_in'|'>'|'<'|'>='|'<=')
+    |   Identifier
+    ;
+
+definitionParameterList
+    :   '(' mathVariableDeclGroup (',' mathVariableDeclGroup)* ')'
     ;
 
 // mathematical clauses

@@ -20,6 +20,7 @@ import edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptAST.ConceptBuilder;
 import edu.clemson.cs.r2jt.absynnew.ModuleAST.PrecisAST.PrecisBuilder;
 import edu.clemson.cs.r2jt.absynnew.ModuleBlockAST.ModuleBlockBuilder;
 import edu.clemson.cs.r2jt.absynnew.decl.*;
+import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST.DefinitionBuilder;
 import edu.clemson.cs.r2jt.absynnew.decl.OperationImplAST.OperationImplBuilder;
 import edu.clemson.cs.r2jt.absynnew.decl.TypeModelAST.TypeDeclBuilder;
 import edu.clemson.cs.r2jt.absynnew.expr.*;
@@ -70,6 +71,15 @@ public class TreeBuildingVisitor<T extends ResolveAST>
      */
     private ImportCollectionAST.ImportCollectionBuilder myImportBuilder =
             new ImportCollectionBuilder();
+
+    /**
+     * <p>All the various signatures styles a definition can take on requires
+     * us to break from our usual post-oriented tree traversal decoration
+     * pattern by declaring this particular builder global. Anyways, this should
+     * be initialized in the appropriate top level definition rule, and reset to
+     * <code>null</code> after being built and put into an annotation.</p>
+     */
+    private DefinitionBuilder myDefinitionBuilder = null;
 
     private final ParseTree myRootTree;
 
@@ -278,6 +288,15 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
+    public void exitMathVariableDecl(
+            @NotNull ResolveParser.MathVariableDeclContext ctx) {
+        MathTypeAST x = get(MathTypeAST.class, ctx
+                .mathTypeExp());
+        put(ctx, new MathVariableAST(ctx.getStart(), ctx.getStop(), ctx
+                .Identifier().getSymbol(), x));
+    }
+
+    @Override
     public void exitMathVariableDeclGroup(
             @NotNull ResolveParser.MathVariableDeclGroupContext ctx) {
         MathTypeAST groupType = get(MathTypeAST.class, ctx.mathTypeExp());
@@ -287,77 +306,6 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                     .getSymbol(), groupType));
         }
     }
-
-    /*
-     * @Override public void exitFacilityDecl(
-     * 
-     * @NotNull ResolveParser.FacilityDeclContext ctx) {
-     * 
-     * myImportBuilder.imports(ImportType.IMPLICIT, ctx.concept).imports(
-     * ctx.externally != null ? ImportType.EXTERNAL
-     * : ImportType.IMPLICIT, ctx.impl);
-     * 
-     * FacilityDeclAST facility =
-     * new FacilityDeclAST(ctx.getStart(), ctx.getStop(), ctx.name,
-     * buildPairing(ctx), getAll(
-     * FacilityDeclAST.PairedEnhancementAST.class,
-     * ctx.pairedFacilityEnhancement()));
-     * 
-     * put(ctx, facility);
-     * }
-     * 
-     * @Override public void exitPairedFacilityEnhancement(
-     * 
-     * @NotNull ResolveParser.PairedFacilityEnhancementContext ctx) {
-     * 
-     * myImportBuilder.imports(ImportType.IMPLICIT, ctx.name).imports(
-     * ctx.externally != null ? ImportType.EXTERNAL
-     * : ImportType.IMPLICIT, ctx.impl);
-     * put(ctx, new FacilityDeclAST.PairedEnhancementAST(buildPairing(ctx)));
-     * }
-     * 
-     * private final FacilityDeclAST.SpecBodyPairAST buildPairing(
-     * ResolveParser.FacilityDeclContext ctx) {
-     * ModuleParameterizationAST spec =
-     * buildParameterization(ctx.concept, ctx,
-     * ctx.moduleArgumentList(0).moduleArgument());
-     * 
-     * ModuleParameterizationAST body =
-     * buildParameterization(ctx.impl, ctx, ctx.moduleArgumentList(1)
-     * .moduleArgument());
-     * return buildPairing(spec, body);
-     * }
-     * 
-     * private final FacilityDeclAST.SpecBodyPairAST buildPairing(
-     * ResolveParser.PairedFacilityEnhancementContext ctx) {
-     * ModuleParameterizationAST spec =
-     * buildParameterization(ctx.name, ctx, ctx.moduleArgumentList(0)
-     * .moduleArgument());
-     * 
-     * ModuleParameterizationAST body =
-     * buildParameterization(ctx.impl, ctx, ctx.moduleArgumentList(1)
-     * .moduleArgument());
-     * return buildPairing(spec, body);
-     * }
-     * 
-     * private final FacilityDeclAST.SpecBodyPairAST buildPairing(
-     * ModuleParameterizationAST spec, ModuleParameterizationAST body) {
-     * return new FacilityDeclAST.SpecBodyPairAST(spec, body);
-     * }
-     * 
-     * private final ModuleParameterizationAST buildParameterization(Token name,
-     * ParserRuleContext ctx,
-     * List<ResolveParser.ModuleArgumentContext> args) {
-     * return new ModuleParameterizationAST(ctx.getStart(), ctx.getStop(),
-     * name, getAll(FacilityDeclAST.ModuleArgAST.class, args));
-     * }
-     * 
-     * @Override public void exitModuleArgument(
-     * 
-     * @NotNull ResolveParser.ModuleArgumentContext ctx) {
-     * put(ctx, new ModuleArgAST(get(ProgExprAST.class, ctx.progExp())));
-     * }
-     */
 
     @Override
     public void exitModuleParameterDecl(
@@ -399,6 +347,71 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                         ExprAST.class, ctx.ensuresClause()));
 
         put(ctx, finalization);
+    }
+
+    @Override
+    public void enterMathDefinitionDecl(
+            @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
+        myDefinitionBuilder =
+                new MathDefinitionAST.DefinitionBuilder(ctx.getStart(), ctx
+                        .getStop());
+    }
+
+    @Override
+    public void exitMathDefinitionDecl(
+            @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
+        put(ctx, get(MathDefinitionAST.class, ctx.getChild(0)));
+        myDefinitionBuilder = null;
+    }
+
+    @Override
+    public void exitMathStandardDefinitionDecl(
+            @NotNull ResolveParser.MathStandardDefinitionDeclContext ctx) {
+        myDefinitionBuilder.body(get(ExprAST.class, ctx.mathAssertionExp()))
+                .type(MathDefinitionAST.DefinitionType.STANDARD);
+
+        //Even though we're dealing with a global builder, we still decorate
+        //this with what we've build so far in case someone requests it.
+        //Also since there is no direct RESOLVE ast equivalent of a definition's
+        //signature, for completeness, just stick the finished definition into
+        //the signature rules' slots too.
+        MathDefinitionAST finished = myDefinitionBuilder.build();
+        put(ctx, finished);
+        put(ctx.definitionSignature(), finished); //set top level sig rule
+        put(ctx.definitionSignature().getChild(0), finished); //set particular
+    }
+
+    @Override
+    public void exitStandardPrefixSignature(
+            @NotNull ResolveParser.StandardPrefixSignatureContext ctx) {
+        myDefinitionBuilder
+                .returnType(get(MathTypeAST.class, ctx.mathTypeExp()));
+        //We've already set the annotation via the top level rule.
+        //see exitMathStandardDefinitionDecl.
+    }
+
+    @Override
+    public void exitStandardInfixSignature(
+            @NotNull ResolveParser.StandardInfixSignatureContext ctx) {
+
+        List<MathVariableAST> x =
+                getAll(MathVariableAST.class, ctx.mathVariableDecl());
+        myDefinitionBuilder.name(ctx.infixOp().getStart()).returnType(
+                get(MathTypeAST.class, ctx.mathTypeExp())).parameters(
+                x);
+        //We've already set the annotation via the top level rule.
+        //see exitMathStandardDefinitionDecl.
+    }
+
+    @Override
+    public void exitDefinitionParameterList(
+            @NotNull ResolveParser.DefinitionParameterListContext ctx) {
+        for (ResolveParser.MathVariableDeclGroupContext grp : ctx
+                .mathVariableDeclGroup()) {
+            myDefinitionBuilder.parameters(getAll(MathVariableAST.class, grp
+                    .Identifier()));
+        }
+        put(ctx, myDefinitionBuilder.build());
     }
 
     @Override
@@ -684,5 +697,4 @@ public class TreeBuildingVisitor<T extends ResolveAST>
             return type.cast(visitedCtxs.get(parseTree));
         }
     }
-
 }
