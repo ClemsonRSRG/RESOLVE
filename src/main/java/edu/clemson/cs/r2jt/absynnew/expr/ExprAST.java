@@ -191,4 +191,30 @@ public abstract class ExprAST extends ResolveAST {
                         + " is not currently supported");
     }
 
+    public boolean isLiteralTrue() {
+        boolean result = (this instanceof MathSymbolAST);
+
+        result =
+                result
+                        && ((MathSymbolAST) this).getName().getText().equals(
+                                "true")
+                        && this.getMathType().equals(
+                                this.getMathType().getTypeGraph().BOOLEAN);
+
+        return result;
+    }
+
+    public boolean isLiteralFalse() {
+        boolean result = (this instanceof MathSymbolAST);
+
+        result =
+                result
+                        && ((MathSymbolAST) this).getName().getText().equals(
+                                "false")
+                        && this.getMathType().equals(
+                                this.getMathType().getTypeGraph().BOOLEAN);
+
+        return result;
+    }
+
 }

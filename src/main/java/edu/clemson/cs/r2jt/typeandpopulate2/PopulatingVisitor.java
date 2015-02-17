@@ -15,12 +15,10 @@ package edu.clemson.cs.r2jt.typeandpopulate2;
 import edu.clemson.cs.r2jt.absynnew.*;
 import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportType;
 import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST;
+import edu.clemson.cs.r2jt.absynnew.decl.MathTypeTheoremAST;
 import edu.clemson.cs.r2jt.absynnew.decl.MathVariableAST;
 import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST.DefinitionType;
-import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
-import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST;
-import edu.clemson.cs.r2jt.absynnew.expr.MathTupleAST;
-import edu.clemson.cs.r2jt.absynnew.expr.ProgExprAST;
+import edu.clemson.cs.r2jt.absynnew.expr.*;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.MathSymbolEntry;
@@ -35,7 +33,7 @@ import java.util.*;
 
 public class PopulatingVisitor extends TreeWalkerVisitor {
 
-    private static final boolean PRINT_DEBUG = false;
+    private static final boolean PRINT_DEBUG = true;
 
     private static final TypeComparison<MathSymbolAST, MTFunction> EXACT_DOMAIN_MATCH =
             new ExactDomainMatch();
@@ -54,6 +52,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
     private int myTypeValueDepth = 0;
     private int myExpressionDepth = 0;
+
+    private boolean myInTypeTheoremBindingExpFlag = false;
 
     /**
      * <p>Any quantification-introducing syntactic node (like, e.g., a
@@ -118,7 +118,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
     @Override
     public void preModuleAST(ModuleAST e) {
-        PopulatingVisitor.emitDebug("----------------------\nodule "
+        PopulatingVisitor.emitDebug("----------------------\nmodule "
                 + e.getName().getText() + "\n----------------------");
         myCurModuleScope = myBuilder.startModuleScope(e);
     }
@@ -127,6 +127,107 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     public void postImportCollectionAST(ImportCollectionAST e) {
         for (Token importRequest : e.getImportsExcluding(ImportType.EXTERNAL)) {
             myCurModuleScope.addImport(new ModuleIdentifier(importRequest));
+        }
+    }
+
+    @Override
+    public boolean walkMathTypeAssertionAST(MathTypeAssertionAST e) {
+
+        preMathTypeAssertionAST(e);
+
+        //If we exist as an implicit type parameter, there's no way our
+        //expression can know its own type (that's defined by the asserted Ty),
+        //so we skip walking it and let postTypeAssertionExp() set its type for
+        //it
+        if (myTypeValueDepth == 0) {
+            TreeWalker.walk(this, e.getExpression());
+        }
+
+        TreeWalker.walk(this, e.getAssertedType());
+        postMathTypeAssertionAST(e);
+        return true;
+    }
+
+    @Override
+    public void postMathTypeAssertionAST(MathTypeAssertionAST e) {
+        if (myTypeValueDepth == 0
+                && (myExpressionDepth > 2 || !myInTypeTheoremBindingExpFlag)) {
+            throw new SrcErrorException("this construct only permitted in "
+                    + "type declarations or in expressions matching: \n\n"
+                    + "   Type Theorem <name>: <quantifiers>, \n"
+                    + "       [<condition> implies] <expression> : "
+                    + "<assertedType>", e.getStart());
+        }
+        else if (myActiveQuantifications.size() > 0
+                && myActiveQuantifications.peek() != SymbolTableEntry.Quantification.NONE) {
+            throw new SrcErrorException(
+                    "implicit types are not permitted inside "
+                            + "quantified variable declarations; "
+                            + "quantify the type explicitly instead.",
+                    e.getStart());
+        }
+        //Note that postTypeTheoremDec() checks the "form" of a type theorem at
+        //the top two levels.  So all we're checking for here is that the type
+        //assertion didn't happen deeper than that (where it shouldn't appear).
+
+        //If we're the assertion of a type theorem, then postTypeTheoremDec()
+        //will take care of any logic.  If we're part of a type declaration,
+        //on the other hand, we've got some bookkeeping to do...
+        if (myTypeValueDepth > 0) {
+            try {
+                MathSymbolAST nodeExp = (MathSymbolAST) e.getExpression();
+                try {
+                    myBuilder.getInnermostActiveScope().addBinding(
+                            nodeExp.getName().getText(),
+                            SymbolTableEntry.Quantification.UNIVERSAL, e,
+                            e.getAssertedType().getMathType());
+                    e.setMathType(e.getAssertedType().getMathType());
+                    e.setMathTypeValue(new MTNamed(myTypeGraph, nodeExp
+                            .getName().getText()));
+
+                    //See walkTypeAssertionExp(): we are responsible for
+                    //setting the VarExp's type.
+                    nodeExp.setMathType(e.getAssertedType().getMathType());
+                    e.setMathTypeValue(new MTNamed(myTypeGraph, nodeExp
+                            .getName().getText()));
+
+                    if (myDefinitionNamedTypes.contains(nodeExp.getName()
+                            .getText())) {
+                        //Regardless of where in the expression it appears, an
+                        //implicit type parameter exists at the top level of a
+                        //definition, and thus a definition that contains, e.g.,
+                        //an implicit type parameter T cannot make reference
+                        //to some existing type with that name (except via full
+                        //qualification), thus the introduction of an implicit
+                        //type parameter must precede any use of that
+                        //parameter's name, even if the name exists in-scope
+                        //before the parameter is declared
+                        throw new SrcErrorException("introduction of "
+                                + "implicit type parameter must precede any "
+                                + "use of that variable name",
+                                nodeExp.getStart());
+                    }
+
+                    //Note that a redudantly named type parameter would be
+                    //caught when we add a symbol to the symbol table, so no
+                    //need to check here
+                    myDefinitionSchematicTypes.put(nodeExp.getName().getText(),
+                            e.getAssertedType().getMathType());
+
+                    PopulatingVisitor.emitDebug("added schematic variable: "
+                            + nodeExp.getName().getText());
+                }
+                catch (DuplicateSymbolException dse) {
+                    duplicateSymbol(nodeExp.getName());
+                }
+            }
+            catch (ClassCastException cce) {
+                throw new SrcErrorException("must be a variable name ", e
+                        .getExpression().getStart());
+            }
+        }
+        else {
+            e.setMathType(myTypeGraph.BOOLEAN);
         }
     }
 
@@ -183,9 +284,82 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
+    public void preMathTypeTheoremAST(MathTypeTheoremAST e) {
+        myBuilder.startScope(e);
+        myInTypeTheoremBindingExpFlag = false;
+        myActiveQuantifications.push(SymbolTableEntry.Quantification.UNIVERSAL);
+    }
+
+    @Override
+    public void midMathTypeTheoremAST(MathTypeTheoremAST e,
+                                      ResolveAST previous, ResolveAST next) {
+        //We've just processed all universal variables for this type theorem,
+        // so we pop a level of quantification off the stack
+        if (next == e.getAssertion()) {
+            myActiveQuantifications.pop();
+            myInTypeTheoremBindingExpFlag = true;
+        }
+    }
+
+    @Override
+    public void postMathTypeTheoremAST(MathTypeTheoremAST e) {
+        e.setMathType(myTypeGraph.BOOLEAN);
+        ExprAST assertion = e.getAssertion();
+
+        ExprAST condition;
+        ExprAST bindingExpression;
+        MathTypeAST typeExp;
+
+        try {
+            if (assertion instanceof MathSymbolAST) {
+                MathSymbolAST assertionAsMathSym = (MathSymbolAST) assertion;
+                String operator = assertionAsMathSym.getName().getText();
+
+                if (operator.equals("implies")) {
+                    if (assertionAsMathSym.getArguments().size() != 2) {
+                        throw new RuntimeException("implies function without" +
+                                "arguments??");
+                    }
+                    condition = assertionAsMathSym.getArguments().get(0);
+                    assertion = assertionAsMathSym.getArguments().get(1);
+                }
+                else {
+                    throw new ClassCastException();
+                }
+            }
+            else {
+                condition = myTypeGraph.getTrueVarExp();
+            }
+
+            MathTypeAssertionAST assertionAsTAE =
+                    (MathTypeAssertionAST) assertion;
+
+            bindingExpression = assertionAsTAE.getExpression();
+            typeExp = assertionAsTAE.getAssertedType();
+
+            try {
+                myTypeGraph.addRelationship(bindingExpression, typeExp
+                        .getMathTypeValue(), condition, myBuilder
+                        .getInnermostActiveScope());
+            }
+            catch (IllegalArgumentException iae) {
+                throw new SrcErrorException(iae.getMessage(), e.getStart());
+            }
+        }
+        catch (ClassCastException cse) {
+            throw new SrcErrorException("top level of type theorem "
+                    + "assertion must be 'implies' or ':'",
+                    assertion.getStart());
+        }
+        myBuilder.endScope();
+    }
+
+    @Override
     public void postMathVariableAST(MathVariableAST e) {
         MTType mathTypeValue = e.getSyntaxType().getMathTypeValue();
         String varName = e.getName().getText();
+
+        System.out.println("UNIVERSAL VARIABLE: " + e.getName().getText());
 
         if (myCurrentDirectDefinition != null
                 && mathTypeValue.isKnownToContainOnlyMTypes()
@@ -234,6 +408,11 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             fieldTypes.add(new MTCartesian.Element(field.getMathType()));
         }
         e.setMathType(new MTCartesian(myTypeGraph, fieldTypes));
+    }
+
+    @Override
+    public void preMathTypeAST(MathTypeAST e) {
+        myTypeValueDepth++;
     }
 
     @Override
@@ -483,11 +662,19 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         return result;
     }
 
-    private boolean withinDefinitionParameters(MathVariableAST p) {
+    private boolean withinTypeTheoremUniversals(MathVariableAST v) {
         if (myCurrentDefinition == null) {
             return false;
         }
-        return myCurrentDefinition.getParameters().contains(p);
+        //Todo
+        return false;
+    }
+
+    private boolean withinDefinitionParameters(MathVariableAST v) {
+        if (myCurrentDefinition == null) {
+            return false;
+        }
+        return myCurrentDefinition.getParameters().contains(v);
     }
 
     @Override
@@ -547,16 +734,16 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     public void notAType(ExprAST e) {
-        throw new SrcErrorException("Not known to be a type.", e.getStart());
+        throw new SrcErrorException("not known to be a type", e.getStart());
     }
 
     public void expected(ExprAST e, MTType expectedType) {
-        throw new SrcErrorException("Expected: " + expectedType + "\nFound: "
+        throw new SrcErrorException("expected: " + expectedType + ";  found: "
                 + e.getMathType(), e.getStart());
     }
 
     public void duplicateSymbol(Token symbol) {
-        throw new SrcErrorException("Duplicate symbol: " + symbol.getText(),
+        throw new SrcErrorException("duplicate symbol: " + symbol.getText(),
                 symbol);
     }
 

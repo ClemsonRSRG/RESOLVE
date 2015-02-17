@@ -12,19 +12,24 @@
  */
 package edu.clemson.cs.r2jt.typereasoning2;
 
-import edu.clemson.cs.r2jt.absyn.*;
-import edu.clemson.cs.r2jt.collections.Iterator;
+import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
+import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST;
+import edu.clemson.cs.r2jt.absynnew.expr.MathTupleAST;
+import edu.clemson.cs.r2jt.typeandpopulate2.BindingException;
 import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.TypeMismatchException;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class BindingExpression {
 
     private final TypeGraph myTypeGraph;
-    private Exp myExpression;
+    private ExprAST myExpression;
 
-    public BindingExpression(TypeGraph g, Exp expression) {
+    public BindingExpression(TypeGraph g, ExprAST expression) {
         myExpression = expression;
         myTypeGraph = g;
     }
@@ -37,11 +42,12 @@ public class BindingExpression {
         return myExpression.getMathTypeValue();
     }
 
-    public Map<String, Exp> bindTo(Exp expr, Map<String, MTType> typeBindings)
+    public Map<String, ExprAST> bindTo(ExprAST expr,
+            Map<String, MTType> typeBindings)
             throws TypeMismatchException,
                 BindingException {
 
-        Map<String, Exp> result = new HashMap<String, Exp>();
+        Map<String, ExprAST> result = new HashMap<String, ExprAST>();
 
         bindTo(myExpression, expr, typeBindings, result);
 
@@ -54,8 +60,8 @@ public class BindingExpression {
         return original.getCopyWithVariablesSubstituted(typeBindings);
     }
 
-    private void bindTo(Exp expr1, Exp expr2, Map<String, MTType> typeBindings,
-            Map<String, Exp> accumulator)
+    private void bindTo(ExprAST expr1, ExprAST expr2,
+            Map<String, MTType> typeBindings, Map<String, ExprAST> accumulator)
             throws TypeMismatchException,
                 BindingException {
 
@@ -75,11 +81,11 @@ public class BindingExpression {
             throw TypeMismatchException.INSTANCE;
         }
 
-        if (expr1 instanceof VarExp) {
-            VarExp e1AsVarExp = (VarExp) expr1;
-            String e1Name = e1AsVarExp.getName().getName();
+        if (expr1 instanceof MathSymbolAST) {
+            MathSymbolAST e1AsVarExp = (MathSymbolAST) expr1;
+            String e1Name = e1AsVarExp.getName().getText();
 
-            if (e1AsVarExp.getQuantification() == VarExp.FORALL) {
+            if (e1AsVarExp.getQuantification() == SymbolTableEntry.Quantification.UNIVERSAL) {
                 if (accumulator.containsKey(e1Name)) {
                     bindTo(accumulator.get(e1Name), expr2, typeBindings,
                             accumulator);
@@ -89,10 +95,10 @@ public class BindingExpression {
                 }
             }
             else {
-                if (expr2 instanceof VarExp) {
-                    VarExp e2AsVarExp = (VarExp) expr2;
+                if (expr2 instanceof MathSymbolAST) {
+                    MathSymbolAST e2AsVarExp = (MathSymbolAST) expr2;
 
-                    if (!e1Name.equals(e2AsVarExp.getName().getName())) {
+                    if (!e1Name.equals(e2AsVarExp.getName().getText())) {
                         throw new BindingException(expr1, expr2);
                     }
                 }
@@ -101,21 +107,21 @@ public class BindingExpression {
                 }
             }
         }
-        else if (expr1 instanceof AbstractFunctionExp
-                && expr2 instanceof AbstractFunctionExp) {
+        else if (expr1 instanceof MathSymbolAST
+                && expr2 instanceof MathSymbolAST) {
 
-            AbstractFunctionExp funExpr1 = (AbstractFunctionExp) expr1;
-            String fun1Name = funExpr1.getOperatorAsString();
+            MathSymbolAST funExpr1 = (MathSymbolAST) expr1;
+            String fun1Name = funExpr1.getName().getText();
 
-            AbstractFunctionExp funExpr2 = (AbstractFunctionExp) expr2;
+            MathSymbolAST funExpr2 = (MathSymbolAST) expr2;
 
-            if (funExpr1.getQuantification() == VarExp.FORALL) {
+            if (funExpr1.getQuantification() == SymbolTableEntry.Quantification.UNIVERSAL) {
                 if (accumulator.containsKey(fun1Name)) {
                     fun1Name =
-                            ((AbstractFunctionExp) accumulator.get(fun1Name))
-                                    .getOperatorAsString();
+                            ((MathSymbolAST) accumulator.get(fun1Name))
+                                    .getName().getText();
 
-                    if (!fun1Name.equals(funExpr2.getOperatorAsString())) {
+                    if (!fun1Name.equals(funExpr2.getName().getText())) {
                         throw new BindingException(expr1, expr2);
                     }
                 }
@@ -132,7 +138,7 @@ public class BindingExpression {
                 }
             }
             else {
-                if (!fun1Name.equals(funExpr2.getOperatorAsString())) {
+                if (!fun1Name.equals(funExpr2.getName().getText())) {
                     throw new BindingException(expr1, expr2);
                 }
             }
@@ -142,8 +148,8 @@ public class BindingExpression {
             			expr2.getMathType());
             }*/
 
-            Iterator<Exp> fun1Args = funExpr1.getParameters().iterator();
-            Iterator<Exp> fun2Args = funExpr2.getParameters().iterator();
+            Iterator<ExprAST> fun1Args = funExpr1.getArguments().iterator();
+            Iterator<ExprAST> fun2Args = funExpr2.getArguments().iterator();
 
             //There must be the same number of parameters, otherwise the 
             //original typecheck would have failed
@@ -152,9 +158,9 @@ public class BindingExpression {
                         accumulator);
             }
         }
-        else if (expr1 instanceof TupleExp) {
+        else if (expr1 instanceof MathTupleAST) {
 
-            TupleExp expr1AsTupleExp = (TupleExp) expr1;
+            MathTupleAST expr1AsTupleExp = (MathTupleAST) expr1;
 
             //TODO : Do we need to somehow "descend" (into what is in all 
             //likelihood a DummyExp) and match universal fields to sub 
@@ -163,10 +169,10 @@ public class BindingExpression {
             //We checked earlier that it's a subtype.  So, if it's universally
             //quantified--we're done here.
             if (!expr1AsTupleExp.isUniversallyQuantified()) {
-                Iterator<Exp> tuple1Fields =
-                        ((TupleExp) expr1).getFields().iterator();
-                Iterator<Exp> tuple2Fields =
-                        ((TupleExp) expr2).getFields().iterator();
+                Iterator<ExprAST> tuple1Fields =
+                        ((MathTupleAST) expr1).getFields().iterator();
+                Iterator<ExprAST> tuple2Fields =
+                        ((MathTupleAST) expr2).getFields().iterator();
 
                 //There must be the same number of fields, otherwise the above
                 //typecheck would have failed
@@ -176,7 +182,7 @@ public class BindingExpression {
                 }
             }
         }
-        else if (expr1 instanceof LambdaExp && expr2 instanceof LambdaExp) {
+        /*else if (expr1 instanceof LambdaExp && expr2 instanceof LambdaExp) {
             LambdaExp expr1AsLambdaExp = (LambdaExp) expr1;
             LambdaExp expr2AsLambdaExp = (LambdaExp) expr2;
 
@@ -187,7 +193,7 @@ public class BindingExpression {
             bindTo(expr1AsLambdaExp.getBody(), expr2AsLambdaExp.getBody(),
                     typeBindings, accumulator);
 
-        }
+        }*/
         else {
             throw new BindingException(expr1, expr2);
         }

@@ -100,6 +100,17 @@ public abstract class TreeWalkerVisitor {
         return false;
     }
 
+    public void preMathTypeAssertionAST(MathTypeAssertionAST e) {}
+
+    public void midMathTypeAssertionAST(MathTypeAssertionAST e,
+                                        ResolveAST previous, ResolveAST next) {}
+
+    public void postMathTypeAssertionAST(MathTypeAssertionAST e) {}
+
+    public boolean walkMathTypeAssertionAST(MathTypeAssertionAST e) {
+        return false;
+    }
+
     public void preTypeAST(TypeAST e) {}
 
     public void midTypeAST(TypeAST e, ResolveAST previous, ResolveAST next) {}

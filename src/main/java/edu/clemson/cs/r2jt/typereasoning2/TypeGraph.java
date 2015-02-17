@@ -15,17 +15,12 @@ package edu.clemson.cs.r2jt.typereasoning2;
 import edu.clemson.cs.r2jt.absynnew.ResolveToken;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST;
-import edu.clemson.cs.r2jt.typeandpopulate.*;
+import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.MathSymbolExprBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate2.*;
-import edu.clemson.cs.r2jt.typeandpopulate2.FunctionApplicationFactory;
-import edu.clemson.cs.r2jt.typeandpopulate2.MTCartesian;
-import edu.clemson.cs.r2jt.typeandpopulate2.MTFunction;
-import edu.clemson.cs.r2jt.typeandpopulate2.MTPowertypeApplication;
-import edu.clemson.cs.r2jt.typeandpopulate2.MTProper;
-import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
-import edu.clemson.cs.r2jt.typeandpopulate2.MTUnion;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.MathSymbolEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.query.UnqualifiedNameQuery;
 
-import java.util.List;
+import java.util.*;
 
 public class TypeGraph {
 
@@ -37,6 +32,11 @@ public class TypeGraph {
      */
     public final PerThreadReasoningResources threadResources =
             new PerThreadReasoningResources();
+
+    private final ExpValuePathStrategy EXP_VALUE_PATH =
+            new ExpValuePathStrategy();
+    private final MTTypeValuePathStrategy MTTYPE_VALUE_PATH =
+            new MTTypeValuePathStrategy();
 
     public final MTType ELEMENT = new MTProper(this, "Element");
     public final MTType ENTITY = new MTProper(this, "Entity");
@@ -147,7 +147,7 @@ public class TypeGraph {
 
         if (!result) {
             try {
-                Exp conditions =
+                ExprAST conditions =
                         getValidTypeConditions(subtype,
                                 new MTPowertypeApplication(this, supertype));
                 result = conditions.isLiteralTrue();
@@ -184,12 +184,12 @@ public class TypeGraph {
      * @return <code>true</code> <strong>iff</strong> <code>value</code> is
      *         definitely in <code>expected</code>.
      */
-    public boolean isKnownToBeIn(Exp value, MTType expected) {
+    public boolean isKnownToBeIn(ExprAST value, MTType expected) {
 
         boolean result;
 
         try {
-            Exp conditions = getValidTypeConditions(value, expected);
+            ExprAST conditions = getValidTypeConditions(value, expected);
             result = conditions.isLiteralTrue();
         }
         catch (TypeMismatchException e) {
@@ -236,7 +236,7 @@ public class TypeGraph {
 
         if (!result) {
             try {
-                Exp conditions = getValidTypeConditions(value, expected);
+                ExprAST conditions = getValidTypeConditions(value, expected);
                 result = conditions.isLiteralTrue();
             }
             catch (TypeMismatchException e) {
@@ -284,12 +284,12 @@ public class TypeGraph {
      *         which <code>value</code> could be demonstrated to be in
      *         <code>expected</code>.
      */
-    private Exp getValidTypeConditions(MTType value, MTType expected)
+    private ExprAST getValidTypeConditions(MTType value, MTType expected)
             throws TypeMismatchException {
         //See note in the getValidTypeConditionsTo() in TypeRelationship,
         //re: Lovecraftian nightmare-scape
 
-        Exp result = getFalseVarExp();
+        ExprAST result = getFalseVarExp();
 
         if (expected == CLS) {
             //Every MTType is in MType except for Entity and MType, itself
@@ -307,7 +307,7 @@ public class TypeGraph {
                 MTPowertypeApplication expectedAsPowertypeApplication =
                         (MTPowertypeApplication) expected;
 
-                DummyExp memberOfValue = new DummyExp(value);
+                DummyExprAST memberOfValue = new DummyExprAST(value);
 
                 if (isKnownToBeIn(memberOfValue, expectedAsPowertypeApplication
                         .getArgument(0))) {
@@ -328,7 +328,7 @@ public class TypeGraph {
             }
 
             try {
-                Exp intermediateResult =
+                ExprAST intermediateResult =
                         getValidTypeConditions(value, value.getType(),
                                 expected, MTTYPE_VALUE_PATH);
 
@@ -381,10 +381,10 @@ public class TypeGraph {
      *         which <code>value</code> could be demonstrated to be in
      *         <code>expected</code>.
      */
-    public Exp getValidTypeConditions(Exp value, MTType expected)
+    public ExprAST getValidTypeConditions(ExprAST value, MTType expected)
             throws TypeMismatchException {
 
-        Exp result;
+        ExprAST result;
 
         MTType valueTypeValue = value.getMathTypeValue();
         if (expected == ENTITY && valueTypeValue != CLS
@@ -449,8 +449,8 @@ public class TypeGraph {
      *         which <code>value</code> could be demonstrated to be in
      *         <code>expected</code>.
      */
-    private <V> Exp getValidTypeConditions(V foundValue, MTType foundType,
-                                           MTType expected, NodePairPathStrategy<V> pathStrategy)
+    private <V> ExprAST getValidTypeConditions(V foundValue, MTType foundType,
+            MTType expected, NodePairPathStrategy<V> pathStrategy)
             throws TypeMismatchException {
 
         if (foundType == null) {
@@ -462,9 +462,9 @@ public class TypeGraph {
         Map<MTType, Map<String, MTType>> potentialExpectedNodes =
                 getSyntacticSubtypesWithRelationships(expected);
 
-        Exp result = getFalseVarExp();
+        ExprAST result = getFalseVarExp();
 
-        Exp newCondition;
+        ExprAST newCondition;
 
         Iterator<Map.Entry<MTType, Map<String, MTType>>> expectedEntries;
         Iterator<Map.Entry<MTType, Map<String, MTType>>> foundEntries =
@@ -534,10 +534,10 @@ public class TypeGraph {
      * @throws TypeMismatchException If the conditions under which the path can
      *         be followed would be <code>false</code>.
      */
-    private <V> Exp getPathConditions(V foundValue,
-                                      Map.Entry<MTType, Map<String, MTType>> foundEntry,
-                                      Map.Entry<MTType, Map<String, MTType>> expectedEntry,
-                                      NodePairPathStrategy<V> pathStrategy) throws TypeMismatchException {
+    private <V> ExprAST getPathConditions(V foundValue,
+            Map.Entry<MTType, Map<String, MTType>> foundEntry,
+            Map.Entry<MTType, Map<String, MTType>> expectedEntry,
+            NodePairPathStrategy<V> pathStrategy) throws TypeMismatchException {
 
         Map<String, MTType> combinedBindings = new HashMap<String, MTType>();
 
@@ -546,7 +546,7 @@ public class TypeGraph {
         combinedBindings
                 .putAll(updateMapLabels(expectedEntry.getValue(), "_d"));
 
-        Exp newCondition =
+        ExprAST newCondition =
                 pathStrategy.getValidTypeConditionsBetween(foundValue,
                         foundEntry.getKey(), expectedEntry.getKey(),
                         combinedBindings);
@@ -594,8 +594,8 @@ public class TypeGraph {
      *        <code>bindingExpression</code>, <code>destination</code>, and
      *        <code>bindingCondition</code> should be evaluated.
      */
-    public void addRelationship(Exp bindingExpression, MTType destination,
-                                Exp bindingCondition, Scope environment) {
+    public void addRelationship(ExprAST bindingExpression, MTType destination,
+            ExprAST bindingCondition, Scope environment) {
 
         //Sanitize and sanity check our inputs somewhat
         if (destination == null) {
@@ -646,13 +646,11 @@ public class TypeGraph {
 
         //We can't use the binding expression as-is.  It must be updated to
         //reflect canonical variable names
-        Map<Exp, Exp> replacements = new HashMap<Exp, Exp>();
+        Map<ExprAST, ExprAST> replacements = new HashMap<ExprAST, ExprAST>();
         for (Map.Entry<String, String> entry : environmentalToExemplar
                 .entrySet()) {
-
-            replacements.put(new VarExp(null, null, new PosSymbol(null, Symbol
-                    .symbol(entry.getKey()))), new VarExp(null, null,
-                    new PosSymbol(null, Symbol.symbol(entry.getValue()))));
+            replacements.put(new MathSymbolExprBuilder(entry.getKey()).build(),
+                    new MathSymbolExprBuilder(entry.getValue()).build());
         }
         bindingExpression =
                 safeVariableNameUpdate(bindingExpression, replacements,
@@ -674,13 +672,13 @@ public class TypeGraph {
         //We'd like to force the presence of the destination node
         getTypeNode(destinationCanonicalResult.canonicalType);
 
-        Populator.emitDebug("Added relationship to type node ["
+        PopulatingVisitor.emitDebug("added relationship to type node ["
                 + sourceCanonicalResult.canonicalType + "]: " + relationship);
     }
 
-    private Exp safeVariableNameUpdate(Exp original,
-                                       Map<Exp, Exp> replacements,
-                                       Map<String, String> environmentalToExemplar) {
+    private ExprAST safeVariableNameUpdate(ExprAST original,
+            Map<ExprAST, ExprAST> replacements,
+            Map<String, String> environmentalToExemplar) {
 
         MTType originalTypeValue = original.getMathTypeValue();
 
@@ -689,13 +687,13 @@ public class TypeGraph {
         if (original.getMathType() == null) {
             throw new RuntimeException("substitute() method for class "
                     + original.getClass() + " did not properly copy the math "
-                    + "type of the object.");
+                    + "type of the object");
         }
 
         if (originalTypeValue != null && original.getMathTypeValue() == null) {
             throw new RuntimeException("substitute() method for class "
                     + original.getClass() + " did not properly copy the math "
-                    + "type value of the object.");
+                    + "type value of the object");
         }
 
         original =
@@ -774,9 +772,9 @@ public class TypeGraph {
     }
 
     private static Set<String> getUniversallyQuantifiedVariables(MTType source,
-                                                                 MTType destination, Scope environment,
-                                                                 CanonicalizationResult sourceCanonicalResult,
-                                                                 CanonicalizationResult destinationCanonicalResult) {
+            MTType destination, Scope environment,
+            CanonicalizationResult sourceCanonicalResult,
+            CanonicalizationResult destinationCanonicalResult) {
 
         Set<String> unboundTypeClosure = new HashSet<String>();
         Set<String> newUnboundTypes = new HashSet<String>();
@@ -847,10 +845,10 @@ public class TypeGraph {
         return result;
     }
 
-    public Exp getCopyWithVariableNamesChanged(Exp original,
-                                               Map<String, String> substitutions) {
+    public ExprAST getCopyWithVariableNamesChanged(ExprAST original,
+            Map<String, String> substitutions) {
 
-        Exp result = Exp.copy(original);
+        ExprAST result = ExprAST.copy(original);
 
         if (result.getMathType() == null) {
             throw new RuntimeException("copy() method for class "
@@ -861,7 +859,7 @@ public class TypeGraph {
         result.setMathType(getCopyWithVariableNamesChanged(
                 result.getMathType(), substitutions));
 
-        List<Exp> children = result.getSubExpressions();
+        List<? extends ExprAST> children = result.getSubExpressions();
         int childCount = children.size();
         for (int childIndex = 0; childIndex < childCount; childIndex++) {
             result.setSubExpression(childIndex,
@@ -873,7 +871,7 @@ public class TypeGraph {
     }
 
     public MTType getCopyWithVariableNamesChanged(MTType original,
-                                                  Map<String, String> substitutions) {
+            Map<String, String> substitutions) {
         VariableReplacingVisitor renamer =
                 new VariableReplacingVisitor(substitutions, this);
         original.accept(renamer);
@@ -881,22 +879,22 @@ public class TypeGraph {
     }
 
     public static MTType getCopyWithVariablesSubstituted(MTType original,
-                                                         Map<String, MTType> substitutions) {
+            Map<String, MTType> substitutions) {
         VariableReplacingVisitor renamer =
                 new VariableReplacingVisitor(substitutions);
         original.accept(renamer);
         return renamer.getFinalExpression();
     }
 
-    public static <T extends Exp> T getCopyWithVariablesSubstituted(T original,
-                                                                    Map<String, MTType> substitutions) {
+    public static <T extends ExprAST> T getCopyWithVariablesSubstituted(
+            T original, Map<String, MTType> substitutions) {
 
         @SuppressWarnings("unchecked")
-        T result = (T) Exp.copy(original);
+        T result = (T) ExprAST.copy(original);
         result.setMathType(result.getMathType()
                 .getCopyWithVariablesSubstituted(substitutions));
 
-        List<Exp> children = result.getSubExpressions();
+        List<? extends ExprAST> children = result.getSubExpressions();
         int childCount = children.size();
         for (int childIndex = 0; childIndex < childCount; childIndex++) {
             result.setSubExpression(childIndex, TypeGraph
@@ -942,7 +940,7 @@ public class TypeGraph {
     }
 
     private <T> Map<String, T> updateMapLabels(Map<String, T> original,
-                                               String suffix) {
+            String suffix) {
 
         Map<String, T> result = new HashMap<String, T>();
         for (Map.Entry<String, T> entry : original.entrySet()) {
@@ -960,10 +958,69 @@ public class TypeGraph {
         Iterator<MTType> iter = keys.iterator();
         while (iter.hasNext()) {
             str.append(myTypeNodes.get(iter.next()).toString());
-
         }
-
         return str.toString();
+    }
+
+    private CanonicalizationResult canonicalize(MTType t, Scope environment,
+            String suffix) {
+
+        CanonicalizingVisitor canonicalizer =
+                new CanonicalizingVisitor(this, environment, suffix);
+
+        t.accept(canonicalizer);
+
+        return new CanonicalizationResult(canonicalizer.getFinalExpression(),
+                canonicalizer.getTypePredicates(), canonicalizer
+                        .getCanonicalToEnvironmentOriginalMapping());
+    }
+
+    private class CanonicalizationResult {
+
+        public final MTType canonicalType;
+        public final List<TypeRelationshipPredicate> predicates;
+        public final Map<String, String> canonicalToEnvironmental;
+
+        public CanonicalizationResult(MTType canonicalType,
+                List<TypeRelationshipPredicate> predicates,
+                Map<String, String> canonicalToOriginal) {
+            this.canonicalType = canonicalType;
+            this.predicates = predicates;
+            this.canonicalToEnvironmental = canonicalToOriginal;
+        }
+    }
+
+    private interface NodePairPathStrategy<V> {
+
+        public ExprAST getValidTypeConditionsBetween(V sourceValue,
+                MTType sourceType, MTType expectedType,
+                Map<String, MTType> bindings) throws TypeMismatchException;
+    }
+
+    private class ExpValuePathStrategy implements NodePairPathStrategy<ExprAST> {
+
+        @Override
+        public ExprAST getValidTypeConditionsBetween(ExprAST sourceValue,
+                MTType sourceType, MTType expectedType,
+                Map<String, MTType> bindings) throws TypeMismatchException {
+
+            return myTypeNodes.get(sourceType).getValidTypeConditionsTo(
+                    sourceValue, expectedType, bindings);
+        }
+    }
+
+    private class MTTypeValuePathStrategy
+            implements
+                NodePairPathStrategy<MTType> {
+
+        @Override
+        public ExprAST getValidTypeConditionsBetween(MTType sourceValue,
+                MTType sourceType, MTType expectedType,
+                Map<String, MTType> bindings) throws TypeMismatchException {
+
+            return myTypeNodes.get(sourceType).getValidTypeConditionsTo(
+                    sourceValue, expectedType, bindings);
+        }
     }
 
     private static class PowertypeApplicationFactory
@@ -1081,5 +1138,34 @@ public class TypeGraph {
 
         result.setMathType(BOOLEAN);
         return result;
+    }
+
+    private static class EstablishedRelationship {
+
+        private final MTType myType1, myType2;
+
+        public EstablishedRelationship(MTType t1, MTType t2) {
+            myType1 = t1;
+            myType2 = t2;
+        }
+
+        @Override
+        public int hashCode() {
+            return myType1.hashCode() * 31 + myType2.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            boolean result = o instanceof EstablishedRelationship;
+
+            if (result) {
+                EstablishedRelationship oAsER = (EstablishedRelationship) o;
+                result =
+                        myType1.equals(oAsER.myType1)
+                                && myType2.equals(oAsER.myType2);
+            }
+
+            return result;
+        }
     }
 }

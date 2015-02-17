@@ -124,7 +124,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
     @Override
     public void exitConceptItems(@NotNull ResolveParser.ConceptItemsContext ctx) {
-        ModuleBlockAST.ModuleBlockBuilder blockBuilder =
+        ModuleBlockBuilder blockBuilder =
                 new ModuleBlockBuilder(ctx.getStart(), ctx.getStop())
                         .generalElements(getAll(ResolveAST.class, ctx
                                 .conceptItem()));
@@ -145,9 +145,24 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     public void exitPrecisModule(@NotNull ResolveParser.PrecisModuleContext ctx) {
         PrecisBuilder builder =
                 new PrecisBuilder(ctx.getStart(), ctx.getStop(), ctx.name)
+                        .block(get(ModuleBlockAST.class, ctx.precisItems()))
                         .imports(myImportBuilder.build());
 
         put(ctx, builder.build());
+    }
+
+    @Override
+    public void exitPrecisItem(@NotNull ResolveParser.PrecisItemContext ctx) {
+        put(ctx, get(ResolveAST.class, ctx.getChild(0)));
+    }
+
+    @Override
+    public void exitPrecisItems(@NotNull ResolveParser.PrecisItemsContext ctx) {
+        ModuleBlockBuilder blockBuilder =
+                new ModuleBlockBuilder(ctx.getStart(), ctx.getStop())
+                        .generalElements(getAll(ResolveAST.class, ctx
+                                .precisItem()));
+        put(ctx, blockBuilder.build());
     }
 
     @Override

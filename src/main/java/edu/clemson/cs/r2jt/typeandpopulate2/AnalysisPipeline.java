@@ -17,6 +17,7 @@ import edu.clemson.cs.r2jt.absynnew.ResolveCompiler;
 import edu.clemson.cs.r2jt.absynnew.TreeWalker;
 import edu.clemson.cs.r2jt.init.AbstractPipeline;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.r2jt.typeandpopulate.Populator;
 
 public class AnalysisPipeline extends AbstractPipeline {
 
@@ -37,5 +38,7 @@ public class AnalysisPipeline extends AbstractPipeline {
         }
         TreeWalker.walk(populator, moduleTarget);
 
+        PopulatingVisitor.emitDebug("Type Graph:\n\n"
+                + mySymbolTable.getTypeGraph().toString());
     }
 }
