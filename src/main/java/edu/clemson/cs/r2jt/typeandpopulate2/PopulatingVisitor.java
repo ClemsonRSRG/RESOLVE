@@ -14,20 +14,24 @@ package edu.clemson.cs.r2jt.typeandpopulate2;
 
 import edu.clemson.cs.r2jt.absynnew.*;
 import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportType;
-import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST;
-import edu.clemson.cs.r2jt.absynnew.decl.MathTheoremAST;
-import edu.clemson.cs.r2jt.absynnew.decl.MathTypeTheoremAST;
-import edu.clemson.cs.r2jt.absynnew.decl.MathVariableAST;
+import edu.clemson.cs.r2jt.absynnew.decl.*;
 import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST.DefinitionType;
 import edu.clemson.cs.r2jt.absynnew.expr.*;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.MathSymbolEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTVoid;
 import edu.clemson.cs.r2jt.typeandpopulate2.query.MathFunctionNamedQuery;
 import edu.clemson.cs.r2jt.typeandpopulate2.query.MathSymbolQuery;
+import edu.clemson.cs.r2jt.typeandpopulate2.query.NameQuery;
 import edu.clemson.cs.r2jt.typereasoning2.TypeComparison;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
+import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTable.ImportStrategy;
+import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTable.FacilityStrategy;
 import org.antlr.v4.runtime.Token;
 
 import java.util.*;
@@ -96,10 +100,24 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     private Set<String> myDefinitionNamedTypes = new HashSet<String>();
 
     /**
+     * <p>While we walk the children of an operation, FacilityOperation, or
+     * procedure, this list will contain all formal parameters encountered so
+     * far, otherwise it will be null.  Since none of these structures can be
+     * be nested, there's no need for a stack.</p>
+     *
+     * <p>If you need to distinguish if you're in the middle of an
+     * operation/FacilityOperation or a procedure, check
+     * myCorrespondingOperation.</p>
+     */
+    private List<ProgramParameterEntry> myCurrentParameters;
+
+    /**
      * <p>A mapping from generic types that appear in the module to the math
      * types that bound their possible values.</p>
      */
     private Map<String, MTType> myGenericTypes = new HashMap<String, MTType>();
+
+    private MathSymbolEntry myExemplarEntry;
 
     private final TypeGraph myTypeGraph;
 
@@ -128,6 +146,161 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     public void postImportCollectionAST(ImportCollectionAST e) {
         for (Token importRequest : e.getImportsExcluding(ImportType.EXTERNAL)) {
             myCurModuleScope.addImport(new ModuleIdentifier(importRequest));
+        }
+    }
+
+    @Override
+    public void preOperationSigAST(OperationSigAST e) {
+        myBuilder.startScope(e);
+        myCurrentParameters = new ArrayList<ProgramParameterEntry>();
+    }
+
+    @Override
+    public void midOperationSigAST(OperationSigAST e,
+                                ResolveAST previous,
+                                ResolveAST next) {
+
+        if (previous == e.getReturnType() && e.getReturnType() != null) {
+            try {
+                //Inside the operation's assertions, the name of the operation
+                //refers to its return value
+                myBuilder.getInnermostActiveScope().addBinding(
+                        e.getName().getText(), e,
+                        e.getReturnType().getMathTypeValue());
+            }
+            catch (DuplicateSymbolException dse) {
+                //This shouldn't be possible--the operation declaration has a
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                throw new RuntimeException(dse);
+            }
+        }
+    }
+
+    @Override
+    public void postOperationSigAST(OperationSigAST dec) {
+        myBuilder.endScope();
+        putOperationLikeThingInSymbolTable(dec.getName(), dec.getReturnType(),
+                dec);
+        myCurrentParameters = null;
+    }
+
+    private void putOperationLikeThingInSymbolTable(Token name,
+                                                    TypeAST returnTy,
+                                                    ResolveAST o) {
+        try {
+            PTType returnType;
+            if (returnTy == null) {
+                returnType = PTVoid.getInstance(myTypeGraph);
+            }
+            else {
+                returnType = returnTy.getProgramTypeValue();
+            }
+            myBuilder.getInnermostActiveScope().addOperation(name.getText(),
+                    o, myCurrentParameters, returnType);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(name);
+        }
+    }
+
+    @Override
+    public void postParameterAST(ParameterAST e) {
+
+        /*ProgramParameterEntry.ParameterMode mode =
+                ProgramParameterEntry.OLD_TO_NEW_MODE.get(dec.getMode());
+
+        if (mode == null) {
+            throw new RuntimeException("Unexpected parameter mode: "
+                    + dec.getMode());
+        }
+
+        try {
+            ProgramParameterEntry paramEntry =
+                    myBuilder.getInnermostActiveScope().addFormalParameter(
+                            dec.getName().getName(), dec, mode,
+                            dec.getTy().getProgramTypeValue());
+            myCurrentParameters.add(paramEntry);
+        }
+        catch (DuplicateSymbolException e) {
+            duplicateSymbol(dec.getName().getName(), dec.getName()
+                    .getLocation());
+        }
+
+        dec.setMathType(dec.getTy().getMathTypeValue());*/
+    }
+
+    @Override
+    public void preTypeModelAST(TypeModelAST e) {
+        myBuilder.startScope(e);
+    }
+
+    @Override
+    public void midTypeModelAST(TypeModelAST e, ResolveAST previous,
+                                ResolveAST next) {
+
+        if (previous == e.getModel()) {
+            try {
+                myExemplarEntry =
+                        myBuilder.getInnermostActiveScope().addBinding(
+                                e.getExemplar().getText(), e,
+                                e.getModel().getMathTypeValue());
+            }
+            catch (DuplicateSymbolException dse) {
+                //This shouldn't be possible--the type declaration has a
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                throw new RuntimeException(dse);
+            }
+        }
+    }
+
+    @Override
+    public void postTypeModelAST(TypeModelAST e) {
+        myBuilder.endScope();
+        try {
+            myBuilder.getInnermostActiveScope().addProgramTypeDefinition(
+                    e.getName().getText(), e,
+                    e.getModel().getMathTypeValue(), myExemplarEntry);
+
+            myExemplarEntry = null;
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(e.getName());
+        }
+    }
+
+    @Override
+    public void postNamedTypeAST(NamedTypeAST e) {
+        //Note that all mathematical types are MathTypeASTs, so this must
+        //be in a program-type syntactic slot.
+        Token tySymbol = e.getName();
+        Token tyQualifier = e.getQualifier();
+        String tyName = tySymbol.getText();
+
+        try {
+            ProgramTypeEntry type =
+                    myBuilder
+                            .getInnermostActiveScope()
+                            .queryForOne(
+                                    new NameQuery(
+                                            tyQualifier,
+                                            tySymbol,
+                                            ImportStrategy.IMPORT_NAMED,
+                                            FacilityStrategy.FACILITY_INSTANTIATE,
+                                            true)).toProgramTypeEntry(
+                            e.getName());
+
+            e.setProgramTypeValue(type.getProgramType());
+            e.setMathType(myTypeGraph.CLS);
+            e.setMathTypeValue(type.getModelType());
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(tyQualifier, tySymbol);
+        }
+        catch (DuplicateSymbolException dse) {
+            //TODO : Error gracefully
+            throw new RuntimeException(dse);
         }
     }
 

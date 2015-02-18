@@ -12,15 +12,17 @@
  */
 package edu.clemson.cs.r2jt.typeandpopulate2;
 
+import edu.clemson.cs.r2jt.absynnew.InitFinalAST;
 import edu.clemson.cs.r2jt.absynnew.ResolveAST;
 import edu.clemson.cs.r2jt.absynnew.decl.MathTheoremAST;
+import edu.clemson.cs.r2jt.absynnew.decl.TypeModelAST;
+import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.MathSymbolEntry;
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramVariableEntry;
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.TheoremEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.*;
+import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
+import org.antlr.v4.runtime.Token;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -68,6 +70,20 @@ public class ScopeBuilder extends SyntacticScope {
                 myParent, myBindings);
     }
 
+    public OperationEntry addOperation(String name,
+                                       ResolveAST definingElement,
+                                       List<ProgramParameterEntry> params,
+                                       PTType returnType)
+            throws DuplicateSymbolException {
+        sanityCheckBindArguments(name, definingElement, returnType);
+
+        OperationEntry entry =
+                new OperationEntry(name, definingElement, myRootModule,
+                        returnType, params);
+        myBindings.put(name, entry);
+        return entry;
+    }
+
     public ProgramVariableEntry addProgramVariable(String name,
             ResolveAST definingElement, PTType type)
             throws DuplicateSymbolException {
@@ -88,6 +104,35 @@ public class ScopeBuilder extends SyntacticScope {
                 new TheoremEntry(myTypeGraph, name, definingElement,
                         myRootModule);
         myBindings.put(name, entry);
+        return entry;
+    }
+
+    public ProgramTypeEntry addProgramTypeDefinition(String name,
+                          TypeModelAST definingElement,
+                          MTType model, MathSymbolEntry exemplarEntry)
+            throws DuplicateSymbolException {
+        sanityCheckBindArguments(name, definingElement, model);
+
+        InitFinalAST.TypeInitAST init = definingElement.getInitialization();
+        InitFinalAST.TypeFinalAST finalization = definingElement.getFinalization();
+
+        ExprAST initRequires = (init == null) ? null : init.getRequires();
+        ExprAST initEnsures = (init == null) ? null : init.getEnsures();
+        ExprAST finalizationRequires =
+                (finalization == null) ? null : finalization.getRequires();
+        ExprAST finalizationEnsures =
+                (finalization == null) ? null : finalization.getEnsures();
+
+        ProgramTypeEntry entry =
+                new ProgramTypeDefinitionEntry(myTypeGraph, name,
+                        definingElement, myRootModule, model, new PTFamily(
+                        model, name, definingElement.getExemplar().getText(),
+                        definingElement.getConstraint(), initRequires,
+                        initEnsures, finalizationRequires,
+                        finalizationEnsures), exemplarEntry);
+
+        myBindings.put(name, entry);
+
         return entry;
     }
 
