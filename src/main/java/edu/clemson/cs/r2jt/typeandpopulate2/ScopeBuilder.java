@@ -94,6 +94,19 @@ public class ScopeBuilder extends SyntacticScope {
         return entry;
     }
 
+    public ProgramParameterEntry addFormalParameter(String name,
+                                                    ResolveAST definingElement,
+                                                    ProgramParameterEntry.ParameterMode mode,
+                                                    PTType type) throws DuplicateSymbolException {
+        sanityCheckBindArguments(name, definingElement, type);
+
+        ProgramParameterEntry entry =
+                new ProgramParameterEntry(myTypeGraph, name, definingElement,
+                        myRootModule, type, mode);
+        myBindings.put(name, entry);
+        return entry;
+    }
+
     public TheoremEntry addTheorem(String name, MathTheoremAST definingElement)
             throws DuplicateSymbolException {
         sanityCheckBindArguments(name, definingElement, "");

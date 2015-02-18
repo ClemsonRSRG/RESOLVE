@@ -21,6 +21,8 @@ import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import org.antlr.v4.runtime.Token;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ProgramParameterEntry extends SymbolTableEntry {
@@ -102,6 +104,18 @@ public class ProgramParameterEntry extends SymbolTableEntry {
         }
 
         public abstract ParameterMode[] getValidImplementationModes();
+    }
+
+    public static Map<String, ParameterMode> getModeMapping() {
+        Map<String, ParameterMode> result =
+                new HashMap<String, ParameterMode>();
+        ParameterMode[] modes = ParameterMode.values();
+
+        for (int i = 0; i < modes.length; i++) {
+            String mode = modes[i].toString().toLowerCase();
+            result.put(mode, modes[i]);
+        }
+        return Collections.unmodifiableMap(result);
     }
 
     private final PTType myDeclaredType;

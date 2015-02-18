@@ -204,28 +204,18 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
     @Override
     public void postParameterAST(ParameterAST e) {
-
-    /*ProgramParameterEntry.ParameterMode mode =
-            ProgramParameterEntry.OLD_TO_NEW_MODE.get(dec.getMode());
-
-    if (mode == null) {
-        throw new RuntimeException("Unexpected parameter mode: "
-                + dec.getMode());
-    }
-
-    try {
-        ProgramParameterEntry paramEntry =
-                myBuilder.getInnermostActiveScope().addFormalParameter(
-                        dec.getName().getName(), dec, mode,
-                        dec.getTy().getProgramTypeValue());
-        myCurrentParameters.add(paramEntry);
-    }
-    catch (DuplicateSymbolException e) {
-        duplicateSymbol(dec.getName().getName(), dec.getName()
-                .getLocation());
-    }
-
-    dec.setMathType(dec.getTy().getMathTypeValue());*/
+        ProgramParameterEntry.ParameterMode mode = e.getMode();
+        try {
+            ProgramParameterEntry paramEntry =
+                    myBuilder.getInnermostActiveScope().addFormalParameter(
+                            e.getName().getText(), e, mode,
+                            e.getType().getProgramTypeValue());
+            myCurrentParameters.add(paramEntry);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(e.getName());
+        }
+        e.setMathType(e.getType().getMathTypeValue());
     }
 
     @Override

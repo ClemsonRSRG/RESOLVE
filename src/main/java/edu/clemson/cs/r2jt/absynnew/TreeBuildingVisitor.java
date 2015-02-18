@@ -30,6 +30,7 @@ import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.parsing.ResolveBaseListener;
 import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import edu.clemson.cs.r2jt.misc.Utils.Builder;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -323,9 +324,11 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     public void exitParameterDecl(
             @NotNull ResolveParser.ParameterDeclContext ctx) {
         NamedTypeAST type = get(NamedTypeAST.class, ctx.type());
-        ParameterAST param =
-                new ParameterAST(ctx.getStart(), ctx.getStop(), ctx.name, type);
-        put(ctx, param);
+        ProgramParameterEntry.ParameterMode mode =
+                ProgramParameterEntry
+                        .getModeMapping().get(ctx.parameterMode().getText());
+        put(ctx, new ParameterAST(ctx.getStart(), ctx.getStop(), ctx.name, type,
+                mode));
     }
 
     @Override
