@@ -27,7 +27,7 @@ public class ParameterAST extends DeclAST {
     private final ProgramParameterEntry.ParameterMode myMode;
 
     public ParameterAST(Token start, Token stop, Token name, NamedTypeAST type,
-                        ProgramParameterEntry.ParameterMode mode) {
+            ProgramParameterEntry.ParameterMode mode) {
         super(start, stop, name);
         myType = type;
         myMode = mode;

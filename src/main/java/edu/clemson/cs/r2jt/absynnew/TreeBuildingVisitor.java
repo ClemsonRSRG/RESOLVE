@@ -325,10 +325,10 @@ public class TreeBuildingVisitor<T extends ResolveAST>
             @NotNull ResolveParser.ParameterDeclContext ctx) {
         NamedTypeAST type = get(NamedTypeAST.class, ctx.type());
         ProgramParameterEntry.ParameterMode mode =
-                ProgramParameterEntry
-                        .getModeMapping().get(ctx.parameterMode().getText());
-        put(ctx, new ParameterAST(ctx.getStart(), ctx.getStop(), ctx.name, type,
-                mode));
+                ProgramParameterEntry.getModeMapping().get(
+                        ctx.parameterMode().getText());
+        put(ctx, new ParameterAST(ctx.getStart(), ctx.getStop(), ctx.name,
+                type, mode));
     }
 
     @Override

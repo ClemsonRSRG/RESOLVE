@@ -95,9 +95,9 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public ProgramParameterEntry addFormalParameter(String name,
-                                                    ResolveAST definingElement,
-                                                    ProgramParameterEntry.ParameterMode mode,
-                                                    PTType type) throws DuplicateSymbolException {
+            ResolveAST definingElement,
+            ProgramParameterEntry.ParameterMode mode, PTType type)
+            throws DuplicateSymbolException {
         sanityCheckBindArguments(name, definingElement, type);
 
         ProgramParameterEntry entry =
