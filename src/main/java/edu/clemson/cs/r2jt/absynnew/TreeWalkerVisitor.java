@@ -487,6 +487,16 @@ public abstract class TreeWalkerVisitor {
         return false;
     }
 
+    public void preMathSetAST(MathSetAST e) {}
+
+    public void midMathSetAST(MathSetAST e, ResolveAST next, ResolveAST previous) {}
+
+    public void postMathSetAST(MathSetAST e) {}
+
+    public boolean walkMathSetAST(MathSetAST e) {
+        return false;
+    }
+
     public void preProgNameRefAST(ProgNameRefAST e) {}
 
     public void midProgNameRefAST(ProgNameRefAST e, ResolveAST previous,

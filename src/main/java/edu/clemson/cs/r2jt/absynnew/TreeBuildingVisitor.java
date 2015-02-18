@@ -657,6 +657,20 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
+    public void exitMathSetCollectionExp(
+            @NotNull ResolveParser.MathSetCollectionExpContext ctx) {
+        put(ctx, new MathSetAST(ctx.getStart(), ctx.getStop(), getAll(
+                ExprAST.class, ctx.mathExp())));
+    }
+
+    @Override
+    public void exitMathSetBuilderExp(
+            @NotNull ResolveParser.MathSetBuilderExpContext ctx) {
+        throw new UnsupportedOperationException("set builder notation not yet "
+                + "supported by the compiler.");
+    }
+
+    @Override
     public void exitMathVariableExp(
             @NotNull ResolveParser.MathVariableExpContext ctx) {
         put(ctx, buildFunctionApplication(ctx.name, ctx).incoming(

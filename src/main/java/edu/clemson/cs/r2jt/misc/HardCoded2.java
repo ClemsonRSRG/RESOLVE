@@ -38,13 +38,22 @@ public class HardCoded2 {
             b.addBinding("SSet", v, g.CLS, g.CLS);
             b.addBinding("B", v, g.CLS, g.BOOLEAN);
 
+            b.addBinding("Card", v, g.CLS, g.CARD);
+            b.addBinding("union", v, g.UNION);
+            b.addBinding("intersect", v, g.INTERSECT);
+
+            b.addBinding("||...||", v, new MTFunction(g, g.CARD, g.CLS));
+            b.addBinding("~", v, new MTFunction(g, g.SET, g.CLS, g.ENTITY));
+            b.addBinding("is_not_in", v, new MTFunction(g, g.BOOLEAN, g.ENTITY,
+                    g.ENTITY));
+            b.addBinding("is_in", v, new MTFunction(g, g.BOOLEAN, g.ENTITY,
+                    g.ENTITY));
+
             b.addBinding("Empty_Set", v, g.CLS, g.EMPTY_SET);
             b.addBinding("Powerset", v, g.POWERTYPE);
             b.addBinding("Powerclass", v, g.POWERCLASS);
             b.addBinding("true", v, g.BOOLEAN);
             b.addBinding("false", v, g.BOOLEAN);
-            b.addBinding("union", v, g.UNION);
-            b.addBinding("intersect", v, g.INTERSECT);
             b.addBinding("->", v, g.FUNCTION);
             b.addBinding("and", v, g.AND);
             b.addBinding("not", v, g.NOT);

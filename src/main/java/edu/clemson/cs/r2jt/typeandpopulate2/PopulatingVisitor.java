@@ -23,6 +23,7 @@ import edu.clemson.cs.r2jt.typeandpopulate2.entry.MathSymbolEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramTypeEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTElement;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTVoid;
 import edu.clemson.cs.r2jt.typeandpopulate2.query.MathFunctionNamedQuery;
@@ -158,7 +159,6 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     @Override
     public void midOperationSigAST(OperationSigAST e, ResolveAST previous,
             ResolveAST next) {
-
         if (previous == e.getReturnType() && e.getReturnType() != null) {
             try {
                 //Inside the operation's assertions, the name of the operation
@@ -177,10 +177,9 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public void postOperationSigAST(OperationSigAST dec) {
+    public void postOperationSigAST(OperationSigAST e) {
         myBuilder.endScope();
-        putOperationLikeThingInSymbolTable(dec.getName(), dec.getReturnType(),
-                dec);
+        putOperationLikeThingInSymbolTable(e.getName(), e.getReturnType(), e);
         myCurrentParameters = null;
     }
 
@@ -199,6 +198,42 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(name);
+        }
+    }
+
+    @Override
+    public void postModuleParameterAST(ModuleParameterAST e) {
+        if (!(e.getPayload() instanceof OperationSigAST)) {
+
+            if (e.getPayload().getMathType() == null) {
+                throw new RuntimeException(e.getPayload().getClass()
+                        + " has a null math type");
+            }
+            e.setMathType(e.getPayload().getMathType());
+        }
+        else {
+            MTType t = ((OperationSigAST) e.getPayload()).getMathType();
+            if (t == null) {
+                t = myTypeGraph.VOID;
+            }
+            e.setMathType(t);
+        }
+    }
+
+    @Override
+    public void postTypeParameterAST(TypeParameterAST e) {
+        try {
+            String paramName = e.getName().getText();
+
+            myBuilder.getInnermostActiveScope().addFormalParameter(paramName,
+                    e, ProgramParameterEntry.ParameterMode.TYPE,
+                    new PTElement(myTypeGraph));
+
+            myGenericTypes.put(paramName, myTypeGraph.CLS);
+            e.setMathType(myTypeGraph.CLS);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(e.getName());
         }
     }
 
@@ -303,7 +338,6 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         if (myTypeValueDepth == 0) {
             TreeWalker.walk(this, e.getExpression());
         }
-
         TreeWalker.walk(this, e.getAssertedType());
         postMathTypeAssertionAST(e);
         return true;
@@ -704,6 +738,28 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                         + e.getClass() + ") got through the "
                         + "populator with no program type value");
             }
+        }
+    }
+
+    @Override
+    public void postMathSetAST(MathSetAST e) {
+        e.setMathType(myTypeGraph.CLS);
+
+        List<ExprAST> elements = e.getElements();
+
+        if (elements.isEmpty()) {
+            e.setMathTypeValue(myTypeGraph.EMPTY_SET);
+        }
+        //Todo: temp, generalize this.
+        else if (elements.size() == 1) {
+            e.setMathTypeValue(new MTPowertypeApplication(myTypeGraph, elements
+                    .get(0).getMathType()));
+        }
+        else { // {1, true} --> Powerset(N) union Powerset(B)
+            /*for (Expression exp : e.getElements()) {
+                e.setMathTypeValue(new MTPowertypeApplication(myTypeGraph, exp
+                        .getMathType()));
+            }*/
         }
     }
 

@@ -22,12 +22,13 @@ import java.util.Map;
 
 /**
  * <p>A <code>MathQuantifiedAST</code> encapsulates a mathematical assertion
- * whose members are bound to quantified {@link MathVariableAST}s.</p>
+ * whose members and subexpressions are bound to some number of quantified
+ * {@link MathVariableAST}s.</p>
  */
 public class MathQuantifiedAST extends ExprAST {
 
     private SymbolTableEntry.Quantification myQuantification;
-    private List<MathVariableAST> myMathematicalVariables;
+    private List<MathVariableAST> myQuantifiedVariables;
 
     private ExprAST myWhere, myAssertion;
 
@@ -36,7 +37,7 @@ public class MathQuantifiedAST extends ExprAST {
             ExprAST where, ExprAST assertion) {
         super(start, stop);
         myQuantification = q;
-        myMathematicalVariables = vars;
+        myQuantifiedVariables = vars;
         myWhere = where;
         myAssertion = assertion;
     }
@@ -54,7 +55,7 @@ public class MathQuantifiedAST extends ExprAST {
     }
 
     public List<MathVariableAST> getQuantifiedVariables() {
-        return myMathematicalVariables;
+        return myQuantifiedVariables;
     }
 
     @Override
@@ -84,7 +85,20 @@ public class MathQuantifiedAST extends ExprAST {
     @Override
     public ExprAST substituteChildren(Map<ExprAST, ExprAST> substitutions) {
         return new MathQuantifiedAST(getStart(), getStop(), myQuantification,
-                myMathematicalVariables, substitute(myWhere, substitutions),
+                myQuantifiedVariables, substitute(myWhere, substitutions),
                 substitute(myAssertion, substitutions));
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder().append("For all ");
+
+        for (MathVariableAST universalVar : myQuantifiedVariables) {
+            result.append(universalVar).append(", ");
+        }
+        if (myWhere != null) {
+            result.append(myWhere);
+        }
+        return result.append(myAssertion).toString();
     }
 }

@@ -313,7 +313,13 @@ mathPrimaryExp
     :   mathLiteralExp
     |   mathFunctionApplicationExp
     |   mathOutfixExp
+    |   mathSetExp
     |   mathTupleExp
+    ;
+
+mathSetExp
+    :   '{' mathVariableDecl '|' mathAssertionExp '}'   #mathSetBuilderExp//Todo
+    |   '{' (mathExp (',' mathExp)*)? '}'               #mathSetCollectionExp
     ;
 
 mathLiteralExp
