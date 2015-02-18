@@ -57,9 +57,8 @@ public class MathDefinitionAST extends DeclAST {
         return myParameters;
     }
 
-    //Todo: Add an (currently optional) rhs to definitions.
-    public ExprAST getDefinitionRightHandSide() {
-        return null;
+    public ExprAST getDefinitionBody() {
+        return myBody;
     }
 
     public static class DefinitionBuilder
@@ -114,6 +113,10 @@ public class MathDefinitionAST extends DeclAST {
             if (name == null) {
                 throw new IllegalStateException("definition w/o name; all "
                         + "must be named");
+            }
+            if (returnType == null) {
+                throw new IllegalStateException("attempting to build a "
+                        + "definition with null return type");
             }
             return new MathDefinitionAST(this);
         }

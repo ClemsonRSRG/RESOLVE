@@ -211,9 +211,8 @@ standardPrefixSignature
     ;
 
 prefixOp
-    :   ('+'|'-'|'not'|'~')
+    :   infixOp
     |   IntegerLiteral
-    |   Identifier
     ;
 
 infixOp

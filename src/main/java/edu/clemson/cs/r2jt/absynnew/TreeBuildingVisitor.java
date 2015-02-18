@@ -73,7 +73,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
             new ImportCollectionBuilder();
 
     /**
-     * <p>All the various signatures styles a definition can take on requires
+     * <p>All the various signature styles a definition can take on requires
      * us to break from our usual post-oriented tree traversal decoration
      * pattern by declaring this particular builder global. Anyways, this should
      * be initialized in the appropriate top level definition rule, and reset to
@@ -120,9 +120,9 @@ public class TreeBuildingVisitor<T extends ResolveAST>
             @NotNull ResolveParser.ConceptModuleContext ctx) {
 
         ConceptBuilder builder =
-                new ConceptBuilder(ctx.getStart(), ctx.getStop(), ctx.name)
-                        .requires(get(ExprAST.class, ctx.requiresClause()))
-                        .block(get(ModuleBlockAST.class, ctx.conceptItems()))
+                new ConceptBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
+                        .requires(get(ExprAST.class, ctx.requiresClause()))//
+                        .block(get(ModuleBlockAST.class, ctx.conceptItems()))//
                         .imports(myImportBuilder.build());
 
         if (ctx.moduleParameterList() != null) {
@@ -154,8 +154,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitPrecisModule(@NotNull ResolveParser.PrecisModuleContext ctx) {
         PrecisBuilder builder =
-                new PrecisBuilder(ctx.getStart(), ctx.getStop(), ctx.name)
-                        .block(get(ModuleBlockAST.class, ctx.precisItems()))
+                new PrecisBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
+                        .block(get(ModuleBlockAST.class, ctx.precisItems()))//
                         .imports(myImportBuilder.build());
 
         put(ctx, builder.build());
@@ -201,15 +201,15 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitFacilityOperationDecl(
             @NotNull ResolveParser.FacilityOperationDeclContext ctx) {
+        List<ParameterAST> formalParams =
+                getAll(ParameterAST.class, ctx.operationParameterList()
+                        .parameterDecl());
 
         OperationImplBuilder builder =
                 new OperationImplBuilder(ctx.getStart(), ctx.getStop(),
                         ctx.name) //
                         .recursive(ctx.recursive != null) //
-                        .parameters(
-                                getAll(ParameterAST.class, ctx
-                                        .operationParameterList()
-                                        .parameterDecl()));
+                        .parameters(formalParams);
 
         for (ResolveParser.VariableDeclGroupContext grp : ctx
                 .variableDeclGroup()) {
@@ -290,10 +290,9 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitMathVariableDecl(
             @NotNull ResolveParser.MathVariableDeclContext ctx) {
-        MathTypeAST x = get(MathTypeAST.class, ctx
-                .mathTypeExp());
         put(ctx, new MathVariableAST(ctx.getStart(), ctx.getStop(), ctx
-                .Identifier().getSymbol(), x));
+                .Identifier().getSymbol(), get(MathTypeAST.class, ctx
+                .mathTypeExp())));
     }
 
     @Override
@@ -384,21 +383,30 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitStandardPrefixSignature(
             @NotNull ResolveParser.StandardPrefixSignatureContext ctx) {
-        myDefinitionBuilder
+        myDefinitionBuilder//
+                .name(ctx.prefixOp().getStart())//
                 .returnType(get(MathTypeAST.class, ctx.mathTypeExp()));
         //We've already set the annotation via the top level rule.
         //see exitMathStandardDefinitionDecl.
     }
 
     @Override
+    public void exitStandardOutfixSignature(
+            @NotNull ResolveParser.StandardOutfixSignatureContext ctx) {
+        myDefinitionBuilder//
+                .name(new ResolveToken(ctx.lOp + "..." + ctx.rOp))//
+                .returnType(get(MathTypeAST.class, ctx.mathTypeExp()))//
+                .parameters(get(MathVariableAST.class, ctx.mathVariableDecl()));
+    }
+
+    @Override
     public void exitStandardInfixSignature(
             @NotNull ResolveParser.StandardInfixSignatureContext ctx) {
-
-        List<MathVariableAST> x =
-                getAll(MathVariableAST.class, ctx.mathVariableDecl());
-        myDefinitionBuilder.name(ctx.infixOp().getStart()).returnType(
-                get(MathTypeAST.class, ctx.mathTypeExp())).parameters(
-                x);
+        myDefinitionBuilder//
+                .name(ctx.infixOp().getStart())//
+                .returnType(get(MathTypeAST.class, ctx.mathTypeExp()))//
+                .parameters(
+                        getAll(MathVariableAST.class, ctx.mathVariableDecl()));
         //We've already set the annotation via the top level rule.
         //see exitMathStandardDefinitionDecl.
     }
@@ -637,10 +645,10 @@ public class TreeBuildingVisitor<T extends ResolveAST>
      * <p>Returns <code>true</code> <strong>iff</strong> the string text within
      * <code>topName</code> equals <code>endName</code></p>.
      *
-     * @param topName The name at the top of a block.
+     * @param topName The name at the top that introduces a block.
      *
      * @param endName The {@link ResolveToken} following the <tt>end</tt>
-     *                of a named block.
+     *                portion of a named block.
      *
      * @throws SrcErrorException If the provided top and bottom names don't
      *      match.

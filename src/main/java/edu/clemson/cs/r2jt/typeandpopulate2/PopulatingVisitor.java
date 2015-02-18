@@ -248,10 +248,12 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     public void postMathDefinitionAST(MathDefinitionAST e) {
         myBuilder.endScope();
 
+        //All definitions must have a non-null 'return type'. This is checked
+        //each time a definition is constructed, so no need to recheck here.
         MTType declaredType = e.getReturnType().getMathTypeValue();
 
-        if (e.getReturnType() != null) {
-            expectType(e.getDefinitionRightHandSide(), declaredType);
+        if (e.getDefinitionBody() != null) {
+            expectType(e.getDefinitionBody(), declaredType);
         }
         else if (e.getDefinitionType() == DefinitionType.INDUCTIVE) {
             // expectType(node.getBase(), myTypeGraph.BOOLEAN);
@@ -259,13 +261,13 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         }
 
         List<MathVariableAST> parameters = e.getParameters();
-        if (parameters != null) {
+        if (!parameters.isEmpty()) {
             declaredType = new MTFunction(myTypeGraph, e);
         }
 
         MTType typeValue = null;
-        if (e.getDefinitionRightHandSide() != null) {
-            typeValue = e.getDefinitionRightHandSide().getMathTypeValue();
+        if (e.getDefinitionBody() != null) {
+            typeValue = e.getDefinitionBody().getMathTypeValue();
         }
 
         //Note that, even if typeValue is null at this point, if declaredType
@@ -358,8 +360,6 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     public void postMathVariableAST(MathVariableAST e) {
         MTType mathTypeValue = e.getSyntaxType().getMathTypeValue();
         String varName = e.getName().getText();
-
-        System.out.println("UNIVERSAL VARIABLE: " + e.getName().getText());
 
         if (myCurrentDirectDefinition != null
                 && mathTypeValue.isKnownToContainOnlyMTypes()
