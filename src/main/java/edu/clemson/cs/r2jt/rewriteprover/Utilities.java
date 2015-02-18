@@ -334,84 +334,82 @@ public class Utilities {
         if (e instanceof MathQuantifiedAST) {
             MathQuantifiedAST eAsQuantifier = (MathQuantifiedAST) e;
 
-             //Normalize our eAsQuantifier so that it doesn't have a "where"
-             //clause by appropriately transferring the "where" clause into
-             //the body using logical connectives
-             if (eAsQuantifier.getWhere() != null) {
-                 if (eAsQuantifier.getQuantification() ==
-                         SymbolTableEntry.Quantification.UNIVERSAL) {
+            //Normalize our eAsQuantifier so that it doesn't have a "where"
+            //clause by appropriately transferring the "where" clause into
+            //the body using logical connectives
+            if (eAsQuantifier.getWhere() != null) {
+                if (eAsQuantifier.getQuantification() == SymbolTableEntry.Quantification.UNIVERSAL) {
 
-                     MathSymbolAST implication =
-                             new MathSymbolAST.MathSymbolExprBuilder("implies")
-                                .arguments(eAsQuantifier.getWhere(),
-                                        eAsQuantifier.getAssertion()).build();
-                     eAsQuantifier =
-                             new MathQuantifiedAST(eAsQuantifier.getStart(),
-                                     eAsQuantifier.getStop(),
-                                     eAsQuantifier.getQuantification(),
-                                     eAsQuantifier
-                                     .getQuantifiedVariables(), null,
-                                     implication);
-                 }
-                 else if (eAsQuantifier.getQuantification() ==
-                         SymbolTableEntry.Quantification.EXISTENTIAL) {
+                    MathSymbolAST implication =
+                            new MathSymbolAST.MathSymbolExprBuilder("implies")
+                                    .arguments(eAsQuantifier.getWhere(),
+                                            eAsQuantifier.getAssertion())
+                                    .build();
+                    eAsQuantifier =
+                            new MathQuantifiedAST(eAsQuantifier.getStart(),
+                                    eAsQuantifier.getStop(), eAsQuantifier
+                                            .getQuantification(), eAsQuantifier
+                                            .getQuantifiedVariables(), null,
+                                    implication);
+                }
+                else if (eAsQuantifier.getQuantification() == SymbolTableEntry.Quantification.EXISTENTIAL) {
 
-                     MathSymbolAST conjunction =
-                             new MathSymbolAST.MathSymbolExprBuilder("and")
-                                     .arguments(eAsQuantifier.getWhere(),
-                                             eAsQuantifier.getAssertion()).build();
-                     eAsQuantifier =
-                             new MathQuantifiedAST(eAsQuantifier.getStart(),
-                                     eAsQuantifier.getStop(),
-                                     eAsQuantifier.getQuantification(),
-                                     eAsQuantifier
-                                             .getQuantifiedVariables(), null,
-                                     conjunction);
-                 }
-                 else {
-                     throw new RuntimeException("don't know how to normalize "
-                             + "this kind of quantified expression");
-                 }
-             }
+                    MathSymbolAST conjunction =
+                            new MathSymbolAST.MathSymbolExprBuilder("and")
+                                    .arguments(eAsQuantifier.getWhere(),
+                                            eAsQuantifier.getAssertion())
+                                    .build();
+                    eAsQuantifier =
+                            new MathQuantifiedAST(eAsQuantifier.getStart(),
+                                    eAsQuantifier.getStop(), eAsQuantifier
+                                            .getQuantification(), eAsQuantifier
+                                            .getQuantifiedVariables(), null,
+                                    conjunction);
+                }
+                else {
+                    throw new RuntimeException("don't know how to normalize "
+                            + "this kind of quantified expression");
+                }
+            }
 
-             java.util.List<MathVariableAST> variableNames =
-                     eAsQuantifier.getQuantifiedVariables();
+            java.util.List<MathVariableAST> variableNames =
+                    eAsQuantifier.getQuantifiedVariables();
 
-             for (MathVariableAST v : variableNames) {
-                 quantifiedVariables.put(v.getName().getText(), eAsQuantifier
-                         .getQuantification());
-             }
+            for (MathVariableAST v : variableNames) {
+                quantifiedVariables.put(v.getName().getText(), eAsQuantifier
+                        .getQuantification());
+            }
 
-             retval =
-                     applyQuantification(eAsQuantifier.getAssertion(),
-                             quantifiedVariables);
+            retval =
+                    applyQuantification(eAsQuantifier.getAssertion(),
+                            quantifiedVariables);
 
-             for (MathVariableAST v : variableNames) {
-                 quantifiedVariables.remove((v.getName().getText()));
-             }
-         }
-         else {
-             if (e instanceof MathSymbolAST) {
-                 MathSymbolAST eAsVar = (MathSymbolAST) e;
-                 String varName = eAsVar.getName().getText();
+            for (MathVariableAST v : variableNames) {
+                quantifiedVariables.remove((v.getName().getText()));
+            }
+        }
+        else {
+            if (e instanceof MathSymbolAST) {
+                MathSymbolAST eAsVar = (MathSymbolAST) e;
+                String varName = eAsVar.getName().getText();
 
-                 if (quantifiedVariables.containsKey(varName)) {
-                     eAsVar.setQuantification(quantifiedVariables.get(varName));
-                 }
-             }
-             else {
-                 java.util.List<? extends ExprAST> subExpressions =
-                         e.getSubExpressions();
-                 int numSubExpressions = subExpressions.size();
-                 ExprAST curSubExpression;
-                 for (int curIndex = 0; curIndex < numSubExpressions; curIndex++) {
-                     curSubExpression = subExpressions.get(curIndex);
-                     e.setSubExpression(curIndex, applyQuantification(
-                             curSubExpression, quantifiedVariables));
-                 }
-             }
-             retval = e;
-         }
+                if (quantifiedVariables.containsKey(varName)) {
+                    eAsVar.setQuantification(quantifiedVariables.get(varName));
+                }
+            }
+            else {
+                java.util.List<? extends ExprAST> subExpressions =
+                        e.getSubExpressions();
+                int numSubExpressions = subExpressions.size();
+                ExprAST curSubExpression;
+                for (int curIndex = 0; curIndex < numSubExpressions; curIndex++) {
+                    curSubExpression = subExpressions.get(curIndex);
+                    e.setSubExpression(curIndex, applyQuantification(
+                            curSubExpression, quantifiedVariables));
+                }
+            }
+            retval = e;
+        }
         return retval;
     }
 
