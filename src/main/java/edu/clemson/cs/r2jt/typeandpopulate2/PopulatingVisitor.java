@@ -137,8 +137,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
         //If we exist as an implicit type parameter, there's no way our
         //expression can know its own type (that's defined by the asserted Ty),
-        //so we skip walking it and let postTypeAssertionExp() set its type for
-        //it
+        //so we skip walking it and let postMathTypeAssertionAST() set its type
+        //for it
         if (myTypeValueDepth == 0) {
             TreeWalker.walk(this, e.getExpression());
         }

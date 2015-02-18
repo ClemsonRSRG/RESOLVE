@@ -370,7 +370,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                 .type(MathDefinitionAST.DefinitionType.STANDARD);
 
         //Even though we're dealing with a global builder, we still decorate
-        //this with what we've build so far in case someone requests it.
+        //this with what we've built so far in case someone requests it.
         //Also since there is no direct RESOLVE ast equivalent of a definition's
         //signature, for completeness, just stick the finished definition into
         //the signature rules' slots too.
