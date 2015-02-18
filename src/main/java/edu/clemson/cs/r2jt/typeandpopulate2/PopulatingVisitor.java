@@ -156,9 +156,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public void midOperationSigAST(OperationSigAST e,
-                                ResolveAST previous,
-                                ResolveAST next) {
+    public void midOperationSigAST(OperationSigAST e, ResolveAST previous,
+            ResolveAST next) {
 
         if (previous == e.getReturnType() && e.getReturnType() != null) {
             try {
@@ -186,8 +185,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     private void putOperationLikeThingInSymbolTable(Token name,
-                                                    TypeAST returnTy,
-                                                    ResolveAST o) {
+            TypeAST returnTy, ResolveAST o) {
         try {
             PTType returnType;
             if (returnTy == null) {
@@ -196,8 +194,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             else {
                 returnType = returnTy.getProgramTypeValue();
             }
-            myBuilder.getInnermostActiveScope().addOperation(name.getText(),
-                    o, myCurrentParameters, returnType);
+            myBuilder.getInnermostActiveScope().addOperation(name.getText(), o,
+                    myCurrentParameters, returnType);
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(name);
@@ -207,27 +205,27 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     @Override
     public void postParameterAST(ParameterAST e) {
 
-        /*ProgramParameterEntry.ParameterMode mode =
-                ProgramParameterEntry.OLD_TO_NEW_MODE.get(dec.getMode());
+    /*ProgramParameterEntry.ParameterMode mode =
+            ProgramParameterEntry.OLD_TO_NEW_MODE.get(dec.getMode());
 
-        if (mode == null) {
-            throw new RuntimeException("Unexpected parameter mode: "
-                    + dec.getMode());
-        }
+    if (mode == null) {
+        throw new RuntimeException("Unexpected parameter mode: "
+                + dec.getMode());
+    }
 
-        try {
-            ProgramParameterEntry paramEntry =
-                    myBuilder.getInnermostActiveScope().addFormalParameter(
-                            dec.getName().getName(), dec, mode,
-                            dec.getTy().getProgramTypeValue());
-            myCurrentParameters.add(paramEntry);
-        }
-        catch (DuplicateSymbolException e) {
-            duplicateSymbol(dec.getName().getName(), dec.getName()
-                    .getLocation());
-        }
+    try {
+        ProgramParameterEntry paramEntry =
+                myBuilder.getInnermostActiveScope().addFormalParameter(
+                        dec.getName().getName(), dec, mode,
+                        dec.getTy().getProgramTypeValue());
+        myCurrentParameters.add(paramEntry);
+    }
+    catch (DuplicateSymbolException e) {
+        duplicateSymbol(dec.getName().getName(), dec.getName()
+                .getLocation());
+    }
 
-        dec.setMathType(dec.getTy().getMathTypeValue());*/
+    dec.setMathType(dec.getTy().getMathTypeValue());*/
     }
 
     @Override
@@ -237,7 +235,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
     @Override
     public void midTypeModelAST(TypeModelAST e, ResolveAST previous,
-                                ResolveAST next) {
+            ResolveAST next) {
 
         if (previous == e.getModel()) {
             try {
@@ -260,8 +258,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         myBuilder.endScope();
         try {
             myBuilder.getInnermostActiveScope().addProgramTypeDefinition(
-                    e.getName().getText(), e,
-                    e.getModel().getMathTypeValue(), myExemplarEntry);
+                    e.getName().getText(), e, e.getModel().getMathTypeValue(),
+                    myExemplarEntry);
 
             myExemplarEntry = null;
         }
@@ -289,7 +287,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                                             ImportStrategy.IMPORT_NAMED,
                                             FacilityStrategy.FACILITY_INSTANTIATE,
                                             true)).toProgramTypeEntry(
-                            e.getName());
+                                    e.getName());
 
             e.setProgramTypeValue(type.getProgramType());
             e.setMathType(myTypeGraph.CLS);

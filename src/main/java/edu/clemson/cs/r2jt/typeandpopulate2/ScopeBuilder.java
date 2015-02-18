@@ -70,10 +70,8 @@ public class ScopeBuilder extends SyntacticScope {
                 myParent, myBindings);
     }
 
-    public OperationEntry addOperation(String name,
-                                       ResolveAST definingElement,
-                                       List<ProgramParameterEntry> params,
-                                       PTType returnType)
+    public OperationEntry addOperation(String name, ResolveAST definingElement,
+            List<ProgramParameterEntry> params, PTType returnType)
             throws DuplicateSymbolException {
         sanityCheckBindArguments(name, definingElement, returnType);
 
@@ -108,13 +106,13 @@ public class ScopeBuilder extends SyntacticScope {
     }
 
     public ProgramTypeEntry addProgramTypeDefinition(String name,
-                          TypeModelAST definingElement,
-                          MTType model, MathSymbolEntry exemplarEntry)
-            throws DuplicateSymbolException {
+            TypeModelAST definingElement, MTType model,
+            MathSymbolEntry exemplarEntry) throws DuplicateSymbolException {
         sanityCheckBindArguments(name, definingElement, model);
 
         InitFinalAST.TypeInitAST init = definingElement.getInitialization();
-        InitFinalAST.TypeFinalAST finalization = definingElement.getFinalization();
+        InitFinalAST.TypeFinalAST finalization =
+                definingElement.getFinalization();
 
         ExprAST initRequires = (init == null) ? null : init.getRequires();
         ExprAST initEnsures = (init == null) ? null : init.getEnsures();
@@ -126,10 +124,11 @@ public class ScopeBuilder extends SyntacticScope {
         ProgramTypeEntry entry =
                 new ProgramTypeDefinitionEntry(myTypeGraph, name,
                         definingElement, myRootModule, model, new PTFamily(
-                        model, name, definingElement.getExemplar().getText(),
-                        definingElement.getConstraint(), initRequires,
-                        initEnsures, finalizationRequires,
-                        finalizationEnsures), exemplarEntry);
+                                model, name, definingElement.getExemplar()
+                                        .getText(), definingElement
+                                        .getConstraint(), initRequires,
+                                initEnsures, finalizationRequires,
+                                finalizationEnsures), exemplarEntry);
 
         myBindings.put(name, entry);
 
