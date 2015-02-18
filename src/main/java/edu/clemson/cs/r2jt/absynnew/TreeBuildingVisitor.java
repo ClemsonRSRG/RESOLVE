@@ -30,6 +30,7 @@ import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.parsing.ResolveBaseListener;
 import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import edu.clemson.cs.r2jt.misc.Utils.Builder;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -349,6 +350,13 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
+    public void exitMathTheoremDecl(
+            @NotNull ResolveParser.MathTheoremDeclContext ctx) {
+        put(ctx, new MathTheoremAST(ctx.getStart(), ctx.getStop(), ctx.name,
+                get(ExprAST.class, ctx.mathAssertionExp())));
+    }
+
+    @Override
     public void enterMathDefinitionDecl(
             @NotNull ResolveParser.MathDefinitionDeclContext ctx) {
         myDefinitionBuilder =
@@ -366,18 +374,61 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitMathStandardDefinitionDecl(
             @NotNull ResolveParser.MathStandardDefinitionDeclContext ctx) {
-        myDefinitionBuilder.body(get(ExprAST.class, ctx.mathAssertionExp()))
-                .type(MathDefinitionAST.DefinitionType.STANDARD);
+        myDefinitionBuilder//
+                .standardBody(get(ExprAST.class, ctx.mathAssertionExp())).type(
+                        MathDefinitionAST.DefinitionType.STANDARD);
 
         //Even though we're dealing with a global builder, we still decorate
         //this with what we've built so far in case someone requests it.
         //Also since there is no direct RESOLVE ast equivalent of a definition's
         //signature, for completeness, just stick the finished definition into
-        //the signature rules' slots too.
+        //the signature rule slots too.
         MathDefinitionAST finished = myDefinitionBuilder.build();
         put(ctx, finished);
         put(ctx.definitionSignature(), finished); //set top level sig rule
         put(ctx.definitionSignature().getChild(0), finished); //set particular
+    }
+
+    @Override
+    public void exitMathInductiveDefinitionDecl(
+            @NotNull ResolveParser.MathInductiveDefinitionDeclContext ctx) {
+        myDefinitionBuilder//
+                .inductiveBaseCase(get(ExprAST.class, ctx.mathAssertionExp(0)))//
+                .inductiveHypo(get(ExprAST.class, ctx.mathAssertionExp(1)))//
+                .type(MathDefinitionAST.DefinitionType.INDUCTIVE);
+
+        MathDefinitionAST finished = myDefinitionBuilder.build();
+        put(ctx, finished);
+        put(ctx.inductiveDefinitionSignature(), finished);
+        put(ctx.inductiveDefinitionSignature().getChild(0), finished);
+    }
+
+    @Override
+    public void exitInductivePrefixSignature(
+            @NotNull ResolveParser.InductivePrefixSignatureContext ctx) {
+        myDefinitionBuilder//
+                .name(ctx.prefixOp().getStart())//
+                .returnType(get(MathTypeAST.class, ctx.mathTypeExp()))//
+                .parameters(
+                        buildInductiveParameter(ctx.Identifier().getSymbol(),
+                                ctx.mathVariableDecl().mathTypeExp()));
+    }
+
+    @Override
+    public void exitInductiveInfixSignature(
+            @NotNull ResolveParser.InductiveInfixSignatureContext ctx) {
+        myDefinitionBuilder//
+                .name(ctx.infixOp().getStart())//
+                .returnType(get(MathTypeAST.class, ctx.mathTypeExp()))//
+                .parameters(
+                        buildInductiveParameter(ctx.Identifier().getSymbol(),
+                                ctx.mathVariableDecl(0).mathTypeExp()));
+    }
+
+    private MathVariableAST buildInductiveParameter(Token name,
+            ResolveParser.MathTypeExpContext t) {
+        MathTypeAST type = get(MathTypeAST.class, t);
+        return new MathVariableAST(null, null, name, type);
     }
 
     @Override
@@ -412,6 +463,16 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
+    public void exitInductiveParameterList(
+            @NotNull ResolveParser.InductiveParameterListContext ctx) {
+        for (ResolveParser.MathVariableDeclGroupContext grp : ctx
+                .mathVariableDeclGroup()) {
+            myDefinitionBuilder.parameters(getAll(MathVariableAST.class, grp
+                    .Identifier()));
+        }
+    }
+
+    @Override
     public void exitDefinitionParameterList(
             @NotNull ResolveParser.DefinitionParameterListContext ctx) {
         for (ResolveParser.MathVariableDeclGroupContext grp : ctx
@@ -419,7 +480,6 @@ public class TreeBuildingVisitor<T extends ResolveAST>
             myDefinitionBuilder.parameters(getAll(MathVariableAST.class, grp
                     .Identifier()));
         }
-        put(ctx, myDefinitionBuilder.build());
     }
 
     @Override
@@ -527,7 +587,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitMathAssertionExp(
             @NotNull ResolveParser.MathAssertionExpContext ctx) {
-        put(ctx, get(ExprAST.class, ctx.mathExp()));
+        put(ctx, get(ExprAST.class, ctx.getChild(0)));
     }
 
     @Override
@@ -559,6 +619,24 @@ public class TreeBuildingVisitor<T extends ResolveAST>
             @NotNull ResolveParser.MathIntegerExpContext ctx) {
         put(ctx, buildFunctionApplication(ctx.IntegerLiteral(), ctx).literal(
                 true).build());
+    }
+
+    @Override
+    public void exitMathQuantifiedExp(
+            @NotNull ResolveParser.MathQuantifiedExpContext ctx) {
+        ExprAST where = get(ExprAST.class, ctx.whereClause());
+        ExprAST assertion = get(ExprAST.class, ctx.mathAssertionExp());
+
+        List<MathVariableAST> quantifiedVariables =
+                getAll(MathVariableAST.class, ctx.mathVariableDeclGroup()
+                        .Identifier());
+
+        MathQuantifiedAST quantExpr =
+                new MathQuantifiedAST(ctx.getStart(), ctx.getStop(),
+                        SymbolTableEntry.Quantification.UNIVERSAL,
+                        quantifiedVariables, where, assertion);
+
+        put(ctx, quantExpr);
     }
 
     @Override

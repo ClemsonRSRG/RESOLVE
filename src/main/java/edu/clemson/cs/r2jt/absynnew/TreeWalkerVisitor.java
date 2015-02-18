@@ -455,6 +455,17 @@ public abstract class TreeWalkerVisitor {
         return false;
     }
 
+    public void preMathQuantifiedAST(MathQuantifiedAST e) {}
+
+    public void midMathQuantifiedAST(MathQuantifiedAST e, ResolveAST previous,
+            ResolveAST next) {}
+
+    public void postMathQuantifiedAST(MathQuantifiedAST e) {}
+
+    public boolean walkMathQuantifiedAST(MathQuantifiedAST e) {
+        return false;
+    }
+
     public void preMathSymbolAST(MathSymbolAST e) {}
 
     public void midMathSymbolAST(MathSymbolAST e, ResolveAST previous,

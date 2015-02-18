@@ -22,6 +22,7 @@ precisItems
 precisItem
     :   mathTypeTheoremDecl
     |   mathDefinitionDecl
+    |   mathTheoremDecl
     ;
 
 // facility module
@@ -182,10 +183,35 @@ mathTheoremDecl
 
 mathDefinitionDecl
     :   mathStandardDefinitionDecl
+    |   mathInductiveDefinitionDecl
+    ;
+
+mathInductiveDefinitionDecl
+    :   'Inductive' 'Definition' inductiveDefinitionSignature
+        'is' '(i.)' mathAssertionExp ';' '(ii.)' mathAssertionExp ';'
     ;
 
 mathStandardDefinitionDecl
     :   'Definition' definitionSignature ('is' mathAssertionExp)? ';'
+    ;
+
+inductiveDefinitionSignature
+    :   inductivePrefixSignature
+    |   inductiveInfixSignature
+    ;
+
+inductivePrefixSignature
+    :   'on' mathVariableDecl 'of' prefixOp
+        '(' (inductiveParameterList ',')? Identifier ')' ':' mathTypeExp
+    ;
+
+inductiveInfixSignature
+    :   'on' mathVariableDecl 'of' '(' mathVariableDecl ')' infixOp
+        '(' Identifier ')' ':' mathTypeExp
+    ;
+
+inductiveParameterList
+    :   mathVariableDeclGroup (',' mathVariableDeclGroup)*
     ;
 
 definitionSignature
@@ -259,6 +285,12 @@ mathTypeExp
 
 mathAssertionExp
     :   mathExp
+    |   mathQuantifiedExp
+    ;
+
+mathQuantifiedExp
+    :   'For' 'all' mathVariableDeclGroup (whereClause)? ','
+         mathAssertionExp
     ;
 
 mathExp

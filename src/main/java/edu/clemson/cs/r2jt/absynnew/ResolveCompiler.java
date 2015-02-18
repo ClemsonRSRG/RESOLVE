@@ -122,7 +122,6 @@ public class ResolveCompiler {
 
     public void compile() {
         try {
-
             for (String target : myTargetFiles) {
                 File currentFile = new File(target);
                 if (!currentFile.isAbsolute()) {

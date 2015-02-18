@@ -126,12 +126,12 @@ public abstract class SymbolTableEntry {
     public ShortFacilityEntry toShortFacilityEntry(Location l) {
         throw new SourceErrorException("Expecting a short facility module.  "
                 + "Found " + getEntryTypeDescription(), l);
-    }
-
-    public TheoremEntry toTheoremEntry(Location l) {
-        throw new SourceErrorException("Expecting a theorem.  " + "Found "
-                + getEntryTypeDescription(), l);
     }*/
+
+    public TheoremEntry toTheoremEntry(Token l) {
+        throw new SrcErrorException("expecting a theorem; found "
+                + getEntryTypeDescription(), l);
+    }
 
     public abstract String getEntryTypeDescription();
 

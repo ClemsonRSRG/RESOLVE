@@ -32,8 +32,8 @@ public class UnderliningErrorListener extends BaseErrorListener {
             String msg, RecognitionException e) {
         String fileName =
                 ((Token) offendingSymbol).getTokenSource().getSourceName();
-        System.err.println(groomFileName(fileName).toLowerCase() + ":" + line
-                + ":" + charPositionInLine + ": " + msg);
+        System.err.println(groomFileName(fileName) + ":" + line + ":"
+                + charPositionInLine + ": " + msg);
         underlineError(recognizer, (Token) offendingSymbol, line,
                 charPositionInLine);
     }
@@ -41,6 +41,7 @@ public class UnderliningErrorListener extends BaseErrorListener {
     /**
      * <p>Internal compiler errors for which there is no line or location
      * information available.</p>
+     *
      * @param msg The error message.
      */
     public void compilerError(String msg) {
@@ -50,7 +51,8 @@ public class UnderliningErrorListener extends BaseErrorListener {
     /**
      * <p>This is called mainly when an {@link SrcErrorException} is raised
      * or caught.</p>
-     * @param offendingSymbol The token indicating a problem site
+     *
+     * @param offendingSymbol The token indicating a problem site.
      * @param msg The error message.
      */
     public void semanticError(Token offendingSymbol, String msg) {
@@ -59,7 +61,7 @@ public class UnderliningErrorListener extends BaseErrorListener {
         }
         else {
             String fileName = offendingSymbol.getTokenSource().getSourceName();
-            System.err.println(groomFileName(fileName).toLowerCase() + ":"
+            System.err.println(groomFileName(fileName) + ":"
                     + offendingSymbol.getLine() + ":"
                     + offendingSymbol.getCharPositionInLine() + ": " + msg);
 

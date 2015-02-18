@@ -13,10 +13,12 @@
 package edu.clemson.cs.r2jt.typeandpopulate2;
 
 import edu.clemson.cs.r2jt.absynnew.ResolveAST;
+import edu.clemson.cs.r2jt.absynnew.decl.MathTheoremAST;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.MathSymbolEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramVariableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 
@@ -69,15 +71,23 @@ public class ScopeBuilder extends SyntacticScope {
     public ProgramVariableEntry addProgramVariable(String name,
             ResolveAST definingElement, PTType type)
             throws DuplicateSymbolException {
-
         sanityCheckBindArguments(name, definingElement, type);
 
         ProgramVariableEntry entry =
                 new ProgramVariableEntry(name, definingElement, myRootModule,
                         type);
-
         myBindings.put(name, entry);
+        return entry;
+    }
 
+    public TheoremEntry addTheorem(String name, MathTheoremAST definingElement)
+            throws DuplicateSymbolException {
+        sanityCheckBindArguments(name, definingElement, "");
+
+        TheoremEntry entry =
+                new TheoremEntry(myTypeGraph, name, definingElement,
+                        myRootModule);
+        myBindings.put(name, entry);
         return entry;
     }
 
@@ -102,16 +112,13 @@ public class ScopeBuilder extends SyntacticScope {
             MTType type, MTType typeValue, Map<String, MTType> schematicTypes,
             Map<String, MTType> genericsInDefiningContext)
             throws DuplicateSymbolException {
-
         sanityCheckBindArguments(name, definingElement, type);
 
         MathSymbolEntry entry =
                 new MathSymbolEntry(myTypeGraph, name, q, definingElement,
                         type, typeValue, schematicTypes,
                         genericsInDefiningContext, myRootModule);
-
         myBindings.put(name, entry);
-
         return entry;
     }
 
@@ -138,17 +145,14 @@ public class ScopeBuilder extends SyntacticScope {
     private void sanityCheckBindArguments(String name,
             ResolveAST definingElement, Object type)
             throws DuplicateSymbolException {
-
         SymbolTableEntry curLocalEntry = myBindings.get(name);
         if (curLocalEntry != null) {
             throw new DuplicateSymbolException(curLocalEntry);
         }
-
         if (name == null || name.equals("")) {
             throw new IllegalArgumentException("symbol table entry name must "
                     + "be non-null and contain at least one character");
         }
-
         if (type == null) {
             throw new IllegalArgumentException("symbol table entry type must "
                     + "be non-null.");

@@ -15,6 +15,7 @@ package edu.clemson.cs.r2jt.typeandpopulate2;
 import edu.clemson.cs.r2jt.absynnew.*;
 import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportType;
 import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST;
+import edu.clemson.cs.r2jt.absynnew.decl.MathTheoremAST;
 import edu.clemson.cs.r2jt.absynnew.decl.MathTypeTheoremAST;
 import edu.clemson.cs.r2jt.absynnew.decl.MathVariableAST;
 import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST.DefinitionType;
@@ -132,7 +133,6 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
     @Override
     public boolean walkMathTypeAssertionAST(MathTypeAssertionAST e) {
-
         preMathTypeAssertionAST(e);
 
         //If we exist as an implicit type parameter, there's no way our
@@ -245,6 +245,31 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
+    public void midMathDefinitionAST(MathDefinitionAST e, ResolveAST previous,
+            ResolveAST next) {
+
+        // If we've just processed the definition's 'return type' and we're
+        // also inductive, so we need to add a binding representing our own
+        // signature in order have the ability to recursively be refer to
+        // ourself in the body.
+        if (previous == e.getReturnType()
+                && e.getDefinitionType() == DefinitionType.INDUCTIVE) {
+            MTType declaredType = e.getReturnType().getMathTypeValue();
+
+            if (!e.getParameters().isEmpty()) {
+                declaredType = new MTFunction(myTypeGraph, e);
+            }
+
+            //Note that, even if typeValue is null at this point, if declaredType
+            //returns true from knownToContainOnlyMTypes(), a new type value will
+            //still be created by the symbol table
+            addBinding(e.getName(), e, declaredType, null,
+                    myDefinitionSchematicTypes);
+            e.setMathType(declaredType);
+        }
+    }
+
+    @Override
     public void postMathDefinitionAST(MathDefinitionAST e) {
         myBuilder.endScope();
 
@@ -256,8 +281,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             expectType(e.getDefinitionBody(), declaredType);
         }
         else if (e.getDefinitionType() == DefinitionType.INDUCTIVE) {
-            // expectType(node.getBase(), myTypeGraph.BOOLEAN);
-            // expectType(node.getHypothesis(), myTypeGraph.BOOLEAN);
+            expectType(e.getInductiveBaseCase(), myTypeGraph.BOOLEAN);
+            expectType(e.getInductiveHypothesis(), myTypeGraph.BOOLEAN);
         }
 
         List<MathVariableAST> parameters = e.getParameters();
@@ -283,6 +308,58 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         myCurrentDirectDefinition = null;
         myDefinitionSchematicTypes.clear();
         e.setMathType(declaredType);
+    }
+
+    @Override
+    public void postMathTheoremAST(MathTheoremAST e) {
+        expectType(e.getAssertion(), myTypeGraph.BOOLEAN);
+        try {
+            myBuilder.getInnermostActiveScope().addTheorem(
+                    e.getName().getText(), e);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(e.getName());
+        }
+        myDefinitionSchematicTypes.clear();
+        PopulatingVisitor.emitDebug("new theorem " + e.getName().getText());
+    }
+
+    @Override
+    public void preMathQuantifiedAST(MathQuantifiedAST e) {
+        PopulatingVisitor.emitDebug("entering preMathQuantifiedAST...");
+        myBuilder.startScope(e);
+    }
+
+    @Override
+    public boolean walkMathQuantifiedAST(MathQuantifiedAST e) {
+        preMathQuantifiedAST(e);
+
+        PopulatingVisitor.emitDebug("entering walkMathQuantifiedAST...");
+        List<MathVariableAST> vars = e.getQuantifiedVariables();
+        SymbolTableEntry.Quantification quantification = e.getQuantification();
+
+        myActiveQuantifications.push(quantification);
+        for (MathVariableAST v : vars) {
+            TreeWalker.walk(this, v);
+        }
+        myActiveQuantifications.pop();
+
+        myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
+        TreeWalker.walk(this, e.getAssertion());
+        myActiveQuantifications.pop();
+
+        PopulatingVisitor.emitDebug("exiting walkQuantExp.");
+        postMathQuantifiedAST(e);
+        //This indicates that we've overrided the default
+        return true;
+    }
+
+    @Override
+    public void postMathQuantifiedAST(MathQuantifiedAST e) {
+        myBuilder.endScope();
+
+        expectType(e.getAssertion(), myTypeGraph.BOOLEAN);
+        e.setMathType(myTypeGraph.BOOLEAN);
     }
 
     @Override
@@ -569,7 +646,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                                         eOperator));
 
         if (sameNameFunctions.isEmpty()) {
-            throw new SrcErrorException("no such function ", e.getStart());
+            throw new SrcErrorException("no such function ", e.getName());
         }
 
         MathSymbolEntry intendedEntry;
