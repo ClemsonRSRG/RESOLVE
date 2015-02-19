@@ -15,8 +15,6 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public class JustificationExp extends Exp {
 
@@ -166,11 +164,6 @@ public class JustificationExp extends Exp {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitJustificationExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getJustificationExpType(this);
     }
 
     /** Returns a formatted text string of this class. */

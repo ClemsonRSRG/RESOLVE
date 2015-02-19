@@ -12,14 +12,9 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
-import edu.clemson.cs.r2jt.proving.absyn.PExpSubexpressionIterator;
-import edu.clemson.cs.r2jt.proving.absyn.PSymbol;
-
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-
+import edu.clemson.cs.r2jt.rewriteprover.absyn.*;
 public class PExpWithScore implements Comparable<PExpWithScore> {
 
     protected PExp m_theorem;

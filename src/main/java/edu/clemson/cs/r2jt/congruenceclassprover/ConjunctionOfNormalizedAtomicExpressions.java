@@ -12,15 +12,9 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import edu.clemson.cs.r2jt.proving.absyn.*;
-import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
-import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
-import edu.clemson.cs.r2jt.proving2.model.Theorem;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.*;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -119,7 +113,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return "";
     }
 
-
     // adds a particular symbol to the registry
     protected int addPsymbol(PSymbol ps) {
         String name = ps.getTopLevelOperation();
@@ -162,7 +155,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      is broken down by addExpression so (|?S| = 0) is an argument
      should return int for true if known to be equal, otherwise return root representative. 
      */
-    protected int addFormula(PExp formula){
+    protected int addFormula(PExp formula) {
         if (formula.isEquality()) {
             int lhs = addFormula(formula.getSubExpressions().get(0));
             PExp r = formula.getSubExpressions().get(1);

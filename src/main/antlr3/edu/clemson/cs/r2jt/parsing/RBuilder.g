@@ -28,9 +28,6 @@ options {
     import edu.clemson.cs.r2jt.data.*;
     import edu.clemson.cs.r2jt.errors.ErrorHandler;
     import edu.clemson.cs.r2jt.collections.Iterator;
-    import edu.clemson.cs.r2jt.type.Type;
-    import edu.clemson.cs.r2jt.type.IsInType;
-    import edu.clemson.cs.r2jt.type.BooleanType;
     //import edu.clemson.cs.r2jt.collections.List;
 }
 
@@ -1923,8 +1920,7 @@ implies_expression returns [Exp exp = null]
         |   ^(id=IFF lf=logical_expression rt=logical_expression)
         )
         {
-            BooleanType b = BooleanType.INSTANCE;
-            $exp = new InfixExp(getLocation($id), $lf.exp, getPosSymbol($id), $rt.exp, b);
+            $exp = new InfixExp(getLocation($id), $lf.exp, getPosSymbol($id), $rt.exp);
         }
     |   ^(  IF test=logical_expression then=logical_expression
             (other=logical_expression)?
@@ -1938,8 +1934,7 @@ logical_expression returns [Exp exp = null]
         |   ^(id=OR lf=logical_expression rt=relational_expression)
         )
         {
-            BooleanType b = BooleanType.INSTANCE;
-            $exp = new InfixExp(getLocation($id), $lf.exp, getPosSymbol($id), $rt.exp, b);
+            $exp = new InfixExp(getLocation($id), $lf.exp, getPosSymbol($id), $rt.exp);
         }
         //{ $exp = new BooleanExp(getLocation($id), $lf.exp, op, $rt.exp); }
     ; 
@@ -2084,7 +2079,7 @@ prefix_expression returns [Exp exp = null]
 unary_expression returns [Exp exp = null]
     :   exp1=primitive_expression { $exp = $exp1.exp; }
     |   (   ^(id=NOT arg=unary_expression)
-            { $exp = new PrefixExp(getLocation($id), getPosSymbol($id), $arg.exp, BooleanType.INSTANCE); }
+            { $exp = new PrefixExp(getLocation($id), getPosSymbol($id), $arg.exp); }
         |   ^(id=COMPLEMENT arg=unary_expression)
             { $exp = new PrefixExp(getLocation($id), getPosSymbol($id), $arg.exp); }
         |   ^(id=UNARY_MINUS arg=unary_expression)
@@ -2227,7 +2222,7 @@ literal_expression returns [Exp exp = null]
     Character ch = null;
     String str = null;
 }
-    :   id=BOOLEAN { $exp = new VarExp(getLocation($id), null, getPosSymbol($id), BooleanType.INSTANCE); }
+    :   id=BOOLEAN { $exp = new VarExp(getLocation($id), null, getPosSymbol($id)); }
     |   exp1=qualified_numeric_literal
     |   NUMERIC_LITERAL
         {   str = $NUMERIC_LITERAL.getText();

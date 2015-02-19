@@ -24,7 +24,7 @@ import edu.clemson.cs.r2jt.treewalk.TreeWalkerStackVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import edu.clemson.cs.r2jt.utilities.SourceErrorException;
+import edu.clemson.cs.r2jt.misc.SourceErrorException;
 
 /**
  * TODO: Write a description of this module

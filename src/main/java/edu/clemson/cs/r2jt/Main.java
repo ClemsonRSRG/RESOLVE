@@ -16,7 +16,6 @@ import java.io.File;
 import java.util.HashMap;
 
 import edu.clemson.cs.r2jt.absyn.ModuleDec;
-import edu.clemson.cs.r2jt.analysis.Analyzer;
 import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
@@ -29,16 +28,12 @@ import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.init.Controller;
 import edu.clemson.cs.r2jt.translation.*;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
-import edu.clemson.cs.r2jt.proofchecking.ProofChecker;
-import edu.clemson.cs.r2jt.proving.Prover;
-import edu.clemson.cs.r2jt.proving2.AlgebraicProver;
-import edu.clemson.cs.r2jt.proving2.ProverListener;
-import edu.clemson.cs.r2jt.verification.Verifier;
-import edu.clemson.cs.r2jt.scope.ModuleScope;
-import edu.clemson.cs.r2jt.scope.OldSymbolTable;
-import edu.clemson.cs.r2jt.utilities.Flag;
-import edu.clemson.cs.r2jt.utilities.FlagDependencies;
-import edu.clemson.cs.r2jt.utilities.FlagDependencyException;
+import edu.clemson.cs.r2jt.rewriteprover.Prover;
+import edu.clemson.cs.r2jt.rewriteprover.AlgebraicProver;
+import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
+import edu.clemson.cs.r2jt.misc.Flag;
+import edu.clemson.cs.r2jt.misc.FlagDependencies;
+import edu.clemson.cs.r2jt.misc.FlagDependencyException;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 
 /**
@@ -360,7 +355,7 @@ public class Main {
         }
         else if (instanceEnvironment.showTable()
                 || instanceEnvironment.showBind()) {
-            printSymbolTable(file, instanceEnvironment);
+            //printSymbolTable(file, instanceEnvironment);
         }
     }
 
@@ -391,25 +386,6 @@ public class Main {
     private static void printEnvironment(File file, CompileEnvironment env) {
         System.out.println();
         System.out.println(env.toString());
-    }
-
-    private static void printSymbolTable(File file, CompileEnvironment env) {
-        if (env.compileCompleted(file)) {
-            OldSymbolTable table = env.getSymbolTable(env.getModuleID(file));
-            ModuleScope scope = table.getModuleScope();
-
-            System.out.println();
-            if (scope != null) {
-                System.out.println(scope.toString());
-            }
-
-            if (env.showImports()) {
-                Iterator<ModuleScope> i = scope.getProgramVisibleModules();
-                while (i.hasNext()) {
-                    System.out.println(i.next().toString());
-                }
-            }
-        }
     }
 
     private static File getMainDir(String preferredMainDirectory) {
@@ -514,19 +490,10 @@ public class Main {
 
             setUpFlags();
             Prover.setUpFlags();
-
             JavaTranslator.setUpFlags();
             CTranslator.setUpFlags();
-
-            Verifier.setUpFlags();
-            ProofChecker.setUpFlags();
-            Analyzer.setUpFlags();
-            PrettyCTranslation.setUpFlags();
-            PrettyJavaTranslation.setUpFlags();
-            Translator.setUpFlags();
             Archiver.setUpFlags();
             ResolveCompiler.setUpFlags();
-            PrettyJavaTranslator.setUpFlags();
             VCGenerator.setUpFlags();
             AlgebraicProver.setUpFlags();
             //Your module here!

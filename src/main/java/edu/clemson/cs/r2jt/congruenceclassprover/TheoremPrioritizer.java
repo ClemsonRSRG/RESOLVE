@@ -11,9 +11,6 @@
  * file 'LICENSE.txt', which is part of this source code package.
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
-
-import edu.clemson.cs.r2jt.proving.absyn.PExp;
-
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -42,8 +39,8 @@ public class TheoremPrioritizer {
                 score += m_theoremAppliedCount.get(t.m_theoremString);
             }
             //if (score <= threshold) {
-                tws.m_score = score;
-                m_pQueue.add(tws);
+            tws.m_score = score;
+            m_pQueue.add(tws);
             //}
 
         }
@@ -61,10 +58,11 @@ public class TheoremPrioritizer {
                     score = c_score;
 
             }
-            else count_of_functions_not_in_vc++;
+            else
+                count_of_functions_not_in_vc++;
         }
         //if(score > count) score /=count;
-        return (score + 1) * ((count_of_functions_not_in_vc + 1)*4);
+        return (score + 1) * ((count_of_functions_not_in_vc + 1) * 4);
     }
 
     public TheoremCongruenceClosureImpl poll() {

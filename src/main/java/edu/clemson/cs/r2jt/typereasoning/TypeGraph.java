@@ -32,11 +32,10 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTPowertypeApplication;
 import edu.clemson.cs.r2jt.typeandpopulate.DuplicateSymbolException;
 import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.absyn.InfixExp;
-import edu.clemson.cs.r2jt.absyn.TupleExp;
 import edu.clemson.cs.r2jt.absyn.VarExp;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
-import edu.clemson.cs.r2jt.population.Populator;
+import edu.clemson.cs.r2jt.typeandpopulate.Populator;
 import java.util.*;
 
 /**
@@ -47,10 +46,9 @@ public class TypeGraph {
 
     /**
      * <p>A set of non-thread-safe resources to be used during general type
-     * reasoning.  This really doesn't belong here, but anything that's 
-     * reasoning about types should already have access to a type graph, and
-     * only one type graph is created per thread, so this is a convenient place
-     * to put it.</p>
+     * reasoning. This really doesn't belong here, but anything that's reasoning
+     * about types should already have access to a type graph, and only one type
+     * graph is created per thread, so this is a convenient place to put it.</p>
      */
     public final PerThreadReasoningResources threadResources =
             new PerThreadReasoningResources();
@@ -62,16 +60,16 @@ public class TypeGraph {
 
     public final MTType ELEMENT = new MTProper(this, "Element");
     public final MTType ENTITY = new MTProper(this, "Entity");
-    public final MTProper MTYPE = new MTProper(this, null, true, "MType");
+    public final MTProper CLS = new MTProper(this, null, true, "MType");
 
-    public final MTProper SET = new MTProper(this, MTYPE, true, "SSet");
-    public final MTProper BOOLEAN = new MTProper(this, MTYPE, false, "B");
-    public final MTProper Z = new MTProper(this, MTYPE, false, "Z");
-    public final MTProper R = new MTProper(this, MTYPE, false, "R");
-    public final MTProper ATOM = new MTProper(this, MTYPE, false, "Atom");
-    public final MTProper VOID = new MTProper(this, MTYPE, false, "Void");
+    public final MTProper SET = new MTProper(this, CLS, true, "SSet");
+    public final MTProper BOOLEAN = new MTProper(this, CLS, false, "B");
+    public final MTProper Z = new MTProper(this, CLS, false, "Z");
+    public final MTProper R = new MTProper(this, CLS, false, "R");
+    public final MTProper ATOM = new MTProper(this, CLS, false, "Atom");
+    public final MTProper VOID = new MTProper(this, CLS, false, "Void");
     public final MTProper EMPTY_SET =
-            new MTProper(this, MTYPE, false, "Empty_Set");
+            new MTProper(this, CLS, false, "Empty_Set");
 
     private final static FunctionApplicationFactory POWERTYPE_APPLICATION =
             new PowertypeApplicationFactory();
@@ -85,17 +83,18 @@ public class TypeGraph {
             new CartesianProductApplicationFactory();
 
     public final MTFunction POWERTYPE =
-            new MTFunction(this, true, POWERTYPE_APPLICATION, MTYPE, MTYPE);
+            new MTFunction(this, true, POWERTYPE_APPLICATION, CLS, CLS);
+    public final MTFunction POWERCLASS =
+            new MTFunction(this, true, POWERTYPE_APPLICATION, CLS, CLS);
     public final MTFunction UNION =
-            new MTFunction(this, UNION_APPLICATION, MTYPE, MTYPE, MTYPE);
+            new MTFunction(this, UNION_APPLICATION, CLS, CLS, CLS);
     public final MTFunction INTERSECT =
-            new MTFunction(this, INTERSECT_APPLICATION, MTYPE, MTYPE, MTYPE);
+            new MTFunction(this, INTERSECT_APPLICATION, CLS, CLS, CLS);
     public final MTFunction FUNCTION =
-            new MTFunction(this, FUNCTION_CONSTRUCTOR_APPLICATION, MTYPE,
-                    MTYPE, MTYPE);
+            new MTFunction(this, FUNCTION_CONSTRUCTOR_APPLICATION, CLS, CLS,
+                    CLS);
     public final MTFunction CROSS =
-            new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, MTYPE, MTYPE,
-                    MTYPE);
+            new MTFunction(this, CARTESIAN_PRODUCT_APPLICATION, CLS, CLS, CLS);
 
     public final MTFunction AND =
             new MTFunction(this, BOOLEAN, BOOLEAN, BOOLEAN);
@@ -133,15 +132,18 @@ public class TypeGraph {
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> every value in
-     * <code>subtype</code> must necessarily be in <code>supertype</code>.</p>
+     * <p>
+     * Returns <code>true</code> <strong>iff</strong> every value in
+     * <code>subtype</code> must necessarily be in <code>supertype</code>.
+     * </p>
      * 
-     * @param subtype A type to test if it is subsumed by 
-     *     <code>supertype</code>.
+     * @param subtype A type to test if it is subsumed by <code>supertype</code>
+     *        .
      * @param supertype A type to test if it subsumes <code>subtype</code>.
-     *     
+     * 
      * @return Returns <code>true</code> <strong>iff</strong> every value in
-     *     <code>subtype</code> must necessarily be in <code>supertype</code>.
+     *         <code>subtype</code> must necessarily be in
+     *         <code>supertype</code>.
      */
     public boolean isSubtype(MTType subtype, MTType supertype) {
         boolean result;
@@ -151,7 +153,7 @@ public class TypeGraph {
 
         try {
             result =
-                    supertype == ENTITY || supertype == MTYPE
+                    supertype == ENTITY || supertype == CLS
                             || myEstablishedSubtypes.contains(r)
                             || subtype.equals(supertype)
                             || subtype.isSyntacticSubtypeOf(supertype);
@@ -183,18 +185,22 @@ public class TypeGraph {
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> <code>value</code>
-     * is known to definitely be a member of <code>expected</code>.</p>
+     * <p>
+     * Returns <code>true</code> <strong>iff</strong> <code>value</code> is
+     * known to definitely be a member of <code>expected</code>.
+     * </p>
      * 
-     * <p>I.e., this is the same as asking if
+     * <p>
+     * I.e., this is the same as asking if
      * <code>getValidTypeConditions(value, expected)</code> 1) doesn't throw an
      * exception and 2) returns a value for which <code>isLiteralTrue()</code>
-     * returns <code>true</code>.</p>
+     * returns <code>true</code>.
+     * </p>
      * 
-     * @param value The <code>RESOLVE</code> value to test for membership. 
+     * @param value The <code>RESOLVE</code> value to test for membership.
      * @param expected A <code>RESOLVE</code> type against which to test
-     *                 membership.
-     *                 
+     *        membership.
+     * 
      * @return <code>true</code> <strong>iff</strong> <code>value</code> is
      *         definitely in <code>expected</code>.
      */
@@ -214,19 +220,23 @@ public class TypeGraph {
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> <code>value</code>, 
-     * which is known to identify a <strong>MType</strong>, is known to 
-     * definitely be a member of <code>expected</code>.</p>
+     * <p>
+     * Returns <code>true</code> <strong>iff</strong> <code>value</code>, which
+     * is known to identify a <strong>MType</strong>, is known to definitely be
+     * a member of <code>expected</code>.
+     * </p>
      * 
-     * <p>I.e., this is the same as asking if
+     * <p>
+     * I.e., this is the same as asking if
      * <code>getValidTypeConditions(value, expected)</code> 1) doesn't throw an
      * exception and 2) returns a value for which <code>isLiteralTrue()</code>
-     * returns <code>true</code>.</p>
+     * returns <code>true</code>.
+     * </p>
      * 
-     * @param value The <code>RESOLVE</code> value to test for membership. 
+     * @param value The <code>RESOLVE</code> value to test for membership.
      * @param expected A <code>RESOLVE</code> type against which to test
-     *                 membership.
-     *                 
+     *        membership.
+     * 
      * @return <code>true</code> <strong>iff</strong> <code>value</code> is
      *         definitely in <code>expected</code>.
      */
@@ -238,9 +248,9 @@ public class TypeGraph {
 
         //If the type of the given value is a subtype of the expected type, then
         //its value must necessarily be in the expected type.  Note we can't
-        //reason about the type of MTYPE, so we exclude it
+        //reason about the type of CLS, so we exclude it
         result =
-                myEstablishedElements.contains(r) || (value != MTYPE)
+                myEstablishedElements.contains(r) || (value != CLS)
                         && (value != ENTITY)
                         && isSubtype(value.getType(), expected);
 
@@ -262,31 +272,36 @@ public class TypeGraph {
     }
 
     /**
-     * <p>Returns the conditions under which <code>value</code> could be 
-     * demonstrated to be a member of <code>expected</code>, given that 
-     * <code>value</code> is known to be in <strong>MType</strong>.</p>
+     * <p>
+     * Returns the conditions under which <code>value</code> could be
+     * demonstrated to be a member of <code>expected</code>, given that
+     * <code>value</code> is known to be in <strong>MType</strong>.
+     * </p>
      * 
-     * <p>The result is a series of disjuncts expressing possible situations 
-     * under which the <code>value</code> would be known to be in 
-     * <code>expected</code>.  One or more of these disjuncts may be 
+     * <p>
+     * The result is a series of disjuncts expressing possible situations under
+     * which the <code>value</code> would be known to be in
+     * <code>expected</code>. One or more of these disjuncts may be
      * <code>false</code>, but if one or more would have been <code>true</code>,
-     * this method will simplify the result to simply <code>true</code>.</p>
+     * this method will simplify the result to simply <code>true</code>.
+     * </p>
      * 
-     * <p>If there is no known set of circumstances under which 
-     * <code>value</code> could be demonstrated a member of 
-     * <code>expected</code> (i.e., if the return value would simply be
-     * <code>false</code>), this method throws a 
-     * <code>TypeMismatchException</code>.</p>
+     * <p>
+     * If there is no known set of circumstances under which <code>value</code>
+     * could be demonstrated a member of <code>expected</code> (i.e., if the
+     * return value would simply be <code>false</code>), this method throws a
+     * <code>TypeMismatchException</code>.
+     * </p>
      * 
-     * @param value The <code>RESOLVE</code> value to test for membership. 
+     * @param value The <code>RESOLVE</code> value to test for membership.
      * @param expected A <code>RESOLVE</code> type against which to test
-     *                 membership.
-     *                 
+     *        membership.
+     * 
      * @return The conditions under which <code>value</code> could be
      *         demonstrated to be in <code>expected</code>.
-     *         
-     * @throws TypeMismatchException If there are no known conditions under 
-     *         which <code>value</code> could be demonstrated to be in 
+     * 
+     * @throws TypeMismatchException If there are no known conditions under
+     *         which <code>value</code> could be demonstrated to be in
      *         <code>expected</code>.
      */
     private Exp getValidTypeConditions(MTType value, MTType expected)
@@ -296,7 +311,7 @@ public class TypeGraph {
 
         Exp result = getFalseVarExp();
 
-        if (expected == MTYPE) {
+        if (expected == CLS) {
             //Every MTType is in MType except for Entity and MType, itself
             result = getTrueVarExp();
         }
@@ -328,7 +343,7 @@ public class TypeGraph {
 
             //At this stage, we've done everything safe and sensible that we can 
             //do if the value we're looking at exists outside Entity
-            if (value == MTYPE || value == ENTITY) {
+            if (value == CLS || value == ENTITY) {
                 throw TypeMismatchException.INSTANCE;
             }
 
@@ -355,30 +370,35 @@ public class TypeGraph {
     }
 
     /**
-     * <p>Returns the conditions under which <code>value</code> could be 
-     * demonstrated to be a member of <code>expected</code>.</p>
+     * <p>
+     * Returns the conditions under which <code>value</code> could be
+     * demonstrated to be a member of <code>expected</code>.
+     * </p>
      * 
-     * <p>The result is a series of disjuncts expressing possible situations 
-     * under which the <code>value</code> would be known to be in 
-     * <code>expected</code>.  One or more of these disjuncts may be 
+     * <p>
+     * The result is a series of disjuncts expressing possible situations under
+     * which the <code>value</code> would be known to be in
+     * <code>expected</code>. One or more of these disjuncts may be
      * <code>false</code>, but if one or more would have been <code>true</code>,
-     * this method will simplify the result to simply <code>true</code>.</p>
+     * this method will simplify the result to simply <code>true</code>.
+     * </p>
      * 
-     * <p>If there is no known set of circumstances under which 
-     * <code>value</code> could be demonstrated a member of 
-     * <code>expected</code> (i.e., if the return value would simply be
-     * <code>false</code>), this method throws a 
-     * <code>TypeMismatchException</code>.</p>
+     * <p>
+     * If there is no known set of circumstances under which <code>value</code>
+     * could be demonstrated a member of <code>expected</code> (i.e., if the
+     * return value would simply be <code>false</code>), this method throws a
+     * <code>TypeMismatchException</code>.
+     * </p>
      * 
-     * @param value The <code>RESOLVE</code> value to test for membership. 
+     * @param value The <code>RESOLVE</code> value to test for membership.
      * @param expected A <code>RESOLVE</code> type against which to test
-     *                 membership.
-     *                 
+     *        membership.
+     * 
      * @return The conditions under which <code>value</code> could be
      *         demonstrated to be in <code>expected</code>.
-     *         
-     * @throws TypeMismatchException If there are no known conditions under 
-     *         which <code>value</code> could be demonstrated to be in 
+     * 
+     * @throws TypeMismatchException If there are no known conditions under
+     *         which <code>value</code> could be demonstrated to be in
      *         <code>expected</code>.
      */
     public Exp getValidTypeConditions(Exp value, MTType expected)
@@ -387,14 +407,14 @@ public class TypeGraph {
         Exp result;
 
         MTType valueTypeValue = value.getMathTypeValue();
-        if (expected == ENTITY && valueTypeValue != MTYPE
+        if (expected == ENTITY && valueTypeValue != CLS
                 && valueTypeValue != ENTITY) {
             //Every RESOLVE value is in Entity.  The only things we could get
             //passed that are "special" and not "RESOLVE values" are MType and
             //Entity itself
             result = getTrueVarExp();
         }
-        else if (valueTypeValue == MTYPE || valueTypeValue == ENTITY) {
+        else if (valueTypeValue == CLS || valueTypeValue == ENTITY) {
             //MType and Entity aren't in anything
             throw TypeMismatchException.INSTANCE;
         }
@@ -412,36 +432,41 @@ public class TypeGraph {
     }
 
     /**
-     * <p>Returns the conditions under which <code>foundValue</code>, which is 
-     * of type <code>foundType</code>, could be	demonstrated to be a member of 
-     * <code>expected</code>.  Individual paths are tested using the given 
-     * <code>pathStrategy</code> (which lets us forget about what the java
-     * type of <code>foundValue</code> is&mdash;only that it's a type 
-     * <code>pathStrategy</code> can handle.)</p>
+     * <p>
+     * Returns the conditions under which <code>foundValue</code>, which is of
+     * type <code>foundType</code>, could be demonstrated to be a member of
+     * <code>expected</code>. Individual paths are tested using the given
+     * <code>pathStrategy</code> (which lets us forget about what the java type
+     * of <code>foundValue</code> is&mdash;only that it's a type
+     * <code>pathStrategy</code> can handle.)
+     * </p>
      * 
-     * <p>The result is a series of disjuncts expressing possible situations 
-     * under which the <code>value</code> would be known to be in 
-     * <code>expected</code>.  One or more of these disjuncts may be 
+     * <p>
+     * The result is a series of disjuncts expressing possible situations under
+     * which the <code>value</code> would be known to be in
+     * <code>expected</code>. One or more of these disjuncts may be
      * <code>false</code>, but if one or more would have been <code>true</code>,
-     * this method will simplify the result to simply <code>true</code>.</p>
+     * this method will simplify the result to simply <code>true</code>.
+     * </p>
      * 
-     * <p>If there is no known set of circumstances under which 
-     * <code>value</code> could be demonstrated a member of 
-     * <code>expected</code> (i.e., if the return value would simply be
-     * <code>false</code>), this method throws a 
-     * <code>TypeMismatchException</code>.</p>
+     * <p>
+     * If there is no known set of circumstances under which <code>value</code>
+     * could be demonstrated a member of <code>expected</code> (i.e., if the
+     * return value would simply be <code>false</code>), this method throws a
+     * <code>TypeMismatchException</code>.
+     * </p>
      * 
      * @param foundValue The <code>RESOLVE</code> value to test for membership.
      * @param foundType The mathematical type of the <code>RESOLVE</code> value
-     *     to test for membership. 
+     *        to test for membership.
      * @param expected A <code>RESOLVE</code> type against which to test
-     *     membership.
-     *                 
+     *        membership.
+     * 
      * @return The conditions under which <code>value</code> could be
      *         demonstrated to be in <code>expected</code>.
-     *         
-     * @throws TypeMismatchException If there are no known conditions under 
-     *         which <code>value</code> could be demonstrated to be in 
+     * 
+     * @throws TypeMismatchException If there are no known conditions under
+     *         which <code>value</code> could be demonstrated to be in
      *         <code>expected</code>.
      */
     private <V> Exp getValidTypeConditions(V foundValue, MTType foundType,
@@ -506,27 +531,28 @@ public class TypeGraph {
     }
 
     /**
-     * <p>Returns the conditions required to establish that 
-     * <code>foundValue</code> is a member of the type represented by 
-     * <code>expectedEntry</code> along the path from <code>foundEntry</code> to
-     * <code>expectedEntry</code>.  If no such conditions exist (i.e., if the
-     * conditions would be <code>false</code>), throws a 
-     * <code>TypeMismatchException</code>.</p>
+     * <p>
+     * Returns the conditions required to establish that <code>foundValue</code>
+     * is a member of the type represented by <code>expectedEntry</code> along
+     * the path from <code>foundEntry</code> to <code>expectedEntry</code>. If
+     * no such conditions exist (i.e., if the conditions would be
+     * <code>false</code>), throws a <code>TypeMismatchException</code>.
+     * </p>
      * 
-     * @param foundValue The value we'd like to establish is in the type 
-     *     represented by <code>expectedEntry</code>.
-     * @param foundEntry A node in the type graph of which 
-     *     <code>foundValue</code> is a syntactic subtype.
-     * @param expectedEntry A node in the type graph of which representing a 
-     *     type in which we would like to establish <code>foundValue</code> 
-     *     resides.
-     * @param pathStrategy The strategy for following the path between 
-     *     <code>foundEntry</code> and <code>expectedEntry</code>.
-     *     
+     * @param foundValue The value we'd like to establish is in the type
+     *        represented by <code>expectedEntry</code>.
+     * @param foundEntry A node in the type graph of which
+     *        <code>foundValue</code> is a syntactic subtype.
+     * @param expectedEntry A node in the type graph of which representing a
+     *        type in which we would like to establish <code>foundValue</code>
+     *        resides.
+     * @param pathStrategy The strategy for following the path between
+     *        <code>foundEntry</code> and <code>expectedEntry</code>.
+     * 
      * @return The conditions under which the path can be followed.
      * 
      * @throws TypeMismatchException If the conditions under which the path can
-     *     be followed would be <code>false</code>.
+     *         be followed would be <code>false</code>.
      */
     private <V> Exp getPathConditions(V foundValue,
             Map.Entry<MTType, Map<String, MTType>> foundEntry,
@@ -549,35 +575,44 @@ public class TypeGraph {
     }
 
     /**
-     * <p>Establishes that values binding to <code>bindingExpression</code> 
-     * under the given environment may be considered to be of type 
+     * <p>
+     * Establishes that values binding to <code>bindingExpression</code> under
+     * the given environment may be considered to be of type
      * <code>destination</code> assuming the proof obligations set forth in
-     * <code>bindingCondition</code> are satisfied.</p>
+     * <code>bindingCondition</code> are satisfied.
+     * </p>
      * 
-     * <p><code>bindingExpression</code> must have a mathematical type set on 
-     * it. I.e., it must be the case that 
-     * <code>bindingExpression.getMathType() != null</code>.</p>
+     * <p>
+     * <code>bindingExpression</code> must have a mathematical type set on it.
+     * I.e., it must be the case that
+     * <code>bindingExpression.getMathType() != null</code>.
+     * </p>
      * 
-     * <p>Any <code>VarExp</code>s, <code>AbstractFunctionExp</code>s, and
-     * <code>MTNamed</code> that appear in <code>bindingExpression</code>,
-     * its associated mathematical type, or <code>destination</code> must be
-     * bound under the given environment.</p>
+     * <p>
+     * Any <code>VarExp</code>s, <code>AbstractFunctionExp</code>s, and
+     * <code>MTNamed</code> that appear in <code>bindingExpression</code>, its
+     * associated mathematical type, or <code>destination</code> must be bound
+     * under the given environment.
+     * </p>
      * 
-     * <p>Conversely, any universally bound variables in the given environment 
-     * must appear in one of <code>bindingExpression</code>, its associated 
-     * mathematical type, or <code>destination</code>.  This gives the typing 
-     * system a chance to provide concrete values to these "open" slots.</p>
+     * <p>
+     * Conversely, any universally bound variables in the given environment must
+     * appear in one of <code>bindingExpression</code>, its associated
+     * mathematical type, or <code>destination</code>. This gives the typing
+     * system a chance to provide concrete values to these "open" slots.
+     * </p>
      * 
-     * @param bindingExpression A snippet of syntax tree describing the 
-     *     structure of values covered by this new relationship.
-     * @param destination The mathematical type that this new relationship 
-     *     establishes values binding to <code>bindingExpression</code> inhabit.
-     * @param bindingCondition Proof obligations that must be raised to 
-     *     establish that a given value binding to 
-     *     <code>bindingExpression</code> inhabits <code>destination</code>.
-     * @param environment The environment under which 
-     *     <code>bindingExpression</code>, <code>destination</code>, and
-     *     <code>bindingCondition</code> should be evaluated.
+     * @param bindingExpression A snippet of syntax tree describing the
+     *        structure of values covered by this new relationship.
+     * @param destination The mathematical type that this new relationship
+     *        establishes values binding to <code>bindingExpression</code>
+     *        inhabit.
+     * @param bindingCondition Proof obligations that must be raised to
+     *        establish that a given value binding to
+     *        <code>bindingExpression</code> inhabits <code>destination</code>.
+     * @param environment The environment under which
+     *        <code>bindingExpression</code>, <code>destination</code>, and
+     *        <code>bindingCondition</code> should be evaluated.
      */
     public void addRelationship(Exp bindingExpression, MTType destination,
             Exp bindingCondition, Scope environment) {

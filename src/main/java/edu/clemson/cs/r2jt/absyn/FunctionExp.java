@@ -20,11 +20,9 @@ import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 
 import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
-import edu.clemson.cs.r2jt.proving.ChainingIterator;
-import edu.clemson.cs.r2jt.proving.DummyIterator;
+import edu.clemson.cs.r2jt.rewriteprover.iterators.ChainingIterator;
+import edu.clemson.cs.r2jt.rewriteprover.iterators.DummyIterator;
 
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.Iterator;
 
 public class FunctionExp extends AbstractFunctionExp {
@@ -48,9 +46,6 @@ public class FunctionExp extends AbstractFunctionExp {
     /** The paramList member. */
     private List<FunctionArgList> paramList;
 
-    /** If the type can be determined in the builder we set it here.  */
-    private Type bType = null;
-
     //private boolean isab;
 
     private int quantification = VarExp.NONE;
@@ -68,17 +63,6 @@ public class FunctionExp extends AbstractFunctionExp {
         this.name = name;
         this.natural = natural;
         this.paramList = paramList;
-        //this.isab = false;
-    }
-
-    public FunctionExp(Location location, PosSymbol qualifier, PosSymbol name,
-            Exp natural, List<FunctionArgList> paramList, Type b) {
-        this.location = location;
-        this.qualifier = qualifier;
-        this.name = name;
-        this.natural = natural;
-        this.paramList = paramList;
-        this.bType = b;
         //this.isab = false;
     }
 
@@ -198,10 +182,6 @@ public class FunctionExp extends AbstractFunctionExp {
         return retval;
     }
 
-    public Type getBtype() {
-        return bType;
-    }
-
     // -----------------------------------------------------------
     // Set Methods
     // -----------------------------------------------------------
@@ -282,7 +262,6 @@ public class FunctionExp extends AbstractFunctionExp {
                         substitute(natural, substitutions), newParamList,
                         quantification);
 
-        retval.setType(type);
         retval.setMathType(myMathType);
 
         return retval;
@@ -291,11 +270,6 @@ public class FunctionExp extends AbstractFunctionExp {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitFunctionExp(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getFunctionExpType(this);
     }
 
     /** Returns a formatted text string of this class. */
@@ -480,7 +454,6 @@ public class FunctionExp extends AbstractFunctionExp {
             }
             clone.setParamList(newFAL);
         }
-        clone.setType(type);
         clone.setMathType(myMathType);
         return clone;
     }
@@ -688,7 +661,6 @@ public class FunctionExp extends AbstractFunctionExp {
         retval =
                 new FunctionExp(null, newQualifier, newName, newNatural,
                         newParamList, quantification);
-        retval.setType(type);
         retval.setMathType(myMathType);
         return retval;
     }

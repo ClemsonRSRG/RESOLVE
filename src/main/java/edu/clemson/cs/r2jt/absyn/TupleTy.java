@@ -15,8 +15,6 @@ package edu.clemson.cs.r2jt.absyn;
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public class TupleTy extends Ty {
 
@@ -80,11 +78,6 @@ public class TupleTy extends Ty {
     /** Accepts a ResolveConceptualVisitor. */
     public void accept(ResolveConceptualVisitor v) {
         v.visitTupleTy(this);
-    }
-
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getTupleTyType(this);
     }
 
     /** Returns a formatted text string of this class. */

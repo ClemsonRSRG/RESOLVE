@@ -20,7 +20,7 @@ import java.util.Map;
 import edu.clemson.cs.r2jt.absyn.ModuleDec;
 import edu.clemson.cs.r2jt.absyn.ResolveConceptualElement;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import edu.clemson.cs.r2jt.utilities.HardCoded;
+import edu.clemson.cs.r2jt.misc.HardCoded;
 
 /**
  * <p>A <code>MathSymbolTableBuilder</code> is a factory for producing immutable

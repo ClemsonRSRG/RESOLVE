@@ -19,10 +19,6 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.type.BooleanType;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
-import edu.clemson.cs.r2jt.verification.*;
 
 public class InfixExp extends AbstractFunctionExp {
 
@@ -54,17 +50,6 @@ public class InfixExp extends AbstractFunctionExp {
         this.right = right;
     }
 
-    // special constructor to use when we can determine the statement return 
-    // type while building the symbol table in RBuilder.g
-    public InfixExp(Location location, Exp left, PosSymbol opName, Exp right,
-            Type bType) {
-        this.location = location;
-        this.left = left;
-        this.opName = opName;
-        this.right = right;
-        super.bType = bType;
-    }
-
     public boolean equivalent(Exp e) {
         boolean retval = e instanceof InfixExp;
 
@@ -86,7 +71,6 @@ public class InfixExp extends AbstractFunctionExp {
                 new InfixExp(location, substitute(left, substitutions), opName,
                         substitute(right, substitutions));
 
-        retval.setType(type);
         retval.setMathType(getMathType());
         retval.setMathTypeValue(getMathTypeValue());
 
@@ -139,11 +123,6 @@ public class InfixExp extends AbstractFunctionExp {
         v.visitInfixExp(this);
     }
 
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getInfixExpType(this);
-    }
-
     /** Returns a formatted text string of this class. */
     public String asString(int indent, int increment) {
 
@@ -186,12 +165,11 @@ public class InfixExp extends AbstractFunctionExp {
 
         if (opName != null) {
 
-            if (!AssertiveCode.isProvePart() && opName.toString().equals("and")) {
+            if (opName.toString().equals("and")) {
                 //sb.append(opName.toString() + "\n");
                 sb.append(opName.toString() + " ");
             }
-            else if (AssertiveCode.isProvePart()
-                    && opName.toString().equals("and")) {
+            else if (opName.toString().equals("and")) {
                 sb.append(opName.toString() + " ");
             }
             else
@@ -287,7 +265,7 @@ public class InfixExp extends AbstractFunctionExp {
         }
 
         if (opName != null) {
-            if (!AssertiveCode.isProvePart() && opName.toString().equals("and")) {
+            if (opName.toString().equals("and")) {
                 sb.append("\n");
             }
             else
@@ -406,7 +384,7 @@ public class InfixExp extends AbstractFunctionExp {
         }
 
         if (opName != null) {
-            if (AssertiveCode.isProvePart() || !opName.toString().equals("and")) {
+            if (!opName.toString().equals("and")) {
                 int count = mycount.intValue();
                 count++;
                 mycount.set(count);
@@ -485,11 +463,10 @@ public class InfixExp extends AbstractFunctionExp {
         }
 
         if (opName != null) {
-            if (!AssertiveCode.isProvePart() && opName.toString().equals("and")) {
+            if (opName.toString().equals("and")) {
                 sb.append(";\n");
             }
-            else if (AssertiveCode.isProvePart()
-                    && opName.toString().equals("and")) {
+            else if (opName.toString().equals("and")) {
                 sb.append(" & ");
             }
             else if (opName.toString().equals("implies")) {
@@ -685,7 +662,6 @@ public class InfixExp extends AbstractFunctionExp {
         if (this.location != null)
             clone.setLocation((Location) location.clone());
         clone.setOpName(opName);
-        clone.setType(type);
         clone.setMathType(getMathType());
         clone.setMathTypeValue(getMathTypeValue());
         return clone;
@@ -731,7 +707,6 @@ public class InfixExp extends AbstractFunctionExp {
         if (!(old instanceof InfixExp)) {
             InfixExp newExp = new InfixExp();
             newExp.setLocation(this.location);
-            newExp.setType(this.type);
             newExp.setMathType(getMathType());
             newExp.setMathTypeValue(getMathTypeValue());
 
@@ -981,7 +956,6 @@ public class InfixExp extends AbstractFunctionExp {
         Exp newLeft = Exp.copy(left);
         Exp newRight = Exp.copy(right);
         retval = new InfixExp(null, newLeft, newOpName, newRight);
-        retval.setType(type);
         retval.setMathType(getMathType());
         retval.setMathTypeValue(getMathTypeValue());
 

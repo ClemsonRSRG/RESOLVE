@@ -16,8 +16,6 @@ import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public class SuppositionExp extends LineNumberedExp {
 
@@ -103,11 +101,6 @@ public class SuppositionExp extends LineNumberedExp {
         v.visitSuppositionExp(this);
     }
 
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getSuppositionExpType(this);
-    }
-
     /** Returns a formatted text string of this class. */
     public String asString(int indent, int increment) {
 
@@ -116,7 +109,7 @@ public class SuppositionExp extends LineNumberedExp {
         printSpace(indent, sb);
         sb.append("SuppositionExp\n");
 
-        sb.append(super.proofCheckInfoToString());
+        sb.append("");
 
         if (myLineNumber != null) {
             printSpace(indent + increment, sb);

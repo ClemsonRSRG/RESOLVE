@@ -14,8 +14,6 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 public class ProgramStringExp extends ProgramExp {
 
@@ -85,11 +83,6 @@ public class ProgramStringExp extends ProgramExp {
         v.visitProgramStringExp(this);
     }
 
-    /** Accepts a TypeResolutionVisitor. */
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getProgramStringExpType(this);
-    }
-
     /** Returns a formatted text string of this class. */
     public String asString(int indent, int increment) {
 
@@ -131,8 +124,6 @@ public class ProgramStringExp extends ProgramExp {
     @Override
     protected ProgramStringExp copy() {
         ProgramStringExp c = new ProgramStringExp(location, value);
-        c.bType = this.bType;
-        c.setType(this.type);
         c.setMathType(this.myMathType);
         c.setMathTypeValue(this.myMathTypeValue);
         return c;

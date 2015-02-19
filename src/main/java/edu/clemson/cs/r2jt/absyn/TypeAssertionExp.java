@@ -12,10 +12,8 @@
  */
 package edu.clemson.cs.r2jt.absyn;
 
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.data.Location;
-import edu.clemson.cs.r2jt.type.Type;
 import java.util.Collections;
 import java.util.Map;
 
@@ -83,11 +81,6 @@ public class TypeAssertionExp extends Exp {
     @Override
     public void accept(ResolveConceptualVisitor v) {
         v.visitImplicitTypeParameterExp(this);
-    }
-
-    @Override
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getImplicitTypeParameterExp(this);
     }
 
     @Override

@@ -14,8 +14,6 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
-import edu.clemson.cs.r2jt.type.Type;
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 
 /**
  * <p>A <code>Ty</code> represents the <em>description</em> of a 
@@ -32,9 +30,6 @@ public abstract class Ty extends ResolveConceptualElement implements Cloneable {
     protected PTType myProgramTypeValue = null;
 
     public abstract void accept(ResolveConceptualVisitor v);
-
-    public abstract Type accept(TypeResolutionVisitor v)
-            throws TypeResolutionException;
 
     public abstract String asString(int indent, int increment);
 

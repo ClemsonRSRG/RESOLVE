@@ -18,10 +18,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import edu.clemson.cs.r2jt.analysis.TypeResolutionException;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
-import edu.clemson.cs.r2jt.type.Type;
 
 /**
  * <p>The value of a type that looks like:</p>
@@ -83,11 +81,6 @@ public class CrossTypeExpression extends Exp {
     @Override
     public void accept(ResolveConceptualVisitor v) {
         v.visitCrossTypeExpression(this);
-    }
-
-    @Override
-    public Type accept(TypeResolutionVisitor v) throws TypeResolutionException {
-        return v.getCrossTypeExpType(this);
     }
 
     @Override

@@ -16,7 +16,6 @@ import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.collections.List;
 import edu.clemson.cs.r2jt.collections.Iterator;
 import edu.clemson.cs.r2jt.data.*;
-import edu.clemson.cs.r2jt.translation.Translator;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;

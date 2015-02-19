@@ -20,9 +20,8 @@ import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.data.Symbol;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerStackVisitor;
-import edu.clemson.cs.r2jt.utilities.SourceErrorException;
+import edu.clemson.cs.r2jt.misc.SourceErrorException;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 /**

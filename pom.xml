@@ -2,13 +2,116 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>edu.clemson.cs.rsrg</groupId>
     <artifactId>RESOLVE</artifactId>
-    <version>14.03.25a</version>
+    <groupId>edu.clemson.cs.rsrg</groupId>
+    <version>15.02.09a</version>
     <packaging>jar</packaging>
-    <!-- this is a comment -->
+
     <name>RESOLVE</name>
-    <url>http://maven.apache.org</url>
+    <description>The RESOLVE compiler.</description>
+    <inceptionYear>2002</inceptionYear>
+    <organization>
+        <name>Reusable Software Research Group</name>
+        <url>http://www.cs.clemson.edu/resolve/</url>
+    </organization>
+
+    <developers>
+
+        <developer>
+            <name>YuShan Sun</name>
+            <roles>
+                <role>Project lead - RESOLVE</role>
+            </roles>
+        </developer>
+
+        <developer>
+            <name>Dan Welch</name>
+            <email>dtw.welch@gmail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
+
+        <developer>
+            <name>Blair Durkee</name>
+            <email>bdurkee@clemson.edu</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
+
+        <developer>
+            <name>Mike Kabanni</name>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
+
+    </developers>
+
+    <licenses>
+        <license>
+            <name>RESOLVE Custom License Header</name>
+            <url>${license.url}</url>
+        </license>
+    </licenses>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- License related information -->
+        <license.url>src/main/resources/LICENSE-Header.txt</license.url>
+    </properties>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/ClemsonRSRG/RESOLVE/issues</url>
+    </issueManagement>
+
+    <scm>
+        <url>https://github.com/ClemsonRSRG/RESOLVE</url>
+        <connection>scm:git:git://github.com/ClemsonRSRG/RESOLVE.git</connection>
+        <developerConnection>scm:git:[fetch=]git://github.com/ClemsonRSRG/RESOLVE.git[push=]https://github.com/ClemsonRSRG/RESOLVE.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-maven-plugin</artifactId>
+            <version>4.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jgrapht</groupId>
+            <artifactId>jgrapht-core</artifactId>
+            <version>0.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr-runtime</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.clemson.cs.resolve</groupId>
+            <artifactId>git-plugin</artifactId>
+            <version>0.0.1-alpha3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>ST4</artifactId>
+            <version>4.0.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20140107</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -48,7 +151,19 @@
                     <connectionType>developerConnection</connectionType>
                 </configuration>
             </plugin>
-            <!-- Plugin to compile ANTLR files. -->
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.5</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr3-maven-plugin</artifactId>
@@ -210,50 +325,5 @@
             </plugins>
         </pluginManagement>
     </build>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- License related information -->
-        <license.url>src/main/resources/LICENSE-Header.txt</license.url>
-    </properties>
-    <licenses>
-        <license>
-            <name>RESOLVE Custom License Header</name>
-            <url>${license.url}</url>
-        </license>
-    </licenses>
 
-    <scm>
-        <connection>scm:svn:http://somerepository.com/svn_repo/trunk</connection>
-        <developerConnection>scm:git:[fetch=]git://github.com/ClemsonRSRG/RESOLVE.git[push=]https://github.com/ClemsonRSRG/RESOLVE.git</developerConnection>
-        <url>http://somerepository.com/view.cvs</url>
-    </scm>
-
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr-runtime</artifactId>
-            <version>3.5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.clemson.cs.resolve</groupId>
-            <artifactId>git-plugin</artifactId>
-            <version>0.0.1-alpha3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>ST4</artifactId>
-            <version>4.0.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20140107</version>
-        </dependency>
-    </dependencies>
 </project>
