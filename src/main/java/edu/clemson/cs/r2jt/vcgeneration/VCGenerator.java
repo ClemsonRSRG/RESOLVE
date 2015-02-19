@@ -480,31 +480,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
                 varFinalDur.setMathType(myTypeGraph.R);
             }
-
-            // Loop through parameter variables to get their finalization duration
-            // (if they are evaluates mode)
-            for (ParameterVarDec p : dec.getParameters()) {
-                if (p.getMode() == Mode.EVALUATES) {
-                    VarDec varDec = new VarDec(p.getName(), p.getTy());
-                    varDec.setMathType(p.getMathType());
-                    Exp finalVarDur =
-                            Utilities
-                                    .createFinalizAnyDur(varDec, myTypeGraph.R);
-
-                    // Create/Add the duration expression
-                    if (varFinalDur == null) {
-                        varFinalDur = finalVarDur;
-                    }
-                    else {
-                        varFinalDur =
-                                new InfixExp((Location) loc.clone(),
-                                        varFinalDur, Utilities
-                                                .createPosSymbol("+"),
-                                        finalVarDur);
-                    }
-                    varFinalDur.setMathType(myTypeGraph.R);
-                }
-            }
         }
 
         // Apply the procedure declaration rule
@@ -645,30 +620,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     Utilities.createPosSymbol("+"), finalVarDur);
                 }
                 varFinalDur.setMathType(myTypeGraph.R);
-            }
-
-            // Loop through parameter variables to get their finalization duration
-            // (if they are evaluates mode)
-            for (ParameterVarDec p : dec.getParameters()) {
-                if (p.getMode() == Mode.EVALUATES) {
-                    VarDec varDec = new VarDec(p.getName(), p.getTy());
-                    varDec.setMathType(p.getMathType());
-                    Exp finalVarDur =
-                            Utilities.createFinalizAnyDur(varDec, BOOLEAN);
-
-                    // Create/Add the duration expression
-                    if (varFinalDur == null) {
-                        varFinalDur = finalVarDur;
-                    }
-                    else {
-                        varFinalDur =
-                                new InfixExp((Location) loc.clone(),
-                                        varFinalDur, Utilities
-                                                .createPosSymbol("+"),
-                                        finalVarDur);
-                    }
-                    varFinalDur.setMathType(myTypeGraph.R);
-                }
             }
         }
 
