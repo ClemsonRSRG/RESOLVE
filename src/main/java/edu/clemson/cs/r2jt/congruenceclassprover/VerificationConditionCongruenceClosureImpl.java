@@ -34,7 +34,7 @@ public class VerificationConditionCongruenceClosureImpl {
     private final Antecedent m_antecedent;
     private final Consequent m_consequent;
     private final ConjunctionOfNormalizedAtomicExpressions m_conjunction;
-    private final List<List<String>> m_goal; // every item in each sublist is equivalent iff proved.  Disjunctions in consequent are split into seperate vc's before we see them here.
+    protected final List<String> m_goal;
 
     public static enum STATUS {
         FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE
@@ -50,7 +50,7 @@ public class VerificationConditionCongruenceClosureImpl {
         m_registry = new Registry(g);
         m_conjunction =
                 new ConjunctionOfNormalizedAtomicExpressions(m_registry);
-        m_goal = new ArrayList<List<String>>();
+        m_goal = new ArrayList<String>();
         forAllQuantifiedPExps = new ArrayList<PExp>();
         addPExp(m_antecedent.iterator(), true);
         addPExp(m_consequent.iterator(), false);
@@ -70,39 +70,41 @@ public class VerificationConditionCongruenceClosureImpl {
 
     protected Map<String, Integer> getGoalSymbols() {
         HashSet<String> goalSymbolSet = new HashSet<String>();
-        for (List<String> agoalList : m_goal) {
-            for (String agoal : agoalList) {
-                // true is the root of many expressions
-                if (agoal.equals("true"))
-                    continue;
-                goalSymbolSet.add(agoal);
-            }
+        for (String goal : m_goal) {
+            // true is the root of many expressions
+            if (goal.equals("true"))
+                continue;
+            goalSymbolSet.add(goal);
+
         }
-        return m_conjunction.getSymbolProximity(goalSymbolSet);
+        Map<String, Integer> rMap =
+                m_conjunction.getSymbolProximity(goalSymbolSet);
+        /*HashMap<String,Integer> rMap = new HashMap<String, Integer>();
+        for(String s : tmpMap.keySet()){
+            if(!m_registry.getUsage(s).equals(Registry.Usage.HASARGS_SINGULAR)){
+                rMap.put(s,tmpMap.get(s));
+            }
+        }*/
+
+        // remove function names
+        return rMap;
     }
 
     public STATUS isProved() {
         if (m_conjunction.m_evaluates_to_false)
             return STATUS.FALSE_ASSUMPTION;
-        for (List<String> g : m_goal) {
-            // check each goal has same root
-            if (!g.get(0).equals(g.get(1))) // diff symbols, same root?
+        String goal1 = m_goal.get(0);
+        String goal2 = m_goal.get(1);
+        // check each goal has same root
+        if (!goal1.equals(goal2)) // diff symbols, same root?
+        {
+            if (m_registry.getIndexForSymbol(goal1) != m_registry
+                    .getIndexForSymbol(goal2)) // can avoid this check by updating goal on merges
             {
-                if (m_registry.getIndexForSymbol(g.get(0)) != m_registry
-                        .getIndexForSymbol(g.get(1))) // can avoid this check by updating goal on merges
-                {
-                    String g0 =
-                            m_registry.getSymbolForIndex(m_registry
-                                    .getIndexForSymbol(g.get(0)));
-                    String g1 =
-                            m_registry.getSymbolForIndex(m_registry
-                                    .getIndexForSymbol(g.get(1)));
-
-                    //if((g0.equals("true") && g1.equals("false")) || (g0.equals("false") && g1.equals("true"))) return STATUS.UNPROVABLE;
-                    return STATUS.STILL_EVALUATING; // not proved yet
-                }
+                return STATUS.STILL_EVALUATING; // not proved yet
             }
         }
+
         return STATUS.PROVED;
     }
 
@@ -142,25 +144,22 @@ public class VerificationConditionCongruenceClosureImpl {
     }
 
     private void addGoal(String a, String b) {
-        List<String> newGoal = new ArrayList<String>(2);
-        newGoal.add(a);
-        newGoal.add(b);
-        m_goal.add(newGoal);
+        m_goal.add(a);
+        m_goal.add(b);
     }
 
     @Override
     public String toString() {
         String r = m_name + "\n" + m_conjunction;
         r += "----------------------------------\n";
-        for (List<String> gl : m_goal) {
-            String ro0 =
-                    m_registry.getSymbolForIndex(m_registry
-                            .getIndexForSymbol(gl.get(0)));
-            String ro1 =
-                    m_registry.getSymbolForIndex(m_registry
-                            .getIndexForSymbol(gl.get(1)));
-            r += ro0 + "=" + ro1 + "\n";
-        }
+
+        String ro0 =
+                m_registry.getSymbolForIndex(m_registry
+                        .getIndexForSymbol(m_goal.get(0)));
+        String ro1 =
+                m_registry.getSymbolForIndex(m_registry
+                        .getIndexForSymbol(m_goal.get(1)));
+        r += ro0 + "=" + ro1 + "\n";
 
         return r;
     }

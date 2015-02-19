@@ -44,8 +44,9 @@ public class SearchBox {
     public boolean directMatch = false;
     public boolean impossibleToMatch = false; //
     protected final List<String> m_origAsStrArray;
-    public final int m_indexInList;
+    public int m_indexInList;
     public int m_lastGoodMatchIndex;
+    public List<String> m_last_candidate;
 
     public SearchBox(NormalizedAtomicExpressionMapImpl query,
             Registry queryReg,
@@ -93,6 +94,7 @@ public class SearchBox {
         return atomAsStrArray;
     }
 
+    // return value not currently used
     public boolean getNextMatch() {
 
         while (inBounds()) {
@@ -101,17 +103,38 @@ public class SearchBox {
             }
             currentIndex++;
         }
-        impossibleToMatch = true;
+        impossibleToMatch = true; // shuts down search for this box
+
+        return false;
+    }
+
+    // True when a search is needed, false if everything is already mapped
+    public boolean unboundInExpression() {
+        for (String curOp : m_origAsStrArray) {
+            // is a variable or created symbol unbound?
+            if (m_origRegistry.getForAlls().contains(curOp)
+                    || m_origRegistry.getUsage(curOp).equals(
+                            Registry.Usage.CREATED)) {
+                if (m_bindings.containsKey(curOp)
+                        && m_bindings.get(curOp).equals("")) {
+                    return true;
+                }
+                if (!m_bindings.containsKey(curOp)) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
     // pre: bounds are set. index is in bounds.
-    // post returns false or sets bindings 
+    // post returns false or sets bindings
     public boolean compareAndBind() {
         NormalizedAtomicExpressionMapImpl candidate =
                 m_dataSet.getExprAtPosition(currentIndex);
 
         List<String> candStrArray = NAEtoList(candidate, m_destRegistry);
+        m_last_candidate = candStrArray;
         if (candStrArray.size() != m_origAsStrArray.size()) {
             return false;
         }
@@ -151,6 +174,7 @@ public class SearchBox {
                 origValForComp = m_origAsStrArray.get(i);
             }
             if (!origValForComp.equals(boundOp)) { // not a wildcard, if not the same, ret false
+
                 m_failedBindings = tempMap;
                 return false; // problem, need to roll back m_bindings
             }
@@ -174,6 +198,7 @@ public class SearchBox {
     public String toString() {
         String rString = "";
         rString += m_origAsStrArray;
+        rString += " " + m_last_candidate;
         rString += m_bindings + "\n";
         if (m_failedBindings != null) {
             rString += "\n\tfailedBindings: " + m_failedBindings;

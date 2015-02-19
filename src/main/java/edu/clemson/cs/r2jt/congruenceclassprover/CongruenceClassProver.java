@@ -97,6 +97,7 @@ public class CongruenceClassProver {
         int i = 0;
 
         for (VC vc : vcs) {
+            //if(!vc.getName().equals("3_1")) continue;
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc));
             myModels[i++] = (new PerVCProverModel(g, vc.getName(), vc, null));
         }
@@ -170,7 +171,7 @@ public class CongruenceClassProver {
             long startTime = System.nanoTime();
             String whyQuit = "";
             VerificationConditionCongruenceClosureImpl.STATUS proved =
-                    prove(vcc);
+                    alt_prove(vcc);
             if (proved
                     .equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
                 whyQuit += " Proved ";
@@ -228,11 +229,110 @@ public class CongruenceClassProver {
         return new String(div) + "\n";
     }
 
+    /* while not proved do
+        rank theorems
+            while top rank below threshold score do
+                apply top rank if not in exclusion list
+                insert top rank
+                add inserted expression to exclusion list
+                choose new top rank
+
+     */
+    protected VerificationConditionCongruenceClosureImpl.STATUS alt_prove(
+            VerificationConditionCongruenceClosureImpl vcc) {
+        long startTime = System.currentTimeMillis();
+        long endTime = myTimeout + startTime;
+        HashSet<String> applied = new HashSet<String>();
+        Map<String, Integer> theoremAppliedCount =
+                new HashMap<String, Integer>();
+        VerificationConditionCongruenceClosureImpl.STATUS status =
+                vcc.isProved();
+        String div = divLine(vcc.m_name);
+        String theseResults =
+                div + ("Before application of theorems: " + vcc + "\n");
+        // add quantified expressions local to the vc to theorems
+        for (PExp p : vcc.forAllQuantifiedPExps) {
+            TheoremCongruenceClosureImpl t =
+                    new TheoremCongruenceClosureImpl(m_typeGraph, p);
+            if (!t.m_unneeded) {
+                m_theorems.add(t);
+            }
+        }
+        int iteration = 0;
+        while (status
+                .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
+                && System.currentTimeMillis() <= endTime) {
+            // Rank theorems
+            Map<String, Integer> vcSymbolRelevanceMap = vcc.getGoalSymbols();
+            int threshold = 16 * vcSymbolRelevanceMap.keySet().size() + 1;
+            TheoremPrioritizer rankedTheorems =
+                    new TheoremPrioritizer(m_theorems, vcSymbolRelevanceMap,
+                            threshold, theoremAppliedCount);
+            //theseResults += "Iteration " + iteration++ + "\n";
+            int max_Theorems_to_choose = 1;
+            int num_Theorems_chosen = 0;
+            while (!rankedTheorems.m_pQueue.isEmpty()
+                    && status
+                            .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
+                    && (num_Theorems_chosen < max_Theorems_to_choose)) {
+                int theoremScore = rankedTheorems.m_pQueue.peek().m_score;
+                TheoremCongruenceClosureImpl cur = rankedTheorems.poll();
+
+                ArrayList<InsertExpWithJustification> instantiatedTheorems =
+                        cur.applyTo(vcc, endTime);
+                if (instantiatedTheorems != null
+                        && instantiatedTheorems.size() != 0) {
+                    InstantiatedTheoremPrioritizer instPQ =
+                            new InstantiatedTheoremPrioritizer(
+                                    instantiatedTheorems, vcSymbolRelevanceMap,
+                                    threshold);
+                    int max_Instantiated_to_Add = 1;
+                    int num_Instantiated_added = 0;
+                    while (num_Instantiated_added < max_Instantiated_to_Add
+                            && !instPQ.m_pQueue.isEmpty()) {
+                        PExpWithScore curP = instPQ.m_pQueue.poll();
+                        if (!applied.contains(curP.m_theorem.toString())) {
+                            String substitutionMade =
+                                    vcc
+                                            .getConjunct()
+                                            .addExpressionAndTrackChanges(
+                                                    curP.m_theorem,
+                                                    endTime,
+                                                    curP.m_theoremDefinitionString);
+                            if (substitutionMade != "") {
+                                applied.add(curP.m_theorem.toString());
+                                theseResults +=
+                                        "Iter:" + ++iteration + "\n["
+                                                + theoremScore + "]"
+                                                + curP.toString() + "\t"
+                                                + substitutionMade + "\n\n";
+                                status = vcc.isProved();
+                                num_Instantiated_added++;
+                                int count = 0;
+                                if (theoremAppliedCount
+                                        .containsKey(cur.m_theoremString))
+                                    count =
+                                            theoremAppliedCount
+                                                    .get(cur.m_theoremString);
+                                theoremAppliedCount.put(cur.m_theoremString,
+                                        ++count);
+                                num_Theorems_chosen++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        m_results += theseResults + div;
+        return vcc.isProved();
+
+    }
+
     protected VerificationConditionCongruenceClosureImpl.STATUS prove(
             VerificationConditionCongruenceClosureImpl vcc) {
         List<TheoremCongruenceClosureImpl> allFuncNamesInVC =
                 new ArrayList<TheoremCongruenceClosureImpl>();
-
+        List<String> theoremsApplied = new ArrayList<String>();
         // Remove theorems with no function names in the vc.
         if (vcc
                 .isProved()
@@ -241,18 +341,22 @@ public class CongruenceClassProver {
             if (DO_NOT_INTRODUCE_NEW_OPERATORS) {
 
                 Set<String> vcFunctionNames = vcc.getFunctionNames();
-                // adding "=" since it is needed for the application of some theorems.
+                // adding operators from boolean theory to default set.
                 vcFunctionNames.add("=");
                 vcFunctionNames.add("true");
+                vcFunctionNames.add("false");
                 vcFunctionNames.add("or");
                 vcFunctionNames.add("not");
+                vcFunctionNames.add("and");
+                vcFunctionNames.add("implies");
 
-                // want to add all order operators and +/- if any of these are used
+                // if one or more of these are used, add the rest
                 HashSet<String> intTheoryNames = new HashSet<String>();
-                /*intTheoryNames.add(">");
+                //intTheoryNames.add(">");
                 intTheoryNames.add("<");
-                intTheoryNames.add(">=");*/
+                //intTheoryNames.add(">=");
                 intTheoryNames.add("<=");
+                intTheoryNames.add("/=");
                 intTheoryNames.add("+");
                 intTheoryNames.add("-");
                 intTheoryNames.add("suc");
@@ -265,8 +369,13 @@ public class CongruenceClassProver {
                 if (!intersect.isEmpty()) {
                     vcFunctionNames.addAll(intTheoryNames);
                 }
-                if (vcFunctionNames.contains("CF")) {
-                    vcFunctionNames.add("DR");
+                if (vcFunctionNames.contains("Iterated_Concatenation")) {
+                    vcFunctionNames.add("K_Z");
+                    vcFunctionNames.add("Summation");
+                    vcFunctionNames.add("Length");
+                    vcFunctionNames.add("Stringify");
+                    vcFunctionNames.add("Composition_of_Z_SStr_Z");
+                    vcFunctionNames.add("Composition_of_Z_Entity_SStr");
                 }
                 for (TheoremCongruenceClosureImpl th : m_theorems) {
                     Set<String> theoremfunctionNames = th.getFunctionNames();
@@ -325,13 +434,13 @@ public class CongruenceClassProver {
                 break; // nothing else to try
             }
             Map<String, Integer> vcGoalSymbolCount = vcc.getGoalSymbols();
-            int threshold = 16 * vcGoalSymbolCount.size() + 1;
+            int threshold = vcGoalSymbolCount.size() + 1;
             // lower thresholds: less output, more time in prioritizer
             InstantiatedTheoremPrioritizer pQ =
                     new InstantiatedTheoremPrioritizer(insertExp,
                             vcGoalSymbolCount, threshold);
-            InstantiatedTheoremPrioritizer.PExpWithScore curP =
-                    pQ.m_pQueue.poll();
+            PExpWithScore curP = pQ.m_pQueue.poll();
+
             int maxToAdd = pQ.m_pQueue.size() * 3 / 4 + 1;
             int numAdded = 0;
             while (curP != null
@@ -341,14 +450,16 @@ public class CongruenceClassProver {
                                     VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                     && System.currentTimeMillis() <= endTime) {
                 if (!applied.contains(curP.m_theorem.toString())) {
-
                     String substitutionsMade =
-                            vcc.getConjunct().addExpression(curP.m_theorem,
-                                    endTime)
+                            vcc.getConjunct().addExpressionAndTrackChanges(
+                                    curP.m_theorem, endTime, curP.toString())
                                     + "\n";
                     if (!substitutionsMade.equals("\n")) {
-                        thString += curP.toString();
-                        thString += substitutionsMade;
+                        //thString += curP.toString();
+                        //thString += substitutionsMade;
+                        //String combined = curP.toString() + "\t\t" + substitutionsMade;
+                        theoremsApplied.add(curP.toString());
+                        //vcc.getRegistry().updateTheoremDependencyGraphKey(curP.toString(),combined);
                     }
                     applied.add(curP.m_theorem.toString());
                     numAdded++;
@@ -359,8 +470,26 @@ public class CongruenceClassProver {
             }
 
         }
-        theseResults += (thString);
+        //theseResults += (thString);
 
+        // cull results
+        String goalA = vcc.m_goal.get(0);
+        String goalB = vcc.m_goal.get(1);
+        newString: for (String th : theoremsApplied) {
+            for (String gl : vcc.m_goal) {
+                //if(gl.equals("true")) continue; // assuming at least one goal is not "true"
+                if (!vcc.getRegistry().m_appliedTheoremDependencyGraph
+                        .containsKey(th))
+                    continue;
+                for (Integer root : vcc.getRegistry().m_appliedTheoremDependencyGraph
+                        .get(th)) {
+                    if (vcc.getRegistry().areEqual(gl, root)) {
+                        theseResults += th;
+                        continue newString;
+                    }
+                }
+            }
+        }
         VerificationConditionCongruenceClosureImpl.STATUS proved =
                 vcc.isProved();
 

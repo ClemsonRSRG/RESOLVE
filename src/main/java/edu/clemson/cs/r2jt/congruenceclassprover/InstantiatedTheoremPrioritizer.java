@@ -13,13 +13,7 @@
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
-import edu.clemson.cs.r2jt.rewriteprover.absyn.PExpSubexpressionIterator;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.*;
 
 /**
  *
@@ -28,73 +22,37 @@ import java.util.PriorityQueue;
 public class InstantiatedTheoremPrioritizer {
 
     protected PriorityQueue<PExpWithScore> m_pQueue;
+    private Map<String, Integer> m_vc_symbols;
 
     public InstantiatedTheoremPrioritizer(
             List<InsertExpWithJustification> theoremList,
             Map<String, Integer> vcSymbols, int threshold) {
         m_pQueue = new PriorityQueue<PExpWithScore>(theoremList.size());
+        m_vc_symbols = vcSymbols;
         for (InsertExpWithJustification p : theoremList) {
-            PExpWithScore pes =
-                    new PExpWithScore(p.m_PExp, vcSymbols, p.m_Justification);
-            if (pes.m_score < threshold)
-                m_pQueue.add(pes);
+            PExpWithScore pes = new PExpWithScore(p.m_PExp, p.m_Justification);
+            pes.m_score = calculateScore(pes.m_theorem_symbols);
+            //if (pes.m_score < threshold)
+            m_pQueue.add(pes);
         }
+    }
+
+    public int calculateScore(Set<String> theorem_symbols) {
+        int max = m_vc_symbols.keySet().size();
+        int score = 0;
+
+        for (String s : theorem_symbols) {
+            if (m_vc_symbols.containsKey(s)) {
+                score += m_vc_symbols.get(s);
+            }
+            else
+                score += max;
+        }
+        return score / theorem_symbols.size();
     }
 
     public PExp poll() {
         return m_pQueue.poll().m_theorem;
     }
 
-    protected class PExpWithScore implements Comparable<PExpWithScore> {
-
-        protected PExp m_theorem;
-        protected String m_theoremDefinitionString;
-        protected Integer m_score = 1;
-        protected HashMap<String, Integer> m_symbol_count;
-
-        public PExpWithScore(PExp theorem, Map<String, Integer> vcSymbols,
-                String justification) {
-            m_theorem = theorem;
-            m_theoremDefinitionString = justification;
-            HashSet<String> thSet = getSetOfSymbolsInPExp(theorem);
-            for (String s : thSet) {
-                if (vcSymbols.containsKey(s)) {
-                    m_score *= vcSymbols.get(s);
-                }
-                else {
-                    m_score *= vcSymbols.keySet().size();
-                }
-            }
-
-        }
-
-        private HashSet<String> getSetOfSymbolsInPExp(PExp p) {
-
-            HashSet<String> rSet = new HashSet<String>();
-            if (p.getClass().getSimpleName().equals("PLambda")) {
-                return rSet;
-            }
-            if (!p.isLiteral()) {
-                rSet.add(p.getTopLevelOperation());
-            }
-            PExpSubexpressionIterator pit = p.getSubExpressionIterator();
-            while (pit.hasNext()) {
-                rSet.addAll(getSetOfSymbolsInPExp(pit.next()));
-            }
-            rSet.remove("=");
-
-            return rSet;
-        }
-
-        @Override
-        public String toString() {
-            return m_theoremDefinitionString + "\n" + "\t[" + m_score + "]"
-                    + " " + m_theorem.toString() + "\n";
-        }
-
-        @Override
-        public int compareTo(PExpWithScore o) {
-            return m_score - o.m_score;
-        }
-    }
 }

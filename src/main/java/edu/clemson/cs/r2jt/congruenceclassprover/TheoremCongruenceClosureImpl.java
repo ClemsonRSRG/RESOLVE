@@ -36,6 +36,7 @@ public class TheoremCongruenceClosureImpl {
     private final PExp m_theorem;
     private final TypeGraph m_typeGraph;
     protected boolean m_unneeded = false;
+    private Set<String> m_function_names;
 
     // TODO: exclude statements with dummy variables not in matching component, or do another search/match with result
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp p) {
@@ -85,17 +86,20 @@ public class TheoremCongruenceClosureImpl {
     }
 
     public Set<String> getFunctionNames() {
-        Registry tReg = new Registry(m_typeGraph);
-        ConjunctionOfNormalizedAtomicExpressions temp =
-                new ConjunctionOfNormalizedAtomicExpressions(tReg);
-        temp.addExpression(m_theorem);
+        if (m_function_names == null) {
+            Registry tReg = new Registry(m_typeGraph);
+            ConjunctionOfNormalizedAtomicExpressions temp =
+                    new ConjunctionOfNormalizedAtomicExpressions(tReg);
+            temp.addExpression(m_theorem);
 
-        Set<String> rSet = tReg.getFunctionNames();
-        rSet.remove("=");
-        rSet.remove("implies");
-        rSet.remove("and");
-        rSet.remove("or");
-        return rSet;
+            Set<String> rSet = tReg.getFunctionNames();
+            rSet.remove("=");
+            rSet.remove("implies");
+            //rSet.remove("and");
+            //rSet.remove("or");
+            m_function_names = rSet;
+        }
+        return m_function_names;
     }
 
     public ArrayList<InsertExpWithJustification> applyTo(
@@ -177,12 +181,6 @@ public class TheoremCongruenceClosureImpl {
     private Stack<HashMap<String, String>> findValidBindings(
             VerificationConditionCongruenceClosureImpl vc, long endTime) {
 
-        boolean extraOutput = false;
-        /*if(m_theoremString.contains("alpha_hack")
-                 ){
-             extraOutput = true;
-             System.out.println("looking for: \n" + m_matchConj + "in " + vc);
-         }*/
         Stack<HashMap<String, String>> allValidBindings =
                 new Stack<HashMap<String, String>>();
 
@@ -205,6 +203,12 @@ public class TheoremCongruenceClosureImpl {
             return allValidBindings;
 
         }
+        boolean extraOutput = false;
+        /*if(m_theoremString.contains("K_Z")
+                && vc.m_name.equals("1_1")    ){
+            extraOutput = true;
+            System.out.println("looking for: \n" + m_matchConj + "in " + vc);
+        }*/
         Stack<SearchBox> boxStack = new Stack<SearchBox>();
         boxStack.push(new SearchBox(m_matchConj.getExprAtPosition(0),
                 m_theoremRegistry, vc.getConjunct(), vc.getRegistry(),
@@ -263,8 +267,8 @@ public class TheoremCongruenceClosureImpl {
             String dSymbol = box.m_bindings.get(oSymbol);
             if (!box.m_destRegistry.isSymbolInTable(dSymbol)) {
                 if (!oSymbol.contains("¢")) {
-                    System.err.println("Unbound: " + oSymbol + ": " + dSymbol
-                            + " in " + m_theoremString);
+                    /*System.err.println("Unbound: " + oSymbol + ": " + dSymbol
+                            + " in " + m_theoremString);*/
                     box.m_failedBindings = box.m_bindings;
                     return false;
                 }
@@ -299,8 +303,8 @@ public class TheoremCongruenceClosureImpl {
                 continue;
             if (dType.isSubtypeOf(oType))
                 continue;
-            if (oType.getClass().getSimpleName().contains("MTFunction")
-                    && dType.getClass().getSimpleName().contains("MTFunction")) {
+            if (oType.getClass().getSimpleName().equals("MTFunction")
+                    && dType.getClass().getSimpleName().equals("MTFunction")) {
                 dType = (MTFunction) dType;
                 MTType oRange = ((MTFunction) oType).getRange();
                 MTType oDomain = ((MTFunction) oType).getDomain();
@@ -350,8 +354,7 @@ public class TheoremCongruenceClosureImpl {
             }
             /*System.err.println("Failed type check: " + oSymbol + "(from theorem): " + oType
                     + " " + dSymbol + ": " + dType);
-            System.err.println(m_theoremString);
-             */
+            System.err.println(m_theoremString);*/
             box.m_failedBindings = box.m_bindings;
             return false;
 
