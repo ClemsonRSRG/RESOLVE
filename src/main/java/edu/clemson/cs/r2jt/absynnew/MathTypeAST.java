@@ -43,4 +43,9 @@ public final class MathTypeAST extends TypeAST {
     public MathTypeAST copy() {
         return new MathTypeAST(ExprAST.copy(myArbitraryTypeExpr));
     }
+
+    @Override
+    public String toString() {
+        return myArbitraryTypeExpr.toString();
+    }
 }
