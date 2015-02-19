@@ -3916,26 +3916,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                 Exp init = Exp.copy(type.getInitialization().getEnsures());
                 init = Utilities.replace(init, exemplar, varDecExp);
 
-                // Make sure we have a constraint
-                Exp constraint;
-                if (type.getConstraint() == null) {
-                    constraint = myTypeGraph.getTrueVarExp();
-                }
-                else {
-                    constraint = Exp.copy(type.getConstraint());
-                }
-                constraint = Utilities.replace(constraint, exemplar, varDecExp);
-
-                // Set the location for the constraint
+                // Set the location for the initialization ensures
                 Location loc;
-                if (constraint.getLocation() != null) {
-                    loc = (Location) constraint.getLocation().clone();
+                if (init.getLocation() != null) {
+                    loc = (Location) init.getLocation().clone();
                 }
                 else {
                     loc = (Location) type.getLocation().clone();
                 }
-                loc.setDetails("Constraints on " + varDec.getName().getName());
-                Utilities.setLocation(constraint, loc);
+                loc.setDetails("Initialization ensures on "
+                        + varDec.getName().getName());
+                Utilities.setLocation(init, loc);
 
                 // Final confirm clause
                 Exp finalConfirm =
@@ -3990,31 +3981,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 Utilities.createDotExp(loc, expList, varDecExp
                                         .getMathType());
 
-                        // Replace both the initialization and constraint clauses appropriately
+                        // Replace the initialization clauses appropriately
                         init = Utilities.replace(init, varDecExp, dotExp);
-                        constraint =
-                                Utilities
-                                        .replace(constraint, varDecExp, dotExp);
-
                     }
                 }
 
                 // Check if our confirm clause uses this variable
                 if (finalConfirm.containsVar(varName, false)) {
-                    Exp exp;
-                    // We don't have any constraints, so add the initialization
-                    // clause as a new assume clause.
-                    if (constraint.equals(myTypeGraph.getTrueVarExp())) {
-                        exp = init;
-                    }
-                    // We actually have a constraint, so add both the initialization
-                    // and constraint as a new assume clause.
-                    else {
-                        exp = myTypeGraph.formConjunct(constraint, init);
-                    }
-
                     // Add the new assume clause to our assertive code.
-                    myCurrentAssertiveCode.addAssume(exp);
+                    myCurrentAssertiveCode.addAssume(init);
                 }
             }
             // Since the type is generic, we can only use the is_initial predicate
