@@ -16,9 +16,11 @@ import edu.clemson.cs.r2jt.proving.absyn.*;
 import edu.clemson.cs.r2jt.proving.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.proving.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.proving2.model.Theorem;
+import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -32,6 +34,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     private final List<NormalizedAtomicExpressionMapImpl> m_removedExprList;
     protected boolean m_evaluates_to_false = false;
     private int f_num = 0;
+    private String m_current_justification = "";
 
     /**
      * @param registry the Registry symbols contained in the conjunction will
@@ -77,6 +80,16 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return addExpression(expression);
     }
 
+    protected String addExpressionAndTrackChanges(PExp expression,
+            long timeToEnd, String justification) {
+        m_timeToEnd = timeToEnd;
+        m_timeToEnd = Long.MAX_VALUE;
+        m_current_justification = justification;
+        String rString = addExpression(expression);
+        m_current_justification = "";
+        return rString;
+    }
+
     // Top level
     protected String addExpression(PExp expression) {
         if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
@@ -106,131 +119,40 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return "";
     }
 
-    /*
-
-    public PSymbol(MTType type, MTType typeValue, String leftPrint,
-            String rightPrint, ImmutableList<PExp> arguments,
-            Quantification quantification, DisplayType display)
-     */
-    // Converts lambda into for all: ex:
-    // lambda(x:Z).(x + k) becomes:
-    // +(x,k) = _v_1
-    // _lambda_1(x) = v_1
-    // and returns int rep for _lambda_1
-    // if an identical formula already exists, this should return the int rep for it and should not
-    // create a new formula.
-    protected int removeLambda(PLambda lamb) {
-
-        // Make new function symbol
-        String fname = "lambda" + f_num++;
-        // Make new parameters
-        ArrayList<PSymbol> paramsAL = new ArrayList<PSymbol>();
-        Iterator<PLambda.Parameter> pit = lamb.parameters.iterator();
-        PExp[] emptyArr = new PExp[0];
-        ArrayBackedImmutableList<PExp> emptyList =
-                new ArrayBackedImmutableList<PExp>(emptyArr);
-
-        int pnum = 0;
-        HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
-        while (pit.hasNext()) {
-            PLambda.Parameter p = pit.next();
-            String pname = p.type.toString().toLowerCase() + pnum++;
-            // temporary hack until I can get lambda param types substituted
-            if (pname.startsWith("'d'")) {
-                pname = "z" + (pnum - 1);
-            }
-            paramsAL
-                    .add(new PSymbol(p.type, p.type, pname, pname,
-                            new ArrayBackedImmutableList<PExp>(emptyList),
-                            PSymbol.Quantification.FOR_ALL,
-                            PSymbol.DisplayType.PREFIX));
-            // map original name to new name to substitute in body
-            quantToLit.put(new PSymbol(p.type, null, p.name), new PSymbol(
-                    p.type, null, pname));
-        }
-        ImmutableList<PExp> argList =
-                new ArrayBackedImmutableList<PExp>(paramsAL
-                        .toArray(new PExp[paramsAL.size()]));
-        PSymbol func =
-                new PSymbol(lamb.getType(), lamb.getTypeValue(), fname, fname,
-                        argList, PSymbol.Quantification.FOR_ALL,
-                        PSymbol.DisplayType.PREFIX);
-        // Enter new expression, replacing parameter name with the fresh one
-        PExp body = lamb.getSubExpressions().get(0).substitute(quantToLit); // this is the body, its a single element list
-        int bodyRep = addFormula(body);
-        int funcRep = addFormula(func);
-        mergeOperators(bodyRep, funcRep);
-        mergeMatchingLambdas();
-        return m_registry.getIndexForSymbol(fname);
-
-    }
-
-    // could be optimized with bin search if expressions were in alpha order.
-    protected String mergeMatchingLambdas() {
-        int i = 0;
-        String rString = "";
-        loopStart: while (i < m_exprList.size()) {
-            int p0_i = m_exprList.get(i).readPosition(0);
-            String p0_i_name = m_registry.getSymbolForIndex(p0_i);
-            if (!p0_i_name.startsWith("lambda")) {
-                ++i;
-                continue;
-            }
-            int pLast = m_exprList.get(i).readRoot();
-            int j = i + 1;
-            while (j < m_exprList.size()) {
-                int p0_j = m_exprList.get(j).readPosition(0);
-                String p0_j_name = m_registry.getSymbolForIndex(p0_j);
-                // compare rest of expressions, if the same, merge func names
-                if (p0_j_name.startsWith("lambda")
-                        && m_exprList.get(j).readRoot() == pLast
-                        && !p0_i_name.equals(p0_j_name)) {
-                    // suppose lambda1(k) = c0, lambda2(j) = c0
-                    // merge makes this: lambda1(k) = c0, lambda1(j) = c0;
-                    rString += mergeOperators(p0_i, p0_j);
-                    //System.err.println("mergeMatchingLambdas: merging " + p0_i_name + " " + p0_j_name);
-                    i = 0;
-                    continue loopStart;
-                }
-                ++j;
-            }
-            ++i;
-        }
-        return rString;
-    }
-
-    protected int addPAlternative(PExp formula) {
-        return -1;
-    }
 
     // adds a particular symbol to the registry
     protected int addPsymbol(PSymbol ps) {
         String name = ps.getTopLevelOperation();
-        MTType type = ps.getTypeValue();
-        if (type == null || ps.isFunction()) {
-            type = ps.getType();
-        }
-        if (ps.name.equals("Az")) {
-            int j = 0;
-        }
+        MTType type = ps.getType();
         Registry.Usage usage = Registry.Usage.SINGULAR_VARIABLE;
         if (ps.isLiteral()) {
             usage = Registry.Usage.LITERAL;
         }
 
-        else if (name.startsWith("lambda")
-                || ps.isFunction()
-                || ps.getType().getClass().getSimpleName().contains(
-                        "MTFunction")) {
+        else if (ps.isFunction()
+                || ps.getType().getClass().getSimpleName().equals("MTFunction")) {
             if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
                 usage = Registry.Usage.HASARGS_FORALL;
             }
             else {
                 usage = Registry.Usage.HASARGS_SINGULAR;
             }
+
         }
         else if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
             usage = Registry.Usage.FORALL;
+        }
+        // The type stored with expressions is actually the range type
+        // Ex: (S = T):B.
+        // However, I need to store types for functions/relations.
+        // Building these here.
+        // It would be far better to handle this upstream.
+        if (ps.getSubExpressions().size() > 0) {
+            List<MTType> paramList = new ArrayList<MTType>();
+            for (PExp pParam : ps.getSubExpressions()) {
+                paramList.add(pParam.getType());
+            }
+            type = new MTFunction(m_registry.m_typeGraph, type, paramList);
         }
         return m_registry.addSymbol(name, type, usage);
     }
@@ -240,7 +162,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      is broken down by addExpression so (|?S| = 0) is an argument
      should return int for true if known to be equal, otherwise return root representative. 
      */
-    protected int addFormula(PExp formula) {
+    protected int addFormula(PExp formula){
         if (formula.isEquality()) {
             int lhs = addFormula(formula.getSubExpressions().get(0));
             PExp r = formula.getSubExpressions().get(1);
@@ -263,11 +185,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             // }
         }
         PSymbol asPsymbol;
-        if (formula instanceof PLambda) {
-            return removeLambda((PLambda) formula);
-        }
-        else if (formula instanceof PAlternatives) {
-            return addPAlternative(formula);
+        if (!(formula instanceof PSymbol)) {
+            System.err.println("unhandled PExp: " + formula.toString());
+            throw new RuntimeException();
+
         }
         else
             asPsymbol = (PSymbol) formula;
@@ -307,9 +228,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         int indexToInsert = -(posIfFound + 1);
         MTType typeOfFormula =
                 m_registry.getTypeByIndex(atomicFormula.readPosition(0));
+        // this is the full type and is necessarily a function type
+
+        MTType rangeType = ((MTFunction) typeOfFormula).getRange();
         String symName =
                 m_registry.getSymbolForIndex(atomicFormula.readPosition(0));
-        assert typeOfFormula != null : symName + " has null type";
+        assert rangeType != null : symName + " has null type";
         // if any of the symbols in atomicFormula are variables (FORALL) make created symbol a variable
         boolean isVar = false;
         for (Integer is : atomicFormula.getKeys()) {
@@ -325,7 +249,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 break;
             }
         }
-        int rhs = m_registry.makeSymbol(typeOfFormula, isVar);
+        int rhs = m_registry.makeSymbol(rangeType, isVar);
         atomicFormula.writeToRoot(rhs);
         m_exprList.add(indexToInsert, atomicFormula);
         return rhs;
@@ -432,8 +356,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 holdingTank.addAll(mResult);
 
         }
-        //mergeArgsOfEqualityPredicateIfRootIsTrue();
-        rString += mergeMatchingLambdas();
         return rString;
     }
 
@@ -492,6 +414,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             // If the modified one is already there, don't put it back
             if (indexToInsert < 0) {
                 indexToInsert = -(indexToInsert + 1);
+                // root of modified expression depends on the changed arg
+                //String fordebug = modifiedEntries.peek().toHumanReadableString(m_registry);
+                int rootOfChangedExpression = modifiedEntries.peek().readRoot();
+                m_registry.addDependency(rootOfChangedExpression,
+                        m_current_justification, false);
                 m_exprList.add(indexToInsert, modifiedEntries.pop());
             }
             else {
@@ -505,6 +432,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
         }
         //System.err.println(m_registry.getSymbolForIndex(a) + "/" + m_registry.getSymbolForIndex(b));
+        m_registry.addDependency(a, m_current_justification, true);
         m_registry.substitute(a, b);
         return coincidentalMergeHoldingTank;
     }
@@ -563,6 +491,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         for (Integer i : relatedKeys.keySet()) {
             rMap.put(m_registry.getSymbolForIndex(i), relatedKeys.get(i));
         }
+
         return rMap;
     }
 
@@ -571,7 +500,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         String r = "";
         if (m_evaluates_to_false)
             r += "Conjunction evaluates to false" + "\n";
-
+        for (MTType key : m_registry.m_typeToSetOfOperators.keySet()) {
+            r += key.toString() + ":\n";
+            r += m_registry.m_typeToSetOfOperators.get(key) + "\n\n";
+        }
         for (NormalizedAtomicExpressionMapImpl cur : m_exprList) {
             r += cur.toHumanReadableString(m_registry) + "\n";
         }

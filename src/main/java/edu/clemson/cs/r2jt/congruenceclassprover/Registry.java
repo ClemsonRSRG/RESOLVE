@@ -34,6 +34,7 @@ public class Registry {
     public Stack<Integer> m_unusedIndices;
     private int m_uniqueCounter = 0;
     protected TypeGraph m_typeGraph;
+    protected Map<String, Set<Integer>> m_appliedTheoremDependencyGraph;
 
     public static enum Usage {
 
@@ -56,9 +57,11 @@ public class Registry {
         m_foralls = new HashSet<String>();
         m_typeGraph = g;
         m_typeDictionary = new TreeMap<String, MTType>();
-        addSymbol("=", g.BOOLEAN, Usage.LITERAL); // = as a predicate function, not as an assertion
+        addSymbol("=", new MTFunction(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
+                Usage.LITERAL); // = as a predicate function, not as an assertion
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
         assert (getIndexForSymbol("=") == 0);
+        m_appliedTheoremDependencyGraph = new HashMap<String, Set<Integer>>();
 
     }
 
@@ -92,6 +95,38 @@ public class Registry {
         m_symbolIndexParentArray.set(opIndexB, opIndexA);
     }
 
+    public void addDependency(int opIndex, String justification,
+            boolean sourceIsRootChange) {
+        if (justification.equals(""))
+            return;
+        //if(getUsage(getSymbolForIndex(opIndex)).equals(Usage.LITERAL)) return;
+        //if(getSymbolForIndex(opIndex).equals("true") && sourceIsRootChange) return;
+        // Do not add a dependency if opIndex was the last symbol created
+        if (opIndex == m_symbolIndexParentArray.size() - 1)
+            return;
+        if (m_appliedTheoremDependencyGraph.containsKey(justification)) {
+            m_appliedTheoremDependencyGraph.get(justification).add(opIndex);
+        }
+        else {
+            HashSet<Integer> syms = new HashSet<Integer>();
+            syms.add(opIndex);
+            m_appliedTheoremDependencyGraph.put(justification, syms);
+        }
+    }
+
+    public void updateTheoremDependencyGraphKey(String oldKey, String newKey) {
+        Set<Integer> valSet = m_appliedTheoremDependencyGraph.get(oldKey);
+        m_appliedTheoremDependencyGraph.remove(oldKey);
+        m_appliedTheoremDependencyGraph.put(newKey, valSet);
+    }
+
+    public boolean areEqual(String symString, int symInt) {
+        int rootOfInt = findAndCompress(symInt);
+        int rootOfString = getIndexForSymbol(symString);
+        rootOfString = findAndCompress(rootOfString);
+        return rootOfInt == rootOfString;
+    }
+
     protected int findAndCompress(int index) {
         Stack<Integer> needToUpdate = new Stack<Integer>();
         assert index < m_symbolIndexParentArray.size() : "findAndCompress error";
@@ -110,6 +145,10 @@ public class Registry {
 
     public String getSymbolForIndex(int index) {
         return m_indexToSymbol.get(findAndCompress(index));
+    }
+
+    public String getRootSymbolForSymbol(String sym) {
+        return getSymbolForIndex(getIndexForSymbol(sym));
     }
 
     public MTType getTypeByIndex(int index) {
