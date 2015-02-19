@@ -11,6 +11,7 @@
  * file 'LICENSE.txt', which is part of this source code package.
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
+
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;

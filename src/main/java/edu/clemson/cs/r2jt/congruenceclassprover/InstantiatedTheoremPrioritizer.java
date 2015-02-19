@@ -11,6 +11,7 @@
  * file 'LICENSE.txt', which is part of this source code package.
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
+
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import java.util.*;
 
