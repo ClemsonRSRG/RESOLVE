@@ -28,4 +28,8 @@ public class MathTheoremAST extends DeclAST {
         super(start, stop, name);
         myAssertion = assertion;
     }
+
+    public ExprAST getAssertion() {
+        return myAssertion;
+    }
 }

@@ -100,11 +100,33 @@ public abstract class TreeWalkerVisitor {
         return false;
     }
 
+    public void preMathTypeAssertionAST(MathTypeAssertionAST e) {}
+
+    public void midMathTypeAssertionAST(MathTypeAssertionAST e,
+            ResolveAST previous, ResolveAST next) {}
+
+    public void postMathTypeAssertionAST(MathTypeAssertionAST e) {}
+
+    public boolean walkMathTypeAssertionAST(MathTypeAssertionAST e) {
+        return false;
+    }
+
     public void preTypeAST(TypeAST e) {}
 
     public void midTypeAST(TypeAST e, ResolveAST previous, ResolveAST next) {}
 
     public void postTypeAST(TypeAST e) {}
+
+    public void prePrecisAST(ModuleAST.PrecisAST e) {}
+
+    public void midPrecisAST(ModuleAST.PrecisAST e, ResolveAST previous,
+            ResolveAST next) {}
+
+    public void postPrecisAST(ModuleAST.PrecisAST e) {}
+
+    public boolean walkPrecisAST(ModuleAST.PrecisAST e) {
+        return false;
+    }
 
     public boolean walkTypeParameterAST(TypeParameterAST e) {
         return false;
@@ -180,16 +202,16 @@ public abstract class TreeWalkerVisitor {
     public void postTypeInitAST(
             edu.clemson.cs.r2jt.absynnew.InitFinalAST.TypeInitAST e) {}
 
-    public boolean walkImportBlockAST(ImportBlockAST e) {
+    public boolean walkImportCollectionAST(ImportCollectionAST e) {
         return false;
     }
 
-    public void preImportBlockAST(ImportBlockAST e) {}
+    public void preImportCollectionAST(ImportCollectionAST e) {}
 
-    public void midImportBlockAST(ImportBlockAST e, ResolveAST previous,
-            ResolveAST next) {}
+    public void midImportCollectionAST(ImportCollectionAST e,
+            ResolveAST previous, ResolveAST next) {}
 
-    public void postImportBlockAST(ImportBlockAST e) {}
+    public void postImportCollectionAST(ImportCollectionAST e) {}
 
     public boolean walkProgLiteralRefAST(ProgLiteralRefAST e) {
         return false;
@@ -433,6 +455,17 @@ public abstract class TreeWalkerVisitor {
         return false;
     }
 
+    public void preMathQuantifiedAST(MathQuantifiedAST e) {}
+
+    public void midMathQuantifiedAST(MathQuantifiedAST e, ResolveAST previous,
+            ResolveAST next) {}
+
+    public void postMathQuantifiedAST(MathQuantifiedAST e) {}
+
+    public boolean walkMathQuantifiedAST(MathQuantifiedAST e) {
+        return false;
+    }
+
     public void preMathSymbolAST(MathSymbolAST e) {}
 
     public void midMathSymbolAST(MathSymbolAST e, ResolveAST previous,
@@ -451,6 +484,16 @@ public abstract class TreeWalkerVisitor {
     public void postStmtAST(StmtAST e) {}
 
     public boolean walkProgNameRefAST(ProgNameRefAST e) {
+        return false;
+    }
+
+    public void preMathSetAST(MathSetAST e) {}
+
+    public void midMathSetAST(MathSetAST e, ResolveAST next, ResolveAST previous) {}
+
+    public void postMathSetAST(MathSetAST e) {}
+
+    public boolean walkMathSetAST(MathSetAST e) {
         return false;
     }
 

@@ -1,5 +1,5 @@
 /**
- * ImportBlockAST.java
+ * ImportCollectionAST.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group
@@ -18,11 +18,11 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.*;
 
 /**
- * <p>An <code>ImportBlockAST</code> classifies and maintains a complete
+ * <p>An <code>ImportCollectionAST</code> classifies and maintains a complete
  * collection of module imports ranging from implicitly referenced/imported
  * modules, to those explicitly requested via the <tt>uses</tt> list.</p>
  */
-public class ImportBlockAST extends ResolveAST {
+public class ImportCollectionAST extends ResolveAST {
 
     public static enum ImportType {
         EXPLICIT, IMPLICIT, EXTERNAL
@@ -30,7 +30,7 @@ public class ImportBlockAST extends ResolveAST {
 
     protected final Map<ImportType, Set<Token>> myImports;
 
-    private ImportBlockAST(ImportCollectionBuilder builder) {
+    private ImportCollectionAST(ImportCollectionBuilder builder) {
         super(builder.getStart(), builder.getStop());
         myImports = builder.usesItems;
     }
@@ -58,6 +58,20 @@ public class ImportBlockAST extends ResolveAST {
     }
 
     /**
+     * <p>Returns <code>true</code> <strong>iff</strong> the set of
+     * <code>type</code> imports contains <code>t</code>; <code>false</code>
+     * otherwise.</p>
+     * @param type  A {@link ImportType}.
+     * @param t     A name token.
+     *
+     * @return      <code>true</code> if <code>t</code> is in the set of
+     *              <code>type</code>, <code>false</code> otherwise.
+     */
+    public boolean inCategory(ImportType type, Token t) {
+        return myImports.get(type).contains(t);
+    }
+
+    /**
      * <p>Returns all imports, regardless of their <code>ImportType</code>, in a
      * single set.</p>
      * 
@@ -78,7 +92,7 @@ public class ImportBlockAST extends ResolveAST {
      */
     public static class ImportCollectionBuilder
             extends
-                AbstractNodeBuilder<ImportBlockAST> {
+                AbstractNodeBuilder<ImportCollectionAST> {
 
         protected final Map<ImportType, Set<Token>> usesItems =
                 new HashMap<ImportType, Set<Token>>();
@@ -130,8 +144,8 @@ public class ImportBlockAST extends ResolveAST {
         }
 
         @Override
-        public ImportBlockAST build() {
-            return new ImportBlockAST(this);
+        public ImportCollectionAST build() {
+            return new ImportCollectionAST(this);
         }
     }
 }

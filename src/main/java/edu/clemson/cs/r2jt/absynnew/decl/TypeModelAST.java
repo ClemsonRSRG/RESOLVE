@@ -16,7 +16,6 @@ import edu.clemson.cs.r2jt.absynnew.AbstractNodeBuilder;
 import edu.clemson.cs.r2jt.absynnew.InitFinalAST;
 import edu.clemson.cs.r2jt.absynnew.MathTypeAST;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
-import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import org.antlr.v4.runtime.Token;
 
 /**

@@ -1,7 +1,35 @@
 grammar Resolve;
 
 module
-    :   conceptModule
+    :   precisModule
+    |   facilityModule
+    |   conceptModule
+    ;
+
+// precis module
+
+precisModule
+    :   'Precis' name=Identifier ';'
+         (usesList)?
+         (precisItems)?
+        'end' closename=Identifier ';'
+    ;
+
+precisItems
+    :   (precisItem)+
+    ;
+
+precisItem
+    :   mathTypeTheoremDecl
+    |   mathDefinitionDecl
+    |   mathTheoremDecl
+    ;
+
+// facility module
+
+facilityModule
+    :   'Facility' name=Identifier ';'
+        'end' closename=Identifier ';'
     ;
 
 // concept module
@@ -33,7 +61,7 @@ usesList
 // parameter related rules
 
 moduleParameterList
-    : '(' moduleParameterDecl (';' moduleParameterDecl)* ')'
+    :   '(' moduleParameterDecl (';' moduleParameterDecl)* ')'
     ;
 
 moduleParameterDecl
@@ -42,7 +70,7 @@ moduleParameterDecl
     ;
 
 typeParameterDecl
-    : 'type' name=Identifier
+    :   'type' name=Identifier
     ;
 
 parameterList
@@ -86,11 +114,11 @@ specTypeFinal
     ;
 
 moduleInit
-    :   'facility' 'initialization'
+    :   'Facility_Initialization'
     ;
 
 moduleFinal
-    :   'facility' 'finalization'
+    :   'Facility_Finalization'
     ;
 
 // functions
@@ -137,7 +165,93 @@ variableDeclGroup
     :   'Var' Identifier (',' Identifier)* ':' type ';'
     ;
 
-// Mathematical clauses
+// mathematical type theorems
+
+mathTypeTheoremDecl
+    :   'Type' 'Theorem' name=Identifier ':'
+        ('For' 'all' mathVariableDeclGroup ',')+ mathExp ';'
+    ;
+
+// mathematical theorems, corollaries, etc
+
+mathTheoremDecl
+    :   ('Theorem'|'Lemma'|'Corollary') name=Identifier
+        ':' mathAssertionExp ';'
+    ;
+
+// mathematical definitions
+
+mathDefinitionDecl
+    :   mathStandardDefinitionDecl
+    |   mathInductiveDefinitionDecl
+    ;
+
+mathInductiveDefinitionDecl
+    :   'Inductive' 'Definition' inductiveDefinitionSignature
+        'is' '(i.)' mathAssertionExp ';' '(ii.)' mathAssertionExp ';'
+    ;
+
+mathStandardDefinitionDecl
+    :   'Definition' definitionSignature ('is' mathAssertionExp)? ';'
+    ;
+
+inductiveDefinitionSignature
+    :   inductivePrefixSignature
+    |   inductiveInfixSignature
+    ;
+
+inductivePrefixSignature
+    :   'on' mathVariableDecl 'of' prefixOp
+        '(' (inductiveParameterList ',')? Identifier ')' ':' mathTypeExp
+    ;
+
+inductiveInfixSignature
+    :   'on' mathVariableDecl 'of' '(' mathVariableDecl ')' infixOp
+        '(' Identifier ')' ':' mathTypeExp
+    ;
+
+inductiveParameterList
+    :   mathVariableDeclGroup (',' mathVariableDeclGroup)*
+    ;
+
+definitionSignature
+    :   standardInfixSignature
+    |   standardOutfixSignature
+    |   standardPrefixSignature
+    ;
+
+standardInfixSignature
+    :   '(' mathVariableDecl ')'
+        infixOp
+        '(' mathVariableDecl ')' ':' mathTypeExp
+    ;
+
+standardOutfixSignature
+    :   ( lOp='|'  '(' mathVariableDecl ')' rOp='|'
+    |     lOp='||' '(' mathVariableDecl ')' rOp='||'
+    |     lOp='<'  '(' mathVariableDecl ')' rOp='>') ':' mathTypeExp
+    ;
+
+standardPrefixSignature
+    :   prefixOp (definitionParameterList)? ':' mathTypeExp
+    ;
+
+prefixOp
+    :   infixOp
+    |   IntegerLiteral
+    ;
+
+infixOp
+    :   ('implies'|'+'|'o'|'-'|'/'|'*'|'..'|'and'|'or')
+    |   ('union'|'intersect'|'is_in'|'is_not_in'|'>'|'<'|'>='|'<=')
+    |   Identifier
+    ;
+
+definitionParameterList
+    :   '(' mathVariableDeclGroup (',' mathVariableDeclGroup)* ')'
+    ;
+
+// mathematical clauses
 
 affectsClause
     :   parameterMode Identifier (',' Identifier)*
@@ -171,6 +285,12 @@ mathTypeExp
 
 mathAssertionExp
     :   mathExp
+    |   mathQuantifiedExp
+    ;
+
+mathQuantifiedExp
+    :   'For' 'all' mathVariableDeclGroup (whereClause)? ','
+         mathAssertionExp
     ;
 
 mathExp
@@ -193,7 +313,13 @@ mathPrimaryExp
     :   mathLiteralExp
     |   mathFunctionApplicationExp
     |   mathOutfixExp
+    |   mathSetExp
     |   mathTupleExp
+    ;
+
+mathSetExp
+    :   '{' mathVariableDecl '|' mathAssertionExp '}'   #mathSetBuilderExp//Todo
+    |   '{' (mathExp (',' mathExp)*)? '}'               #mathSetCollectionExp
     ;
 
 mathLiteralExp

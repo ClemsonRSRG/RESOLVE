@@ -13,7 +13,7 @@
 package edu.clemson.cs.r2jt.absynnew.expr;
 
 import edu.clemson.cs.r2jt.absynnew.ResolveAST;
-import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import org.antlr.v4.runtime.Token;
 
 import java.util.*;
@@ -189,6 +189,32 @@ public abstract class ExprAST extends ResolveAST {
         throw new UnsupportedOperationException(
                 "equivalence for classes of type " + this.getClass()
                         + " is not currently supported");
+    }
+
+    public boolean isLiteralTrue() {
+        boolean result = (this instanceof MathSymbolAST);
+
+        result =
+                result
+                        && ((MathSymbolAST) this).getName().getText().equals(
+                                "true")
+                        && this.getMathType().equals(
+                                this.getMathType().getTypeGraph().BOOLEAN);
+
+        return result;
+    }
+
+    public boolean isLiteralFalse() {
+        boolean result = (this instanceof MathSymbolAST);
+
+        result =
+                result
+                        && ((MathSymbolAST) this).getName().getText().equals(
+                                "false")
+                        && this.getMathType().equals(
+                                this.getMathType().getTypeGraph().BOOLEAN);
+
+        return result;
     }
 
 }

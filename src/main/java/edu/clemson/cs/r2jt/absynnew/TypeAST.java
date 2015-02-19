@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.r2jt.absynnew;
 
-import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import org.antlr.v4.runtime.Token;
 
 /**

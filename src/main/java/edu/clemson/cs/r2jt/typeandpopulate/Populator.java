@@ -173,7 +173,6 @@ public class Populator extends TreeWalkerVisitor {
 
     public Populator(MathSymbolTableBuilder builder) {
         myActiveQuantifications.push(SymbolTableEntry.Quantification.NONE);
-
         myTypeGraph = builder.getTypeGraph();
         myBuilder = builder;
         myFacilityQualifier = null;
@@ -2479,7 +2478,8 @@ public class Populator extends TreeWalkerVisitor {
     /**
      * <p>For a given <code>AbstractFunctionExp</code>, finds the entry in the
      * symbol table to which it refers.  For a complete discussion of the
-     * algorithm used, see <a href="http://sourceforge.net/apps/mediawiki/resolve/index.php?title=Package_Search_Algorithm">
+     * algorithm used, see
+     * <a href="http://sourceforge.net/apps/mediawiki/resolve/index.php?title=Package_Search_Algorithm">
      * Package Search Algorithm</a>.</p>
      */
     private MathSymbolEntry getIntendedFunction(AbstractFunctionExp e) {

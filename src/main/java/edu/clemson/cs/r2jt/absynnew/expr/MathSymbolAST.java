@@ -15,6 +15,11 @@ package edu.clemson.cs.r2jt.absynnew.expr;
 import edu.clemson.cs.r2jt.absynnew.AbstractNodeBuilder;
 import edu.clemson.cs.r2jt.absynnew.ResolveToken;
 import edu.clemson.cs.r2jt.parsing.ResolveLexer;
+import edu.clemson.cs.r2jt.rewriteprover.absyn2.PSymbol;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTFunction;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
@@ -28,19 +33,57 @@ import java.util.*;
  */
 public class MathSymbolAST extends ExprAST {
 
-    private final Token myName;
+    public static enum DisplayStyle {
+        INFIX, OUTFIX, PREFIX
+    }
+
+    private final Token myLeftPrint, myRightPrint, myName;
 
     private final List<ExprAST> myArguments = new ArrayList<ExprAST>();
     private final boolean myLiteralFlag, myIncomingFlag;
+    private SymbolTableEntry.Quantification myQuantification;
+    private final DisplayStyle myDisplayStyle;
 
     private MathSymbolAST(MathSymbolExprBuilder builder) {
         super(builder.getStart(), builder.getStop());
 
         myName = builder.name;
+        myLeftPrint = builder.lprint;
+        myRightPrint = builder.rprint;
+
         myArguments.addAll(builder.arguments);
         myLiteralFlag = builder.literal;
         myIncomingFlag = builder.incoming;
-        //Todo: Add quantification.
+        myDisplayStyle = builder.style;
+        myQuantification = builder.quantification;
+    }
+
+    /**
+     * <p>This class represents function <em>applications</em>.  The type of a
+     * function application is the type of the range of the function.  Often
+     * we'd like to think about the type of the <em>function itself</em>, not
+     * the type of the result of its application.  Unfortunately our AST does
+     * not consider that the 'function' part of a FunctionExp (as distinct from
+     * its parameters) might be a first-class citizen with a type of its own.
+     * This method emulates retrieving the (not actually extant) first-class
+     * function part and guessing its type.  In this case, the guess is
+     * "conservative", in that we guess the smallest set that can't be
+     * contradicted by the available information.  For nodes without a true,
+     * first-class function to consult (which, at the moment, is all of them),
+     * this means that for the formal parameter types, we'll guess the types of
+     * the actual parameters, and for the return type we'll guess
+     * <strong>Empty_Set</strong> (since we have no information about how the
+     * return value is used.)  This guarantees that the type we return will be
+     * a subset of the actual type of the function the RESOLVE programmer
+     * intends (assuming she has called it correctly.)</p>
+     */
+    public MTFunction getConservativePreApplicationType(TypeGraph g) {
+        List<MTType> subTypes = new LinkedList<MTType>();
+
+        for (ExprAST arg : myArguments) {
+            subTypes.add(arg.getMathType());
+        }
+        return new MTFunction(g, g.EMPTY_SET, subTypes);
     }
 
     public Token getName() {
@@ -57,6 +100,24 @@ public class MathSymbolAST extends ExprAST {
 
     public boolean isFunction() {
         return myArguments.size() > 0;
+    }
+
+    public DisplayStyle getStyle() {
+        return myDisplayStyle;
+    }
+
+    public void setQuantification(SymbolTableEntry.Quantification q) {
+        myQuantification = q;
+    }
+
+    //Todo: Figure out what qualifiers are going to look like in a
+    //mathematical setting.
+    public Token getQualifier() {
+        return null;
+    }
+
+    public SymbolTableEntry.Quantification getQuantification() {
+        return myQuantification;
     }
 
     @Override
@@ -85,8 +146,8 @@ public class MathSymbolAST extends ExprAST {
         MathSymbolAST newName =
                 new MathSymbolExprBuilder(getStart(), getStop(), myName, null)
                         .arguments(myArguments).literal(myLiteralFlag)
-                        //.quantification(myQuantification)
-                        .incoming(myIncomingFlag).build();
+                        .quantification(myQuantification).incoming(
+                                myIncomingFlag).build();
 
         if (substitutions.containsKey(newName)) {
             //Note that there's no particular mathematical justification why
@@ -98,16 +159,15 @@ public class MathSymbolAST extends ExprAST {
                     new MathSymbolExprBuilder(getStart(), getStop(),
                             ((MathSymbolAST) substitutions.get(newName))
                                     .getName(), null).arguments(myArguments)
-                            .literal(myLiteralFlag)
-                            //.quantification(myQuantification)
-                            .incoming(myIncomingFlag).build();
+                            .literal(myLiteralFlag).quantification(
+                                    myQuantification).incoming(myIncomingFlag)
+                            .build();
         }
 
         MathSymbolAST result =
                 new MathSymbolExprBuilder(getStart(), getStop(), newName
                         .getName(), null).arguments(myArguments).literal(
-                        myLiteralFlag)
-                //.quantification(myQuantification)
+                        myLiteralFlag).quantification(myQuantification)
                         .incoming(myIncomingFlag).build();
 
         result.setMathType(myMathType);
@@ -125,8 +185,8 @@ public class MathSymbolAST extends ExprAST {
             result =
                     myName.equals(((MathSymbolAST) e).myName)
                             && argumentsEquivalent(myArguments,
-                                    eAsSymbol.myArguments);
-            //  && myQuantification == eAsSymbol.myQuantification;
+                                    eAsSymbol.myArguments)
+                            && myQuantification == eAsSymbol.myQuantification;
         }
         return result;
     }
@@ -152,14 +212,49 @@ public class MathSymbolAST extends ExprAST {
 
         MathSymbolAST result =
                 new MathSymbolExprBuilder(getStart(), getStop(), newName, null)
-                        .arguments(newArgs)
-                        //.quantification(myQuantification)
-                        .literal(myLiteralFlag).incoming(myIncomingFlag)
-                        .build();
+                        .arguments(newArgs).quantification(myQuantification)
+                        .style(myDisplayStyle).literal(myLiteralFlag).incoming(
+                                myIncomingFlag).build();
 
         result.setMathType(myMathType);
         result.setMathTypeValue(myMathTypeValue);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        if (isFunction()) {
+
+            if (myDisplayStyle == DisplayStyle.INFIX) {
+                result.append(myArguments.get(0)).append(" " + myName + " ")
+                        .append(myArguments.get(1));
+            }
+            else if (myDisplayStyle == DisplayStyle.OUTFIX) {
+                result.append(myLeftPrint).append(myArguments.get(0)).append(
+                        myRightPrint);
+            }
+            else {
+                result.append(myName.getText()).append("(");
+
+                for (ExprAST arg : myArguments) {
+                    if (first) {
+                        result.append(arg);
+                        first = false;
+                    }
+                    else {
+                        result.append(", ").append(arg);
+                    }
+                }
+                result.append(")");
+            }
+
+        }
+        else {
+            result.append(myName.getText());
+        }
+        return result.toString();
     }
 
     /**
@@ -176,6 +271,10 @@ public class MathSymbolAST extends ExprAST {
 
         protected boolean incoming = false;
         protected boolean literal = false;
+
+        protected DisplayStyle style = DisplayStyle.PREFIX;
+        protected SymbolTableEntry.Quantification quantification =
+                SymbolTableEntry.Quantification.NONE;
 
         protected final List<ExprAST> arguments = new ArrayList<ExprAST>();
 
@@ -213,6 +312,17 @@ public class MathSymbolAST extends ExprAST {
 
         public MathSymbolExprBuilder literal(boolean e) {
             literal = e;
+            return this;
+        }
+
+        public MathSymbolExprBuilder quantification(
+                SymbolTableEntry.Quantification q) {
+            quantification = q;
+            return this;
+        }
+
+        public MathSymbolExprBuilder style(DisplayStyle e) {
+            style = e;
             return this;
         }
 

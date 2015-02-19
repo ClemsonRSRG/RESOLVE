@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.r2jt.absynnew.decl;
 
-import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import org.antlr.v4.runtime.Token;
 
 /**
@@ -23,9 +22,5 @@ public class TypeParameterAST extends DeclAST {
 
     public TypeParameterAST(Token start, Token stop, Token name) {
         super(start, stop, name);
-    }
-
-    public TypeParameterAST(ResolveParser.TypeParameterDeclContext ctx) {
-        this(ctx.getStart(), ctx.getStop(), ctx.name);
     }
 }

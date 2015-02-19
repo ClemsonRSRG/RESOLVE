@@ -25,18 +25,19 @@ import java.util.List;
 public abstract class ModuleAST extends ResolveAST {
 
     private final Token myName;
+    private final ImportCollectionAST myImports;
     private final List<ModuleParameterAST> myModuleParams;
-    private final ImportBlockAST myImportBlock;
     private final ExprAST myRequires;
     private final ModuleBlockAST myBodyBlock;
 
-    public ModuleAST(Token start, Token stop, Token name, ImportBlockAST uses,
-            List<ModuleParameterAST> params, ExprAST req, ModuleBlockAST block) {
+    public ModuleAST(Token start, Token stop, Token name,
+            ImportCollectionAST uses, List<ModuleParameterAST> params,
+            ExprAST req, ModuleBlockAST block) {
         super(start, stop);
         myName = name;
 
         myModuleParams = params;
-        myImportBlock = uses;
+        myImports = uses;
         myRequires = req;
         myBodyBlock = block;
     }
@@ -49,8 +50,8 @@ public abstract class ModuleAST extends ResolveAST {
         return myModuleParams;
     }
 
-    public ImportBlockAST getImportBlock() {
-        return myImportBlock;
+    public ImportCollectionAST getImportBlock() {
+        return myImports;
     }
 
     public ExprAST getRequires() {

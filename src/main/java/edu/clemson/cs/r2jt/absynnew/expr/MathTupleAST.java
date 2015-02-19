@@ -156,4 +156,21 @@ public class MathTupleAST extends ExprAST {
         result.setMathTypeValue(getMathTypeValue());
         return result;
     }
+
+    @Override
+    public String toString() {
+        String result = "(";
+
+        boolean first = true;
+        for (ExprAST field : myFields) {
+            if (!first) {
+                result += ", ";
+            }
+            else {
+                first = false;
+            }
+            result += field;
+        }
+        return result + ")";
+    }
 }
