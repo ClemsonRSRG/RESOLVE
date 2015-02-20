@@ -219,12 +219,11 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                 new OperationSigAST.OperationDeclBuilder(ctx) //
                         .type(get(NamedTypeAST.class, ctx.type())) //
                         .requires(get(ExprAST.class, ctx.requiresClause())) //
-                        .ensures(get(ExprAST.class, ctx.ensuresClause())); //
-
-        for (ResolveParser.ParameterDeclGroupContext grp : ctx
-                .operationParameterList().parameterDeclGroup()) {
-            builder.params(getAll(ParameterAST.class, grp.Identifier()));
-        }
+                        .ensures(get(ExprAST.class, ctx.ensuresClause())) //
+                        .params(
+                                get(ParameterAST.class, ctx
+                                        .operationParameterList()
+                                        .parameterDecl()));
         put(ctx, builder.build());
     }
 
@@ -241,12 +240,12 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         OperationImplBuilder builder =
                 new OperationImplBuilder(ctx.getStart(), ctx.getStop(),
                         ctx.name) //
-                        .recursive(ctx.recursive != null); //
+                        .recursive(ctx.recursive != null) //
+                        .parameters(
+                                get(ParameterAST.class, ctx
+                                        .operationParameterList()
+                                        .parameterDecl()));
 
-        for (ResolveParser.ParameterDeclGroupContext grp : ctx
-                .operationParameterList().parameterDeclGroup()) {
-            builder.parameters(getAll(ParameterAST.class, grp.Identifier()));
-        }
         //Todo: Use blockAST for procedure, facility operation bodies,
         //will help clean this up a little bit.
         for (ResolveParser.VariableDeclGroupContext grp : ctx
@@ -270,12 +269,12 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                         ctx.name) //
                         .returnType(get(NamedTypeAST.class, ctx.type())) //
                         .recursive(ctx.recursive != null) //
-                        .implementsContract(true);
+                        .implementsContract(true) //
+                        .parameters(
+                                get(ParameterAST.class, ctx
+                                        .operationParameterList()
+                                        .parameterDecl()));
 
-        for (ResolveParser.ParameterDeclGroupContext grp : ctx
-                .operationParameterList().parameterDeclGroup()) {
-            builder.parameters(getAll(ParameterAST.class, grp.Identifier()));
-        }
         //Variable lists are a pain in the ass. It'd be easier if we just kept
         //them list-ifed.
         for (ResolveParser.VariableDeclGroupContext grp : ctx
@@ -380,16 +379,14 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void exitParameterDeclGroup(
-            @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
+    public void exitParameterDecl(
+            @NotNull ResolveParser.ParameterDeclContext ctx) {
         NamedTypeAST groupType = get(NamedTypeAST.class, ctx.type());
         ProgramParameterEntry.ParameterMode mode =
                 ProgramParameterEntry.getModeMapping().get(
                         ctx.parameterMode().getText());
-        for (TerminalNode t : ctx.Identifier()) {
-            put(t, new ParameterAST(ctx.getStart(), ctx.getStop(), t
-                    .getSymbol(), groupType, mode));
-        }
+        put(ctx, new ParameterAST(ctx.getStart(), ctx.getStop(), ctx.name,
+                groupType, mode));
     }
 
     @Override
@@ -837,6 +834,15 @@ public class TreeBuildingVisitor<T extends ResolveAST>
      */
     private <E extends ResolveAST> E get(Class<E> type, ParseTree t) {
         return myDecorator.getProp(type, t);
+    }
+
+    private <E extends ResolveAST> List<E> get(Class<E> type,
+            List<? extends ParseTree> t) {
+        return myDecorator.collect(type, t);
+    }
+
+    private <E extends ResolveAST> List<E> get(Class<E> type, ParseTree... t) {
+        return myDecorator.collect(type, Arrays.asList(t));
     }
 
     private <E extends ResolveAST> List<E> getAll(Class<E> type,

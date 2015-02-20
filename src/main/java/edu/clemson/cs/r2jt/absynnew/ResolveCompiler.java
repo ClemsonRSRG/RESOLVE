@@ -149,8 +149,7 @@ public class ResolveCompiler {
                 //        new CodeGenPipeline(this, )
 
                 for (ModuleIdentifier m : getCompileOrder(g)) {
-                    System.out.println("populating: " + m);
-                    //analysisPipe.process(m);
+                    analysisPipe.process(m);
                     //codegenPipe.process(m);
                     //verificationPipe.process(m);
                 }
@@ -212,8 +211,9 @@ public class ResolveCompiler {
         GraphIterator<ModuleIdentifier, DefaultEdge> iterator =
                 new DepthFirstIterator<ModuleIdentifier, DefaultEdge>(g, i);
         while (iterator.hasNext()) {
+            //we've reached j from i -- a path exists.
             if (iterator.next().equals(j)) {
-                return true; // we've reached j from i -- a path exists.
+                return true;
             }
         }
         return false;

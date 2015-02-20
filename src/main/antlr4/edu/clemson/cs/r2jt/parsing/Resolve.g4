@@ -72,7 +72,7 @@ usesList
 // parameter related rules
 
 operationParameterList
-    :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
+    :   '(' (parameterDecl (';' parameterDecl)*)?  ')'
     ;
 
 moduleParameterList
@@ -81,15 +81,15 @@ moduleParameterList
 
 moduleParameterDecl
     :   typeParameterDecl
-    |   parameterDeclGroup
+    |   parameterDecl
     ;
 
 typeParameterDecl
     :   'type' name=Identifier
     ;
 
-parameterDeclGroup
-    :   parameterMode Identifier (',' Identifier)* ':' type
+parameterDecl
+    :   parameterMode name=Identifier ':' type
     ;
 
 parameterMode
