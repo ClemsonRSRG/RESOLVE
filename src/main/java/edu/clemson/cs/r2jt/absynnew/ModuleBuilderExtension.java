@@ -34,7 +34,7 @@ public abstract class ModuleBuilderExtension<E extends ModuleBuilderExtension<E>
         extends
             AbstractNodeBuilder<ModuleAST> {
 
-    public ModuleBlockAST block;
+    public BlockAST block;
     public ExprAST requires = null;
 
     public final List<ModuleParameterAST> moduleParameters =
@@ -78,8 +78,8 @@ public abstract class ModuleBuilderExtension<E extends ModuleBuilderExtension<E>
     }
 
     @SuppressWarnings("unchecked")
-    public E block(ModuleBlockAST e) {
-        block = e == null ? ModuleBlockAST.EMPTY_BLOCK : e;
+    public E block(BlockAST e) {
+        block = e == null ? BlockAST.EMPTY_BLOCK : e;
         return (E) this;
     }
 }

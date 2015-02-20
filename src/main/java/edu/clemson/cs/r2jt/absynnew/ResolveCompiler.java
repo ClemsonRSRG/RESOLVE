@@ -22,9 +22,12 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.ConnectivityInspector;
+import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
+import org.jgrapht.traverse.DepthFirstIterator;
+import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import java.io.File;
@@ -113,8 +116,8 @@ public class ResolveCompiler {
                 }
             }
             else {
-                UnderliningErrorListener.INSTANCE
-                        .compilerError("unrecognized flag " + s);
+                UnderliningErrorListener
+                        .internalError("unrecognized flag " + s);
             }
         }
         //Todo: Sanity check lib directory (make sure it's valid, exists, etc)
@@ -175,9 +178,6 @@ public class ResolveCompiler {
         for (Token importRequest : root.getImportBlock().getImportsExcluding(
                 ImportCollectionAST.ImportType.EXTERNAL)) {
 
-            ConnectivityInspector<ModuleIdentifier, DefaultEdge> conn =
-                    new ConnectivityInspector<ModuleIdentifier, DefaultEdge>(g);
-
             File file = findResolveFile(importRequest.getText(), NATIVE_EXT);
             ModuleAST module = myModules.get(importRequest);
 
@@ -196,9 +196,7 @@ public class ResolveCompiler {
                             + "type: " + module.getClass());
                 }
             }
-            // If there exists a path from the dependent (module referenced) to
-            // the root (source node), then adding the edge will cause a cycle.
-            if (conn.pathExists(id(root), id(module))) {
+            if (pathExists(g, id(root), id(module))) {
                 throw new CircularDependencyException(
                         "circular dependency detected");
             }
@@ -206,6 +204,19 @@ public class ResolveCompiler {
             findDependencies(g, module);
         }
         addFilesForExternalImports(root);
+    }
+
+    protected boolean pathExists(DefaultDirectedGraph g, ModuleIdentifier i,
+            ModuleIdentifier j) {
+        GraphIterator<ModuleIdentifier, DefaultEdge> iterator =
+                new DepthFirstIterator<ModuleIdentifier, DefaultEdge>(g, i);
+        while (iterator.hasNext()) {
+            //we've reached j from i -- a path exists.
+            if (iterator.next().equals(j)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected List<ModuleIdentifier> getCompileOrder(DefaultDirectedGraph g) {

@@ -254,6 +254,16 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
+    public void postFacilityAST(FacilityAST e) {
+        try {
+            myBuilder.getInnermostActiveScope().addFacility(e);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(e.getName());
+        }
+    }
+
+    @Override
     public void preTypeModelAST(TypeModelAST e) {
         myBuilder.startScope(e);
     }

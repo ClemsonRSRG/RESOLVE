@@ -71,7 +71,6 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
         if (result) {
             result = ((ModuleIdentifier) o).myName.equals(myName);
         }
-
         return result;
     }
 

@@ -12,7 +12,9 @@
  */
 package edu.clemson.cs.r2jt.absynnew;
 
+import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
@@ -111,6 +113,22 @@ public class ImportCollectionAST extends ResolveAST {
                     usesItems.put(curType, new HashSet<Token>());
                 }
             }
+        }
+
+        public ImportCollectionBuilder imports(
+                @NotNull ResolveParser.FacilityDeclContext ctx) {
+            imports(ImportType.IMPLICIT, ctx.concept);
+            ImportType specType =
+                    (ctx.externally != null) ? ImportType.EXTERNAL
+                            : ImportType.IMPLICIT;
+            imports(specType, ctx.impl);
+            //Todo: External keyword for enhancement pairs.
+            for (ResolveParser.EnhancementPairDeclContext enhancement : ctx
+                    .enhancementPairDecl()) {
+                imports(ImportType.IMPLICIT, ctx.concept);
+                imports(specType, ctx.impl);
+            }
+            return this;
         }
 
         public ImportCollectionBuilder imports(ImportType type, Token... t) {

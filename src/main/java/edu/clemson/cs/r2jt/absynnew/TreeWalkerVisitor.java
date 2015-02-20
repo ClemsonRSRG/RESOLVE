@@ -334,6 +334,17 @@ public abstract class TreeWalkerVisitor {
     public void postFacilityAST(
             edu.clemson.cs.r2jt.absynnew.ModuleAST.FacilityAST e) {}
 
+    public void preFacilityAST(FacilityAST e) {}
+
+    public void midFacilityAST(FacilityAST e, ResolveAST previous,
+            ResolveAST next) {}
+
+    public void postFacilityAST(FacilityAST e) {}
+
+    public boolean walkFacilityAST(FacilityAST e) {
+        return false;
+    }
+
     public boolean walkParameterAST(ParameterAST e) {
         return false;
     }
@@ -366,16 +377,15 @@ public abstract class TreeWalkerVisitor {
 
     public void postExprAST(ExprAST e) {}
 
-    public boolean walkModuleBlockAST(ModuleBlockAST e) {
+    public boolean walkBlockAST(BlockAST e) {
         return false;
     }
 
-    public void preModuleBlockAST(ModuleBlockAST e) {}
+    public void preBlockAST(BlockAST e) {}
 
-    public void midModuleBlockAST(ModuleBlockAST e, ResolveAST previous,
-            ResolveAST next) {}
+    public void midBlockAST(BlockAST e, ResolveAST previous, ResolveAST next) {}
 
-    public void postModuleBlockAST(ModuleBlockAST e) {}
+    public void postBlockAST(BlockAST e) {}
 
     public boolean walkNamedTypeAST(NamedTypeAST e) {
         return false;
