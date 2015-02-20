@@ -88,12 +88,14 @@ public class AssertiveCode {
      * <p>Add the <code>Exp</code> containing a new assumes
      * clause.</p>
      *
+     * @param l The location for this assume clause.
      * @param e The corresponding assume <code>Exp</code>.
+     * @param b Boolean to determine if we simplify this assume clause
+     *          or not.
      */
-    public void addAssume(Exp e) {
+    public void addAssume(Location l, Exp e, boolean b) {
         // Creates a new AssumeStmt
-        AssumeStmt assume = new AssumeStmt();
-        assume.setAssertion(e);
+        AssumeStmt assume = new AssumeStmt(l, e, b);
 
         // Adds the assume to our list of verification statements
         addCode(assume);

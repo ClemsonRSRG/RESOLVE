@@ -21,28 +21,26 @@ public class ConfirmStmt extends Statement {
     // ===========================================================
 
     /** The location member. */
-    private Location location;
+    private Location myLocation;
 
     /** The left member. */
-    private Exp assertion;
+    private Exp myAssertion;
 
     /** The simplify flag */
-    private boolean simplify;
+    private boolean mySimplify;
 
     // ===========================================================
     // Constructors
     // ===========================================================
-
-    public ConfirmStmt() {};
 
     public ConfirmStmt(Location location, Exp assertion) {
         this(location, assertion, false);
     }
 
     public ConfirmStmt(Location location, Exp assertion, boolean simplify) {
-        this.location = location;
-        this.assertion = assertion;
-        this.simplify = simplify;
+        myLocation = location;
+        myAssertion = assertion;
+        mySimplify = simplify;
     }
 
     // ===========================================================
@@ -55,17 +53,17 @@ public class ConfirmStmt extends Statement {
 
     /** Returns the value of the location variable. */
     public Location getLocation() {
-        return location;
+        return myLocation;
     }
 
-    /** Returns the value of the Expression */
+    /** Returns the value of the expression */
     public Exp getAssertion() {
-        return assertion;
+        return myAssertion;
     }
 
-    /** Returns whether we simplify the Expression or not */
+    /** Returns whether we simplify the expression or not */
     public boolean getSimplify() {
-        return simplify;
+        return mySimplify;
     }
 
     // -----------------------------------------------------------
@@ -74,17 +72,17 @@ public class ConfirmStmt extends Statement {
 
     /** Sets the location variable to the specified value. */
     public void setLocation(Location location) {
-        this.location = location;
+        myLocation = location;
     }
 
     /** Sets the right variable to the specified value. */
     public void setAssertion(Exp assertion) {
-        this.assertion = assertion;
+        myAssertion = assertion;
     }
 
-    /** Sets whether we simplify the Expression or not */
+    /** Sets whether we simplify the expression or not */
     public void setSimplify(boolean simplify) {
-        this.simplify = simplify;
+        mySimplify = simplify;
     }
 
     // ===========================================================
@@ -104,8 +102,8 @@ public class ConfirmStmt extends Statement {
         printSpace(indent, sb);
         sb.append("ConfirmStmt\n");
 
-        if (assertion != null) {
-            sb.append(assertion.asString(indent + increment, increment));
+        if (myAssertion != null) {
+            sb.append(myAssertion.asString(indent + increment, increment));
         }
 
         return sb.toString();
@@ -118,8 +116,8 @@ public class ConfirmStmt extends Statement {
 
         printSpace(indent, sb);
 
-        if (assertion != null) {
-            sb.append("Confirm " + assertion.toString(0));
+        if (myAssertion != null) {
+            sb.append("Confirm " + myAssertion.toString(0));
         }
         else {
             sb.append("Confirm true");
@@ -129,6 +127,7 @@ public class ConfirmStmt extends Statement {
     }
 
     public ConfirmStmt clone() {
-        return new ConfirmStmt(location, (Exp) Exp.clone(assertion), simplify);
+        return new ConfirmStmt((Location) myLocation.clone(), Exp
+                .copy(myAssertion), mySimplify);
     }
 }

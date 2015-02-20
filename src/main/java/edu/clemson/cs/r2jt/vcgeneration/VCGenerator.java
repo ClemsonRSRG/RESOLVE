@@ -2200,15 +2200,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Modify the location of the requires clause and add it to myCurrentAssertiveCode
         if (ensures != null) {
             // Obtain the current location
+            Location loc = null;
             if (stmt.getName().getLocation() != null) {
                 // Set the details of the current location
-                Location loc = (Location) stmt.getName().getLocation().clone();
+                loc = (Location) stmt.getName().getLocation().clone();
                 loc.setDetails("Ensures Clause of " + opDec.getName());
                 Utilities.setLocation(ensures, loc);
             }
 
             // Add this to our list of things to assume
-            myCurrentAssertiveCode.addAssume(ensures);
+            myCurrentAssertiveCode.addAssume(loc, ensures, false);
         }
 
         // Verbose Mode Debug Messages
@@ -2311,18 +2312,25 @@ public class VCGenerator extends TreeWalkerVisitor {
         AssertiveCode assertiveCode =
                 new AssertiveCode(myInstanceEnvironment, dec);
 
+        // Obtain the location for each assume clause
+        Location decLoc = dec.getLocation();
+
         // Add the global constraints as given
-        assertiveCode.addAssume(myGlobalConstraintExp);
+        assertiveCode.addAssume((Location) decLoc.clone(),
+                myGlobalConstraintExp, false);
 
         // Add the global require clause as given
-        assertiveCode.addAssume(myGlobalRequiresExp);
+        assertiveCode.addAssume((Location) decLoc.clone(), myGlobalRequiresExp,
+                false);
 
         // Add the convention as given
-        assertiveCode.addAssume(dec.getConvention());
+        assertiveCode.addAssume((Location) decLoc.clone(), dec.getConvention(),
+                false);
 
         // Add the correspondence as given
         myCorrespondenceExp = dec.getCorrespondence();
-        assertiveCode.addAssume(myCorrespondenceExp);
+        assertiveCode.addAssume((Location) decLoc.clone(), myCorrespondenceExp,
+                false);
 
         // Search for the type we are implementing
         SymbolTableEntry ste =
@@ -2433,7 +2441,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Only add the field constraints if we don't have true
             if (!fieldConstraints.isLiteralTrue()) {
-                assertiveCode.addAssume(fieldConstraints);
+                assertiveCode.addAssume(loc, fieldConstraints, false);
             }
         }
 
@@ -2461,11 +2469,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         AssertiveCode assertiveCode =
                 new AssertiveCode(myInstanceEnvironment, dec);
 
+        // Location for the assume clauses
+        Location decLoc = dec.getLocation();
+
         // Add the global constraints as given
-        assertiveCode.addAssume(myGlobalConstraintExp);
+        assertiveCode.addAssume((Location) decLoc.clone(),
+                myGlobalConstraintExp, false);
 
         // Add the global require clause as given
-        assertiveCode.addAssume(myGlobalRequiresExp);
+        assertiveCode.addAssume((Location) decLoc.clone(), myGlobalRequiresExp,
+                false);
 
         // TODO: Loop through every enhancement/enhancement realization declaration, if any.
 
@@ -3138,9 +3151,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                         ensures = ((EqualsExp) opEnsures).getRight();
 
                         // Obtain the current location
+                        Location loc = null;
                         if (testParamExp.getName().getLocation() != null) {
                             // Set the details of the current location
-                            Location loc =
+                            loc =
                                     (Location) testParamExp.getName()
                                             .getLocation().clone();
                             loc.setDetails("If Statement Condition");
@@ -3152,7 +3166,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 replaceFormalWithActualEns(ensures, opDec
                                         .getParameters(), opDec.getStateVars(),
                                         testParamExp.getArguments(), false);
-                        myCurrentAssertiveCode.addAssume(ensures);
+                        myCurrentAssertiveCode.addAssume(loc, ensures, false);
 
                         // Negation of the condition
                         negEnsures = Utilities.negateExp(ensures, BOOLEAN);
@@ -3286,7 +3300,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Add the negation of the if condition as the assume clause
         if (negEnsures != null) {
-            negIfAssertiveCode.addAssume(negEnsures);
+            negIfAssertiveCode.addAssume(ifLocation, negEnsures, false);
         }
         else {
             Utilities.illegalOperationEnsures(opDec.getLocation());
@@ -3394,11 +3408,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         AssertiveCode assertiveCode =
                 new AssertiveCode(myInstanceEnvironment, dec);
 
+        // Location for the assume clauses
+        Location decLoc = dec.getLocation();
+
         // Add the global constraints as given
-        assertiveCode.addAssume(myGlobalConstraintExp);
+        assertiveCode.addAssume((Location) decLoc.clone(),
+                myGlobalConstraintExp, false);
 
         // Add the global require clause as given
-        assertiveCode.addAssume(myGlobalRequiresExp);
+        assertiveCode.addAssume((Location) decLoc.clone(), myGlobalRequiresExp,
+                false);
 
         // Add any variable declarations for records
         if (dec.getRepresentation() instanceof RecordTy) {
@@ -3438,7 +3457,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                             .getExemplar(), typeEntry.getModelType(), null);
 
             // Add the correspondence as given
-            assertiveCode.addAssume(dec.getCorrespondence());
+            assertiveCode.addAssume((Location) decLoc.clone(), dec
+                    .getCorrespondence(), false);
 
             // Make sure we have a convention
             if (dec.getConvention() == null) {
@@ -3539,29 +3559,34 @@ public class VCGenerator extends TreeWalkerVisitor {
             List<Statement> statementList, boolean isLocal) {
         // Add the global requires clause
         if (myGlobalRequiresExp != null) {
-            myCurrentAssertiveCode.addAssume(myGlobalRequiresExp);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    myGlobalRequiresExp, false);
         }
 
         // Add the global constraints
         if (myGlobalConstraintExp != null) {
-            myCurrentAssertiveCode.addAssume(myGlobalConstraintExp);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    myGlobalConstraintExp, false);
         }
 
         // Add the convention as something we need to ensure
         if (myConventionExp != null && !isLocal) {
             Exp convention = Exp.copy(myConventionExp);
-            myCurrentAssertiveCode.addAssume(convention);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    convention, false);
         }
 
         // Add the correspondence as a given
         if (myCorrespondenceExp != null && !isLocal) {
             Exp correspondence = Exp.copy(myCorrespondenceExp);
-            myCurrentAssertiveCode.addAssume(correspondence);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    correspondence, false);
         }
 
         // Add the requires clause
         if (requires != null) {
-            myCurrentAssertiveCode.addAssume(requires);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    requires, false);
         }
 
         // Add the facility formal to actuals
@@ -3595,7 +3620,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
         }
         if (!formalActualExp.isLiteralTrue()) {
-            myCurrentAssertiveCode.addAssume(formalActualExp);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    formalActualExp, false);
         }
 
         // NY - Add any procedure duration clauses
@@ -3622,7 +3648,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             Utilities.setLocation(equalsExp, eqLoc);
 
             // Add it to our things to assume
-            myCurrentAssertiveCode.addAssume(equalsExp);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    equalsExp, false);
 
             // Create the duration expression
             Exp durationExp;
@@ -3655,7 +3682,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Add the facility type constraints
         if (typeConstraint != null) {
-            myCurrentAssertiveCode.addAssume(typeConstraint);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    typeConstraint, false);
         }
 
         // Add the remember rule
@@ -3689,7 +3717,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             Utilities.setLocation(equalsExp, eqLoc);
 
             // Add it to our things to assume
-            myCurrentAssertiveCode.addAssume(equalsExp);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    equalsExp, false);
         }
 
         // Add the list of statements
@@ -3698,7 +3727,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add the correspondence as a given again
         if (myCorrespondenceExp != null && !isLocal) {
             Exp correspondence = Exp.copy(myCorrespondenceExp);
-            myCurrentAssertiveCode.addAssume(correspondence);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    correspondence, false);
         }
 
         // Add the convention as something we need to ensure
@@ -3989,7 +4019,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Check if our confirm clause uses this variable
                 if (finalConfirm.containsVar(varName, false)) {
                     // Add the new assume clause to our assertive code.
-                    myCurrentAssertiveCode.addAssume(init);
+                    myCurrentAssertiveCode.addAssume((Location) loc.clone(),
+                            init, false);
                 }
             }
             // Since the type is generic, we can only use the is_initial predicate
@@ -4009,7 +4040,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
 
                 // Add to our assertive code as an assume
-                myCurrentAssertiveCode.addAssume(isInitialExp);
+                myCurrentAssertiveCode.addAssume((Location) varLoc.clone(),
+                        isInitialExp, false);
             }
 
             // NY YS
@@ -4174,7 +4206,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             assume = myTypeGraph.formConjunct(assume, equalPExp);
         }
 
-        myCurrentAssertiveCode.addAssume(assume);
+        myCurrentAssertiveCode.addAssume((Location) whileLoc.clone(), assume,
+                false);
 
         // if statement body
         edu.clemson.cs.r2jt.collections.List<Statement> ifStmtList =
