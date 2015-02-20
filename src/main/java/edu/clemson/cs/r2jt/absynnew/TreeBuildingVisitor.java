@@ -18,7 +18,8 @@ import edu.clemson.cs.r2jt.absynnew.InitFinalAST.TypeFinalAST;
 import edu.clemson.cs.r2jt.absynnew.InitFinalAST.TypeInitAST;
 import edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptAST.ConceptBuilder;
 import edu.clemson.cs.r2jt.absynnew.ModuleAST.PrecisAST.PrecisBuilder;
-import edu.clemson.cs.r2jt.absynnew.ModuleBlockAST.ModuleBlockBuilder;
+import edu.clemson.cs.r2jt.absynnew.ModuleAST.FacilityAST.FacilityBuilder;
+import edu.clemson.cs.r2jt.absynnew.BlockAST.BlockBuilder;
 import edu.clemson.cs.r2jt.absynnew.decl.*;
 import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST.DefinitionBuilder;
 import edu.clemson.cs.r2jt.absynnew.decl.OperationImplAST.OperationImplBuilder;
@@ -35,6 +36,7 @@ import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -58,7 +60,7 @@ import java.util.List;
  * {@link ResolveParserFactory} and the {@link TreeUtil#createASTNodeFrom}
  * method.</p>
  *
- * <p>References to the completed, AST can be acquired through
+ * <p>References to the completed, ast can be acquired through
  * calls to {@link #build()}.</p>
  */
 public class TreeBuildingVisitor<T extends ResolveAST>
@@ -124,7 +126,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         ConceptBuilder builder =
                 new ConceptBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
                         .requires(get(ExprAST.class, ctx.requiresClause()))//
-                        .block(get(ModuleBlockAST.class, ctx.conceptItems()))//
+                        .block(get(BlockAST.class, ctx.conceptItems()))//
                         .imports(myImportBuilder.build());
 
         if (ctx.moduleParameterList() != null) {
@@ -136,8 +138,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
     @Override
     public void exitConceptItems(@NotNull ResolveParser.ConceptItemsContext ctx) {
-        ModuleBlockBuilder blockBuilder =
-                new ModuleBlockBuilder(ctx.getStart(), ctx.getStop())
+        BlockBuilder blockBuilder =
+                new BlockBuilder(ctx.getStart(), ctx.getStop())
                         .generalElements(getAll(ResolveAST.class, ctx
                                 .conceptItem()));
         put(ctx, blockBuilder.build());
@@ -157,10 +159,19 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     public void exitPrecisModule(@NotNull ResolveParser.PrecisModuleContext ctx) {
         PrecisBuilder builder =
                 new PrecisBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
-                        .block(get(ModuleBlockAST.class, ctx.precisItems()))//
+                        .block(get(BlockAST.class, ctx.precisItems()))//
                         .imports(myImportBuilder.build());
 
         put(ctx, builder.build());
+    }
+
+    @Override
+    public void exitPrecisItems(@NotNull ResolveParser.PrecisItemsContext ctx) {
+        BlockBuilder blockBuilder =
+                new BlockBuilder(ctx.getStart(), ctx.getStop())
+                        .generalElements(getAll(ResolveAST.class, ctx
+                                .precisItem()));
+        put(ctx, blockBuilder.build());
     }
 
     @Override
@@ -169,12 +180,35 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void exitPrecisItems(@NotNull ResolveParser.PrecisItemsContext ctx) {
-        ModuleBlockBuilder blockBuilder =
-                new ModuleBlockBuilder(ctx.getStart(), ctx.getStop())
+    public void enterFacilityModule(
+            @NotNull ResolveParser.FacilityModuleContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
+    }
+
+    @Override
+    public void exitFacilityModule(
+            @NotNull ResolveParser.FacilityModuleContext ctx) {
+        FacilityBuilder builder =
+                new FacilityBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
+                        .block(get(BlockAST.class, ctx.facilityItems()))//
+                        .imports(myImportBuilder.build());
+
+        put(ctx, builder.build());
+    }
+
+    @Override
+    public void exitFacilityItems(
+            @NotNull ResolveParser.FacilityItemsContext ctx) {
+        BlockBuilder blockBuilder =
+                new BlockBuilder(ctx.getStart(), ctx.getStop())
                         .generalElements(getAll(ResolveAST.class, ctx
-                                .precisItem()));
+                                .facilityItem()));
         put(ctx, blockBuilder.build());
+    }
+
+    @Override
+    public void exitFacilityItem(@NotNull ResolveParser.FacilityItemContext ctx) {
+        put(ctx, get(ResolveAST.class, ctx.getChild(0)));
     }
 
     @Override
@@ -185,12 +219,12 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                 new OperationSigAST.OperationDeclBuilder(ctx) //
                         .type(get(NamedTypeAST.class, ctx.type())) //
                         .requires(get(ExprAST.class, ctx.requiresClause())) //
-                        .ensures(get(ExprAST.class, ctx.ensuresClause())) //
-                        .params(
-                                getAll(ParameterAST.class, ctx
-                                        .operationParameterList()
-                                        .parameterDecl()));
+                        .ensures(get(ExprAST.class, ctx.ensuresClause())); //
 
+        for (ResolveParser.ParameterDeclGroupContext grp : ctx
+                .operationParameterList().parameterDeclGroup()) {
+            builder.params(getAll(ParameterAST.class, grp.Identifier()));
+        }
         put(ctx, builder.build());
     }
 
@@ -203,16 +237,18 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitFacilityOperationDecl(
             @NotNull ResolveParser.FacilityOperationDeclContext ctx) {
-        List<ParameterAST> formalParams =
-                getAll(ParameterAST.class, ctx.operationParameterList()
-                        .parameterDecl());
 
         OperationImplBuilder builder =
                 new OperationImplBuilder(ctx.getStart(), ctx.getStop(),
                         ctx.name) //
-                        .recursive(ctx.recursive != null) //
-                        .parameters(formalParams);
+                        .recursive(ctx.recursive != null); //
 
+        for (ResolveParser.ParameterDeclGroupContext grp : ctx
+                .operationParameterList().parameterDeclGroup()) {
+            builder.parameters(getAll(ParameterAST.class, grp.Identifier()));
+        }
+        //Todo: Use blockAST for procedure, facility operation bodies,
+        //will help clean this up a little bit.
         for (ResolveParser.VariableDeclGroupContext grp : ctx
                 .variableDeclGroup()) {
             builder.localVariables(getAll(VariableAST.class, grp.Identifier()));
@@ -234,12 +270,12 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                         ctx.name) //
                         .returnType(get(NamedTypeAST.class, ctx.type())) //
                         .recursive(ctx.recursive != null) //
-                        .implementsContract(true) //
-                        .parameters(
-                                getAll(ParameterAST.class, ctx
-                                        .operationParameterList()
-                                        .parameterDecl()));
+                        .implementsContract(true);
 
+        for (ResolveParser.ParameterDeclGroupContext grp : ctx
+                .operationParameterList().parameterDeclGroup()) {
+            builder.parameters(getAll(ParameterAST.class, grp.Identifier()));
+        }
         //Variable lists are a pain in the ass. It'd be easier if we just kept
         //them list-ifed.
         for (ResolveParser.VariableDeclGroupContext grp : ctx
@@ -258,6 +294,27 @@ public class TreeBuildingVisitor<T extends ResolveAST>
             put(t, new VariableAST(ctx.getStart(), ctx.getStop(),
                     t.getSymbol(), groupType));
         }
+    }
+
+    @Override
+    public void exitFacilityDecl(@NotNull ResolveParser.FacilityDeclContext ctx) {
+        List<EnhancementPairAST> enhancements =
+                getAll(EnhancementPairAST.class, ctx.enhancementPairDecl());
+        myImportBuilder.imports(ctx);
+
+        put(ctx, new FacilityAST(ctx.getStart(), ctx.getStop(), ctx.name,
+                ctx.concept, ctx.impl, enhancements));
+    }
+
+    @Override
+    public void exitEnhancementPairDecl(
+            @NotNull ResolveParser.EnhancementPairDeclContext ctx) {
+        List<ModuleArgumentAST> specArgs =
+                getAll(ModuleArgumentAST.class, ctx.specArgs.moduleArgument());
+        List<ModuleArgumentAST> bodyArgs =
+                getAll(ModuleArgumentAST.class, ctx.bodyArgs.moduleArgument());
+        put(ctx, new EnhancementPairAST(ctx.getStart(), ctx.getStop(),
+                ctx.spec, specArgs, ctx.body, bodyArgs));
     }
 
     @Override
@@ -321,14 +378,16 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void exitParameterDecl(
-            @NotNull ResolveParser.ParameterDeclContext ctx) {
-        NamedTypeAST type = get(NamedTypeAST.class, ctx.type());
+    public void exitParameterDeclGroup(
+            @NotNull ResolveParser.ParameterDeclGroupContext ctx) {
+        NamedTypeAST groupType = get(NamedTypeAST.class, ctx.type());
         ProgramParameterEntry.ParameterMode mode =
                 ProgramParameterEntry.getModeMapping().get(
                         ctx.parameterMode().getText());
-        put(ctx, new ParameterAST(ctx.getStart(), ctx.getStop(), ctx.name,
-                type, mode));
+        for (TerminalNode t : ctx.Identifier()) {
+            put(t, new ParameterAST(ctx.getStart(), ctx.getStop(), t
+                    .getSymbol(), groupType, mode));
+        }
     }
 
     @Override
@@ -588,6 +647,12 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
+    public void exitConstraintClause(
+            @NotNull ResolveParser.ConstraintClauseContext ctx) {
+        put(ctx, get(ExprAST.class, ctx.mathAssertionExp()));
+    }
+
+    @Override
     public void exitMathAssertionExp(
             @NotNull ResolveParser.MathAssertionExpContext ctx) {
         put(ctx, get(ExprAST.class, ctx.getChild(0)));
@@ -765,14 +830,14 @@ public class TreeBuildingVisitor<T extends ResolveAST>
      * @param t    A {@link ParseTree} indicating which subtree to draw the
      *             annotation from.
      *
-     * @param <T>  A type.
+     * @param <E>  An ast type.
      * @return
      */
-    private <T extends ResolveAST> T get(Class<T> type, ParseTree t) {
+    private <E extends ResolveAST> E get(Class<E> type, ParseTree t) {
         return myDecorator.getProp(type, t);
     }
 
-    private <T extends ResolveAST> List<T> getAll(Class<T> type,
+    private <E extends ResolveAST> List<E> getAll(Class<E> type,
             List<? extends ParseTree> t) {
         return myDecorator.collect(type, t);
     }

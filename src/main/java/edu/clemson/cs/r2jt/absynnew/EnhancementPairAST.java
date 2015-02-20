@@ -28,10 +28,14 @@ public class EnhancementPairAST extends ResolveAST {
             new ArrayList<ModuleArgumentAST>();
 
     public EnhancementPairAST(Token start, Token stop, Token specName,
-            Token bodyName) {
+            List<ModuleArgumentAST> specArgs, Token bodyName,
+            List<ModuleArgumentAST> bodyArgs) {
         super(start, stop);
         mySpecificationName = specName;
         myBodyName = bodyName;
+
+        mySpecificationArgs.addAll(specArgs);
+        myBodyArgs.addAll(bodyArgs);
     }
 
     public Token getSpecificationName() {

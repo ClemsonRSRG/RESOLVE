@@ -32,11 +32,31 @@ public class FacilityAST extends DeclAST {
     private final List<EnhancementPairAST> myEnhancements;
 
     public FacilityAST(Token start, Token stop, Token name, Token conceptName,
+            Token bodyName) {
+        this(start, stop, name, conceptName,
+                new ArrayList<ModuleArgumentAST>(), bodyName,
+                new ArrayList<ModuleArgumentAST>(),
+                new ArrayList<EnhancementPairAST>());
+    }
+
+    public FacilityAST(Token start, Token stop, Token name, Token conceptName,
             Token bodyName, List<EnhancementPairAST> enhancements) {
+        this(start, stop, name, conceptName,
+                new ArrayList<ModuleArgumentAST>(), bodyName,
+                new ArrayList<ModuleArgumentAST>(), enhancements);
+    }
+
+    public FacilityAST(Token start, Token stop, Token name, Token conceptName,
+            List<ModuleArgumentAST> specArgs, Token bodyName,
+            List<ModuleArgumentAST> bodyArgs,
+            List<EnhancementPairAST> enhancements) {
         super(start, stop, name);
         myConceptName = conceptName;
         myBodyName = bodyName;
         myEnhancements = enhancements;
+
+        myBodyArguments.addAll(bodyArgs);
+        myConceptArguments.addAll(specArgs);
     }
 
     public Token getConceptName() {

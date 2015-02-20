@@ -28,11 +28,11 @@ public abstract class ModuleAST extends ResolveAST {
     private final ImportCollectionAST myImports;
     private final List<ModuleParameterAST> myModuleParams;
     private final ExprAST myRequires;
-    private final ModuleBlockAST myBodyBlock;
+    private final BlockAST myBodyBlock;
 
     public ModuleAST(Token start, Token stop, Token name,
             ImportCollectionAST uses, List<ModuleParameterAST> params,
-            ExprAST req, ModuleBlockAST block) {
+            ExprAST req, BlockAST block) {
         super(start, stop);
         myName = name;
 
@@ -58,7 +58,7 @@ public abstract class ModuleAST extends ResolveAST {
         return myRequires;
     }
 
-    public ModuleBlockAST getBodyBlock() {
+    public BlockAST getBodyBlock() {
         return myBodyBlock;
     }
 

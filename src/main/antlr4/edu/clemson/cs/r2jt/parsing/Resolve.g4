@@ -29,7 +29,17 @@ precisItem
 
 facilityModule
     :   'Facility' name=Identifier ';'
+        (usesList)?
+        (facilityItems)?
         'end' closename=Identifier ';'
+    ;
+
+facilityItems
+    :   (facilityItem)+
+    ;
+
+facilityItem
+    :   facilityDecl
     ;
 
 // concept module
@@ -50,6 +60,7 @@ conceptItem
     :   constraintClause
     |   operationDecl
     |   typeModelDecl
+    |   mathDefinitionDecl
     ;
 
 // uses, imports
@@ -60,25 +71,25 @@ usesList
 
 // parameter related rules
 
+operationParameterList
+    :   '(' (parameterDeclGroup (';' parameterDeclGroup)*)?  ')'
+    ;
+
 moduleParameterList
     :   '(' moduleParameterDecl (';' moduleParameterDecl)* ')'
     ;
 
 moduleParameterDecl
     :   typeParameterDecl
-    |   parameterDecl
+    |   parameterDeclGroup
     ;
 
 typeParameterDecl
     :   'type' name=Identifier
     ;
 
-parameterList
-    :   parameterDecl (',' parameterDecl)*
-    ;
-
-parameterDecl
-    :   parameterMode name=Identifier ':' type
+parameterDeclGroup
+    :   parameterMode Identifier (',' Identifier)* ':' type
     ;
 
 parameterMode
@@ -147,8 +158,27 @@ operationDecl
             (ensuresClause)?
     ;
 
-operationParameterList
-    :   '(' (parameterDecl (';' parameterDecl)*)? ')'
+// facility and enhancements
+
+//Todo: This also needs enhancements that can be realized by the base concept.
+facilityDecl
+    :   'Facility' name=Identifier 'is' concept=Identifier
+        (conceptArgs=moduleArgumentList)? (externally='externally')? 'realized'
+        'by' impl=Identifier (moduleArgumentList)?
+        (enhancementPairDecl)* ';'
+    ;
+
+enhancementPairDecl
+    :   'enhanced' 'by' spec=Identifier (specArgs=moduleArgumentList)?
+        'realized' 'by' body=Identifier (bodyArgs=moduleArgumentList)?
+    ;
+
+moduleArgumentList
+    :   '(' moduleArgument (',' moduleArgument)* ')'
+    ;
+
+moduleArgument
+    :   progExp
     ;
 
 // variable declarations
@@ -270,7 +300,7 @@ decreasingClause
     ;
 
 constraintClause
-    :   'constraint' mathAssertionExp ';'
+    :   ('constraint'|'Constraint') mathAssertionExp ';'
     ;
 
 whereClause

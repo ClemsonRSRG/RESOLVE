@@ -14,6 +14,7 @@ package edu.clemson.cs.r2jt.typeandpopulate2;
 
 import edu.clemson.cs.r2jt.absynnew.InitFinalAST;
 import edu.clemson.cs.r2jt.absynnew.ResolveAST;
+import edu.clemson.cs.r2jt.absynnew.decl.FacilityAST;
 import edu.clemson.cs.r2jt.absynnew.decl.MathTheoremAST;
 import edu.clemson.cs.r2jt.absynnew.decl.TypeModelAST;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
@@ -104,6 +105,20 @@ public class ScopeBuilder extends SyntacticScope {
                 new ProgramParameterEntry(myTypeGraph, name, definingElement,
                         myRootModule, type, mode);
         myBindings.put(name, entry);
+        return entry;
+    }
+
+    public FacilityEntry addFacility(FacilityAST facility)
+            throws DuplicateSymbolException {
+        SymbolTableEntry curLocalEntry =
+                myBindings.get(facility.getName().getText());
+
+        if (curLocalEntry != null) {
+            throw new DuplicateSymbolException(curLocalEntry);
+        }
+        FacilityEntry entry =
+                new FacilityEntry(facility, myRootModule, getSourceRepository());
+        myBindings.put(facility.getName().getText(), entry);
         return entry;
     }
 
