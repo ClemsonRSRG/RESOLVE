@@ -113,8 +113,8 @@ public class ResolveCompiler {
                 }
             }
             else {
-                UnderliningErrorListener.INSTANCE
-                        .compilerError("unrecognized flag " + s);
+                UnderliningErrorListener
+                        .internalError("unrecognized flag " + s);
             }
         }
         //Todo: Sanity check lib directory (make sure it's valid, exists, etc)
