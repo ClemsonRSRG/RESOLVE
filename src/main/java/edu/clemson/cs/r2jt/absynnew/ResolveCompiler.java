@@ -207,13 +207,13 @@ public class ResolveCompiler {
         addFilesForExternalImports(root);
     }
 
-    protected boolean pathExists(DefaultDirectedGraph g,
-                                 ModuleIdentifier i, ModuleIdentifier j) {
+    protected boolean pathExists(DefaultDirectedGraph g, ModuleIdentifier i,
+            ModuleIdentifier j) {
         GraphIterator<ModuleIdentifier, DefaultEdge> iterator =
                 new DepthFirstIterator<ModuleIdentifier, DefaultEdge>(g, i);
         while (iterator.hasNext()) {
             if (iterator.next().equals(j)) {
-                return true;    // we've reached j from i -- a path exists.
+                return true; // we've reached j from i -- a path exists.
             }
         }
         return false;
