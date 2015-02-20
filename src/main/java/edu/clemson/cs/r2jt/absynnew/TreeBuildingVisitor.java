@@ -285,6 +285,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         put(ctx, builder.build());
     }
 
+    //Todo: Make the *declGroup methods return a BlockAST then filter by the
+    //type you want; in the ctx you want.
     @Override
     public void exitVariableDeclGroup(
             @NotNull ResolveParser.VariableDeclGroupContext ctx) {
