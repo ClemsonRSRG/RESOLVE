@@ -148,8 +148,10 @@ public class ResolveCompiler {
                 //CodeGenPipeline codegenPipe =
                 //        new CodeGenPipeline(this, )
 
+                System.out.println(g);
                 for (ModuleIdentifier m : getCompileOrder(g)) {
-                    analysisPipe.process(m);
+                    System.out.println("populating: " + m);
+                    //analysisPipe.process(m);
                     //codegenPipe.process(m);
                     //verificationPipe.process(m);
                 }
@@ -196,7 +198,7 @@ public class ResolveCompiler {
                             + "type: " + module.getClass());
                 }
             }
-            if (pathExists(g, id(root), id(module))) {
+            if (pathExists(g, id(module), id(root))) {
                 throw new CircularDependencyException(
                         "circular dependency detected");
             }
@@ -205,14 +207,20 @@ public class ResolveCompiler {
         }
         addFilesForExternalImports(root);
     }
-
-    protected boolean pathExists(DefaultDirectedGraph g, ModuleIdentifier i,
-            ModuleIdentifier j) {
+    protected boolean pathExists(DefaultDirectedGraph g, ModuleIdentifier src,
+            ModuleIdentifier dest) {
+        //If src doesn't exist in  g, there is obviously no path from
+        //src -> ... -> dest
+        if (!g.containsVertex(src)) {
+            return false;
+        }
         GraphIterator<ModuleIdentifier, DefaultEdge> iterator =
-                new DepthFirstIterator<ModuleIdentifier, DefaultEdge>(g, i);
+                new DepthFirstIterator<ModuleIdentifier, DefaultEdge>(g, src);
+
         while (iterator.hasNext()) {
-            //we've reached j from i -- a path exists.
-            if (iterator.next().equals(j)) {
+            ModuleIdentifier next = iterator.next();
+            //we've reached dest from src -- a path exists.
+            if (next.equals(dest)) {
                 return true;
             }
         }

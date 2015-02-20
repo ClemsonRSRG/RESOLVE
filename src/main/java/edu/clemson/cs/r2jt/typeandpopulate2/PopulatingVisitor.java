@@ -61,6 +61,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
     private boolean myInTypeTheoremBindingExpFlag = false;
 
+    private boolean myWalkingModuleParameterFlag = false;
+
     /**
      * <p>Any quantification-introducing syntactic node (like, e.g., a
      * QuantExp), introduces a level to this stack to reflect the quantification
@@ -202,6 +204,11 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
+    public void preModuleParameterAST(ModuleParameterAST e) {
+        myWalkingModuleParameterFlag = true;
+    }
+
+    @Override
     public void postModuleParameterAST(ModuleParameterAST e) {
         if (!(e.getPayload() instanceof OperationSigAST)) {
 
@@ -218,6 +225,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             }
             e.setMathType(t);
         }
+        myWalkingModuleParameterFlag = false;
     }
 
     @Override
@@ -245,7 +253,9 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                     myBuilder.getInnermostActiveScope().addFormalParameter(
                             e.getName().getText(), e, mode,
                             e.getType().getProgramTypeValue());
-            myCurrentParameters.add(paramEntry);
+            if (myWalkingModuleParameterFlag == false) {
+                myCurrentParameters.add(paramEntry);
+            }
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(e.getName());

@@ -48,6 +48,10 @@ public class HardCoded2 {
                     g.ENTITY));
             b.addBinding("is_in", v, new MTFunction(g, g.BOOLEAN, g.ENTITY,
                     g.ENTITY));
+            b.addBinding("<=", v, new MTFunction(g, g.BOOLEAN, g.CARD, g.CARD));
+            b.addBinding("<", v, new MTFunction(g, g.BOOLEAN, g.CARD, g.CARD));
+            b.addBinding(">", v, new MTFunction(g, g.BOOLEAN, g.CARD, g.CARD));
+            b.addBinding(">=", v, new MTFunction(g, g.BOOLEAN, g.CARD, g.CARD));
 
             b.addBinding("Empty_Set", v, g.CLS, g.EMPTY_SET);
             b.addBinding("Powerset", v, g.POWERTYPE);
