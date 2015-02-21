@@ -207,7 +207,8 @@ procedureDecl
     ;
 
 facilityOperationDecl
-    :   (recursive='Recursive')? name=Identifier operationParameterList ';'
+    :   (recursive='Recursive')? 'Operation'
+        name=Identifier operationParameterList ';'
         (requiresClause)?
         (ensuresClause)?
         'Procedure'
@@ -227,8 +228,8 @@ operationDecl
 //Todo: This also needs enhancements realizable by the base concept.
 facilityDecl
     :   'Facility' name=Identifier 'is' concept=Identifier
-        (conceptArgs=moduleArgumentList)? (externally='externally')? 'realized'
-        'by' impl=Identifier (moduleArgumentList)?
+        (specArgs=moduleArgumentList)? (externally='externally')? 'realized'
+        'by' impl=Identifier (bodyArgs=moduleArgumentList)?
         (enhancementPairDecl)* ';'
     ;
 

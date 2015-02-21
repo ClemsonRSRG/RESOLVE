@@ -24,9 +24,13 @@ public class ModuleArgumentAST extends ResolveAST {
     private MTType myMathType;
     private PTType myProgramTypeValue;
 
-    public ModuleArgumentAST(ExprAST expr, Token start, Token stop) {
+    public ModuleArgumentAST(Token start, Token stop, ExprAST expr) {
         super(start, stop);
         myArgumentExpr = expr;
+    }
+
+    public ModuleArgumentAST(ExprAST expr) {
+        this(expr.getStart(), expr.getStop(), expr);
     }
 
     public ExprAST getArgumentExpr() {

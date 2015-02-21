@@ -44,6 +44,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -346,23 +347,54 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
     @Override
     public void exitFacilityDecl(@NotNull ResolveParser.FacilityDeclContext ctx) {
+
+        List<ModuleArgumentAST> specArgs =
+                ctx.specArgs == null ? new ArrayList<ModuleArgumentAST>()
+                        : getAll(ModuleArgumentAST.class, ctx.specArgs
+                                .moduleArgument());
+
+        List<ModuleArgumentAST> bodyArgs =
+                ctx.bodyArgs == null ? new ArrayList<ModuleArgumentAST>()
+                        : getAll(ModuleArgumentAST.class, ctx.bodyArgs
+                                .moduleArgument());
+
         List<EnhancementPairAST> enhancements =
                 getAll(EnhancementPairAST.class, ctx.enhancementPairDecl());
         myImportBuilder.imports(ctx);
 
         put(ctx, new FacilityAST(ctx.getStart(), ctx.getStop(), ctx.name,
-                ctx.concept, ctx.impl, enhancements));
+                ctx.concept, specArgs, ctx.impl, bodyArgs, enhancements));
     }
 
     @Override
     public void exitEnhancementPairDecl(
             @NotNull ResolveParser.EnhancementPairDeclContext ctx) {
         List<ModuleArgumentAST> specArgs =
-                getAll(ModuleArgumentAST.class, ctx.specArgs.moduleArgument());
+                ctx.specArgs == null ? new ArrayList<ModuleArgumentAST>()
+                        : getAll(ModuleArgumentAST.class, ctx.specArgs
+                                .moduleArgument());
+
         List<ModuleArgumentAST> bodyArgs =
-                getAll(ModuleArgumentAST.class, ctx.bodyArgs.moduleArgument());
+                ctx.bodyArgs == null ? new ArrayList<ModuleArgumentAST>()
+                        : getAll(ModuleArgumentAST.class, ctx.bodyArgs
+                                .moduleArgument());
+
         put(ctx, new EnhancementPairAST(ctx.getStart(), ctx.getStop(),
                 ctx.spec, specArgs, ctx.body, bodyArgs));
+    }
+
+    @Override
+    public void exitModuleArgumentList(
+            @NotNull ResolveParser.ModuleArgumentListContext ctx) {
+        for (ResolveParser.ModuleArgumentContext arg : ctx.moduleArgument()) {
+            put(arg, get(ModuleArgumentAST.class, arg));
+        }
+    }
+
+    @Override
+    public void exitModuleArgument(
+            @NotNull ResolveParser.ModuleArgumentContext ctx) {
+        put(ctx, new ModuleArgumentAST(get(ProgExprAST.class, ctx.progExp())));
     }
 
     @Override

@@ -60,6 +60,17 @@ public abstract class TreeWalkerVisitor {
         return false;
     }
 
+    public void preModuleArgumentAST(ModuleArgumentAST e) {}
+
+    public void midModuleArgumentAST(ModuleArgumentAST e, ResolveAST previous,
+                                     ResolveAST next) {}
+
+    public void postModuleArgumentAST(ModuleArgumentAST e) {}
+
+    public boolean walkModuleArgumentAST(ModuleArgumentAST e) {
+        return false;
+    }
+
     public void preModuleAST(ModuleAST e) {}
 
     public void midModuleAST(ModuleAST e, ResolveAST previous, ResolveAST next) {}

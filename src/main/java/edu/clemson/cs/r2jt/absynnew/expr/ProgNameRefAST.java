@@ -58,4 +58,13 @@ public class ProgNameRefAST extends ProgExprAST {
         return new ProgNameRefAST(getStart(), getStop(), getQualifier(),
                 getName());
     }
+
+    @Override
+    public String toString() {
+        String result = "";
+        if (myQualifier != null) {
+            result += myQualifier.getText() + "::";
+        }
+        return result + myName.getText();
+    }
 }
