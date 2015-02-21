@@ -70,6 +70,17 @@ conceptItem
     |   mathDefinitionDecl
     ;
 
+// concept impl module
+
+conceptImplModule
+    :   'Realization' name=Identifier 'for' concept=Identifier
+        ('enhanced' 'by' enhancement=Identifier)* ';'
+        (usesList)?
+        (requiresClause)?
+        (implItems)?
+        'end' closename=Identifier ';'
+    ;
+
 // enhancement module
 
 enhancementModule
@@ -98,15 +109,15 @@ enhancementImplModule
         'for' enhancement=Identifier 'of' concept=Identifier ';'
         (usesList)?
         (requiresClause)?
-        (enhancementImplItems)?
+        (implItems)?
         'end' closename=Identifier ';'
     ;
 
-enhancementImplItems
-    :   enhancementImplItem
+implItems
+    :   implItem
     ;
 
-enhancementImplItem
+implItem
     :   operationProcedureDecl
     |   facilityDecl
     |   procedureDecl
@@ -179,7 +190,7 @@ typeModelFinal
     ;
 
 //We use special rules for facility module init and final to allow requires
-//and ensures clauses (which aren't allowed in normal body modules)...
+//and ensures clauses (which aren't allowed in normal impl modules)...
 moduleFacilityInit
     :   'Facility_Initialization'
         (requiresClause)?

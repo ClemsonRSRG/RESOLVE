@@ -107,12 +107,6 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void enterConceptModule(
-            @NotNull ResolveParser.ConceptModuleContext ctx) {
-        sanityCheckBlockEnds(ctx.name, ctx.closename);
-    }
-
-    @Override
     public void exitUsesList(@NotNull ResolveParser.UsesListContext ctx) {
         myImportBuilder =
                 new ImportCollectionBuilder(ctx.getStart(), ctx.getStop())
@@ -123,6 +117,12 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitModule(@NotNull ResolveParser.ModuleContext ctx) {
         put(ctx, get(ModuleAST.class, ctx.getChild(0)));
+    }
+
+    @Override
+    public void enterConceptModule(
+            @NotNull ResolveParser.ConceptModuleContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 
     @Override
@@ -194,6 +194,12 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     public void exitEnhancementItem(
             @NotNull ResolveParser.EnhancementItemContext ctx) {
         put(ctx, get(ResolveAST.class, ctx.getChild(0)));
+    }
+
+    @Override
+    public void enterConceptImplModule(
+            @NotNull ResolveParser.ConceptImplModuleContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 
     @Override
