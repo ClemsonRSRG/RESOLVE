@@ -179,8 +179,6 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         put(ctx, builder.build());
     }
 
-
-
     @Override
     public void exitEnhancementItems(
             @NotNull ResolveParser.EnhancementItemsContext ctx) {

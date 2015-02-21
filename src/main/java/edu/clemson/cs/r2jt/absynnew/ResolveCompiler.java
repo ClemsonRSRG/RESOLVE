@@ -21,8 +21,6 @@ import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.ConnectivityInspector;
-import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
@@ -177,7 +175,7 @@ public class ResolveCompiler {
     }
 
     private void findDependencies(DefaultDirectedGraph g, ModuleAST root) {
-        for (Token importRequest : root.getImportBlock().getImportsExcluding(
+        for (Token importRequest : root.getImports().getImportsExcluding(
                 ImportCollectionAST.ImportType.EXTERNAL)) {
 
             File file = findResolveFile(importRequest.getText(), NATIVE_EXT);
@@ -190,7 +188,7 @@ public class ResolveCompiler {
                 myFiles.put(id(module), file);
             }
 
-            if (root.getImportBlock().inCategory(
+            if (root.getImports().inCategory(
                     ImportCollectionAST.ImportType.IMPLICIT, importRequest)) {
                 if (!module.appropriateForImport()) {
                     throw new IllegalArgumentException("invalid import "
@@ -249,7 +247,7 @@ public class ResolveCompiler {
 
     private void addFilesForExternalImports(ModuleAST m) {
         Set<Token> externals =
-                m.getImportBlock().getImportsOfType(
+                m.getImports().getImportsOfType(
                         ImportCollectionAST.ImportType.EXTERNAL);
 
         for (Token externalImport : externals) {

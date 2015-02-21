@@ -50,7 +50,7 @@ public abstract class ModuleAST extends ResolveAST {
         return myModuleParams;
     }
 
-    public ImportCollectionAST getImportBlock() {
+    public ImportCollectionAST getImports() {
         return myImports;
     }
 
@@ -70,12 +70,11 @@ public abstract class ModuleAST extends ResolveAST {
         return true;
     }
 
-    //Todo ImplModuleAST
     public static class ImplModuleAST extends ModuleAST {
 
         private ImplModuleAST(ImplModuleBuilder builder) {
             super(builder.getStart(), builder.getStop(), builder.getName(),
-                    builder.usesBlock, Collections
+                    builder.imports, Collections
                             .<ModuleParameterAST> emptyList(),
                     builder.requires, builder.block);
         }
@@ -99,7 +98,7 @@ public abstract class ModuleAST extends ResolveAST {
 
         private PrecisAST(PrecisBuilder builder) {
             super(builder.getStart(), builder.getStop(), builder.getName(),
-                    builder.usesBlock, Collections
+                    builder.imports, Collections
                             .<ModuleParameterAST> emptyList(), null,
                     builder.block);
         }
@@ -130,7 +129,7 @@ public abstract class ModuleAST extends ResolveAST {
 
         private SpecModuleAST(SpecModuleBuilder builder) {
             super(builder.getStart(), builder.getStop(), builder.getName(),
-                    builder.usesBlock, Collections
+                    builder.imports, Collections
                             .<ModuleParameterAST> emptyList(), null,
                     builder.block);
             myConceptName = builder.conceptName;
