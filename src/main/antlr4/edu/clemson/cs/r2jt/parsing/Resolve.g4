@@ -96,8 +96,23 @@ enhancementItem
 enhancementImplModule
     :   'Realization' name=Identifier (moduleParameterList)?
         'for' enhancement=Identifier 'of' concept=Identifier ';'
-
+        (usesList)?
+        (requiresClause)?
+        (enhancementImplItems)?
         'end' closename=Identifier ';'
+    ;
+
+enhancementImplItems
+    :   enhancementImplItem
+    ;
+
+enhancementImplItem
+    :   facilityOperationDecl   //perhaps this needs a rename now.
+    |   facilityDecl
+    |   procedureDecl
+    |   mathDefinitionDecl
+    |   moduleImplInit
+    |   moduleImplFinal
     ;
 
 // uses, imports
@@ -193,13 +208,13 @@ moduleSpecFinal
         (ensuresClause)?
     ;
 
-moduleBodyInit
+moduleImplInit
     :   'Facility_Initialization'
         (variableDeclGroup)*
         //Todo: stmts
     ;
 
-moduleBodyFinal
+moduleImplFinal
     :   'Facility_Finalization'
         (variableDeclGroup)*
         //Todo: stmts
@@ -238,13 +253,13 @@ operationDecl
 facilityDecl
     :   'Facility' name=Identifier 'is' concept=Identifier
         (specArgs=moduleArgumentList)? (externally='externally')? 'realized'
-        'by' impl=Identifier (bodyArgs=moduleArgumentList)?
+        'by' impl=Identifier (implArgs=moduleArgumentList)?
         (enhancementPairDecl)* ';'
     ;
 
 enhancementPairDecl
     :   'enhanced' 'by' spec=Identifier (specArgs=moduleArgumentList)?
-        'realized' 'by' body=Identifier (bodyArgs=moduleArgumentList)?
+        'realized' 'by' impl=Identifier (implArgs=moduleArgumentList)?
     ;
 
 moduleArgumentList

@@ -143,14 +143,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public void preSpecModuleAST(ModuleAST.SpecModuleAST e) {
-        //Enhancements implicitly import the concepts they enhance
-        myCurModuleScope.addImport(new ModuleIdentifier(e.getConceptName()
-                .getText()));
-    }
-
-    @Override
-    public void postImportCollectionAST(ImportCollectionAST e) {
+    public void preImportCollectionAST(ImportCollectionAST e) {
         for (Token importRequest : e.getImportsExcluding(ImportType.EXTERNAL)) {
             myCurModuleScope.addImport(new ModuleIdentifier(importRequest));
         }

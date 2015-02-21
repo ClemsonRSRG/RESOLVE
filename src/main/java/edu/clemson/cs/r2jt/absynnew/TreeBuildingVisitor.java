@@ -165,6 +165,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitEnhancementModule(
             @NotNull ResolveParser.EnhancementModuleContext ctx) {
+        myImportBuilder.imports(ImportType.IMPLICIT, ctx.concept);
         SpecModuleBuilder builder =
                 new SpecModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
                         .requires(get(ExprAST.class, ctx.requiresClause()))//
@@ -351,8 +352,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                                 .moduleArgument());
 
         List<ModuleArgumentAST> bodyArgs =
-                ctx.bodyArgs == null ? new ArrayList<ModuleArgumentAST>()
-                        : getAll(ModuleArgumentAST.class, ctx.bodyArgs
+                ctx.implArgs == null ? new ArrayList<ModuleArgumentAST>()
+                        : getAll(ModuleArgumentAST.class, ctx.implArgs
                                 .moduleArgument());
 
         List<EnhancementPairAST> enhancements =
@@ -371,13 +372,13 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                         : getAll(ModuleArgumentAST.class, ctx.specArgs
                                 .moduleArgument());
 
-        List<ModuleArgumentAST> bodyArgs =
-                ctx.bodyArgs == null ? new ArrayList<ModuleArgumentAST>()
-                        : getAll(ModuleArgumentAST.class, ctx.bodyArgs
+        List<ModuleArgumentAST> implArgs =
+                ctx.implArgs == null ? new ArrayList<ModuleArgumentAST>()
+                        : getAll(ModuleArgumentAST.class, ctx.implArgs
                                 .moduleArgument());
 
         put(ctx, new EnhancementPairAST(ctx.getStart(), ctx.getStop(),
-                ctx.spec, specArgs, ctx.body, bodyArgs));
+                ctx.spec, specArgs, ctx.impl, implArgs));
     }
 
     @Override
@@ -531,6 +532,27 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         mySeenModuleInitFlag = true;
     }
 
+    @Override
+    public void exitModuleImplInit(
+            @NotNull ResolveParser.ModuleImplInitContext ctx) {
+        put(ctx, buildImplModuleInitFinal(ctx, ctx.variableDeclGroup(),
+                Type.MODULE_INIT));
+        mySeenModuleInitFlag = true;
+    }
+
+    @Override
+    public void exitModuleImplFinal(
+            @NotNull ResolveParser.ModuleImplFinalContext ctx) {
+        put(ctx, buildImplModuleInitFinal(ctx, ctx.variableDeclGroup(),
+                Type.MODULE_FINAL));
+        mySeenModuleFinalFlag = true;
+    }
+
+    private InitFinalAST buildImplModuleInitFinal(ParserRuleContext ctx,
+            List<ResolveParser.VariableDeclGroupContext> v, Type t) {
+        return buildImplModuleInitFinal(ctx, v, null, null, t);
+    }
+
     private InitFinalAST buildImplModuleInitFinal(ParserRuleContext ctx,
             List<ResolveParser.VariableDeclGroupContext> v, ParseTree requires,
             ParseTree ensures, Type t) {
@@ -546,7 +568,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     /**
-     * <p>Raises hell if the user wrote more than a single module level
+     * <p>Raises hell if the user provided more than a single module level
      * initialization or finalization section.</p>
      */
     private void sanityCheckInitFinal(ParserRuleContext ctx) {
