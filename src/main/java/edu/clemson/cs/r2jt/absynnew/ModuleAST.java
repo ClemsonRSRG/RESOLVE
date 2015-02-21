@@ -153,8 +153,7 @@ public abstract class ModuleAST extends ResolveAST {
 
         private SpecModuleAST(SpecModuleBuilder builder) {
             super(builder.getStart(), builder.getStop(), builder.getName(),
-                    builder.imports, Collections
-                            .<ModuleParameterAST> emptyList(), null,
+                    builder.imports, builder.moduleParameters, builder.requires,
                     builder.block);
             myConceptName = builder.conceptName;
         }
