@@ -2871,6 +2871,19 @@ public class VCGenerator extends TreeWalkerVisitor {
                                             .getStateVars(), assignParamExp
                                             .getArguments(), true);
 
+                            // Replace all instances of the left hand side
+                            // variable in the current final confirm statement.
+                            ConfirmStmt confirmStmt =
+                                    myCurrentAssertiveCode.getFinalConfirm();
+                            Exp newConf = confirmStmt.getAssertion();
+                            newConf =
+                                    Utilities.replace(newConf, leftVariable,
+                                            ensures);
+
+                            // Set this as our new final confirm statement.
+                            myCurrentAssertiveCode.setFinalConfirm(newConf,
+                                    confirmStmt.getSimplify());
+
                             // NY YS
                             // Duration for CallStmt
                             if (myInstanceEnvironment.flags
@@ -2930,6 +2943,14 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                                 // Construct the Duration Clause
                                 Exp opDur = Exp.copy(ope.getDurationClause());
+
+                                // Replace PostCondition variables in the duration clause
+                                opDur =
+                                        replaceFormalWithActualEns(opDur, opDec
+                                                .getParameters(), opDec
+                                                .getStateVars(), assignParamExp
+                                                .getArguments(), false);
+
                                 VarExp cumDur =
                                         Utilities
                                                 .createVarExp(
@@ -3020,19 +3041,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                                         finalConfirmExp, finalConfirm
                                                 .getSimplify());
                             }
-
-                            // Replace all instances of the left hand side
-                            // variable in the current final confirm statement.
-                            ConfirmStmt confirmStmt =
-                                    myCurrentAssertiveCode.getFinalConfirm();
-                            Exp newConf = confirmStmt.getAssertion();
-                            newConf =
-                                    Utilities.replace(newConf, leftVariable,
-                                            ensures);
-
-                            // Set this as our new final confirm statement.
-                            myCurrentAssertiveCode.setFinalConfirm(newConf,
-                                    confirmStmt.getSimplify());
                         }
                         else {
                             Utilities.illegalOperationEnsures(opDec
