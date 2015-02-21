@@ -150,8 +150,8 @@ public class ResolveCompiler {
 
                 System.out.println(g);
                 for (ModuleIdentifier m : getCompileOrder(g)) {
-                    System.out.println("populating: " + m);
-                    //analysisPipe.process(m);
+                    //System.out.println("populating: " + m);
+                    analysisPipe.process(m);
                     //codegenPipe.process(m);
                     //verificationPipe.process(m);
                 }

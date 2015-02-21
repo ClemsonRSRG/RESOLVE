@@ -16,7 +16,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 /**
- * <p>A collection of general-purpose abstract syntax related methods.</p>
+ * <p>A place for general-purpose abstract syntax related methods.</p>
  *
  * @author dtwelch
  */
