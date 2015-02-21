@@ -2127,6 +2127,12 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Construct the Duration Clause
             Exp opDur = Exp.copy(ope.getDurationClause());
+
+            // Replace PostCondition variables in the duration clause
+            opDur =
+                    replaceFormalWithActualEns(opDur, opDec.getParameters(),
+                            opDec.getStateVars(), stmt.getArguments(), false);
+
             VarExp cumDur =
                     Utilities.createVarExp((Location) loc.clone(), null,
                             Utilities.createPosSymbol(Utilities
