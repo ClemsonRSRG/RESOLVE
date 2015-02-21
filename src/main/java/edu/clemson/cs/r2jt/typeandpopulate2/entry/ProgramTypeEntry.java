@@ -22,7 +22,7 @@ import org.antlr.v4.runtime.Token;
 
 import java.util.Map;
 
-public class ProgramTypeEntry extends SymbolTableEntry {
+public class ProgramTypeEntry extends AbstractProgramEntry {
 
     private final MTType myModelType;
     private final PTType myProgramType;
@@ -54,6 +54,7 @@ public class ProgramTypeEntry extends SymbolTableEntry {
         return myModelType;
     }
 
+    @Override
     public PTType getProgramType() {
         return myProgramType;
     }

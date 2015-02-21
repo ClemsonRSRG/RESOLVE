@@ -128,6 +128,11 @@ public abstract class SymbolTableEntry {
                 + "Found " + getEntryTypeDescription(), l);
     }*/
 
+    public AbstractProgramEntry toProgrammaticEntry(Token l) {
+        throw new SrcErrorException("expecting a programmatic entry; found "
+                + getEntryTypeDescription(), l);
+    }
+
     public TheoremEntry toTheoremEntry(Token l) {
         throw new SrcErrorException("expecting a theorem; found "
                 + getEntryTypeDescription(), l);

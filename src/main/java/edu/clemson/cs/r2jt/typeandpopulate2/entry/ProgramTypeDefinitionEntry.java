@@ -49,4 +49,9 @@ public class ProgramTypeDefinitionEntry extends ProgramTypeEntry {
     public ProgramTypeDefinitionEntry toProgramTypeDefinitionEntry(Token l) {
         return this;
     }
+
+    @Override
+    public AbstractProgramEntry toProgrammaticEntry(Token l) {
+        return this;
+    }
 }

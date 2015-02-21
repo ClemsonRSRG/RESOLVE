@@ -19,10 +19,7 @@ import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST.DefinitionType;
 import edu.clemson.cs.r2jt.absynnew.expr.*;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.MathSymbolEntry;
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramTypeEntry;
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTElement;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTVoid;
@@ -547,6 +544,40 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
+    public void postModuleArgumentAST(ModuleArgumentAST e) {
+        e.setProgramTypeValue(e.getArgumentExpr().getProgramType());
+    }
+
+    @Override
+    public void postProgNameRefAST(ProgNameRefAST e) {
+        try {
+            AbstractProgramEntry entry =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameQuery(e.getQualifier(), e
+                                    .getName(), ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_IGNORE, false))
+                            .toProgrammaticEntry(e.getName());
+
+            e.setProgramType(entry.getProgramType());
+
+            //Handle math typing stuff
+            postSymbolExp(e.getQualifier(), e.getName(), e);
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(e.getQualifier(), e.getName());
+        }
+        catch (DuplicateSymbolException dse) {
+            throw new RuntimeException("ToDo"); //TODO
+        }
+    }
+
+    @Override
+    public void postProgIntegerRefAST(ProgLiteralRefAST.ProgIntegerRefAST e) {
+        e.setProgramType(getIntegerProgramType());
+        e.setMathType(myTypeGraph.Z);
+    }
+
+    @Override
     public void preMathQuantifiedAST(MathQuantifiedAST e) {
         PopulatingVisitor.emitDebug("entering preMathQuantifiedAST...");
         myBuilder.startScope(e);
@@ -961,6 +992,31 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             }
         }
     }
+
+    private PTType getIntegerProgramType() {
+        PTType result;
+
+        try {
+            ProgramTypeEntry type =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameQuery(null, "Integer",
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false)).toProgramTypeEntry(null);
+
+            result = type.getProgramType();
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new RuntimeException("No program Integer type in scope???");
+        }
+        catch (DuplicateSymbolException dse) {
+            //Shouldn't be possible--NameQuery can't throw this
+            throw new RuntimeException(dse);
+        }
+
+        return result;
+    }
+
 
     private MathSymbolEntry getIntendedEntry(Token qualifier, Token symbolName,
             ExprAST node) {
