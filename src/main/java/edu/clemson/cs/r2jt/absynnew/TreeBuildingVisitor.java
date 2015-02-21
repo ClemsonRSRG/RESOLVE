@@ -158,6 +158,18 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
+    public void enterEnhancementModule(
+            @NotNull ResolveParser.EnhancementModuleContext ctx) {
+        sanityCheckBlockEnds(ctx.name, ctx.closename);
+    }
+
+    @Override
+    public void exitEnhancementModule(
+            @NotNull ResolveParser.EnhancementModuleContext ctx) {
+
+    }
+
+    @Override
     public void enterPrecisModule(@NotNull ResolveParser.PrecisModuleContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
@@ -871,16 +883,16 @@ public class TreeBuildingVisitor<T extends ResolveAST>
      * @param <E>  An ast type.
      * @return
      */
-    private <E extends ResolveAST> E get(Class<E> type, ParseTree t) {
+    protected <E extends ResolveAST> E get(Class<E> type, ParseTree t) {
         return myDecorator.getProp(type, t);
     }
 
-    private <E extends ResolveAST> List<E> getAll(Class<E> type,
+    protected <E extends ResolveAST> List<E> getAll(Class<E> type,
             List<? extends ParseTree> t) {
         return myDecorator.collect(type, t);
     }
 
-    private static class TreeDecorator {
+    protected static class TreeDecorator {
 
         private final ParseTreeProperty<ResolveAST> visitedCtxs =
                 new ParseTreeProperty<ResolveAST>();

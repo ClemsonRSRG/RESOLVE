@@ -4,14 +4,15 @@ module
     :   precisModule
     |   facilityModule
     |   conceptModule
+    |   enhancementModule
     ;
 
 // precis module
 
 precisModule
     :   'Precis' name=Identifier ';'
-         (usesList)?
-         (precisItems)?
+        (usesList)?
+        (precisItems)?
         'end' closename=Identifier ';'
     ;
 
@@ -63,6 +64,27 @@ conceptItem
     |   operationDecl
     |   typeModelDecl
     |   mathDefinitionDecl
+    ;
+
+// enhancement module
+
+enhancementModule
+    :   'Enhancement' name=Identifier (moduleParameterList)?
+        'for' concept=Identifier ';'
+        (usesList)?
+        (requiresClause)?
+        (enhancementItems)?
+        'end' closename=Identifier ';' EOF
+    ;
+
+enhancementItems
+    :   (enhancementItem)+
+    ;
+
+enhancementItem
+    :   operationDecl
+    |   mathDefinitionDecl
+    |   typeModelDecl
     ;
 
 // uses, imports

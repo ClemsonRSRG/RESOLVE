@@ -146,4 +146,37 @@ public abstract class ModuleAST extends ResolveAST {
             }
         }
     }
+
+    public static class EnhancementAST extends ModuleAST {
+        private final Token myConceptName;
+
+        private EnhancementAST(EnhancementBuilder builder) {
+            super(builder.getStart(), builder.getStop(), builder.getName(),
+                    builder.usesBlock, Collections
+                            .<ModuleParameterAST> emptyList(), null,
+                    builder.block);
+            myConceptName = builder.conceptName;
+        }
+
+        public Token getConceptName() {
+            return myConceptName;
+        }
+
+        public static class EnhancementBuilder
+                extends
+                ModuleBuilderExtension<EnhancementBuilder> {
+            protected final Token conceptName;
+
+            public EnhancementBuilder(Token start, Token stop, Token name,
+                                      Token conceptName) {
+                super(start, stop, name);
+                this.conceptName = conceptName;
+            }
+
+            @Override
+            public EnhancementAST build() {
+                return new EnhancementAST(this);
+            }
+        }
+    }
 }

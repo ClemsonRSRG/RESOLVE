@@ -23,6 +23,17 @@ public abstract class TreeWalkerVisitor {
 
     public void postAny(ResolveAST e) {}
 
+    public void preEnhancementAST(ModuleAST.EnhancementAST e) {}
+
+    public void midEnhancementAST(ModuleAST.EnhancementAST e,
+                                  ResolveAST previous, ResolveAST next) {}
+
+    public void postEnhancementAST(ModuleAST.EnhancementAST e) {}
+
+    public boolean walkEnhancementAST(ModuleAST.EnhancementAST e) {
+        return false;
+    }
+
     public boolean walkOperationImplAST(OperationImplAST e) {
         return false;
     }
