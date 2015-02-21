@@ -85,6 +85,13 @@ public class TreeBuildingVisitor<T extends ResolveAST>
      */
     private DefinitionBuilder myDefinitionBuilder = null;
 
+    /**
+     * <p>These flags enable a simple error check to ensure that the user has
+     * provided at most a single module level initialization and finalization
+     * section, respectively.</p>
+     */
+    private boolean mySeenModuleInitFlag, mySeenModuleFinalFlag = false;
+
     private final ParseTree myRootTree;
 
     public TreeBuildingVisitor(ParseTree tree) {
@@ -221,7 +228,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                         .requires(get(ExprAST.class, ctx.requiresClause())) //
                         .ensures(get(ExprAST.class, ctx.ensuresClause())) //
                         .params(
-                                get(ParameterAST.class, ctx
+                                getAll(ParameterAST.class, ctx
                                         .operationParameterList()
                                         .parameterDecl()));
         put(ctx, builder.build());
@@ -242,7 +249,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                         ctx.name) //
                         .recursive(ctx.recursive != null) //
                         .parameters(
-                                get(ParameterAST.class, ctx
+                                getAll(ParameterAST.class, ctx
                                         .operationParameterList()
                                         .parameterDecl()));
 
@@ -271,7 +278,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                         .recursive(ctx.recursive != null) //
                         .implementsContract(true) //
                         .parameters(
-                                get(ParameterAST.class, ctx
+                                getAll(ParameterAST.class, ctx
                                         .operationParameterList()
                                         .parameterDecl()));
 
@@ -387,6 +394,38 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                         ctx.parameterMode().getText());
         put(ctx, new ParameterAST(ctx.getStart(), ctx.getStop(), ctx.name,
                 groupType, mode));
+    }
+
+    //Todo: Figure out if we want to throw this SrcErrorException in the
+    //constructor of ModuleAST or not (filter the blockAST by type). hmmm.
+    @Override
+    public void exitModuleInit(@NotNull ResolveParser.ModuleInitContext ctx) {
+        if (mySeenModuleInitFlag) {
+            throw new SrcErrorException("only one module level initialization"
+                    + " section per module is permitted", ctx.getStart());
+        }
+        InitFinalAST.ModuleInitAST moduleInit =
+                new InitFinalAST.ModuleInitAST(ctx.getStart(), ctx.getStop(),
+                        get(ExprAST.class, ctx.requiresClause()), get(
+                                ExprAST.class, ctx.ensuresClause()));
+
+        mySeenModuleInitFlag = true;
+        put(ctx, moduleInit);
+    }
+
+    @Override
+    public void exitModuleFinal(@NotNull ResolveParser.ModuleFinalContext ctx) {
+        if (mySeenModuleFinalFlag) {
+            throw new SrcErrorException("only one module level finalization"
+                    + " section per module is permitted", ctx.getStart());
+        }
+        InitFinalAST.ModuleFinalAST moduleFinal =
+                new InitFinalAST.ModuleFinalAST(ctx.getStart(), ctx.getStop(),
+                        get(ExprAST.class, ctx.requiresClause()), get(
+                                ExprAST.class, ctx.ensuresClause()));
+
+        mySeenModuleFinalFlag = true;
+        put(ctx, moduleFinal);
     }
 
     @Override
@@ -834,15 +873,6 @@ public class TreeBuildingVisitor<T extends ResolveAST>
      */
     private <E extends ResolveAST> E get(Class<E> type, ParseTree t) {
         return myDecorator.getProp(type, t);
-    }
-
-    private <E extends ResolveAST> List<E> get(Class<E> type,
-            List<? extends ParseTree> t) {
-        return myDecorator.collect(type, t);
-    }
-
-    private <E extends ResolveAST> List<E> get(Class<E> type, ParseTree... t) {
-        return myDecorator.collect(type, Arrays.asList(t));
     }
 
     private <E extends ResolveAST> List<E> getAll(Class<E> type,

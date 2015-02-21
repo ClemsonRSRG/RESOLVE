@@ -77,12 +77,25 @@ public abstract class InitFinalAST extends ResolveAST {
     public static class ModuleInitAST extends InitFinalAST {
 
         public ModuleInitAST(Token start, Token stop, ExprAST requires,
+                ExprAST ensures) {
+            this(start, stop, requires, ensures, new ArrayList<VariableAST>(),
+                    new ArrayList<StmtAST>());
+        }
+
+        public ModuleInitAST(Token start, Token stop, ExprAST requires,
                 ExprAST ensures, List<VariableAST> vars, List<StmtAST> stmts) {
-            super(start, stop, requires, ensures, vars, stmts);
+            super(start, stop, requires, ensures, new ArrayList<VariableAST>(),
+                    new ArrayList<StmtAST>());
         }
     }
 
     public static class ModuleFinalAST extends InitFinalAST {
+
+        public ModuleFinalAST(Token start, Token stop, ExprAST requires,
+                ExprAST ensures) {
+            this(start, stop, requires, ensures, new ArrayList<VariableAST>(),
+                    new ArrayList<StmtAST>());
+        }
 
         public ModuleFinalAST(Token start, Token stop, ExprAST requires,
                 ExprAST ensures, List<VariableAST> vars, List<StmtAST> stmts) {

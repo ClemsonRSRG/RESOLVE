@@ -58,6 +58,8 @@ conceptItems
 
 conceptItem
     :   constraintClause
+    |   moduleInit
+    |   moduleFinal
     |   operationDecl
     |   typeModelDecl
     |   mathDefinitionDecl
@@ -126,10 +128,20 @@ specTypeFinal
 
 moduleInit
     :   'Facility_Initialization'
+        (requiresClause)?
+        (ensuresClause)?
     ;
 
 moduleFinal
     :   'Facility_Finalization'
+        (requiresClause)?
+        (ensuresClause)?
+    ;
+
+moduleBodyInit
+    :   'Facility_Finalization'
+        (variableDeclGroup)*
+        //Todo: stmts
     ;
 
 // functions
@@ -138,7 +150,7 @@ procedureDecl
     :   (recursive='Recursive')? 'Procedure' name=Identifier (':' type)
         operationParameterList ';'
         (variableDeclGroup)*
-
+        //Todo: Stmts
         'end' closename=Identifier
     ;
 
@@ -148,7 +160,7 @@ facilityOperationDecl
         (ensuresClause)?
         'Procedure'
         (variableDeclGroup)*
-
+        //Todo: Stmts
         'end' closename=Identifier ';'
     ;
 
@@ -160,7 +172,7 @@ operationDecl
 
 // facility and enhancements
 
-//Todo: This also needs enhancements that can be realized by the base concept.
+//Todo: This also needs enhancements realizable by the base concept.
 facilityDecl
     :   'Facility' name=Identifier 'is' concept=Identifier
         (conceptArgs=moduleArgumentList)? (externally='externally')? 'realized'

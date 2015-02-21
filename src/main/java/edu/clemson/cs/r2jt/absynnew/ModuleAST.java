@@ -14,6 +14,7 @@ package edu.clemson.cs.r2jt.absynnew;
 
 import edu.clemson.cs.r2jt.absynnew.decl.ModuleParameterAST;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
+import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import org.antlr.v4.runtime.Token;
 
 import java.util.Collections;

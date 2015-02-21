@@ -207,9 +207,10 @@ public class ResolveCompiler {
         }
         addFilesForExternalImports(root);
     }
+
     protected boolean pathExists(DefaultDirectedGraph g, ModuleIdentifier src,
             ModuleIdentifier dest) {
-        //If src doesn't exist in  g, there is obviously no path from
+        //If src doesn't exist in g, then there is obviously no path from
         //src -> ... -> dest
         if (!g.containsVertex(src)) {
             return false;

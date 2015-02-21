@@ -35,7 +35,7 @@ import java.util.Map;
  * 
  * <p>Note that <code>ScopeBuilder</code> has no public constructor.  
  * <code>ScopeBuilders</code>s are acquired through calls to some of the methods
- * of {@link edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder MathSymbolTableBuilder}.</p>
+ * of {@link MathSymbolTableBuilder MathSymbolTableBuilder}.</p>
  */
 public class ScopeBuilder extends SyntacticScope {
 
