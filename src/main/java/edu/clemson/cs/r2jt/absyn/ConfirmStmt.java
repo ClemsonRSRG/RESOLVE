@@ -127,7 +127,11 @@ public class ConfirmStmt extends Statement {
     }
 
     public ConfirmStmt clone() {
-        return new ConfirmStmt((Location) myLocation.clone(), Exp
-                .copy(myAssertion), mySimplify);
+        Location loc = null;
+        if (myLocation != null) {
+            loc = (Location) myLocation.clone();
+        }
+
+        return new ConfirmStmt(loc, Exp.copy(myAssertion), mySimplify);
     }
 }

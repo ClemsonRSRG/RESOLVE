@@ -4040,8 +4040,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
 
                 // Add to our assertive code as an assume
-                myCurrentAssertiveCode.addAssume((Location) varLoc.clone(),
-                        isInitialExp, false);
+                myCurrentAssertiveCode.addAssume(varLoc, isInitialExp, false);
             }
 
             // NY YS
