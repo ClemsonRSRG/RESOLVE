@@ -41,7 +41,7 @@ facilityItems
 
 facilityItem
     :   facilityDecl
-    |   facilityOperationDecl
+    |   operationProcedureDecl
     |   mathDefinitionDecl
     |   moduleFacilityInit
     |   moduleFacilityFinal
@@ -107,7 +107,7 @@ enhancementImplItems
     ;
 
 enhancementImplItem
-    :   facilityOperationDecl   //perhaps this needs a rename now.
+    :   operationProcedureDecl
     |   facilityDecl
     |   procedureDecl
     |   mathDefinitionDecl
@@ -230,7 +230,7 @@ procedureDecl
         'end' closename=Identifier
     ;
 
-facilityOperationDecl
+operationProcedureDecl
     :   (recursive='Recursive')? 'Operation'
         name=Identifier operationParameterList ';'
         (requiresClause)?
@@ -259,7 +259,8 @@ facilityDecl
 
 enhancementPairDecl
     :   'enhanced' 'by' spec=Identifier (specArgs=moduleArgumentList)?
-        'realized' 'by' impl=Identifier (implArgs=moduleArgumentList)?
+        (externally='externally')? 'realized' 'by' impl=Identifier
+        (implArgs=moduleArgumentList)?
     ;
 
 moduleArgumentList

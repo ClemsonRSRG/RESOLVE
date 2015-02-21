@@ -45,7 +45,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <p>Constructs an ast representation of <tt>RESOLVE</tt> sourcecode from the
+ * <p>Constructs an ast representation of RESOLVE sourcecode from the
  * concrete syntax tree produced by <tt>Antlr v4.x</tt>.</p>
  *
  * <p>The ast is built over the course of a pre-post traversal of the concrete
@@ -238,7 +238,6 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                 new ImplModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
                         .block(get(BlockAST.class, ctx.facilityItems()))//
                         .imports(myImportBuilder.build());
-
         put(ctx, builder.build());
     }
 
@@ -274,14 +273,14 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void enterFacilityOperationDecl(
-            @NotNull ResolveParser.FacilityOperationDeclContext ctx) {
+    public void enterOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 
     @Override
-    public void exitFacilityOperationDecl(
-            @NotNull ResolveParser.FacilityOperationDeclContext ctx) {
+    public void exitOperationProcedureDecl(
+            @NotNull ResolveParser.OperationProcedureDeclContext ctx) {
 
         OperationImplBuilder builder =
                 new OperationImplBuilder(ctx.getStart(), ctx.getStop(),
@@ -292,12 +291,11 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                                         .operationParameterList()
                                         .parameterDecl()));
 
-        //Todo: Use blockAST for procedure, facility operation bodies,
-        //will help clean this up a little bit.
         for (ResolveParser.VariableDeclGroupContext grp : ctx
                 .variableDeclGroup()) {
             builder.localVariables(getAll(VariableAST.class, grp.Identifier()));
         }
+        //Todo: Use BlockAST to contain statements.... maybe.
         put(ctx, builder.build());
     }
 

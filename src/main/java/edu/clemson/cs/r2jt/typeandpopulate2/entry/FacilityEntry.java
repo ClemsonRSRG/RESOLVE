@@ -76,14 +76,13 @@ public class FacilityEntry extends SymbolTableEntry {
 
             spec =
                     new ModuleParameterization(new ModuleIdentifier(enhancement
-                            .getSpecificationName().getText()), enhancement
-                            .getSpecificationArguments(), this,
-                            mySourceRepository);
+                            .getSpecName().getText()), enhancement
+                            .getSpecArguments(), this, mySourceRepository);
 
             realization =
                     new ModuleParameterization(new ModuleIdentifier(enhancement
-                            .getBodyName().getText()), enhancement
-                            .getBodyArguments(), this, mySourceRepository);
+                            .getImplName().getText()), enhancement
+                            .getImplArguments(), this, mySourceRepository);
 
             myEnhancements.add(spec);
             myEnhancementRealizations.put(spec, realization);
