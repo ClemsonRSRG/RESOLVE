@@ -14,7 +14,6 @@ package edu.clemson.cs.r2jt.absynnew;
 
 import edu.clemson.cs.r2jt.absynnew.decl.ModuleParameterAST;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
-import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import org.antlr.v4.runtime.Token;
 
 import java.util.Collections;
@@ -71,54 +70,27 @@ public abstract class ModuleAST extends ResolveAST {
         return true;
     }
 
-    /**
-     * <p>A <code>ConceptAST</code> is <tt>RESOLVE</tt>'s abstract syntax
-     * encapsulation of an 'interface-like-module' containing formal
-     * specifications for user defined types and operations.</p>
-     */
-    public static class ConceptAST extends ModuleAST {
+    //Todo ImplModuleAST
+    public static class ImplModuleAST extends ModuleAST {
 
-        private ConceptAST(ConceptBuilder builder) {
-            super(builder.getStart(), builder.getStop(), builder.getName(),
-                    builder.usesBlock, builder.moduleParameters,
-                    builder.requires, builder.block);
-        }
-
-        public static class ConceptBuilder
-                extends
-                    ModuleBuilderExtension<ConceptBuilder> {
-
-            public ConceptBuilder(Token start, Token stop, Token name) {
-                super(start, stop, name);
-            }
-
-            @Override
-            public ConceptAST build() {
-                return new ConceptAST(this);
-            }
-        }
-    }
-
-    public static class FacilityAST extends ModuleAST {
-
-        private FacilityAST(FacilityBuilder builder) {
+        private ImplModuleAST(ImplModuleBuilder builder) {
             super(builder.getStart(), builder.getStop(), builder.getName(),
                     builder.usesBlock, Collections
                             .<ModuleParameterAST> emptyList(),
                     builder.requires, builder.block);
         }
 
-        public static class FacilityBuilder
+        public static class ImplModuleBuilder
                 extends
-                    ModuleBuilderExtension<FacilityBuilder> {
+                    ModuleBuilderExtension<ImplModuleBuilder> {
 
-            public FacilityBuilder(Token start, Token stop, Token name) {
+            public ImplModuleBuilder(Token start, Token stop, Token name) {
                 super(start, stop, name);
             }
 
             @Override
-            public FacilityAST build() {
-                return new FacilityAST(this);
+            public ImplModuleAST build() {
+                return new ImplModuleAST(this);
             }
         }
     }
@@ -147,11 +119,16 @@ public abstract class ModuleAST extends ResolveAST {
         }
     }
 
-    public static class EnhancementAST extends ModuleAST {
+    /**
+     * <p>A <code>SpecModuleAST</code> is <tt>RESOLVE</tt>'s abstract syntax
+     * encapsulation of an 'interface-like-module' containing formal
+     * specifications for user defined types and operations.</p>
+     */
+    public static class SpecModuleAST extends ModuleAST {
 
         private final Token myConceptName;
 
-        private EnhancementAST(EnhancementBuilder builder) {
+        private SpecModuleAST(SpecModuleBuilder builder) {
             super(builder.getStart(), builder.getStop(), builder.getName(),
                     builder.usesBlock, Collections
                             .<ModuleParameterAST> emptyList(), null,
@@ -163,21 +140,24 @@ public abstract class ModuleAST extends ResolveAST {
             return myConceptName;
         }
 
-        public static class EnhancementBuilder
+        public static class SpecModuleBuilder
                 extends
-                    ModuleBuilderExtension<EnhancementBuilder> {
+                    ModuleBuilderExtension<SpecModuleBuilder> {
 
-            protected final Token conceptName;
+            protected Token conceptName;
 
-            public EnhancementBuilder(Token start, Token stop, Token name,
-                    Token conceptName) {
+            public SpecModuleBuilder(Token start, Token stop, Token name) {
                 super(start, stop, name);
-                this.conceptName = conceptName;
+            }
+
+            public SpecModuleBuilder concept(Token t) {
+                this.conceptName = t;
+                return this;
             }
 
             @Override
-            public EnhancementAST build() {
-                return new EnhancementAST(this);
+            public SpecModuleAST build() {
+                return new SpecModuleAST(this);
             }
         }
     }

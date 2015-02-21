@@ -91,6 +91,15 @@ enhancementItem
     |   typeModelDecl
     ;
 
+// enhancement impl module
+
+enhancementImplModule
+    :   'Realization' name=Identifier (moduleParameterList)?
+        'for' enhancement=Identifier 'of' concept=Identifier ';'
+
+        'end' closename=Identifier ';'
+    ;
+
 // uses, imports
 
 usesList

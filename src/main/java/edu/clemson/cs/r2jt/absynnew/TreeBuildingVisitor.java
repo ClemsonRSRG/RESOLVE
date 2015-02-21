@@ -15,10 +15,9 @@ package edu.clemson.cs.r2jt.absynnew;
 import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportCollectionBuilder;
 import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportType;
 import edu.clemson.cs.r2jt.absynnew.InitFinalAST.Type;
-import edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptAST.ConceptBuilder;
 import edu.clemson.cs.r2jt.absynnew.ModuleAST.PrecisAST.PrecisBuilder;
-import edu.clemson.cs.r2jt.absynnew.ModuleAST.FacilityAST.FacilityBuilder;
-import edu.clemson.cs.r2jt.absynnew.ModuleAST.EnhancementAST.EnhancementBuilder;
+import edu.clemson.cs.r2jt.absynnew.ModuleAST.ImplModuleAST.ImplModuleBuilder;
+import edu.clemson.cs.r2jt.absynnew.ModuleAST.SpecModuleAST.SpecModuleBuilder;
 import edu.clemson.cs.r2jt.absynnew.BlockAST.BlockBuilder;
 import edu.clemson.cs.r2jt.absynnew.decl.*;
 import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST.DefinitionBuilder;
@@ -37,14 +36,12 @@ import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -132,8 +129,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     public void exitConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
 
-        ConceptBuilder builder =
-                new ConceptBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
+        SpecModuleBuilder builder =
+                new SpecModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
                         .requires(get(ExprAST.class, ctx.requiresClause()))//
                         .block(get(BlockAST.class, ctx.conceptItems()))//
                         .imports(myImportBuilder.build());
@@ -168,11 +165,11 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitEnhancementModule(
             @NotNull ResolveParser.EnhancementModuleContext ctx) {
-        EnhancementBuilder builder =
-                new EnhancementBuilder(ctx.getStart(), ctx.getStop(), ctx.name,
-                        ctx.concept)//
+        SpecModuleBuilder builder =
+                new SpecModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
                         .requires(get(ExprAST.class, ctx.requiresClause()))//
                         .block(get(BlockAST.class, ctx.enhancementItems()))//
+                        .concept(ctx.concept)//
                         .imports(myImportBuilder.build());
 
         if (ctx.moduleParameterList() != null) {
@@ -181,6 +178,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         }
         put(ctx, builder.build());
     }
+
+
 
     @Override
     public void exitEnhancementItems(
@@ -236,8 +235,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
-        FacilityBuilder builder =
-                new FacilityBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
+        ImplModuleBuilder builder =
+                new ImplModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
                         .block(get(BlockAST.class, ctx.facilityItems()))//
                         .imports(myImportBuilder.build());
 

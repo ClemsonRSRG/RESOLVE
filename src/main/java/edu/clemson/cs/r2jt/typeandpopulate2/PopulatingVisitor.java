@@ -143,7 +143,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public void preEnhancementAST(ModuleAST.EnhancementAST e) {
+    public void preSpecModuleAST(ModuleAST.SpecModuleAST e) {
         //Enhancements implicitly import the concepts they enhance
         myCurModuleScope.addImport(new ModuleIdentifier(e.getConceptName()
                 .getText()));
@@ -553,8 +553,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         try {
             AbstractProgramEntry entry =
                     myBuilder.getInnermostActiveScope().queryForOne(
-                            new NameQuery(e.getQualifier(), e
-                                    .getName(), ImportStrategy.IMPORT_NAMED,
+                            new NameQuery(e.getQualifier(), e.getName(),
+                                    ImportStrategy.IMPORT_NAMED,
                                     FacilityStrategy.FACILITY_IGNORE, false))
                             .toProgrammaticEntry(e.getName());
 
@@ -1016,7 +1016,6 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
         return result;
     }
-
 
     private MathSymbolEntry getIntendedEntry(Token qualifier, Token symbolName,
             ExprAST node) {
