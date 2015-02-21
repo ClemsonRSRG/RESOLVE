@@ -5,6 +5,7 @@ module
     |   facilityModule
     |   conceptModule
     |   enhancementModule
+    |   conceptImplModule
     ;
 
 // precis module

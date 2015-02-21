@@ -203,6 +203,17 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
+    public void exitConceptImplModule(
+            @NotNull ResolveParser.ConceptImplModuleContext ctx) {
+        myImportBuilder.imports(ImportType.IMPLICIT, ctx.concept);
+        ImplModuleBuilder builder =
+                new ImplModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)
+                        .block(get(BlockAST.class, ctx.implItems())).imports(
+                                myImportBuilder.build()).concept(ctx.concept);
+        put(ctx, builder.build());
+    }
+
+    @Override
     public void enterPrecisModule(@NotNull ResolveParser.PrecisModuleContext ctx) {
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }

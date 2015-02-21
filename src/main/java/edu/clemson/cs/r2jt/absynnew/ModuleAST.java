@@ -72,19 +72,43 @@ public abstract class ModuleAST extends ResolveAST {
 
     public static class ImplModuleAST extends ModuleAST {
 
+        private final Token myConcept, myEnhancement;
+
         private ImplModuleAST(ImplModuleBuilder builder) {
             super(builder.getStart(), builder.getStop(), builder.getName(),
                     builder.imports, Collections
                             .<ModuleParameterAST> emptyList(),
                     builder.requires, builder.block);
+            myConcept = builder.concept;
+            myEnhancement = builder.enhancement;
+        }
+
+        public Token getConcept() {
+            return myConcept;
+        }
+
+        public Token getEnhancement() {
+            return myEnhancement;
         }
 
         public static class ImplModuleBuilder
                 extends
                     ModuleBuilderExtension<ImplModuleBuilder> {
 
+            protected Token concept, enhancement;
+
             public ImplModuleBuilder(Token start, Token stop, Token name) {
                 super(start, stop, name);
+            }
+
+            public ImplModuleBuilder concept(Token e) {
+                concept = e;
+                return this;
+            }
+
+            public ImplModuleBuilder enhancement(Token e) {
+                concept = e;
+                return this;
             }
 
             @Override
