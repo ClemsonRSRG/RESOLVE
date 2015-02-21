@@ -148,8 +148,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     @Override
     public void preEnhancementAST(ModuleAST.EnhancementAST e) {
         //Enhancements implicitly import the concepts they enhance
-        myCurModuleScope.addImport(
-                new ModuleIdentifier(e.getConceptName().getText()));
+        myCurModuleScope.addImport(new ModuleIdentifier(e.getConceptName()
+                .getText()));
     }
 
     @Override
@@ -260,7 +260,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                     myBuilder.getInnermostActiveScope().addFormalParameter(
                             e.getName().getText(), e, mode,
                             e.getType().getProgramTypeValue());
-            if (myWalkingModuleParameterFlag == false) {
+            if (!myWalkingModuleParameterFlag) {
                 myCurrentParameters.add(paramEntry);
             }
         }

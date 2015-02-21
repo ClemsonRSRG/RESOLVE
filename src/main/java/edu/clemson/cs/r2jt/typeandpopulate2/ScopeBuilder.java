@@ -138,9 +138,8 @@ public class ScopeBuilder extends SyntacticScope {
             MathSymbolEntry exemplarEntry) throws DuplicateSymbolException {
         sanityCheckBindArguments(name, definingElement, model);
 
-        InitFinalAST.TypeInitAST init = definingElement.getInitialization();
-        InitFinalAST.TypeFinalAST finalization =
-                definingElement.getFinalization();
+        InitFinalAST init = definingElement.getInitialization();
+        InitFinalAST finalization = definingElement.getFinalization();
 
         ExprAST initRequires = (init == null) ? null : init.getRequires();
         ExprAST initEnsures = (init == null) ? null : init.getEnsures();

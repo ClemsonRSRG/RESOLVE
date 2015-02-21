@@ -14,11 +14,11 @@ package edu.clemson.cs.r2jt.absynnew;
 
 import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportCollectionBuilder;
 import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportType;
-import edu.clemson.cs.r2jt.absynnew.InitFinalAST.TypeFinalAST;
-import edu.clemson.cs.r2jt.absynnew.InitFinalAST.TypeInitAST;
+import edu.clemson.cs.r2jt.absynnew.InitFinalAST.Type;
 import edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptAST.ConceptBuilder;
 import edu.clemson.cs.r2jt.absynnew.ModuleAST.PrecisAST.PrecisBuilder;
 import edu.clemson.cs.r2jt.absynnew.ModuleAST.FacilityAST.FacilityBuilder;
+import edu.clemson.cs.r2jt.absynnew.ModuleAST.EnhancementAST.EnhancementBuilder;
 import edu.clemson.cs.r2jt.absynnew.BlockAST.BlockBuilder;
 import edu.clemson.cs.r2jt.absynnew.decl.*;
 import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST.DefinitionBuilder;
@@ -27,6 +27,7 @@ import edu.clemson.cs.r2jt.absynnew.decl.TypeModelAST.TypeDeclBuilder;
 import edu.clemson.cs.r2jt.absynnew.expr.*;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.MathSymbolExprBuilder;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.DisplayStyle;
+import edu.clemson.cs.r2jt.absynnew.stmt.StmtAST;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.parsing.ResolveBaseListener;
 import edu.clemson.cs.r2jt.parsing.ResolveParser;
@@ -166,7 +167,34 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitEnhancementModule(
             @NotNull ResolveParser.EnhancementModuleContext ctx) {
+        EnhancementBuilder builder =
+                new EnhancementBuilder(ctx.getStart(), ctx.getStop(), ctx.name,
+                        ctx.concept)//
+                        .requires(get(ExprAST.class, ctx.requiresClause()))//
+                        .block(get(BlockAST.class, ctx.enhancementItems()))//
+                        .imports(myImportBuilder.build());
 
+        if (ctx.moduleParameterList() != null) {
+            builder.parameters(getAll(ModuleParameterAST.class, ctx
+                    .moduleParameterList().moduleParameterDecl()));
+        }
+        put(ctx, builder.build());
+    }
+
+    @Override
+    public void exitEnhancementItems(
+            @NotNull ResolveParser.EnhancementItemsContext ctx) {
+        BlockBuilder blockBuilder =
+                new BlockBuilder(ctx.getStart(), ctx.getStop())
+                        .generalElements(getAll(ResolveAST.class, ctx
+                                .enhancementItem()));
+        put(ctx, blockBuilder.build());
+    }
+
+    @Override
+    public void exitEnhancementItem(
+            @NotNull ResolveParser.EnhancementItemContext ctx) {
+        put(ctx, get(ResolveAST.class, ctx.getChild(0)));
     }
 
     @Override
@@ -344,9 +372,9 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                 new TypeDeclBuilder(ctx.getStart(), ctx.getStop(), ctx.name,
                         ctx.exemplar)//
                         .model(get(MathTypeAST.class, ctx.mathTypeExp()))//
-                        .init(get(TypeInitAST.class, ctx.specTypeInit()))//
-                        .finalize(get(TypeFinalAST.class, ctx.specTypeFinal()))//
-                        .constraint(get(ExprAST.class, ctx.constraintClause()));
+                        .init(get(InitFinalAST.class, ctx.typeModelInit()))//
+                        .constraint(get(ExprAST.class, ctx.constraintClause()))//
+                        .finalize(get(InitFinalAST.class, ctx.typeModelFinal()));
 
         put(ctx, builder.build());
     }
@@ -411,54 +439,96 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     //Todo: Figure out if we want to throw this SrcErrorException in the
     //constructor of ModuleAST or not (filter the blockAST by type). hmmm.
     @Override
-    public void exitModuleInit(@NotNull ResolveParser.ModuleInitContext ctx) {
-        if (mySeenModuleInitFlag) {
-            throw new SrcErrorException("only one module level initialization"
-                    + " section per module is permitted", ctx.getStart());
-        }
-        InitFinalAST.ModuleInitAST moduleInit =
-                new InitFinalAST.ModuleInitAST(ctx.getStart(), ctx.getStop(),
-                        get(ExprAST.class, ctx.requiresClause()), get(
-                                ExprAST.class, ctx.ensuresClause()));
+    public void exitModuleSpecInit(
+            @NotNull ResolveParser.ModuleSpecInitContext ctx) {
+        sanityCheckInitFinal(ctx);
+        InitFinalAST moduleInit =
+                new InitFinalAST(ctx.getStart(), ctx.getStop(), get(
+                        ExprAST.class, ctx.requiresClause()), get(
+                        ExprAST.class, ctx.ensuresClause()), Type.MODULE_INIT);
 
         mySeenModuleInitFlag = true;
         put(ctx, moduleInit);
     }
 
     @Override
-    public void exitModuleFinal(@NotNull ResolveParser.ModuleFinalContext ctx) {
-        if (mySeenModuleFinalFlag) {
-            throw new SrcErrorException("only one module level finalization"
-                    + " section per module is permitted", ctx.getStart());
-        }
-        InitFinalAST.ModuleFinalAST moduleFinal =
-                new InitFinalAST.ModuleFinalAST(ctx.getStart(), ctx.getStop(),
-                        get(ExprAST.class, ctx.requiresClause()), get(
-                                ExprAST.class, ctx.ensuresClause()));
+    public void exitModuleSpecFinal(
+            @NotNull ResolveParser.ModuleSpecFinalContext ctx) {
+        sanityCheckInitFinal(ctx);
+        InitFinalAST moduleFinal =
+                new InitFinalAST(ctx.getStart(), ctx.getStop(), get(
+                        ExprAST.class, ctx.requiresClause()), get(
+                        ExprAST.class, ctx.ensuresClause()), Type.MODULE_FINAL);
 
         mySeenModuleFinalFlag = true;
         put(ctx, moduleFinal);
     }
 
     @Override
-    public void exitSpecTypeInit(@NotNull ResolveParser.SpecTypeInitContext ctx) {
-        TypeInitAST initialization =
-                new TypeInitAST(ctx.getStart(), ctx.getStop(), get(
+    public void exitTypeModelInit(
+            @NotNull ResolveParser.TypeModelInitContext ctx) {
+        InitFinalAST initialization =
+                new InitFinalAST(ctx.getStart(), ctx.getStop(), get(
                         ExprAST.class, ctx.requiresClause()), get(
-                        ExprAST.class, ctx.ensuresClause()));
+                        ExprAST.class, ctx.ensuresClause()), Type.TYPE_INIT);
 
         put(ctx, initialization);
     }
 
     @Override
-    public void exitSpecTypeFinal(
-            @NotNull ResolveParser.SpecTypeFinalContext ctx) {
-        TypeFinalAST finalization =
-                new TypeFinalAST(ctx.getStart(), ctx.getStop(), get(
+    public void exitTypeModelFinal(
+            @NotNull ResolveParser.TypeModelFinalContext ctx) {
+        InitFinalAST finalization =
+                new InitFinalAST(ctx.getStart(), ctx.getStop(), get(
                         ExprAST.class, ctx.requiresClause()), get(
-                        ExprAST.class, ctx.ensuresClause()));
+                        ExprAST.class, ctx.ensuresClause()), Type.TYPE_FINAL);
 
         put(ctx, finalization);
+    }
+
+    @Override
+    public void exitModuleFacilityInit(
+            @NotNull ResolveParser.ModuleFacilityInitContext ctx) {
+        put(ctx, buildImplModuleInitFinal(ctx, ctx.variableDeclGroup(), ctx
+                .requiresClause(), ctx.ensuresClause(), Type.MODULE_INIT));
+        mySeenModuleInitFlag = true;
+    }
+
+    @Override
+    public void exitModuleFacilityFinal(
+            @NotNull ResolveParser.ModuleFacilityFinalContext ctx) {
+        put(ctx, buildImplModuleInitFinal(ctx, ctx.variableDeclGroup(), ctx
+                .requiresClause(), ctx.ensuresClause(), Type.MODULE_FINAL));
+        mySeenModuleInitFlag = true;
+    }
+
+    private InitFinalAST buildImplModuleInitFinal(ParserRuleContext ctx,
+            List<ResolveParser.VariableDeclGroupContext> v, ParseTree requires,
+            ParseTree ensures, Type t) {
+        sanityCheckInitFinal(ctx);
+        List<VariableAST> variables = new ArrayList<VariableAST>();
+
+        for (ResolveParser.VariableDeclGroupContext grp : v) {
+            variables.addAll(getAll(VariableAST.class, grp.Identifier()));
+        }
+        return new InitFinalAST(ctx.getStart(), ctx.getStop(), get(
+                ExprAST.class, requires), get(ExprAST.class, ensures),
+                variables, new ArrayList<StmtAST>(), t);
+    }
+
+    /**
+     * <p>Raises hell if the user wrote more than a single module level
+     * initialization or finalization section.</p>
+     */
+    private void sanityCheckInitFinal(ParserRuleContext ctx) {
+        if (mySeenModuleInitFlag) {
+            throw new SrcErrorException("only one module level initialization"
+                    + " section per module is permitted", ctx.getStart());
+        }
+        if (mySeenModuleFinalFlag) {
+            throw new SrcErrorException("only one module level finalization"
+                    + " section per module is permitted", ctx.getStart());
+        }
     }
 
     @Override

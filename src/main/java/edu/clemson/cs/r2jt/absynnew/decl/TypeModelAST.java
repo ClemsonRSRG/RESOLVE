@@ -38,8 +38,7 @@ public class TypeModelAST extends DeclAST {
     private final Token myExemplar;
     private final ExprAST myConstraint;
 
-    private final InitFinalAST.TypeInitAST myInitialization;
-    private final InitFinalAST.TypeFinalAST myFinalization;
+    private final InitFinalAST myInitialization, myFinalization;
 
     private TypeModelAST(TypeDeclBuilder builder) {
         super(builder.getStart(), builder.getStop(), builder.name);
@@ -63,16 +62,16 @@ public class TypeModelAST extends DeclAST {
     }
 
     /**
-     * <p>Returns the {@link InitFinalAST.TypeInitAST} associated with this
+     * <p>Returns the {@link InitFinalAST} associated with this
      * <code>TypeModelAST</code>.</p>
      *
      * @return An initialization item.
      */
-    public InitFinalAST.TypeInitAST getInitialization() {
+    public InitFinalAST getInitialization() {
         return myInitialization;
     }
 
-    public InitFinalAST.TypeFinalAST getFinalization() {
+    public InitFinalAST getFinalization() {
         return myFinalization;
     }
 
@@ -85,8 +84,7 @@ public class TypeModelAST extends DeclAST {
         public final Token name, exemplar;
         public ExprAST constraint;
 
-        public InitFinalAST.TypeInitAST initialization;
-        public InitFinalAST.TypeFinalAST finalization;
+        public InitFinalAST initialization, finalization;
 
         public TypeDeclBuilder(Token start, Token stop, Token name,
                 Token exemplar) {
@@ -105,12 +103,12 @@ public class TypeModelAST extends DeclAST {
             return this;
         }
 
-        public TypeDeclBuilder init(InitFinalAST.TypeInitAST e) {
+        public TypeDeclBuilder init(InitFinalAST e) {
             initialization = e;
             return this;
         }
 
-        public TypeDeclBuilder finalize(InitFinalAST.TypeFinalAST e) {
+        public TypeDeclBuilder finalize(InitFinalAST e) {
             finalization = e;
             return this;
         }

@@ -41,6 +41,10 @@ facilityItems
 
 facilityItem
     :   facilityDecl
+    |   facilityOperationDecl
+    |   mathDefinitionDecl
+    |   moduleFacilityInit
+    |   moduleFacilityFinal
     ;
 
 // concept module
@@ -59,8 +63,8 @@ conceptItems
 
 conceptItem
     :   constraintClause
-    |   moduleInit
-    |   moduleFinal
+    |   moduleSpecInit
+    |   moduleSpecFinal
     |   operationDecl
     |   typeModelDecl
     |   mathDefinitionDecl
@@ -136,31 +140,57 @@ typeModelDecl
     :   'Type' 'Family' name=Identifier 'is' 'modeled' 'by' mathTypeExp ';'
         'exemplar' exemplar=Identifier ';'
         (constraintClause)?
-        (specTypeInit)?
-        (specTypeFinal)?
+        (typeModelInit)?
+        (typeModelFinal)?
     ;
 
-specTypeInit
+// initialization, finalization rules
+
+typeModelInit
     :   'initialization' (requiresClause)? (ensuresClause)?
     ;
 
-specTypeFinal
+typeModelFinal
     :   'finalization' (requiresClause)? (ensuresClause)?
     ;
 
-moduleInit
+//We use special rules for facility module init and final to allow requires
+//and ensures clauses (which aren't allowed in normal body modules)...
+moduleFacilityInit
+    :   'Facility_Initialization'
+        (requiresClause)?
+        (ensuresClause)?
+        (variableDeclGroup)*
+        //stmt block
+    ;
+
+moduleFacilityFinal
+    :   'Facility_Finalization'
+         (requiresClause)?
+         (ensuresClause)?
+         (variableDeclGroup)*
+         //stmt block
+    ;
+
+moduleSpecInit
     :   'Facility_Initialization'
         (requiresClause)?
         (ensuresClause)?
     ;
 
-moduleFinal
+moduleSpecFinal
     :   'Facility_Finalization'
         (requiresClause)?
         (ensuresClause)?
     ;
 
 moduleBodyInit
+    :   'Facility_Initialization'
+        (variableDeclGroup)*
+        //Todo: stmts
+    ;
+
+moduleBodyFinal
     :   'Facility_Finalization'
         (variableDeclGroup)*
         //Todo: stmts

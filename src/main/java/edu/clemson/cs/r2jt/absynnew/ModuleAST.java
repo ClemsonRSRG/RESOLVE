@@ -32,13 +32,13 @@ public abstract class ModuleAST extends ResolveAST {
     private final BlockAST myBodyBlock;
 
     public ModuleAST(Token start, Token stop, Token name,
-            ImportCollectionAST uses, List<ModuleParameterAST> params,
+            ImportCollectionAST imports, List<ModuleParameterAST> params,
             ExprAST req, BlockAST block) {
         super(start, stop);
         myName = name;
 
         myModuleParams = params;
-        myImports = uses;
+        myImports = imports;
         myRequires = req;
         myBodyBlock = block;
     }
@@ -148,6 +148,7 @@ public abstract class ModuleAST extends ResolveAST {
     }
 
     public static class EnhancementAST extends ModuleAST {
+
         private final Token myConceptName;
 
         private EnhancementAST(EnhancementBuilder builder) {
@@ -164,11 +165,12 @@ public abstract class ModuleAST extends ResolveAST {
 
         public static class EnhancementBuilder
                 extends
-                ModuleBuilderExtension<EnhancementBuilder> {
+                    ModuleBuilderExtension<EnhancementBuilder> {
+
             protected final Token conceptName;
 
             public EnhancementBuilder(Token start, Token stop, Token name,
-                                      Token conceptName) {
+                    Token conceptName) {
                 super(start, stop, name);
                 this.conceptName = conceptName;
             }
