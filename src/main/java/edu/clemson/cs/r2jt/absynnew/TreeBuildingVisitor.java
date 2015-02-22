@@ -783,20 +783,13 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void exitProgRecordDotExp(
-            @NotNull ResolveParser.ProgRecordDotExpContext ctx) {
-        throw new UnsupportedOperationException("program record dot "
-                + "expressions not yet supported by the compiler.");
+    public void exitProgDotExp(@NotNull ResolveParser.ProgDotExpContext ctx) {
+        put(ctx, new ProgDotAST(ctx.getStart(), ctx.getStop(), getAll(
+                ProgNameRefAST.class, ctx.progNamedExp())));
     }
 
     @Override
     public void exitProgNamedExp(@NotNull ResolveParser.ProgNamedExpContext ctx) {
-        put(ctx, get(ProgExprAST.class, ctx.progNamedVarExp()));
-    }
-
-    @Override
-    public void exitProgNamedVarExp(
-            @NotNull ResolveParser.ProgNamedVarExpContext ctx) {
         put(ctx, new ProgNameRefAST(ctx.getStart(), ctx.getStop(),
                 ctx.qualifier, ctx.name));
     }
@@ -859,6 +852,14 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     public void exitMathPrimaryExp(
             @NotNull ResolveParser.MathPrimaryExpContext ctx) {
         put(ctx, get(ExprAST.class, ctx.getChild(0)));
+    }
+
+    @Override
+    public void exitMathDotExp(@NotNull ResolveParser.MathDotExpContext ctx) {
+        MathDotAST dots =
+                new MathDotAST(ctx.getStart(), ctx.getStop(), getAll(
+                        MathSymbolAST.class, ctx.mathFunctionApplicationExp()));
+        put(ctx, dots);
     }
 
     @Override

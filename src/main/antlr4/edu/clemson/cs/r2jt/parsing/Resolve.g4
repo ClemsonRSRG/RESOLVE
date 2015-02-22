@@ -443,10 +443,15 @@ mathExp
 
 mathPrimaryExp
     :   mathLiteralExp
+    |   mathDotExp
     |   mathFunctionApplicationExp
     |   mathOutfixExp
     |   mathSetExp
     |   mathTupleExp
+    ;
+
+mathDotExp
+    :   mathFunctionApplicationExp ('.' mathFunctionApplicationExp)+
     ;
 
 mathSetExp
@@ -466,7 +471,7 @@ mathFunctionApplicationExp
 
 mathCleanFunctionExp
     :   name=Identifier '(' mathExp (',' mathExp)* ')'  #mathFunctionExp
-    |   (qualifier=Identifier '::')? name=Identifier    #mathVariableExp//Todo
+    |   (qualifier=Identifier '::')? name=Identifier    #mathVariableExp
     |   ('+'|'-'|'*'|'/')                               #mathOpExp
     ;
 
@@ -493,7 +498,12 @@ progExp
 progPrimary
     :   progLiteralExp
     |   progParamExp
-    |   progVarExp
+    |   progNamedExp
+    |   progDotExp
+    ;
+
+progDotExp
+    :   progNamedExp ('.' progNamedExp)+
     ;
 
 progParamExp
@@ -501,12 +511,7 @@ progParamExp
         '(' (progExp (',' progExp)*)? ')'
     ;
 
-progVarExp
-    :   progNamedVarExp ('.' progNamedVarExp)+      #progRecordDotExp
-    |   progNamedVarExp                             #progNamedExp
-    ;
-
-progNamedVarExp
+progNamedExp
     :   (qualifier=Identifier '::')? name=Identifier
     ;
 

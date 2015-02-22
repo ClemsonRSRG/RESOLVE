@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>An <code>InitFinalAST</code> provides a general scope for
- * users for specifications and code that deals with module (or type level)
- * initialization or finalization.</p>
+ * <p>An <code>InitFinalAST</code> provides a general scope for specifications
+ * and code that deals with module (or type level) initialization or
+ * finalization.</p>
  */
 public class InitFinalAST extends ResolveAST {
 
@@ -78,4 +78,5 @@ public class InitFinalAST extends ResolveAST {
     public List<StmtAST> getStatements() {
         return myStatements;
     }
+
 }

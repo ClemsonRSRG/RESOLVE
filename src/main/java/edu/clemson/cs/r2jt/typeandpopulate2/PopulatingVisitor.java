@@ -1292,9 +1292,9 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                     myTypeGraph.isKnownToBeIn(foundValue, expectedType);
 
             //Todo: I'm not currently considering lambdas.
-            /*if (!result && foundValue instanceof LambdaExp
+            if (!result && foundValue instanceof MathLambdaAST
                     && expectedType instanceof MTFunction) {
-                LambdaExp foundValueAsLambda = (LambdaExp) foundValue;
+                MathLambdaAST foundValueAsLambda = (MathLambdaAST) foundValue;
                 MTFunction expectedTypeAsFunction = (MTFunction) expectedType;
 
                 result =
@@ -1302,9 +1302,9 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                                 .getDomain(), expectedTypeAsFunction
                                 .getDomain())
                                 && myTypeGraph.isKnownToBeIn(foundValueAsLambda
-                                .getBody(), expectedTypeAsFunction
-                                .getRange());
-            }*/
+                                        .getBody(), expectedTypeAsFunction
+                                        .getRange());
+            }
             return result;
         }
 
