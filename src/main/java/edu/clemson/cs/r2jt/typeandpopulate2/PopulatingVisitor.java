@@ -18,6 +18,9 @@ import edu.clemson.cs.r2jt.absynnew.decl.*;
 import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST.DefinitionType;
 import edu.clemson.cs.r2jt.absynnew.expr.*;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
+import edu.clemson.cs.r2jt.misc.Utils;
+import edu.clemson.cs.r2jt.misc.Utils.Indirect;
+import edu.clemson.cs.r2jt.misc.HardCoded2;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.*;
@@ -936,6 +939,177 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                         .getMathType()));
             }*/
         }
+    }
+
+    @Override
+    public boolean walkMathDotAST(MathDotAST e) {
+        preAny(e);
+        preExprAST(e);
+        preMathDotAST(e);
+
+        Indirect<MathSymbolAST> lastGoodOut =
+                new Utils.Indirect<MathSymbolAST>();
+        Iterator<MathSymbolAST> segments = e.getSegments().iterator();
+        MathSymbolEntry entry = getTopLevelValue(segments, lastGoodOut);
+
+        Token lastGood = lastGoodOut.data.getStart();
+
+        MTType curType = entry.getType();
+        MTCartesian curTypeCartesian;
+        MathSymbolAST nextSegment = lastGoodOut.data, lastSegment;
+        while (segments.hasNext()) {
+            lastSegment = nextSegment;
+            nextSegment = segments.next();
+
+            String segmentName = nextSegment.getName().getText();
+            try {
+                curTypeCartesian = (MTCartesian) curType;
+                curType = curTypeCartesian.getFactor(segmentName);
+            }
+            catch (ClassCastException cce) {
+                curType =
+                        HardCoded2.getMetaFieldType(myTypeGraph, lastSegment,
+                                segmentName);
+
+                if (curType == null) {
+                    throw new SrcErrorException("Value not a tuple.",
+                            lastGood);
+                }
+            }
+            catch (NoSuchElementException nsee) {
+                curType =
+                        HardCoded2.getMetaFieldType(myTypeGraph, lastSegment,
+                                segmentName);
+
+                if (curType == null) {
+                    throw new SrcErrorException("No such factor.", lastGood);
+                }
+            }
+
+            //getName() would have thrown an exception if nextSegment wasn't
+            //a VarExp or a FunctionExp.  In the former case, we're good to
+            //go--but in the latter case, we still need to typecheck
+            //parameters, assure they match the signature, and adjust
+            //curType to reflect the RANGE of the function type rather than
+            //the entire type
+            if (nextSegment.isFunction()) {
+                curType = applyFunction(nextSegment, curType);
+            }
+
+            nextSegment.setMathType(curType);
+            lastGood = nextSegment.getStart();
+        }
+        postMathDotAST(e);
+        postExprAST(e);
+        postAny(e);
+
+        return true;
+    }
+
+    /**
+     * <p>This method has to do an annoying amount of work, so pay attention:
+     * takes an iterator over segments as returned from DotExp.getSegments().
+     * Either the first segment or first two segments will be advanced over
+     * from the iterator, depending on whether this method determines the DotExp
+     * refers to a local value (one segment), is a qualified name referring to
+     * a value in another module (two segments), or is a Conc expression (two
+     * segments).  The segments will receive appropriate types.  The data field
+     * of lastGood will be set with the location of the last segment read.
+     * Then, the <code>MathSymbolEntry</code> corresponding to the correct
+     * top-level value will be returned.</p>
+     */
+    private MathSymbolEntry getTopLevelValue(Iterator<MathSymbolAST> segments,
+                                             Indirect<MathSymbolAST> lastGood) {
+        MathSymbolEntry result = null;
+        MathSymbolAST first = segments.next();
+        Token firstName = first.getName() ;
+
+        //First, we'll see if we're a Conc expression
+        if (firstName.getText().equals("Conc")) {
+            //Awesome.  We better be in a type definition and our second segment
+            //better refer to the exemplar
+            MathSymbolAST second = segments.next();
+
+            if (!second.toString().equals(
+                    myTypeDefinitionEntry.getProgramType().getExemplarName())) {
+                throw new RuntimeException("No idea what's going on here.");
+            }
+
+            //The Conc segment doesn't have a sensible type, but we'll set one
+            //for completeness.
+            first.setMathType(myTypeGraph.BOOLEAN);
+            second.setMathType(myTypeDefinitionEntry.getModelType());
+            result = myTypeDefinitionEntry.getExemplar();
+
+            lastGood.data = second;
+        }
+        else {
+            //Next, we'll see if there's a locally-accessible symbol with this
+            //name
+            try {
+                result =
+                        myBuilder
+                                .getInnermostActiveScope()
+                                .queryForOne(
+                                        new NameQuery(
+                                                first.getQualifier(),
+                                                firstName,
+                                                ImportStrategy.IMPORT_NAMED,
+                                                FacilityStrategy.FACILITY_IGNORE,
+                                                true)).toMathSymbolEntry(
+                                first.getStart());
+
+                //There is.  Cool.  We type it and we're done
+                lastGood.data = first;
+                first.setMathType(result.getType());
+                try {
+                    first.setMathTypeValue(result.getTypeValue());
+                }
+                catch (SymbolNotOfKindTypeException snokte) {
+
+                }
+            }
+            catch (NoSuchSymbolException nsse) {
+                noSuchSymbol(first.getQualifier(), first.getName());
+            }
+            catch (DuplicateSymbolException dse) {
+                duplicateSymbol(firstName);
+                throw new RuntimeException(); //This will never fire
+            }
+        }
+        return result;
+    }
+
+    private MTType applyFunction(MathSymbolAST functionSegment, MTType type) {
+        MTType result;
+
+        try {
+            MTFunction functionType = (MTFunction) type;
+
+            //Ok, we need to type check our arguments before we can
+            //continue
+            for (ExprAST arg : functionSegment.getArguments()) {
+                TreeWalker.walk(this, arg);
+            }
+            if (!INEXACT_DOMAIN_MATCH.compare(functionSegment, functionSegment
+                            .getConservativePreApplicationType(myTypeGraph),
+                    functionType)) {
+                throw new SrcErrorException("Parameters do not "
+                        + "match function range.\n\nExpected: "
+                        + functionType.getDomain()
+                        + "\nFound:    "
+                        + functionSegment.getConservativePreApplicationType(
+                        myTypeGraph).getDomain(), functionSegment.getStart());
+            }
+
+            result = functionType.getRange();
+        }
+        catch (ClassCastException cce) {
+            throw new SrcErrorException("Not a function.", functionSegment
+                    .getStart());
+        }
+
+        return result;
     }
 
     @Override

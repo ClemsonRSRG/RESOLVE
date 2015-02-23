@@ -12,10 +12,12 @@
  */
 package edu.clemson.cs.r2jt.misc;
 
+import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.MathSymbolExprBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate2.DuplicateSymbolException;
 import edu.clemson.cs.r2jt.typeandpopulate2.MTFunction;
+import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate2.ScopeBuilder;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 
@@ -77,5 +79,15 @@ public class HardCoded2 {
             //Not possible--we're the first ones to add anything
             throw new RuntimeException(dse);
         }
+    }
+
+    public static MTType getMetaFieldType(
+            TypeGraph g, ExprAST e, String metaSegment) {
+        MTType result = null;
+
+        if (e.getMathTypeValue() != null && metaSegment.equals("Is_Initial")) {
+            result = new MTFunction(g, g.BOOLEAN, g.ENTITY);
+        }
+        return result;
     }
 }

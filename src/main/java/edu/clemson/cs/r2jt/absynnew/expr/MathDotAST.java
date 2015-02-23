@@ -31,6 +31,10 @@ public class MathDotAST extends ExprAST {
         mySegments = segments;
     }
 
+    public List<MathSymbolAST> getSegments() {
+        return mySegments;
+    }
+
     @Override
     public List<? extends ExprAST> getSubExpressions() {
         return mySegments;
