@@ -71,12 +71,11 @@ public abstract class SymbolTableEntry {
         return myDefiningElement;
     }
 
-    /*
-       public RepresentationTypeEntry toRepresentationTypeEntry(Location l) {
-           throw new SourceErrorException("Expecting a program type "
-                   + "representation.  Found " + getEntryTypeDescription() + ".",
-                   l);
-       }*/
+    public RepresentationTypeEntry toRepresentationTypeEntry(Token l) {
+        throw new SrcErrorException("Expecting a program type "
+                + "representation.  Found " + getEntryTypeDescription() + ".",
+                l);
+    }
 
     public MathSymbolEntry toMathSymbolEntry(Token l) {
         throw new SrcErrorException("expecting a math symbol; found "

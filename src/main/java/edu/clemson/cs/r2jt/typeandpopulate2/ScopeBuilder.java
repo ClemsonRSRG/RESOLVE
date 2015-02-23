@@ -17,6 +17,7 @@ import edu.clemson.cs.r2jt.absynnew.ResolveAST;
 import edu.clemson.cs.r2jt.absynnew.decl.FacilityAST;
 import edu.clemson.cs.r2jt.absynnew.decl.MathTheoremAST;
 import edu.clemson.cs.r2jt.absynnew.decl.TypeModelAST;
+import edu.clemson.cs.r2jt.absynnew.decl.TypeRepresentationAST;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.*;
@@ -131,6 +132,23 @@ public class ScopeBuilder extends SyntacticScope {
                         myRootModule);
         myBindings.put(name, entry);
         return entry;
+    }
+
+    public RepresentationTypeEntry addRepresentationTypeEntry(String name,
+            TypeRepresentationAST definingElement,
+            ProgramTypeDefinitionEntry definition, PTType representationType,
+            ExprAST convention, ExprAST correspondence)
+            throws DuplicateSymbolException {
+
+        sanityCheckBindArguments(name, definingElement, "");
+
+        RepresentationTypeEntry result =
+                new RepresentationTypeEntry(myTypeGraph, name, definingElement,
+                        myRootModule, definition, representationType,
+                        convention, correspondence);
+
+        myBindings.put(name, result);
+        return result;
     }
 
     public ProgramTypeEntry addProgramTypeDefinition(String name,

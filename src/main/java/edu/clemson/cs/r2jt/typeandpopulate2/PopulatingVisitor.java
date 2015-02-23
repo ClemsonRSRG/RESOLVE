@@ -20,10 +20,7 @@ import edu.clemson.cs.r2jt.absynnew.expr.*;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.*;
-import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTElement;
-import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTRecord;
-import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
-import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTVoid;
+import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.*;
 import edu.clemson.cs.r2jt.typeandpopulate2.query.MathFunctionNamedQuery;
 import edu.clemson.cs.r2jt.typeandpopulate2.query.MathSymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate2.query.NameQuery;
@@ -61,6 +58,14 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     private boolean myInTypeTheoremBindingExpFlag = false;
 
     private boolean myWalkingModuleParameterFlag = false;
+
+    /**
+     * <p>When parsing a type realization declaration, this is set to the
+     * entry corresponding to the conceptual declaration from the concept.  When
+     * not inside such a declaration, this will be null.</p>
+     */
+    private ProgramTypeDefinitionEntry myTypeDefinitionEntry;
+    private PTRepresentation myPTRepresentationType;
 
     /**
      * <p>Any quantification-introducing syntactic node (like, e.g., a
@@ -293,6 +298,71 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             duplicateSymbol(e.getName());
         }
         e.setMathType(e.getType().getMathTypeValue());
+    }
+
+    @Override
+    public void preTypeRepresentationAST(TypeRepresentationAST r) {
+        myBuilder.startScope(r);
+        Token type = r.getName();
+
+        List<SymbolTableEntry> es =
+                myBuilder.getInnermostActiveScope().query(
+                        new NameQuery(null, type, ImportStrategy.IMPORT_NAMED,
+                                FacilityStrategy.FACILITY_IGNORE, false));
+
+        if (es.isEmpty()) {
+            noSuchSymbol(null, type);
+        }
+        else if (es.size() > 1) {
+            ambiguousSymbol(type, es);
+        }
+        else {
+            myTypeDefinitionEntry =
+                    es.get(0).toProgramTypeDefinitionEntry(type);
+        }
+    }
+
+    @Override
+    public void midTypeRepresentationAST(TypeRepresentationAST e,
+            ResolveAST previous, ResolveAST next) {
+
+        if (previous instanceof TypeAST) {
+            //We've finished the representation and are about to parse
+            //conventions, etc.  We introduce the exemplar gets added as
+            //a program variable with the appropriate type.
+            myPTRepresentationType =
+                    new PTRepresentation(myTypeGraph, ((TypeAST) previous)
+                            .getProgramTypeValue(), myTypeDefinitionEntry);
+            try {
+                myBuilder.getInnermostActiveScope().addProgramVariable(
+                        myTypeDefinitionEntry.getProgramType()
+                                .getExemplarName(), e, myPTRepresentationType);
+            }
+            catch (DuplicateSymbolException dse) {
+                //This shouldn't be possible--the type declaration has a
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                throw new RuntimeException(dse);
+            }
+        }
+    }
+
+    @Override
+    public void postTypeRepresentationAST(TypeRepresentationAST r) {
+        myBuilder.endScope();
+
+        try {
+            myBuilder.getInnermostActiveScope().addRepresentationTypeEntry(
+                    r.getName().getText(), r, myTypeDefinitionEntry,
+                    myPTRepresentationType, r.getConvention(),
+                    r.getCorrespondence());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(r.getName());
+        }
+
+        myPTRepresentationType = null;
+        myTypeDefinitionEntry = null;
     }
 
     @Override
