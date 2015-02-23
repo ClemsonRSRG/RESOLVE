@@ -679,6 +679,15 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     public void postProgIntegerRefAST(ProgLiteralRefAST.ProgIntegerRefAST e) {
         e.setProgramType(getIntegerProgramType());
         e.setMathType(myTypeGraph.Z);
+
+        String typeValueDesc = "";
+        if (e.getMathTypeValue() != null) {
+            typeValueDesc =
+                    ", referencing math type " + e.getMathTypeValue() + " ("
+                            + e.getMathTypeValue().getClass() + ")";
+        }
+        PopulatingVisitor.emitDebug("processed symbol " + e
+                + " with type " + e.getMathType() + typeValueDesc);
     }
 
     @Override
