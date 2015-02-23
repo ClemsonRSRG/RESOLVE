@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
+import edu.clemson.cs.r2jt.absynnew.TreeUtil;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
@@ -90,5 +91,14 @@ public class ProgOperationRefAST extends ProgExprAST {
         }
         return new ProgOperationRefAST(getStart(), getStop(), myQualifier,
                 myName, newArguments);
+    }
+
+    @Override
+    public String toString() {
+        String result = "";
+        if (myQualifier != null) {
+            result += myQualifier + "::";
+        }
+        return result + myName + "(" + TreeUtil.join(myArguments, ", ") + ")";
     }
 }

@@ -14,6 +14,9 @@ package edu.clemson.cs.r2jt.absynnew;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.stringtemplate.v4.ST;
+
+import java.util.Collection;
 
 /**
  * <p>A place for general-purpose abstract syntax related methods.</p>
@@ -21,6 +24,19 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
  * @author dtwelch
  */
 public class TreeUtil {
+
+    /**
+     * <p>Joins (delimits) a list by separator <code>sep</code>.</p>
+     *
+     * @param l     The collection of elements to delmit.
+     * @param sep   The desired separator.
+     * @return      The delimited list.
+     */
+    public static String join(Collection<?> l, String sep) {
+        ST elements =
+                new ST("<elems; separator={" + sep + "}>").add("elems", l);
+        return elements.render();
+    }
 
     /**
      * <p>Returns the abstract syntax representation of the concrete tree

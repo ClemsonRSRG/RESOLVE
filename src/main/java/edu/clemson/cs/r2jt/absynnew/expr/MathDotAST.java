@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
+import edu.clemson.cs.r2jt.absynnew.TreeUtil;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import org.antlr.v4.runtime.Token;
 import org.stringtemplate.v4.ST;
@@ -59,7 +60,6 @@ public class MathDotAST extends ExprAST {
 
     @Override
     public String toString() {
-        ST x = new ST("<segments; separator = {.}>");
-        return x.add("segments", mySegments).render();
+        return TreeUtil.join(mySegments, ".");
     }
 }

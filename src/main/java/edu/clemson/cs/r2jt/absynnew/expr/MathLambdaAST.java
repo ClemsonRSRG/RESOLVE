@@ -13,6 +13,7 @@
 package edu.clemson.cs.r2jt.absynnew.expr;
 
 import edu.clemson.cs.r2jt.absyn.MathVarDec;
+import edu.clemson.cs.r2jt.absynnew.TreeUtil;
 import edu.clemson.cs.r2jt.absynnew.decl.MathVariableAST;
 import edu.clemson.cs.r2jt.typeandpopulate2.MTFunction;
 import org.antlr.v4.runtime.Token;
@@ -71,9 +72,8 @@ public class MathLambdaAST extends ExprAST {
 
     @Override
     public String toString() {
-        ST params =
-                new ST("<params; separator={.}>").add("params", myParameters);
-        return "lambda(" + params.render() + ").(" + myBody + ")";
+        return "lambda(" + TreeUtil.join(myParameters, ", ") + ").(" + myBody
+                + ")";
     }
 
     @Override

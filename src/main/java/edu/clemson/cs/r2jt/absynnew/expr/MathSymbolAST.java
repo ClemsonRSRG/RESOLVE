@@ -14,6 +14,7 @@ package edu.clemson.cs.r2jt.absynnew.expr;
 
 import edu.clemson.cs.r2jt.absynnew.AbstractNodeBuilder;
 import edu.clemson.cs.r2jt.absynnew.ResolveToken;
+import edu.clemson.cs.r2jt.absynnew.TreeUtil;
 import edu.clemson.cs.r2jt.parsing.ResolveLexer;
 import edu.clemson.cs.r2jt.rewriteprover.absyn2.PSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate2.MTFunction;
@@ -226,7 +227,6 @@ public class MathSymbolAST extends ExprAST {
         StringBuilder result = new StringBuilder();
         boolean first = true;
         if (isFunction()) {
-
             if (myDisplayStyle == DisplayStyle.INFIX) {
                 result.append(myArguments.get(0)).append(" " + myName + " ")
                         .append(myArguments.get(1));
@@ -237,19 +237,8 @@ public class MathSymbolAST extends ExprAST {
             }
             else {
                 result.append(myName.getText()).append("(");
-
-                for (ExprAST arg : myArguments) {
-                    if (first) {
-                        result.append(arg);
-                        first = false;
-                    }
-                    else {
-                        result.append(", ").append(arg);
-                    }
-                }
-                result.append(")");
+                result.append(TreeUtil.join(myArguments, ", ")).append(")");
             }
-
         }
         else {
             result.append(myName.getText());
