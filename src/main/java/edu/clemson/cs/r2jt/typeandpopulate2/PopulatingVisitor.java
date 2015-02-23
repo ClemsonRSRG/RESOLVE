@@ -972,8 +972,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                                 segmentName);
 
                 if (curType == null) {
-                    throw new SrcErrorException("Value not a tuple.",
-                            lastGood);
+                    throw new SrcErrorException("Value not a tuple.", lastGood);
                 }
             }
             catch (NoSuchElementException nsee) {
@@ -1019,10 +1018,10 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
      * top-level value will be returned.</p>
      */
     private MathSymbolEntry getTopLevelValue(Iterator<MathSymbolAST> segments,
-                                             Indirect<MathSymbolAST> lastGood) {
+            Indirect<MathSymbolAST> lastGood) {
         MathSymbolEntry result = null;
         MathSymbolAST first = segments.next();
-        Token firstName = first.getName() ;
+        Token firstName = first.getName();
 
         //First, we'll see if we're a Conc expression
         if (firstName.getText().equals("Conc")) {
@@ -1057,7 +1056,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                                                 ImportStrategy.IMPORT_NAMED,
                                                 FacilityStrategy.FACILITY_IGNORE,
                                                 true)).toMathSymbolEntry(
-                                first.getStart());
+                                        first.getStart());
 
                 //There is.  Cool.  We type it and we're done
                 lastGood.data = first;
@@ -1092,14 +1091,15 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                 TreeWalker.walk(this, arg);
             }
             if (!INEXACT_DOMAIN_MATCH.compare(functionSegment, functionSegment
-                            .getConservativePreApplicationType(myTypeGraph),
+                    .getConservativePreApplicationType(myTypeGraph),
                     functionType)) {
                 throw new SrcErrorException("Parameters do not "
                         + "match function range.\n\nExpected: "
                         + functionType.getDomain()
                         + "\nFound:    "
                         + functionSegment.getConservativePreApplicationType(
-                        myTypeGraph).getDomain(), functionSegment.getStart());
+                                myTypeGraph).getDomain(), functionSegment
+                        .getStart());
             }
 
             result = functionType.getRange();

@@ -81,8 +81,8 @@ public class HardCoded2 {
         }
     }
 
-    public static MTType getMetaFieldType(
-            TypeGraph g, ExprAST e, String metaSegment) {
+    public static MTType getMetaFieldType(TypeGraph g, ExprAST e,
+            String metaSegment) {
         MTType result = null;
 
         if (e.getMathTypeValue() != null && metaSegment.equals("Is_Initial")) {
