@@ -21,11 +21,13 @@ import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTElement;
+import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTRecord;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTVoid;
 import edu.clemson.cs.r2jt.typeandpopulate2.query.MathFunctionNamedQuery;
 import edu.clemson.cs.r2jt.typeandpopulate2.query.MathSymbolQuery;
 import edu.clemson.cs.r2jt.typeandpopulate2.query.NameQuery;
+import edu.clemson.cs.r2jt.typeandpopulate2.query.ProgramVariableQuery;
 import edu.clemson.cs.r2jt.typereasoning2.TypeComparison;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTable.ImportStrategy;
@@ -163,8 +165,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public void midMathLambdaAST(MathLambdaAST e,
-                                 ResolveAST next, ResolveAST previous) {
+    public void midMathLambdaAST(MathLambdaAST e, ResolveAST next,
+            ResolveAST previous) {
         if (next == e.getBody()) {
             myDefinitionParameterSectionFlag = false;
         }
@@ -582,18 +584,16 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     @Override
     public void postProgNameRefAST(ProgNameRefAST e) {
         try {
-            AbstractProgramEntry entry =
+            ProgramVariableEntry entry =
                     myBuilder.getInnermostActiveScope().queryForOne(
-                            new NameQuery(e.getQualifier(), e.getName(),
-                                    ImportStrategy.IMPORT_NAMED,
-                                    FacilityStrategy.FACILITY_IGNORE, false))
-                            .toProgrammaticEntry(e.getName());
+                            new ProgramVariableQuery(e.getQualifier(), e
+                                    .getName()));
 
             e.setProgramType(entry.getProgramType());
-
             //Handle math typing stuff
             postSymbolExp(e.getQualifier(), e.getName(), e);
         }
+        //try again in here with the other query...
         catch (NoSuchSymbolException nsse) {
             noSuchSymbol(e.getQualifier(), e.getName());
         }
@@ -731,9 +731,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                     + "name", e.getStart());
         }
 
-        if ((myDefinitionParameterSectionFlag ||
-                (myActiveQuantifications.size() > 0 && myActiveQuantifications
-                .peek() != SymbolTableEntry.Quantification.NONE))
+        if ((myDefinitionParameterSectionFlag || (myActiveQuantifications
+                .size() > 0 && myActiveQuantifications.peek() != SymbolTableEntry.Quantification.NONE))
                 && mathTypeValue.isKnownToContainOnlyMTypes()) {
             myDefinitionSchematicTypes.put(varName, mathTypeValue);
         }
@@ -769,6 +768,22 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             fieldTypes.add(new MTCartesian.Element(field.getMathType()));
         }
         e.setMathType(new MTCartesian(myTypeGraph, fieldTypes));
+    }
+
+    @Override
+    public void postRecordTypeAST(RecordTypeAST e) {
+        Map<String, PTType> fieldMap = new HashMap<String, PTType>();
+        List<VariableAST> fields = e.getFields();
+
+        for (VariableAST field : fields) {
+            fieldMap.put(field.getName().getText(), field.getType()
+                    .getProgramTypeValue());
+        }
+        PTRecord record = new PTRecord(myTypeGraph, fieldMap);
+
+        e.setProgramTypeValue(record);
+        e.setMathType(myTypeGraph.CLS);
+        e.setMathTypeValue(record.toMath());
     }
 
     @Override

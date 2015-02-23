@@ -23,6 +23,7 @@ import edu.clemson.cs.r2jt.absynnew.decl.*;
 import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST.DefinitionBuilder;
 import edu.clemson.cs.r2jt.absynnew.decl.OperationImplAST.OperationImplBuilder;
 import edu.clemson.cs.r2jt.absynnew.decl.TypeModelAST.TypeDeclBuilder;
+import edu.clemson.cs.r2jt.absynnew.decl.TypeRepresentationAST.RepresentationBuilder;
 import edu.clemson.cs.r2jt.absynnew.expr.*;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.MathSymbolExprBuilder;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.DisplayStyle;
@@ -211,6 +212,20 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                         .block(get(BlockAST.class, ctx.implItems())).imports(
                                 myImportBuilder.build()).concept(ctx.concept);
         put(ctx, builder.build());
+    }
+
+    @Override
+    public void exitImplItems(@NotNull ResolveParser.ImplItemsContext ctx) {
+        BlockBuilder blockBuilder =
+                new BlockBuilder(ctx.getStart(), ctx.getStop())
+                        .generalElements(getAll(ResolveAST.class, ctx
+                                .implItem()));
+        put(ctx, blockBuilder.build());
+    }
+
+    @Override
+    public void exitImplItem(@NotNull ResolveParser.ImplItemContext ctx) {
+        put(ctx, get(ResolveAST.class, ctx.getChild(0)));
     }
 
     @Override
@@ -422,6 +437,45 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                         .finalize(get(InitFinalAST.class, ctx.typeModelFinal()));
 
         put(ctx, builder.build());
+    }
+
+    @Override
+    public void exitTypeRepresentationDecl(
+            @NotNull ResolveParser.TypeRepresentationDeclContext ctx) {
+        InitFinalAST initial =
+                get(InitFinalAST.class, ctx.typeRepresentationInit());
+        InitFinalAST finalize =
+                get(InitFinalAST.class, ctx.typeRepresentationFinal());
+        ExprAST correspondence = get(ExprAST.class, ctx.correspondenceClause());
+        ParserRuleContext typeCtx =
+                ctx.type() != null ? ctx.type() : ctx.record();
+
+        RepresentationBuilder builder =
+                new RepresentationBuilder(ctx.getStart(), ctx.getStop(),
+                        ctx.name)//
+                        .representation(get(TypeAST.class, typeCtx))//
+                        .convention(get(ExprAST.class, ctx.conventionClause()))//
+                        .initialization(initial)//
+                        .finalization(finalize)//
+                        .correspondence(correspondence);
+
+        put(ctx, builder.build());
+    }
+
+    @Override
+    public void exitRecord(@NotNull ResolveParser.RecordContext ctx) {
+        List<VariableAST> fields = new ArrayList<VariableAST>();
+
+        for (ResolveParser.RecordVariableDeclGroupContext grp : ctx
+                .recordVariableDeclGroup()) {
+            NamedTypeAST grpType = get(NamedTypeAST.class, grp.type());
+
+            for (TerminalNode t : grp.Identifier()) {
+                fields.add(new VariableAST(grp.getStart(), grp.getStop(), t
+                        .getSymbol(), grpType));
+            }
+        }
+        put(ctx, new RecordTypeAST(ctx.getStart(), ctx.getStop(), fields));
     }
 
     @Override
@@ -832,6 +886,18 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
+    public void exitConventionClause(
+            @NotNull ResolveParser.ConventionClauseContext ctx) {
+        put(ctx, get(ExprAST.class, ctx.mathAssertionExp()));
+    }
+
+    @Override
+    public void exitCorrespondenceClause(
+            @NotNull ResolveParser.CorrespondenceClauseContext ctx) {
+        put(ctx, get(ExprAST.class, ctx.mathAssertionExp()));
+    }
+
+    @Override
     public void exitMathAssertionExp(
             @NotNull ResolveParser.MathAssertionExpContext ctx) {
         put(ctx, get(ExprAST.class, ctx.getChild(0)));
@@ -920,6 +986,19 @@ public class TreeBuildingVisitor<T extends ResolveAST>
             @NotNull ResolveParser.MathSetBuilderExpContext ctx) {
         throw new UnsupportedOperationException("set builder notation not yet "
                 + "supported by the compiler.");
+    }
+
+    @Override
+    public void exitMathLambdaExp(
+            @NotNull ResolveParser.MathLambdaExpContext ctx) {
+        List<MathVariableAST> parameters = new ArrayList<MathVariableAST>();
+
+        for (ResolveParser.MathVariableDeclGroupContext grp : ctx
+                .mathVariableDeclGroup()) {
+            parameters.addAll(getAll(MathVariableAST.class, grp.Identifier()));
+        }
+        put(ctx, new MathLambdaAST(ctx.getStart(), ctx.getStop(), parameters,
+                get(ExprAST.class, ctx.mathAssertionExp())));
     }
 
     @Override

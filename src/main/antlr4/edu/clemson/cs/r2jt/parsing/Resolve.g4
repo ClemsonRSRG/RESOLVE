@@ -115,7 +115,7 @@ enhancementImplModule
     ;
 
 implItems
-    :   implItem
+    :   (implItem)+
     ;
 
 implItem
@@ -123,6 +123,9 @@ implItem
     |   facilityDecl
     |   procedureDecl
     |   mathDefinitionDecl
+    |   typeRepresentationDecl
+    |   conventionClause
+    |   correspondenceClause
     |   moduleImplInit
     |   moduleImplFinal
     ;
@@ -173,7 +176,7 @@ type
     ;
 
 record
-    :   'Record' (recordVariableDeclGroup)+ 'end' ';'
+    :   'Record' (recordVariableDeclGroup)+ 'end'
     ;
 
 recordVariableDeclGroup
@@ -189,8 +192,11 @@ typeModelDecl
     ;
 
 typeRepresentationDecl
-    :   'Type' name=Identifier '=' (record|type) ';'
+    :   'Type' name=Identifier ('='|'is' 'represented' 'by') (record|type) ';'
         (conventionClause)?
+        (correspondenceClause)?
+        (typeRepresentationInit)?
+        (typeRepresentationFinal)?
     ;
 
 // initialization, finalization rules
@@ -201,6 +207,14 @@ typeModelInit
 
 typeModelFinal
     :   'finalization' (requiresClause)? (ensuresClause)?
+    ;
+
+typeRepresentationInit
+    :   'initialization' (variableDeclGroup)* //stmts
+    ;
+
+typeRepresentationFinal
+    :   'finalization' (variableDeclGroup)* //stmts
     ;
 
 //We use special rules for facility module init and final to allow requires
@@ -422,6 +436,10 @@ whereClause
     :   'where' mathAssertionExp
     ;
 
+correspondenceClause
+    :   'correspondence' mathAssertionExp ';'
+    ;
+
 conventionClause
     :   'convention' mathAssertionExp ';'
     ;
@@ -465,20 +483,16 @@ mathPrimaryExp
     |   mathOutfixExp
     |   mathSetExp
     |   mathTupleExp
-    ;
-
-mathDotExp
-    :   mathFunctionApplicationExp ('.' mathFunctionApplicationExp)+
-    ;
-
-mathSetExp
-    :   '{' mathVariableDecl '|' mathAssertionExp '}'   #mathSetBuilderExp//Todo
-    |   '{' (mathExp (',' mathExp)*)? '}'               #mathSetCollectionExp
+    |   mathLambdaExp
     ;
 
 mathLiteralExp
     :   BooleanLiteral      #mathBooleanExp
     |   IntegerLiteral      #mathIntegerExp
+    ;
+
+mathDotExp
+    :   mathFunctionApplicationExp ('.' mathFunctionApplicationExp)+
     ;
 
 mathFunctionApplicationExp
@@ -498,8 +512,20 @@ mathOutfixExp
     |   lop='||' mathExp rop='||'
     ;
 
+mathSetExp
+    :   '{' mathVariableDecl '|' mathAssertionExp '}'   #mathSetBuilderExp//Todo
+    |   '{' (mathExp (',' mathExp)*)? '}'               #mathSetCollectionExp
+    ;
+
 mathTupleExp
     :   '(' mathExp (',' mathExp)+ ')'
+    ;
+
+//NOTE: Allows only very rudimentary lambda expressions.
+
+mathLambdaExp
+    :   'lambda' '(' mathVariableDeclGroup (',' mathVariableDeclGroup)* ')'
+        '.' '(' mathAssertionExp ')'
     ;
 
 // program expressions
