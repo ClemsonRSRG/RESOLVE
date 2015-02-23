@@ -75,11 +75,11 @@
     </scm>
 
     <dependencies>
-        <dependency>
+     <!--   <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>0.9.9-RC1</version>
-        </dependency>
+        </dependency> -->
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-maven-plugin</artifactId>

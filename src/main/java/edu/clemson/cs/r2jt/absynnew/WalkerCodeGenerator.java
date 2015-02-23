@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.r2jt.absynnew;
 
-import org.reflections.Reflections;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -60,18 +59,18 @@ public class WalkerCodeGenerator {
     }
 
     private static ST createClassTemplate(String className) {
-        Reflections reflections =
-                new Reflections("edu.clemson.cs.r2jt.absynnew");
+        /* Reflections reflections =
+                 new Reflections("edu.clemson.cs.r2jt.absynnew");
 
-        Set<Class<? extends ResolveAST>> absynClasses =
-                reflections.getSubTypesOf(ResolveAST.class);
+         Set<Class<? extends ResolveAST>> absynClasses =
+                 reflections.getSubTypesOf(ResolveAST.class);*/
 
         ST walkerClass =
                 GROUP.getInstanceOf("WalkerImplementation").add("name",
                         className);
 
-        //  Set<Class<? extends ResolveAST>> absynClasses =
-        //          new HashSet<Class<? extends ResolveAST>>();
+        Set<Class<? extends ResolveAST>> absynClasses =
+                new HashSet<Class<? extends ResolveAST>>();
 
         for (Class<?> e : absynClasses) {
 
