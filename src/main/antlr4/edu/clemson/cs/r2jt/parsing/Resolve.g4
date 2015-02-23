@@ -166,10 +166,18 @@ parameterMode
         | 'evaluates' )
     ;
 
-// type related rules
+// type and record related rules
 
 type
-    : (qualifier=Identifier '::')? name=Identifier
+    :   (qualifier=Identifier '::')? name=Identifier
+    ;
+
+record
+    :   'Record' (recordVariableDeclGroup)+ 'end' ';'
+    ;
+
+recordVariableDeclGroup
+    :   Identifier (',' Identifier)* ':' type ';'
     ;
 
 typeModelDecl
@@ -178,6 +186,11 @@ typeModelDecl
         (constraintClause)?
         (typeModelInit)?
         (typeModelFinal)?
+    ;
+
+typeRepresentationDecl
+    :   'Type' name=Identifier '=' (record|type) ';'
+        (conventionClause)?
     ;
 
 // initialization, finalization rules
@@ -407,6 +420,10 @@ constraintClause
 
 whereClause
     :   'where' mathAssertionExp
+    ;
+
+conventionClause
+    :   'convention' mathAssertionExp ';'
     ;
 
 // mathematical expressions
