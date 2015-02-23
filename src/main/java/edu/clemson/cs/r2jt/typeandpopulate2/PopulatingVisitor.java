@@ -1005,6 +1005,19 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         return true;
     }
 
+    @Override
+    public void postMathDotAST(MathDotAST e) {
+        //Might already have been set in preDotExp(), in which case our children
+        //weren't visited
+        if (e.getMathType() == null) {
+            List<MathSymbolAST> segments = e.getSegments();
+            ExprAST lastSeg = segments.get(segments.size() - 1);
+
+            e.setMathType(lastSeg.getMathType());
+            e.setMathTypeValue(lastSeg.getMathTypeValue());
+        }
+    }
+
     /**
      * <p>This method has to do an annoying amount of work, so pay attention:
      * takes an iterator over segments as returned from DotExp.getSegments().
