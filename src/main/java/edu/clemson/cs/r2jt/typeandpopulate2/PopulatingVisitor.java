@@ -79,6 +79,12 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             new LinkedList<SymbolTableEntry.Quantification>();
 
     /**
+     * <p>While walking the parameters of a definition, this flag will be set
+     * to true.</p>
+     */
+    private boolean myDefinitionParameterSectionFlag = false;
+
+    /**
      * <p>While we walk the children of a direct definition, this will be set
      * with a pointer to the definition declaration we are walking, otherwise
      * it will be null.  Note that definitions cannot be nested, so there's
@@ -147,6 +153,33 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         for (Token importRequest : e.getImportsExcluding(ImportType.EXTERNAL)) {
             myCurModuleScope.addImport(new ModuleIdentifier(importRequest));
         }
+    }
+
+    @Override
+    public void preMathLambdaAST(MathLambdaAST e) {
+        myBuilder.startScope(e);
+        emitDebug("lambda expression " + e);
+        myDefinitionParameterSectionFlag = true;
+    }
+
+    @Override
+    public void midMathLambdaAST(MathLambdaAST e,
+                                 ResolveAST next, ResolveAST previous) {
+        if (next == e.getBody()) {
+            myDefinitionParameterSectionFlag = false;
+        }
+    }
+
+    @Override
+    public void postMathLambdaAST(MathLambdaAST e) {
+        myBuilder.endScope();
+
+        List<MTType> parameterTypes = new LinkedList<MTType>();
+        for (MathVariableAST p : e.getParameters()) {
+            parameterTypes.add(p.getSyntaxType().getMathTypeValue());
+        }
+        e.setMathType(new MTFunction(myTypeGraph, e.getBody().getMathType(),
+                parameterTypes));
     }
 
     @Override
@@ -452,8 +485,10 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         }
         // Keep track also of any definition (inductive or direct)
         myCurrentDefinition = e;
+
         myDefinitionSchematicTypes.clear();
         myDefinitionNamedTypes.clear();
+        myDefinitionParameterSectionFlag = true;
     }
 
     @Override
@@ -464,6 +499,9 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         // also inductive, so we need to add a binding representing our own
         // signature in order have the ability to recursively be refer to
         // ourself in the body.
+        if (next == e.getReturnType()) {
+            myDefinitionParameterSectionFlag = false;
+        }
         if (previous == e.getReturnType()
                 && e.getDefinitionType() == DefinitionType.INDUCTIVE) {
             MTType declaredType = e.getReturnType().getMathTypeValue();
@@ -693,7 +731,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                     + "name", e.getStart());
         }
 
-        if ((withinDefinitionParameters(e) || (myActiveQuantifications.size() > 0 && myActiveQuantifications
+        if ((myDefinitionParameterSectionFlag ||
+                (myActiveQuantifications.size() > 0 && myActiveQuantifications
                 .peek() != SymbolTableEntry.Quantification.NONE))
                 && mathTypeValue.isKnownToContainOnlyMTypes()) {
             myDefinitionSchematicTypes.put(varName, mathTypeValue);
@@ -707,7 +746,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
         e.setMathType(mathTypeValue);
 
         SymbolTableEntry.Quantification q;
-        if (withinDefinitionParameters(e) && myTypeValueDepth == 0) {
+        if (myDefinitionParameterSectionFlag && myTypeValueDepth == 0) {
             q = SymbolTableEntry.Quantification.UNIVERSAL;
         }
         else {
@@ -1028,21 +1067,6 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             throw new RuntimeException(); //This will never fire
         }
         return result;
-    }
-
-    private boolean withinTypeTheoremUniversals(MathVariableAST v) {
-        if (myCurrentDefinition == null) {
-            return false;
-        }
-        //Todo
-        return false;
-    }
-
-    private boolean withinDefinitionParameters(MathVariableAST v) {
-        if (myCurrentDefinition == null) {
-            return false;
-        }
-        return myCurrentDefinition.getParameters().contains(v);
     }
 
     @Override
