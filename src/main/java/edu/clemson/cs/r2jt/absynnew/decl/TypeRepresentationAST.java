@@ -27,7 +27,7 @@ public class TypeRepresentationAST extends DeclAST {
 
     private final InitFinalAST myInitialization, myFinalization;
 
-    public TypeRepresentationAST(RepresentationBuilder builder) {
+    private TypeRepresentationAST(RepresentationBuilder builder) {
         super(builder.getStart(), builder.getStop(), builder.name);
 
         myRepresentationType = builder.representation;
