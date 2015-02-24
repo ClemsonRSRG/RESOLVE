@@ -96,6 +96,19 @@ public class ScopeBuilder extends SyntacticScope {
         return entry;
     }
 
+    public ProcedureEntry addProcedure(String name,
+                                       ResolveAST definingElement,
+                                       OperationEntry correspondingOperation)
+            throws DuplicateSymbolException {
+        sanityCheckBindArguments(name, definingElement, "");
+
+        ProcedureEntry entry =
+                new ProcedureEntry(name, definingElement, myRootModule,
+                        correspondingOperation);
+        myBindings.put(name, entry);
+        return entry;
+    }
+
     public ProgramParameterEntry addFormalParameter(String name,
             ResolveAST definingElement,
             ProgramParameterEntry.ParameterMode mode, PTType type)

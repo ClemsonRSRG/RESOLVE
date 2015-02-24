@@ -115,14 +115,14 @@ public abstract class SymbolTableEntry {
     /*public OperationProfileEntry toOperationProfileEntry(Location l) {
         throw new SourceErrorException("Expecting a operation profile.  Found "
                 + getEntryTypeDescription(), l);
-    }
+    }*/
 
-    public ProcedureEntry toProcedureEntry(Location l) {
-        throw new SourceErrorException("Expecting a procedure.  Found "
+    public ProcedureEntry toProcedureEntry(Token l) {
+        throw new SrcErrorException("Expecting a procedure.  Found "
                 + getEntryTypeDescription(), l);
     }
 
-    public ShortFacilityEntry toShortFacilityEntry(Location l) {
+    /*public ShortFacilityEntry toShortFacilityEntry(Location l) {
         throw new SourceErrorException("Expecting a short facility module.  "
                 + "Found " + getEntryTypeDescription(), l);
     }*/

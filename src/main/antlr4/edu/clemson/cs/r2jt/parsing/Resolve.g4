@@ -262,11 +262,11 @@ moduleImplFinal
 // functions
 
 procedureDecl
-    :   (recursive='Recursive')? 'Procedure' name=Identifier (':' type)
-        operationParameterList ';'
+    :   (recursive='Recursive')? 'Procedure' name=Identifier
+        operationParameterList (':' type)? ';'
         (variableDeclGroup)*
         //Todo: Stmts
-        'end' closename=Identifier
+        'end' closename=Identifier ';'
     ;
 
 operationProcedureDecl

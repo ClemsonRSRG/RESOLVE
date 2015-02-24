@@ -24,10 +24,7 @@ import edu.clemson.cs.r2jt.misc.HardCoded2;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.*;
-import edu.clemson.cs.r2jt.typeandpopulate2.query.MathFunctionNamedQuery;
-import edu.clemson.cs.r2jt.typeandpopulate2.query.MathSymbolQuery;
-import edu.clemson.cs.r2jt.typeandpopulate2.query.NameQuery;
-import edu.clemson.cs.r2jt.typeandpopulate2.query.ProgramVariableQuery;
+import edu.clemson.cs.r2jt.typeandpopulate2.query.*;
 import edu.clemson.cs.r2jt.typereasoning2.TypeComparison;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTable.ImportStrategy;
@@ -61,6 +58,16 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     private boolean myInTypeTheoremBindingExpFlag = false;
 
     private boolean myWalkingModuleParameterFlag = false;
+
+    /**
+     * <p>While walking a procedure, this is set to the entry for the operation
+     * or FacilityOperation that the procedure is attempting to implement.</p>
+     *
+     * <p><strong>INVARIANT:</strong>
+     * <code>myCorrespondingOperation != null</code> <em>implies</em>
+     * <code>myCurrentParameters != null</code>.</p>
+     */
+    private OperationEntry myCorrespondingOperation;
 
     /**
      * <p>When parsing a type realization declaration, this is set to the
@@ -222,6 +229,136 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     public void postOperationSigAST(OperationSigAST e) {
         myBuilder.endScope();
         putOperationLikeThingInSymbolTable(e.getName(), e.getReturnType(), e);
+        myCurrentParameters = null;
+    }
+
+    @Override
+    public void preOperationImplAST(OperationImplAST e) {
+        try {
+            //Figure out what Operation we correspond to (we don't use
+            //OperationQuery because we want to check parameter types
+            //separately in postProcedureDec)
+            myCorrespondingOperation =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameAndEntryTypeQuery(null, e.getName(),
+                                    OperationEntry.class,
+                                    ImportStrategy.IMPORT_NAMED,
+                                    FacilityStrategy.FACILITY_IGNORE, false))
+                            .toOperationEntry(e.getName());
+
+            myBuilder.startScope(e);
+            myCurrentParameters = new LinkedList<ProgramParameterEntry>();
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new SrcErrorException("Procedure "
+                    + e.getName().getText()
+                    + " does not implement any known operation.", e.getName());
+        }
+        catch (DuplicateSymbolException dse) {
+            //We should have caught this before now, like when we defined the
+            //duplicate Operation
+            throw new RuntimeException("Duplicate Operations for "
+                    + e.getName().getText() + "?");
+        }
+    }
+
+    @Override
+    public void midOperationImplAST(OperationImplAST e,
+                                ResolveAST previous, ResolveAST next) {
+        if (previous != null && previous == e.getReturnType()) {
+            try {
+                myBuilder.getInnermostActiveScope().addProgramVariable(
+                        e.getName().getText(), e,
+                        e.getReturnType().getProgramTypeValue());
+            }
+            catch (DuplicateSymbolException dse) {
+                duplicateSymbol(e.getName());
+            }
+        }
+    }
+
+    @Override
+    public void postOperationImplAST(OperationImplAST e) {
+        myBuilder.endScope();
+
+        //We're about to throw away all information about procedure parameters,
+        //since they're redundant anyway.  So we sanity-check them first.
+        TypeAST returnTy = e.getReturnType();
+        PTType returnType;
+        if (returnTy == null) {
+            returnType = PTVoid.getInstance(myTypeGraph);
+        }
+        else {
+            returnType = returnTy.getProgramTypeValue();
+        }
+        if (!returnType.equals(myCorrespondingOperation.getReturnType())) {
+            throw new SrcErrorException("Procedure return type does "
+                    + "not correspond to the return type of the operation "
+                    + "it implements.  \n\nExpected type: "
+                    + myCorrespondingOperation.getReturnType() + " ("
+                    + myCorrespondingOperation.getSourceModuleIdentifier()
+                    + "." + myCorrespondingOperation.getName() + ")\n\n"
+                    + "Found type: " + returnType, e.getStart());
+        }
+        if (myCorrespondingOperation.getParameters().size() != myCurrentParameters
+                .size()) {
+            throw new SrcErrorException("Procedure parameter count "
+                    + "does not correspond to the parameter count of the "
+                    + "operation it implements. \n\nExpected count: "
+                    + myCorrespondingOperation.getParameters().size() + " ("
+                    + myCorrespondingOperation.getSourceModuleIdentifier()
+                    + "." + myCorrespondingOperation.getName() + ")\n\n"
+                    + "Found count: " + myCurrentParameters.size(),
+                    e.getStart());
+        }
+        Iterator<ProgramParameterEntry> opParams =
+                myCorrespondingOperation.getParameters().iterator();
+        Iterator<ProgramParameterEntry> procParams =
+                myCurrentParameters.iterator();
+
+        ProgramParameterEntry curOpParam, curProcParam;
+        while (opParams.hasNext()) {
+            curOpParam = opParams.next();
+            curProcParam = procParams.next();
+            if (!curOpParam.getParameterMode().canBeImplementedWith(
+                    curProcParam.getParameterMode())) {
+                throw new SrcErrorException(curOpParam.getParameterMode()
+                        + "-mode parameter "
+                        + "cannot be implemented with "
+                        + curProcParam.getParameterMode()
+                        + " mode.  "
+                        + "Select one of these valid modes instead: "
+                        + Arrays.toString(curOpParam.getParameterMode()
+                        .getValidImplementationModes()), curProcParam
+                        .getDefiningElement().getStart());
+            }
+            if (!curProcParam.getDeclaredType().acceptableFor(
+                    curOpParam.getDeclaredType())) {
+                throw new SrcErrorException("Parameter type does not "
+                        + "match corresponding operation parameter type."
+                        + "\n\nExpected: " + curOpParam.getDeclaredType()
+                        + " (" + curOpParam.getSourceModuleIdentifier() + "."
+                        + myCorrespondingOperation.getName() + ")\n\n"
+                        + "Found: " + curProcParam.getDeclaredType(),
+                        curProcParam.getDefiningElement().getStart());
+            }
+            if (!curOpParam.getName().equals(curProcParam.getName())) {
+                throw new SrcErrorException("Parmeter name does not "
+                        + "match corresponding operation parameter name."
+                        + "\n\nExpected name: " + curOpParam.getName() + " ("
+                        + curOpParam.getSourceModuleIdentifier() + "."
+                        + myCorrespondingOperation.getName() + ")\n\n"
+                        + "Found name: " + curProcParam.getName(), curProcParam
+                        .getDefiningElement().getStart());
+            }
+        }
+        try {
+            myBuilder.getInnermostActiveScope().addProcedure(
+                    e.getName().getText(), e, myCorrespondingOperation);
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(e.getName());
+        }
         myCurrentParameters = null;
     }
 
