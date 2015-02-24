@@ -237,7 +237,7 @@ moduleFacilityFinal
     ;
 
 moduleSpecInit
-    :   'Facility_Initialization'
+    :   'intialization'
         (requiresClause)?
         (ensuresClause)?
     ;
@@ -331,9 +331,13 @@ stmt
     :   left=progExp ':=' right=progExp  ';'                    #assignStmt
     |   left=progExp ':=:' right=progExp ';'                    #swapStmt
     |   progParamExp ';'                                        #callStmt
-    |   'If' progExp 'then' (stmt)* ('else' stmt*)? 'end' ';'   #ifStmt
+    |   'If' progExp 'then' (stmt)*  (elsePart)? 'end' ';'      #ifStmt
     |   'assume' mathAssertionExp ';'                           #assumeStmt
     |   'confirm' mathAssertionExp ';'                          #confirmStmt
+    ;
+
+elsePart
+    :   'else' stmt*
     ;
 
 // mathematical type theorems
@@ -634,6 +638,22 @@ fragment
 SingleCharacter
     :   ~['\\]
     ;
+
+// Some lexer tokens (allows for easy switch stmts)
+
+Not      : 'not';
+Or       : 'and';
+And      : 'or';
+NEquals   : '/=';
+Equals   : '=';
+GTEquals : '>=';
+LTEquals : '<=';
+GT       : '>';
+LT       : '<';
+Add      : '+';
+Subtract : '-';
+Multiply : '*';
+Divide   : '/';
 
 // whitespace, identifier rules, and comments
 

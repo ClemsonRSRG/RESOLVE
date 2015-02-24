@@ -28,10 +28,7 @@ import edu.clemson.cs.r2jt.absynnew.decl.TypeRepresentationAST.RepresentationBui
 import edu.clemson.cs.r2jt.absynnew.expr.*;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.MathSymbolExprBuilder;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.DisplayStyle;
-import edu.clemson.cs.r2jt.absynnew.stmt.AssignAST;
-import edu.clemson.cs.r2jt.absynnew.stmt.CallAST;
-import edu.clemson.cs.r2jt.absynnew.stmt.StmtAST;
-import edu.clemson.cs.r2jt.absynnew.stmt.SwapAST;
+import edu.clemson.cs.r2jt.absynnew.stmt.*;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.parsing.ResolveBaseListener;
 import edu.clemson.cs.r2jt.parsing.ResolveParser;
@@ -221,12 +218,12 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitEnhancementImplModule(
             @NotNull ResolveParser.EnhancementImplModuleContext ctx) {
-        myImportBuilder.imports(ImportType.IMPLICIT, ctx.concept)
-                .imports(ImportType.IMPLICIT, ctx.enhancement);
+        myImportBuilder.imports(ImportType.IMPLICIT, ctx.concept).imports(
+                ImportType.IMPLICIT, ctx.enhancement);
         ImplModuleBuilder builder =
                 new ImplModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)
                         .block(get(BlockAST.class, ctx.implItems())).imports(
-                        myImportBuilder.build()).concept(ctx.concept);
+                                myImportBuilder.build()).concept(ctx.concept);
         put(ctx, builder.build());
     }
 
@@ -692,6 +689,18 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
+    public void exitIfStmt(@NotNull ResolveParser.IfStmtContext ctx) {
+        ProgExprAST condition = get(ProgExprAST.class, ctx.progExp());
+        List<StmtAST> ifBlock = getAll(StmtAST.class, ctx.stmt());
+        List<StmtAST> elseBlock = new ArrayList<StmtAST>();
+        if (ctx.elsePart() != null) {
+            elseBlock = getAll(StmtAST.class, ctx.elsePart().stmt());
+        }
+        put(ctx, new IfAST(ctx.getStart(), ctx.getStop(), condition, ifBlock,
+                elseBlock));
+    }
+
+    @Override
     public void exitMathTheoremDecl(
             @NotNull ResolveParser.MathTheoremDeclContext ctx) {
         put(ctx, new MathTheoremAST(ctx.getStart(), ctx.getStop(), ctx.name,
@@ -833,25 +842,16 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitProgApplicationExp(
             @NotNull ResolveParser.ProgApplicationExpContext ctx) {
-        Token name = null;
-        if (ctx.op.getText().equals("+")) {
-            name = new ResolveToken("Sum");
-        }
-        else if (ctx.op.getText().equals("-")) {
-            name = new ResolveToken("Difference");
-        }
-        else if (ctx.op.getText().equals("*")) {
-            name = new ResolveToken("Product");
-        }
-        else if (ctx.op.getText().equals("/")) {
-            name = new ResolveToken("Divide");
-        }
-        else {
-            name = ctx.op;
+        Token name = TreeUtil.getParameterizedExprName(ctx.op);
+        //Unary minus unfornately needs special casing (or else we'll call it
+        //negate).
+        if (ctx.progExp().size() == 1 && ctx.op.getText().equals("-")) {
+            name = new ResolveToken("Negate");
         }
         ProgOperationRefAST call =
                 new ProgOperationRefAST(ctx.getStart(), ctx.getStop(), null,
-                        name, getAll(ProgExprAST.class, ctx.progExp()));
+                        TreeUtil.getParameterizedExprName(ctx.op), getAll(
+                                ProgExprAST.class, ctx.progExp()));
         put(ctx, call);
     }
 

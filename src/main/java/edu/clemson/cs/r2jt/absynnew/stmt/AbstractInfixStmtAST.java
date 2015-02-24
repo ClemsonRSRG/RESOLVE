@@ -38,6 +38,6 @@ public abstract class AbstractInfixStmtAST extends StmtAST {
 
     @Override
     public String toString() {
-        return myLeft + getOperand() + myRight;
+        return myLeft + " " + getOperand() + " " + myRight + ";";
     }
 }

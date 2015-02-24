@@ -59,7 +59,7 @@ public class WalkerCodeGenerator {
     }
 
     private static ST createClassTemplate(String className) {
-        /* Reflections reflections =
+        /*Reflections reflections =
                   new Reflections("edu.clemson.cs.r2jt.absynnew");
 
           Set<Class<? extends ResolveAST>> absynClasses =

@@ -942,8 +942,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
 
         e.setMathType(mathTypeValue);
         try {
-            myBuilder.getInnermostActiveScope().addProgramVariable(varName,
-                    e, e.getType().getProgramTypeValue());
+            myBuilder.getInnermostActiveScope().addProgramVariable(varName, e,
+                    e.getType().getProgramTypeValue());
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(e.getName());

@@ -12,7 +12,9 @@
  */
 package edu.clemson.cs.r2jt.absynnew;
 
+import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stringtemplate.v4.ST;
 
@@ -24,6 +26,50 @@ import java.util.Collection;
  * @author dtwelch
  */
 public class TreeUtil {
+
+    public static Token getParameterizedExprName(Token op) {
+        String result;
+
+        switch (op.getType()) {
+        case ResolveParser.Add:
+            result = "Sum";
+            break;
+        case ResolveParser.Subtract:
+            result = "Difference";
+            break;
+        case ResolveParser.Multiply:
+            result = "Product";
+            break;
+        case ResolveParser.Divide:
+            result = "Divide";
+            break;
+        case ResolveParser.GT:
+            result = "Greater";
+            break;
+        case ResolveParser.LT:
+            result = "Less";
+            break;
+        case ResolveParser.LTEquals:
+            result = "Less_Or_Equal";
+            break;
+        case ResolveParser.GTEquals:
+            result = "Greater_Or_Equal";
+            break;
+        case ResolveParser.And:
+            result = "And";
+            break;
+        case ResolveParser.Or:
+            result = "Or";
+            break;
+        case ResolveParser.Not:
+            result = "Negate";
+            break;
+        default:
+            result = op.getText();
+            break;
+        }
+        return new ResolveToken(result);
+    }
 
     /**
      * <p>Joins (delimits) a list by separator <code>sep</code>.</p>
