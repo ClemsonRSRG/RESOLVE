@@ -265,7 +265,7 @@ procedureDecl
     :   (recursive='Recursive')? 'Procedure' name=Identifier
         operationParameterList (':' type)? ';'
         (variableDeclGroup)*
-        //Todo: Stmts
+        (stmt)*
         'end' closename=Identifier ';'
     ;
 
@@ -276,7 +276,7 @@ operationProcedureDecl
         (ensuresClause)?
         'Procedure'
         (variableDeclGroup)*
-        //Todo: Stmts
+        (stmt)*
         'end' closename=Identifier ';'
     ;
 
@@ -322,6 +322,15 @@ mathVariableDecl
 
 variableDeclGroup
     :   'Var' Identifier (',' Identifier)* ':' type ';'
+    ;
+
+// statements
+
+stmt
+    :   left=progExp ':=' right=progExp  ';'        #assignStmt
+    |   left=progExp ':=:' right=progExp ';'        #swapStmt
+    |   progParamExp ';'                            #callStmt
+    //Todo if, while
     ;
 
 // mathematical type theorems

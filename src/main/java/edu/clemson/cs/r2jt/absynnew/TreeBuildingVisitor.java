@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absynnew;
 
+import edu.clemson.cs.r2jt.absyn.CallStmt;
 import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportCollectionBuilder;
 import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportType;
 import edu.clemson.cs.r2jt.absynnew.InitFinalAST.Type;
@@ -27,7 +28,10 @@ import edu.clemson.cs.r2jt.absynnew.decl.TypeRepresentationAST.RepresentationBui
 import edu.clemson.cs.r2jt.absynnew.expr.*;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.MathSymbolExprBuilder;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.DisplayStyle;
+import edu.clemson.cs.r2jt.absynnew.stmt.AssignAST;
+import edu.clemson.cs.r2jt.absynnew.stmt.CallAST;
 import edu.clemson.cs.r2jt.absynnew.stmt.StmtAST;
+import edu.clemson.cs.r2jt.absynnew.stmt.SwapAST;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.parsing.ResolveBaseListener;
 import edu.clemson.cs.r2jt.parsing.ResolveParser;
@@ -346,6 +350,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                         .returnType(get(NamedTypeAST.class, ctx.type())) //
                         .recursive(ctx.recursive != null) //
                         .implementsContract(true) //
+                        .statements(getAll(StmtAST.class, ctx.stmt())) //
                         .parameters(
                                 getAll(ParameterAST.class, ctx
                                         .operationParameterList()
@@ -360,8 +365,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         put(ctx, builder.build());
     }
 
-    //Todo: Make the *declGroup methods return a BlockAST then filter by the
-    //type you want; in the ctx you want.
+    //Todo: Make the *declGroup methods return a BlockAST then filter by ctx
     @Override
     public void exitVariableDeclGroup(
             @NotNull ResolveParser.VariableDeclGroupContext ctx) {
@@ -652,6 +656,30 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
+    public void exitAssignStmt(@NotNull ResolveParser.AssignStmtContext ctx) {
+        AssignAST assign =
+                new AssignAST(ctx.getStart(), ctx.getStop(), get(
+                        ProgExprAST.class, ctx.left), get(ProgExprAST.class,
+                        ctx.right));
+        put(ctx, assign);
+    }
+
+    @Override
+    public void exitSwapStmt(@NotNull ResolveParser.SwapStmtContext ctx) {
+        SwapAST swap =
+                new SwapAST(ctx.getStart(), ctx.getStop(), get(
+                        ProgExprAST.class, ctx.left), get(ProgExprAST.class,
+                        ctx.right));
+        put(ctx, swap);
+    }
+
+    @Override
+    public void exitCallStmt(@NotNull ResolveParser.CallStmtContext ctx) {
+        put(ctx,
+                new CallAST(get(ProgOperationRefAST.class, ctx.progParamExp())));
+    }
+
+    @Override
     public void exitMathTheoremDecl(
             @NotNull ResolveParser.MathTheoremDeclContext ctx) {
         put(ctx, new MathTheoremAST(ctx.getStart(), ctx.getStop(), ctx.name,
@@ -792,9 +820,25 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitProgApplicationExp(
             @NotNull ResolveParser.ProgApplicationExpContext ctx) {
+        Token name = null;
+        if (ctx.op.getText().equals("+")) {
+            name = new ResolveToken("Sum");
+        }
+        else if (ctx.op.getText().equals("-")) {
+            name = new ResolveToken("Difference");
+        }
+        else if (ctx.op.getText().equals("*")) {
+            name = new ResolveToken("Product");
+        }
+        else if (ctx.op.getText().equals("/")) {
+            name = new ResolveToken("Divide");
+        }
+        else {
+            name = ctx.op;
+        }
         ProgOperationRefAST call =
                 new ProgOperationRefAST(ctx.getStart(), ctx.getStop(), null,
-                        ctx.op, getAll(ProgExprAST.class, ctx.progExp()));
+                        name, getAll(ProgExprAST.class, ctx.progExp()));
         put(ctx, call);
     }
 

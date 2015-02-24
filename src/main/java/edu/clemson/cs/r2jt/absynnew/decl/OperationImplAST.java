@@ -15,6 +15,7 @@ package edu.clemson.cs.r2jt.absynnew.decl;
 import edu.clemson.cs.r2jt.absynnew.AbstractNodeBuilder;
 import edu.clemson.cs.r2jt.absynnew.NamedTypeAST;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
+import edu.clemson.cs.r2jt.absynnew.stmt.StmtAST;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ public class OperationImplAST extends OperationAST {
     private final boolean implementsContract;
 
     private final List<VariableAST> myVariables;
+    private final List<StmtAST> myStatements;
 
     private OperationImplAST(OperationImplBuilder builder) {
         super(builder.getStart(), builder.getStop(), builder.name,
@@ -48,6 +50,7 @@ public class OperationImplAST extends OperationAST {
 
         implementsContract = builder.implementsContract;
         myVariables = builder.variables;
+        myStatements = builder.statements;
     }
 
     /**
@@ -73,6 +76,7 @@ public class OperationImplAST extends OperationAST {
 
         protected List<ParameterAST> parameters = new ArrayList<ParameterAST>();
         protected List<VariableAST> variables = new ArrayList<VariableAST>();
+        protected List<StmtAST> statements = new ArrayList<StmtAST>();
 
         protected NamedTypeAST returnType = null;
         protected boolean recursive, implementsContract = false;
@@ -136,6 +140,12 @@ public class OperationImplAST extends OperationAST {
         public OperationImplBuilder localVariables(List<VariableAST> e) {
             sanityCheckAdditions(e);
             variables.addAll(e);
+            return this;
+        }
+
+        public OperationImplBuilder statements(List<StmtAST> e) {
+            sanityCheckAdditions(e);
+            statements.addAll(e);
             return this;
         }
 

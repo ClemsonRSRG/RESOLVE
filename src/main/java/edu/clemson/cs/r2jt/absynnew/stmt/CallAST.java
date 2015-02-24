@@ -26,4 +26,9 @@ public class CallAST extends StmtAST {
     public ProgOperationRefAST getWrappedOpReferenceExpr() {
         return myOpReferenceExpr;
     }
+
+    @Override
+    public String toString() {
+        return myOpReferenceExpr + ";";
+    }
 }

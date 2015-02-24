@@ -23,9 +23,8 @@ public class ProcedureEntry extends SymbolTableEntry {
 
     private final OperationEntry myCorrespondingOperation;
 
-    public ProcedureEntry(String name,
-                          ResolveAST definingElement,
-                          ModuleIdentifier sourceModule, OperationEntry correspondingOperation) {
+    public ProcedureEntry(String name, ResolveAST definingElement,
+            ModuleIdentifier sourceModule, OperationEntry correspondingOperation) {
         super(name, definingElement, sourceModule);
 
         myCorrespondingOperation = correspondingOperation;

@@ -29,6 +29,10 @@ public class ProgDotAST extends ProgExprAST {
         mySegments = segs;
     }
 
+    public List<ProgNameRefAST> getSegments() {
+        return mySegments;
+    }
+
     @Override
     public List<? extends ExprAST> getSubExpressions() {
         return mySegments;

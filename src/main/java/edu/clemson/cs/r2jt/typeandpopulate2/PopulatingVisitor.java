@@ -250,8 +250,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             myCurrentParameters = new LinkedList<ProgramParameterEntry>();
         }
         catch (NoSuchSymbolException nsse) {
-            throw new SrcErrorException("Procedure "
-                    + e.getName().getText()
+            throw new SrcErrorException("Procedure " + e.getName().getText()
                     + " does not implement any known operation.", e.getName());
         }
         catch (DuplicateSymbolException dse) {
@@ -263,8 +262,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public void midOperationImplAST(OperationImplAST e,
-                                ResolveAST previous, ResolveAST next) {
+    public void midOperationImplAST(OperationImplAST e, ResolveAST previous,
+            ResolveAST next) {
         if (previous != null && previous == e.getReturnType()) {
             try {
                 myBuilder.getInnermostActiveScope().addProgramVariable(
@@ -308,8 +307,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                     + myCorrespondingOperation.getParameters().size() + " ("
                     + myCorrespondingOperation.getSourceModuleIdentifier()
                     + "." + myCorrespondingOperation.getName() + ")\n\n"
-                    + "Found count: " + myCurrentParameters.size(),
-                    e.getStart());
+                    + "Found count: " + myCurrentParameters.size(), e
+                    .getStart());
         }
         Iterator<ProgramParameterEntry> opParams =
                 myCorrespondingOperation.getParameters().iterator();
@@ -329,7 +328,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                         + " mode.  "
                         + "Select one of these valid modes instead: "
                         + Arrays.toString(curOpParam.getParameterMode()
-                        .getValidImplementationModes()), curProcParam
+                                .getValidImplementationModes()), curProcParam
                         .getDefiningElement().getStart());
             }
             if (!curProcParam.getDeclaredType().acceptableFor(
@@ -1084,6 +1083,102 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                 e.setMathTypeValue(new MTPowertypeApplication(myTypeGraph, exp
                         .getMathType()));
             }*/
+        }
+    }
+
+    @Override
+    public void postProgOperationRefAST(ProgOperationRefAST e) {
+        List<ProgExprAST> args = e.getArguments();
+
+        List<PTType> argTypes = new LinkedList<PTType>();
+        for (ProgExprAST arg : args) {
+            argTypes.add(arg.getProgramType());
+        }
+
+        try {
+            OperationEntry op =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new OperationQuery(e.getQualifier(), e.getName(),
+                                    argTypes));
+
+            e.setProgramType(op.getReturnType());
+            e.setMathType(op.getReturnType().toMath());
+        }
+        catch (NoSuchSymbolException nsse) {
+            throw new SrcErrorException("No operation found corresponding "
+                    + "the call with the specified arguments: ", e.getStart());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(e.getName());
+        }
+    }
+
+    @Override
+    public boolean walkProgDotAST(ProgDotAST e) {
+
+        preAny(e);
+        preExprAST(e);
+        preProgExprAST(e);
+        preProgDotAST(e);
+
+        postProgDotAST(e);
+        postProgExprAST(e);
+        postExprAST(e);
+        postAny(e);
+
+        return true;
+    }
+
+    @Override
+    public void preProgDotAST(ProgDotAST e) {
+        //Dot expressions are handled ridiculously, even for this compiler, so
+        //this method just deals with the cases we've encountered so far and
+        //lots of assumptions are made.  Expect it to break frequently when you
+        //encounter some new case
+
+        Token firstNameTok = e.getSegments().get(0).getName();
+        String firstName = firstNameTok.getText();
+
+        try {
+            ProgramVariableEntry eEntry =
+                    myBuilder.getInnermostActiveScope().queryForOne(
+                            new NameQuery(null, firstName))
+                            .toProgramVariableEntry(firstNameTok);
+            e.getSegments().get(0).setProgramType(eEntry.getProgramType());
+            e.getSegments().get(0)
+                    .setMathType(eEntry.getProgramType().toMath());
+
+            PTType eType = eEntry.getProgramType();
+
+            if (eType instanceof PTRepresentation) {
+                eType = ((PTRepresentation) eType).getBaseType();
+            }
+
+            PTRecord recordType = (PTRecord) eType;
+            String fieldName = e.getSegments().get(1).getName().getText();
+
+            PTType fieldType = recordType.getFieldType(fieldName);
+
+            if (fieldType == null) {
+                throw new RuntimeException("Could not retrieve type of "
+                        + " field '" + fieldName
+                        + "'. Either it doesn't exist "
+                        + "in the record or it's missing a type.");
+            }
+
+            e.getSegments().get(1).setProgramType(fieldType);
+            e.setProgramType(fieldType);
+
+            e.getSegments().get(1).setMathType(fieldType.toMath());
+            e.setMathType(fieldType.toMath());
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchSymbol(null, firstNameTok);
+        }
+        catch (DuplicateSymbolException dse) {
+            //This flavor of name query shouldn't be able to throw this--we're
+            //only looking in the local module so there's no overloading
+            throw new RuntimeException(dse);
         }
     }
 

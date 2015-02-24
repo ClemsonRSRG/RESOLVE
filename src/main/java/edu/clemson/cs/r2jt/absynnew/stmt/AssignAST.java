@@ -1,5 +1,5 @@
 /**
- * StmtAST.java
+ * AssignAST.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group
@@ -12,16 +12,18 @@
  */
 package edu.clemson.cs.r2jt.absynnew.stmt;
 
-import edu.clemson.cs.r2jt.absynnew.ResolveAST;
+import edu.clemson.cs.r2jt.absynnew.expr.ProgExprAST;
 import org.antlr.v4.runtime.Token;
 
-public abstract class StmtAST<D extends ResolveAST> extends ResolveAST {
+public class AssignAST extends AbstractInfixStmtAST {
 
-    public static enum StatmentType {
-        CALL, SWAP, ASSIGN, IF, WHILE
+    public AssignAST(Token start, Token stop, ProgExprAST left,
+            ProgExprAST right) {
+        super(start, stop, left, right);
     }
 
-    public StmtAST(Token start, Token stop) {
-        super(start, stop);
+    @Override
+    public String getOperand() {
+        return ":=";
     }
 }

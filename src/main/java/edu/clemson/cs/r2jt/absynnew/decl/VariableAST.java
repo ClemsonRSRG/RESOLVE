@@ -27,4 +27,9 @@ public class VariableAST extends DeclAST {
     public NamedTypeAST getType() {
         return myType;
     }
+
+    @Override
+    public String toString() {
+        return "Var " + getName().getText() + " : " + myType + ";";
+    }
 }

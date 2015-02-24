@@ -96,9 +96,8 @@ public class ScopeBuilder extends SyntacticScope {
         return entry;
     }
 
-    public ProcedureEntry addProcedure(String name,
-                                       ResolveAST definingElement,
-                                       OperationEntry correspondingOperation)
+    public ProcedureEntry addProcedure(String name, ResolveAST definingElement,
+            OperationEntry correspondingOperation)
             throws DuplicateSymbolException {
         sanityCheckBindArguments(name, definingElement, "");
 
