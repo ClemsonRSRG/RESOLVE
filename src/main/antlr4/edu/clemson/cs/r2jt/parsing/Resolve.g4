@@ -328,12 +328,12 @@ variableDeclGroup
 // statements
 
 stmt
-    :   left=progExp ':=' right=progExp  ';'        #assignStmt
-    |   left=progExp ':=:' right=progExp ';'        #swapStmt
-    |   progParamExp ';'                            #callStmt
-    |   'assume' mathAssertionExp ';'               #assumeStmt
-    |   'confirm' mathAssertionExp ';'              #confirmStmt
-    //Todo if, while
+    :   left=progExp ':=' right=progExp  ';'                    #assignStmt
+    |   left=progExp ':=:' right=progExp ';'                    #swapStmt
+    |   progParamExp ';'                                        #callStmt
+    |   'If' progExp 'then' (stmt)* ('else' stmt*)? 'end' ';'   #ifStmt
+    |   'assume' mathAssertionExp ';'                           #assumeStmt
+    |   'confirm' mathAssertionExp ';'                          #confirmStmt
     ;
 
 // mathematical type theorems
@@ -543,11 +543,13 @@ mathLambdaExp
 // program expressions
 
 progExp
-    :   op=('not'|'-') progExp              #progApplicationExp
-    |   progExp op=('*'|'/') progExp        #progApplicationExp
-    |   progExp op=('+'|'-') progExp        #progApplicationExp
-    |   '(' progExp ')'                     #progNestedExp
-    |   progPrimary                         #progPrimaryExp
+    :   op=('not'|'-') progExp                  #progApplicationExp
+    |   progExp op=('*'|'/') progExp            #progApplicationExp
+    |   progExp op=('+'|'-') progExp            #progApplicationExp
+    |   progExp op=('<='|'>='|'>'|'<') progExp  #progApplicationExp
+    |   mathExp op=('='|'/=') mathExp           #progApplicationExp
+    |   '(' progExp ')'                         #progNestedExp
+    |   progPrimary                             #progPrimaryExp
     ;
 
 progPrimary
