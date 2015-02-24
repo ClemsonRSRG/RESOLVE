@@ -1123,8 +1123,9 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             e.setMathType(op.getReturnType().toMath());
         }
         catch (NoSuchSymbolException nsse) {
-            throw new SrcErrorException("No operation found corresponding "
-                    + "the call with the specified arguments: ", e.getStart());
+            throw new SrcErrorException("No operation named '"
+                    + e.getName().getText() + "' found corresponding "
+                    + "the call with the specified arguments: ", e.getName());
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(e.getName());

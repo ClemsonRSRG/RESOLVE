@@ -589,15 +589,15 @@ progExp
     |   progExp op=('*'|'/') progExp            #progApplicationExp
     |   progExp op=('+'|'-') progExp            #progApplicationExp
     |   progExp op=('<='|'>='|'>'|'<') progExp  #progApplicationExp
-    |   mathExp op=('='|'/=') mathExp           #progApplicationExp
+    |   progExp op=('='|'/=') progExp           #progApplicationExp
     |   '(' progExp ')'                         #progNestedExp
     |   progPrimary                             #progPrimaryExp
     ;
 
 progPrimary
     :   progLiteralExp
-    |   progParamExp
     |   progVariableExp
+    |   progParamExp
     ;
 
 //This intermediate rule is really only needed to help make

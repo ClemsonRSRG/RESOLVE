@@ -73,6 +73,12 @@ public class TreeUtil {
         case ResolveParser.GTEquals:
             result = "Greater_Or_Equal";
             break;
+        case ResolveParser.NEquals:
+            result = "Are_Not_Equal";
+            break;
+        case ResolveParser.Equals:
+            result = "Are_Equal";
+            break;
         case ResolveParser.And:
             result = "And";
             break;
@@ -80,7 +86,7 @@ public class TreeUtil {
             result = "Or";
             break;
         case ResolveParser.Not:
-            result = "Negate";
+            result = "Not";
             break;
         default:
             result = op.getText();
