@@ -219,6 +219,18 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
+    public void exitEnhancementImplModule(
+            @NotNull ResolveParser.EnhancementImplModuleContext ctx) {
+        myImportBuilder.imports(ImportType.IMPLICIT, ctx.concept)
+                .imports(ImportType.IMPLICIT, ctx.enhancement);
+        ImplModuleBuilder builder =
+                new ImplModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)
+                        .block(get(BlockAST.class, ctx.implItems())).imports(
+                        myImportBuilder.build()).concept(ctx.concept);
+        put(ctx, builder.build());
+    }
+
+    @Override
     public void exitImplItems(@NotNull ResolveParser.ImplItemsContext ctx) {
         BlockBuilder blockBuilder =
                 new BlockBuilder(ctx.getStart(), ctx.getStop())
@@ -752,7 +764,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                 .returnType(get(MathTypeAST.class, ctx.mathTypeExp()))//
                 .parameters(
                         buildInductiveParameter(ctx.Identifier().getSymbol(),
-                                ctx.mathVariableDecl(0).mathTypeExp()));
+                                ctx.mathVariableDecl(0).mathTypeExp()),
+                        get(MathVariableAST.class, ctx.mathVariableDecl(1)));
     }
 
     private MathVariableAST buildInductiveParameter(Token name,

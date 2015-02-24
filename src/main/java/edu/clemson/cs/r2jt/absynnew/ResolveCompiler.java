@@ -130,23 +130,19 @@ public class ResolveCompiler {
                 }
 
                 ModuleAST targetModule = createModuleAST(currentFile);
-                ModuleIdentifier id = new ModuleIdentifier(targetModule);
-
-                myFiles.put(id, currentFile);
-                myModules.put(id, targetModule);
+                myFiles.put(new ModuleIdentifier(targetModule), currentFile);
+                myModules.put(new ModuleIdentifier(targetModule), targetModule);
 
                 DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g =
                         new DefaultDirectedGraph<ModuleIdentifier, DefaultEdge>(
                                 DefaultEdge.class);
-                g.addVertex(id);
+                g.addVertex(new ModuleIdentifier(targetModule));
                 findDependencies(g, targetModule);
 
                 AnalysisPipeline analysisPipe =
                         new AnalysisPipeline(this, mySymbolTable);
                 //CodeGenPipeline codegenPipe =
                 //        new CodeGenPipeline(this, )
-
-                System.out.println(g);
                 for (ModuleIdentifier m : getCompileOrder(g)) {
                     //System.out.println("populating: " + m);
                     analysisPipe.process(m);

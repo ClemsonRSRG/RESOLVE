@@ -936,6 +936,24 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
+    public void postVariableAST(VariableAST e) {
+        MTType mathTypeValue = e.getType().getMathTypeValue();
+        String varName = e.getName().getText();
+
+        e.setMathType(mathTypeValue);
+        try {
+            myBuilder.getInnermostActiveScope().addProgramVariable(varName,
+                    e, e.getType().getProgramTypeValue());
+        }
+        catch (DuplicateSymbolException dse) {
+            duplicateSymbol(e.getName());
+        }
+        PopulatingVisitor.emitDebug("  New program variable: " + varName
+                + " of type " + mathTypeValue.toString()
+                + " with quantification NONE");
+    }
+
+    @Override
     public void postMathVariableAST(MathVariableAST e) {
         MTType mathTypeValue = e.getSyntaxType().getMathTypeValue();
         String varName = e.getName().getText();

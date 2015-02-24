@@ -40,4 +40,13 @@ public final class NamedTypeAST extends TypeAST {
     public Token getQualifier() {
         return myQualifier;
     }
+
+    @Override
+    public String toString() {
+        String result = "";
+        if (myQualifier != null) {
+            result += myQualifier.getText() + "::";
+        }
+        return result + myName;
+    }
 }

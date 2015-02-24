@@ -5,6 +5,7 @@ module
     |   facilityModule
     |   conceptModule
     |   enhancementModule
+    |   enhancementImplModule
     |   conceptImplModule
     ;
 
@@ -330,6 +331,8 @@ stmt
     :   left=progExp ':=' right=progExp  ';'        #assignStmt
     |   left=progExp ':=:' right=progExp ';'        #swapStmt
     |   progParamExp ';'                            #callStmt
+    |   'assume' mathAssertionExp ';'               #assumeStmt
+    |   'confirm' mathAssertionExp ';'              #confirmStmt
     //Todo if, while
     ;
 
