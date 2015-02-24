@@ -686,8 +686,8 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                     ", referencing math type " + e.getMathTypeValue() + " ("
                             + e.getMathTypeValue().getClass() + ")";
         }
-        PopulatingVisitor.emitDebug("processed symbol " + e
-                + " with type " + e.getMathType() + typeValueDesc);
+        PopulatingVisitor.emitDebug("processed symbol " + e + " with type "
+                + e.getMathType() + typeValueDesc);
     }
 
     @Override
