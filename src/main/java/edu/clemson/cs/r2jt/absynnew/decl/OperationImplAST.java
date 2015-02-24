@@ -15,6 +15,7 @@ package edu.clemson.cs.r2jt.absynnew.decl;
 import edu.clemson.cs.r2jt.absynnew.AbstractNodeBuilder;
 import edu.clemson.cs.r2jt.absynnew.NamedTypeAST;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
+import edu.clemson.cs.r2jt.absynnew.stmt.StmtAST;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
@@ -37,32 +38,39 @@ public class OperationImplAST extends OperationAST {
      * implementing an {@link OperationSigAST}; otherwise we're a private
      * operation within some facility module.</p>
      */
-    private final boolean implementsContract;
+    private final boolean myImplementsContractFlag;
 
     private final List<VariableAST> myVariables;
+    private final List<StmtAST> myStatements;
 
     private OperationImplAST(OperationImplBuilder builder) {
         super(builder.getStart(), builder.getStop(), builder.name,
                 builder.parameters, builder.returnType, builder.requires,
                 builder.ensures);
 
-        implementsContract = builder.implementsContract;
+        myImplementsContractFlag = builder.implementsContract;
         myVariables = builder.variables;
+        myStatements = builder.statements;
     }
 
     /**
-     * <p>Returns <code>true</code> if this <code>OperationImplAST</code>
+     * <p>Returns <code>true</code> iff this <code>OperationImplAST</code>
      * implements an {@link OperationSigAST} declared elsewhere;
      * <code>false</code> otherwise.</p>
      * 
-     * @return <code>true</code>
+     * @return <code>true</code> iff this implements a specification;
+     *         <code>false</code> otherwise.
      */
     public boolean implementsContract() {
-        return implementsContract;
+        return myImplementsContractFlag;
     }
 
     public List<VariableAST> getVariables() {
         return myVariables;
+    }
+
+    public List<StmtAST> getStatements() {
+        return myStatements;
     }
 
     public static class OperationImplBuilder
@@ -73,6 +81,7 @@ public class OperationImplAST extends OperationAST {
 
         protected List<ParameterAST> parameters = new ArrayList<ParameterAST>();
         protected List<VariableAST> variables = new ArrayList<VariableAST>();
+        protected List<StmtAST> statements = new ArrayList<StmtAST>();
 
         protected NamedTypeAST returnType = null;
         protected boolean recursive, implementsContract = false;
@@ -136,6 +145,12 @@ public class OperationImplAST extends OperationAST {
         public OperationImplBuilder localVariables(List<VariableAST> e) {
             sanityCheckAdditions(e);
             variables.addAll(e);
+            return this;
+        }
+
+        public OperationImplBuilder statements(List<StmtAST> e) {
+            sanityCheckAdditions(e);
+            statements.addAll(e);
             return this;
         }
 

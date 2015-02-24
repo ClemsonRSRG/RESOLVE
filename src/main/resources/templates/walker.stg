@@ -1,0 +1,28 @@
+WalkerImplementation(name, interfaceName, methods) ::= <<
+package edu.clemson.cs.r2jt.absynnew;
+
+import edu.clemson.cs.r2jt.absynnew.decl.*;
+import edu.clemson.cs.r2jt.absynnew.expr.*;
+import edu.clemson.cs.r2jt.absynnew.stmt.*;
+
+public abstract class <name> {
+
+    public void preAny(ResolveAST e) {}
+
+    public void postAny(ResolveAST e) {}
+
+    <methods; separator = "\n\n">
+}>>
+
+walkerMethods(name, qualName, isMember) ::= <<
+
+public boolean walk<name>(<if(isMember)><qualName><else><name><endif> e) {
+    return false;
+}
+
+public void pre<name>(<if(isMember)><qualName><else><name><endif> e) {}
+
+public void mid<name>(<if(isMember)><qualName><else><name><endif> e,
+    ResolveAST previous, ResolveAST next) {}
+
+public void post<name>(<if(isMember)><qualName><else><name><endif> e) {}>>

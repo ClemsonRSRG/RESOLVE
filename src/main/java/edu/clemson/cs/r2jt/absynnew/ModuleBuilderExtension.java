@@ -34,14 +34,15 @@ public abstract class ModuleBuilderExtension<E extends ModuleBuilderExtension<E>
         extends
             AbstractNodeBuilder<ModuleAST> {
 
-    public BlockAST block;
+    public final Token name;
+    public BlockAST block = BlockAST.EMPTY_BLOCK;
     public ExprAST requires = null;
 
     public final List<ModuleParameterAST> moduleParameters =
             new ArrayList<ModuleParameterAST>();
 
-    public ImportCollectionAST usesBlock = null;
-    public final Token name;
+    public ImportCollectionAST imports =
+            new ImportCollectionAST.ImportCollectionBuilder().build();
 
     public ModuleBuilderExtension(Token start, Token stop, Token name) {
         super(start, stop);
@@ -61,19 +62,14 @@ public abstract class ModuleBuilderExtension<E extends ModuleBuilderExtension<E>
 
     @SuppressWarnings("unchecked")
     public E imports(ImportCollectionAST e) {
-        usesBlock = e;
+        sanityCheckAddition(e);
+        imports = e;
         return (E) this;
     }
 
     @SuppressWarnings("unchecked")
     public E requires(ExprAST e) {
         requires = e;
-        return (E) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public E usesBlock(ImportCollectionAST e) {
-        usesBlock = e;
         return (E) this;
     }
 

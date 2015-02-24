@@ -74,17 +74,6 @@ public class BlockAST extends ResolveAST {
 
         protected List<ResolveAST> elements = new ArrayList<ResolveAST>();
 
-        /**
-         * <p>These flags enable allow a simple sanity check. Specifically, they
-         * ensure there is only one module-level initialization or finalization.
-         * This check being here is a consequence of the fact that we allow
-         * module level inits and finals to be interleaved between any number of
-         * other constructs. So this is a convenient place to perform this
-         * check.</p>
-         */
-        private boolean seenModuleLevelInitialization = false;
-        private boolean seenModuleLevelFinalization = false;
-
         public BlockBuilder(Token start, Token stop) {
             super(start, stop);
         }

@@ -60,20 +60,17 @@ public class WalkerCodeGenerator {
 
     private static ST createClassTemplate(String className) {
         /*Reflections reflections =
-                new Reflections("edu.clemson.cs.r2jt.absynnew");
+                  new Reflections("edu.clemson.cs.r2jt.absynnew");
 
+          Set<Class<? extends ResolveAST>> absynClasses =
+                  reflections.getSubTypesOf(ResolveAST.class);*/
         Set<Class<? extends ResolveAST>> absynClasses =
-                reflections.getSubTypesOf(ResolveAST.class);*/
-
+                new HashSet<Class<? extends ResolveAST>>();
         ST walkerClass =
                 GROUP.getInstanceOf("WalkerImplementation").add("name",
                         className);
 
-        Set<Class<? extends ResolveAST>> absynClasses =
-                new HashSet<Class<? extends ResolveAST>>();
-
         for (Class<?> e : absynClasses) {
-
             ST defaultImplementations =
                     GROUP.getInstanceOf("walkerMethods").add("name",
                             e.getSimpleName()).add("qualName",

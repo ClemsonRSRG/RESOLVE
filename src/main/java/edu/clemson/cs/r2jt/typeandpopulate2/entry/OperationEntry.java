@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OperationEntry extends SymbolTableEntry {
+public class OperationEntry extends AbstractProgramEntry {
 
     private final PTType myReturnType;
     private final ImmutableList<ProgramParameterEntry> myParameters;
@@ -46,6 +46,10 @@ public class OperationEntry extends SymbolTableEntry {
 
         myParameters = parameters;
         myReturnType = returnType;
+    }
+
+    public PTType getProgramType() {
+        return myReturnType;
     }
 
     public OperationEntry toOperationEntry(Token l) {
@@ -100,5 +104,10 @@ public class OperationEntry extends SymbolTableEntry {
             return (ProgramParameterEntry) input.instantiateGenerics(
                     myGenericInstantiations, myInstantiatingFacility);
         }
+    }
+
+    @Override
+    public AbstractProgramEntry toProgrammaticEntry(Token l) {
+        return this;
     }
 }

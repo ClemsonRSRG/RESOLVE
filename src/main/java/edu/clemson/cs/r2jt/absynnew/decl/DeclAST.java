@@ -50,4 +50,15 @@ public abstract class DeclAST extends ResolveAST {
     public Token getName() {
         return myName;
     }
+
+    @Override
+    public String toString() {
+        if (getStart() == null || getStop() == null) {
+            return this.getClass().getSimpleName() + "@-1:-1{name=" + getName()
+                    + "}";
+        }
+        return this.getClass().getSimpleName() + "@" + getStart().getLine()
+                + ":" + getStart().getCharPositionInLine() + "{" + getName()
+                + "}";
+    }
 }

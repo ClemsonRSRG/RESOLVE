@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
+import edu.clemson.cs.r2jt.absynnew.TreeUtil;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
@@ -33,14 +34,14 @@ import java.util.Map;
 public class ProgOperationRefAST extends ProgExprAST {
 
     private final Token myQualifier, myName;
-    private final List<ProgExprAST> myArguments;
+    private final List<ProgExprAST> myArguments = new ArrayList<ProgExprAST>();
 
     public ProgOperationRefAST(Token start, Token stop, Token qualifier,
             Token name, List<ProgExprAST> arguments) {
         super(start, stop);
         myName = name;
         myQualifier = qualifier;
-        myArguments = arguments;
+        myArguments.addAll(arguments);
     }
 
     public Token getName() {
@@ -90,5 +91,14 @@ public class ProgOperationRefAST extends ProgExprAST {
         }
         return new ProgOperationRefAST(getStart(), getStop(), myQualifier,
                 myName, newArguments);
+    }
+
+    @Override
+    public String toString() {
+        String result = "";
+        if (myQualifier != null) {
+            result += myQualifier + "::";
+        }
+        return result + myName + "(" + TreeUtil.join(myArguments, ", ") + ")";
     }
 }

@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class ProgLiteralRefAST<T> extends ProgExprAST {
 
-    private final T myLiteral;
+    protected final T myLiteral;
 
     public ProgLiteralRefAST(Token start, Token stop, T literal) {
         super(start, stop);
@@ -53,6 +53,11 @@ public class ProgLiteralRefAST<T> extends ProgExprAST {
     @Override
     protected ExprAST substituteChildren(Map<ExprAST, ExprAST> substitutions) {
         return new ProgLiteralRefAST<T>(getStart(), getStop(), myLiteral);
+    }
+
+    @Override
+    public String toString() {
+        return myLiteral.toString();
     }
 
     public static class ProgCharacterRefAST

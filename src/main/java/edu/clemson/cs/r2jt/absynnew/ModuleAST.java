@@ -31,13 +31,13 @@ public abstract class ModuleAST extends ResolveAST {
     private final BlockAST myBodyBlock;
 
     public ModuleAST(Token start, Token stop, Token name,
-            ImportCollectionAST uses, List<ModuleParameterAST> params,
+            ImportCollectionAST imports, List<ModuleParameterAST> params,
             ExprAST req, BlockAST block) {
         super(start, stop);
         myName = name;
 
         myModuleParams = params;
-        myImports = uses;
+        myImports = imports;
         myRequires = req;
         myBodyBlock = block;
     }
@@ -50,7 +50,7 @@ public abstract class ModuleAST extends ResolveAST {
         return myModuleParams;
     }
 
-    public ImportCollectionAST getImportBlock() {
+    public ImportCollectionAST getImports() {
         return myImports;
     }
 
@@ -70,54 +70,50 @@ public abstract class ModuleAST extends ResolveAST {
         return true;
     }
 
-    /**
-     * <p>A <code>ConceptAST</code> is <tt>RESOLVE</tt>'s abstract syntax
-     * encapsulation of an 'interface-like-module' containing formal
-     * specifications for user defined types and operations.</p>
-     */
-    public static class ConceptAST extends ModuleAST {
+    public static class ImplModuleAST extends ModuleAST {
 
-        private ConceptAST(ConceptBuilder builder) {
+        private final Token myConcept, myEnhancement;
+
+        private ImplModuleAST(ImplModuleBuilder builder) {
             super(builder.getStart(), builder.getStop(), builder.getName(),
-                    builder.usesBlock, builder.moduleParameters,
-                    builder.requires, builder.block);
-        }
-
-        public static class ConceptBuilder
-                extends
-                    ModuleBuilderExtension<ConceptBuilder> {
-
-            public ConceptBuilder(Token start, Token stop, Token name) {
-                super(start, stop, name);
-            }
-
-            @Override
-            public ConceptAST build() {
-                return new ConceptAST(this);
-            }
-        }
-    }
-
-    public static class FacilityAST extends ModuleAST {
-
-        private FacilityAST(FacilityBuilder builder) {
-            super(builder.getStart(), builder.getStop(), builder.getName(),
-                    builder.usesBlock, Collections
+                    builder.imports, Collections
                             .<ModuleParameterAST> emptyList(),
                     builder.requires, builder.block);
+            myConcept = builder.concept;
+            myEnhancement = builder.enhancement;
         }
 
-        public static class FacilityBuilder
-                extends
-                    ModuleBuilderExtension<FacilityBuilder> {
+        public Token getConcept() {
+            return myConcept;
+        }
 
-            public FacilityBuilder(Token start, Token stop, Token name) {
+        public Token getEnhancement() {
+            return myEnhancement;
+        }
+
+        public static class ImplModuleBuilder
+                extends
+                    ModuleBuilderExtension<ImplModuleBuilder> {
+
+            protected Token concept, enhancement;
+
+            public ImplModuleBuilder(Token start, Token stop, Token name) {
                 super(start, stop, name);
             }
 
+            public ImplModuleBuilder concept(Token e) {
+                concept = e;
+                return this;
+            }
+
+            public ImplModuleBuilder enhancement(Token e) {
+                concept = e;
+                return this;
+            }
+
             @Override
-            public FacilityAST build() {
-                return new FacilityAST(this);
+            public ImplModuleAST build() {
+                return new ImplModuleAST(this);
             }
         }
     }
@@ -126,7 +122,7 @@ public abstract class ModuleAST extends ResolveAST {
 
         private PrecisAST(PrecisBuilder builder) {
             super(builder.getStart(), builder.getStop(), builder.getName(),
-                    builder.usesBlock, Collections
+                    builder.imports, Collections
                             .<ModuleParameterAST> emptyList(), null,
                     builder.block);
         }
@@ -142,6 +138,48 @@ public abstract class ModuleAST extends ResolveAST {
             @Override
             public PrecisAST build() {
                 return new PrecisAST(this);
+            }
+        }
+    }
+
+    /**
+     * <p>A <code>SpecModuleAST</code> is <tt>RESOLVE</tt>'s abstract syntax
+     * encapsulation of an 'interface-like-module' containing formal
+     * specifications for user defined types and operations.</p>
+     */
+    public static class SpecModuleAST extends ModuleAST {
+
+        private final Token myConceptName;
+
+        private SpecModuleAST(SpecModuleBuilder builder) {
+            super(builder.getStart(), builder.getStop(), builder.getName(),
+                    builder.imports, builder.moduleParameters,
+                    builder.requires, builder.block);
+            myConceptName = builder.conceptName;
+        }
+
+        public Token getConceptName() {
+            return myConceptName;
+        }
+
+        public static class SpecModuleBuilder
+                extends
+                    ModuleBuilderExtension<SpecModuleBuilder> {
+
+            protected Token conceptName;
+
+            public SpecModuleBuilder(Token start, Token stop, Token name) {
+                super(start, stop, name);
+            }
+
+            public SpecModuleBuilder concept(Token t) {
+                this.conceptName = t;
+                return this;
+            }
+
+            @Override
+            public SpecModuleAST build() {
+                return new SpecModuleAST(this);
             }
         }
     }

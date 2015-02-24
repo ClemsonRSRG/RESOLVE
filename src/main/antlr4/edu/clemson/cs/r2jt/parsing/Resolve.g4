@@ -4,14 +4,17 @@ module
     :   precisModule
     |   facilityModule
     |   conceptModule
+    |   enhancementModule
+    |   enhancementImplModule
+    |   conceptImplModule
     ;
 
 // precis module
 
 precisModule
     :   'Precis' name=Identifier ';'
-         (usesList)?
-         (precisItems)?
+        (usesList)?
+        (precisItems)?
         'end' closename=Identifier ';'
     ;
 
@@ -40,6 +43,10 @@ facilityItems
 
 facilityItem
     :   facilityDecl
+    |   operationProcedureDecl
+    |   mathDefinitionDecl
+    |   moduleFacilityInit
+    |   moduleFacilityFinal
     ;
 
 // concept module
@@ -58,9 +65,70 @@ conceptItems
 
 conceptItem
     :   constraintClause
+    |   moduleSpecInit
+    |   moduleSpecFinal
     |   operationDecl
     |   typeModelDecl
     |   mathDefinitionDecl
+    ;
+
+// concept impl module
+
+conceptImplModule
+    :   'Realization' name=Identifier 'for' concept=Identifier
+        ('enhanced' 'by' enhancement=Identifier)* ';'
+        (usesList)?
+        (requiresClause)?
+        (implItems)?
+        'end' closename=Identifier ';'
+    ;
+
+// enhancement module
+
+enhancementModule
+    :   'Enhancement' name=Identifier (moduleParameterList)?
+        'for' concept=Identifier ';'
+        (usesList)?
+        (requiresClause)?
+        (enhancementItems)?
+        'end' closename=Identifier ';' EOF
+    ;
+
+enhancementItems
+    :   (enhancementItem)+
+    ;
+
+enhancementItem
+    :   operationDecl
+    |   mathDefinitionDecl
+    |   typeModelDecl
+    ;
+
+// enhancement impl module
+
+enhancementImplModule
+    :   'Realization' name=Identifier (moduleParameterList)?
+        'for' enhancement=Identifier 'of' concept=Identifier ';'
+        (usesList)?
+        (requiresClause)?
+        (implItems)?
+        'end' closename=Identifier ';'
+    ;
+
+implItems
+    :   (implItem)+
+    ;
+
+implItem
+    :   operationProcedureDecl
+    |   facilityDecl
+    |   procedureDecl
+    |   mathDefinitionDecl
+    |   typeRepresentationDecl
+    |   conventionClause
+    |   correspondenceClause
+    |   moduleImplInit
+    |   moduleImplFinal
     ;
 
 // uses, imports
@@ -102,53 +170,114 @@ parameterMode
         | 'evaluates' )
     ;
 
-// type related rules
+// type and record related rules
 
 type
-    : (qualifier=Identifier '::')? name=Identifier
+    :   (qualifier=Identifier '::')? name=Identifier
+    ;
+
+record
+    :   'Record' (recordVariableDeclGroup)+ 'end'
+    ;
+
+recordVariableDeclGroup
+    :   Identifier (',' Identifier)* ':' type ';'
     ;
 
 typeModelDecl
     :   'Type' 'Family' name=Identifier 'is' 'modeled' 'by' mathTypeExp ';'
         'exemplar' exemplar=Identifier ';'
         (constraintClause)?
-        (specTypeInit)?
-        (specTypeFinal)?
+        (typeModelInit)?
+        (typeModelFinal)?
     ;
 
-specTypeInit
+typeRepresentationDecl
+    :   'Type' name=Identifier ('='|'is' 'represented' 'by') (record|type) ';'
+        (conventionClause)?
+        (correspondenceClause)?
+        (typeRepresentationInit)?
+        (typeRepresentationFinal)?
+    ;
+
+// initialization, finalization rules
+
+typeModelInit
     :   'initialization' (requiresClause)? (ensuresClause)?
     ;
 
-specTypeFinal
+typeModelFinal
     :   'finalization' (requiresClause)? (ensuresClause)?
     ;
 
-moduleInit
-    :   'Facility_Initialization'
+typeRepresentationInit
+    :   'initialization' (variableDeclGroup)* //stmts
     ;
 
-moduleFinal
+typeRepresentationFinal
+    :   'finalization' (variableDeclGroup)* //stmts
+    ;
+
+//We use special rules for facility module init and final to allow requires
+//and ensures clauses (which aren't allowed in normal impl modules)...
+moduleFacilityInit
+    :   'Facility_Initialization'
+        (requiresClause)?
+        (ensuresClause)?
+        (variableDeclGroup)*
+        //stmt block
+    ;
+
+moduleFacilityFinal
     :   'Facility_Finalization'
+         (requiresClause)?
+         (ensuresClause)?
+         (variableDeclGroup)*
+         //stmt block
+    ;
+
+moduleSpecInit
+    :   'intialization'
+        (requiresClause)?
+        (ensuresClause)?
+    ;
+
+moduleSpecFinal
+    :   'Facility_Finalization'
+        (requiresClause)?
+        (ensuresClause)?
+    ;
+
+moduleImplInit
+    :   'Facility_Initialization'
+        (variableDeclGroup)*
+        //Todo: stmts
+    ;
+
+moduleImplFinal
+    :   'Facility_Finalization'
+        (variableDeclGroup)*
+        //Todo: stmts
     ;
 
 // functions
 
 procedureDecl
-    :   (recursive='Recursive')? 'Procedure' name=Identifier (':' type)
-        operationParameterList ';'
+    :   (recursive='Recursive')? 'Procedure' name=Identifier
+        operationParameterList (':' type)? ';'
         (variableDeclGroup)*
-
-        'end' closename=Identifier
+        (stmt)*
+        'end' closename=Identifier ';'
     ;
 
-facilityOperationDecl
-    :   (recursive='Recursive')? name=Identifier operationParameterList ';'
+operationProcedureDecl
+    :   (recursive='Recursive')? 'Operation'
+        name=Identifier operationParameterList ';'
         (requiresClause)?
         (ensuresClause)?
         'Procedure'
         (variableDeclGroup)*
-
+        (stmt)*
         'end' closename=Identifier ';'
     ;
 
@@ -160,17 +289,18 @@ operationDecl
 
 // facility and enhancements
 
-//Todo: This also needs enhancements that can be realized by the base concept.
+//Todo: This also needs enhancements realizable by the base concept.
 facilityDecl
     :   'Facility' name=Identifier 'is' concept=Identifier
-        (conceptArgs=moduleArgumentList)? (externally='externally')? 'realized'
-        'by' impl=Identifier (moduleArgumentList)?
+        (specArgs=moduleArgumentList)? (externally='externally')? 'realized'
+        'by' impl=Identifier (implArgs=moduleArgumentList)?
         (enhancementPairDecl)* ';'
     ;
 
 enhancementPairDecl
     :   'enhanced' 'by' spec=Identifier (specArgs=moduleArgumentList)?
-        'realized' 'by' body=Identifier (bodyArgs=moduleArgumentList)?
+        (externally='externally')? 'realized' 'by' impl=Identifier
+        (implArgs=moduleArgumentList)?
     ;
 
 moduleArgumentList
@@ -192,7 +322,52 @@ mathVariableDecl
     ;
 
 variableDeclGroup
-    :   'Var' Identifier (',' Identifier)* ':' type ';'
+    :   'var' Identifier (',' Identifier)* ':' type ';'
+    ;
+
+// statements
+
+stmt
+    :   assignStmt
+    |   swapStmt
+    |   callStmt
+    |   assumeStmt
+    |   confirmStmt
+    |   ifStmt
+    |   whileStmt
+    ;
+
+assignStmt
+    :   left=progExp ':=' right=progExp ';'
+    ;
+
+swapStmt
+    :   left=progExp ':=:' right=progExp ';'
+    ;
+
+callStmt
+    :   progParamExp ';'
+    ;
+
+assumeStmt
+    :   'assume' mathAssertionExp ';'
+    ;
+
+confirmStmt
+    :   'confirm' mathAssertionExp ';'
+    ;
+
+ifStmt
+    :   'if' progExp 'then' (stmt)*  (elsePart)? 'end' 'if' ';'
+    ;
+
+elsePart
+    :   'else' stmt*
+    ;
+
+whileStmt
+    :   'while' progExp (changingClause)?
+        (maintainingClause)? (decreasingClause)? 'do' stmt* 'end' 'loop' ';'
     ;
 
 // mathematical type theorems
@@ -295,16 +470,32 @@ ensuresClause
     :   'ensures' mathAssertionExp ';'
     ;
 
-decreasingClause
-    :   'decreasing' mathAssertionExp ';'
-    ;
-
 constraintClause
     :   ('constraint'|'Constraint') mathAssertionExp ';'
     ;
 
+changingClause
+    :   'changing' progVariableExp (',' progVariableExp)*
+    ;
+
+maintainingClause
+    :   'maintaining' mathAssertionExp ';'
+    ;
+
+decreasingClause
+    :   'decreasing' mathAssertionExp ';'
+    ;
+
 whereClause
     :   'where' mathAssertionExp
+    ;
+
+correspondenceClause
+    :   'correspondence' mathAssertionExp ';'
+    ;
+
+conventionClause
+    :   'convention' mathAssertionExp ';'
     ;
 
 // mathematical expressions
@@ -341,20 +532,21 @@ mathExp
 
 mathPrimaryExp
     :   mathLiteralExp
+    |   mathDotExp
     |   mathFunctionApplicationExp
     |   mathOutfixExp
     |   mathSetExp
     |   mathTupleExp
-    ;
-
-mathSetExp
-    :   '{' mathVariableDecl '|' mathAssertionExp '}'   #mathSetBuilderExp//Todo
-    |   '{' (mathExp (',' mathExp)*)? '}'               #mathSetCollectionExp
+    |   mathLambdaExp
     ;
 
 mathLiteralExp
     :   BooleanLiteral      #mathBooleanExp
     |   IntegerLiteral      #mathIntegerExp
+    ;
+
+mathDotExp
+    :   mathFunctionApplicationExp ('.' mathFunctionApplicationExp)+
     ;
 
 mathFunctionApplicationExp
@@ -364,7 +556,7 @@ mathFunctionApplicationExp
 
 mathCleanFunctionExp
     :   name=Identifier '(' mathExp (',' mathExp)* ')'  #mathFunctionExp
-    |   (qualifier=Identifier '::')? name=Identifier    #mathVariableExp//Todo
+    |   (qualifier=Identifier '::')? name=Identifier    #mathVariableExp
     |   ('+'|'-'|'*'|'/')                               #mathOpExp
     ;
 
@@ -374,24 +566,50 @@ mathOutfixExp
     |   lop='||' mathExp rop='||'
     ;
 
+mathSetExp
+    :   '{' mathVariableDecl '|' mathAssertionExp '}'   #mathSetBuilderExp//Todo
+    |   '{' (mathExp (',' mathExp)*)? '}'               #mathSetCollectionExp
+    ;
+
 mathTupleExp
     :   '(' mathExp (',' mathExp)+ ')'
+    ;
+
+//NOTE: Allows only very rudimentary lambda expressions.
+
+mathLambdaExp
+    :   'lambda' '(' mathVariableDeclGroup (',' mathVariableDeclGroup)* ')'
+        '.' '(' mathAssertionExp ')'
     ;
 
 // program expressions
 
 progExp
-    :   op=('not'|'-') progExp              #progApplicationExp
-    |   progExp op=('*'|'/') progExp        #progApplicationExp
-    |   progExp op=('+'|'-') progExp        #progApplicationExp
-    |   '(' progExp ')'                     #progNestedExp
-    |   progPrimary                         #progPrimaryExp
+    :   op=('not'|'-') progExp                  #progApplicationExp
+    |   progExp op=('*'|'/') progExp            #progApplicationExp
+    |   progExp op=('+'|'-') progExp            #progApplicationExp
+    |   progExp op=('<='|'>='|'>'|'<') progExp  #progApplicationExp
+    |   progExp op=('='|'/=') progExp           #progApplicationExp
+    |   '(' progExp ')'                         #progNestedExp
+    |   progPrimary                             #progPrimaryExp
     ;
 
 progPrimary
     :   progLiteralExp
+    |   progVariableExp
     |   progParamExp
-    |   progVarExp
+    ;
+
+//This intermediate rule is really only needed to help make
+//the 'changingClause' rule a little more strict about what it accepts.
+//A root VariableExp class is no longer reflected in the ast.
+progVariableExp
+    :   progDotExp
+    |   progNamedExp
+    ;
+
+progDotExp
+    :   progNamedExp ('.' progNamedExp)+
     ;
 
 progParamExp
@@ -399,12 +617,7 @@ progParamExp
         '(' (progExp (',' progExp)*)? ')'
     ;
 
-progVarExp
-    :   progNamedVarExp ('.' progNamedVarExp)+      #progRecordDotExp
-    |   progNamedVarExp                             #progNamedExp
-    ;
-
-progNamedVarExp
+progNamedExp
     :   (qualifier=Identifier '::')? name=Identifier
     ;
 
@@ -470,6 +683,22 @@ fragment
 SingleCharacter
     :   ~['\\]
     ;
+
+// Some lexer tokens (allows for easy switch stmts)
+
+Not      : 'not';
+Or       : 'and';
+And      : 'or';
+NEquals   : '/=';
+Equals   : '=';
+GTEquals : '>=';
+LTEquals : '<=';
+GT       : '>';
+LT       : '<';
+Add      : '+';
+Subtract : '-';
+Multiply : '*';
+Divide   : '/';
 
 // whitespace, identifier rules, and comments
 

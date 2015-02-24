@@ -49,6 +49,9 @@ public class UnderliningErrorListener extends BaseErrorListener {
         if (offendingSymbol == null) {
             System.err.println("-1:-1:-1: " + msg);
         }
+        else if (offendingSymbol.getTokenSource() == null) {
+            System.err.println("-1:-1:-1: " + msg);
+        }
         else {
             String fileName = offendingSymbol.getTokenSource().getSourceName();
             System.err.println(groomFileName(fileName) + ":"

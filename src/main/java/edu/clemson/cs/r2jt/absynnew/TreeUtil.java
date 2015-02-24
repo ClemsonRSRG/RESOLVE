@@ -12,15 +12,101 @@
  */
 package edu.clemson.cs.r2jt.absynnew;
 
+import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.stringtemplate.v4.ST;
+
+import java.util.Collection;
 
 /**
- * <p>A collection of general-purpose abstract syntax related methods.</p>
+ * <p>A place for general-purpose abstract syntax related methods.</p>
  *
  * @author dtwelch
  */
 public class TreeUtil {
+
+    /**
+     * <p>Returns the appropriate RESOLVE function name for the operator
+     * appearing in {@link Token} <code>op</code>. Note that the name returned
+     * is contingent on the naming of the operations in the 'standard' templates
+     * (e.g. <tt>Integer_Template</tt>, <tt>Boolean_Template</tt>, etc).</p>
+     *
+     * <p>So it's important to realize that if one of these 'standard' operation
+     * name's changes, that this method is updated to reflect the new name,
+     * or {@link edu.clemson.cs.r2jt.typeandpopulate2.PopulatingVisitor}
+     * will fail to find the operation (or worse, find a wrong one).</p>
+     * @param op  A syntactic operator (<tt>+, -, *</tt>) as would appear
+     *            in user sourcecode.
+     * @return    The name of the
+     *            {@link edu.clemson.cs.r2jt.absynnew.decl.OperationSigAST}
+     *              representing the operator <code>op</code>.
+     */
+    public static Token getTemplateOperationNameFor(Token op) {
+        String result;
+        if (op == null) {
+            throw new IllegalArgumentException("op passed is null");
+        }
+        switch (op.getType()) {
+        case ResolveParser.Add:
+            result = "Sum";
+            break;
+        case ResolveParser.Subtract:
+            result = "Difference";
+            break;
+        case ResolveParser.Multiply:
+            result = "Product";
+            break;
+        case ResolveParser.Divide:
+            result = "Divide";
+            break;
+        case ResolveParser.GT:
+            result = "Greater";
+            break;
+        case ResolveParser.LT:
+            result = "Less";
+            break;
+        case ResolveParser.LTEquals:
+            result = "Less_Or_Equal";
+            break;
+        case ResolveParser.GTEquals:
+            result = "Greater_Or_Equal";
+            break;
+        case ResolveParser.NEquals:
+            result = "Are_Not_Equal";
+            break;
+        case ResolveParser.Equals:
+            result = "Are_Equal";
+            break;
+        case ResolveParser.And:
+            result = "And";
+            break;
+        case ResolveParser.Or:
+            result = "Or";
+            break;
+        case ResolveParser.Not:
+            result = "Not";
+            break;
+        default:
+            result = op.getText();
+            break;
+        }
+        return new ResolveToken(result);
+    }
+
+    /**
+     * <p>Joins (delimits) a list by separator <code>sep</code>.</p>
+     *
+     * @param l     The collection of elements to delmit.
+     * @param sep   The desired separator.
+     * @return      The delimited list.
+     */
+    public static String join(Collection<?> l, String sep) {
+        ST elements =
+                new ST("<elems; separator={" + sep + "}>").add("elems", l);
+        return elements.render();
+    }
 
     /**
      * <p>Returns the abstract syntax representation of the concrete tree
