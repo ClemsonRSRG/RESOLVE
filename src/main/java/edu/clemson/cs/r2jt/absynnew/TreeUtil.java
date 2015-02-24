@@ -27,9 +27,27 @@ import java.util.Collection;
  */
 public class TreeUtil {
 
-    public static Token getParameterizedExprName(Token op) {
+    /**
+     * <p>Returns the appropriate RESOLVE function name for the operator
+     * appearing in {@link Token} <code>op</code>. Note that the name returned
+     * is contingent on the naming of the operations in the 'standard' templates
+     * (e.g. <tt>Integer_Template</tt>, <tt>Boolean_Template</tt>, etc).</p>
+     *
+     * <p>So it's important to realize that if one of these 'standard' operation
+     * name's changes, that this method is updated to reflect the new name,
+     * or {@link edu.clemson.cs.r2jt.typeandpopulate2.PopulatingVisitor}
+     * will fail to find the operation (or worse, find a wrong one).</p>
+     * @param op  A syntactic operator (<tt>+, -, *</tt>) as would appear
+     *            in user sourcecode.
+     * @return    The name of the
+     *            {@link edu.clemson.cs.r2jt.absynnew.decl.OperationSigAST}
+     *              representing the operator <code>op</code>.
+     */
+    public static Token getTemplateOperationNameFor(Token op) {
         String result;
-
+        if (op == null) {
+            throw new IllegalArgumentException("op passed is null");
+        }
         switch (op.getType()) {
         case ResolveParser.Add:
             result = "Sum";

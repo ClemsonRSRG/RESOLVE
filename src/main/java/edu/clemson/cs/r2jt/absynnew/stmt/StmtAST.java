@@ -17,10 +17,6 @@ import org.antlr.v4.runtime.Token;
 
 public abstract class StmtAST<D extends ResolveAST> extends ResolveAST {
 
-    public static enum StatmentType {
-        CALL, SWAP, ASSIGN, IF, WHILE
-    }
-
     public StmtAST(Token start, Token stop) {
         super(start, stop);
     }

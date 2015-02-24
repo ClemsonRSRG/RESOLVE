@@ -22,11 +22,12 @@ import java.util.Map;
 
 public class ProgDotAST extends ProgExprAST {
 
-    private final List<ProgNameRefAST> mySegments;
+    private final List<ProgNameRefAST> mySegments =
+            new ArrayList<ProgNameRefAST>();
 
     public ProgDotAST(Token start, Token stop, List<ProgNameRefAST> segs) {
         super(start, stop);
-        mySegments = segs;
+        mySegments.addAll(segs);
     }
 
     public List<ProgNameRefAST> getSegments() {

@@ -25,11 +25,11 @@ import java.util.List;
  */
 public class RecordTypeAST extends TypeAST {
 
-    private final List<VariableAST> myFields;
+    private final List<VariableAST> myFields = new ArrayList<VariableAST>();
 
     public RecordTypeAST(Token start, Token stop, List<VariableAST> fields) {
         super(start, stop);
-        myFields = fields;
+        myFields.addAll(fields);
     }
 
     public List<VariableAST> getFields() {

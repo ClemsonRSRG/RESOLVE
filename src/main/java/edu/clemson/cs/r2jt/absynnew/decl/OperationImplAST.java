@@ -38,7 +38,7 @@ public class OperationImplAST extends OperationAST {
      * implementing an {@link OperationSigAST}; otherwise we're a private
      * operation within some facility module.</p>
      */
-    private final boolean implementsContract;
+    private final boolean myImplementsContractFlag;
 
     private final List<VariableAST> myVariables;
     private final List<StmtAST> myStatements;
@@ -48,24 +48,29 @@ public class OperationImplAST extends OperationAST {
                 builder.parameters, builder.returnType, builder.requires,
                 builder.ensures);
 
-        implementsContract = builder.implementsContract;
+        myImplementsContractFlag = builder.implementsContract;
         myVariables = builder.variables;
         myStatements = builder.statements;
     }
 
     /**
-     * <p>Returns <code>true</code> if this <code>OperationImplAST</code>
+     * <p>Returns <code>true</code> iff this <code>OperationImplAST</code>
      * implements an {@link OperationSigAST} declared elsewhere;
      * <code>false</code> otherwise.</p>
      * 
-     * @return <code>true</code>
+     * @return <code>true</code> iff this implements a specification;
+     *         <code>false</code> otherwise.
      */
     public boolean implementsContract() {
-        return implementsContract;
+        return myImplementsContractFlag;
     }
 
     public List<VariableAST> getVariables() {
         return myVariables;
+    }
+
+    public List<StmtAST> getStatements() {
+        return myStatements;
     }
 
     public static class OperationImplBuilder

@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.r2jt.absynnew;
 
-import edu.clemson.cs.r2jt.absyn.CallStmt;
 import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportCollectionBuilder;
 import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportType;
 import edu.clemson.cs.r2jt.absynnew.InitFinalAST.Type;
@@ -340,7 +339,6 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                 .variableDeclGroup()) {
             builder.localVariables(getAll(VariableAST.class, grp.Identifier()));
         }
-        //Todo: Use BlockAST to contain statements.... maybe.
         put(ctx, builder.build());
     }
 
@@ -665,6 +663,11 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
+    public void exitStmt(@NotNull ResolveParser.StmtContext ctx) {
+        put(ctx, get(StmtAST.class, ctx.getChild(0)));
+    }
+
+    @Override
     public void exitAssignStmt(@NotNull ResolveParser.AssignStmtContext ctx) {
         AssignAST assign =
                 new AssignAST(ctx.getStart(), ctx.getStop(), get(
@@ -684,8 +687,9 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
     @Override
     public void exitCallStmt(@NotNull ResolveParser.CallStmtContext ctx) {
-        put(ctx,
-                new CallAST(get(ProgOperationRefAST.class, ctx.progParamExp())));
+        ProgOperationRefAST opRef =
+                get(ProgOperationRefAST.class, ctx.progParamExp());
+        put(ctx, new CallAST(opRef));
     }
 
     @Override
@@ -698,6 +702,24 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         }
         put(ctx, new IfAST(ctx.getStart(), ctx.getStop(), condition, ifBlock,
                 elseBlock));
+    }
+
+    @Override
+    public void exitWhileStmt(@NotNull ResolveParser.WhileStmtContext ctx) {
+        ProgExprAST condition = get(ProgExprAST.class, ctx.progExp());
+
+        ExprAST maintaining = get(ExprAST.class, ctx.maintainingClause());
+        ExprAST decreasing = get(ExprAST.class, ctx.decreasingClause());
+        List<ProgExprAST> changingVars = new ArrayList<ProgExprAST>();
+        List<StmtAST> stmts = getAll(StmtAST.class, ctx.stmt());
+
+        if (ctx.changingClause() != null) {
+            changingVars =
+                    getAll(ProgExprAST.class, ctx.changingClause()
+                            .progVariableExp());
+        }
+        put(ctx, new WhileAST(ctx.getStart(), ctx.getStop(), condition,
+                changingVars, maintaining, decreasing, stmts));
     }
 
     @Override
@@ -842,7 +864,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitProgApplicationExp(
             @NotNull ResolveParser.ProgApplicationExpContext ctx) {
-        Token name = TreeUtil.getParameterizedExprName(ctx.op);
+        Token name = TreeUtil.getTemplateOperationNameFor(ctx.op);
         //Unary minus unfornately needs special casing (or else we'll call it
         //negate).
         if (ctx.progExp().size() == 1 && ctx.op.getText().equals("-")) {
@@ -850,7 +872,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         }
         ProgOperationRefAST call =
                 new ProgOperationRefAST(ctx.getStart(), ctx.getStop(), null,
-                        TreeUtil.getParameterizedExprName(ctx.op), getAll(
+                        TreeUtil.getTemplateOperationNameFor(ctx.op), getAll(
                                 ProgExprAST.class, ctx.progExp()));
         put(ctx, call);
     }
@@ -881,6 +903,12 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
     @Override
     public void exitProgPrimary(@NotNull ResolveParser.ProgPrimaryContext ctx) {
+        put(ctx, get(ProgExprAST.class, ctx.getChild(0)));
+    }
+
+    @Override
+    public void exitProgVariableExp(
+            @NotNull ResolveParser.ProgVariableExpContext ctx) {
         put(ctx, get(ProgExprAST.class, ctx.getChild(0)));
     }
 
@@ -951,6 +979,18 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitCorrespondenceClause(
             @NotNull ResolveParser.CorrespondenceClauseContext ctx) {
+        put(ctx, get(ExprAST.class, ctx.mathAssertionExp()));
+    }
+
+    @Override
+    public void exitMaintainingClause(
+            @NotNull ResolveParser.MaintainingClauseContext ctx) {
+        put(ctx, get(ExprAST.class, ctx.mathAssertionExp()));
+    }
+
+    @Override
+    public void exitDecreasingClause(
+            @NotNull ResolveParser.DecreasingClauseContext ctx) {
         put(ctx, get(ExprAST.class, ctx.mathAssertionExp()));
     }
 

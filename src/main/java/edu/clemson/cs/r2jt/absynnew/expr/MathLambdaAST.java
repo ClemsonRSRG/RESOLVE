@@ -26,7 +26,8 @@ import java.util.Map;
 
 public class MathLambdaAST extends ExprAST {
 
-    private final List<MathVariableAST> myParameters;
+    private final List<MathVariableAST> myParameters =
+            new ArrayList<MathVariableAST>();
     private ExprAST myBody;
 
     public MathLambdaAST(Token start, Token stop,
@@ -36,7 +37,7 @@ public class MathLambdaAST extends ExprAST {
         if (parameters == null) {
             throw new IllegalArgumentException("null MathLambdaAST params");
         }
-        myParameters = parameters;
+        myParameters.addAll(parameters);
         myBody = body;
     }
 

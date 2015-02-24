@@ -24,11 +24,12 @@ import java.util.Map;
 
 public class MathDotAST extends ExprAST {
 
-    private final List<MathSymbolAST> mySegments;
+    private final List<MathSymbolAST> mySegments =
+            new ArrayList<MathSymbolAST>();
 
     public MathDotAST(Token start, Token stop, List<MathSymbolAST> segments) {
         super(start, stop);
-        mySegments = segments;
+        mySegments.addAll(segments);
     }
 
     public List<MathSymbolAST> getSegments() {

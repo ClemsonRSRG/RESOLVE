@@ -33,8 +33,8 @@ public class InitFinalAST extends ResolveAST {
 
     private final ExprAST myRequires, myEnsures;
 
-    private final List<VariableAST> myVariables;
-    private final List<StmtAST> myStatements;
+    private final List<VariableAST> myVariables = new ArrayList<VariableAST>();
+    private final List<StmtAST> myStatements = new ArrayList<StmtAST>();
 
     private final Type myType;
 
@@ -44,8 +44,8 @@ public class InitFinalAST extends ResolveAST {
         myRequires = requires;
         myEnsures = ensures;
 
-        myVariables = vars;
-        myStatements = stmts;
+        myVariables.addAll(vars);
+        myStatements.addAll(stmts);
         myType = t;
     }
 

@@ -322,22 +322,52 @@ mathVariableDecl
     ;
 
 variableDeclGroup
-    :   'Var' Identifier (',' Identifier)* ':' type ';'
+    :   'var' Identifier (',' Identifier)* ':' type ';'
     ;
 
 // statements
 
 stmt
-    :   left=progExp ':=' right=progExp  ';'                    #assignStmt
-    |   left=progExp ':=:' right=progExp ';'                    #swapStmt
-    |   progParamExp ';'                                        #callStmt
-    |   'If' progExp 'then' (stmt)*  (elsePart)? 'end' ';'      #ifStmt
-    |   'assume' mathAssertionExp ';'                           #assumeStmt
-    |   'confirm' mathAssertionExp ';'                          #confirmStmt
+    :   assignStmt
+    |   swapStmt
+    |   callStmt
+    |   assumeStmt
+    |   confirmStmt
+    |   ifStmt
+    |   whileStmt
+    ;
+
+assignStmt
+    :   left=progExp ':=' right=progExp ';'
+    ;
+
+swapStmt
+    :   left=progExp ':=:' right=progExp ';'
+    ;
+
+callStmt
+    :   progParamExp ';'
+    ;
+
+assumeStmt
+    :   'assume' mathAssertionExp ';'
+    ;
+
+confirmStmt
+    :   'confirm' mathAssertionExp ';'
+    ;
+
+ifStmt
+    :   'if' progExp 'then' (stmt)*  (elsePart)? 'end' 'if' ';'
     ;
 
 elsePart
     :   'else' stmt*
+    ;
+
+whileStmt
+    :   'while' progExp (changingClause)?
+        (maintainingClause)? (decreasingClause)? 'do' stmt* 'end' 'loop' ';'
     ;
 
 // mathematical type theorems
@@ -440,12 +470,20 @@ ensuresClause
     :   'ensures' mathAssertionExp ';'
     ;
 
-decreasingClause
-    :   'decreasing' mathAssertionExp ';'
-    ;
-
 constraintClause
     :   ('constraint'|'Constraint') mathAssertionExp ';'
+    ;
+
+changingClause
+    :   'changing' progVariableExp (',' progVariableExp)*
+    ;
+
+maintainingClause
+    :   'maintaining' mathAssertionExp ';'
+    ;
+
+decreasingClause
+    :   'decreasing' mathAssertionExp ';'
     ;
 
 whereClause
@@ -559,8 +597,15 @@ progExp
 progPrimary
     :   progLiteralExp
     |   progParamExp
+    |   progVariableExp
+    ;
+
+//This intermediate rule is really only needed to help make
+//the 'changingClause' rule a little more strict about what it accepts.
+//A root VariableExp class is no longer reflected in the ast.
+progVariableExp
+    :   progDotExp
     |   progNamedExp
-    |   progDotExp
     ;
 
 progDotExp

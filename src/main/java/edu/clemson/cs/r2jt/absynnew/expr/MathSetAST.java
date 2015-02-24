@@ -26,11 +26,11 @@ import java.util.Map;
  */
 public class MathSetAST extends ExprAST {
 
-    private final List<ExprAST> myElements;
+    private final List<ExprAST> myElements = new ArrayList<ExprAST>();
 
     public MathSetAST(Token start, Token stop, List<ExprAST> elements) {
         super(start, stop);
-        myElements = elements;
+        myElements.addAll(elements);
     }
 
     public List<ExprAST> getElements() {

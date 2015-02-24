@@ -13,8 +13,10 @@
 package edu.clemson.cs.r2jt.absynnew.stmt;
 
 import edu.clemson.cs.r2jt.absynnew.expr.ProgExprAST;
+import edu.emory.mathcs.backport.java.util.Collections;
 import org.antlr.v4.runtime.Token;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class IfAST extends StmtAST {
@@ -26,7 +28,15 @@ public class IfAST extends StmtAST {
             List<StmtAST> ifThenBlock, List<StmtAST> elseBlock) {
         super(start, stop);
         myCondition = condition;
+
+        if (elseBlock == null) {
+            ifThenBlock = new ArrayList<StmtAST>();
+        }
         myThenBlock = ifThenBlock;
+
+        if (elseBlock == null) {
+            elseBlock = new ArrayList<StmtAST>();
+        }
         myElseBlock = elseBlock;
     }
 

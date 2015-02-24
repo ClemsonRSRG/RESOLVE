@@ -34,14 +34,14 @@ import java.util.Map;
 public class ProgOperationRefAST extends ProgExprAST {
 
     private final Token myQualifier, myName;
-    private final List<ProgExprAST> myArguments;
+    private final List<ProgExprAST> myArguments = new ArrayList<ProgExprAST>();
 
     public ProgOperationRefAST(Token start, Token stop, Token qualifier,
             Token name, List<ProgExprAST> arguments) {
         super(start, stop);
         myName = name;
         myQualifier = qualifier;
-        myArguments = arguments;
+        myArguments.addAll(arguments);
     }
 
     public Token getName() {

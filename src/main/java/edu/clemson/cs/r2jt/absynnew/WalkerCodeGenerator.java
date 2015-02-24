@@ -71,7 +71,6 @@ public class WalkerCodeGenerator {
                         className);
 
         for (Class<?> e : absynClasses) {
-
             ST defaultImplementations =
                     GROUP.getInstanceOf("walkerMethods").add("name",
                             e.getSimpleName()).add("qualName",
