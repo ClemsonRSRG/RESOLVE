@@ -1283,12 +1283,16 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
-    public void midDefinitionDec(DefinitionDec node, ResolveConceptualElement previous, ResolveConceptualElement next) {
+    public void midDefinitionDec(DefinitionDec node,
+            ResolveConceptualElement previous, ResolveConceptualElement next) {
         if (node.isInductive() && next instanceof DefinitionBody) {
             try {
                 //System.out.println(new MTFunction(myTypeGraph, node));
-                myBuilder.getInnermostActiveScope().addBinding(node.getName().getName(), node, new MTFunction(myTypeGraph, node));
-            } catch (DuplicateSymbolException e) {
+                myBuilder.getInnermostActiveScope().addBinding(
+                        node.getName().getName(), node,
+                        new MTFunction(myTypeGraph, node));
+            }
+            catch (DuplicateSymbolException e) {
                 // we tried!
             }
         }
