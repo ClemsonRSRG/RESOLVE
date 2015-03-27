@@ -207,12 +207,15 @@ public class CongruenceClassProver {
                 "Elapsed time from construction: " + totalTime + " ms" + "\n";
         String div = divLine("Summary");
         summary = div + summary + div;
-        if (!FlagManager.getInstance().isFlagSet("nodebug")) {
-            System.out.println(m_results + summary);
-        }
-        m_results = summary + m_results;
 
-        outputProofFile();
+        if (!m_environment.isWebIDEFlagSet()) {
+            if (!FlagManager.getInstance().isFlagSet("nodebug")) {
+                System.out.println(m_results + summary);
+            }
+            m_results = summary + m_results;
+
+            outputProofFile();
+        }
     }
 
     private String divLine(String label) {
