@@ -13,23 +13,28 @@
 package edu.clemson.cs.r2jt.absynnew;
 
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
+import edu.clemson.cs.r2jt.absynnew.expr.ProgExprAST;
 import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import org.antlr.v4.runtime.Token;
 
 public class ModuleArgumentAST extends ResolveAST {
 
-    private final ExprAST myArgumentExpr;
+    private final ProgExprAST myArgumentExpr;
 
     private MTType myMathType;
     private PTType myProgramTypeValue;
 
-    public ModuleArgumentAST(ExprAST expr, Token start, Token stop) {
+    public ModuleArgumentAST(Token start, Token stop, ProgExprAST expr) {
         super(start, stop);
         myArgumentExpr = expr;
     }
 
-    public ExprAST getArgumentExpr() {
+    public ModuleArgumentAST(ProgExprAST expr) {
+        this(expr.getStart(), expr.getStop(), expr);
+    }
+
+    public ProgExprAST getArgumentExpr() {
         return myArgumentExpr;
     }
 

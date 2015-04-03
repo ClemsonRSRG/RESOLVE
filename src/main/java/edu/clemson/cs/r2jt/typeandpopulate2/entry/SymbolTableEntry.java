@@ -71,12 +71,11 @@ public abstract class SymbolTableEntry {
         return myDefiningElement;
     }
 
-    /*
-       public RepresentationTypeEntry toRepresentationTypeEntry(Location l) {
-           throw new SourceErrorException("Expecting a program type "
-                   + "representation.  Found " + getEntryTypeDescription() + ".",
-                   l);
-       }*/
+    public RepresentationTypeEntry toRepresentationTypeEntry(Token l) {
+        throw new SrcErrorException("Expecting a program type "
+                + "representation.  Found " + getEntryTypeDescription() + ".",
+                l);
+    }
 
     public MathSymbolEntry toMathSymbolEntry(Token l) {
         throw new SrcErrorException("expecting a math symbol; found "
@@ -116,17 +115,22 @@ public abstract class SymbolTableEntry {
     /*public OperationProfileEntry toOperationProfileEntry(Location l) {
         throw new SourceErrorException("Expecting a operation profile.  Found "
                 + getEntryTypeDescription(), l);
-    }
+    }*/
 
-    public ProcedureEntry toProcedureEntry(Location l) {
-        throw new SourceErrorException("Expecting a procedure.  Found "
+    public ProcedureEntry toProcedureEntry(Token l) {
+        throw new SrcErrorException("Expecting a procedure.  Found "
                 + getEntryTypeDescription(), l);
     }
 
-    public ShortFacilityEntry toShortFacilityEntry(Location l) {
+    /*public ShortFacilityEntry toShortFacilityEntry(Location l) {
         throw new SourceErrorException("Expecting a short facility module.  "
                 + "Found " + getEntryTypeDescription(), l);
     }*/
+
+    public AbstractProgramEntry toProgrammaticEntry(Token l) {
+        throw new SrcErrorException("expecting a programmatic entry; found "
+                + getEntryTypeDescription(), l);
+    }
 
     public TheoremEntry toTheoremEntry(Token l) {
         throw new SrcErrorException("expecting a theorem; found "

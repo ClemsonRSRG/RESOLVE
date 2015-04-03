@@ -1106,7 +1106,6 @@ public class Populator extends TreeWalkerVisitor {
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(varName, programVar.getLocation());
         }
-
         Populator.emitDebug("  New program variable: " + varName + " of type "
                 + mathTypeValue.toString() + " with quantification NONE");
     }
@@ -1281,6 +1280,22 @@ public class Populator extends TreeWalkerVisitor {
 
         myDefinitionSchematicTypes.clear();
         myDefinitionNamedTypes.clear();
+    }
+
+    @Override
+    public void midDefinitionDec(DefinitionDec node,
+            ResolveConceptualElement previous, ResolveConceptualElement next) {
+        if (node.isInductive() && next instanceof DefinitionBody) {
+            try {
+                //System.out.println(new MTFunction(myTypeGraph, node));
+                myBuilder.getInnermostActiveScope().addBinding(
+                        node.getName().getName(), node,
+                        new MTFunction(myTypeGraph, node));
+            }
+            catch (DuplicateSymbolException e) {
+                // we tried!
+            }
+        }
     }
 
     @Override
@@ -1716,8 +1731,8 @@ public class Populator extends TreeWalkerVisitor {
             }
         }
         catch (ClassCastException cse) {
-            throw new SourceErrorException("Top level of type theorem "
-                    + "assertion must be 'implies' or ':'.", assertion
+            throw new SourceErrorException("top level of type theorem "
+                    + "assertion must be 'implies' or ':'", assertion
                     .getLocation());
         }
 

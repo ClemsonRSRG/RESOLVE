@@ -21,25 +21,46 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>An <code>InitFinalAST</code> provides a general scope for
- * users for specifications and code that deals with module (or type level)
- * initialization or finalization.</p>
+ * <p>An <code>InitFinalAST</code> provides a general scope for specifications
+ * and code that deals with module (or type level) initialization or
+ * finalization.</p>
  */
-public abstract class InitFinalAST extends ResolveAST {
+public class InitFinalAST extends ResolveAST {
+
+    public static enum Type {
+        TYPE_INIT, TYPE_FINAL, MODULE_INIT, MODULE_FINAL
+    }
 
     private final ExprAST myRequires, myEnsures;
 
-    private final List<VariableAST> myVariables;
-    private final List<StmtAST> myStatements;
+    private final List<VariableAST> myVariables = new ArrayList<VariableAST>();
+    private final List<StmtAST> myStatements = new ArrayList<StmtAST>();
+
+    private final Type myType;
 
     public InitFinalAST(Token start, Token stop, ExprAST requires,
-            ExprAST ensures, List<VariableAST> vars, List<StmtAST> stmts) {
+            ExprAST ensures, List<VariableAST> vars, List<StmtAST> stmts, Type t) {
         super(start, stop);
         myRequires = requires;
         myEnsures = ensures;
 
-        myVariables = vars;
-        myStatements = stmts;
+        myVariables.addAll(vars);
+        myStatements.addAll(stmts);
+        myType = t;
+    }
+
+    public InitFinalAST(Token start, Token stop, ExprAST requires,
+            ExprAST ensures, Type t) {
+        this(start, stop, requires, ensures, new ArrayList<VariableAST>(),
+                new ArrayList<StmtAST>(), t);
+    }
+
+    public InitFinalAST(Token start, Token stop, Type t) {
+        this(start, stop, null, null, t);
+    }
+
+    public Type getType() {
+        return myType;
     }
 
     public ExprAST getRequires() {
@@ -58,35 +79,4 @@ public abstract class InitFinalAST extends ResolveAST {
         return myStatements;
     }
 
-    public static class TypeInitAST extends InitFinalAST {
-
-        public TypeInitAST(Token start, Token stop, ExprAST req, ExprAST ens) {
-            super(start, stop, req, ens, new ArrayList<VariableAST>(),
-                    new ArrayList<StmtAST>());
-        }
-    }
-
-    public static class TypeFinalAST extends InitFinalAST {
-
-        public TypeFinalAST(Token start, Token stop, ExprAST req, ExprAST ens) {
-            super(start, stop, req, ens, new ArrayList<VariableAST>(),
-                    new ArrayList<StmtAST>());
-        }
-    }
-
-    public static class ModuleInitAST extends InitFinalAST {
-
-        public ModuleInitAST(Token start, Token stop, ExprAST requires,
-                ExprAST ensures, List<VariableAST> vars, List<StmtAST> stmts) {
-            super(start, stop, requires, ensures, vars, stmts);
-        }
-    }
-
-    public static class ModuleFinalAST extends InitFinalAST {
-
-        public ModuleFinalAST(Token start, Token stop, ExprAST requires,
-                ExprAST ensures, List<VariableAST> vars, List<StmtAST> stmts) {
-            super(start, stop, requires, ensures, vars, stmts);
-        }
-    }
 }

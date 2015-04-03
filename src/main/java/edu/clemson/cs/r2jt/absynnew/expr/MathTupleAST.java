@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
+import edu.clemson.cs.r2jt.absynnew.TreeUtil;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
@@ -159,18 +160,6 @@ public class MathTupleAST extends ExprAST {
 
     @Override
     public String toString() {
-        String result = "(";
-
-        boolean first = true;
-        for (ExprAST field : myFields) {
-            if (!first) {
-                result += ", ";
-            }
-            else {
-                first = false;
-            }
-            result += field;
-        }
-        return result + ")";
+        return "(" + TreeUtil.join(myFields, ", ") + ")";
     }
 }

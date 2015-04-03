@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
+import edu.clemson.cs.r2jt.absynnew.TreeUtil;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
@@ -25,11 +26,11 @@ import java.util.Map;
  */
 public class MathSetAST extends ExprAST {
 
-    private final List<ExprAST> myElements;
+    private final List<ExprAST> myElements = new ArrayList<ExprAST>();
 
     public MathSetAST(Token start, Token stop, List<ExprAST> elements) {
         super(start, stop);
-        myElements = elements;
+        myElements.addAll(elements);
     }
 
     public List<ExprAST> getElements() {
@@ -60,20 +61,6 @@ public class MathSetAST extends ExprAST {
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        boolean first = false;
-
-        result.append("{");
-        for (ExprAST element : myElements) {
-            if (first) {
-                result.append(element);
-                first = false;
-            }
-            else {
-                result.append(", ").append(element);
-            }
-        }
-        result.append("}");
-        return result.toString();
+        return "{ " + TreeUtil.join(myElements, ", ") + " }";
     }
 }

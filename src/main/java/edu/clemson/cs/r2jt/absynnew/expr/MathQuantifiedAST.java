@@ -28,7 +28,8 @@ import java.util.Map;
 public class MathQuantifiedAST extends ExprAST {
 
     private SymbolTableEntry.Quantification myQuantification;
-    private List<MathVariableAST> myQuantifiedVariables;
+    private List<MathVariableAST> myQuantifiedVariables =
+            new ArrayList<MathVariableAST>();
 
     private ExprAST myWhere, myAssertion;
 

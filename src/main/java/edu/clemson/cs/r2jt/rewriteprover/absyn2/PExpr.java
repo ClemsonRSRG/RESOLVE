@@ -13,6 +13,7 @@
 package edu.clemson.cs.r2jt.rewriteprover.absyn2;
 
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
+import edu.clemson.cs.r2jt.absynnew.expr.MathSetAST;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST;
 import edu.clemson.cs.r2jt.rewriteprover.Utilities;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
@@ -22,16 +23,8 @@ import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import org.antlr.v4.runtime.Token;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Deque;
+import java.util.*;
 import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * <p><code>PExpr</code> is the root of the prover abstract syntax tree
@@ -334,6 +327,16 @@ public abstract class PExpr {
                             fullName(null, eAsFunctionExp.getName().getText()),
                             arguments, convertExpQuantification(eAsFunctionExp
                                     .getQuantification()));
+        }
+        else if (e instanceof MathSetAST) {
+            MathSetAST eAsSet = (MathSetAST) e;
+            List<PExpr> elements = new ArrayList<PExpr>();
+            for (ExprAST element : eAsSet.getElements()) {
+                elements.add(PExpr.buildPExp(element));
+            }
+            retval =
+                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                            fullName(null, "{..}"));
         }
         /*else if (e instanceof DotExp) {
             DotExp eAsDotExp = (DotExp) e;

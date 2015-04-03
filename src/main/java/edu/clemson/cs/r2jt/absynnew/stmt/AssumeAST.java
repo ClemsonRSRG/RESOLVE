@@ -1,5 +1,5 @@
 /**
- * CallAST.java
+ * AssumeAST.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group
@@ -12,23 +12,24 @@
  */
 package edu.clemson.cs.r2jt.absynnew.stmt;
 
-import edu.clemson.cs.r2jt.absynnew.expr.ProgOperationRefAST;
+import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
+import org.antlr.v4.runtime.Token;
 
-public class CallAST extends StmtAST {
+public class AssumeAST extends StmtAST {
 
-    private final ProgOperationRefAST myOpReferenceExpr;
+    private final ExprAST myAssertion;
 
-    public CallAST(ProgOperationRefAST expr) {
-        super(expr.getStart(), expr.getStop());
-        myOpReferenceExpr = expr;
+    public AssumeAST(Token start, Token stop, ExprAST assertion) {
+        super(start, stop);
+        myAssertion = assertion;
     }
 
-    public ProgOperationRefAST getWrappedOpReferenceExpr() {
-        return myOpReferenceExpr;
+    public ExprAST getAssertion() {
+        return myAssertion;
     }
 
     @Override
     public String toString() {
-        return myOpReferenceExpr + ";";
+        return "assume " + myAssertion + ";";
     }
 }

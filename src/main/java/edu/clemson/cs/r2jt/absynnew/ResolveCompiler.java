@@ -21,10 +21,11 @@ import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
+import org.jgrapht.traverse.DepthFirstIterator;
+import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import java.io.File;
@@ -113,8 +114,8 @@ public class ResolveCompiler {
                 }
             }
             else {
-                UnderliningErrorListener.INSTANCE
-                        .compilerError("unrecognized flag " + s);
+                UnderliningErrorListener
+                        .internalError("unrecognized flag " + s);
             }
         }
         //Todo: Sanity check lib directory (make sure it's valid, exists, etc)
@@ -129,23 +130,21 @@ public class ResolveCompiler {
                 }
 
                 ModuleAST targetModule = createModuleAST(currentFile);
-                ModuleIdentifier id = new ModuleIdentifier(targetModule);
-
-                myFiles.put(id, currentFile);
-                myModules.put(id, targetModule);
+                myFiles.put(new ModuleIdentifier(targetModule), currentFile);
+                myModules.put(new ModuleIdentifier(targetModule), targetModule);
 
                 DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g =
                         new DefaultDirectedGraph<ModuleIdentifier, DefaultEdge>(
                                 DefaultEdge.class);
-                g.addVertex(id);
+                g.addVertex(new ModuleIdentifier(targetModule));
                 findDependencies(g, targetModule);
 
                 AnalysisPipeline analysisPipe =
                         new AnalysisPipeline(this, mySymbolTable);
                 //CodeGenPipeline codegenPipe =
                 //        new CodeGenPipeline(this, )
-
                 for (ModuleIdentifier m : getCompileOrder(g)) {
+                    //System.out.println("populating: " + m);
                     analysisPipe.process(m);
                     //codegenPipe.process(m);
                     //verificationPipe.process(m);
@@ -172,11 +171,8 @@ public class ResolveCompiler {
     }
 
     private void findDependencies(DefaultDirectedGraph g, ModuleAST root) {
-        for (Token importRequest : root.getImportBlock().getImportsExcluding(
+        for (Token importRequest : root.getImports().getImportsExcluding(
                 ImportCollectionAST.ImportType.EXTERNAL)) {
-
-            ConnectivityInspector<ModuleIdentifier, DefaultEdge> conn =
-                    new ConnectivityInspector<ModuleIdentifier, DefaultEdge>(g);
 
             File file = findResolveFile(importRequest.getText(), NATIVE_EXT);
             ModuleAST module = myModules.get(importRequest);
@@ -188,7 +184,7 @@ public class ResolveCompiler {
                 myFiles.put(id(module), file);
             }
 
-            if (root.getImportBlock().inCategory(
+            if (root.getImports().inCategory(
                     ImportCollectionAST.ImportType.IMPLICIT, importRequest)) {
                 if (!module.appropriateForImport()) {
                     throw new IllegalArgumentException("invalid import "
@@ -196,9 +192,7 @@ public class ResolveCompiler {
                             + "type: " + module.getClass());
                 }
             }
-            // If there exists a path from the dependent (module referenced) to
-            // the root (source node), then adding the edge will cause a cycle.
-            if (conn.pathExists(id(root), id(module))) {
+            if (pathExists(g, id(module), id(root))) {
                 throw new CircularDependencyException(
                         "circular dependency detected");
             }
@@ -206,6 +200,26 @@ public class ResolveCompiler {
             findDependencies(g, module);
         }
         addFilesForExternalImports(root);
+    }
+
+    protected boolean pathExists(DefaultDirectedGraph g, ModuleIdentifier src,
+            ModuleIdentifier dest) {
+        //If src doesn't exist in g, then there is obviously no path from
+        //src -> ... -> dest
+        if (!g.containsVertex(src)) {
+            return false;
+        }
+        GraphIterator<ModuleIdentifier, DefaultEdge> iterator =
+                new DepthFirstIterator<ModuleIdentifier, DefaultEdge>(g, src);
+
+        while (iterator.hasNext()) {
+            ModuleIdentifier next = iterator.next();
+            //we've reached dest from src -- a path exists.
+            if (next.equals(dest)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected List<ModuleIdentifier> getCompileOrder(DefaultDirectedGraph g) {
@@ -229,7 +243,7 @@ public class ResolveCompiler {
 
     private void addFilesForExternalImports(ModuleAST m) {
         Set<Token> externals =
-                m.getImportBlock().getImportsOfType(
+                m.getImports().getImportsOfType(
                         ImportCollectionAST.ImportType.EXTERNAL);
 
         for (Token externalImport : externals) {

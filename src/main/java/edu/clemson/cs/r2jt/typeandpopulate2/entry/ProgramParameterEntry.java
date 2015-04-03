@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ProgramParameterEntry extends SymbolTableEntry {
+public class ProgramParameterEntry extends AbstractProgramEntry {
 
     public static enum ParameterMode {
         ALTERS {
@@ -152,6 +152,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     }
 
     @Override
+    public PTType getProgramType() {
+        return myDeclaredType;
+    }
+
+    @Override
     public ProgramParameterEntry toProgramParameterEntry(Token l) {
         return this;
     }
@@ -164,6 +169,11 @@ public class ProgramParameterEntry extends SymbolTableEntry {
     @Override
     public ProgramVariableEntry toProgramVariableEntry(Token l) {
         return myProgramVariableAlterEgo;
+    }
+
+    @Override
+    public AbstractProgramEntry toProgrammaticEntry(Token l) {
+        return this;
     }
 
     @Override

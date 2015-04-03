@@ -1056,8 +1056,9 @@ public class Controller {
                         locator.locateFileInTree(ModuleID.createConceptID(ps)
                                 .getFilename(), ModuleID.createFacilityID(ps)
                                 .getFilename(), ModuleID.createTheoryID(ps)
-                                .getFilename(), myInstanceEnvironment
-                                .getMainDir());
+                                .getFilename(), ModuleID
+                                .createPerformanceID(ps).getFilename(),
+                                myInstanceEnvironment.getMainDir());
             }
             else if (files.size() == 1) {
                 file = files.get(0);

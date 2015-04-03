@@ -19,7 +19,7 @@ import org.antlr.v4.runtime.Token;
 
 import java.util.Map;
 
-public class ProgramVariableEntry extends SymbolTableEntry {
+public class ProgramVariableEntry extends AbstractProgramEntry {
 
     private final PTType myType;
     private final MathSymbolEntry myMathSymbolAlterEgo;
@@ -38,6 +38,7 @@ public class ProgramVariableEntry extends SymbolTableEntry {
                         null, null, null, sourceModule);
     }
 
+    @Override
     public PTType getProgramType() {
         return myType;
     }
@@ -76,5 +77,10 @@ public class ProgramVariableEntry extends SymbolTableEntry {
 
     public MathSymbolEntry toMathSymbolEntry(Token l) {
         return myMathSymbolAlterEgo;
+    }
+
+    @Override
+    public AbstractProgramEntry toProgrammaticEntry(Token l) {
+        return this;
     }
 }

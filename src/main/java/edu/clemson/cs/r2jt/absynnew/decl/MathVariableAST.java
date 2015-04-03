@@ -27,4 +27,9 @@ public class MathVariableAST extends DeclAST {
     public MathTypeAST getSyntaxType() {
         return mySyntacticType;
     }
+
+    @Override
+    public String toString() {
+        return getName() + " : " + mySyntacticType;
+    }
 }

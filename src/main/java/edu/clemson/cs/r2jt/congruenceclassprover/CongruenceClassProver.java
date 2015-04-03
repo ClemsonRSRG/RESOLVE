@@ -218,7 +218,6 @@ public class CongruenceClassProver {
 
             outputProofFile();
         }
-
     }
 
     private String divLine(String label) {

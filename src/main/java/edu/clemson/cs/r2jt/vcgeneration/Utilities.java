@@ -19,10 +19,9 @@ import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
-import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.query.OperationQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.*;
 import edu.clemson.cs.r2jt.misc.SourceErrorException;
 
 import java.util.List;
@@ -228,6 +227,109 @@ public class Utilities {
     }
 
     /**
+     * <p>Creates function expression "Dur_Call" with a specified number
+     * of parameters</p>
+     *
+     * @param loc The location where we are creating this expression.
+     * @param numArg Number of Arguments.
+     * @param integerType Mathematical integer type.
+     * @param realType Mathematical real type.
+     *
+     * @return The created <code>FunctionExp</code>.
+     */
+    protected static FunctionExp createDurCallExp(Location loc, String numArg,
+            MTType integerType, MTType realType) {
+        // Obtain the necessary information from the variable
+        VarExp param =
+                createVarExp(loc, null, createPosSymbol(numArg), integerType,
+                        null);
+
+        // Create the list of arguments to the function
+        edu.clemson.cs.r2jt.collections.List<Exp> params =
+                new edu.clemson.cs.r2jt.collections.List<Exp>();
+        params.add(param);
+
+        // Create the duration call exp
+        FunctionExp durCallExp =
+                createFunctionExp(loc, null, createPosSymbol("Dur_Call"),
+                        params, realType);
+
+        return durCallExp;
+    }
+
+    /**
+     * <p>Creates function expression "F_Dur" for a specified
+     * variable.</p>
+     *
+     * @param var Local Variable.
+     * @param realType Mathematical real type.
+     *
+     * @return The created <code>FunctionExp</code>.
+     */
+    protected static FunctionExp createFinalizAnyDur(VarDec var, MTType realType) {
+        // Obtain the necessary information from the variable
+        Ty varTy = var.getTy();
+        NameTy varNameTy = (NameTy) varTy;
+        VarExp param =
+                createVarExp(var.getLocation(), null, var.getName(), var
+                        .getTy().getMathTypeValue(), null);
+        VarExp param1 =
+                createVarExp(varNameTy.getLocation(), null,
+                        createPosSymbol(varNameTy.getName().getName()), var
+                                .getTy().getMathTypeValue(), null);
+
+        // Create the list of arguments to the function
+        edu.clemson.cs.r2jt.collections.List<Exp> params =
+                new edu.clemson.cs.r2jt.collections.List<Exp>();
+        params.add(param1);
+        params.add(param);
+
+        // Create the final duration
+        FunctionExp finalDurAnyExp =
+                createFunctionExp(var.getLocation(), null,
+                        createPosSymbol("F_Dur"), params, realType);
+
+        return finalDurAnyExp;
+    }
+
+    /**
+     * <p>Creates function expression "F_Dur" for a specified
+     * variable expression.</p>
+     *
+     * @param varExp A Variable Expression.
+     * @param realType Mathematical real type.
+     *
+     * @return The created <code>FunctionExp</code>.
+     */
+    protected static FunctionExp createFinalizAnyDurExp(VariableExp varExp,
+            MTType realType) {
+        if (varExp.getProgramType() instanceof PTFamily) {
+            PTFamily type = (PTFamily) varExp.getProgramType();
+            Exp param = convertExp(varExp);
+            VarExp param1 =
+                    createVarExp(varExp.getLocation(), null,
+                            createPosSymbol(type.getName()), varExp
+                                    .getMathType(), varExp.getMathTypeValue());
+
+            // Create the list of arguments to the function
+            edu.clemson.cs.r2jt.collections.List<Exp> params =
+                    new edu.clemson.cs.r2jt.collections.List<Exp>();
+            params.add(param1);
+            params.add(param);
+
+            // Create the final duration
+            FunctionExp finalDurAnyExp =
+                    createFunctionExp(varExp.getLocation(), null,
+                            createPosSymbol("F_Dur"), params, realType);
+
+            return finalDurAnyExp;
+        }
+        else {
+            throw new RuntimeException();
+        }
+    }
+
+    /**
      * <p>Creates function expression with the specified
      * name and arguments.</p>
      *
@@ -259,6 +361,36 @@ public class Utilities {
         exp.setMathType(funcType);
 
         return exp;
+    }
+
+    /**
+     * <p>Creates function expression "I_Dur" for a specified
+     * variable.</p>
+     *
+     * @param var Local Variable.
+     * @param realType Mathematical real type.
+     *
+     * @return The created <code>FunctionExp</code>.
+     */
+    protected static FunctionExp createInitAnyDur(VarDec var, MTType realType) {
+        // Obtain the necessary information from the variable
+        VarExp param =
+                createVarExp(var.getLocation(), null,
+                        createPosSymbol(((NameTy) var.getTy()).getName()
+                                .getName()), var.getTy().getMathTypeValue(),
+                        null);
+
+        // Create the list of arguments to the function
+        edu.clemson.cs.r2jt.collections.List<Exp> params =
+                new edu.clemson.cs.r2jt.collections.List<Exp>();
+        params.add(param);
+
+        // Create the final duration
+        FunctionExp initDurExp =
+                createFunctionExp(var.getLocation(), null,
+                        createPosSymbol("I_Dur"), params, realType);
+
+        return initDurExp;
     }
 
     /**
@@ -307,6 +439,26 @@ public class Utilities {
         exps.add(right);
         DotExp exp = createDotExp(var.getLocation(), exps, booleanType);
 
+        return exp;
+    }
+
+    /**
+     * <p>Creates a less than equal infix expression.</p>
+     *
+     * @param location Location for the new infix expression.
+     * @param left The left hand side of the less than equal expression.
+     * @param right The right hand side of the less than equal expression.
+     * @param booleanType Mathematical boolean type.
+     *
+     * @return The new <code>InfixExp</code>.
+     */
+    protected static InfixExp createLessThanEqExp(Location location, Exp left,
+            Exp right, MTType booleanType) {
+        // Create the "Less Than Equal" InfixExp
+        InfixExp exp =
+                new InfixExp(location, left, Utilities.createPosSymbol("<="),
+                        right);
+        exp.setMathType(booleanType);
         return exp;
     }
 
@@ -426,6 +578,25 @@ public class Utilities {
         exp.setMathType(type);
         exp.setMathTypeValue(typeValue);
         return exp;
+    }
+
+    /**
+     * <p>Gets the current "Cum_Dur" expression. We should only have one in
+     * the current scope.</p>
+     *
+     * @param searchingExp The expression we are searching for "Cum_Dur"
+     *
+     * @return The current "Cum_Dur".
+     */
+    protected static String getCumDur(Exp searchingExp) {
+        String cumDur = "Cum_Dur";
+
+        // Loop until we find one
+        while (!searchingExp.containsVar(cumDur, false)) {
+            cumDur = "?" + cumDur;
+        }
+
+        return cumDur;
     }
 
     /**
@@ -816,6 +987,43 @@ public class Utilities {
         }
 
         return op;
+    }
+
+    /**
+     * <p>Given the qualifier, name and the list of argument
+     * types, locate and return the <code>OperationProfileEntry</code>
+     * stored in the symbol table.</p>
+     *
+     * @param loc The location in the AST that we are
+     *            currently visiting.
+     * @param qualifier The qualifier of the operation.
+     * @param name The name of the operation.
+     * @param argTypes The list of argument types.
+     * @param scope The module scope to start our search.
+     *
+     * @return An <code>OperationProfileEntry</code> from the
+     *         symbol table.
+     */
+    protected static OperationProfileEntry searchOperationProfile(Location loc,
+            PosSymbol qualifier, PosSymbol name, List<PTType> argTypes,
+            ModuleScope scope) {
+        // Query for the corresponding operation profile
+        OperationProfileEntry ope = null;
+        try {
+            ope =
+                    scope.queryForOne(new OperationProfileQuery(qualifier,
+                            name, argTypes));
+        }
+        catch (NoSuchSymbolException nsse) {
+            noSuchModule(loc);
+        }
+        catch (DuplicateSymbolException dse) {
+            // This should have been caught earlier, when the duplicate operation is
+            // created.
+            throw new RuntimeException(dse);
+        }
+
+        return ope;
     }
 
     /**

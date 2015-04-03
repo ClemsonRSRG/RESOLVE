@@ -39,16 +39,6 @@ public class UnderliningErrorListener extends BaseErrorListener {
     }
 
     /**
-     * <p>Internal compiler errors for which there is no line or location
-     * information available.</p>
-     *
-     * @param msg The error message.
-     */
-    public void compilerError(String msg) {
-        System.err.println("error: " + msg);
-    }
-
-    /**
      * <p>This is called mainly when an {@link SrcErrorException} is raised
      * or caught.</p>
      *
@@ -57,6 +47,9 @@ public class UnderliningErrorListener extends BaseErrorListener {
      */
     public void semanticError(Token offendingSymbol, String msg) {
         if (offendingSymbol == null) {
+            System.err.println("-1:-1:-1: " + msg);
+        }
+        else if (offendingSymbol.getTokenSource() == null) {
             System.err.println("-1:-1:-1: " + msg);
         }
         else {
@@ -68,6 +61,41 @@ public class UnderliningErrorListener extends BaseErrorListener {
             underlineError(null, offendingSymbol, offendingSymbol.getLine(),
                     offendingSymbol.getCharPositionInLine());
         }
+    }
+
+    /**
+     * <p>Internal compiler errors for which there is no line or location
+     * information available.</p>
+     */
+    public static void fatalInternalError(String error, Throwable e) {
+        internalError(error, e);
+        throw new RuntimeException(error, e);
+    }
+
+    public static void internalError(String error, Throwable e) {
+        StackTraceElement location = getLastNonErrorManagerCodeLocation(e);
+        internalError("Exception " + e + "@" + location + ": " + error);
+    }
+
+    public static void internalError(String error) {
+        StackTraceElement location =
+                getLastNonErrorManagerCodeLocation(new Exception());
+        String msg = location + ": " + error;
+        System.err.println("internal error: " + msg);
+    }
+
+    private static StackTraceElement getLastNonErrorManagerCodeLocation(
+            Throwable e) {
+        StackTraceElement[] stack = e.getStackTrace();
+        int i = 0;
+        for (; i < stack.length; i++) {
+            StackTraceElement t = stack[i];
+            if (!t.toString().contains("UnderliningErrorListener")) {
+                break;
+            }
+        }
+        StackTraceElement location = stack[i];
+        return location;
     }
 
     protected void underlineError(Recognizer recognizer, Token offendingToken,

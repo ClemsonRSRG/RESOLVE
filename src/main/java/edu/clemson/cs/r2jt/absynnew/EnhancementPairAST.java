@@ -17,6 +17,10 @@ import org.antlr.v4.runtime.Token;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <p>A <code>EnhancementPairAST</code> pairs a possibly parameterized
+ * specification with a possibly parameterized implementation.</p>
+ */
 public class EnhancementPairAST extends ResolveAST {
 
     private final Token mySpecificationName, myBodyName;
@@ -28,25 +32,29 @@ public class EnhancementPairAST extends ResolveAST {
             new ArrayList<ModuleArgumentAST>();
 
     public EnhancementPairAST(Token start, Token stop, Token specName,
-            Token bodyName) {
+            List<ModuleArgumentAST> specArgs, Token bodyName,
+            List<ModuleArgumentAST> bodyArgs) {
         super(start, stop);
         mySpecificationName = specName;
         myBodyName = bodyName;
+
+        mySpecificationArgs.addAll(specArgs);
+        myBodyArgs.addAll(bodyArgs);
     }
 
-    public Token getSpecificationName() {
+    public Token getSpecName() {
         return mySpecificationName;
     }
 
-    public Token getBodyName() {
+    public Token getImplName() {
         return myBodyName;
     }
 
-    public List<ModuleArgumentAST> getSpecificationArguments() {
+    public List<ModuleArgumentAST> getSpecArguments() {
         return mySpecificationArgs;
     }
 
-    public List<ModuleArgumentAST> getBodyArguments() {
+    public List<ModuleArgumentAST> getImplArguments() {
         return myBodyArgs;
     }
 }

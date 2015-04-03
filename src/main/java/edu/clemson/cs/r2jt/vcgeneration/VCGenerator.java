@@ -59,6 +59,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     // Operation/Procedure level global variables
     private OperationEntry myCurrentOperationEntry;
+    private OperationProfileEntry myCurrentOperationProfileEntry;
     private Exp myOperationDecreasingExp;
 
     /**
@@ -122,7 +123,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     private static final String FLAG_ALTSECTION_NAME = "GenerateVCs";
     private static final String FLAG_DESC_ATLVERIFY_VC = "Generate VCs.";
-    private static final String FLAG_DESC_ATTLISTVCS_VC = "";
+    private static final String FLAG_DESC_ATTPVCS_VC =
+            "Generate Performance VCs";
 
     // ===========================================================
     // Flags
@@ -131,12 +133,11 @@ public class VCGenerator extends TreeWalkerVisitor {
     public static final Flag FLAG_ALTVERIFY_VC =
             new Flag(FLAG_ALTSECTION_NAME, "altVCs", FLAG_DESC_ATLVERIFY_VC);
 
-    public static final Flag FLAG_ALTLISTVCS_VC =
-            new Flag(FLAG_ALTSECTION_NAME, "altListVCs",
-                    FLAG_DESC_ATTLISTVCS_VC, Flag.Type.HIDDEN);
+    public static final Flag FLAG_ALTPVCS_VC =
+            new Flag(FLAG_ALTSECTION_NAME, "PVCs", FLAG_DESC_ATTPVCS_VC);
 
     public static final void setUpFlags() {
-        FlagDependencies.addImplies(FLAG_ALTVERIFY_VC, FLAG_ALTLISTVCS_VC);
+        FlagDependencies.addImplies(FLAG_ALTPVCS_VC, FLAG_ALTVERIFY_VC);
     }
 
     // ===========================================================
@@ -155,6 +156,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCorrespondenceExp = null;
         myCurrentModuleScope = null;
         myCurrentOperationEntry = null;
+        myCurrentOperationProfileEntry = null;
         myGlobalConstraintExp = null;
         myGlobalRequiresExp = null;
         myOperationDecreasingExp = null;
@@ -407,6 +409,12 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentOperationEntry =
                 Utilities.searchOperation(dec.getLocation(), null, dec
                         .getName(), argTypes, myCurrentModuleScope);
+        // Obtain the performance duration clause
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            myCurrentOperationProfileEntry =
+                    Utilities.searchOperationProfile(dec.getLocation(), null,
+                            dec.getName(), argTypes, myCurrentModuleScope);
+        }
     }
 
     @Override
@@ -435,6 +443,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
+        Exp procDur = null;
+        Exp varFinalDur = null;
 
         // Obtain type constrains from parameter
         // TODO: Only add type constraints if they use the facility;
@@ -450,9 +460,32 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
         }
 
+        // NY YS
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            procDur = myCurrentOperationProfileEntry.getDurationClause();
+
+            // Loop through local variables to get their finalization duration
+            for (VarDec v : dec.getVariables()) {
+                Exp finalVarDur =
+                        Utilities.createFinalizAnyDur(v, myTypeGraph.R);
+
+                // Create/Add the duration expression
+                if (varFinalDur == null) {
+                    varFinalDur = finalVarDur;
+                }
+                else {
+                    varFinalDur =
+                            new InfixExp((Location) loc.clone(), varFinalDur,
+                                    Utilities.createPosSymbol("+"), finalVarDur);
+                }
+                varFinalDur.setMathType(myTypeGraph.R);
+            }
+        }
+
         // Apply the procedure declaration rule
         applyProcedureDeclRule(loc, name, requires, ensures, decreasing,
-                typeConstraint, variableList, statementList, isLocal);
+                procDur, varFinalDur, typeConstraint, variableList,
+                statementList, isLocal);
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
@@ -469,6 +502,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         myOperationDecreasingExp = null;
         myCurrentOperationEntry = null;
+        myCurrentOperationProfileEntry = null;
     }
 
     // -----------------------------------------------------------
@@ -514,6 +548,12 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentOperationEntry =
                 Utilities.searchOperation(dec.getLocation(), null, dec
                         .getName(), argTypes, myCurrentModuleScope);
+        // Obtain the performance duration clause
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            myCurrentOperationProfileEntry =
+                    Utilities.searchOperationProfile(dec.getLocation(), null,
+                            dec.getName(), argTypes, myCurrentModuleScope);
+        }
     }
 
     @Override
@@ -544,6 +584,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
+        Exp procDur = null;
+        Exp varFinalDur = null;
 
         // Obtain type constrains from parameter
         // TODO: Only add type constraints if they use the facility;
@@ -560,9 +602,31 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
         }
 
+        // NY YS
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            procDur = myCurrentOperationProfileEntry.getDurationClause();
+
+            // Loop through local variables to get their finalization duration
+            for (VarDec v : dec.getVariables()) {
+                Exp finalVarDur = Utilities.createFinalizAnyDur(v, BOOLEAN);
+
+                // Create/Add the duration expression
+                if (varFinalDur == null) {
+                    varFinalDur = finalVarDur;
+                }
+                else {
+                    varFinalDur =
+                            new InfixExp((Location) loc.clone(), varFinalDur,
+                                    Utilities.createPosSymbol("+"), finalVarDur);
+                }
+                varFinalDur.setMathType(myTypeGraph.R);
+            }
+        }
+
         // Apply the procedure declaration rule
         applyProcedureDeclRule(loc, name, requires, ensures, decreasing,
-                facTypeConstraint, variableList, statementList, isLocal);
+                procDur, varFinalDur, facTypeConstraint, variableList,
+                statementList, isLocal);
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
@@ -579,6 +643,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         myOperationDecreasingExp = null;
         myCurrentOperationEntry = null;
+        myCurrentOperationProfileEntry = null;
     }
 
     // -----------------------------------------------------------
@@ -1775,7 +1840,7 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private Exp simplifyAssumeRule(AssumeStmt stmt, Exp exp) {
         // Variables
-        Exp assertion = stmt.getAssertion();
+        /*Exp assertion = stmt.getAssertion();
 
         // EqualsExp
         if (assertion instanceof EqualsExp) {
@@ -1788,8 +1853,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                         Utilities.replace(exp, equalsExp.getLeft(), equalsExp
                                 .getRight());
 
-                // If tmp is not null, then it means we have to check the right
-                if (tmp == null) {
+                // If tmp hasn't changed, then it means we have to check the right
+                if (tmp.equals(exp)) {
                     tmp =
                             Utilities.replace(exp, equalsExp.getRight(),
                                     equalsExp.getLeft());
@@ -1837,7 +1902,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Store the new assertion
-        stmt.setAssertion(assertion);
+        stmt.setAssertion(assertion);*/
 
         return exp;
     }
@@ -2022,6 +2087,95 @@ public class VCGenerator extends TreeWalkerVisitor {
                 replaceFormalWithActualEns(ensures, opDec.getParameters(),
                         opDec.getStateVars(), stmt.getArguments(), false);
 
+        // NY YS
+        // Duration for CallStmt
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            Location loc = (Location) stmt.getLocation().clone();
+            ConfirmStmt finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
+            Exp finalConfirmExp = finalConfirm.getAssertion();
+
+            // Obtain the corresponding OperationProfileEntry
+            List<PTType> argTypes = new LinkedList<PTType>();
+            for (ProgramExp arg : stmt.getArguments()) {
+                argTypes.add(arg.getProgramType());
+            }
+
+            OperationProfileEntry ope =
+                    Utilities.searchOperationProfile(loc, stmt.getQualifier(),
+                            stmt.getName(), argTypes, myCurrentModuleScope);
+
+            // Add the profile ensures as additional assume
+            Exp profileEnsures = ope.getEnsuresClause();
+            if (profileEnsures != null) {
+                profileEnsures =
+                        replaceFormalWithActualEns(profileEnsures, opDec
+                                .getParameters(), opDec.getStateVars(), stmt
+                                .getArguments(), false);
+
+                // Obtain the current location
+                if (stmt.getName().getLocation() != null) {
+                    // Set the details of the current location
+                    Location ensuresLoc = (Location) loc.clone();
+                    ensuresLoc.setDetails("Ensures Clause of "
+                            + opDec.getName() + " from Profile "
+                            + ope.getName());
+                    Utilities.setLocation(profileEnsures, ensuresLoc);
+                }
+
+                ensures = myTypeGraph.formConjunct(ensures, profileEnsures);
+            }
+
+            // Construct the Duration Clause
+            Exp opDur = Exp.copy(ope.getDurationClause());
+
+            // Replace PostCondition variables in the duration clause
+            opDur =
+                    replaceFormalWithActualEns(opDur, opDec.getParameters(),
+                            opDec.getStateVars(), stmt.getArguments(), false);
+
+            VarExp cumDur =
+                    Utilities.createVarExp((Location) loc.clone(), null,
+                            Utilities.createPosSymbol(Utilities
+                                    .getCumDur(finalConfirmExp)),
+                            myTypeGraph.R, null);
+            Exp durCallExp =
+                    Utilities.createDurCallExp((Location) loc.clone(), Integer
+                            .toString(opDec.getParameters().size()),
+                            myTypeGraph.Z, myTypeGraph.R);
+            InfixExp sumEvalDur =
+                    new InfixExp((Location) loc.clone(), opDur, Utilities
+                            .createPosSymbol("+"), durCallExp);
+            sumEvalDur.setMathType(myTypeGraph.R);
+            sumEvalDur =
+                    new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                            Utilities.createPosSymbol("+"), sumEvalDur);
+            sumEvalDur.setMathType(myTypeGraph.R);
+
+            // For any evaluates mode expression, we need to finalize the variable
+            edu.clemson.cs.r2jt.collections.List<ProgramExp> assignExpList =
+                    stmt.getArguments();
+            for (int i = 0; i < assignExpList.size(); i++) {
+                ParameterVarDec p = opDec.getParameters().get(i);
+                VariableExp pExp = (VariableExp) assignExpList.get(i);
+                if (p.getMode() == Mode.EVALUATES) {
+                    VarDec v =
+                            new VarDec(Utilities.getVarName(pExp), p.getTy());
+                    FunctionExp finalDur =
+                            Utilities.createFinalizAnyDur(v, myTypeGraph.R);
+                    sumEvalDur =
+                            new InfixExp((Location) loc.clone(), sumEvalDur,
+                                    Utilities.createPosSymbol("+"), finalDur);
+                    sumEvalDur.setMathType(myTypeGraph.R);
+                }
+            }
+
+            // Replace Cum_Dur in our final ensures clause
+            finalConfirmExp =
+                    Utilities.replace(finalConfirmExp, cumDur, sumEvalDur);
+            myCurrentAssertiveCode.setFinalConfirm(finalConfirmExp,
+                    finalConfirm.getSimplify());
+        }
+
         // Modify the location of the requires clause and add it to myCurrentAssertiveCode
         if (requires != null) {
             // Obtain the current location
@@ -2052,15 +2206,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Modify the location of the requires clause and add it to myCurrentAssertiveCode
         if (ensures != null) {
             // Obtain the current location
+            Location loc = null;
             if (stmt.getName().getLocation() != null) {
                 // Set the details of the current location
-                Location loc = (Location) stmt.getName().getLocation().clone();
+                loc = (Location) stmt.getName().getLocation().clone();
                 loc.setDetails("Ensures Clause of " + opDec.getName());
                 Utilities.setLocation(ensures, loc);
             }
 
             // Add this to our list of things to assume
-            myCurrentAssertiveCode.addAssume(ensures);
+            myCurrentAssertiveCode.addAssume(loc, ensures, false);
         }
 
         // Verbose Mode Debug Messages
@@ -2163,18 +2318,25 @@ public class VCGenerator extends TreeWalkerVisitor {
         AssertiveCode assertiveCode =
                 new AssertiveCode(myInstanceEnvironment, dec);
 
+        // Obtain the location for each assume clause
+        Location decLoc = dec.getLocation();
+
         // Add the global constraints as given
-        assertiveCode.addAssume(myGlobalConstraintExp);
+        assertiveCode.addAssume((Location) decLoc.clone(),
+                myGlobalConstraintExp, false);
 
         // Add the global require clause as given
-        assertiveCode.addAssume(myGlobalRequiresExp);
+        assertiveCode.addAssume((Location) decLoc.clone(), myGlobalRequiresExp,
+                false);
 
         // Add the convention as given
-        assertiveCode.addAssume(dec.getConvention());
+        assertiveCode.addAssume((Location) decLoc.clone(), dec.getConvention(),
+                false);
 
         // Add the correspondence as given
         myCorrespondenceExp = dec.getCorrespondence();
-        assertiveCode.addAssume(myCorrespondenceExp);
+        assertiveCode.addAssume((Location) decLoc.clone(), myCorrespondenceExp,
+                false);
 
         // Search for the type we are implementing
         SymbolTableEntry ste =
@@ -2285,7 +2447,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Only add the field constraints if we don't have true
             if (!fieldConstraints.isLiteralTrue()) {
-                assertiveCode.addAssume(fieldConstraints);
+                assertiveCode.addAssume(loc, fieldConstraints, false);
             }
         }
 
@@ -2313,11 +2475,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         AssertiveCode assertiveCode =
                 new AssertiveCode(myInstanceEnvironment, dec);
 
+        // Location for the assume clauses
+        Location decLoc = dec.getLocation();
+
         // Add the global constraints as given
-        assertiveCode.addAssume(myGlobalConstraintExp);
+        assertiveCode.addAssume((Location) decLoc.clone(),
+                myGlobalConstraintExp, false);
 
         // Add the global require clause as given
-        assertiveCode.addAssume(myGlobalRequiresExp);
+        assertiveCode.addAssume((Location) decLoc.clone(), myGlobalRequiresExp,
+                false);
 
         // TODO: Loop through every enhancement/enhancement realization declaration, if any.
 
@@ -2716,6 +2883,164 @@ public class VCGenerator extends TreeWalkerVisitor {
                             // Set this as our new final confirm statement.
                             myCurrentAssertiveCode.setFinalConfirm(newConf,
                                     confirmStmt.getSimplify());
+
+                            // NY YS
+                            // Duration for CallStmt
+                            if (myInstanceEnvironment.flags
+                                    .isFlagSet(FLAG_ALTPVCS_VC)) {
+                                Location loc =
+                                        (Location) stmt.getLocation().clone();
+                                ConfirmStmt finalConfirm =
+                                        myCurrentAssertiveCode
+                                                .getFinalConfirm();
+                                Exp finalConfirmExp =
+                                        finalConfirm.getAssertion();
+
+                                // Obtain the corresponding OperationProfileEntry
+                                List<PTType> argTypes =
+                                        new LinkedList<PTType>();
+                                for (ProgramExp arg : assignParamExp
+                                        .getArguments()) {
+                                    argTypes.add(arg.getProgramType());
+                                }
+
+                                OperationProfileEntry ope =
+                                        Utilities.searchOperationProfile(loc,
+                                                qualifier, assignParamExp
+                                                        .getName(), argTypes,
+                                                myCurrentModuleScope);
+
+                                // Add the profile ensures as additional assume
+                                Exp profileEnsures = ope.getEnsuresClause();
+                                if (profileEnsures != null) {
+                                    profileEnsures =
+                                            replaceFormalWithActualEns(
+                                                    profileEnsures, opDec
+                                                            .getParameters(),
+                                                    opDec.getStateVars(),
+                                                    assignParamExp
+                                                            .getArguments(),
+                                                    false);
+
+                                    // Obtain the current location
+                                    if (assignParamExp.getLocation() != null) {
+                                        // Set the details of the current location
+                                        Location ensuresLoc =
+                                                (Location) loc.clone();
+                                        ensuresLoc
+                                                .setDetails("Ensures Clause of "
+                                                        + opDec.getName()
+                                                        + " from Profile "
+                                                        + ope.getName());
+                                        Utilities.setLocation(profileEnsures,
+                                                ensuresLoc);
+                                    }
+
+                                    ensures =
+                                            myTypeGraph.formConjunct(ensures,
+                                                    profileEnsures);
+                                }
+
+                                // Construct the Duration Clause
+                                Exp opDur = Exp.copy(ope.getDurationClause());
+
+                                // Replace PostCondition variables in the duration clause
+                                opDur =
+                                        replaceFormalWithActualEns(opDur, opDec
+                                                .getParameters(), opDec
+                                                .getStateVars(), assignParamExp
+                                                .getArguments(), false);
+
+                                VarExp cumDur =
+                                        Utilities
+                                                .createVarExp(
+                                                        (Location) loc.clone(),
+                                                        null,
+                                                        Utilities
+                                                                .createPosSymbol(Utilities
+                                                                        .getCumDur(finalConfirmExp)),
+                                                        myTypeGraph.R, null);
+                                Exp durCallExp =
+                                        Utilities
+                                                .createDurCallExp(
+                                                        (Location) loc.clone(),
+                                                        Integer
+                                                                .toString(opDec
+                                                                        .getParameters()
+                                                                        .size()),
+                                                        myTypeGraph.Z,
+                                                        myTypeGraph.R);
+                                InfixExp sumEvalDur =
+                                        new InfixExp((Location) loc.clone(),
+                                                opDur, Utilities
+                                                        .createPosSymbol("+"),
+                                                durCallExp);
+                                sumEvalDur.setMathType(myTypeGraph.R);
+                                sumEvalDur =
+                                        new InfixExp((Location) loc.clone(),
+                                                Exp.copy(cumDur), Utilities
+                                                        .createPosSymbol("+"),
+                                                sumEvalDur);
+                                sumEvalDur.setMathType(myTypeGraph.R);
+
+                                // For any evaluates mode expression, we need to finalize the variable
+                                edu.clemson.cs.r2jt.collections.List<ProgramExp> assignExpList =
+                                        assignParamExp.getArguments();
+                                for (int i = 0; i < assignExpList.size(); i++) {
+                                    ParameterVarDec p =
+                                            opDec.getParameters().get(i);
+                                    VariableExp pExp =
+                                            (VariableExp) assignExpList.get(i);
+                                    if (p.getMode() == Mode.EVALUATES) {
+                                        VarDec v =
+                                                new VarDec(Utilities
+                                                        .getVarName(pExp), p
+                                                        .getTy());
+                                        FunctionExp finalDur =
+                                                Utilities.createFinalizAnyDur(
+                                                        v, myTypeGraph.R);
+                                        sumEvalDur =
+                                                new InfixExp(
+                                                        (Location) loc.clone(),
+                                                        sumEvalDur,
+                                                        Utilities
+                                                                .createPosSymbol("+"),
+                                                        finalDur);
+                                        sumEvalDur.setMathType(myTypeGraph.R);
+                                    }
+                                }
+
+                                // Add duration of assignment and finalize the temporary variable
+                                Exp assignDur =
+                                        Utilities.createVarExp((Location) loc
+                                                .clone(), null, Utilities
+                                                .createPosSymbol("Dur_Assgn"),
+                                                myTypeGraph.R, null);
+                                sumEvalDur =
+                                        new InfixExp((Location) loc.clone(),
+                                                sumEvalDur, Utilities
+                                                        .createPosSymbol("+"),
+                                                assignDur);
+                                sumEvalDur.setMathType(myTypeGraph.R);
+
+                                Exp finalExpDur =
+                                        Utilities.createFinalizAnyDurExp(stmt
+                                                .getVar(), myTypeGraph.R);
+                                sumEvalDur =
+                                        new InfixExp((Location) loc.clone(),
+                                                sumEvalDur, Utilities
+                                                        .createPosSymbol("+"),
+                                                finalExpDur);
+                                sumEvalDur.setMathType(myTypeGraph.R);
+
+                                // Replace Cum_Dur in our final ensures clause
+                                finalConfirmExp =
+                                        Utilities.replace(finalConfirmExp,
+                                                cumDur, sumEvalDur);
+                                myCurrentAssertiveCode.setFinalConfirm(
+                                        finalConfirmExp, finalConfirm
+                                                .getSimplify());
+                            }
                         }
                         else {
                             Utilities.illegalOperationEnsures(opDec
@@ -2840,9 +3165,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                         ensures = ((EqualsExp) opEnsures).getRight();
 
                         // Obtain the current location
+                        Location loc = null;
                         if (testParamExp.getName().getLocation() != null) {
                             // Set the details of the current location
-                            Location loc =
+                            loc =
                                     (Location) testParamExp.getName()
                                             .getLocation().clone();
                             loc.setDetails("If Statement Condition");
@@ -2854,7 +3180,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 replaceFormalWithActualEns(ensures, opDec
                                         .getParameters(), opDec.getStateVars(),
                                         testParamExp.getArguments(), false);
-                        myCurrentAssertiveCode.addAssume(ensures);
+                        myCurrentAssertiveCode.addAssume(loc, ensures, false);
 
                         // Negation of the condition
                         negEnsures = Utilities.negateExp(ensures, BOOLEAN);
@@ -2872,13 +3198,19 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
         }
 
-        // Add any statements inside the then clause
+        // Create a list for the then clause
+        edu.clemson.cs.r2jt.collections.List<Statement> thenStmtList;
         if (stmt.getThenclause() != null) {
-            myCurrentAssertiveCode.addStatements(stmt.getThenclause());
+            thenStmtList = stmt.getThenclause();
+        }
+        else {
+            thenStmtList =
+                    new edu.clemson.cs.r2jt.collections.List<Statement>();
         }
 
         // Modify the confirm details
         ConfirmStmt ifConfirm = myCurrentAssertiveCode.getFinalConfirm();
+        Exp ifConfirmExp = ifConfirm.getAssertion();
         Location ifLocation;
         if (ifConfirm.getLocation() != null) {
             ifLocation = (Location) ifConfirm.getLocation().clone();
@@ -2889,8 +3221,91 @@ public class VCGenerator extends TreeWalkerVisitor {
         String ifDetail = "Condition at " + ifLocation.toString() + " is true";
         ifLocation.setDetails(ifDetail);
         ifConfirm.setLocation(ifLocation);
-        myCurrentAssertiveCode.setFinalConfirm(ifConfirm.getAssertion(),
-                ifConfirm.getSimplify());
+
+        // NY YS
+        // Duration for If Part
+        InfixExp sumEvalDur = null;
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            Location loc = (Location) ifLocation.clone();
+            VarExp cumDur;
+            boolean trueConfirm = false;
+
+            // Our previous rule must have been a while rule
+            ConfirmStmt conf = null;
+            if (ifConfirmExp.isLiteralTrue() && thenStmtList.size() != 0) {
+                Statement st = thenStmtList.get(thenStmtList.size() - 1);
+                if (st instanceof ConfirmStmt) {
+                    conf = (ConfirmStmt) st;
+                    cumDur =
+                            Utilities.createVarExp((Location) loc.clone(),
+                                    null, Utilities.createPosSymbol(Utilities
+                                            .getCumDur(conf.getAssertion())),
+                                    myTypeGraph.R, null);
+                    trueConfirm = true;
+                }
+                else {
+                    cumDur = null;
+                    Utilities.noSuchSymbol(null, "Cum_Dur", loc);
+                }
+            }
+            else {
+                cumDur =
+                        Utilities.createVarExp((Location) loc.clone(), null,
+                                Utilities.createPosSymbol(Utilities
+                                        .getCumDur(ifConfirmExp)),
+                                myTypeGraph.R, null);
+            }
+
+            // Search for operation profile
+            List<PTType> argTypes = new LinkedList<PTType>();
+            List<ProgramExp> argsList = testParamExp.getArguments();
+            for (ProgramExp arg : argsList) {
+                argTypes.add(arg.getProgramType());
+            }
+            OperationProfileEntry ope =
+                    Utilities.searchOperationProfile(loc, qualifier,
+                            testParamExp.getName(), argTypes,
+                            myCurrentModuleScope);
+            Exp opDur = Exp.copy(ope.getDurationClause());
+
+            Exp durCallExp =
+                    Utilities.createDurCallExp(loc, Integer.toString(opDec
+                            .getParameters().size()), myTypeGraph.Z,
+                            myTypeGraph.R);
+            sumEvalDur =
+                    new InfixExp((Location) loc.clone(), opDur, Utilities
+                            .createPosSymbol("+"), durCallExp);
+            sumEvalDur.setMathType(myTypeGraph.R);
+
+            Exp sumPlusCumDur =
+                    new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                            Utilities.createPosSymbol("+"), Exp
+                                    .copy(sumEvalDur));
+            sumPlusCumDur.setMathType(myTypeGraph.R);
+
+            if (trueConfirm && conf != null) {
+                // Replace "Cum_Dur" with "Cum_Dur + Dur_Call(<num of args>) + <duration of call>"
+                Exp confirm = conf.getAssertion();
+                confirm =
+                        Utilities.replace(confirm, cumDur, Exp
+                                .copy(sumPlusCumDur));
+                conf.setAssertion(confirm);
+                thenStmtList.set(thenStmtList.size() - 1, conf);
+            }
+            else {
+                // Replace "Cum_Dur" with "Cum_Dur + Dur_Call(<num of args>) + <duration of call>"
+                ifConfirmExp =
+                        Utilities.replace(ifConfirmExp, cumDur, Exp
+                                .copy(sumPlusCumDur));
+            }
+        }
+
+        // Add the statements inside the if to the assertive code
+        myCurrentAssertiveCode.addStatements(thenStmtList);
+
+        // Set the final if confirm
+        myCurrentAssertiveCode.setFinalConfirm(ifConfirmExp, ifConfirm
+                .getSimplify());
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nIf Part Rule Applied: \n");
@@ -2899,26 +3314,93 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Add the negation of the if condition as the assume clause
         if (negEnsures != null) {
-            negIfAssertiveCode.addAssume(negEnsures);
+            negIfAssertiveCode.addAssume(ifLocation, negEnsures, false);
         }
         else {
             Utilities.illegalOperationEnsures(opDec.getLocation());
         }
 
-        // Add any statements inside the else clause
+        // Create a list for the then clause
+        edu.clemson.cs.r2jt.collections.List<Statement> elseStmtList;
         if (stmt.getElseclause() != null) {
-            negIfAssertiveCode.addStatements(stmt.getElseclause());
+            elseStmtList = stmt.getElseclause();
+        }
+        else {
+            elseStmtList =
+                    new edu.clemson.cs.r2jt.collections.List<Statement>();
         }
 
         // Modify the confirm details
         ConfirmStmt negIfConfirm = negIfAssertiveCode.getFinalConfirm();
+        Exp negIfConfirmExp = negIfConfirm.getAssertion();
         Location negIfLocation = (Location) ifConfirm.getLocation().clone();
         String negIfDetail =
                 "Condition at " + negIfLocation.toString() + " is false";
         negIfLocation.setDetails(negIfDetail);
         negIfConfirm.setLocation(negIfLocation);
-        negIfAssertiveCode.setFinalConfirm(negIfConfirm.getAssertion(),
-                negIfConfirm.getSimplify());
+
+        // NY YS
+        // Duration for Else Part
+        if (sumEvalDur != null) {
+            Location loc = (Location) negIfLocation.clone();
+            VarExp cumDur;
+            boolean trueConfirm = false;
+
+            // Our previous rule must have been a while rule
+            ConfirmStmt conf = null;
+            if (negIfConfirmExp.isLiteralTrue() && elseStmtList.size() != 0) {
+                Statement st = elseStmtList.get(elseStmtList.size() - 1);
+                if (st instanceof ConfirmStmt) {
+                    conf = (ConfirmStmt) st;
+                    cumDur =
+                            Utilities.createVarExp((Location) loc.clone(),
+                                    null, Utilities.createPosSymbol(Utilities
+                                            .getCumDur(conf.getAssertion())),
+                                    myTypeGraph.R, null);
+                    trueConfirm = true;
+                }
+                else {
+                    cumDur = null;
+                    Utilities.noSuchSymbol(null, "Cum_Dur", loc);
+                }
+            }
+            else {
+                cumDur =
+                        Utilities.createVarExp((Location) loc.clone(), null,
+                                Utilities.createPosSymbol(Utilities
+                                        .getCumDur(negIfConfirmExp)),
+                                myTypeGraph.R, null);
+            }
+
+            Exp sumPlusCumDur =
+                    new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                            Utilities.createPosSymbol("+"), Exp
+                                    .copy(sumEvalDur));
+            sumPlusCumDur.setMathType(myTypeGraph.R);
+
+            if (trueConfirm && conf != null) {
+                // Replace "Cum_Dur" with "Cum_Dur + Dur_Call(<num of args>) + <duration of call>"
+                Exp confirm = conf.getAssertion();
+                confirm =
+                        Utilities.replace(confirm, cumDur, Exp
+                                .copy(sumPlusCumDur));
+                conf.setAssertion(confirm);
+                elseStmtList.set(elseStmtList.size() - 1, conf);
+            }
+            else {
+                // Replace "Cum_Dur" with "Cum_Dur + Dur_Call(<num of args>) + <duration of call>"
+                negIfConfirmExp =
+                        Utilities.replace(negIfConfirmExp, cumDur, Exp
+                                .copy(sumPlusCumDur));
+            }
+        }
+
+        // Add the statements inside the else to the assertive code
+        negIfAssertiveCode.addStatements(elseStmtList);
+
+        // Set the final else confirm
+        negIfAssertiveCode.setFinalConfirm(negIfConfirmExp, negIfConfirm
+                .getSimplify());
 
         // Add this new assertive code to our incomplete assertive code stack
         myIncAssertiveCodeStack.push(negIfAssertiveCode);
@@ -2940,11 +3422,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         AssertiveCode assertiveCode =
                 new AssertiveCode(myInstanceEnvironment, dec);
 
+        // Location for the assume clauses
+        Location decLoc = dec.getLocation();
+
         // Add the global constraints as given
-        assertiveCode.addAssume(myGlobalConstraintExp);
+        assertiveCode.addAssume((Location) decLoc.clone(),
+                myGlobalConstraintExp, false);
 
         // Add the global require clause as given
-        assertiveCode.addAssume(myGlobalRequiresExp);
+        assertiveCode.addAssume((Location) decLoc.clone(), myGlobalRequiresExp,
+                false);
 
         // Add any variable declarations for records
         if (dec.getRepresentation() instanceof RecordTy) {
@@ -2984,7 +3471,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                             .getExemplar(), typeEntry.getModelType(), null);
 
             // Add the correspondence as given
-            assertiveCode.addAssume(dec.getCorrespondence());
+            assertiveCode.addAssume((Location) decLoc.clone(), dec
+                    .getCorrespondence(), false);
 
             // Make sure we have a convention
             if (dec.getConvention() == null) {
@@ -3072,40 +3560,47 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param requires Requires clause
      * @param ensures Ensures clause
      * @param decreasing Decreasing clause (if any)
+     * @param procDur Procedure duration clause (if in performance mode)
+     * @param varFinalDur Local variable finalization duration clause (if in performance mode)
      * @param typeConstraint Facility type constraints (if any)
      * @param variableList List of all variables for this procedure
      * @param statementList List of statements for this procedure
      * @param isLocal True if the it is a local operation. False otherwise.
      */
     private void applyProcedureDeclRule(Location opLoc, String name,
-            Exp requires, Exp ensures, Exp decreasing, Exp typeConstraint,
-            List<VarDec> variableList, List<Statement> statementList,
-            boolean isLocal) {
+            Exp requires, Exp ensures, Exp decreasing, Exp procDur,
+            Exp varFinalDur, Exp typeConstraint, List<VarDec> variableList,
+            List<Statement> statementList, boolean isLocal) {
         // Add the global requires clause
         if (myGlobalRequiresExp != null) {
-            myCurrentAssertiveCode.addAssume(myGlobalRequiresExp);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    myGlobalRequiresExp, false);
         }
 
         // Add the global constraints
         if (myGlobalConstraintExp != null) {
-            myCurrentAssertiveCode.addAssume(myGlobalConstraintExp);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    myGlobalConstraintExp, false);
         }
 
         // Add the convention as something we need to ensure
         if (myConventionExp != null && !isLocal) {
             Exp convention = Exp.copy(myConventionExp);
-            myCurrentAssertiveCode.addAssume(convention);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    convention, false);
         }
 
         // Add the correspondence as a given
         if (myCorrespondenceExp != null && !isLocal) {
             Exp correspondence = Exp.copy(myCorrespondenceExp);
-            myCurrentAssertiveCode.addAssume(correspondence);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    correspondence, false);
         }
 
         // Add the requires clause
         if (requires != null) {
-            myCurrentAssertiveCode.addAssume(requires);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    requires, false);
         }
 
         // Add the facility formal to actuals
@@ -3139,12 +3634,70 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
         }
         if (!formalActualExp.isLiteralTrue()) {
-            myCurrentAssertiveCode.addAssume(formalActualExp);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    formalActualExp, false);
+        }
+
+        // NY - Add any procedure duration clauses
+        if (procDur != null) {
+            // Add Cum_Dur as a free variable
+            VarExp cumDur =
+                    Utilities.createVarExp((Location) opLoc.clone(), null,
+                            Utilities.createPosSymbol("Cum_Dur"),
+                            myTypeGraph.R, null);
+            myCurrentAssertiveCode.addFreeVar(cumDur);
+
+            // Create 0.0
+            VarExp zeroPtZero =
+                    Utilities.createVarExp(opLoc, null, Utilities
+                            .createPosSymbol("0.0"), myTypeGraph.R, null);
+
+            // Create an equals expression (Cum_Dur = 0.0)
+            EqualsExp equalsExp =
+                    new EqualsExp(null, Exp.copy(cumDur), EqualsExp.EQUAL,
+                            zeroPtZero);
+            equalsExp.setMathType(BOOLEAN);
+            Location eqLoc = (Location) opLoc.clone();
+            eqLoc.setDetails("Initialization of Cum_Dur for Procedure " + name);
+            Utilities.setLocation(equalsExp, eqLoc);
+
+            // Add it to our things to assume
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    equalsExp, false);
+
+            // Create the duration expression
+            Exp durationExp;
+            if (varFinalDur != null) {
+                durationExp =
+                        new InfixExp(null, Exp.copy(cumDur), Utilities
+                                .createPosSymbol("+"), varFinalDur);
+            }
+            else {
+                durationExp = Exp.copy(cumDur);
+            }
+            durationExp.setMathType(myTypeGraph.R);
+            Location sumLoc = (Location) opLoc.clone();
+            sumLoc
+                    .setDetails("Summation of Finalization Duration for Procedure "
+                            + name);
+            Utilities.setLocation(durationExp, sumLoc);
+
+            InfixExp greaterEqExp =
+                    new InfixExp(null, durationExp, Utilities
+                            .createPosSymbol("<="), procDur);
+            greaterEqExp.setMathType(BOOLEAN);
+            Location andLoc = (Location) opLoc.clone();
+            andLoc.setDetails("Duration Clause of " + name);
+            Utilities.setLocation(greaterEqExp, andLoc);
+
+            // Append the duration to the ensures clause
+            ensures = myTypeGraph.formConjunct(ensures, greaterEqExp);
         }
 
         // Add the facility type constraints
         if (typeConstraint != null) {
-            myCurrentAssertiveCode.addAssume(typeConstraint);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    typeConstraint, false);
         }
 
         // Add the remember rule
@@ -3178,7 +3731,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             Utilities.setLocation(equalsExp, eqLoc);
 
             // Add it to our things to assume
-            myCurrentAssertiveCode.addAssume(equalsExp);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    equalsExp, false);
         }
 
         // Add the list of statements
@@ -3187,7 +3741,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add the correspondence as a given again
         if (myCorrespondenceExp != null && !isLocal) {
             Exp correspondence = Exp.copy(myCorrespondenceExp);
-            myCurrentAssertiveCode.addAssume(correspondence);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    correspondence, false);
         }
 
         // Add the convention as something we need to ensure
@@ -3323,6 +3878,29 @@ public class VCGenerator extends TreeWalkerVisitor {
         conf = Utilities.replace(conf, newLeft, newRight);
         conf = Utilities.replace(conf, tmp, newLeft);
 
+        // NY YS
+        // Duration for swap statements
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            Location loc = stmt.getLocation();
+            VarExp cumDur =
+                    Utilities
+                            .createVarExp((Location) loc.clone(), null,
+                                    Utilities.createPosSymbol(Utilities
+                                            .getCumDur(conf)), myTypeGraph.R,
+                                    null);
+
+            Exp swapDur =
+                    Utilities.createVarExp((Location) loc.clone(), null,
+                            Utilities.createPosSymbol("Dur_Swap"),
+                            myTypeGraph.R, null);
+            InfixExp sumSwapDur =
+                    new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                            Utilities.createPosSymbol("+"), swapDur);
+            sumSwapDur.setMathType(myTypeGraph.R);
+
+            conf = Utilities.replace(conf, cumDur, sumSwapDur);
+        }
+
         // Set this new expression as the new final confirm
         myCurrentAssertiveCode.setFinalConfirm(conf, confirmStmt.getSimplify());
 
@@ -3382,26 +3960,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                 Exp init = Exp.copy(type.getInitialization().getEnsures());
                 init = Utilities.replace(init, exemplar, varDecExp);
 
-                // Make sure we have a constraint
-                Exp constraint;
-                if (type.getConstraint() == null) {
-                    constraint = myTypeGraph.getTrueVarExp();
-                }
-                else {
-                    constraint = Exp.copy(type.getConstraint());
-                }
-                constraint = Utilities.replace(constraint, exemplar, varDecExp);
-
-                // Set the location for the constraint
+                // Set the location for the initialization ensures
                 Location loc;
-                if (constraint.getLocation() != null) {
-                    loc = (Location) constraint.getLocation().clone();
+                if (init.getLocation() != null) {
+                    loc = (Location) init.getLocation().clone();
                 }
                 else {
                     loc = (Location) type.getLocation().clone();
                 }
-                loc.setDetails("Constraints on " + varDec.getName().getName());
-                Utilities.setLocation(constraint, loc);
+                loc.setDetails("Initialization ensures on "
+                        + varDec.getName().getName());
+                Utilities.setLocation(init, loc);
 
                 // Final confirm clause
                 Exp finalConfirm =
@@ -3456,31 +4025,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 Utilities.createDotExp(loc, expList, varDecExp
                                         .getMathType());
 
-                        // Replace both the initialization and constraint clauses appropriately
+                        // Replace the initialization clauses appropriately
                         init = Utilities.replace(init, varDecExp, dotExp);
-                        constraint =
-                                Utilities
-                                        .replace(constraint, varDecExp, dotExp);
-
                     }
                 }
 
                 // Check if our confirm clause uses this variable
                 if (finalConfirm.containsVar(varName, false)) {
-                    Exp exp;
-                    // We don't have any constraints, so add the initialization
-                    // clause as a new assume clause.
-                    if (constraint.equals(myTypeGraph.getTrueVarExp())) {
-                        exp = init;
-                    }
-                    // We actually have a constraint, so add both the initialization
-                    // and constraint as a new assume clause.
-                    else {
-                        exp = myTypeGraph.formConjunct(constraint, init);
-                    }
-
                     // Add the new assume clause to our assertive code.
-                    myCurrentAssertiveCode.addAssume(exp);
+                    myCurrentAssertiveCode.addAssume((Location) loc.clone(),
+                            init, false);
                 }
             }
             // Since the type is generic, we can only use the is_initial predicate
@@ -3500,7 +4054,33 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
 
                 // Add to our assertive code as an assume
-                myCurrentAssertiveCode.addAssume(isInitialExp);
+                myCurrentAssertiveCode.addAssume(varLoc, isInitialExp, false);
+            }
+
+            // NY YS
+            // Initialization duration for this variable
+            if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+                ConfirmStmt finalConfirmStmt =
+                        myCurrentAssertiveCode.getFinalConfirm();
+                Exp finalConfirm = finalConfirmStmt.getAssertion();
+
+                Location loc =
+                        ((NameTy) varDec.getTy()).getName().getLocation();
+                VarExp cumDur =
+                        Utilities.createVarExp((Location) loc.clone(), null,
+                                Utilities.createPosSymbol(Utilities
+                                        .getCumDur(finalConfirm)),
+                                myTypeGraph.R, null);
+                Exp initDur = Utilities.createInitAnyDur(varDec, myTypeGraph.R);
+                InfixExp sumInitDur =
+                        new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                                Utilities.createPosSymbol("+"), initDur);
+                sumInitDur.setMathType(myTypeGraph.R);
+
+                finalConfirm =
+                        Utilities.replace(finalConfirm, cumDur, sumInitDur);
+                myCurrentAssertiveCode.setFinalConfirm(finalConfirm,
+                        finalConfirmStmt.getSimplify());
             }
 
             // Verbose Mode Debug Messages
@@ -3537,6 +4117,16 @@ public class VCGenerator extends TreeWalkerVisitor {
             simplifyInvariant = true;
         }
 
+        // NY YS
+        // Obtain the elapsed time duration of loop
+        Exp elapsedTimeDur = null;
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)) {
+            if (stmt.getElapsed_Time() != null) {
+                elapsedTimeDur = Exp.copy(stmt.getElapsed_Time());
+                elapsedTimeDur.setMathType(myTypeGraph.R);
+            }
+        }
+
         // Confirm the base case of invariant
         Exp baseCase = Exp.copy(invariant);
         Location baseLoc;
@@ -3548,6 +4138,31 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         baseLoc.setDetails("Base Case of the Invariant of While Statement");
         Utilities.setLocation(baseCase, baseLoc);
+
+        // NY YS
+        // Confirm that elapsed time is 0.0
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)
+                && elapsedTimeDur != null) {
+            Exp initElapseDurExp = Exp.copy(elapsedTimeDur);
+            Location initElapseLoc;
+            if (elapsedTimeDur != null && elapsedTimeDur.getLocation() != null) {
+                initElapseLoc = (Location) elapsedTimeDur.getLocation().clone();
+            }
+            else {
+                initElapseLoc = (Location) elapsedTimeDur.getLocation().clone();
+            }
+            initElapseLoc
+                    .setDetails("Base Case of Elapsed Time Duration of While Statement");
+            Utilities.setLocation(initElapseDurExp, initElapseLoc);
+            Exp zeroEqualExp =
+                    new EqualsExp((Location) initElapseLoc.clone(),
+                            initElapseDurExp, 1, Utilities.createVarExp(
+                                    (Location) initElapseLoc.clone(), null,
+                                    Utilities.createPosSymbol("0.0"),
+                                    myTypeGraph.R, null));
+            zeroEqualExp.setMathType(BOOLEAN);
+            baseCase = myTypeGraph.formConjunct(baseCase, zeroEqualExp);
+        }
         myCurrentAssertiveCode.addConfirm((Location) baseLoc.clone(), baseCase,
                 simplifyInvariant);
 
@@ -3584,7 +4199,28 @@ public class VCGenerator extends TreeWalkerVisitor {
             assume = Exp.copy(invariant);
         }
 
-        myCurrentAssertiveCode.addAssume(assume);
+        // NY YS
+        // Also assume NQV(RP, Cum_Dur) = El_Dur_Exp
+        Exp nqv2 = null;
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)
+                & elapsedTimeDur != null) {
+            VarExp cumDurExp =
+                    Utilities.createVarExp((Location) whileLoc.clone(), null,
+                            Utilities.createPosSymbol("Cum_Dur"),
+                            myTypeGraph.R, null);
+            nqv2 =
+                    Utilities.createQuestionMarkVariable(finalConfirm,
+                            cumDurExp);
+            nqv2.setMathType(cumDurExp.getMathType());
+            Exp equalPExp =
+                    new EqualsExp((Location) whileLoc.clone(), Exp.copy(nqv2),
+                            1, Exp.copy(elapsedTimeDur));
+            equalPExp.setMathType(BOOLEAN);
+            assume = myTypeGraph.formConjunct(assume, equalPExp);
+        }
+
+        myCurrentAssertiveCode.addAssume((Location) whileLoc.clone(), assume,
+                false);
 
         // if statement body
         edu.clemson.cs.r2jt.collections.List<Statement> ifStmtList =
@@ -3616,6 +4252,23 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp infixExp =
                     Utilities.createLessThanExp(decreasingLoc, Exp
                             .copy(decreasingExp), Exp.copy(nqv), BOOLEAN);
+
+            // Confirm NQV(RP, Cum_Dur) <= El_Dur_Exp
+            if (nqv2 != null) {
+                Location elapsedTimeLoc =
+                        (Location) elapsedTimeDur.getLocation().clone();
+                if (elapsedTimeLoc != null) {
+                    elapsedTimeLoc.setDetails("Termination of While Statement");
+                }
+
+                Exp infixExp2 =
+                        Utilities.createLessThanEqExp(elapsedTimeLoc, Exp
+                                .copy(nqv2), Exp.copy(elapsedTimeDur), BOOLEAN);
+
+                infixExp = myTypeGraph.formConjunct(infixExp, infixExp2);
+                infixExp.setLocation(decreasingLoc);
+            }
+
             ifStmtList.add(new ConfirmStmt(decreasingLoc, infixExp, false));
         }
 
@@ -3633,8 +4286,29 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         edu.clemson.cs.r2jt.collections.List<Statement> elseStmtList =
                 new edu.clemson.cs.r2jt.collections.List<Statement>();
-        elseStmtList.add(new ConfirmStmt(elseConfirmLoc,
-                Exp.copy(finalConfirm), simplifyFinalConfirm));
+
+        // NY YS
+        // Form the confirm clause for the else
+        Exp elseConfirm = Exp.copy(finalConfirm);
+        if (myInstanceEnvironment.flags.isFlagSet(FLAG_ALTPVCS_VC)
+                & elapsedTimeDur != null) {
+            Location loc = stmt.getLocation();
+            VarExp cumDur =
+                    Utilities.createVarExp((Location) loc.clone(), null,
+                            Utilities.createPosSymbol(Utilities
+                                    .getCumDur(elseConfirm)), myTypeGraph.R,
+                            null);
+            InfixExp sumWhileDur =
+                    new InfixExp((Location) loc.clone(), Exp.copy(cumDur),
+                            Utilities.createPosSymbol("+"), Exp
+                                    .copy(elapsedTimeDur));
+            sumWhileDur.setMathType(myTypeGraph.R);
+
+            elseConfirm = Utilities.replace(elseConfirm, cumDur, sumWhileDur);
+        }
+
+        elseStmtList.add(new ConfirmStmt(elseConfirmLoc, elseConfirm,
+                simplifyFinalConfirm));
 
         // condition
         ProgramExp condition = (ProgramExp) Exp.copy(stmt.getTest());

@@ -14,8 +14,10 @@ package edu.clemson.cs.r2jt.typeandpopulate2;
 
 import edu.clemson.cs.r2jt.absynnew.InitFinalAST;
 import edu.clemson.cs.r2jt.absynnew.ResolveAST;
+import edu.clemson.cs.r2jt.absynnew.decl.FacilityAST;
 import edu.clemson.cs.r2jt.absynnew.decl.MathTheoremAST;
 import edu.clemson.cs.r2jt.absynnew.decl.TypeModelAST;
+import edu.clemson.cs.r2jt.absynnew.decl.TypeRepresentationAST;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.*;
@@ -34,7 +36,7 @@ import java.util.Map;
  * 
  * <p>Note that <code>ScopeBuilder</code> has no public constructor.  
  * <code>ScopeBuilders</code>s are acquired through calls to some of the methods
- * of {@link edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder MathSymbolTableBuilder}.</p>
+ * of {@link MathSymbolTableBuilder MathSymbolTableBuilder}.</p>
  */
 public class ScopeBuilder extends SyntacticScope {
 
@@ -94,6 +96,18 @@ public class ScopeBuilder extends SyntacticScope {
         return entry;
     }
 
+    public ProcedureEntry addProcedure(String name, ResolveAST definingElement,
+            OperationEntry correspondingOperation)
+            throws DuplicateSymbolException {
+        sanityCheckBindArguments(name, definingElement, "");
+
+        ProcedureEntry entry =
+                new ProcedureEntry(name, definingElement, myRootModule,
+                        correspondingOperation);
+        myBindings.put(name, entry);
+        return entry;
+    }
+
     public ProgramParameterEntry addFormalParameter(String name,
             ResolveAST definingElement,
             ProgramParameterEntry.ParameterMode mode, PTType type)
@@ -104,6 +118,20 @@ public class ScopeBuilder extends SyntacticScope {
                 new ProgramParameterEntry(myTypeGraph, name, definingElement,
                         myRootModule, type, mode);
         myBindings.put(name, entry);
+        return entry;
+    }
+
+    public FacilityEntry addFacility(FacilityAST facility)
+            throws DuplicateSymbolException {
+        SymbolTableEntry curLocalEntry =
+                myBindings.get(facility.getName().getText());
+
+        if (curLocalEntry != null) {
+            throw new DuplicateSymbolException(curLocalEntry);
+        }
+        FacilityEntry entry =
+                new FacilityEntry(facility, myRootModule, getSourceRepository());
+        myBindings.put(facility.getName().getText(), entry);
         return entry;
     }
 
@@ -118,14 +146,30 @@ public class ScopeBuilder extends SyntacticScope {
         return entry;
     }
 
+    public RepresentationTypeEntry addRepresentationTypeEntry(String name,
+            TypeRepresentationAST definingElement,
+            ProgramTypeDefinitionEntry definition, PTType representationType,
+            ExprAST convention, ExprAST correspondence)
+            throws DuplicateSymbolException {
+
+        sanityCheckBindArguments(name, definingElement, "");
+
+        RepresentationTypeEntry result =
+                new RepresentationTypeEntry(myTypeGraph, name, definingElement,
+                        myRootModule, definition, representationType,
+                        convention, correspondence);
+
+        myBindings.put(name, result);
+        return result;
+    }
+
     public ProgramTypeEntry addProgramTypeDefinition(String name,
             TypeModelAST definingElement, MTType model,
             MathSymbolEntry exemplarEntry) throws DuplicateSymbolException {
         sanityCheckBindArguments(name, definingElement, model);
 
-        InitFinalAST.TypeInitAST init = definingElement.getInitialization();
-        InitFinalAST.TypeFinalAST finalization =
-                definingElement.getFinalization();
+        InitFinalAST init = definingElement.getInitialization();
+        InitFinalAST finalization = definingElement.getFinalization();
 
         ExprAST initRequires = (init == null) ? null : init.getRequires();
         ExprAST initEnsures = (init == null) ? null : init.getEnsures();
