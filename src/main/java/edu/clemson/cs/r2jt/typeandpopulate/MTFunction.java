@@ -393,6 +393,18 @@ public class MTFunction extends MTAbstract<MTFunction> {
         return myDomain;
     }
 
+    public String getParamString() {
+        String rString = "";
+        if (myDomain.getClass().getSimpleName().equals("MTCartesian")) {
+            MTCartesian dC = (MTCartesian) myDomain;
+            rString = dC.getParamString();
+        }
+        else
+            rString = myDomain.toString();
+
+        return rString;
+    }
+
     public MTType getRange() {
         return myRange;
     }

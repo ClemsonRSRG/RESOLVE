@@ -729,4 +729,38 @@ public class PSymbol extends PExp {
                 || (name.equals("0") || name.equals("1") || name.equals("true") || name
                         .equals("false"));
     }
+
+    public String toSMTLIB(Map<String, MTType> typeMap) {
+        String opString = getTopLevelOperation();
+        boolean negate = false;
+        if (opString == "/=") {
+            opString = "=";
+            negate = true;
+        }
+        else if (opString == "implies")
+            opString = "=>";
+        else if (opString.contains("_"))
+            opString = opString.replace("_", "");
+        String argsString = "";
+        PExpSubexpressionIterator subIt = getSubExpressionIterator();
+        while (subIt.hasNext()) {
+            PExp cur = subIt.next();
+
+            if (cur.getSubExpressions().size() > 0)
+                argsString += "( " + cur.toSMTLIB(typeMap) + " ) ";
+            else {
+                String op = cur.getTopLevelOperation();
+                if (op.contains("_"))
+                    op = op.replace("_", "");
+                argsString += " " + op + " ";
+                if (typeMap != null)
+                    typeMap.put(op, cur.getType());
+            }
+        }
+        String combined = opString + " " + argsString;
+        if (negate)
+            return "not ( " + combined + ")";
+        else
+            return combined;
+    }
 }

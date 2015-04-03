@@ -206,6 +206,31 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return addAtomicFormula(newExpr);
     }
 
+    protected void natToZ(String natSymb) {
+        int intRepOfOp = m_registry.getIndexForSymbol("<=");
+        if (intRepOfOp < 0)
+            return;
+        NormalizedAtomicExpressionMapImpl newExpr =
+                new NormalizedAtomicExpressionMapImpl();
+        newExpr.writeOnto(intRepOfOp, 0);
+        int intRepOfZero = m_registry.getIndexForSymbol("0");
+        if (intRepOfZero < 0)
+            return;
+        newExpr.writeOnto(intRepOfZero, 1);
+        int intRepOfNatSymb = m_registry.getIndexForSymbol(natSymb);
+        if (intRepOfNatSymb < 0)
+            return;
+        newExpr.writeOnto(intRepOfNatSymb, 2);
+        int intRepForTrue = m_registry.getIndexForSymbol("true");
+        if (intRepForTrue < 0)
+            return;
+        int intRepForExpr = addAtomicFormula(newExpr);
+        if (intRepForExpr != intRepForTrue) {
+            mergeOperators(intRepForExpr, intRepForTrue);
+        }
+        m_registry.makeZ(natSymb);
+    }
+
     /**
      * @param atomicFormula one sided expression. (= new root) is appended and
      * expression is inserted if no match of the side is found. Otherwise

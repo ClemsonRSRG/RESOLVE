@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
+import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
 import edu.clemson.cs.r2jt.parsing.RBuilder;
 import edu.clemson.cs.r2jt.parsing.RLexer;
 import edu.clemson.cs.r2jt.parsing.RParser;
@@ -1214,6 +1215,19 @@ public class Controller {
                                 myInstanceEnvironment.getProverListener());
                 try {
                     ccProver.start();
+                }
+                catch (IOException ioe) {
+                    throw new RuntimeException(ioe);
+                }
+            }
+            // SMT Prover
+            if (myInstanceEnvironment.flags.isFlagSet(SMTProver.FLAG_PROVE)) {
+                SMTProver smtProver =
+                        new SMTProver(table.getTypeGraph(), vcs, scope,
+                                myInstanceEnvironment, myInstanceEnvironment
+                                        .getProverListener());
+                try {
+                    smtProver.start();
                 }
                 catch (IOException ioe) {
                     throw new RuntimeException(ioe);

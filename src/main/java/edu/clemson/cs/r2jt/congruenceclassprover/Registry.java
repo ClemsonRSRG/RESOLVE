@@ -65,6 +65,21 @@ public class Registry {
 
     }
 
+    protected void makeZ(String symbol) {
+        MTType tN = m_typeDictionary.get("N");
+        MTType tZ = m_typeDictionary.get("Z");
+        if (tN == null || tZ == null)
+            return;
+        int sIdx = m_symbolToIndex.get(symbol);
+        if (sIdx < 0)
+            return;
+        Set<String> nSet = m_typeToSetOfOperators.get(tN);
+        nSet.remove(symbol);
+        m_typeToSetOfOperators.get(tZ).add(symbol);
+        m_indexToType.set(sIdx, tZ);
+
+    }
+
     public Usage getUsage(String symbol) {
         return m_symbolToUsage.get(symbol);
     }
@@ -190,10 +205,7 @@ public class Registry {
         if (isSymbolInTable(symbolName)) {
             return getIndexForSymbol(symbolName);
         }
-        if (symbolName.equals("Az")) {
-            symbolType =
-                    new MTFunction(m_typeGraph, m_typeGraph.Z, m_typeGraph.Z);
-        }
+
         if (m_typeToSetOfOperators.containsKey(symbolType)) {
             m_typeToSetOfOperators.get(symbolType).add(symbolName);
         }
@@ -227,7 +239,8 @@ public class Registry {
     public Set<String> getFunctionNames() {
         HashSet<String> rSet = new HashSet<String>();
         for (Entry<String, Usage> e : m_symbolToUsage.entrySet()) {
-            if (e.getValue().equals(Usage.HASARGS_SINGULAR)) {
+            if (e.getValue().equals(Usage.HASARGS_SINGULAR)
+                    || e.getValue().equals(Usage.HASARGS_FORALL)) {
                 rSet.add(e.getKey());
             }
         }

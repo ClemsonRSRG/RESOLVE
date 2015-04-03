@@ -28,6 +28,7 @@ import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.EmptyImmutableList;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 public class ImmutableConjuncts implements Iterable<PExp> {
 
@@ -144,8 +145,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * <p>Returns a copy of this set of conjuncts with very obviously 
      * <code>true</code> conjuncts removed.  Examples are the actual "true" 
      * value and equalities with the same thing on the left and right side.</p>
-     *  
-     * @param expressions The expressions to process.
+     *
      */
     public ImmutableConjuncts eliminateObviousConjuncts() {
         PExp[] workingSpace = new PExp[myConjuncts.size()];
@@ -252,7 +252,7 @@ public class ImmutableConjuncts implements Iterable<PExp> {
      * has an equal expression in <code>this</code>, and <em>visa versa</em>.
      * </p>
      * 
-     * @param otherConjuncts The set of conjuncts to test against 
+     * @param o The set of conjuncts to test against
      *                       <code>this</code>.
      * @return True <strong>iff</strong> the given set of conjuncts is equal.
      */
@@ -652,5 +652,36 @@ public class ImmutableConjuncts implements Iterable<PExp> {
         }
 
         return myCachedSymbolNames;
+    }
+
+    public String toSMTLIB(Map<String, MTType> typeMap) {
+        String rString = "";
+
+        for (PExp p : myConjuncts) {
+            String forAllString = "";
+            String thereExistsString = "";
+            for (PSymbol ps : p.getQuantifiedVariables()) {
+                if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL))
+                    forAllString +=
+                            "( " + ps.toSMTLIB(typeMap) + " "
+                                    + ps.getType().toString() + " )";
+                if (ps.quantification
+                        .equals(PSymbol.Quantification.THERE_EXISTS))
+                    thereExistsString +=
+                            "( " + ps.toSMTLIB(typeMap) + " "
+                                    + ps.getType().toString() + " )";
+            }
+            if (forAllString.length() > 0) {
+                forAllString = " forall ( " + forAllString + " ) ";
+            }
+            if (thereExistsString.length() > 0) {
+                thereExistsString = " exists ( " + thereExistsString + " ) ";
+            }
+            rString +=
+                    "(assert( " + forAllString + " " + thereExistsString
+                            + p.toSMTLIB(typeMap) + "))" + ";" + p.toString()
+                            + "\n";
+        }
+        return rString;
     }
 }

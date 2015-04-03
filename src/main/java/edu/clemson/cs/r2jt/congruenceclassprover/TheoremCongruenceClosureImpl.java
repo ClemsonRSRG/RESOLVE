@@ -95,7 +95,7 @@ public class TheoremCongruenceClosureImpl {
             Set<String> rSet = tReg.getFunctionNames();
             rSet.remove("=");
             rSet.remove("implies");
-            //rSet.remove("and");
+            rSet.remove("and");
             //rSet.remove("or");
             m_function_names = rSet;
         }
@@ -345,6 +345,7 @@ public class TheoremCongruenceClosureImpl {
                         .isSubtypeOf(oDomain)))
                         && (oRange.alphaEquivalentTo(dRange) || (dRange
                                 .isSubtypeOf(oRange)))) {
+
                     /*System.out.println("Type match: " + oSymbol + ":" + oType
                             + " maps to " + dSymbol + ":" + dType); */
                     continue;
@@ -354,7 +355,8 @@ public class TheoremCongruenceClosureImpl {
             }
             /*System.err.println("Failed type check: " + oSymbol + "(from theorem): " + oType
                     + " " + dSymbol + ": " + dType);
-            System.err.println(m_theoremString);*/
+            System.err.println(m_theoremString);
+             */
             box.m_failedBindings = box.m_bindings;
             return false;
 
