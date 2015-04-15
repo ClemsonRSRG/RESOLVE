@@ -1840,13 +1840,13 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private Exp simplifyAssumeRule(AssumeStmt stmt, Exp exp) {
         // Variables
-        /*Exp assertion = stmt.getAssertion();
+        Exp assumeExp = stmt.getAssertion();
 
         // EqualsExp
-        if (assertion instanceof EqualsExp) {
-            EqualsExp equalsExp = (EqualsExp) assertion;
+        if (assumeExp instanceof EqualsExp) {
+            EqualsExp equalsExp = (EqualsExp) assumeExp;
 
-            // Only do simplifications if we have an equals
+            // Do simplifications if we have an equals
             if (equalsExp.getOperator() == EqualsExp.EQUAL) {
                 // Create a temp expression where left is replaced with the right
                 Exp tmp =
@@ -1860,15 +1860,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     equalsExp.getLeft());
                 }
 
-                // Update exp
+                // Update exp if we did a replacement
                 if (!tmp.equals(exp)) {
                     exp = tmp;
+                    assumeExp = null;
                 }
             }
         }
         // InfixExp
-        else if (assertion instanceof InfixExp) {
-            InfixExp infixExp = (InfixExp) assertion;
+        else if (assumeExp instanceof InfixExp) {
+            InfixExp infixExp = (InfixExp) assumeExp;
 
             // Only do simplifications if we have an and operator
             if (infixExp.getOpName().equals("and")) {
@@ -1879,30 +1880,30 @@ public class VCGenerator extends TreeWalkerVisitor {
                 exp = simplifyAssumeRule(left, exp);
                 exp = simplifyAssumeRule(right, exp);
 
-                // Case #1: Nothing left
+                // Case #1: Nothing on the left and nothing on the right
                 if (left.getAssertion() == null && right.getAssertion() == null) {
-                    assertion = null;
+                    assumeExp = null;
                 }
                 // Case #2: Both still have assertions
                 else if (left.getAssertion() != null
                         && right.getAssertion() != null) {
-                    assertion =
+                    assumeExp =
                             myTypeGraph.formConjunct(left.getAssertion(), right
                                     .getAssertion());
                 }
                 // Case #3: Left still has assertions
                 else if (left.getAssertion() != null) {
-                    assertion = left.getAssertion();
+                    assumeExp = left.getAssertion();
                 }
-                // Case #r: Right still has assertions
+                // Case #4: Right still has assertions
                 else {
-                    assertion = right.getAssertion();
+                    assumeExp = right.getAssertion();
                 }
             }
         }
 
         // Store the new assertion
-        stmt.setAssertion(assertion);*/
+        stmt.setAssertion(assumeExp);
 
         return exp;
     }
