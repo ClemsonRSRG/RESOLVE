@@ -2782,8 +2782,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 .copy(myOperationDecreasingExp));
                 leftExp.setMathType(myOperationDecreasingExp.getMathType());
                 InfixExp exp =
-                        Utilities.createLessThanEqExp(stmt.getLocation(), leftExp,
-                                pVal, BOOLEAN);
+                        Utilities.createLessThanEqExp(stmt.getLocation(),
+                                leftExp, pVal, BOOLEAN);
 
                 // Create the new confirm statement
                 Location loc;
