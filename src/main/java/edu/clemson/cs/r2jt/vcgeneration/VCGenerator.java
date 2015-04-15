@@ -2056,14 +2056,15 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Create a new infix expression
             IntegerExp oneExp = new IntegerExp();
             oneExp.setValue(1);
-            oneExp.setMathType(pVal.getMathType());
-            InfixExp rightExp =
+            oneExp.setMathType(myOperationDecreasingExp.getMathType());
+            InfixExp leftExp =
                     new InfixExp(stmt.getLocation(), oneExp, Utilities
-                            .createPosSymbol("+"), pVal);
-            rightExp.setMathType(pVal.getMathType());
+                            .createPosSymbol("+"), Exp
+                            .copy(myOperationDecreasingExp));
+            leftExp.setMathType(myOperationDecreasingExp.getMathType());
             InfixExp exp =
-                    Utilities.createLessThanEqExp(stmt.getLocation(), Exp
-                            .copy(myOperationDecreasingExp), rightExp, BOOLEAN);
+                    Utilities.createLessThanEqExp(stmt.getLocation(), leftExp,
+                            pVal, BOOLEAN);
 
             // Create the new confirm statement
             Location loc;
@@ -2774,15 +2775,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Create a new infix expression
                 IntegerExp oneExp = new IntegerExp();
                 oneExp.setValue(1);
-                oneExp.setMathType(pVal.getMathType());
-                InfixExp rightExp =
+                oneExp.setMathType(myOperationDecreasingExp.getMathType());
+                InfixExp leftExp =
                         new InfixExp(stmt.getLocation(), oneExp, Utilities
-                                .createPosSymbol("+"), pVal);
-                rightExp.setMathType(pVal.getMathType());
+                                .createPosSymbol("+"), Exp
+                                .copy(myOperationDecreasingExp));
+                leftExp.setMathType(myOperationDecreasingExp.getMathType());
                 InfixExp exp =
-                        Utilities.createLessThanEqExp(stmt.getLocation(), Exp
-                                .copy(myOperationDecreasingExp), rightExp,
-                                BOOLEAN);
+                        Utilities.createLessThanEqExp(stmt.getLocation(), leftExp,
+                                pVal, BOOLEAN);
 
                 // Create the new confirm statement
                 Location loc;
