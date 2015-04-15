@@ -3118,6 +3118,14 @@ public class VCGenerator extends TreeWalkerVisitor {
         else {
             // TODO: ERROR!
         }
+        Location ifConditionLoc;
+        if (ifCondition.getLocation() != null) {
+            ifConditionLoc = (Location) ifCondition.getLocation().clone();
+        }
+        else {
+            ifConditionLoc = (Location) stmt.getLocation().clone();
+        }
+
         OperationDec opDec =
                 getOperationDec(ifCondition.getLocation(), qualifier,
                         testParamExp.getName(), testParamExp.getArguments());
@@ -3229,15 +3237,17 @@ public class VCGenerator extends TreeWalkerVisitor {
         ConfirmStmt ifConfirm = myCurrentAssertiveCode.getFinalConfirm();
         Exp ifConfirmExp = ifConfirm.getAssertion();
         Location ifLocation;
-        if (ifConfirm.getLocation() != null) {
-            ifLocation = (Location) ifConfirm.getLocation().clone();
+        if (ifConfirmExp.getLocation() != null) {
+            ifLocation = (Location) ifConfirmExp.getLocation().clone();
         }
         else {
             ifLocation = (Location) stmt.getLocation().clone();
         }
-        String ifDetail = "Condition at " + ifLocation.toString() + " is true";
+        String ifDetail =
+                ifConfirmExp.getLocation().getDetails() + ", Condition at "
+                        + ifConditionLoc.toString() + " is true";
         ifLocation.setDetails(ifDetail);
-        ifConfirm.setLocation(ifLocation);
+        ifConfirmExp.setLocation(ifLocation);
 
         // NY YS
         // Duration for If Part
@@ -3350,11 +3360,18 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Modify the confirm details
         ConfirmStmt negIfConfirm = negIfAssertiveCode.getFinalConfirm();
         Exp negIfConfirmExp = negIfConfirm.getAssertion();
-        Location negIfLocation = (Location) ifConfirm.getLocation().clone();
+        Location negIfLocation;
+        if (negIfConfirmExp.getLocation() != null) {
+            negIfLocation = (Location) negIfConfirmExp.getLocation().clone();
+        }
+        else {
+            negIfLocation = (Location) stmt.getLocation().clone();
+        }
         String negIfDetail =
-                "Condition at " + negIfLocation.toString() + " is false";
+                negIfLocation.getDetails() + ", Condition at "
+                        + ifConditionLoc.toString() + " is false";
         negIfLocation.setDetails(negIfDetail);
-        negIfConfirm.setLocation(negIfLocation);
+        negIfConfirmExp.setLocation(negIfLocation);
 
         // NY YS
         // Duration for Else Part
