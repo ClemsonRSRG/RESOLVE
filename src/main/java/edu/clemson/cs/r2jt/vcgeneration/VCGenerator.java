@@ -2053,9 +2053,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                             .getLocation(), myCurrentModuleScope);
 
             // Create a new infix expression
+            IntegerExp oneExp = new IntegerExp();
+            oneExp.setValue(1);
+            oneExp.setMathType(pVal.getMathType());
+            InfixExp rightExp =
+                    new InfixExp(stmt.getLocation(), oneExp, Utilities
+                            .createPosSymbol("+"), pVal);
+            rightExp.setMathType(pVal.getMathType());
             InfixExp exp =
-                    Utilities.createLessThanExp(stmt.getLocation(), Exp
-                            .copy(myOperationDecreasingExp), pVal, BOOLEAN);
+                    Utilities.createLessThanEqExp(stmt.getLocation(), Exp
+                            .copy(myOperationDecreasingExp), rightExp, BOOLEAN);
 
             // Create the new confirm statement
             Location loc;
@@ -2764,9 +2771,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 .getLocation(), myCurrentModuleScope);
 
                 // Create a new infix expression
+                IntegerExp oneExp = new IntegerExp();
+                oneExp.setValue(1);
+                oneExp.setMathType(pVal.getMathType());
+                InfixExp rightExp =
+                        new InfixExp(stmt.getLocation(), oneExp, Utilities
+                                .createPosSymbol("+"), pVal);
+                rightExp.setMathType(pVal.getMathType());
                 InfixExp exp =
-                        Utilities.createLessThanExp(stmt.getLocation(), Exp
-                                .copy(myOperationDecreasingExp), pVal, BOOLEAN);
+                        Utilities.createLessThanEqExp(stmt.getLocation(), Exp
+                                .copy(myOperationDecreasingExp), rightExp,
+                                BOOLEAN);
 
                 // Create the new confirm statement
                 Location loc;
