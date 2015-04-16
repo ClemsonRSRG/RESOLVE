@@ -533,4 +533,8 @@ public class PAlternatives extends PExp {
                     myType, myTypeValue);
         }
     }
+
+    public String toSMTLIB(Map<String, MTType> typeMap) {
+        return "not implemented";
+    }
 }

@@ -206,6 +206,19 @@ public class MTCartesian extends MTAbstract<MTCartesian> {
         return myElementTypes;
     }
 
+    public String getParamString() {
+        String rString = "";
+        for (MTType m : myElementTypes) {
+            if (m.getClass().getSimpleName().equals("MTCartesian")) {
+                MTCartesian mc = (MTCartesian) m;
+                rString += mc.getParamString() + " ";
+            }
+            else
+                rString += m.toString() + " ";
+        }
+        return rString;
+    }
+
     @Override
     public MTType withComponentReplaced(int index, MTType newType) {
         List<Element> newElements = new LinkedList<Element>(myElements);

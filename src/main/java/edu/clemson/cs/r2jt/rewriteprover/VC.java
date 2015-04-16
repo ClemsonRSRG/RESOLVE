@@ -13,8 +13,11 @@
 package edu.clemson.cs.r2jt.rewriteprover;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExpVisitor;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 /**
  * <p>Represents an immutable <em>verification condition</em>, which takes the 
@@ -97,5 +100,11 @@ public class VC {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String toSMTLIB() {
+        String rString = "";
+        Map<String, MTType> constantTypes = new HashMap<String, MTType>();
+        return rString;
     }
 }

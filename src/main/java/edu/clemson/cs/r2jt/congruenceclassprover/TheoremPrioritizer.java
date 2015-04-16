@@ -50,20 +50,21 @@ public class TheoremPrioritizer {
 
     public int calculateScore(Set<String> theorem_symbols) {
         int count_of_functions_not_in_vc = 0;
-        int score = m_vc_symbols.keySet().size();
+        int size = m_vc_symbols.keySet().size();
+        int score = size;
         for (String s : theorem_symbols) {
 
             if (m_vc_symbols.containsKey(s)) {
                 int c_score = m_vc_symbols.get(s);
+                // c_score: the number of steps it takes to reach the goal symbol from s.
                 if (c_score < score)
                     score = c_score;
-
             }
             else
                 count_of_functions_not_in_vc++;
         }
         //if(score > count) score /=count;
-        return (score + 1) * ((count_of_functions_not_in_vc + 1) * 4);
+        return score + (count_of_functions_not_in_vc * 2000);
     }
 
     public TheoremCongruenceClosureImpl poll() {

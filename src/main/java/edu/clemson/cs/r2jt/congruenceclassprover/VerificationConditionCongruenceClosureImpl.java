@@ -12,10 +12,14 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
+import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.r2jt.rewriteprover.Antecedent;
 import edu.clemson.cs.r2jt.rewriteprover.Consequent;
 import edu.clemson.cs.r2jt.rewriteprover.VC;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
+import edu.clemson.cs.r2jt.typeandpopulate.MTProper;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,6 +34,7 @@ import java.util.Set;
 public class VerificationConditionCongruenceClosureImpl {
 
     private final Registry m_registry;
+    private final TypeGraph m_typegraph;
     public final String m_name;
     private final Antecedent m_antecedent;
     private final Consequent m_consequent;
@@ -44,6 +49,7 @@ public class VerificationConditionCongruenceClosureImpl {
 
     // currently support only unchained equalities, so each sublist is size 2.
     public VerificationConditionCongruenceClosureImpl(TypeGraph g, VC vc) {
+        m_typegraph = g;
         m_name = vc.getName();
         m_antecedent = vc.getAntecedent();
         m_consequent = vc.getConsequent();
@@ -54,6 +60,18 @@ public class VerificationConditionCongruenceClosureImpl {
         forAllQuantifiedPExps = new ArrayList<PExp>();
         addPExp(m_antecedent.iterator(), true);
         addPExp(m_consequent.iterator(), false);
+        //naturalNumsFix();
+    }
+
+    protected void naturalNumsFix() {
+        if (m_registry.m_typeDictionary.containsKey("N")) {
+            MTType natType = m_registry.m_typeDictionary.get("N");
+            Set<String> natSymbols = m_registry.getSetMatchingType(natType);
+
+            for (String s : natSymbols) {
+                m_conjunction.natToZ(s);
+            }
+        }
     }
 
     protected ConjunctionOfNormalizedAtomicExpressions getConjunct() {
@@ -92,7 +110,7 @@ public class VerificationConditionCongruenceClosureImpl {
 
     public STATUS isProved() {
         if (m_conjunction.m_evaluates_to_false)
-            return STATUS.FALSE_ASSUMPTION;
+            return STATUS.FALSE_ASSUMPTION; // this doesn't mean P->Q = False, it just means P = false
         String goal1 = m_goal.get(0);
         String goal2 = m_goal.get(1);
         // check each goal has same root

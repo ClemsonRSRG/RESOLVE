@@ -16,6 +16,7 @@ import java.util.Map;
 
 import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
 public class Consequent extends ImmutableConjuncts {
 
@@ -63,5 +64,15 @@ public class Consequent extends ImmutableConjuncts {
 
     public Antecedent assumed() {
         return new Antecedent(this);
+    }
+
+    public String negateToSMT(Map<String, MTType> typeMap)
+            throws RuntimeException {
+        String rString = "";
+        if (this.size() != 1) {
+            throw new RuntimeException("Invalid Consequent");
+        }
+        rString = "(assert (not ( " + this.get(0).toSMTLIB(typeMap) + ") ) )\n";
+        return rString;
     }
 }

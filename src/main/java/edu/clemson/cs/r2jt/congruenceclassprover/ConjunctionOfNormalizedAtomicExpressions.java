@@ -140,7 +140,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         // However, I need to store types for functions/relations.
         // Building these here.
         // It would be far better to handle this upstream.
-        if (ps.getSubExpressions().size() > 0) {
+        // Currently PExps from theorems have correct type set already
+        if (ps.getSubExpressions().size() > 0
+                && !type.getClass().getSimpleName().equals("MTFunction")) {
             List<MTType> paramList = new ArrayList<MTType>();
             for (PExp pParam : ps.getSubExpressions()) {
                 paramList.add(pParam.getType());
@@ -204,6 +206,31 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             newExpr.writeOnto(root, pos);
         }
         return addAtomicFormula(newExpr);
+    }
+
+    protected void natToZ(String natSymb) {
+        int intRepOfOp = m_registry.getIndexForSymbol("<=");
+        if (intRepOfOp < 0)
+            return;
+        NormalizedAtomicExpressionMapImpl newExpr =
+                new NormalizedAtomicExpressionMapImpl();
+        newExpr.writeOnto(intRepOfOp, 0);
+        int intRepOfZero = m_registry.getIndexForSymbol("0");
+        if (intRepOfZero < 0)
+            return;
+        newExpr.writeOnto(intRepOfZero, 1);
+        int intRepOfNatSymb = m_registry.getIndexForSymbol(natSymb);
+        if (intRepOfNatSymb < 0)
+            return;
+        newExpr.writeOnto(intRepOfNatSymb, 2);
+        int intRepForTrue = m_registry.getIndexForSymbol("true");
+        if (intRepForTrue < 0)
+            return;
+        int intRepForExpr = addAtomicFormula(newExpr);
+        if (intRepForExpr != intRepForTrue) {
+            mergeOperators(intRepForExpr, intRepForTrue);
+        }
+        m_registry.makeZ(natSymb);
     }
 
     /**

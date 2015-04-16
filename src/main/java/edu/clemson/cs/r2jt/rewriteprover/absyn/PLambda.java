@@ -112,6 +112,11 @@ public class PLambda extends PExp {
     }
 
     @Override
+    public String toSMTLIB(Map<String, MTType> typeMap) {
+        return null;
+    }
+
+    @Override
     protected void splitIntoConjuncts(List<PExp> accumulator) {
         accumulator.add(this);
     }
@@ -207,6 +212,10 @@ public class PLambda extends PExp {
         return false;
     }
 
+    public String toSMTLIB() {
+        return "not implemented";
+    }
+
     @Override
     public boolean isVariable() {
         return false;
@@ -259,5 +268,6 @@ public class PLambda extends PExp {
         public String toString() {
             return name + " : " + type;
         }
+
     }
 }
