@@ -4284,9 +4284,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                 decreasingLoc.setDetails("Termination of While Statement");
             }
 
+            // Create a new infix expression
+            IntegerExp oneExp = new IntegerExp();
+            oneExp.setValue(1);
+            oneExp.setMathType(decreasingExp.getMathType());
+            InfixExp leftExp =
+                    new InfixExp(stmt.getLocation(), oneExp, Utilities
+                            .createPosSymbol("+"), Exp.copy(decreasingExp));
+            leftExp.setMathType(decreasingExp.getMathType());
             Exp infixExp =
-                    Utilities.createLessThanExp(decreasingLoc, Exp
-                            .copy(decreasingExp), Exp.copy(nqv), BOOLEAN);
+                    Utilities.createLessThanEqExp(decreasingLoc, leftExp, Exp
+                            .copy(nqv), BOOLEAN);
 
             // Confirm NQV(RP, Cum_Dur) <= El_Dur_Exp
             if (nqv2 != null) {
@@ -4305,6 +4313,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
 
             ifStmtList.add(new ConfirmStmt(decreasingLoc, infixExp, false));
+        }
+        else {
+            throw new RuntimeException("No decreasing clause!");
         }
 
         // empty elseif pair
