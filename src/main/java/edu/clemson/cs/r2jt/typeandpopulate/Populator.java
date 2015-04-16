@@ -635,7 +635,7 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         // If there is a decreasing clause, check to see if it is an "N"
-        if (dec.getRecursive()) {
+        /*if (dec.getRecursive()) {
             MathSymbolEntry intendedEntry =
                     getIntendedEntry(null, "N", dec.getDecreasing());
             try {
@@ -647,7 +647,7 @@ public class Populator extends TreeWalkerVisitor {
             catch (SymbolNotOfKindTypeException e) {
                 notAType(intendedEntry, dec.getLocation());
             }
-        }
+        }*/
 
         try {
             myBuilder.getInnermostActiveScope().addProcedure(
