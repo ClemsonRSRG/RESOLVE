@@ -22,7 +22,15 @@ import edu.clemson.cs.r2jt.misc.Utils;
 import edu.clemson.cs.r2jt.misc.Utils.Indirect;
 import edu.clemson.cs.r2jt.misc.HardCoded2;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.*;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.MathSymbolEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.OperationEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramTypeDefinitionEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramTypeEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramVariableEntry;
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.*;
 import edu.clemson.cs.r2jt.typeandpopulate2.query.*;
 import edu.clemson.cs.r2jt.typereasoning2.TypeComparison;
@@ -351,6 +359,10 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
                         .getDefiningElement().getStart());
             }
         }
+
+        // TODO: Add decreasing clause to procedure and check that it is typed "N"
+        // See Populator.java
+
         try {
             myBuilder.getInnermostActiveScope().addProcedure(
                     e.getName().getText(), e, myCorrespondingOperation);
