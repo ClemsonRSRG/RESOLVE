@@ -266,8 +266,7 @@ public class CongruenceClassProver {
         int iteration = 0;
         while (status
                 .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
-                && System.currentTimeMillis() <= endTime
-                && (myProverListener == null || !(myProverListener.readCancel()))) {
+                && System.currentTimeMillis() <= endTime) {
             // Rank theorems
             Map<String, Integer> vcSymbolRelevanceMap = vcc.getGoalSymbols();
             int threshold = 16 * vcSymbolRelevanceMap.keySet().size() + 1;
@@ -295,9 +294,7 @@ public class CongruenceClassProver {
                     int max_Instantiated_to_Add = 1;
                     int num_Instantiated_added = 0;
                     while (num_Instantiated_added < max_Instantiated_to_Add
-                            && !instPQ.m_pQueue.isEmpty()
-                            && (myProverListener == null || !myProverListener
-                                    .readCancel())) {
+                            && !instPQ.m_pQueue.isEmpty()) {
                         PExpWithScore curP = instPQ.m_pQueue.poll();
                         if (!applied.contains(curP.m_theorem.toString())) {
                             String substitutionMade =

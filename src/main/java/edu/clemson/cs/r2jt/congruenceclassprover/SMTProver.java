@@ -34,9 +34,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.jar.Attributes;
 
 /**
  * Created by nabilkabbani on 3/12/15.
+ * example where this isn't working: http://rise4fun.com/Z3/sl8nv
  */
 public class SMTProver {
 
@@ -52,6 +54,10 @@ public class SMTProver {
     private final long DEFAULTTIMEOUT = 10000;
     private int numVCs;
     private Set<String> m_theorem_decls;
+    public final static String TypeSort = "MType";
+    public final static String NameSort = "Syms";
+    public final static String ReserveString = "@!";
+    public final static Set<String> NamesNotToBeChanged = new HashSet<String>();
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
     private ProverListener myProverListener;
@@ -69,6 +75,13 @@ public class SMTProver {
         totalTime = System.currentTimeMillis();
         numVCs = vcs.size();
         m_theorem_decls = new HashSet<String>();
+        NamesNotToBeChanged.add("=");
+        NamesNotToBeChanged.add("=>");
+        NamesNotToBeChanged.add("and");
+        NamesNotToBeChanged.add("or");
+        NamesNotToBeChanged.add("not");
+        NamesNotToBeChanged.add("true");
+        NamesNotToBeChanged.add("false");
         // Only for web ide //////////////////////////////////////////
         myModels = new PerVCProverModel[vcs.size()];
         if (listener != null) {
@@ -97,9 +110,6 @@ public class SMTProver {
             String vcString = getVCSMTStr(vc);
             vcDecls += vcString;
             String vcWtheorems = theoremsInSMTLib + vcString;
-            if (!useSolvers) {
-                vcWtheorems = replaceIntegerSymbols(vcWtheorems);
-            }
             m_perVCsmtLibScripts[i] = vcWtheorems;
             if (i < vcs.size()) {
                 vcDecls += "(pop)\n";
@@ -107,13 +117,6 @@ public class SMTProver {
 
             i += 1;
         }
-        theoremsInSMTLib += "(assert ( forall ((n N)) ( <= 0 n) ))\n";
-        m_smtlibScript += theoremsInSMTLib + vcDecls + "(exit)";
-        if (!useSolvers) {
-            m_smtlibScript = replaceIntegerSymbols(m_smtlibScript);
-
-        }
-        createSMTScriptForProvingTheoremFile("Integer_Theory");
 
     }
 
@@ -125,24 +128,23 @@ public class SMTProver {
         HashSet<String> namedSort = new HashSet<String>();
         for (Map.Entry<String, MTType> kv : typeMap.entrySet()) {
             MTType type = kv.getValue();
+            String typeString = replaceReservedChars(type.toString());
             String s = kv.getKey();
-            if (s.equals("E")) {
-                int k = 9;
-            }
             if (m_theorem_decls.contains(s))
                 continue;
             if (type.getClass().getSimpleName().equals("MTNamed")
-                    && !namedSort.contains(type.toString())) {
+                    && !namedSort.contains(typeString)) {
                 declarations +=
-                        "(define-sort " + type.toString() + "() Entity)\n";
-                declarations +=
-                        "(declare-const " + s + " " + type.toString() + ")\n";
-                namedSort.add(type.toString());
+                        "(declare-const " + typeString + " " + TypeSort + ") "
+                                + "\n";
+                namedSort.add(typeString);
 
             }
-            else if (type.getClass().getSimpleName().equals("MTNamed")) {
+            if (type.getClass().getSimpleName().equals("MTNamed")) {
                 declarations +=
-                        "(declare-const " + s + " " + type.toString() + ")\n";
+                        "(declare-const " + s + " " + NameSort + ") " + "\n";
+                declarations +=
+                        "(assert (EleOf " + s + " " + typeString + "))\n";
 
             }
             else if (type.getClass().getSimpleName().equals(
@@ -150,47 +152,53 @@ public class SMTProver {
                 MTFunctionApplication mtf = (MTFunctionApplication) type;
                 String args = "";
                 for (MTType m : mtf.getArguments()) {
+                    String argTypeString = replaceReservedChars(m.toString());
                     if (m.getClass().getSimpleName().equals("MTNamed")
-                            && !namedSort.contains(m.toString())) {
+                            && !namedSort.contains(argTypeString)) {
                         declarations +=
-                                "(define-sort " + m.toString() + "() Entity)\n";
-                        namedSort.add(m.toString());
+                                "(declare-const " + argTypeString + " "
+                                        + TypeSort + ") " + "\n";
+                        namedSort.add(argTypeString);
                     }
-                    args += m.toString() + " ";
+
+                    args += argTypeString + " ";
                 }
+                declarations += "(declare-const " + s + " " + NameSort + " )\n";
                 declarations +=
-                        "(declare-const " + s + " (" + mtf.getName() + " "
-                                + args + ") )\n";
+                        "(assert (EleOf " + s + "(" + ReserveString
+                                + mtf.getName() + " " + args + ")))\n";
             }
             else {
-
-                if (!(s.matches("[0-9]") || (s.equals("EmptyString")))) {
-                    if (type.toString().equals("N")) {
-                        declarations += "(declare-const " + s + " Z )\n";
-                        declarations += "(assert ( <= 0 " + s + " ) )\n";
-                    }
-                    else {
-                        declarations +=
-                                "(declare-const " + s + " " + type.toString()
-                                        + ")\n";
-                    }
-                }
+                declarations += "(declare-const " + s + " " + NameSort + " )\n";
+                declarations += "(assert (EleOf " + s + " " + type + "))\n";
             }
 
         }
-        //declarations += "(declare-fun Entry.IsInitial (Entry) B)\n";
+        for (String s : namedSort) {
+            s = s.replace("@", "");
+            declarations +=
+                    "(declare-fun " + ReserveString + s + ".Is!Initial ("
+                            + NameSort + "  ) B)\n";
+
+        }
         String script = declarations + assertions;
-        script = script.replaceAll("[/'/_]", "");
         script += "\n" + ("(echo \"" + vc.getName() + "\")(check-sat)\n");
         return script;
 
     }
 
+    public static String replaceReservedChars(String name) {
+        name = name.replace("_", "!");
+        name = name.replace("|", "l");
+        name = name.replace("'", "@");
+        return name;
+    }
+
     String getTheoremSMTStr(boolean useSolvers) {
         String rString = "";//"(set-option :smt.mbqi false)\n";
         Set<String> moduleIdExclusion = new HashSet<String>();
-        moduleIdExclusion.add("GLOBAL");
-        moduleIdExclusion.add("Natural_Number_Theory");
+        //moduleIdExclusion.add("GLOBAL");
+        //moduleIdExclusion.add("Natural_Number_Theory");
         moduleIdExclusion.add("Boolean_Theory");
         moduleIdExclusion.add("Set_Theory");
         if (useSolvers) {
@@ -203,48 +211,65 @@ public class SMTProver {
                         MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
                         MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
         String declString =
-                "(declare-sort MType)\n(define-sort Entity() MType)\n(define-sort B() Bool)\n";
-        if (useSolvers) {
-            declString += "(define-sort Z() Int)\n";
-        }
-        else {
-            declString += "(declare-sort Z)\n\n";
-            declString += "(declare-fun minus ( Z ) Z)\n";
-        }
+                "(declare-sort " + TypeSort + ")\n(declare-sort " + NameSort
+                        + ")\n(define-sort B() Bool)\n";
+        declString +=
+                "(declare-fun EleOf(" + NameSort + " " + TypeSort + ") Bool)\n";
+
+        //declString += "(declare-const Z " + TypeSort + " )\n";
+        declString += "(declare-const N " + TypeSort + " )\n";
+        //declString += "(declare-fun minus ( S ) S)\n";
+        HashSet<String> declaredFuns = new HashSet<String>(); // for overloading
         for (MathSymbolEntry m : mathSymbolEntries) {
             String source = m.getSourceModuleIdentifier().toString();
             if (!(moduleIdExclusion.contains(source))) {
                 MTType type = m.getType();
                 String typeString = type.toString();
                 String typeClass = type.getClass().getSimpleName();
-                String name = m.getName();
+                String name = replaceReservedChars(m.getName());
 
-                name = name.replace("_", "");
-                m_theorem_decls.add(name);
                 if (typeString.equals("MType")) {
                     declString +=
-                            "(define-sort " + name + "() " + "MType) " + "\n";
+                            "(declare-const " + name + " " + TypeSort + ") "
+                                    + "\n";
+                    m_theorem_decls.add(name);
                 }
-                else if (typeClass.equals("MTProper")) {
+                // add spec chars if not a type
+                name = ReserveString + name;
+                m_theorem_decls.add(name);
+                if (typeClass.equals("MTProper") && !typeString.equals("MType")) {
+                    /*
+                    (declare-const PVal S)
+                    (assert (EleOf PVal N))
+                     */
                     declString +=
-                            "(declare-const " + name + " " + typeString + ")\n";
+                            "(declare-const " + name + " " + NameSort + " )\n";
+                    declString +=
+                            "(assert (EleOf " + name + " " + typeString
+                                    + "))\n";
                 }
                 else {
                     if (typeClass.equals("MTFunction")) {
                         MTFunction mtf = (MTFunction) type;
-                        String paramTypes = mtf.getParamString();
-                        if (name.equals("Str")) {
-                            declString +=
-                                    "(define-sort " + name + " (" + paramTypes
-                                            + ") " + mtf.getRange().toString()
-                                            + ")\n";
+                        String paramString = mtf.getParamStringForSMT();
+                        String rangeString = "";
+                        if (mtf.getRange().toString().equals("B")) {
+                            rangeString = "Bool";
                         }
-                        else {
-                            declString +=
-                                    "(declare-fun " + name + " (" + paramTypes
-                                            + ") " + mtf.getRange().toString()
-                                            + ")\n";
+                        else if (mtf.getRange().toString().equals("MType")) {
+                            rangeString = "MType";
                         }
+                        else
+                            rangeString = NameSort;
+
+                        String funcDecl =
+                                "(declare-fun " + name + " (" + paramString
+                                        + ") " + rangeString + ")\n";
+                        if (!declaredFuns.contains(funcDecl)) {
+                            declString += funcDecl;
+                            declaredFuns.add(funcDecl);
+                        }
+
                     }
                 }
 
@@ -261,29 +286,23 @@ public class SMTProver {
             String source = e.getSourceModuleIdentifier().toString();
             if (!(moduleIdExclusion.contains(source))) {
                 String thSmt = e.toSMTLIB(null, false); //assertion.toSMTLIB();
-                smtTheorems += thSmt + "\n";
+                if (!thSmt.isEmpty())
+                    smtTheorems +=
+                            ";" + e.getAssertion().toString() + "\n" + thSmt
+                                    + "\n";
             }
 
         }
+        // Manually entering type theorems
+        smtTheorems +=
+                "(assert (forall ((s " + NameSort
+                        + ")) ( => (EleOf s N) (EleOf s Z))))\n";
+        smtTheorems +=
+                "(assert (forall ((t " + TypeSort + ")(s " + NameSort
+                        + " )) (=> (EleOf s (" + ReserveString
+                        + "Str t)) (EleOf s SStr))))\n";
         rString += smtTheorems;
         return rString;
-    }
-
-    public String replaceIntegerSymbols(String s) {
-        s = s.replace("+", " plus ");
-        s = s.replace(" -", " minus");
-        s = s.replace(" <= ", " LTE ");
-        s = s.replace(" < ", " LT ");
-        s = s.replace(" >= ", " GTE ");
-        s = s.replace(" > ", " GT ");
-        s = s.replace(" 1 ", " one ");
-        s = s.replace(" 1)", " one)");
-        s = s.replace(" 0 ", " zero ");
-        s = s.replace(" 0)", " zero )");
-        s = s.replace(" * ", " mult ");
-        s = s.replace(" / ", " divide ");
-        s = s.replace(" mod ", " modulus ");
-        return s;
     }
 
     public void start() throws IOException {
@@ -304,9 +323,10 @@ public class SMTProver {
 
 
          */
-        String fname = "temp.smt";
+        int count = 0;
         for (String vcS : m_perVCsmtLibScripts) {
             long perVCtime = System.currentTimeMillis();
+            String fname = "temp" + count++ + ".smt";
             createTextFile(fname, vcS);
 
             ProcessBuilder pb =

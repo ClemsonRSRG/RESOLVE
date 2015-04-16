@@ -106,6 +106,11 @@ public class Registry {
      * @param opIndexB index to be replaced by opIndexA
      */
     public void substitute(int opIndexA, int opIndexB) {
+        MTType aType = getTypeByIndex(opIndexA);
+        MTType bType = getTypeByIndex(opIndexB);
+        if (bType.isSubtypeOf(aType)) {
+            m_indexToType.set(opIndexA, bType);
+        }
         m_unusedIndices.push(opIndexB);
         m_symbolIndexParentArray.set(opIndexB, opIndexA);
     }
