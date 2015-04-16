@@ -355,8 +355,8 @@ public class TheoremCongruenceClosureImpl {
             }
             /*System.err.println("Failed type check: " + oSymbol + "(from theorem): " + oType
                     + " " + dSymbol + ": " + dType);
-            System.err.println(m_theoremString);
-             */
+            System.err.println(m_theoremString);*/
+
             box.m_failedBindings = box.m_bindings;
             return false;
 

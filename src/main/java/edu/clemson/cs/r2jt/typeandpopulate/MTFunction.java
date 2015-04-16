@@ -16,6 +16,7 @@ import edu.clemson.cs.r2jt.absyn.DefinitionDec;
 import edu.clemson.cs.r2jt.absyn.Exp;
 import edu.clemson.cs.r2jt.absyn.LambdaExp;
 import edu.clemson.cs.r2jt.absyn.MathVarDec;
+import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
 import edu.clemson.cs.r2jt.typereasoning.TypeComparison;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.util.Arrays;
@@ -50,6 +51,7 @@ public class MTFunction extends MTAbstract<MTFunction> {
     private final FunctionApplicationFactory myFunctionApplicationFactory;
 
     private List<MTType> myComponents;
+    private List<MTType> myParamTypes;
 
     public MTFunction(TypeGraph g, MTType range, List<MTType> paramTypes,
             String singleParameterName) {
@@ -123,7 +125,7 @@ public class MTFunction extends MTAbstract<MTFunction> {
             List<String> paramNames, List<MTType> paramTypes) {
 
         super(g);
-
+        myParamTypes = paramTypes;
         if (paramNames.size() == 1) {
             mySingleParameterName = paramNames.get(0);
         }
@@ -351,6 +353,22 @@ public class MTFunction extends MTAbstract<MTFunction> {
         }
 
         return result;
+    }
+
+    public String getParamStringForSMT() {
+        String rString = "";
+        for (MTType m : myParamTypes) {
+            if (m.toString().equals("B")) {
+                rString += "B ";
+            }
+            else if (m.toString().equals("MType")) {
+                rString += SMTProver.TypeSort + " ";
+            }
+            else
+                rString += SMTProver.NameSort + " ";
+        }
+        return rString;
+
     }
 
     private static List<String> getParamNames(

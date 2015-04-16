@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
@@ -739,8 +740,10 @@ public class PSymbol extends PExp {
         }
         else if (opString == "implies")
             opString = "=>";
-        else if (opString.contains("_"))
-            opString = opString.replace("_", "");
+        opString = SMTProver.replaceReservedChars(opString);
+        if (!SMTProver.NamesNotToBeChanged.contains(opString)) {
+            opString = SMTProver.ReserveString + opString;
+        }
         String argsString = "";
         PExpSubexpressionIterator subIt = getSubExpressionIterator();
         while (subIt.hasNext()) {
@@ -750,8 +753,10 @@ public class PSymbol extends PExp {
                 argsString += "( " + cur.toSMTLIB(typeMap) + " ) ";
             else {
                 String op = cur.getTopLevelOperation();
-                if (op.contains("_"))
-                    op = op.replace("_", "");
+                op = SMTProver.replaceReservedChars(op);
+                if (!SMTProver.NamesNotToBeChanged.contains(op)) {
+                    op = SMTProver.ReserveString + op;
+                }
                 argsString += " " + op + " ";
                 if (typeMap != null)
                     typeMap.put(op, cur.getType());

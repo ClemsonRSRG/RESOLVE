@@ -13,6 +13,7 @@
 package edu.clemson.cs.r2jt.typeandpopulate.entry;
 
 import edu.clemson.cs.r2jt.absyn.MathAssertionDec;
+import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
@@ -34,8 +35,10 @@ public class TheoremEntry extends SymbolTableEntry {
     public TheoremEntry(TypeGraph g, String name,
             MathAssertionDec definingElement, ModuleIdentifier sourceModule) {
         super(name, definingElement, sourceModule);
-
-        myAssertionAsPExp = PExp.buildPExp(definingElement.getAssertion());
+        if (g == null) {
+            int bp = 0;
+        }
+        myAssertionAsPExp = PExp.buildPExp(g, definingElement.getAssertion());
 
         myMathSymbolAlterEgo =
                 new MathSymbolEntry(g, name, Quantification.NONE,
@@ -71,21 +74,39 @@ public class TheoremEntry extends SymbolTableEntry {
 
     public String toSMTLIB(Map<String, MTType> typeMap, boolean negate) {
         String forAllString = "";
-        String thereExistsString = "";
-        for (PSymbol ps : myAssertionAsPExp.getQuantifiedVariables()) {
-            if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL))
-                forAllString +=
-                        "( " + ps.toSMTLIB(null) + " "
-                                + ps.getType().toString() + " )";
-            if (ps.quantification.equals(PSymbol.Quantification.THERE_EXISTS))
-                thereExistsString +=
-                        "( " + ps.toSMTLIB(null) + " "
-                                + ps.getType().toString() + " )";
+        String typeRestrictionString = "";
+
+        int varCount = 0;
+        PExp asPExp = getAssertion();
+        for (PSymbol ps : asPExp.getQuantifiedVariables()) {
+            String nameSort = SMTProver.NameSort;
+            MTType type = ps.getType();
+            String typeString = ps.getType().toString();
+            if (type.getClass().getSimpleName().equals("MTFunction")) {
+                return "";
+            }
+            // TODO: add support for functions as types
+            if (typeString.equals("B")) {
+                nameSort = "B";
+            }
+            String name = ps.toSMTLIB(null);
+
+            if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
+                forAllString += "( " + name + " " + nameSort + " )";
+                if (nameSort != "B") {
+                    typeRestrictionString +=
+                            "( " + "EleOf " + name + " " + type + " )";
+                    varCount++;
+                }
+            }
+            else
+                throw new UnsupportedOperationException(
+                        "Only universal quantification is supported.");
         }
         if (forAllString.length() > 0) {
             forAllString = " forall ( " + forAllString + " ) ";
         }
-        if (forAllString.length() == 0 && thereExistsString.length() == 0) {
+        else if (forAllString.length() == 0) {
             if (!negate)
                 return "(assert ( " + myAssertionAsPExp.toSMTLIB(typeMap)
                         + ") )";
@@ -93,11 +114,15 @@ public class TheoremEntry extends SymbolTableEntry {
                 return "(assert ( not ( " + myAssertionAsPExp.toSMTLIB(typeMap)
                         + ") ) )";
         }
+        if (varCount > 1) {
+            typeRestrictionString = "( and " + typeRestrictionString + " ) ";
+        }
+        String assertion =
+                forAllString + " ( => " + typeRestrictionString + "( "
+                        + myAssertionAsPExp.toSMTLIB(typeMap) + " )) ";
         if (!negate)
-            return "(assert ( " + forAllString + " " + thereExistsString
-                    + " ( " + myAssertionAsPExp.toSMTLIB(typeMap) + ") ) )";
+            return "(assert ( " + assertion + " )) ";
         else
-            return "(assert ( not ( " + forAllString + " " + thereExistsString
-                    + " ( " + myAssertionAsPExp.toSMTLIB(typeMap) + ") ) ) )";
+            return "(assert ( not ( " + assertion + " ))) ";
     }
 }

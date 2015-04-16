@@ -13,12 +13,7 @@
 package edu.clemson.cs.r2jt.rewriteprover.absyn;
 
 import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
@@ -30,9 +25,6 @@ import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.rewriteprover.Utilities;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Deque;
 
 /**
  * <p><code>PExp</code> is the root of the prover abstract syntax tree 
@@ -319,8 +311,12 @@ public abstract class PExp {
     }
 
     public static PExp buildPExp(Exp e) {
-        PExp retval;
+        return buildPExp(null, e);
+    }
 
+    public static PExp buildPExp(TypeGraph g, Exp e) {
+        PExp retval;
+        //g = null;
         e = Utilities.applyQuantification(e);
 
         if (e == null) {
@@ -333,22 +329,37 @@ public abstract class PExp {
 
             List<PExp> arguments = new LinkedList<PExp>();
             Iterator<Exp> eArgs = eAsFunctionExp.argumentIterator();
+            List<MTType> paramTypes = new ArrayList<MTType>();
             while (eArgs.hasNext()) {
-                arguments.add(PExp.buildPExp(eArgs.next()));
+                PExp argExp = PExp.buildPExp(g, eArgs.next());
+                arguments.add(argExp);
+                paramTypes.add(argExp.getType());
             }
-
-            retval =
-                    new PSymbol(e.getMathType(), e.getMathTypeValue(),
-                            fullName(eAsFunctionExp.getQualifier(),
-                                    eAsFunctionExp.getName().getName()),
-                            arguments, convertExpQuantification(eAsFunctionExp
-                                    .getQuantification()));
+            if (g != null) {
+                MTFunction fullType =
+                        new MTFunction(g, e.getMathType(), paramTypes);
+                retval =
+                        new PSymbol(fullType, e.getMathTypeValue(), fullName(
+                                eAsFunctionExp.getQualifier(), eAsFunctionExp
+                                        .getName().getName()), arguments,
+                                convertExpQuantification(eAsFunctionExp
+                                        .getQuantification()));
+            }
+            else {
+                retval =
+                        new PSymbol(e.getMathType(), e.getMathTypeValue(),
+                                fullName(eAsFunctionExp.getQualifier(),
+                                        eAsFunctionExp.getName().getName()),
+                                arguments,
+                                convertExpQuantification(eAsFunctionExp
+                                        .getQuantification()));
+            }
         }
         else if (e instanceof PrefixExp) {
             PrefixExp eAsPrefixExp = (PrefixExp) e;
 
             List<PExp> arguments = new LinkedList<PExp>();
-            arguments.add(PExp.buildPExp(eAsPrefixExp.getArgument()));
+            arguments.add(PExp.buildPExp(g, eAsPrefixExp.getArgument()));
 
             retval =
                     new PSymbol(e.getMathType(), e.getMathTypeValue(),
@@ -358,8 +369,8 @@ public abstract class PExp {
             InfixExp eAsInfixExp = (InfixExp) e;
 
             List<PExp> arguments = new LinkedList<PExp>();
-            arguments.add(PExp.buildPExp(eAsInfixExp.getLeft()));
-            arguments.add(PExp.buildPExp(eAsInfixExp.getRight()));
+            arguments.add(PExp.buildPExp(g, eAsInfixExp.getLeft()));
+            arguments.add(PExp.buildPExp(g, eAsInfixExp.getRight()));
 
             retval =
                     new PSymbol(e.getMathType(), e.getMathTypeValue(),
@@ -370,8 +381,8 @@ public abstract class PExp {
             IsInExp eAsIsInExp = (IsInExp) e;
 
             List<PExp> arguments = new LinkedList<PExp>();
-            arguments.add(PExp.buildPExp(eAsIsInExp.getLeft()));
-            arguments.add(PExp.buildPExp(eAsIsInExp.getRight()));
+            arguments.add(PExp.buildPExp(g, eAsIsInExp.getLeft()));
+            arguments.add(PExp.buildPExp(g, eAsIsInExp.getRight()));
 
             retval =
                     new PSymbol(e.getMathType(), e.getMathTypeValue(), "is_in",
@@ -381,7 +392,7 @@ public abstract class PExp {
             OutfixExp eAsOutfixExp = (OutfixExp) e;
 
             List<PExp> arguments = new LinkedList<PExp>();
-            arguments.add(PExp.buildPExp(eAsOutfixExp.getArgument()));
+            arguments.add(PExp.buildPExp(g, eAsOutfixExp.getArgument()));
 
             retval =
                     new PSymbol(e.getMathType(), e.getMathTypeValue(),
@@ -393,8 +404,8 @@ public abstract class PExp {
             EqualsExp eAsEqualsExp = (EqualsExp) e;
 
             List<PExp> arguments = new LinkedList<PExp>();
-            arguments.add(PExp.buildPExp(eAsEqualsExp.getLeft()));
-            arguments.add(PExp.buildPExp(eAsEqualsExp.getRight()));
+            arguments.add(PExp.buildPExp(g, eAsEqualsExp.getLeft()));
+            arguments.add(PExp.buildPExp(g, eAsEqualsExp.getRight()));
 
             retval =
                     new PSymbol(e.getMathType(), e.getMathTypeValue(),
@@ -443,7 +454,7 @@ public abstract class PExp {
                     symbol += sAsFE.getOperatorAsString();
 
                     for (Exp param : sAsFE.getParameters()) {
-                        arguments.add(buildPExp(param));
+                        arguments.add(buildPExp(g, param));
                     }
                 }
                 else {
@@ -452,7 +463,7 @@ public abstract class PExp {
             }
 
             if (eAsDotExp.getSemanticExp() != null) {
-                symbol += PExp.buildPExp(eAsDotExp.getSemanticExp());
+                symbol += PExp.buildPExp(g, eAsDotExp.getSemanticExp());
             }
 
             retval =
@@ -496,7 +507,7 @@ public abstract class PExp {
 
             retval =
                     new PLambda(new ArrayBackedImmutableList(parameters), PExp
-                            .buildPExp(eAsLambdaExp.getBody()));
+                            .buildPExp(g, eAsLambdaExp.getBody()));
         }
         else if (e instanceof AlternativeExp) {
             AlternativeExp eAsAlternativeExp = (AlternativeExp) e;
