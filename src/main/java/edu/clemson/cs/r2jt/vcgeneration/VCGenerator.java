@@ -1258,10 +1258,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                         // or constraint clauses.
                         if (ste instanceof ProgramTypeEntry) {
                             // Deep copy the original initialization ensures and the constraint
-                            init =
-                                    Exp.copy(type.getInitialization()
-                                            .getEnsures());
-                            constraint = Exp.copy(type.getConstraint());
+                            if (type.getInitialization() != null
+                                    && type.getInitialization().getEnsures() != null) {
+                                init =
+                                        Exp.copy(type.getInitialization()
+                                                .getEnsures());
+                            }
+                            if (type.getConstraint() != null) {
+                                constraint = Exp.copy(type.getConstraint());
+                            }
                         }
                     }
 
