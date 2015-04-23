@@ -48,6 +48,7 @@ public class SMTProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_smtlibScript = "";
+    private String m_theoremScript ="";
     private final String[] m_perVCsmtLibScripts;
     private final TypeGraph m_typeGraph;
     private final boolean useSolvers = false;
@@ -102,14 +103,14 @@ public class SMTProver {
         m_scope = scope;
         m_perVCsmtLibScripts = new String[vcs.size()];
         String vcDecls = "";
-        String theoremsInSMTLib = getTheoremSMTStr(useSolvers);
+        m_theoremScript = getTheoremSMTStr(useSolvers);
         int i = 0;
         for (VC vc : vcs) {
             myModels[i] = (new PerVCProverModel(g, vc.getName(), vc, null));
             vcDecls += "(push)\n";
             String vcString = getVCSMTStr(vc);
             vcDecls += vcString;
-            String vcWtheorems = theoremsInSMTLib + vcString;
+            String vcWtheorems = m_theoremScript + vcString;
             m_perVCsmtLibScripts[i] = vcWtheorems;
             if (i < vcs.size()) {
                 vcDecls += "(pop)\n";
@@ -117,6 +118,7 @@ public class SMTProver {
 
             i += 1;
         }
+        
 
     }
 
@@ -229,7 +231,7 @@ public class SMTProver {
                 String typeString = type.toString();
                 String typeClass = type.getClass().getSimpleName();
                 String name = replaceReservedChars(m.getName());
-
+                if(name.contains(".."))continue;
                 if (typeString.equals("MType")) {
                     declString +=
                             "(declare-const " + name + " " + TypeSort + ") "
@@ -268,6 +270,8 @@ public class SMTProver {
                                 "(declare-fun " + name + " (" + paramString
                                         + ") " + rangeString + ")\n";
                         String trClause = mtf.getTypeRestrictionClauseForSMT(name) + "\n";
+                        if(trClause.contains("->")) trClause = "";
+                        if(trClause.contains(" Set")) trClause ="";
                         if (!declaredFuns.contains(funcDecl) ) {
                             declString += funcDecl;
                             declString += trClause;
