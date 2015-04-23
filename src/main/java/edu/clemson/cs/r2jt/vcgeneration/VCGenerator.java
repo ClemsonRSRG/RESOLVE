@@ -1864,9 +1864,21 @@ public class VCGenerator extends TreeWalkerVisitor {
                     // and right cannot be an incoming value expression.
                     if (tmp.equals(exp)
                             && !(equalsExp.getRight() instanceof OldExp)) {
-                        tmp =
-                                Utilities.replace(exp, equalsExp.getRight(),
-                                        equalsExp.getLeft());
+
+                        // Don't do any substitution if it is P_val
+                        if (equalsExp.getLeft() instanceof VarExp
+                                && ((VarExp) equalsExp.getLeft()).getName()
+                                        .getName().matches("\\?*P_val")) {
+                            tmp = exp;
+
+                            // TODO: Figure out if we should keep this given or not
+                        }
+                        else {
+                            tmp =
+                                    Utilities.replace(exp,
+                                            equalsExp.getRight(), equalsExp
+                                                    .getLeft());
+                        }
                     }
 
                     // Update exp if we did a replacement
