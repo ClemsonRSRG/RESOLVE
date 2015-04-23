@@ -1838,7 +1838,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                     // Update exp if we did a replacement
                     if (!tmp.equals(exp)) {
                         exp = tmp;
-                        assumeExp = null;
+
+                        // If this is not a stipulate assume clause,
+                        // we can safely get rid of it, otherwise we keep it.
+                        if (!stmt.getIsStipulate()) {
+                            assumeExp = null;
+                        }
                     }
                 }
             }
