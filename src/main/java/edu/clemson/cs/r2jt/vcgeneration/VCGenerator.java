@@ -4267,9 +4267,14 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentAssertiveCode.addAssume((Location) whileLoc.clone(), assume,
                 false);
 
-        // if statement body
+        // if statement body (need to deep copy!)
         edu.clemson.cs.r2jt.collections.List<Statement> ifStmtList =
+                new edu.clemson.cs.r2jt.collections.List<Statement>();
+        edu.clemson.cs.r2jt.collections.List<Statement> whileStmtList =
                 stmt.getStatements();
+        for (Statement s : whileStmtList) {
+            ifStmtList.add((Statement) s.clone());
+        }
 
         // Confirm the inductive case of invariant
         Exp inductiveCase = Exp.copy(invariant);
