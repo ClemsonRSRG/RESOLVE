@@ -1283,15 +1283,15 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                     // Only worry about replaces mode parameters
                     if (p.getMode() == Mode.REPLACES && init != null) {
-                        // Replace the formal with the actual
-                        if (exemplar != null) {
-                            init =
-                                    Utilities.replace(init, exemplar,
-                                            parameterExp);
-                        }
+                        // Obtain the original dec from the AST
+                        Location varLoc = p.getLocation();
 
-                        // Set the details for the new location
-                        if (init.getLocation() != null) {
+                        // Create an is_initial dot expression
+                        VarDec pVarDec = new VarDec(p.getName(), p.getTy());
+                        DotExp isInitialExp =
+                                Utilities
+                                        .createInitExp(pVarDec, MTYPE, BOOLEAN);
+                        if (varLoc != null) {
                             Location initLoc;
                             if (requires != null
                                     && requires.getLocation() != null) {
@@ -1317,19 +1317,21 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     + " (Assumption from \""
                                     + p.getMode().getModeName()
                                     + "\" parameter mode)");
-                            init.setLocation(initLoc);
+                            Utilities.setLocation(isInitialExp, initLoc);
                         }
 
                         // Create an AND infix expression with the requires clause
                         if (requires != null
                                 && !requires
                                         .equals(myTypeGraph.getTrueVarExp())) {
-                            requires = myTypeGraph.formConjunct(requires, init);
+                            requires =
+                                    myTypeGraph.formConjunct(requires,
+                                            isInitialExp);
                             requires.setLocation((Location) opLocation.clone());
                         }
                         // Make initialization expression the requires clause
                         else {
-                            requires = init;
+                            requires = isInitialExp;
                         }
                     }
                     // Constraints for the other parameter modes needs to be added
