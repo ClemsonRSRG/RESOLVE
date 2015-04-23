@@ -90,7 +90,7 @@ public class AssertiveCode {
      *
      * @param l The location for this assume clause.
      * @param e The corresponding assume <code>Exp</code>.
-     * @param b Boolean to determine if we simplify this assume clause
+     * @param b Boolean to determine if this is a stipulate assume clause
      *          or not.
      */
     public void addAssume(Location l, Exp e, boolean b) {

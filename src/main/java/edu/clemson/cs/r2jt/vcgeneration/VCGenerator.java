@@ -3181,7 +3181,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 replaceFormalWithActualEns(ensures, opDec
                                         .getParameters(), opDec.getStateVars(),
                                         testParamExp.getArguments(), false);
-                        myCurrentAssertiveCode.addAssume(loc, ensures, false);
+                        myCurrentAssertiveCode.addAssume(loc, ensures, true);
 
                         // Negation of the condition
                         negEnsures = Utilities.negateExp(ensures, BOOLEAN);
@@ -3316,7 +3316,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Add the negation of the if condition as the assume clause
         if (negEnsures != null) {
-            negIfAssertiveCode.addAssume(ifLocation, negEnsures, false);
+            negIfAssertiveCode.addAssume(ifLocation, negEnsures, true);
         }
         else {
             Utilities.illegalOperationEnsures(opDec.getLocation());
@@ -4229,7 +4229,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         myCurrentAssertiveCode.addAssume((Location) whileLoc.clone(), assume,
-                false);
+                true);
 
         // if statement body (need to deep copy!)
         edu.clemson.cs.r2jt.collections.List<Statement> ifStmtList =
