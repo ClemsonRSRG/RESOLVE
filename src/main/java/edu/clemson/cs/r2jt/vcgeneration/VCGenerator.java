@@ -47,6 +47,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     private final TypeGraph myTypeGraph;
     private final MTType BOOLEAN;
     private final MTType MTYPE;
+    private MTType Z;
     private ModuleScope myCurrentModuleScope;
 
     // Module level global variables
@@ -150,6 +151,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myTypeGraph = mySymbolTable.getTypeGraph();
         BOOLEAN = myTypeGraph.BOOLEAN;
         MTYPE = myTypeGraph.CLS;
+        Z = null;
 
         // Current items
         myConventionExp = null;
@@ -202,6 +204,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         try {
             myCurrentModuleScope =
                     mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
+
+            // Get "Z" from the TypeGraph
+            Z = Utilities.getMathTypeZ(dec.getLocation(), myCurrentModuleScope);
 
             // From the list of imports, obtain the global constraints
             // of the imported modules.
@@ -272,6 +277,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         try {
             myCurrentModuleScope =
                     mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
+
+            // Get "Z" from the TypeGraph
+            Z = Utilities.getMathTypeZ(dec.getLocation(), myCurrentModuleScope);
 
             // From the list of imports, obtain the global constraints
             // of the imported modules.
@@ -370,6 +378,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         try {
             myCurrentModuleScope =
                     mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
+
+            // Get "Z" from the TypeGraph
+            Z = Utilities.getMathTypeZ(dec.getLocation(), myCurrentModuleScope);
 
             // From the list of imports, obtain the global constraints
             // of the imported modules.
@@ -2172,8 +2183,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                             myTypeGraph.R, null);
             Exp durCallExp =
                     Utilities.createDurCallExp((Location) loc.clone(), Integer
-                            .toString(opDec.getParameters().size()),
-                            myTypeGraph.Z, myTypeGraph.R);
+                            .toString(opDec.getParameters().size()), Z,
+                            myTypeGraph.R);
             InfixExp sumEvalDur =
                     new InfixExp((Location) loc.clone(), opDur, Utilities
                             .createPosSymbol("+"), durCallExp);
@@ -3008,8 +3019,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                                 .toString(opDec
                                                                         .getParameters()
                                                                         .size()),
-                                                        myTypeGraph.Z,
-                                                        myTypeGraph.R);
+                                                        Z, myTypeGraph.R);
                                 InfixExp sumEvalDur =
                                         new InfixExp((Location) loc.clone(),
                                                 opDur, Utilities
@@ -3320,8 +3330,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             Exp durCallExp =
                     Utilities.createDurCallExp(loc, Integer.toString(opDec
-                            .getParameters().size()), myTypeGraph.Z,
-                            myTypeGraph.R);
+                            .getParameters().size()), Z, myTypeGraph.R);
             sumEvalDur =
                     new InfixExp((Location) loc.clone(), opDur, Utilities
                             .createPosSymbol("+"), durCallExp);

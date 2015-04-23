@@ -600,6 +600,29 @@ public class Utilities {
     }
 
     /**
+     * <p>Returns the math type for "Z".</p>
+     *
+     * @param location Current location in the AST.
+     * @param scope The module scope to start our search.
+     *
+     *
+     * @return The <code>MTType</code> for "Z".
+     */
+    protected static MTType getMathTypeZ(Location location, ModuleScope scope) {
+        // Locate "Z" (Integer)
+        MathSymbolEntry mse = searchMathSymbol(location, "Z", scope);
+        MTType Z = null;
+        try {
+            Z = mse.getTypeValue();
+        }
+        catch (SymbolNotOfKindTypeException e) {
+            notAType(mse, location);
+        }
+
+        return Z;
+    }
+
+    /**
      * <p>Get the <code>PosSymbol</code> associated with the
      * <code>VariableExp</code> left.</p>
      *
