@@ -1258,10 +1258,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                         // or constraint clauses.
                         if (ste instanceof ProgramTypeEntry) {
                             // Deep copy the original initialization ensures and the constraint
-                            init =
-                                    Exp.copy(type.getInitialization()
-                                            .getEnsures());
-                            constraint = Exp.copy(type.getConstraint());
+                            if (type.getInitialization() != null
+                                    && type.getInitialization().getEnsures() != null) {
+                                init =
+                                        Exp.copy(type.getInitialization()
+                                                .getEnsures());
+                            }
+                            if (type.getConstraint() != null) {
+                                constraint = Exp.copy(type.getConstraint());
+                            }
                         }
                     }
 
@@ -1840,35 +1845,41 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private Exp simplifyAssumeRule(AssumeStmt stmt, Exp exp) {
         // Variables
-        /*Exp assertion = stmt.getAssertion();
+        Exp assumeExp = stmt.getAssertion();
 
         // EqualsExp
-        if (assertion instanceof EqualsExp) {
-            EqualsExp equalsExp = (EqualsExp) assertion;
+        if (assumeExp instanceof EqualsExp) {
+            EqualsExp equalsExp = (EqualsExp) assumeExp;
 
-            // Only do simplifications if we have an equals
+            // Do simplifications if we have an equals
             if (equalsExp.getOperator() == EqualsExp.EQUAL) {
-                // Create a temp expression where left is replaced with the right
-                Exp tmp =
-                        Utilities.replace(exp, equalsExp.getLeft(), equalsExp
-                                .getRight());
+                // Don't replace if the left expression is an incoming value expression
+                if (!(equalsExp.getLeft() instanceof OldExp)) {
+                    // Create a temp expression where left is replaced with the right
+                    Exp tmp =
+                            Utilities.replace(exp, equalsExp.getLeft(),
+                                    equalsExp.getRight());
 
-                // If tmp hasn't changed, then it means we have to check the right
-                if (tmp.equals(exp)) {
-                    tmp =
-                            Utilities.replace(exp, equalsExp.getRight(),
-                                    equalsExp.getLeft());
-                }
+                    // If tmp hasn't changed, then it means we have to check the right
+                    // and right cannot be an incoming value expression.
+                    if (tmp.equals(exp)
+                            && !(equalsExp.getRight() instanceof OldExp)) {
+                        tmp =
+                                Utilities.replace(exp, equalsExp.getRight(),
+                                        equalsExp.getLeft());
+                    }
 
-                // Update exp
-                if (!tmp.equals(exp)) {
-                    exp = tmp;
+                    // Update exp if we did a replacement
+                    if (!tmp.equals(exp)) {
+                        exp = tmp;
+                        assumeExp = null;
+                    }
                 }
             }
         }
         // InfixExp
-        else if (assertion instanceof InfixExp) {
-            InfixExp infixExp = (InfixExp) assertion;
+        else if (assumeExp instanceof InfixExp) {
+            InfixExp infixExp = (InfixExp) assumeExp;
 
             // Only do simplifications if we have an and operator
             if (infixExp.getOpName().equals("and")) {
@@ -1879,30 +1890,30 @@ public class VCGenerator extends TreeWalkerVisitor {
                 exp = simplifyAssumeRule(left, exp);
                 exp = simplifyAssumeRule(right, exp);
 
-                // Case #1: Nothing left
+                // Case #1: Nothing on the left and nothing on the right
                 if (left.getAssertion() == null && right.getAssertion() == null) {
-                    assertion = null;
+                    assumeExp = null;
                 }
                 // Case #2: Both still have assertions
                 else if (left.getAssertion() != null
                         && right.getAssertion() != null) {
-                    assertion =
+                    assumeExp =
                             myTypeGraph.formConjunct(left.getAssertion(), right
                                     .getAssertion());
                 }
                 // Case #3: Left still has assertions
                 else if (left.getAssertion() != null) {
-                    assertion = left.getAssertion();
+                    assumeExp = left.getAssertion();
                 }
-                // Case #r: Right still has assertions
+                // Case #4: Right still has assertions
                 else {
-                    assertion = right.getAssertion();
+                    assumeExp = right.getAssertion();
                 }
             }
         }
 
         // Store the new assertion
-        stmt.setAssertion(assertion);*/
+        stmt.setAssertion(assumeExp);
 
         return exp;
     }
@@ -2044,7 +2055,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Check for recursive call of itself
         if (myCurrentOperationEntry != null
-                && myCurrentOperationEntry.getName().equals(opDec.getName())
+                && myCurrentOperationEntry.getName().equals(
+                        opDec.getName().getName())
                 && myCurrentOperationEntry.getReturnType() != null) {
             // Create a new confirm statement using P_val and the decreasing clause
             VarExp pVal =
@@ -2052,9 +2064,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                             .getLocation(), myCurrentModuleScope);
 
             // Create a new infix expression
+            IntegerExp oneExp = new IntegerExp();
+            oneExp.setValue(1);
+            oneExp.setMathType(myOperationDecreasingExp.getMathType());
+            InfixExp leftExp =
+                    new InfixExp(stmt.getLocation(), oneExp, Utilities
+                            .createPosSymbol("+"), Exp
+                            .copy(myOperationDecreasingExp));
+            leftExp.setMathType(myOperationDecreasingExp.getMathType());
             InfixExp exp =
-                    Utilities.createLessThanExp(stmt.getLocation(), Exp
-                            .copy(myOperationDecreasingExp), pVal, BOOLEAN);
+                    Utilities.createLessThanEqExp(stmt.getLocation(), leftExp,
+                            pVal, BOOLEAN);
 
             // Create the new confirm statement
             Location loc;
@@ -2754,8 +2774,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Check for recursive call of itself
             if (myCurrentOperationEntry != null
-                    && myCurrentOperationEntry.getName()
-                            .equals(opDec.getName())
+                    && myCurrentOperationEntry.getName().equals(
+                            opDec.getName().getName())
                     && myCurrentOperationEntry.getReturnType() != null) {
                 // Create a new confirm statement using P_val and the decreasing clause
                 VarExp pVal =
@@ -2763,9 +2783,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 .getLocation(), myCurrentModuleScope);
 
                 // Create a new infix expression
+                IntegerExp oneExp = new IntegerExp();
+                oneExp.setValue(1);
+                oneExp.setMathType(myOperationDecreasingExp.getMathType());
+                InfixExp leftExp =
+                        new InfixExp(stmt.getLocation(), oneExp, Utilities
+                                .createPosSymbol("+"), Exp
+                                .copy(myOperationDecreasingExp));
+                leftExp.setMathType(myOperationDecreasingExp.getMathType());
                 InfixExp exp =
-                        Utilities.createLessThanExp(stmt.getLocation(), Exp
-                                .copy(myOperationDecreasingExp), pVal, BOOLEAN);
+                        Utilities.createLessThanEqExp(stmt.getLocation(),
+                                leftExp, pVal, BOOLEAN);
 
                 // Create the new confirm statement
                 Location loc;
@@ -3101,6 +3129,14 @@ public class VCGenerator extends TreeWalkerVisitor {
         else {
             // TODO: ERROR!
         }
+        Location ifConditionLoc;
+        if (ifCondition.getLocation() != null) {
+            ifConditionLoc = (Location) ifCondition.getLocation().clone();
+        }
+        else {
+            ifConditionLoc = (Location) stmt.getLocation().clone();
+        }
+
         OperationDec opDec =
                 getOperationDec(ifCondition.getLocation(), qualifier,
                         testParamExp.getName(), testParamExp.getArguments());
@@ -3212,15 +3248,17 @@ public class VCGenerator extends TreeWalkerVisitor {
         ConfirmStmt ifConfirm = myCurrentAssertiveCode.getFinalConfirm();
         Exp ifConfirmExp = ifConfirm.getAssertion();
         Location ifLocation;
-        if (ifConfirm.getLocation() != null) {
-            ifLocation = (Location) ifConfirm.getLocation().clone();
+        if (ifConfirmExp.getLocation() != null) {
+            ifLocation = (Location) ifConfirmExp.getLocation().clone();
         }
         else {
             ifLocation = (Location) stmt.getLocation().clone();
         }
-        String ifDetail = "Condition at " + ifLocation.toString() + " is true";
+        String ifDetail =
+                ifConfirmExp.getLocation().getDetails() + ", Condition at "
+                        + ifConditionLoc.toString() + " is true";
         ifLocation.setDetails(ifDetail);
-        ifConfirm.setLocation(ifLocation);
+        ifConfirmExp.setLocation(ifLocation);
 
         // NY YS
         // Duration for If Part
@@ -3333,11 +3371,18 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Modify the confirm details
         ConfirmStmt negIfConfirm = negIfAssertiveCode.getFinalConfirm();
         Exp negIfConfirmExp = negIfConfirm.getAssertion();
-        Location negIfLocation = (Location) ifConfirm.getLocation().clone();
+        Location negIfLocation;
+        if (negIfConfirmExp.getLocation() != null) {
+            negIfLocation = (Location) negIfConfirmExp.getLocation().clone();
+        }
+        else {
+            negIfLocation = (Location) stmt.getLocation().clone();
+        }
         String negIfDetail =
-                "Condition at " + negIfLocation.toString() + " is false";
+                negIfLocation.getDetails() + ", Condition at "
+                        + ifConditionLoc.toString() + " is false";
         negIfLocation.setDetails(negIfDetail);
-        negIfConfirm.setLocation(negIfLocation);
+        negIfConfirmExp.setLocation(negIfLocation);
 
         // NY YS
         // Duration for Else Part
@@ -4222,9 +4267,14 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentAssertiveCode.addAssume((Location) whileLoc.clone(), assume,
                 false);
 
-        // if statement body
+        // if statement body (need to deep copy!)
         edu.clemson.cs.r2jt.collections.List<Statement> ifStmtList =
+                new edu.clemson.cs.r2jt.collections.List<Statement>();
+        edu.clemson.cs.r2jt.collections.List<Statement> whileStmtList =
                 stmt.getStatements();
+        for (Statement s : whileStmtList) {
+            ifStmtList.add((Statement) s.clone());
+        }
 
         // Confirm the inductive case of invariant
         Exp inductiveCase = Exp.copy(invariant);
@@ -4249,9 +4299,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                 decreasingLoc.setDetails("Termination of While Statement");
             }
 
+            // Create a new infix expression
+            IntegerExp oneExp = new IntegerExp();
+            oneExp.setValue(1);
+            oneExp.setMathType(decreasingExp.getMathType());
+            InfixExp leftExp =
+                    new InfixExp(stmt.getLocation(), oneExp, Utilities
+                            .createPosSymbol("+"), Exp.copy(decreasingExp));
+            leftExp.setMathType(decreasingExp.getMathType());
             Exp infixExp =
-                    Utilities.createLessThanExp(decreasingLoc, Exp
-                            .copy(decreasingExp), Exp.copy(nqv), BOOLEAN);
+                    Utilities.createLessThanEqExp(decreasingLoc, leftExp, Exp
+                            .copy(nqv), BOOLEAN);
 
             // Confirm NQV(RP, Cum_Dur) <= El_Dur_Exp
             if (nqv2 != null) {
@@ -4270,6 +4328,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
 
             ifStmtList.add(new ConfirmStmt(decreasingLoc, infixExp, false));
+        }
+        else {
+            throw new RuntimeException("No decreasing clause!");
         }
 
         // empty elseif pair

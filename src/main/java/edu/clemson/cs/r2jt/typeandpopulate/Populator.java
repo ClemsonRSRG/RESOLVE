@@ -624,7 +624,7 @@ public class Populator extends TreeWalkerVisitor {
             }
 
             if (!curOpParam.getName().equals(curProcParam.getName())) {
-                throw new SourceErrorException("Parmeter name does not "
+                throw new SourceErrorException("Parameter name does not "
                         + "match corresponding operation parameter name."
                         + "\n\nExpected name: " + curOpParam.getName() + " ("
                         + curOpParam.getSourceModuleIdentifier() + "."
@@ -633,6 +633,21 @@ public class Populator extends TreeWalkerVisitor {
                         .getDefiningElement().getLocation());
             }
         }
+
+        // If there is a decreasing clause, check to see if it is an "N"
+        /*if (dec.getRecursive()) {
+            MathSymbolEntry intendedEntry =
+                    getIntendedEntry(null, "N", dec.getDecreasing());
+            try {
+                if (!dec.getDecreasing().getMathType().isSubtypeOf(
+                        intendedEntry.getTypeValue())) {
+                    expected(dec.getDecreasing(), intendedEntry.getTypeValue());
+                }
+            }
+            catch (SymbolNotOfKindTypeException e) {
+                notAType(intendedEntry, dec.getLocation());
+            }
+        }*/
 
         try {
             myBuilder.getInnermostActiveScope().addProcedure(

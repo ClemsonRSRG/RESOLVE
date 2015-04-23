@@ -75,7 +75,7 @@ public class AssertiveCode {
         }
         myVerificationStmtList = new ArrayList<VerificationStatement>();
         for (VerificationStatement stmt : old.myVerificationStmtList) {
-            myVerificationStmtList.add(stmt);
+            myVerificationStmtList.add((VerificationStatement) stmt.clone());
         }
         myInstantiatingElement = old.myInstantiatingElement;
     }
