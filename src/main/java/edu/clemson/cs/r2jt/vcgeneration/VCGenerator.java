@@ -3225,7 +3225,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             ifLocation = (Location) stmt.getLocation().clone();
         }
         String ifDetail =
-                ifConfirmExp.getLocation().getDetails() + ", Condition at "
+                ifLocation.getDetails() + ", Condition at "
                         + ifConditionLoc.toString() + " is true";
         ifLocation.setDetails(ifDetail);
         ifConfirmExp.setLocation(ifLocation);
