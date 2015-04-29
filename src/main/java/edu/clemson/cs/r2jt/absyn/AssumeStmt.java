@@ -84,11 +84,6 @@ public class AssumeStmt extends Statement {
         myAssertion = assertion;
     }
 
-    /** Sets whether we simplify the expression or not */
-    public void setSimplify(boolean isStipulate) {
-        myIsStipulate = isStipulate;
-    }
-
     // ===========================================================
     // Public Methods
     // ===========================================================
