@@ -118,8 +118,8 @@ public class HardCoded {
             b.addBinding("or", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
                     g.BOOLEAN));
 
-            //b.addBinding("Z", v, g.CLS, g.Z);
-            //b.addBinding("-", v, new MTFunction(g, g.Z, g.Z));
+            b.addBinding("Z", v, g.CLS, g.Z);
+            b.addBinding("-", v, new MTFunction(g, g.Z, g.Z));
         }
         catch (DuplicateSymbolException dse) {
             //Not possible--we're the first ones to add anything
