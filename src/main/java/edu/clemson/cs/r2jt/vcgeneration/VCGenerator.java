@@ -1855,9 +1855,12 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Only do simplifications if we have an and operator
             if (infixExp.getOpName().equals("and")) {
                 // Recursively call simplify on the left and on the right
-                AssumeStmt left = new AssumeStmt(Exp.copy(infixExp.getLeft()));
+                AssumeStmt left =
+                        new AssumeStmt(stmt.getLocation(), Exp.copy(infixExp
+                                .getLeft()), stmt.getIsStipulate());
                 AssumeStmt right =
-                        new AssumeStmt(Exp.copy(infixExp.getRight()));
+                        new AssumeStmt(stmt.getLocation(), Exp.copy(infixExp
+                                .getRight()), stmt.getIsStipulate());
                 exp = simplifyAssumeRule(left, exp);
                 exp = simplifyAssumeRule(right, exp);
 
