@@ -140,7 +140,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         // However, I need to store types for functions/relations.
         // Building these here.
         // It would be far better to handle this upstream.
-        if (ps.getSubExpressions().size() > 0) {
+        // Currently PExps from theorems have correct type set already
+        if (ps.getSubExpressions().size() > 0
+                && !type.getClass().getSimpleName().equals("MTFunction")) {
             List<MTType> paramList = new ArrayList<MTType>();
             for (PExp pParam : ps.getSubExpressions()) {
                 paramList.add(pParam.getType());

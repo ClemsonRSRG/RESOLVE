@@ -4,7 +4,7 @@
 
     <artifactId>RESOLVE</artifactId>
     <groupId>edu.clemson.cs.rsrg</groupId>
-    <version>15.02.09a</version>
+    <version>15.04.15a</version>
     <packaging>jar</packaging>
 
     <name>RESOLVE</name>
@@ -18,7 +18,7 @@
     <developers>
 
         <developer>
-            <name>YuShan Sun</name>
+            <name>Yu-Shan Sun</name>
             <roles>
                 <role>Project lead - RESOLVE</role>
             </roles>
@@ -198,6 +198,7 @@
                         <exclude>rsrg-format.xml</exclude>
                         <exclude>LICENSE.txt</exclude>
                         <exclude>src/main/antlr3/**</exclude>
+                        <exclude>src/main/antlr4/**</exclude>
                         <exclude>src/main/java/edu/clemson/cs/r2jt/parsing/.makify</exclude>
                         <exclude>src/main/resources/**</exclude>
                     </excludes>

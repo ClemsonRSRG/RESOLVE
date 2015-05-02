@@ -26,17 +26,17 @@ public class AssumeStmt extends Statement {
     /** The left member. */
     private Exp myAssertion;
 
-    /** The simplify flag */
-    private boolean mySimplify;
+    /** The stipulate flag */
+    private boolean myIsStipulate;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
-    public AssumeStmt(Location location, Exp assertion, boolean simplify) {
+    public AssumeStmt(Location location, Exp assertion, boolean isStipulate) {
         myLocation = location;
         myAssertion = assertion;
-        mySimplify = simplify;
+        myIsStipulate = isStipulate;
     }
 
     public AssumeStmt(Location location, Exp assertion) {
@@ -65,9 +65,9 @@ public class AssumeStmt extends Statement {
         return myAssertion;
     }
 
-    /** Returns whether we simplify the expression or not */
-    public boolean getSimplify() {
-        return mySimplify;
+    /** Returns whether is is a stipulate assume expression or not */
+    public boolean getIsStipulate() {
+        return myIsStipulate;
     }
 
     // -----------------------------------------------------------
@@ -85,8 +85,8 @@ public class AssumeStmt extends Statement {
     }
 
     /** Sets whether we simplify the expression or not */
-    public void setSimplify(boolean simplify) {
-        mySimplify = simplify;
+    public void setSimplify(boolean isStipulate) {
+        myIsStipulate = isStipulate;
     }
 
     // ===========================================================
@@ -132,6 +132,6 @@ public class AssumeStmt extends Statement {
 
     public AssumeStmt clone() {
         return new AssumeStmt((Location) myLocation.clone(), Exp
-                .copy(myAssertion), mySimplify);
+                .copy(myAssertion), myIsStipulate);
     }
 }
