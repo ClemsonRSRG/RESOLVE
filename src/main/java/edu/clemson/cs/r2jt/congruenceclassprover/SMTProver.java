@@ -182,7 +182,8 @@ public class SMTProver {
             }
 
         }
-        //declarations += "(declare-fun Entry.IsInitial (Entry) B)\n";
+        declarations += "(declare-fun Entry.IsInitial (Entry) B)\n";
+
         String script = declarations + assertions;
         script = script.replaceAll("[/'/_]", "");
         script += "\n" + ("(echo \"" + vc.getName() + "\")(check-sat)\n");
