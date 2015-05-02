@@ -113,7 +113,7 @@ public class SMTProver {
             m_smtlibScript = replaceIntegerSymbols(m_smtlibScript);
 
         }
-        createSMTScriptForProvingTheoremFile("Integer_Theory");
+        //createSMTScriptForProvingTheoremFile("Integer_Theory");
 
     }
 
@@ -126,9 +126,6 @@ public class SMTProver {
         for (Map.Entry<String, MTType> kv : typeMap.entrySet()) {
             MTType type = kv.getValue();
             String s = kv.getKey();
-            if (s.equals("E")) {
-                int k = 9;
-            }
             if (m_theorem_decls.contains(s))
                 continue;
             if (type.getClass().getSimpleName().equals("MTNamed")
@@ -147,7 +144,13 @@ public class SMTProver {
             }
             else if (type.getClass().getSimpleName().equals(
                     "MTFunctionApplication")) {
+
                 MTFunctionApplication mtf = (MTFunctionApplication) type;
+                if(mtf.getName().equals("Str")){
+                    declarations +=
+                            "(declare-const " + s + " SStr)\n";
+                    continue;
+                }
                 String args = "";
                 for (MTType m : mtf.getArguments()) {
                     if (m.getClass().getSimpleName().equals("MTNamed")
@@ -158,6 +161,7 @@ public class SMTProver {
                     }
                     args += m.toString() + " ";
                 }
+
                 declarations +=
                         "(declare-const " + s + " (" + mtf.getName() + " "
                                 + args + ") )\n";
@@ -193,6 +197,7 @@ public class SMTProver {
         moduleIdExclusion.add("Natural_Number_Theory");
         moduleIdExclusion.add("Boolean_Theory");
         moduleIdExclusion.add("Set_Theory");
+        moduleIdExclusion.add("Conditional_Function_Theory");
         if (useSolvers) {
             moduleIdExclusion.add("Integer_Theory");
         }
@@ -233,6 +238,8 @@ public class SMTProver {
                     if (typeClass.equals("MTFunction")) {
                         MTFunction mtf = (MTFunction) type;
                         String paramTypes = mtf.getParamString();
+                        if(name.equals("ArrayIsInitialinRange")) continue;
+                        if(name.equals("Content"))continue;
                         if (name.equals("Str")) {
                             declString +=
                                     "(define-sort " + name + " (" + paramTypes
@@ -304,8 +311,10 @@ public class SMTProver {
 
 
          */
-        String fname = "temp.smt";
+        //String fname = "temp.smt";
+        int f = 1;
         for (String vcS : m_perVCsmtLibScripts) {
+            String fname = "temp" + (f++) + ".smt";
             long perVCtime = System.currentTimeMillis();
             createTextFile(fname, vcS);
 

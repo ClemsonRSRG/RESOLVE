@@ -60,7 +60,7 @@ public class VerificationConditionCongruenceClosureImpl {
         forAllQuantifiedPExps = new ArrayList<PExp>();
         addPExp(m_antecedent.iterator(), true);
         addPExp(m_consequent.iterator(), false);
-        //naturalNumsFix();
+        naturalNumsFix();
     }
 
     protected void naturalNumsFix() {
