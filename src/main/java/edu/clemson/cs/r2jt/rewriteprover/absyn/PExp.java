@@ -516,7 +516,7 @@ public abstract class PExp {
         }
         else {
             throw new RuntimeException("Expressions of type " + e.getClass()
-                    + " are not accepted by the prover.");
+                    + " are not accepted by the prover." + e.getLocation());
         }
 
         //The Analyzer doesn't work consistently.  Fail early if we don't have

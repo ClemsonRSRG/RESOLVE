@@ -52,7 +52,7 @@ public class SMTProver {
     private final String[] m_perVCsmtLibScripts;
     private final TypeGraph m_typeGraph;
     private final boolean useSolvers = false;
-    private final long DEFAULTTIMEOUT = 10000;
+    private final long DEFAULTTIMEOUT = 20000;
     private int numVCs;
     private Set<String> m_theorem_decls;
     public final static String TypeSort = "MType";
