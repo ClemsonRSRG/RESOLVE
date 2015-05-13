@@ -278,7 +278,6 @@ public class ResolveCompiler2 {
             JavaTranslator.setUpFlags();
             CTranslator.setUpFlags();
             Archiver.setUpFlags();
-            ResolveCompiler.setUpFlags();
             VCGenerator.setUpFlags();
             AlgebraicProver.setUpFlags();
             CongruenceClassProver.setUpFlags();
