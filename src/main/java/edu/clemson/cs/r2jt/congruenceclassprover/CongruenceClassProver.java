@@ -276,6 +276,7 @@ public class CongruenceClassProver {
             //theseResults += "Iteration " + iteration++ + "\n";
             int max_Theorems_to_choose = 1;
             int num_Theorems_chosen = 0;
+            long timeAtLastIter = System.currentTimeMillis();
             while (!rankedTheorems.m_pQueue.isEmpty()
                     && status
                             .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
@@ -307,10 +308,12 @@ public class CongruenceClassProver {
                             if (substitutionMade != "") {
                                 applied.add(curP.m_theorem.toString());
                                 theseResults +=
-                                        "Iter:" + ++iteration + "\n["
+                                        "Iter:" + ++iteration + " Iter Time: " + (System.currentTimeMillis() - timeAtLastIter) + " Elapsed Time: "
+                                                + (System.currentTimeMillis() - startTime) +  "\n["
                                                 + theoremScore + "]"
                                                 + curP.toString() + "\t"
                                                 + substitutionMade + "\n\n";
+                                timeAtLastIter = System.currentTimeMillis();
                                 status = vcc.isProved();
                                 num_Instantiated_added++;
                                 int count = 0;

@@ -51,7 +51,7 @@ public class TheoremPrioritizer {
     public int calculateScore(Set<String> theorem_symbols) {
         int count_of_functions_not_in_vc = 0;
         int size = m_vc_symbols.keySet().size();
-        int score = size;
+        int score = 0;
         for (String s : theorem_symbols) {
 
             if (m_vc_symbols.containsKey(s)) {
