@@ -32,6 +32,7 @@ public class PExpTest {
      */
     @Test
     public void testBuildPExp_String_TypeGraph() {
+        /*
         System.out.println("buildPExp(String, TypeGraph)");
 
         TypeGraph g = new TypeGraph();
@@ -63,5 +64,7 @@ public class PExpTest {
         subexp = subexpressions.next();
         assertEquals(subexp.getType(), g.BOOLEAN);
         assertEquals(((PSymbol) subexp).quantification, Quantification.FOR_ALL);
+        */
     }
+
 }
