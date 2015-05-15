@@ -64,17 +64,18 @@ public class VerificationConditionCongruenceClosureImpl {
 
     }
 
-    protected void makeNumsN(){
+    protected void makeNumsN() {
         if (m_registry.m_typeDictionary.containsKey("N")) {
             MTType natType = m_registry.m_typeDictionary.get("N");
-            for(int i = 0; i < m_registry.m_indexToSymbol.size(); ++i){
+            for (int i = 0; i < m_registry.m_indexToSymbol.size(); ++i) {
                 String s = m_registry.m_indexToSymbol.get(i);
-                if(s.matches("[0-9]+")){
-                    m_registry.m_indexToType.set(i,natType);
+                if (s.matches("[0-9]+")) {
+                    m_registry.m_indexToType.set(i, natType);
                 }
             }
         }
     }
+
     protected void makeNZ() {
         if (m_registry.m_typeDictionary.containsKey("N")) {
             MTType natType = m_registry.m_typeDictionary.get("N");

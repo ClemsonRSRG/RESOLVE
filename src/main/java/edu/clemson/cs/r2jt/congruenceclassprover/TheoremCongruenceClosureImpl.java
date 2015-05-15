@@ -303,7 +303,7 @@ public class TheoremCongruenceClosureImpl {
                 continue;
             if (dType.isSubtypeOf(oType))
                 continue;
-            if(dType.toString().equals(oType.toString()))
+            if (dType.toString().equals(oType.toString()))
                 continue;
             if (oType.getClass().getSimpleName().equals("MTFunction")
                     && dType.getClass().getSimpleName().equals("MTFunction")) {
@@ -356,12 +356,13 @@ public class TheoremCongruenceClosureImpl {
                         + oRange + " dest: " + dType); */
             }
             //if(m_theoremString.contains("Prt_Btwn")) {
-                /*System.err.println("Failed type check: " + oSymbol + "(from theorem): " + oType
-                        + " " + dSymbol + ": " + dType);
-                System.err.println(m_theoremString);*/
+            /*System.err.println("Failed type check: " + oSymbol + "(from theorem): " + oType
+                    + " " + dSymbol + ": " + dType);
+            System.err.println(m_theoremString);*/
             //}
-            if(oType.toString().equals(dType.toString())){
-                System.err.println("Type error" + oType.toString() + "\n" + m_theoremString + "\n" + dSymbol);
+            if (oType.toString().equals(dType.toString())) {
+                System.err.println("Type error" + oType.toString() + "\n"
+                        + m_theoremString + "\n" + dSymbol);
             }
             box.m_failedBindings = box.m_bindings;
             return false;

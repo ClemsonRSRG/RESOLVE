@@ -2211,18 +2211,6 @@ public abstract class TreeWalkerVisitor {
 
     public void postProgramIntegerExp(ProgramIntegerExp data) {}
 
-    // ProgramOpExp
-    public boolean walkProgramOpExp(ProgramOpExp data) {
-        return false;
-    }
-
-    public void preProgramOpExp(ProgramOpExp data) {}
-
-    public void midProgramOpExp(ProgramOpExp node,
-            ResolveConceptualElement previous, ResolveConceptualElement next) {}
-
-    public void postProgramOpExp(ProgramOpExp data) {}
-
     // ProgramParamExp
     public boolean walkProgramParamExp(ProgramParamExp data) {
         return false;

@@ -1500,8 +1500,13 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postProgramIntegerExp(ProgramIntegerExp e) {
-        e.setProgramType(getIntegerProgramType());
-        e.setMathType(myTypeGraph.Z);
+        // YS: We need to set the PTType to Integer
+        // and the MathType to Z. Not sure if this the right fix,
+        // but I simply got the the math type of the PTType (Integer),
+        // which has Z as its math type.
+        PTType ptType = getIntegerProgramType();
+        e.setProgramType(ptType);
+        e.setMathType(ptType.toMath());
     }
 
     @Override
@@ -1524,12 +1529,6 @@ public class Populator extends TreeWalkerVisitor {
         PTType ptType = getStringProgramType();
         e.setProgramType(ptType);
         e.setMathType(ptType.toMath());
-    }
-
-    @Override
-    public void postProgramOpExp(ProgramOpExp e) {
-        e.setProgramType(e.getProgramType(myTypeGraph));
-        e.setMathType(e.getProgramType().toMath());
     }
 
     @Override

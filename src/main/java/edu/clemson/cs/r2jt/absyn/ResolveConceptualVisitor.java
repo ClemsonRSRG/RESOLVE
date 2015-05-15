@@ -140,8 +140,6 @@ public class ResolveConceptualVisitor {
 
     public void visitAffectsItem(AffectsItem data) {}
 
-    public void visitProgramOpExp(ProgramOpExp data) {}
-
     public void visitVariableRecordExp(VariableRecordExp data) {}
 
     public void visitMathTypeFormalDec(MathTypeFormalDec data) {}

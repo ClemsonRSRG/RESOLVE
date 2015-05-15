@@ -750,7 +750,7 @@ public class PSymbol extends PExp {
             PExp cur = subIt.next();
 
             if (cur.getSubExpressions().size() > 0)
-                argsString +=  cur.toSMTLIB(typeMap);
+                argsString += cur.toSMTLIB(typeMap);
             else {
                 String op = cur.getTopLevelOperation();
                 op = SMTProver.replaceReservedChars(op);
@@ -763,7 +763,7 @@ public class PSymbol extends PExp {
             }
         }
         String combined = opString + " " + argsString;
-        if(!argsString.equals("")){
+        if (!argsString.equals("")) {
             combined = "(" + combined + ")";
         }
         if (negate)

@@ -308,9 +308,13 @@ public class CongruenceClassProver {
                             if (substitutionMade != "") {
                                 applied.add(curP.m_theorem.toString());
                                 theseResults +=
-                                        "Iter:" + ++iteration + " Iter Time: " + (System.currentTimeMillis() - timeAtLastIter) + " Elapsed Time: "
-                                                + (System.currentTimeMillis() - startTime) +  "\n["
-                                                + theoremScore + "]"
+                                        "Iter:"
+                                                + ++iteration
+                                                + " Iter Time: "
+                                                + (System.currentTimeMillis() - timeAtLastIter)
+                                                + " Elapsed Time: "
+                                                + (System.currentTimeMillis() - startTime)
+                                                + "\n[" + theoremScore + "]"
                                                 + curP.toString() + "\t"
                                                 + substitutionMade + "\n\n";
                                 timeAtLastIter = System.currentTimeMillis();

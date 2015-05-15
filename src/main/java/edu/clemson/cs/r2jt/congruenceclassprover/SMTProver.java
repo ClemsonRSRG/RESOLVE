@@ -48,7 +48,7 @@ public class SMTProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_smtlibScript = "";
-    private String m_theoremScript ="";
+    private String m_theoremScript = "";
     private final String[] m_perVCsmtLibScripts;
     private final TypeGraph m_typeGraph;
     private final boolean useSolvers = false;
@@ -118,7 +118,6 @@ public class SMTProver {
 
             i += 1;
         }
-        
 
     }
 
@@ -145,8 +144,7 @@ public class SMTProver {
             if (type.getClass().getSimpleName().equals("MTNamed")) {
                 declarations +=
                         "(declare-const " + s + " " + NameSort + ") " + "\n";
-                declarations +=
-                        "(assert (EleOf " + s + " Entity))\n";
+                declarations += "(assert (EleOf " + s + " Entity))\n";
 
             }
             else if (type.getClass().getSimpleName().equals(
@@ -163,7 +161,7 @@ public class SMTProver {
                         namedSort.add(argTypeString);
                     }
 
-                    args +=  "Entity ";
+                    args += "Entity ";
                 }
                 declarations += "(declare-const " + s + " " + NameSort + " )\n";
                 declarations +=
@@ -197,7 +195,8 @@ public class SMTProver {
     }
 
     String getTheoremSMTStr(boolean useSolvers) {
-        String rString = "(set-option :smt.auto-config false)\n(set-option :smt.mbqi false)\n";
+        String rString =
+                "(set-option :smt.auto-config false)\n(set-option :smt.mbqi false)\n";
         Set<String> moduleIdExclusion = new HashSet<String>();
         //moduleIdExclusion.add("GLOBAL");
         //moduleIdExclusion.add("Natural_Number_Theory");
@@ -225,13 +224,15 @@ public class SMTProver {
         HashSet<String> declaredFuns = new HashSet<String>(); // for overloading
         for (MathSymbolEntry m : mathSymbolEntries) {
             String source = m.getSourceModuleIdentifier().toString();
-            if(source.equals("String_Theory")) usingStringTheory = true;
+            if (source.equals("String_Theory"))
+                usingStringTheory = true;
             if (!(moduleIdExclusion.contains(source))) {
                 MTType type = m.getType();
                 String typeString = type.toString();
                 String typeClass = type.getClass().getSimpleName();
                 String name = replaceReservedChars(m.getName());
-                if(name.contains(".."))continue;
+                if (name.contains(".."))
+                    continue;
                 if (typeString.equals("MType")) {
                     declString +=
                             "(declare-const " + name + " " + TypeSort + ") "
@@ -269,10 +270,13 @@ public class SMTProver {
                         String funcDecl =
                                 "(declare-fun " + name + " (" + paramString
                                         + ") " + rangeString + ")\n";
-                        String trClause = mtf.getTypeRestrictionClauseForSMT(name) + "\n";
-                        if(trClause.contains("->")) trClause = "";
-                        if(trClause.contains(" Set")) trClause ="";
-                        if (!declaredFuns.contains(funcDecl) ) {
+                        String trClause =
+                                mtf.getTypeRestrictionClauseForSMT(name) + "\n";
+                        if (trClause.contains("->"))
+                            trClause = "";
+                        if (trClause.contains(" Set"))
+                            trClause = "";
+                        if (!declaredFuns.contains(funcDecl)) {
                             declString += funcDecl;
                             declString += trClause;
                             declaredFuns.add(funcDecl);
@@ -305,29 +309,41 @@ public class SMTProver {
         smtTheorems +=
                 "(assert (forall ((s " + NameSort
                         + ")) ( => (EleOf s N) (EleOf s Z))))\n";
-        if(usingStringTheory) {
+        if (usingStringTheory) {
             smtTheorems +=
                     "(assert (forall ((t " + TypeSort + ")(s " + NameSort
                             + " )) (=> (EleOf s (" + ReserveString
                             + "Str t)) (EleOf s SStr))))\n";
-            smtTheorems += "(assert( forall((s0 Syms)(s1 " + TypeSort +"))(EleOf(@!<!> s0)(" + ReserveString+"Str s1))))\n";
-            smtTheorems += "(assert( forall((s0 " + TypeSort +"))(EleOf @!Empty!String (@!Str s0))))\n";
-            smtTheorems += "(assert( forall((s0 Syms)(t0 " + TypeSort + "))(=>(EleOf s0 t0)(EleOf(@!<!> s0) (@!Str t0)))))";
+            smtTheorems +=
+                    "(assert( forall((s0 Syms)(s1 " + TypeSort
+                            + "))(EleOf(@!<!> s0)(" + ReserveString
+                            + "Str s1))))\n";
+            smtTheorems +=
+                    "(assert( forall((s0 " + TypeSort
+                            + "))(EleOf @!Empty!String (@!Str s0))))\n";
+            smtTheorems +=
+                    "(assert( forall((s0 Syms)(t0 "
+                            + TypeSort
+                            + "))(=>(EleOf s0 t0)(EleOf(@!<!> s0) (@!Str t0)))))";
             /*
             Type Theorem Concatenation_Preserves_Generic_Type:
-		For all T : MType,
-		For all U, V : Str(T),
-			U o V : Str(T);
+            For all T : MType,
+            For all U, V : Str(T),
+            U o V : Str(T);
              */
-            smtTheorems += "(assert( forall((u Syms)(v Syms)(t " + TypeSort + ")) (=> (and (EleOf u (@!Str t))(EleOf v (@!Str t)))(EleOf (@!o u v) (@!Str t)))))";
+            smtTheorems +=
+                    "(assert( forall((u Syms)(v Syms)(t "
+                            + TypeSort
+                            + ")) (=> (and (EleOf u (@!Str t))(EleOf v (@!Str t)))(EleOf (@!o u v) (@!Str t)))))";
             /*
             Type Theorem Reverse_Preserves_Generic_Type:
-		For all T : MType,
-		For all S : Str(T),
-			Reverse(S) : Str(T);
+            For all T : MType,
+            For all S : Str(T),
+            Reverse(S) : Str(T);
 
              */
-            smtTheorems += "(assert( forall((s Syms)(t MType)) (=> (EleOf s (@!Str t))(EleOf (@!Reverse s) (@!Str t)))))";
+            smtTheorems +=
+                    "(assert( forall((s Syms)(t MType)) (=> (EleOf s (@!Str t))(EleOf (@!Reverse s) (@!Str t)))))";
         }
         rString += smtTheorems;
         return rString;

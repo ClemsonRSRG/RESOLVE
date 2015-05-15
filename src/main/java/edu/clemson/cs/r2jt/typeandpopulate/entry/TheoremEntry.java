@@ -108,8 +108,7 @@ public class TheoremEntry extends SymbolTableEntry {
         }
         else if (forAllString.length() == 0) {
             if (!negate)
-                return "(assert " + myAssertionAsPExp.toSMTLIB(typeMap)
-                        + ")";
+                return "(assert " + myAssertionAsPExp.toSMTLIB(typeMap) + ")";
             else
                 return "(assert(not " + myAssertionAsPExp.toSMTLIB(typeMap)
                         + "))";
