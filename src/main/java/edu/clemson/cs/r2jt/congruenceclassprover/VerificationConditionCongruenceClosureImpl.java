@@ -60,10 +60,22 @@ public class VerificationConditionCongruenceClosureImpl {
         forAllQuantifiedPExps = new ArrayList<PExp>();
         addPExp(m_antecedent.iterator(), true);
         addPExp(m_consequent.iterator(), false);
-        //naturalNumsFix();
+        makeNumsN();
+
     }
 
-    protected void naturalNumsFix() {
+    protected void makeNumsN(){
+        if (m_registry.m_typeDictionary.containsKey("N")) {
+            MTType natType = m_registry.m_typeDictionary.get("N");
+            for(int i = 0; i < m_registry.m_indexToSymbol.size(); ++i){
+                String s = m_registry.m_indexToSymbol.get(i);
+                if(s.matches("[0-9]+")){
+                    m_registry.m_indexToType.set(i,natType);
+                }
+            }
+        }
+    }
+    protected void makeNZ() {
         if (m_registry.m_typeDictionary.containsKey("N")) {
             MTType natType = m_registry.m_typeDictionary.get("N");
             Set<String> natSymbols = m_registry.getSetMatchingType(natType);
