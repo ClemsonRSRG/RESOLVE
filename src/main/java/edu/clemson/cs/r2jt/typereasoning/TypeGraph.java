@@ -64,7 +64,6 @@ public class TypeGraph {
 
     public final MTProper SET = new MTProper(this, CLS, true, "SSet");
     public final MTProper BOOLEAN = new MTProper(this, CLS, false, "B");
-    public final MTProper Z = new MTProper(this, CLS, false, "Z");
     public final MTProper R = new MTProper(this, CLS, false, "R");
     public final MTProper ATOM = new MTProper(this, CLS, false, "Atom");
     public final MTProper VOID = new MTProper(this, CLS, false, "Void");

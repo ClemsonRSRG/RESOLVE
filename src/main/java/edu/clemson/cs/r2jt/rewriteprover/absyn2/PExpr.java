@@ -184,7 +184,7 @@ public abstract class PExpr {
      * @param description
      * @return
      */
-    public static PExpr buildPExp(String description, TypeGraph g) {
+    /*public static PExpr buildPExp(String description, TypeGraph g) {
         Deque<PExpr> stack = new LinkedList<PExpr>();
 
         PSymbol.Quantification quant = PSymbol.Quantification.NONE;
@@ -274,37 +274,7 @@ public abstract class PExpr {
         }
 
         return result;
-    }
-
-    /**
-     * <p>Simply walks the tree represented by the given <code>Exp</code> and
-     * sounds the alarm if it or any sub-expression does not have a type.  As
-     * a convenience, returns the same expression it is given so that it can
-     * be used without introducing intermediate variables.</p>
-     *
-     * @param e
-     */
-    public static <E extends ExprAST> E sanityCheckExp(E e) {
-
-        if (e.getMathType() == null) {
-
-            String varExpAdditional = "";
-            if (e instanceof MathSymbolAST) {
-                varExpAdditional =
-                        " = \"" + ((MathSymbolAST) e).getName().getText()
-                                + "\"";
-            }
-
-            throw new UnsupportedOperationException(
-                    "Expression has null type.\n\n" + e + " (" + e.getClass()
-                            + ")" + varExpAdditional);
-        }
-
-        for (ExprAST subexp : e.getSubExpressions()) {
-            sanityCheckExp(subexp);
-        }
-        return e;
-    }
+    }*/
 
     public static PExpr buildPExp(ExprAST e) {
         PExpr retval;
