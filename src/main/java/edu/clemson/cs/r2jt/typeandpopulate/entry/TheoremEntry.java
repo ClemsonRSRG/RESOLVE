@@ -92,10 +92,10 @@ public class TheoremEntry extends SymbolTableEntry {
             String name = ps.toSMTLIB(null);
 
             if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
-                forAllString += "( " + name + " " + nameSort + " )";
+                forAllString += "(" + name + " " + nameSort + ")";
                 if (nameSort != "B") {
                     typeRestrictionString +=
-                            "( " + "EleOf " + name + " " + type + " )";
+                            "(" + "EleOf " + name + " " + type + ")";
                     varCount++;
                 }
             }
@@ -104,25 +104,25 @@ public class TheoremEntry extends SymbolTableEntry {
                         "Only universal quantification is supported.");
         }
         if (forAllString.length() > 0) {
-            forAllString = " forall ( " + forAllString + " ) ";
+            forAllString = "forall(" + forAllString + ")";
         }
         else if (forAllString.length() == 0) {
             if (!negate)
-                return "(assert ( " + myAssertionAsPExp.toSMTLIB(typeMap)
-                        + ") )";
+                return "(assert " + myAssertionAsPExp.toSMTLIB(typeMap)
+                        + ")";
             else
-                return "(assert ( not ( " + myAssertionAsPExp.toSMTLIB(typeMap)
-                        + ") ) )";
+                return "(assert(not " + myAssertionAsPExp.toSMTLIB(typeMap)
+                        + "))";
         }
         if (varCount > 1) {
-            typeRestrictionString = "( and " + typeRestrictionString + " ) ";
+            typeRestrictionString = "(and " + typeRestrictionString + ")";
         }
         String assertion =
-                forAllString + " ( => " + typeRestrictionString + "( "
-                        + myAssertionAsPExp.toSMTLIB(typeMap) + " )) ";
+                "(" + forAllString + " (=> " + typeRestrictionString
+                        + myAssertionAsPExp.toSMTLIB(typeMap) + "))";
         if (!negate)
-            return "(assert ( " + assertion + " )) ";
+            return "(assert " + assertion + ") ";
         else
-            return "(assert ( not ( " + assertion + " ))) ";
+            return "(assert(not " + assertion + "))";
     }
 }

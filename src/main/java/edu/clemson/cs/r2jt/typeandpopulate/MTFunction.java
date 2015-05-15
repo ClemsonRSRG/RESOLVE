@@ -370,7 +370,48 @@ public class MTFunction extends MTAbstract<MTFunction> {
         return rString;
 
     }
-
+    public String getTypeRestrictionClauseForSMT(String funName){
+        // for all i,j : Syms, i:T, J:U implies op i j:V
+        String range = getRange().toString();
+        if(range.equals("B") || range.equals("MType") || range.contains("'"))
+            return "";
+        String trClause = "";
+        String sorts = "";
+        String antC = "";
+        String sucC = funName;
+        String pName = "s";
+        String tName = "";
+        int n = 0;
+        int antCount = 0;
+        for(MTType m : myParamTypes){
+           pName = pName + n++;
+            if (m.toString().equals("B")) {
+                tName = "B ";
+            }
+            else if (m.toString().equals("MType")) {
+                tName = SMTProver.TypeSort;
+            }
+            else if (m.toString().contains("'")){
+                return "";
+            }
+            else {
+                tName = SMTProver.NameSort;
+                antC += "(EleOf " + pName + " " + m.toString() + ")";
+                antCount ++;
+            }
+            sorts += "("+ pName + " " + tName +")";
+            sucC += " " + pName;
+        }
+        if(antCount > 1){
+            antC = "(and "+ antC + ")";
+        }
+        sucC = "(EleOf(" + sucC + ")" + range + ")";
+        if(antCount > 0)
+            trClause = "(assert( forall(" + sorts + ")(=>" + antC + sucC + ")))";
+        else
+            trClause  = "(assert( forall(" + sorts + ")" + sucC + ")))";
+        return trClause;
+    }
     private static List<String> getParamNames(
             edu.clemson.cs.r2jt.collections.List<MathVarDec> params) {
 
