@@ -48,10 +48,11 @@ public class SMTProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_smtlibScript = "";
+    private String m_theoremScript ="";
     private final String[] m_perVCsmtLibScripts;
     private final TypeGraph m_typeGraph;
     private final boolean useSolvers = false;
-    private final long DEFAULTTIMEOUT = 10000;
+    private final long DEFAULTTIMEOUT = 20000;
     private int numVCs;
     private Set<String> m_theorem_decls;
     public final static String TypeSort = "MType";
@@ -102,14 +103,14 @@ public class SMTProver {
         m_scope = scope;
         m_perVCsmtLibScripts = new String[vcs.size()];
         String vcDecls = "";
-        String theoremsInSMTLib = getTheoremSMTStr(useSolvers);
+        m_theoremScript = getTheoremSMTStr(useSolvers);
         int i = 0;
         for (VC vc : vcs) {
             myModels[i] = (new PerVCProverModel(g, vc.getName(), vc, null));
             vcDecls += "(push)\n";
             String vcString = getVCSMTStr(vc);
             vcDecls += vcString;
-            String vcWtheorems = theoremsInSMTLib + vcString;
+            String vcWtheorems = m_theoremScript + vcString;
             m_perVCsmtLibScripts[i] = vcWtheorems;
             if (i < vcs.size()) {
                 vcDecls += "(pop)\n";
@@ -117,6 +118,7 @@ public class SMTProver {
 
             i += 1;
         }
+        
 
     }
 
@@ -132,19 +134,19 @@ public class SMTProver {
             String s = kv.getKey();
             if (m_theorem_decls.contains(s))
                 continue;
-            if (type.getClass().getSimpleName().equals("MTNamed")
+            /*if (type.getClass().getSimpleName().equals("MTNamed")
                     && !namedSort.contains(typeString)) {
                 declarations +=
                         "(declare-const " + typeString + " " + TypeSort + ") "
                                 + "\n";
                 namedSort.add(typeString);
 
-            }
+            }*/
             if (type.getClass().getSimpleName().equals("MTNamed")) {
                 declarations +=
                         "(declare-const " + s + " " + NameSort + ") " + "\n";
                 declarations +=
-                        "(assert (EleOf " + s + " " + typeString + "))\n";
+                        "(assert (EleOf " + s + " Entity))\n";
 
             }
             else if (type.getClass().getSimpleName().equals(
@@ -161,7 +163,7 @@ public class SMTProver {
                         namedSort.add(argTypeString);
                     }
 
-                    args += argTypeString + " ";
+                    args +=  "Entity ";
                 }
                 declarations += "(declare-const " + s + " " + NameSort + " )\n";
                 declarations +=
@@ -195,12 +197,13 @@ public class SMTProver {
     }
 
     String getTheoremSMTStr(boolean useSolvers) {
-        String rString = "";//"(set-option :smt.mbqi false)\n";
+        String rString = "(set-option :smt.auto-config false)\n(set-option :smt.mbqi false)\n";
         Set<String> moduleIdExclusion = new HashSet<String>();
         //moduleIdExclusion.add("GLOBAL");
         //moduleIdExclusion.add("Natural_Number_Theory");
         moduleIdExclusion.add("Boolean_Theory");
         moduleIdExclusion.add("Set_Theory");
+        boolean usingStringTheory = false;
         if (useSolvers) {
             moduleIdExclusion.add("Integer_Theory");
         }
@@ -222,12 +225,13 @@ public class SMTProver {
         HashSet<String> declaredFuns = new HashSet<String>(); // for overloading
         for (MathSymbolEntry m : mathSymbolEntries) {
             String source = m.getSourceModuleIdentifier().toString();
+            if(source.equals("String_Theory")) usingStringTheory = true;
             if (!(moduleIdExclusion.contains(source))) {
                 MTType type = m.getType();
                 String typeString = type.toString();
                 String typeClass = type.getClass().getSimpleName();
                 String name = replaceReservedChars(m.getName());
-
+                if(name.contains(".."))continue;
                 if (typeString.equals("MType")) {
                     declString +=
                             "(declare-const " + name + " " + TypeSort + ") "
@@ -265,8 +269,12 @@ public class SMTProver {
                         String funcDecl =
                                 "(declare-fun " + name + " (" + paramString
                                         + ") " + rangeString + ")\n";
-                        if (!declaredFuns.contains(funcDecl)) {
+                        String trClause = mtf.getTypeRestrictionClauseForSMT(name) + "\n";
+                        if(trClause.contains("->")) trClause = "";
+                        if(trClause.contains(" Set")) trClause ="";
+                        if (!declaredFuns.contains(funcDecl) ) {
                             declString += funcDecl;
+                            declString += trClause;
                             declaredFuns.add(funcDecl);
                         }
 
@@ -297,10 +305,30 @@ public class SMTProver {
         smtTheorems +=
                 "(assert (forall ((s " + NameSort
                         + ")) ( => (EleOf s N) (EleOf s Z))))\n";
-        smtTheorems +=
-                "(assert (forall ((t " + TypeSort + ")(s " + NameSort
-                        + " )) (=> (EleOf s (" + ReserveString
-                        + "Str t)) (EleOf s SStr))))\n";
+        if(usingStringTheory) {
+            smtTheorems +=
+                    "(assert (forall ((t " + TypeSort + ")(s " + NameSort
+                            + " )) (=> (EleOf s (" + ReserveString
+                            + "Str t)) (EleOf s SStr))))\n";
+            smtTheorems += "(assert( forall((s0 Syms)(s1 " + TypeSort +"))(EleOf(@!<!> s0)(" + ReserveString+"Str s1))))\n";
+            smtTheorems += "(assert( forall((s0 " + TypeSort +"))(EleOf @!Empty!String (@!Str s0))))\n";
+            smtTheorems += "(assert( forall((s0 Syms)(t0 " + TypeSort + "))(=>(EleOf s0 t0)(EleOf(@!<!> s0) (@!Str t0)))))";
+            /*
+            Type Theorem Concatenation_Preserves_Generic_Type:
+		For all T : MType,
+		For all U, V : Str(T),
+			U o V : Str(T);
+             */
+            smtTheorems += "(assert( forall((u Syms)(v Syms)(t " + TypeSort + ")) (=> (and (EleOf u (@!Str t))(EleOf v (@!Str t)))(EleOf (@!o u v) (@!Str t)))))";
+            /*
+            Type Theorem Reverse_Preserves_Generic_Type:
+		For all T : MType,
+		For all S : Str(T),
+			Reverse(S) : Str(T);
+
+             */
+            smtTheorems += "(assert( forall((s Syms)(t MType)) (=> (EleOf s (@!Str t))(EleOf (@!Reverse s) (@!Str t)))))";
+        }
         rString += smtTheorems;
         return rString;
     }
@@ -308,21 +336,7 @@ public class SMTProver {
     public void start() throws IOException {
 
         String pfName = outputProofFile();
-        /*        int hardTimeout = (numVCs * (int)myTimeout)/1000;
 
-         ProcessBuilder pb = new ProcessBuilder("/Users/nabilkabbani/Tools/z3/build/z3", "-smt2", "-t:" + myTimeout, "-T:" + hardTimeout,pfName);
-         pb.inheritIO();
-
-         System.out.println(pfName);
-         Process p = pb.start();
-         try {
-         p.waitFor();
-         } catch (InterruptedException e) {
-         e.printStackTrace();
-         }
-
-
-         */
         int count = 0;
         for (String vcS : m_perVCsmtLibScripts) {
             long perVCtime = System.currentTimeMillis();
@@ -381,86 +395,6 @@ public class SMTProver {
         w.close();
 
         return pfName;
-    }
-
-    protected void createSMTScriptForProvingTheoremFile(String moduleId) {
-        String rString = "";//"(set-option :smt.mbqi false)\n";
-
-        List<MathSymbolEntry> mathSymbolEntries =
-                m_scope.query(new EntryTypeQuery<MathSymbolEntry>(
-                        MathSymbolEntry.class,
-                        MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
-                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
-        String declString =
-                "(declare-sort MType)\n(define-sort Entity() MType)\n(define-sort B() Bool)\n";
-        declString += "(define-sort Z() Int)\n(define-sort N() Int)\n";
-
-        for (MathSymbolEntry m : mathSymbolEntries) {
-            String source = m.getSourceModuleIdentifier().toString();
-            if (source == moduleId) {
-                MTType type = m.getType();
-                String typeString = type.toString();
-                String typeClass = type.getClass().getSimpleName();
-                String name = m.getName().replace("_", "");
-                if (typeString.equals("MType")) {
-                    declString +=
-                            "(define-sort " + name + "() " + "MType) " + "\n";
-                }
-                else if (typeClass.equals("MTProper")) {
-                    declString +=
-                            "(declare-const " + name + " " + typeString + ")\n";
-                }
-                else {
-                    if (typeClass.equals("MTFunction")) {
-                        MTFunction mtf = (MTFunction) type;
-                        String paramTypes = mtf.getParamString();
-                        if (name.equals("Str")) {
-                            declString +=
-                                    "(define-sort " + name + " (" + paramTypes
-                                            + ") " + mtf.getRange().toString()
-                                            + ")\n";
-                        }
-                        else {
-                            declString +=
-                                    "(declare-fun " + name + " (" + paramTypes
-                                            + ") " + mtf.getRange().toString()
-                                            + ")\n";
-                        }
-                    }
-                }
-
-            }
-        }
-        rString += declString;
-        //rString += "(assert (forall ((n N )) (LTE zero n) ))\n";
-        List<TheoremEntry> theoremEntries =
-                m_scope.query(new EntryTypeQuery(TheoremEntry.class,
-                        MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
-                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
-        String smtTheorems = "";
-        int i = 0;
-        for (TheoremEntry e : theoremEntries) {
-            String source = e.getSourceModuleIdentifier().toString();
-            if (moduleId == source) {
-                ++i;
-                String thSmt = "(push)\n " + e.toSMTLIB(null, true); //assertion.toSMTLIB();
-                thSmt += "(echo \"" + e.getAssertion().toString() + "\")\n";
-                thSmt += "(check-sat)\n";
-                if (i < theoremEntries.size())
-                    thSmt += "(pop)\n";
-                smtTheorems += thSmt + "\n";
-            }
-
-        }
-        rString += smtTheorems;
-
-        try {
-            createTextFile("smtProofFileForTheorems.smt", rString);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
 }

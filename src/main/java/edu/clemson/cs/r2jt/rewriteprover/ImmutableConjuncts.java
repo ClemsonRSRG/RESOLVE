@@ -663,24 +663,26 @@ public class ImmutableConjuncts implements Iterable<PExp> {
             for (PSymbol ps : p.getQuantifiedVariables()) {
                 if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL))
                     forAllString +=
-                            "( " + ps.toSMTLIB(typeMap) + " "
-                                    + ps.getType().toString() + " )";
+                            "(" + ps.toSMTLIB(typeMap) + " "
+                                    + ps.getType().toString() + ")";
                 if (ps.quantification
                         .equals(PSymbol.Quantification.THERE_EXISTS))
                     thereExistsString +=
-                            "( " + ps.toSMTLIB(typeMap) + " "
-                                    + ps.getType().toString() + " )";
+                            "(" + ps.toSMTLIB(typeMap) + " "
+                                    + ps.getType().toString() + ")";
             }
             if (forAllString.length() > 0) {
-                forAllString = " forall ( " + forAllString + " ) ";
+                forAllString = "forall(" + forAllString + ")";
             }
             if (thereExistsString.length() > 0) {
-                thereExistsString = " exists ( " + thereExistsString + " ) ";
+                thereExistsString = "exists(" + thereExistsString + ")";
             }
+            String body = forAllString + " " + thereExistsString
+                    + p.toSMTLIB(typeMap);
             rString +=
-                    "(assert( " + forAllString + " " + thereExistsString
-                            + p.toSMTLIB(typeMap) + "))" + ";" + p.toString()
+                    "(assert " + body + ")" + ";" + p.toString()
                             + "\n";
+
         }
         return rString;
     }
