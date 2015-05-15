@@ -677,11 +677,10 @@ public class ImmutableConjuncts implements Iterable<PExp> {
             if (thereExistsString.length() > 0) {
                 thereExistsString = "exists(" + thereExistsString + ")";
             }
-            String body = forAllString + " " + thereExistsString
-                    + p.toSMTLIB(typeMap);
-            rString +=
-                    "(assert " + body + ")" + ";" + p.toString()
-                            + "\n";
+            String body =
+                    forAllString + " " + thereExistsString
+                            + p.toSMTLIB(typeMap);
+            rString += "(assert " + body + ")" + ";" + p.toString() + "\n";
 
         }
         return rString;

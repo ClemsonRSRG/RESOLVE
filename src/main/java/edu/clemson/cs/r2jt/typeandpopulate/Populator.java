@@ -1527,12 +1527,6 @@ public class Populator extends TreeWalkerVisitor {
     }
 
     @Override
-    public void postProgramOpExp(ProgramOpExp e) {
-        e.setProgramType(e.getProgramType(myTypeGraph));
-        e.setMathType(e.getProgramType().toMath());
-    }
-
-    @Override
     public void preProgramDotExp(ProgramDotExp e) {
         myFacilityQualifier = e.getQualifier();
     }
