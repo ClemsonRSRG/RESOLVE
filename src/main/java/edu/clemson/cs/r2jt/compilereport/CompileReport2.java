@@ -51,12 +51,12 @@ public class CompileReport2 {
     // Public Methods
     // ===========================================================
 
-    public void resetReport() {
-        myVCSuccess = false;
-        myTranslateSuccess = false;
-        myBuildJarSuccess = false;
-        myErrors = false;
-        myFacilityName = "";
+    public void setError() {
+        myErrors = true;
+    }
+
+    public void setJarSuccess() {
+        myBuildJarSuccess = true;
     }
 
     public void setTranslateSuccess() {
