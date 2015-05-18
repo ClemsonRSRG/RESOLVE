@@ -1,5 +1,5 @@
 /**
- * ResolveCompiler2.java
+ * ResolveCompiler.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group
@@ -15,7 +15,7 @@ package edu.clemson.cs.r2jt.init2;
 import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
 import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
-import edu.clemson.cs.r2jt.init2.model.CompileEnvironment2;
+import edu.clemson.cs.r2jt.init2.misc.CompileEnvironment;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * TODO: Description for this class
  */
-public class ResolveCompiler2 {
+public class ResolveCompiler {
 
     private boolean myCompileAllFilesInDir = false;
     private String[] myCompilerArgs;
@@ -73,7 +73,7 @@ public class ResolveCompiler2 {
     // Constructors
     // ===========================================================
 
-    public ResolveCompiler2(String[] args) {
+    public ResolveCompiler(String[] args) {
         myCompilerArgs = args;
         myFilesToCompile = new LinkedList<File>();
 
@@ -87,7 +87,7 @@ public class ResolveCompiler2 {
 
     public void invokeCompiler() {
         // Handle all arguments to the compiler
-        CompileEnvironment2 compileEnvironment = handleCompileArgs();
+        CompileEnvironment compileEnvironment = handleCompileArgs();
 
         // Print Compiler Messages
         System.out.println("RESOLVE Compiler/Verifier - " + myCompilerVersion
@@ -171,10 +171,10 @@ public class ResolveCompiler2 {
         return mainDir;
     }
 
-    private CompileEnvironment2 handleCompileArgs() {
-        CompileEnvironment2 compileEnvironment = null;
+    private CompileEnvironment handleCompileArgs() {
+        CompileEnvironment compileEnvironment = null;
         try {
-            compileEnvironment = new CompileEnvironment2(myCompilerArgs);
+            compileEnvironment = new CompileEnvironment(myCompilerArgs);
 
             // Change Main Directory
             String preferredMainDirectory = null;
@@ -217,7 +217,7 @@ public class ResolveCompiler2 {
 
                 // Turn off debugging messages
                 if (compileEnvironment.flags
-                        .isFlagSet(ResolveCompiler2.FLAG_NO_DEBUG)) {
+                        .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
                     compileEnvironment.setDebugOff();
                 }
 
@@ -244,14 +244,14 @@ public class ResolveCompiler2 {
         return compileEnvironment;
     }
 
-    private void printHelpMessage(CompileEnvironment2 e) {
+    private void printHelpMessage(CompileEnvironment e) {
         System.out.println("Usage: java -jar RESOLVE.jar [options] <files>");
         System.out.println("where options include:");
 
         printOptions(e);
     }
 
-    private void printOptions(CompileEnvironment2 e) {
+    private void printOptions(CompileEnvironment e) {
         System.out.println("  -R             Recurse through directories.");
         System.out.println("  -D <dir>       Use <dir> as the main directory.");
         System.out.println("  -translate     Translate to Java code.");

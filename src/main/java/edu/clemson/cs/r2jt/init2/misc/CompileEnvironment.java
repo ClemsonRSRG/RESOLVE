@@ -1,5 +1,5 @@
 /**
- * CompileEnvironment2.java
+ * CompileEnvironment.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group
@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init2.model;
+package edu.clemson.cs.r2jt.init2.misc;
 
 import edu.clemson.cs.r2jt.errors.ErrorHandler2;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
@@ -23,7 +23,7 @@ import java.io.File;
 /**
  * TODO: Description for this class
  */
-public class CompileEnvironment2 {
+public class CompileEnvironment {
 
     // ===========================================================
     // Member Fields
@@ -32,7 +32,7 @@ public class CompileEnvironment2 {
     public final FlagManager flags;
 
     private File myCompileMainDir = null;
-    private CompileReport2 myCompileReport;
+    private CompileReport myCompileReport;
     private boolean myDebugOff = false;
     private final ErrorHandler2 myErrorHandler;
     private boolean myGenPVCs = false;
@@ -44,7 +44,7 @@ public class CompileEnvironment2 {
     // Constructors
     // ===========================================================
 
-    public CompileEnvironment2(String[] args) throws FlagDependencyException {
+    public CompileEnvironment(String[] args) throws FlagDependencyException {
         flags = new FlagManager(args);
         myErrorHandler = new ErrorHandler2(this);
     }
@@ -53,7 +53,7 @@ public class CompileEnvironment2 {
     // Public Methods
     // ===========================================================
 
-    public CompileReport2 getCompileReport() {
+    public CompileReport getCompileReport() {
         return myCompileReport;
     }
 
@@ -92,7 +92,7 @@ public class CompileEnvironment2 {
         return myTypeGraph;
     }
 
-    public void setCompileReport(CompileReport2 cr) {
+    public void setCompileReport(CompileReport cr) {
         myCompileReport = cr;
     }
 

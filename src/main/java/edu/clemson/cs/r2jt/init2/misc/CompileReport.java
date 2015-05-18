@@ -1,5 +1,5 @@
 /**
- * CompileReport2.java
+ * CompileReport.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group
@@ -10,12 +10,12 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init2.model;
+package edu.clemson.cs.r2jt.init2.misc;
 
 /**
  * TODO: Description for this class
  */
-public class CompileReport2 {
+public class CompileReport {
 
     // ===========================================================
     // Member Fields
@@ -35,7 +35,7 @@ public class CompileReport2 {
     // Constructors
     // ===========================================================
 
-    public CompileReport2() {
+    public CompileReport() {
         myBugReportBuffer = new StringBuilder();
         myBugReports = false;
         myBuildJarSuccess = false;
