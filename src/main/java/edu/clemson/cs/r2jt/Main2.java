@@ -12,6 +12,8 @@
  */
 package edu.clemson.cs.r2jt;
 
+import edu.clemson.cs.r2jt.init2.ResolveCompiler2;
+
 /**
  * <p>The main class for the RESOLVE compiler when invoking
  * from the command line or using an IDE.</p>

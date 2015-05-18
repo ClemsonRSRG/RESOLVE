@@ -10,9 +10,8 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init;
+package edu.clemson.cs.r2jt.init2.model;
 
-import edu.clemson.cs.r2jt.compilereport.CompileReport2;
 import edu.clemson.cs.r2jt.errors.ErrorHandler2;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
 import edu.clemson.cs.r2jt.misc.FlagManager;
