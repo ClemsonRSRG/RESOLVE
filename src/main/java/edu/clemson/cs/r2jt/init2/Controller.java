@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init2.controller;
+package edu.clemson.cs.r2jt.init2;
 
 import edu.clemson.cs.r2jt.init2.misc.CompileEnvironment;
 import edu.clemson.cs.r2jt.init2.misc.CompileReport;
