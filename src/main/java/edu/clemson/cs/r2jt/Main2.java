@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.r2jt;
 
-import edu.clemson.cs.r2jt.init2.ResolveCompiler2;
+import edu.clemson.cs.r2jt.init2.ResolveCompiler;
 
 /**
  * <p>The main class for the RESOLVE compiler when invoking
@@ -21,7 +21,8 @@ import edu.clemson.cs.r2jt.init2.ResolveCompiler2;
 public class Main2 {
 
     public static void main(String[] args) {
-        ResolveCompiler2 compiler = new ResolveCompiler2(args);
+        ResolveCompiler compiler =
+                new edu.clemson.cs.r2jt.init2.ResolveCompiler(args);
         compiler.invokeCompiler();
     }
 

@@ -1,5 +1,5 @@
 /**
- * Controller2.java
+ * Controller.java
  * ---------------------------------
  * Copyright (c) 2014
  * RESOLVE Software Research Group
@@ -12,28 +12,28 @@
  */
 package edu.clemson.cs.r2jt.init2.controller;
 
-import edu.clemson.cs.r2jt.init2.model.CompileReport2;
+import edu.clemson.cs.r2jt.init2.misc.CompileEnvironment;
+import edu.clemson.cs.r2jt.init2.misc.CompileReport;
 import edu.clemson.cs.r2jt.errors.ErrorHandler2;
-import edu.clemson.cs.r2jt.init2.model.CompileEnvironment2;
 
 /**
  * A manager for the target file of a compilation.
  */
-public class Controller2 {
+public class Controller {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    private final CompileReport2 myCompileReport;
+    private final CompileReport myCompileReport;
     private final ErrorHandler2 myErrorHandler;
-    private final CompileEnvironment2 myInstanceEnvironment;
+    private final CompileEnvironment myInstanceEnvironment;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
-    public Controller2(CompileEnvironment2 e) {
+    public Controller(CompileEnvironment e) {
         myCompileReport = e.getCompileReport();
         myErrorHandler = e.getErrorHandler();
         myInstanceEnvironment = e;
