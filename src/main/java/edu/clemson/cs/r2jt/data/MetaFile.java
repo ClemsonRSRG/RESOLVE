@@ -68,7 +68,7 @@ public class MetaFile {
         myCustomPath = customPath;
     }
 
-    /*public void setMyKind(ModuleType myKind) {
+    /*public void setMyKind(ModuleKind myKind) {
     	this.myKind = myKind;
     }*/
 
