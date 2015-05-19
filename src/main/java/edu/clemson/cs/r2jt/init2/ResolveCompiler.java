@@ -15,6 +15,8 @@ package edu.clemson.cs.r2jt.init2;
 import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
 import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
+import edu.clemson.cs.r2jt.init2.file.ConcreteFile;
+import edu.clemson.cs.r2jt.init2.file.FileInterface;
 import edu.clemson.cs.r2jt.init2.misc.CompileEnvironment;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
@@ -94,9 +96,19 @@ public class ResolveCompiler {
                 + " Version.");
         System.out.println("  Use -help flag for options.");
 
-        /*
+        // Compile files/directories listed in the argument list
+        compileFiles(myFilesToCompile, compileEnvironment);
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    private void compileFiles(List<File> fileList,
+            CompileEnvironment compileEnvironment) {
         // Compile all files
-        for (File file : myFilesToCompile) {
+        for (File file : fileList) {
+            // Recursively compile all RESOLVE files in the specified directory
             if (file.isDirectory()) {
                 if (myCompileAllFilesInDir) {
                     compileFilesInDir(file, compileEnvironment);
@@ -105,26 +117,50 @@ public class ResolveCompiler {
                     System.err.println("Skipping directory " + file.getName());
                 }
             }
+            // Print error message if it is not a valid RESOLVE file
             else if (!isResolveFile(file.getName())) {
                 System.err.println("The file " + file.getName()
                         + " is not a RESOLVE file.");
             }
+            // Error if we can't locate the file
             else if (!file.isFile()) {
                 System.err.println("Cannot find the file " + file.getName()
                         + " in this directory.");
             }
             else {
-                compileEnvironment.setTargetFile(file);
-                compileMainFile(file, compileEnvironment, compileEnvironment.getSymbolTable());
+                // Convert to the internal representation of a RESOLVE file
+                FileInterface f = new ConcreteFile();
+
+                // Invoke the compiler
+                compileMainFile(f, compileEnvironment);
             }
-        }*/
+        }
     }
 
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
+    private void compileFilesInDir(File directory,
+            CompileEnvironment compileEnvironment) {
+        File[] filesInDir = directory.listFiles();
+        List<File> fileList = new LinkedList<File>();
 
-    /**
+        // Obtain all RESOLVE files in the directory and add those as new files
+        // we need to compile.
+        for (File f : filesInDir) {
+            if (isResolveFile(f.getName())) {
+                fileList.add(f);
+            }
+        }
+
+        // Compile these files first
+        compileFiles(fileList, compileEnvironment);
+    }
+
+    private void compileMainFile(FileInterface file,
+            CompileEnvironment compileEnvironment) {
+        Controller controller = new Controller(compileEnvironment);
+        controller.compileTargetFile(file);
+    }
+
+    /*
      * Converts the specified pathname to a <code>File</code> representing
      * the absolute path to the pathname.
      */
@@ -242,6 +278,15 @@ public class ResolveCompiler {
         }
 
         return compileEnvironment;
+    }
+
+    /*
+     * Determines if the specified filename is a valid RESOLVE filename.
+     */
+    private boolean isResolveFile(String filename) {
+        return (filename.endsWith(".mt") || filename.endsWith(".co")
+                || filename.endsWith(".en") || filename.endsWith(".rb")
+                || filename.endsWith(".fa") || filename.endsWith(".pp"));
     }
 
     private void printHelpMessage(CompileEnvironment e) {

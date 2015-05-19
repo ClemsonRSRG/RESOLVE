@@ -15,6 +15,6 @@ package edu.clemson.cs.r2jt.init2.file;
 /**
  * TODO: Description for this class
  */
-public class ConcreteFile {
+public class ConcreteFile implements FileInterface {
 
 }

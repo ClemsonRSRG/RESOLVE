@@ -13,6 +13,7 @@
 package edu.clemson.cs.r2jt.init2.misc;
 
 import edu.clemson.cs.r2jt.errors.ErrorHandler2;
+import edu.clemson.cs.r2jt.init2.file.FileInterface;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
 import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
@@ -38,6 +39,7 @@ public class CompileEnvironment {
     private boolean myGenPVCs = false;
     private String myOutputFileName = null;
     private ScopeRepository mySymbolTable = null;
+    private FileInterface myTargetFile = null;
     private TypeGraph myTypeGraph = null;
 
     // ===========================================================
@@ -130,6 +132,10 @@ public class CompileEnvironment {
         }
 
         mySymbolTable = table;
+    }
+
+    public void setTargetFile(FileInterface f) {
+        myTargetFile = f;
     }
 
     public void setTypeGraph(TypeGraph t) {
