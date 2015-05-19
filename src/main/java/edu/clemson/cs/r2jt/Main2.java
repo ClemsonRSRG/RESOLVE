@@ -21,7 +21,7 @@ import edu.clemson.cs.r2jt.init2.ResolveCompiler;
 public class Main2 {
 
     public static void main(String[] args) {
-        ResolveCompiler compiler =
+        edu.clemson.cs.r2jt.init2.ResolveCompiler compiler =
                 new edu.clemson.cs.r2jt.init2.ResolveCompiler(args);
         compiler.invokeCompiler();
     }
