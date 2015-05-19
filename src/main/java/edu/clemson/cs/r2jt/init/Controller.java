@@ -416,9 +416,9 @@ public class Controller {
             //String fileConcept = inputFile.getMyAssocConcept();
             //String filePkg = inputFile.getMyPkg();
             String fileSource = inputFile.getMyFileSource();
-            //ModuleKind fileKind = inputFile.getMyKind();
+            //ModuleType fileKind = inputFile.getMyKind();
             /*String filePath = myInstanceEnvironment.getMainDir().getAbsolutePath();
-             if(fileKind.equals(ModuleKind.FACILITY)){
+             if(fileKind.equals(ModuleType.FACILITY)){
              filePath += File.separator + "Facilities" + File.separator;
              }
              else{
@@ -532,9 +532,9 @@ public class Controller {
             //String fileConcept = inputFile.getMyAssocConcept();
             //String filePkg = inputFile.getMyPkg();
             String fileSource = inputFile.getMyFileSource();
-            //ModuleKind fileKind = inputFile.getMyKind();
+            //ModuleType fileKind = inputFile.getMyKind();
             /*String filePath = myInstanceEnvironment.getMainDir().getAbsolutePath();
-             if(fileKind.equals(ModuleKind.FACILITY)){
+             if(fileKind.equals(ModuleType.FACILITY)){
              filePath += File.separator + "Facilities" + File.separator;
              }
              else{
@@ -990,7 +990,7 @@ public class Controller {
                                     .getMainDir());
                 }
             }
-            else { // ModuleKind is body or enhancement
+            else { // ModuleType is body or enhancement
                 /* Check to see if this is one of the files we specified as not to be imported. */
                 if (!onNoImportList(moduleToImport.getFilename())) {
                     file =

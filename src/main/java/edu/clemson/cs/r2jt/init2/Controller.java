@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.r2jt.init2;
 
-import edu.clemson.cs.r2jt.init2.file.FileInterface;
+import edu.clemson.cs.r2jt.init2.file.ResolveFile;
 import edu.clemson.cs.r2jt.init2.misc.CompileEnvironment;
 import edu.clemson.cs.r2jt.init2.misc.CompileReport;
 import edu.clemson.cs.r2jt.errors.ErrorHandler2;
@@ -48,7 +48,7 @@ public class Controller {
      * command line of the compiler as opposed to one that is being compiled
      * because it was imported by another file.
      */
-    public void compileTargetFile(FileInterface file) {
+    public void compileTargetFile(ResolveFile file) {
         // Set this as our target file in the compile environment
         myCompileEnvironment.setTargetFile(file);
     }

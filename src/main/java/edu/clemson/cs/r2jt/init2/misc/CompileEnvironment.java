@@ -13,7 +13,7 @@
 package edu.clemson.cs.r2jt.init2.misc;
 
 import edu.clemson.cs.r2jt.errors.ErrorHandler2;
-import edu.clemson.cs.r2jt.init2.file.FileInterface;
+import edu.clemson.cs.r2jt.init2.file.ResolveFile;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
 import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
@@ -32,14 +32,14 @@ public class CompileEnvironment {
 
     public final FlagManager flags;
 
-    private File myCompileMainDir = null;
+    private File myCompileDir = null;
     private CompileReport myCompileReport;
     private boolean myDebugOff = false;
     private final ErrorHandler2 myErrorHandler;
     private boolean myGenPVCs = false;
     private String myOutputFileName = null;
     private ScopeRepository mySymbolTable = null;
-    private FileInterface myTargetFile = null;
+    private ResolveFile myTargetFile = null;
     private TypeGraph myTypeGraph = null;
 
     // ===========================================================
@@ -70,8 +70,8 @@ public class CompileEnvironment {
         return myErrorHandler;
     }
 
-    public File getMainDir() {
-        return myCompileMainDir;
+    public File getWorkspaceDir() {
+        return myCompileDir;
     }
 
     public String getOutputFilename() {
@@ -106,9 +106,9 @@ public class CompileEnvironment {
         myDebugOff = true;
     }
 
-    /** Sets the main directory to the specified directory. */
-    public void setMainDir(File mainDir) {
-        myCompileMainDir = mainDir;
+    /** Sets the workspace directory to the specified directory. */
+    public void setWorkspaceDir(File dir) {
+        myCompileDir = dir;
     }
 
     /** Name the output file. */
@@ -134,7 +134,7 @@ public class CompileEnvironment {
         mySymbolTable = table;
     }
 
-    public void setTargetFile(FileInterface f) {
+    public void setTargetFile(ResolveFile f) {
         myTargetFile = f;
     }
 

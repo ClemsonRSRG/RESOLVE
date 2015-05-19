@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.r2jt.errors;
 
-import edu.clemson.cs.r2jt.ResolveCompiler;
+import edu.clemson.cs.r2jt.init2.ResolveCompiler;
 import edu.clemson.cs.r2jt.init2.misc.CompileEnvironment;
 
 /**
