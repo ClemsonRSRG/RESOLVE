@@ -1995,50 +1995,16 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param stmt Our current <code>CallStmt</code>.
      */
     private void applyCallStmtRule(CallStmt stmt) {
-        // Check for recursive call of itself
-        if (myCurrentOperationEntry != null
-                && myCurrentOperationEntry.getName().equals(
-                        stmt.getName().getName())
-                && myCurrentOperationEntry.getReturnType() != null) {
-            // Create a new confirm statement using P_val and the decreasing clause
-            VarExp pVal =
-                    Utilities.createPValExp(myOperationDecreasingExp
-                            .getLocation(), myCurrentModuleScope);
-
-            // Create a new infix expression
-            IntegerExp oneExp = new IntegerExp();
-            oneExp.setValue(1);
-            oneExp.setMathType(myOperationDecreasingExp.getMathType());
-            InfixExp leftExp =
-                    new InfixExp(stmt.getLocation(), oneExp, Utilities
-                            .createPosSymbol("+"), Exp
-                            .copy(myOperationDecreasingExp));
-            leftExp.setMathType(myOperationDecreasingExp.getMathType());
-            InfixExp exp =
-                    Utilities.createLessThanEqExp(stmt.getLocation(), leftExp,
-                            pVal, BOOLEAN);
-
-            // Create the new confirm statement
-            Location loc;
-            if (myOperationDecreasingExp.getLocation() != null) {
-                loc = (Location) myOperationDecreasingExp.getLocation().clone();
-            }
-            else {
-                loc = (Location) stmt.getLocation().clone();
-            }
-            loc.setDetails("Show Termination of Recursive Call");
-            Utilities.setLocation(exp, loc);
-            ConfirmStmt conf = new ConfirmStmt(loc, exp, false);
-
-            // Add it to our list of assertions
-            myCurrentAssertiveCode.addCode(conf);
+        List<ProgramExp> callArgs = stmt.getArguments();
+        for (ProgramExp p : callArgs) {
+            // Check for nested function calls in p
+            NestedFuncWalker nfw =
+                    new NestedFuncWalker(myCurrentOperationEntry.getName(),
+                            mySymbolTable, myCurrentModuleScope,
+                            myCurrentAssertiveCode);
+            TreeWalker tw = new TreeWalker(nfw);
+            tw.visit(p);
         }
-
-        // Check for nested function calls in the arguments
-        NestedFuncWalker nfw =
-                new NestedFuncWalker(mySymbolTable, myCurrentModuleScope);
-        TreeWalker tw = new TreeWalker(nfw);
-        tw.visit(stmt);
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nOperation Call Rule Applied: \n");
