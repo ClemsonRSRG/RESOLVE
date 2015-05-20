@@ -2005,6 +2005,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             TreeWalker tw = new TreeWalker(nfw);
             tw.visit(p);
 
+            // Add the requires clause as something we need to confirm
             Exp pRequires = nfw.getRequiresClause();
             if (!pRequires.isLiteralTrue()) {
                 myCurrentAssertiveCode.addConfirm(pRequires.getLocation(),
