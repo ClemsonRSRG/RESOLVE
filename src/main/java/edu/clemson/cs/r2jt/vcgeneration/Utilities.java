@@ -39,36 +39,36 @@ public class Utilities {
     // Error Handling
     // -----------------------------------------------------------
 
-    protected static void expNotHandled(Exp exp, Location l) {
+    public static void expNotHandled(Exp exp, Location l) {
         String message = "Exp not handled: " + exp.toString();
         throw new SourceErrorException(message, l);
     }
 
-    protected static void illegalOperationEnsures(Location l) {
+    public static void illegalOperationEnsures(Location l) {
         // TODO: Move this to sanity check.
         String message =
                 "Ensures clauses of operations that return a value should be of the form <OperationName> = <value>";
         throw new SourceErrorException(message, l);
     }
 
-    protected static void notAType(SymbolTableEntry entry, Location l) {
+    public static void notAType(SymbolTableEntry entry, Location l) {
         throw new SourceErrorException(entry.getSourceModuleIdentifier()
                 .fullyQualifiedRepresentation(entry.getName())
                 + " is not known to be a type.", l);
     }
 
-    protected static void notInFreeVarList(PosSymbol name, Location l) {
+    public static void notInFreeVarList(PosSymbol name, Location l) {
         String message =
                 "State variable " + name + " not in free variable list";
         throw new SourceErrorException(message, l);
     }
 
-    protected static void noSuchModule(Location location) {
+    public static void noSuchModule(Location location) {
         throw new SourceErrorException(
                 "Module does not exist or is not in scope.", location);
     }
 
-    protected static void noSuchSymbol(PosSymbol qualifier, String symbolName,
+    public static void noSuchSymbol(PosSymbol qualifier, String symbolName,
             Location l) {
 
         String message;
@@ -85,7 +85,7 @@ public class Utilities {
         throw new SourceErrorException(message, l);
     }
 
-    protected static void tyNotHandled(Ty ty, Location location) {
+    public static void tyNotHandled(Ty ty, Location location) {
         String message = "Ty not handled: " + ty.toString();
         throw new SourceErrorException(message, location);
     }
@@ -102,7 +102,7 @@ public class Utilities {
      *
      * @return An <code>Exp</code>.
      */
-    protected static Exp convertExp(Exp oldExp) {
+    public static Exp convertExp(Exp oldExp) {
         Exp retExp;
 
         // Case #1: ProgramIntegerExp
@@ -189,7 +189,7 @@ public class Utilities {
      *
      * @return The created conceptual variable as a <code>DotExp</code>.
      */
-    protected static DotExp createConcVarExp(Location location, VarExp name,
+    public static DotExp createConcVarExp(Location location, VarExp name,
             MTType concType, MTType booleanType) {
         // Create a variable that refers to the conceptual exemplar
         VarExp cName =
@@ -218,7 +218,7 @@ public class Utilities {
      *
      * @return The created <code>DotExp</code>.
      */
-    protected static DotExp createDotExp(Location location,
+    public static DotExp createDotExp(Location location,
             edu.clemson.cs.r2jt.collections.List<Exp> dotExpList, MTType dotType) {
         // Create the DotExp
         DotExp exp = new DotExp(location, dotExpList, null);
@@ -237,7 +237,7 @@ public class Utilities {
      *
      * @return The created <code>FunctionExp</code>.
      */
-    protected static FunctionExp createDurCallExp(Location loc, String numArg,
+    public static FunctionExp createDurCallExp(Location loc, String numArg,
             MTType integerType, MTType realType) {
         // Obtain the necessary information from the variable
         VarExp param =
@@ -266,7 +266,7 @@ public class Utilities {
      *
      * @return The created <code>FunctionExp</code>.
      */
-    protected static FunctionExp createFinalizAnyDur(VarDec var, MTType realType) {
+    public static FunctionExp createFinalizAnyDur(VarDec var, MTType realType) {
         // Obtain the necessary information from the variable
         Ty varTy = var.getTy();
         NameTy varNameTy = (NameTy) varTy;
@@ -301,7 +301,7 @@ public class Utilities {
      *
      * @return The created <code>FunctionExp</code>.
      */
-    protected static FunctionExp createFinalizAnyDurExp(VariableExp varExp,
+    public static FunctionExp createFinalizAnyDurExp(VariableExp varExp,
             MTType realType) {
         if (varExp.getProgramType() instanceof PTFamily) {
             PTFamily type = (PTFamily) varExp.getProgramType();
@@ -342,7 +342,7 @@ public class Utilities {
      *
      * @return The created <code>FunctionExp</code>.
      */
-    protected static FunctionExp createFunctionExp(Location location,
+    public static FunctionExp createFunctionExp(Location location,
             PosSymbol qualifier, PosSymbol name,
             edu.clemson.cs.r2jt.collections.List<Exp> argExpList,
             MTType funcType) {
@@ -372,7 +372,7 @@ public class Utilities {
      *
      * @return The created <code>FunctionExp</code>.
      */
-    protected static FunctionExp createInitAnyDur(VarDec var, MTType realType) {
+    public static FunctionExp createInitAnyDur(VarDec var, MTType realType) {
         // Obtain the necessary information from the variable
         VarExp param =
                 createVarExp(var.getLocation(), null,
@@ -403,7 +403,7 @@ public class Utilities {
      *
      * @return The new <code>DotExp</code>.
      */
-    protected static DotExp createInitExp(VarDec var, MTType mType,
+    public static DotExp createInitExp(VarDec var, MTType mType,
             MTType booleanType) {
         // Convert the declared variable into a VarExp
         VarExp varExp =
@@ -452,7 +452,7 @@ public class Utilities {
      *
      * @return The new <code>InfixExp</code>.
      */
-    protected static InfixExp createLessThanEqExp(Location location, Exp left,
+    public static InfixExp createLessThanEqExp(Location location, Exp left,
             Exp right, MTType booleanType) {
         // Create the "Less Than Equal" InfixExp
         InfixExp exp =
@@ -472,7 +472,7 @@ public class Utilities {
      *
      * @return The new <code>InfixExp</code>.
      */
-    protected static InfixExp createLessThanExp(Location location, Exp left,
+    public static InfixExp createLessThanExp(Location location, Exp left,
             Exp right, MTType booleanType) {
         // Create the "Less Than" InfixExp
         InfixExp exp =
@@ -490,7 +490,7 @@ public class Utilities {
      *
      * @return The new <code>PosSymbol</code>.
      */
-    protected static PosSymbol createPosSymbol(String name) {
+    public static PosSymbol createPosSymbol(String name) {
         // Create the PosSymbol
         PosSymbol posSym = new PosSymbol();
         posSym.setSymbol(Symbol.symbol(name));
@@ -508,7 +508,7 @@ public class Utilities {
      *
      * @return The created <code>VarExp</code>.
      */
-    protected static VarExp createPValExp(Location location, ModuleScope scope) {
+    public static VarExp createPValExp(Location location, ModuleScope scope) {
         // Locate "N" (Natural Number)
         MathSymbolEntry mse = searchMathSymbol(location, "N", scope);
         try {
@@ -532,7 +532,7 @@ public class Utilities {
      *
      * @return A new variable with the question mark in <code>VarExp</code> form.
      */
-    protected static VarExp createQuestionMarkVariable(Exp exp, VarExp oldVar) {
+    public static VarExp createQuestionMarkVariable(Exp exp, VarExp oldVar) {
         // Add an extra question mark to the front of oldVar
         VarExp newOldVar =
                 new VarExp(null, null, createPosSymbol("?"
@@ -571,7 +571,7 @@ public class Utilities {
      *
      * @return The new <code>VarExp</code>.
      */
-    protected static VarExp createVarExp(Location loc, PosSymbol qualifier,
+    public static VarExp createVarExp(Location loc, PosSymbol qualifier,
             PosSymbol name, MTType type, MTType typeValue) {
         // Create the VarExp
         VarExp exp = new VarExp(loc, qualifier, name);
@@ -588,7 +588,7 @@ public class Utilities {
      *
      * @return The current "Cum_Dur".
      */
-    protected static String getCumDur(Exp searchingExp) {
+    public static String getCumDur(Exp searchingExp) {
         String cumDur = "Cum_Dur";
 
         // Loop until we find one
@@ -608,7 +608,7 @@ public class Utilities {
      *
      * @return The <code>MTType</code> for "Z".
      */
-    protected static MTType getMathTypeZ(Location location, ModuleScope scope) {
+    public static MTType getMathTypeZ(Location location, ModuleScope scope) {
         // Locate "Z" (Integer)
         MathSymbolEntry mse = searchMathSymbol(location, "Z", scope);
         MTType Z = null;
@@ -630,7 +630,7 @@ public class Utilities {
      *
      * @return The <code>PosSymbol</code> of left.
      */
-    protected static PosSymbol getVarName(VariableExp left) {
+    public static PosSymbol getVarName(VariableExp left) {
         // Return value
         PosSymbol name;
 
@@ -668,7 +668,7 @@ public class Utilities {
      *
      * @return True if it is a local operation, false otherwise.
      */
-    protected static boolean isLocationOperation(String name, ModuleScope scope) {
+    public static boolean isLocationOperation(String name, ModuleScope scope) {
         boolean isIn;
 
         // Query for the corresponding operation
@@ -715,7 +715,7 @@ public class Utilities {
      *
      * @return True/False
      */
-    protected static boolean isVerificationVar(Exp name) {
+    public static boolean isVerificationVar(Exp name) {
         // VarExp
         if (name instanceof VarExp) {
             String strName = ((VarExp) name).getName().getName();
@@ -748,7 +748,7 @@ public class Utilities {
      *
      * @return Negated expression.
      */
-    protected static Exp negateExp(Exp exp, MTType booleanType) {
+    public static Exp negateExp(Exp exp, MTType booleanType) {
         Exp retExp = Exp.copy(exp);
         if (exp instanceof EqualsExp) {
             if (((EqualsExp) exp).getOperator() == EqualsExp.EQUAL)
@@ -782,7 +782,7 @@ public class Utilities {
      *
      * @return The new <code>Exp</code>.
      */
-    protected static Exp replace(Exp exp, Exp old, Exp repl) {
+    public static Exp replace(Exp exp, Exp old, Exp repl) {
         // Clone old and repl and use the Exp replace to do all its work
         Exp tmp = Exp.replace(exp, Exp.copy(old), Exp.copy(repl));
 
@@ -803,7 +803,7 @@ public class Utilities {
      *
      * @return The modified expression.
      */
-    protected static Exp replaceFacilityDeclarationVariables(Exp exp,
+    public static Exp replaceFacilityDeclarationVariables(Exp exp,
             List facParam, List concParam) {
         for (int i = 0; i < facParam.size(); i++) {
             if (facParam.get(i) instanceof Dec
@@ -898,7 +898,7 @@ public class Utilities {
      *
      * @return The constraint in <code>Exp</code> form if found, null otherwise.
      */
-    protected static Exp retrieveConstraint(Location location,
+    public static Exp retrieveConstraint(Location location,
             PosSymbol qualifier, PosSymbol name, Exp varName, ModuleScope scope) {
         Exp constraint = null;
 
@@ -949,7 +949,7 @@ public class Utilities {
      * @return An <code>MathSymbolEntry</code> from the
      *         symbol table.
      */
-    protected static MathSymbolEntry searchMathSymbol(Location loc,
+    public static MathSymbolEntry searchMathSymbol(Location loc,
             String name, ModuleScope scope) {
         // Query for the corresponding math symbol
         MathSymbolEntry ms = null;
@@ -990,7 +990,7 @@ public class Utilities {
      * @return An <code>OperationEntry</code> from the
      *         symbol table.
      */
-    protected static OperationEntry searchOperation(Location loc,
+    public static OperationEntry searchOperation(Location loc,
             PosSymbol qualifier, PosSymbol name, List<PTType> argTypes,
             ModuleScope scope) {
         // Query for the corresponding operation
@@ -1027,7 +1027,7 @@ public class Utilities {
      * @return An <code>OperationProfileEntry</code> from the
      *         symbol table.
      */
-    protected static OperationProfileEntry searchOperationProfile(Location loc,
+    public static OperationProfileEntry searchOperationProfile(Location loc,
             PosSymbol qualifier, PosSymbol name, List<PTType> argTypes,
             ModuleScope scope) {
         // Query for the corresponding operation profile
@@ -1063,7 +1063,7 @@ public class Utilities {
      * @return A <code>SymbolTableEntry</code> from the
      *         symbol table.
      */
-    protected static SymbolTableEntry searchProgramType(Location loc,
+    public static SymbolTableEntry searchProgramType(Location loc,
             PosSymbol qualifier, PosSymbol name, ModuleScope scope) {
         SymbolTableEntry retEntry = null;
 
@@ -1109,7 +1109,7 @@ public class Utilities {
      * @param exp The <code>Exp</code> that needs to be modified.
      * @param loc The new <code>Location</code>.
      */
-    protected static void setLocation(Exp exp, Location loc) {
+    public static void setLocation(Exp exp, Location loc) {
         // Special handling for InfixExp
         if (exp instanceof InfixExp) {
             ((InfixExp) exp).setAllLocations(loc);
