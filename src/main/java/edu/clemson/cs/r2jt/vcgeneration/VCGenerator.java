@@ -20,6 +20,7 @@ import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.rewriteprover.VC;
+import edu.clemson.cs.r2jt.treewalk.TreeWalker;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
@@ -28,6 +29,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
+import edu.clemson.cs.r2jt.vcgeneration.treewalkers.NestedFuncWalker;
 
 import java.io.File;
 import java.util.*;
@@ -1992,7 +1994,12 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @param stmt Our current <code>CallStmt</code>.
      */
-    private void applyCallStmtRule(CallStmt stmt) {
+    private void applyCallStmtRule(CallStmt stmt) {      
+        // Check for nested function calls in the arguments
+        NestedFuncWalker nfw = new NestedFuncWalker(mySymbolTable, myCurrentModuleScope);
+        TreeWalker tw = new TreeWalker(nfw);
+        tw.visit(stmt);
+
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nOperation Call Rule Applied: \n");
         myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
