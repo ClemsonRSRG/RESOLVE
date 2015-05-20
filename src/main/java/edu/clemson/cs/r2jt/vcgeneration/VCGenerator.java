@@ -2004,6 +2004,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                             myCurrentAssertiveCode);
             TreeWalker tw = new TreeWalker(nfw);
             tw.visit(p);
+
+            Exp pRequires = nfw.getRequiresClause();
+            if (!pRequires.isLiteralTrue()) {
+                myCurrentAssertiveCode.addConfirm(pRequires.getLocation(),
+                        pRequires, false);
+            }
         }
 
         // Verbose Mode Debug Messages
