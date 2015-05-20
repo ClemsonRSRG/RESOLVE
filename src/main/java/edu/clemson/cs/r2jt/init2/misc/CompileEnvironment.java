@@ -30,8 +30,6 @@ public class CompileEnvironment {
     // Member Fields
     // ===========================================================
 
-    public final FlagManager flags;
-
     private File myCompileDir = null;
     private CompileReport myCompileReport;
     private boolean myDebugOff = false;
@@ -41,6 +39,12 @@ public class CompileEnvironment {
     private ScopeRepository mySymbolTable = null;
     private ResolveFile myTargetFile = null;
     private TypeGraph myTypeGraph = null;
+
+    // ===========================================================
+    // Objects
+    // ===========================================================
+
+    public final FlagManager flags;
 
     // ===========================================================
     // Constructors
@@ -141,5 +145,9 @@ public class CompileEnvironment {
     public void setTypeGraph(TypeGraph t) {
         myTypeGraph = t;
     }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
 
 }

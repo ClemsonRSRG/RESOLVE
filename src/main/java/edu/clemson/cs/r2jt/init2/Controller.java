@@ -43,6 +43,10 @@ public class Controller {
         mySymbolTable = (MathSymbolTableBuilder) e.getSymbolTable();
     }
 
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
+
     /**
      * Compiles a target file. A target file is one that is specified on the
      * command line of the compiler as opposed to one that is being compiled
@@ -52,5 +56,9 @@ public class Controller {
         // Set this as our target file in the compile environment
         myCompileEnvironment.setTargetFile(file);
     }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
 
 }

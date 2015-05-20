@@ -41,8 +41,12 @@ import org.antlr.v4.runtime.ANTLRInputStream;
  */
 public class ResolveCompiler {
 
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
     private boolean myCompileAllFilesInDir = false;
-    private String[] myCompilerArgs;
+    private final String[] myCompilerArgs;
     private final String myCompilerVersion = "Summer 2015";
     private final List<File> myFilesToCompile;
 
@@ -65,10 +69,17 @@ public class ResolveCompiler {
     // Flags
     // ===========================================================
 
+    /**
+     * <p>Tells the compiler to print out a general help message and
+     * all the flags.</p>
+     */
     public static final Flag FLAG_HELP =
             new Flag(FLAG_SECTION_GENERAL, "help",
                     "Displays this help information.");
 
+    /**
+     * <p>Tells the compiler to print out all the flags.</p>
+     */
     public static final Flag FLAG_EXTENDED_HELP =
             new Flag(FLAG_SECTION_GENERAL, "xhelp",
                     "Displays all flags, including development flags and many others "
@@ -108,6 +119,11 @@ public class ResolveCompiler {
     // Constructors
     // ===========================================================
 
+    /**
+     * <p>TODO: Add description.</p>
+     *
+     * @param args The specified compiler arguments array.
+     */
     public ResolveCompiler(String[] args) {
         myCompilerArgs = args;
         myFilesToCompile = new LinkedList<File>();
@@ -120,6 +136,10 @@ public class ResolveCompiler {
     // Public Methods
     // ===========================================================
 
+    /**
+     * <p>This invokes the RESOLVE compiler. Usually this method
+     * is called by running the compiler from the command line.</p>
+     */
     public void invokeCompiler() {
         // Handle all arguments to the compiler
         CompileEnvironment compileEnvironment = handleCompileArgs();
@@ -137,6 +157,9 @@ public class ResolveCompiler {
     // Private Methods
     // ===========================================================
 
+    /*
+     * Compiles all files in the specified list.
+     */
     private void compileFiles(List<File> fileList,
             CompileEnvironment compileEnvironment) {
         // Compile all files
@@ -187,6 +210,10 @@ public class ResolveCompiler {
         }
     }
 
+    /*
+     * This method finds all RESOLVE files in the directory and
+     * adds those to files the compiler will compile/verify.
+     */
     private void compileFilesInDir(File directory,
             CompileEnvironment compileEnvironment) {
         File[] filesInDir = directory.listFiles();
@@ -204,6 +231,10 @@ public class ResolveCompiler {
         compileFiles(fileList, compileEnvironment);
     }
 
+    /*
+     * This method will instantiate the controller and
+     * begin the compilation process for the specified file.
+     */
     private void compileMainFile(ResolveFile file,
             CompileEnvironment compileEnvironment) {
         Controller controller = new Controller(compileEnvironment);
@@ -223,6 +254,10 @@ public class ResolveCompiler {
                 .getExtension()) - 1);
     }
 
+    /*
+     * The folder RESOLVE and it's sub folders are viewed by the compiler
+     * as "packages", therefore we will need to store these for future use.
+     */
     private List<String> getPackageList(String filePath, String workspacePath) {
         // Obtain the relative path using the workspace path and current file path.
         String relativePath = filePath.substring(workspacePath.length() + 1);
@@ -235,6 +270,10 @@ public class ResolveCompiler {
         return pkgList;
     }
 
+    /*
+     * Get the absolute path to the RESOLVE Workspace. This workspace
+     * must have the same structure as the one hosted on Github.
+     */
     private File getWorkspaceDir(String path) {
         File resolvePath = null;
         String resolveDirName = "RESOLVE";
@@ -284,12 +323,18 @@ public class ResolveCompiler {
         return resolvePath;
     }
 
+    /*
+     * Method that handles the basic arguments.
+     */
     private CompileEnvironment handleCompileArgs() {
         CompileEnvironment compileEnvironment = null;
         try {
+            // Instantiate a new compile environment that will store
+            // all the necessary information needed throughout the compilation
+            // process.
             compileEnvironment = new CompileEnvironment(myCompilerArgs);
 
-            // Change Workspace Directory
+            // Workspace Directory
             String workspaceDir = null;
 
             // Handle remaining arguments
@@ -379,23 +424,27 @@ public class ResolveCompiler {
         return type;
     }
 
+    /*
+     * This prints the help message that prints out all the optional flags.
+     */
     private void printHelpMessage(CompileEnvironment e) {
         System.out.println("Usage: java -jar RESOLVE.jar [options] <files>");
         System.out.println("where options include:");
+        System.out.println();
 
-        printOptions(e);
-    }
-
-    private void printOptions(CompileEnvironment e) {
+        // General flags
         System.out.println("  -R             Recurse through directories.");
-        System.out.println("  -D <dir>       Use <dir> as the main directory.");
+
+        // Prover flags
+
+        // Translator flags
         System.out.println("  -translate     Translate to Java code.");
+
+        // VC Generator flags
         System.out.println("  -PVCs           Generate verification "
                 + "conditions for performance.");
         System.out.println("  -VCs           Generate verification "
                 + "conditions.");
-        System.out.println("  -isabelle      Used with -VCs to generate "
-                + "VCs for Isabelle.");
 
         System.out.println(FlagDependencies.getListingString(e.flags
                 .isFlagSet(FLAG_EXTENDED_HELP)));
@@ -421,8 +470,15 @@ public class ResolveCompiler {
         }
     }
 
+    /*
+     * Add all the required and implied flags. Including those needed
+     * by the WebIDE.
+     */
     private void setUpFlags() {
+        // Extended help implies that the general help is also on.
         FlagDependencies.addImplies(FLAG_EXTENDED_HELP, FLAG_HELP);
+
+        // WebIDE
         FlagDependencies.addRequires(FLAG_ERRORS_ON_STD_OUT, FLAG_WEB);
         FlagDependencies.addImplies(FLAG_WEB, FLAG_ERRORS_ON_STD_OUT);
         FlagDependencies.addImplies(FLAG_WEB, FLAG_NO_DEBUG);
