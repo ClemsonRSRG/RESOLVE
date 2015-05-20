@@ -143,8 +143,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     public void postProgramParamExp(ProgramParamExp exp) {
         // Call a method to locate the operation dec for this call
         OperationDec opDec =
-                getOperationDec(myCurrentLocation, myCurrentQualifier,
-                        exp.getName(), exp.getArguments());
+                getOperationDec(myCurrentLocation, myCurrentQualifier, exp
+                        .getName(), exp.getArguments());
 
         // Get the requires clause for this operation
         Exp requires;
@@ -164,8 +164,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
 
         // Replace PreCondition variables in the requires clause
         requires =
-                replaceFormalWithActualReq(requires, opDec.getParameters(),
-                        exp.getArguments());
+                replaceFormalWithActualReq(requires, opDec.getParameters(), exp
+                        .getArguments());
     }
 
     // ===========================================================
@@ -208,7 +208,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
      * @return The operation corresponding to the calling statement in <code>OperationDec</code> form.
      */
     private OperationDec getOperationDec(Location loc, PosSymbol qual,
-                                         PosSymbol name, List<ProgramExp> args) {
+            PosSymbol name, List<ProgramExp> args) {
         // Obtain the corresponding OperationEntry and OperationDec
         List<PTType> argTypes = new LinkedList<PTType>();
         for (ProgramExp arg : args) {
@@ -230,7 +230,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
             opDec =
                     new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
                             fOpDec.getReturnTy(), fOpDec.getStateVars(), fOpDec
-                            .getRequires(), fOpDec.getEnsures());
+                                    .getRequires(), fOpDec.getEnsures());
         }
 
         return opDec;
@@ -247,7 +247,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
      * @return The requires clause in <code>Exp</code> form.
      */
     private Exp replaceFormalWithActualReq(Exp requires,
-                                           List<ParameterVarDec> paramList, List<ProgramExp> argList) {
+            List<ParameterVarDec> paramList, List<ProgramExp> argList) {
         // List to hold temp and real values of variables in case
         // of duplicate spec and real variables
         List<Exp> undRepList = new ArrayList<Exp>();
@@ -269,7 +269,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
             // New VarExp
             VarExp newExp =
                     Utilities.createVarExp(null, null, Utilities
-                                    .createPosSymbol("_" + varDec.getName().getName()),
+                            .createPosSymbol("_" + varDec.getName().getName()),
                             repl.getMathType(), repl.getMathTypeValue());
 
             // Replace the old with the new in the requires clause

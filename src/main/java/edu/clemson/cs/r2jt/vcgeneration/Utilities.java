@@ -949,8 +949,8 @@ public class Utilities {
      * @return An <code>MathSymbolEntry</code> from the
      *         symbol table.
      */
-    public static MathSymbolEntry searchMathSymbol(Location loc,
-            String name, ModuleScope scope) {
+    public static MathSymbolEntry searchMathSymbol(Location loc, String name,
+            ModuleScope scope) {
         // Query for the corresponding math symbol
         MathSymbolEntry ms = null;
         try {
