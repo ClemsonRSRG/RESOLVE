@@ -972,6 +972,49 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>Modify the argument expression list if we have a
+     * nested function call.</p>
+     *
+     * @param callArgs The original list of arguments.
+     *
+     * @return The modified list of arguments.
+     */
+    private List<Exp> modifyArgumentList(List<ProgramExp> callArgs) {
+        // Find all the replacements that needs to happen to the requires
+        // and ensures clauses
+        List<Exp> replaceArgs = new ArrayList<Exp>();
+        for (ProgramExp p : callArgs) {
+            // Check for nested function calls in ProgramDotExp
+            // and ProgramParamExp.
+            if (p instanceof ProgramDotExp || p instanceof ProgramParamExp) {
+                NestedFuncWalker nfw =
+                        new NestedFuncWalker(myCurrentOperationEntry,
+                                myOperationDecreasingExp, mySymbolTable,
+                                myCurrentModuleScope, myCurrentAssertiveCode);
+                TreeWalker tw = new TreeWalker(nfw);
+                tw.visit(p);
+
+                // Add the requires clause as something we need to confirm
+                Exp pRequires = nfw.getRequiresClause();
+                if (!pRequires.isLiteralTrue()) {
+                    myCurrentAssertiveCode.addConfirm(pRequires.getLocation(),
+                            pRequires, false);
+                }
+
+                // Add the modified ensures clause as the new expression we want
+                // to replace in the CallStmt's ensures clause.
+                replaceArgs.add(nfw.getEnsuresClause());
+            }
+            // For all other types of arguments, simply add it to the list to be replaced
+            else {
+                replaceArgs.add(p);
+            }
+        }
+
+        return replaceArgs;
+    }
+
+    /**
      * <p>Modifies the ensures clause based on the parameter mode.</p>
      *
      * @param ensures The <code>Exp</code> containing the ensures clause.
@@ -2041,34 +2084,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Find all the replacements that needs to happen to the requires
         // and ensures clauses
         List<ProgramExp> callArgs = stmt.getArguments();
-        List<Exp> replaceArgs = new ArrayList<Exp>();
-        for (ProgramExp p : callArgs) {
-            // Check for nested function calls in ProgramDotExp
-            // and ProgramParamExp.
-            if (p instanceof ProgramDotExp || p instanceof ProgramParamExp) {
-                NestedFuncWalker nfw =
-                        new NestedFuncWalker(myCurrentOperationEntry,
-                                myOperationDecreasingExp, mySymbolTable,
-                                myCurrentModuleScope, myCurrentAssertiveCode);
-                TreeWalker tw = new TreeWalker(nfw);
-                tw.visit(p);
-
-                // Add the requires clause as something we need to confirm
-                Exp pRequires = nfw.getRequiresClause();
-                if (!pRequires.isLiteralTrue()) {
-                    myCurrentAssertiveCode.addConfirm(pRequires.getLocation(),
-                            pRequires, false);
-                }
-
-                // Add the modified ensures clause as the new expression we want
-                // to replace in the CallStmt's ensures clause.
-                replaceArgs.add(nfw.getEnsuresClause());
-            }
-            // For all other types of arguments, simply add it to the list to be replaced
-            else {
-                replaceArgs.add(p);
-            }
-        }
+        List<Exp> replaceArgs = modifyArgumentList(callArgs);
 
         // Modify ensures using the parameter modes
         ensures =
@@ -2675,6 +2691,362 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param stmt Our current <code>FuncAssignStmt</code>.
      */
     private void applyFuncAssignStmtRule(FuncAssignStmt stmt) {
+        PosSymbol qualifier = null;
+        ProgramExp assignExp = stmt.getAssign();
+        ProgramParamExp assignParamExp = null;
+
+        // Replace all instances of the variable on the left hand side
+        // in the ensures clause with the expression on the right.
+        Exp leftVariable;
+
+        // We have a variable inside a record as the variable being assigned.
+        if (stmt.getVar() instanceof VariableDotExp) {
+            VariableDotExp v = (VariableDotExp) stmt.getVar();
+            List<VariableExp> vList = v.getSegments();
+            edu.clemson.cs.r2jt.collections.List<Exp> newSegments =
+                    new edu.clemson.cs.r2jt.collections.List<Exp>();
+
+            // Loot through each variable expression and add it to our dot list
+            for (VariableExp vr : vList) {
+                VarExp varExp = new VarExp();
+                if (vr instanceof VariableNameExp) {
+                    varExp.setName(((VariableNameExp) vr).getName());
+                    varExp.setMathType(vr.getMathType());
+                    varExp.setMathTypeValue(vr.getMathTypeValue());
+                    newSegments.add(varExp);
+                }
+            }
+
+            // Expression to be replaced
+            leftVariable = new DotExp(v.getLocation(), newSegments, null);
+            leftVariable.setMathType(v.getMathType());
+            leftVariable.setMathTypeValue(v.getMathTypeValue());
+        }
+        // We have a regular variable being assigned.
+        else {
+            // Expression to be replaced
+            VariableNameExp v = (VariableNameExp) stmt.getVar();
+            leftVariable = new VarExp(v.getLocation(), null, v.getName());
+            leftVariable.setMathType(v.getMathType());
+            leftVariable.setMathTypeValue(v.getMathTypeValue());
+        }
+
+        // Simply replace the numbers/characters/strings
+        if (assignExp instanceof ProgramIntegerExp
+                || assignExp instanceof ProgramCharExp
+                || assignExp instanceof ProgramStringExp) {
+            Exp replaceExp = Utilities.convertExp(assignExp);
+
+            // Replace all instances of the left hand side
+            // variable in the current final confirm statement.
+            ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+            Exp newConf = confirmStmt.getAssertion();
+            newConf = Utilities.replace(newConf, leftVariable, replaceExp);
+
+            // Set this as our new final confirm statement.
+            myCurrentAssertiveCode.setFinalConfirm(newConf, confirmStmt
+                    .getSimplify());
+        }
+        else {
+            // Check to see what kind of expression is on the right hand side
+            if (assignExp instanceof ProgramParamExp) {
+                // Cast to a ProgramParamExp
+                assignParamExp = (ProgramParamExp) assignExp;
+            }
+            else if (assignExp instanceof ProgramDotExp) {
+                // Cast to a ProgramParamExp
+                ProgramDotExp dotExp = (ProgramDotExp) assignExp;
+                assignParamExp = (ProgramParamExp) dotExp.getExp();
+                qualifier = dotExp.getQualifier();
+            }
+
+            // Call a method to locate the operation dec for this call
+            OperationDec opDec =
+                    getOperationDec(stmt.getLocation(), qualifier,
+                            assignParamExp.getName(), assignParamExp
+                                    .getArguments());
+
+            // Check for recursive call of itself
+            if (myCurrentOperationEntry != null
+                    && myCurrentOperationEntry.getName().equals(
+                            opDec.getName().getName())
+                    && myCurrentOperationEntry.getReturnType() != null) {
+                // Create a new confirm statement using P_val and the decreasing clause
+                VarExp pVal =
+                        Utilities.createPValExp(myOperationDecreasingExp
+                                .getLocation(), myCurrentModuleScope);
+
+                // Create a new infix expression
+                IntegerExp oneExp = new IntegerExp();
+                oneExp.setValue(1);
+                oneExp.setMathType(myOperationDecreasingExp.getMathType());
+                InfixExp leftExp =
+                        new InfixExp(stmt.getLocation(), oneExp, Utilities
+                                .createPosSymbol("+"), Exp
+                                .copy(myOperationDecreasingExp));
+                leftExp.setMathType(myOperationDecreasingExp.getMathType());
+                InfixExp exp =
+                        Utilities.createLessThanEqExp(stmt.getLocation(),
+                                leftExp, pVal, BOOLEAN);
+
+                // Create the new confirm statement
+                Location loc;
+                if (myOperationDecreasingExp.getLocation() != null) {
+                    loc =
+                            (Location) myOperationDecreasingExp.getLocation()
+                                    .clone();
+                }
+                else {
+                    loc = (Location) stmt.getLocation().clone();
+                }
+                loc.setDetails("Show Termination of Recursive Call");
+                Utilities.setLocation(exp, loc);
+                ConfirmStmt conf = new ConfirmStmt(loc, exp, false);
+
+                // Add it to our list of assertions
+                myCurrentAssertiveCode.addCode(conf);
+            }
+
+            // Get the requires clause for this operation
+            Exp requires;
+            boolean simplify = false;
+            if (opDec.getRequires() != null) {
+                requires = Exp.copy(opDec.getRequires());
+
+                // Simplify if we just have true
+                if (requires.isLiteralTrue()) {
+                    simplify = true;
+                }
+            }
+            else {
+                requires = myTypeGraph.getTrueVarExp();
+                simplify = true;
+            }
+
+            // Find all the replacements that needs to happen to the requires
+            // and ensures clauses
+            List<ProgramExp> callArgs = assignParamExp.getArguments();
+            List<Exp> replaceArgs = modifyArgumentList(callArgs);
+
+            // Get the ensures clause for this operation
+            // Note: If there isn't an ensures clause, it is set to "True"
+            Exp ensures, opEnsures;
+            if (opDec.getEnsures() != null) {
+                opEnsures = Exp.copy(opDec.getEnsures());
+
+                // Make sure we have an EqualsExp, else it is an error.
+                if (opEnsures instanceof EqualsExp) {
+                    // Has to be a VarExp on the left hand side (containing the name
+                    // of the function operation)
+                    if (((EqualsExp) opEnsures).getLeft() instanceof VarExp) {
+                        VarExp leftExp =
+                                (VarExp) ((EqualsExp) opEnsures).getLeft();
+
+                        // Check if it has the name of the operation
+                        if (leftExp.getName().equals(opDec.getName())) {
+                            ensures = ((EqualsExp) opEnsures).getRight();
+
+                            // Obtain the current location
+                            if (assignParamExp.getName().getLocation() != null) {
+                                // Set the details of the current location
+                                Location loc =
+                                        (Location) assignParamExp.getName()
+                                                .getLocation().clone();
+                                loc.setDetails("Ensures Clause of "
+                                        + opDec.getName());
+                                Utilities.setLocation(ensures, loc);
+                            }
+
+                            // Replace the formal with the actual
+                            ensures =
+                                    replaceFormalWithActualEns(ensures, opDec
+                                            .getParameters(), opDec
+                                            .getStateVars(), replaceArgs, true);
+
+                            // Replace all instances of the left hand side
+                            // variable in the current final confirm statement.
+                            ConfirmStmt confirmStmt =
+                                    myCurrentAssertiveCode.getFinalConfirm();
+                            Exp newConf = confirmStmt.getAssertion();
+                            newConf =
+                                    Utilities.replace(newConf, leftVariable,
+                                            ensures);
+
+                            // Set this as our new final confirm statement.
+                            myCurrentAssertiveCode.setFinalConfirm(newConf,
+                                    confirmStmt.getSimplify());
+
+                            // NY YS
+                            // Duration for CallStmt
+                            if (myInstanceEnvironment.flags
+                                    .isFlagSet(FLAG_ALTPVCS_VC)) {
+                                Location loc =
+                                        (Location) stmt.getLocation().clone();
+                                ConfirmStmt finalConfirm =
+                                        myCurrentAssertiveCode
+                                                .getFinalConfirm();
+                                Exp finalConfirmExp =
+                                        finalConfirm.getAssertion();
+
+                                // Obtain the corresponding OperationProfileEntry
+                                List<PTType> argTypes =
+                                        new LinkedList<PTType>();
+                                for (ProgramExp arg : assignParamExp
+                                        .getArguments()) {
+                                    argTypes.add(arg.getProgramType());
+                                }
+
+                                OperationProfileEntry ope =
+                                        Utilities.searchOperationProfile(loc,
+                                                qualifier, assignParamExp
+                                                        .getName(), argTypes,
+                                                myCurrentModuleScope);
+
+                                // Add the profile ensures as additional assume
+                                Exp profileEnsures = ope.getEnsuresClause();
+                                if (profileEnsures != null) {
+                                    profileEnsures =
+                                            replaceFormalWithActualEns(
+                                                    profileEnsures, opDec
+                                                            .getParameters(),
+                                                    opDec.getStateVars(),
+                                                    replaceArgs, false);
+
+                                    // Obtain the current location
+                                    if (assignParamExp.getLocation() != null) {
+                                        // Set the details of the current location
+                                        Location ensuresLoc =
+                                                (Location) loc.clone();
+                                        ensuresLoc
+                                                .setDetails("Ensures Clause of "
+                                                        + opDec.getName()
+                                                        + " from Profile "
+                                                        + ope.getName());
+                                        Utilities.setLocation(profileEnsures,
+                                                ensuresLoc);
+                                    }
+
+                                    finalConfirmExp =
+                                            myTypeGraph.formConjunct(
+                                                    finalConfirmExp,
+                                                    profileEnsures);
+                                }
+
+                                // Construct the Duration Clause
+                                Exp opDur = Exp.copy(ope.getDurationClause());
+
+                                // Replace PostCondition variables in the duration clause
+                                opDur =
+                                        replaceFormalWithActualEns(opDur, opDec
+                                                .getParameters(), opDec
+                                                .getStateVars(), replaceArgs,
+                                                false);
+
+                                VarExp cumDur =
+                                        Utilities
+                                                .createVarExp(
+                                                        (Location) loc.clone(),
+                                                        null,
+                                                        Utilities
+                                                                .createPosSymbol(Utilities
+                                                                        .getCumDur(finalConfirmExp)),
+                                                        myTypeGraph.R, null);
+                                Exp durCallExp =
+                                        Utilities
+                                                .createDurCallExp(
+                                                        (Location) loc.clone(),
+                                                        Integer
+                                                                .toString(opDec
+                                                                        .getParameters()
+                                                                        .size()),
+                                                        Z, myTypeGraph.R);
+                                InfixExp sumEvalDur =
+                                        new InfixExp((Location) loc.clone(),
+                                                opDur, Utilities
+                                                        .createPosSymbol("+"),
+                                                durCallExp);
+                                sumEvalDur.setMathType(myTypeGraph.R);
+                                sumEvalDur =
+                                        new InfixExp((Location) loc.clone(),
+                                                Exp.copy(cumDur), Utilities
+                                                        .createPosSymbol("+"),
+                                                sumEvalDur);
+                                sumEvalDur.setMathType(myTypeGraph.R);
+
+                                // For any evaluates mode expression, we need to finalize the variable
+                                edu.clemson.cs.r2jt.collections.List<ProgramExp> assignExpList =
+                                        assignParamExp.getArguments();
+                                for (int i = 0; i < assignExpList.size(); i++) {
+                                    ParameterVarDec p =
+                                            opDec.getParameters().get(i);
+                                    VariableExp pExp =
+                                            (VariableExp) assignExpList.get(i);
+                                    if (p.getMode() == Mode.EVALUATES) {
+                                        VarDec v =
+                                                new VarDec(Utilities
+                                                        .getVarName(pExp), p
+                                                        .getTy());
+                                        FunctionExp finalDur =
+                                                Utilities.createFinalizAnyDur(
+                                                        v, myTypeGraph.R);
+                                        sumEvalDur =
+                                                new InfixExp(
+                                                        (Location) loc.clone(),
+                                                        sumEvalDur,
+                                                        Utilities
+                                                                .createPosSymbol("+"),
+                                                        finalDur);
+                                        sumEvalDur.setMathType(myTypeGraph.R);
+                                    }
+                                }
+
+                                // Add duration of assignment and finalize the temporary variable
+                                Exp assignDur =
+                                        Utilities.createVarExp((Location) loc
+                                                .clone(), null, Utilities
+                                                .createPosSymbol("Dur_Assgn"),
+                                                myTypeGraph.R, null);
+                                sumEvalDur =
+                                        new InfixExp((Location) loc.clone(),
+                                                sumEvalDur, Utilities
+                                                        .createPosSymbol("+"),
+                                                assignDur);
+                                sumEvalDur.setMathType(myTypeGraph.R);
+
+                                Exp finalExpDur =
+                                        Utilities.createFinalizAnyDurExp(stmt
+                                                .getVar(), myTypeGraph.R);
+                                sumEvalDur =
+                                        new InfixExp((Location) loc.clone(),
+                                                sumEvalDur, Utilities
+                                                        .createPosSymbol("+"),
+                                                finalExpDur);
+                                sumEvalDur.setMathType(myTypeGraph.R);
+
+                                // Replace Cum_Dur in our final ensures clause
+                                finalConfirmExp =
+                                        Utilities.replace(finalConfirmExp,
+                                                cumDur, sumEvalDur);
+                                myCurrentAssertiveCode.setFinalConfirm(
+                                        finalConfirmExp, finalConfirm
+                                                .getSimplify());
+                            }
+                        }
+                        else {
+                            Utilities.illegalOperationEnsures(opDec
+                                    .getLocation());
+                        }
+                    }
+                    else {
+                        Utilities.illegalOperationEnsures(opDec.getLocation());
+                    }
+                }
+                else {
+                    Utilities.illegalOperationEnsures(opDec.getLocation());
+                }
+            }
+        }
+
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nFunction Rule Applied: \n");
         myVCBuffer.append(myCurrentAssertiveCode.assertionToString());

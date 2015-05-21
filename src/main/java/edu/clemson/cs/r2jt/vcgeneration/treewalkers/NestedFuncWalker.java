@@ -143,13 +143,15 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
         reqloc.setDetails("Requires Clause of " + opDec.getName() + details);
         Utilities.setLocation(opRequires, reqloc);
 
-        // Form one requires clause
-        if (myRequiresClause.isLiteralTrue()) {
-            myRequiresClause = opRequires;
-        }
-        else {
-            myRequiresClause =
-                    myTypeGraph.formConjunct(myRequiresClause, opRequires);
+        // Form one requires clause if it is necessary
+        if (!opRequires.isLiteralTrue()) {
+            if (myRequiresClause.isLiteralTrue()) {
+                myRequiresClause = opRequires;
+            }
+            else {
+                myRequiresClause =
+                        myTypeGraph.formConjunct(myRequiresClause, opRequires);
+            }
         }
 
         // Get the ensures clause for this operation
