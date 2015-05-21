@@ -165,8 +165,15 @@ public class ResolveCompiler {
     // Private Methods
     // ===========================================================
 
-    /*
-     * Attempts to compile all physical files specified by the argument list
+    /**
+     * <p>Attempts to compile all physical files specified by the
+     * argument list.</p>
+     *
+     * @param fileArgList List of strings representing the name of the file.
+     * @param compileEnvironment The current job's compile environment.
+     *
+     * @throws FileNotFoundException
+     * @throws IllegalArgumentException
      */
     private void compileRealFiles(List<String> fileArgList,
             CompileEnvironment compileEnvironment)
@@ -226,9 +233,12 @@ public class ResolveCompiler {
         }
     }
 
-    /*
-     * This method finds all RESOLVE files in the directory and
-     * adds those to files the compiler will compile/verify.
+    /**
+     * <p>This method finds all RESOLVE files in the directory and
+     * adds those to files the compiler will compile/verify.</p>
+     *
+     * @param directory The directory we are searching for RESOLVE files
+     * @param compileEnvironment The current compilation environment.
      */
     private void compileFilesInDir(File directory,
             CompileEnvironment compileEnvironment) {
@@ -255,9 +265,12 @@ public class ResolveCompiler {
         }
     }
 
-    /*
-     * This method will instantiate the controller and
-     * begin the compilation process for the specified file.
+    /**
+     * <p>This method will instantiate the controller and
+     * begin the compilation process for the specified file.</p>
+     *
+     * @param file
+     * @param compileEnvironment
      */
     private void compileMainFile(ResolveFile file,
             CompileEnvironment compileEnvironment) {
@@ -265,25 +278,39 @@ public class ResolveCompiler {
         controller.compileTargetFile(file);
     }
 
-    /*
-     * Converts the specified pathname to a <code>File</code> representing
-     * the absolute path to the pathname.
+    /**
+     * <p>Converts the specified pathname to a <code>File</code>
+     * representing the absolute path to the pathname.</p>
+     *
+     * @param pathname The file path.
+     *
+     * @return The <code>File</code> specified by the path.
      */
     private File getAbsoluteFile(String pathname) {
         return new File(pathname).getAbsoluteFile();
     }
 
-    /*
-     * Returns the file name without the extension.
+    /**
+     * <p>Returns the file name without the extension.</p>
+     *
+     * @param fileName Name of the file with the extension.
+     * @param moduleType The extension of the file.
+     *
+     * @return Name of the file without the extension.
      */
     private String getFileName(String fileName, ModuleType moduleType) {
         return fileName.substring(0, fileName.lastIndexOf(moduleType
                 .getExtension()) - 1);
     }
 
-    /*
-     * The folder RESOLVE and it's sub folders are viewed by the compiler
-     * as "packages", therefore we will need to store these for future use.
+    /**
+     * <p>The folder RESOLVE and it's sub folders are viewed by the compiler
+     * as "packages", therefore we will need to store these for future use.</p>
+     *
+     * @param filePath The absolute path to the file.
+     * @param workspacePath The current workspace's absolute path.
+     *
+     * @return A list containing the RESOLVE "packages"
      */
     private List<String> getPackageList(String filePath, String workspacePath) {
         // Obtain the relative path using the workspace path and current file path.
@@ -297,9 +324,13 @@ public class ResolveCompiler {
         return pkgList;
     }
 
-    /*
-     * Get the absolute path to the RESOLVE Workspace. This workspace
-     * must have the same structure as the one hosted on Github.
+    /**
+     * <p>Get the absolute path to the RESOLVE Workspace. This workspace
+     * must have the same structure as the one hosted on Github.</p>
+     *
+     * @param path The absolute path we are going to search.
+     *
+     * @return File path to the current RESOLVE workspace.
      */
     private File getWorkspaceDir(String path) {
         File resolvePath = null;
@@ -350,8 +381,12 @@ public class ResolveCompiler {
         return resolvePath;
     }
 
-    /*
-     * Method that handles the basic arguments.
+    /**
+     * <p>Method that handles the basic arguments and returns a
+     * <code>CompileEnvironment</code> that includes information
+     * on the current compilation job.</p>
+     *
+     * @return A new <code>CompileEnvironment</code> for the current job.
      */
     private CompileEnvironment handleCompileArgs() {
         CompileEnvironment compileEnvironment = null;
@@ -423,8 +458,11 @@ public class ResolveCompiler {
         return compileEnvironment;
     }
 
-    /*
-     * Determines if the specified filename is a valid RESOLVE file type.
+    /**
+     * <p>Determines if the specified filename is a valid RESOLVE file type.</p>
+     *
+     * @return A RESOLVE extension type object if it is an extension we
+     * recognize or null if it is not.
      */
     private ModuleType getModuleType(String filename) {
         ModuleType type = null;
@@ -451,8 +489,10 @@ public class ResolveCompiler {
         return type;
     }
 
-    /*
-     * This prints the help message that prints out all the optional flags.
+    /**
+     * <p>This prints the help message that prints out all the optional flags.</p>
+     *
+     * @param e This is the current compilation job's environment.
      */
     private void printHelpMessage(CompileEnvironment e) {
         System.out.println("Usage: java -jar RESOLVE.jar [options] <files>");
@@ -461,6 +501,8 @@ public class ResolveCompiler {
 
         // General flags
         System.out.println("  -R             Recurse through directories.");
+
+        // TODO: Each module should have a common method that specifies all the relevant flags
 
         // Prover flags
 
@@ -477,10 +519,10 @@ public class ResolveCompiler {
                 .isFlagSet(FLAG_EXTENDED_HELP)));
     }
 
-    /*
-     * This method sets up dependencies between compiler flags.  If you are
+    /**
+     * <p>This method sets up dependencies between compiler flags.  If you are
      * integrating your module into the compiler flag management system, this is
-     * where to do it.
+     * where to do it.</p>
      */
     private synchronized void setUpFlagDependencies() {
         if (!FlagDependencies.isSealed()) {
@@ -497,9 +539,9 @@ public class ResolveCompiler {
         }
     }
 
-    /*
-     * Add all the required and implied flags. Including those needed
-     * by the WebIDE.
+    /**
+     * <p>Add all the required and implied flags. Including those needed
+     * by the WebIDE.</p>
      */
     private void setUpFlags() {
         // Extended help implies that the general help is also on.
