@@ -2047,9 +2047,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             // and ProgramParamExp.
             if (p instanceof ProgramDotExp || p instanceof ProgramParamExp) {
                 NestedFuncWalker nfw =
-                        new NestedFuncWalker(myCurrentOperationEntry.getName(),
-                                mySymbolTable, myCurrentModuleScope,
-                                myCurrentAssertiveCode);
+                        new NestedFuncWalker(myCurrentOperationEntry,
+                                myOperationDecreasingExp, mySymbolTable,
+                                myCurrentModuleScope, myCurrentAssertiveCode);
                 TreeWalker tw = new TreeWalker(nfw);
                 tw.visit(p);
 
