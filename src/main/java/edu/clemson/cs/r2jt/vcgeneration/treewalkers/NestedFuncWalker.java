@@ -217,14 +217,24 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
      */
     public Exp getEnsuresClause() {
         Set<String> opNameSet = myEnsuresClauseMap.keySet();
+        Exp ensures;
 
-        if (opNameSet.size() != 1) {
-            throw new RuntimeException();
+        // We can't have more than one thing left in our map.
+        // This must mean something went wrong and we have leftover
+        // ensures clause that we haven't replaced.
+        if (opNameSet.size() > 1) {
+            throw new RuntimeException(
+                    "An error occurred while walking the tree!");
         }
-
-        Exp ensures = null;
-        for (String s : opNameSet) {
-            ensures = myEnsuresClauseMap.remove(s);
+        // Retrieve the ensures clause of the nested function call.
+        else if (opNameSet.size() == 1) {
+            ensures = myEnsuresClauseMap.remove(opNameSet.iterator().next());
+        }
+        // Ideally, this should be checked before us. The ensures clause of any
+        // operation that returns a value must be of the explicit form:
+        // <Return_Variable_Name> = <Return_Value>
+        else {
+            throw new RuntimeException("Wrong format for the ensures clause!");
         }
 
         return ensures;
