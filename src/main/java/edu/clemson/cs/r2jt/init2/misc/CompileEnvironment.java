@@ -37,7 +37,7 @@ public class CompileEnvironment {
     private CompileReport myCompileReport;
     private boolean myDebugOff = false;
     private final ErrorHandler2 myErrorHandler;
-    private Map<String, ResolveFile> myFileMap;
+    private Map<String, ResolveFile> myUserFileMap;
     private boolean myGenPVCs = false;
     private ProverListener myListener = null;
     private String myOutputFileName = null;
@@ -58,7 +58,7 @@ public class CompileEnvironment {
     public CompileEnvironment(String[] args) throws FlagDependencyException {
         flags = new FlagManager(args);
         myErrorHandler = new ErrorHandler2(this);
-        myFileMap = new HashMap<String, ResolveFile>();
+        myUserFileMap = new HashMap<String, ResolveFile>();
     }
 
     // ===========================================================
@@ -105,11 +105,11 @@ public class CompileEnvironment {
     }
 
     public ResolveFile getUserFileFromMap(String key) {
-        return myFileMap.get(key);
+        return myUserFileMap.get(key);
     }
 
     public boolean isMetaFile(String key) {
-        return myFileMap.containsKey(key);
+        return myUserFileMap.containsKey(key);
     }
 
     public void setCompileReport(CompileReport cr) {
@@ -128,7 +128,7 @@ public class CompileEnvironment {
      * Used to set a map of user files when used with the web interface
      */
     public void setFileMap(Map<String, ResolveFile> fMap) {
-        myFileMap = fMap;
+        myUserFileMap = fMap;
     }
 
     /** Name the output file. */
