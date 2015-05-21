@@ -3106,7 +3106,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         AssertiveCode negIfAssertiveCode =
                 new AssertiveCode(myCurrentAssertiveCode);
 
-        // TODO: Might need to take this out when we figure out the evaluates mode business
         // Call a method to locate the operation dec for this call
         PosSymbol qualifier = null;
         ProgramParamExp testParamExp = null;
@@ -3123,8 +3122,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             qualifier = dotExp.getQualifier();
         }
         else {
-            // TODO: ERROR!
+            Utilities.expNotHandled(ifCondition, stmt.getLocation());
         }
+
         Location ifConditionLoc;
         if (ifCondition.getLocation() != null) {
             ifConditionLoc = (Location) ifCondition.getLocation().clone();
@@ -3136,6 +3136,45 @@ public class VCGenerator extends TreeWalkerVisitor {
         OperationDec opDec =
                 getOperationDec(ifCondition.getLocation(), qualifier,
                         testParamExp.getName(), testParamExp.getArguments());
+
+        // Check for recursive call of itself
+        if (myCurrentOperationEntry != null
+                && myCurrentOperationEntry.getName().equals(
+                        opDec.getName().getName())
+                && myCurrentOperationEntry.getReturnType() != null) {
+            // Create a new confirm statement using P_val and the decreasing clause
+            VarExp pVal =
+                    Utilities.createPValExp(myOperationDecreasingExp
+                            .getLocation(), myCurrentModuleScope);
+
+            // Create a new infix expression
+            IntegerExp oneExp = new IntegerExp();
+            oneExp.setValue(1);
+            oneExp.setMathType(myOperationDecreasingExp.getMathType());
+            InfixExp leftExp =
+                    new InfixExp(stmt.getLocation(), oneExp, Utilities
+                            .createPosSymbol("+"), Exp
+                            .copy(myOperationDecreasingExp));
+            leftExp.setMathType(myOperationDecreasingExp.getMathType());
+            InfixExp exp =
+                    Utilities.createLessThanEqExp(stmt.getLocation(), leftExp,
+                            pVal, BOOLEAN);
+
+            // Create the new confirm statement
+            Location loc;
+            if (myOperationDecreasingExp.getLocation() != null) {
+                loc = (Location) myOperationDecreasingExp.getLocation().clone();
+            }
+            else {
+                loc = (Location) stmt.getLocation().clone();
+            }
+            loc.setDetails("Show Termination of Recursive Call");
+            Utilities.setLocation(exp, loc);
+            ConfirmStmt conf = new ConfirmStmt(loc, exp, false);
+
+            // Add it to our list of assertions
+            myCurrentAssertiveCode.addCode(conf);
+        }
 
         // Confirm the invoking condition
         // Get the requires clause for this operation
@@ -3154,10 +3193,15 @@ public class VCGenerator extends TreeWalkerVisitor {
             simplify = true;
         }
 
+        // Find all the replacements that needs to happen to the requires
+        // and ensures clauses
+        List<ProgramExp> callArgs = testParamExp.getArguments();
+        List<Exp> replaceArgs = modifyArgumentList(callArgs);
+
         // Replace PreCondition variables in the requires clause
-        //requires =
-        //replaceFormalWithActualReq(requires, opDec.getParameters(),
-        //testParamExp.getArguments());
+        requires =
+                replaceFormalWithActualReq(requires, opDec.getParameters(),
+                        replaceArgs);
 
         // Modify the location of the requires clause and add it to myCurrentAssertiveCode
         // Obtain the current location
@@ -3208,10 +3252,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                         }
 
                         // Replace the formals with the actuals.
-                        //ensures =
-                        //replaceFormalWithActualEns(ensures, opDec
-                        // .getParameters(), opDec.getStateVars(),
-                        //testParamExp.getArguments(), false);
+                        ensures =
+                                replaceFormalWithActualEns(ensures, opDec
+                                        .getParameters(), opDec.getStateVars(),
+                                        replaceArgs, false);
                         myCurrentAssertiveCode.addAssume(loc, ensures, true);
 
                         // Negation of the condition
