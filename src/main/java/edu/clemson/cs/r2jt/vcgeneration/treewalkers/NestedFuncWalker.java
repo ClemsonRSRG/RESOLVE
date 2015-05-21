@@ -50,8 +50,11 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     // The current assertive code
     private final AssertiveCode myCurrentAssertiveCode;
 
-    // Name of the Procedure/Operation Module
-    private String myCurrentOperationName;
+    // Current Procedure/Operation Module for the Assertive Code
+    private final OperationEntry myCurrentOperationEntry;
+
+    // Decreasing clause (if any)
+    private final Exp myOperationDecreasingExp;
 
     // Requires/Ensures
     private Exp myRequiresClause;
@@ -64,8 +67,9 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     // Constructors
     // ===========================================================
 
-    public NestedFuncWalker(String name, ScopeRepository table,
-            ModuleScope scope, AssertiveCode assertiveCode) {
+    public NestedFuncWalker(OperationEntry entry, Exp decreasingExp,
+            ScopeRepository table, ModuleScope scope,
+            AssertiveCode assertiveCode) {
         mySymbolTable = (MathSymbolTableBuilder) table;
         myTypeGraph = mySymbolTable.getTypeGraph();
         myRequiresClause = myTypeGraph.getTrueVarExp();
@@ -73,7 +77,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
         myCurrentAssertiveCode = assertiveCode;
         myCurrentLocation = null;
         myCurrentModuleScope = scope;
-        myCurrentOperationName = name;
+        myCurrentOperationEntry = entry;
+        myOperationDecreasingExp = decreasingExp;
         myQualifier = null;
     }
 
@@ -130,8 +135,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
 
         // Append the name of the current procedure
         String details = "";
-        if (myCurrentOperationName != null) {
-            details = " in Procedure " + myCurrentOperationName;
+        if (myCurrentOperationEntry != null) {
+            details = " in Procedure " + myCurrentOperationEntry.getName();
         }
 
         // Set the details of the current location
@@ -202,6 +207,45 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
             else {
                 Utilities.illegalOperationEnsures(opDec.getLocation());
             }
+        }
+
+        // Check for recursive call of itself
+        if (myCurrentOperationEntry != null
+                && myCurrentOperationEntry.getName().equals(
+                        opDec.getName().getName())
+                && myCurrentOperationEntry.getReturnType() != null) {
+            // Create a new confirm statement using P_val and the decreasing clause
+            VarExp pVal =
+                    Utilities.createPValExp(myOperationDecreasingExp
+                            .getLocation(), myCurrentModuleScope);
+
+            // Create a new infix expression
+            IntegerExp oneExp = new IntegerExp();
+            oneExp.setValue(1);
+            oneExp.setMathType(myOperationDecreasingExp.getMathType());
+            InfixExp leftExp =
+                    new InfixExp(myCurrentLocation, oneExp, Utilities
+                            .createPosSymbol("+"), Exp
+                            .copy(myOperationDecreasingExp));
+            leftExp.setMathType(myOperationDecreasingExp.getMathType());
+            InfixExp infixExp =
+                    Utilities.createLessThanEqExp(myCurrentLocation, leftExp,
+                            pVal, myTypeGraph.BOOLEAN);
+
+            // Create the new confirm statement
+            Location loc;
+            if (myOperationDecreasingExp.getLocation() != null) {
+                loc = (Location) myOperationDecreasingExp.getLocation().clone();
+            }
+            else {
+                loc = (Location) myCurrentLocation.clone();
+            }
+            loc.setDetails("Show Termination of Recursive Call");
+            Utilities.setLocation(infixExp, loc);
+            ConfirmStmt conf = new ConfirmStmt(loc, infixExp, false);
+
+            // Add it to our list of assertions
+            myCurrentAssertiveCode.addCode(conf);
         }
     }
 
