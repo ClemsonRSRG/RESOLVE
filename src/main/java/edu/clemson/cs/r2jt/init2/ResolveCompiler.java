@@ -18,11 +18,13 @@ import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
 import edu.clemson.cs.r2jt.init2.file.ModuleType;
 import edu.clemson.cs.r2jt.init2.file.ResolveFile;
 import edu.clemson.cs.r2jt.init2.misc.CompileEnvironment;
+import edu.clemson.cs.r2jt.init2.misc.CompileReport;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
 import edu.clemson.cs.r2jt.rewriteprover.AlgebraicProver;
 import edu.clemson.cs.r2jt.rewriteprover.Prover;
+import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.r2jt.translation.CTranslator;
 import edu.clemson.cs.r2jt.translation.JavaTranslator;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
@@ -32,6 +34,7 @@ import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -161,9 +164,121 @@ public class ResolveCompiler {
         }
     }
 
+    /**
+     * <p>This invokes the RESOLVE compiler. Usually this method
+     * is called by running the compiler from the WebAPI/WebIDE.</p>
+     *
+     * @param fileMap A map containing all the user modified files.
+     * @param proverListener A listener object that needs to be
+     *                       passed to the prover.
+     */
+    public void invokeCompiler(Map<String, ResolveFile> fileMap,
+            ProverListener proverListener) {
+        // Handle all arguments to the compiler
+        CompileEnvironment compileEnvironment = handleCompileArgs();
+
+        // Create a new compilation report needed by the WebAPI/WebIDE
+        compileEnvironment.setCompileReport(new CompileReport());
+
+        // Store the file map
+        compileEnvironment.setFileMap(fileMap);
+
+        // Store the listener required by all provers
+        compileEnvironment.setProverListener(proverListener);
+
+        // Compile files/directories listed in the argument list
+        try {
+            compileArbitraryFiles(myArgumentFileList, compileEnvironment);
+        }
+        catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+        }
+        catch (FileNotFoundException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>Attempts to compile all "meta" files files specified by the
+     * argument list. If the "meta" file is not supplied, attempt to
+     * search for it as a physical file.</p>
+     *
+     * @param fileArgList List of strings representing the name of the file.
+     * @param compileEnvironment The current job's compile environment.
+     *
+     * @throws FileNotFoundException
+     * @throws IllegalArgumentException
+     */
+    private void compileArbitraryFiles(List<String> fileArgList,
+            CompileEnvironment compileEnvironment)
+            throws FileNotFoundException,
+                IllegalArgumentException {
+        // Loop through the argument list to determine if it is a file or a directory
+        for (String fileString : fileArgList) {
+            // First check if this is a "meta" file
+            if (compileEnvironment.isMetaFile(fileString)) {
+                // Invoke the compiler on this file
+                compileMainFile(compileEnvironment
+                        .getUserFileFromMap(fileString), compileEnvironment);
+            }
+            // If not, it must be a physical file. Use the compileRealFile method.
+            else {
+                List<String> newFileList = new LinkedList<String>();
+                newFileList.add(fileString);
+
+                compileRealFiles(newFileList, compileEnvironment);
+            }
+        }
+    }
+
+    /**
+     * <p>This method finds all RESOLVE files in the directory and
+     * adds those to files the compiler will compile/verify.</p>
+     *
+     * @param directory The directory we are searching for RESOLVE files
+     * @param compileEnvironment The current compilation environment.
+     */
+    private void compileFilesInDir(File directory,
+            CompileEnvironment compileEnvironment) {
+        File[] filesInDir = directory.listFiles();
+        List<String> fileList = new LinkedList<String>();
+
+        // Obtain all RESOLVE files in the directory and add those as new files
+        // we need to compile.
+        for (File f : filesInDir) {
+            if (getModuleType(f.getName()) != null) {
+                fileList.add(f.getName());
+            }
+        }
+
+        // Compile these files first
+        try {
+            compileRealFiles(fileList, compileEnvironment);
+        }
+        catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+        }
+        catch (FileNotFoundException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    /**
+     * <p>This method will instantiate the controller and
+     * begin the compilation process for the specified file.</p>
+     *
+     * @param file
+     * @param compileEnvironment
+     */
+    private void compileMainFile(ResolveFile file,
+            CompileEnvironment compileEnvironment) {
+        Controller controller = new Controller(compileEnvironment);
+        controller.compileTargetFile(file);
+    }
 
     /**
      * <p>Attempts to compile all physical files specified by the
@@ -231,51 +346,6 @@ public class ResolveCompiler {
                 }
             }
         }
-    }
-
-    /**
-     * <p>This method finds all RESOLVE files in the directory and
-     * adds those to files the compiler will compile/verify.</p>
-     *
-     * @param directory The directory we are searching for RESOLVE files
-     * @param compileEnvironment The current compilation environment.
-     */
-    private void compileFilesInDir(File directory,
-            CompileEnvironment compileEnvironment) {
-        File[] filesInDir = directory.listFiles();
-        List<String> fileList = new LinkedList<String>();
-
-        // Obtain all RESOLVE files in the directory and add those as new files
-        // we need to compile.
-        for (File f : filesInDir) {
-            if (getModuleType(f.getName()) != null) {
-                fileList.add(f.getName());
-            }
-        }
-
-        // Compile these files first
-        try {
-            compileRealFiles(fileList, compileEnvironment);
-        }
-        catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-        }
-        catch (FileNotFoundException e) {
-            System.err.println(e.getMessage());
-        }
-    }
-
-    /**
-     * <p>This method will instantiate the controller and
-     * begin the compilation process for the specified file.</p>
-     *
-     * @param file
-     * @param compileEnvironment
-     */
-    private void compileMainFile(ResolveFile file,
-            CompileEnvironment compileEnvironment) {
-        Controller controller = new Controller(compileEnvironment);
-        controller.compileTargetFile(file);
     }
 
     /**
