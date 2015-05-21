@@ -28,7 +28,7 @@ import edu.clemson.cs.r2jt.translation.JavaTranslator;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 import java.io.File;
-import java.util.Collection;
+import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class ResolveCompiler {
     private boolean myCompileAllFilesInDir = false;
     private final String[] myCompilerArgs;
     private final String myCompilerVersion = "Summer 2015";
-    private final List<File> myFilesToCompile;
+    private final List<String> myArgumentFileList;
 
     // ===========================================================
     // Flag Strings
@@ -126,7 +126,7 @@ public class ResolveCompiler {
      */
     public ResolveCompiler(String[] args) {
         myCompilerArgs = args;
-        myFilesToCompile = new LinkedList<File>();
+        myArgumentFileList = new LinkedList<String>();
 
         // Make sure the flag dependencies are set
         setUpFlagDependencies();
@@ -150,7 +150,15 @@ public class ResolveCompiler {
         System.out.println("  Use -help flag for options.");
 
         // Compile files/directories listed in the argument list
-        compileFiles(myFilesToCompile, compileEnvironment);
+        try {
+            compileRealFiles(myArgumentFileList, compileEnvironment);
+        }
+        catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+        }
+        catch (FileNotFoundException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     // ===========================================================
@@ -158,25 +166,33 @@ public class ResolveCompiler {
     // ===========================================================
 
     /*
-     * Compiles all files in the specified list.
+     * Attempts to compile all physical files specified by the argument list
      */
-    private void compileFiles(List<File> fileList,
-            CompileEnvironment compileEnvironment) {
-        // Compile all files
-        for (File file : fileList) {
+    private void compileRealFiles(List<String> fileArgList,
+            CompileEnvironment compileEnvironment)
+            throws FileNotFoundException,
+                IllegalArgumentException {
+        // Loop through the argument list to determine if it is a file or a directory
+        for (String fileString : fileArgList) {
+            // Convert to a file object
+            File file = getAbsoluteFile(fileString);
+
+            // Error if we can't locate the file
+            if (!file.isFile()) {
+                throw new FileNotFoundException("Cannot find the file "
+                        + file.getName() + " in this directory.");
+            }
             // Recursively compile all RESOLVE files in the specified directory
-            if (file.isDirectory()) {
+            else if (file.isDirectory()) {
+                // If the option to compile all files in the directory is given
                 if (myCompileAllFilesInDir) {
                     compileFilesInDir(file, compileEnvironment);
                 }
                 else {
-                    System.err.println("Skipping directory " + file.getName());
+                    throw new IllegalArgumentException(
+                            "Option to compile all files in the directory not set. Skipping directory "
+                                    + file.getName());
                 }
-            }
-            // Error if we can't locate the file
-            else if (!file.isFile()) {
-                System.err.println("Cannot find the file " + file.getName()
-                        + " in this directory.");
             }
             // Process this file
             else {
@@ -217,18 +233,26 @@ public class ResolveCompiler {
     private void compileFilesInDir(File directory,
             CompileEnvironment compileEnvironment) {
         File[] filesInDir = directory.listFiles();
-        List<File> fileList = new LinkedList<File>();
+        List<String> fileList = new LinkedList<String>();
 
         // Obtain all RESOLVE files in the directory and add those as new files
         // we need to compile.
         for (File f : filesInDir) {
             if (getModuleType(f.getName()) != null) {
-                fileList.add(f);
+                fileList.add(f.getName());
             }
         }
 
         // Compile these files first
-        compileFiles(fileList, compileEnvironment);
+        try {
+            compileRealFiles(fileList, compileEnvironment);
+        }
+        catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+        }
+        catch (FileNotFoundException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     /*
@@ -249,6 +273,9 @@ public class ResolveCompiler {
         return new File(pathname).getAbsoluteFile();
     }
 
+    /*
+     * Returns the file name without the extension.
+     */
     private String getFileName(String fileName, ModuleType moduleType) {
         return fileName.substring(0, fileName.lastIndexOf(moduleType
                 .getExtension()) - 1);
@@ -363,7 +390,7 @@ public class ResolveCompiler {
                         }
                     }
                     else {
-                        myFilesToCompile.add(getAbsoluteFile(remainingArgs[i]));
+                        myArgumentFileList.add(remainingArgs[i]);
                     }
                 }
 
