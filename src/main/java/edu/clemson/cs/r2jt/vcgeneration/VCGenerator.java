@@ -2828,6 +2828,40 @@ public class VCGenerator extends TreeWalkerVisitor {
             List<ProgramExp> callArgs = assignParamExp.getArguments();
             List<Exp> replaceArgs = modifyArgumentList(callArgs);
 
+            // Replace PreCondition variables in the requires clause
+            requires =
+                    replaceFormalWithActualReq(requires, opDec.getParameters(),
+                            replaceArgs);
+
+            // Modify the location of the requires clause and add it to myCurrentAssertiveCode
+            // Obtain the current location
+            // Note: If we don't have a location, we create one
+            Location reqloc;
+            if (assignParamExp.getName().getLocation() != null) {
+                reqloc =
+                        (Location) assignParamExp.getName().getLocation()
+                                .clone();
+            }
+            else {
+                reqloc = new Location(null, null);
+            }
+
+            // Append the name of the current procedure
+            String details = "";
+            if (myCurrentOperationEntry != null) {
+                details = " in Procedure " + myCurrentOperationEntry.getName();
+            }
+
+            // Set the details of the current location
+            reqloc
+                    .setDetails("Requires Clause of " + opDec.getName()
+                            + details);
+            Utilities.setLocation(requires, reqloc);
+
+            // Add this to our list of things to confirm
+            myCurrentAssertiveCode.addConfirm((Location) reqloc.clone(),
+                    requires, simplify);
+
             // Get the ensures clause for this operation
             // Note: If there isn't an ensures clause, it is set to "True"
             Exp ensures, opEnsures;
