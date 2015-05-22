@@ -10,19 +10,22 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init2.misc;
+package edu.clemson.cs.r2jt.init2;
 
+import edu.clemson.cs.r2jt.absynnew.ModuleAST;
 import edu.clemson.cs.r2jt.errors.ErrorHandler2;
 import edu.clemson.cs.r2jt.init2.file.ResolveFile;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
 import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-
 import java.io.File;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * TODO: Description for this class
@@ -35,15 +38,17 @@ public class CompileEnvironment {
 
     private File myCompileDir = null;
     private CompileReport myCompileReport;
+    private final Map<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>> myCompilingModules;
     private boolean myDebugOff = false;
     private final ErrorHandler2 myErrorHandler;
-    private Map<String, ResolveFile> myUserFileMap;
     private boolean myGenPVCs = false;
+    private final Stack<ModuleIdentifier> myIncompleteModules;
     private ProverListener myListener = null;
     private String myOutputFileName = null;
     private ScopeRepository mySymbolTable = null;
     private ResolveFile myTargetFile = null;
     private TypeGraph myTypeGraph = null;
+    private Map<String, ResolveFile> myUserFileMap;
 
     // ===========================================================
     // Objects
@@ -57,7 +62,10 @@ public class CompileEnvironment {
 
     public CompileEnvironment(String[] args) throws FlagDependencyException {
         flags = new FlagManager(args);
+        myCompilingModules =
+                new HashMap<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>>();
         myErrorHandler = new ErrorHandler2(this);
+        myIncompleteModules = new Stack<ModuleIdentifier>();
         myUserFileMap = new HashMap<String, ResolveFile>();
     }
 
@@ -65,8 +73,27 @@ public class CompileEnvironment {
     // Public Methods
     // ===========================================================
 
-    public CompileReport getCompileReport() {
-        return myCompileReport;
+    /**
+     * <p>Constructs a record containing the module id, the file, and the module
+     * dec, and places it in the module environment. Also places the module into
+     * a stack that indicates compilation has begun on this module but has not
+     * completed.</p>
+     *
+     * @param file The original source file.
+     * @param moduleAST The ANTLR4 module AST.
+     */
+    public void constructRecord(ResolveFile file, ModuleAST moduleAST) {
+        ModuleIdentifier mid = new ModuleIdentifier(moduleAST);
+        assert !myCompilingModules.containsKey(mid) : "We already compiled a module with this ID!";
+        myCompilingModules.put(mid,
+                new AbstractMap.SimpleEntry<ModuleAST, ResolveFile>(moduleAST,
+                        file));
+        myIncompleteModules.push(mid);
+
+        // Print out debugging message
+        if (!myDebugOff) {
+            myErrorHandler.message("Construct record: " + mid.toString()); //DEBUG
+        }
     }
 
     /**
@@ -74,6 +101,10 @@ public class CompileEnvironment {
      */
     public boolean debugOff() {
         return myDebugOff;
+    }
+
+    public CompileReport getCompileReport() {
+        return myCompileReport;
     }
 
     public ErrorHandler2 getErrorHandler() {

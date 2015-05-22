@@ -17,8 +17,6 @@ import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
 import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
 import edu.clemson.cs.r2jt.init2.file.ModuleType;
 import edu.clemson.cs.r2jt.init2.file.ResolveFile;
-import edu.clemson.cs.r2jt.init2.misc.CompileEnvironment;
-import edu.clemson.cs.r2jt.init2.misc.CompileReport;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
