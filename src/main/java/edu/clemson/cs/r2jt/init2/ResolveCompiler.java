@@ -17,6 +17,7 @@ import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
 import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
 import edu.clemson.cs.r2jt.init2.file.ModuleType;
 import edu.clemson.cs.r2jt.init2.file.ResolveFile;
+import edu.clemson.cs.r2jt.init2.file.Utilities;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
@@ -29,13 +30,10 @@ import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Collections;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
-
-import org.antlr.v4.runtime.ANTLRInputStream;
 
 /**
  * TODO: Description for this class
@@ -157,7 +155,7 @@ public class ResolveCompiler {
         catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
         }
-        catch (FileNotFoundException e) {
+        catch (IOException e) {
             System.err.println(e.getMessage());
         }
     }
@@ -191,7 +189,7 @@ public class ResolveCompiler {
         catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
         }
-        catch (FileNotFoundException e) {
+        catch (IOException e) {
             System.err.println(e.getMessage());
         }
     }
@@ -208,12 +206,12 @@ public class ResolveCompiler {
      * @param fileArgList List of strings representing the name of the file.
      * @param compileEnvironment The current job's compile environment.
      *
-     * @throws FileNotFoundException
+     * @throws IOException
      * @throws IllegalArgumentException
      */
     private void compileArbitraryFiles(List<String> fileArgList,
             CompileEnvironment compileEnvironment)
-            throws FileNotFoundException,
+            throws IOException,
                 IllegalArgumentException {
         // Loop through the argument list to determine if it is a file or a directory
         for (String fileString : fileArgList) {
@@ -248,7 +246,7 @@ public class ResolveCompiler {
         // Obtain all RESOLVE files in the directory and add those as new files
         // we need to compile.
         for (File f : filesInDir) {
-            if (getModuleType(f.getName()) != null) {
+            if (Utilities.getModuleType(f.getName()) != null) {
                 fileList.add(f.getName());
             }
         }
@@ -260,7 +258,7 @@ public class ResolveCompiler {
         catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
         }
-        catch (FileNotFoundException e) {
+        catch (IOException e) {
             System.err.println(e.getMessage());
         }
     }
@@ -285,17 +283,17 @@ public class ResolveCompiler {
      * @param fileArgList List of strings representing the name of the file.
      * @param compileEnvironment The current job's compile environment.
      *
-     * @throws FileNotFoundException
+     * @throws IOException
      * @throws IllegalArgumentException
      */
     private void compileRealFiles(List<String> fileArgList,
             CompileEnvironment compileEnvironment)
-            throws FileNotFoundException,
+            throws IOException,
                 IllegalArgumentException {
         // Loop through the argument list to determine if it is a file or a directory
         for (String fileString : fileArgList) {
             // Convert to a file object
-            File file = getAbsoluteFile(fileString);
+            File file = Utilities.getAbsoluteFile(fileString);
 
             // Error if we can't locate the file
             if (!file.isFile()) {
@@ -316,7 +314,7 @@ public class ResolveCompiler {
             }
             // Process this file
             else {
-                ModuleType moduleType = getModuleType(file.getName());
+                ModuleType moduleType = Utilities.getModuleType(file.getName());
 
                 // Print error message if it is not a valid RESOLVE file
                 if (moduleType == null) {
@@ -324,129 +322,18 @@ public class ResolveCompiler {
                             + " is not a RESOLVE file.");
                 }
                 else {
-                    // Convert to the internal representation of a RESOLVE file
-                    String name = getFileName(file.getName(), moduleType);
                     String workspacePath =
                             compileEnvironment.getWorkspaceDir()
                                     .getAbsolutePath();
-                    List<String> pkgList =
-                            getPackageList(file.getAbsolutePath(),
-                                    workspacePath);
-                    ANTLRInputStream inputStream =
-                            new ANTLRInputStream(file.getAbsolutePath());
                     ResolveFile f =
-                            new ResolveFile(name, moduleType, inputStream,
-                                    workspacePath, pkgList, file
-                                            .getAbsolutePath());
+                            Utilities.convertToResolveFile(file, moduleType,
+                                    workspacePath);
 
                     // Invoke the compiler
                     compileMainFile(f, compileEnvironment);
                 }
             }
         }
-    }
-
-    /**
-     * <p>Converts the specified pathname to a <code>File</code>
-     * representing the absolute path to the pathname.</p>
-     *
-     * @param pathname The file path.
-     *
-     * @return The <code>File</code> specified by the path.
-     */
-    private File getAbsoluteFile(String pathname) {
-        return new File(pathname).getAbsoluteFile();
-    }
-
-    /**
-     * <p>Returns the file name without the extension.</p>
-     *
-     * @param fileName Name of the file with the extension.
-     * @param moduleType The extension of the file.
-     *
-     * @return Name of the file without the extension.
-     */
-    private String getFileName(String fileName, ModuleType moduleType) {
-        return fileName.substring(0, fileName.lastIndexOf(moduleType
-                .getExtension()) - 1);
-    }
-
-    /**
-     * <p>The folder RESOLVE and it's sub folders are viewed by the compiler
-     * as "packages", therefore we will need to store these for future use.</p>
-     *
-     * @param filePath The absolute path to the file.
-     * @param workspacePath The current workspace's absolute path.
-     *
-     * @return A list containing the RESOLVE "packages"
-     */
-    private List<String> getPackageList(String filePath, String workspacePath) {
-        // Obtain the relative path using the workspace path and current file path.
-        String relativePath = filePath.substring(workspacePath.length() + 1);
-
-        // Add all package names using the Java Collections
-        List<String> pkgList = new LinkedList<String>();
-        Collections.addAll(pkgList, relativePath.split(Pattern
-                .quote(File.separator)));
-
-        return pkgList;
-    }
-
-    /**
-     * <p>Get the absolute path to the RESOLVE Workspace. This workspace
-     * must have the same structure as the one hosted on Github.</p>
-     *
-     * @param path The absolute path we are going to search.
-     *
-     * @return File path to the current RESOLVE workspace.
-     */
-    private File getWorkspaceDir(String path) {
-        File resolvePath = null;
-        String resolveDirName = "RESOLVE";
-
-        // Look in the specified path
-        if (path != null) {
-            resolvePath = new File(path);
-
-            // Not a valid path
-            if (!resolvePath.exists()) {
-                System.err.println("Warning: Directory '" + resolveDirName
-                        + "' not found, using current " + "directory.");
-
-                resolvePath = null;
-            }
-        }
-
-        // Attempt to locate the folder containing the folder "RESOLVE"
-        if (resolvePath == null) {
-            File currentDir = getAbsoluteFile("");
-
-            // Check to see if our current path is the path that contains
-            // the RESOLVE folder.
-            if (currentDir.getName().equals(resolveDirName)) {
-                resolvePath = currentDir;
-            }
-
-            // Attempt to locate the "RESOLVE" folder
-            while ((resolvePath == null)
-                    && (currentDir.getParentFile() != null)) {
-                currentDir = currentDir.getParentFile();
-                if (currentDir.getName().equals(resolveDirName)) {
-                    // We store the path that contains the "RESOLVE" folder
-                    resolvePath = currentDir.getParentFile();
-                }
-            }
-
-            // Probably will crash because we can't find "RESOLVE"
-            if (resolvePath == null) {
-                System.err.println("Warning: Directory '" + resolveDirName
-                        + "' not found, using current directory.");
-
-                resolvePath = getAbsoluteFile("");
-            }
-        }
-
-        return resolvePath;
     }
 
     /**
@@ -504,8 +391,8 @@ public class ResolveCompiler {
                 }
 
                 // Store the workspace directory to the compile environment
-                compileEnvironment
-                        .setWorkspaceDir(getWorkspaceDir(workspaceDir));
+                compileEnvironment.setWorkspaceDir(Utilities
+                        .getWorkspaceDir(workspaceDir));
 
                 // Store the symbol table
                 MathSymbolTableBuilder symbolTable =
@@ -524,37 +411,6 @@ public class ResolveCompiler {
         }
 
         return compileEnvironment;
-    }
-
-    /**
-     * <p>Determines if the specified filename is a valid RESOLVE file type.</p>
-     *
-     * @return A RESOLVE extension type object if it is an extension we
-     * recognize or null if it is not.
-     */
-    private ModuleType getModuleType(String filename) {
-        ModuleType type = null;
-
-        if (filename.endsWith(ModuleType.THEORY.getExtension())) {
-            type = ModuleType.THEORY;
-        }
-        else if (filename.endsWith(ModuleType.CONCEPT.getExtension())) {
-            type = ModuleType.CONCEPT;
-        }
-        else if (filename.endsWith(ModuleType.ENHANCEMENT.getExtension())) {
-            type = ModuleType.ENHANCEMENT;
-        }
-        else if (filename.endsWith(ModuleType.REALIZATION.getExtension())) {
-            type = ModuleType.REALIZATION;
-        }
-        else if (filename.endsWith(ModuleType.FACILITY.getExtension())) {
-            type = ModuleType.FACILITY;
-        }
-        else if (filename.endsWith(ModuleType.PROFILE.getExtension())) {
-            type = ModuleType.PROFILE;
-        }
-
-        return type;
     }
 
     /**
