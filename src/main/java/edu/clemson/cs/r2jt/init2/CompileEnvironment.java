@@ -39,6 +39,7 @@ public class CompileEnvironment {
     private File myCompileDir = null;
     private CompileReport myCompileReport;
     private final Map<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>> myCompilingModules;
+    private final Map<ModuleIdentifier, File> myExternalRealizFiles;
     private boolean myDebugOff = false;
     private final ErrorHandler2 myErrorHandler;
     private boolean myGenPVCs = false;
@@ -65,6 +66,7 @@ public class CompileEnvironment {
         myCompilingModules =
                 new HashMap<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>>();
         myErrorHandler = new ErrorHandler2(this);
+        myExternalRealizFiles = new HashMap<ModuleIdentifier, File>();
         myIncompleteModules = new Stack<ModuleIdentifier>();
         myUserFileMap = new HashMap<String, ResolveFile>();
     }
@@ -94,6 +96,36 @@ public class CompileEnvironment {
         if (!myDebugOff) {
             myErrorHandler.message("Construct record: " + mid.toString()); //DEBUG
         }
+    }
+
+    /**
+     * Returns true if the specified module is present in the compilation
+     * environment, has an associated file and a valid module dec.
+     */
+    public boolean containsID(ModuleIdentifier id) {
+        return myCompilingModules.containsKey(id);
+    }
+
+    /**
+     * Returns the file associated with the specified id.
+     */
+    public ResolveFile getFile(ModuleIdentifier id) {
+        return myCompilingModules.get(id).getValue();
+    }
+
+    /**
+     * Returns the <code>ModuleAST</code> associated with the specified id.
+     */
+    public ModuleAST getModuleAST(ModuleIdentifier id) {
+        return myCompilingModules.get(id).getKey();
+    }
+
+    public void addExternalRealizFile(ModuleIdentifier id, File file) {
+        myExternalRealizFiles.put(id, file);
+    }
+
+    public boolean isExternalRealizFile(ModuleIdentifier id) {
+        return myExternalRealizFiles.containsKey(id);
     }
 
     /**
