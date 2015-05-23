@@ -19,7 +19,7 @@ import edu.clemson.cs.r2jt.misc.FlagDependencyException;
 import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
+import edu.clemson.cs.r2jt.typeandpopulate2.ScopeRepository;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.io.File;
 import java.util.AbstractMap;

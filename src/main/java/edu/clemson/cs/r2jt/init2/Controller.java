@@ -20,10 +20,11 @@ import edu.clemson.cs.r2jt.init2.file.ModuleType;
 import edu.clemson.cs.r2jt.init2.file.ResolveFile;
 import edu.clemson.cs.r2jt.errors.ErrorHandler2;
 import edu.clemson.cs.r2jt.init2.file.Utilities;
+import edu.clemson.cs.r2jt.init2.pipeline.AnalysisPipeline;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.parsing.ResolveParser;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.jgrapht.Graphs;
@@ -100,11 +101,11 @@ public class Controller {
             findDependencies(g, targetModule);
 
             // Begin analyzing the file
-            /*AnalysisPipeline analysisPipe =
-                    new AnalysisPipeline(this, mySymbolTable);
+            AnalysisPipeline analysisPipe =
+                    new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
             for (ModuleIdentifier m : getCompileOrder(g)) {
                 analysisPipe.process(m);
-            }*/
+            }
         }
         catch (Throwable e) {
             Throwable cause = e;

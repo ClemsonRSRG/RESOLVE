@@ -26,7 +26,7 @@ import edu.clemson.cs.r2jt.rewriteprover.Prover;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.r2jt.translation.CTranslator;
 import edu.clemson.cs.r2jt.translation.JavaTranslator;
-import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
+import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 import java.io.File;
 import java.io.FileNotFoundException;
