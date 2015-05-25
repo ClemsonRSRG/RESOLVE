@@ -12,16 +12,14 @@
  */
 package edu.clemson.cs.r2jt.init2.file;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
+import org.antlr.v4.runtime.ANTLRInputStream;
 
 /**
  * TODO: Description for this class
@@ -49,8 +47,8 @@ public class Utilities {
         ANTLRInputStream inputStream =
                 new ANTLRInputStream(new FileInputStream(file));
 
-        return new ResolveFile(name, moduleType, inputStream, workspacePath,
-                pkgList, file.getAbsolutePath());
+        return new ResolveFile(name, moduleType, inputStream, pkgList, file
+                .getAbsolutePath());
     }
 
     /**
