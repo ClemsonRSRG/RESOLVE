@@ -13,8 +13,6 @@
 package edu.clemson.cs.r2jt.init2;
 
 import edu.clemson.cs.r2jt.absynnew.*;
-import edu.clemson.cs.r2jt.init2.CompileEnvironment;
-import edu.clemson.cs.r2jt.init2.CompileReport;
 import edu.clemson.cs.r2jt.init2.file.FileLocator;
 import edu.clemson.cs.r2jt.init2.file.ModuleType;
 import edu.clemson.cs.r2jt.init2.file.ResolveFile;
@@ -25,6 +23,10 @@ import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.jgrapht.Graphs;
@@ -34,11 +36,6 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.*;
 
 /**
  * A manager for the target file of a compilation.

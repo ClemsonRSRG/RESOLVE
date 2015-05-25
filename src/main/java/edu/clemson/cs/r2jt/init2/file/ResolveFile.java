@@ -29,21 +29,18 @@ public class ResolveFile {
     private final String myModuleFileName;
     private final ModuleType myModuleFileType;
     private final List<String> myPkgList;
-    private final String myWorkspaceAbsolutePath;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     public ResolveFile(String name, ModuleType moduleType,
-            ANTLRInputStream input, String workspacePath,
-            List<String> packageList, String jarTempPath) {
+            ANTLRInputStream input, List<String> packageList, String jarTempPath) {
         myInputStream = input;
         myCreatedJarTempPath = jarTempPath;
         myModuleFileName = name;
         myModuleFileType = moduleType;
         myPkgList = packageList;
-        myWorkspaceAbsolutePath = workspacePath;
     }
 
     // ===========================================================
@@ -68,10 +65,6 @@ public class ResolveFile {
 
     public List<String> getPkgList() {
         return myPkgList;
-    }
-
-    public String getWorkspaceAbsolutePath() {
-        return myWorkspaceAbsolutePath;
     }
 
 }
