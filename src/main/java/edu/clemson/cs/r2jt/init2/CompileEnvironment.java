@@ -22,10 +22,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.ScopeRepository;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.io.File;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * TODO: Description for this class
@@ -43,7 +40,7 @@ public class CompileEnvironment {
     private boolean myDebugOff = false;
     private final ErrorHandler2 myErrorHandler;
     private boolean myGenPVCs = false;
-    private final Stack<ModuleIdentifier> myIncompleteModules;
+    private final List<ModuleIdentifier> myIncompleteModules;
     private ProverListener myListener = null;
     private String myOutputFileName = null;
     private ScopeRepository mySymbolTable = null;
@@ -67,13 +64,31 @@ public class CompileEnvironment {
                 new HashMap<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>>();
         myErrorHandler = new ErrorHandler2(this);
         myExternalRealizFiles = new HashMap<ModuleIdentifier, File>();
-        myIncompleteModules = new Stack<ModuleIdentifier>();
+        myIncompleteModules = new LinkedList<ModuleIdentifier>();
         myUserFileMap = new HashMap<String, ResolveFile>();
     }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>Remove the module associated with the <code>ModuleIdentifier</code>
+     * from our incomplete module stack. This indicates the completion of
+     * this module.</p>
+     *
+     * @param mid Completed module's identifier.
+     */
+    public void completeRecord(ModuleIdentifier mid) {
+        assert myCompilingModules.containsKey(mid) : "We haven't seen a module with this ID yet!";
+        assert myIncompleteModules.contains(mid) : "We already completed compilation for a module with this ID!";
+        myIncompleteModules.remove(mid);
+
+        // Print out debugging message
+        if (!myDebugOff) {
+            myErrorHandler.message("Complete record: " + mid.toString()); //DEBUG
+        }
+    }
 
     /**
      * <p>Constructs a record containing the module id, the file, and the module
@@ -90,7 +105,7 @@ public class CompileEnvironment {
         myCompilingModules.put(mid,
                 new AbstractMap.SimpleEntry<ModuleAST, ResolveFile>(moduleAST,
                         file));
-        myIncompleteModules.push(mid);
+        myIncompleteModules.add(mid);
 
         // Print out debugging message
         if (!myDebugOff) {
