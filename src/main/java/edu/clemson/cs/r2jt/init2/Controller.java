@@ -105,6 +105,9 @@ public class Controller {
                     new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
             for (ModuleIdentifier m : getCompileOrder(g)) {
                 analysisPipe.process(m);
+
+                // Complete compilation for this module
+                myCompileEnvironment.completeRecord(m);
             }
         }
         catch (Throwable e) {
@@ -123,6 +126,9 @@ public class Controller {
                 UnderliningErrorListener.INSTANCE.semanticError(see
                         .getOffendingToken(), e.getMessage());
             }
+
+            // Update the compile report with an error
+            myCompileReport.setError();
         }
     }
 
