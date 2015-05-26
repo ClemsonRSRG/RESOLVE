@@ -38,7 +38,11 @@ import org.jgrapht.traverse.GraphIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
 /**
- * A manager for the target file of a compilation.
+ * <p>A manager for the target file of a compilation.</p>
+ *
+ * @author Yu-Shan Sun
+ * @author Daniel Welch
+ * @version 1.0
  */
 public class Controller {
 
@@ -46,25 +50,62 @@ public class Controller {
     // Member Fields
     // ===========================================================
 
+    /**
+     * <p>The current job's compilation environment
+     * that stores all necessary objects and flags.</p>
+     */
+    private final CompileEnvironment myCompileEnvironment;
+
+    /**
+     * <p>This stores the all relevant information that needs
+     * to be returned to the WebIDE/WebAPI.</p>
+     */
+    private final CompileReport myCompileReport;
+
+    /**
+     * <p>This is the error handler for the RESOLVE compiler.</p>
+     */
+    private final ErrorHandler2 myErrorHandler;
+
+    /**
+     * <p>This factory takes care of generating an ANTLR4 parser.</p>
+     */
+    private final ResolveParserFactory myParserFactory;
+
+    /**
+     * <p>The symbol table for the compiler.</p>
+     */
+    private final MathSymbolTableBuilder mySymbolTable;
+
+    // ===========================================================
+    // Objects
+    // ===========================================================
+
+    /**
+     * <p>This is a list of all externally realized file extensions
+     * accepted by the RESOLVE compiler. When adding a new type of
+     * extension, simply add the extension name into the list.</p>
+     */
     public static final List<String> NON_NATIVE_EXT =
             Collections.unmodifiableList(Arrays.asList("java", "c", "h"));
-
-    private final CompileEnvironment myCompileEnvironment;
-    private final CompileReport myCompileReport;
-    private final ErrorHandler2 myErrorHandler;
-    private final ResolveParserFactory myParserFactory;
-    private final MathSymbolTableBuilder mySymbolTable;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
-    public Controller(CompileEnvironment e) {
-        myCompileEnvironment = e;
-        myCompileReport = e.getCompileReport();
-        myErrorHandler = e.getErrorHandler();
+    /**
+     * <p>This object takes care of all dependency imports, population,
+     * semantic analysis, translation, VC generation and/or verification.</p>
+     *
+     * @param compileEnvironment The current job's compilation environment
+     *                           that stores all necessary objects and flags.
+     */
+    public Controller(CompileEnvironment compileEnvironment) {
+        myCompileEnvironment = compileEnvironment;
+        myCompileReport = compileEnvironment.getCompileReport();
+        myErrorHandler = compileEnvironment.getErrorHandler();
         myParserFactory = new ResolveParserFactory();
-        mySymbolTable = (MathSymbolTableBuilder) e.getSymbolTable();
+        mySymbolTable = (MathSymbolTableBuilder) compileEnvironment.getSymbolTable();
     }
 
     // ===========================================================
