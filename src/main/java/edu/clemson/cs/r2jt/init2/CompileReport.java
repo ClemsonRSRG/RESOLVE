@@ -13,7 +13,10 @@
 package edu.clemson.cs.r2jt.init2;
 
 /**
- * TODO: Description for this class
+ * <p>This is a compilation report used by the WebIDE/WebAPI.</p>
+ *
+ * @author Yu-Shan Sun
+ * @version 1.0
  */
 public class CompileReport {
 
@@ -66,9 +69,5 @@ public class CompileReport {
     public void setVCSuccess() {
         myVCSuccess = true;
     }
-
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
 
 }

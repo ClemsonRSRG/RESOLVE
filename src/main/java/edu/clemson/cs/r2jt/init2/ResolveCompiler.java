@@ -471,8 +471,9 @@ public class ResolveCompiler {
         System.out.println("  -VCs           Generate verification "
                 + "conditions.");
 
-        System.out.println(FlagDependencies.getListingString(compileEnvironment.flags
-                .isFlagSet(FLAG_EXTENDED_HELP)));
+        System.out.println(FlagDependencies
+                .getListingString(compileEnvironment.flags
+                        .isFlagSet(FLAG_EXTENDED_HELP)));
     }
 
     /**

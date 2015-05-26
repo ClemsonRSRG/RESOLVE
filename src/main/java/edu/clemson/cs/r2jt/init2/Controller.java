@@ -105,7 +105,8 @@ public class Controller {
         myCompileReport = compileEnvironment.getCompileReport();
         myErrorHandler = compileEnvironment.getErrorHandler();
         myParserFactory = new ResolveParserFactory();
-        mySymbolTable = (MathSymbolTableBuilder) compileEnvironment.getSymbolTable();
+        mySymbolTable =
+                (MathSymbolTableBuilder) compileEnvironment.getSymbolTable();
     }
 
     // ===========================================================
@@ -120,9 +121,6 @@ public class Controller {
      * @param file The compiling RESOLVE file.
      */
     public void compileTargetFile(ResolveFile file) {
-        // Set this as our target file in the compile environment
-        myCompileEnvironment.setTargetFile(file);
-
         try {
             // Use ANTLR4 to build the AST
             ModuleAST targetModule = createModuleAST(file);
@@ -149,6 +147,8 @@ public class Controller {
             }
         }
         catch (Throwable e) {
+            // Update the compile report with an error
+            myCompileReport.setError();
             Throwable cause = e;
             while (cause != null && !(cause instanceof SrcErrorException)) {
                 cause = cause.getCause();
@@ -164,9 +164,6 @@ public class Controller {
                 UnderliningErrorListener.INSTANCE.semanticError(see
                         .getOffendingToken(), e.getMessage());
             }
-
-            // Update the compile report with an error
-            myCompileReport.setError();
         }
     }
 
