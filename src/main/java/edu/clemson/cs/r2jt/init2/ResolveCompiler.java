@@ -36,7 +36,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * TODO: Description for this class
+ * <p>This class takes care of all argument processing and creates
+ * a <code>CompileEnvironment</code> for the current job.</p>
+ *
+ * @author Yu-Shan Sun
+ * @author Daniel Welch
+ * @version 1.0
  */
 public class ResolveCompiler {
 
@@ -44,9 +49,27 @@ public class ResolveCompiler {
     // Member Fields
     // ===========================================================
 
+    /**
+     * <p>Boolean flag that checks to see if we need to compile
+     * all the files in the folder.</p>
+     */
     private boolean myCompileAllFilesInDir = false;
+
+    /**
+     * <p>This stores all the arguments received by the RESOLVE
+     * compiler.</p>
+     */
     private final String[] myCompilerArgs;
+
+    /**
+     * <p>This indicates the current compiler version.</p>
+     */
     private final String myCompilerVersion = "Summer 2015";
+
+    /**
+     * <p>This stores all the file names specified in the argument
+     * list.</p>
+     */
     private final List<String> myArgumentFileList;
 
     // ===========================================================
@@ -119,7 +142,10 @@ public class ResolveCompiler {
     // ===========================================================
 
     /**
-     * <p>TODO: Add description.</p>
+     * <p>This creates a "handler" type object for RESOLVE
+     * compiler arguments. This constructor takes care of
+     * all possible flag dependencies and will work for both
+     * invoking from the command line and from the WebIDE/WebAPI.</p>
      *
      * @param args The specified compiler arguments array.
      */
@@ -204,7 +230,8 @@ public class ResolveCompiler {
      * search for it as a physical file.</p>
      *
      * @param fileArgList List of strings representing the name of the file.
-     * @param compileEnvironment The current job's compile environment.
+     * @param compileEnvironment The current job's compilation environment
+     *                           that stores all necessary objects and flags.
      *
      * @throws IOException
      * @throws IllegalArgumentException
@@ -236,7 +263,8 @@ public class ResolveCompiler {
      * adds those to files the compiler will compile/verify.</p>
      *
      * @param directory The directory we are searching for RESOLVE files
-     * @param compileEnvironment The current compilation environment.
+     * @param compileEnvironment The current job's compilation environment
+     *                           that stores all necessary objects and flags.
      */
     private void compileFilesInDir(File directory,
             CompileEnvironment compileEnvironment) {
@@ -267,8 +295,10 @@ public class ResolveCompiler {
      * <p>This method will instantiate the controller and
      * begin the compilation process for the specified file.</p>
      *
-     * @param file
-     * @param compileEnvironment
+     * @param file The current <code>ResolveFile</code> specified by
+     *             the argument list we wish to compile.
+     * @param compileEnvironment The current job's compilation environment
+     *                           that stores all necessary objects and flags.
      */
     private void compileMainFile(ResolveFile file,
             CompileEnvironment compileEnvironment) {
@@ -281,7 +311,8 @@ public class ResolveCompiler {
      * argument list.</p>
      *
      * @param fileArgList List of strings representing the name of the file.
-     * @param compileEnvironment The current job's compile environment.
+     * @param compileEnvironment The current job's compilation environment
+     *                           that stores all necessary objects and flags.
      *
      * @throws IOException
      * @throws IllegalArgumentException
@@ -416,9 +447,10 @@ public class ResolveCompiler {
     /**
      * <p>This prints the help message that prints out all the optional flags.</p>
      *
-     * @param e This is the current compilation job's environment.
+     * @param compileEnvironment The current job's compilation environment
+     *                           that stores all necessary objects and flags.
      */
-    private void printHelpMessage(CompileEnvironment e) {
+    private void printHelpMessage(CompileEnvironment compileEnvironment) {
         System.out.println("Usage: java -jar RESOLVE.jar [options] <files>");
         System.out.println("where options include:");
         System.out.println();
@@ -439,12 +471,12 @@ public class ResolveCompiler {
         System.out.println("  -VCs           Generate verification "
                 + "conditions.");
 
-        System.out.println(FlagDependencies.getListingString(e.flags
+        System.out.println(FlagDependencies.getListingString(compileEnvironment.flags
                 .isFlagSet(FLAG_EXTENDED_HELP)));
     }
 
     /**
-     * <p>This method sets up dependencies between compiler flags.  If you are
+     * <p>This method sets up dependencies between compiler flags. If you are
      * integrating your module into the compiler flag management system, this is
      * where to do it.</p>
      */
