@@ -135,6 +135,7 @@ public class CompileEnvironment {
      */
     public CompileEnvironment(String[] args) throws FlagDependencyException {
         flags = new FlagManager(args);
+        myCompileReport = new CompileReport();
         myCompilingModules =
                 new HashMap<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>>();
         myErrorHandler = new ErrorHandler2(this);
@@ -347,15 +348,6 @@ public class CompileEnvironment {
      */
     public boolean isMetaFile(String key) {
         return myUserFileMap.containsKey(key);
-    }
-
-    /**
-     * <p>Stores this as the compile report for the WebIDE/WebAPI.</p>
-     *
-     * @param cr A newly created <code>CompileReport</code>.
-     */
-    public void setCompileReport(CompileReport cr) {
-        myCompileReport = cr;
     }
 
     /**
