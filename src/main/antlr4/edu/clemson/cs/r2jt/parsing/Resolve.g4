@@ -389,6 +389,12 @@ mathTheoremDecl
 mathDefinitionDecl
     :   mathStandardDefinitionDecl
     |   mathInductiveDefinitionDecl
+    |   mathCategoricalDecl
+    ;
+
+mathCategoricalDecl
+    :   'Categorical' 'Definition' 'introduces' categoricalDefinitionSignature
+        'related by' mathAssertionExp ';'
     ;
 
 mathInductiveDefinitionDecl
@@ -398,6 +404,10 @@ mathInductiveDefinitionDecl
 
 mathStandardDefinitionDecl
     :   'Definition' definitionSignature ('is' mathAssertionExp)? ';'
+    ;
+
+categoricalDefinitionSignature
+    :   definitionSignature (',' definitionSignature)*
     ;
 
 inductiveDefinitionSignature
