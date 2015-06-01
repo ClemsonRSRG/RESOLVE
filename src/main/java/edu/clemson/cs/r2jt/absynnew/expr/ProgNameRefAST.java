@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>A <code>ProgNameRefAST</code> represents a reference to some named element
- * within an expression or subexpression.</p>
+ * A {@code ProgNameRefAST} represents a reference to some named element
+ * within an expression or subexpression.
  */
 public class ProgNameRefAST extends ProgExprAST {
 

@@ -21,7 +21,6 @@ import org.antlr.v4.runtime.Token;
 public class ModuleArgumentAST extends ResolveAST {
 
     private final ProgExprAST myArgumentExpr;
-
     private MTType myMathType;
     private PTType myProgramTypeValue;
 

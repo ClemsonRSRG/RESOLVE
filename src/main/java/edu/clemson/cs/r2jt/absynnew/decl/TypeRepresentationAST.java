@@ -29,7 +29,6 @@ public class TypeRepresentationAST extends DeclAST {
 
     private TypeRepresentationAST(RepresentationBuilder builder) {
         super(builder.getStart(), builder.getStop(), builder.name);
-
         myRepresentationType = builder.representation;
         myConvention = builder.convention;
         myCorrespondence = builder.correspondence;

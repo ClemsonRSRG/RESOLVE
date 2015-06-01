@@ -25,8 +25,8 @@ public class WhileAST extends StmtAST {
     private final ProgExprAST myCondition;
 
     /**
-     * <p>The following variables taken together allow loops to be annotated
-     * with an invariant.</p>
+     * The following variables taken together allow loops to be annotated
+     * with an invariant.
      */
     private final List<ProgExprAST> myChangingVariables =
             new ArrayList<ProgExprAST>();

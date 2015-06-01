@@ -22,9 +22,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <p>A mathematical definition. A <code>MathDefinitionAST</code> comes in three
+ * A mathematical definition. A {@code MathDefinitionAST} comes in three
  * flavors: Inductive, categorical, and standard. The right hand side is
- * currently optional in all except inductive -- where it is enforced.</p>
+ * currently optional in all except inductive -- where it is enforced.
  */
 public class MathDefinitionAST extends DeclAST {
 
@@ -37,7 +37,7 @@ public class MathDefinitionAST extends DeclAST {
     private final DefinitionType myDefinitionType;
 
     /**
-     * <p>If this <code>MathDefinitionAST</code> represents an non-inductive
+     * If this {@code MathDefinitionDeclAST} represents an non-inductive
      * definition, then both <code>myInductiveBaseCase == null</code> and
      * <code>myInductiveHypothesis == null</code>. In this case,
      * <code>myStandardBody</code> may be <code>null</code> -- depending on

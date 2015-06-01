@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>An <code>InitFinalAST</code> provides a general scope for specifications
+ * An {@code InitFinalAST} provides a general scope for specifications
  * and code that deals with module (or type level) initialization or
- * finalization.</p>
+ * finalization.
  */
 public class InitFinalAST extends ResolveAST {
 

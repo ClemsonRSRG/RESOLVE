@@ -20,17 +20,17 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>The <code>TreeWalker</code> is used to apply the visitor pattern to the
+ * The {@code TreeWalker} is used to apply the visitor pattern to the
  * RESOLVE abstract syntax tree. The visitor logic is implemented as a
- * <code>TreeWalkerVisitor</code></p>.
+ * {@code TreeWalkerVisitor}.
  */
 public class TreeWalker {
 
     private final TreeWalkerVisitor myVisitor;
 
     /**
-     * <p>Constructs a new <code>TreeWalker</code> that applies the logic of
-     * <code>TreeWalkerVisitor</code> to a RESOLVE abstract syntax tree.</p>
+     * Constructs a new {@code TreeWalker} that applies the logic of
+     * {@code TreeWalkerVisitor} to a abstract syntax tree.
      *
      * @param listener	An instance of TreeWalkerListener which implements
      * 				    listener methods to be applied to nodes of the AST.
@@ -44,13 +44,13 @@ public class TreeWalker {
     }
 
     /**
-     * <p>Visits the node <code>e</code> by calling <tt>pre</tt> listener
+     * Visits the node {@code e} by calling pre listener
      * methods, recursively visiting child nodes, and calling appropriate
-     * <tt>post</tt> methods.</p>
-     *
-     * <p>If the <code>TreeWalkerVisitor</code> happens to encounter a method
-     * named <code>walk[className]</code>, that returns true, the children are
-     * skipped.</p>
+     * post methods.
+     * <p>
+     * If the {@code TreeWalkerVisitor} happens to encounter a method
+     * named {@pre walk[className]}, that returns true, the children are
+     * skipped.
      *
      * @param e	The RESOLVE ast node to walk
      */

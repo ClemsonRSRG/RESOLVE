@@ -672,8 +672,8 @@ public class TypeGraph {
         //We'd like to force the presence of the destination node
         getTypeNode(destinationCanonicalResult.canonicalType);
 
-        PopulatingVisitor.emitDebug("added relationship to type node ["
-                + sourceCanonicalResult.canonicalType + "]: " + relationship);
+        //PopulatingVisitor.emitDebug("added relationship to type node ["
+        //        + sourceCanonicalResult.canonicalType + "]: " + relationship);
     }
 
     private ExprAST safeVariableNameUpdate(ExprAST original,
