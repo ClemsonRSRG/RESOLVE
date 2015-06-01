@@ -204,8 +204,8 @@ public class TheoremCongruenceClosureImpl {
 
         }
         boolean extraOutput = false;
-        /*if(m_theoremString.contains("K_Z")
-                && vc.m_name.equals("1_1")    ){
+        /*if(m_theoremString.contains("narg")
+                && vc.m_name.equals("0_3")    ){
             extraOutput = true;
             System.out.println("looking for: \n" + m_matchConj + "in " + vc);
         }*/
@@ -222,7 +222,7 @@ public class TheoremCongruenceClosureImpl {
             curBox.getNextMatch();
             if (curBox.impossibleToMatch) {
                 if (extraOutput)
-                    System.out.println("rejecting " + curBox);
+                    System.out.println("rejecting " + curBox.toString());
                 boxStack.pop();
                 if (!boxStack.isEmpty()) {
                     boxStack.peek().currentIndex =
@@ -355,11 +355,11 @@ public class TheoremCongruenceClosureImpl {
                 /*System.err.println("Type Mismatch: orig: " + oDomain + "->"
                         + oRange + " dest: " + dType); */
             }
-            //if(m_theoremString.contains("Prt_Btwn")) {
-            /*System.err.println("Failed type check: " + oSymbol + "(from theorem): " + oType
+            /*if(m_theoremString.contains("narg")) {
+             System.err.println("Failed type check: " + oSymbol + "(from theorem): " + oType
                     + " " + dSymbol + ": " + dType);
-            System.err.println(m_theoremString);*/
-            //}
+            System.err.println(m_theoremString);
+            }*/
             if (oType.toString().equals(dType.toString())) {
                 System.err.println("Type error" + oType.toString() + "\n"
                         + m_theoremString + "\n" + dSymbol);

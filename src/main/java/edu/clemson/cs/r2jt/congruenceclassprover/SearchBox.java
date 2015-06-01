@@ -47,6 +47,7 @@ public class SearchBox {
     public int m_indexInList;
     public int m_lastGoodMatchIndex;
     public List<String> m_last_candidate;
+    protected String m_conflict = "";
 
     public SearchBox(NormalizedAtomicExpressionMapImpl query,
             Registry queryReg,
@@ -174,7 +175,7 @@ public class SearchBox {
                 origValForComp = m_origAsStrArray.get(i);
             }
             if (!origValForComp.equals(boundOp)) { // not a wildcard, if not the same, ret false
-
+                m_conflict = origOp + ": " + origValForComp + " is not " + boundOp;
                 m_failedBindings = tempMap;
                 return false; // problem, need to roll back m_bindings
             }
@@ -203,6 +204,8 @@ public class SearchBox {
         if (m_failedBindings != null) {
             rString += "\n\tfailedBindings: " + m_failedBindings;
         }
+
+            rString += m_conflict;
         return rString;
     }
 }
