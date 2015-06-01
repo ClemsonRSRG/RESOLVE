@@ -108,7 +108,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     public void exitUsesList(@NotNull ResolveParser.UsesListContext ctx) {
         myImportBuilder =
                 new ImportCollectionBuilder(ctx.getStart(), ctx.getStop())
-                        .imports(ImportType.EXPLICIT, ctx.Identifier());
+                        .imports(ImportType.EXPLICIT, ctx.IDENTIFIER());
         put(ctx, myImportBuilder.build());
     }
 
@@ -334,7 +334,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
         for (ResolveParser.VariableDeclGroupContext grp : ctx
                 .variableDeclGroup()) {
-            builder.localVariables(getAll(VariableAST.class, grp.Identifier()));
+            builder.localVariables(getAll(VariableAST.class, grp.IDENTIFIER()));
         }
         put(ctx, builder.build());
     }
@@ -364,7 +364,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         //them list-ifed.
         for (ResolveParser.VariableDeclGroupContext grp : ctx
                 .variableDeclGroup()) {
-            builder.localVariables(getAll(VariableAST.class, grp.Identifier()));
+            builder.localVariables(getAll(VariableAST.class, grp.IDENTIFIER()));
         }
         put(ctx, builder.build());
     }
@@ -375,7 +375,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
             @NotNull ResolveParser.VariableDeclGroupContext ctx) {
         NamedTypeAST groupType = get(NamedTypeAST.class, ctx.type());
 
-        for (TerminalNode t : ctx.Identifier()) {
+        for (TerminalNode t : ctx.IDENTIFIER()) {
             put(t, new VariableAST(ctx.getStart(), ctx.getStop(),
                     t.getSymbol(), groupType));
         }
@@ -478,7 +478,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                 .recordVariableDeclGroup()) {
             NamedTypeAST grpType = get(NamedTypeAST.class, grp.type());
 
-            for (TerminalNode t : grp.Identifier()) {
+            for (TerminalNode t : grp.IDENTIFIER()) {
                 fields.add(new VariableAST(grp.getStart(), grp.getStop(), t
                         .getSymbol(), grpType));
             }
@@ -493,7 +493,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
         for (ResolveParser.MathVariableDeclGroupContext grp : ctx
                 .mathVariableDeclGroup()) {
-            universals.addAll(getAll(MathVariableAST.class, grp.Identifier()));
+            universals.addAll(getAll(MathVariableAST.class, grp.IDENTIFIER()));
         }
         MathTypeTheoremAST theorem =
                 new MathTypeTheoremAST(ctx.getStart(), ctx.getStop(), ctx.name,
@@ -505,7 +505,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     public void exitMathVariableDecl(
             @NotNull ResolveParser.MathVariableDeclContext ctx) {
         put(ctx, new MathVariableAST(ctx.getStart(), ctx.getStop(), ctx
-                .Identifier().getSymbol(), get(MathTypeAST.class, ctx
+                .IDENTIFIER().getSymbol(), get(MathTypeAST.class, ctx
                 .mathTypeExp())));
     }
 
@@ -514,7 +514,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
             @NotNull ResolveParser.MathVariableDeclGroupContext ctx) {
         MathTypeAST groupType = get(MathTypeAST.class, ctx.mathTypeExp());
 
-        for (TerminalNode t : ctx.Identifier()) {
+        for (TerminalNode t : ctx.IDENTIFIER()) {
             put(t, new MathVariableAST(ctx.getStart(), ctx.getStop(), t
                     .getSymbol(), groupType));
         }
@@ -637,7 +637,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         List<VariableAST> variables = new ArrayList<VariableAST>();
 
         for (ResolveParser.VariableDeclGroupContext grp : v) {
-            variables.addAll(getAll(VariableAST.class, grp.Identifier()));
+            variables.addAll(getAll(VariableAST.class, grp.IDENTIFIER()));
         }
         return new InitFinalAST(ctx.getStart(), ctx.getStop(), get(
                 ExprAST.class, requires), get(ExprAST.class, ensures),
@@ -780,7 +780,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                 .name(ctx.prefixOp().getStart())//
                 .returnType(get(MathTypeAST.class, ctx.mathTypeExp()))//
                 .parameters(
-                        buildInductiveParameter(ctx.Identifier().getSymbol(),
+                        buildInductiveParameter(ctx.IDENTIFIER().getSymbol(),
                                 ctx.mathVariableDecl().mathTypeExp()));
     }
 
@@ -791,7 +791,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                 .name(ctx.infixOp().getStart())//
                 .returnType(get(MathTypeAST.class, ctx.mathTypeExp()))//
                 .parameters(
-                        buildInductiveParameter(ctx.Identifier().getSymbol(),
+                        buildInductiveParameter(ctx.IDENTIFIER().getSymbol(),
                                 ctx.mathVariableDecl(0).mathTypeExp()),
                         get(MathVariableAST.class, ctx.mathVariableDecl(1)));
     }
@@ -839,7 +839,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         for (ResolveParser.MathVariableDeclGroupContext grp : ctx
                 .mathVariableDeclGroup()) {
             myDefinitionBuilder.parameters(getAll(MathVariableAST.class, grp
-                    .Identifier()));
+                    .IDENTIFIER()));
         }
     }
 
@@ -849,7 +849,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         for (ResolveParser.MathVariableDeclGroupContext grp : ctx
                 .mathVariableDeclGroup()) {
             myDefinitionBuilder.parameters(getAll(MathVariableAST.class, grp
-                    .Identifier()));
+                    .IDENTIFIER()));
         }
     }
 
@@ -934,14 +934,14 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     public void exitProgIntegerExp(
             @NotNull ResolveParser.ProgIntegerExpContext ctx) {
         put(ctx, new ProgLiteralRefAST.ProgIntegerRefAST(ctx.getStart(), ctx
-                .getStop(), Integer.valueOf(ctx.IntegerLiteral().getText())));
+                .getStop(), Integer.valueOf(ctx.INTEGER_LITERAL().getText())));
     }
 
     @Override
     public void exitProgStringExp(
             @NotNull ResolveParser.ProgStringExpContext ctx) {
         put(ctx, new ProgLiteralRefAST.ProgStringRefAST(ctx.getStart(), ctx
-                .getStop(), String.valueOf(ctx.StringLiteral().getText())));
+                .getStop(), String.valueOf(ctx.STRING_LITERAL().getText())));
     }
 
     @Override
@@ -1025,14 +1025,14 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitMathBooleanExp(
             @NotNull ResolveParser.MathBooleanExpContext ctx) {
-        put(ctx, buildFunctionApplication(ctx.BooleanLiteral(), ctx).literal(
+        put(ctx, buildFunctionApplication(ctx.BOOLEAN_LITERAL(), ctx).literal(
                 true).build());
     }
 
     @Override
     public void exitMathIntegerExp(
             @NotNull ResolveParser.MathIntegerExpContext ctx) {
-        put(ctx, buildFunctionApplication(ctx.IntegerLiteral(), ctx).literal(
+        put(ctx, buildFunctionApplication(ctx.INTEGER_LITERAL(), ctx).literal(
                 true).build());
     }
 
@@ -1044,7 +1044,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
         List<MathVariableAST> quantifiedVariables =
                 getAll(MathVariableAST.class, ctx.mathVariableDeclGroup()
-                        .Identifier());
+                        .IDENTIFIER());
 
         MathQuantifiedAST quantExpr =
                 new MathQuantifiedAST(ctx.getStart(), ctx.getStop(),
@@ -1089,7 +1089,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
         for (ResolveParser.MathVariableDeclGroupContext grp : ctx
                 .mathVariableDeclGroup()) {
-            parameters.addAll(getAll(MathVariableAST.class, grp.Identifier()));
+            parameters.addAll(getAll(MathVariableAST.class, grp.IDENTIFIER()));
         }
         put(ctx, new MathLambdaAST(ctx.getStart(), ctx.getStop(), parameters,
                 get(ExprAST.class, ctx.mathAssertionExp())));

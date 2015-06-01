@@ -28,7 +28,7 @@ public class ResolveToken extends CommonToken {
     public String mySourceName;
 
     public ResolveToken(String text) {
-        super(ResolveLexer.Identifier, text);
+        super(ResolveLexer.IDENTIFIER, text);
     }
 
     public ResolveToken(int type, String text) {
