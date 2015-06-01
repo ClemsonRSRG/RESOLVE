@@ -35,7 +35,7 @@ public class AnalysisPipeline extends AbstractPipeline {
         }
         ModuleAST moduleTarget =
                 myCompileEnvironment.getModuleAST(currentTarget);
-        TreeWalker.walk(populator, moduleTarget);
+        //TreeWalker.walk(populator, moduleTarget);
 
         PopulatingVisitor.emitDebug("Type Graph:\n\n"
                 + mySymbolTable.getTypeGraph().toString());

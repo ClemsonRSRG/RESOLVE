@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>A <code>MathQuantifiedAST</code> encapsulates a mathematical assertion
+ * A {@code MathQuantifiedAST} encapsulates a mathematical assertion
  * whose members and subexpressions are bound to some number of quantified
- * {@link MathVariableAST}s.</p>
+ * {@link MathVariableAST}s.
  */
 public class MathQuantifiedAST extends ExprAST {
 

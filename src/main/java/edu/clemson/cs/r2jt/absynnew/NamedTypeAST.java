@@ -16,8 +16,8 @@ import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import org.antlr.v4.runtime.Token;
 
 /**
- * <p>A <code>NamedTypeAST</code> refers to any type represented by a
- * possibly qualified identifier/name.</p>
+ * A {@code NamedTypeAST} refers to any type represented by a
+ * possibly qualified identifier/name.
  */
 public final class NamedTypeAST extends TypeAST {
 

@@ -18,12 +18,11 @@ import org.antlr.v4.runtime.Token;
 import java.util.Collection;
 
 /**
- * <p>Factors out some common logic for <code>Builder</code>s that construct
- * <code>ResolveAST</code> node classes.</p>
+ * Factors out some common logic for {@code Builder}s that construct
+ * {@code ResolveAST} node classes.
  *
- * <p><strong>Note:</strong> this class is <em>not</em> intended to hold any
- * adder methods, no matter how common they might be -- as this breaks the
- * pattern being used here.</p>
+ * Note: this class is not intended to hold any adder methods, no matter how
+ * common they might be -- as this breaks the pattern being used here.
  *
  * @param <T> The type of the {@link ResolveAST} node being built.
  */

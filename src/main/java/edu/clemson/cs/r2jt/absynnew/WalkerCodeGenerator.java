@@ -23,9 +23,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * <p>This class generates a <tt>Java</tt> treewalking abstract class
+ * This class generates a <tt>Java</tt> treewalking abstract class
  * containing dummy implementations for each node in <tt>RESOLVE</tt>s AST
- * hierarchy.</p>
+ * hierarchy.
  */
 public class WalkerCodeGenerator {
 

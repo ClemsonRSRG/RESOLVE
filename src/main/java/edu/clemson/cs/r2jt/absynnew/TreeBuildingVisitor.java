@@ -15,9 +15,6 @@ package edu.clemson.cs.r2jt.absynnew;
 import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportCollectionBuilder;
 import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST.ImportType;
 import edu.clemson.cs.r2jt.absynnew.InitFinalAST.Type;
-import edu.clemson.cs.r2jt.absynnew.ModuleAST.PrecisAST.PrecisBuilder;
-import edu.clemson.cs.r2jt.absynnew.ModuleAST.ImplModuleAST.ImplModuleBuilder;
-import edu.clemson.cs.r2jt.absynnew.ModuleAST.SpecModuleAST.SpecModuleBuilder;
 import edu.clemson.cs.r2jt.absynnew.BlockAST.BlockBuilder;
 import edu.clemson.cs.r2jt.absynnew.decl.*;
 import edu.clemson.cs.r2jt.absynnew.decl.MathDefinitionAST.DefinitionBuilder;
@@ -126,7 +123,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 
-    @Override
+    /*@Override
     public void exitConceptModule(
             @NotNull ResolveParser.ConceptModuleContext ctx) {
 
@@ -141,7 +138,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                     .moduleParameterList().moduleParameterDecl()));
         }
         put(ctx, builder.build());
-    }
+    }*/
 
     @Override
     public void exitConceptItems(@NotNull ResolveParser.ConceptItemsContext ctx) {
@@ -163,7 +160,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
         sanityCheckBlockEnds(ctx.name, ctx.closename);
     }
 
-    @Override
+    /*@Override
     public void exitEnhancementModule(
             @NotNull ResolveParser.EnhancementModuleContext ctx) {
         myImportBuilder.imports(ImportType.IMPLICIT, ctx.concept);
@@ -179,7 +176,7 @@ public class TreeBuildingVisitor<T extends ResolveAST>
                     .moduleParameterList().moduleParameterDecl()));
         }
         put(ctx, builder.build());
-    }
+    }*/
 
     @Override
     public void exitEnhancementItems(
@@ -207,11 +204,11 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     public void exitConceptImplModule(
             @NotNull ResolveParser.ConceptImplModuleContext ctx) {
         myImportBuilder.imports(ImportType.IMPLICIT, ctx.concept);
-        ImplModuleBuilder builder =
-                new ImplModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)
-                        .block(get(BlockAST.class, ctx.implItems())).imports(
-                                myImportBuilder.build()).concept(ctx.concept);
-        put(ctx, builder.build());
+        /*       ImplModuleBuilder builder =
+                       new ImplModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)
+                               .block(get(BlockAST.class, ctx.implItems())).imports(
+                                       myImportBuilder.build()).concept(ctx.concept);
+               put(ctx, builder.build());*/
     }
 
     @Override
@@ -219,11 +216,11 @@ public class TreeBuildingVisitor<T extends ResolveAST>
             @NotNull ResolveParser.EnhancementImplModuleContext ctx) {
         myImportBuilder.imports(ImportType.IMPLICIT, ctx.concept).imports(
                 ImportType.IMPLICIT, ctx.enhancement);
-        ImplModuleBuilder builder =
-                new ImplModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)
-                        .block(get(BlockAST.class, ctx.implItems())).imports(
-                                myImportBuilder.build()).concept(ctx.concept);
-        put(ctx, builder.build());
+        /*&        ImplModuleBuilder builder =
+         new ImplModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)
+         .block(get(BlockAST.class, ctx.implItems())).imports(
+         myImportBuilder.build()).concept(ctx.concept);
+         put(ctx, builder.build());*/
     }
 
     @Override
@@ -247,12 +244,12 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
     @Override
     public void exitPrecisModule(@NotNull ResolveParser.PrecisModuleContext ctx) {
-        PrecisBuilder builder =
-                new PrecisBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
-                        .block(get(BlockAST.class, ctx.precisItems()))//
-                        .imports(myImportBuilder.build());
+    /*       PrecisBuilder builder =
+                   new PrecisBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
+                           .block(get(BlockAST.class, ctx.precisItems()))//
+                           .imports(myImportBuilder.build());*/
 
-        put(ctx, builder.build());
+    //put(ctx, builder.build());
     }
 
     @Override
@@ -278,11 +275,11 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitFacilityModule(
             @NotNull ResolveParser.FacilityModuleContext ctx) {
-        ImplModuleBuilder builder =
-                new ImplModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
-                        .block(get(BlockAST.class, ctx.facilityItems()))//
-                        .imports(myImportBuilder.build());
-        put(ctx, builder.build());
+    /*        ImplModuleBuilder builder =
+     new ImplModuleBuilder(ctx.getStart(), ctx.getStop(), ctx.name)//
+     .block(get(BlockAST.class, ctx.facilityItems()))//
+     .imports(myImportBuilder.build());
+     put(ctx, builder.build());*/
     }
 
     @Override
@@ -864,17 +861,17 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     @Override
     public void exitProgApplicationExp(
             @NotNull ResolveParser.ProgApplicationExpContext ctx) {
-        Token name = TreeUtil.getTemplateOperationNameFor(ctx.op);
-        //Unary minus unfornately needs special casing (or else we'll call it
-        //negate).
-        if (ctx.progExp().size() == 1 && ctx.op.getText().equals("-")) {
-            name = new ResolveToken("Negate");
-        }
-        ProgOperationRefAST call =
-                new ProgOperationRefAST(ctx.getStart(), ctx.getStop(), null,
-                        TreeUtil.getTemplateOperationNameFor(ctx.op), getAll(
-                                ProgExprAST.class, ctx.progExp()));
-        put(ctx, call);
+    /*      Token name = TreeUtil.getTemplateOperationNameFor(ctx.op);
+          //Unary minus unfornately needs special casing (or else we'll call it
+          //negate).
+          if (ctx.progExp().size() == 1 && ctx.op.getText().equals("-")) {
+              name = new ResolveToken("Negate");
+          }
+          ProgOperationRefAST call =
+                  new ProgOperationRefAST(ctx.getStart(), ctx.getStop(), null,
+                          TreeUtil.getTemplateOperationNameFor(ctx.op), getAll(
+                                  ProgExprAST.class, ctx.progExp()));
+          put(ctx, call);*/
     }
 
     @Override
@@ -923,8 +920,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
     @Override
     public void exitProgDotExp(@NotNull ResolveParser.ProgDotExpContext ctx) {
-        put(ctx, new ProgDotAST(ctx.getStart(), ctx.getStop(), getAll(
-                ProgNameRefAST.class, ctx.progNamedExp())));
+        put(ctx, new ProgNamedSegmentsAST(ctx.getStart(), ctx.getStop(),
+                getAll(ProgNameRefAST.class, ctx.progNamedExp())));
     }
 
     @Override
@@ -1019,8 +1016,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
     @Override
     public void exitMathDotExp(@NotNull ResolveParser.MathDotExpContext ctx) {
-        MathDotAST dots =
-                new MathDotAST(ctx.getStart(), ctx.getStop(), getAll(
+        MathSegmentsAST dots =
+                new MathSegmentsAST(ctx.getStart(), ctx.getStop(), getAll(
                         MathSymbolAST.class, ctx.mathFunctionApplicationExp()));
         put(ctx, dots);
     }

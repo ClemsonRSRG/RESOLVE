@@ -15,8 +15,8 @@ package edu.clemson.cs.r2jt.absynnew.decl;
 import org.antlr.v4.runtime.Token;
 
 /**
- * <p>A <code>TypeParameterAST</code> represents some generic type
- * parameterizing a module (e.g. <code>T</code>, <code>Entry</code>, etc)</p>.
+ * A {@code TypeParameterAST} represents some generic type parameterizing a
+ * module (e.g. {@code T}, {@code Entry}, etc).
  */
 public class TypeParameterAST extends DeclAST {
 

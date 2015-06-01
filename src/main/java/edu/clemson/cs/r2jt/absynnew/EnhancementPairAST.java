@@ -18,14 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>A <code>EnhancementPairAST</code> pairs a possibly parameterized
- * specification with a possibly parameterized implementation.</p>
+ * An {@code EnhancementPairAST} pairs a possibly parameterized
+ * specification with a possibly parameterized implementation.
  */
 public class EnhancementPairAST extends ResolveAST {
 
     private final Token mySpecificationName, myBodyName;
 
-    private final List<ModuleArgumentAST> mySpecificationArgs =
+    private final List<ModuleArgumentAST> mySpecArgs =
             new ArrayList<ModuleArgumentAST>();
 
     private final List<ModuleArgumentAST> myBodyArgs =
@@ -37,8 +37,7 @@ public class EnhancementPairAST extends ResolveAST {
         super(start, stop);
         mySpecificationName = specName;
         myBodyName = bodyName;
-
-        mySpecificationArgs.addAll(specArgs);
+        mySpecArgs.addAll(specArgs);
         myBodyArgs.addAll(bodyArgs);
     }
 
@@ -51,7 +50,7 @@ public class EnhancementPairAST extends ResolveAST {
     }
 
     public List<ModuleArgumentAST> getSpecArguments() {
-        return mySpecificationArgs;
+        return mySpecArgs;
     }
 
     public List<ModuleArgumentAST> getImplArguments() {

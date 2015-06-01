@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
-import edu.clemson.cs.r2jt.absynnew.TreeUtil;
+import edu.clemson.cs.r2jt.misc.Utils;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
@@ -20,16 +20,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>A <code>ProgOperationRefAST</code> represents a reference within an
- * expression or subexpression to some operation.</p>
+ * A {@code ProgOperationRefAST} represents a reference within an
+ * expression or subexpression to some operation.
  *
- * <p>Realize that every call in the ast, including the 'official'
+ * Realize that every call in the ast, including the 'official'
  * {@link edu.clemson.cs.r2jt.absynnew.stmt.CallAST}s should reference this
- * class. Ultimately even the primitive operations <code>+, -, *</code> get
- * converted into <code>ProgOperationRefAST</code>s
+ * class. Ultimately even the primitive operations {@code +, -, /} get
+ * converted into {@code ProgOperationRefAST}s
  * (by {@link edu.clemson.cs.r2jt.absynnew.TreeBuildingVisitor}) with names
  * appropriate for referencing their corresponding, formally specified template
- * operations.</p>
+ * operations.
  */
 public class ProgOperationRefAST extends ProgExprAST {
 
@@ -99,6 +99,6 @@ public class ProgOperationRefAST extends ProgExprAST {
         if (myQualifier != null) {
             result += myQualifier + "::";
         }
-        return result + myName + "(" + TreeUtil.join(myArguments, ", ") + ")";
+        return result + myName + "(" + Utils.join(myArguments, ", ") + ")";
     }
 }

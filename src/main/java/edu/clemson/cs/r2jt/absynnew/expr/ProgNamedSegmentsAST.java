@@ -1,5 +1,5 @@
 /**
- * ProgDotAST.java
+ * ProgNamedSegmentsAST.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -12,20 +12,30 @@
  */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
-import edu.clemson.cs.r2jt.absynnew.TreeUtil;
+import edu.clemson.cs.r2jt.misc.Utils;
 import org.antlr.v4.runtime.Token;
-import org.stringtemplate.v4.ST;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ProgDotAST extends ProgExprAST {
+/**
+ * Represents a series of {@link ProgNameRefAST}s delimited by '.' (dot)
+ * notation. Note that {@code ProgNamedSegmentsAST} was explicitly designed
+ * to be a "flat", meaning may only contain segments that are not themselves
+ * other segments--only names.
+ */
+//Todo: Technically this class needs a 'starting element' as well that can
+//be ProgParamAST. Think operation that returns a record that therefore allows
+//dots to proceed function calls (e.g. Foo(x).y.z). Since no examples contain
+//this case, we'll leave this class be for now.
+public class ProgNamedSegmentsAST extends ProgExprAST {
 
     private final List<ProgNameRefAST> mySegments =
             new ArrayList<ProgNameRefAST>();
 
-    public ProgDotAST(Token start, Token stop, List<ProgNameRefAST> segs) {
+    public ProgNamedSegmentsAST(Token start, Token stop,
+            List<ProgNameRefAST> segs) {
         super(start, stop);
         mySegments.addAll(segs);
     }
@@ -57,12 +67,12 @@ public class ProgDotAST extends ProgExprAST {
         for (ExprAST e : mySegments) {
             newSegments.add((ProgNameRefAST) substitute(e, substitutions));
         }
-        retval = new ProgDotAST(getStart(), getStop(), newSegments);
+        retval = new ProgNamedSegmentsAST(getStart(), getStop(), newSegments);
         return retval;
     }
 
     @Override
     public String toString() {
-        return TreeUtil.join(mySegments, ".");
+        return Utils.join(mySegments, ".");
     }
 }

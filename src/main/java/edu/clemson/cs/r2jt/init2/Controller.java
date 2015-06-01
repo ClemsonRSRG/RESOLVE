@@ -70,7 +70,7 @@ public class Controller {
     /**
      * <p>This factory takes care of generating an ANTLR4 parser.</p>
      */
-    private final ResolveParserFactory myParserFactory;
+    //private final ResolveParserFactory myParserFactory;
 
     /**
      * <p>The symbol table for the compiler.</p>
@@ -104,7 +104,7 @@ public class Controller {
         myCompileEnvironment = compileEnvironment;
         myCompileReport = compileEnvironment.getCompileReport();
         myErrorHandler = compileEnvironment.getErrorHandler();
-        myParserFactory = new ResolveParserFactory();
+        //myParserFactory = new ResolveParserFactory();
         mySymbolTable =
                 (MathSymbolTableBuilder) compileEnvironment.getSymbolTable();
     }
@@ -209,10 +209,11 @@ public class Controller {
      * @return The ANTLR4 Module AST.
      */
     private ModuleAST createModuleAST(ResolveFile file) {
-        ResolveParser parser =
-                myParserFactory.createParser(file.getInputStream());
-        ParserRuleContext start = parser.module();
-        return TreeUtil.createASTNodeFrom(start);
+        /*  ResolveParser parser =
+                  myParserFactory.createParser(file.getInputStream());
+          ParserRuleContext start = parser.module();
+          return TreeUtil.createASTNodeFrom(start);*/
+        return null;
     }
 
     /**

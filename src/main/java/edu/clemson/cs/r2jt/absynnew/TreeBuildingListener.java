@@ -1,5 +1,5 @@
 /**
- * CircularDependencyException.java
+ * TreeBuildingListener.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -13,13 +13,6 @@
 package edu.clemson.cs.r2jt.absynnew;
 
 /**
- * An {@code CircularDependencyException} indicates an unresolvable
- * circular dependency between two (or more) modules.
+ * Created by daniel on 6/1/15.
  */
-public class CircularDependencyException extends RuntimeException {
-
-    public CircularDependencyException(String msg) {
-        super(msg);
-    }
-
-}
+public class TreeBuildingListener {}

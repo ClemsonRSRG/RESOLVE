@@ -15,16 +15,16 @@ package edu.clemson.cs.r2jt.absynnew;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 
 /**
- * <p>A syntactic type based on an arbitrary mathematical {@link ExprAST}.  All
+ * A syntactic type based on an arbitrary mathematical {@link ExprAST}.  All
  * fields referencing a "math type" should be wrapped with this
- * <code>MathTypeAST</code>.  Ultimately their interfaces should be changed to
+ * {@code MathTypeAST}.  Ultimately their interfaces should be changed to
  * reflect this fact, or this class should be unwrapped and math types should
- * simply be represented by {@link ExprAST}s.</p>
+ * simply be represented by {@link ExprAST}s.
  *
- * <p>Addendum: having an event in the walker indicating when we're within some
+ * Addendum: having an event in the walker indicating when we're within some
  * mathematical type's tree (essentially what this node buys us) has proven
  * useful in population.. unwrapping as posed above does not seem especially
- * helpful at this point.</p>
+ * helpful at this point.
  */
 public final class MathTypeAST extends TypeAST {
 

@@ -19,9 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>A <code>RecordTypeAST</code> represents programmatic type designed
- * for grouping variables and other pieces of data together -- not unlike a
- * traditional <tt>C</tt> struct.</p>
+ * A {@code RecordTypeAST} represents programmatic type designed
+ * for grouping variables and other pieces of data together -- think c struct.
  */
 public class RecordTypeAST extends TypeAST {
 

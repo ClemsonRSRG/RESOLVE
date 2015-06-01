@@ -22,8 +22,6 @@ import edu.clemson.cs.r2jt.misc.Utils;
 import edu.clemson.cs.r2jt.misc.Utils.Indirect;
 import edu.clemson.cs.r2jt.misc.HardCoded2;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.MathSymbolEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
@@ -1150,7 +1148,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public boolean walkProgDotAST(ProgDotAST e) {
+    public boolean walkProgDotAST(ProgNamedSegmentsAST e) {
 
         preAny(e);
         preExprAST(e);
@@ -1166,7 +1164,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public void preProgDotAST(ProgDotAST e) {
+    public void preProgDotAST(ProgNamedSegmentsAST e) {
         //Dot expressions are handled ridiculously, even for this compiler, so
         //this method just deals with the cases we've encountered so far and
         //lots of assumptions are made.  Expect it to break frequently when you
@@ -1219,7 +1217,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public boolean walkMathDotAST(MathDotAST e) {
+    public boolean walkMathDotAST(MathSegmentsAST e) {
         preAny(e);
         preExprAST(e);
         preMathDotAST(e);
@@ -1283,7 +1281,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public void postMathDotAST(MathDotAST e) {
+    public void postMathDotAST(MathSegmentsAST e) {
         //Might already have been set in preDotExp(), in which case our children
         //weren't visited
         if (e.getMathType() == null) {

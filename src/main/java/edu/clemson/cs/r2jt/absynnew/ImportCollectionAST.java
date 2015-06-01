@@ -20,9 +20,9 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.*;
 
 /**
- * <p>An <code>ImportCollectionAST</code> classifies and maintains a complete
+ * An {@code ImportCollectionAST} classifies and maintains a complete
  * collection of module imports ranging from implicitly referenced/imported
- * modules, to those explicitly requested via the <tt>uses</tt> list.</p>
+ * modules, to those explicitly requested via the <tt>uses</tt> list.
  */
 public class ImportCollectionAST extends ResolveAST {
 
@@ -38,10 +38,10 @@ public class ImportCollectionAST extends ResolveAST {
     }
 
     /**
-     * <p>Retrieves a set of all imports except those of <code>type</code>.</p>
+     * Retrieves a set of all imports except those of {@code type}.
      * 
      * @param type Any types we would like to filter/exclude.
-     * @return A set of {@link Token} filtered by <code>type</code>.
+     * @return A set of {@link Token} filtered by {@code type}.
      */
     public Set<Token> getImportsExcluding(ImportType... type) {
         Set<Token> result = new HashSet<Token>();
@@ -60,24 +60,23 @@ public class ImportCollectionAST extends ResolveAST {
     }
 
     /**
-     * <p>Returns <code>true</code> <strong>iff</strong> the set of
-     * <code>type</code> imports contains <code>t</code>; <code>false</code>
-     * otherwise.</p>
+     * Returns {@code true} iff the set of {@code type} imports contains
+     * {@code t}; {@code false}.
+     * otherwise.
      * @param type  A {@link ImportType}.
      * @param t     A name token.
      *
-     * @return      <code>true</code> if <code>t</code> is in the set of
-     *              <code>type</code>, <code>false</code> otherwise.
+     * @return      true if t is in the set of type, false otherwise.
      */
     public boolean inCategory(ImportType type, Token t) {
         return myImports.get(type).contains(t);
     }
 
     /**
-     * <p>Returns all imports, regardless of their <code>ImportType</code>, in a
-     * single set.</p>
+     * Returns all imports, regardless of their <code>ImportType</code>, in a
+     * single set.
      * 
-     * @return <strong>All</strong> imports.
+     * @return All imports.
      */
     public Set<Token> getImports() {
         Set<Token> aggregateImports = new HashSet<Token>();
@@ -89,8 +88,8 @@ public class ImportCollectionAST extends ResolveAST {
     }
 
     /**
-     * <p>Useful for collecting <em>all</em> imports over the course of the
-     * construction of a given {@link ModuleAST}.</p>
+     * Useful for collecting all imports over the course of the
+     * construction of a given {@link ModuleAST}.
      */
     public static class ImportCollectionBuilder
             extends

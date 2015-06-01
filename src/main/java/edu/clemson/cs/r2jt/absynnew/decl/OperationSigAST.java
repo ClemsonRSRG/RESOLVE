@@ -22,13 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>An <code>OperationDeclAST</code> encapsulates the signature of a function
- * (operation). This includes specifications in the form of <tt>requires</tt>
- * and <tt>ensures</tt> clauses, as well as a set of formal, mode-preceded
- * {@link ParameterAST}s.</p>
+ * An {@code OperationDeclAST} encapsulates the signature of a function
+ * (operation). This includes specifications in the form of requires
+ * and ensures clauses, as well as a set of formal, mode-preceded
+ * {@link ParameterAST}s.
  *
- * <p>This class should only appear within the context of specification modules
- * (e.g. {@link edu.clemson.cs.r2jt.absynnew.ModuleAST.SpecModuleAST}s)</p>
+ * This class should only appear within the context of specification modules
+ * (e.g. {@link edu.clemson.cs.r2jt.absynnew.ModuleAST.EnhancementModuleAST}s)
  */
 public class OperationSigAST extends OperationAST {
 
