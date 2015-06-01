@@ -25,12 +25,6 @@ BASECASE
     :   'Base_Case'
     ;
 
-BOOLEAN
-    :   'B'
-    |   'false'
-    |   'true'
-    ;
-
 BY
     :   'by'
     ;
@@ -41,6 +35,10 @@ CARTPROD
 
 CASE
     :   'Case'
+    ;
+
+CATEGORICAL
+    :   'Categorical'
     ;
 
 CHANGING
@@ -54,6 +52,10 @@ CLEARS
 
 CONCEPT
     :   'Concept'
+    ;
+
+CONFIRM
+    :   'Confirm'
     ;
 
 CONSTRAINT
@@ -181,12 +183,20 @@ IMPLIES
     :   'implies'
     ;
 
+IN
+    :   'is_in'
+    ;
+
 INDUCTIVE
     :   'Inductive'
     ;
 
-INDUCTIVECASE
-    :   'Inductive_case'
+INDUCTIVE_BASE_NUM
+    :   '(i.)'
+    ;
+
+INDUCTIVE_HYP_NUM
+    :   '(ii.)'
     ;
 
 INITIALIZATION
@@ -207,38 +217,6 @@ INTRODUCES
 
 IS
     :   'is'
-    ;
-
-IN
-    :   'is_in'
-    ;
-
-NOT_IN
-    :   'is_not_in'
-    ;
-
-NOT_PROP_SUBSET
-    :   'is_not_proper_subset_of'
-    ;
-
-NOT_SUBSET
-    :   'is_not_subset_of'
-    ;
-
-NOT_SUBSTR
-    :   'is_not_substring_of'
-    ;
-
-PROP_SUBSET
-    :   'is_proper_subset_of'
-    ;
-
-SUBSET
-    :   'is_subset_of'
-    ;
-
-SUBSTR
-    :   'is_substring_of'
     ;
 
 ITERATE
@@ -277,12 +255,28 @@ NOT
     :   'not'
     ;
 
-CAT
-    :   'o'
+NOT_IN
+    :   'is_not_in'
+    ;
+
+NOT_PROP_SUBSET
+    :   'is_not_proper_subset_of'
+    ;
+
+NOT_SUBSET
+    :   'is_not_subset_of'
+    ;
+
+NOT_SUBSTR
+    :   'is_not_substring_of'
     ;
 
 OF
     :   'of'
+    ;
+
+ON
+    :   'on'
     ;
 
 OP
@@ -314,6 +308,10 @@ PONENS
     :   'ponens'
     ;
 
+PRECIS
+    :   'Precis'
+    ;
+
 PRESERVES
     :   'pres'
     |   'preserves'
@@ -326,6 +324,10 @@ PROFILE
 PROCEDURE
     :   'Proc'
     |   'Procedure'
+    ;
+
+PROP_SUBSET
+    :   'is_proper_subset_of'
     ;
 
 REALIZATION
@@ -370,6 +372,14 @@ RESTORES
     |   'restores'
     ;
 
+SUBSET
+    :   'is_subset_of'
+    ;
+
+SUBSTR
+    :   'is_substring_of'
+    ;
+
 SUCH
     :   'such'
     ;
@@ -386,11 +396,6 @@ THEOREM
     :   'Theorem'
     ;
 
-THEORY
-    :   'Precis'
-    |   'Theory'
-    ;
-
 THERE
     :   'There'
     |   'there'
@@ -398,6 +403,7 @@ THERE
 
 TYPE
     :   'Type'
+    |   'type'
     ;
 
 UNION
@@ -427,4 +433,201 @@ WHILE
 
 WITH_PROFILE
     :   'with_profile'
+    ;
+
+// Additional Symbol Tokens
+
+ASSIGN_OP
+    :   ':='
+    ;
+
+BAR
+    :   '|'
+    ;
+
+COLON
+    :   ':'
+    ;
+
+COMMA
+    :   ','
+    ;
+
+CONCAT
+    :   'o'
+    ;
+
+DBL_BAR
+    :   '||'
+    ;
+
+DIVIDE
+    :   '/'
+    ;
+
+DOT
+    :   '.'
+    ;
+
+EQL
+    :   '='
+    ;
+
+FUNCARROW
+    :   '->'
+    ;
+
+GT
+    :   '>'
+    ;
+
+GT_EQL
+    :   '>='
+    ;
+
+HASH
+    :   '#'
+    ;
+
+LBRACE
+    :   '{'
+    ;
+
+LPAREN
+    :   '('
+    ;
+
+LT
+    :   '<'
+    ;
+
+LT_EQL
+    :   '<='
+    ;
+
+MINUS
+    :   '-'
+    ;
+
+MULTIPLY
+    :   '*'
+    ;
+
+NOT_EQL
+    :   '/='
+    ;
+
+PLUS
+    :   '+'
+    ;
+
+QUALIFIER
+    :   '::'
+    ;
+
+RANGE
+    :   '..'
+    ;
+
+RBRACE
+    :   '}'
+    ;
+
+RPAREN
+    :   ')'
+    ;
+
+SEMICOLON
+    :   ';'
+    ;
+
+SWAP_OP
+    :   ':=:'
+    ;
+
+TILDE
+    :   '~'
+    ;
+
+// literal rules and fragments
+
+BOOLEAN_LITERAL
+    :   'B'
+    |   'false'
+    |   'true'
+    ;
+
+INTEGER_LITERAL
+    :   DecimalIntegerLiteral
+    ;
+
+CHARACTER_LITERAL
+    :   '\'' SingleCharacter '\''
+    ;
+
+STRING_LITERAL
+    :   '\"' StringCharacters? '\"'
+    ;
+
+fragment
+StringCharacters
+    :   StringCharacter+
+    ;
+
+fragment
+StringCharacter
+    :   ~["\\]
+    ;
+
+fragment
+DecimalIntegerLiteral
+    :   '0'
+    |   NonZeroDigit (Digits)?
+    ;
+
+fragment
+Digits
+    :   Digit (Digit)*
+    ;
+
+fragment
+Digit
+    :   '0'
+    |   NonZeroDigit
+    ;
+
+fragment
+NonZeroDigit
+    :   [1-9]
+    ;
+
+fragment
+SingleCharacter
+    :   ~['\\]
+    ;
+
+// whitespace, identifier rules, and comments
+
+COMMENT
+    :   '(*' .*? '*)' -> skip
+    ;
+
+IDENTIFIER
+    :   LETTER LETTER_OR_DIGIT*
+    ;
+
+LETTER
+    :   [a-zA-Z$_]
+    ;
+
+LETTER_OR_DIGIT
+    :   [a-zA-Z0-9$_]
+    ;
+
+LINE_COMMENT
+    :   '--' ~[\r\n]* -> skip
+    ;
+
+SPACE
+    :  [ \t\r\n\u000C]+ -> skip
     ;
