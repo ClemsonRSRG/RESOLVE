@@ -199,9 +199,6 @@ public class ResolveCompiler {
         // Handle all arguments to the compiler
         CompileEnvironment compileEnvironment = handleCompileArgs();
 
-        // Create a new compilation report needed by the WebAPI/WebIDE
-        compileEnvironment.setCompileReport(new CompileReport());
-
         // Store the file map
         compileEnvironment.setFileMap(fileMap);
 

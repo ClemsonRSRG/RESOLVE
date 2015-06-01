@@ -268,7 +268,7 @@ public class MathSymbolAST extends ExprAST {
         protected final List<ExprAST> arguments = new ArrayList<ExprAST>();
 
         public MathSymbolExprBuilder(String name) {
-            this(null, null, new ResolveToken(ResolveLexer.Identifier, name),
+            this(null, null, new ResolveToken(ResolveLexer.IDENTIFIER, name),
                     null);
         }
 
@@ -286,7 +286,7 @@ public class MathSymbolAST extends ExprAST {
             }
             else {
                 this.name =
-                        new ResolveToken(ResolveLexer.Identifier, lprint
+                        new ResolveToken(ResolveLexer.IDENTIFIER, lprint
                                 .getText()
                                 + "..." + rprint.getText());
             }

@@ -1,5 +1,9 @@
 grammar Resolve;
 
+options {
+    tokenVocab=ResolveLexer;
+}
+
 module
     :   precisModule
     |   facilityModule
@@ -12,10 +16,10 @@ module
 // precis module
 
 precisModule
-    :   'Precis' name=Identifier ';'
+    :   PRECIS name=IDENTIFIER SEMICOLON
         (usesList)?
         (precisItems)?
-        'end' closename=Identifier ';'
+        END closename=IDENTIFIER SEMICOLON
     ;
 
 precisItems
@@ -31,10 +35,10 @@ precisItem
 // facility module
 
 facilityModule
-    :   'Facility' name=Identifier ';'
+    :   FACILITY name=IDENTIFIER SEMICOLON
         (usesList)?
         (facilityItems)?
-        'end' closename=Identifier ';'
+        END closename=IDENTIFIER SEMICOLON EOF
     ;
 
 facilityItems
@@ -52,11 +56,11 @@ facilityItem
 // concept module
 
 conceptModule
-    :   'Concept' name=Identifier (moduleParameterList)? ';'
+    :   CONCEPT name=IDENTIFIER (moduleParameterList)? SEMICOLON
         (usesList)?
         (requiresClause)?
         (conceptItems)?
-        'end' closename=Identifier ';' EOF
+        END closename=IDENTIFIER SEMICOLON EOF
     ;
 
 conceptItems
@@ -75,23 +79,23 @@ conceptItem
 // concept impl module
 
 conceptImplModule
-    :   'Realization' name=Identifier 'for' concept=Identifier
-        ('enhanced' 'by' enhancement=Identifier)* ';'
+    :   REALIZATION name=IDENTIFIER FOR concept=IDENTIFIER
+        (ENHANCED BY enhancement=IDENTIFIER)* SEMICOLON
         (usesList)?
         (requiresClause)?
         (implItems)?
-        'end' closename=Identifier ';'
+        END closename=IDENTIFIER SEMICOLON EOF
     ;
 
 // enhancement module
 
 enhancementModule
-    :   'Enhancement' name=Identifier (moduleParameterList)?
-        'for' concept=Identifier ';'
+    :   ENHANCEMENT name=IDENTIFIER (moduleParameterList)?
+        FOR concept=IDENTIFIER SEMICOLON
         (usesList)?
         (requiresClause)?
         (enhancementItems)?
-        'end' closename=Identifier ';' EOF
+        END closename=IDENTIFIER SEMICOLON EOF
     ;
 
 enhancementItems
@@ -107,12 +111,12 @@ enhancementItem
 // enhancement impl module
 
 enhancementImplModule
-    :   'Realization' name=Identifier (moduleParameterList)?
-        'for' enhancement=Identifier 'of' concept=Identifier ';'
+    :   REALIZATION name=IDENTIFIER (moduleParameterList)?
+        FOR enhancement=IDENTIFIER OF concept=IDENTIFIER SEMICOLON
         (usesList)?
         (requiresClause)?
         (implItems)?
-        'end' closename=Identifier ';'
+        END closename=IDENTIFIER SEMICOLON
     ;
 
 implItems
@@ -134,17 +138,17 @@ implItem
 // uses, imports
 
 usesList
-    :   'uses' Identifier (',' Identifier)* ';'
+    :   USES IDENTIFIER (COMMA IDENTIFIER)* SEMICOLON
     ;
 
 // parameter related rules
 
 operationParameterList
-    :   '(' (parameterDecl (';' parameterDecl)*)?  ')'
+    :   LPAREN (parameterDecl (SEMICOLON parameterDecl)*)? RPAREN
     ;
 
 moduleParameterList
-    :   '(' moduleParameterDecl (';' moduleParameterDecl)* ')'
+    :   LPAREN moduleParameterDecl (SEMICOLON moduleParameterDecl)* RPAREN
     ;
 
 moduleParameterDecl
@@ -153,47 +157,47 @@ moduleParameterDecl
     ;
 
 typeParameterDecl
-    :   'type' name=Identifier
+    :   TYPE name=IDENTIFIER
     ;
 
 parameterDecl
-    :   parameterMode name=Identifier ':' type
+    :   parameterMode name=IDENTIFIER COLON type
     ;
 
 parameterMode
-    :   ( 'alters'
-        | 'updates'
-        | 'clears'
-        | 'restores'
-        | 'preserves'
-        | 'replaces'
-        | 'evaluates' )
+    :   ( ALTERS
+        | UPDATES
+        | CLEARS
+        | RESTORES
+        | PRESERVES
+        | REPLACES
+        | EVALUATES )
     ;
 
 // type and record related rules
 
 type
-    :   (qualifier=Identifier '::')? name=Identifier
+    :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
     ;
 
 record
-    :   'Record' (recordVariableDeclGroup)+ 'end'
+    :   RECORD (recordVariableDeclGroup)+ END
     ;
 
 recordVariableDeclGroup
-    :   Identifier (',' Identifier)* ':' type ';'
+    :   IDENTIFIER (COMMA IDENTIFIER)* COLON type SEMICOLON
     ;
 
 typeModelDecl
-    :   'Type' 'Family' name=Identifier 'is' 'modeled' 'by' mathTypeExp ';'
-        'exemplar' exemplar=Identifier ';'
+    :   TYPE FAMILY name=IDENTIFIER IS MODELED BY mathTypeExp SEMICOLON
+        EXEMPLAR exemplar=IDENTIFIER SEMICOLON
         (constraintClause)?
         (typeModelInit)?
         (typeModelFinal)?
     ;
 
 typeRepresentationDecl
-    :   'Type' name=Identifier ('='|'is' 'represented' 'by') (record|type) ';'
+    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (record|type) SEMICOLON
         (conventionClause)?
         (correspondenceClause)?
         (typeRepresentationInit)?
@@ -203,25 +207,25 @@ typeRepresentationDecl
 // initialization, finalization rules
 
 typeModelInit
-    :   'initialization' (requiresClause)? (ensuresClause)?
+    :   INITIALIZATION (requiresClause)? (ensuresClause)?
     ;
 
 typeModelFinal
-    :   'finalization' (requiresClause)? (ensuresClause)?
+    :   FINALIZATION (requiresClause)? (ensuresClause)?
     ;
 
 typeRepresentationInit
-    :   'initialization' (variableDeclGroup)* //stmts
+    :   INITIALIZATION (variableDeclGroup)* //stmts
     ;
 
 typeRepresentationFinal
-    :   'finalization' (variableDeclGroup)* //stmts
+    :   FINALIZATION (variableDeclGroup)* //stmts
     ;
 
 //We use special rules for facility module init and final to allow requires
 //and ensures clauses (which aren't allowed in normal impl modules)...
 moduleFacilityInit
-    :   'Facility_Initialization'
+    :   FAC_INIT
         (requiresClause)?
         (ensuresClause)?
         (variableDeclGroup)*
@@ -229,7 +233,7 @@ moduleFacilityInit
     ;
 
 moduleFacilityFinal
-    :   'Facility_Finalization'
+    :   FAC_FINAL
          (requiresClause)?
          (ensuresClause)?
          (variableDeclGroup)*
@@ -237,25 +241,25 @@ moduleFacilityFinal
     ;
 
 moduleSpecInit
-    :   'intialization'
+    :   INITIALIZATION
         (requiresClause)?
         (ensuresClause)?
     ;
 
 moduleSpecFinal
-    :   'Facility_Finalization'
+    :   FAC_FINAL
         (requiresClause)?
         (ensuresClause)?
     ;
 
 moduleImplInit
-    :   'Facility_Initialization'
+    :   FAC_INIT
         (variableDeclGroup)*
         //Todo: stmts
     ;
 
 moduleImplFinal
-    :   'Facility_Finalization'
+    :   FAC_FINAL
         (variableDeclGroup)*
         //Todo: stmts
     ;
@@ -263,26 +267,26 @@ moduleImplFinal
 // functions
 
 procedureDecl
-    :   (recursive='Recursive')? 'Procedure' name=Identifier
-        operationParameterList (':' type)? ';'
+    :   (recursive=RECURSIVE)? PROCEDURE name=IDENTIFIER
+        operationParameterList (COLON type)? SEMICOLON
         (variableDeclGroup)*
         (stmt)*
-        'end' closename=Identifier ';'
+        END closename=IDENTIFIER SEMICOLON
     ;
 
 operationProcedureDecl
-    :   (recursive='Recursive')? 'Operation'
-        name=Identifier operationParameterList ';'
+    :   (recursive=RECURSIVE)? OPERATION
+        name=IDENTIFIER operationParameterList SEMICOLON
         (requiresClause)?
         (ensuresClause)?
-        'Procedure'
+        PROCEDURE
         (variableDeclGroup)*
         (stmt)*
-        'end' closename=Identifier ';'
+        END closename=IDENTIFIER SEMICOLON
     ;
 
 operationDecl
-    :   'Operation' name=Identifier operationParameterList (':' type)? ';'
+    :   OPERATION name=IDENTIFIER operationParameterList (COLON type)? SEMICOLON
             (requiresClause)?
             (ensuresClause)?
     ;
@@ -291,20 +295,20 @@ operationDecl
 
 //Todo: This also needs enhancements realizable by the base concept.
 facilityDecl
-    :   'Facility' name=Identifier 'is' concept=Identifier
-        (specArgs=moduleArgumentList)? (externally='externally')? 'realized'
-        'by' impl=Identifier (implArgs=moduleArgumentList)?
-        (enhancementPairDecl)* ';'
+    :   FACILITY name=IDENTIFIER IS concept=IDENTIFIER
+        (specArgs=moduleArgumentList)? (externally=EXTERNALLY)? REALIZED
+        BY impl=IDENTIFIER (implArgs=moduleArgumentList)?
+        (enhancementPairDecl)* SEMICOLON
     ;
 
 enhancementPairDecl
-    :   'enhanced' 'by' spec=Identifier (specArgs=moduleArgumentList)?
-        (externally='externally')? 'realized' 'by' impl=Identifier
+    :   ENHANCED BY spec=IDENTIFIER (specArgs=moduleArgumentList)?
+        (externally=EXTERNALLY)? REALIZED BY impl=IDENTIFIER
         (implArgs=moduleArgumentList)?
     ;
 
 moduleArgumentList
-    :   '(' moduleArgument (',' moduleArgument)* ')'
+    :   LPAREN moduleArgument (COMMA moduleArgument)* RPAREN
     ;
 
 moduleArgument
@@ -314,15 +318,15 @@ moduleArgument
 // variable declarations
 
 mathVariableDeclGroup
-    :   Identifier (',' Identifier)* ':' mathTypeExp
+    :   IDENTIFIER (COMMA IDENTIFIER)* COLON mathTypeExp
     ;
 
 mathVariableDecl
-    :   Identifier ':' mathTypeExp
+    :   IDENTIFIER COLON mathTypeExp
     ;
 
 variableDeclGroup
-    :   'var' Identifier (',' Identifier)* ':' type ';'
+    :   VAR IDENTIFIER (COMMA IDENTIFIER)* COLON type SEMICOLON
     ;
 
 // statements
@@ -331,57 +335,52 @@ stmt
     :   assignStmt
     |   swapStmt
     |   callStmt
-    |   assumeStmt
     |   confirmStmt
     |   ifStmt
     |   whileStmt
     ;
 
 assignStmt
-    :   left=progExp ':=' right=progExp ';'
+    :   left=progExp ASSIGN_OP right=progExp SEMICOLON
     ;
 
 swapStmt
-    :   left=progExp ':=:' right=progExp ';'
+    :   left=progExp SWAP_OP right=progExp SEMICOLON
     ;
 
 callStmt
-    :   progParamExp ';'
-    ;
-
-assumeStmt
-    :   'assume' mathAssertionExp ';'
+    :   progParamExp SEMICOLON
     ;
 
 confirmStmt
-    :   'confirm' mathAssertionExp ';'
+    :   CONFIRM mathAssertionExp SEMICOLON
     ;
 
 ifStmt
-    :   'if' progExp 'then' (stmt)*  (elsePart)? 'end' 'if' ';'
+    :   IF progExp THEN (stmt)*  (elsePart)? END SEMICOLON
     ;
 
 elsePart
-    :   'else' stmt*
+    :   ELSE stmt*
     ;
 
 whileStmt
-    :   'while' progExp (changingClause)?
-        (maintainingClause)? (decreasingClause)? 'do' stmt* 'end' 'loop' ';'
+    :   WHILE progExp (changingClause)?
+        (maintainingClause)? (decreasingClause)? DO stmt* END SEMICOLON
     ;
 
 // mathematical type theorems
 
 mathTypeTheoremDecl
-    :   'Type' 'Theorem' name=Identifier ':'
-        ('For' 'all' mathVariableDeclGroup ',')+ mathExp ';'
+    :   TYPE THEOREM name=IDENTIFIER COLON
+        (FOR ALL mathVariableDeclGroup COMMA)+ mathExp SEMICOLON
     ;
 
 // mathematical theorems, corollaries, etc
 
 mathTheoremDecl
-    :   ('Theorem'|'Lemma'|'Corollary') name=Identifier
-        ':' mathAssertionExp ';'
+    :   (THEOREM | LEMMA | COROLLARY) name=IDENTIFIER
+        COLON mathAssertionExp SEMICOLON
     ;
 
 // mathematical definitions
@@ -389,15 +388,26 @@ mathTheoremDecl
 mathDefinitionDecl
     :   mathStandardDefinitionDecl
     |   mathInductiveDefinitionDecl
+    |   mathCategoricalDecl
+    ;
+
+mathCategoricalDecl
+    :   CATEGORICAL DEFINITION INTRODUCES categoricalDefinitionSignature
+        RELATED BY mathAssertionExp SEMICOLON
     ;
 
 mathInductiveDefinitionDecl
-    :   'Inductive' 'Definition' inductiveDefinitionSignature
-        'is' '(i.)' mathAssertionExp ';' '(ii.)' mathAssertionExp ';'
+    :   INDUCTIVE DEFINITION inductiveDefinitionSignature
+        IS INDUCTIVE_BASE_NUM mathAssertionExp SEMICOLON
+        INDUCTIVE_HYP_NUM mathAssertionExp SEMICOLON
     ;
 
 mathStandardDefinitionDecl
-    :   'Definition' definitionSignature ('is' mathAssertionExp)? ';'
+    :   DEFINITION definitionSignature (IS mathAssertionExp)? SEMICOLON
+    ;
+
+categoricalDefinitionSignature
+    :   definitionSignature (COMMA definitionSignature)*
     ;
 
 inductiveDefinitionSignature
@@ -406,17 +416,17 @@ inductiveDefinitionSignature
     ;
 
 inductivePrefixSignature
-    :   'on' mathVariableDecl 'of' prefixOp
-        '(' (inductiveParameterList ',')? Identifier ')' ':' mathTypeExp
+    :   ON mathVariableDecl OF prefixOp
+        LPAREN (inductiveParameterList COMMA)? IDENTIFIER RPAREN COLON mathTypeExp
     ;
 
 inductiveInfixSignature
-    :   'on' mathVariableDecl 'of' '(' mathVariableDecl ')' infixOp
-        '(' Identifier ')' ':' mathTypeExp
+    :   ON mathVariableDecl OF LPAREN mathVariableDecl RPAREN infixOp
+        LPAREN IDENTIFIER RPAREN COLON mathTypeExp
     ;
 
 inductiveParameterList
-    :   mathVariableDeclGroup (',' mathVariableDeclGroup)*
+    :   mathVariableDeclGroup (COMMA mathVariableDeclGroup)*
     ;
 
 definitionSignature
@@ -426,76 +436,76 @@ definitionSignature
     ;
 
 standardInfixSignature
-    :   '(' mathVariableDecl ')'
+    :   LPAREN mathVariableDecl RPAREN
         infixOp
-        '(' mathVariableDecl ')' ':' mathTypeExp
+        LPAREN mathVariableDecl RPAREN COLON mathTypeExp
     ;
 
 standardOutfixSignature
-    :   ( lOp='|'  '(' mathVariableDecl ')' rOp='|'
-    |     lOp='||' '(' mathVariableDecl ')' rOp='||'
-    |     lOp='<'  '(' mathVariableDecl ')' rOp='>') ':' mathTypeExp
+    :   ( lOp=BAR LPAREN mathVariableDecl RPAREN rOp=BAR
+    |     lOp=DBL_BAR LPAREN mathVariableDecl RPAREN rOp=DBL_BAR
+    |     lOp=LT LPAREN mathVariableDecl RPAREN rOp=GT) COLON mathTypeExp
     ;
 
 standardPrefixSignature
-    :   prefixOp (definitionParameterList)? ':' mathTypeExp
+    :   prefixOp (definitionParameterList)? COLON mathTypeExp
     ;
 
 prefixOp
     :   infixOp
-    |   IntegerLiteral
+    |   INTEGER_LITERAL
     ;
 
 infixOp
-    :   ('implies'|'+'|'o'|'-'|'/'|'*'|'..'|'and'|'or')
-    |   ('union'|'intersect'|'is_in'|'is_not_in'|'>'|'<'|'>='|'<=')
-    |   Identifier
+    :   (IMPLIES | PLUS | CONCAT | MINUS | DIVIDE | MULTIPLY | RANGE | AND | OR)
+    |   (UNION | INTERSECT | IN | NOT_IN | GT | LT | GT_EQL | LT_EQL)
+    |   IDENTIFIER
     ;
 
 definitionParameterList
-    :   '(' mathVariableDeclGroup (',' mathVariableDeclGroup)* ')'
+    :   LPAREN mathVariableDeclGroup (COMMA mathVariableDeclGroup)* RPAREN
     ;
 
 // mathematical clauses
 
 affectsClause
-    :   parameterMode Identifier (',' Identifier)*
+    :   parameterMode IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
 requiresClause
-    :   'requires' mathAssertionExp ';'
+    :   REQUIRES mathAssertionExp SEMICOLON
     ;
 
 ensuresClause
-    :   'ensures' mathAssertionExp ';'
+    :   ENSURES mathAssertionExp SEMICOLON
     ;
 
 constraintClause
-    :   ('constraint'|'Constraint') mathAssertionExp ';'
+    :   CONSTRAINT mathAssertionExp SEMICOLON
     ;
 
 changingClause
-    :   'changing' progVariableExp (',' progVariableExp)*
+    :   CHANGING progVariableExp (COMMA progVariableExp)*
     ;
 
 maintainingClause
-    :   'maintaining' mathAssertionExp ';'
+    :   MAINTAINING mathAssertionExp SEMICOLON
     ;
 
 decreasingClause
-    :   'decreasing' mathAssertionExp ';'
+    :   DECREASING mathAssertionExp SEMICOLON
     ;
 
 whereClause
-    :   'where' mathAssertionExp
+    :   WHERE mathAssertionExp
     ;
 
 correspondenceClause
-    :   'correspondence' mathAssertionExp ';'
+    :   CORR mathAssertionExp SEMICOLON
     ;
 
 conventionClause
-    :   'convention' mathAssertionExp ';'
+    :   CONVENTION mathAssertionExp SEMICOLON
     ;
 
 // mathematical expressions
@@ -510,24 +520,24 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   'For' 'all' mathVariableDeclGroup (whereClause)? ','
+    :   FOR ALL mathVariableDeclGroup (whereClause)? COMMA
          mathAssertionExp
     ;
 
 mathExp
     :   mathPrimaryExp                                  #mathPrimeExp
-    |   op=('+'|'-'|'~'|'not') mathExp                  #mathUnaryExp
-    |   mathExp op=('*'|'/'|'~') mathExp                #mathInfixExp
-    |   mathExp op=('+'|'-') mathExp                    #mathInfixExp
-    |   mathExp op=('..'|'->') mathExp                  #mathInfixExp
-    |   mathExp op=('o'|'union'|'intersect') mathExp    #mathInfixExp
-    |   mathExp op=('is_in'|'is_not_in') mathExp        #mathInfixExp
-    |   mathExp op=('<='|'>='|'>'|'<') mathExp          #mathInfixExp
-    |   mathExp op=('='|'/=') mathExp                   #mathInfixExp
-    |   mathExp op='implies' mathExp                    #mathInfixExp
-    |   mathExp op=('and'|'or') mathExp                 #mathInfixExp
-    |   mathExp (':') mathExp                           #mathTypeAssertExp
-    |   '(' mathAssertionExp ')'                        #mathNestedExp
+    |   op=(PLUS|MINUS|TILDE|NOT) mathExp               #mathUnaryExp
+    |   mathExp op=(MULTIPLY|DIVIDE|TILDE) mathExp      #mathInfixExp
+    |   mathExp op=(PLUS|MINUS) mathExp                 #mathInfixExp
+    |   mathExp op=(RANGE|FUNCARROW) mathExp            #mathInfixExp
+    |   mathExp op=(CONCAT|UNION|INTERSECT) mathExp     #mathInfixExp
+    |   mathExp op=(IN|NOT_IN) mathExp                  #mathInfixExp
+    |   mathExp op=(LT_EQL|GT_EQL|GT|LT) mathExp        #mathInfixExp
+    |   mathExp op=(EQL|NOT_EQL) mathExp                #mathInfixExp
+    |   mathExp op=IMPLIES mathExp                      #mathInfixExp
+    |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
+    |   mathExp (COLON) mathExp                         #mathTypeAssertExp
+    |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
     ;
 
 mathPrimaryExp
@@ -541,57 +551,57 @@ mathPrimaryExp
     ;
 
 mathLiteralExp
-    :   BooleanLiteral      #mathBooleanExp
-    |   IntegerLiteral      #mathIntegerExp
+    :   BOOLEAN_LITERAL      #mathBooleanExp
+    |   INTEGER_LITERAL      #mathIntegerExp
     ;
 
 mathDotExp
-    :   mathFunctionApplicationExp ('.' mathFunctionApplicationExp)+
+    :   mathFunctionApplicationExp (DOT mathFunctionApplicationExp)+
     ;
 
 mathFunctionApplicationExp
-    :   '#' mathCleanFunctionExp
+    :   HASH mathCleanFunctionExp
     |   mathCleanFunctionExp
     ;
 
 mathCleanFunctionExp
-    :   name=Identifier '(' mathExp (',' mathExp)* ')'  #mathFunctionExp
-    |   (qualifier=Identifier '::')? name=Identifier    #mathVariableExp
-    |   ('+'|'-'|'*'|'/')                               #mathOpExp
+    :   name=IDENTIFIER LPAREN mathExp (COMMA mathExp)* RPAREN  #mathFunctionExp
+    |   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER       #mathVariableExp
+    |   (PLUS|MINUS|MULTIPLY|DIVIDE)                            #mathOpExp
     ;
 
 mathOutfixExp
-    :   lop='<' mathExp rop='>'
-    |   lop='|' mathExp rop='|'
-    |   lop='||' mathExp rop='||'
+    :   lop=LT mathExp rop=GT
+    |   lop=BAR mathExp rop=BAR
+    |   lop=DBL_BAR mathExp rop=DBL_BAR
     ;
 
 mathSetExp
-    :   '{' mathVariableDecl '|' mathAssertionExp '}'   #mathSetBuilderExp//Todo
-    |   '{' (mathExp (',' mathExp)*)? '}'               #mathSetCollectionExp
+    :   LBRACE mathVariableDecl BAR mathAssertionExp RBRACE #mathSetBuilderExp//Todo
+    |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE           #mathSetCollectionExp
     ;
 
 mathTupleExp
-    :   '(' mathExp (',' mathExp)+ ')'
+    :   LPAREN mathExp (COMMA mathExp)+ RPAREN
     ;
 
 //NOTE: Allows only very rudimentary lambda expressions.
 
 mathLambdaExp
-    :   'lambda' '(' mathVariableDeclGroup (',' mathVariableDeclGroup)* ')'
-        '.' '(' mathAssertionExp ')'
+    :   LAMBDA LPAREN mathVariableDeclGroup (COMMA mathVariableDeclGroup)* RPAREN
+        DOT LPAREN mathAssertionExp RPAREN
     ;
 
 // program expressions
 
 progExp
-    :   op=('not'|'-') progExp                  #progApplicationExp
-    |   progExp op=('*'|'/') progExp            #progApplicationExp
-    |   progExp op=('+'|'-') progExp            #progApplicationExp
-    |   progExp op=('<='|'>='|'>'|'<') progExp  #progApplicationExp
-    |   progExp op=('='|'/=') progExp           #progApplicationExp
-    |   '(' progExp ')'                         #progNestedExp
-    |   progPrimary                             #progPrimaryExp
+    :   op=(NOT|MINUS) progExp                      #progApplicationExp
+    |   progExp op=(MULTIPLY|DIVIDE) progExp        #progApplicationExp
+    |   progExp op=(PLUS|MINUS) progExp             #progApplicationExp
+    |   progExp op=(LT_EQL|GT_EQL|GT|LT) progExp    #progApplicationExp
+    |   progExp op=(EQL|NOT_EQL) progExp            #progApplicationExp
+    |   LPAREN progExp RPAREN                       #progNestedExp
+    |   progPrimary                                 #progPrimaryExp
     ;
 
 progPrimary
@@ -609,119 +619,20 @@ progVariableExp
     ;
 
 progDotExp
-    :   progNamedExp ('.' progNamedExp)+
+    :   progNamedExp (DOT progNamedExp)+
     ;
 
 progParamExp
-    :   (qualifier=Identifier '::')? name=Identifier
-        '(' (progExp (',' progExp)*)? ')'
+    :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
+        LPAREN (progExp (COMMA progExp)*)? RPAREN
     ;
 
 progNamedExp
-    :   (qualifier=Identifier '::')? name=Identifier
+    :   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER
     ;
 
 progLiteralExp
-    :   IntegerLiteral      #progIntegerExp
-    |   CharacterLiteral    #progCharacterExp
-    |   StringLiteral       #progStringExp
-    ;
-
-// literal rules and fragments
-
-BooleanLiteral
-    :   'true'
-    |   'false'
-    |   'B'
-    ;
-
-IntegerLiteral
-    :   DecimalIntegerLiteral
-    ;
-
-CharacterLiteral
-    :   '\'' SingleCharacter '\''
-    ;
-
-StringLiteral
-    :   '\"' StringCharacters? '\"'
-    ;
-
-fragment
-StringCharacters
-    :   StringCharacter+
-    ;
-
-fragment
-StringCharacter
-    :   ~["\\]
-    ;
-
-fragment
-DecimalIntegerLiteral
-    :   '0'
-    |   NonZeroDigit (Digits)?
-    ;
-
-fragment
-Digits
-    :   Digit (Digit)*
-    ;
-
-fragment
-Digit
-    :   '0'
-    |   NonZeroDigit
-    ;
-
-fragment
-NonZeroDigit
-    :   [1-9]
-    ;
-
-fragment
-SingleCharacter
-    :   ~['\\]
-    ;
-
-// Some lexer tokens (allows for easy switch stmts)
-
-Not      : 'not';
-Or       : 'and';
-And      : 'or';
-NEquals   : '/=';
-Equals   : '=';
-GTEquals : '>=';
-LTEquals : '<=';
-GT       : '>';
-LT       : '<';
-Add      : '+';
-Subtract : '-';
-Multiply : '*';
-Divide   : '/';
-
-// whitespace, identifier rules, and comments
-
-Identifier
-    :   Letter LetterOrDigit*
-    ;
-
-Letter
-    :   [a-zA-Z$_]
-    ;
-
-LetterOrDigit
-    :   [a-zA-Z0-9$_]
-    ;
-
-SPACE
-    :  [ \t\r\n\u000C]+ -> skip
-    ;
-
-COMMENT
-    :   '(*' .*? '*)' -> skip
-    ;
-
-LINE_COMMENT
-    :   '--' ~[\r\n]* -> skip
+    :   INTEGER_LITERAL      #progIntegerExp
+    |   CHARACTER_LITERAL    #progCharacterExp
+    |   STRING_LITERAL       #progStringExp
     ;

@@ -62,7 +62,7 @@ public class ErrorHandler2 {
     public void message(String msg) {
         if (!myInstanceEnvironment.debugOff()) {
             try {
-                myOutputWriter.write(msg);
+                myOutputWriter.write(msg + "\n");
                 myOutputWriter.flush();
             }
             catch (IOException e) {
