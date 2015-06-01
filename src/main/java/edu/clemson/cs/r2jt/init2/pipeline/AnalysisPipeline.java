@@ -28,16 +28,16 @@ public class AnalysisPipeline extends AbstractPipeline {
 
     @Override
     public void process(ModuleIdentifier currentTarget) {
-        PopulatingVisitor populator = new PopulatingVisitor(mySymbolTable);
+    /* PopulatingVisitor populator = new PopulatingVisitor(mySymbolTable);
 
-        if (!myCompileEnvironment.containsID(currentTarget)) {
-            throw new IllegalStateException("module ast null");
-        }
-        ModuleAST moduleTarget =
-                myCompileEnvironment.getModuleAST(currentTarget);
-        //TreeWalker.walk(populator, moduleTarget);
+     if (!myCompileEnvironment.containsID(currentTarget)) {
+         throw new IllegalStateException("module ast null");
+     }
+     ModuleAST moduleTarget =
+             myCompileEnvironment.getModuleAST(currentTarget);
+     //TreeWalker.walk(populator, moduleTarget);
 
-        PopulatingVisitor.emitDebug("Type Graph:\n\n"
-                + mySymbolTable.getTypeGraph().toString());
+     PopulatingVisitor.emitDebug("Type Graph:\n\n"
+             + mySymbolTable.getTypeGraph().toString());*/
     }
 }

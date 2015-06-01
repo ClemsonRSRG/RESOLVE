@@ -1148,14 +1148,14 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public boolean walkProgDotAST(ProgNamedSegmentsAST e) {
+    public boolean walkProgNamedSegmentsAST(ProgNamedSegmentsAST e) {
 
         preAny(e);
         preExprAST(e);
         preProgExprAST(e);
-        preProgDotAST(e);
+        preProgNamedSegmentsAST(e);
 
-        postProgDotAST(e);
+        postProgNamedSegmentsAST(e);
         postProgExprAST(e);
         postExprAST(e);
         postAny(e);
@@ -1164,7 +1164,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public void preProgDotAST(ProgNamedSegmentsAST e) {
+    public void preProgNamedSegmentsAST(ProgNamedSegmentsAST e) {
         //Dot expressions are handled ridiculously, even for this compiler, so
         //this method just deals with the cases we've encountered so far and
         //lots of assumptions are made.  Expect it to break frequently when you
@@ -1217,10 +1217,10 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public boolean walkMathDotAST(MathSegmentsAST e) {
+    public boolean walkMathSegmentsAST(MathSegmentsAST e) {
         preAny(e);
         preExprAST(e);
-        preMathDotAST(e);
+        preMathSegmentsAST(e);
 
         Indirect<MathSymbolAST> lastGoodOut =
                 new Utils.Indirect<MathSymbolAST>();
@@ -1273,7 +1273,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
             nextSegment.setMathType(curType);
             lastGood = nextSegment.getStart();
         }
-        postMathDotAST(e);
+        postMathSegmentsAST(e);
         postExprAST(e);
         postAny(e);
 
@@ -1281,7 +1281,7 @@ public class PopulatingVisitor extends TreeWalkerVisitor {
     }
 
     @Override
-    public void postMathDotAST(MathSegmentsAST e) {
+    public void postMathSegmentsAST(MathSegmentsAST e) {
         //Might already have been set in preDotExp(), in which case our children
         //weren't visited
         if (e.getMathType() == null) {
