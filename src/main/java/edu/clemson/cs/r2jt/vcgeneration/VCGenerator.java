@@ -4294,7 +4294,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         myCurrentAssertiveCode.addAssume((Location) whileLoc.clone(), assume,
-                true);
+                false);
 
         // if statement body (need to deep copy!)
         edu.clemson.cs.r2jt.collections.List<Statement> ifStmtList =
