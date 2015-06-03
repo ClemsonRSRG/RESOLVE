@@ -1861,33 +1861,22 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Do simplifications if we have an equals
             if (equalsExp.getOperator() == EqualsExp.EQUAL) {
-                // Don't replace if the left expression is an incoming value expression
-                // Only replace if this is a VarExp
-                if (equalsExp.getLeft() instanceof VarExp) {
+                // Check to see if the left hand side is an expression
+                // we can replace.
+                if (Utilities.containsReplaceableExp(equalsExp.getLeft())) {
                     // Create a temp expression where left is replaced with the right
                     Exp tmp =
                             Utilities.replace(exp, equalsExp.getLeft(),
                                     equalsExp.getRight());
 
-                    // If tmp hasn't changed, then it means we have to check the right
-                    // and right cannot be an incoming value expression.
+                    // If tmp hasn't changed, then check to see if the right hand side
+                    // is an expression we can replace.
                     if (tmp.equals(exp)
-                            && (equalsExp.getRight() instanceof VarExp)) {
-
-                        // Don't do any substitution if it is P_val
-                        if (equalsExp.getLeft() instanceof VarExp
-                                && ((VarExp) equalsExp.getLeft()).getName()
-                                        .getName().matches("\\?*P_val")) {
-                            tmp = exp;
-
-                            // TODO: Figure out if we should keep this given or not
-                        }
-                        else {
-                            tmp =
-                                    Utilities.replace(exp,
-                                            equalsExp.getRight(), equalsExp
-                                                    .getLeft());
-                        }
+                            && (Utilities.containsReplaceableExp(equalsExp
+                                    .getRight()))) {
+                        tmp =
+                                Utilities.replace(exp, equalsExp.getRight(),
+                                        equalsExp.getLeft());
                     }
 
                     // Update exp if we did a replacement

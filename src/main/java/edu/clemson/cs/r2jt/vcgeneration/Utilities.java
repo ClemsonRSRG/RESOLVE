@@ -95,6 +95,34 @@ public class Utilities {
     // -----------------------------------------------------------
 
     /**
+     * <p>This method checks to see if this the expression we passed
+     * is either a variable expression or a dotted expression that
+     * contains a variable expression in the last position.</p>
+     *
+     * @param exp The checking expression.
+     *
+     * @return True if is an expression we can replace, false otherwise.
+     */
+    public static boolean containsReplaceableExp(Exp exp) {
+        boolean retVal = false;
+
+        // Case #1: VarExp
+        if (exp instanceof VarExp) {
+            retVal = true;
+        }
+        // Case #2: DotExp
+        else if (exp instanceof DotExp) {
+            DotExp dotExp = (DotExp) exp;
+            List<Exp> dotExpList = dotExp.getSegments();
+            retVal =
+                    containsReplaceableExp(dotExpList
+                            .get(dotExpList.size() - 1));
+        }
+
+        return retVal;
+    }
+
+    /**
      * <p>Converts the different types of <code>Exp</code> to the
      * ones used by the VC Generator.</p>
      *
