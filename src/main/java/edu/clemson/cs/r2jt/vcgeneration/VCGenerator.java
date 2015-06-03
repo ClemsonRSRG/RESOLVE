@@ -1862,7 +1862,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Do simplifications if we have an equals
             if (equalsExp.getOperator() == EqualsExp.EQUAL) {
                 // Don't replace if the left expression is an incoming value expression
-                if (!(equalsExp.getLeft() instanceof OldExp)) {
+                // Only replace if this is a VarExp
+                if (equalsExp.getLeft() instanceof VarExp) {
                     // Create a temp expression where left is replaced with the right
                     Exp tmp =
                             Utilities.replace(exp, equalsExp.getLeft(),
@@ -1871,7 +1872,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     // If tmp hasn't changed, then it means we have to check the right
                     // and right cannot be an incoming value expression.
                     if (tmp.equals(exp)
-                            && !(equalsExp.getRight() instanceof OldExp)) {
+                            && (equalsExp.getRight() instanceof VarExp)) {
 
                         // Don't do any substitution if it is P_val
                         if (equalsExp.getLeft() instanceof VarExp
