@@ -24,6 +24,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.query.*;
 import edu.clemson.cs.r2jt.misc.SourceErrorException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -1145,5 +1146,28 @@ public class Utilities {
         else {
             exp.setLocation(loc);
         }
+    }
+
+    public static List<Exp> splitConjunctExp(Exp exp, List<Exp> expList) {
+        // Attempt to split the expression if it contains a conjunct
+        if (exp instanceof InfixExp) {
+            InfixExp infixExp = (InfixExp) exp;
+
+            // Split the expression if it is a conjunct
+            if (infixExp.getOpName().equals("and")) {
+                expList = splitConjunctExp(infixExp.getLeft(), expList);
+                expList = splitConjunctExp(infixExp.getRight(), expList);
+            }
+            // Otherwise simply add it to our list
+            else {
+                expList.add(infixExp);
+            }
+        }
+        // Otherwise it is an individual assume statement we need to deal with.
+        else {
+            expList.add(exp);
+        }
+
+        return expList;
     }
 }

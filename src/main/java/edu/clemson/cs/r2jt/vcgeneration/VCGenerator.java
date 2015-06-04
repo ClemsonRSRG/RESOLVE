@@ -1854,6 +1854,12 @@ public class VCGenerator extends TreeWalkerVisitor {
     private Exp simplifyAssumeRule(AssumeStmt stmt, Exp exp) {
         // Variables
         Exp assumeExp = stmt.getAssertion();
+        List<Exp> assumeExpList = Utilities.splitConjunctExp(assumeExp, new ArrayList<Exp>());
+
+        for (int i = 0; i < assumeExpList.size(); i++) {
+            Exp currentExp = assumeExpList.get(i);
+
+        }
 
         // EqualsExp
         if (assumeExp instanceof EqualsExp) {
