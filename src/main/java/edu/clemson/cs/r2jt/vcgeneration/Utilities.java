@@ -958,7 +958,7 @@ public class Utilities {
      */
     public static Exp replace(Exp exp, Exp old, Exp repl) {
         // Clone old and repl and use the Exp replace to do all its work
-        Exp tmp = Exp.replace(exp, Exp.copy(old), Exp.copy(repl));
+        Exp tmp = Exp.replace(Exp.copy(exp), Exp.copy(old), Exp.copy(repl));
 
         // Return the corresponding Exp
         if (tmp != null)
