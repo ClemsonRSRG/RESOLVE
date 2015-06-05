@@ -274,8 +274,12 @@ public class OutputVCs {
                     .webEncode(reformatOutputString(consequent.toString())));
 
             // VC Details
-            newVC.put("vcInfo", ResolveCompiler.webEncode(loc.getDetails()
-                    + ": " + loc.toString()));
+            String details = loc.getDetails();
+            if (details == null) {
+                details = "Explicit Confirm Statement";
+            }
+            newVC.put("vcInfo", ResolveCompiler.webEncode(details + ": "
+                    + loc.toString()));
 
             // Store this VC inside the array
             vcArray.put(newVC);
