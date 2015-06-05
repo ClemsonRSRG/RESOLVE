@@ -1854,7 +1854,8 @@ public class VCGenerator extends TreeWalkerVisitor {
     private Exp simplifyAssumeRule(AssumeStmt stmt, Exp exp) {
         // Variables
         Exp assumeExp = stmt.getAssertion();
-        List<Exp> assumeExpList = Utilities.splitConjunctExp(assumeExp, new ArrayList<Exp>());
+        List<Exp> assumeExpList =
+                Utilities.splitConjunctExp(assumeExp, new ArrayList<Exp>());
 
         for (int i = 0; i < assumeExpList.size(); i++) {
             Exp currentExp = assumeExpList.get(i);
@@ -2255,6 +2256,12 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         else if (statement instanceof IfStmt) {
             applyIfStmtRule((IfStmt) statement);
+        }
+        else if (statement instanceof MemoryStmt) {
+            // TODO: Deal with Forget
+            if (((MemoryStmt) statement).isRemember()) {
+                applyRememberRule();
+            }
         }
         else if (statement instanceof SwapStmt) {
             applySwapStmtRule((SwapStmt) statement);
@@ -3781,7 +3788,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Add the remember rule
-        myCurrentAssertiveCode.addRemember();
+        myCurrentAssertiveCode.addCode(new MemoryStmt((Location) opLoc.clone(),
+                true));
 
         // Add declared variables into the assertion. Also add
         // them to the list of free variables.
@@ -3892,10 +3900,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Code
             case VerificationStatement.CODE:
                 applyCodeRules((Statement) curAssertion.getAssertion());
-                break;
-            // Remember Assertion
-            case VerificationStatement.REMEMBER:
-                applyRememberRule();
                 break;
             // Variable Declaration Assertion
             case VerificationStatement.VARIABLE:
