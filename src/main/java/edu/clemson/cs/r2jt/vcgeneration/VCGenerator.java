@@ -769,24 +769,32 @@ public class VCGenerator extends TreeWalkerVisitor {
                     && ((EqualsExp) currentAssumeExp).getOperator() == EqualsExp.EQUAL) {
                 EqualsExp equalsExp = (EqualsExp) currentAssumeExp;
 
-                // Check to see if the left hand side is an expression
-                // we can replace.
-                if (Utilities.containsReplaceableExp(equalsExp.getLeft())) {
-                    // Loop through each confirm expression
-                    for (int j = 0; j < confirmExpList.size(); j++) {
-                        Exp currentConfirmExp = confirmExpList.get(j);
+                // Loop through each confirm expression
+                for (int j = 0; j < confirmExpList.size(); j++) {
+                    Exp currentConfirmExp = confirmExpList.get(j);
+                    Exp tmp;
 
+                    // Check to see if the left hand side is an expression
+                    // we can replace.
+                    if (Utilities.containsReplaceableExp(equalsExp.getLeft())) {
                         // Create a temp expression where left is replaced with the right
-                        Exp tmp =
+                        tmp =
                                 Utilities.replace(currentConfirmExp, equalsExp
                                         .getLeft(), equalsExp.getRight());
 
                         // If nothing got replaced.
                         if (tmp.equals(currentConfirmExp)) {
                             // Check to see if the right hand side is an expression
-                            // we can replace.
+                            // we can replace. Note that we don't replace if the
+                            // left hand side is P_Val or Cum_Dur.
                             if (Utilities.containsReplaceableExp(equalsExp
-                                    .getRight())) {
+                                    .getRight())
+                                    && !((VarExp) equalsExp.getLeft())
+                                            .getName().getName().matches(
+                                                    "\\?*P_val")
+                                    && !((VarExp) equalsExp.getLeft())
+                                            .getName().getName().matches(
+                                                    "\\?*Cum_Dur")) {
                                 // Create a temp expression where left is replaced with the right
                                 tmp =
                                         Utilities.replace(currentConfirmExp,
@@ -794,15 +802,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                         .getLeft());
                             }
 
-                            // If nothing got replaced.
-                            if (tmp.equals(currentConfirmExp)) {
-                                // Create a new implies expression if there are common symbols
-                                // in the assume and in the confirm. (Parsimonious step)
-                                tmp =
-                                        formImplies(currentAssumeExp,
-                                                currentConfirmExp, isStipulate);
-                            }
-                            else {
+                            // If something got replaced.
+                            if (!tmp.equals(currentConfirmExp)) {
                                 // Replace all instances of the right side in the rest of the assume statements
                                 for (int k = i + 1; k < assumeExpList.size(); k++) {
                                     Exp newAssumeExp =
@@ -824,9 +825,43 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 assumeExpList.set(k, newAssumeExp);
                             }
                         }
-
-                        confirmExpList.set(j, tmp);
                     }
+                    // Check to see if the right hand side is an expression
+                    // we can replace.
+                    else if (Utilities.containsReplaceableExp(equalsExp
+                            .getRight())) {
+                        // Create a temp expression where left is replaced with the right
+                        tmp =
+                                Utilities.replace(currentConfirmExp, equalsExp
+                                        .getRight(), equalsExp.getLeft());
+
+                        // If something got replaced.
+                        if (!tmp.equals(currentConfirmExp)) {
+                            // Replace all instances of the right side in the rest of the assume statements
+                            for (int k = i + 1; k < assumeExpList.size(); k++) {
+                                Exp newAssumeExp =
+                                        Utilities.replace(assumeExpList.get(k),
+                                                equalsExp.getRight(), equalsExp
+                                                        .getLeft());
+                                assumeExpList.set(k, newAssumeExp);
+                            }
+                        }
+                    }
+                    else {
+                        tmp = currentConfirmExp;
+                    }
+
+                    // Both the left and the right did not contain any variables
+                    // we can replace.
+                    if (tmp.equals(currentConfirmExp)) {
+                        // Create a new implies expression if there are common symbols
+                        // in the assume and in the confirm. (Parsimonious step)
+                        tmp =
+                                formImplies(currentAssumeExp,
+                                        currentConfirmExp, isStipulate);
+                    }
+
+                    confirmExpList.set(j, tmp);
                 }
             }
             // Create a new implies expression if there are common symbols
