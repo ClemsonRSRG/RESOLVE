@@ -25,7 +25,9 @@ import edu.clemson.cs.r2jt.typeandpopulate.query.*;
 import edu.clemson.cs.r2jt.misc.SourceErrorException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * TODO: Write a description of this module
@@ -649,6 +651,161 @@ public class Utilities {
         }
 
         return Z;
+    }
+
+    public static Set<String> getSymbols(Exp exp) {
+        // Return value
+        Set<String> symbolsSet = new HashSet<String>();
+
+        // CharExp
+        if (exp instanceof CharExp) {
+            symbolsSet.add(Character.toString(((CharExp) exp).getValue()));
+        }
+        // DotExp
+        else if (exp instanceof DotExp) {
+            List<Exp> segExpList = ((DotExp) exp).getSegments();
+            StringBuffer currentStr = new StringBuffer();
+
+            // Iterate through each of the segment expressions
+            for (Exp e : segExpList) {
+                // For each expression, obtain the set of symbols
+                // and form a candidate expression.
+                Set<String> retSet = getSymbols(e);
+                for (String s : retSet) {
+                    if (currentStr.length() != 0) {
+                        currentStr.append(".");
+                    }
+                    currentStr.append(s);
+                }
+                symbolsSet.add(currentStr.toString());
+            }
+        }
+        // DoubleExp
+        else if (exp instanceof DoubleExp) {
+            symbolsSet.add(Double.toHexString(((DoubleExp) exp).getValue()));
+        }
+        // EqualsExp
+        else if (exp instanceof EqualsExp) {
+            symbolsSet.addAll(getSymbols(((EqualsExp) exp).getLeft()));
+            symbolsSet.addAll(getSymbols(((EqualsExp) exp).getRight()));
+        }
+        // FunctionExp
+        else if (exp instanceof FunctionExp) {
+            FunctionExp funcExp = (FunctionExp) exp;
+            StringBuffer funcName = new StringBuffer();
+
+            // Add the name of the function (including any qualifiers)
+            if (funcExp.getQualifier() != null) {
+                funcName.append(funcExp.getQualifier().getName());
+                funcName.append(".");
+            }
+            funcName.append(funcExp.getName());
+            symbolsSet.add(funcName.toString());
+
+            // Add all the symbols in the argument list
+            List<FunctionArgList> funcArgList = funcExp.getParamList();
+            for (FunctionArgList f : funcArgList) {
+                List<Exp> funcArgExpList = f.getArguments();
+                for (Exp e : funcArgExpList) {
+                    symbolsSet.addAll(getSymbols(e));
+                }
+            }
+        }
+        // If Exp
+        else if (exp instanceof IfExp) {
+            symbolsSet.addAll(getSymbols(((IfExp) exp).getTest()));
+            symbolsSet.addAll(getSymbols(((IfExp) exp).getThenclause()));
+            symbolsSet.addAll(getSymbols(((IfExp) exp).getElseclause()));
+        }
+        // InfixExp
+        else if (exp instanceof InfixExp) {
+            symbolsSet.addAll(getSymbols(((InfixExp) exp).getLeft()));
+            symbolsSet.addAll(getSymbols(((InfixExp) exp).getRight()));
+        }
+        // IntegerExp
+        else if (exp instanceof IntegerExp) {
+            symbolsSet.add(Integer.toString(((IntegerExp) exp).getValue()));
+        }
+        // LambdaExp
+        else if (exp instanceof LambdaExp) {
+            LambdaExp lambdaExp = (LambdaExp) exp;
+
+            // Add all the parameter variables
+            List<MathVarDec> paramList = lambdaExp.getParameters();
+            for (MathVarDec v : paramList) {
+                symbolsSet.add(v.getName().getName());
+            }
+
+            // Add all the symbols in the body
+            symbolsSet.addAll(getSymbols(lambdaExp.getBody()));
+        }
+        // OldExp
+        else if (exp instanceof OldExp) {
+            symbolsSet.add(exp.toString(0));
+        }
+        // OutfixExp
+        else if (exp instanceof OutfixExp) {
+            symbolsSet.addAll(getSymbols(((OutfixExp) exp).getArgument()));
+        }
+        // PrefixExp
+        else if (exp instanceof PrefixExp) {
+            symbolsSet.addAll(getSymbols(((PrefixExp) exp).getArgument()));
+        }
+        // SetExp
+        else if (exp instanceof SetExp) {
+            SetExp setExp = (SetExp) exp;
+
+            // Add all the parts that form the set expression
+            symbolsSet.add(setExp.getVar().getName().getName());
+            symbolsSet.addAll(getSymbols(((SetExp) exp).getWhere()));
+            symbolsSet.addAll(getSymbols(((SetExp) exp).getBody()));
+        }
+        // StringExp
+        else if (exp instanceof StringExp) {
+            symbolsSet.add(((StringExp) exp).getValue());
+        }
+        // SuppositionExp
+        else if (exp instanceof SuppositionExp) {
+            SuppositionExp suppositionExp = (SuppositionExp) exp;
+
+            // Add all the expressions
+            symbolsSet.addAll(getSymbols(suppositionExp.getExp()));
+
+            // Add all the variables
+            List<MathVarDec> varList = suppositionExp.getVars();
+            for (MathVarDec v : varList) {
+                symbolsSet.add(v.getName().getName());
+            }
+        }
+        // TupleExp
+        else if (exp instanceof TupleExp) {
+            TupleExp tupleExp = (TupleExp) exp;
+
+            // Add all the expressions in the fields
+            List<Exp> fieldList = tupleExp.getFields();
+            for (Exp e : fieldList) {
+                symbolsSet.addAll(getSymbols(e));
+            }
+        }
+        // VarExp
+        else if (exp instanceof VarExp) {
+            VarExp varExp = (VarExp) exp;
+            StringBuffer varName = new StringBuffer();
+
+            // Add the name of the variable (including any qualifiers)
+            if (varExp.getQualifier() != null) {
+                varName.append(varExp.getQualifier().getName());
+                varName.append(".");
+            }
+            varName.append(varExp.getName());
+            symbolsSet.add(varName.toString());
+        }
+        // Not Handled!
+        else {
+            expNotHandled(exp, exp.getLocation());
+        }
+
+        return symbolsSet;
     }
 
     /**
