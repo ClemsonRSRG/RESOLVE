@@ -792,15 +792,25 @@ public class VCGenerator extends TreeWalkerVisitor {
                                         Utilities.replace(currentConfirmExp,
                                                 equalsExp.getRight(), equalsExp
                                                         .getLeft());
+                            }
 
-                                // If nothing got replaced.
-                                if (tmp.equals(currentConfirmExp)) {
-                                    // Create a new implies expression if there are common symbols
-                                    // in the assume and in the confirm. (Parsimonious step)
-                                    currentConfirmExp =
-                                            formImplies(currentAssumeExp,
-                                                    currentConfirmExp,
-                                                    isStipulate);
+                            // If nothing got replaced.
+                            if (tmp.equals(currentConfirmExp)) {
+                                // Create a new implies expression if there are common symbols
+                                // in the assume and in the confirm. (Parsimonious step)
+                                tmp =
+                                        formImplies(currentAssumeExp,
+                                                currentConfirmExp, isStipulate);
+                            }
+                            else {
+                                // Replace all instances of the right side in the rest of the assume statements
+                                for (int k = i + 1; k < assumeExpList.size(); k++) {
+                                    Exp newAssumeExp =
+                                            Utilities.replace(assumeExpList
+                                                    .get(k), equalsExp
+                                                    .getRight(), equalsExp
+                                                    .getLeft());
+                                    assumeExpList.set(k, newAssumeExp);
                                 }
                             }
                         }
@@ -815,7 +825,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             }
                         }
 
-                        confirmExpList.set(j, currentConfirmExp);
+                        confirmExpList.set(j, tmp);
                     }
                 }
             }
