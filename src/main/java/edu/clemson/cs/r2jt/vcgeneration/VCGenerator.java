@@ -714,6 +714,40 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>This is a helper method that checks to see if the given assume expression
+     * can be used to prove our confirm expression. This is done by finding the
+     * intersection between the set of symbols in the assume expression and
+     * the set of symbols in the confirm expression.</p>
+     *
+     * <p>If the intersection is not empty, then modify the confirm expression by
+     * forming an implies expression using the assume and confirm expressions.
+     * If it is empty, then it simply returns the confirm expression.</p>
+     *
+     * @param assumeExp The current assume expression.
+     * @param confirmExp The current confirm expression.
+     * @param expSymbolMapping Map containing all the previously computed expressions and
+     *                         their respective symbols set.
+     * @param isStipulate Whether or not the assume expression is an stipulate assume expression.
+     *
+     * @return The modified confirm expression.
+     */
+    private Exp formImplies(Exp assumeExp, Exp confirmExp,
+            Map<Exp, Set<String>> expSymbolMapping, boolean isStipulate) {
+        // Create a new implies expression if there are common symbols
+        // in the assume and in the confirm. (Parsimonious step)
+        Set<String> confirmSymbolSet = expSymbolMapping.get(confirmExp);
+        Set<String> assumeSymbolSet = Utilities.getSymbols(assumeExp);
+        Set<String> intersection = new HashSet<String>(confirmSymbolSet);
+        intersection.retainAll(assumeSymbolSet);
+
+        if (!intersection.isEmpty() || isStipulate) {
+            confirmExp = myTypeGraph.formImplies(assumeExp, confirmExp);
+        }
+
+        return confirmExp;
+    }
+
+    /**
      * <p>This method iterates through each of the assume expressions.
      * If the expression is a replaceable equals expression, it will substitute
      * all instances of the expression in the rest of the assume expression
@@ -739,95 +773,92 @@ public class VCGenerator extends TreeWalkerVisitor {
             expSymbolMapping.put(c, Utilities.getSymbols(Exp.copy(c)));
         }
 
-        // Variables
-        /*Exp assumeExp = stmt.getAssertion();
-        List<Exp> assumeExpList =
-                Utilities.splitConjunctExp(assumeExp, new ArrayList<Exp>());
-
+        // Loop through each assume expression
         for (int i = 0; i < assumeExpList.size(); i++) {
-            Exp currentExp = assumeExpList.get(i);
+            Exp currentAssumeExp = assumeExpList.get(i);
 
-        }
+            // Attempts to simplify equality expressions
+            if (currentAssumeExp instanceof EqualsExp
+                    && ((EqualsExp) currentAssumeExp).getOperator() == EqualsExp.EQUAL) {
+                EqualsExp equalsExp = (EqualsExp) currentAssumeExp;
 
-        // EqualsExp
-        if (assumeExp instanceof EqualsExp) {
-            EqualsExp equalsExp = (EqualsExp) assumeExp;
-
-            // Do simplifications if we have an equals
-            if (equalsExp.getOperator() == EqualsExp.EQUAL) {
                 // Check to see if the left hand side is an expression
                 // we can replace.
                 if (Utilities.containsReplaceableExp(equalsExp.getLeft())) {
-                    // Create a temp expression where left is replaced with the right
-                    Exp tmp =
-                            Utilities.replace(exp, equalsExp.getLeft(),
-                                    equalsExp.getRight());
+                    // Loop through each confirm expression
+                    for (int j = 0; j < confirmExpList.size(); j++) {
+                        Exp currentConfirmExp = confirmExpList.get(j);
 
-                    // If tmp hasn't changed, then check to see if the right hand side
-                    // is an expression we can replace.
-                    if (tmp.equals(exp)
-                            && (Utilities.containsReplaceableExp(equalsExp
-                                    .getRight()))) {
-                        tmp =
-                                Utilities.replace(exp, equalsExp.getRight(),
-                                        equalsExp.getLeft());
-                    }
+                        // Create a temp expression where left is replaced with the right
+                        Exp tmp =
+                                Utilities.replace(currentConfirmExp, equalsExp
+                                        .getLeft(), equalsExp.getRight());
 
-                    // Update exp if we did a replacement
-                    if (!tmp.equals(exp)) {
-                        exp = tmp;
+                        // If nothing got replaced.
+                        if (tmp.equals(currentConfirmExp)) {
+                            // Check to see if the right hand side is an expression
+                            // we can replace.
+                            if (Utilities.containsReplaceableExp(equalsExp
+                                    .getRight())) {
+                                // Create a temp expression where left is replaced with the right
+                                tmp =
+                                        Utilities.replace(currentConfirmExp,
+                                                equalsExp.getRight(), equalsExp
+                                                        .getLeft());
 
-                        // If this is not a stipulate assume clause,
-                        // we can safely get rid of it, otherwise we keep it.
-                        if (!stmt.getIsStipulate()) {
-                            assumeExp = null;
+                                // If nothing got replaced.
+                                if (tmp.equals(currentConfirmExp)) {
+                                    // Create a new implies expression if there are common symbols
+                                    // in the assume and in the confirm. (Parsimonious step)
+                                    currentConfirmExp =
+                                            formImplies(currentAssumeExp,
+                                                    currentConfirmExp,
+                                                    expSymbolMapping,
+                                                    isStipulate);
+                                }
+                            }
                         }
+                        else {
+                            // Replace all instances of the left side in the rest of the assume statements
+                            for (int k = i + 1; k < assumeExpList.size(); k++) {
+                                Exp newAssumeExp =
+                                        Utilities.replace(assumeExpList.get(k),
+                                                equalsExp.getLeft(), equalsExp
+                                                        .getRight());
+                                assumeExpList.set(k, newAssumeExp);
+                            }
+                        }
+
+                        confirmExpList.set(j, currentConfirmExp);
                     }
                 }
             }
-        }
-        // InfixExp
-        else if (assumeExp instanceof InfixExp) {
-            InfixExp infixExp = (InfixExp) assumeExp;
-
-            // Only do simplifications if we have an and operator
-            if (infixExp.getOpName().equals("and")) {
-                // Recursively call simplify on the left and on the right
-                AssumeStmt left =
-                        new AssumeStmt(stmt.getLocation(), Exp.copy(infixExp
-                                .getLeft()), stmt.getIsStipulate());
-                AssumeStmt right =
-                        new AssumeStmt(stmt.getLocation(), Exp.copy(infixExp
-                                .getRight()), stmt.getIsStipulate());
-                exp = simplifyAssumeRule(left, exp);
-                exp = simplifyAssumeRule(right, exp);
-
-                // Case #1: Nothing on the left and nothing on the right
-                if (left.getAssertion() == null && right.getAssertion() == null) {
-                    assumeExp = null;
-                }
-                // Case #2: Both still have assertions
-                else if (left.getAssertion() != null
-                        && right.getAssertion() != null) {
-                    assumeExp =
-                            myTypeGraph.formConjunct(left.getAssertion(), right
-                                    .getAssertion());
-                }
-                // Case #3: Left still has assertions
-                else if (left.getAssertion() != null) {
-                    assumeExp = left.getAssertion();
-                }
-                // Case #4: Right still has assertions
-                else {
-                    assumeExp = right.getAssertion();
+            // Create a new implies expression if there are common symbols
+            // in the assume and in the confirm. (Parsimonious step)
+            else {
+                // Loop through each confirm expression
+                for (int j = 0; j < confirmExpList.size(); j++) {
+                    Exp currentConfirmExp = confirmExpList.get(j);
+                    currentConfirmExp =
+                            formImplies(currentAssumeExp, currentConfirmExp,
+                                    expSymbolMapping, isStipulate);
+                    confirmExpList.set(j, currentConfirmExp);
                 }
             }
         }
 
-        // Store the new assertion
-        stmt.setAssertion(assumeExp);*/
+        // Form the return confirm statement
+        Exp retExp = myTypeGraph.getTrueVarExp();
+        for (Exp e : confirmExpList) {
+            if (retExp.isLiteralTrue()) {
+                retExp = e;
+            }
+            else {
+                retExp = myTypeGraph.formConjunct(retExp, e);
+            }
+        }
 
-        return null;
+        return retExp;
     }
 
     /**
