@@ -725,20 +725,15 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @param assumeExp The current assume expression.
      * @param confirmExp The current confirm expression.
-     * @param expSymbolMapping Map containing all the previously computed expressions and
-     *                         their respective symbols set.
      * @param isStipulate Whether or not the assume expression is an stipulate assume expression.
      *
      * @return The modified confirm expression.
      */
-    private Exp formImplies(Exp assumeExp, Exp confirmExp,
-            Map<Exp, Set<String>> expSymbolMapping, boolean isStipulate) {
+    private Exp formImplies(Exp assumeExp, Exp confirmExp, boolean isStipulate) {
         // Create a new implies expression if there are common symbols
         // in the assume and in the confirm. (Parsimonious step)
-        Set<String> confirmSymbolSet = expSymbolMapping.get(confirmExp);
-        Set<String> assumeSymbolSet = Utilities.getSymbols(assumeExp);
-        Set<String> intersection = new HashSet<String>(confirmSymbolSet);
-        intersection.retainAll(assumeSymbolSet);
+        Set<String> intersection = Utilities.getSymbols(confirmExp);
+        intersection.retainAll(Utilities.getSymbols(assumeExp));
 
         if (!intersection.isEmpty() || isStipulate) {
             confirmExp = myTypeGraph.formImplies(assumeExp, confirmExp);
@@ -765,14 +760,6 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private Exp formParsimoniousVC(List<Exp> confirmExpList,
             List<Exp> assumeExpList, boolean isStipulate) {
-        // Finds the set of symbols for each of the confirm expressions
-        // and stores this in the map.
-        Map<Exp, Set<String>> expSymbolMapping =
-                new HashMap<Exp, Set<String>>();
-        for (Exp c : confirmExpList) {
-            expSymbolMapping.put(c, Utilities.getSymbols(Exp.copy(c)));
-        }
-
         // Loop through each assume expression
         for (int i = 0; i < assumeExpList.size(); i++) {
             Exp currentAssumeExp = assumeExpList.get(i);
@@ -813,7 +800,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     currentConfirmExp =
                                             formImplies(currentAssumeExp,
                                                     currentConfirmExp,
-                                                    expSymbolMapping,
                                                     isStipulate);
                                 }
                             }
@@ -841,7 +827,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     Exp currentConfirmExp = confirmExpList.get(j);
                     currentConfirmExp =
                             formImplies(currentAssumeExp, currentConfirmExp,
-                                    expSymbolMapping, isStipulate);
+                                    isStipulate);
                     confirmExpList.set(j, currentConfirmExp);
                 }
             }
