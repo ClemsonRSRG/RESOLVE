@@ -2027,15 +2027,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                     formParsimoniousVC(confirmExpList, assumeExpList, stmt
                             .getIsStipulate());
 
-            // Only create an implies expression if the goal is not just "true".
-            // If the goal is "true", then simplify should be true as well.
-            if (stmt.getAssertion() != null && !simplify) {
-                // Create a new implies expression
-                currentFinalConfirm =
-                        myTypeGraph.formImplies(stmt.getAssertion(),
-                                currentFinalConfirm);
-            }
-
             // Set this as our new final confirm
             myCurrentAssertiveCode.setFinalConfirm(currentFinalConfirm,
                     simplify);
