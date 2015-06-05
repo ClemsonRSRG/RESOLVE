@@ -1977,7 +1977,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                 currentFinalConfirm =
                         myTypeGraph.formImplies(stmt.getAssertion(),
                                 currentFinalConfirm);
-                simplify = false;
             }
 
             // Set this as our new final confirm
