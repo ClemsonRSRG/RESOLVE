@@ -779,6 +779,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 Exp currentConfirmExp = confirmExpList.get(j);
                 Exp tmp;
                 boolean hasVerificationVar = false;
+                boolean doneReplacement = false;
 
                 // Attempts to simplify equality expressions
                 if (currentAssumeExp instanceof EqualsExp
@@ -852,6 +853,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                         .getRight());
                                 assumeExpList.set(k, newAssumeExp);
                             }
+
+                            doneReplacement = true;
                         }
                     }
                     // Only right hand side is replaceable
@@ -872,6 +875,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                         .getLeft());
                                 assumeExpList.set(k, newAssumeExp);
                             }
+
+                            doneReplacement = true;
                         }
                     }
                     else {
@@ -884,15 +889,30 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                 // Create a new implies expression if there are common symbols
                 // in the assume and in the confirm. (Parsimonious step)
-                // Don't do this step if we changed our boolean flag
                 Exp newConfirmExp;
-                if (!hasVerificationVar) {
+                if (isStipulate) {
+                    // Should always form the implies
                     newConfirmExp =
-                            formImplies(currentAssumeExp, tmp,
-                                    isStipulate);
+                            formImplies(currentAssumeExp, tmp, isStipulate);
                 }
                 else {
-                    newConfirmExp = Exp.copy(tmp);
+                    // Note: If did the replacement and it is not a stipulate
+                    // assume statement, we simply get rid of it.
+                    if (doneReplacement) {
+                        newConfirmExp = Exp.copy(tmp);
+                    }
+                    else {
+                        // Ignore expressions that we couldn't replace
+                        // that has P_val or Cum_Dur as the left hand side.
+                        if (!hasVerificationVar) {
+                            newConfirmExp =
+                                    formImplies(currentAssumeExp, tmp,
+                                            isStipulate);
+                        }
+                        else {
+                            newConfirmExp = Exp.copy(tmp);
+                        }
+                    }
                 }
 
                 confirmExpList.set(j, newConfirmExp);
