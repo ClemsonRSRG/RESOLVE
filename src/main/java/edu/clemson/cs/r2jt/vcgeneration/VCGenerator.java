@@ -730,15 +730,23 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @return The modified confirm expression.
      */
     private Exp formImplies(Exp assumeExp, Exp confirmExp, boolean isStipulate) {
-        // Create a new implies expression if there are common symbols
-        // in the assume and in the confirm. (Parsimonious step)
-        Set<String> intersection = Utilities.getSymbols(confirmExp);
-        intersection.retainAll(Utilities.getSymbols(assumeExp));
-
-        if (!intersection.isEmpty() || isStipulate) {
+        // If it is stipulate clause, keep it no matter what
+        if (isStipulate) {
             confirmExp =
                     myTypeGraph.formImplies(Exp.copy(assumeExp), Exp
                             .copy(confirmExp));
+        }
+        else {
+            // Create a new implies expression if there are common symbols
+            // in the assume and in the confirm. (Parsimonious step)
+            Set<String> intersection = Utilities.getSymbols(confirmExp);
+            intersection.retainAll(Utilities.getSymbols(assumeExp));
+
+            if (!intersection.isEmpty()) {
+                confirmExp =
+                        myTypeGraph.formImplies(Exp.copy(assumeExp), Exp
+                                .copy(confirmExp));
+            }
         }
 
         return confirmExp;
@@ -766,15 +774,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         for (int i = 0; i < assumeExpList.size(); i++) {
             Exp currentAssumeExp = assumeExpList.get(i);
 
-            // Attempts to simplify equality expressions
-            if (currentAssumeExp instanceof EqualsExp
-                    && ((EqualsExp) currentAssumeExp).getOperator() == EqualsExp.EQUAL) {
-                EqualsExp equalsExp = (EqualsExp) currentAssumeExp;
+            // Loop through each confirm expression
+            for (int j = 0; j < confirmExpList.size(); j++) {
+                Exp currentConfirmExp = confirmExpList.get(j);
+                Exp tmp;
+                boolean hasVerificationVar = false;
 
-                // Loop through each confirm expression
-                for (int j = 0; j < confirmExpList.size(); j++) {
-                    Exp currentConfirmExp = confirmExpList.get(j);
-                    Exp tmp;
+                // Attempts to simplify equality expressions
+                if (currentAssumeExp instanceof EqualsExp
+                        && ((EqualsExp) currentAssumeExp).getOperator() == EqualsExp.EQUAL) {
+                    EqualsExp equalsExp = (EqualsExp) currentAssumeExp;
                     boolean isLeftReplaceable =
                             Utilities.containsReplaceableExp(equalsExp
                                     .getLeft());
@@ -784,6 +793,16 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                     // Check if left hand side is replaceable
                     if (isLeftReplaceable) {
+                        // Check to see if we have P_val or Cum_Dur
+                        if (equalsExp.getLeft() instanceof VarExp) {
+                            if (((VarExp) equalsExp.getLeft()).getName()
+                                    .getName().matches("\\?*P_val")
+                                    || ((VarExp) equalsExp.getLeft()).getName()
+                                            .getName().matches("\\?*Cum_Dur")) {
+                                hasVerificationVar = true;
+                            }
+                        }
+
                         // Create a temp expression where left is replaced with the right
                         tmp =
                                 Utilities.replace(currentConfirmExp, equalsExp
@@ -791,22 +810,10 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                         // If nothing got replaced
                         if (tmp.equals(currentConfirmExp)) {
-                            // Check to see if we have P_val or Cum_Dur
-                            boolean replacement = true;
-                            if (equalsExp.getLeft() instanceof VarExp) {
-                                if (((VarExp) equalsExp.getLeft()).getName()
-                                        .getName().matches("\\?*P_val")
-                                        || ((VarExp) equalsExp.getLeft())
-                                                .getName().getName().matches(
-                                                        "\\?*Cum_Dur")) {
-                                    replacement = false;
-                                }
-                            }
-
                             // Check to see if the right hand side is an expression
                             // we can replace. Note that we don't replace if the
                             // left hand side is P_val or Cum_Dur.
-                            if (replacement) {
+                            if (!hasVerificationVar) {
                                 if (isRightReplaceable) {
                                     // Create a temp expression where right is replaced with the left
                                     tmp =
@@ -867,27 +874,21 @@ public class VCGenerator extends TreeWalkerVisitor {
                             }
                         }
                     }
-
-                    // Create a new implies expression if there are common symbols
-                    // in the assume and in the confirm. (Parsimonious step)
-                    tmp =
-                            formImplies(equalsExp, currentConfirmExp,
-                                    isStipulate);
-
-                    confirmExpList.set(j, tmp);
                 }
-            }
-            // Create a new implies expression if there are common symbols
-            // in the assume and in the confirm. (Parsimonious step)
-            else {
-                // Loop through each confirm expression
-                for (int j = 0; j < confirmExpList.size(); j++) {
-                    Exp currentConfirmExp = confirmExpList.get(j);
-                    currentConfirmExp =
+
+                // Create a new implies expression if there are common symbols
+                // in the assume and in the confirm. (Parsimonious step)
+                // Don't do this step if we changed our boolean flag
+                if (!hasVerificationVar) {
+                    tmp =
                             formImplies(currentAssumeExp, currentConfirmExp,
                                     isStipulate);
-                    confirmExpList.set(j, currentConfirmExp);
                 }
+                else {
+                    tmp = currentConfirmExp;
+                }
+
+                confirmExpList.set(j, tmp);
             }
         }
 
