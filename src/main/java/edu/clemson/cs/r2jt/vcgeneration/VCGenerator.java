@@ -736,7 +736,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         intersection.retainAll(Utilities.getSymbols(assumeExp));
 
         if (!intersection.isEmpty() || isStipulate) {
-            confirmExp = myTypeGraph.formImplies(assumeExp, confirmExp);
+            confirmExp =
+                    myTypeGraph.formImplies(Exp.copy(assumeExp), Exp
+                            .copy(confirmExp));
         }
 
         return confirmExp;
@@ -763,7 +765,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Loop through each assume expression
         for (int i = 0; i < assumeExpList.size(); i++) {
             Exp currentAssumeExp = assumeExpList.get(i);
-            boolean formImplies = true;
 
             // Attempts to simplify equality expressions
             if (currentAssumeExp instanceof EqualsExp
@@ -798,48 +799,64 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                         // If nothing got replaced
                         if (tmp.equals(currentConfirmExp)) {
+                            // Check to see if we have P_val or Cum_Dur
+                            boolean replacement = true;
+                            if (equalsExp.getLeft() instanceof VarExp) {
+                                if (((VarExp) equalsExp.getLeft()).getName()
+                                        .getName().matches("\\?*P_val")
+                                        || ((VarExp) equalsExp.getLeft())
+                                                .getName().getName().matches(
+                                                        "\\?*Cum_Dur")) {
+                                    replacement = false;
+                                }
+                            }
+
                             // Check to see if the right hand side is an expression
                             // we can replace. Note that we don't replace if the
                             // left hand side is P_val or Cum_Dur.
-                            if (isRightReplaceable) {
-                                // Check to see if we have P_val or Cum_Dur
-                                boolean replacement = true;
-                                if (equalsExp.getLeft() instanceof VarExp) {
-                                    if (((VarExp) equalsExp.getLeft())
-                                            .getName().getName().matches(
-                                                    "\\?*P_val")
-                                            || ((VarExp) equalsExp.getLeft())
-                                                    .getName().getName()
-                                                    .matches("\\?*Cum_Dur")) {
-                                        replacement = false;
-                                    }
-                                }
-
-                                // Only attempt to do the replacement if we don't have
-                                // P_val or Cum_Dur
-                                if (replacement) {
+                            if (replacement) {
+                                if (isRightReplaceable) {
                                     // Create a temp expression where right is replaced with the left
                                     tmp =
                                             Utilities.replace(
                                                     currentConfirmExp,
                                                     equalsExp.getRight(),
                                                     equalsExp.getLeft());
-                                }
 
-                                // If something got replaced, then we replace the rest of
-                                // the assume statements if possible.
-                                // If nothing got replaced, we don't need this assume!
-                                if (!tmp.equals(currentConfirmExp)) {
-                                    // Replace all instances of the right side in the rest of the assume statements
-                                    for (int k = i + 1; k < assumeExpList
-                                            .size(); k++) {
-                                        Exp newAssumeExp =
-                                                Utilities.replace(assumeExpList
-                                                        .get(k), equalsExp
-                                                        .getRight(), equalsExp
-                                                        .getLeft());
-                                        assumeExpList.set(k, newAssumeExp);
+                                    // If something got replaced, then we replace the rest of
+                                    // the assume statements if possible.
+                                    if (!tmp.equals(currentConfirmExp)) {
+                                        // Replace all instances of the right side in the rest of the assume statements
+                                        for (int k = i + 1; k < assumeExpList
+                                                .size(); k++) {
+                                            Exp newAssumeExp =
+                                                    Utilities
+                                                            .replace(
+                                                                    assumeExpList
+                                                                            .get(k),
+                                                                    equalsExp
+                                                                            .getRight(),
+                                                                    equalsExp
+                                                                            .getLeft());
+                                            assumeExpList.set(k, newAssumeExp);
+                                        }
                                     }
+                                    // Create a new implies expression if there are common symbols
+                                    // in the assume and in the confirm. (Parsimonious step)
+                                    else {
+                                        tmp =
+                                                formImplies(equalsExp,
+                                                        currentConfirmExp,
+                                                        isStipulate);
+                                    }
+                                }
+                                // Create a new implies expression if there are common symbols
+                                // in the assume and in the confirm. (Parsimonious step)
+                                else {
+                                    tmp =
+                                            formImplies(equalsExp,
+                                                    currentConfirmExp,
+                                                    isStipulate);
                                 }
                             }
                         }
@@ -863,7 +880,6 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                         // If something got replaced, then we replace the rest of
                         // the assume statements if possible.
-                        // If nothing got replaced, we don't need this assume!
                         if (!tmp.equals(currentConfirmExp)) {
                             // Replace all instances of the right side in the rest of the assume statements
                             for (int k = i + 1; k < assumeExpList.size(); k++) {
@@ -873,6 +889,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                         .getLeft());
                                 assumeExpList.set(k, newAssumeExp);
                             }
+                        }
+                        // Create a new implies expression if there are common symbols
+                        // in the assume and in the confirm. (Parsimonious step)
+                        else {
+                            tmp =
+                                    formImplies(currentAssumeExp,
+                                            currentConfirmExp, isStipulate);
                         }
                     }
 
