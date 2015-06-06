@@ -874,21 +874,28 @@ public class VCGenerator extends TreeWalkerVisitor {
                             }
                         }
                     }
-                }
-
-                // Create a new implies expression if there are common symbols
-                // in the assume and in the confirm. (Parsimonious step)
-                // Don't do this step if we changed our boolean flag
-                if (!hasVerificationVar) {
-                    tmp =
-                            formImplies(currentAssumeExp, currentConfirmExp,
-                                    isStipulate);
+                    else {
+                        tmp = currentConfirmExp;
+                    }
                 }
                 else {
                     tmp = currentConfirmExp;
                 }
 
-                confirmExpList.set(j, tmp);
+                // Create a new implies expression if there are common symbols
+                // in the assume and in the confirm. (Parsimonious step)
+                // Don't do this step if we changed our boolean flag
+                Exp newConfirmExp;
+                if (!hasVerificationVar) {
+                    newConfirmExp =
+                            formImplies(currentAssumeExp, tmp,
+                                    isStipulate);
+                }
+                else {
+                    newConfirmExp = Exp.copy(tmp);
+                }
+
+                confirmExpList.set(j, newConfirmExp);
             }
         }
 
