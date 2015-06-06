@@ -1176,11 +1176,16 @@ public class VCGenerator extends TreeWalkerVisitor {
             myVCBuffer.append("\n***********************");
             myVCBuffer.append("***********************\n");
 
-            // Add it to our list of final assertive codes if we don't have confirm true
-            // as our goal.
-            if (!myCurrentAssertiveCode.getFinalConfirm().getAssertion()
-                    .isLiteralTrue()) {
+            // Add it to our list of final assertive codes
+            ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+            if (!confirmStmt.getAssertion().isLiteralTrue()) {
                 myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
+            }
+            else {
+                // Only add true if it is a goal we want to show up.
+                if (!confirmStmt.getSimplify()) {
+                    myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
+                }
             }
 
             // Set the current assertive code to null
@@ -2682,13 +2687,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     Utilities.replaceFacilityDeclarationVariables(req,
                             facConceptDec.getParameters(), conceptParams);
             req.setLocation(loc);
-
-            boolean simplify = false;
-            // Simplify if we just have true
-            if (req.isLiteralTrue()) {
-                simplify = true;
-            }
-            assertiveCode.setFinalConfirm(req, simplify);
+            assertiveCode.setFinalConfirm(req, false);
 
             // Obtain the constraint of the concept type
             Exp assumeExp = null;
