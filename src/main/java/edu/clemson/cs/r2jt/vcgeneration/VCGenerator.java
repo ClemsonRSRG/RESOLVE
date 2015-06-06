@@ -782,16 +782,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                             Utilities.containsReplaceableExp(equalsExp
                                     .getRight());
 
-                    // Both sides do not contain expressions that
-                    // we can replace
-                    if (!isLeftReplaceable && !isRightReplaceable) {
-                        // Create a new implies expression if there are common symbols
-                        // in the assume and in the confirm. (Parsimonious step)
-                        tmp =
-                                formImplies(equalsExp, currentConfirmExp,
-                                        isStipulate);
-                    }
-                    else if (isLeftReplaceable) {
+                    // Check if left hand side is replaceable
+                    if (isLeftReplaceable) {
                         // Create a temp expression where left is replaced with the right
                         tmp =
                                 Utilities.replace(currentConfirmExp, equalsExp
@@ -841,22 +833,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                                             assumeExpList.set(k, newAssumeExp);
                                         }
                                     }
-                                    // Create a new implies expression if there are common symbols
-                                    // in the assume and in the confirm. (Parsimonious step)
-                                    else {
-                                        tmp =
-                                                formImplies(equalsExp,
-                                                        currentConfirmExp,
-                                                        isStipulate);
-                                    }
-                                }
-                                // Create a new implies expression if there are common symbols
-                                // in the assume and in the confirm. (Parsimonious step)
-                                else {
-                                    tmp =
-                                            formImplies(equalsExp,
-                                                    currentConfirmExp,
-                                                    isStipulate);
                                 }
                             }
                         }
@@ -872,7 +848,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                         }
                     }
                     // Only right hand side is replaceable
-                    else {
+                    else if (isRightReplaceable) {
                         // Create a temp expression where right is replaced with the left
                         tmp =
                                 Utilities.replace(currentConfirmExp, equalsExp
@@ -890,14 +866,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 assumeExpList.set(k, newAssumeExp);
                             }
                         }
-                        // Create a new implies expression if there are common symbols
-                        // in the assume and in the confirm. (Parsimonious step)
-                        else {
-                            tmp =
-                                    formImplies(currentAssumeExp,
-                                            currentConfirmExp, isStipulate);
-                        }
                     }
+
+                    // Create a new implies expression if there are common symbols
+                    // in the assume and in the confirm. (Parsimonious step)
+                    tmp =
+                            formImplies(equalsExp, currentConfirmExp,
+                                    isStipulate);
 
                     confirmExpList.set(j, tmp);
                 }
