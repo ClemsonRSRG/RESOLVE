@@ -840,6 +840,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                                             .getLeft());
                                             assumeExpList.set(k, newAssumeExp);
                                         }
+
+                                        doneReplacement = true;
                                     }
                                 }
                             }
