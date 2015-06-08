@@ -102,4 +102,13 @@ public class MemoryStmt extends Statement {
 
         return sb.toString();
     }
+
+    /** Returns a formatted text string for the VC Generator. */
+    public String toString(int indent) {
+        StringBuffer sb = new StringBuffer();
+        printSpace(indent, sb);
+        sb.append("Remember");
+        return sb.toString();
+    }
+
 }

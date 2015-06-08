@@ -714,6 +714,198 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>This is a helper method that checks to see if the given assume expression
+     * can be used to prove our confirm expression. This is done by finding the
+     * intersection between the set of symbols in the assume expression and
+     * the set of symbols in the confirm expression.</p>
+     *
+     * <p>If the intersection is not empty, then modify the confirm expression by
+     * forming an implies expression using the assume and confirm expressions.
+     * If it is empty, then it simply returns the confirm expression.</p>
+     *
+     * @param assumeExp The current assume expression.
+     * @param confirmExp The current confirm expression.
+     * @param isStipulate Whether or not the assume expression is an stipulate assume expression.
+     *
+     * @return The modified confirm expression.
+     */
+    private Exp formImplies(Exp assumeExp, Exp confirmExp, boolean isStipulate) {
+        // If it is stipulate clause, keep it no matter what
+        if (isStipulate) {
+            confirmExp =
+                    myTypeGraph.formImplies(Exp.copy(assumeExp), Exp
+                            .copy(confirmExp));
+        }
+        else {
+            // Create a new implies expression if there are common symbols
+            // in the assume and in the confirm. (Parsimonious step)
+            Set<String> intersection = Utilities.getSymbols(confirmExp);
+            intersection.retainAll(Utilities.getSymbols(assumeExp));
+
+            if (!intersection.isEmpty()) {
+                confirmExp =
+                        myTypeGraph.formImplies(Exp.copy(assumeExp), Exp
+                                .copy(confirmExp));
+            }
+        }
+
+        return confirmExp;
+    }
+
+    /**
+     * <p>This method iterates through each of the assume expressions.
+     * If the expression is a replaceable equals expression, it will substitute
+     * all instances of the expression in the rest of the assume expression
+     * list and in the confirm expression list.</p>
+     *
+     * <p>When it is not a replaceable expression, we apply a step to generate
+     * parsimonious VCs.</p>
+     *
+     * @param confirmExpList The list of conjunct confirm expressions.
+     * @param assumeExpList The list of conjunct assume expressions.
+     * @param isStipulate Boolean to indicate whether it is a stipulate assume
+     *                    clause and we need to keep the assume statement.
+     *
+     * @return The modified confirm statement expression in <code>Exp/code> form.
+     */
+    private Exp formParsimoniousVC(List<Exp> confirmExpList,
+            List<Exp> assumeExpList, boolean isStipulate) {
+        // Loop through each assume expression
+        for (int i = 0; i < assumeExpList.size(); i++) {
+            Exp currentAssumeExp = assumeExpList.get(i);
+
+            // Loop through each confirm expression
+            for (int j = 0; j < confirmExpList.size(); j++) {
+                Exp currentConfirmExp = confirmExpList.get(j);
+                Exp tmp;
+                boolean hasVerificationVar = false;
+                boolean doneReplacement = false;
+
+                // Attempts to simplify equality expressions
+                if (currentAssumeExp instanceof EqualsExp
+                        && ((EqualsExp) currentAssumeExp).getOperator() == EqualsExp.EQUAL) {
+                    EqualsExp equalsExp = (EqualsExp) currentAssumeExp;
+                    boolean isLeftReplaceable =
+                            Utilities.containsReplaceableExp(equalsExp
+                                    .getLeft());
+                    boolean isRightReplaceable =
+                            Utilities.containsReplaceableExp(equalsExp
+                                    .getRight());
+
+                    // Check if both the left and right are replaceable
+                    if (isLeftReplaceable && isRightReplaceable) {
+                        // Don't do any substitutions, we don't know
+                        // which makes sense in the current context.
+                        tmp = currentConfirmExp;
+                    }
+                    // Check if left hand side is replaceable
+                    else if (isLeftReplaceable) {
+                        // Check to see if we have P_val or Cum_Dur
+                        if (equalsExp.getLeft() instanceof VarExp) {
+                            if (((VarExp) equalsExp.getLeft()).getName()
+                                    .getName().matches("\\?*P_val")
+                                    || ((VarExp) equalsExp.getLeft()).getName()
+                                            .getName().matches("\\?*Cum_Dur")) {
+                                hasVerificationVar = true;
+                            }
+                        }
+
+                        // Create a temp expression where left is replaced with the right
+                        tmp =
+                                Utilities.replace(currentConfirmExp, equalsExp
+                                        .getLeft(), equalsExp.getRight());
+
+                        // If nothing got replaced
+                        if (!tmp.equals(currentConfirmExp)) {
+                            // Replace all instances of the left side in the rest of the assume statements
+                            for (int k = i + 1; k < assumeExpList.size(); k++) {
+                                Exp newAssumeExp =
+                                        Utilities.replace(assumeExpList.get(k),
+                                                equalsExp.getLeft(), equalsExp
+                                                        .getRight());
+                                assumeExpList.set(k, newAssumeExp);
+                            }
+
+                            doneReplacement = true;
+                        }
+                    }
+                    // Only right hand side is replaceable
+                    else if (isRightReplaceable) {
+                        // Create a temp expression where right is replaced with the left
+                        tmp =
+                                Utilities.replace(currentConfirmExp, equalsExp
+                                        .getRight(), equalsExp.getLeft());
+
+                        // If something got replaced, then we replace the rest of
+                        // the assume statements if possible.
+                        if (!tmp.equals(currentConfirmExp)) {
+                            // Replace all instances of the right side in the rest of the assume statements
+                            for (int k = i + 1; k < assumeExpList.size(); k++) {
+                                Exp newAssumeExp =
+                                        Utilities.replace(assumeExpList.get(k),
+                                                equalsExp.getRight(), equalsExp
+                                                        .getLeft());
+                                assumeExpList.set(k, newAssumeExp);
+                            }
+
+                            doneReplacement = true;
+                        }
+                    }
+                    else {
+                        tmp = currentConfirmExp;
+                    }
+                }
+                else {
+                    tmp = currentConfirmExp;
+                }
+
+                // Create a new implies expression if there are common symbols
+                // in the assume and in the confirm. (Parsimonious step)
+                Exp newConfirmExp;
+                if (isStipulate) {
+                    // Should always form the implies
+                    newConfirmExp =
+                            formImplies(currentAssumeExp, tmp, isStipulate);
+                }
+                else {
+                    // Note: If did the replacement and it is not a stipulate
+                    // assume statement, we simply get rid of it.
+                    if (doneReplacement) {
+                        newConfirmExp = Exp.copy(tmp);
+                    }
+                    else {
+                        // Ignore expressions that we couldn't replace
+                        // that has P_val or Cum_Dur as the left hand side.
+                        if (!hasVerificationVar) {
+                            newConfirmExp =
+                                    formImplies(currentAssumeExp, tmp,
+                                            isStipulate);
+                        }
+                        else {
+                            newConfirmExp = Exp.copy(tmp);
+                        }
+                    }
+                }
+
+                confirmExpList.set(j, newConfirmExp);
+            }
+        }
+
+        // Form the return confirm statement
+        Exp retExp = myTypeGraph.getTrueVarExp();
+        for (Exp e : confirmExpList) {
+            if (retExp.isLiteralTrue()) {
+                retExp = e;
+            }
+            else {
+                retExp = myTypeGraph.formConjunct(retExp, e);
+            }
+        }
+
+        return retExp;
+    }
+
+    /**
      * <p>Creates the name of the output file.</p>
      *
      * @return Name of the file
@@ -959,11 +1151,16 @@ public class VCGenerator extends TreeWalkerVisitor {
             myVCBuffer.append("\n***********************");
             myVCBuffer.append("***********************\n");
 
-            // Add it to our list of final assertive codes if we don't have confirm true
-            // as our goal.
-            if (!myCurrentAssertiveCode.getFinalConfirm().getAssertion()
-                    .isLiteralTrue()) {
+            // Add it to our list of final assertive codes
+            ConfirmStmt confirmStmt = myCurrentAssertiveCode.getFinalConfirm();
+            if (!confirmStmt.getAssertion().isLiteralTrue()) {
                 myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
+            }
+            else {
+                // Only add true if it is a goal we want to show up.
+                if (!confirmStmt.getSimplify()) {
+                    myFinalAssertiveCodeList.add(myCurrentAssertiveCode);
+                }
             }
 
             // Set the current assertive code to null
@@ -1843,109 +2040,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         return requires;
     }
 
-    /**
-     * <p>Simplify the assume statement where possible.</p>
-     *
-     * @param stmt The assume statement we want to simplify.
-     * @param exp The current expression we are dealing with.
-     *
-     * @return The modified expression in <code>Exp/code> form.
-     */
-    private Exp simplifyAssumeRule(AssumeStmt stmt, Exp exp) {
-        // Variables
-        Exp assumeExp = stmt.getAssertion();
-
-        // EqualsExp
-        if (assumeExp instanceof EqualsExp) {
-            EqualsExp equalsExp = (EqualsExp) assumeExp;
-
-            // Do simplifications if we have an equals
-            if (equalsExp.getOperator() == EqualsExp.EQUAL) {
-                // Don't replace if the left expression is an incoming value expression
-                if (!(equalsExp.getLeft() instanceof OldExp)) {
-                    // Create a temp expression where left is replaced with the right
-                    Exp tmp =
-                            Utilities.replace(exp, equalsExp.getLeft(),
-                                    equalsExp.getRight());
-
-                    // If tmp hasn't changed, then it means we have to check the right
-                    // and right cannot be an incoming value expression.
-                    if (tmp.equals(exp)
-                            && !(equalsExp.getRight() instanceof OldExp)) {
-
-                        // Don't do any substitution if it is P_val
-                        if (equalsExp.getLeft() instanceof VarExp
-                                && ((VarExp) equalsExp.getLeft()).getName()
-                                        .getName().matches("\\?*P_val")) {
-                            tmp = exp;
-
-                            // TODO: Figure out if we should keep this given or not
-                        }
-                        else {
-                            tmp =
-                                    Utilities.replace(exp,
-                                            equalsExp.getRight(), equalsExp
-                                                    .getLeft());
-                        }
-                    }
-
-                    // Update exp if we did a replacement
-                    if (!tmp.equals(exp)) {
-                        exp = tmp;
-
-                        // If this is not a stipulate assume clause,
-                        // we can safely get rid of it, otherwise we keep it.
-                        if (!stmt.getIsStipulate()) {
-                            assumeExp = null;
-                        }
-                    }
-                }
-            }
-        }
-        // InfixExp
-        else if (assumeExp instanceof InfixExp) {
-            InfixExp infixExp = (InfixExp) assumeExp;
-
-            // Only do simplifications if we have an and operator
-            if (infixExp.getOpName().equals("and")) {
-                // Recursively call simplify on the left and on the right
-                AssumeStmt left =
-                        new AssumeStmt(stmt.getLocation(), Exp.copy(infixExp
-                                .getLeft()), stmt.getIsStipulate());
-                AssumeStmt right =
-                        new AssumeStmt(stmt.getLocation(), Exp.copy(infixExp
-                                .getRight()), stmt.getIsStipulate());
-                exp = simplifyAssumeRule(left, exp);
-                exp = simplifyAssumeRule(right, exp);
-
-                // Case #1: Nothing on the left and nothing on the right
-                if (left.getAssertion() == null && right.getAssertion() == null) {
-                    assumeExp = null;
-                }
-                // Case #2: Both still have assertions
-                else if (left.getAssertion() != null
-                        && right.getAssertion() != null) {
-                    assumeExp =
-                            myTypeGraph.formConjunct(left.getAssertion(), right
-                                    .getAssertion());
-                }
-                // Case #3: Left still has assertions
-                else if (left.getAssertion() != null) {
-                    assumeExp = left.getAssertion();
-                }
-                // Case #4: Right still has assertions
-                else {
-                    assumeExp = right.getAssertion();
-                }
-            }
-        }
-
-        // Store the new assertion
-        stmt.setAssertion(assumeExp);
-
-        return exp;
-    }
-
     // -----------------------------------------------------------
     // Proof Rules
     // -----------------------------------------------------------
@@ -1967,21 +2061,20 @@ public class VCGenerator extends TreeWalkerVisitor {
             myVCBuffer.append("\n_____________________ \n");
         }
         else {
-            // Apply simplification
+            // Apply simplification for equals expressions and
+            // apply steps to generate parsimonious vcs.
             ConfirmStmt finalConfirm = myCurrentAssertiveCode.getFinalConfirm();
             boolean simplify = finalConfirm.getSimplify();
-            Exp currentFinalConfirm =
-                    simplifyAssumeRule(stmt, finalConfirm.getAssertion());
+            List<Exp> assumeExpList =
+                    Utilities.splitConjunctExp(stmt.getAssertion(),
+                            new ArrayList<Exp>());
+            List<Exp> confirmExpList =
+                    Utilities.splitConjunctExp(finalConfirm.getAssertion(),
+                            new ArrayList<Exp>());
 
-            // Only create an implies expression if the goal is not just "true".
-            // If the goal is "true", then simplify should be true as well.
-            if (stmt.getAssertion() != null && !simplify) {
-                // Create a new implies expression
-                currentFinalConfirm =
-                        myTypeGraph.formImplies(stmt.getAssertion(),
-                                currentFinalConfirm);
-                simplify = false;
-            }
+            Exp currentFinalConfirm =
+                    formParsimoniousVC(confirmExpList, assumeExpList, stmt
+                            .getIsStipulate());
 
             // Set this as our new final confirm
             myCurrentAssertiveCode.setFinalConfirm(currentFinalConfirm,
@@ -2063,6 +2156,45 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         else {
             ensures = myTypeGraph.getTrueVarExp();
+        }
+
+        // Check for recursive call of itself
+        if (myCurrentOperationEntry != null
+                && myCurrentOperationEntry.getName().equals(
+                        opDec.getName().getName())
+                && myCurrentOperationEntry.getReturnType() != null) {
+            // Create a new confirm statement using P_val and the decreasing clause
+            VarExp pVal =
+                    Utilities.createPValExp(myOperationDecreasingExp
+                            .getLocation(), myCurrentModuleScope);
+
+            // Create a new infix expression
+            IntegerExp oneExp = new IntegerExp();
+            oneExp.setValue(1);
+            oneExp.setMathType(myOperationDecreasingExp.getMathType());
+            InfixExp leftExp =
+                    new InfixExp(stmt.getLocation(), oneExp, Utilities
+                            .createPosSymbol("+"), Exp
+                            .copy(myOperationDecreasingExp));
+            leftExp.setMathType(myOperationDecreasingExp.getMathType());
+            InfixExp exp =
+                    Utilities.createLessThanEqExp(stmt.getLocation(), leftExp,
+                            pVal, BOOLEAN);
+
+            // Create the new confirm statement
+            Location loc;
+            if (myOperationDecreasingExp.getLocation() != null) {
+                loc = (Location) myOperationDecreasingExp.getLocation().clone();
+            }
+            else {
+                loc = (Location) stmt.getLocation().clone();
+            }
+            loc.setDetails("Show Termination of Recursive Call");
+            Utilities.setLocation(exp, loc);
+            ConfirmStmt conf = new ConfirmStmt(loc, exp, false);
+
+            // Add it to our list of assertions
+            myCurrentAssertiveCode.addCode(conf);
         }
 
         // Get the requires clause for this operation
@@ -2259,6 +2391,12 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         else if (statement instanceof IfStmt) {
             applyIfStmtRule((IfStmt) statement);
+        }
+        else if (statement instanceof MemoryStmt) {
+            // TODO: Deal with Forget
+            if (((MemoryStmt) statement).isRemember()) {
+                applyRememberRule();
+            }
         }
         else if (statement instanceof SwapStmt) {
             applySwapStmtRule((SwapStmt) statement);
@@ -2524,13 +2662,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     Utilities.replaceFacilityDeclarationVariables(req,
                             facConceptDec.getParameters(), conceptParams);
             req.setLocation(loc);
-
-            boolean simplify = false;
-            // Simplify if we just have true
-            if (req.isLiteralTrue()) {
-                simplify = true;
-            }
-            assertiveCode.setFinalConfirm(req, simplify);
+            assertiveCode.setFinalConfirm(req, false);
 
             // Obtain the constraint of the concept type
             Exp assumeExp = null;
@@ -3785,7 +3917,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Add the remember rule
-        myCurrentAssertiveCode.addRemember();
+        myCurrentAssertiveCode.addCode(new MemoryStmt((Location) opLoc.clone(),
+                true));
 
         // Add declared variables into the assertion. Also add
         // them to the list of free variables.
@@ -3896,10 +4029,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Code
             case VerificationStatement.CODE:
                 applyCodeRules((Statement) curAssertion.getAssertion());
-                break;
-            // Remember Assertion
-            case VerificationStatement.REMEMBER:
-                applyRememberRule();
                 break;
             // Variable Declaration Assertion
             case VerificationStatement.VARIABLE:
@@ -4304,7 +4433,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         myCurrentAssertiveCode.addAssume((Location) whileLoc.clone(), assume,
-                true);
+                false);
 
         // if statement body (need to deep copy!)
         edu.clemson.cs.r2jt.collections.List<Statement> ifStmtList =

@@ -38,8 +38,7 @@ public class VerificationStatement implements Cloneable {
     // Code for each type of Verification Statement
     public static final int CODE = 1;
     public static final int VARIABLE = 2;
-    public static final int REMEMBER = 3;
-    public static final int CHANGE = 4;
+    public static final int CHANGE = 3;
 
     // ===========================================================
     // Constructors
@@ -55,9 +54,6 @@ public class VerificationStatement implements Cloneable {
                 || (type == CHANGE)) {
             myType = type;
             myAssertion = assertion;
-        }
-        else if (type == REMEMBER) {
-            myType = type;
         }
     }
 
@@ -85,10 +81,6 @@ public class VerificationStatement implements Cloneable {
                             new VerificationStatement(myType,
                                     ((VarDec) myAssertion).clone());
                 }
-                return clone;
-            }
-            else if (myType == REMEMBER) {
-                clone = new VerificationStatement(myType, null);
                 return clone;
             }
             else if (myType == CHANGE) {
@@ -171,9 +163,6 @@ public class VerificationStatement implements Cloneable {
             str = "Variable";
             break;
         case 3:
-            str = "Remember";
-            break;
-        case 4:
             str = "Change";
             break;
         default:
