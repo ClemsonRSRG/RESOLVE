@@ -792,8 +792,14 @@ public class VCGenerator extends TreeWalkerVisitor {
                             Utilities.containsReplaceableExp(equalsExp
                                     .getRight());
 
+                    // Check if both the left and right are replaceable
+                    if (isLeftReplaceable && isRightReplaceable) {
+                        // Don't do any substitutions, we don't know
+                        // which makes sense in the current context.
+                        tmp = currentConfirmExp;
+                    }
                     // Check if left hand side is replaceable
-                    if (isLeftReplaceable) {
+                    else if (isLeftReplaceable) {
                         // Check to see if we have P_val or Cum_Dur
                         if (equalsExp.getLeft() instanceof VarExp) {
                             if (((VarExp) equalsExp.getLeft()).getName()
@@ -810,43 +816,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                         .getLeft(), equalsExp.getRight());
 
                         // If nothing got replaced
-                        if (tmp.equals(currentConfirmExp)) {
-                            // Check to see if the right hand side is an expression
-                            // we can replace. Note that we don't replace if the
-                            // left hand side is P_val or Cum_Dur.
-                            if (!hasVerificationVar) {
-                                if (isRightReplaceable) {
-                                    // Create a temp expression where right is replaced with the left
-                                    tmp =
-                                            Utilities.replace(
-                                                    currentConfirmExp,
-                                                    equalsExp.getRight(),
-                                                    equalsExp.getLeft());
-
-                                    // If something got replaced, then we replace the rest of
-                                    // the assume statements if possible.
-                                    if (!tmp.equals(currentConfirmExp)) {
-                                        // Replace all instances of the right side in the rest of the assume statements
-                                        for (int k = i + 1; k < assumeExpList
-                                                .size(); k++) {
-                                            Exp newAssumeExp =
-                                                    Utilities
-                                                            .replace(
-                                                                    assumeExpList
-                                                                            .get(k),
-                                                                    equalsExp
-                                                                            .getRight(),
-                                                                    equalsExp
-                                                                            .getLeft());
-                                            assumeExpList.set(k, newAssumeExp);
-                                        }
-
-                                        doneReplacement = true;
-                                    }
-                                }
-                            }
-                        }
-                        else {
+                        if (!tmp.equals(currentConfirmExp)) {
                             // Replace all instances of the left side in the rest of the assume statements
                             for (int k = i + 1; k < assumeExpList.size(); k++) {
                                 Exp newAssumeExp =
