@@ -3015,11 +3015,26 @@ public class VCGenerator extends TreeWalkerVisitor {
                         // Create an equals expression from formal to actual
                         Exp actualExp;
                         if (conceptParams.get(i).getEvalExp() != null) {
-                            actualExp =
-                                    Utilities
-                                            .convertExp(conceptParams.get(i)
-                                                    .getEvalExp(),
-                                                    myCurrentModuleScope);
+                            // Check for nested function calls in ProgramDotExp
+                            // and ProgramParamExp.
+                            ProgramExp p = conceptParams.get(i).getEvalExp();
+                            if (p instanceof ProgramDotExp
+                                    || p instanceof ProgramParamExp) {
+                                NestedFuncWalker nfw =
+                                        new NestedFuncWalker(null, null, mySymbolTable,
+                                                myCurrentModuleScope, assertiveCode);
+                                TreeWalker tw = new TreeWalker(nfw);
+                                tw.visit(p);
+
+                                // Use the modified ensures clause as the new expression we want
+                                // to replace.
+                                actualExp = nfw.getEnsuresClause();
+                            }
+                            // For all other types of arguments, simply convert it to a
+                            // math expression.
+                            else {
+                                actualExp = Utilities.convertExp(p);
+                            }
                         }
                         else {
                             actualExp = Exp.copy(varDecExp);
