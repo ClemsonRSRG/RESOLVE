@@ -23,8 +23,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.query.*;
 import edu.clemson.cs.r2jt.misc.SourceErrorException;
-
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -1002,99 +1000,6 @@ public class Utilities {
             return tmp;
         else
             return exp;
-    }
-
-    /**
-     * <p>Replace the formal with the actual variables
-     * from the facility declaration rule.</p>
-     *
-     * @param exp The expression to be replaced.
-     * @param facParam The list of facility declaration parameter variables.
-     * @param concParam The list of concept parameter variables.
-     *
-     * @return The modified expression.
-     */
-    public static Exp replaceFacilityDeclarationVariables(Exp exp,
-            List facParam, List concParam) {
-        for (int i = 0; i < facParam.size(); i++) {
-            if (facParam.get(i) instanceof Dec
-                    && (concParam.get(i) instanceof Dec)) {
-                // Both are instances of Dec
-                Dec facDec = (Dec) facParam.get(i);
-                Dec concDec = (Dec) concParam.get(i);
-
-                // Variable to be replaced
-                VarExp expToReplace =
-                        createVarExp(facDec.getLocation(), null, facDec
-                                .getName(), facDec.getMathType(), null);
-
-                // Concept variable
-                VarExp expToUse =
-                        createVarExp(concDec.getLocation(), null, concDec
-                                .getName(), concDec.getMathType(), null);
-
-                // Temporary replacement to avoid formal and actuals being the same
-                exp = replace(exp, expToReplace, expToUse);
-
-                // Create a old exp from expToReplace
-                OldExp r = new OldExp(null, expToReplace);
-                r.setMathType(expToReplace.getMathType());
-
-                // Create a old exp from expToUse
-                OldExp u = new OldExp(null, expToUse);
-                u.setMathType(expToUse.getMathType());
-
-                // Actually perform the desired replacement
-                exp = replace(exp, r, u);
-            }
-            else if (facParam.get(i) instanceof Dec
-                    && concParam.get(i) instanceof ModuleArgumentItem) {
-                // We have a ModuleArgumentItem
-                Dec facDec = (Dec) facParam.get(i);
-                ModuleArgumentItem concItem =
-                        (ModuleArgumentItem) concParam.get(i);
-
-                // Variable to be replaced
-                VarExp expToReplace =
-                        createVarExp(facDec.getLocation(), null, facDec
-                                .getName(), facDec.getMathType(), null);
-
-                // Concept variable
-                VarExp expToUse = new VarExp();
-                if (concItem.getName() != null) {
-                    expToUse.setName(concItem.getName());
-                }
-                else {
-                    expToUse.setName(createPosSymbol(concItem.getEvalExp()
-                            .toString()));
-                }
-
-                // Set the math type for the concept variable
-                if (concItem.getProgramTypeValue() != null) {
-                    expToUse.setMathType(concItem.getProgramTypeValue()
-                            .toMath());
-                }
-                else {
-                    expToUse.setMathType(concItem.getMathType());
-                }
-
-                // Temporary replacement to avoid formal and actuals being the same
-                exp = replace(exp, expToReplace, expToUse);
-
-                // Create a old exp from expToReplace
-                OldExp r = new OldExp(null, expToReplace);
-                r.setMathType(expToReplace.getMathType());
-
-                // Create a old exp from expToUse
-                OldExp u = new OldExp(null, expToUse);
-                u.setMathType(expToUse.getMathType());
-
-                // Actually perform the desired replacement
-                exp = replace(exp, r, u);
-            }
-        }
-
-        return exp;
     }
 
     /**

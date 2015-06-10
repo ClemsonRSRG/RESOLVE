@@ -30,7 +30,6 @@ import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.vcgeneration.treewalkers.NestedFuncWalker;
-
 import java.io.File;
 import java.util.*;
 import java.util.List;
@@ -1747,6 +1746,130 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     /**
      * <p>Replace the formal with the actual variables
+     * from the facility declaration rule.</p>
+     *
+     * @param exp The expression to be replaced.
+     * @param facParam The list of facility declaration parameter variables.
+     * @param concParam The list of concept parameter variables.
+     * @param assertiveCode The current assertive code we are constructing.     *
+     *
+     * @return The modified expression.
+     */
+    private Exp replaceFacilityDeclarationVariables(Exp exp,
+            edu.clemson.cs.r2jt.collections.List facParam,
+            edu.clemson.cs.r2jt.collections.List concParam,
+            AssertiveCode assertiveCode) {
+        for (int i = 0; i < facParam.size(); i++) {
+            if (facParam.get(i) instanceof Dec
+                    && (concParam.get(i) instanceof Dec)) {
+                // Both are instances of Dec
+                Dec facDec = (Dec) facParam.get(i);
+                Dec concDec = (Dec) concParam.get(i);
+
+                // Variable to be replaced
+                VarExp expToReplace =
+                        Utilities.createVarExp(facDec.getLocation(), null,
+                                facDec.getName(), facDec.getMathType(), null);
+
+                // Concept variable
+                VarExp expToUse =
+                        Utilities.createVarExp(concDec.getLocation(), null,
+                                concDec.getName(), concDec.getMathType(), null);
+
+                // Temporary replacement to avoid formal and actuals being the same
+                exp = Utilities.replace(exp, expToReplace, expToUse);
+
+                // Create a old exp from expToReplace
+                OldExp r = new OldExp(null, expToReplace);
+                r.setMathType(expToReplace.getMathType());
+
+                // Create a old exp from expToUse
+                OldExp u = new OldExp(null, expToUse);
+                u.setMathType(expToUse.getMathType());
+
+                // Actually perform the desired replacement
+                exp = Utilities.replace(exp, r, u);
+            }
+            else if (facParam.get(i) instanceof Dec
+                    && concParam.get(i) instanceof ModuleArgumentItem) {
+                // We have a ModuleArgumentItem
+                Dec facDec = (Dec) facParam.get(i);
+                ModuleArgumentItem concItem =
+                        (ModuleArgumentItem) concParam.get(i);
+
+                // Concept variable to be replaced
+                VarExp expToReplace =
+                        Utilities.createVarExp(facDec.getLocation(), null,
+                                facDec.getName(), facDec.getMathType(), null);
+
+                // Obtain the math type for the module argument item
+                MTType type;
+                if (concItem.getProgramTypeValue() != null) {
+                    type = concItem.getProgramTypeValue().toMath();
+                }
+                else {
+                    type = concItem.getMathType();
+                }
+
+                // Convert the module argument items into math expressions
+                Exp expToUse;
+                if (concItem.getName() != null) {
+                    expToUse =
+                            Utilities.createVarExp(concItem.getLocation(),
+                                    concItem.getQualifier(),
+                                    concItem.getName(), type, null);
+                }
+                else {
+                    // Check for nested function calls in ProgramDotExp
+                    // and ProgramParamExp.
+                    ProgramExp p = concItem.getEvalExp();
+                    if (p instanceof ProgramDotExp
+                            || p instanceof ProgramParamExp) {
+                        NestedFuncWalker nfw =
+                                new NestedFuncWalker(null, null, mySymbolTable,
+                                        myCurrentModuleScope, assertiveCode);
+                        TreeWalker tw = new TreeWalker(nfw);
+                        tw.visit(p);
+
+                        // Add the requires clause as something we need to confirm
+                        Exp pRequires = nfw.getRequiresClause();
+                        if (!pRequires.isLiteralTrue()) {
+                            assertiveCode.addConfirm(pRequires.getLocation(),
+                                    pRequires, false);
+                        }
+
+                        // Use the modified ensures clause as the new expression we want
+                        // to replace.
+                        expToUse = nfw.getEnsuresClause();
+                    }
+                    // For all other types of arguments, simply convert it to a
+                    // math expression.
+                    else {
+                        expToUse = Utilities.convertExp(p);
+                    }
+                }
+
+                // Temporary replacement to avoid formal and actuals being the same
+                exp = Utilities.replace(exp, expToReplace, expToUse);
+
+                // Create a old exp from expToReplace
+                OldExp r = new OldExp(null, expToReplace);
+                r.setMathType(expToReplace.getMathType());
+
+                // Create a old exp from expToUse
+                OldExp u = new OldExp(null, expToUse);
+                u.setMathType(expToUse.getMathType());
+
+                // Actually perform the desired replacement
+                exp = Utilities.replace(exp, r, u);
+            }
+        }
+
+        return exp;
+    }
+
+    /**
+     * <p>Replace the formal with the actual variables
      * inside the ensures clause.</p>
      *
      * @param ensures The ensures clause.
@@ -2773,7 +2896,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                             .getName())).getDefiningElement();
 
             // Concept parameters
-            List<ModuleArgumentItem> conceptParams = dec.getConceptParams();
+            edu.clemson.cs.r2jt.collections.List<ModuleArgumentItem> conceptParams =
+                    dec.getConceptParams();
 
             // Concept requires clause
             Exp req =
@@ -2783,8 +2907,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             loc.setDetails("Facility Declaration Rule");
 
             req =
-                    Utilities.replaceFacilityDeclarationVariables(req,
-                            facConceptDec.getParameters(), conceptParams);
+                    replaceFacilityDeclarationVariables(req, facConceptDec
+                            .getParameters(), conceptParams, assertiveCode);
             req.setLocation(loc);
             assertiveCode.setFinalConfirm(req, false);
 
@@ -2874,11 +2998,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                         // Replace with facility declaration variables
                         constraint =
-                                Utilities
-                                        .replaceFacilityDeclarationVariables(
-                                                constraint, facConceptDec
-                                                        .getParameters(),
-                                                conceptParams);
+                                replaceFacilityDeclarationVariables(constraint,
+                                        facConceptDec.getParameters(),
+                                        conceptParams, assertiveCode);
 
                         if (assumeExp == null) {
                             assumeExp = constraint;
