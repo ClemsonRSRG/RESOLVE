@@ -43,7 +43,8 @@ public class Utilities {
     // -----------------------------------------------------------
 
     public static void expNotHandled(Exp exp, Location l) {
-        String message = "Exp not handled: " + exp.toString();
+        String message =
+                "Exp type not handled: " + exp.getClass().getCanonicalName();
         throw new SourceErrorException(message, l);
     }
 
@@ -676,8 +677,28 @@ public class Utilities {
         // Not CharExp, DoubleExp, IntegerExp or StringExp
         if (!(exp instanceof CharExp) && !(exp instanceof DoubleExp)
                 && !(exp instanceof IntegerExp) && !(exp instanceof StringExp)) {
+            // AlternativeExp
+            if (exp instanceof AlternativeExp) {
+                List<AltItemExp> alternativesList =
+                        ((AlternativeExp) exp).getAlternatives();
+
+                // Iterate through each of the alternatives
+                for (AltItemExp altExp : alternativesList) {
+                    Exp test = altExp.getTest();
+                    Exp assignment = altExp.getAssignment();
+
+                    // Don't loop if they are null
+                    if (test != null) {
+                        symbolsSet.addAll(getSymbols(altExp.getTest()));
+                    }
+
+                    if (assignment != null) {
+                        symbolsSet.addAll(getSymbols(altExp.getAssignment()));
+                    }
+                }
+            }
             // DotExp
-            if (exp instanceof DotExp) {
+            else if (exp instanceof DotExp) {
                 List<Exp> segExpList = ((DotExp) exp).getSegments();
                 StringBuffer currentStr = new StringBuffer();
 
