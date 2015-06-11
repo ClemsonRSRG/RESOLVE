@@ -1874,24 +1874,22 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Loop through the argument list
             for (int i = 0; i < formalParamList.size(); i++) {
                 // Concept variable
-                Exp formalExp = formalParamList.get(i);
+                VarExp formalExp = (VarExp) formalParamList.get(i);
 
-                // Actual argument
-                Exp actualExp = actualParamList.get(i);
+                if (formalExp != null) {
+                    // Temporary replacement to avoid formal and actuals being the same
+                    VarExp newFormalExp =
+                            Utilities.createVarExp(null, null,
+                                    Utilities.createPosSymbol("_"
+                                            + formalExp.getName()), formalExp
+                                            .getMathType(), formalExp
+                                            .getMathTypeValue());
+                    retExp = Utilities.replace(retExp, formalExp, newFormalExp);
 
-                // Temporary replacement to avoid formal and actuals being the same
-                retExp = Utilities.replace(retExp, actualExp, formalExp);
-
-                // Create a old exp from actualExp
-                OldExp r = new OldExp(null, actualExp);
-                r.setMathType(actualExp.getMathType());
-
-                // Create a old exp from formalExp
-                OldExp u = new OldExp(null, formalExp);
-                u.setMathType(formalExp.getMathType());
-
-                // Actually perform the desired replacement
-                retExp = Utilities.replace(retExp, r, u);
+                    // Actually perform the desired replacement
+                    Exp actualExp = actualParamList.get(i);
+                    retExp = Utilities.replace(retExp, newFormalExp, actualExp);
+                }
             }
         }
         else {
