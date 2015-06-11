@@ -713,8 +713,67 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This is a helper method that checks to see if each assume expression in
-     * the list can be used to prove our confirm expression.</p>
+     * <p>Converts each module's formal argument into variable expressions. This is only
+     * possible if the argument is of type <code>ConstantParamDec</code>. All other types
+     * are simply ignored and has mapped value of <code>null</code>.</p>
+     *
+     * @param formalParams The formal parameter list for a <code>ModuleDec</code>.
+     *
+     * @return A map containing the original argument dec and the newly created variable expression.
+     */
+    private Map<Dec, Exp> createModuleFormalArgExpList(
+            List<ModuleParameterDec> formalParams) {
+        Map<Dec, Exp> retExpMap = new HashMap<Dec, Exp>();
+
+        // Create a variable expression for each of the module arguments
+        // and put it in our map.
+        for (ModuleParameterDec dec : formalParams) {
+            Dec wrappedDec = dec.getWrappedDec();
+
+            // Only do this for constant parameter declarations
+            // We don't really care about type declarations or definitions.
+            Exp newExp;
+            if (wrappedDec instanceof ConstantParamDec) {
+                newExp =
+                        Utilities.createVarExp(wrappedDec.getLocation(), null,
+                                wrappedDec.getName(), wrappedDec.getMathType(),
+                                null);
+            }
+            else {
+                newExp = null;
+            }
+
+            // Store the result
+            retExpMap.put(wrappedDec, newExp);
+        }
+
+        return retExpMap;
+    }
+
+    /**
+     * <p>Creates the name of the output file.</p>
+     *
+     * @return Name of the file
+     */
+    private String createVCFileName() {
+        File file = myInstanceEnvironment.getTargetFile();
+        ModuleID cid = myInstanceEnvironment.getModuleID(file);
+        file = myInstanceEnvironment.getFile(cid);
+        String filename = file.toString();
+        int temp = filename.indexOf(".");
+        String tempfile = filename.substring(0, temp);
+        String mainFileName;
+
+        mainFileName = tempfile + ".asrt_new";
+
+        return mainFileName;
+    }
+
+    /**
+     * <p>This is a helper method that checks to see if the given assume expression
+     * can be used to prove our confirm expression. This is done by finding the
+     * intersection between the set of symbols in the assume expression and
+     * the set of symbols in the confirm expression.</p>
      *
      * <p>If the assume expressions are part of a stipulate assume clause,
      * then we keep all the assume expressions no matter what.</p>
@@ -1018,25 +1077,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         return retExp;
-    }
-
-    /**
-     * <p>Creates the name of the output file.</p>
-     *
-     * @return Name of the file
-     */
-    private String createVCFileName() {
-        File file = myInstanceEnvironment.getTargetFile();
-        ModuleID cid = myInstanceEnvironment.getModuleID(file);
-        file = myInstanceEnvironment.getFile(cid);
-        String filename = file.toString();
-        int temp = filename.indexOf(".");
-        String tempfile = filename.substring(0, temp);
-        String mainFileName;
-
-        mainFileName = tempfile + ".asrt_new";
-
-        return mainFileName;
     }
 
     /**
@@ -2918,6 +2958,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                             .getModuleScope(
                                     new ModuleIdentifier(dec.getConceptName()
                                             .getName())).getDefiningElement();
+
+            // Convert the module arguments into mathematical expressions
+            // Note that we could potentially have a nested function call
+            // as one of the arguments, therefore we pass in the assertive
+            // code to store the confirm statement generated from all the
+            // requires clauses.
+            Map<Dec, Exp> conceptFormalArgMap =
+                    createModuleFormalArgExpList(facConceptDec.getParameters());
+            System.out.println(conceptFormalArgMap);
 
             // Concept requires clause
             Exp conceptReq =
