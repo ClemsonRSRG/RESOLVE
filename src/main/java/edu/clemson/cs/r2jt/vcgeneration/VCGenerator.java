@@ -2883,16 +2883,33 @@ public class VCGenerator extends TreeWalkerVisitor {
         AssertiveCode assertiveCode =
                 new AssertiveCode(myInstanceEnvironment, dec);
 
-        // Location for the assume clauses
+        // Location for the current facility dec
         Location decLoc = dec.getLocation();
 
         // Add the global constraints as given
-        assertiveCode.addAssume((Location) decLoc.clone(),
-                myGlobalConstraintExp, false);
+        Location gConstraintLoc;
+        if (myGlobalConstraintExp.getLocation() != null) {
+            gConstraintLoc =
+                    (Location) myGlobalConstraintExp.getLocation().clone();
+        }
+        else {
+            gConstraintLoc = (Location) decLoc.clone();
+        }
+        gConstraintLoc.setDetails("Global Constraints from "
+                + myCurrentModuleScope.getModuleIdentifier());
+        assertiveCode.addAssume(gConstraintLoc, myGlobalConstraintExp, false);
 
         // Add the global require clause as given
-        assertiveCode.addAssume((Location) decLoc.clone(), myGlobalRequiresExp,
-                false);
+        Location gRequiresLoc;
+        if (myGlobalRequiresExp.getLocation() != null) {
+            gRequiresLoc = (Location) myGlobalRequiresExp.getLocation().clone();
+        }
+        else {
+            gRequiresLoc = (Location) decLoc.clone();
+        }
+        gRequiresLoc.setDetails("Global Requires Clause from "
+                + myCurrentModuleScope.getModuleIdentifier());
+        assertiveCode.addAssume(gRequiresLoc, myGlobalRequiresExp, false);
 
         /**
         // TODO: Loop through every enhancement/enhancement realization declaration, if any.
