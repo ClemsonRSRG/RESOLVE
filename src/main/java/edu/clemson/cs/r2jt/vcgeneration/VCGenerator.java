@@ -2721,8 +2721,17 @@ public class VCGenerator extends TreeWalkerVisitor {
         Location decLoc = dec.getLocation();
 
         // Add the global constraints as given
-        assertiveCode.addAssume((Location) decLoc.clone(),
-                myGlobalConstraintExp, false);
+        Location constraintLoc;
+        if (myGlobalConstraintExp.getLocation() != null) {
+            constraintLoc =
+                    (Location) myGlobalConstraintExp.getLocation().clone();
+        }
+        else {
+            constraintLoc = (Location) decLoc.clone();
+        }
+        constraintLoc.setDetails("Global Constraints from "
+                + myCurrentModuleScope.getModuleIdentifier());
+        assertiveCode.addAssume(constraintLoc, myGlobalConstraintExp, false);
 
         // Add the global require clause as given
         assertiveCode.addAssume((Location) decLoc.clone(), myGlobalRequiresExp,
