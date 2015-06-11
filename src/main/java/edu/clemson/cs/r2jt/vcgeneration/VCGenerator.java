@@ -30,6 +30,8 @@ import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.vcgeneration.treewalkers.NestedFuncWalker;
+import sun.security.pkcs11.Secmod;
+
 import java.io.File;
 import java.util.*;
 import java.util.List;
@@ -710,6 +712,77 @@ public class VCGenerator extends TreeWalkerVisitor {
                     .getLocation(), null, v.getName(), v.getTy()
                     .getMathTypeValue(), null));
         }
+    }
+
+    /**
+     * <p>Converts each actual programming expression into their mathematical
+     * counterparts. It is possible that the passed in programming expression
+     * contains nested function calls, therefore we will need to obtain all the
+     * requires clauses from the different calls and add it as a confirm statement
+     * in our current assertive code.</p>
+     *
+     * @param assertiveCode Current assertive code.
+     * @param actualParams The list of actual parameter arguments.
+     *
+     * @return A map containing the original argument item and the newly
+     * created mathematical expression.
+     */
+    private Map<ModuleArgumentItem, Exp> createModuleActualArgExpList(
+            AssertiveCode assertiveCode, List<ModuleArgumentItem> actualParams) {
+        Map<ModuleArgumentItem, Exp> retExpMap =
+                new HashMap<ModuleArgumentItem, Exp>();
+
+        for (ModuleArgumentItem item : actualParams) {
+            // Obtain the math type for the module argument item
+            MTType type;
+            if (item.getProgramTypeValue() != null) {
+                type = item.getProgramTypeValue().toMath();
+            }
+            else {
+                type = item.getMathType();
+            }
+
+            // Convert the module argument items into math expressions
+            Exp expToUse;
+            if (item.getName() != null) {
+                expToUse =
+                        Utilities.createVarExp(item.getLocation(), item
+                                .getQualifier(), item.getName(), type, null);
+            }
+            else {
+                // Check for nested function calls in ProgramDotExp
+                // and ProgramParamExp.
+                ProgramExp p = item.getEvalExp();
+                if (p instanceof ProgramDotExp || p instanceof ProgramParamExp) {
+                    NestedFuncWalker nfw =
+                            new NestedFuncWalker(null, null, mySymbolTable,
+                                    myCurrentModuleScope, assertiveCode);
+                    TreeWalker tw = new TreeWalker(nfw);
+                    tw.visit(p);
+
+                    // Add the requires clause as something we need to confirm
+                    Exp pRequires = nfw.getRequiresClause();
+                    if (!pRequires.isLiteralTrue()) {
+                        assertiveCode.addConfirm(pRequires.getLocation(),
+                                pRequires, false);
+                    }
+
+                    // Use the modified ensures clause as the new expression we want
+                    // to replace.
+                    expToUse = nfw.getEnsuresClause();
+                }
+                // For all other types of arguments, simply convert it to a
+                // math expression.
+                else {
+                    expToUse = Utilities.convertExp(p);
+                }
+            }
+
+            // Add this to our return map
+            retExpMap.put(item, expToUse);
+        }
+
+        return retExpMap;
     }
 
     /**
@@ -2967,6 +3040,10 @@ public class VCGenerator extends TreeWalkerVisitor {
             Map<Dec, Exp> conceptFormalArgMap =
                     createModuleFormalArgExpList(facConceptDec.getParameters());
             System.out.println(conceptFormalArgMap);
+            Map<ModuleArgumentItem, Exp> conceptActualArgMap =
+                    createModuleActualArgExpList(assertiveCode, dec
+                            .getConceptParams());
+            System.out.println(conceptActualArgMap);
 
             // Concept requires clause
             Exp conceptReq =
