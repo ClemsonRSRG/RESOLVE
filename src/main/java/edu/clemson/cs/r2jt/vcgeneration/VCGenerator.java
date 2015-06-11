@@ -2911,6 +2911,32 @@ public class VCGenerator extends TreeWalkerVisitor {
                 + myCurrentModuleScope.getModuleIdentifier());
         assertiveCode.addAssume(gRequiresLoc, myGlobalRequiresExp, false);
 
+        try {
+            // Obtain the concept module for the facility
+            ConceptModuleDec facConceptDec =
+                    (ConceptModuleDec) mySymbolTable
+                            .getModuleScope(
+                                    new ModuleIdentifier(dec.getConceptName()
+                                            .getName())).getDefiningElement();
+
+            // Concept requires clause
+            Exp conceptReq =
+                    getRequiresClause(facConceptDec.getLocation(),
+                            facConceptDec);
+            Location conceptReqLoc =
+                    (Location) dec.getConceptName().getLocation().clone();
+            conceptReqLoc.setDetails("Requires Clause for Concept "
+                    + facConceptDec.getName().getName()
+                    + " in Facility Instantiation Rule");
+            conceptReq.setLocation(conceptReqLoc);
+
+            // Set this as our final confirm statement for this assertive code
+            assertiveCode.setFinalConfirm(conceptReq, false);
+        }
+        catch (NoSuchSymbolException e) {
+            Utilities.noSuchModule(dec.getLocation());
+        }
+
         /**
         // TODO: Loop through every enhancement/enhancement realization declaration, if any.
 
