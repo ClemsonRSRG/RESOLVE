@@ -2885,6 +2885,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         assertiveCode.addAssume((Location) decLoc.clone(), myGlobalRequiresExp,
                 false);
 
+        /**
         // TODO: Loop through every enhancement/enhancement realization declaration, if any.
 
         // Obtain the concept module for the facility
@@ -3063,7 +3064,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         catch (NoSuchSymbolException e) {
             Utilities.noSuchModule(dec.getLocation());
-        }
+        }*/
 
         // Add this new assertive code to our incomplete assertive code stack
         myIncAssertiveCodeStack.push(assertiveCode);
