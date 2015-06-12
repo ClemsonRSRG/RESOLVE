@@ -60,7 +60,7 @@ public class VerificationConditionCongruenceClosureImpl {
         forAllQuantifiedPExps = new ArrayList<PExp>();
         addPExp(m_antecedent.iterator(), true);
         addPExp(m_consequent.iterator(), false);
-        makeNumsN();
+        //makeNumsN();
 
     }
 
@@ -80,17 +80,6 @@ public class VerificationConditionCongruenceClosureImpl {
                     }
 
                 }
-            }
-        }
-    }
-
-    protected void makeNZ() {
-        if (m_registry.m_typeDictionary.containsKey("N")) {
-            MTType natType = m_registry.m_typeDictionary.get("N");
-            Set<String> natSymbols = m_registry.getSetMatchingType(natType);
-
-            for (String s : natSymbols) {
-                m_conjunction.natToZ(s);
             }
         }
     }
@@ -129,22 +118,22 @@ public class VerificationConditionCongruenceClosureImpl {
         return rMap;
     }
 
+    // updated for multiple pairs of goals (any match -- goals or'd)
     public STATUS isProved() {
         if (m_conjunction.m_evaluates_to_false)
             return STATUS.FALSE_ASSUMPTION; // this doesn't mean P->Q = False, it just means P = false
-        String goal1 = m_goal.get(0);
-        String goal2 = m_goal.get(1);
-        // check each goal has same root
-        if (!goal1.equals(goal2)) // diff symbols, same root?
-        {
-            if (m_registry.getIndexForSymbol(goal1) != m_registry
-                    .getIndexForSymbol(goal2)) // can avoid this check by updating goal on merges
+        for(int i = 0; i < m_goal.size(); i += 2) {
+            String goal1 = m_goal.get(i);
+            String goal2 = m_goal.get(i+1);
+            int g1 = m_registry.getIndexForSymbol(goal1);
+            int g2 = m_registry.getIndexForSymbol(goal2);
+            // check each goal has same root
+            if (g1==g2)
             {
-                return STATUS.STILL_EVALUATING; // not proved yet
+                return STATUS.PROVED;
             }
         }
-
-        return STATUS.PROVED;
+        return STATUS.STILL_EVALUATING;
     }
 
     private void addPExp(Iterator<PExp> pit, boolean inAntecedent) {

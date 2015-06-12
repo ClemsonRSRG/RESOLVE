@@ -65,26 +65,12 @@ public class Registry {
 
     }
 
-    protected void makeZ(String symbol) {
-        MTType tN = m_typeDictionary.get("N");
-        MTType tZ = m_typeDictionary.get("Z");
-        if (tN == null || tZ == null)
-            return;
-        int sIdx = m_symbolToIndex.get(symbol);
-        if (sIdx < 0)
-            return;
-        Set<String> nSet = m_typeToSetOfOperators.get(tN);
-        nSet.remove(symbol);
-        m_typeToSetOfOperators.get(tZ).add(symbol);
-        m_indexToType.set(sIdx, tZ);
-
-    }
-
     public Usage getUsage(String symbol) {
         return m_symbolToUsage.get(symbol);
     }
 
     public Set<String> getSetMatchingType(MTType t) {
+        assert t != null : "request for null type";
         Set<String> rSet = new HashSet<String>();
         Set<MTType> allTypesInSet = m_typeToSetOfOperators.keySet();
         assert !m_typeToSetOfOperators.isEmpty() : "empty m_typeToSetOfOperator.keySet()";
@@ -96,10 +82,23 @@ public class Registry {
                 rSet.addAll(m_typeToSetOfOperators.get(m));
             }
         }
-        rSet.addAll(m_typeToSetOfOperators.get(t));
+        if(m_typeToSetOfOperators.get(t)!=null)
+            rSet.addAll(m_typeToSetOfOperators.get(t));
+
         return rSet;
     }
 
+    public Set<String> getParentsByType(MTType t){
+        Set<String> rSet = getSetMatchingType(t);
+        Set<String> fSet = new HashSet<String>();
+        for(String s : rSet){
+            int id = getIndexForSymbol(s);
+            if(m_symbolIndexParentArray.get(id)== id){
+                fSet.add(s);
+            }
+        }
+        return fSet;
+    }
     /**
      *
      * @param opIndexA index that becomes parent of B

@@ -37,38 +37,58 @@ public class TheoremCongruenceClosureImpl {
     private final TypeGraph m_typeGraph;
     protected boolean m_unneeded = false;
     private Set<String> m_function_names;
+    private boolean partMatchedisConstantEquation = false;
 
     // TODO: exclude statements with dummy variables not in matching component, or do another search/match with result
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp p) {
         m_typeGraph = g;
         m_theorem = p;
         m_theoremString = p.toString();
+        if(m_theoremString.contains("nf")){
+            int bp = 0;
+        }
         isEquality = p.getTopLevelOperation().equals("=");
         m_theoremRegistry = new Registry(g);
         m_matchConj =
                 new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry);
 
-        if (isEquality) {
+        if (isEquality) { // no longer used (goes to another constructor)
             m_matchConj.addFormula(p.getSubExpressions().get(0));
             m_insertExpr = p;
         }
         else if (p.getTopLevelOperation().equals("implies")) {
-            m_matchConj.addExpression(p.getSubExpressions().get(0));
+            PExp matchingpart = p.getSubExpressions().get(0);
+            m_matchConj.addExpression(matchingpart);
             m_insertExpr = p.getSubExpressions().get(1);
+            if(matchingpart.getTopLevelOperation().equals("=")){
+                if(matchingpart.getSubExpressions().get(0).getSubExpressions().size() == 0 &&
+                matchingpart.getSubExpressions().get(1).getSubExpressions().size() == 0){
+                    partMatchedisConstantEquation = true;
+                }
+            } //
         }
         else {
+            if(p.getQuantifiedVariables().size() == 1){
+                // empty matchConj will trigger find by type
+                m_matchConj.addFormula(p); // this adds symbols to reg
+                m_matchConj.clear(); // will match based on types
+                m_insertExpr = p;
+            }
+            else {
             /* experimental
             
             Is_Permutation((S o T), (T o S)) for example,
             should go into matchConj as itself, but equal to a boolean variable.
             .
              */
-            m_matchConj.addFormula(p);
-            m_insertExpr = p; // this will add "= true"
+                m_matchConj.addFormula(p);
+                m_insertExpr = p; // this will add "= true"
+            }
         }
 
     }
 
+    // for theorems that are equations
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp toMatchAndBind,
             PExp toInsert, boolean enterToMatchAndBindAsEquivalentToTrue) {
         m_typeGraph = g;
@@ -186,22 +206,40 @@ public class TheoremCongruenceClosureImpl {
 
         // Case where no match conj. is produced.
         // Example: S = Empty_String. Relevant info is only in registry.
-        if (m_matchConj.size() == 0) {
-            HashMap<String, String> wildToActual =
-                    new HashMap<String, String>();
-            for (String wild : m_theoremRegistry.getForAlls()) {
-                // go through parent array to get value for wildcard
-                String actual =
-                        m_theoremRegistry.getSymbolForIndex(m_theoremRegistry
-                                .getIndexForSymbol(wild));
-                if (actual.equals(wild)
-                        || m_theoremRegistry.getForAlls().contains(actual))
-                    return null;
-                wildToActual.put(wild, actual);
-            }
-            allValidBindings.push(wildToActual);
-            return allValidBindings;
 
+        if (m_matchConj.size() == 0) {
+            // x = constant?
+            if(partMatchedisConstantEquation){
+                HashMap<String, String> wildToActual =
+                        new HashMap<String, String>();
+                for (String wild : m_theoremRegistry.getForAlls()) {
+                    // go through parent array to get value for wildcard
+                    String actual =
+                            m_theoremRegistry.getSymbolForIndex(m_theoremRegistry
+                                    .getIndexForSymbol(wild));
+                    if (actual.equals(wild)
+                            || m_theoremRegistry.getForAlls().contains(actual))
+                        return null;
+                    wildToActual.put(wild, actual);
+                }
+                allValidBindings.push(wildToActual);
+                return allValidBindings;
+
+            }
+            // only valid for preds other than equality
+            Set<String>  foralls = m_theoremRegistry.getForAlls();
+            if(foralls.size()!=1) return null;
+            String wild = foralls.iterator().next();
+            MTType t = m_theoremRegistry.getTypeByIndex(m_theoremRegistry.getIndexForSymbol(wild));
+
+            for (String actual : vc.getRegistry().getParentsByType(t)) {
+                HashMap<String, String> wildToActual =
+                        new HashMap<String, String>();
+                wildToActual.put(wild, actual);
+                if(!wild.equals(actual)) // can be = with constants in theorems
+                    allValidBindings.push(wildToActual);
+            }
+            return allValidBindings;
         }
         boolean extraOutput = false;
         /*if(m_theoremString.contains("narg")

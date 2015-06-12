@@ -35,10 +35,7 @@ public class TheoremEntry extends SymbolTableEntry {
     public TheoremEntry(TypeGraph g, String name,
             MathAssertionDec definingElement, ModuleIdentifier sourceModule) {
         super(name, definingElement, sourceModule);
-        if (g == null) {
-            int bp = 0;
-        }
-        myAssertionAsPExp = PExp.buildPExp(g, definingElement.getAssertion());
+        myAssertionAsPExp = PExp.buildPExp(definingElement.getAssertion());
 
         myMathSymbolAlterEgo =
                 new MathSymbolEntry(g, name, Quantification.NONE,
