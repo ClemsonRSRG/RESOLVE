@@ -480,7 +480,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
             // All other types of expressions
             else {
                 // Convert the pExp into a something we can use
-                repl = Utilities.convertExp(pExp);
+                repl = Utilities.convertExp(pExp, myCurrentModuleScope);
             }
 
             // Case #1: ProgramIntegerExp
@@ -489,7 +489,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
             if (pExp instanceof ProgramIntegerExp
                     || pExp instanceof ProgramCharExp
                     || pExp instanceof ProgramStringExp) {
-                Exp convertExp = Utilities.convertExp(pExp);
+                Exp convertExp =
+                        Utilities.convertExp(pExp, myCurrentModuleScope);
                 if (pExp instanceof ProgramIntegerExp) {
                     replName =
                             Integer.toString(((IntegerExp) convertExp)
@@ -775,7 +776,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
             // All other types of expressions
             else {
                 // Convert the pExp into a something we can use
-                repl = Utilities.convertExp(pExp);
+                repl = Utilities.convertExp(pExp, myCurrentModuleScope);
             }
 
             // New VarExp

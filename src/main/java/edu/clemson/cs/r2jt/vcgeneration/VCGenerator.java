@@ -1862,7 +1862,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             oldExp.setMathTypeValue(exp.getMathTypeValue());
 
             // Convert the pExp into a something we can use
-            Exp repl = Utilities.convertExp(exp);
+            Exp repl = Utilities.convertExp(exp, myCurrentModuleScope);
             Exp undqRep = null, quesRep = null;
             OldExp oSpecVar, oRealVar;
             String replName = null;
@@ -1873,7 +1873,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             if (exp instanceof ProgramIntegerExp
                     || exp instanceof ProgramCharExp
                     || exp instanceof ProgramStringExp) {
-                Exp convertExp = Utilities.convertExp(exp);
+                Exp convertExp =
+                        Utilities.convertExp(exp, myCurrentModuleScope);
                 if (exp instanceof ProgramIntegerExp) {
                     replName =
                             Integer.toString(((IntegerExp) convertExp)
@@ -2125,7 +2126,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp exp = argList.get(i);
 
             // Convert the pExp into a something we can use
-            Exp repl = Utilities.convertExp(exp);
+            Exp repl = Utilities.convertExp(exp, myCurrentModuleScope);
 
             // VarExp form of the parameter variable
             VarExp oldExp =
@@ -2886,8 +2887,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                         Exp actualExp;
                         if (conceptParams.get(i).getEvalExp() != null) {
                             actualExp =
-                                    Utilities.convertExp(conceptParams.get(i)
-                                            .getEvalExp());
+                                    Utilities
+                                            .convertExp(conceptParams.get(i)
+                                                    .getEvalExp(),
+                                                    myCurrentModuleScope);
                         }
                         else {
                             actualExp = Exp.copy(varDecExp);
@@ -2983,7 +2986,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (assignExp instanceof ProgramIntegerExp
                 || assignExp instanceof ProgramCharExp
                 || assignExp instanceof ProgramStringExp) {
-            Exp replaceExp = Utilities.convertExp(assignExp);
+            Exp replaceExp =
+                    Utilities.convertExp(assignExp, myCurrentModuleScope);
 
             // Replace all instances of the left hand side
             // variable in the current final confirm statement.
@@ -3297,7 +3301,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                                 Exp finalExpDur =
                                         Utilities.createFinalizAnyDurExp(stmt
-                                                .getVar(), myTypeGraph.R);
+                                                .getVar(), myTypeGraph.R,
+                                                myCurrentModuleScope);
                                 sumEvalDur =
                                         new InfixExp((Location) loc.clone(),
                                                 sumEvalDur, Utilities
@@ -4170,8 +4175,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         VariableExp stmtRight = (VariableExp) Exp.copy(stmt.getRight());
 
         // New left and right
-        Exp newLeft = Utilities.convertExp(stmtLeft);
-        Exp newRight = Utilities.convertExp(stmtRight);
+        Exp newLeft = Utilities.convertExp(stmtLeft, myCurrentModuleScope);
+        Exp newRight = Utilities.convertExp(stmtRight, myCurrentModuleScope);
 
         // Use our final confirm to obtain the math types
         List lst = conf.getSubExpressions();
