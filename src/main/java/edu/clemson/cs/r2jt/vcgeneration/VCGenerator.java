@@ -856,9 +856,22 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                     // Check if both the left and right are replaceable
                     if (isLeftReplaceable && isRightReplaceable) {
-                        // Don't do any substitutions, we don't know
-                        // which makes sense in the current context.
-                        tmp = currentConfirmExp;
+                        // Only check for verification variable on the left
+                        // hand side. If that is the case, we know the
+                        // right hand side is the only one that makes sense
+                        // in the current context, therefore we do the
+                        // substitution.
+                        if (hasVerificationVar) {
+                            tmp =
+                                    Utilities.replace(currentConfirmExp,
+                                            equalsExp.getLeft(), equalsExp
+                                                    .getRight());
+                        }
+                        else {
+                            // Don't do any substitutions, we don't know
+                            // which makes sense in the current context.
+                            tmp = currentConfirmExp;
+                        }
                     }
                     // Check if left hand side is replaceable
                     else if (isLeftReplaceable) {
