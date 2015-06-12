@@ -866,6 +866,34 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     Utilities.replace(currentConfirmExp,
                                             equalsExp.getLeft(), equalsExp
                                                     .getRight());
+
+                            // Check to see if something has been replaced
+                            if (!tmp.equals(currentConfirmExp)) {
+                                // Replace all instances of the left side in
+                                // the assume expressions we have already processed.
+                                for (int k = 0; k < remAssumeExpList.size(); k++) {
+                                    Exp newAssumeExp =
+                                            Utilities.replace(remAssumeExpList
+                                                    .get(k), equalsExp
+                                                    .getLeft(), equalsExp
+                                                    .getRight());
+                                    remAssumeExpList.set(k, newAssumeExp);
+                                }
+
+                                // Replace all instances of the left side in
+                                // the assume expressions we haven't processed.
+                                for (int k = j + 1; k < assumeExpCopyList
+                                        .size(); k++) {
+                                    Exp newAssumeExp =
+                                            Utilities.replace(assumeExpCopyList
+                                                    .get(k), equalsExp
+                                                    .getLeft(), equalsExp
+                                                    .getRight());
+                                    assumeExpCopyList.set(k, newAssumeExp);
+                                }
+
+                                doneReplacement = true;
+                            }
                         }
                         else {
                             // Don't do any substitutions, we don't know
