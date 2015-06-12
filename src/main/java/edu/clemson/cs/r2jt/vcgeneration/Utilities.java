@@ -130,17 +130,32 @@ public class Utilities {
      * ones used by the VC Generator.</p>
      *
      * @param oldExp The expression to be converted.
+     * @param scope The module scope to start our search.
      *
      * @return An <code>Exp</code>.
      */
-    public static Exp convertExp(Exp oldExp) {
+    public static Exp convertExp(Exp oldExp, ModuleScope scope) {
         Exp retExp;
 
         // Case #1: ProgramIntegerExp
         if (oldExp instanceof ProgramIntegerExp) {
             IntegerExp exp = new IntegerExp();
             exp.setValue(((ProgramIntegerExp) oldExp).getValue());
-            exp.setMathType(oldExp.getMathType());
+
+            // At this point all programming integer expressions
+            // should be greater than or equals to 0. Negative
+            // numbers should have called the corresponding operation
+            // to convert it to a negative number. Therefore, we
+            // need to locate the type "N" (Natural Number)
+            MathSymbolEntry mse =
+                    searchMathSymbol(exp.getLocation(), "N", scope);
+            try {
+                exp.setMathType(mse.getTypeValue());
+            }
+            catch (SymbolNotOfKindTypeException e) {
+                notAType(mse, exp.getLocation());
+            }
+
             retExp = exp;
         }
         // Case #2: ProgramCharacterExp
@@ -329,14 +344,15 @@ public class Utilities {
      *
      * @param varExp A Variable Expression.
      * @param realType Mathematical real type.
+     * @param scope The module scope to start our search.
      *
      * @return The created <code>FunctionExp</code>.
      */
     public static FunctionExp createFinalizAnyDurExp(VariableExp varExp,
-            MTType realType) {
+            MTType realType, ModuleScope scope) {
         if (varExp.getProgramType() instanceof PTFamily) {
             PTFamily type = (PTFamily) varExp.getProgramType();
-            Exp param = convertExp(varExp);
+            Exp param = convertExp(varExp, scope);
             VarExp param1 =
                     createVarExp(varExp.getLocation(), null,
                             createPosSymbol(type.getName()), varExp
