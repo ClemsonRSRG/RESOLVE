@@ -844,6 +844,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                             Utilities.containsReplaceableExp(equalsExp
                                     .getRight());
 
+                    // Check to see if we have P_val or Cum_Dur
+                    if (equalsExp.getLeft() instanceof VarExp) {
+                        if (((VarExp) equalsExp.getLeft()).getName().getName()
+                                .matches("\\?*P_val")
+                                || ((VarExp) equalsExp.getLeft()).getName()
+                                        .getName().matches("\\?*Cum_Dur")) {
+                            hasVerificationVar = true;
+                        }
+                    }
+
                     // Check if both the left and right are replaceable
                     if (isLeftReplaceable && isRightReplaceable) {
                         // Don't do any substitutions, we don't know
@@ -852,16 +862,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
                     // Check if left hand side is replaceable
                     else if (isLeftReplaceable) {
-                        // Check to see if we have P_val or Cum_Dur
-                        if (equalsExp.getLeft() instanceof VarExp) {
-                            if (((VarExp) equalsExp.getLeft()).getName()
-                                    .getName().matches("\\?*P_val")
-                                    || ((VarExp) equalsExp.getLeft()).getName()
-                                            .getName().matches("\\?*Cum_Dur")) {
-                                hasVerificationVar = true;
-                            }
-                        }
-
                         // Create a temp expression where left is replaced with the right
                         tmp =
                                 Utilities.replace(currentConfirmExp, equalsExp
