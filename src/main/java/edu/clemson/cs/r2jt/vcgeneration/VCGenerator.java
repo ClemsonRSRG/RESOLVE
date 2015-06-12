@@ -828,7 +828,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Loop through each assume expression
             for (int j = 0; j < assumeExpCopyList.size(); j++) {
-                Exp currentAssumeExp = assumeExpCopyList.get(i);
+                Exp currentAssumeExp = assumeExpCopyList.get(j);
                 Exp tmp;
                 boolean hasVerificationVar = false;
                 boolean doneReplacement = false;
@@ -881,7 +881,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                             // Replace all instances of the left side in
                             // the assume expressions we haven't processed.
-                            for (int k = i + 1; k < assumeExpCopyList.size(); k++) {
+                            for (int k = j + 1; k < assumeExpCopyList.size(); k++) {
                                 Exp newAssumeExp =
                                         Utilities.replace(assumeExpCopyList
                                                 .get(k), equalsExp.getLeft(),
@@ -913,7 +913,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                             // Replace all instances of the right side in
                             // the assume expressions we haven't processed.
-                            for (int k = i + 1; k < assumeExpCopyList.size(); k++) {
+                            for (int k = j + 1; k < assumeExpCopyList.size(); k++) {
                                 Exp newAssumeExp =
                                         Utilities.replace(assumeExpCopyList
                                                 .get(k), equalsExp.getRight(),
