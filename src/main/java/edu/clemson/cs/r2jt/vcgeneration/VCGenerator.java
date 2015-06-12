@@ -714,38 +714,78 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This is a helper method that checks to see if the given assume expression
-     * can be used to prove our confirm expression. This is done by finding the
-     * intersection between the set of symbols in the assume expression and
-     * the set of symbols in the confirm expression.</p>
+     * <p>This is a helper method that checks to see if each assume expression in
+     * the list can be used to prove our confirm expression.</p>
      *
-     * <p>If the intersection is not empty, then modify the confirm expression by
-     * forming an implies expression using the assume and confirm expressions.
-     * If it is empty, then it simply returns the confirm expression.</p>
+     * <p>If the assume expressions are part of a stipulate assume clause,
+     * then we keep all the assume expressions no matter what.</p>
      *
-     * @param assumeExp The current assume expression.
+     * <p>If it is not a stipulate assume clause, we loop though keep looping through
+     * all the assume expressions until we can't form another implies.</p>
+     *
      * @param confirmExp The current confirm expression.
+     * @param remAssumeExpList The list of remaining assume expressions.
      * @param isStipulate Whether or not the assume expression is an stipulate assume expression.
      *
      * @return The modified confirm expression.
      */
-    private Exp formImplies(Exp assumeExp, Exp confirmExp, boolean isStipulate) {
+    private Exp formImplies(Exp confirmExp, List<Exp> remAssumeExpList,
+            boolean isStipulate) {
         // If it is stipulate clause, keep it no matter what
         if (isStipulate) {
-            confirmExp =
-                    myTypeGraph.formImplies(Exp.copy(assumeExp), Exp
-                            .copy(confirmExp));
-        }
-        else {
-            // Create a new implies expression if there are common symbols
-            // in the assume and in the confirm. (Parsimonious step)
-            Set<String> intersection = Utilities.getSymbols(confirmExp);
-            intersection.retainAll(Utilities.getSymbols(assumeExp));
-
-            if (!intersection.isEmpty()) {
+            for (Exp assumeExp : remAssumeExpList) {
                 confirmExp =
                         myTypeGraph.formImplies(Exp.copy(assumeExp), Exp
                                 .copy(confirmExp));
+            }
+        }
+        else {
+            boolean checkList = false;
+            if (remAssumeExpList.size() > 0) {
+                checkList = true;
+            }
+
+            // Loop until we no longer add more expressions or we have added all
+            // expressions in the remaining assume expression list.
+            while (checkList) {
+                List<Exp> tmpExpList = new ArrayList<Exp>();
+                boolean formedImplies = false;
+
+                for (Exp assumeExp : remAssumeExpList) {
+                    // Create a new implies expression if there are common symbols
+                    // in the assume and in the confirm. (Parsimonious step)
+                    Set<String> intersection = Utilities.getSymbols(confirmExp);
+                    intersection.retainAll(Utilities.getSymbols(assumeExp));
+
+                    if (!intersection.isEmpty()) {
+                        confirmExp =
+                                myTypeGraph.formImplies(Exp.copy(assumeExp),
+                                        Exp.copy(confirmExp));
+                        formedImplies = true;
+                    }
+                    else {
+                        tmpExpList.add(assumeExp);
+                    }
+                }
+
+                remAssumeExpList = tmpExpList;
+                if (remAssumeExpList.size() > 0) {
+                    // Check to see if we formed an implication
+                    if (formedImplies) {
+                        // Loop again to see if we can form any more implications
+                        checkList = true;
+                    }
+                    else {
+                        // If no implications are formed, then none of the remaining
+                        // expressions will be helpful.
+                        checkList = false;
+                    }
+                }
+                else {
+                    // Since we are done with all asusme expressions, we can quit
+                    // out of the loop.
+                    checkList = false;
+                }
             }
         }
 
@@ -770,13 +810,25 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private Exp formParsimoniousVC(List<Exp> confirmExpList,
             List<Exp> assumeExpList, boolean isStipulate) {
-        // Loop through each assume expression
-        for (int i = 0; i < assumeExpList.size(); i++) {
-            Exp currentAssumeExp = assumeExpList.get(i);
+        // Loop through each confirm expression
+        for (int i = 0; i < confirmExpList.size(); i++) {
+            Exp currentConfirmExp = confirmExpList.get(i);
 
-            // Loop through each confirm expression
-            for (int j = 0; j < confirmExpList.size(); j++) {
-                Exp currentConfirmExp = confirmExpList.get(j);
+            // Make a deep copy of the assume expression list
+            List<Exp> assumeExpCopyList = new ArrayList<Exp>();
+            for (Exp assumeExp : assumeExpList) {
+                assumeExpCopyList.add(Exp.copy(assumeExp));
+            }
+
+            // Stores the remaining assume expressions
+            // we have not substituted. Note that if the expression
+            // is part of a stipulate assume statement, we keep
+            // the assume no matter what.
+            List<Exp> remAssumeExpList = new ArrayList<Exp>();
+
+            // Loop through each assume expression
+            for (int j = 0; j < assumeExpCopyList.size(); j++) {
+                Exp currentAssumeExp = assumeExpCopyList.get(i);
                 Exp tmp;
                 boolean hasVerificationVar = false;
                 boolean doneReplacement = false;
@@ -815,15 +867,26 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 Utilities.replace(currentConfirmExp, equalsExp
                                         .getLeft(), equalsExp.getRight());
 
-                        // If nothing got replaced
+                        // Check to see if something has been replaced
                         if (!tmp.equals(currentConfirmExp)) {
-                            // Replace all instances of the left side in the rest of the assume statements
-                            for (int k = i + 1; k < assumeExpList.size(); k++) {
+                            // Replace all instances of the left side in
+                            // the assume expressions we have already processed.
+                            for (int k = 0; k < remAssumeExpList.size(); k++) {
                                 Exp newAssumeExp =
-                                        Utilities.replace(assumeExpList.get(k),
-                                                equalsExp.getLeft(), equalsExp
-                                                        .getRight());
-                                assumeExpList.set(k, newAssumeExp);
+                                        Utilities.replace(remAssumeExpList
+                                                .get(k), equalsExp.getLeft(),
+                                                equalsExp.getRight());
+                                remAssumeExpList.set(k, newAssumeExp);
+                            }
+
+                            // Replace all instances of the left side in
+                            // the assume expressions we haven't processed.
+                            for (int k = i + 1; k < assumeExpCopyList.size(); k++) {
+                                Exp newAssumeExp =
+                                        Utilities.replace(assumeExpCopyList
+                                                .get(k), equalsExp.getLeft(),
+                                                equalsExp.getRight());
+                                assumeExpCopyList.set(k, newAssumeExp);
                             }
 
                             doneReplacement = true;
@@ -836,21 +899,32 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 Utilities.replace(currentConfirmExp, equalsExp
                                         .getRight(), equalsExp.getLeft());
 
-                        // If something got replaced, then we replace the rest of
-                        // the assume statements if possible.
+                        // Check to see if something has been replaced
                         if (!tmp.equals(currentConfirmExp)) {
-                            // Replace all instances of the right side in the rest of the assume statements
-                            for (int k = i + 1; k < assumeExpList.size(); k++) {
+                            // Replace all instances of the right side in
+                            // the assume expressions we have already processed.
+                            for (int k = 0; k < remAssumeExpList.size(); k++) {
                                 Exp newAssumeExp =
-                                        Utilities.replace(assumeExpList.get(k),
-                                                equalsExp.getRight(), equalsExp
-                                                        .getLeft());
-                                assumeExpList.set(k, newAssumeExp);
+                                        Utilities.replace(remAssumeExpList
+                                                .get(k), equalsExp.getRight(),
+                                                equalsExp.getLeft());
+                                remAssumeExpList.set(k, newAssumeExp);
+                            }
+
+                            // Replace all instances of the right side in
+                            // the assume expressions we haven't processed.
+                            for (int k = i + 1; k < assumeExpCopyList.size(); k++) {
+                                Exp newAssumeExp =
+                                        Utilities.replace(assumeExpCopyList
+                                                .get(k), equalsExp.getRight(),
+                                                equalsExp.getLeft());
+                                assumeExpCopyList.set(k, newAssumeExp);
                             }
 
                             doneReplacement = true;
                         }
                     }
+                    // Both sides are not replaceable
                     else {
                         tmp = currentConfirmExp;
                     }
@@ -859,36 +933,37 @@ public class VCGenerator extends TreeWalkerVisitor {
                     tmp = currentConfirmExp;
                 }
 
-                // Create a new implies expression if there are common symbols
-                // in the assume and in the confirm. (Parsimonious step)
-                Exp newConfirmExp;
+                // Check to see if this is a stipulate assume clause
+                // If yes, we keep a copy of the current
+                // assume expression.
                 if (isStipulate) {
-                    // Should always form the implies
-                    newConfirmExp =
-                            formImplies(currentAssumeExp, tmp, isStipulate);
+                    remAssumeExpList.add(Exp.copy(currentAssumeExp));
                 }
                 else {
-                    // Note: If did the replacement and it is not a stipulate
-                    // assume statement, we simply get rid of it.
+                    // Update the current confirm expression
+                    // if we did a replacement.
                     if (doneReplacement) {
-                        newConfirmExp = Exp.copy(tmp);
+                        currentConfirmExp = tmp;
                     }
                     else {
-                        // Ignore expressions that we couldn't replace
-                        // that has P_val or Cum_Dur as the left hand side.
+                        // Check to see if this a verification
+                        // variable. If yes, we don't keep this assume.
+                        // Otherwise, we need to store this for the
+                        // step that generates the parsimonious vcs.
                         if (!hasVerificationVar) {
-                            newConfirmExp =
-                                    formImplies(currentAssumeExp, tmp,
-                                            isStipulate);
-                        }
-                        else {
-                            newConfirmExp = Exp.copy(tmp);
+                            remAssumeExpList.add(Exp.copy(currentAssumeExp));
                         }
                     }
                 }
-
-                confirmExpList.set(j, newConfirmExp);
             }
+
+            // Use the remaining assume expression list
+            // Create a new implies expression if there are common symbols
+            // in the assume and in the confirm. (Parsimonious step)
+            Exp newConfirmExp =
+                    formImplies(currentConfirmExp, remAssumeExpList,
+                            isStipulate);
+            confirmExpList.set(i, newConfirmExp);
         }
 
         // Form the return confirm statement
