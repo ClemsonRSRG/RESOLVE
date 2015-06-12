@@ -772,7 +772,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // For all other types of arguments, simply convert it to a
                 // math expression.
                 else {
-                    expToUse = Utilities.convertExp(p);
+                    expToUse = Utilities.convertExp(p, myCurrentModuleScope);
                 }
             }
 
