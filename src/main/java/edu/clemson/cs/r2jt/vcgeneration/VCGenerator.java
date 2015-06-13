@@ -2975,6 +2975,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Set this as our final confirm statement for this assertive code
             assertiveCode.setFinalConfirm(conceptReq, false);
+
+            // TODO: Need to add module argument constraints here.
         }
         catch (NoSuchSymbolException e) {
             Utilities.noSuchModule(dec.getLocation());
