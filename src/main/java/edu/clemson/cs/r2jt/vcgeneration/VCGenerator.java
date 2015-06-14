@@ -2950,6 +2950,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     new ModuleIdentifier(dec.getConceptName()
                                             .getName())).getDefiningElement();
 
+            // TODO: Check to see if we can simply form equality expressions and add those as assumes
+
             // Convert the module arguments into mathematical expressions
             // Note that we could potentially have a nested function call
             // as one of the arguments, therefore we pass in the assertive
