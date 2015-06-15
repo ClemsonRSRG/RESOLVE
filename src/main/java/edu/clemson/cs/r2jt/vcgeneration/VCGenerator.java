@@ -2983,6 +2983,10 @@ public class VCGenerator extends TreeWalkerVisitor {
             // TODO: Need to see if the concept realization has anything we need to generate VCs
 
             // TODO: Loop through every enhancement/enhancement realization declaration, if any.
+            List<EnhancementItem> enhancementList = dec.getEnhancements();
+            for (EnhancementItem e : enhancementList) {
+                // Do something here.
+            }
         }
         catch (NoSuchSymbolException e) {
             Utilities.noSuchModule(dec.getLocation());
