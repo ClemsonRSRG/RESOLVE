@@ -2979,13 +2979,16 @@ public class VCGenerator extends TreeWalkerVisitor {
             assertiveCode.setFinalConfirm(conceptReq, false);
 
             // TODO: Need to add module argument constraints here.
+
+            // TODO: Need to see if the concept realization has anything we need to generate VCs
+
+            // TODO: Loop through every enhancement/enhancement realization declaration, if any.
         }
         catch (NoSuchSymbolException e) {
             Utilities.noSuchModule(dec.getLocation());
         }
 
         /**
-        // TODO: Loop through every enhancement/enhancement realization declaration, if any.
 
         // Obtain the concept module for the facility
         try {
