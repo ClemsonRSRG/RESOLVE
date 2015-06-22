@@ -763,7 +763,7 @@ public class PSymbol extends PExp {
             }
         }
         String combined = opString + " " + argsString;
-        if (!argsString.equals("")) {
+        if (argsString.length()!=0) {
             combined = "(" + combined + ")";
         }
         if (negate)

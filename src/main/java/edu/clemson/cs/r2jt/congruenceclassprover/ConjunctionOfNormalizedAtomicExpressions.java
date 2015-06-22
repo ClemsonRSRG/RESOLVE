@@ -15,6 +15,8 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.*;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import sun.plugin.dom.exception.NoModificationAllowedException;
+
 import java.util.*;
 
 /**
@@ -23,12 +25,13 @@ import java.util.*;
 public class ConjunctionOfNormalizedAtomicExpressions {
 
     private final Registry m_registry;
-    private final List<NormalizedAtomicExpressionMapImpl> m_exprList;
+    protected final List<NormalizedAtomicExpressionMapImpl> m_exprList;
     protected long m_timeToEnd = -1;
     private final List<NormalizedAtomicExpressionMapImpl> m_removedExprList;
     protected boolean m_evaluates_to_false = false;
     private int f_num = 0;
     private String m_current_justification = "";
+    protected Map<Integer, Set<NormalizedAtomicExpressionMapImpl>> m_useMap;
 
     /**
      * @param registry the Registry symbols contained in the conjunction will
@@ -38,34 +41,15 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         m_registry = registry;
         m_exprList = new LinkedList<NormalizedAtomicExpressionMapImpl>();
         m_removedExprList = new LinkedList<NormalizedAtomicExpressionMapImpl>();
+        m_useMap = new HashMap<Integer, Set<NormalizedAtomicExpressionMapImpl>>();
     }
 
     protected int size() {
         return m_exprList.size();
     }
 
-    protected void clear(){
+    protected void clear() {
         m_exprList.clear();
-    }
-    protected void findNAE(SearchBox box) {
-        NormalizedAtomicExpressionMapImpl translQuery = box.m_translated;
-        int lowerBound = Collections.binarySearch(m_exprList, translQuery);
-        // if it exists in the list...
-        if (lowerBound >= 0 && lowerBound < m_exprList.size()) {
-            box.lowerBound = lowerBound;
-            box.upperBound = lowerBound;
-            box.currentIndex = lowerBound;
-            box.directMatch = true;
-            return;
-        }
-        lowerBound = -lowerBound - 1;
-        NormalizedAtomicExpressionMapImpl ubExpr =
-                translQuery.incrementLastKnown();
-
-        box.upperBound = m_exprList.size() - 1;
-        box.lowerBound = lowerBound;
-        box.currentIndex = lowerBound;
-        box.directMatch = false;
     }
 
     protected NormalizedAtomicExpressionMapImpl getExprAtPosition(int position) {
@@ -210,7 +194,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         return addAtomicFormula(newExpr);
     }
-
 
     /**
      * @param atomicFormula one sided expression. (= new root) is appended and
@@ -436,7 +419,145 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return coincidentalMergeHoldingTank;
     }
 
+    protected void updateUseMap(){
+        m_useMap.clear();
+        for(NormalizedAtomicExpressionMapImpl e : m_exprList){
+            for(Integer k: e.getKeys()){
+                assert m_registry.findAndCompress(k) == k : "child symbol in conj";
+                if(m_useMap.containsKey(k))
+                    m_useMap.get(k).add(e);
+                else{
+                    HashSet<NormalizedAtomicExpressionMapImpl> nm = new HashSet<NormalizedAtomicExpressionMapImpl>();
+                    nm.add(e);
+                    m_useMap.put(k,nm);
+                }
+            }
+        }
+        // for debug
+        String s = "";
+        /*for(Integer k : m_useMap.keySet()){
+            s += m_registry.getSymbolForIndex(k) + "\n";
+            for(NormalizedAtomicExpressionMapImpl nm : m_useMap.get(k)){
+                s += nm.toHumanReadableString(m_registry) + "\n";
+            }
+            s += "\n";
+        }
+        System.err.println(s);
+        */
+    }
+
+    protected Set<java.util.Map<String,String>> getMatchesForOverideSet(NormalizedAtomicExpressionMapImpl expr,
+                                                           Registry exprReg, Set<Map<String,String>> foreignSymbolOverideSet){
+        Set<java.util.Map<String,String>> rSet = new HashSet<Map<String, String>>();
+        for(Map<String,String> fs_m: foreignSymbolOverideSet){
+            Set<java.util.Map<String,String>> results= getMatches(expr, exprReg, fs_m);
+            if(results!=null && results.size()!=0)
+                rSet.addAll(results);
+        }
+        return rSet;
+    }
+    // return map is expr Symbol -> this Symbol
+    // returns null if no match found;
+    // foreignSymbolOveride is expr Symbol -> this Symbol
+    protected Set<java.util.Map<String,String>> getMatches(NormalizedAtomicExpressionMapImpl expr,
+                                            Registry exprReg, Map<String,String> foreignSymbolOveride){
+
+        Set<NormalizedAtomicExpressionMapImpl> candidates = new HashSet<NormalizedAtomicExpressionMapImpl>();
+        boolean firstKey = true;
+        for(Integer k: expr.getKeys()){
+            String eSymb = exprReg.getSymbolForIndex(k);
+
+            // String equals not going to do the right thing even for empty strings
+            boolean isWild = foreignSymbolOveride.containsKey(eSymb) && foreignSymbolOveride.get(eSymb).length()==0;
+            if(isWild) continue; // if it is wild, no point in looking for it here, go to next key
+            if(foreignSymbolOveride.containsKey(eSymb))
+                eSymb = foreignSymbolOveride.get(eSymb);
+            // Early return for case where no possible match can occur
+            if(!m_registry.m_symbolToIndex.containsKey(eSymb)) {
+               return null;
+            }
+            // Either the symbol is a previously matched wildcard or it is a literal
+            int symbolInConj = m_registry.getIndexForSymbol(eSymb);
+            Set<NormalizedAtomicExpressionMapImpl> results = m_useMap.get(symbolInConj);
+            // early return for no matches.  Can have symbols in reg that are not used.
+            if(results == null || results.isEmpty())
+                return null;
+            // remove equations with non matching length
+            Set<NormalizedAtomicExpressionMapImpl> removalSet = new HashSet<NormalizedAtomicExpressionMapImpl>();
+            for(NormalizedAtomicExpressionMapImpl r_n : results){
+                if(r_n.numOperators()!= expr.numOperators()) {
+                    removalSet.add(r_n);
+                    //System.err.println(r_n.toHumanReadableString(m_registry) + "\n" + expr.toHumanReadableString(exprReg)+"\n" + eSymb + "\n");
+                }
+
+            }
+            results.removeAll(removalSet);
+            removalSet.clear();
+
+            // remove equations from the result set if they do not have the literal we just searched for where they occur
+            // in the search expression.  They may occur elsewhere, in which case they will be dealt with at another
+            // loop iteration (is another literal of the search expr in the same pos?) or in the binding phase.
+            // 0101 expPos
+            // 1111 r_n     Is OK
+            // 1011 r_n     Is NOT ok
+            int exprPositions = expr.readOperator(k); // this is the bit code, 1 if used, 0 if not
+            for(NormalizedAtomicExpressionMapImpl r_n : results){
+                int conjPos = r_n.readOperator(symbolInConj);
+                if((conjPos & exprPositions)!= exprPositions){
+                    removalSet.add(r_n);
+                }
+            }
+            results.removeAll(removalSet);
+            if(firstKey)
+                candidates = results;
+            else{
+                // candidates = candidates intersect results
+                candidates.retainAll(results);
+            }
+            firstKey = false;
+        }
+        // early return for case where no result due to non matching literal positions
+        if(candidates.isEmpty()) return null;
+
+        // At this point candidates is a set of all expressions that syntactically match,
+        // also considering the wildcards already defined
+
+        // Create collection of bindings to return
+        Set<Map<String,String>> rSet = new HashSet<Map<String, String>>();
+        for(NormalizedAtomicExpressionMapImpl c_n : candidates){
+            // If a symbol in c_n is an undefined key in the overide map, define that key
+            HashMap<String,String> binding = new HashMap<String,String>(foreignSymbolOveride);
+            boolean bindingTypeChecks = true;
+            // hopefully I don't need to deep copy Strings
+            for(String exprKey : binding.keySet()){
+                if(binding.get(exprKey).length()==0){
+                    // We have found a wildcard
+                    int posInSearchExpr = expr.readOperator(exprReg.getIndexForSymbol(exprKey));
+                    if(posInSearchExpr==0) continue; // meaning the wildcard is not a part of the equation
+                    int localSymbolIndex = c_n.readPositionBitcode(posInSearchExpr);
+                    assert localSymbolIndex!=-1 : "error in prover search";
+                    String localSymbol = m_registry.getSymbolForIndex(localSymbolIndex);
+                    // Type check here.  Incompatible types should invalidate the whole binding
+                    MTType theoremSymbolType = exprReg.getTypeByIndex(exprReg.getIndexForSymbol(exprKey));
+                    MTType localSymbolType = m_registry.getTypeByIndex(localSymbolIndex);
+                    if(!localSymbolType.isSubtypeOf(theoremSymbolType)) {
+                        bindingTypeChecks = false;
+                        break;
+                    }
+                    binding.put(exprKey,localSymbol);
+                }
+            }
+            if(bindingTypeChecks) {
+                // At this point we have bound all the wildcards for a particular candidate
+                rSet.add(binding);
+            }
+
+        }
+        return rSet;
+    }
+
     protected Map<String, Integer> getSymbolProximity(Set<String> symbols) {
+        updateUseMap();
         boolean done = false;
         Map<Integer, Integer> relatedKeys = new HashMap<Integer, Integer>();
         for (String s : symbols) {

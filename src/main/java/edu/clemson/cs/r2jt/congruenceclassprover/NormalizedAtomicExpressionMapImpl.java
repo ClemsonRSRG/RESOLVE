@@ -28,6 +28,7 @@ public class NormalizedAtomicExpressionMapImpl
 
     private static final int m_maxPositions = 6;
     private final Map<Integer, Integer> m_expression;
+    private int arity = 0; // number of arguments
 
     public NormalizedAtomicExpressionMapImpl() {
         m_expression = new TreeMap<Integer, Integer>();
@@ -84,11 +85,25 @@ public class NormalizedAtomicExpressionMapImpl
         return -1;
     }
 
+    // returns a key if it used everywhere in positionBitCode
+    public int readPositionBitcode(int positionBitCode) {
+        Set<Map.Entry<Integer, Integer>> entries = m_expression.entrySet();
+        for (Map.Entry<Integer, Integer> e : entries) {
+            if ((e.getValue() & positionBitCode) == positionBitCode) {
+                return e.getKey();
+            }
+            /* todo: possible use for map: multiple operators in a single position.
+             for use in binding quantified variables.
+             */
+        }
+        return -1;
+    }
     /**
      * @param operator integer value of operator
      * @param position 0 denotes first position.
      */
     public void writeOnto(int operator, int position) {
+        if(position != m_maxPositions && position > arity) arity = position;
         position = 1 << position;
         Integer curValue = m_expression.get(operator);
         if (curValue != null) {
@@ -156,67 +171,9 @@ public class NormalizedAtomicExpressionMapImpl
     }
 
     public int numOperators() {
-        return m_expression.keySet().size();
+        return arity;
     }
 
-    public NormalizedAtomicExpressionMapImpl translateFromRegParam1ToRegParam2(
-            Registry source, Registry destination,
-            HashMap<String, String> mapping) {
-
-        NormalizedAtomicExpressionMapImpl translated =
-                new NormalizedAtomicExpressionMapImpl();
-        Set<Integer> keys = m_expression.keySet();
-        for (Integer k : keys) {
-            String sourceName = source.getSymbolForIndex(k);
-            String destName = "";
-            switch (source.getUsage(sourceName)) {
-            case LITERAL:
-            case HASARGS_SINGULAR:// literals and func names should be in both
-                if (destination.isSymbolInTable(sourceName)) {
-                    destName = sourceName;
-                }
-                else {
-                    return translated.clear();
-                }
-                break;
-            case HASARGS_FORALL:
-            case FORALL:
-                if (mapping.containsKey(sourceName)) {
-                    destName = mapping.get(sourceName);
-                }
-                break;
-            }
-            if (!destName.equals("")) {
-                int trKey = destination.getIndexForSymbol(destName);
-                int positions = m_expression.get(k);
-                translated.m_expression.put(trKey, positions);
-            }
-
-        }
-        return translated;
-    }
-
-    public NormalizedAtomicExpressionMapImpl incrementLastKnown() {
-        NormalizedAtomicExpressionMapImpl incremented =
-                new NormalizedAtomicExpressionMapImpl();
-        int pos = 0;
-        int op = readPosition(pos);
-        if (op < 0) { // function operator unknown, upper bound is end of list
-            incremented.writeOnto(Integer.MAX_VALUE, 0);
-            incremented.writeToRoot(Integer.MAX_VALUE);
-            return incremented;
-        }
-        int opPrev = op;
-        while (op >= 0) {
-            incremented.writeOnto(opPrev, pos);
-            pos++;
-            opPrev = op;
-            op = readPosition(pos);
-        }
-        incremented.m_expression.remove(opPrev);
-        incremented.writeOnto(++opPrev, pos - 1);
-        return incremented;
-    }
 
     public String toHumanReadableString(Registry registry) {
         if (m_expression.isEmpty()) {

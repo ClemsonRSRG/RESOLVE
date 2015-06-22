@@ -12,16 +12,14 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
+import edu.clemson.cs.r2jt.collections.Map;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Created by mike on 4/3/2014.
@@ -44,7 +42,7 @@ public class TheoremCongruenceClosureImpl {
         m_typeGraph = g;
         m_theorem = p;
         m_theoremString = p.toString();
-        if(m_theoremString.contains("nf")){
+        if (m_theoremString.contains("nf")) {
             int bp = 0;
         }
         isEquality = p.getTopLevelOperation().equals("=");
@@ -55,32 +53,31 @@ public class TheoremCongruenceClosureImpl {
         if (isEquality) { // no longer used (goes to another constructor)
             m_matchConj.addFormula(p.getSubExpressions().get(0));
             m_insertExpr = p;
-        }
-        else if (p.getTopLevelOperation().equals("implies")) {
+        } else if (p.getTopLevelOperation().equals("implies")) {
             PExp matchingpart = p.getSubExpressions().get(0);
             m_matchConj.addExpression(matchingpart);
             m_insertExpr = p.getSubExpressions().get(1);
-            if(matchingpart.getTopLevelOperation().equals("=")){
-                if(matchingpart.getSubExpressions().get(0).getSubExpressions().size() == 0 &&
-                matchingpart.getSubExpressions().get(1).getSubExpressions().size() == 0){
+            if (matchingpart.getTopLevelOperation().equals("=")) {
+                if (matchingpart.getSubExpressions().get(0).getSubExpressions()
+                        .size() == 0
+                        && matchingpart.getSubExpressions().get(1)
+                        .getSubExpressions().size() == 0) {
                     partMatchedisConstantEquation = true;
                 }
             } //
-        }
-        else {
-            if(p.getQuantifiedVariables().size() == 1){
+        } else {
+            if (p.getQuantifiedVariables().size() == 1) {
                 // empty matchConj will trigger find by type
                 m_matchConj.addFormula(p); // this adds symbols to reg
                 m_matchConj.clear(); // will match based on types
                 m_insertExpr = p;
-            }
-            else {
-            /* experimental
-            
-            Is_Permutation((S o T), (T o S)) for example,
-            should go into matchConj as itself, but equal to a boolean variable.
-            .
-             */
+            } else {
+                /* experimental
+                
+                Is_Permutation((S o T), (T o S)) for example,
+                should go into matchConj as itself, but equal to a boolean variable.
+                .
+                 */
                 m_matchConj.addFormula(p);
                 m_insertExpr = p; // this will add "= true"
             }
@@ -90,7 +87,7 @@ public class TheoremCongruenceClosureImpl {
 
     // for theorems that are equations
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp toMatchAndBind,
-            PExp toInsert, boolean enterToMatchAndBindAsEquivalentToTrue) {
+                                        PExp toInsert, boolean enterToMatchAndBindAsEquivalentToTrue) {
         m_typeGraph = g;
         m_theorem = toInsert;
         m_theoremString = toInsert.toString();
@@ -133,27 +130,28 @@ public class TheoremCongruenceClosureImpl {
                     m_theoremString));
             return rList;
         }
-
-        Stack<HashMap<String, String>> allValidBindings =
-                findValidBindings(vc, endTime);
+        Set<java.util.Map<String, String>> allValidBindings;
+        if (m_matchConj.size() == 0) {
+            allValidBindings = findValidBindingsByType(vc, endTime);
+        } else
+            allValidBindings = findValidBindings(vc, endTime);
         // temporary: exclude inserting lambdas (causes a hang -- probably in prioritization system)
         if (allValidBindings == null || allValidBindings.size() == 0) {
-            m_unneeded = true;
+            //m_unneeded = true;
             return null;
         }
 
         HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
-        outerBindingLoop: while (!allValidBindings.empty()
-                && System.currentTimeMillis() < endTime) {
-            HashMap<String, String> curBinding = allValidBindings.pop();
+        for (java.util.Map<String,String> curBinding : allValidBindings) {
             for (String thKey : curBinding.keySet()) {
 
                 MTType quanType =
                         m_theoremRegistry.getTypeByIndex(m_theoremRegistry
                                 .getIndexForSymbol(thKey));
 
-                quantToLit.put(new PSymbol(quanType, null, thKey), new PSymbol(
-                        quanType, null, curBinding.get(thKey)));
+                quantToLit.put(
+                        new PSymbol(quanType, null, thKey),
+                        new PSymbol(quanType, null, curBinding.get(thKey)));
             }
             // todo: replace lambda param types if they are type variables
             PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
@@ -165,7 +163,7 @@ public class TheoremCongruenceClosureImpl {
         return rList;
     }
 
-    private HashMap<String, String> getInitBindings() {
+    private java.util.Map<String, String> getInitBindings() {
         HashMap<String, String> initBindings = new HashMap<String, String>();
         for (int i = 0; i < m_theoremRegistry.m_indexToSymbol.size(); ++i) {
             String curSym = m_theoremRegistry.m_indexToSymbol.get(i);
@@ -179,237 +177,75 @@ public class TheoremCongruenceClosureImpl {
         return initBindings;
     }
 
-    private boolean pushNewSearchBox(Stack<SearchBox> boxStack) {
-        SearchBox top = boxStack.peek();
-        int index = top.m_indexInList + 1;
-        // if top of stack contains last expression return false, cant push another
-        if (index == m_matchConj.size()) {
-            return false;
-        }
-        /*
-         SearchBox(NormalizedAtomicExpressionMapImpl query, Registry queryReg,
-         ConjunctionOfNormalizedAtomicExpressions dataSet, Registry dataReg,
-         HashMap<String,String> bindings, int indexInList)
-         */
-
-        boxStack.push(new SearchBox(m_matchConj.getExprAtPosition(index),
-                m_theoremRegistry, top.m_dataSet, top.m_destRegistry,
-                new HashMap<String, String>(top.m_bindings), index));
-        return true;
-    }
-
-    private Stack<HashMap<String, String>> findValidBindings(
+    private Set<java.util.Map<String, String>> findValidBindingsByType(
             VerificationConditionCongruenceClosureImpl vc, long endTime) {
-
-        Stack<HashMap<String, String>> allValidBindings =
-                new Stack<HashMap<String, String>>();
-
         // Case where no match conj. is produced.
         // Example: S = Empty_String. Relevant info is only in registry.
-
-        if (m_matchConj.size() == 0) {
-            // x = constant?
-            if(partMatchedisConstantEquation){
-                HashMap<String, String> wildToActual =
-                        new HashMap<String, String>();
-                for (String wild : m_theoremRegistry.getForAlls()) {
-                    // go through parent array to get value for wildcard
-                    String actual =
-                            m_theoremRegistry.getSymbolForIndex(m_theoremRegistry
-                                    .getIndexForSymbol(wild));
-                    if (actual.equals(wild)
-                            || m_theoremRegistry.getForAlls().contains(actual))
-                        return null;
-                    wildToActual.put(wild, actual);
-                }
-                allValidBindings.push(wildToActual);
-                return allValidBindings;
-
-            }
-            // only valid for preds other than equality
-            Set<String>  foralls = m_theoremRegistry.getForAlls();
-            if(foralls.size()!=1) return null;
-            String wild = foralls.iterator().next();
-            MTType t = m_theoremRegistry.getTypeByIndex(m_theoremRegistry.getIndexForSymbol(wild));
-
-            for (String actual : vc.getRegistry().getParentsByType(t)) {
-                HashMap<String, String> wildToActual =
-                        new HashMap<String, String>();
+        Set<java.util.Map<String, String>> allValidBindings =
+                new HashSet<java.util.Map<String, String>>();
+        // x = constant?
+        if (partMatchedisConstantEquation) {
+            HashMap<String, String> wildToActual =
+                    new HashMap<String, String>();
+            for (String wild : m_theoremRegistry.getForAlls()) {
+                // go through parent array to get value for wildcard
+                String actual =
+                        m_theoremRegistry
+                                .getSymbolForIndex(m_theoremRegistry
+                                        .getIndexForSymbol(wild));
+                if (actual.equals(wild)
+                        || m_theoremRegistry.getForAlls().contains(actual))
+                    return null;
                 wildToActual.put(wild, actual);
-                if(!wild.equals(actual)) // can be = with constants in theorems
-                    allValidBindings.push(wildToActual);
             }
+            allValidBindings.add(wildToActual);
             return allValidBindings;
-        }
-        boolean extraOutput = false;
-        /*if(m_theoremString.contains("narg")
-                && vc.m_name.equals("0_3")    ){
-            extraOutput = true;
-            System.out.println("looking for: \n" + m_matchConj + "in " + vc);
-        }*/
-        Stack<SearchBox> boxStack = new Stack<SearchBox>();
-        boxStack.push(new SearchBox(m_matchConj.getExprAtPosition(0),
-                m_theoremRegistry, vc.getConjunct(), vc.getRegistry(),
-                getInitBindings(), 0));
 
-        while (!boxStack.isEmpty() && System.currentTimeMillis() < endTime) {
-            SearchBox curBox = boxStack.peek();
-            // rollBack
-            curBox.m_bindings =
-                    new HashMap<String, String>(curBox.m_bindingsInitial);
-            curBox.getNextMatch();
-            if (curBox.impossibleToMatch) {
-                if (extraOutput)
-                    System.out.println("rejecting " + curBox.toString());
-                boxStack.pop();
-                if (!boxStack.isEmpty()) {
-                    boxStack.peek().currentIndex =
-                            boxStack.peek().m_lastGoodMatchIndex;
-                    boxStack.peek().currentIndex++;
-                }
-            }
-            else {
-                if (extraOutput) {
-                    System.out.println("matched " + curBox.toString());
-                }
-                // save bindings if for last index, then try and find more
-                if (curBox.m_indexInList + 1 == m_matchConj.size()) {
-                    if (allValidBindings.isEmpty()
-                            || !curBox.m_bindings.equals(allValidBindings
-                                    .peek())) {
-                        // use allBound to disable type checks, otherwise just use typeCheck
-                        if (typeCheck(curBox)) {
-                            allValidBindings.push(curBox.m_bindings);
-                            if (extraOutput)
-                                System.out
-                                        .println("saved " + curBox.m_bindings);
-                        }
-                        else {
-                            if (extraOutput) {
-                                System.out.println("failed type check");
-                            }
-                        }
-                    }
-                    boxStack.peek().currentIndex++;
-                }
-                else {
-                    pushNewSearchBox(boxStack);
-                }
-            }
+        }
+        // only valid for preds other than equality
+        Set<String> foralls = m_theoremRegistry.getForAlls();
+        if (foralls.size() != 1)
+            return null;
+        String wild = foralls.iterator().next();
+        MTType t =
+                m_theoremRegistry.getTypeByIndex(m_theoremRegistry
+                        .getIndexForSymbol(wild));
+
+        for (String actual : vc.getRegistry().getParentsByType(t)) {
+            HashMap<String, String> wildToActual =
+                    new HashMap<String, String>();
+            wildToActual.put(wild, actual);
+            if (!wild.equals(actual)) // can be = with constants in theorems
+                allValidBindings.add(wildToActual);
         }
         return allValidBindings;
+
     }
 
-    boolean allBound(SearchBox box) {
-        for (String oSymbol : box.m_bindings.keySet()) {
-            String dSymbol = box.m_bindings.get(oSymbol);
-            if (!box.m_destRegistry.isSymbolInTable(dSymbol)) {
-                if (!oSymbol.contains("¢")) {
-                    /*System.err.println("Unbound: " + oSymbol + ": " + dSymbol
-                            + " in " + m_theoremString);*/
-                    box.m_failedBindings = box.m_bindings;
-                    return false;
-                }
-                continue;
+    private Set<java.util.Map<String, String>> findValidBindings(
+            VerificationConditionCongruenceClosureImpl vc, long endTime) {
+
+        boolean extraOutput = false;
+        // these are alpha ordered, could rearrange
+        Set<java.util.Map<String,String>> results = new HashSet<java.util.Map<String, String>>();
+        results.add(getInitBindings());
+        for(NormalizedAtomicExpressionMapImpl e_t: m_matchConj.m_exprList){
+            results = vc.getConjunct().getMatchesForOverideSet(e_t,m_theoremRegistry,results);
+        }
+
+        // sanity check
+        for(java.util.Map<String,String> m :results)
+        for(String m_k :m.keySet()){
+            if(m_k.length()==0 || m.get(m_k).length()==0){
+                int bp=0;
             }
         }
-        return true;
-    }
-
-    boolean typeCheck(SearchBox box) {
-        // type check here
-        // oSymbols: Theorem symbols
-        for (String oSymbol : box.m_bindings.keySet()) {
-            String dSymbol = box.m_bindings.get(oSymbol);
-            if (!box.m_destRegistry.isSymbolInTable(dSymbol)) {
-                if (!oSymbol.contains("¢")) {
-                    System.err.println("Unbound: " + oSymbol + ":'" + dSymbol
-                            + "' in " + m_theoremString);
-                    box.m_failedBindings = box.m_bindings;
-                    return false;
-                }
-                continue;
-            }
-            MTType oType, dType;
-            oType =
-                    box.m_origRegistry.getTypeByIndex(box.m_origRegistry
-                            .getIndexForSymbol(oSymbol));
-            dType =
-                    box.m_destRegistry.getTypeByIndex(box.m_destRegistry
-                            .getIndexForSymbol(dSymbol));
-            if (oType.alphaEquivalentTo(dType))
-                continue;
-            if (dType.isSubtypeOf(oType))
-                continue;
-            if (dType.toString().equals(oType.toString()))
-                continue;
-            if (oType.getClass().getSimpleName().equals("MTFunction")
-                    && dType.getClass().getSimpleName().equals("MTFunction")) {
-                dType = (MTFunction) dType;
-                MTType oRange = ((MTFunction) oType).getRange();
-                MTType oDomain = ((MTFunction) oType).getDomain();
-                MTType dRange = ((MTFunction) dType).getRange();
-                MTType dDomain = ((MTFunction) dType).getDomain();
-                if (oRange == null || oDomain == null || dRange == null
-                        || dDomain == null) {
-                    //System.err.println("null type error");
-                    return false;
-                }
-                // Check if these are type variables
-
-                String bDomain, bRange;
-                if (box.m_bindings.containsKey(oRange.toString().replace("'",
-                        ""))) {
-                    bRange =
-                            box.m_bindings.get(oRange.toString().replace("'",
-                                    ""));
-                    oRange = box.m_destRegistry.m_typeDictionary.get(bRange);
-                    if (oRange == null) {
-                        //System.err.println("null type for: " + bRange);
-                        return false;
-                    }
-                }
-                if (box.m_bindings.containsKey(oDomain.toString().replace("'",
-                        ""))) {
-                    bDomain =
-                            box.m_bindings.get(oDomain.toString().replace("'",
-                                    ""));
-                    oDomain = box.m_destRegistry.m_typeDictionary.get(bDomain);
-                    if (oDomain == null) {
-                        //System.err.println("null type for:" + bDomain);
-                        return false;
-                    }
-                }
-
-                if ((oDomain.alphaEquivalentTo(dDomain) || (dDomain
-                        .isSubtypeOf(oDomain)))
-                        && (oRange.alphaEquivalentTo(dRange) || (dRange
-                                .isSubtypeOf(oRange)))) {
-
-                    /*System.out.println("Type match: " + oSymbol + ":" + oType
-                            + " maps to " + dSymbol + ":" + dType); */
-                    continue;
-                }
-                /*System.err.println("Type Mismatch: orig: " + oDomain + "->"
-                        + oRange + " dest: " + dType); */
-            }
-            /*if(m_theoremString.contains("narg")) {
-             System.err.println("Failed type check: " + oSymbol + "(from theorem): " + oType
-                    + " " + dSymbol + ": " + dType);
-            System.err.println(m_theoremString);
-            }*/
-            if (oType.toString().equals(dType.toString())) {
-                System.err.println("Type error" + oType.toString() + "\n"
-                        + m_theoremString + "\n" + dSymbol);
-            }
-            box.m_failedBindings = box.m_bindings;
-            return false;
-
+        if(m_matchConj.size()>1 && results.size() > 0){
+            int bp=0;
         }
-        //System.out.println(box.m_bindings);
-
-        return true;
+        return results;
     }
+
 
     @Override
     public String toString() {

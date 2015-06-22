@@ -73,9 +73,10 @@ public class VerificationConditionCongruenceClosureImpl {
 
                 if (s.matches("[0-9]+")) {
                     MTType oldType = m_registry.m_indexToType.get(i);
-                    if(oldType != natType) {
+                    if (oldType != natType) {
                         m_registry.m_indexToType.set(i, natType);
-                        m_registry.m_typeToSetOfOperators.get(oldType).remove(s);
+                        m_registry.m_typeToSetOfOperators.get(oldType)
+                                .remove(s);
                         m_registry.m_typeToSetOfOperators.get(natType).add(s);
                     }
 
@@ -122,14 +123,13 @@ public class VerificationConditionCongruenceClosureImpl {
     public STATUS isProved() {
         if (m_conjunction.m_evaluates_to_false)
             return STATUS.FALSE_ASSUMPTION; // this doesn't mean P->Q = False, it just means P = false
-        for(int i = 0; i < m_goal.size(); i += 2) {
+        for (int i = 0; i < m_goal.size(); i += 2) {
             String goal1 = m_goal.get(i);
-            String goal2 = m_goal.get(i+1);
+            String goal2 = m_goal.get(i + 1);
             int g1 = m_registry.getIndexForSymbol(goal1);
             int g2 = m_registry.getIndexForSymbol(goal2);
             // check each goal has same root
-            if (g1==g2)
-            {
+            if (g1 == g2) {
                 return STATUS.PROVED;
             }
         }

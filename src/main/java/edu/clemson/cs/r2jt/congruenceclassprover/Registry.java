@@ -82,23 +82,24 @@ public class Registry {
                 rSet.addAll(m_typeToSetOfOperators.get(m));
             }
         }
-        if(m_typeToSetOfOperators.get(t)!=null)
+        if (m_typeToSetOfOperators.get(t) != null)
             rSet.addAll(m_typeToSetOfOperators.get(t));
 
         return rSet;
     }
 
-    public Set<String> getParentsByType(MTType t){
+    public Set<String> getParentsByType(MTType t) {
         Set<String> rSet = getSetMatchingType(t);
         Set<String> fSet = new HashSet<String>();
-        for(String s : rSet){
+        for (String s : rSet) {
             int id = getIndexForSymbol(s);
-            if(m_symbolIndexParentArray.get(id)== id){
+            if (m_symbolIndexParentArray.get(id) == id) {
                 fSet.add(s);
             }
         }
         return fSet;
     }
+
     /**
      *
      * @param opIndexA index that becomes parent of B
@@ -116,7 +117,7 @@ public class Registry {
 
     public void addDependency(int opIndex, String justification,
             boolean sourceIsRootChange) {
-        if (justification.equals(""))
+        if (justification.length()==0)
             return;
         //if(getUsage(getSymbolForIndex(opIndex)).equals(Usage.LITERAL)) return;
         //if(getSymbolForIndex(opIndex).equals("true") && sourceIsRootChange) return;
@@ -147,6 +148,8 @@ public class Registry {
     }
 
     protected int findAndCompress(int index) {
+        // early return for parent
+        if(m_symbolIndexParentArray.get(index) == index) return index;
         Stack<Integer> needToUpdate = new Stack<Integer>();
         assert index < m_symbolIndexParentArray.size() : "findAndCompress error";
         int parent = m_symbolIndexParentArray.get(index);
@@ -163,7 +166,9 @@ public class Registry {
     }
 
     public String getSymbolForIndex(int index) {
-        return m_indexToSymbol.get(findAndCompress(index));
+        String rS = m_indexToSymbol.get(findAndCompress(index));
+        assert rS.length()!=0 : "Blank symbol error";
+        return rS;
     }
 
     public String getRootSymbolForSymbol(String sym) {
@@ -203,9 +208,10 @@ public class Registry {
 
     // if symbol is new, it adds it, otherwise, it returns current int rep
     public int addSymbol(String symbolName, MTType symbolType, Usage usage) {
-        // temporary until type system is fixed
-        if (symbolName.equals("Integer"))
-            symbolName = "Z";
+        if(symbolName.length()==0){
+            int bp =0;
+        }
+        assert symbolName.length()!=0 : "blank symbol error in addSymbol";
         if (isSymbolInTable(symbolName)) {
             return getIndexForSymbol(symbolName);
         }

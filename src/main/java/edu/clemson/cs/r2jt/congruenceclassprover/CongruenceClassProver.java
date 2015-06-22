@@ -54,7 +54,7 @@ public class CongruenceClassProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
-    private final long DEFAULTTIMEOUT = 20000;
+    private final long DEFAULTTIMEOUT = 5000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = true;
@@ -283,9 +283,6 @@ public class CongruenceClassProver {
                     && (num_Theorems_chosen < max_Theorems_to_choose)) {
                 int theoremScore = rankedTheorems.m_pQueue.peek().m_score;
                 TheoremCongruenceClosureImpl cur = rankedTheorems.poll();
-                if(cur.m_theoremString.contains("nf")){
-                    int bp = 0;
-                }
 
                 ArrayList<InsertExpWithJustification> instantiatedTheorems =
                         cur.applyTo(vcc, endTime);
@@ -300,9 +297,7 @@ public class CongruenceClassProver {
                     while (num_Instantiated_added < max_Instantiated_to_Add
                             && !instPQ.m_pQueue.isEmpty()) {
                         PExpWithScore curP = instPQ.m_pQueue.poll();
-                        if(curP.m_theoremDefinitionString.contains("nf")){
-                            int bp = 0;
-                        }
+
                         if (!applied.contains(curP.m_theorem.toString())) {
                             String substitutionMade =
                                     vcc

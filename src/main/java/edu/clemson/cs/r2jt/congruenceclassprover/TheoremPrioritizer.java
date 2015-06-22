@@ -64,7 +64,9 @@ public class TheoremPrioritizer {
                 count_of_functions_not_in_vc++;
         }
         //if(score > count) score /=count;
-        return score + (count_of_functions_not_in_vc * 2000);
+        //return score + (count_of_functions_not_in_vc * 2000);
+        if(count_of_functions_not_in_vc > 0) return Integer.MAX_VALUE;
+        else return score;
     }
 
     public TheoremCongruenceClosureImpl poll() {
