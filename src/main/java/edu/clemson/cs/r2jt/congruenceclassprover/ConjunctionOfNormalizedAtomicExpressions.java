@@ -490,17 +490,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             // early return for no matches.
             if(results == null || results.isEmpty())
                 return null;
-            // remove equations with non matching length
-            Set<NormalizedAtomicExpressionMapImpl> removalSet = new HashSet<NormalizedAtomicExpressionMapImpl>();
-            for(NormalizedAtomicExpressionMapImpl r_n : results){
-                if(r_n.numOperators()!= expr.numOperators()) {
-                    removalSet.add(r_n);
-                    //System.err.println(r_n.toHumanReadableString(m_registry) + "\n" + expr.toHumanReadableString(exprReg)+"\n" + eSymb + "\n");
-                }
-            }
-            results.removeAll(removalSet);
-            removalSet.clear();
 
+            Set<NormalizedAtomicExpressionMapImpl> removalSet = new HashSet<NormalizedAtomicExpressionMapImpl>();
+            // remove equations with non matching length
             // remove equations from the result set if they do not have the literal we just searched for where they occur
             // in the search expression.  They may occur elsewhere, in which case they will be dealt with at another
             // loop iteration (is another literal of the search expr in the same pos?) or in the binding phase.
@@ -510,11 +502,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             int exprPositions = expr.readOperator(k); // this is the bit code, 1 if used, 0 if not
             for(NormalizedAtomicExpressionMapImpl r_n : results){
                 int conjPos = r_n.readOperator(symbolInConj);
-                if((conjPos & exprPositions)!= exprPositions){
+                if((r_n.numOperators()!= expr.numOperators()) ||
+                        (conjPos & exprPositions)!= exprPositions){
                     removalSet.add(r_n);
                 }
             }
-
             results.removeAll(removalSet);
             if(firstKey)
                 candidates = results;
