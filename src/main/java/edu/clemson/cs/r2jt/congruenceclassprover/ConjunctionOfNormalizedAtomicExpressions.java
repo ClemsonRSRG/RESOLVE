@@ -529,7 +529,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         for(NormalizedAtomicExpressionMapImpl c_n : candidates){
             // If a symbol in c_n is an undefined key in the overide map, define that key
             HashMap<String,String> binding = new HashMap<String,String>(foreignSymbolOveride);
-            boolean bindingTypeChecks = true;
+            boolean validBinding = true;
             // hopefully I don't need to deep copy Strings
             for(String exprKey : binding.keySet()){
                 if(binding.get(exprKey).length()==0){
@@ -537,19 +537,25 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     int posInSearchExpr = expr.readOperator(exprReg.getIndexForSymbol(exprKey));
                     if(posInSearchExpr==0) continue; // meaning the wildcard is not a part of the equation
                     int localSymbolIndex = c_n.readPositionBitcode(posInSearchExpr);
-                    assert localSymbolIndex!=-1 : "error in prover search";
+                    if(localSymbolIndex == -1){
+                        // Occurs when wildcard used in multiple positions, but different symbols in matched expr.
+                        // Throw it out.
+                        validBinding = false;
+                        break;
+
+                    }
                     String localSymbol = m_registry.getSymbolForIndex(localSymbolIndex);
                     // Type check here.  Incompatible types should invalidate the whole binding
                     MTType theoremSymbolType = exprReg.getTypeByIndex(exprReg.getIndexForSymbol(exprKey));
                     MTType localSymbolType = m_registry.getTypeByIndex(localSymbolIndex);
                     if(!localSymbolType.isSubtypeOf(theoremSymbolType)) {
-                        bindingTypeChecks = false;
+                        validBinding = false;
                         break;
                     }
                     binding.put(exprKey,localSymbol);
                 }
             }
-            if(bindingTypeChecks) {
+            if(validBinding) {
                 // At this point we have bound all the wildcards for a particular candidate
 
                 rSet.add(binding);
