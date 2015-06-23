@@ -202,7 +202,10 @@ public class NormalizedAtomicExpressionMapImpl
 
         return r;
     }
-
+    @Override
+    public int hashCode(){
+        return m_expression.hashCode();
+    }
     @Override
     public String toString() {
         return m_expression.toString();

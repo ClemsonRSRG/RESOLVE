@@ -232,17 +232,6 @@ public class TheoremCongruenceClosureImpl {
         for(NormalizedAtomicExpressionMapImpl e_t: m_matchConj.m_exprList){
             results = vc.getConjunct().getMatchesForOverideSet(e_t,m_theoremRegistry,results);
         }
-
-        // sanity check
-        for(java.util.Map<String,String> m :results)
-        for(String m_k :m.keySet()){
-            if(m_k.length()==0 || m.get(m_k).length()==0){
-                int bp=0;
-            }
-        }
-        if(m_matchConj.size()>1 && results.size() > 0){
-            int bp=0;
-        }
         return results;
     }
 

@@ -27,11 +27,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     private final Registry m_registry;
     protected final List<NormalizedAtomicExpressionMapImpl> m_exprList;
     protected long m_timeToEnd = -1;
-    private final List<NormalizedAtomicExpressionMapImpl> m_removedExprList;
     protected boolean m_evaluates_to_false = false;
     private int f_num = 0;
     private String m_current_justification = "";
-    protected Map<Integer, Set<NormalizedAtomicExpressionMapImpl>> m_useMap;
+    private final Map<Integer, Set<NormalizedAtomicExpressionMapImpl>> m_useMap;
 
     /**
      * @param registry the Registry symbols contained in the conjunction will
@@ -39,8 +38,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      */
     public ConjunctionOfNormalizedAtomicExpressions(Registry registry) {
         m_registry = registry;
+        // Array list is much slower than LinkedList for this application
         m_exprList = new LinkedList<NormalizedAtomicExpressionMapImpl>();
-        m_removedExprList = new LinkedList<NormalizedAtomicExpressionMapImpl>();
         m_useMap = new HashMap<Integer, Set<NormalizedAtomicExpressionMapImpl>>();
     }
 
@@ -68,6 +67,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         m_current_justification = justification;
         String rString = addExpression(expression);
         m_current_justification = "";
+        updateUseMap();
         return rString;
     }
 
@@ -421,6 +421,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     protected void updateUseMap(){
         m_useMap.clear();
+        assert m_useMap.size()==0;
         for(NormalizedAtomicExpressionMapImpl e : m_exprList){
             for(Integer k: e.getKeys()){
                 assert m_registry.findAndCompress(k) == k : "child symbol in conj";
@@ -434,16 +435,19 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
         }
         // for debug
-        String s = "";
-        /*for(Integer k : m_useMap.keySet()){
+        /*String s = "";
+        for(Integer k : m_useMap.keySet()){
             s += m_registry.getSymbolForIndex(k) + "\n";
             for(NormalizedAtomicExpressionMapImpl nm : m_useMap.get(k)){
                 s += nm.toHumanReadableString(m_registry) + "\n";
             }
             s += "\n";
         }
-        System.err.println(s);
-        */
+        System.err.println(s);*/
+        for(Integer k : m_useMap.keySet()){
+            assert !m_useMap.get(k).isEmpty();
+            assert m_useMap.get(k).size()!=0;
+        }
     }
 
     protected Set<java.util.Map<String,String>> getMatchesForOverideSet(NormalizedAtomicExpressionMapImpl expr,
@@ -461,13 +465,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // foreignSymbolOveride is expr Symbol -> this Symbol
     protected Set<java.util.Map<String,String>> getMatches(NormalizedAtomicExpressionMapImpl expr,
                                             Registry exprReg, Map<String,String> foreignSymbolOveride){
-
         Set<NormalizedAtomicExpressionMapImpl> candidates = new HashSet<NormalizedAtomicExpressionMapImpl>();
         boolean firstKey = true;
         for(Integer k: expr.getKeys()){
             String eSymb = exprReg.getSymbolForIndex(k);
-
-            // String equals not going to do the right thing even for empty strings
+            // String equals does not work for ""
             boolean isWild = foreignSymbolOveride.containsKey(eSymb) && foreignSymbolOveride.get(eSymb).length()==0;
             if(isWild) continue; // if it is wild, no point in looking for it here, go to next key
             if(foreignSymbolOveride.containsKey(eSymb))
@@ -476,10 +478,16 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             if(!m_registry.m_symbolToIndex.containsKey(eSymb)) {
                return null;
             }
+
             // Either the symbol is a previously matched wildcard or it is a literal
             int symbolInConj = m_registry.getIndexForSymbol(eSymb);
-            Set<NormalizedAtomicExpressionMapImpl> results = m_useMap.get(symbolInConj);
-            // early return for no matches.  Can have symbols in reg that are not used.
+            // Literal is in the registry, but it may not be in an expression. Some symbols added by default.
+            if(!m_useMap.containsKey(symbolInConj)){
+                return null;
+            }
+            // ALIAS alert!!!!!
+            Set<NormalizedAtomicExpressionMapImpl> results = new HashSet<NormalizedAtomicExpressionMapImpl>(m_useMap.get(symbolInConj));
+            // early return for no matches.
             if(results == null || results.isEmpty())
                 return null;
             // remove equations with non matching length
@@ -489,7 +497,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     removalSet.add(r_n);
                     //System.err.println(r_n.toHumanReadableString(m_registry) + "\n" + expr.toHumanReadableString(exprReg)+"\n" + eSymb + "\n");
                 }
-
             }
             results.removeAll(removalSet);
             removalSet.clear();
@@ -507,12 +514,15 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     removalSet.add(r_n);
                 }
             }
+
             results.removeAll(removalSet);
             if(firstKey)
                 candidates = results;
             else{
                 // candidates = candidates intersect results
                 candidates.retainAll(results);
+                if(candidates.isEmpty())
+                    return null;
             }
             firstKey = false;
         }
@@ -549,6 +559,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
             if(bindingTypeChecks) {
                 // At this point we have bound all the wildcards for a particular candidate
+
                 rSet.add(binding);
             }
 
@@ -557,7 +568,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     protected Map<String, Integer> getSymbolProximity(Set<String> symbols) {
-        updateUseMap();
         boolean done = false;
         Map<Integer, Integer> relatedKeys = new HashMap<Integer, Integer>();
         for (String s : symbols) {
@@ -590,20 +600,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             if (startSize == relatedKeys.size()) {
                 done = true;
             }
-        }
 
-        HashSet<Integer> toRemove = new HashSet<Integer>();
-        for (int i = 0; i < m_exprList.size(); ++i) {
-            toRemove.add(i);
-        }
-        toRemove.removeAll(relatedSet);
-
-        for (Integer i : toRemove) {
-            m_removedExprList.add(m_exprList.get(i));
-        }
-
-        for (NormalizedAtomicExpressionMapImpl r : m_removedExprList) {
-            m_exprList.remove(r);
         }
 
         Map<String, Integer> rMap =

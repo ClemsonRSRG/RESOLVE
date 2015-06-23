@@ -208,9 +208,7 @@ public class Registry {
 
     // if symbol is new, it adds it, otherwise, it returns current int rep
     public int addSymbol(String symbolName, MTType symbolType, Usage usage) {
-        if(symbolName.length()==0){
-            int bp =0;
-        }
+        symbolName = symbolName.replaceAll("\\p{Cc}", "");
         assert symbolName.length()!=0 : "blank symbol error in addSymbol";
         if (isSymbolInTable(symbolName)) {
             return getIndexForSymbol(symbolName);
