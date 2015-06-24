@@ -42,9 +42,6 @@ public class TheoremCongruenceClosureImpl {
         m_typeGraph = g;
         m_theorem = p;
         m_theoremString = p.toString();
-        if (m_theoremString.contains("nf")) {
-            int bp = 0;
-        }
         isEquality = p.getTopLevelOperation().equals("=");
         m_theoremRegistry = new Registry(g);
         m_matchConj =
@@ -129,6 +126,13 @@ public class TheoremCongruenceClosureImpl {
             rList.add(new InsertExpWithJustification(m_insertExpr,
                     m_theoremString));
             return rList;
+        }
+        // Set flag if quantified variable was not in the matching part
+        for(PSymbol ps : m_insertExpr.getQuantifiedVariables()){
+            if(!m_theoremRegistry.getForAlls().contains(ps.toString())){
+                m_unneeded = true;
+                return null;
+            }
         }
         Set<java.util.Map<String, String>> allValidBindings;
         if (m_matchConj.size() == 0) {
