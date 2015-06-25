@@ -19,6 +19,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
+import java.sql.PseudoColumnUsage;
 import java.util.*;
 
 /**
@@ -35,6 +36,8 @@ public class TheoremCongruenceClosureImpl {
     private final TypeGraph m_typeGraph;
     protected boolean m_unneeded = false;
     private Set<String> m_function_names;
+    private Set<String> m_matching_literals;
+    private Set<String> m_all_literals;
     private boolean partMatchedisConstantEquation = false;
 
     // TODO: exclude statements with dummy variables not in matching component, or do another search/match with result
@@ -116,6 +119,29 @@ public class TheoremCongruenceClosureImpl {
         return m_function_names;
     }
 
+    public Set<String> getLiteralsInMatchingPart(){
+        // registry should only contain symbols from matching section
+        if(m_matching_literals== null){
+            m_matching_literals = m_theoremRegistry.getCommonlyDefinedSymbols();
+        }
+        return m_matching_literals;
+    }
+
+    public Set<String> getNonQuantifiedSymbols(){
+        if(m_all_literals==null) {
+            m_all_literals = ((PSymbol)m_theorem).getNonQuantifiedSymbols();
+
+            m_all_literals.remove("=");
+            m_all_literals.remove("and");
+            m_all_literals.remove("implies");
+            m_all_literals.remove("true");
+            m_all_literals.remove("false");
+            int bp = 0;
+        }
+
+        return m_all_literals;
+
+    }
     public ArrayList<InsertExpWithJustification> applyTo(
             VerificationConditionCongruenceClosureImpl vc, long endTime) {
         ArrayList<InsertExpWithJustification> rList =

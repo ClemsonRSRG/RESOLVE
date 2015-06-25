@@ -598,7 +598,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             if (startSize == relatedKeys.size()) {
                 done = true;
             }
-
         }
 
         Map<String, Integer> rMap =

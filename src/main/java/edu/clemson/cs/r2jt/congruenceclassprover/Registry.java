@@ -254,4 +254,21 @@ public class Registry {
         }
         return rSet;
     }
+
+    // Symbols that have common definitons
+    // this assumes this is called for a theorem registry
+    public Set<String> getCommonlyDefinedSymbols() {
+        HashSet<String> rSet = new HashSet<String>();
+        for (Entry<String, Usage> e : m_symbolToUsage.entrySet()) {
+            if (!e.getValue().equals(Usage.FORALL) && (!e.getValue().equals(Usage.CREATED))) {
+                rSet.add(e.getKey());
+            }
+        }
+        rSet.remove("true");
+        rSet.remove("false");
+        rSet.remove("=");
+        rSet.remove("implies");
+        rSet.remove("and");
+        return rSet;
+    }
 }
