@@ -888,10 +888,14 @@ public class VCGenerator extends TreeWalkerVisitor {
                     intersection.retainAll(Utilities.getSymbols(assumeExp));
 
                     if (!intersection.isEmpty()) {
-                        confirmExp =
-                                myTypeGraph.formImplies(Exp.copy(assumeExp),
-                                        Exp.copy(confirmExp));
-                        formedImplies = true;
+                        // Don't form implies if we have "Assume true"
+                        if (!assumeExp.isLiteralTrue()) {
+                            confirmExp =
+                                    myTypeGraph.formImplies(
+                                            Exp.copy(assumeExp), Exp
+                                                    .copy(confirmExp));
+                            formedImplies = true;
+                        }
                     }
                     else {
                         tmpExpList.add(assumeExp);
@@ -912,7 +916,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
                 }
                 else {
-                    // Since we are done with all asusme expressions, we can quit
+                    // Since we are done with all assume expressions, we can quit
                     // out of the loop.
                     checkList = false;
                 }
