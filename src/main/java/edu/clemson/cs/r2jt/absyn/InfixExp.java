@@ -618,14 +618,8 @@ public class InfixExp extends AbstractFunctionExp {
 
         }
         else if (single) {
-            if (assumpts == null) {
-                lst.add(new InfixExp(null, getTrueVarExp(this.myMathType
-                        .getTypeGraph()), createPosSymbol("implies"), this));
-            }
-            else {
-                lst.add(new InfixExp(null, assumpts,
-                        createPosSymbol("implies"), this));
-            }
+            lst.add(new InfixExp(null, assumpts, createPosSymbol("implies"),
+                    this));
         }
 
         return lst;

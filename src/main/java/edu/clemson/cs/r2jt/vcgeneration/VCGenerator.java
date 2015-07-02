@@ -30,6 +30,7 @@ import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.vcgeneration.treewalkers.NestedFuncWalker;
+import sun.security.pkcs11.Secmod;
 
 import java.io.File;
 import java.util.*;
@@ -714,8 +715,137 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>This is a helper method that checks to see if each assume expression in
-     * the list can be used to prove our confirm expression.</p>
+     * <p>Converts each actual programming expression into their mathematical
+     * counterparts. It is possible that the passed in programming expression
+     * contains nested function calls, therefore we will need to obtain all the
+     * requires clauses from the different calls and add it as a confirm statement
+     * in our current assertive code.</p>
+     *
+     * @param assertiveCode Current assertive code.
+     * @param actualParams The list of actual parameter arguments.
+     *
+     * @return A list containing the newly created mathematical expression.
+     */
+    private List<Exp> createModuleActualArgExpList(AssertiveCode assertiveCode,
+            List<ModuleArgumentItem> actualParams) {
+        List<Exp> retExpList = new ArrayList<Exp>();
+
+        for (ModuleArgumentItem item : actualParams) {
+            // Obtain the math type for the module argument item
+            MTType type;
+            if (item.getProgramTypeValue() != null) {
+                type = item.getProgramTypeValue().toMath();
+            }
+            else {
+                type = item.getMathType();
+            }
+
+            // Convert the module argument items into math expressions
+            Exp expToUse;
+            if (item.getName() != null) {
+                expToUse =
+                        Utilities.createVarExp(item.getLocation(), item
+                                .getQualifier(), item.getName(), type, null);
+            }
+            else {
+                // Check for nested function calls in ProgramDotExp
+                // and ProgramParamExp.
+                ProgramExp p = item.getEvalExp();
+                if (p instanceof ProgramDotExp || p instanceof ProgramParamExp) {
+                    NestedFuncWalker nfw =
+                            new NestedFuncWalker(null, null, mySymbolTable,
+                                    myCurrentModuleScope, assertiveCode);
+                    TreeWalker tw = new TreeWalker(nfw);
+                    tw.visit(p);
+
+                    // Add the requires clause as something we need to confirm
+                    Exp pRequires = nfw.getRequiresClause();
+                    if (!pRequires.isLiteralTrue()) {
+                        assertiveCode.addConfirm(pRequires.getLocation(),
+                                pRequires, false);
+                    }
+
+                    // Use the modified ensures clause as the new expression we want
+                    // to replace.
+                    expToUse = nfw.getEnsuresClause();
+                }
+                // For all other types of arguments, simply convert it to a
+                // math expression.
+                else {
+                    expToUse = Utilities.convertExp(p, myCurrentModuleScope);
+                }
+            }
+
+            // Add this to our return list
+            retExpList.add(expToUse);
+        }
+
+        return retExpList;
+    }
+
+    /**
+     * <p>Converts each module's formal argument into variable expressions. This is only
+     * possible if the argument is of type <code>ConstantParamDec</code>. All other types
+     * are simply ignored and has mapped value of <code>null</code>.</p>
+     *
+     * @param formalParams The formal parameter list for a <code>ModuleDec</code>.
+     *
+     * @return A list containing the newly created variable expression.
+     */
+    private List<Exp> createModuleFormalArgExpList(
+            List<ModuleParameterDec> formalParams) {
+        List<Exp> retExpList = new ArrayList<Exp>();
+
+        // Create a variable expression for each of the module arguments
+        // and put it in our map.
+        for (ModuleParameterDec dec : formalParams) {
+            Dec wrappedDec = dec.getWrappedDec();
+
+            // Only do this for constant parameter declarations
+            // We don't really care about type declarations or definitions.
+            Exp newExp;
+            if (wrappedDec instanceof ConstantParamDec
+                    || wrappedDec instanceof ConceptTypeParamDec) {
+                newExp =
+                        Utilities.createVarExp(wrappedDec.getLocation(), null,
+                                wrappedDec.getName(), wrappedDec.getMathType(),
+                                null);
+            }
+            else {
+                newExp = null;
+            }
+
+            // Store the result
+            retExpList.add(newExp);
+        }
+
+        return retExpList;
+    }
+
+    /**
+     * <p>Creates the name of the output file.</p>
+     *
+     * @return Name of the file
+     */
+    private String createVCFileName() {
+        File file = myInstanceEnvironment.getTargetFile();
+        ModuleID cid = myInstanceEnvironment.getModuleID(file);
+        file = myInstanceEnvironment.getFile(cid);
+        String filename = file.toString();
+        int temp = filename.indexOf(".");
+        String tempfile = filename.substring(0, temp);
+        String mainFileName;
+
+        mainFileName = tempfile + ".asrt_new";
+
+        return mainFileName;
+    }
+
+    /**
+     * <p>This is a helper method that checks to see if the given assume expression
+     * can be used to prove our confirm expression. This is done by finding the
+     * intersection between the set of symbols in the assume expression and
+     * the set of symbols in the confirm expression.</p>
      *
      * <p>If the assume expressions are part of a stipulate assume clause,
      * then we keep all the assume expressions no matter what.</p>
@@ -758,10 +888,14 @@ public class VCGenerator extends TreeWalkerVisitor {
                     intersection.retainAll(Utilities.getSymbols(assumeExp));
 
                     if (!intersection.isEmpty()) {
-                        confirmExp =
-                                myTypeGraph.formImplies(Exp.copy(assumeExp),
-                                        Exp.copy(confirmExp));
-                        formedImplies = true;
+                        // Don't form implies if we have "Assume true"
+                        if (!assumeExp.isLiteralTrue()) {
+                            confirmExp =
+                                    myTypeGraph.formImplies(
+                                            Exp.copy(assumeExp), Exp
+                                                    .copy(confirmExp));
+                            formedImplies = true;
+                        }
                     }
                     else {
                         tmpExpList.add(assumeExp);
@@ -782,7 +916,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
                 }
                 else {
-                    // Since we are done with all asusme expressions, we can quit
+                    // Since we are done with all assume expressions, we can quit
                     // out of the loop.
                     checkList = false;
                 }
@@ -1022,25 +1156,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Creates the name of the output file.</p>
-     *
-     * @return Name of the file
-     */
-    private String createVCFileName() {
-        File file = myInstanceEnvironment.getTargetFile();
-        ModuleID cid = myInstanceEnvironment.getModuleID(file);
-        file = myInstanceEnvironment.getFile(cid);
-        String filename = file.toString();
-        int temp = filename.indexOf(".");
-        String tempfile = filename.substring(0, temp);
-        String mainFileName;
-
-        mainFileName = tempfile + ".asrt_new";
-
-        return mainFileName;
-    }
-
-    /**
      * <p>Returns all the constraint clauses combined together for the
      * for the current <code>ModuleDec</code>.</p>
      *
@@ -1142,7 +1257,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             retExp = myTypeGraph.getTrueVarExp();
         }
 
-        if (retExp.getLocation() != null) {
+        if (location != null) {
             Location loc = (Location) location.clone();
             loc.setDetails("Ensures Clause of " + name);
             Utilities.setLocation(retExp, loc);
@@ -1469,8 +1584,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
 
                     // Create an AND infix expression with the ensures clause
-                    if (ensures != null
-                            && !ensures.equals(myTypeGraph.getTrueVarExp())) {
+                    if (ensures != null) {
                         Location newEnsuresLoc =
                                 (Location) ensures.getLocation().clone();
                         ensures = myTypeGraph.formConjunct(ensures, init);
@@ -1744,6 +1858,49 @@ public class VCGenerator extends TreeWalkerVisitor {
         requires = modifyRequiresByGlobalMode(requires);
 
         return requires;
+    }
+
+    /**
+     * <p>Replace the formal parameter variables with the actual mathematical
+     * expressions passed in.</p>
+     *
+     * @param exp The expression to be replaced.
+     * @param actualParamList The list of actual parameter variables.
+     * @param formalParamList The list of formal parameter variables.
+     *
+     * @return The modified expression.
+     */
+    private Exp replaceFacilityDeclarationVariables(Exp exp,
+            List<Exp> formalParamList, List<Exp> actualParamList) {
+        Exp retExp = Exp.copy(exp);
+
+        if (formalParamList.size() == actualParamList.size()) {
+            // Loop through the argument list
+            for (int i = 0; i < formalParamList.size(); i++) {
+                // Concept variable
+                VarExp formalExp = (VarExp) formalParamList.get(i);
+
+                if (formalExp != null) {
+                    // Temporary replacement to avoid formal and actuals being the same
+                    VarExp newFormalExp =
+                            Utilities.createVarExp(null, null,
+                                    Utilities.createPosSymbol("_"
+                                            + formalExp.getName()), formalExp
+                                            .getMathType(), formalExp
+                                            .getMathTypeValue());
+                    retExp = Utilities.replace(retExp, formalExp, newFormalExp);
+
+                    // Actually perform the desired replacement
+                    Exp actualExp = actualParamList.get(i);
+                    retExp = Utilities.replace(retExp, newFormalExp, actualExp);
+                }
+            }
+        }
+        else {
+            throw new RuntimeException("Size not equal!");
+        }
+
+        return retExp;
     }
 
     /**
@@ -2273,6 +2430,14 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         else {
             ensures = myTypeGraph.getTrueVarExp();
+            Location loc;
+            if (opDec.getLocation() != null) {
+                loc = (Location) opDec.getLocation().clone();
+            }
+            else {
+                loc = (Location) opDec.getEnsures().getLocation().clone();
+            }
+            ensures.setLocation(loc);
         }
 
         // Check for recursive call of itself
@@ -2591,8 +2756,17 @@ public class VCGenerator extends TreeWalkerVisitor {
         Location decLoc = dec.getLocation();
 
         // Add the global constraints as given
-        assertiveCode.addAssume((Location) decLoc.clone(),
-                myGlobalConstraintExp, false);
+        Location constraintLoc;
+        if (myGlobalConstraintExp.getLocation() != null) {
+            constraintLoc =
+                    (Location) myGlobalConstraintExp.getLocation().clone();
+        }
+        else {
+            constraintLoc = (Location) decLoc.clone();
+        }
+        constraintLoc.setDetails("Global Constraints from "
+                + myCurrentModuleScope.getModuleIdentifier());
+        assertiveCode.addAssume(constraintLoc, myGlobalConstraintExp, false);
 
         // Add the global require clause as given
         assertiveCode.addAssume((Location) decLoc.clone(), myGlobalRequiresExp,
@@ -2744,18 +2918,85 @@ public class VCGenerator extends TreeWalkerVisitor {
         AssertiveCode assertiveCode =
                 new AssertiveCode(myInstanceEnvironment, dec);
 
-        // Location for the assume clauses
+        // Location for the current facility dec
         Location decLoc = dec.getLocation();
 
         // Add the global constraints as given
-        assertiveCode.addAssume((Location) decLoc.clone(),
-                myGlobalConstraintExp, false);
+        Location gConstraintLoc;
+        if (myGlobalConstraintExp.getLocation() != null) {
+            gConstraintLoc =
+                    (Location) myGlobalConstraintExp.getLocation().clone();
+        }
+        else {
+            gConstraintLoc = (Location) decLoc.clone();
+        }
+        gConstraintLoc.setDetails("Global Constraints from "
+                + myCurrentModuleScope.getModuleIdentifier());
+        assertiveCode.addAssume(gConstraintLoc, myGlobalConstraintExp, false);
 
         // Add the global require clause as given
-        assertiveCode.addAssume((Location) decLoc.clone(), myGlobalRequiresExp,
-                false);
+        Location gRequiresLoc;
+        if (myGlobalRequiresExp.getLocation() != null) {
+            gRequiresLoc = (Location) myGlobalRequiresExp.getLocation().clone();
+        }
+        else {
+            gRequiresLoc = (Location) decLoc.clone();
+        }
+        gRequiresLoc.setDetails("Global Requires Clause from "
+                + myCurrentModuleScope.getModuleIdentifier());
+        assertiveCode.addAssume(gRequiresLoc, myGlobalRequiresExp, false);
 
-        // TODO: Loop through every enhancement/enhancement realization declaration, if any.
+        try {
+            // Obtain the concept module for the facility
+            ConceptModuleDec facConceptDec =
+                    (ConceptModuleDec) mySymbolTable
+                            .getModuleScope(
+                                    new ModuleIdentifier(dec.getConceptName()
+                                            .getName())).getDefiningElement();
+
+            // TODO: Check to see if we can simply form equality expressions and add those as assumes
+
+            // Convert the module arguments into mathematical expressions
+            // Note that we could potentially have a nested function call
+            // as one of the arguments, therefore we pass in the assertive
+            // code to store the confirm statement generated from all the
+            // requires clauses.
+            List<Exp> conceptFormalArgList =
+                    createModuleFormalArgExpList(facConceptDec.getParameters());
+            List<Exp> conceptActualArgList =
+                    createModuleActualArgExpList(assertiveCode, dec
+                            .getConceptParams());
+
+            // Concept requires clause
+            Exp conceptReq =
+                    replaceFacilityDeclarationVariables(getRequiresClause(
+                            facConceptDec.getLocation(), facConceptDec),
+                            conceptFormalArgList, conceptActualArgList);
+            Location conceptReqLoc =
+                    (Location) dec.getConceptName().getLocation().clone();
+            conceptReqLoc.setDetails("Requires Clause for "
+                    + facConceptDec.getName().getName()
+                    + " in Facility Instantiation Rule");
+            conceptReq.setLocation(conceptReqLoc);
+
+            // Set this as our final confirm statement for this assertive code
+            assertiveCode.setFinalConfirm(conceptReq, false);
+
+            // TODO: Need to add module argument constraints here.
+
+            // TODO: Need to see if the concept realization has anything we need to generate VCs
+
+            // TODO: Loop through every enhancement/enhancement realization declaration, if any.
+            List<EnhancementItem> enhancementList = dec.getEnhancements();
+            for (EnhancementItem e : enhancementList) {
+                // Do something here.
+            }
+        }
+        catch (NoSuchSymbolException e) {
+            Utilities.noSuchModule(dec.getLocation());
+        }
+
+        /**
 
         // Obtain the concept module for the facility
         try {
@@ -2766,7 +3007,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                             .getName())).getDefiningElement();
 
             // Concept parameters
-            List<ModuleArgumentItem> conceptParams = dec.getConceptParams();
+            edu.clemson.cs.r2jt.collections.List<ModuleArgumentItem> conceptParams =
+                    dec.getConceptParams();
 
             // Concept requires clause
             Exp req =
@@ -2776,8 +3018,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             loc.setDetails("Facility Declaration Rule");
 
             req =
-                    Utilities.replaceFacilityDeclarationVariables(req,
-                            facConceptDec.getParameters(), conceptParams);
+                    replaceFacilityDeclarationVariables(req, facConceptDec
+                            .getParameters(), conceptParams, assertiveCode);
             req.setLocation(loc);
             assertiveCode.setFinalConfirm(req, false);
 
@@ -2867,11 +3109,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                         // Replace with facility declaration variables
                         constraint =
-                                Utilities
-                                        .replaceFacilityDeclarationVariables(
-                                                constraint, facConceptDec
-                                                        .getParameters(),
-                                                conceptParams);
+                                replaceFacilityDeclarationVariables(constraint,
+                                        facConceptDec.getParameters(),
+                                        conceptParams, assertiveCode);
 
                         if (assumeExp == null) {
                             assumeExp = constraint;
@@ -2886,11 +3126,26 @@ public class VCGenerator extends TreeWalkerVisitor {
                         // Create an equals expression from formal to actual
                         Exp actualExp;
                         if (conceptParams.get(i).getEvalExp() != null) {
-                            actualExp =
-                                    Utilities
-                                            .convertExp(conceptParams.get(i)
-                                                    .getEvalExp(),
-                                                    myCurrentModuleScope);
+                            // Check for nested function calls in ProgramDotExp
+                            // and ProgramParamExp.
+                            ProgramExp p = conceptParams.get(i).getEvalExp();
+                            if (p instanceof ProgramDotExp
+                                    || p instanceof ProgramParamExp) {
+                                NestedFuncWalker nfw =
+                                        new NestedFuncWalker(null, null, mySymbolTable,
+                                                myCurrentModuleScope, assertiveCode);
+                                TreeWalker tw = new TreeWalker(nfw);
+                                tw.visit(p);
+
+                                // Use the modified ensures clause as the new expression we want
+                                // to replace.
+                                actualExp = nfw.getEnsuresClause();
+                            }
+                            // For all other types of arguments, simply convert it to a
+                            // math expression.
+                            else {
+                                actualExp = Utilities.convertExp(p);
+                            }
                         }
                         else {
                             actualExp = Exp.copy(varDecExp);
@@ -2919,7 +3174,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
         catch (NoSuchSymbolException e) {
             Utilities.noSuchModule(dec.getLocation());
-        }
+        }*/
 
         // Add this new assertive code to our incomplete assertive code stack
         myIncAssertiveCodeStack.push(assertiveCode);
@@ -3807,10 +4062,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                     Utilities.createVarExp(type.getLocation(), null, type
                             .getExemplar(), typeEntry.getModelType(), null);
 
-            // Add the correspondence as given
-            assertiveCode.addAssume((Location) decLoc.clone(), dec
-                    .getCorrespondence(), false);
-
             // Make sure we have a convention
             if (dec.getConvention() == null) {
                 myConventionExp = myTypeGraph.getTrueVarExp();
@@ -3843,6 +4094,19 @@ public class VCGenerator extends TreeWalkerVisitor {
                     + " generated by Initialization Rule");
             Utilities.setLocation(convention, conventionLoc);
             assertiveCode.addConfirm(loc, convention, simplify);
+
+            // Add the correspondence as given
+            Location corrLoc;
+            if (dec.getCorrespondence().getLocation() != null) {
+                corrLoc =
+                        (Location) dec.getCorrespondence().getLocation()
+                                .clone();
+            }
+            else {
+                corrLoc = (Location) decLoc.clone();
+            }
+            corrLoc.setDetails("Correspondence for " + dec.getName().getName());
+            assertiveCode.addAssume(corrLoc, dec.getCorrespondence(), false);
 
             // Create a variable that refers to the conceptual exemplar
             DotExp conceptualVar =
@@ -4090,23 +4354,11 @@ public class VCGenerator extends TreeWalkerVisitor {
             conventionLoc.setDetails(convention.getLocation().getDetails()
                     + " generated by " + name);
             Utilities.setLocation(convention, conventionLoc);
-
-            // Simplify if we just have true
-            boolean simplify = false;
-            if (myConventionExp.isLiteralTrue()) {
-                simplify = true;
-            }
-            myCurrentAssertiveCode.addConfirm(conventionLoc, convention,
-                    simplify);
+            ensures = myTypeGraph.formConjunct(convention, ensures);
         }
 
-        // Simplify if we just have true
-        boolean simplify = false;
-        if (ensures.isLiteralTrue()) {
-            simplify = true;
-        }
         // Add the final confirms clause
-        myCurrentAssertiveCode.setFinalConfirm(ensures, simplify);
+        myCurrentAssertiveCode.setFinalConfirm(ensures, false);
 
         // Verbose Mode Debug Messages
         myVCBuffer.append("\nProcedure Declaration Rule Applied: \n");
