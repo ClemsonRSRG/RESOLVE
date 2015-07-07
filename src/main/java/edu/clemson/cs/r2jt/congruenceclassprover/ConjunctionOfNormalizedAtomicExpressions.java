@@ -548,6 +548,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     // Type check here.  Incompatible types should invalidate the whole binding
                     MTType theoremSymbolType = exprReg.getTypeByIndex(exprReg.getIndexForSymbol(exprKey));
                     MTType localSymbolType = m_registry.getTypeByIndex(localSymbolIndex);
+                    if(localSymbol.contains("lambda")){
+                        int bp = 0;
+                    }
                     if(!localSymbolType.isSubtypeOf(theoremSymbolType)) {
                         validBinding = false;
                         break;

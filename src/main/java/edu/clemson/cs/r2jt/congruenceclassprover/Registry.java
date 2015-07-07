@@ -229,7 +229,7 @@ public class Registry {
         }
 
         m_symbolToUsage.put(symbolName, usage);
-        if (usage.equals(Usage.FORALL)) {
+        if (usage.equals(Usage.FORALL) || usage.equals(Usage.HASARGS_FORALL)) {
             m_foralls.add(symbolName);
         }
         int incomingsize = m_symbolToIndex.size();
@@ -247,8 +247,7 @@ public class Registry {
     public Set<String> getFunctionNames() {
         HashSet<String> rSet = new HashSet<String>();
         for (Entry<String, Usage> e : m_symbolToUsage.entrySet()) {
-            if (e.getValue().equals(Usage.HASARGS_SINGULAR)
-                    || e.getValue().equals(Usage.HASARGS_FORALL)) {
+            if (e.getValue().equals(Usage.HASARGS_SINGULAR)) {
                 rSet.add(e.getKey());
             }
         }
@@ -259,8 +258,10 @@ public class Registry {
     // this assumes this is called for a theorem registry
     public Set<String> getCommonlyDefinedSymbols() {
         HashSet<String> rSet = new HashSet<String>();
+
         for (Entry<String, Usage> e : m_symbolToUsage.entrySet()) {
-            if (!e.getValue().equals(Usage.FORALL) && (!e.getValue().equals(Usage.CREATED))) {
+            if ((!e.getValue().equals(Usage.FORALL) && (!e.getValue().equals(Usage.CREATED))) &&
+                    !e.getValue().equals(Usage.HASARGS_FORALL)){
                 rSet.add(e.getKey());
             }
         }

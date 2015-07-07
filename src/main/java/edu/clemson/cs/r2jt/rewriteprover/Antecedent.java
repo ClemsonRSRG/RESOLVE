@@ -13,7 +13,11 @@
 package edu.clemson.cs.r2jt.rewriteprover;
 
 import edu.clemson.cs.r2jt.absyn.Exp;
+import edu.clemson.cs.r2jt.absyn.LambdaExp;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
+
+import java.util.HashSet;
 
 public class Antecedent extends ImmutableConjuncts {
 

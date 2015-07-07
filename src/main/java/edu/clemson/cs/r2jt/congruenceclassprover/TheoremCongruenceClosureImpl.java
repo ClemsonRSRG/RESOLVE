@@ -100,6 +100,9 @@ public class TheoremCongruenceClosureImpl {
         else
             m_matchConj.addFormula(toMatchAndBind);
         m_insertExpr = toInsert;
+        if(m_theoremString.contains("Iterated")){
+            int bp = 0;
+        }
     }
 
     public Set<String> getFunctionNames() {
@@ -147,6 +150,9 @@ public class TheoremCongruenceClosureImpl {
         ArrayList<InsertExpWithJustification> rList =
                 new ArrayList<InsertExpWithJustification>();
 
+        if(m_theoremString.contains("Iterated")){
+            int bp = 0;
+        }
         if (m_insertExpr.getQuantifiedVariables().isEmpty()) {
             String r = "\tinserting: " + m_insertExpr + "\n";
             rList.add(new InsertExpWithJustification(m_insertExpr,
@@ -256,6 +262,9 @@ public class TheoremCongruenceClosureImpl {
             VerificationConditionCongruenceClosureImpl vc, long endTime) {
 
         boolean extraOutput = false;
+        if(m_theoremString.contains("(1,0,F)")){
+            int bp = 0;
+        }
         // these are alpha ordered, could rearrange
         Set<java.util.Map<String,String>> results = new HashSet<java.util.Map<String, String>>();
         results.add(getInitBindings());

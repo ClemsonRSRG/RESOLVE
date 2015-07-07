@@ -13,18 +13,23 @@
 package edu.clemson.cs.r2jt.rewriteprover;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
+import edu.clemson.cs.r2jt.absyn.LambdaExp;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExpVisitor;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PLambda;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
  * <p>Represents an immutable <em>verification condition</em>, which takes the 
  * form of a mathematical implication.</p>
- * 
- * <p>This class is intended to supersede and eventually replace
- * <code>VerificationConditionCongruenceClosureImpl</code>.</p>
  */
 public class VC {
 
@@ -41,8 +46,14 @@ public class VC {
      */
     private final boolean myDerivedFlag;
 
-    private final Antecedent myAntecedent;
-    private final Consequent myConsequent;
+    private Antecedent myAntecedent;
+    private Consequent myConsequent;
+
+    private java.util.HashMap<PLambda,String> m_liftedLamdas;
+    public java.util.List<PSymbol> m_liftedLambdaPredicates;
+    private int m_lamdaTag = 0;
+    private TypeGraph m_typegraph;
+    private VC liftedCopy;
 
     public VC(String name, Antecedent antecedent, Consequent consequent) {
         this(name, antecedent, consequent, false);
@@ -55,6 +66,8 @@ public class VC {
         myAntecedent = antecedent;
         myConsequent = consequent;
         myDerivedFlag = derived;
+        m_liftedLamdas = new HashMap<PLambda, String>();
+        m_liftedLambdaPredicates = new ArrayList<PSymbol>();
     }
 
     public String getName() {
@@ -66,7 +79,51 @@ public class VC {
 
         return retval;
     }
+    public void liftLambdas(TypeGraph g){
+        m_typegraph = g;
+        ArrayList<PExp> newConjuncts = new ArrayList<PExp>();
+        java.util.List<PExp> a_p = myAntecedent.getMutableCopy();
+        for(PExp p : a_p){
+            newConjuncts.add(recursiveLift(p));
+        }
+        myAntecedent = new Antecedent(newConjuncts);
 
+        newConjuncts.clear();
+        a_p = myConsequent.getMutableCopy();
+        for(PExp p : a_p){
+            newConjuncts.add(recursiveLift(p));
+        }
+        myConsequent = new Consequent(newConjuncts);
+        for(PLambda p : m_liftedLamdas.keySet()){
+            String name = m_liftedLamdas.get(p);
+            PExp body = p.getBody();
+            PSymbol lhs = new PSymbol(p.getType(),p.getTypeValue(),name,p.getParameters());
+            ArrayList<PExp> args = new ArrayList<PExp>();
+            args.add(lhs);
+            args.add(body);
+            m_liftedLambdaPredicates.add(new PSymbol(m_typegraph.BOOLEAN,null,"=",args));
+        }
+    }
+
+    private PExp recursiveLift(PExp p){
+        ArrayList<PExp> newArgList = new ArrayList<PExp>();
+        for(PExp p_s : p.getSubExpressions()){
+            newArgList.add(recursiveLift(p_s));
+        }
+        if(p instanceof PLambda){
+            String lname = "";
+            if(!m_liftedLamdas.containsKey(p)) {
+                lname = "lambda" + m_lamdaTag++;
+                m_liftedLamdas.put((PLambda)p,lname);
+            }
+            else{
+                lname = m_liftedLamdas.get(p);
+            }
+            return new PSymbol(p.getType(),p.getTypeValue(),lname);
+
+        }
+        return new PSymbol(p.getType(),p.getTypeValue(),p.getTopLevelOperation(),newArgList);
+    }
     public String getSourceName() {
         return myName;
     }
@@ -79,6 +136,7 @@ public class VC {
         return myConsequent;
     }
 
+
     @Override
     public String toString() {
 
@@ -86,6 +144,12 @@ public class VC {
                 "========== " + getName() + " ==========\n" + myAntecedent
                         + "  -->\n" + myConsequent;
 
+        if(!m_liftedLambdaPredicates.isEmpty()){
+            retval += "lifted lambda predicates:\n";
+            for(PExp p: m_liftedLambdaPredicates){
+                retval += p.toString() + "\n";
+            }
+        }
         return retval;
     }
 

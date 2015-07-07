@@ -43,6 +43,7 @@ public class TheoremPrioritizer {
                     !shouldExclude(t.getFunctionNames())) {
                 score = calculateScore(t.getNonQuantifiedSymbols());
             }
+
             if (m_theoremAppliedCount.containsKey(t.m_theoremString)) {
                 score += m_theoremAppliedCount.get(t.m_theoremString);
             }
@@ -50,7 +51,9 @@ public class TheoremPrioritizer {
             tws.m_score = score;
             m_pQueue.add(tws);
             //}
-
+            if(t.m_theoremString.contains("Iterated")){
+                int bp = 0;
+            }
         }
 
     }
@@ -64,16 +67,16 @@ public class TheoremPrioritizer {
         return false;
     }
     public int calculateScore(Set<String> theorem_symbols) {
-        int score = 0;
         int not_contained_penalty = m_vc_symbols.keySet().size();
+        int score = not_contained_penalty;
         for (String s : theorem_symbols) {
             if (m_vc_symbols.containsKey(s)) {
-               score  += m_vc_symbols.get(s);
+                int c_score = m_vc_symbols.get(s);
+                if (c_score < score)
+                    score = c_score;
             }
-            else
-                score += not_contained_penalty;
         }
-        return score/theorem_symbols.size();
+        return score;
     }
 
     public TheoremCongruenceClosureImpl poll() {

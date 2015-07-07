@@ -100,7 +100,9 @@ public class CongruenceClassProver {
         int i = 0;
 
         for (VC vc : vcs) {
-            //if(!vc.getName().equals("3_1")) continue;
+            // make every PExp a PSymbol
+            vc.liftLambdas(m_typeGraph);
+            System.err.println(vc.toString());
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc));
             myModels[i++] = (new PerVCProverModel(g, vc.getName(), vc, null));
         }
