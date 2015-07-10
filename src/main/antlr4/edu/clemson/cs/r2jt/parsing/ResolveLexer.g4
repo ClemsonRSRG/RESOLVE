@@ -1,5 +1,9 @@
 lexer grammar ResolveLexer;
 
+ABS
+    :   'abs'
+    ;
+
 ALL
     :   'all'
     ;
@@ -15,6 +19,19 @@ AND
 
 ARRAY
     :   'Array'
+    ;
+
+AUX_CODE
+    :   'Aux_Code'
+    ;
+
+AUX_VAR
+    :   'Aux_Var'
+    ;
+
+AUXILIARY
+    :   'Aux'
+    |   'Auxiliary'
     ;
 
 AXIOM
@@ -48,6 +65,10 @@ CHANGING
 CLEARS
     :   'clr'
     |   'clears'
+    ;
+
+COMPLEMENT
+    :   'complement'
     ;
 
 CONCEPT
@@ -106,7 +127,7 @@ ELAPSED_TIME
     ;
 
 ELSE
-    :   'else'
+    :   'Else'
     ;
 
 END
@@ -172,7 +193,7 @@ FOR
     ;
 
 IF
-    :   'if'
+    :   'If'
     ;
 
 IMPLICIT
@@ -217,6 +238,10 @@ INTRODUCES
 
 IS
     :   'is'
+    ;
+
+IS_IN
+    :   'is_in'
     ;
 
 ITERATE
@@ -370,6 +395,10 @@ REQUIRES
 RESTORES
     :   'rest'
     |   'restores'
+    ;
+
+SHORT_FOR
+    :   'short_for'
     ;
 
 SUBSET
