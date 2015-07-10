@@ -11,6 +11,8 @@ module
     |   enhancementModule
     |   enhancementImplModule
     |   conceptImplModule
+    |   conceptPerformanceModule
+    |   enhancementPerformanceModule
     ;
 
 // precis module
@@ -133,6 +135,27 @@ implItem
     |   correspondenceClause
     |   moduleImplInit
     |   moduleImplFinal
+    ;
+
+// concept performance module
+
+conceptPerformanceModule
+    :   PROFILE name=IDENTIFIER (moduleParameterList)?
+        SHORT_FOR fullName=IDENTIFIER FOR concept=IDENTIFIER SEMICOLON
+        (usesList)?
+        (requiresClause)?
+        END closename=IDENTIFIER SEMICOLON EOF
+    ;
+
+// enhancement performance module
+
+enhancementPerformanceModule
+    :   PROFILE name=IDENTIFIER (moduleParameterList)?
+        SHORT_FOR fullName=IDENTIFIER FOR enhancement=IDENTIFIER
+        WITH_PROFILE conceptProfile=IDENTIFIER SEMICOLON
+        (usesList)?
+        (requiresClause)?
+        END closename=IDENTIFIER SEMICOLON EOF
     ;
 
 // uses, imports
