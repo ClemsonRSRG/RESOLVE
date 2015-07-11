@@ -7,6 +7,7 @@ options {
 module
     :   precisModule
     |   facilityModule
+    |   shortFacilityModule
     |   conceptModule
     |   enhancementModule
     |   enhancementImplModule
@@ -53,6 +54,12 @@ facilityItem
     |   mathDefinitionDecl
     |   moduleFacilityInit
     |   moduleFacilityFinal
+    ;
+
+// short facility module
+
+shortFacilityModule
+    :   facilityDecl EOF
     ;
 
 // concept module
