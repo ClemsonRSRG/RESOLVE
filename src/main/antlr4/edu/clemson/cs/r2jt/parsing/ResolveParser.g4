@@ -1,4 +1,4 @@
-parser grammar Resolve;
+parser grammar ResolveParser;
 
 options {
     tokenVocab=ResolveLexer;
