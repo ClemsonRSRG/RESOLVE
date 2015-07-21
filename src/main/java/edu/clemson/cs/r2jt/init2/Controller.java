@@ -209,10 +209,10 @@ public class Controller {
      * @return The ANTLR4 Module AST.
      */
     private ModuleAST createModuleAST(ResolveFile file) {
-        /*  ResolveParser parser =
-                  myParserFactory.createParser(file.getInputStream());
-          ParserRuleContext start = parser.module();
-          return TreeUtil.createASTNodeFrom(start);*/
+        //ResolveParser parser =
+        //        myParserFactory.createParser(file.getInputStream());
+        //ParserRuleContext start = parser.module();
+        //return TreeUtil.createASTNodeFrom(start);
         return null;
     }
 

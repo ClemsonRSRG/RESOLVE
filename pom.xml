@@ -160,6 +160,12 @@
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
                 <version>4.5</version>
+                <configuration>
+                    <sourceDirectory>src/main/antlr4</sourceDirectory>
+                    <arguments>
+                        <argument>-visitor</argument>
+                    </arguments>
+                </configuration>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
