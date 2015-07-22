@@ -257,39 +257,6 @@ public class ResolveCompiler {
     }
 
     /**
-     * <p>This method finds all RESOLVE files in the directory and
-     * adds those to files the compiler will compile/verify.</p>
-     *
-     * @param directory The directory we are searching for RESOLVE files
-     * @param compileEnvironment The current job's compilation environment
-     *                           that stores all necessary objects and flags.
-     */
-    private void compileFilesInDir(File directory,
-            CompileEnvironment compileEnvironment) {
-        File[] filesInDir = directory.listFiles();
-        List<String> fileList = new LinkedList<String>();
-
-        // Obtain all RESOLVE files in the directory and add those as new files
-        // we need to compile.
-        for (File f : filesInDir) {
-            if (Utilities.getModuleType(f.getName()) != null) {
-                fileList.add(f.getName());
-            }
-        }
-
-        // Compile these files first
-        try {
-            compileRealFiles(fileList, compileEnvironment);
-        }
-        catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-        }
-        catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
-    }
-
-    /**
      * <p>This method will instantiate the controller and
      * begin the compilation process for the specified file.</p>
      *
