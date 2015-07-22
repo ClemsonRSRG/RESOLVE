@@ -79,8 +79,12 @@ public class ResolveCompiler {
             "Changes the compiler output files to XML";
     private static final String FLAG_DESC_WEB =
             "Change the output to be more web-friendly for the Web Interface.";
+    private static final String FLAG_DESC_WORKSPACE_DIR =
+            "Changes the workspace directory path.";
     private static final String FLAG_SECTION_GENERAL = "General";
     private static final String FLAG_SECTION_NAME = "Output";
+
+    private static final String[] WORKSPACE_DIR_ARG_NAME = { "Path" };
 
     // ===========================================================
     // Flags
@@ -131,6 +135,13 @@ public class ResolveCompiler {
     public static final Flag FLAG_WEB =
             new Flag(FLAG_SECTION_NAME, "webinterface", FLAG_DESC_WEB,
                     Flag.Type.HIDDEN);
+
+    /**
+     * <p>Tells the compiler the RESOLVE workspace directory path.</p>
+     */
+    public static final Flag FLAG_WORKSPACE_DIR =
+            new Flag(FLAG_SECTION_GENERAL, "workspaceDir",
+                    FLAG_DESC_WORKSPACE_DIR, WORKSPACE_DIR_ARG_NAME);
 
     // ===========================================================
     // Constructors
@@ -369,20 +380,12 @@ public class ResolveCompiler {
 
             // Handle remaining arguments
             String[] remainingArgs = compileEnvironment.getRemainingArgs();
-            if (remainingArgs.length >= 1
-                    && !compileEnvironment.flags.isFlagSet(FLAG_HELP)) {
+            if (compileEnvironment.flags.isFlagSet(FLAG_HELP)) {
+                printHelpMessage(compileEnvironment);
+            }
+            else {
                 for (int i = 0; i < remainingArgs.length; i++) {
-                    if (remainingArgs[i].equals("-PVCs")) {
-                        compileEnvironment.setPerformanceFlag();
-                        System.out.println("Here!");
-                    }
-                    else if (remainingArgs[i].equalsIgnoreCase("-workspaceDir")) {
-                        if (i + 1 < remainingArgs.length) {
-                            i++;
-                            workspaceDir = remainingArgs[i];
-                        }
-                    }
-                    else if (remainingArgs[i].equals("-o")) {
+                    if (remainingArgs[i].equals("-o")) {
                         if (i + 1 < remainingArgs.length) {
                             String outputFile;
                             i++;
@@ -401,17 +404,10 @@ public class ResolveCompiler {
                     compileEnvironment.setDebugOff();
                 }
 
-                // Store the workspace directory to the compile environment
-                compileEnvironment.setWorkspaceDir(Utilities
-                        .getWorkspaceDir(workspaceDir));
-
                 // Store the symbol table
                 MathSymbolTableBuilder symbolTable =
                         new MathSymbolTableBuilder();
                 compileEnvironment.setSymbolTable(symbolTable);
-            }
-            else {
-                printHelpMessage(compileEnvironment);
             }
         }
         catch (FlagDependencyException fde) {

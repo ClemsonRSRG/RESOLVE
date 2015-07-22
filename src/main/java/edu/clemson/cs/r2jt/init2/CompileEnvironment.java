@@ -15,6 +15,7 @@ package edu.clemson.cs.r2jt.init2;
 import edu.clemson.cs.r2jt.absynnew.ModuleAST;
 import edu.clemson.cs.r2jt.errors.ErrorHandler2;
 import edu.clemson.cs.r2jt.init2.file.ResolveFile;
+import edu.clemson.cs.r2jt.init2.file.Utilities;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
 import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
@@ -145,11 +146,19 @@ public class CompileEnvironment {
         myUserFileMap = new HashMap<String, ResolveFile>();
 
         if (!flags.isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
-            // Print Compiler Messages
-            System.out.println("RESOLVE Compiler/Verifier - " + compilerVersion
-                    + " Version.");
-            System.out.println("\tUse -help flag for options.");
-            System.out.println();
+            synchronized (System.out) {
+                // Print Compiler Messages
+                System.out.println("RESOLVE Compiler/Verifier - " + compilerVersion
+                        + " Version.");
+                System.out.println("\tUse -help flag for options.");
+                System.out.println();
+            }
+        }
+
+        if (flags.isFlagSet(ResolveCompiler.FLAG_WORKSPACE_DIR)) {
+            myCompileDir =
+                    Utilities.getWorkspaceDir(flags.getFlagArgument(
+                            ResolveCompiler.FLAG_WORKSPACE_DIR, "Path"));
         }
     }
 
@@ -429,15 +438,6 @@ public class CompileEnvironment {
      */
     public void setTypeGraph(TypeGraph t) {
         myTypeGraph = t;
-    }
-
-    /**
-     * <p>Sets the workspace directory to the specified directory.</p>
-     *
-     * @param dir A <code>File</code> object to the RESOLVE workspace directory.
-     */
-    public void setWorkspaceDir(File dir) {
-        myCompileDir = dir;
     }
 
 }
