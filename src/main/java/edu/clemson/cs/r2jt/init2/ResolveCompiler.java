@@ -384,6 +384,14 @@ public class ResolveCompiler {
                 printHelpMessage(compileEnvironment);
             }
             else {
+                if (remainingArgs.length == 0) {
+                    throw new FlagDependencyException("Need to specify a filename.");
+                }
+                else {
+                    for (String arg : remainingArgs) {
+                        myArgumentFileList.add(arg);
+                    }
+                }
                 for (int i = 0; i < remainingArgs.length; i++) {
                     if (remainingArgs[i].equals("-o")) {
                         if (i + 1 < remainingArgs.length) {
@@ -392,9 +400,6 @@ public class ResolveCompiler {
                             outputFile = remainingArgs[i];
                             compileEnvironment.setOutputFileName(outputFile);
                         }
-                    }
-                    else {
-                        myArgumentFileList.add(remainingArgs[i]);
                     }
                 }
 
