@@ -21,6 +21,7 @@ import edu.clemson.cs.r2jt.init2.file.Utilities;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
+import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.rewriteprover.AlgebraicProver;
 import edu.clemson.cs.r2jt.rewriteprover.Prover;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
@@ -162,11 +163,6 @@ public class ResolveCompiler {
     public void invokeCompiler() {
         // Handle all arguments to the compiler
         CompileEnvironment compileEnvironment = handleCompileArgs();
-
-        // Print Compiler Messages
-        System.out.println("RESOLVE Compiler/Verifier - " + myCompilerVersion
-                + " Version.");
-        System.out.println("  Use -help flag for options.");
 
         // Compile files/directories listed in the argument list
         try {
@@ -365,7 +361,8 @@ public class ResolveCompiler {
             // Instantiate a new compile environment that will store
             // all the necessary information needed throughout the compilation
             // process.
-            compileEnvironment = new CompileEnvironment(myCompilerArgs);
+            compileEnvironment =
+                    new CompileEnvironment(myCompilerArgs, myCompilerVersion);
 
             // Workspace Directory
             String workspaceDir = null;
@@ -377,6 +374,7 @@ public class ResolveCompiler {
                 for (int i = 0; i < remainingArgs.length; i++) {
                     if (remainingArgs[i].equals("-PVCs")) {
                         compileEnvironment.setPerformanceFlag();
+                        System.out.println("Here!");
                     }
                     else if (remainingArgs[i].equalsIgnoreCase("-workspaceDir")) {
                         if (i + 1 < remainingArgs.length) {
@@ -433,26 +431,14 @@ public class ResolveCompiler {
      *                           that stores all necessary objects and flags.
      */
     private void printHelpMessage(CompileEnvironment compileEnvironment) {
-        System.out.println("Usage: java -jar RESOLVE.jar [options] <files>");
-        System.out.println("where options include:");
-        System.out.println();
-
-        // TODO: Each module should have a common method that specifies all the relevant flags
-
-        // Prover flags
-
-        // Translator flags
-        System.out.println("  -translate     Translate to Java code.");
-
-        // VC Generator flags
-        System.out.println("  -PVCs           Generate verification "
-                + "conditions for performance.");
-        System.out.println("  -VCs           Generate verification "
-                + "conditions.");
-
-        System.out.println(FlagDependencies
-                .getListingString(compileEnvironment.flags
-                        .isFlagSet(FLAG_EXTENDED_HELP)));
+        if (!compileEnvironment.flags.isFlagSet(FLAG_NO_DEBUG)) {
+            System.out
+                    .println("Usage: java -jar RESOLVE.jar [options] <files>");
+            System.out.println("where options include:");
+            System.out.println(FlagDependencies
+                    .getListingString(compileEnvironment.flags
+                            .isFlagSet(FLAG_EXTENDED_HELP)));
+        }
     }
 
     /**

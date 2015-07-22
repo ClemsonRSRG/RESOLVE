@@ -133,7 +133,8 @@ public class CompileEnvironment {
      *
      * @throws FlagDependencyException
      */
-    public CompileEnvironment(String[] args) throws FlagDependencyException {
+    public CompileEnvironment(String[] args, String compilerVersion)
+            throws FlagDependencyException {
         flags = new FlagManager(args);
         myCompileReport = new CompileReport();
         myCompilingModules =
@@ -142,6 +143,14 @@ public class CompileEnvironment {
         myExternalRealizFiles = new HashMap<ModuleIdentifier, File>();
         myIncompleteModules = new LinkedList<ModuleIdentifier>();
         myUserFileMap = new HashMap<String, ResolveFile>();
+
+        if (!flags.isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+            // Print Compiler Messages
+            System.out.println("RESOLVE Compiler/Verifier - " + compilerVersion
+                    + " Version.");
+            System.out.println("\tUse -help flag for options.");
+            System.out.println();
+        }
     }
 
     // ===========================================================
