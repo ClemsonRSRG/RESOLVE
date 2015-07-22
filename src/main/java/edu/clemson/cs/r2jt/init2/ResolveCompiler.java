@@ -50,12 +50,6 @@ public class ResolveCompiler {
     // ===========================================================
 
     /**
-     * <p>Boolean flag that checks to see if we need to compile
-     * all the files in the folder.</p>
-     */
-    private boolean myCompileAllFilesInDir = false;
-
-    /**
      * <p>This stores all the arguments received by the RESOLVE
      * compiler.</p>
      */
@@ -330,15 +324,9 @@ public class ResolveCompiler {
             }
             // Recursively compile all RESOLVE files in the specified directory
             else if (file.isDirectory()) {
-                // If the option to compile all files in the directory is given
-                if (myCompileAllFilesInDir) {
-                    compileFilesInDir(file, compileEnvironment);
-                }
-                else {
-                    throw new IllegalArgumentException(
-                            "Option to compile all files in the directory not set. Skipping directory "
-                                    + file.getName());
-                }
+                throw new IllegalArgumentException(
+                        file.getName()
+                                + " is an directory. Directories cannot be specified as an argument to the RESOLVE compiler.");
             }
             // Process this file
             else {
@@ -387,10 +375,7 @@ public class ResolveCompiler {
             if (remainingArgs.length >= 1
                     && !compileEnvironment.flags.isFlagSet(FLAG_HELP)) {
                 for (int i = 0; i < remainingArgs.length; i++) {
-                    if (remainingArgs[i].equals("-R")) {
-                        myCompileAllFilesInDir = true;
-                    }
-                    else if (remainingArgs[i].equals("-PVCs")) {
+                    if (remainingArgs[i].equals("-PVCs")) {
                         compileEnvironment.setPerformanceFlag();
                     }
                     else if (remainingArgs[i].equalsIgnoreCase("-workspaceDir")) {
@@ -451,9 +436,6 @@ public class ResolveCompiler {
         System.out.println("Usage: java -jar RESOLVE.jar [options] <files>");
         System.out.println("where options include:");
         System.out.println();
-
-        // General flags
-        System.out.println("  -R             Recurse through directories.");
 
         // TODO: Each module should have a common method that specifies all the relevant flags
 
