@@ -64,11 +64,6 @@ public class CompileEnvironment {
     private final Map<ModuleIdentifier, File> myExternalRealizFiles;
 
     /**
-     * <p>A flag to see if we want to show debugging information or not.</p>
-     */
-    private boolean myDebugOff = false;
-
-    /**
      * <p>This is the error handler for the RESOLVE compiler.</p>
      */
     private final ErrorHandler2 myErrorHandler;
@@ -148,8 +143,8 @@ public class CompileEnvironment {
         if (!flags.isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
             synchronized (System.out) {
                 // Print Compiler Messages
-                System.out.println("RESOLVE Compiler/Verifier - " + compilerVersion
-                        + " Version.");
+                System.out.println("RESOLVE Compiler/Verifier - "
+                        + compilerVersion + " Version.");
                 System.out.println("\tUse -help flag for options.");
                 System.out.println();
             }
@@ -179,8 +174,8 @@ public class CompileEnvironment {
         myIncompleteModules.remove(mid);
 
         // Print out debugging message
-        if (!myDebugOff) {
-            myErrorHandler.message("Complete record: " + mid.toString()); //DEBUG
+        if (!flags.isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+            myErrorHandler.message("Complete record: " + mid.toString());
         }
     }
 
@@ -202,7 +197,7 @@ public class CompileEnvironment {
         myIncompleteModules.add(mid);
 
         // Print out debugging message
-        if (!myDebugOff) {
+        if (!flags.isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
             myErrorHandler.message("Construct record: " + mid.toString()); //DEBUG
         }
     }
@@ -255,15 +250,6 @@ public class CompileEnvironment {
      */
     public boolean isExternalRealizFile(ModuleIdentifier id) {
         return myExternalRealizFiles.containsKey(id);
-    }
-
-    /**
-     * <p>Checks to see if we want debugging output or not.</p>
-     *
-     * @return Returns true iff we should suppress debug output.
-     */
-    public boolean debugOff() {
-        return myDebugOff;
     }
 
     /**
@@ -366,14 +352,6 @@ public class CompileEnvironment {
      */
     public boolean isMetaFile(String key) {
         return myUserFileMap.containsKey(key);
-    }
-
-    /**
-     * <p>Indicates that debug output should be turned off to the maximum amount
-     * this is possible.</p>
-     */
-    public void setDebugOff() {
-        myDebugOff = true;
     }
 
     /**

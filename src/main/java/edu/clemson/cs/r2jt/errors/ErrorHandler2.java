@@ -60,7 +60,8 @@ public class ErrorHandler2 {
      * @param msg A compilation message.
      */
     public void message(String msg) {
-        if (!myInstanceEnvironment.debugOff()) {
+        if (!myInstanceEnvironment.flags
+                .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
             try {
                 myOutputWriter.write(msg + "\n");
                 myOutputWriter.flush();

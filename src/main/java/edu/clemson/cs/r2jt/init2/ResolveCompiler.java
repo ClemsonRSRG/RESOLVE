@@ -385,7 +385,8 @@ public class ResolveCompiler {
             }
             else {
                 if (remainingArgs.length == 0) {
-                    throw new FlagDependencyException("Need to specify a filename.");
+                    throw new FlagDependencyException(
+                            "Need to specify a filename.");
                 }
                 else {
                     // The remaining arguments must be filenames, so we add those
@@ -395,12 +396,6 @@ public class ResolveCompiler {
                     }
                 }
 
-                // Turn off debugging messages
-                if (compileEnvironment.flags
-                        .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
-                    compileEnvironment.setDebugOff();
-                }
-
                 // Store the symbol table
                 MathSymbolTableBuilder symbolTable =
                         new MathSymbolTableBuilder();
@@ -408,9 +403,6 @@ public class ResolveCompiler {
             }
         }
         catch (FlagDependencyException fde) {
-            System.out.println("RESOLVE Compiler/Verifier - "
-                    + myCompilerVersion + " Version.");
-            System.out.println("  Use -help flag for options.");
             System.err.println(fde.getMessage());
         }
 
