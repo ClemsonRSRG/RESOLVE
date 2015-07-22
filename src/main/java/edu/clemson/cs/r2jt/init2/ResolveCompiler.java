@@ -388,18 +388,10 @@ public class ResolveCompiler {
                     throw new FlagDependencyException("Need to specify a filename.");
                 }
                 else {
+                    // The remaining arguments must be filenames, so we add those
+                    // to our list of files to compile.
                     for (String arg : remainingArgs) {
                         myArgumentFileList.add(arg);
-                    }
-                }
-                for (int i = 0; i < remainingArgs.length; i++) {
-                    if (remainingArgs[i].equals("-o")) {
-                        if (i + 1 < remainingArgs.length) {
-                            String outputFile;
-                            i++;
-                            outputFile = remainingArgs[i];
-                            compileEnvironment.setOutputFileName(outputFile);
-                        }
                     }
                 }
 
