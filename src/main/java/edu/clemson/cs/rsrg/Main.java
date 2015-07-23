@@ -1,5 +1,5 @@
 /**
- * Main2.java
+ * Main.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt;
+package edu.clemson.cs.rsrg;
 
 import edu.clemson.cs.r2jt.init2.ResolveCompiler;
 
@@ -22,7 +22,7 @@ import edu.clemson.cs.r2jt.init2.ResolveCompiler;
  * @author Daniel Welch
  * @version 1.0
  */
-public class Main2 {
+public class Main {
 
     /**
      * <p>This method creates and invokes the <code>ResolveCompiler</code>
