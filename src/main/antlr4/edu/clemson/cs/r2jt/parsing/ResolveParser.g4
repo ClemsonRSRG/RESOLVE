@@ -579,11 +579,11 @@ callStmt
     ;
 
 confirmStmt
-    :   CONFIRM mathAssertionExp SEMICOLON
+    :   CONFIRM mathExp SEMICOLON
     ;
 
 ifStmt
-    :   IF progExp THEN (stmt)*  (elsePart)? END SEMICOLON
+    :   IF progExp THEN (stmt)* (elsePart)? END SEMICOLON
     ;
 
 elsePart
@@ -606,7 +606,7 @@ mathTypeTheoremDecl
 
 mathAssertionDecl
     :   (AXIOM | COROLLARY | LEMMA | PROPERTY | THEOREM ) name=mathTheoremIdent
-        COLON mathAssertionExp SEMICOLON
+        COLON mathExp SEMICOLON
     ;
 
 mathTheoremIdent
@@ -629,22 +629,22 @@ mathDefinitionDecl
 
 mathCategoricalDecl
     :   CATEGORICAL DEFINITION INTRODUCES categoricalDefinitionSignature
-        RELATED BY mathAssertionExp SEMICOLON
+        RELATED BY mathExp SEMICOLON
     ;
 
 mathImplicitDefinitionDecl
     :   IMPLICIT DEFINITION definitionSignature
-        IS mathAssertionExp SEMICOLON
+        IS mathExp SEMICOLON
     ;
 
 mathInductiveDefinitionDecl
     :   INDUCTIVE DEFINITION inductiveDefinitionSignature
-        IS INDUCTIVE_BASE_NUM mathAssertionExp SEMICOLON
-        INDUCTIVE_HYP_NUM mathAssertionExp SEMICOLON
+        IS INDUCTIVE_BASE_NUM mathExp SEMICOLON
+        INDUCTIVE_HYP_NUM mathExp SEMICOLON
     ;
 
 mathStandardDefinitionDecl
-    :   DEFINITION definitionSignature (EQL mathAssertionExp)? SEMICOLON
+    :   DEFINITION definitionSignature (EQL mathExp)? SEMICOLON
     ;
 
 categoricalDefinitionSignature
@@ -715,15 +715,15 @@ affectsClause
     ;
 
 requiresClause
-    :   REQUIRES mathAssertionExp SEMICOLON
+    :   REQUIRES mathExp SEMICOLON
     ;
 
 ensuresClause
-    :   ENSURES mathAssertionExp SEMICOLON
+    :   ENSURES mathExp SEMICOLON
     ;
 
 constraintClause
-    :   CONSTRAINT mathAssertionExp SEMICOLON
+    :   CONSTRAINT mathExp SEMICOLON
     ;
 
 changingClause
@@ -731,31 +731,31 @@ changingClause
     ;
 
 maintainingClause
-    :   MAINTAINING mathAssertionExp SEMICOLON
+    :   MAINTAINING mathExp SEMICOLON
     ;
 
 decreasingClause
-    :   DECREASING mathAssertionExp SEMICOLON
+    :   DECREASING mathAddingExp SEMICOLON
     ;
 
 whereClause
-    :   WHERE mathAssertionExp
+    :   WHERE mathExp
     ;
 
 correspondenceClause
-    :   CORR mathAssertionExp SEMICOLON
+    :   CORR mathExp SEMICOLON
     ;
 
 conventionClause
-    :   CONVENTION mathAssertionExp SEMICOLON
+    :   CONVENTION mathExp SEMICOLON
     ;
 
 durationClause
-    :   DURATION mathAssertionExp SEMICOLON
+    :   DURATION mathAddingExp SEMICOLON
     ;
 
 manipulationDispClause
-    :   MAINP_DISP mathAssertionExp SEMICOLON
+    :   MAINP_DISP mathAddingExp SEMICOLON
     ;
 
 // mathematical type declarations
@@ -767,41 +767,92 @@ confirmMathTypeDecl
 // mathematical expressions
 
 mathTypeExp
-    :   mathExp
-    ;
-
-mathAssertionExp
-    :   mathExp
-    |   mathQuantifiedExp
-    ;
-
-mathQuantifiedExp
-    :   FOR ALL mathVariableDeclGroup (whereClause)? COMMA
-         mathAssertionExp
+    :   mathInfixExp
     ;
 
 mathExp
-    :   mathPrimaryExp                                  #mathPrimeExp
-    |   op=(PLUS|MINUS|TILDE|NOT) mathExp               #mathUnaryExp
-    |   mathExp op=(MULTIPLY|DIVIDE|TILDE) mathExp      #mathInfixExp
-    |   mathExp op=(PLUS|MINUS) mathExp                 #mathInfixExp
-    |   mathExp op=(RANGE|FUNCARROW) mathExp            #mathInfixExp
-    |   mathExp op=(CONCAT|UNION|INTERSECT) mathExp     #mathInfixExp
-    |   mathExp op=(IN|NOT_IN) mathExp                  #mathInfixExp
-    |   mathExp op=(LT_EQL|GT_EQL|GT|LT) mathExp        #mathInfixExp
-    |   mathExp op=(EQL|NOT_EQL) mathExp                #mathInfixExp
-    |   mathImpliesExp                                  #mathInfixExp
-    |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
-    |   mathExp (COLON) mathExp                         #mathTypeAssertExp
-    |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
+    :   mathIteratedExp
+    |   mathQuantifiedExp
+    ;
+
+mathIteratedExp
+    :   op=(BIG_CONCAT | BIG_INTERSECT | BIG_PRODUCT | BIG_SUM | BIG_UNION)
+        IDENTIFIER COLON mathTypeExp
+        (whereClause)?
+        (COMMA | OF) LBRACE mathExp RBRACE
+    ;
+
+mathQuantifiedExp
+    :   mathImpliesExp
+    |   FOR ALL mathVariableDeclGroup (whereClause)? COMMA
+        mathQuantifiedExp
+    |   THERE EXIST UNIQUE mathVariableDeclGroup (whereClause)? (SUCH THAT | COMMA)
+        mathQuantifiedExp
+    |   THERE EXIST mathVariableDeclGroup (whereClause)? (SUCH THAT | COMMA)
+        mathQuantifiedExp
     ;
 
 mathImpliesExp
-    :   mathExp op=IMPLIES mathExp
+    :   mathLogicalExp (op=(IMPLIES | IFF) mathLogicalExp)?
+    |   IF mathLogicalExp
+        THEN mathLogicalExp
+        (ELSE mathLogicalExp)?
+    ;
+
+mathLogicalExp
+    :   mathRelationalExp (op=(AND | OR) mathRelationalExp)*
+    ;
+
+mathRelationalExp
+    :   mathInfixExp
+        (op1=(LT | LT_EQL))
+        mathInfixExp
+        (op2=(LT | LT_EQL))
+        mathInfixExp
+    |   mathInfixExp
+        (op=(EQL | NOT_EQL | LT | LT_EQL | GT | GT_EQL | IN | NOT_IN |
+             SUBSET | NOT_SUBSET | PROP_SUBSET | NOT_PROP_SUBSET | SUBSTR | NOT_SUBSTR)
+         mathInfixExp)?
+    ;
+
+mathInfixExp
+    :   mathTypeAssertionExp RANGE mathTypeAssertionExp
+    |   mathTypeAssertionExp
+    ;
+
+mathTypeAssertionExp
+    :   mathFunctionTypeExp (COLON mathTypeExp)?
+    ;
+
+mathFunctionTypeExp
+    :   mathAddingExp (FUNCARROW mathAddingExp)*
+    ;
+
+mathAddingExp
+    :   mathMultiplyingExp
+        (op=(PLUS | MINUS | CONCAT | UNION | INTERSECT | WITHOUT | TILDE)
+         mathMultiplyingExp)*
+    ;
+
+mathMultiplyingExp
+    :   mathExponentialExp
+        (op=(MULTIPLY | DIVIDE | MOD | REM | DIV)
+         mathExponentialExp)*
+    ;
+
+mathExponentialExp
+    :   mathPrefixExp (EXP mathExponentialExp)?
+    ;
+
+mathPrefixExp
+    :   prefixOp mathPrimaryExp
+    |   mathPrimaryExp
     ;
 
 mathPrimaryExp
-    :   mathLiteralExp
+    :   mathAlternativeExp
+    |   mathIteratedExp
+    |   mathLiteralExp
     |   mathDotExp
     |   mathFunctionApplicationExp
     |   mathOutfixExp
@@ -810,9 +861,21 @@ mathPrimaryExp
     |   mathLambdaExp
     ;
 
+mathAlternativeExp
+    :   DBL_LBRACE (mathAlternativeExpItem)+ DBL_RBRACE
+    ;
+
+mathAlternativeExpItem
+    :   mathAddingExp
+        (IF mathRelationalExp | OTHERWISE)
+        SEMICOLON
+    ;
+
 mathLiteralExp
-    :   BOOLEAN_LITERAL      #mathBooleanExp
-    |   INTEGER_LITERAL      #mathIntegerExp
+    :   BOOLEAN_LITERAL         #mathBooleanExp
+    |   INTEGER_LITERAL         #mathIntegerExp
+    |   CHARACTER_LITERAL       #mathCharacterExp
+    |   STRING_LITERAL          #mathStringExp
     ;
 
 mathDotExp
@@ -837,7 +900,7 @@ mathOutfixExp
     ;
 
 mathSetExp
-    :   LBRACE mathVariableDecl BAR mathAssertionExp RBRACE #mathSetBuilderExp//Todo
+    :   LBRACE mathVariableDecl BAR mathExp RBRACE          #mathSetBuilderExp
     |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE           #mathSetCollectionExp
     ;
 
@@ -849,7 +912,7 @@ mathTupleExp
 
 mathLambdaExp
     :   LAMBDA LPAREN mathVariableDeclGroup (COMMA mathVariableDeclGroup)* RPAREN
-        DOT LPAREN mathAssertionExp RPAREN
+        DOT LPAREN mathExp RPAREN
     ;
 
 // program expressions

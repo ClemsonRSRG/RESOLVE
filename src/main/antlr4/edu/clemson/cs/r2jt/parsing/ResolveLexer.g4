@@ -42,6 +42,26 @@ BASECASE
     :   'Base_Case'
     ;
 
+BIG_CONCAT
+    :   'Concatenation'
+    ;
+
+BIG_INTERSECT
+    :   'Intersection'
+    ;
+
+BIG_PRODUCT
+    :   'Product'
+    ;
+
+BIG_SUM
+    :   'Sum'
+    ;
+
+BIG_UNION
+    :   'Union'
+    ;
+
 BY
     :   'by'
     ;
@@ -198,6 +218,10 @@ FOR
 
 IF
     :   'If'
+    ;
+
+IFF
+    :   'iff'
     ;
 
 IMPLICIT
@@ -455,6 +479,11 @@ UNION
     :   'union'
     ;
 
+UNIQUE
+    :   'Unique'
+    |   'unique'
+    ;
+
 UPDATES
     :   'upd'
     |   'updates'
@@ -474,6 +503,10 @@ WHERE
 
 WHILE
     :   'While'
+    ;
+
+WITHOUT
+    :   'without'
     ;
 
 WITH_PROFILE
@@ -504,6 +537,14 @@ CONCAT
 
 DBL_BAR
     :   '||'
+    ;
+
+DBL_LBRACE
+    :   '{{'
+    ;
+
+DBL_RBRACE
+    :   '}}'
     ;
 
 DIVIDE
