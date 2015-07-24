@@ -342,15 +342,12 @@ public class ResolveCompiler {
             compileEnvironment =
                     new CompileEnvironment(myCompilerArgs, myCompilerVersion);
 
-            // Workspace Directory
-            String workspaceDir = null;
-
-            // Handle remaining arguments
-            String[] remainingArgs = compileEnvironment.getRemainingArgs();
             if (compileEnvironment.flags.isFlagSet(FLAG_HELP)) {
                 printHelpMessage(compileEnvironment);
             }
             else {
+                // Handle remaining arguments
+                String[] remainingArgs = compileEnvironment.getRemainingArgs();
                 if (remainingArgs.length == 0) {
                     throw new FlagDependencyException(
                             "Need to specify a filename.");
@@ -384,12 +381,14 @@ public class ResolveCompiler {
      */
     private void printHelpMessage(CompileEnvironment compileEnvironment) {
         if (!compileEnvironment.flags.isFlagSet(FLAG_NO_DEBUG)) {
-            System.out
-                    .println("Usage: java -jar RESOLVE.jar [options] <files>");
-            System.out.println("where options include:");
-            System.out.println(FlagDependencies
-                    .getListingString(compileEnvironment.flags
-                            .isFlagSet(FLAG_EXTENDED_HELP)));
+            synchronized (System.out) {
+                System.out
+                        .println("Usage: java -jar RESOLVE.jar [options] <files>");
+                System.out.println("where options include:");
+                System.out.println(FlagDependencies
+                        .getListingString(compileEnvironment.flags
+                                .isFlagSet(FLAG_EXTENDED_HELP)));
+            }
         }
     }
 
