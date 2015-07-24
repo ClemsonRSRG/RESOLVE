@@ -252,7 +252,7 @@ conceptImplParameterDecl
     ;
 
 parameterDecl
-    :   parameterMode name=IDENTIFIER COLON type
+    :   parameterMode variableDeclGroup
     ;
 
 parameterMode
@@ -451,33 +451,42 @@ performanceModuleSpecFinal
 procedureDecl
     :   (recursive=RECURSIVE)? PROCEDURE name=IDENTIFIER
         operationParameterList (COLON type)? SEMICOLON
+        (affectsClause)*
+        (decreasingClause)?
+        (facilityDecl)*
         (variableDecl)*
+        (auxVariableDecl)*
         (stmt)*
         END closename=IDENTIFIER SEMICOLON
     ;
 
 operationProcedureDecl
-    :   (recursive=RECURSIVE)? OPERATION
+    :   OPERATION
         name=IDENTIFIER operationParameterList SEMICOLON
+        (affectsClause)*
         (requiresClause)?
         (ensuresClause)?
-        PROCEDURE
+        (recursive=RECURSIVE)? PROCEDURE
+        (decreasingClause)?
+        (facilityDecl)*
         (variableDecl)*
+        (auxVariableDecl)*
         (stmt)*
         END closename=IDENTIFIER SEMICOLON
     ;
 
 operationDecl
     :   OPERATION name=IDENTIFIER operationParameterList (COLON type)? SEMICOLON
-            (requiresClause)?
-            (ensuresClause)?
+        (affectsClause)*
+        (requiresClause)?
+        (ensuresClause)?
     ;
 
 performanceOperationDecl
     :   OPERATION name=IDENTIFIER operationParameterList (COLON type)? SEMICOLON
-            (ensuresClause)?
-            (durationClause)?
-            (manipulationDispClause)?
+        (ensuresClause)?
+        (durationClause)?
+        (manipulationDispClause)?
     ;
 
 // facility and enhancements
@@ -702,7 +711,7 @@ definitionParameterList
 // mathematical clauses
 
 affectsClause
-    :   parameterMode IDENTIFIER (COMMA IDENTIFIER)*
+    :   parameterMode progNamedExp (COMMA progNamedExp)* SEMICOLON
     ;
 
 requiresClause
