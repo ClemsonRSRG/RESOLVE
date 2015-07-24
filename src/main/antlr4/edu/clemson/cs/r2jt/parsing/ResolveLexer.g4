@@ -264,6 +264,10 @@ MAINTAINING
     :   'maintaining'
     ;
 
+MATH
+    :   'Math'
+    ;
+
 MOD
     :   'mod'
     ;
@@ -349,6 +353,10 @@ PROFILE
 PROCEDURE
     :   'Proc'
     |   'Procedure'
+    ;
+
+PROPERTY
+    :   'Property'
     ;
 
 PROP_SUBSET

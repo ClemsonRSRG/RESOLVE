@@ -32,7 +32,7 @@ precisItems
 precisItem
     :   mathTypeTheoremDecl
     |   mathDefinitionDecl
-    |   mathTheoremDecl
+    |   mathAssertionDecl
     ;
 
 // facility module
@@ -49,7 +49,8 @@ facilityItems
     ;
 
 facilityItem
-    :   facilityDecl
+    :   stateVariableDecl
+    |   facilityDecl
     |   operationProcedureDecl
     |   mathDefinitionDecl
     |   moduleFacilityInit
@@ -77,18 +78,23 @@ conceptItems
     ;
 
 conceptItem
-    :   constraintClause
+    :   moduleStateVariableDecl
+    |   confirmMathTypeDecl
+    |   constraintClause
     |   moduleSpecInit
     |   moduleSpecFinal
     |   operationDecl
     |   typeModelDecl
     |   mathDefinitionDecl
+    |   mathDefinesDecl
     ;
 
 // concept impl module
 
 conceptImplModule
-    :   REALIZATION name=IDENTIFIER FOR concept=IDENTIFIER
+    :   REALIZATION name=IDENTIFIER
+        (WITH_PROFILE profile=IDENTIFIER)?
+        FOR concept=IDENTIFIER
         (ENHANCED BY enhancement=IDENTIFIER)* SEMICOLON
         (usesList)?
         (requiresClause)?
@@ -112,16 +118,22 @@ enhancementItems
     ;
 
 enhancementItem
-    :   operationDecl
-    |   mathDefinitionDecl
+    :   moduleStateVariableDecl
+    |   operationDecl
     |   typeModelDecl
+    |   mathDefinitionDecl
+    |   mathDefinesDecl
     ;
 
 // enhancement impl module
 
 enhancementImplModule
     :   REALIZATION name=IDENTIFIER (moduleParameterList)?
-        FOR enhancement=IDENTIFIER OF concept=IDENTIFIER SEMICOLON
+        (WITH_PROFILE profile=IDENTIFIER)?
+        FOR enhancement=IDENTIFIER
+        OF concept=IDENTIFIER
+        (ENHANCED BY cEnhancement=IDENTIFIER (moduleParameterList)?
+         REALIZED BY cRealization=IDENTIFIER (WITH_PROFILE cProfile=IDENTIFIER)? (moduleParameterList)?)* SEMICOLON
         (usesList)?
         (requiresClause)?
         (implItems)?
@@ -133,7 +145,8 @@ implItems
     ;
 
 implItem
-    :   operationProcedureDecl
+    :   stateVariableDecl
+    |   operationProcedureDecl
     |   facilityDecl
     |   procedureDecl
     |   mathDefinitionDecl
@@ -154,6 +167,22 @@ conceptPerformanceModule
         END closename=IDENTIFIER SEMICOLON EOF
     ;
 
+conceptPerformanceItems
+    :   (conceptPerformanceItem)+
+    ;
+
+conceptPerformanceItem
+    :   moduleStateVariableDecl
+    |   confirmMathTypeDecl
+    |   constraintClause
+    |   performanceModuleSpecInit
+    |   performanceModuleSpecFinal
+    |   performanceOperationDecl
+    |   performanceTypeModelDecl
+    |   mathDefinitionDecl
+    |   mathDefinesDecl
+    ;
+
 // enhancement performance module
 
 enhancementPerformanceModule
@@ -163,6 +192,18 @@ enhancementPerformanceModule
         (usesList)?
         (requiresClause)?
         END closename=IDENTIFIER SEMICOLON EOF
+    ;
+
+enhancementPerformanceItems
+    :   (enhancementPerformanceItem)+
+    ;
+
+enhancementPerformanceItem
+    :   confirmMathTypeDecl
+    |   performanceOperationDecl
+    |   performanceTypeModelDecl
+    |   mathDefinitionDecl
+    |   mathDefinesDecl
     ;
 
 // uses, imports
@@ -224,6 +265,7 @@ typeModelDecl
         (constraintClause)?
         (typeModelInit)?
         (typeModelFinal)?
+        END
     ;
 
 typeRepresentationDecl
@@ -232,24 +274,91 @@ typeRepresentationDecl
         (correspondenceClause)?
         (typeRepresentationInit)?
         (typeRepresentationFinal)?
+        END
+    ;
+
+facilityTypeRepresentationDecl
+    :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (record|type) SEMICOLON
+        (conventionClause)?
+        (facilityTypeRepresentationInit)?
+        (facilityTypeRepresentationFinal)?
+        END
+    ;
+
+performanceTypeModelDecl
+    :   TYPE FAMILY IS MODELED BY mathTypeExp SEMICOLON
+        (constraintClause)?
+        (performanceTypeModelInit)?
+        (performanceTypeModelFinal)?
+        END
     ;
 
 // initialization, finalization rules
 
 typeModelInit
-    :   INITIALIZATION (requiresClause)? (ensuresClause)?
+    :   INITIALIZATION
+        (requiresClause)?
+        (ensuresClause)?
     ;
 
 typeModelFinal
-    :   FINALIZATION (requiresClause)? (ensuresClause)?
+    :   FINALIZATION
+        (requiresClause)?
+        (ensuresClause)?
     ;
 
 typeRepresentationInit
-    :   INITIALIZATION (variableDeclGroup)* //stmts
+    :   INITIALIZATION
+        (affectsClause)*
+        (facilityDecl)*
+        (variableDeclGroup)*
+        (auxVariableDeclGroup)*
+        (stmt)*
+        END SEMICOLON
     ;
 
 typeRepresentationFinal
-    :   FINALIZATION (variableDeclGroup)* //stmts
+    :   FINALIZATION
+        (affectsClause)*
+        (facilityDecl)*
+        (variableDeclGroup)*
+        (auxVariableDeclGroup)*
+        (stmt)*
+        END SEMICOLON
+    ;
+
+facilityTypeRepresentationInit
+    :   INITIALIZATION
+        (affectsClause)*
+        (facilityDecl)*
+        (variableDeclGroup)*
+        (auxVariableDeclGroup)*
+        (stmt)*
+        END SEMICOLON
+    ;
+
+facilityTypeRepresentationFinal
+    :   FINALIZATION
+        (affectsClause)*
+        (requiresClause)?
+        (ensuresClause)?
+        (facilityDecl)*
+        (variableDeclGroup)*
+        (auxVariableDeclGroup)*
+        (stmt)*
+        END SEMICOLON
+    ;
+
+performanceTypeModelInit
+    :   INITIALIZATION
+        (durationClause)?
+        (manipulationDispClause)?
+    ;
+
+performanceTypeModelFinal
+    :   FINALIZATION
+        (durationClause)?
+        (manipulationDispClause)?
     ;
 
 //We use special rules for facility module init and final to allow requires
@@ -294,6 +403,18 @@ moduleImplFinal
         //Todo: stmts
     ;
 
+performanceModuleSpecInit
+    :   PERF_INIT
+        (durationClause)?
+        (manipulationDispClause)?
+    ;
+
+performanceModuleSpecFinal
+    :   PERF_FINAL
+        (durationClause)?
+        (manipulationDispClause)?
+    ;
+
 // functions
 
 procedureDecl
@@ -319,6 +440,13 @@ operationDecl
     :   OPERATION name=IDENTIFIER operationParameterList (COLON type)? SEMICOLON
             (requiresClause)?
             (ensuresClause)?
+    ;
+
+performanceOperationDecl
+    :   OPERATION name=IDENTIFIER operationParameterList (COLON type)? SEMICOLON
+            (ensuresClause)?
+            (durationClause)?
+            (manipulationDispClause)?
     ;
 
 // facility and enhancements
@@ -357,6 +485,20 @@ mathVariableDecl
 
 variableDeclGroup
     :   VAR IDENTIFIER (COMMA IDENTIFIER)* COLON type SEMICOLON
+    ;
+
+auxVariableDeclGroup
+    :   AUX_VAR IDENTIFIER (COMMA IDENTIFIER)* COLON type SEMICOLON
+    ;
+
+// state variable declaration
+
+moduleStateVariableDecl
+    :   VAR mathVariableDeclGroup SEMICOLON
+    ;
+
+stateVariableDecl
+    :   VAR variableDeclGroup SEMICOLON
     ;
 
 // statements
@@ -408,12 +550,16 @@ mathTypeTheoremDecl
 
 // mathematical theorems, corollaries, etc
 
-mathTheoremDecl
-    :   (THEOREM | LEMMA | COROLLARY) name=IDENTIFIER
+mathAssertionDecl
+    :   (AXIOM | COROLLARY | LEMMA | PROPERTY | THEOREM ) name=IDENTIFIER
         COLON mathAssertionExp SEMICOLON
     ;
 
 // mathematical definitions
+
+mathDefinesDecl
+    :   DEFINES definitionSignature SEMICOLON
+    ;
 
 mathDefinitionDecl
     :   mathStandardDefinitionDecl
@@ -536,6 +682,20 @@ correspondenceClause
 
 conventionClause
     :   CONVENTION mathAssertionExp SEMICOLON
+    ;
+
+durationClause
+    :   DURATION mathAssertionExp SEMICOLON
+    ;
+
+manipulationDispClause
+    :   MAINP_DISP mathAssertionExp SEMICOLON
+    ;
+
+// mathematical type declarations
+
+confirmMathTypeDecl
+    :   CONFIRM MATH TYPE mathVariableDecl SEMICOLON
     ;
 
 // mathematical expressions

@@ -720,8 +720,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void exitMathTheoremDecl(
-            @NotNull ResolveParser.MathTheoremDeclContext ctx) {
+    public void exitMathAssertionDecl(
+            @NotNull ResolveParser.MathAssertionDeclContext ctx) {
         put(ctx, new MathTheoremAST(ctx.getStart(), ctx.getStop(), ctx.name,
                 get(ExprAST.class, ctx.mathAssertionExp())));
     }
