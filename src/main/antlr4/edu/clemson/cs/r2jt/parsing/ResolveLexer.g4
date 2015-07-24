@@ -114,6 +114,10 @@ DEFINITION
     |   'Def'
     ;
 
+DIV
+    :   'div'
+    ;
+
 DO
     :   'do'
     ;
@@ -383,6 +387,10 @@ RELATED
     :   'related'
     ;
 
+REM
+    :   'rem'
+    ;
+
 REMEMBER
     :   'Remember'
     ;
@@ -508,6 +516,10 @@ DOT
 
 EQL
     :   '='
+    ;
+
+EXP
+    :   '**'
     ;
 
 FUNCARROW

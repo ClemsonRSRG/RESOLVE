@@ -690,9 +690,9 @@ prefixOp
     ;
 
 infixOp
-    :   (IMPLIES | PLUS | CONCAT | MINUS | DIVIDE | MULTIPLY | RANGE | AND | OR)
-    |   (UNION | INTERSECT | IN | NOT_IN | GT | LT | GT_EQL | LT_EQL)
-    |   IDENTIFIER
+    :   (IMPLIES | PLUS | CONCAT | MINUS | DIVIDE | MULTIPLY | EXP | MOD | REM | DIV |
+         IMPLIES | IFF | RANGE | AND | OR | UNION | INTERSECT | IN | NOT_IN | GT | LT |
+         GT_EQL | LT_EQL | EQL | NOT_EQL)
     ;
 
 definitionParameterList
