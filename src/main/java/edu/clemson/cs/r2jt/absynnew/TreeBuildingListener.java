@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absynnew;
 
-import edu.clemson.cs.r2jt.parsing.ResolveParserBaseListener;
+import edu.clemson.cs.r2jt.parsing.ResolveBaseListener;
 import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -21,7 +21,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TreeBuildingListener extends ResolveParserBaseListener {
+public class TreeBuildingListener extends ResolveBaseListener {
 
     private final ParseTreeProperty<ResolveAST> built =
             new ParseTreeProperty<ResolveAST>();

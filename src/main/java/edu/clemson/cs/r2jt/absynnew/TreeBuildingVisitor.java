@@ -26,7 +26,7 @@ import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.MathSymbolExprBuilder;
 import edu.clemson.cs.r2jt.absynnew.expr.MathSymbolAST.DisplayStyle;
 import edu.clemson.cs.r2jt.absynnew.stmt.*;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
-import edu.clemson.cs.r2jt.parsing.ResolveParserBaseListener;
+import edu.clemson.cs.r2jt.parsing.ResolveBaseListener;
 import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import edu.clemson.cs.r2jt.misc.Utils.Builder;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
@@ -62,7 +62,7 @@ import java.util.List;
  */
 public class TreeBuildingVisitor<T extends ResolveAST>
         extends
-            ResolveParserBaseListener implements Builder<T> {
+            ResolveBaseListener implements Builder<T> {
 
     private final TreeDecorator myDecorator = new TreeDecorator();
 
@@ -720,8 +720,8 @@ public class TreeBuildingVisitor<T extends ResolveAST>
     }
 
     @Override
-    public void exitMathAssertionDecl(
-            @NotNull ResolveParser.MathAssertionDeclContext ctx) {
+    public void exitMathTheoremDecl(
+            @NotNull ResolveParser.MathTheoremDeclContext ctx) {
         put(ctx, new MathTheoremAST(ctx.getStart(), ctx.getStop(), ctx.name,
                 get(ExprAST.class, ctx.mathAssertionExp())));
     }

@@ -1,5 +1,9 @@
 lexer grammar ResolveLexer;
 
+ABS
+    :   'abs'
+    ;
+
 ALL
     :   'all'
     ;
@@ -17,12 +21,45 @@ ARRAY
     :   'Array'
     ;
 
+AUX_CODE
+    :   'Aux_Code'
+    ;
+
+AUX_VAR
+    :   'Aux_Var'
+    ;
+
+AUXILIARY
+    :   'Aux'
+    |   'Auxiliary'
+    ;
+
 AXIOM
     :   'Axiom'
     ;
 
 BASECASE
     :   'Base_Case'
+    ;
+
+BIG_CONCAT
+    :   'Concatenation'
+    ;
+
+BIG_INTERSECT
+    :   'Intersection'
+    ;
+
+BIG_PRODUCT
+    :   'Product'
+    ;
+
+BIG_SUM
+    :   'Sum'
+    ;
+
+BIG_UNION
+    :   'Union'
     ;
 
 BY
@@ -48,6 +85,10 @@ CHANGING
 CLEARS
     :   'clr'
     |   'clears'
+    ;
+
+COMPLEMENT
+    :   'complement'
     ;
 
 CONCEPT
@@ -93,6 +134,10 @@ DEFINITION
     |   'Def'
     ;
 
+DIV
+    :   'div'
+    ;
+
 DO
     :   'do'
     ;
@@ -106,7 +151,7 @@ ELAPSED_TIME
     ;
 
 ELSE
-    :   'else'
+    :   'Else'
     ;
 
 END
@@ -172,7 +217,11 @@ FOR
     ;
 
 IF
-    :   'if'
+    :   'If'
+    ;
+
+IFF
+    :   'iff'
     ;
 
 IMPLICIT
@@ -219,6 +268,10 @@ IS
     :   'is'
     ;
 
+IS_IN
+    :   'is_in'
+    ;
+
 ITERATE
     :   'Iterate'
     ;
@@ -237,6 +290,10 @@ MAINP_DISP
 
 MAINTAINING
     :   'maintaining'
+    ;
+
+MATH
+    :   'Math'
     ;
 
 MOD
@@ -326,6 +383,10 @@ PROCEDURE
     |   'Procedure'
     ;
 
+PROPERTY
+    :   'Property'
+    ;
+
 PROP_SUBSET
     :   'is_proper_subset_of'
     ;
@@ -350,6 +411,10 @@ RELATED
     :   'related'
     ;
 
+REM
+    :   'rem'
+    ;
+
 REMEMBER
     :   'Remember'
     ;
@@ -370,6 +435,10 @@ REQUIRES
 RESTORES
     :   'rest'
     |   'restores'
+    ;
+
+SHORT_FOR
+    :   'short_for'
     ;
 
 SUBSET
@@ -410,6 +479,11 @@ UNION
     :   'union'
     ;
 
+UNIQUE
+    :   'Unique'
+    |   'unique'
+    ;
+
 UPDATES
     :   'upd'
     |   'updates'
@@ -429,6 +503,10 @@ WHERE
 
 WHILE
     :   'While'
+    ;
+
+WITHOUT
+    :   'without'
     ;
 
 WITH_PROFILE
@@ -461,6 +539,14 @@ DBL_BAR
     :   '||'
     ;
 
+DBL_LBRACE
+    :   '{{'
+    ;
+
+DBL_RBRACE
+    :   '}}'
+    ;
+
 DIVIDE
     :   '/'
     ;
@@ -473,8 +559,16 @@ EQL
     :   '='
     ;
 
+EXP
+    :   '**'
+    ;
+
 FUNCARROW
     :   '->'
+    ;
+
+GG
+    :   '>>'
     ;
 
 GT
@@ -491,6 +585,10 @@ HASH
 
 LBRACE
     :   '{'
+    ;
+
+LL
+    :   '<<'
     ;
 
 LPAREN
@@ -557,8 +655,17 @@ BOOLEAN_LITERAL
     |   'true'
     ;
 
+NUMERIC_LITERAL
+    :   INTEGER_LITERAL
+    |   REAL_LITERAL
+    ;
+
 INTEGER_LITERAL
     :   DecimalIntegerLiteral
+    ;
+
+REAL_LITERAL
+    :   DecimalIntegerLiteral '.' DecimalIntegerLiteral*
     ;
 
 CHARACTER_LITERAL
