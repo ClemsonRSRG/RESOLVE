@@ -10,9 +10,9 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init2.pipeline;
+package edu.clemson.cs.rsrg.init.pipeline;
 
-import edu.clemson.cs.r2jt.init2.CompileEnvironment;
+import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 

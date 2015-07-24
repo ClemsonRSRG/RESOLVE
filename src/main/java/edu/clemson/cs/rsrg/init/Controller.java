@@ -10,14 +10,14 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init2;
+package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.r2jt.absynnew.*;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.file.Utilities;
-import edu.clemson.cs.r2jt.init2.pipeline.AnalysisPipeline;
+import edu.clemson.cs.rsrg.init.pipeline.AnalysisPipeline;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;

@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init2;
+package edu.clemson.cs.rsrg.init;
 
 /**
  * <p>This is a compilation report used by the WebIDE/WebAPI.</p>

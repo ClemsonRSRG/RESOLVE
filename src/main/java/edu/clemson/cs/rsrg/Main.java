@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg;
 
-import edu.clemson.cs.r2jt.init2.ResolveCompiler;
+import edu.clemson.cs.rsrg.init.ResolveCompiler;
 
 /**
  * <p>The main class for the RESOLVE compiler when invoking
