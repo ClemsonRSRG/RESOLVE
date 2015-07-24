@@ -13,8 +13,8 @@
 package edu.clemson.cs.r2jt.init2;
 
 import edu.clemson.cs.r2jt.absynnew.ModuleAST;
-import edu.clemson.cs.r2jt.init2.file.ResolveFile;
-import edu.clemson.cs.r2jt.init2.file.Utilities;
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.Utilities;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
 import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;

@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init2.file;
+package edu.clemson.cs.rsrg.init.file;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,7 +22,12 @@ import java.util.regex.Pattern;
 import org.antlr.v4.runtime.ANTLRInputStream;
 
 /**
- * TODO: Description for this class
+ * <p>This class contains static helper methods that for processing
+ * files and to convert <code>File</code> objects to <code>ResolveFile</code>
+ * objects.</p>
+ *
+ * @author Yu-Shan Sun
+ * @version 1.0
  */
 public class Utilities {
 

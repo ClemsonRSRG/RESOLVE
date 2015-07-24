@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init2.file;
+package edu.clemson.cs.rsrg.init.file;
 
 import java.io.File;
 import java.io.IOException;

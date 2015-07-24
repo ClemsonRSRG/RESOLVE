@@ -13,10 +13,10 @@
 package edu.clemson.cs.r2jt.init2;
 
 import edu.clemson.cs.r2jt.absynnew.*;
-import edu.clemson.cs.r2jt.init2.file.FileLocator;
-import edu.clemson.cs.r2jt.init2.file.ModuleType;
-import edu.clemson.cs.r2jt.init2.file.ResolveFile;
-import edu.clemson.cs.r2jt.init2.file.Utilities;
+import edu.clemson.cs.rsrg.init.file.FileLocator;
+import edu.clemson.cs.rsrg.init.file.ModuleType;
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.Utilities;
 import edu.clemson.cs.r2jt.init2.pipeline.AnalysisPipeline;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
