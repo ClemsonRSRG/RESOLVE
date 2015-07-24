@@ -584,14 +584,19 @@ whileStmt
 
 mathTypeTheoremDecl
     :   TYPE THEOREM name=IDENTIFIER COLON
-        (FOR ALL mathVariableDeclGroup COMMA)+ mathExp SEMICOLON
+        (FOR ALL mathVariableDeclGroup COMMA)+ mathImpliesExp SEMICOLON
     ;
 
 // mathematical theorems, corollaries, etc
 
 mathAssertionDecl
-    :   (AXIOM | COROLLARY | LEMMA | PROPERTY | THEOREM ) name=IDENTIFIER
+    :   (AXIOM | COROLLARY | LEMMA | PROPERTY | THEOREM ) name=mathTheoremIdent
         COLON mathAssertionExp SEMICOLON
+    ;
+
+mathTheoremIdent
+    :   IDENTIFIER
+    |   NUMERIC_LITERAL
     ;
 
 // mathematical definitions
@@ -763,10 +768,14 @@ mathExp
     |   mathExp op=(IN|NOT_IN) mathExp                  #mathInfixExp
     |   mathExp op=(LT_EQL|GT_EQL|GT|LT) mathExp        #mathInfixExp
     |   mathExp op=(EQL|NOT_EQL) mathExp                #mathInfixExp
-    |   mathExp op=IMPLIES mathExp                      #mathInfixExp
+    |   mathImpliesExp                                  #mathInfixExp
     |   mathExp op=(AND|OR) mathExp                     #mathInfixExp
     |   mathExp (COLON) mathExp                         #mathTypeAssertExp
     |   LPAREN mathAssertionExp RPAREN                  #mathNestedExp
+    ;
+
+mathImpliesExp
+    :   mathExp op=IMPLIES mathExp
     ;
 
 mathPrimaryExp

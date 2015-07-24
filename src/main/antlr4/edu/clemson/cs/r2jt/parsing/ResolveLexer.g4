@@ -594,8 +594,17 @@ BOOLEAN_LITERAL
     |   'true'
     ;
 
+NUMERIC_LITERAL
+    :   INTEGER_LITERAL
+    |   REAL_LITERAL
+    ;
+
 INTEGER_LITERAL
     :   DecimalIntegerLiteral
+    ;
+
+REAL_LITERAL
+    :   DecimalIntegerLiteral '.' DecimalIntegerLiteral*
     ;
 
 CHARACTER_LITERAL
