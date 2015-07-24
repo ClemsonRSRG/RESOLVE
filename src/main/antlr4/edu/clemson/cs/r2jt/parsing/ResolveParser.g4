@@ -612,7 +612,8 @@ mathDefinesDecl
     ;
 
 mathDefinitionDecl
-    :   mathStandardDefinitionDecl
+    :   mathImplicitDefinitionDecl
+    |   mathStandardDefinitionDecl
     |   mathInductiveDefinitionDecl
     |   mathCategoricalDecl
     ;
@@ -622,6 +623,11 @@ mathCategoricalDecl
         RELATED BY mathAssertionExp SEMICOLON
     ;
 
+mathImplicitDefinitionDecl
+    :   IMPLICIT DEFINITION definitionSignature
+        IS mathAssertionExp SEMICOLON
+    ;
+
 mathInductiveDefinitionDecl
     :   INDUCTIVE DEFINITION inductiveDefinitionSignature
         IS INDUCTIVE_BASE_NUM mathAssertionExp SEMICOLON
@@ -629,7 +635,7 @@ mathInductiveDefinitionDecl
     ;
 
 mathStandardDefinitionDecl
-    :   DEFINITION definitionSignature (IS mathAssertionExp)? SEMICOLON
+    :   DEFINITION definitionSignature (EQL mathAssertionExp)? SEMICOLON
     ;
 
 categoricalDefinitionSignature
@@ -670,16 +676,17 @@ standardInfixSignature
 standardOutfixSignature
     :   ( lOp=BAR LPAREN mathVariableDecl RPAREN rOp=BAR
     |     lOp=DBL_BAR LPAREN mathVariableDecl RPAREN rOp=DBL_BAR
-    |     lOp=LT LPAREN mathVariableDecl RPAREN rOp=GT) COLON mathTypeExp
+    |     lOp=LT LPAREN mathVariableDecl RPAREN rOp=GT
+    |     lOp=LL LPAREN mathVariableDecl RPAREN rOp=GG) COLON mathTypeExp
     ;
 
 standardPrefixSignature
-    :   prefixOp (definitionParameterList)? COLON mathTypeExp
+    :   (IDENTIFIER | prefixOp | NUMERIC_LITERAL)
+        (definitionParameterList)? COLON mathTypeExp
     ;
 
 prefixOp
-    :   infixOp
-    |   INTEGER_LITERAL
+    :   (PLUS | MINUS | NOT | ABS | COMPLEMENT)
     ;
 
 infixOp

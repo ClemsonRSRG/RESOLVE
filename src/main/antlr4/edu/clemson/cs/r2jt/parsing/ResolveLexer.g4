@@ -514,6 +514,10 @@ FUNCARROW
     :   '->'
     ;
 
+GG
+    :   '>>'
+    ;
+
 GT
     :   '>'
     ;
@@ -528,6 +532,10 @@ HASH
 
 LBRACE
     :   '{'
+    ;
+
+LL
+    :   '<<'
     ;
 
 LPAREN
