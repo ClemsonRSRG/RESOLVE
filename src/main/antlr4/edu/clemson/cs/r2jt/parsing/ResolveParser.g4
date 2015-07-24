@@ -223,12 +223,32 @@ moduleParameterList
     ;
 
 moduleParameterDecl
-    :   typeParameterDecl
-    |   parameterDecl
+    :   definitionParameterDecl
+    |   typeParameterDecl
+    |   constantParameterDecl
+    |   operationParameterDecl
+    |   conceptImplParameterDecl
+    ;
+
+definitionParameterDecl
+    :   DEFINITION definitionSignature
     ;
 
 typeParameterDecl
     :   TYPE name=IDENTIFIER
+    ;
+
+constantParameterDecl
+    :   EVALUATES variableDeclGroup
+    ;
+
+operationParameterDecl
+    :   operationDecl
+    ;
+
+conceptImplParameterDecl
+    :   REALIZATION name=IDENTIFIER
+        FOR (CONCEPT)? concept=IDENTIFIER
     ;
 
 parameterDecl
