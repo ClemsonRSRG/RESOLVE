@@ -15,9 +15,7 @@ package edu.clemson.cs.rsrg.init.file;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import org.antlr.v4.runtime.ANTLRInputStream;
 
@@ -27,6 +25,7 @@ import org.antlr.v4.runtime.ANTLRInputStream;
  * objects.</p>
  *
  * @author Yu-Shan Sun
+ * @author Daniel Welch
  * @version 1.0
  */
 public class Utilities {
@@ -189,6 +188,78 @@ public class Utilities {
         }
 
         return type;
+    }
+
+    /**
+     * <p>A helper method to form a string using the values inside the
+     * Java collection.</p>
+     *
+     * @param data The collection of values.
+     * @param separator The separator to be used.
+     * @param <T> The type of the values inside the collection.
+     *
+     * @return The formatted string.
+     */
+    public static <T> String join(Collection<T> data, String separator) {
+        return join(data, separator, "", "");
+    }
+
+    /**
+     * <p>A helper method to form a string using the values inside the
+     * Java collection.</p>
+     *
+     * @param data The collection of values.
+     * @param separator The separator to be used.
+     * @param left The left most value for the string.
+     * @param right The right most value for the string.
+     * @param <T> The type of the values inside the collection.
+     *
+     * @return The formatted string.
+     */
+    public static <T> String join(Collection<T> data, String separator,
+            String left, String right) {
+        return join(data.iterator(), separator, left, right);
+    }
+
+    /**
+     * <p>A helper method to form a string using an iterator.</p>
+     *
+     * @param iter An iterator for the collection of values.
+     * @param separator The separator to be used.
+     * @param left The left most value for the string.
+     * @param right The right most value for the string.
+     * @param <T> The type of the values inside the collection.
+     *
+     * @return The formatted string.
+     */
+    public static <T> String join(Iterator<T> iter, String separator,
+            String left, String right) {
+        StringBuilder buf = new StringBuilder();
+
+        buf.append(left);
+        while (iter.hasNext()) {
+            buf.append(iter.next());
+            if (iter.hasNext()) {
+                buf.append(separator);
+            }
+        }
+        buf.append(right);
+
+        return buf.toString();
+    }
+
+    /**
+     * <p>A helper method to form a string using the values inside the
+     * array.</p>
+     *
+     * @param array The array of values.
+     * @param separator The separator to be used.
+     * @param <T> The type of the values inside the collection.
+     *
+     * @return The formatted string.
+     */
+    public static <T> String join(T[] array, String separator) {
+        return join(Arrays.asList(array), separator);
     }
 
 }

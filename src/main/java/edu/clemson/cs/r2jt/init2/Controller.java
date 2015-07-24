@@ -283,7 +283,8 @@ public class Controller {
         // If not, use the file locator to locate our file
         else {
             try {
-                FileLocator l = new FileLocator(baseName);
+                FileLocator l =
+                        new FileLocator(baseName, ModuleType.getAllExtensions());
                 File workspaceDir = myCompileEnvironment.getWorkspaceDir();
                 Files.walkFileTree(workspaceDir.toPath(), l);
                 ModuleType extType = Utilities.getModuleType(baseName);

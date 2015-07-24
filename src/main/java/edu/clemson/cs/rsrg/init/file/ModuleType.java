@@ -12,6 +12,9 @@
  */
 package edu.clemson.cs.rsrg.init.file;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>This class contains all the possible RESOLVE extension files as
  * well as helper methods to retrieve the description and
@@ -73,6 +76,24 @@ public class ModuleType {
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>Obtain the list of all possible extensions for RESOLVE
+     * files.</p>
+     *
+     * @return The list of extension names.
+     */
+    public static List<String> getAllExtensions() {
+        List<String> extensions = new ArrayList<String>();
+        extensions.add(THEORY.getExtension());
+        extensions.add(CONCEPT.getExtension());
+        extensions.add(ENHANCEMENT.getExtension());
+        extensions.add(REALIZATION.getExtension());
+        extensions.add(FACILITY.getExtension());
+        extensions.add(PROFILE.getExtension());
+
+        return extensions;
+    }
 
     /**
      * <p>Obtains the description of the extension as a
