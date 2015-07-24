@@ -311,8 +311,8 @@ typeRepresentationInit
     :   INITIALIZATION
         (affectsClause)*
         (facilityDecl)*
-        (variableDeclGroup)*
-        (auxVariableDeclGroup)*
+        (variableDecl)*
+        (auxVariableDecl)*
         (stmt)*
         END SEMICOLON
     ;
@@ -321,8 +321,8 @@ typeRepresentationFinal
     :   FINALIZATION
         (affectsClause)*
         (facilityDecl)*
-        (variableDeclGroup)*
-        (auxVariableDeclGroup)*
+        (variableDecl)*
+        (auxVariableDecl)*
         (stmt)*
         END SEMICOLON
     ;
@@ -331,8 +331,8 @@ facilityTypeRepresentationInit
     :   INITIALIZATION
         (affectsClause)*
         (facilityDecl)*
-        (variableDeclGroup)*
-        (auxVariableDeclGroup)*
+        (variableDecl)*
+        (auxVariableDecl)*
         (stmt)*
         END SEMICOLON
     ;
@@ -343,8 +343,8 @@ facilityTypeRepresentationFinal
         (requiresClause)?
         (ensuresClause)?
         (facilityDecl)*
-        (variableDeclGroup)*
-        (auxVariableDeclGroup)*
+        (variableDecl)*
+        (auxVariableDecl)*
         (stmt)*
         END SEMICOLON
     ;
@@ -365,18 +365,24 @@ performanceTypeModelFinal
 //and ensures clauses (which aren't allowed in normal impl modules)...
 moduleFacilityInit
     :   FAC_INIT
+        (affectsClause)*
         (requiresClause)?
         (ensuresClause)?
-        (variableDeclGroup)*
-        //stmt block
+        (facilityDecl)*
+        (variableDecl)*
+        (auxVariableDecl)*
+        (stmt)*
     ;
 
 moduleFacilityFinal
     :   FAC_FINAL
-         (requiresClause)?
-         (ensuresClause)?
-         (variableDeclGroup)*
-         //stmt block
+        (affectsClause)*
+        (requiresClause)?
+        (ensuresClause)?
+        (facilityDecl)*
+        (variableDecl)*
+        (auxVariableDecl)*
+        (stmt)*
     ;
 
 moduleSpecInit
@@ -393,14 +399,19 @@ moduleSpecFinal
 
 moduleImplInit
     :   FAC_INIT
-        (variableDeclGroup)*
-        //Todo: stmts
+        (affectsClause)*
+        (facilityDecl)*
+        (variableDecl)*
+        (auxVariableDecl)*
+        (stmt)*
     ;
 
 moduleImplFinal
     :   FAC_FINAL
-        (variableDeclGroup)*
-        //Todo: stmts
+        (facilityDecl)*
+        (variableDecl)*
+        (auxVariableDecl)*
+        (stmt)*
     ;
 
 performanceModuleSpecInit
@@ -420,7 +431,7 @@ performanceModuleSpecFinal
 procedureDecl
     :   (recursive=RECURSIVE)? PROCEDURE name=IDENTIFIER
         operationParameterList (COLON type)? SEMICOLON
-        (variableDeclGroup)*
+        (variableDecl)*
         (stmt)*
         END closename=IDENTIFIER SEMICOLON
     ;
@@ -431,7 +442,7 @@ operationProcedureDecl
         (requiresClause)?
         (ensuresClause)?
         PROCEDURE
-        (variableDeclGroup)*
+        (variableDecl)*
         (stmt)*
         END closename=IDENTIFIER SEMICOLON
     ;
@@ -484,11 +495,19 @@ mathVariableDecl
     ;
 
 variableDeclGroup
-    :   VAR IDENTIFIER (COMMA IDENTIFIER)* COLON type SEMICOLON
+    :   IDENTIFIER (COMMA IDENTIFIER)* COLON type
+    ;
+
+variableDecl
+    :   VAR variableDeclGroup SEMICOLON
     ;
 
 auxVariableDeclGroup
-    :   AUX_VAR IDENTIFIER (COMMA IDENTIFIER)* COLON type SEMICOLON
+    :   IDENTIFIER (COMMA IDENTIFIER)* COLON type
+    ;
+
+auxVariableDecl
+    :   AUX_VAR auxVariableDeclGroup SEMICOLON
     ;
 
 // state variable declaration
