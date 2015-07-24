@@ -13,7 +13,6 @@
 package edu.clemson.cs.r2jt.init2;
 
 import edu.clemson.cs.r2jt.absynnew.ModuleAST;
-import edu.clemson.cs.r2jt.errors.ErrorHandler2;
 import edu.clemson.cs.r2jt.init2.file.ResolveFile;
 import edu.clemson.cs.r2jt.init2.file.Utilities;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
@@ -22,6 +21,7 @@ import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.ScopeRepository;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
+import edu.clemson.cs.rsrg.outputhandler.OutputInterface;
 import java.io.File;
 import java.util.*;
 
@@ -64,15 +64,9 @@ public class CompileEnvironment {
     private final Map<ModuleIdentifier, File> myExternalRealizFiles;
 
     /**
-     * <p>This is the error handler for the RESOLVE compiler.</p>
+     * <p>This is the default error handler for the RESOLVE compiler.</p>
      */
-    private final ErrorHandler2 myErrorHandler;
-
-    /**
-     * <p>This flag indicates whether or not we want to generate
-     * performance VCs.</p>
-     */
-    private boolean myGenPVCs = false;
+    private final OutputInterface myErrorHandler;
 
     /**
      * <p>This list stores all the incomplete modules.</p>
@@ -84,12 +78,6 @@ public class CompileEnvironment {
      * interested party as soon as the prover is done processing a VC.</p>
      */
     private ProverListener myListener = null;
-
-    /**
-     * <p>This string stores the desired output file name provided
-     * by the user.</p>
-     */
-    private String myOutputFileName = null;
 
     /**
      * <p>The symbol table for the compiler.</p>
@@ -126,16 +114,18 @@ public class CompileEnvironment {
      * necessary modules, files and flags.</p>
      *
      * @param args The specified compiler arguments array.
+     * @param compilerVersion The current compiler version.
+     * @param errorHandler An error handler to display debug or error messages.
      *
      * @throws FlagDependencyException
      */
-    public CompileEnvironment(String[] args, String compilerVersion)
-            throws FlagDependencyException {
+    public CompileEnvironment(String[] args, String compilerVersion,
+            OutputInterface errorHandler) throws FlagDependencyException {
         flags = new FlagManager(args);
         myCompileReport = new CompileReport();
         myCompilingModules =
                 new HashMap<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>>();
-        myErrorHandler = new ErrorHandler2(this);
+        myErrorHandler = errorHandler;
         myExternalRealizFiles = new HashMap<ModuleIdentifier, File>();
         myIncompleteModules = new LinkedList<ModuleIdentifier>();
         myUserFileMap = new HashMap<String, ResolveFile>();
@@ -143,10 +133,9 @@ public class CompileEnvironment {
         if (!flags.isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
             synchronized (System.out) {
                 // Print Compiler Messages
-                System.out.println("RESOLVE Compiler/Verifier - "
+                myErrorHandler.message("RESOLVE Compiler/Verifier - "
                         + compilerVersion + " Version.");
-                System.out.println("\tUse -help flag for options.");
-                System.out.println();
+                myErrorHandler.message("\tUse -help flag for options.\n");
             }
         }
 
@@ -267,7 +256,7 @@ public class CompileEnvironment {
      *
      * @return Error handler object.
      */
-    public ErrorHandler2 getErrorHandler() {
+    public OutputInterface getErrorHandler() {
         return myErrorHandler;
     }
 
@@ -279,25 +268,6 @@ public class CompileEnvironment {
      */
     public File getWorkspaceDir() {
         return myCompileDir;
-    }
-
-    /**
-     * <p>Returns the output name that the user have specified.</p>
-     *
-     * @return A <code>String</code> name for the output file.
-     */
-    public String getOutputFilename() {
-        return myOutputFileName;
-    }
-
-    /**
-     * <p>Checks to see if the user have requested the VC Generator
-     * to generate performance VCs.</p>
-     *
-     * @return True if the user wants performance VCs, false otherwise.
-     */
-    public boolean getPerformanceFlag() {
-        return myGenPVCs;
     }
 
     /**
@@ -362,22 +332,6 @@ public class CompileEnvironment {
      */
     public void setFileMap(Map<String, ResolveFile> fMap) {
         myUserFileMap = fMap;
-    }
-
-    /**
-     * <p>Sets the name of the output file.</p>
-     *
-     * @param outputFile Name of the output file specified by the user.
-     */
-    public void setOutputFileName(String outputFile) {
-        myOutputFileName = outputFile;
-    }
-
-    /**
-     * <p>Sets the flag to generate performance VCs.</p>
-     */
-    public void setPerformanceFlag() {
-        myGenPVCs = true;
     }
 
     /**

@@ -1,5 +1,5 @@
 /**
- * ErrorHandler2.java
+ * WriterOutputHandler.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -10,39 +10,39 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.errors;
-
-import edu.clemson.cs.r2jt.init2.ResolveCompiler;
-import edu.clemson.cs.r2jt.init2.CompileEnvironment;
+package edu.clemson.cs.rsrg.outputhandler;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
 
 /**
- * TODO: Description for this class
+ * <p>This class outputs all debugging, errors and/or
+ * other information coming from the compiler to the specified
+ * writer.</p>
+ *
+ * @author Yu-Shan Sun
+ * @version 1.0
  */
-public class ErrorHandler2 {
+public class WriterOutputHandler implements OutputInterface {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    private final CompileEnvironment myInstanceEnvironment;
-    private final boolean myIsWebOutput;
+    /** <p>This is the output writer object.</p> */
     private final Writer myOutputWriter;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
-    public ErrorHandler2(CompileEnvironment e) {
-        this(e, new PrintWriter(System.err, true));
-    }
-
-    public ErrorHandler2(CompileEnvironment e, Writer outWriter) {
-        myInstanceEnvironment = e;
-        myIsWebOutput = e.flags.isFlagSet(ResolveCompiler.FLAG_WEB);
+    /**
+     * <p>This constructor takes a Java <code>Writer</code> object
+     * that will be used to display the information.</p>
+     *
+     * @param outWriter A <code>Writer</code> object.
+     */
+    public WriterOutputHandler(Writer outWriter) {
         myOutputWriter = outWriter;
     }
 
@@ -60,17 +60,14 @@ public class ErrorHandler2 {
      * @param msg A compilation message.
      */
     public void message(String msg) {
-        if (!myInstanceEnvironment.flags
-                .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
-            try {
-                myOutputWriter.write(msg + "\n");
-                myOutputWriter.flush();
-            }
-            catch (IOException e) {
-                System.err
-                        .println("Error writing information to the specified output");
-                e.printStackTrace();
-            }
+        try {
+            myOutputWriter.write(msg + "\n");
+            myOutputWriter.flush();
+        }
+        catch (IOException e) {
+            System.err
+                    .println("Error writing information to the specified output");
+            e.printStackTrace();
         }
     }
 

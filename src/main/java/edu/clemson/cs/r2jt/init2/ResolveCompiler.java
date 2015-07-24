@@ -21,7 +21,6 @@ import edu.clemson.cs.r2jt.init2.file.Utilities;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
-import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.rewriteprover.AlgebraicProver;
 import edu.clemson.cs.r2jt.rewriteprover.Prover;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
@@ -29,6 +28,8 @@ import edu.clemson.cs.r2jt.translation.CTranslator;
 import edu.clemson.cs.r2jt.translation.JavaTranslator;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
+import edu.clemson.cs.rsrg.outputhandler.DebugMsgHandler;
+import edu.clemson.cs.rsrg.outputhandler.OutputInterface;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -172,8 +173,11 @@ public class ResolveCompiler {
      * is called by running the compiler from the command line.</p>
      */
     public void invokeCompiler() {
+        // Create a debug message handler
+        OutputInterface debugHandler = new DebugMsgHandler();
+
         // Handle all arguments to the compiler
-        CompileEnvironment compileEnvironment = handleCompileArgs();
+        CompileEnvironment compileEnvironment = handleCompileArgs(debugHandler);
 
         // Compile files/directories listed in the argument list
         try {
@@ -196,9 +200,9 @@ public class ResolveCompiler {
      *                       passed to the prover.
      */
     public void invokeCompiler(Map<String, ResolveFile> fileMap,
-            ProverListener proverListener) {
+            OutputInterface errorHandler, ProverListener proverListener) {
         // Handle all arguments to the compiler
-        CompileEnvironment compileEnvironment = handleCompileArgs();
+        CompileEnvironment compileEnvironment = handleCompileArgs(errorHandler);
 
         // Store the file map
         compileEnvironment.setFileMap(fileMap);
@@ -308,8 +312,8 @@ public class ResolveCompiler {
 
                 // Print error message if it is not a valid RESOLVE file
                 if (moduleType == null) {
-                    System.err.println("The file " + file.getName()
-                            + " is not a RESOLVE file.");
+                    throw new IllegalArgumentException("The file "
+                            + file.getName() + " is not a RESOLVE file.");
                 }
                 else {
                     String workspacePath =
@@ -331,16 +335,19 @@ public class ResolveCompiler {
      * <code>CompileEnvironment</code> that includes information
      * on the current compilation job.</p>
      *
+     * @param errorHandler An error handler to display debug or error messages.
+     *
      * @return A new <code>CompileEnvironment</code> for the current job.
      */
-    private CompileEnvironment handleCompileArgs() {
+    private CompileEnvironment handleCompileArgs(OutputInterface errorHandler) {
         CompileEnvironment compileEnvironment = null;
         try {
             // Instantiate a new compile environment that will store
             // all the necessary information needed throughout the compilation
             // process.
             compileEnvironment =
-                    new CompileEnvironment(myCompilerArgs, myCompilerVersion);
+                    new CompileEnvironment(myCompilerArgs, myCompilerVersion,
+                            errorHandler);
 
             if (compileEnvironment.flags.isFlagSet(FLAG_HELP)) {
                 printHelpMessage(compileEnvironment);
@@ -381,14 +388,13 @@ public class ResolveCompiler {
      */
     private void printHelpMessage(CompileEnvironment compileEnvironment) {
         if (!compileEnvironment.flags.isFlagSet(FLAG_NO_DEBUG)) {
-            synchronized (System.out) {
-                System.out
-                        .println("Usage: java -jar RESOLVE.jar [options] <files>");
-                System.out.println("where options include:");
-                System.out.println(FlagDependencies
-                        .getListingString(compileEnvironment.flags
-                                .isFlagSet(FLAG_EXTENDED_HELP)));
-            }
+            OutputInterface debugHandler = compileEnvironment.getErrorHandler();
+            debugHandler
+                    .message("Usage: java -jar RESOLVE.jar [options] <files>");
+            debugHandler.message("where options include:");
+            debugHandler.message(FlagDependencies
+                    .getListingString(compileEnvironment.flags
+                            .isFlagSet(FLAG_EXTENDED_HELP)));
         }
     }
 

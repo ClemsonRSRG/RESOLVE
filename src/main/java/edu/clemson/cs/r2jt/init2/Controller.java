@@ -16,18 +16,16 @@ import edu.clemson.cs.r2jt.absynnew.*;
 import edu.clemson.cs.r2jt.init2.file.FileLocator;
 import edu.clemson.cs.r2jt.init2.file.ModuleType;
 import edu.clemson.cs.r2jt.init2.file.ResolveFile;
-import edu.clemson.cs.r2jt.errors.ErrorHandler2;
 import edu.clemson.cs.r2jt.init2.file.Utilities;
 import edu.clemson.cs.r2jt.init2.pipeline.AnalysisPipeline;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
-import edu.clemson.cs.r2jt.parsing.ResolveParser;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.outputhandler.OutputInterface;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -65,7 +63,7 @@ public class Controller {
     /**
      * <p>This is the error handler for the RESOLVE compiler.</p>
      */
-    private final ErrorHandler2 myErrorHandler;
+    private final OutputInterface myErrorHandler;
 
     /**
      * <p>This factory takes care of generating an ANTLR4 parser.</p>
