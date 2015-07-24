@@ -482,17 +482,23 @@ performanceOperationDecl
 
 // facility and enhancements
 
-//Todo: This also needs enhancements realizable by the base concept.
 facilityDecl
     :   FACILITY name=IDENTIFIER IS concept=IDENTIFIER
-        (specArgs=moduleArgumentList)? (externally=EXTERNALLY)? REALIZED
-        BY impl=IDENTIFIER (implArgs=moduleArgumentList)?
+        (specArgs=moduleArgumentList)?
+        (conceptEnhancementDecl)*
+        (externally=EXTERNALLY)? REALIZED
+        BY impl=IDENTIFIER (WITH_PROFILE profile=IDENTIFIER)? (implArgs=moduleArgumentList)?
         (enhancementPairDecl)* SEMICOLON
+    ;
+
+conceptEnhancementDecl
+    :   ENHANCED BY spec=IDENTIFIER (specArgs=moduleArgumentList)?
     ;
 
 enhancementPairDecl
     :   ENHANCED BY spec=IDENTIFIER (specArgs=moduleArgumentList)?
         (externally=EXTERNALLY)? REALIZED BY impl=IDENTIFIER
+        (WITH_PROFILE profile=IDENTIFIER)?
         (implArgs=moduleArgumentList)?
     ;
 
