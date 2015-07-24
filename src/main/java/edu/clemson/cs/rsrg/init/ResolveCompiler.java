@@ -72,8 +72,8 @@ public class ResolveCompiler {
     // Flag Strings
     // ===========================================================
 
-    private static final String FLAG_DESC_NO_DEBUG =
-            "Remove debugging statements from the compiler output.";
+    private static final String FLAG_DESC_DEBUG =
+            "Print debugging statements from the compiler output.";
     private static final String FLAG_DESC_ERRORS_ON_STD_OUT =
             "Change the output to be more web-friendly for the Web Interface.";
     private static final String FLAG_DESC_XML_OUT =
@@ -116,11 +116,11 @@ public class ResolveCompiler {
                     FLAG_DESC_ERRORS_ON_STD_OUT, Flag.Type.HIDDEN);
 
     /**
-     * <p>Tells the compiler to remove debugging messages from the compiler
+     * <p>Tells the compiler to print debugging messages from the compiler
      * output.</p>
      */
-    public static final Flag FLAG_NO_DEBUG =
-            new Flag(FLAG_SECTION_NAME, "nodebug", FLAG_DESC_NO_DEBUG);
+    public static final Flag FLAG_DEBUG =
+            new Flag(FLAG_SECTION_NAME, "debug", FLAG_DESC_DEBUG);
 
     /**
      * <p>Tells the compiler to remove debugging messages from the compiler
@@ -387,7 +387,7 @@ public class ResolveCompiler {
      *                           that stores all necessary objects and flags.
      */
     private void printHelpMessage(CompileEnvironment compileEnvironment) {
-        if (!compileEnvironment.flags.isFlagSet(FLAG_NO_DEBUG)) {
+        if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG)) {
             OutputInterface debugHandler = compileEnvironment.getErrorHandler();
             debugHandler
                     .message("Usage: java -jar RESOLVE.jar [options] <files>");
@@ -429,7 +429,6 @@ public class ResolveCompiler {
         // WebIDE
         FlagDependencies.addRequires(FLAG_ERRORS_ON_STD_OUT, FLAG_WEB);
         FlagDependencies.addImplies(FLAG_WEB, FLAG_ERRORS_ON_STD_OUT);
-        FlagDependencies.addImplies(FLAG_WEB, FLAG_NO_DEBUG);
         FlagDependencies.addImplies(FLAG_WEB, FLAG_XML_OUT);
         FlagDependencies.addImplies(FLAG_WEB, Prover.FLAG_NOGUI);
     }

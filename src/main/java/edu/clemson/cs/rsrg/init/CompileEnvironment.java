@@ -130,7 +130,7 @@ public class CompileEnvironment {
         myIncompleteModules = new LinkedList<ModuleIdentifier>();
         myUserFileMap = new HashMap<String, ResolveFile>();
 
-        if (!flags.isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             synchronized (System.out) {
                 // Print Compiler Messages
                 myErrorHandler.message("RESOLVE Compiler/Verifier - "
@@ -163,7 +163,7 @@ public class CompileEnvironment {
         myIncompleteModules.remove(mid);
 
         // Print out debugging message
-        if (!flags.isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+        if (!flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             myErrorHandler.message("Complete record: " + mid.toString());
         }
     }
@@ -186,7 +186,7 @@ public class CompileEnvironment {
         myIncompleteModules.add(mid);
 
         // Print out debugging message
-        if (!flags.isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+        if (!flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             myErrorHandler.message("Construct record: " + mid.toString()); //DEBUG
         }
     }
