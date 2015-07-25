@@ -786,9 +786,9 @@ mathQuantifiedExp
     :   mathImpliesExp
     |   FOR ALL mathVariableDeclGroup (whereClause)? COMMA
         mathQuantifiedExp
-    |   THERE EXIST UNIQUE mathVariableDeclGroup (whereClause)? (SUCH THAT | COMMA)
+    |   THERE EXISTS UNIQUE mathVariableDeclGroup (whereClause)? (SUCH THAT | COMMA)
         mathQuantifiedExp
-    |   THERE EXIST mathVariableDeclGroup (whereClause)? (SUCH THAT | COMMA)
+    |   THERE EXISTS mathVariableDeclGroup (whereClause)? (SUCH THAT | COMMA)
         mathQuantifiedExp
     ;
 
