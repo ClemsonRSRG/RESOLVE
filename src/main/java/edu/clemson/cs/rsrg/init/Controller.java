@@ -21,12 +21,13 @@ import edu.clemson.cs.rsrg.init.pipeline.AnalysisPipeline;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.parsing.*;
 import edu.clemson.cs.rsrg.outputhandler.OutputInterface;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
-import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.*;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -124,7 +125,7 @@ public class Controller {
             ModuleAST targetModule = createModuleAST(file);
 
             // Add this file to our compile environment
-            myCompileEnvironment.constructRecord(file, targetModule);
+            /*myCompileEnvironment.constructRecord(file, targetModule);
 
             // Create a dependencies graph and search for import
             // dependencies.
@@ -142,7 +143,7 @@ public class Controller {
 
                 // Complete compilation for this module
                 myCompileEnvironment.completeRecord(m);
-            }
+            }*/
         }
         catch (Throwable e) {
             // Update the compile report with an error
@@ -207,6 +208,9 @@ public class Controller {
      * @return The ANTLR4 Module AST.
      */
     private ModuleAST createModuleAST(ResolveFile file) {
+        ResolveLexer lexer = new ResolveLexer(file.getInputStream());
+        TokenStream tokenStream = new CommonTokenStream(lexer);
+        ResolveParser parser = new ResolveParser(tokenStream);
         //ResolveParser parser =
         //        myParserFactory.createParser(file.getInputStream());
         //ParserRuleContext start = parser.module();

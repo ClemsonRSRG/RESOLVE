@@ -139,11 +139,14 @@ public class CompileEnvironment {
             }
         }
 
+        // Check for custom workspace path
+        String path = null;
         if (flags.isFlagSet(ResolveCompiler.FLAG_WORKSPACE_DIR)) {
-            myCompileDir =
-                    Utilities.getWorkspaceDir(flags.getFlagArgument(
-                            ResolveCompiler.FLAG_WORKSPACE_DIR, "Path"));
+            path =
+                    flags.getFlagArgument(ResolveCompiler.FLAG_WORKSPACE_DIR,
+                            "Path");
         }
+        myCompileDir = Utilities.getWorkspaceDir(path);
     }
 
     // ===========================================================
