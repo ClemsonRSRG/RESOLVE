@@ -285,7 +285,7 @@ typeModelDecl
         (constraintClause)?
         (typeModelInit)?
         (typeModelFinal)?
-        END
+        END SEMICOLON
     ;
 
 typeRepresentationDecl
@@ -294,7 +294,7 @@ typeRepresentationDecl
         (correspondenceClause)?
         (typeRepresentationInit)?
         (typeRepresentationFinal)?
-        END
+        END SEMICOLON
     ;
 
 facilityTypeRepresentationDecl
@@ -302,7 +302,7 @@ facilityTypeRepresentationDecl
         (conventionClause)?
         (facilityTypeRepresentationInit)?
         (facilityTypeRepresentationFinal)?
-        END
+        END SEMICOLON
     ;
 
 performanceTypeModelDecl
@@ -310,7 +310,7 @@ performanceTypeModelDecl
         (constraintClause)?
         (performanceTypeModelInit)?
         (performanceTypeModelFinal)?
-        END
+        END SEMICOLON
     ;
 
 // initialization, finalization rules
