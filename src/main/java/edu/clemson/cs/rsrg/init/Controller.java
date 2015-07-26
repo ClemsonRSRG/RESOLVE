@@ -211,6 +211,7 @@ public class Controller {
         ResolveLexer lexer = new ResolveLexer(file.getInputStream());
         TokenStream tokenStream = new CommonTokenStream(lexer);
         ResolveParser parser = new ResolveParser(tokenStream);
+        ParserRuleContext context = parser.module();
         //ResolveParser parser =
         //        myParserFactory.createParser(file.getInputStream());
         //ParserRuleContext start = parser.module();
