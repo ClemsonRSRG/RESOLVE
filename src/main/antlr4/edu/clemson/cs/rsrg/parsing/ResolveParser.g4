@@ -611,7 +611,8 @@ mathAssertionDecl
 
 mathTheoremIdent
     :   IDENTIFIER
-    |   NUMERIC_LITERAL
+    |   INTEGER_LITERAL
+    |   REAL_LITERAL
     ;
 
 // mathematical definitions
@@ -690,7 +691,7 @@ standardOutfixSignature
     ;
 
 standardPrefixSignature
-    :   (IDENTIFIER | prefixOp | NUMERIC_LITERAL)
+    :   (IDENTIFIER | prefixOp | INTEGER_LITERAL | REAL_LITERAL)
         (definitionParameterList)? COLON mathTypeExp
     ;
 
@@ -859,6 +860,8 @@ mathPrimaryExp
     |   mathSetExp
     |   mathTupleExp
     |   mathLambdaExp
+    |   mathTaggedCartProdTypeExp
+    |   mathNestedExp
     ;
 
 mathAlternativeExp
@@ -874,12 +877,14 @@ mathAlternativeExpItem
 mathLiteralExp
     :   BOOLEAN_LITERAL         #mathBooleanExp
     |   INTEGER_LITERAL         #mathIntegerExp
+    |   REAL_LITERAL            #mathRealExp
     |   CHARACTER_LITERAL       #mathCharacterExp
     |   STRING_LITERAL          #mathStringExp
     ;
 
 mathDotExp
-    :   mathFunctionApplicationExp (DOT mathFunctionApplicationExp)+
+    :   mathFunctionApplicationExp (DOT mathCleanFunctionExp)+
+    |   mathFunctionApplicationExp
     ;
 
 mathFunctionApplicationExp
@@ -888,13 +893,15 @@ mathFunctionApplicationExp
     ;
 
 mathCleanFunctionExp
-    :   name=IDENTIFIER LPAREN mathExp (COMMA mathExp)* RPAREN  #mathFunctionExp
-    |   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER       #mathVariableExp
-    |   (PLUS|MINUS|MULTIPLY|DIVIDE)                            #mathOpExp
+    :   name=IDENTIFIER (CARAT mathNestedExp)? LPAREN mathExp (COMMA mathExp)* RPAREN
+    |   name=IDENTIFIER
+    |   OP (infixOp | NOT | ABS | COMPLEMENT)
     ;
 
+
 mathOutfixExp
-    :   lop=LT mathExp rop=GT
+    :   lop=LT mathInfixExp rop=GT
+    |   lop=LL mathExp rop=GT
     |   lop=BAR mathExp rop=BAR
     |   lop=DBL_BAR mathExp rop=DBL_BAR
     ;
@@ -913,6 +920,14 @@ mathTupleExp
 mathLambdaExp
     :   LAMBDA LPAREN mathVariableDeclGroup (COMMA mathVariableDeclGroup)* RPAREN
         DOT LPAREN mathExp RPAREN
+    ;
+
+mathTaggedCartProdTypeExp
+    :   CARTPROD (mathVariableDeclGroup SEMICOLON)+ END
+    ;
+
+mathNestedExp
+    :   LPAREN mathExp RPAREN
     ;
 
 // program expressions

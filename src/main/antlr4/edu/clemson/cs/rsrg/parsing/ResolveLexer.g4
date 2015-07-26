@@ -523,6 +523,10 @@ BAR
     :   '|'
     ;
 
+CARAT
+    :   '^'
+    ;
+
 COLON
     :   ':'
     ;
@@ -655,17 +659,12 @@ BOOLEAN_LITERAL
     |   'true'
     ;
 
-NUMERIC_LITERAL
-    :   INTEGER_LITERAL
-    |   REAL_LITERAL
-    ;
-
 INTEGER_LITERAL
-    :   DecimalIntegerLiteral
+    :   Digits
     ;
 
 REAL_LITERAL
-    :   DecimalIntegerLiteral '.' DecimalIntegerLiteral*
+    :   Digits DOT Digits+
     ;
 
 CHARACTER_LITERAL
@@ -687,25 +686,13 @@ StringCharacter
     ;
 
 fragment
-DecimalIntegerLiteral
-    :   '0'
-    |   NonZeroDigit (Digits)?
-    ;
-
-fragment
 Digits
-    :   Digit (Digit)*
+    :   [0-9]+
     ;
 
 fragment
 Digit
-    :   '0'
-    |   NonZeroDigit
-    ;
-
-fragment
-NonZeroDigit
-    :   [1-9]
+    :   [0-9]
     ;
 
 fragment
