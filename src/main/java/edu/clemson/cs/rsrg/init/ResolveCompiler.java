@@ -28,8 +28,8 @@ import edu.clemson.cs.r2jt.translation.CTranslator;
 import edu.clemson.cs.r2jt.translation.JavaTranslator;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
-import edu.clemson.cs.rsrg.outputhandler.DebugMsgHandler;
-import edu.clemson.cs.rsrg.outputhandler.OutputInterface;
+import edu.clemson.cs.rsrg.errorhandling.StdErrHandler;
+import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -174,7 +174,7 @@ public class ResolveCompiler {
      */
     public void invokeCompiler() {
         // Create a debug message handler
-        OutputInterface debugHandler = new DebugMsgHandler();
+        ErrorHandler debugHandler = new StdErrHandler();
 
         // Handle all arguments to the compiler
         CompileEnvironment compileEnvironment = handleCompileArgs(debugHandler);
@@ -200,7 +200,7 @@ public class ResolveCompiler {
      *                       passed to the prover.
      */
     public void invokeCompiler(Map<String, ResolveFile> fileMap,
-            OutputInterface errorHandler, ProverListener proverListener) {
+            ErrorHandler errorHandler, ProverListener proverListener) {
         // Handle all arguments to the compiler
         CompileEnvironment compileEnvironment = handleCompileArgs(errorHandler);
 
@@ -339,7 +339,7 @@ public class ResolveCompiler {
      *
      * @return A new <code>CompileEnvironment</code> for the current job.
      */
-    private CompileEnvironment handleCompileArgs(OutputInterface errorHandler) {
+    private CompileEnvironment handleCompileArgs(ErrorHandler errorHandler) {
         CompileEnvironment compileEnvironment = null;
         try {
             // Instantiate a new compile environment that will store
@@ -388,11 +388,11 @@ public class ResolveCompiler {
      */
     private void printHelpMessage(CompileEnvironment compileEnvironment) {
         if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG)) {
-            OutputInterface debugHandler = compileEnvironment.getErrorHandler();
-            debugHandler
-                    .message("Usage: java -jar RESOLVE.jar [options] <files>");
-            debugHandler.message("where options include:");
-            debugHandler.message(FlagDependencies
+            ErrorHandler debugHandler = compileEnvironment.getErrorHandler();
+            debugHandler.info(null,
+                    "Usage: java -jar RESOLVE.jar [options] <files>");
+            debugHandler.info(null, "where options include:");
+            debugHandler.info(null, FlagDependencies
                     .getListingString(compileEnvironment.flags
                             .isFlagSet(FLAG_EXTENDED_HELP)));
         }

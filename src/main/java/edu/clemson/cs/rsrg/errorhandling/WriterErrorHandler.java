@@ -1,5 +1,5 @@
 /**
- * WriterOutputHandler.java
+ * WriterErrorHandler.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.errorhandling;
 
+import edu.clemson.cs.rsrg.init.file.Location;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -23,7 +24,7 @@ import java.io.Writer;
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class WriterErrorHandler implements OutputInterface {
+public class WriterErrorHandler implements ErrorHandler {
 
     // ===========================================================
     // Member Fields
@@ -55,13 +56,70 @@ public class WriterErrorHandler implements OutputInterface {
     // -----------------------------------------------------------
 
     /**
+     * <p>Outputs a critical error message.</p>
+     *
+     * @param msg Message to be displayed.
+     */
+    public void error(Location l, String msg) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Error: ");
+            if (l != null) {
+                sb.append(l.toString());
+            }
+            sb.append(msg);
+            sb.append("\n");
+
+            myOutputWriter.write(sb.toString());
+            myOutputWriter.flush();
+        }
+        catch (IOException e) {
+            System.err
+                    .println("Error writing information to the specified output");
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * <p>Outputs an informational message, not an error or warning.</p>
      *
      * @param msg A compilation message.
      */
-    public void message(String msg) {
+    public void info(Location l, String msg) {
         try {
-            myOutputWriter.write(msg + "\n");
+            StringBuilder sb = new StringBuilder();
+            if (l != null) {
+                sb.append(l.toString());
+            }
+            sb.append(msg);
+            sb.append("\n");
+
+            myOutputWriter.write(sb.toString());
+            myOutputWriter.flush();
+        }
+        catch (IOException e) {
+            System.err
+                    .println("Error writing information to the specified output");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * <p>Outputs a warning message.</p>
+     *
+     * @param msg Message to be displayed.
+     */
+    public void warning(Location l, String msg) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Warning: ");
+            if (l != null) {
+                sb.append(l.toString());
+            }
+            sb.append(msg);
+            sb.append("\n");
+
+            myOutputWriter.write(sb.toString());
             myOutputWriter.flush();
         }
         catch (IOException e) {

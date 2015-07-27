@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.r2jt.absynnew.ModuleAST;
+import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.file.Utilities;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
@@ -21,7 +22,6 @@ import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.ScopeRepository;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import edu.clemson.cs.rsrg.outputhandler.OutputInterface;
 import java.io.File;
 import java.util.*;
 
@@ -66,7 +66,7 @@ public class CompileEnvironment {
     /**
      * <p>This is the default error handler for the RESOLVE compiler.</p>
      */
-    private final OutputInterface myErrorHandler;
+    private final ErrorHandler myErrorHandler;
 
     /**
      * <p>This list stores all the incomplete modules.</p>
@@ -120,7 +120,7 @@ public class CompileEnvironment {
      * @throws FlagDependencyException
      */
     public CompileEnvironment(String[] args, String compilerVersion,
-            OutputInterface errorHandler) throws FlagDependencyException {
+            ErrorHandler errorHandler) throws FlagDependencyException {
         flags = new FlagManager(args);
         myCompileReport = new CompileReport();
         myCompilingModules =
@@ -133,9 +133,9 @@ public class CompileEnvironment {
         if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             synchronized (System.out) {
                 // Print Compiler Messages
-                myErrorHandler.message("RESOLVE Compiler/Verifier - "
+                myErrorHandler.info(null, "RESOLVE Compiler/Verifier - "
                         + compilerVersion + " Version.");
-                myErrorHandler.message("\tUse -help flag for options.\n");
+                myErrorHandler.info(null, "\tUse -help flag for options.\n");
             }
         }
 
@@ -167,7 +167,7 @@ public class CompileEnvironment {
 
         // Print out debugging message
         if (!flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myErrorHandler.message("Complete record: " + mid.toString());
+            myErrorHandler.info(null, "Complete record: " + mid.toString());
         }
     }
 
@@ -190,7 +190,7 @@ public class CompileEnvironment {
 
         // Print out debugging message
         if (!flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myErrorHandler.message("Construct record: " + mid.toString()); //DEBUG
+            myErrorHandler.info(null, "Construct record: " + mid.toString()); //DEBUG
         }
     }
 
@@ -259,7 +259,7 @@ public class CompileEnvironment {
      *
      * @return Error handler object.
      */
-    public OutputInterface getErrorHandler() {
+    public ErrorHandler getErrorHandler() {
         return myErrorHandler;
     }
 

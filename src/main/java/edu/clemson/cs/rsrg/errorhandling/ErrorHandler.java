@@ -12,30 +12,37 @@
  */
 package edu.clemson.cs.rsrg.errorhandling;
 
+import edu.clemson.cs.rsrg.init.file.Location;
+
 /**
  * <p>A common interface that all handlers for debugging,
  * errors and/or other information coming from the compiler
  * must implement.</p>
  *
  * @author Yu-Shan Sun
- * @author Daniel Welch
  * @version 1.0
  */
-public interface RESOLVECompilerListener {
+public interface ErrorHandler {
 
     /**
+     * <p>This method displays the error message passed in.</p>
      *
-     * @param msg
+     * @param msg Message to be displayed.
      */
-    void error(RESOLVEMessage msg);
+    void error(Location l, String msg);
 
     /**
      * <p>This method displays the information passed in.</p>
      *
      * @param msg Message to be displayed.
      */
-    void info(RESOLVEMessage msg);
+    void info(Location l, String msg);
 
-    void warning(RESOLVEMessage msg);
+    /**
+     * <p>This method displays compiler warning passed in.</p>
+     *
+     * @param msg Message to be displayed.
+     */
+    void warning(Location l, String msg);
 
 }

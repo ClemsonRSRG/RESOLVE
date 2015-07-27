@@ -13,16 +13,15 @@
 package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.r2jt.absynnew.*;
+import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.file.Utilities;
-import edu.clemson.cs.rsrg.init.pipeline.AnalysisPipeline;
 import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.parsing.*;
-import edu.clemson.cs.rsrg.outputhandler.OutputInterface;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -64,7 +63,7 @@ public class Controller {
     /**
      * <p>This is the error handler for the RESOLVE compiler.</p>
      */
-    private final OutputInterface myErrorHandler;
+    private final ErrorHandler myErrorHandler;
 
     /**
      * <p>This factory takes care of generating an ANTLR4 parser.</p>

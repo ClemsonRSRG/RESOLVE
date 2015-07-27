@@ -1,5 +1,5 @@
 /**
- * DebugMsgHandler.java
+ * StdErrHandler.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -22,9 +22,7 @@ import java.io.PrintWriter;
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class StdErrHandler extends WriterErrorHandler
-        implements
-            OutputInterface {
+public class StdErrHandler extends WriterErrorHandler implements ErrorHandler {
 
     // ===========================================================
     // Constructors
