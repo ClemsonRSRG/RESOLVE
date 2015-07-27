@@ -1,5 +1,5 @@
 /**
- * OutputInterface.java
+ * ErrorHandler.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.outputhandler;
+package edu.clemson.cs.rsrg.errorhandling;
 
 /**
  * <p>A common interface that all handlers for debugging,
@@ -18,15 +18,24 @@ package edu.clemson.cs.rsrg.outputhandler;
  * must implement.</p>
  *
  * @author Yu-Shan Sun
+ * @author Daniel Welch
  * @version 1.0
  */
-public interface OutputInterface {
+public interface RESOLVECompilerListener {
+
+    /**
+     *
+     * @param msg
+     */
+    void error(RESOLVEMessage msg);
 
     /**
      * <p>This method displays the information passed in.</p>
      *
      * @param msg Message to be displayed.
      */
-    void message(String msg);
+    void info(RESOLVEMessage msg);
+
+    void warning(RESOLVEMessage msg);
 
 }

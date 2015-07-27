@@ -74,6 +74,22 @@ public class ResolveFile {
     // Public Methods
     // ===========================================================
 
+    public boolean equals(ResolveFile f) {
+        boolean result;
+        if (f == null) {
+            result = false;
+        }
+        else {
+            result =
+                    (myModuleFileName.equals(f.myModuleFileName)
+                            && myModuleFileType.equals(f.myModuleFileType)
+                            && myPkgList.equals(f.myPkgList)
+                            && myInputStream.equals(f.myInputStream) && myCreatedJarPath
+                            .equals(f.myCreatedJarPath));
+        }
+        return result;
+    }
+
     /**
      * <p>If the option to create an executable jar is given,
      * this is the place where the file will be created.</p>

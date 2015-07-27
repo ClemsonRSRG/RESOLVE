@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.outputhandler;
+package edu.clemson.cs.rsrg.errorhandling;
 
 import java.io.PrintWriter;
 
@@ -22,7 +22,7 @@ import java.io.PrintWriter;
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class DebugMsgHandler extends WriterOutputHandler
+public class StdErrHandler extends WriterErrorHandler
         implements
             OutputInterface {
 
@@ -34,7 +34,7 @@ public class DebugMsgHandler extends WriterOutputHandler
      * <p>This constructor will create an output handler that
      * always output to standard err.</p>
      */
-    public DebugMsgHandler() {
+    public StdErrHandler() {
         super(new PrintWriter(System.err, true));
     }
 

@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.outputhandler;
+package edu.clemson.cs.rsrg.errorhandling;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -23,7 +23,7 @@ import java.io.Writer;
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class WriterOutputHandler implements OutputInterface {
+public class WriterErrorHandler implements OutputInterface {
 
     // ===========================================================
     // Member Fields
@@ -42,7 +42,7 @@ public class WriterOutputHandler implements OutputInterface {
      *
      * @param outWriter A <code>Writer</code> object.
      */
-    public WriterOutputHandler(Writer outWriter) {
+    public WriterErrorHandler(Writer outWriter) {
         myOutputWriter = outWriter;
     }
 
