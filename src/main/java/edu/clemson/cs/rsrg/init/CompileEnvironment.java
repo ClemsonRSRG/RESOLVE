@@ -47,12 +47,6 @@ public class CompileEnvironment {
     private File myCompileDir = null;
 
     /**
-     * <p>This object contains information about the current compilation for the
-     * WebIDE/WebAPI.</p>
-     */
-    private CompileReport myCompileReport;
-
-    /**
      * <p>This contains all modules we have currently seen. This includes both complete
      * and incomplete modules. A module is complete when we are done processing it. An
      * incomplete module usually means that we are still processing it's import.</p>
@@ -124,7 +118,6 @@ public class CompileEnvironment {
     public CompileEnvironment(String[] args, String compilerVersion,
             ErrorHandler errorHandler) throws FlagDependencyException {
         flags = new FlagManager(args);
-        myCompileReport = new CompileReport();
         myCompilingModules =
                 new HashMap<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>>();
         myExternalRealizFiles = new HashMap<ModuleIdentifier, File>();
@@ -265,16 +258,6 @@ public class CompileEnvironment {
      */
     public boolean isExternalRealizFile(ModuleIdentifier id) {
         return myExternalRealizFiles.containsKey(id);
-    }
-
-    /**
-     * <p>Returns the report object that contains all the compilation
-     * results needed by the WebIDE/WebAPI.</p>
-     *
-     * @return A report object.
-     */
-    public CompileReport getCompileReport() {
-        return myCompileReport;
     }
 
     /**

@@ -55,12 +55,6 @@ public class Controller {
     private final CompileEnvironment myCompileEnvironment;
 
     /**
-     * <p>This stores the all relevant information that needs
-     * to be returned to the WebIDE/WebAPI.</p>
-     */
-    private final CompileReport myCompileReport;
-
-    /**
      * <p>This is the error handler for the RESOLVE compiler.</p>
      */
     private final ErrorHandler myErrorHandler;
@@ -100,7 +94,6 @@ public class Controller {
      */
     public Controller(CompileEnvironment compileEnvironment) {
         myCompileEnvironment = compileEnvironment;
-        myCompileReport = compileEnvironment.getCompileReport();
         myErrorHandler = compileEnvironment.getErrorHandler();
         //myParserFactory = new ResolveParserFactory();
         mySymbolTable =
@@ -145,8 +138,6 @@ public class Controller {
             }*/
         }
         catch (Throwable e) {
-            // Update the compile report with an error
-            myCompileReport.setError();
             Throwable cause = e;
             while (cause != null && !(cause instanceof SrcErrorException)) {
                 cause = cause.getCause();
