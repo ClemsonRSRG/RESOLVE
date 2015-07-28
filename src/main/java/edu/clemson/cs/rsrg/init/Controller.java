@@ -163,6 +163,13 @@ public class Controller {
                         .getOffendingToken(), e.getMessage());
             }
         }
+        finally {
+            // Stop error logging
+            ErrorHandler errorHandler = myCompileEnvironment.getErrorHandler();
+            if (!errorHandler.hasStopped()) {
+                errorHandler.stopLogging();
+            }
+        }
     }
 
     // ===========================================================
@@ -194,6 +201,14 @@ public class Controller {
             }
             catch (IOException ioe) {
                 throw new RuntimeException(ioe.getMessage());
+            }
+            finally {
+                // Stop error logging
+                ErrorHandler errorHandler =
+                        myCompileEnvironment.getErrorHandler();
+                if (!errorHandler.hasStopped()) {
+                    errorHandler.stopLogging();
+                }
             }
         }
     }
@@ -298,6 +313,14 @@ public class Controller {
             }
             catch (IOException ioe) {
                 throw new RuntimeException(ioe.getMessage());
+            }
+            finally {
+                // Stop error logging
+                ErrorHandler errorHandler =
+                        myCompileEnvironment.getErrorHandler();
+                if (!errorHandler.hasStopped()) {
+                    errorHandler.stopLogging();
+                }
             }
         }
 

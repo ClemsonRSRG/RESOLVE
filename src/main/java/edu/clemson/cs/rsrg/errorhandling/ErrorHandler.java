@@ -32,11 +32,26 @@ public interface ErrorHandler {
     void error(Location l, String msg);
 
     /**
+     * <p>Checks to see if we are still logging information.</p>
+     *
+     * @return True if we are done logging, false otherwise.
+     */
+    boolean hasStopped();
+
+    /**
      * <p>This method displays the information passed in.</p>
      *
      * @param msg Message to be displayed.
      */
     void info(Location l, String msg);
+
+    /**
+     * <p>Stop logging anymore information.
+     *
+     * (Note: Should only be called when the compile process
+     * is over or has been aborted due to an error.)</p>
+     */
+    void stopLogging();
 
     /**
      * <p>This method displays compiler warning passed in.</p>

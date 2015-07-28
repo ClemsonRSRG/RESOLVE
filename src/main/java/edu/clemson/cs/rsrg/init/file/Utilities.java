@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
+import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import org.antlr.v4.runtime.ANTLRInputStream;
 
 /**
@@ -122,7 +123,6 @@ public class Utilities {
             if (!resolvePath.exists()) {
                 System.err.println("Warning: Directory '" + resolveDirName
                         + "' not found, using current " + "directory.");
-
                 resolvePath = null;
             }
         }
@@ -150,7 +150,7 @@ public class Utilities {
             // Probably will crash because we can't find "RESOLVE"
             if (resolvePath == null) {
                 System.err.println("Warning: Directory '" + resolveDirName
-                        + "' not found, using current directory.");
+                        + "' not found, using current " + "directory.");
 
                 resolvePath = getAbsoluteFile("");
             }

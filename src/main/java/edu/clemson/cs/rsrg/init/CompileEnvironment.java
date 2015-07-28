@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.r2jt.absynnew.ModuleAST;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
+import edu.clemson.cs.rsrg.errorhandling.WriterErrorHandler;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.file.Utilities;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
@@ -22,7 +23,8 @@ import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.ScopeRepository;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import java.io.File;
+import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -125,19 +127,9 @@ public class CompileEnvironment {
         myCompileReport = new CompileReport();
         myCompilingModules =
                 new HashMap<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>>();
-        myErrorHandler = errorHandler;
         myExternalRealizFiles = new HashMap<ModuleIdentifier, File>();
         myIncompleteModules = new LinkedList<ModuleIdentifier>();
         myUserFileMap = new HashMap<String, ResolveFile>();
-
-        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            synchronized (System.out) {
-                // Print Compiler Messages
-                myErrorHandler.info(null, "RESOLVE Compiler/Verifier - "
-                        + compilerVersion + " Version.");
-                myErrorHandler.info(null, "\tUse -help flag for options.\n");
-            }
-        }
 
         // Check for custom workspace path
         String path = null;
@@ -147,6 +139,37 @@ public class CompileEnvironment {
                             "Path");
         }
         myCompileDir = Utilities.getWorkspaceDir(path);
+
+        // Check for file error output flag
+        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_FILE_OUT)) {
+            try {
+                Date date = new Date();
+                SimpleDateFormat dateFormat =
+                        new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+                File errorFile =
+                        new File(myCompileDir, "Error-Log-"
+                                + dateFormat.format(date) + ".log");
+
+                errorHandler =
+                        new WriterErrorHandler(new BufferedWriter(
+                                new OutputStreamWriter(new FileOutputStream(
+                                        errorFile), "utf-8")));
+            }
+            catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+        myErrorHandler = errorHandler;
+
+        // Debugging information
+        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+            synchronized (System.out) {
+                // Print Compiler Messages
+                myErrorHandler.info(null, "RESOLVE Compiler/Verifier - "
+                        + compilerVersion + " Version.");
+                myErrorHandler.info(null, "\tUse -help flag for options.\n");
+            }
+        }
     }
 
     // ===========================================================

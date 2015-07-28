@@ -36,4 +36,19 @@ public class StdErrHandler extends WriterErrorHandler implements ErrorHandler {
         super(new PrintWriter(System.err, true));
     }
 
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
+
+    /**
+     * <p>Stop logging anymore information.
+     *
+     * (Note: Should only be called when the compile process
+     * is over or has been aborted due to an error.)</p>
+     */
+    @Override
+    public void stopLogging() {
+        stopLogging = true;
+    }
+
 }

@@ -74,12 +74,8 @@ public class ResolveCompiler {
 
     private static final String FLAG_DESC_DEBUG =
             "Print debugging statements from the compiler output.";
-    private static final String FLAG_DESC_ERRORS_ON_STD_OUT =
-            "Change the output to be more web-friendly for the Web Interface.";
-    private static final String FLAG_DESC_XML_OUT =
-            "Changes the compiler output files to XML";
-    private static final String FLAG_DESC_WEB =
-            "Change the output to be more web-friendly for the Web Interface.";
+    private static final String FLAG_DESC_FILE_OUT =
+            "Changes the compiler output to a file";
     private static final String FLAG_DESC_WORKSPACE_DIR =
             "Changes the workspace directory path.";
     private static final String FLAG_SECTION_GENERAL = "General";
@@ -108,14 +104,6 @@ public class ResolveCompiler {
                             + "not relevant to most users.");
 
     /**
-     * <p>Tells the compiler to send error messages to std_out instead
-     * of std_err.</p>
-     */
-    public static final Flag FLAG_ERRORS_ON_STD_OUT =
-            new Flag(FLAG_SECTION_NAME, "errorsOnStdOut",
-                    FLAG_DESC_ERRORS_ON_STD_OUT, Flag.Type.HIDDEN);
-
-    /**
      * <p>Tells the compiler to print debugging messages from the compiler
      * output.</p>
      */
@@ -123,19 +111,11 @@ public class ResolveCompiler {
             new Flag(FLAG_SECTION_NAME, "debug", FLAG_DESC_DEBUG);
 
     /**
-     * <p>Tells the compiler to remove debugging messages from the compiler
-     * output.</p>
+     * <p>Tells the compiler to print debugging messages from the compiler
+     * output to a file.</p>
      */
-    public static final Flag FLAG_XML_OUT =
-            new Flag(FLAG_SECTION_NAME, "XMLout", FLAG_DESC_XML_OUT);
-
-    /**
-     * <p>The main web interface flag.  Tells the compiler to modify
-     * some of the output to be more user-friendly for the web.</p>
-     */
-    public static final Flag FLAG_WEB =
-            new Flag(FLAG_SECTION_NAME, "webinterface", FLAG_DESC_WEB,
-                    Flag.Type.HIDDEN);
+    public static final Flag FLAG_DEBUG_FILE_OUT =
+            new Flag(FLAG_SECTION_NAME, "debugOutToFile", FLAG_DESC_FILE_OUT);
 
     /**
      * <p>Tells the compiler the RESOLVE workspace directory path.</p>
@@ -173,11 +153,11 @@ public class ResolveCompiler {
      * is called by running the compiler from the command line.</p>
      */
     public void invokeCompiler() {
-        // Create a debug message handler
-        ErrorHandler debugHandler = new StdErrHandler();
+        // Create a error handler
+        ErrorHandler errorHandler = new StdErrHandler();
 
         // Handle all arguments to the compiler
-        CompileEnvironment compileEnvironment = handleCompileArgs(debugHandler);
+        CompileEnvironment compileEnvironment = handleCompileArgs(errorHandler);
 
         // Compile files/directories listed in the argument list
         try {
@@ -188,6 +168,14 @@ public class ResolveCompiler {
         }
         catch (IOException e) {
             System.err.println(e.getMessage());
+        }
+        finally {
+            // Stop error logging
+            // YS - The error handler object might have changed.
+            errorHandler = compileEnvironment.getErrorHandler();
+            if (!errorHandler.hasStopped()) {
+                errorHandler.stopLogging();
+            }
         }
     }
 
@@ -219,6 +207,14 @@ public class ResolveCompiler {
         }
         catch (IOException e) {
             System.err.println(e.getMessage());
+        }
+        finally {
+            // Stop error logging
+            // YS - The error handler object might have changed.
+            errorHandler = compileEnvironment.getErrorHandler();
+            if (!errorHandler.hasStopped()) {
+                errorHandler.stopLogging();
+            }
         }
     }
 
@@ -376,6 +372,14 @@ public class ResolveCompiler {
         catch (FlagDependencyException fde) {
             System.err.println(fde.getMessage());
         }
+        finally {
+            // Stop error logging
+            // YS - The error handler object might have changed.
+            errorHandler = compileEnvironment.getErrorHandler();
+            if (!errorHandler.hasStopped()) {
+                errorHandler.stopLogging();
+            }
+        }
 
         return compileEnvironment;
     }
@@ -426,11 +430,8 @@ public class ResolveCompiler {
         // Extended help implies that the general help is also on.
         FlagDependencies.addImplies(FLAG_EXTENDED_HELP, FLAG_HELP);
 
-        // WebIDE
-        FlagDependencies.addRequires(FLAG_ERRORS_ON_STD_OUT, FLAG_WEB);
-        FlagDependencies.addImplies(FLAG_WEB, FLAG_ERRORS_ON_STD_OUT);
-        FlagDependencies.addImplies(FLAG_WEB, FLAG_XML_OUT);
-        FlagDependencies.addImplies(FLAG_WEB, Prover.FLAG_NOGUI);
+        // Debug out to file implies that the debug flag is also on.
+        FlagDependencies.addImplies(FLAG_DEBUG_FILE_OUT, FLAG_DEBUG);
     }
 
 }
