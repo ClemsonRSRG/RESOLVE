@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.errorhandling.exception;
 
-import org.antlr.v4.runtime.Token;
+import edu.clemson.cs.rsrg.parsing.data.ResolveToken;
 
 /**
  * <p>The abstract parent class for all runtime exceptions the compiler.</p>
@@ -27,7 +27,7 @@ public abstract class CompilerException extends RuntimeException {
     // ===========================================================
 
     /** <p>Token that caused the exception to be thrown</p> */
-    private final Token myOffendingToken;
+    private final ResolveToken myOffendingToken;
 
     // ==========================================================
     // Constructors
@@ -41,7 +41,7 @@ public abstract class CompilerException extends RuntimeException {
      * @param t Offending token
      * @param cause Cause of the exception.
      */
-    protected CompilerException(String message, Token t, Throwable cause) {
+    protected CompilerException(String message, ResolveToken t, Throwable cause) {
         super(message, cause);
         myOffendingToken = t;
     }
@@ -53,7 +53,7 @@ public abstract class CompilerException extends RuntimeException {
      * @param message Message to be displayed when the exception is thrown.
      * @param t Offending token
      */
-    protected CompilerException(String message, Token t) {
+    protected CompilerException(String message, ResolveToken t) {
         this(message, t, null);
     }
 
@@ -87,7 +87,7 @@ public abstract class CompilerException extends RuntimeException {
      *
      * @return A token object.
      */
-    public Token getOffendingToken() {
+    public ResolveToken getOffendingToken() {
         return myOffendingToken;
     }
 

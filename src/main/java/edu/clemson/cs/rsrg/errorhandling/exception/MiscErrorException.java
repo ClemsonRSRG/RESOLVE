@@ -12,8 +12,6 @@
  */
 package edu.clemson.cs.rsrg.errorhandling.exception;
 
-import org.antlr.v4.runtime.Token;
-
 /**
  *  <p>The miscellaneous error exception for the compiler
  *  where there is no line or location information available.</p>

@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.errorhandling.exception;
 
-import org.antlr.v4.runtime.Token;
+import edu.clemson.cs.rsrg.parsing.data.ResolveToken;
 
 /**
  * <p>The default source error exception for the compiler.</p>
@@ -41,7 +41,7 @@ public class SourceErrorException extends CompilerException {
      * @param t Offending token
      * @param cause Cause of the exception.
      */
-    public SourceErrorException(String message, Token t, Throwable cause) {
+    public SourceErrorException(String message, ResolveToken t, Throwable cause) {
         super(message, t, cause);
     }
 
@@ -52,7 +52,7 @@ public class SourceErrorException extends CompilerException {
      * @param message Message to be displayed when the exception is thrown.
      * @param t Offending token
      */
-    public SourceErrorException(String message, Token t) {
+    public SourceErrorException(String message, ResolveToken t) {
         super(message, t);
     }
 

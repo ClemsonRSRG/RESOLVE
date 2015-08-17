@@ -16,10 +16,7 @@ import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST;
 import edu.clemson.cs.r2jt.absynnew.ModuleAST;
 import edu.clemson.cs.rsrg.errorhandling.AntlrErrorListener;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
-import edu.clemson.cs.rsrg.errorhandling.exception.CircularDependencyException;
-import edu.clemson.cs.rsrg.errorhandling.exception.ImportException;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
-import edu.clemson.cs.rsrg.errorhandling.exception.SourceErrorException;
+import edu.clemson.cs.rsrg.errorhandling.exception.*;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
@@ -146,7 +143,7 @@ public class Controller {
         }
         catch (Throwable e) {
             Throwable cause = e;
-            while (cause != null && !(cause instanceof SourceErrorException)) {
+            while (cause != null && !(cause instanceof CompilerException)) {
                 cause = cause.getCause();
             }
 
@@ -158,9 +155,8 @@ public class Controller {
                 throw new MiscErrorException("Unknown Exception", e);
             }
             else {
-                SourceErrorException see = (SourceErrorException) cause;
-                myErrorHandler.error((ResolveToken) see.getOffendingToken(), e
-                        .getMessage());
+                CompilerException see = (CompilerException) cause;
+                myErrorHandler.error(see.getOffendingToken(), e.getMessage());
             }
         }
         finally {
@@ -183,6 +179,8 @@ public class Controller {
      * future use.</p>
      *
      * @param m The compiling module.
+     *
+     * @throws MiscErrorException
      */
     private void addFilesForExternalImports(ModuleAST m) {
         Set<Token> externals =
@@ -212,11 +210,14 @@ public class Controller {
      * @param file The RESOLVE file that we are going to compile.
      *
      * @return The ANTLR4 Module AST.
+     *
+     * @throws MiscErrorException
      */
     private ModuleAST createModuleAST(ResolveFile file) {
         ANTLRInputStream input = file.getInputStream();
         if (input == null) {
-            throw new IllegalArgumentException("ANTLRInputStream null");
+            throw new MiscErrorException("ANTLRInputStream null",
+                    new IllegalArgumentException());
         }
 
         ResolveLexer lexer = new ResolveLexer(input);
@@ -239,6 +240,9 @@ public class Controller {
      *
      * @param g The compilation's file dependency graph.
      * @param root Current compiling module.
+     *
+     * @throws CircularDependencyException
+     * @throws ImportException
      */
     private void findDependencies(DefaultDirectedGraph g, ModuleAST root) {
         for (Token importRequest : root.getImports().getImportsExcluding(
@@ -291,6 +295,8 @@ public class Controller {
      * @param baseName The name of the file including the extension
      *
      * @return A <code>ResolveFile</code> object that is used by the compiler.
+     *
+     * @throws MiscErrorException
      */
     private ResolveFile findResolveFile(String baseName) {
         // First check to see if this is a user created
