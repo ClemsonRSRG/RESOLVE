@@ -10,7 +10,9 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.init.file;
+package edu.clemson.cs.rsrg.parsing.data;
+
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
 
 /**
  * <p>This class points to the location within a ResolveFile.</p>
@@ -18,6 +20,7 @@ package edu.clemson.cs.rsrg.init.file;
  * @author Yu-Shan Sun
  * @version 1.0
  */
+@Deprecated
 public class Location {
 
     // ===========================================================
