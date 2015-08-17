@@ -213,9 +213,18 @@ public class Controller {
      * @return The ANTLR4 Module AST.
      */
     private ModuleAST createModuleAST(ResolveFile file) {
-        ResolveLexer lexer = new ResolveLexer(file.getInputStream());
+        ANTLRInputStream input = file.getInputStream();
+        if (input == null) {
+            throw new IllegalArgumentException("ANTLRInputStream null");
+        }
+
+        ResolveLexer lexer = new ResolveLexer(input);
+        ResolveTokenFactory factory = new ResolveTokenFactory(input);
+        lexer.setTokenFactory(factory);
+
         TokenStream tokenStream = new CommonTokenStream(lexer);
         ResolveParser parser = new ResolveParser(tokenStream);
+        parser.setTokenFactory(factory);
         ParserRuleContext context = parser.module();
         //ResolveParser parser =
         //        myParserFactory.createParser(file.getInputStream());
