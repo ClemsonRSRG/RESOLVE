@@ -90,7 +90,7 @@ public class UnderliningErrorListener extends BaseErrorListener {
         int i = 0;
         for (; i < stack.length; i++) {
             StackTraceElement t = stack[i];
-            if (!t.toString().contains("UnderliningErrorListener")) {
+            if (!t.toString().contains("AntlrErrorListener")) {
                 break;
             }
         }

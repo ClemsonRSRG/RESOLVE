@@ -12,16 +12,23 @@
  */
 package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.r2jt.absynnew.*;
+import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST;
+import edu.clemson.cs.r2jt.absynnew.ModuleAST;
+import edu.clemson.cs.rsrg.errorhandling.AntlrErrorListener;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
+import edu.clemson.cs.rsrg.errorhandling.exception.CircularDependencyException;
+import edu.clemson.cs.rsrg.errorhandling.exception.ImportException;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.errorhandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.file.Utilities;
-import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.parsing.*;
+import edu.clemson.cs.rsrg.parsing.data.ResolveToken;
+import edu.clemson.cs.rsrg.parsing.data.ResolveTokenFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,9 +67,9 @@ public class Controller {
     private final ErrorHandler myErrorHandler;
 
     /**
-     * <p>This factory takes care of generating an ANTLR4 parser.</p>
+     * <p>This is the error listener for all ANTLR4 related objects.</p>
      */
-    //private final ResolveParserFactory myParserFactory;
+    private final AntlrErrorListener myAntlrErrorListener;
 
     /**
      * <p>The symbol table for the compiler.</p>
@@ -95,7 +102,7 @@ public class Controller {
     public Controller(CompileEnvironment compileEnvironment) {
         myCompileEnvironment = compileEnvironment;
         myErrorHandler = compileEnvironment.getErrorHandler();
-        //myParserFactory = new ResolveParserFactory();
+        myAntlrErrorListener = new AntlrErrorListener(myErrorHandler);
         mySymbolTable =
                 (MathSymbolTableBuilder) compileEnvironment.getSymbolTable();
     }
@@ -139,19 +146,21 @@ public class Controller {
         }
         catch (Throwable e) {
             Throwable cause = e;
-            while (cause != null && !(cause instanceof SrcErrorException)) {
+            while (cause != null && !(cause instanceof SourceErrorException)) {
                 cause = cause.getCause();
             }
+
             if (cause == null) {
+                // TODO: Check to see if ever get here. All exceptions should extend the CompilerException class.
                 if (e instanceof RuntimeException) {
                     throw (RuntimeException) e;
                 }
-                throw new RuntimeException(e);
+                throw new MiscErrorException("Unknown Exception", e);
             }
             else {
-                SrcErrorException see = (SrcErrorException) cause;
-                UnderliningErrorListener.INSTANCE.semanticError(see
-                        .getOffendingToken(), e.getMessage());
+                SourceErrorException see = (SourceErrorException) cause;
+                myErrorHandler.error((ResolveToken) see.getOffendingToken(), e
+                        .getMessage());
             }
         }
         finally {
@@ -191,15 +200,7 @@ public class Controller {
                         new ModuleIdentifier(externalImport), l.getFile());
             }
             catch (IOException ioe) {
-                throw new RuntimeException(ioe.getMessage());
-            }
-            finally {
-                // Stop error logging
-                ErrorHandler errorHandler =
-                        myCompileEnvironment.getErrorHandler();
-                if (!errorHandler.hasStopped()) {
-                    errorHandler.stopLogging();
-                }
+                throw new MiscErrorException(ioe.getMessage(), ioe.getCause());
             }
         }
     }
@@ -224,11 +225,10 @@ public class Controller {
 
         TokenStream tokenStream = new CommonTokenStream(lexer);
         ResolveParser parser = new ResolveParser(tokenStream);
+        parser.removeErrorListeners();
+        parser.addErrorListener(myAntlrErrorListener);
         parser.setTokenFactory(factory);
         ParserRuleContext context = parser.module();
-        //ResolveParser parser =
-        //        myParserFactory.createParser(file.getInputStream());
-        //ParserRuleContext start = parser.module();
         //return TreeUtil.createASTNodeFrom(start);
         return null;
     }
@@ -261,8 +261,8 @@ public class Controller {
             if (root.getImports().inCategory(
                     ImportCollectionAST.ImportType.IMPLICIT, importRequest)) {
                 if (!module.appropriateForImport()) {
-                    throw new IllegalArgumentException("invalid import "
-                            + module.getName() + "; cannot import module of "
+                    throw new ImportException("Invalid import "
+                            + module.getName() + "; Cannot import module of "
                             + "type: " + module.getClass());
                 }
             }
@@ -270,7 +270,7 @@ public class Controller {
             // Check for circular dependency
             if (pathExists(g, id, rootId)) {
                 throw new CircularDependencyException(
-                        "circular dependency detected");
+                        "Circular dependency detected.");
             }
 
             // Add new edge to our graph indicating the relationship between
@@ -312,15 +312,7 @@ public class Controller {
                                 workspaceDir.getAbsolutePath());
             }
             catch (IOException ioe) {
-                throw new RuntimeException(ioe.getMessage());
-            }
-            finally {
-                // Stop error logging
-                ErrorHandler errorHandler =
-                        myCompileEnvironment.getErrorHandler();
-                if (!errorHandler.hasStopped()) {
-                    errorHandler.stopLogging();
-                }
+                throw new MiscErrorException(ioe.getMessage(), ioe.getCause());
             }
         }
 

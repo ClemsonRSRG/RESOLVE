@@ -15,6 +15,8 @@ package edu.clemson.cs.rsrg.init;
 import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
 import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
+import edu.clemson.cs.rsrg.errorhandling.exception.CompilerException;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.file.Utilities;
@@ -163,11 +165,8 @@ public class ResolveCompiler {
         try {
             compileRealFiles(myArgumentFileList, compileEnvironment);
         }
-        catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-        }
-        catch (IOException e) {
-            System.err.println(e.getMessage());
+        catch (CompilerException e) {
+            compileEnvironment.getErrorHandler().error(null, e.getMessage());
         }
         finally {
             // Stop error logging
@@ -202,11 +201,8 @@ public class ResolveCompiler {
         try {
             compileArbitraryFiles(myArgumentFileList, compileEnvironment);
         }
-        catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-        }
-        catch (IOException e) {
-            System.err.println(e.getMessage());
+        catch (CompilerException e) {
+            compileEnvironment.getErrorHandler().error(null, e.getMessage());
         }
         finally {
             // Stop error logging
@@ -231,13 +227,10 @@ public class ResolveCompiler {
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
      *
-     * @throws IOException
-     * @throws IllegalArgumentException
+     * @throws CompilerException
      */
     private void compileArbitraryFiles(List<String> fileArgList,
-            CompileEnvironment compileEnvironment)
-            throws IOException,
-                IllegalArgumentException {
+            CompileEnvironment compileEnvironment) throws CompilerException {
         // Loop through the argument list to determine if it is a file or a directory
         for (String fileString : fileArgList) {
             // First check if this is a "meta" file
@@ -279,13 +272,10 @@ public class ResolveCompiler {
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
      *
-     * @throws IOException
-     * @throws IllegalArgumentException
+     * @throws CompilerException
      */
     private void compileRealFiles(List<String> fileArgList,
-            CompileEnvironment compileEnvironment)
-            throws IOException,
-                IllegalArgumentException {
+            CompileEnvironment compileEnvironment) throws CompilerException {
         // Loop through the argument list to determine if it is a file or a directory
         for (String fileString : fileArgList) {
             // Convert to a file object
@@ -293,14 +283,16 @@ public class ResolveCompiler {
 
             // Error if we can't locate the file
             if (!file.isFile()) {
-                throw new FileNotFoundException("Cannot find the file "
-                        + file.getName() + " in this directory.");
+                throw new MiscErrorException("Cannot find the file "
+                        + file.getName() + " in this directory.",
+                        new FileNotFoundException());
             }
             // Recursively compile all RESOLVE files in the specified directory
             else if (file.isDirectory()) {
-                throw new IllegalArgumentException(
+                throw new MiscErrorException(
                         file.getName()
-                                + " is an directory. Directories cannot be specified as an argument to the RESOLVE compiler.");
+                                + " is an directory. Directories cannot be specified as an argument to the RESOLVE compiler.",
+                        new IllegalArgumentException());
             }
             // Process this file
             else {
@@ -308,19 +300,26 @@ public class ResolveCompiler {
 
                 // Print error message if it is not a valid RESOLVE file
                 if (moduleType == null) {
-                    throw new IllegalArgumentException("The file "
-                            + file.getName() + " is not a RESOLVE file.");
+                    throw new MiscErrorException("The file " + file.getName()
+                            + " is not a RESOLVE file.",
+                            new IllegalArgumentException());
                 }
                 else {
-                    String workspacePath =
-                            compileEnvironment.getWorkspaceDir()
-                                    .getAbsolutePath();
-                    ResolveFile f =
-                            Utilities.convertToResolveFile(file, moduleType,
-                                    workspacePath);
+                    try {
+                        String workspacePath =
+                                compileEnvironment.getWorkspaceDir()
+                                        .getAbsolutePath();
+                        ResolveFile f =
+                                Utilities.convertToResolveFile(file,
+                                        moduleType, workspacePath);
 
-                    // Invoke the compiler
-                    compileMainFile(f, compileEnvironment);
+                        // Invoke the compiler
+                        compileMainFile(f, compileEnvironment);
+                    }
+                    catch (IOException ioe) {
+                        throw new MiscErrorException(ioe.getMessage(), ioe
+                                .getCause());
+                    }
                 }
             }
         }
@@ -370,7 +369,12 @@ public class ResolveCompiler {
             }
         }
         catch (FlagDependencyException fde) {
-            System.err.println(fde.getMessage());
+            // YS - The error handler object might have changed.
+            compileEnvironment.getErrorHandler().error(null, fde.getMessage());
+        }
+        catch (IOException ioe) {
+            // YS - The error handler object might have changed.
+            compileEnvironment.getErrorHandler().error(null, ioe.getMessage());
         }
         finally {
             // Stop error logging

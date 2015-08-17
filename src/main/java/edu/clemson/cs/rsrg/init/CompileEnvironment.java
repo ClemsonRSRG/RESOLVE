@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.init;
 import edu.clemson.cs.r2jt.absynnew.ModuleAST;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import edu.clemson.cs.rsrg.errorhandling.WriterErrorHandler;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.file.Utilities;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
@@ -114,9 +115,12 @@ public class CompileEnvironment {
      * @param errorHandler An error handler to display debug or error messages.
      *
      * @throws FlagDependencyException
+     * @throws IOException
      */
     public CompileEnvironment(String[] args, String compilerVersion,
-            ErrorHandler errorHandler) throws FlagDependencyException {
+            ErrorHandler errorHandler)
+            throws FlagDependencyException,
+                IOException {
         flags = new FlagManager(args);
         myCompilingModules =
                 new HashMap<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>>();
@@ -135,22 +139,17 @@ public class CompileEnvironment {
 
         // Check for file error output flag
         if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_FILE_OUT)) {
-            try {
-                Date date = new Date();
-                SimpleDateFormat dateFormat =
-                        new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
-                File errorFile =
-                        new File(myCompileDir, "Error-Log-"
-                                + dateFormat.format(date) + ".log");
+            Date date = new Date();
+            SimpleDateFormat dateFormat =
+                    new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            File errorFile =
+                    new File(myCompileDir, "Error-Log-"
+                            + dateFormat.format(date) + ".log");
 
-                errorHandler =
-                        new WriterErrorHandler(new BufferedWriter(
-                                new OutputStreamWriter(new FileOutputStream(
-                                        errorFile), "utf-8")));
-            }
-            catch (IOException ioe) {
-                ioe.printStackTrace();
-            }
+            errorHandler =
+                    new WriterErrorHandler(new BufferedWriter(
+                            new OutputStreamWriter(new FileOutputStream(
+                                    errorFile), "utf-8")));
         }
         myErrorHandler = errorHandler;
 
@@ -360,13 +359,14 @@ public class CompileEnvironment {
      */
     public void setSymbolTable(ScopeRepository table) {
         if (table == null) {
-            throw new IllegalArgumentException(
-                    "Symbol table may not be set to null!");
+            throw new MiscErrorException(
+                    "Symbol table may not be set to null!",
+                    new IllegalArgumentException());
         }
 
         if (mySymbolTable != null) {
-            throw new IllegalStateException(
-                    "Symbol table may only be set once!");
+            throw new MiscErrorException("Symbol table may only be set once!",
+                    new IllegalStateException());
         }
 
         mySymbolTable = table;

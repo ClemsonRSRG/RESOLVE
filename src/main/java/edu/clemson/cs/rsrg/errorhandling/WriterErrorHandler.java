@@ -182,7 +182,7 @@ public class WriterErrorHandler implements ErrorHandler {
     private String getLocation(ResolveToken token) {
         StringBuilder sb = new StringBuilder();
         if (token != null) {
-            sb.append(token.getTokenSource());
+            sb.append(groomFileName(token.getTokenSource().getSourceName()));
 
             // Append the line and column number
             sb.append("(");
@@ -193,6 +193,21 @@ public class WriterErrorHandler implements ErrorHandler {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * <p>Trims all the path information from the filename.</p>
+     *
+     * @param fileName The full path filename.
+     *
+     * @return Filename only.
+     */
+    private String groomFileName(String fileName) {
+        int start = fileName.lastIndexOf("/");
+        if (start == -1) {
+            return fileName;
+        }
+        return fileName.substring(start + 1, fileName.length());
     }
 
 }
