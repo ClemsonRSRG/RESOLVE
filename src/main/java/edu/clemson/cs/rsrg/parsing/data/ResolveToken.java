@@ -29,6 +29,9 @@ import org.antlr.v4.runtime.misc.Pair;
  */
 public class ResolveToken extends CommonToken {
 
+    /** <p>The source location for this token.</p> */
+    protected String mySourceName;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -54,7 +57,7 @@ public class ResolveToken extends CommonToken {
 
     /**
      * <p>This constructor allows you
-     * to create a token with more details.</p>
+     * to create a token from a source pair.</p>
      *
      * @param source Token source.
      * @param type Token type.
