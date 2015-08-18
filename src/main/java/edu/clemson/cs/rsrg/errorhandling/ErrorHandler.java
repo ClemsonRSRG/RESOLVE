@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.errorhandling;
 
-import edu.clemson.cs.rsrg.parsing.data.ResolveToken;
+import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
  * <p>A common interface that all handlers for debugging,
@@ -27,10 +27,10 @@ public interface ErrorHandler {
     /**
      * <p>This method displays the error message passed in.</p>
      *
-     * @param token The token where we encountered the error.
+     * @param l The location where we encountered the error.
      * @param msg Message to be displayed.
      */
-    void error(ResolveToken token, String msg);
+    void error(Location l, String msg);
 
     /**
      * <p>Checks to see if we are still logging information.</p>
@@ -42,10 +42,10 @@ public interface ErrorHandler {
     /**
      * <p>This method displays the information passed in.</p>
      *
-     * @param token The token where we encountered the error.
+     * @param l The location where we encountered the error.
      * @param msg Message to be displayed.
      */
-    void info(ResolveToken token, String msg);
+    void info(Location l, String msg);
 
     /**
      * <p>Stop logging anymore information.
@@ -58,9 +58,9 @@ public interface ErrorHandler {
     /**
      * <p>This method displays compiler warning passed in.</p>
      *
-     * @param token The token where we encountered the error.
+     * @param l The location where we encountered the error.
      * @param msg Message to be displayed.
      */
-    void warning(ResolveToken token, String msg);
+    void warning(Location l, String msg);
 
 }

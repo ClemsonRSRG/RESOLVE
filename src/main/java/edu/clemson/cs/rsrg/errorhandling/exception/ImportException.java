@@ -17,7 +17,7 @@ package edu.clemson.cs.rsrg.errorhandling.exception;
  * while trying to import a new module.</p>
  *
  * @author Yu-Shan Sun
- * @version 1.0
+ * @version 2.0
  */
 public class ImportException extends CompilerException {
 
@@ -39,7 +39,7 @@ public class ImportException extends CompilerException {
      * @param message Message to be displayed when the exception is thrown.
      */
     public ImportException(String message) {
-        super(message);
+        super(message, (Throwable) null);
     }
 
 }

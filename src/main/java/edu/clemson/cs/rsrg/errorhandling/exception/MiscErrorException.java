@@ -17,7 +17,7 @@ package edu.clemson.cs.rsrg.errorhandling.exception;
  *  where there is no line or location information available.</p>
  *
  * @author Yu-Shan Sun
- * @version 1.0
+ * @version 2.0
  */
 public class MiscErrorException extends CompilerException {
 

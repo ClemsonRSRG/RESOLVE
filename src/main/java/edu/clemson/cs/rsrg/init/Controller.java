@@ -156,7 +156,7 @@ public class Controller {
             }
             else {
                 CompilerException see = (CompilerException) cause;
-                myErrorHandler.error(see.getOffendingToken(), e.getMessage());
+                myErrorHandler.error(see.getErrorLocation(), e.getMessage());
             }
         }
         finally {

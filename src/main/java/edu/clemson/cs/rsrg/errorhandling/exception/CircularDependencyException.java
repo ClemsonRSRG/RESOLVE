@@ -18,7 +18,7 @@ package edu.clemson.cs.rsrg.errorhandling.exception;
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
- * @version 1.0
+ * @version 2.0
  */
 public class CircularDependencyException extends CompilerException {
 
@@ -40,7 +40,7 @@ public class CircularDependencyException extends CompilerException {
      * @param message Message to be displayed when the exception is thrown.
      */
     public CircularDependencyException(String message) {
-        super(message);
+        super(message, (Throwable) null);
     }
 
 }

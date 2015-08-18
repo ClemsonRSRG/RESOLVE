@@ -12,13 +12,14 @@
  */
 package edu.clemson.cs.rsrg.errorhandling.exception;
 
-import edu.clemson.cs.rsrg.parsing.data.ResolveToken;
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
  * <p>The abstract parent class for all runtime exceptions the compiler.</p>
  *
  * @author Yu-Shan Sun
- * @version 1.0
+ * @version 2.0
  */
 public abstract class CompilerException extends RuntimeException {
 
@@ -26,35 +27,33 @@ public abstract class CompilerException extends RuntimeException {
     // Member Fields
     // ===========================================================
 
-    /** <p>Token that caused the exception to be thrown</p> */
-    private final ResolveToken myOffendingToken;
+    /** <p>Location that caused the exception to be thrown</p> */
+    private final Location myErrorLocation;
 
     // ==========================================================
     // Constructors
     // ==========================================================
 
     /**
-     * <p>This constructor takes in a throwable cause and a message for the
-     * token that caused the exception to be thrown.</p>
+     * <p>This constructor takes in a throwable cause and a message
+     * that caused the exception to be thrown.</p>
      *
      * @param message Message to be displayed when the exception is thrown.
-     * @param t Offending token
-     * @param cause Cause of the exception.
+     * @param location Location where the exception originated from.
      */
-    protected CompilerException(String message, ResolveToken t, Throwable cause) {
-        super(message, cause);
-        myOffendingToken = t;
+    protected CompilerException(String message, Location location) {
+        this(message, location, null);
     }
 
     /**
      * <p>This constructor takes in a message for the
-     * token that caused the exception to be thrown.</p>
+     * symbol that caused the exception to be thrown.</p>
      *
      * @param message Message to be displayed when the exception is thrown.
-     * @param t Offending token
+     * @param symbol Offending symbol
      */
-    protected CompilerException(String message, ResolveToken t) {
-        this(message, t, null);
+    protected CompilerException(String message, PosSymbol symbol) {
+        this(message, symbol, null);
     }
 
     /**
@@ -65,17 +64,34 @@ public abstract class CompilerException extends RuntimeException {
      * @param cause Cause of the exception.
      */
     protected CompilerException(String message, Throwable cause) {
-        this(message, null, cause);
+        this(message, (Location) null, cause);
     }
 
     /**
-     * <p>This constructor takes in a message
+     * <p>This constructor takes in a throwable cause and a message for the
+     * symbol that caused the exception to be thrown.</p>
+     *
+     * @param message Message to be displayed when the exception is thrown.
+     * @param symbol Offending symbol
+     * @param cause Cause of the exception.
+     */
+    protected CompilerException(String message, PosSymbol symbol,
+            Throwable cause) {
+        this(message, symbol.getLocation(), cause);
+    }
+
+    /**
+     * <p>This constructor takes in a throwable cause, a message and a location
      * that caused the exception to be thrown.</p>
      *
      * @param message Message to be displayed when the exception is thrown.
+     * @param location Location where the exception originated from.
+     * @param cause Cause of the exception.
      */
-    protected CompilerException(String message) {
-        this(message, null, null);
+    protected CompilerException(String message, Location location,
+            Throwable cause) {
+        super(message, cause);
+        myErrorLocation = location;
     }
 
     // ===========================================================
@@ -83,12 +99,12 @@ public abstract class CompilerException extends RuntimeException {
     // ===========================================================
 
     /**
-     * <p>Return the token that caused this exception to be thrown.</p>
+     * <p>Return the location that caused this exception to be thrown.</p>
      *
-     * @return A token object.
+     * @return A {link Location} object.
      */
-    public ResolveToken getOffendingToken() {
-        return myOffendingToken;
+    public Location getErrorLocation() {
+        return myErrorLocation;
     }
 
 }

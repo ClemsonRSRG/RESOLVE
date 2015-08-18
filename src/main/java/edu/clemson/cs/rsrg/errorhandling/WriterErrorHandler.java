@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.errorhandling;
 
-import edu.clemson.cs.rsrg.parsing.data.ResolveToken;
+import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -58,15 +58,18 @@ public class WriterErrorHandler implements ErrorHandler {
     /**
      * <p>Outputs a critical error message.</p>
      *
-     * @param token The token where we encountered the error.
+     * @param l The location where we encountered the error.
      * @param msg Message to be displayed.
      */
-    public void error(ResolveToken token, String msg) {
+    public void error(Location l, String msg) {
         try {
             if (!stopLogging) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("Error: ");
-                sb.append(getLocation(token));
+                if (l != null) {
+                    sb.append(l.toString());
+                }
+                sb.append("\n");
                 sb.append(msg);
                 sb.append("\n");
 
@@ -96,14 +99,17 @@ public class WriterErrorHandler implements ErrorHandler {
     /**
      * <p>Outputs an informational message, not an error or warning.</p>
      *
-     * @param token The token where we encountered the error.
+     * @param l The location where we encountered the error.
      * @param msg A compilation message.
      */
-    public void info(ResolveToken token, String msg) {
+    public void info(Location l, String msg) {
         try {
             if (!stopLogging) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(getLocation(token));
+                if (l != null) {
+                    sb.append(l.toString());
+                }
+                sb.append("\n");
                 sb.append(msg);
                 sb.append("\n");
 
@@ -142,15 +148,18 @@ public class WriterErrorHandler implements ErrorHandler {
     /**
      * <p>Outputs a warning message.</p>
      *
-     * @param token The token where we encountered the error.
+     * @param l The location where we encountered the error.
      * @param msg Message to be displayed.
      */
-    public void warning(ResolveToken token, String msg) {
+    public void warning(Location l, String msg) {
         try {
             if (!stopLogging) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("Warning: ");
-                sb.append(getLocation(token));
+                if (l != null) {
+                    sb.append(l.toString());
+                }
+                sb.append("\n");
                 sb.append(msg);
                 sb.append("\n");
 
@@ -166,48 +175,6 @@ public class WriterErrorHandler implements ErrorHandler {
                     .println("Error writing information to the specified output.");
             e.printStackTrace();
         }
-    }
-
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
-
-    /**
-     * <p>Returns the location from the token in string format.</p>
-     *
-     * @param token The token where we encountered the error.
-     *
-     * @return Location as a string.
-     */
-    private String getLocation(ResolveToken token) {
-        StringBuilder sb = new StringBuilder();
-        if (token != null) {
-            sb.append(groomFileName(token.getTokenSource().getSourceName()));
-
-            // Append the line and column number
-            sb.append("(");
-            sb.append(token.getLine());
-            sb.append(":");
-            sb.append(token.getCharPositionInLine());
-            sb.append(")");
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * <p>Trims all the path information from the filename.</p>
-     *
-     * @param fileName The full path filename.
-     *
-     * @return Filename only.
-     */
-    private String groomFileName(String fileName) {
-        int start = fileName.lastIndexOf("/");
-        if (start == -1) {
-            return fileName;
-        }
-        return fileName.substring(start + 1, fileName.length());
     }
 
 }

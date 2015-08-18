@@ -1,5 +1,5 @@
 /**
- * AsStringCapability.java
+ * BasicCapabilities.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
