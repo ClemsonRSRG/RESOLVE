@@ -20,7 +20,6 @@ import edu.clemson.cs.rsrg.init.file.ResolveFile;
  * @author Yu-Shan Sun
  * @version 1.0
  */
-@Deprecated
 public class Location {
 
     // ===========================================================
