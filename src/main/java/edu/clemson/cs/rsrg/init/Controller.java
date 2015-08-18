@@ -10,25 +10,27 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init2;
+package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.r2jt.absynnew.*;
-import edu.clemson.cs.r2jt.init2.file.FileLocator;
-import edu.clemson.cs.r2jt.init2.file.ModuleType;
-import edu.clemson.cs.r2jt.init2.file.ResolveFile;
-import edu.clemson.cs.r2jt.errors.ErrorHandler2;
-import edu.clemson.cs.r2jt.init2.file.Utilities;
-import edu.clemson.cs.r2jt.init2.pipeline.AnalysisPipeline;
-import edu.clemson.cs.r2jt.misc.SrcErrorException;
-import edu.clemson.cs.r2jt.parsing.ResolveParser;
+import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST;
+import edu.clemson.cs.r2jt.absynnew.ModuleAST;
+import edu.clemson.cs.rsrg.errorhandling.AntlrErrorListener;
+import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
+import edu.clemson.cs.rsrg.errorhandling.exception.*;
+import edu.clemson.cs.rsrg.init.file.FileLocator;
+import edu.clemson.cs.rsrg.init.file.ModuleType;
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.Utilities;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.parsing.*;
+import edu.clemson.cs.rsrg.parsing.data.ResolveToken;
+import edu.clemson.cs.rsrg.parsing.data.ResolveTokenFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.*;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -57,20 +59,14 @@ public class Controller {
     private final CompileEnvironment myCompileEnvironment;
 
     /**
-     * <p>This stores the all relevant information that needs
-     * to be returned to the WebIDE/WebAPI.</p>
-     */
-    private final CompileReport myCompileReport;
-
-    /**
      * <p>This is the error handler for the RESOLVE compiler.</p>
      */
-    private final ErrorHandler2 myErrorHandler;
+    private final ErrorHandler myErrorHandler;
 
     /**
-     * <p>This factory takes care of generating an ANTLR4 parser.</p>
+     * <p>This is the error listener for all ANTLR4 related objects.</p>
      */
-    //private final ResolveParserFactory myParserFactory;
+    private final AntlrErrorListener myAntlrErrorListener;
 
     /**
      * <p>The symbol table for the compiler.</p>
@@ -102,9 +98,8 @@ public class Controller {
      */
     public Controller(CompileEnvironment compileEnvironment) {
         myCompileEnvironment = compileEnvironment;
-        myCompileReport = compileEnvironment.getCompileReport();
         myErrorHandler = compileEnvironment.getErrorHandler();
-        //myParserFactory = new ResolveParserFactory();
+        myAntlrErrorListener = new AntlrErrorListener(myErrorHandler);
         mySymbolTable =
                 (MathSymbolTableBuilder) compileEnvironment.getSymbolTable();
     }
@@ -126,7 +121,7 @@ public class Controller {
             ModuleAST targetModule = createModuleAST(file);
 
             // Add this file to our compile environment
-            myCompileEnvironment.constructRecord(file, targetModule);
+            /*myCompileEnvironment.constructRecord(file, targetModule);
 
             // Create a dependencies graph and search for import
             // dependencies.
@@ -144,25 +139,31 @@ public class Controller {
 
                 // Complete compilation for this module
                 myCompileEnvironment.completeRecord(m);
-            }
+            }*/
         }
         catch (Throwable e) {
-            // Update the compile report with an error
-            myCompileReport.setError();
             Throwable cause = e;
-            while (cause != null && !(cause instanceof SrcErrorException)) {
+            while (cause != null && !(cause instanceof CompilerException)) {
                 cause = cause.getCause();
             }
+
             if (cause == null) {
+                // TODO: Check to see if ever get here. All exceptions should extend the CompilerException class.
                 if (e instanceof RuntimeException) {
                     throw (RuntimeException) e;
                 }
-                throw new RuntimeException(e);
+                throw new MiscErrorException("Unknown Exception", e);
             }
             else {
-                SrcErrorException see = (SrcErrorException) cause;
-                UnderliningErrorListener.INSTANCE.semanticError(see
-                        .getOffendingToken(), e.getMessage());
+                CompilerException see = (CompilerException) cause;
+                myErrorHandler.error(see.getOffendingToken(), e.getMessage());
+            }
+        }
+        finally {
+            // Stop error logging
+            ErrorHandler errorHandler = myCompileEnvironment.getErrorHandler();
+            if (!errorHandler.hasStopped()) {
+                errorHandler.stopLogging();
             }
         }
     }
@@ -178,6 +179,8 @@ public class Controller {
      * future use.</p>
      *
      * @param m The compiling module.
+     *
+     * @throws MiscErrorException
      */
     private void addFilesForExternalImports(ModuleAST m) {
         Set<Token> externals =
@@ -195,7 +198,7 @@ public class Controller {
                         new ModuleIdentifier(externalImport), l.getFile());
             }
             catch (IOException ioe) {
-                throw new RuntimeException(ioe.getMessage());
+                throw new MiscErrorException(ioe.getMessage(), ioe.getCause());
             }
         }
     }
@@ -207,12 +210,27 @@ public class Controller {
      * @param file The RESOLVE file that we are going to compile.
      *
      * @return The ANTLR4 Module AST.
+     *
+     * @throws MiscErrorException
      */
     private ModuleAST createModuleAST(ResolveFile file) {
-        /*  ResolveParser parser =
-                  myParserFactory.createParser(file.getInputStream());
-          ParserRuleContext start = parser.module();
-          return TreeUtil.createASTNodeFrom(start);*/
+        ANTLRInputStream input = file.getInputStream();
+        if (input == null) {
+            throw new MiscErrorException("ANTLRInputStream null",
+                    new IllegalArgumentException());
+        }
+
+        ResolveLexer lexer = new ResolveLexer(input);
+        ResolveTokenFactory factory = new ResolveTokenFactory(input);
+        lexer.setTokenFactory(factory);
+
+        TokenStream tokenStream = new CommonTokenStream(lexer);
+        ResolveParser parser = new ResolveParser(tokenStream);
+        parser.removeErrorListeners();
+        parser.addErrorListener(myAntlrErrorListener);
+        parser.setTokenFactory(factory);
+        ParserRuleContext context = parser.module();
+        //return TreeUtil.createASTNodeFrom(start);
         return null;
     }
 
@@ -222,6 +240,9 @@ public class Controller {
      *
      * @param g The compilation's file dependency graph.
      * @param root Current compiling module.
+     *
+     * @throws CircularDependencyException
+     * @throws ImportException
      */
     private void findDependencies(DefaultDirectedGraph g, ModuleAST root) {
         for (Token importRequest : root.getImports().getImportsExcluding(
@@ -244,8 +265,8 @@ public class Controller {
             if (root.getImports().inCategory(
                     ImportCollectionAST.ImportType.IMPLICIT, importRequest)) {
                 if (!module.appropriateForImport()) {
-                    throw new IllegalArgumentException("invalid import "
-                            + module.getName() + "; cannot import module of "
+                    throw new ImportException("Invalid import "
+                            + module.getName() + "; Cannot import module of "
                             + "type: " + module.getClass());
                 }
             }
@@ -253,7 +274,7 @@ public class Controller {
             // Check for circular dependency
             if (pathExists(g, id, rootId)) {
                 throw new CircularDependencyException(
-                        "circular dependency detected");
+                        "Circular dependency detected.");
             }
 
             // Add new edge to our graph indicating the relationship between
@@ -274,6 +295,8 @@ public class Controller {
      * @param baseName The name of the file including the extension
      *
      * @return A <code>ResolveFile</code> object that is used by the compiler.
+     *
+     * @throws MiscErrorException
      */
     private ResolveFile findResolveFile(String baseName) {
         // First check to see if this is a user created
@@ -285,7 +308,8 @@ public class Controller {
         // If not, use the file locator to locate our file
         else {
             try {
-                FileLocator l = new FileLocator(baseName);
+                FileLocator l =
+                        new FileLocator(baseName, ModuleType.getAllExtensions());
                 File workspaceDir = myCompileEnvironment.getWorkspaceDir();
                 Files.walkFileTree(workspaceDir.toPath(), l);
                 ModuleType extType = Utilities.getModuleType(baseName);
@@ -294,7 +318,7 @@ public class Controller {
                                 workspaceDir.getAbsolutePath());
             }
             catch (IOException ioe) {
-                throw new RuntimeException(ioe.getMessage());
+                throw new MiscErrorException(ioe.getMessage(), ioe.getCause());
             }
         }
 

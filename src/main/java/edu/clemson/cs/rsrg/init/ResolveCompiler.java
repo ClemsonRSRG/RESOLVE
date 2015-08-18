@@ -10,14 +10,16 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init2;
+package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
 import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
-import edu.clemson.cs.r2jt.init2.file.ModuleType;
-import edu.clemson.cs.r2jt.init2.file.ResolveFile;
-import edu.clemson.cs.r2jt.init2.file.Utilities;
+import edu.clemson.cs.rsrg.errorhandling.exception.CompilerException;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.init.file.ModuleType;
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.Utilities;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
@@ -28,6 +30,8 @@ import edu.clemson.cs.r2jt.translation.CTranslator;
 import edu.clemson.cs.r2jt.translation.JavaTranslator;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
+import edu.clemson.cs.rsrg.errorhandling.StdErrHandler;
+import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -50,12 +54,6 @@ public class ResolveCompiler {
     // ===========================================================
 
     /**
-     * <p>Boolean flag that checks to see if we need to compile
-     * all the files in the folder.</p>
-     */
-    private boolean myCompileAllFilesInDir = false;
-
-    /**
      * <p>This stores all the arguments received by the RESOLVE
      * compiler.</p>
      */
@@ -76,16 +74,16 @@ public class ResolveCompiler {
     // Flag Strings
     // ===========================================================
 
-    private static final String FLAG_DESC_NO_DEBUG =
-            "Remove debugging statements from the compiler output.";
-    private static final String FLAG_DESC_ERRORS_ON_STD_OUT =
-            "Change the output to be more web-friendly for the Web Interface.";
-    private static final String FLAG_DESC_XML_OUT =
-            "Changes the compiler output files to XML";
-    private static final String FLAG_DESC_WEB =
-            "Change the output to be more web-friendly for the Web Interface.";
+    private static final String FLAG_DESC_DEBUG =
+            "Print debugging statements from the compiler output.";
+    private static final String FLAG_DESC_FILE_OUT =
+            "Changes the compiler output to a file";
+    private static final String FLAG_DESC_WORKSPACE_DIR =
+            "Changes the workspace directory path.";
     private static final String FLAG_SECTION_GENERAL = "General";
     private static final String FLAG_SECTION_NAME = "Output";
+
+    private static final String[] WORKSPACE_DIR_ARG_NAME = { "Path" };
 
     // ===========================================================
     // Flags
@@ -108,34 +106,25 @@ public class ResolveCompiler {
                             + "not relevant to most users.");
 
     /**
-     * <p>Tells the compiler to send error messages to std_out instead
-     * of std_err.</p>
-     */
-    public static final Flag FLAG_ERRORS_ON_STD_OUT =
-            new Flag(FLAG_SECTION_NAME, "errorsOnStdOut",
-                    FLAG_DESC_ERRORS_ON_STD_OUT, Flag.Type.HIDDEN);
-
-    /**
-     * <p>Tells the compiler to remove debugging messages from the compiler
+     * <p>Tells the compiler to print debugging messages from the compiler
      * output.</p>
      */
-    public static final Flag FLAG_NO_DEBUG =
-            new Flag(FLAG_SECTION_NAME, "nodebug", FLAG_DESC_NO_DEBUG);
+    public static final Flag FLAG_DEBUG =
+            new Flag(FLAG_SECTION_NAME, "debug", FLAG_DESC_DEBUG);
 
     /**
-     * <p>Tells the compiler to remove debugging messages from the compiler
-     * output.</p>
+     * <p>Tells the compiler to print debugging messages from the compiler
+     * output to a file.</p>
      */
-    public static final Flag FLAG_XML_OUT =
-            new Flag(FLAG_SECTION_NAME, "XMLout", FLAG_DESC_XML_OUT);
+    public static final Flag FLAG_DEBUG_FILE_OUT =
+            new Flag(FLAG_SECTION_NAME, "debugOutToFile", FLAG_DESC_FILE_OUT);
 
     /**
-     * <p>The main web interface flag.  Tells the compiler to modify
-     * some of the output to be more user-friendly for the web.</p>
+     * <p>Tells the compiler the RESOLVE workspace directory path.</p>
      */
-    public static final Flag FLAG_WEB =
-            new Flag(FLAG_SECTION_NAME, "webinterface", FLAG_DESC_WEB,
-                    Flag.Type.HIDDEN);
+    public static final Flag FLAG_WORKSPACE_DIR =
+            new Flag(FLAG_SECTION_GENERAL, "workspaceDir",
+                    FLAG_DESC_WORKSPACE_DIR, WORKSPACE_DIR_ARG_NAME);
 
     // ===========================================================
     // Constructors
@@ -166,23 +155,26 @@ public class ResolveCompiler {
      * is called by running the compiler from the command line.</p>
      */
     public void invokeCompiler() {
-        // Handle all arguments to the compiler
-        CompileEnvironment compileEnvironment = handleCompileArgs();
+        // Create a error handler
+        ErrorHandler errorHandler = new StdErrHandler();
 
-        // Print Compiler Messages
-        System.out.println("RESOLVE Compiler/Verifier - " + myCompilerVersion
-                + " Version.");
-        System.out.println("  Use -help flag for options.");
+        // Handle all arguments to the compiler
+        CompileEnvironment compileEnvironment = handleCompileArgs(errorHandler);
 
         // Compile files/directories listed in the argument list
         try {
             compileRealFiles(myArgumentFileList, compileEnvironment);
         }
-        catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
+        catch (CompilerException e) {
+            compileEnvironment.getErrorHandler().error(null, e.getMessage());
         }
-        catch (IOException e) {
-            System.err.println(e.getMessage());
+        finally {
+            // Stop error logging
+            // YS - The error handler object might have changed.
+            errorHandler = compileEnvironment.getErrorHandler();
+            if (!errorHandler.hasStopped()) {
+                errorHandler.stopLogging();
+            }
         }
     }
 
@@ -195,9 +187,9 @@ public class ResolveCompiler {
      *                       passed to the prover.
      */
     public void invokeCompiler(Map<String, ResolveFile> fileMap,
-            ProverListener proverListener) {
+            ErrorHandler errorHandler, ProverListener proverListener) {
         // Handle all arguments to the compiler
-        CompileEnvironment compileEnvironment = handleCompileArgs();
+        CompileEnvironment compileEnvironment = handleCompileArgs(errorHandler);
 
         // Store the file map
         compileEnvironment.setFileMap(fileMap);
@@ -209,11 +201,16 @@ public class ResolveCompiler {
         try {
             compileArbitraryFiles(myArgumentFileList, compileEnvironment);
         }
-        catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
+        catch (CompilerException e) {
+            compileEnvironment.getErrorHandler().error(null, e.getMessage());
         }
-        catch (IOException e) {
-            System.err.println(e.getMessage());
+        finally {
+            // Stop error logging
+            // YS - The error handler object might have changed.
+            errorHandler = compileEnvironment.getErrorHandler();
+            if (!errorHandler.hasStopped()) {
+                errorHandler.stopLogging();
+            }
         }
     }
 
@@ -230,13 +227,10 @@ public class ResolveCompiler {
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
      *
-     * @throws IOException
-     * @throws IllegalArgumentException
+     * @throws CompilerException
      */
     private void compileArbitraryFiles(List<String> fileArgList,
-            CompileEnvironment compileEnvironment)
-            throws IOException,
-                IllegalArgumentException {
+            CompileEnvironment compileEnvironment) throws CompilerException {
         // Loop through the argument list to determine if it is a file or a directory
         for (String fileString : fileArgList) {
             // First check if this is a "meta" file
@@ -252,39 +246,6 @@ public class ResolveCompiler {
 
                 compileRealFiles(newFileList, compileEnvironment);
             }
-        }
-    }
-
-    /**
-     * <p>This method finds all RESOLVE files in the directory and
-     * adds those to files the compiler will compile/verify.</p>
-     *
-     * @param directory The directory we are searching for RESOLVE files
-     * @param compileEnvironment The current job's compilation environment
-     *                           that stores all necessary objects and flags.
-     */
-    private void compileFilesInDir(File directory,
-            CompileEnvironment compileEnvironment) {
-        File[] filesInDir = directory.listFiles();
-        List<String> fileList = new LinkedList<String>();
-
-        // Obtain all RESOLVE files in the directory and add those as new files
-        // we need to compile.
-        for (File f : filesInDir) {
-            if (Utilities.getModuleType(f.getName()) != null) {
-                fileList.add(f.getName());
-            }
-        }
-
-        // Compile these files first
-        try {
-            compileRealFiles(fileList, compileEnvironment);
-        }
-        catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-        }
-        catch (IOException e) {
-            System.err.println(e.getMessage());
         }
     }
 
@@ -311,13 +272,10 @@ public class ResolveCompiler {
      * @param compileEnvironment The current job's compilation environment
      *                           that stores all necessary objects and flags.
      *
-     * @throws IOException
-     * @throws IllegalArgumentException
+     * @throws CompilerException
      */
     private void compileRealFiles(List<String> fileArgList,
-            CompileEnvironment compileEnvironment)
-            throws IOException,
-                IllegalArgumentException {
+            CompileEnvironment compileEnvironment) throws CompilerException {
         // Loop through the argument list to determine if it is a file or a directory
         for (String fileString : fileArgList) {
             // Convert to a file object
@@ -325,20 +283,16 @@ public class ResolveCompiler {
 
             // Error if we can't locate the file
             if (!file.isFile()) {
-                throw new FileNotFoundException("Cannot find the file "
-                        + file.getName() + " in this directory.");
+                throw new MiscErrorException("Cannot find the file "
+                        + file.getName() + " in this directory.",
+                        new FileNotFoundException());
             }
             // Recursively compile all RESOLVE files in the specified directory
             else if (file.isDirectory()) {
-                // If the option to compile all files in the directory is given
-                if (myCompileAllFilesInDir) {
-                    compileFilesInDir(file, compileEnvironment);
-                }
-                else {
-                    throw new IllegalArgumentException(
-                            "Option to compile all files in the directory not set. Skipping directory "
-                                    + file.getName());
-                }
+                throw new MiscErrorException(
+                        file.getName()
+                                + " is an directory. Directories cannot be specified as an argument to the RESOLVE compiler.",
+                        new IllegalArgumentException());
             }
             // Process this file
             else {
@@ -346,19 +300,26 @@ public class ResolveCompiler {
 
                 // Print error message if it is not a valid RESOLVE file
                 if (moduleType == null) {
-                    System.err.println("The file " + file.getName()
-                            + " is not a RESOLVE file.");
+                    throw new MiscErrorException("The file " + file.getName()
+                            + " is not a RESOLVE file.",
+                            new IllegalArgumentException());
                 }
                 else {
-                    String workspacePath =
-                            compileEnvironment.getWorkspaceDir()
-                                    .getAbsolutePath();
-                    ResolveFile f =
-                            Utilities.convertToResolveFile(file, moduleType,
-                                    workspacePath);
+                    try {
+                        String workspacePath =
+                                compileEnvironment.getWorkspaceDir()
+                                        .getAbsolutePath();
+                        ResolveFile f =
+                                Utilities.convertToResolveFile(file,
+                                        moduleType, workspacePath);
 
-                    // Invoke the compiler
-                    compileMainFile(f, compileEnvironment);
+                        // Invoke the compiler
+                        compileMainFile(f, compileEnvironment);
+                    }
+                    catch (IOException ioe) {
+                        throw new MiscErrorException(ioe.getMessage(), ioe
+                                .getCause());
+                    }
                 }
             }
         }
@@ -369,73 +330,59 @@ public class ResolveCompiler {
      * <code>CompileEnvironment</code> that includes information
      * on the current compilation job.</p>
      *
+     * @param errorHandler An error handler to display debug or error messages.
+     *
      * @return A new <code>CompileEnvironment</code> for the current job.
      */
-    private CompileEnvironment handleCompileArgs() {
+    private CompileEnvironment handleCompileArgs(ErrorHandler errorHandler) {
         CompileEnvironment compileEnvironment = null;
         try {
             // Instantiate a new compile environment that will store
             // all the necessary information needed throughout the compilation
             // process.
-            compileEnvironment = new CompileEnvironment(myCompilerArgs);
+            compileEnvironment =
+                    new CompileEnvironment(myCompilerArgs, myCompilerVersion,
+                            errorHandler);
 
-            // Workspace Directory
-            String workspaceDir = null;
-
-            // Handle remaining arguments
-            String[] remainingArgs = compileEnvironment.getRemainingArgs();
-            if (remainingArgs.length >= 1
-                    && !compileEnvironment.flags.isFlagSet(FLAG_HELP)) {
-                for (int i = 0; i < remainingArgs.length; i++) {
-                    if (remainingArgs[i].equals("-R")) {
-                        myCompileAllFilesInDir = true;
-                    }
-                    else if (remainingArgs[i].equals("-PVCs")) {
-                        compileEnvironment.setPerformanceFlag();
-                    }
-                    else if (remainingArgs[i].equalsIgnoreCase("-workspaceDir")) {
-                        if (i + 1 < remainingArgs.length) {
-                            i++;
-                            workspaceDir = remainingArgs[i];
-                        }
-                    }
-                    else if (remainingArgs[i].equals("-o")) {
-                        if (i + 1 < remainingArgs.length) {
-                            String outputFile;
-                            i++;
-                            outputFile = remainingArgs[i];
-                            compileEnvironment.setOutputFileName(outputFile);
-                        }
-                    }
-                    else {
-                        myArgumentFileList.add(remainingArgs[i]);
+            if (compileEnvironment.flags.isFlagSet(FLAG_HELP)) {
+                printHelpMessage(compileEnvironment);
+            }
+            else {
+                // Handle remaining arguments
+                String[] remainingArgs = compileEnvironment.getRemainingArgs();
+                if (remainingArgs.length == 0) {
+                    throw new FlagDependencyException(
+                            "Need to specify a filename.");
+                }
+                else {
+                    // The remaining arguments must be filenames, so we add those
+                    // to our list of files to compile.
+                    for (String arg : remainingArgs) {
+                        myArgumentFileList.add(arg);
                     }
                 }
-
-                // Turn off debugging messages
-                if (compileEnvironment.flags
-                        .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
-                    compileEnvironment.setDebugOff();
-                }
-
-                // Store the workspace directory to the compile environment
-                compileEnvironment.setWorkspaceDir(Utilities
-                        .getWorkspaceDir(workspaceDir));
 
                 // Store the symbol table
                 MathSymbolTableBuilder symbolTable =
                         new MathSymbolTableBuilder();
                 compileEnvironment.setSymbolTable(symbolTable);
             }
-            else {
-                printHelpMessage(compileEnvironment);
-            }
         }
         catch (FlagDependencyException fde) {
-            System.out.println("RESOLVE Compiler/Verifier - "
-                    + myCompilerVersion + " Version.");
-            System.out.println("  Use -help flag for options.");
-            System.err.println(fde.getMessage());
+            // YS - The error handler object might have changed.
+            compileEnvironment.getErrorHandler().error(null, fde.getMessage());
+        }
+        catch (IOException ioe) {
+            // YS - The error handler object might have changed.
+            compileEnvironment.getErrorHandler().error(null, ioe.getMessage());
+        }
+        finally {
+            // Stop error logging
+            // YS - The error handler object might have changed.
+            errorHandler = compileEnvironment.getErrorHandler();
+            if (!errorHandler.hasStopped()) {
+                errorHandler.stopLogging();
+            }
         }
 
         return compileEnvironment;
@@ -448,29 +395,15 @@ public class ResolveCompiler {
      *                           that stores all necessary objects and flags.
      */
     private void printHelpMessage(CompileEnvironment compileEnvironment) {
-        System.out.println("Usage: java -jar RESOLVE.jar [options] <files>");
-        System.out.println("where options include:");
-        System.out.println();
-
-        // General flags
-        System.out.println("  -R             Recurse through directories.");
-
-        // TODO: Each module should have a common method that specifies all the relevant flags
-
-        // Prover flags
-
-        // Translator flags
-        System.out.println("  -translate     Translate to Java code.");
-
-        // VC Generator flags
-        System.out.println("  -PVCs           Generate verification "
-                + "conditions for performance.");
-        System.out.println("  -VCs           Generate verification "
-                + "conditions.");
-
-        System.out.println(FlagDependencies
-                .getListingString(compileEnvironment.flags
-                        .isFlagSet(FLAG_EXTENDED_HELP)));
+        if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG)) {
+            ErrorHandler debugHandler = compileEnvironment.getErrorHandler();
+            debugHandler.info(null,
+                    "Usage: java -jar RESOLVE.jar [options] <files>");
+            debugHandler.info(null, "where options include:");
+            debugHandler.info(null, FlagDependencies
+                    .getListingString(compileEnvironment.flags
+                            .isFlagSet(FLAG_EXTENDED_HELP)));
+        }
     }
 
     /**
@@ -501,12 +434,8 @@ public class ResolveCompiler {
         // Extended help implies that the general help is also on.
         FlagDependencies.addImplies(FLAG_EXTENDED_HELP, FLAG_HELP);
 
-        // WebIDE
-        FlagDependencies.addRequires(FLAG_ERRORS_ON_STD_OUT, FLAG_WEB);
-        FlagDependencies.addImplies(FLAG_WEB, FLAG_ERRORS_ON_STD_OUT);
-        FlagDependencies.addImplies(FLAG_WEB, FLAG_NO_DEBUG);
-        FlagDependencies.addImplies(FLAG_WEB, FLAG_XML_OUT);
-        FlagDependencies.addImplies(FLAG_WEB, Prover.FLAG_NOGUI);
+        // Debug out to file implies that the debug flag is also on.
+        FlagDependencies.addImplies(FLAG_DEBUG_FILE_OUT, FLAG_DEBUG);
     }
 
 }

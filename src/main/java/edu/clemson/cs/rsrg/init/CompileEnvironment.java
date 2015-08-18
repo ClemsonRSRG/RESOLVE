@@ -10,18 +10,22 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init2;
+package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.r2jt.absynnew.ModuleAST;
-import edu.clemson.cs.r2jt.errors.ErrorHandler2;
-import edu.clemson.cs.r2jt.init2.file.ResolveFile;
+import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
+import edu.clemson.cs.rsrg.errorhandling.WriterErrorHandler;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.file.Utilities;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
 import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.ScopeRepository;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import java.io.File;
+import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -44,12 +48,6 @@ public class CompileEnvironment {
     private File myCompileDir = null;
 
     /**
-     * <p>This object contains information about the current compilation for the
-     * WebIDE/WebAPI.</p>
-     */
-    private CompileReport myCompileReport;
-
-    /**
      * <p>This contains all modules we have currently seen. This includes both complete
      * and incomplete modules. A module is complete when we are done processing it. An
      * incomplete module usually means that we are still processing it's import.</p>
@@ -63,20 +61,9 @@ public class CompileEnvironment {
     private final Map<ModuleIdentifier, File> myExternalRealizFiles;
 
     /**
-     * <p>A flag to see if we want to show debugging information or not.</p>
+     * <p>This is the default error handler for the RESOLVE compiler.</p>
      */
-    private boolean myDebugOff = false;
-
-    /**
-     * <p>This is the error handler for the RESOLVE compiler.</p>
-     */
-    private final ErrorHandler2 myErrorHandler;
-
-    /**
-     * <p>This flag indicates whether or not we want to generate
-     * performance VCs.</p>
-     */
-    private boolean myGenPVCs = false;
+    private final ErrorHandler myErrorHandler;
 
     /**
      * <p>This list stores all the incomplete modules.</p>
@@ -88,12 +75,6 @@ public class CompileEnvironment {
      * interested party as soon as the prover is done processing a VC.</p>
      */
     private ProverListener myListener = null;
-
-    /**
-     * <p>This string stores the desired output file name provided
-     * by the user.</p>
-     */
-    private String myOutputFileName = null;
 
     /**
      * <p>The symbol table for the compiler.</p>
@@ -130,18 +111,57 @@ public class CompileEnvironment {
      * necessary modules, files and flags.</p>
      *
      * @param args The specified compiler arguments array.
+     * @param compilerVersion The current compiler version.
+     * @param errorHandler An error handler to display debug or error messages.
      *
      * @throws FlagDependencyException
+     * @throws IOException
      */
-    public CompileEnvironment(String[] args) throws FlagDependencyException {
+    public CompileEnvironment(String[] args, String compilerVersion,
+            ErrorHandler errorHandler)
+            throws FlagDependencyException,
+                IOException {
         flags = new FlagManager(args);
-        myCompileReport = new CompileReport();
         myCompilingModules =
                 new HashMap<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>>();
-        myErrorHandler = new ErrorHandler2(this);
         myExternalRealizFiles = new HashMap<ModuleIdentifier, File>();
         myIncompleteModules = new LinkedList<ModuleIdentifier>();
         myUserFileMap = new HashMap<String, ResolveFile>();
+
+        // Check for custom workspace path
+        String path = null;
+        if (flags.isFlagSet(ResolveCompiler.FLAG_WORKSPACE_DIR)) {
+            path =
+                    flags.getFlagArgument(ResolveCompiler.FLAG_WORKSPACE_DIR,
+                            "Path");
+        }
+        myCompileDir = Utilities.getWorkspaceDir(path);
+
+        // Check for file error output flag
+        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG_FILE_OUT)) {
+            Date date = new Date();
+            SimpleDateFormat dateFormat =
+                    new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            File errorFile =
+                    new File(myCompileDir, "Error-Log-"
+                            + dateFormat.format(date) + ".log");
+
+            errorHandler =
+                    new WriterErrorHandler(new BufferedWriter(
+                            new OutputStreamWriter(new FileOutputStream(
+                                    errorFile), "utf-8")));
+        }
+        myErrorHandler = errorHandler;
+
+        // Debugging information
+        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+            synchronized (System.out) {
+                // Print Compiler Messages
+                myErrorHandler.info(null, "RESOLVE Compiler/Verifier - "
+                        + compilerVersion + " Version.");
+                myErrorHandler.info(null, "\tUse -help flag for options.\n");
+            }
+        }
     }
 
     // ===========================================================
@@ -161,8 +181,8 @@ public class CompileEnvironment {
         myIncompleteModules.remove(mid);
 
         // Print out debugging message
-        if (!myDebugOff) {
-            myErrorHandler.message("Complete record: " + mid.toString()); //DEBUG
+        if (!flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+            myErrorHandler.info(null, "Complete record: " + mid.toString());
         }
     }
 
@@ -184,8 +204,8 @@ public class CompileEnvironment {
         myIncompleteModules.add(mid);
 
         // Print out debugging message
-        if (!myDebugOff) {
-            myErrorHandler.message("Construct record: " + mid.toString()); //DEBUG
+        if (!flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+            myErrorHandler.info(null, "Construct record: " + mid.toString()); //DEBUG
         }
     }
 
@@ -240,30 +260,11 @@ public class CompileEnvironment {
     }
 
     /**
-     * <p>Checks to see if we want debugging output or not.</p>
-     *
-     * @return Returns true iff we should suppress debug output.
-     */
-    public boolean debugOff() {
-        return myDebugOff;
-    }
-
-    /**
-     * <p>Returns the report object that contains all the compilation
-     * results needed by the WebIDE/WebAPI.</p>
-     *
-     * @return A report object.
-     */
-    public CompileReport getCompileReport() {
-        return myCompileReport;
-    }
-
-    /**
      * <p>Returns the compiler's error handler object.</p>
      *
      * @return Error handler object.
      */
-    public ErrorHandler2 getErrorHandler() {
+    public ErrorHandler getErrorHandler() {
         return myErrorHandler;
     }
 
@@ -275,25 +276,6 @@ public class CompileEnvironment {
      */
     public File getWorkspaceDir() {
         return myCompileDir;
-    }
-
-    /**
-     * <p>Returns the output name that the user have specified.</p>
-     *
-     * @return A <code>String</code> name for the output file.
-     */
-    public String getOutputFilename() {
-        return myOutputFileName;
-    }
-
-    /**
-     * <p>Checks to see if the user have requested the VC Generator
-     * to generate performance VCs.</p>
-     *
-     * @return True if the user wants performance VCs, false otherwise.
-     */
-    public boolean getPerformanceFlag() {
-        return myGenPVCs;
     }
 
     /**
@@ -351,14 +333,6 @@ public class CompileEnvironment {
     }
 
     /**
-     * <p>Indicates that debug output should be turned off to the maximum amount
-     * this is possible.</p>
-     */
-    public void setDebugOff() {
-        myDebugOff = true;
-    }
-
-    /**
      * <p>Used to set a map of user files when invoking the compiler from
      * the WebIDE/WebAPI.</p>
      *
@@ -366,22 +340,6 @@ public class CompileEnvironment {
      */
     public void setFileMap(Map<String, ResolveFile> fMap) {
         myUserFileMap = fMap;
-    }
-
-    /**
-     * <p>Sets the name of the output file.</p>
-     *
-     * @param outputFile Name of the output file specified by the user.
-     */
-    public void setOutputFileName(String outputFile) {
-        myOutputFileName = outputFile;
-    }
-
-    /**
-     * <p>Sets the flag to generate performance VCs.</p>
-     */
-    public void setPerformanceFlag() {
-        myGenPVCs = true;
     }
 
     /**
@@ -401,13 +359,14 @@ public class CompileEnvironment {
      */
     public void setSymbolTable(ScopeRepository table) {
         if (table == null) {
-            throw new IllegalArgumentException(
-                    "Symbol table may not be set to null!");
+            throw new MiscErrorException(
+                    "Symbol table may not be set to null!",
+                    new IllegalArgumentException());
         }
 
         if (mySymbolTable != null) {
-            throw new IllegalStateException(
-                    "Symbol table may only be set once!");
+            throw new MiscErrorException("Symbol table may only be set once!",
+                    new IllegalStateException());
         }
 
         mySymbolTable = table;
@@ -420,15 +379,6 @@ public class CompileEnvironment {
      */
     public void setTypeGraph(TypeGraph t) {
         myTypeGraph = t;
-    }
-
-    /**
-     * <p>Sets the workspace directory to the specified directory.</p>
-     *
-     * @param dir A <code>File</code> object to the RESOLVE workspace directory.
-     */
-    public void setWorkspaceDir(File dir) {
-        myCompileDir = dir;
     }
 
 }
