@@ -26,7 +26,7 @@ public class MiscErrorException extends CompilerException {
     // ===========================================================
 
     /** <p>Serial version for Serializable objects</p> */
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     // ==========================================================
     // Constructors
