@@ -23,12 +23,14 @@ public class InstantiatedTheoremPrioritizer {
 
     protected PriorityQueue<PExpWithScore> m_pQueue;
     private Map<String, Integer> m_vc_symbols;
+    protected Registry m_vcReg;
 
     public InstantiatedTheoremPrioritizer(
             List<InsertExpWithJustification> theoremList,
-            Map<String, Integer> vcSymbols, int threshold) {
+            Map<String, Integer> vcSymbols, int threshold, Registry vcReg) {
         m_pQueue = new PriorityQueue<PExpWithScore>(theoremList.size());
         m_vc_symbols = vcSymbols;
+        m_vcReg = vcReg;
         for (InsertExpWithJustification p : theoremList) {
             PExpWithScore pes = new PExpWithScore(p.m_PExp, p.m_Justification);
             pes.m_score = calculateScore(pes.m_theorem_symbols);
@@ -42,8 +44,9 @@ public class InstantiatedTheoremPrioritizer {
         int score = 0;
 
         for (String s : theorem_symbols) {
-            if (m_vc_symbols.containsKey(s)) {
-                score += m_vc_symbols.get(s);
+            String rS = m_vcReg.getRootSymbolForSymbol(s);
+            if (m_vc_symbols.containsKey(rS)) {
+                score += m_vc_symbols.get(rS);
             }
             else
                 score += max;

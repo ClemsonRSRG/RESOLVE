@@ -31,16 +31,18 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     private int f_num = 0;
     private String m_current_justification = "";
     private final Map<Integer, Set<NormalizedAtomicExpressionMapImpl>> m_useMap;
+    protected final boolean m_forVC_flag;
 
     /**
      * @param registry the Registry symbols contained in the conjunction will
      * reference. This class will add entries to the registry if needed.
      */
-    public ConjunctionOfNormalizedAtomicExpressions(Registry registry) {
+    public ConjunctionOfNormalizedAtomicExpressions(Registry registry, boolean for_VC) {
         m_registry = registry;
         // Array list is much slower than LinkedList for this application
         m_exprList = new LinkedList<NormalizedAtomicExpressionMapImpl>();
         m_useMap = new HashMap<Integer, Set<NormalizedAtomicExpressionMapImpl>>();
+        m_forVC_flag = for_VC;
     }
 
     protected int size() {
@@ -65,12 +67,54 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         m_timeToEnd = timeToEnd;
         m_timeToEnd = Long.MAX_VALUE;
         m_current_justification = justification;
-        String rString = addExpression(expression);
+        String rString = "";
+        boolean haPart = false;
+        for(String eS : expression.getSymbolNames()){
+            String root = m_registry.getRootSymbolForSymbol(eS);
+            if(m_registry.m_partTypes.contains(root)){
+                haPart = true;
+                break;
+            }
+        }
+        if(haPart){
+            List<PExp> frs = makeFRestr(expression);
+            for(PExp pf : frs){
+                rString += addExpression(pf);
+                System.err.println(pf.toString());
+            }
+        }
+        rString += addExpression(expression);
         m_current_justification = "";
         updateUseMap();
         return rString;
     }
 
+    private List<PExp> makeFRestr(PExp pf){
+        ArrayList<PExp> rList = new ArrayList<PExp>();
+        if(!pf.getTopLevelOperation().equals("=")) return rList;
+        PExp lhs = pf.getSubExpressions().get(0);
+        PExp rhs = pf.getSubExpressions().get(1);
+        if(!(lhs.getSubExpressions().size() == 1 && rhs.getSubExpressions().size() == 1))
+            return rList;
+        PExp lhsArg = lhs.getSubExpressions().get(0);
+        PExp rhsArg = rhs.getSubExpressions().get(0);
+        if(!lhsArg.toString().equals(rhsArg.toString()))return rList;
+        if(!m_registry.m_partTypes.contains(m_registry.getRootSymbolForSymbol(
+                lhsArg.getTopLevelOperation()))) return rList;
+        ArrayList<PExp> args = new ArrayList<PExp>();
+        args.add(new PSymbol(lhs.getType(),lhs.getTypeValue(),lhs.getTopLevelOperation()));
+        args.add(lhsArg);
+        PExp fr1 = new PSymbol(m_registry.m_typeGraph.BOOLEAN,null,"FRestr",args);
+        args.clear();
+        args.add(new PSymbol(lhs.getType(), rhs.getTypeValue(), rhs.getTopLevelOperation()));
+        args.add(rhsArg);
+        PExp fr2 = new PSymbol(m_registry.m_typeGraph.BOOLEAN,null,"FRestr",args);
+        args.clear();
+        args.add(fr1);
+        args.add(fr2);
+        rList.add(new PSymbol(m_registry.m_typeGraph.BOOLEAN,null,"=",args));
+        return rList;
+    }
     // Top level
     protected String addExpression(PExp expression) {
         if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
@@ -192,6 +236,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             assert newExpr != null;
             newExpr.writeOnto(root, pos);
         }
+        mergeArgsOfEqualityPredicateIfRootIsTrue();
         return addAtomicFormula(newExpr);
     }
 
@@ -323,7 +368,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 opA = opB;
                 opB = temp;
             }
-
+            // prefer partial domain symbols
+            if (bString.contains(".") ) {
+                int temp = opA;
+                opA = opB;
+                opB = temp;
+            }
             if (aString.equals("false") && bString.equals("true")
                     || (aString.equals("true") && bString.equals("false"))) {
                 m_evaluates_to_false = true;
@@ -341,6 +391,90 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rString;
     }
 
+    // Unfinished, putting this in theorems
+    protected void mergeSplitDomains(){
+        if(m_useMap.isEmpty()){
+            updateUseMap();
+        }
+        // Get set of partial domains
+        Set<String> partTypes = m_registry.m_partTypes;
+        // Get set of applications with split domains
+        Map<String,Set<NormalizedAtomicExpressionMapImpl>> sdUsage = new HashMap<String, Set<NormalizedAtomicExpressionMapImpl>>();
+        for(String pt: partTypes){
+            // use root of class
+            String root = m_registry.getRootSymbolForSymbol(pt);
+            if(m_useMap.containsKey(root)){
+                if(!sdUsage.containsKey(pt)){
+                    sdUsage.put(pt,new HashSet<NormalizedAtomicExpressionMapImpl>());
+                }
+                sdUsage.get(pt).addAll(m_useMap.get(root));
+            }
+        }
+        // map each domain to set of ops equal when using
+        for(String dom : sdUsage.keySet()){
+            int domIdx = m_registry.getIndexForSymbol(dom);
+            if(!m_registry.m_partTypeParentArray.containsKey(domIdx)){
+                m_registry.m_partTypeParentArray.put(domIdx,new ArrayList<Integer>());
+            }
+            ArrayList<Integer> p_array = m_registry.m_partTypeParentArray.get(domIdx);
+            for(NormalizedAtomicExpressionMapImpl nm : sdUsage.get(dom)){
+                int op = nm.readPosition(0);
+                int rhs = nm.readRoot();
+
+                // Wont work, need pairs. perhaps make p-array for each domain
+            }
+        }
+
+    }
+    // Finds equivalent lambda functions
+    protected void mergeEquivalentLambdaFunctions(){
+        if(m_useMap.isEmpty()){
+            updateUseMap();
+        }
+        // Get set of lambda function names
+        Set<String> lamdaNames = m_registry.m_lambda_names;
+        // Get set of equations using them
+        Set<NormalizedAtomicExpressionMapImpl> lambdaEqs = new HashSet<NormalizedAtomicExpressionMapImpl>();
+        for(String ls : lamdaNames){
+            int lsI = m_registry.getIndexForSymbol(ls);
+            if(m_useMap.containsKey(lsI))
+                lambdaEqs.addAll(m_useMap.get(lsI));
+        }
+        // Keep those with lambda used as func name and all quantified var as arg
+        Map<String,Set<String>> cMap = new HashMap<String, Set<String>>();
+        for(NormalizedAtomicExpressionMapImpl n : lambdaEqs){
+            int opInt = n.readPosition(0);
+            String opName = m_registry.getSymbolForIndex(opInt);
+            if(!opName.contains("lambda")) continue;
+            boolean allArgsAreQuantified = true;
+            for(String a : n.getArgumentsAsStrings(m_registry)){
+                if(!m_registry.m_symbolToUsage.get(a).equals(Registry.Usage.FORALL)){
+                    allArgsAreQuantified = false;
+                }
+            }
+            if(!allArgsAreQuantified) continue;
+            // Map rhs -> {lhs} containing lambda
+            String eqTo = m_registry.getSymbolForIndex(n.readRoot());
+            if(cMap.get(eqTo)==null){
+                cMap.put(eqTo,new HashSet<String>());
+            }
+            cMap.get(eqTo).add(opName);
+        }
+        // for each set of size > 1, merge func names
+        for(String s : cMap.keySet()){
+            Set<String> ls = cMap.get(s);
+            if(ls.size()>1){
+                String firstOp = ls.iterator().next();
+                int fa = m_registry.getIndexForSymbol(firstOp);
+                ls.remove(firstOp);
+                for(String otherOps : ls){
+                    int oa = m_registry.getIndexForSymbol(otherOps);
+                    mergeOperators(fa,oa);
+                }
+            }
+        }
+
+    }
     // This has been replaced by a theorem in my Boolean_Theory - mike
     // look for =(x,y)=true in list.  If found call merge(x,y).
     //  = will always be at top of list.
@@ -548,9 +682,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     // Type check here.  Incompatible types should invalidate the whole binding
                     MTType theoremSymbolType = exprReg.getTypeByIndex(exprReg.getIndexForSymbol(exprKey));
                     MTType localSymbolType = m_registry.getTypeByIndex(localSymbolIndex);
-                    if(localSymbol.contains("lambda")){
-                        int bp = 0;
-                    }
                     if(!localSymbolType.isSubtypeOf(theoremSymbolType)) {
                         validBinding = false;
                         break;

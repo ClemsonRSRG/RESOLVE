@@ -30,9 +30,9 @@ import edu.clemson.cs.r2jt.misc.RCollections;
 
 public class PAlternatives extends PExp {
 
-    private final List<Alternative> myAlternatives;
+    public final List<Alternative> myAlternatives;
 
-    private final PExp myOtherwiseClauseResult;
+    public final PExp myOtherwiseClauseResult;
 
     public PAlternatives(List<PExp> conditions, List<PExp> results,
             PExp otherwiseClauseResult, MTType type, MTType typeValue) {
@@ -446,7 +446,7 @@ public class PAlternatives extends PExp {
         }
     }
 
-    private static class Alternative {
+    public static class Alternative {
 
         public final PExp condition;
         public final PExp result;

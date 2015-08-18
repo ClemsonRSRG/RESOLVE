@@ -22,12 +22,8 @@ import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.query.MultimatchSymbolQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
@@ -54,7 +50,7 @@ public class CongruenceClassProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
-    private final long DEFAULTTIMEOUT = 5000;
+    private final long DEFAULTTIMEOUT = 10000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = true;
@@ -101,10 +97,10 @@ public class CongruenceClassProver {
 
         for (VC vc : vcs) {
             // make every PExp a PSymbol
-            vc.liftLambdas(m_typeGraph);
-            System.err.println(vc.toString());
+            vc.convertAllToPsymbols(m_typeGraph);
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc));
             myModels[i++] = (new PerVCProverModel(g, vc.getName(), vc, null));
+
         }
         m_theorems = new ArrayList<TheoremCongruenceClosureImpl>();
         List<TheoremEntry> theoremEntries =
@@ -257,12 +253,14 @@ public class CongruenceClassProver {
         String div = divLine(vcc.m_name);
         String theseResults =
                 div + ("Before application of theorems: " + vcc + "\n");
+        ArrayList<TheoremCongruenceClosureImpl> theoremsForThisVC = new ArrayList<TheoremCongruenceClosureImpl>();
+        theoremsForThisVC.addAll(m_theorems);
         // add quantified expressions local to the vc to theorems
         for (PExp p : vcc.forAllQuantifiedPExps) {
             TheoremCongruenceClosureImpl t =
                     new TheoremCongruenceClosureImpl(m_typeGraph, p);
             if (!t.m_unneeded) {
-                m_theorems.add(t);
+                theoremsForThisVC.add(t);
             }
         }
         int iteration = 0;
@@ -273,8 +271,8 @@ public class CongruenceClassProver {
             Map<String, Integer> vcSymbolRelevanceMap = vcc.getGoalSymbols();
             int threshold = 16 * vcSymbolRelevanceMap.keySet().size() + 1;
             TheoremPrioritizer rankedTheorems =
-                    new TheoremPrioritizer(m_theorems, vcSymbolRelevanceMap,
-                            threshold, theoremAppliedCount);
+                    new TheoremPrioritizer(theoremsForThisVC, vcSymbolRelevanceMap,
+                            threshold, theoremAppliedCount, vcc.getRegistry());
             //theseResults += "Iteration " + iteration++ + "\n";
             int max_Theorems_to_choose = 1;
             int num_Theorems_chosen = 0;
@@ -293,7 +291,7 @@ public class CongruenceClassProver {
                     InstantiatedTheoremPrioritizer instPQ =
                             new InstantiatedTheoremPrioritizer(
                                     instantiatedTheorems, vcSymbolRelevanceMap,
-                                    threshold);
+                                    threshold, vcc.getRegistry());
                     int max_Instantiated_to_Add = 1;
                     int num_Instantiated_added = 0;
                     while (num_Instantiated_added < max_Instantiated_to_Add
@@ -332,6 +330,7 @@ public class CongruenceClassProver {
                                 theoremAppliedCount.put(cur.m_theoremString,
                                         ++count);
                                 num_Theorems_chosen++;
+
                             }
                         }
                     }

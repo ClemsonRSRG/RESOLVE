@@ -35,6 +35,9 @@ public class Registry {
     private int m_uniqueCounter = 0;
     protected TypeGraph m_typeGraph;
     protected Map<String, Set<Integer>> m_appliedTheoremDependencyGraph;
+    protected Set<String> m_lambda_names;
+    protected Set<String> m_partTypes;
+    protected Map<Integer,ArrayList<Integer>> m_partTypeParentArray;
 
     public static enum Usage {
 
@@ -42,7 +45,7 @@ public class Registry {
         HASARGS_FORALL
     };
 
-    private final Map<String, Usage> m_symbolToUsage;
+    protected final Map<String, Usage> m_symbolToUsage;
     private final Set<String> m_foralls;
     protected Map<String, MTType> m_typeDictionary;
 
@@ -62,6 +65,9 @@ public class Registry {
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
         assert (getIndexForSymbol("=") == 0);
         m_appliedTheoremDependencyGraph = new HashMap<String, Set<Integer>>();
+        m_lambda_names = new HashSet<String>();
+        m_partTypes = new HashSet<String>();
+        m_partTypeParentArray = new HashMap<Integer, ArrayList<Integer>>();
 
     }
 
@@ -172,7 +178,9 @@ public class Registry {
     }
 
     public String getRootSymbolForSymbol(String sym) {
-        return getSymbolForIndex(getIndexForSymbol(sym));
+        if(m_symbolToIndex.containsKey(sym))
+            return getSymbolForIndex(getIndexForSymbol(sym));
+        else return "";
     }
 
     public MTType getTypeByIndex(int index) {
@@ -209,11 +217,19 @@ public class Registry {
     // if symbol is new, it adds it, otherwise, it returns current int rep
     public int addSymbol(String symbolName, MTType symbolType, Usage usage) {
         symbolName = symbolName.replaceAll("\\p{Cc}", "");
+        if(symbolName.contains("lambda"))
+            m_lambda_names.add(symbolName);
         assert symbolName.length()!=0 : "blank symbol error in addSymbol";
         if (isSymbolInTable(symbolName)) {
             return getIndexForSymbol(symbolName);
         }
-
+        if(symbolName.contains(".")){
+            m_partTypes.add(symbolName);
+        }
+        // create unique name for f.a. quant vars.
+        if(usage.equals(Usage.FORALL)){
+            //symbolName = String.format(m_cvFormat, m_uniqueCounter++);
+        }
         if (m_typeToSetOfOperators.containsKey(symbolType)) {
             m_typeToSetOfOperators.get(symbolType).add(symbolName);
         }

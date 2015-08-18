@@ -13,22 +13,18 @@
 package edu.clemson.cs.r2jt.rewriteprover;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.TreeSet;
 
-import edu.clemson.cs.r2jt.absyn.LambdaExp;
-import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
-import edu.clemson.cs.r2jt.rewriteprover.absyn.PExpVisitor;
-import edu.clemson.cs.r2jt.rewriteprover.absyn.PLambda;
-import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.*;
+import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 /**
- * <p>Represents an immutable <em>verification condition</em>, which takes the 
+ * <p>Represents an immutable <em>verification condition</em>, which takes the
  * form of a mathematical implication.</p>
  */
 public class VC {
@@ -49,9 +45,11 @@ public class VC {
     private Antecedent myAntecedent;
     private Consequent myConsequent;
 
-    private java.util.HashMap<PLambda,String> m_liftedLamdas;
+    private java.util.HashMap<PLambda, String> m_liftedLamdas;
     public java.util.List<PSymbol> m_liftedLambdaPredicates;
-    private int m_lamdaTag = 0;
+    public java.util.Set<PExp> m_conditions;
+    private int m_lambdaTag = 0;
+    private int m_qVarTag = 0;
     private TypeGraph m_typegraph;
     private VC liftedCopy;
 
@@ -60,7 +58,7 @@ public class VC {
     }
 
     public VC(String name, Antecedent antecedent, Consequent consequent,
-            boolean derived) {
+              boolean derived) {
 
         myName = name;
         myAntecedent = antecedent;
@@ -68,6 +66,7 @@ public class VC {
         myDerivedFlag = derived;
         m_liftedLamdas = new HashMap<PLambda, String>();
         m_liftedLambdaPredicates = new ArrayList<PSymbol>();
+        m_conditions = new java.util.HashSet<PExp>();
     }
 
     public String getName() {
@@ -79,51 +78,170 @@ public class VC {
 
         return retval;
     }
-    public void liftLambdas(TypeGraph g){
+
+    public void convertAllToPsymbols(TypeGraph g) {
         m_typegraph = g;
+        liftLambdas();
+        convertPAlternatives();
+        replaceLambdaSymbols();
+        uniquelyNameQuantifiers();
+
+    }
+
+    public void uniquelyNameQuantifiers() {
+        java.util.HashSet<PExp> replacement = new java.util.HashSet<PExp>();
+        for (PExp p : m_conditions) {
+            // replace the qVars dup with unique names
+            java.util.Set<PSymbol> qVars = p.getQuantifiedVariables();
+            HashMap<PExp, PExp> substMap = new HashMap<PExp, PExp>();
+            for (PSymbol pq : qVars) {
+                PSymbol repP = new PSymbol(pq.getType(), pq.getTypeValue(), pq.getType().toString() + m_qVarTag++, pq.quantification);
+                substMap.put(pq, repP);
+            }
+            if (!substMap.isEmpty()) {
+                p = (PSymbol) p.substitute(substMap);
+            }
+            replacement.add(p);
+            //m_qVarTag = 0;
+        }
+        m_conditions = replacement;
+    }
+
+    public void replaceLambdaSymbols() {
+        Map<PExp, PExp> substMap = new HashMap<PExp, PExp>();
         ArrayList<PExp> newConjuncts = new ArrayList<PExp>();
         java.util.List<PExp> a_p = myAntecedent.getMutableCopy();
-        for(PExp p : a_p){
+        // build map
+        for (PExp p : a_p) {
+            if (p.isEquality()) {
+                ImmutableList<PExp> args = p.getSubExpressions();
+                PExp args0 = args.get(0);
+                PExp args1 = args.get(1);
+                if (args0.isVariable() && args1.isVariable()) {
+                    if (args0.getTopLevelOperation().contains("lambda")) {
+                        substMap.put(args0, args1);
+                    } else if (args1.getTopLevelOperation().contains("lambda")) {
+                        substMap.put(args1, args0);
+                    }
+                }
+            }
+        }
+        if(!substMap.isEmpty()) {
+            myAntecedent = new Antecedent(myAntecedent.substitute(substMap));
+            myConsequent = new Consequent(myConsequent.substitute(substMap));
+            ArrayList<PSymbol> n_Preds = new ArrayList<PSymbol>();
+            for(PSymbol p : m_liftedLambdaPredicates){
+                n_Preds.add((PSymbol)p.substitute(substMap));
+            }
+            m_liftedLambdaPredicates = n_Preds;
+        }
+
+    }
+
+    // Assumes lambdas lifted first
+    // Assumes all remaining PAlternatives are in m_liftedLambdaPredicates
+    public void convertPAlternatives() {
+        ArrayList<PSymbol> converted = new ArrayList<PSymbol>();
+        for (PSymbol p : m_liftedLambdaPredicates) {
+            if (p.arguments.size() == 2) {
+                // lhs can't be a PALT
+                PExp lhs = p.arguments.get(0);
+                PExp rhs = p.arguments.get(1);
+                if (rhs instanceof PAlternatives) {
+                    PAlternatives asPa = (PAlternatives) rhs;
+                    ArrayList<PExp> conditions = new ArrayList<PExp>();
+                    for (PAlternatives.Alternative pa : asPa.myAlternatives) {
+                        conditions.add(pa.condition);
+                        ArrayList<PExp> args = new ArrayList<PExp>();
+                        args.add(lhs);
+                        args.add(pa.result);
+                        PSymbol ant = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+
+                        args.clear();
+                        args.add(pa.condition);
+                        args.add(ant);
+                        PSymbol pc = new PSymbol(m_typegraph.BOOLEAN, null, "implies", args);
+                        converted.add(pc);
+                        m_conditions.add(pa.condition);
+                    }
+
+                    // do otherwise clause
+                    if (conditions.size() > 1) {
+                        // make conjunction
+                    } else {
+                        ArrayList<PExp> args = new ArrayList<PExp>();
+                        args.add(conditions.get(0));
+                        PExp neg = new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
+                        args.clear();
+
+                        args.add(lhs);
+                        args.add(asPa.myOtherwiseClauseResult);
+                        PExp eq = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+                        args.clear();
+                        args.add(neg);
+                        args.add(eq);
+                        converted.add(new PSymbol(m_typegraph.BOOLEAN, null, "implies", args));
+                        //m_conditions.add(neg);
+                    }
+
+                }
+                // No PAlt
+                else {
+                    converted.add(p);
+                }
+            }
+
+        }
+        m_liftedLambdaPredicates = converted;
+    }
+
+    public void liftLambdas() {
+        ArrayList<PExp> newConjuncts = new ArrayList<PExp>();
+        java.util.List<PExp> a_p = myAntecedent.getMutableCopy();
+        for (PExp p : a_p) {
             newConjuncts.add(recursiveLift(p));
         }
         myAntecedent = new Antecedent(newConjuncts);
 
         newConjuncts.clear();
         a_p = myConsequent.getMutableCopy();
-        for(PExp p : a_p){
+        for (PExp p : a_p) {
             newConjuncts.add(recursiveLift(p));
         }
         myConsequent = new Consequent(newConjuncts);
-        for(PLambda p : m_liftedLamdas.keySet()){
+
+
+        for (PLambda p : m_liftedLamdas.keySet()) {
             String name = m_liftedLamdas.get(p);
             PExp body = p.getBody();
-            PSymbol lhs = new PSymbol(p.getType(),p.getTypeValue(),name,p.getParameters());
+            PSymbol lhs = new PSymbol(p.getType(), p.getTypeValue(), name, p.getParameters());
             ArrayList<PExp> args = new ArrayList<PExp>();
             args.add(lhs);
             args.add(body);
-            m_liftedLambdaPredicates.add(new PSymbol(m_typegraph.BOOLEAN,null,"=",args));
+            m_liftedLambdaPredicates.add(new PSymbol(m_typegraph.BOOLEAN, null, "=", args));
         }
     }
 
-    private PExp recursiveLift(PExp p){
+    private PExp recursiveLift(PExp p) {
         ArrayList<PExp> newArgList = new ArrayList<PExp>();
-        for(PExp p_s : p.getSubExpressions()){
+        for (PExp p_s : p.getSubExpressions()) {
             newArgList.add(recursiveLift(p_s));
         }
-        if(p instanceof PLambda){
+        if (p instanceof PLambda) {
             String lname = "";
             if(!m_liftedLamdas.containsKey(p)) {
-                lname = "lambda" + m_lamdaTag++;
+                lname = "lambda" + m_lambdaTag++;
                 m_liftedLamdas.put((PLambda)p,lname);
             }
             else{
                 lname = m_liftedLamdas.get(p);
             }
-            return new PSymbol(p.getType(),p.getTypeValue(),lname);
+            return new PSymbol(p.getType(), p.getTypeValue(), lname);
 
         }
-        return new PSymbol(p.getType(),p.getTypeValue(),p.getTopLevelOperation(),newArgList);
+        return new PSymbol(p.getType(), p.getTypeValue(), p.getTopLevelOperation(), newArgList);
     }
+
     public String getSourceName() {
         return myName;
     }
@@ -144,9 +262,9 @@ public class VC {
                 "========== " + getName() + " ==========\n" + myAntecedent
                         + "  -->\n" + myConsequent;
 
-        if(!m_liftedLambdaPredicates.isEmpty()){
+        if (!m_liftedLambdaPredicates.isEmpty()) {
             retval += "lifted lambda predicates:\n";
-            for(PExp p: m_liftedLambdaPredicates){
+            for (PExp p : m_liftedLambdaPredicates) {
                 retval += p.toString() + "\n";
             }
         }
@@ -160,8 +278,7 @@ public class VC {
             myAntecedent.processStringRepresentation(visitor, a);
             a.append("  -->\n");
             myConsequent.processStringRepresentation(visitor, a);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

@@ -48,7 +48,7 @@ public class TheoremCongruenceClosureImpl {
         isEquality = p.getTopLevelOperation().equals("=");
         m_theoremRegistry = new Registry(g);
         m_matchConj =
-                new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry);
+                new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,false);
 
         if (isEquality) { // no longer used (goes to another constructor)
             m_matchConj.addFormula(p.getSubExpressions().get(0));
@@ -94,7 +94,7 @@ public class TheoremCongruenceClosureImpl {
         isEquality = true;
         m_theoremRegistry = new Registry(g);
         m_matchConj =
-                new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry);
+                new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,false);
         if (enterToMatchAndBindAsEquivalentToTrue)
             m_matchConj.addExpression(toMatchAndBind);
         else
@@ -109,7 +109,7 @@ public class TheoremCongruenceClosureImpl {
         if (m_function_names == null) {
             Registry tReg = new Registry(m_typeGraph);
             ConjunctionOfNormalizedAtomicExpressions temp =
-                    new ConjunctionOfNormalizedAtomicExpressions(tReg);
+                    new ConjunctionOfNormalizedAtomicExpressions(tReg,false);
             temp.addExpression(m_theorem);
 
             Set<String> rSet = tReg.getFunctionNames();
@@ -150,9 +150,6 @@ public class TheoremCongruenceClosureImpl {
         ArrayList<InsertExpWithJustification> rList =
                 new ArrayList<InsertExpWithJustification>();
 
-        if(m_theoremString.contains("Iterated")){
-            int bp = 0;
-        }
         if (m_insertExpr.getQuantifiedVariables().isEmpty()) {
             String r = "\tinserting: " + m_insertExpr + "\n";
             rList.add(new InsertExpWithJustification(m_insertExpr,
