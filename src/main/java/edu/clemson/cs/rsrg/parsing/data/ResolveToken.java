@@ -98,6 +98,25 @@ public class ResolveToken extends CommonToken {
     }
 
     /**
+     * <p>Returns the location from the token in string format.</p>
+     *
+     * @return Location as a String.
+     */
+    public String getLocation() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(groomFileName(getTokenSource().getSourceName()));
+
+        // Append the line and column number
+        sb.append("(");
+        sb.append(getLine());
+        sb.append(":");
+        sb.append(getCharPositionInLine());
+        sb.append(")");
+
+        return sb.toString();
+    }
+
+    /**
      * <p>Returns a hash code for this string.</p>
      *
      * @return A hash code value for this object.
@@ -115,6 +134,25 @@ public class ResolveToken extends CommonToken {
     @Override
     public String toString() {
         return getText();
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>Trims all the path information from the filename.</p>
+     *
+     * @param fileName The full path filename.
+     *
+     * @return Filename only.
+     */
+    private String groomFileName(String fileName) {
+        int start = fileName.lastIndexOf("/");
+        if (start == -1) {
+            return fileName;
+        }
+        return fileName.substring(start + 1, fileName.length());
     }
 
 }

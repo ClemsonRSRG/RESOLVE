@@ -32,6 +32,16 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 public class Utilities {
 
     /**
+     * <p>A builder of objects of type <code>T</code>.</p>
+     *
+     * @param <T> The type object to be created.
+     */
+    public interface Builder<T> {
+
+        T build();
+    }
+
+    /**
      * <p>Converts a regular <code>File</code> object to the
      * <code>ResolveFile</code> accepted by the compiler.</p>
      *

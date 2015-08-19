@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.r2jt.absynnew.ModuleAST;
+import edu.clemson.cs.rsrg.absyn.ModuleDec;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import edu.clemson.cs.rsrg.errorhandling.WriterErrorHandler;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
@@ -21,7 +21,7 @@ import edu.clemson.cs.rsrg.init.file.Utilities;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
 import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
+import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.ScopeRepository;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import java.io.*;
@@ -52,7 +52,7 @@ public class CompileEnvironment {
      * and incomplete modules. A module is complete when we are done processing it. An
      * incomplete module usually means that we are still processing it's import.</p>
      */
-    private final Map<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>> myCompilingModules;
+    private final Map<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleDec, ResolveFile>> myCompilingModules;
 
     /**
      * <p>This map stores all externally realizations for a particular concept.
@@ -123,10 +123,10 @@ public class CompileEnvironment {
                 IOException {
         flags = new FlagManager(args);
         myCompilingModules =
-                new HashMap<ModuleIdentifier, AbstractMap.SimpleEntry<ModuleAST, ResolveFile>>();
-        myExternalRealizFiles = new HashMap<ModuleIdentifier, File>();
-        myIncompleteModules = new LinkedList<ModuleIdentifier>();
-        myUserFileMap = new HashMap<String, ResolveFile>();
+                new HashMap<>();
+        myExternalRealizFiles = new HashMap<>();
+        myIncompleteModules = new LinkedList<>();
+        myUserFileMap = new HashMap<>();
 
         // Check for custom workspace path
         String path = null;
@@ -193,13 +193,13 @@ public class CompileEnvironment {
      * completed.</p>
      *
      * @param file The original source file.
-     * @param moduleAST The ANTLR4 module AST.
+     * @param moduleDec The module representation declaration.
      */
-    public void constructRecord(ResolveFile file, ModuleAST moduleAST) {
-        ModuleIdentifier mid = new ModuleIdentifier(moduleAST);
+    public void constructRecord(ResolveFile file, ModuleDec moduleDec) {
+        ModuleIdentifier mid = new ModuleIdentifier(moduleDec);
         assert !myCompilingModules.containsKey(mid) : "We already compiled a module with this ID!";
         myCompilingModules.put(mid,
-                new AbstractMap.SimpleEntry<ModuleAST, ResolveFile>(moduleAST,
+                new AbstractMap.SimpleEntry<>(moduleDec,
                         file));
         myIncompleteModules.add(mid);
 
@@ -229,11 +229,11 @@ public class CompileEnvironment {
     }
 
     /**
-     * <pReturns the <code>ModuleAST</code> associated with the specified id.></p>
+     * <pReturns the <code>ModuleDec</code> associated with the specified id.></p>
      *
      * @param id The ID for the <code>ResolveFile</code> we want to search for.
      */
-    public ModuleAST getModuleAST(ModuleIdentifier id) {
+    public ModuleDec getModuleAST(ModuleIdentifier id) {
         return myCompilingModules.get(id).getKey();
     }
 

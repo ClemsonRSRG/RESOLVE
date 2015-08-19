@@ -81,8 +81,8 @@ public class AntlrErrorListener extends BaseErrorListener {
         String errorLine = lines[line - 1].replaceAll("\t", " ");
 
         String errorMsg =
-                buildErrorMsg(getLocation(offendingToken), charPositionInLine,
-                        errorLine, msg);
+                buildErrorMsg(offendingToken, charPositionInLine, errorLine,
+                        msg);
         myErrorHandler.error(null, errorMsg);
 
     }
@@ -96,17 +96,19 @@ public class AntlrErrorListener extends BaseErrorListener {
      * the ANTLR4 provided message, build the adequate error message
      * to be displayed to the user.</p>
      *
-     * @param location Location as a String.
+     * @param offendingToken The offending token.
      * @param charPositionInLine The error position in the line.
      * @param line The text from the line that caused the error.
      * @param msg The error message retrieved from ANTLR4.
      *
      * @return The formatted error message as a String.
      */
-    private String buildErrorMsg(String location, int charPositionInLine,
-            String line, String msg) {
+    private String buildErrorMsg(ResolveToken offendingToken,
+            int charPositionInLine, String line, String msg) {
         StringBuilder sb = new StringBuilder();
-        sb.append(location);
+        if (offendingToken != null) {
+            sb.append(offendingToken.getLocation());
+        }
         sb.append("\n");
         sb.append(line);
         for (int i = 0; i < charPositionInLine; i++) {
@@ -116,44 +118,6 @@ public class AntlrErrorListener extends BaseErrorListener {
         sb.append(msg);
 
         return sb.toString();
-    }
-
-    /**
-     * <p>Returns the location from the token in string format.</p>
-     *
-     * @param token The token where we encountered the error.
-     *
-     * @return Location as a String.
-     */
-    private String getLocation(ResolveToken token) {
-        StringBuilder sb = new StringBuilder();
-        if (token != null) {
-            sb.append(groomFileName(token.getTokenSource().getSourceName()));
-
-            // Append the line and column number
-            sb.append("(");
-            sb.append(token.getLine());
-            sb.append(":");
-            sb.append(token.getCharPositionInLine());
-            sb.append(")");
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * <p>Trims all the path information from the filename.</p>
-     *
-     * @param fileName The full path filename.
-     *
-     * @return Filename only.
-     */
-    private String groomFileName(String fileName) {
-        int start = fileName.lastIndexOf("/");
-        if (start == -1) {
-            return fileName;
-        }
-        return fileName.substring(start + 1, fileName.length());
     }
 
 }

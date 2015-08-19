@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.r2jt.absynnew.ImportCollectionAST;
-import edu.clemson.cs.r2jt.absynnew.ModuleAST;
+import edu.clemson.cs.rsrg.absyn.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.UsesItem;
 import edu.clemson.cs.rsrg.errorhandling.AntlrErrorListener;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import edu.clemson.cs.rsrg.errorhandling.exception.*;
@@ -21,11 +21,10 @@ import edu.clemson.cs.rsrg.init.file.FileLocator;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.file.Utilities;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.parsing.*;
-import edu.clemson.cs.rsrg.parsing.data.ResolveToken;
 import edu.clemson.cs.rsrg.parsing.data.ResolveTokenFactory;
+import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -118,28 +117,28 @@ public class Controller {
     public void compileTargetFile(ResolveFile file) {
         try {
             // Use ANTLR4 to build the AST
-            ModuleAST targetModule = createModuleAST(file);
+            ModuleDec targetModule = createModuleAST(file);
 
             // Add this file to our compile environment
-            /*myCompileEnvironment.constructRecord(file, targetModule);
+            myCompileEnvironment.constructRecord(file, targetModule);
 
             // Create a dependencies graph and search for import
             // dependencies.
             DefaultDirectedGraph<ModuleIdentifier, DefaultEdge> g =
-                    new DefaultDirectedGraph<ModuleIdentifier, DefaultEdge>(
+                    new DefaultDirectedGraph<>(
                             DefaultEdge.class);
             g.addVertex(new ModuleIdentifier(targetModule));
             findDependencies(g, targetModule);
 
             // Begin analyzing the file
-            AnalysisPipeline analysisPipe =
-                    new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
+            //AnalysisPipeline analysisPipe =
+            //        new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
             for (ModuleIdentifier m : getCompileOrder(g)) {
-                analysisPipe.process(m);
+                //analysisPipe.process(m);
 
                 // Complete compilation for this module
                 myCompileEnvironment.completeRecord(m);
-            }*/
+            }
         }
         catch (Throwable e) {
             Throwable cause = e;
@@ -182,20 +181,17 @@ public class Controller {
      *
      * @throws MiscErrorException
      */
-    private void addFilesForExternalImports(ModuleAST m) {
-        Set<Token> externals =
-                m.getImports().getImportsOfType(
-                        ImportCollectionAST.ImportType.EXTERNAL);
-
-        for (Token externalImport : externals) {
+    private void addFilesForExternalImports(ModuleDec m) {
+        List<UsesItem> allUsesItems = m.getUsesItems();
+        for (UsesItem importItem : allUsesItems) {
             try {
                 FileLocator l =
-                        new FileLocator(externalImport.getText(),
+                        new FileLocator(importItem.getName().getName(),
                                 NON_NATIVE_EXT);
                 File workspaceDir = myCompileEnvironment.getWorkspaceDir();
                 Files.walkFileTree(workspaceDir.toPath(), l);
                 myCompileEnvironment.addExternalRealizFile(
-                        new ModuleIdentifier(externalImport), l.getFile());
+                        new ModuleIdentifier(importItem), l.getFile());
             }
             catch (IOException ioe) {
                 throw new MiscErrorException(ioe.getMessage(), ioe.getCause());
@@ -209,29 +205,31 @@ public class Controller {
      *
      * @param file The RESOLVE file that we are going to compile.
      *
-     * @return The ANTLR4 Module AST.
+     * @return The inner representation for a module. See {link ModuleDec}.
      *
      * @throws MiscErrorException
      */
-    private ModuleAST createModuleAST(ResolveFile file) {
+    private ModuleDec createModuleAST(ResolveFile file) {
         ANTLRInputStream input = file.getInputStream();
         if (input == null) {
             throw new MiscErrorException("ANTLRInputStream null",
                     new IllegalArgumentException());
         }
 
+        // Create a RESOLVE language lexer
         ResolveLexer lexer = new ResolveLexer(input);
         ResolveTokenFactory factory = new ResolveTokenFactory(input);
         lexer.setTokenFactory(factory);
 
+        // Create a RESOLVE language parser
         TokenStream tokenStream = new CommonTokenStream(lexer);
         ResolveParser parser = new ResolveParser(tokenStream);
         parser.removeErrorListeners();
         parser.addErrorListener(myAntlrErrorListener);
         parser.setTokenFactory(factory);
         ParserRuleContext context = parser.module();
-        //return TreeUtil.createASTNodeFrom(start);
-        return null;
+
+        return TreeUtil.createASTNodeFrom(myErrorHandler, context);
     }
 
     /**
@@ -244,16 +242,17 @@ public class Controller {
      * @throws CircularDependencyException
      * @throws ImportException
      */
-    private void findDependencies(DefaultDirectedGraph g, ModuleAST root) {
-        for (Token importRequest : root.getImports().getImportsExcluding(
-                ImportCollectionAST.ImportType.EXTERNAL)) {
-            ResolveFile file = findResolveFile(importRequest.getText());
+    private void findDependencies(DefaultDirectedGraph g, ModuleDec root) {
+        List<UsesItem> allUsesItems = root.getUsesItems();
+        for (UsesItem importRequest : allUsesItems) {
+            ResolveFile file =
+                    findResolveFile(importRequest.getName().getName());
             ModuleIdentifier id = new ModuleIdentifier(importRequest);
             ModuleIdentifier rootId = new ModuleIdentifier(root);
-            ModuleAST module;
+            ModuleDec module;
 
             // Search for the file in our processed modules
-            if (myCompileEnvironment.containsID(id)) {
+            if (!myCompileEnvironment.containsID(id)) {
                 module = createModuleAST(file);
                 myCompileEnvironment.constructRecord(file, module);
             }
@@ -262,13 +261,11 @@ public class Controller {
             }
 
             // Import error
-            if (root.getImports().inCategory(
-                    ImportCollectionAST.ImportType.IMPLICIT, importRequest)) {
-                if (!module.appropriateForImport()) {
-                    throw new ImportException("Invalid import "
-                            + module.getName() + "; Cannot import module of "
-                            + "type: " + module.getClass());
-                }
+            if (module == null) {
+                throw new ImportException("Invalid import "
+                        + importRequest.toString()
+                        + "; Cannot import module of " + "type: "
+                        + file.getModuleType().getExtension());
             }
 
             // Check for circular dependency
@@ -334,13 +331,13 @@ public class Controller {
      * @return An ordered list of <code>ModuleIdentifiers</code>.
      */
     private List<ModuleIdentifier> getCompileOrder(DefaultDirectedGraph g) {
-        List<ModuleIdentifier> result = new ArrayList<ModuleIdentifier>();
+        List<ModuleIdentifier> result = new ArrayList<>();
 
         EdgeReversedGraph<ModuleIdentifier, DefaultEdge> reversed =
-                new EdgeReversedGraph<ModuleIdentifier, DefaultEdge>(g);
+                new EdgeReversedGraph<>(g);
 
         TopologicalOrderIterator<ModuleIdentifier, DefaultEdge> dependencies =
-                new TopologicalOrderIterator<ModuleIdentifier, DefaultEdge>(
+                new TopologicalOrderIterator<>(
                         reversed);
         while (dependencies.hasNext()) {
             result.add(dependencies.next());
@@ -366,7 +363,7 @@ public class Controller {
             return false;
         }
         GraphIterator<ModuleIdentifier, DefaultEdge> iterator =
-                new DepthFirstIterator<ModuleIdentifier, DefaultEdge>(g, src);
+                new DepthFirstIterator<>(g, src);
 
         while (iterator.hasNext()) {
             ModuleIdentifier next = iterator.next();
@@ -377,5 +374,4 @@ public class Controller {
         }
         return false;
     }
-
 }
