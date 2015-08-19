@@ -84,7 +84,6 @@ public class AntlrErrorListener extends BaseErrorListener {
                 buildErrorMsg(offendingToken, charPositionInLine, errorLine,
                         msg);
         myErrorHandler.error(null, errorMsg);
-
     }
 
     // ===========================================================
@@ -111,6 +110,7 @@ public class AntlrErrorListener extends BaseErrorListener {
         }
         sb.append("\n");
         sb.append(line);
+        sb.append("\n");
         for (int i = 0; i < charPositionInLine; i++) {
             sb.append(" ");
         }

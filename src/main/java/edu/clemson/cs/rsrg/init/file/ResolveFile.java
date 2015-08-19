@@ -139,4 +139,14 @@ public class ResolveFile {
         return myPkgList;
     }
 
+    /**
+     * <p>Returns the name of the file in string format.</p>
+     *
+     * @return File as a string.
+     */
+    @Override
+    public String toString() {
+        return myModuleFileName + "." + myModuleFileType.getExtension();
+    }
+
 }

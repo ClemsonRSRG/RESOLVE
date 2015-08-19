@@ -104,7 +104,8 @@ public class ResolveToken extends CommonToken {
      */
     public String getLocation() {
         StringBuilder sb = new StringBuilder();
-        sb.append(groomFileName(getTokenSource().getSourceName()));
+        sb.append(groomFileName(mySourceName));
+        sb.append(" ");
 
         // Append the line and column number
         sb.append("(");

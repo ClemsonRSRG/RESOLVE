@@ -234,9 +234,17 @@ public class Controller {
         parser.setTokenFactory(factory);
         ParserRuleContext rootModuleCtx = parser.module();
 
+        // Build the intermediate representation
         TreeBuildingVisitor v = new TreeBuildingVisitor(file);
         ParseTreeWalker.DEFAULT.walk(v, rootModuleCtx);
         ModuleDec result = v.getModule();
+        int numErrors = parser.getNumberOfSyntaxErrors();
+        if (numErrors != 0) {
+            throw new MiscErrorException("Found " + numErrors
+                    + " errors while parsing " + file.toString(),
+                    new IllegalStateException());
+        }
+
         return result;
     }
 

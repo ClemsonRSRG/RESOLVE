@@ -70,7 +70,7 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     @Override
     public ResolveToken create(int type, String text) {
         ResolveToken t = new ResolveToken(type, text);
-        t.mySourceName = myFile.getName();
+        t.mySourceName = myFile.toString();
 
         return t;
     }
@@ -90,7 +90,7 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
         ResolveToken t = new ResolveToken(source, type, channel, start, stop);
         t.setLine(line);
         t.setCharPositionInLine(charPositionInLine);
-        t.mySourceName = myInput.getSourceName();
+        t.mySourceName = myFile.toString();
 
         return t;
     }
