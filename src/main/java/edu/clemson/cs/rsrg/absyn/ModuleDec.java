@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn;
 
+import edu.clemson.cs.rsrg.absyn.misc.UsesItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 

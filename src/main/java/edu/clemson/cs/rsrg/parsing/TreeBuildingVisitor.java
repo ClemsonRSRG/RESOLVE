@@ -14,12 +14,13 @@ package edu.clemson.cs.rsrg.parsing;
 
 import edu.clemson.cs.r2jt.misc.Utils;
 import edu.clemson.cs.rsrg.absyn.*;
-import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
+import edu.clemson.cs.rsrg.absyn.declarations.MathAssertionDec;
+import edu.clemson.cs.rsrg.absyn.misc.UsesItem;
+import edu.clemson.cs.rsrg.absyn.modules.PrecisModuleDec;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
-import edu.clemson.cs.rsrg.init.file.Utilities.Builder;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import edu.clemson.cs.rsrg.parsing.ResolveParser;
 import edu.clemson.cs.rsrg.parsing.ResolveParserBaseListener;
@@ -27,7 +28,6 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 

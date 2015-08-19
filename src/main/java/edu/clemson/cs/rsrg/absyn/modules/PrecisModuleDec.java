@@ -10,8 +10,12 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn;
+package edu.clemson.cs.rsrg.absyn.modules;
 
+import edu.clemson.cs.rsrg.absyn.Dec;
+import edu.clemson.cs.rsrg.absyn.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.misc.UsesItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 

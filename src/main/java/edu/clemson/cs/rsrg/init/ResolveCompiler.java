@@ -62,7 +62,7 @@ public class ResolveCompiler {
     /**
      * <p>This indicates the current compiler version.</p>
      */
-    private final String myCompilerVersion = "Summer 2015";
+    private final String myCompilerVersion = "Fall 2015";
 
     /**
      * <p>This stores all the file names specified in the argument

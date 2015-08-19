@@ -13,8 +13,8 @@
 package edu.clemson.cs.rsrg.init;
 
 import edu.clemson.cs.rsrg.absyn.ModuleDec;
-import edu.clemson.cs.rsrg.parsing.TreeBuildingVisitor;
-import edu.clemson.cs.rsrg.absyn.UsesItem;
+import edu.clemson.cs.rsrg.absyn.misc.UsesItem;
+import edu.clemson.cs.rsrg.parsing.*;
 import edu.clemson.cs.rsrg.errorhandling.AntlrErrorListener;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import edu.clemson.cs.rsrg.errorhandling.exception.*;
@@ -23,7 +23,6 @@ import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.init.file.Utilities;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
-import edu.clemson.cs.rsrg.parsing.*;
 import edu.clemson.cs.rsrg.parsing.data.ResolveTokenFactory;
 import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
 import java.io.File;
