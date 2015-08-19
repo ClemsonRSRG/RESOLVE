@@ -12,10 +12,14 @@
  */
 package edu.clemson.cs.rsrg.absyn;
 
+import edu.clemson.cs.rsrg.absyn.declarations.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.misc.UsesItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -30,26 +34,50 @@ public abstract class ModuleDec extends Dec {
     // Member Fields
     // ===========================================================
 
-    /** <p>The current module's import objects.</p> */
-    protected final List<UsesItem> myUsesItems;
-
     /** <p>The current module's declaration objects.</p> */
-    protected final List<Dec> myDecs;
+    protected final List<Dec> myDecs = new ArrayList<>();
+
+    /** <p>The current module's parameter declaration objects.</p> */
+    protected final List<ModuleParameterDec> myParameterDecs = new ArrayList<>();
+
+    /** <p>The current module's import objects.</p> */
+    protected final List<UsesItem> myUsesItems = new ArrayList<>();
 
     // ===========================================================
     // Constructor
     // ===========================================================
 
-    protected ModuleDec(Location l, PosSymbol name, List<UsesItem> usesItems,
+    /**
+     * <p>A helper constructor that allow us to store the parameter
+     * uses and general declarations of the created object directly
+     * in the this class.</p>
+     *
+     * @param l A {link Location} representation object.
+     * @param name The name in {link PosSymbol} format.
+     * @param parameterDecs The list of {link ModuleParameterDec} objects.
+     * @param usesItems The list of {link UsesItem} objects.
+     * @param decs The list of {link Dec} objects.
+     */
+    protected ModuleDec(Location l, PosSymbol name, List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
             List<Dec> decs) {
         super(l, name);
-        myUsesItems = usesItems;
-        myDecs = decs;
+        myParameterDecs.addAll(parameterDecs);
+        myUsesItems.addAll(usesItems);
+        myDecs.addAll(decs);
     }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    /**
+     * <p>This method must be implemented by all inherited classes
+     * to override the default clone method implementation.</p>
+     *
+     * @return A deep copy of the object.
+     */
+    @Override
+    public abstract ModuleDec clone();
 
     /**
      * <p>This method gets all the object declarations associated
@@ -59,6 +87,16 @@ public abstract class ModuleDec extends Dec {
      */
     public List<Dec> getDecList() {
         return myDecs;
+    }
+
+    /**
+     * <p>This method gets all the object parameter declarations associated
+     * with this module.</p>
+     *
+     * @return A list of {link ModuleParameterDec} objects.
+     */
+    public List<ModuleParameterDec> getParameterDecs() {
+        return myParameterDecs;
     }
 
     /**

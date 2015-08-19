@@ -36,7 +36,7 @@ public class MathAssertionDec extends Dec {
     }
 
     @Override
-    public ResolveConceptualElement clone() {
+    public MathAssertionDec clone() {
         return null;
     }
 

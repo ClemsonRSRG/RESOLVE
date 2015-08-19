@@ -56,6 +56,15 @@ public abstract class Dec extends ResolveConceptualElement {
     // ===========================================================
 
     /**
+     * <p>This method must be implemented by all inherited classes
+     * to override the default clone method implementation.</p>
+     *
+     * @return A deep copy of the object.
+     */
+    @Override
+    public abstract Dec clone();
+
+    /**
      * <p>This method gets the mathematical type associated
      * with this object.</p>
      *

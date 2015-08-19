@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.parsing;
 import edu.clemson.cs.r2jt.misc.Utils;
 import edu.clemson.cs.rsrg.absyn.*;
 import edu.clemson.cs.rsrg.absyn.declarations.MathAssertionDec;
+import edu.clemson.cs.rsrg.absyn.declarations.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.misc.UsesItem;
 import edu.clemson.cs.rsrg.absyn.modules.PrecisModuleDec;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
@@ -47,39 +48,37 @@ public class TreeBuildingVisitor extends ResolveParserBaseListener {
         return myFinalModule;
     }
 
-    @Override public void exitModule(ResolveParser.ModuleContext ctx) {
+    @Override
+    public void exitModule(ResolveParser.ModuleContext ctx) {
         myNodes.put(ctx, myNodes.get(ctx.getChild(0)));
         myFinalModule = (ModuleDec) myNodes.get(ctx.getChild(0));
     }
 
-    @Override public void exitPrecisModule(
+    @Override
+    public void exitPrecisModule(
             ResolveParser.PrecisModuleContext ctx) {
         List<Dec> decls =
                 Utils.collect(Dec.class, ctx.precisItems() != null ?
                         ctx.precisItems().precisItem() :
                         new ArrayList<ParseTree>(), myNodes);
-        //lines 56-59 same as:
-        //List<ResolveParser.PrecisItemContext> trees = ctx.precisItems() != null ?
-        //        ctx.precisItems().precisItem() : new ArrayList<ResolveParser.PrecisItemContext>();
-        //List<Dec> decls = new ArrayList<>();
-        //for (ResolveParser.PrecisItemContext t : precisItems) {
-        //    decls.add(((Dec)myNodes.get(t));
-        //}
+        List<ModuleParameterDec> parameterDecls = new ArrayList<>();
         List<UsesItem> uses =
                 Utils.collect(UsesItem.class, ctx.usesList() != null ?
                         ctx.usesList().usesItem() :
                         new ArrayList<ParseTree>(), myNodes);
         PrecisModuleDec precis =
                 new PrecisModuleDec(createLocation(ctx), createPosSymbol(ctx.name),
-                        uses, decls);
+                        parameterDecls, uses, decls);
         myNodes.put(ctx, precis);
     }
 
-    @Override public void exitUsesItem(ResolveParser.UsesItemContext ctx) {
+    @Override
+    public void exitUsesItem(ResolveParser.UsesItemContext ctx) {
         myNodes.put(ctx, new UsesItem(createPosSymbol(ctx.getStart())));
     }
 
-    @Override public void exitPrecisItem(ResolveParser.PrecisItemContext ctx) {
+    @Override
+    public void exitPrecisItem(ResolveParser.PrecisItemContext ctx) {
         //this node at any given time has at most one child. if you're unsure,
         //go back to the grammar and check: is it  a rule that only refers to
         //other rules? The absence of these types of middle rules in the parse

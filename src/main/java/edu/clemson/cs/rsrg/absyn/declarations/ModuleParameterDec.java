@@ -1,5 +1,5 @@
 /**
- * UsesItem.java
+ * ModuleParameterDec.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -10,38 +10,40 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.misc;
+package edu.clemson.cs.rsrg.absyn.declarations;
 
-import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.Dec;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class functions as a reference to the name of the
- * imported module used by a module the compiler is currently compiling.</p>
+ * <p>This is a wrapper class for all the different module parameter
+ * declarations that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class UsesItem extends ResolveConceptualElement {
+public class ModuleParameterDec extends Dec {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>Name of this imported module.</p> */
-    private final PosSymbol myName;
+    /** <p>The actual module parameter declaration</p> */
+    private final Dec myWrappedDec;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>Constructs an item that represents a imported module.</p>
+     * <p>Given a declaration, we wrap it to indicate that this
+     * is a module level parameter declaration.</p>
      *
-     * @param name Name of the imported module.
+     * @param dec The declaration to be wrapped.
+     * @param <T> The type of declaration.
      */
-    public UsesItem(PosSymbol name) {
-        super(name.getLocation());
-        myName = name;
+    public <T extends Dec> ModuleParameterDec(T dec) {
+        super(dec.getLocation(), dec.getName());
+        myWrappedDec = dec;
     }
 
     // ===========================================================
@@ -61,26 +63,18 @@ public class UsesItem extends ResolveConceptualElement {
      */
     @Override
     public String asString(int indentSize, int innerIndentSize) {
-        StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
-        sb.append("UsesItem\n");
-        if (myName != null) {
-            sb.append(myName.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-        }
-
-        return sb.toString();
+        return myWrappedDec.asString(indentSize, innerIndentSize);
     }
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for the {link UsesItem} class.</p>
+     * for the {link ModuleParameterDec} class.</p>
      *
      * @return A deep copy of the object.
      */
     @Override
-    public UsesItem clone() {
-        return new UsesItem(myName.clone());
+    public ModuleParameterDec clone() {
+        return new ModuleParameterDec(myWrappedDec.clone());
     }
 
     /**
@@ -94,9 +88,9 @@ public class UsesItem extends ResolveConceptualElement {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof UsesItem) {
-            UsesItem usesItem = (UsesItem) o;
-            result = myName.equals(usesItem);
+        if (o instanceof ModuleParameterDec) {
+            ModuleParameterDec moduleParameterDec = (ModuleParameterDec) o;
+            result = myWrappedDec.equals(moduleParameterDec);
         }
 
         return result;
@@ -108,18 +102,18 @@ public class UsesItem extends ResolveConceptualElement {
      *
      * @return A {link PosSymbol} representation of the name.
      */
+    @Override
     public PosSymbol getName() {
-        return myName;
+        return myWrappedDec.getName();
     }
 
     /**
-     * <p>Returns the symbol in string format.</p>
+     * <p>Returns the inner wrapped declaration.</p>
      *
-     * @return Symbol as a string.
+     * @return A {link Dec} object.
      */
-    @Override
-    public String toString() {
-        return myName.toString();
+    public Dec getWrappedDec() {
+        return myWrappedDec;
     }
 
 }
