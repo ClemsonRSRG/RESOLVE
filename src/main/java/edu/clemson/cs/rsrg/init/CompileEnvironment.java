@@ -181,7 +181,7 @@ public class CompileEnvironment {
         myIncompleteModules.remove(mid);
 
         // Print out debugging message
-        if (!flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
             myErrorHandler.info(null, "Complete record: " + mid.toString());
         }
     }
@@ -204,8 +204,8 @@ public class CompileEnvironment {
         myIncompleteModules.add(mid);
 
         // Print out debugging message
-        if (!flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myErrorHandler.info(null, "Construct record: " + mid.toString()); //DEBUG
+        if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+            myErrorHandler.info(null, "Construct record: " + mid.toString());
         }
     }
 

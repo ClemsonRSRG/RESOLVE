@@ -166,15 +166,10 @@ public class ResolveCompiler {
             compileRealFiles(myArgumentFileList, compileEnvironment);
         }
         catch (CompilerException e) {
-            compileEnvironment.getErrorHandler().error(null, e.getMessage());
-        }
-        finally {
-            // Stop error logging
             // YS - The error handler object might have changed.
             errorHandler = compileEnvironment.getErrorHandler();
-            if (!errorHandler.hasStopped()) {
-                errorHandler.stopLogging();
-            }
+            errorHandler.error(null, e.getMessage());
+            errorHandler.stopLogging();
         }
     }
 
@@ -202,15 +197,10 @@ public class ResolveCompiler {
             compileArbitraryFiles(myArgumentFileList, compileEnvironment);
         }
         catch (CompilerException e) {
-            compileEnvironment.getErrorHandler().error(null, e.getMessage());
-        }
-        finally {
-            // Stop error logging
             // YS - The error handler object might have changed.
             errorHandler = compileEnvironment.getErrorHandler();
-            if (!errorHandler.hasStopped()) {
-                errorHandler.stopLogging();
-            }
+            errorHandler.error(null, e.getMessage());
+            errorHandler.stopLogging();
         }
     }
 
@@ -370,19 +360,15 @@ public class ResolveCompiler {
         }
         catch (FlagDependencyException fde) {
             // YS - The error handler object might have changed.
-            compileEnvironment.getErrorHandler().error(null, fde.getMessage());
+            errorHandler = compileEnvironment.getErrorHandler();
+            errorHandler.error(null, fde.getMessage());
+            errorHandler.stopLogging();
         }
         catch (IOException ioe) {
             // YS - The error handler object might have changed.
-            compileEnvironment.getErrorHandler().error(null, ioe.getMessage());
-        }
-        finally {
-            // Stop error logging
-            // YS - The error handler object might have changed.
             errorHandler = compileEnvironment.getErrorHandler();
-            if (!errorHandler.hasStopped()) {
-                errorHandler.stopLogging();
-            }
+            errorHandler.error(null, ioe.getMessage());
+            errorHandler.stopLogging();
         }
 
         return compileEnvironment;

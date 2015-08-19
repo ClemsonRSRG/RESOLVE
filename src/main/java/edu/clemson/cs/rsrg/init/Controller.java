@@ -159,13 +159,7 @@ public class Controller {
             else {
                 CompilerException see = (CompilerException) cause;
                 myErrorHandler.error(see.getErrorLocation(), e.getMessage());
-            }
-        }
-        finally {
-            // Stop error logging
-            ErrorHandler errorHandler = myCompileEnvironment.getErrorHandler();
-            if (!errorHandler.hasStopped()) {
-                errorHandler.stopLogging();
+                myErrorHandler.stopLogging();
             }
         }
     }
