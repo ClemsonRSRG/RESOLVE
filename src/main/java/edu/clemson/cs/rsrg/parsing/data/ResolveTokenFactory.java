@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.parsing.data;
 
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.TokenFactory;
@@ -33,6 +34,9 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     // Member Fields
     // ===========================================================
 
+    /** <p>The file that created this token factory.</p> */
+    private final ResolveFile myFile;
+
     /** <p>Input data stream</p> */
     private final CharStream myInput;
 
@@ -43,9 +47,11 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
     /**
      * <p>This object creates {@link ResolveToken}s rather than the default tokens.</p>
      *
+     * @param file Input file.
      * @param input Input data stream.
      */
-    public ResolveTokenFactory(CharStream input) {
+    public ResolveTokenFactory(ResolveFile file, CharStream input) {
+        myFile = file;
         myInput = input;
     }
 
@@ -63,7 +69,10 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
      */
     @Override
     public ResolveToken create(int type, String text) {
-        return new ResolveToken(type, text);
+        ResolveToken t = new ResolveToken(type, text);
+        t.mySourceName = myFile.getName();
+
+        return t;
     }
 
     /**
