@@ -185,8 +185,18 @@ public class Controller {
                                 NON_NATIVE_EXT);
                 File workspaceDir = myCompileEnvironment.getWorkspaceDir();
                 Files.walkFileTree(workspaceDir.toPath(), l);
-                myCompileEnvironment.addExternalRealizFile(
-                        new ModuleIdentifier(importItem), l.getFile());
+
+                // Only attempt to add
+                List<File> foundFiles = l.getFiles();
+                if (foundFiles.size() == 1) {
+                    myCompileEnvironment.addExternalRealizFile(
+                            new ModuleIdentifier(importItem), l.getFile());
+                }
+                else if (foundFiles.size() > 1) {
+                    throw new ImportException(
+                            "Found more than one external import with the name "
+                                    + importItem.getName().getName() + ";");
+                }
             }
             catch (IOException ioe) {
                 throw new MiscErrorException(ioe.getMessage(), ioe.getCause());
@@ -307,7 +317,8 @@ public class Controller {
                         new FileLocator(baseName, ModuleType.getAllExtensions());
                 File workspaceDir = myCompileEnvironment.getWorkspaceDir();
                 Files.walkFileTree(workspaceDir.toPath(), l);
-                ModuleType extType = Utilities.getModuleType(baseName);
+                ModuleType extType =
+                        Utilities.getModuleType(l.getFile().getName());
                 file =
                         Utilities.convertToResolveFile(l.getFile(), extType,
                                 workspaceDir.getAbsolutePath());

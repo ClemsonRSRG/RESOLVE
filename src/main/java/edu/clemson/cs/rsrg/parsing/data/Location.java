@@ -151,7 +151,9 @@ public class Location {
 
         // Append the name of the file and the extension
         sb.append(myFile.getName());
+        sb.append(".");
         sb.append(myFile.getModuleType().getExtension());
+        sb.append(" ");
 
         // Append the line number and the column number
         sb.append("(");

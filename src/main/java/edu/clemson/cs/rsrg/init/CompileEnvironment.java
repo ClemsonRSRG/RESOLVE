@@ -182,7 +182,7 @@ public class CompileEnvironment {
 
         // Print out debugging message
         if (flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
-            myErrorHandler.info(null, "Complete record: " + mid.toString());
+            myErrorHandler.info(null, "Completed record: " + mid.toString());
         }
     }
 

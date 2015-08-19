@@ -42,7 +42,7 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     private String myPattern = null;
 
     /** <p>The list of resulting matches.</p> */
-    private List<File> myMatches = new ArrayList<File>();
+    private List<File> myMatches = new ArrayList<>();
 
     // ===========================================================
     // Constructors
@@ -57,10 +57,10 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      *                   myPattern is matched (e.g. {@code ["java", "cpp", "groovy"]}).
      */
     public FileLocator(String pattern, List<String> extensions) {
-        this.myPattern = pattern;
-        this.myPathMatcher =
+        myPattern = pattern;
+        myPathMatcher =
                 FileSystems.getDefault().getPathMatcher(
-                        "glob:" + pattern + parseExtensions(extensions));
+                        "glob:" + pattern + "." + parseExtensions(extensions));
     }
 
     /**
@@ -73,7 +73,7 @@ public class FileLocator extends SimpleFileVisitor<Path> {
     public FileLocator(String extension) {
         myPathMatcher =
                 FileSystems.getDefault().getPathMatcher(
-                        "glob:*{" + extension + "}");
+                        "glob:*.{" + extension + "}");
     }
 
     // ===========================================================

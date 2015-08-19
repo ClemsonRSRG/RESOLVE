@@ -84,7 +84,7 @@ public class ModuleType {
      * @return The list of extension names.
      */
     public static List<String> getAllExtensions() {
-        List<String> extensions = new ArrayList<String>();
+        List<String> extensions = new ArrayList<>();
         extensions.add(THEORY.getExtension());
         extensions.add(CONCEPT.getExtension());
         extensions.add(ENHANCEMENT.getExtension());
