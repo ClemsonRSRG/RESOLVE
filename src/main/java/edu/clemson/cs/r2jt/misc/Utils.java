@@ -12,8 +12,14 @@
  */
 package edu.clemson.cs.r2jt.misc;
 
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Utils {
 
@@ -80,5 +86,30 @@ public class Utils {
             }
         }
         return builder.toString();
+    }
+
+    /**
+     * Returns a list of {@code E} given: an expected type {@code T}, some
+     * number
+     * of concrete syntax {@code nodes}, and a mapping from rule contexts to
+     * some number of elements descending from {@code E}.
+     *
+     * @param expectedType The class type to inhabit the returned list
+     * @param nodes A list of concrete syntax nodes, as obtained through
+     *        a visitor, listener, etc.
+     * @param annotations A map from rule context to the primary supertype
+     *        of {@code expectedType} ({@code E}).
+     * @param <E> Super type of {@code expectedType}.
+     * @param <T> The expected type.
+     * @return A list of {@code T}.
+     */
+    public static <E, T extends E> List<T> collect(
+            Class<T> expectedType, List<? extends ParseTree> nodes,
+            ParseTreeProperty<? extends E> annotations) {
+        List<T> result = new ArrayList<>();
+        for (ParseTree node : nodes) {
+            result.add(expectedType.cast(annotations.get(node)));
+        }
+        return result;
     }
 }

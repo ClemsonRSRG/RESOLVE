@@ -31,6 +31,26 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
     // Public Methods
     // ===========================================================
 
+    //Todo: All of these abstract methods your going to have to implement in the subclasses is going to end up killing you.
+    // unless you take care of them in intermediate abstract classes. I'm just trying to implement a module subclass for instance and I've learned
+    //I need to implement, like, 6 different things. GetLocation for example shouldn't be abstract, it should probably just be sitting up here and you
+    //super all locations up here. from the nodes. super-ing 1 thing is easier than implementing getLocation()
+    //16-40 different times and in different places.
+
+    /**
+     * Refers to the starting position of this {@code ResolveConceptualElement}
+     * in the sourcefile.
+     * <p>
+     * Note that this is <em>not</em> the starting position
+     * of the name or anything like that -- but the actual start of the
+     * construct itself.</p>
+     */
+    protected final Location myLoc;
+
+    public ResolveConceptualElement(Location l) {
+        myLoc = l;
+    }
+
     /**
      * <p>This method must be implemented by all inherited classes
      * to create a special indented text version of the class as a string.</p>
@@ -128,7 +148,7 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
                                 && ResolveConceptualElement.class
                                 .isAssignableFrom(listOf)) {
                             children
-                                    .add(new VirtualListNode(
+                                    .add(new VirtualListNode(myLoc,
                                             this,
                                             curField.getName(),
                                             (java.util.List<ResolveConceptualElement>) fieldList,
@@ -159,7 +179,9 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
      *
      * @return A {link Location} representation object.
      */
-    public abstract Location getLocation();
+    public Location getLocation() {
+        return myLoc;
+    }
 
     /**
      * <p>This method must be implemented by all inherited classes

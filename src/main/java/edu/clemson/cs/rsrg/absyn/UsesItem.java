@@ -40,6 +40,7 @@ public class UsesItem extends ResolveConceptualElement {
      * @param name Name of the imported module.
      */
     public UsesItem(PosSymbol name) {
+        super(name.getLocation());
         myName = name;
     }
 
@@ -93,16 +94,6 @@ public class UsesItem extends ResolveConceptualElement {
     @Override
     public boolean equals(Object o) {
         return myName.equals(o);
-    }
-
-    /**
-     * <p>Returns of the location where this object
-     * originated from.</p>
-     *
-     * @return A {link Location} representation object.
-     */
-    public Location getLocation() {
-        return myName.getLocation();
     }
 
     /**

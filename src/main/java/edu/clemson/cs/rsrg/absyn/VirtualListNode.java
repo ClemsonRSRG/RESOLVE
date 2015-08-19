@@ -56,8 +56,10 @@ public class VirtualListNode extends ResolveConceptualElement {
      * @param list List of children elements.
      * @param listType Class type of the children elements.
      */
-    public VirtualListNode(ResolveConceptualElement parent, String listName,
-            List<ResolveConceptualElement> list, Class<?> listType) {
+    public VirtualListNode(Location l, ResolveConceptualElement parent,
+            String listName, List<ResolveConceptualElement> list,
+            Class<?> listType) {
+        super(l);
         myParent = parent;
         myName = parent.getClass().getSimpleName() + toCamelCase(listName);
         myList = list;
@@ -95,7 +97,7 @@ public class VirtualListNode extends ResolveConceptualElement {
     public VirtualListNode clone() {
         List<ResolveConceptualElement> listCopy = new ArrayList<>(myList.size());
         Collections.copy(listCopy, myList);
-        return new VirtualListNode(myParent.clone(), myName, listCopy, myListType);
+        return new VirtualListNode(myLoc, myParent.clone(), myName, listCopy, myListType);
     }
 
     /**

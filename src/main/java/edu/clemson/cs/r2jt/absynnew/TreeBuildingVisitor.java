@@ -106,9 +106,10 @@ public class TreeBuildingVisitor<T extends ResolveAST>
 
     @Override
     public void exitUsesList(@NotNull ResolveParser.UsesListContext ctx) {
+        List<TerminalNode> x = new ArrayList<TerminalNode>();
         myImportBuilder =
                 new ImportCollectionBuilder(ctx.getStart(), ctx.getStop())
-                        .imports(ImportType.EXPLICIT, ctx.IDENTIFIER());
+                        .imports(ImportType.EXPLICIT, x);
         put(ctx, myImportBuilder.build());
     }
 

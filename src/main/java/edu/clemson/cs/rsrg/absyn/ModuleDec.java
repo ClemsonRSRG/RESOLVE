@@ -12,6 +12,9 @@
  */
 package edu.clemson.cs.rsrg.absyn;
 
+import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+
 import java.util.List;
 
 /**
@@ -28,6 +31,14 @@ public abstract class ModuleDec extends Dec {
 
     /** <p>The current module's import objects.</p> */
     protected List<UsesItem> myUsesItems;
+    protected final List<Dec> myDecs;
+
+    public ModuleDec(Location l, PosSymbol name, List<UsesItem> usesItems,
+            List<Dec> decs) {
+        super(l, name);
+        myUsesItems = usesItems;
+        myDecs = decs;
+    }
 
     // ===========================================================
     // Public Methods

@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.absyn;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.rsrg.errorhandling.exception.NullMathTypeException;
+import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
@@ -30,10 +31,16 @@ public abstract class Dec extends ResolveConceptualElement {
 
     /** <p>The object's mathematical type.</p> */
     protected MTType myMathType = null;
+    protected final PosSymbol myName;
 
     // ===========================================================
     // Public Methods
     // ===========================================================
+
+    public Dec(Location l, PosSymbol name) {
+        super(l);
+        myName = name;
+    }
 
     /**
      * <p>This method gets the mathematical type associated
@@ -51,7 +58,9 @@ public abstract class Dec extends ResolveConceptualElement {
      *
      * @return The name in {link PosSymbol} format.
      */
-    public abstract PosSymbol getName();
+    public PosSymbol getName() {
+        return myName;
+    }
 
     /**
      * <p>This method sets the mathematical type associated
@@ -66,6 +75,12 @@ public abstract class Dec extends ResolveConceptualElement {
         }
 
         myMathType = mt;
+    }
+
+    @Override
+    public String toString() {
+        return "<" + this.getClass().getSimpleName() + "@" + myLoc + ">:"
+                + getName();
     }
 
 }

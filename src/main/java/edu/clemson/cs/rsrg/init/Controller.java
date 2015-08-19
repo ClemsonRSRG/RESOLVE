@@ -12,7 +12,9 @@
  */
 package edu.clemson.cs.rsrg.init;
 
+import edu.clemson.cs.r2jt.absynnew.TreeWalker;
 import edu.clemson.cs.rsrg.absyn.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.TreeBuildingVisitor;
 import edu.clemson.cs.rsrg.absyn.UsesItem;
 import edu.clemson.cs.rsrg.errorhandling.AntlrErrorListener;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -227,9 +230,12 @@ public class Controller {
         parser.removeErrorListeners();
         parser.addErrorListener(myAntlrErrorListener);
         parser.setTokenFactory(factory);
-        ParserRuleContext context = parser.module();
+        ParserRuleContext rootModuleCtx = parser.module();
 
-        return TreeUtil.createASTNodeFrom(myErrorHandler, context);
+        TreeBuildingVisitor v = new TreeBuildingVisitor(file);
+        ParseTreeWalker.DEFAULT.walk(v, rootModuleCtx);
+        ModuleDec result = v.getModule();
+        return result;
     }
 
     /**
