@@ -65,7 +65,7 @@ public class WriterErrorHandler implements ErrorHandler {
         try {
             if (!stopLogging) {
                 StringBuilder sb = new StringBuilder();
-                sb.append("Error: ");
+                sb.append("\nError: ");
                 if (l != null) {
                     sb.append(l.toString());
                 }
@@ -154,7 +154,7 @@ public class WriterErrorHandler implements ErrorHandler {
         try {
             if (!stopLogging) {
                 StringBuilder sb = new StringBuilder();
-                sb.append("Warning: ");
+                sb.append("\nWarning: ");
                 if (l != null) {
                     sb.append(l.toString());
                 }
