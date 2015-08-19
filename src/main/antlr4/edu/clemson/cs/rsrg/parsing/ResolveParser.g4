@@ -643,7 +643,7 @@ mathImplicitDefinitionDecl
     ;
 
 mathInductiveDefinitionDecl
-    :   INDUCTIVE DEFINITION inductiveDefinitionSignature
+    :   INDUCTIVE DEFINITION definitionSignature
         IS INDUCTIVE_BASE_NUM mathExp SEMICOLON
         INDUCTIVE_HYP_NUM mathExp SEMICOLON
     ;
@@ -654,25 +654,6 @@ mathStandardDefinitionDecl
 
 categoricalDefinitionSignature
     :   definitionSignature (COMMA definitionSignature)*
-    ;
-
-inductiveDefinitionSignature
-    :   inductivePrefixSignature
-    |   inductiveInfixSignature
-    ;
-
-inductivePrefixSignature
-    :   ON mathVariableDecl OF prefixOp
-        LPAREN (inductiveParameterList COMMA)? IDENTIFIER RPAREN COLON mathTypeExp
-    ;
-
-inductiveInfixSignature
-    :   ON mathVariableDecl OF LPAREN mathVariableDecl RPAREN infixOp
-        LPAREN IDENTIFIER RPAREN COLON mathTypeExp
-    ;
-
-inductiveParameterList
-    :   mathVariableDeclGroup (COMMA mathVariableDeclGroup)*
     ;
 
 definitionSignature
