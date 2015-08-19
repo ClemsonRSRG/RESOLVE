@@ -35,9 +35,7 @@ import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>This class takes care of all argument processing and creates
@@ -76,8 +74,6 @@ public class ResolveCompiler {
 
     private static final String FLAG_DESC_DEBUG =
             "Print debugging statements from the compiler output.";
-    private static final String FLAG_DESC_FILE_OUT =
-            "Changes the compiler output to a file";
     private static final String FLAG_DESC_WORKSPACE_DIR =
             "Changes the workspace directory path.";
     private static final String FLAG_SECTION_GENERAL = "General";
@@ -117,7 +113,13 @@ public class ResolveCompiler {
      * output to a file.</p>
      */
     public static final Flag FLAG_DEBUG_FILE_OUT =
-            new Flag(FLAG_SECTION_NAME, "debugOutToFile", FLAG_DESC_FILE_OUT);
+            new Flag(FLAG_SECTION_NAME, "debugOutToFile", FLAG_DESC_DEBUG);
+
+    /**
+     * <p>Tells the compiler to print compiler exception's stack traces.</p>
+     */
+    public static final Flag FLAG_DEBUG_STACK_TRACE =
+            new Flag(FLAG_SECTION_NAME, "stacktrace", FLAG_DESC_DEBUG);
 
     /**
      * <p>Tells the compiler the RESOLVE workspace directory path.</p>
@@ -140,7 +142,7 @@ public class ResolveCompiler {
      */
     public ResolveCompiler(String[] args) {
         myCompilerArgs = args;
-        myArgumentFileList = new LinkedList<String>();
+        myArgumentFileList = new LinkedList<>();
 
         // Make sure the flag dependencies are set
         setUpFlagDependencies();
@@ -169,6 +171,9 @@ public class ResolveCompiler {
             // YS - The error handler object might have changed.
             errorHandler = compileEnvironment.getErrorHandler();
             errorHandler.error(null, e.getMessage());
+            if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)) {
+                e.printStackTrace();
+            }
             errorHandler.stopLogging();
         }
     }
@@ -200,6 +205,10 @@ public class ResolveCompiler {
             // YS - The error handler object might have changed.
             errorHandler = compileEnvironment.getErrorHandler();
             errorHandler.error(null, e.getMessage());
+            if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)
+                    && errorHandler instanceof StdErrHandler) {
+                e.printStackTrace();
+            }
             errorHandler.stopLogging();
         }
     }
@@ -362,12 +371,20 @@ public class ResolveCompiler {
             // YS - The error handler object might have changed.
             errorHandler = compileEnvironment.getErrorHandler();
             errorHandler.error(null, fde.getMessage());
+            if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)
+                    && errorHandler instanceof StdErrHandler) {
+                fde.printStackTrace();
+            }
             errorHandler.stopLogging();
         }
         catch (IOException ioe) {
             // YS - The error handler object might have changed.
             errorHandler = compileEnvironment.getErrorHandler();
             errorHandler.error(null, ioe.getMessage());
+            if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)
+                    && errorHandler instanceof StdErrHandler) {
+                ioe.printStackTrace();
+            }
             errorHandler.stopLogging();
         }
 
@@ -422,6 +439,8 @@ public class ResolveCompiler {
 
         // Debug out to file implies that the debug flag is also on.
         FlagDependencies.addImplies(FLAG_DEBUG_FILE_OUT, FLAG_DEBUG);
-    }
 
+        // Stack traces require debug flag is on
+        FlagDependencies.addRequires(FLAG_DEBUG_STACK_TRACE, FLAG_DEBUG);
+    }
 }
