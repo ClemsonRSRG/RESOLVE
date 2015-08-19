@@ -30,10 +30,16 @@ public abstract class ModuleDec extends Dec {
     // ===========================================================
 
     /** <p>The current module's import objects.</p> */
-    protected List<UsesItem> myUsesItems;
+    protected final List<UsesItem> myUsesItems;
+
+    /** <p>The current module's declaration objects.</p> */
     protected final List<Dec> myDecs;
 
-    public ModuleDec(Location l, PosSymbol name, List<UsesItem> usesItems,
+    // ===========================================================
+    // Constructor
+    // ===========================================================
+
+    protected ModuleDec(Location l, PosSymbol name, List<UsesItem> usesItems,
             List<Dec> decs) {
         super(l, name);
         myUsesItems = usesItems;
@@ -45,6 +51,16 @@ public abstract class ModuleDec extends Dec {
     // ===========================================================
 
     /**
+     * <p>This method gets all the object declarations associated
+     * with this module.</p>
+     *
+     * @return A list of {link Dec} objects.
+     */
+    public List<Dec> getDecList() {
+        return myDecs;
+    }
+
+    /**
      * <p>This method gets all the import objects associated
      * with this module.</p>
      *
@@ -52,16 +68,6 @@ public abstract class ModuleDec extends Dec {
      */
     public List<UsesItem> getUsesItems() {
         return myUsesItems;
-    }
-
-    /**
-     * <p>This method stores the list of all the import objects associated
-     * with this module.</p>
-     *
-     * @param usesItems A list of {link UsesItem} objects.
-     */
-    public void setUsesItems(List<UsesItem> usesItems) {
-        myUsesItems = usesItems;
     }
 
 }

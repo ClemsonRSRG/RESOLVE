@@ -31,16 +31,29 @@ public abstract class Dec extends ResolveConceptualElement {
 
     /** <p>The object's mathematical type.</p> */
     protected MTType myMathType = null;
+
+    /** <p>The object's name representation.</p> */
     protected final PosSymbol myName;
+
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
+    /**
+     * <p>A helper constructor that allow us to store the location
+     * of the created object directly in the this class.</p>
+     *
+     * @param l A {link Location} representation object.
+     * @param name The name in {link PosSymbol} format.
+     */
+    protected Dec(Location l, PosSymbol name) {
+        super(l);
+        myName = name;
+    }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
-
-    public Dec(Location l, PosSymbol name) {
-        super(l);
-        myName = name;
-    }
 
     /**
      * <p>This method gets the mathematical type associated
@@ -53,8 +66,8 @@ public abstract class Dec extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method must be implemented by all inherited classes
-     * to return the name of this declaration module.</p>
+     * <p>Returns the symbol representation
+     * of this class.</p>
      *
      * @return The name in {link PosSymbol} format.
      */
@@ -77,6 +90,11 @@ public abstract class Dec extends ResolveConceptualElement {
         myMathType = mt;
     }
 
+    /**
+     * <p>Returns this object in string format.</p>
+     *
+     * @return This class as a string.
+     */
     @Override
     public String toString() {
         return "<" + this.getClass().getSimpleName() + "@" + myLoc + ">:"

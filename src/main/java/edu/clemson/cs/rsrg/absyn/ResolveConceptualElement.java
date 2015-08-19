@@ -28,7 +28,7 @@ import java.util.*;
 public abstract class ResolveConceptualElement implements BasicCapabilities {
 
     // ===========================================================
-    // Public Methods
+    // Member Fields
     // ===========================================================
 
     //Todo: All of these abstract methods your going to have to implement in the subclasses is going to end up killing you.
@@ -38,18 +38,32 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
     //16-40 different times and in different places.
 
     /**
-     * Refers to the starting position of this {@code ResolveConceptualElement}
-     * in the sourcefile.
-     * <p>
-     * Note that this is <em>not</em> the starting position
+     * <p>Refers to the starting position of this {@code ResolveConceptualElement}
+     * in the sourcefile.</p>
+     *
+     * <p>Note that this is <em>not</em> the starting position
      * of the name or anything like that -- but the actual start of the
      * construct itself.</p>
      */
     protected final Location myLoc;
 
-    public ResolveConceptualElement(Location l) {
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
+    /**
+     * <p>A helper constructor that allow us to store the location
+     * of the created object directly in the this class.</p>
+     *
+     * @param l A {link Location} representation object.
+     */
+    protected ResolveConceptualElement(Location l) {
         myLoc = l;
     }
+
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
 
     /**
      * <p>This method must be implemented by all inherited classes
@@ -173,8 +187,7 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
     }
 
     /**
-     * <p>This method must be implemented by all inherited classes
-     * to return the location where this object
+     * <p>Return the location where this object
      * originated from.</p>
      *
      * @return A {link Location} representation object.

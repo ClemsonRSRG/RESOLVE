@@ -12,9 +12,8 @@
  */
 package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.r2jt.absynnew.TreeWalker;
 import edu.clemson.cs.rsrg.absyn.ModuleDec;
-import edu.clemson.cs.rsrg.absyn.TreeBuildingVisitor;
+import edu.clemson.cs.rsrg.parsing.TreeBuildingVisitor;
 import edu.clemson.cs.rsrg.absyn.UsesItem;
 import edu.clemson.cs.rsrg.errorhandling.AntlrErrorListener;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
