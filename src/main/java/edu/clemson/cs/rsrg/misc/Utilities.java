@@ -10,20 +10,23 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.init.file;
+package edu.clemson.cs.rsrg.misc;
 
+import edu.clemson.cs.rsrg.init.file.ModuleType;
+import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
-import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 /**
- * <p>This class contains static helper methods that for processing
- * files and to convert <code>File</code> objects to <code>ResolveFile</code>
- * objects.</p>
+ * <p>This class contains a collection of static helper methods
+ * that the RESOLVE compiler uses throughout the compilation
+ * process.</p>
  *
  * @author Yu-Shan Sun
  * @author Daniel Welch
@@ -39,6 +42,30 @@ public class Utilities {
     public interface Builder<T> {
 
         T build();
+    }
+
+    /**
+     * <p>Returns a list of {@code E} given: an expected type {@code T}, some
+     * number of concrete syntax {@code nodes}, and a mapping from rule contexts
+     * to some number of elements descending from {@code E}.</p>
+     *
+     * @param expectedType The class type to inhabit the returned list
+     * @param nodes A list of concrete syntax nodes, as obtained through
+     *        a visitor, listener, etc.
+     * @param annotations A map from rule context to the primary supertype
+     *        of {@code expectedType} ({@code E}).
+     * @param <E> Super type of {@code expectedType}.
+     * @param <T> The expected type.
+     * @return A list of {@code T}.
+     */
+    public static <E, T extends E> List<T> collect(
+            Class<T> expectedType, List<? extends ParseTree> nodes,
+            ParseTreeProperty<? extends E> annotations) {
+        List<T> result = new ArrayList<>();
+        for (ParseTree node : nodes) {
+            result.add(expectedType.cast(annotations.get(node)));
+        }
+        return result;
     }
 
     /**

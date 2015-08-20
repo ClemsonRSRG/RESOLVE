@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.init.file;
 
+import edu.clemson.cs.rsrg.misc.Utilities;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;

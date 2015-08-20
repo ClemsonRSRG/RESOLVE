@@ -17,7 +17,7 @@ import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import edu.clemson.cs.rsrg.errorhandling.WriterErrorHandler;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
-import edu.clemson.cs.rsrg.init.file.Utilities;
+import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.r2jt.misc.FlagDependencyException;
 import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;

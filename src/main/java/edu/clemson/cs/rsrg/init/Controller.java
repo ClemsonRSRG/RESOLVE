@@ -21,11 +21,11 @@ import edu.clemson.cs.rsrg.errorhandling.exception.*;
 import edu.clemson.cs.rsrg.init.file.FileLocator;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
-import edu.clemson.cs.rsrg.init.file.Utilities;
+import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 import edu.clemson.cs.rsrg.parsing.ResolveLexer;
 import edu.clemson.cs.rsrg.parsing.ResolveParser;
-import edu.clemson.cs.rsrg.parsing.TreeBuildingVisitor;
+import edu.clemson.cs.rsrg.parsing.TreeBuildingListener;
 import edu.clemson.cs.rsrg.parsing.data.ResolveTokenFactory;
 import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
 import java.io.File;
@@ -242,7 +242,7 @@ public class Controller {
         ParserRuleContext rootModuleCtx = parser.module();
 
         // Build the intermediate representation
-        TreeBuildingVisitor v = new TreeBuildingVisitor(file);
+        TreeBuildingListener v = new TreeBuildingListener(file);
         ParseTreeWalker.DEFAULT.walk(v, rootModuleCtx);
         ModuleDec result = v.getModule();
         int numErrors = parser.getNumberOfSyntaxErrors();
