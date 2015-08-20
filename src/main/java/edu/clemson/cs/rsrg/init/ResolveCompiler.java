@@ -16,13 +16,13 @@ import edu.clemson.cs.r2jt.archiving.Archiver;
 import edu.clemson.cs.r2jt.congruenceclassprover.CongruenceClassProver;
 import edu.clemson.cs.r2jt.congruenceclassprover.SMTProver;
 import edu.clemson.cs.rsrg.errorhandling.exception.CompilerException;
+import edu.clemson.cs.rsrg.errorhandling.exception.FlagDependencyException;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.init.file.ModuleType;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
+import edu.clemson.cs.rsrg.init.flag.Flag;
+import edu.clemson.cs.rsrg.init.flag.FlagDependencies;
 import edu.clemson.cs.rsrg.misc.Utilities;
-import edu.clemson.cs.r2jt.misc.Flag;
-import edu.clemson.cs.r2jt.misc.FlagDependencies;
-import edu.clemson.cs.r2jt.misc.FlagDependencyException;
 import edu.clemson.cs.r2jt.rewriteprover.AlgebraicProver;
 import edu.clemson.cs.r2jt.rewriteprover.Prover;
 import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
@@ -240,7 +240,7 @@ public class ResolveCompiler {
             }
             // If not, it must be a physical file. Use the compileRealFile method.
             else {
-                List<String> newFileList = new LinkedList<String>();
+                List<String> newFileList = new LinkedList<>();
                 newFileList.add(fileString);
 
                 compileRealFiles(newFileList, compileEnvironment);
@@ -367,23 +367,13 @@ public class ResolveCompiler {
                 compileEnvironment.setSymbolTable(symbolTable);
             }
         }
-        catch (FlagDependencyException fde) {
+        catch (FlagDependencyException | IOException e) {
             // YS - The error handler object might have changed.
             errorHandler = compileEnvironment.getErrorHandler();
-            errorHandler.error(null, fde.getMessage());
+            errorHandler.error(null, e.getMessage());
             if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)
                     && errorHandler instanceof StdErrHandler) {
-                fde.printStackTrace();
-            }
-            errorHandler.stopLogging();
-        }
-        catch (IOException ioe) {
-            // YS - The error handler object might have changed.
-            errorHandler = compileEnvironment.getErrorHandler();
-            errorHandler.error(null, ioe.getMessage());
-            if (compileEnvironment.flags.isFlagSet(FLAG_DEBUG_STACK_TRACE)
-                    && errorHandler instanceof StdErrHandler) {
-                ioe.printStackTrace();
+                e.printStackTrace();
             }
             errorHandler.stopLogging();
         }
