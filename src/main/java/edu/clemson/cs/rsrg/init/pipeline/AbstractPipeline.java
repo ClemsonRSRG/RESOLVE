@@ -13,8 +13,8 @@
 package edu.clemson.cs.rsrg.init.pipeline;
 
 import edu.clemson.cs.rsrg.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
+import edu.clemson.cs.rsrg.typeandpopulate.ModuleIdentifier;
 
 /**
  * TODO: Description for this class
