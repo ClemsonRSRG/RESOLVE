@@ -68,7 +68,7 @@ public class ModuleParameterDec extends Dec {
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for the {link ModuleParameterDec} class.</p>
+     * for the {@link ModuleParameterDec} class.</p>
      *
      * @return A deep copy of the object.
      */
@@ -79,7 +79,7 @@ public class ModuleParameterDec extends Dec {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {link UsesItem} class.</p>
+     * for the {link @ModuleParameterDec} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -110,7 +110,7 @@ public class ModuleParameterDec extends Dec {
     /**
      * <p>Returns the inner wrapped declaration.</p>
      *
-     * @return A {link Dec} object.
+     * @return A {@link Dec} object.
      */
     public Dec getWrappedDec() {
         return myWrappedDec;

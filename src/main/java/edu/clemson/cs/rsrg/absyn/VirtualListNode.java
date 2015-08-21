@@ -47,7 +47,7 @@ public class VirtualListNode extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This object is used by the {link Treewalker} class to create
+     * <p>This object is used by the {@link Treewalker} class to create
      * virtual list nodes for all the children objects inside the current
      * traversing object.</p>
      *
@@ -89,7 +89,7 @@ public class VirtualListNode extends ResolveConceptualElement {
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for the {link VirtualListNode} class.</p>
+     * for the {@link VirtualListNode} class.</p>
      *
      * @return A deep copy of the object.
      */
@@ -102,7 +102,7 @@ public class VirtualListNode extends ResolveConceptualElement {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {link VirtualListNode} class.</p>
+     * for the {@link VirtualListNode} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -135,7 +135,7 @@ public class VirtualListNode extends ResolveConceptualElement {
      * <p>Returns of the location where this object
      * originated from.</p>
      *
-     * @return A {link Location} representation object.
+     * @return A {@link Location} representation object.
      */
     @Override
     public Location getLocation() {
@@ -149,7 +149,7 @@ public class VirtualListNode extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the string representation of the {link ResolveConceptualElement}
+     * <p>Returns the string representation of the {@link ResolveConceptualElement}
      * that created this object.</p>
      *
      * @return Name as a string.
@@ -159,7 +159,7 @@ public class VirtualListNode extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the string representation of the {link ResolveConceptualElement}
+     * <p>Returns the string representation of the {@link ResolveConceptualElement}
      * that created this object.</p>
      *
      * @return Name as a string.

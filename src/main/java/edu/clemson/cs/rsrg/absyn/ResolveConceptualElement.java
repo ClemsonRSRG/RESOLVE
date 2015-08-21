@@ -55,7 +55,7 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
      * <p>A helper constructor that allow us to store the location
      * of the created object directly in the this class.</p>
      *
-     * @param l A {link Location} representation object.
+     * @param l A {@link Location} representation object.
      */
     protected ResolveConceptualElement(Location l) {
         myLoc = l;
@@ -190,7 +190,7 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
      * <p>Return the location where this object
      * originated from.</p>
      *
-     * @return A {link Location} representation object.
+     * @return A {@link Location} representation object.
      */
     public Location getLocation() {
         return myLoc;

@@ -74,7 +74,7 @@ public class UsesItem extends ResolveConceptualElement {
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for the {link UsesItem} class.</p>
+     * for the {@link UsesItem} class.</p>
      *
      * @return A deep copy of the object.
      */
@@ -85,7 +85,7 @@ public class UsesItem extends ResolveConceptualElement {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {link UsesItem} class.</p>
+     * for the {@link UsesItem} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -96,7 +96,7 @@ public class UsesItem extends ResolveConceptualElement {
         boolean result = false;
         if (o instanceof UsesItem) {
             UsesItem usesItem = (UsesItem) o;
-            result = myName.equals(usesItem);
+            result = myName.equals(usesItem.myName);
         }
 
         return result;
@@ -106,7 +106,7 @@ public class UsesItem extends ResolveConceptualElement {
      * <p>Returns the symbol representation
      * of this class.</p>
      *
-     * @return A {link PosSymbol} representation of the name.
+     * @return A {@link PosSymbol} representation of the name.
      */
     public PosSymbol getName() {
         return myName;

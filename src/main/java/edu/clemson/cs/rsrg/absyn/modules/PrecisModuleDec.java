@@ -39,11 +39,11 @@ public class PrecisModuleDec extends ModuleDec {
     /**
      * <p>This constructor creates a "Precis" module representation.</p>
      *
-     * @param l A {link Location} representation object.
-     * @param name The name in {link PosSymbol} format.
-     * @param parameterDecs The list of {link ModuleParameterDec} objects.
-     * @param usesItems The list of {link UsesItem} objects.
-     * @param decs The list of {link Dec} objects.
+     * @param l A {@link Location} representation object.
+     * @param name The name in {@link PosSymbol} format.
+     * @param parameterDecs The list of {@link ModuleParameterDec} objects.
+     * @param usesItems The list of {@link UsesItem} objects.
+     * @param decs The list of {@link Dec} objects.
      */
     public PrecisModuleDec(Location l, PosSymbol name,
             List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
@@ -107,7 +107,7 @@ public class PrecisModuleDec extends ModuleDec {
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for the {link PrecisModuleDec} class.</p>
+     * for the {@link PrecisModuleDec} class.</p>
      *
      * @return A deep copy of the object.
      */
@@ -126,7 +126,7 @@ public class PrecisModuleDec extends ModuleDec {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {link PrecisModuleDec} class.</p>
+     * for the {@link PrecisModuleDec} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -160,9 +160,9 @@ public class PrecisModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>Returns the symbol in string format.</p>
+     * <p>Returns the module in string format.</p>
      *
-     * @return Symbol as a string.
+     * @return Module as a string.
      */
     @Override
     public String toString() {

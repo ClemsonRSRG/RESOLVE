@@ -52,11 +52,11 @@ public abstract class ModuleDec extends Dec {
      * uses and general declarations of the created object directly
      * in the this class.</p>
      *
-     * @param l A {link Location} representation object.
-     * @param name The name in {link PosSymbol} format.
-     * @param parameterDecs The list of {link ModuleParameterDec} objects.
-     * @param usesItems The list of {link UsesItem} objects.
-     * @param decs The list of {link Dec} objects.
+     * @param l A {@link Location} representation object.
+     * @param name The name in {@link PosSymbol} format.
+     * @param parameterDecs The list of {@link ModuleParameterDec} objects.
+     * @param usesItems The list of {@link UsesItem} objects.
+     * @param decs The list of {@link Dec} objects.
      */
     protected ModuleDec(Location l, PosSymbol name, List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
             List<Dec> decs) {
@@ -93,7 +93,7 @@ public abstract class ModuleDec extends Dec {
      * <p>This method gets all the object parameter declarations associated
      * with this module.</p>
      *
-     * @return A list of {link ModuleParameterDec} objects.
+     * @return A list of {@link ModuleParameterDec} objects.
      */
     public List<ModuleParameterDec> getParameterDecs() {
         return myParameterDecs;
@@ -103,7 +103,7 @@ public abstract class ModuleDec extends Dec {
      * <p>This method gets all the import objects associated
      * with this module.</p>
      *
-     * @return A list of {link UsesItem} objects.
+     * @return A list of {@link UsesItem} objects.
      */
     public List<UsesItem> getUsesItems() {
         return myUsesItems;

@@ -43,8 +43,8 @@ public abstract class Dec extends ResolveConceptualElement {
      * <p>A helper constructor that allow us to store the location
      * of the created object directly in the this class.</p>
      *
-     * @param l A {link Location} representation object.
-     * @param name The name in {link PosSymbol} format.
+     * @param l A {@link Location} representation object.
+     * @param name The name in {@link PosSymbol} format.
      */
     protected Dec(Location l, PosSymbol name) {
         super(l);
@@ -68,7 +68,7 @@ public abstract class Dec extends ResolveConceptualElement {
      * <p>This method gets the mathematical type associated
      * with this object.</p>
      *
-     * @return The {link MTType} type object.
+     * @return The {@link MTType} type object.
      */
     public final MTType getMathType() {
         return myMathType;
@@ -78,7 +78,7 @@ public abstract class Dec extends ResolveConceptualElement {
      * <p>Returns the symbol representation
      * of this class.</p>
      *
-     * @return The name in {link PosSymbol} format.
+     * @return The name in {@link PosSymbol} format.
      */
     public PosSymbol getName() {
         return myName;
@@ -88,7 +88,7 @@ public abstract class Dec extends ResolveConceptualElement {
      * <p>This method sets the mathematical type associated
      * with this object.</p>
      *
-     * @param mt The {link MTType} type object.
+     * @param mt The {@link MTType} type object.
      */
     public final void setMathType(MTType mt) {
         if (mt == null) {
