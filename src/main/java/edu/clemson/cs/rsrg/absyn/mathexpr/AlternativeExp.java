@@ -349,5 +349,4 @@ public class AlternativeExp extends MathExp {
 
         return new AlternativeExp(myLoc, newAlternatives);
     }
-
 }

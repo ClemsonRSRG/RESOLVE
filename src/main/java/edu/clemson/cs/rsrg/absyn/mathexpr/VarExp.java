@@ -67,7 +67,7 @@ public class VarExp extends MathExp {
      * @param quantifier A {@link SymbolTableEntry.Quantification} quantifier object.
      */
     public VarExp(Location l, PosSymbol qualifier, PosSymbol name,
-                  SymbolTableEntry.Quantification quantifier) {
+            SymbolTableEntry.Quantification quantifier) {
         super(l);
         myQualifier = qualifier;
         myName = name;
@@ -97,11 +97,13 @@ public class VarExp extends MathExp {
         sb.append("VarExp\n");
 
         if (myQualifier != null) {
-            sb.append(myQualifier.asString(indentSize + innerIndentSize, innerIndentSize));
+            sb.append(myQualifier.asString(indentSize + innerIndentSize,
+                    innerIndentSize));
         }
 
         if (myName != null) {
-            sb.append(myName.asString(indentSize + innerIndentSize, innerIndentSize));
+            sb.append(myName.asString(indentSize + innerIndentSize,
+                    innerIndentSize));
         }
 
         return sb.toString();
@@ -317,7 +319,8 @@ public class VarExp extends MathExp {
         }
         PosSymbol newName = myName.clone();
 
-        return new VarExp(new Location(myLoc), newQualifier, newName, myQuantification);
+        return new VarExp(new Location(myLoc), newQualifier, newName,
+                myQuantification);
     }
 
     /**
@@ -342,7 +345,8 @@ public class VarExp extends MathExp {
         }
         PosSymbol newName = myName.clone();
 
-        return new VarExp(new Location(myLoc), newQualifier, newName, myQuantification);
+        return new VarExp(new Location(myLoc), newQualifier, newName,
+                myQuantification);
     }
 
 }

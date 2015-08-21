@@ -83,15 +83,18 @@ public class InfixExp extends AbstractFunctionExp {
         sb.append("InfixExp\n");
 
         if (myLeftHandSide != null) {
-            sb.append(myLeftHandSide.asString(indentSize + innerIndentSize, innerIndentSize));
+            sb.append(myLeftHandSide.asString(indentSize + innerIndentSize,
+                    innerIndentSize));
         }
 
         if (myOperationName != null) {
-            sb.append(myOperationName.asString(indentSize + innerIndentSize, innerIndentSize));
+            sb.append(myOperationName.asString(indentSize + innerIndentSize,
+                    innerIndentSize));
         }
 
         if (myRightHandSide != null) {
-            sb.append(myRightHandSide.asString(indentSize + innerIndentSize, innerIndentSize));
+            sb.append(myRightHandSide.asString(indentSize + innerIndentSize,
+                    innerIndentSize));
         }
 
         return sb.toString();
@@ -157,7 +160,9 @@ public class InfixExp extends AbstractFunctionExp {
                     result = myLeftHandSide.equals(eAsInfixExp.myLeftHandSide);
 
                     if (result) {
-                        result = myRightHandSide.equals(eAsInfixExp.myRightHandSide);
+                        result =
+                                myRightHandSide
+                                        .equals(eAsInfixExp.myRightHandSide);
                     }
                 }
             }
@@ -184,9 +189,12 @@ public class InfixExp extends AbstractFunctionExp {
         if (retval) {
             InfixExp eAsInfix = (InfixExp) e;
             retval =
-                    posSymbolEquivalent(myOperationName, eAsInfix.myOperationName)
-                            && myLeftHandSide.equivalent(eAsInfix.myLeftHandSide)
-                            && myRightHandSide.equivalent(eAsInfix.myRightHandSide);
+                    posSymbolEquivalent(myOperationName,
+                            eAsInfix.myOperationName)
+                            && myLeftHandSide
+                                    .equivalent(eAsInfix.myLeftHandSide)
+                            && myRightHandSide
+                                    .equivalent(eAsInfix.myRightHandSide);
         }
 
         return retval;
@@ -250,7 +258,8 @@ public class InfixExp extends AbstractFunctionExp {
 
         Exp newRight = myRightHandSide;
         if (myRightHandSide instanceof OldExp) {
-            newRight = ((MathExp) ((OldExp) myRightHandSide).getExp()).remember();
+            newRight =
+                    ((MathExp) ((OldExp) myRightHandSide).getExp()).remember();
         }
 
         if (newLeft != null) {
@@ -261,7 +270,8 @@ public class InfixExp extends AbstractFunctionExp {
             newRight = ((MathExp) newRight).remember();
         }
 
-        return new InfixExp(new Location(myLoc), newLeft, myOperationName.clone(), newRight);
+        return new InfixExp(new Location(myLoc), newLeft, myOperationName
+                .clone(), newRight);
     }
 
     /**
@@ -312,20 +322,24 @@ public class InfixExp extends AbstractFunctionExp {
         }
 
         // Simplify A -> true to true
-        if (operatorName.equals("implies") && rightHandSide instanceof VarExp && ((VarExp) rightHandSide).isLiteralTrue()) {
+        if (operatorName.equals("implies") && rightHandSide instanceof VarExp
+                && ((VarExp) rightHandSide).isLiteralTrue()) {
             retVal = myMathType.getTypeGraph().getTrueVarExp();
         }
 
         // Our right hand side is an InfixExp
         if (operatorName.equals("implies") && rightHandSide instanceof InfixExp) {
-            PosSymbol innerOperaratorName = ((InfixExp) rightHandSide).getOpName();
+            PosSymbol innerOperaratorName =
+                    ((InfixExp) rightHandSide).getOpName();
             Exp innerLeftSide = ((InfixExp) rightHandSide).getLeft();
             Exp innerRightSide = ((InfixExp) rightHandSide).getRight();
 
             // Implies
             if (innerOperaratorName.equals("implies")) {
                 // Simplify A -> B -> C to (A ^ B) -> C
-                leftHandSide = myMathType.getTypeGraph().formConjunct(leftHandSide, innerLeftSide);
+                leftHandSide =
+                        myMathType.getTypeGraph().formConjunct(leftHandSide,
+                                innerLeftSide);
                 rightHandSide = innerRightSide;
             }
             // And
@@ -347,36 +361,49 @@ public class InfixExp extends AbstractFunctionExp {
         if (operatorName.equals("implies") && leftHandSide instanceof InfixExp) {
             // Contains only "and"-ed expressions
             if (((InfixExp) leftHandSide).onlyAndExps()) {
-                Iterator<Exp> iter = ((InfixExp) leftHandSide).getExpressions().iterator();
+                Iterator<Exp> iter =
+                        ((InfixExp) leftHandSide).getExpressions().iterator();
                 while (iter.hasNext()) {
-                    rightHandSide = rightHandSide.compareWithAssumptions(iter.next());
+                    rightHandSide =
+                            rightHandSide.compareWithAssumptions(iter.next());
                 }
             }
         }
-        else if (operatorName.equals("implies") && leftHandSide instanceof InfixExp && rightHandSide instanceof InfixExp) {
+        else if (operatorName.equals("implies")
+                && leftHandSide instanceof InfixExp
+                && rightHandSide instanceof InfixExp) {
             // Contains only "and"-ed expressions
-            if (((InfixExp) leftHandSide).onlyAndExps() && ((InfixExp) rightHandSide).onlyAndExps()) {
-                Iterator<Exp> iter = ((InfixExp) leftHandSide).getExpressions().iterator();
+            if (((InfixExp) leftHandSide).onlyAndExps()
+                    && ((InfixExp) rightHandSide).onlyAndExps()) {
+                Iterator<Exp> iter =
+                        ((InfixExp) leftHandSide).getExpressions().iterator();
                 while (iter.hasNext()) {
-                    rightHandSide = rightHandSide.compareWithAssumptions(iter.next());
+                    rightHandSide =
+                            rightHandSide.compareWithAssumptions(iter.next());
                 }
             }
         }
 
         //Simplify (A ^ true) to A or (true ^ A) to A
         if (operatorName.equals("and")) {
-            if (leftHandSide instanceof VarExp && ((VarExp) leftHandSide).isLiteralTrue()) {
+            if (leftHandSide instanceof VarExp
+                    && ((VarExp) leftHandSide).isLiteralTrue()) {
                 retVal = rightHandSide.clone();
             }
-            else if (rightHandSide instanceof VarExp && ((VarExp) rightHandSide).isLiteralTrue()) {
+            else if (rightHandSide instanceof VarExp
+                    && ((VarExp) rightHandSide).isLiteralTrue()) {
                 retVal = leftHandSide.clone();
             }
             else {
-                retVal = new InfixExp(new Location(myLoc), leftHandSide, operatorName, rightHandSide);
+                retVal =
+                        new InfixExp(new Location(myLoc), leftHandSide,
+                                operatorName, rightHandSide);
             }
         }
         else {
-            retVal = new InfixExp(new Location(myLoc), leftHandSide, operatorName, rightHandSide);
+            retVal =
+                    new InfixExp(new Location(myLoc), leftHandSide,
+                            operatorName, rightHandSide);
 
             if (retVal.equivalent(this)) {
                 retVal = ((MathExp) retVal).simplify();
@@ -482,7 +509,9 @@ public class InfixExp extends AbstractFunctionExp {
             Exp newLeftSide = myLeftHandSide.compareWithAssumptions(exp);
             Exp newRightSide = myRightHandSide.compareWithAssumptions(exp);
 
-            retExp = new InfixExp(new Location(myLoc), newLeftSide, myOperationName.clone(), newRightSide);
+            retExp =
+                    new InfixExp(new Location(myLoc), newLeftSide,
+                            myOperationName.clone(), newRightSide);
         }
         else {
             retExp = this.clone();
@@ -499,7 +528,8 @@ public class InfixExp extends AbstractFunctionExp {
      */
     @Override
     protected Exp copy() {
-        return new InfixExp(new Location(myLoc), myLeftHandSide.clone(), myOperationName.clone(), myRightHandSide.clone());
+        return new InfixExp(new Location(myLoc), myLeftHandSide.clone(),
+                myOperationName.clone(), myRightHandSide.clone());
     }
 
     /**
@@ -518,8 +548,9 @@ public class InfixExp extends AbstractFunctionExp {
      */
     @Override
     protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new InfixExp(new Location(myLoc), substitute(myLeftHandSide, substitutions), myOperationName.clone(),
-                substitute(myRightHandSide, substitutions));
+        return new InfixExp(new Location(myLoc), substitute(myLeftHandSide,
+                substitutions), myOperationName.clone(), substitute(
+                myRightHandSide, substitutions));
     }
 
     // ===========================================================
@@ -623,7 +654,8 @@ public class InfixExp extends AbstractFunctionExp {
         Exp leftSimplify = ((MathExp) myLeftHandSide).simplify();
         Exp rightSimplify = ((MathExp) myRightHandSide).simplify();
 
-        return new InfixExp(new Location(myLoc), leftSimplify, myOperationName.clone(), rightSimplify);
+        return new InfixExp(new Location(myLoc), leftSimplify, myOperationName
+                .clone(), rightSimplify);
     }
 
 }

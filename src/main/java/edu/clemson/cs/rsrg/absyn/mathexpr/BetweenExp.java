@@ -159,12 +159,16 @@ public class BetweenExp extends MathExp {
                 Iterator<Exp> eJoiningExps =
                         eAsBetweenExp.myJoiningExps.iterator();
 
-                while (result && thisJoiningExps.hasNext() && eJoiningExps.hasNext()) {
-                    result &= thisJoiningExps.next().equals(eJoiningExps.next());
+                while (result && thisJoiningExps.hasNext()
+                        && eJoiningExps.hasNext()) {
+                    result &=
+                            thisJoiningExps.next().equals(eJoiningExps.next());
                 }
 
                 //Both had better have run out at the same time
-                result &= (!thisJoiningExps.hasNext()) && (!eJoiningExps.hasNext());
+                result &=
+                        (!thisJoiningExps.hasNext())
+                                && (!eJoiningExps.hasNext());
             }
         }
 
@@ -348,5 +352,4 @@ public class BetweenExp extends MathExp {
 
         return new BetweenExp(new Location(myLoc), newJoiningExps);
     }
-
 }
