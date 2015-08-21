@@ -300,7 +300,7 @@ public class InfixExp extends AbstractFunctionExp {
     @Override
     public MathExp simplify() {
         Exp retVal;
-        InfixExp simplified = simplifyComponents();
+        InfixExp simplified = applySimplification();
         PosSymbol operatorName = simplified.getOpName();
 
         // Further simplification of the left hand side
@@ -620,37 +620,56 @@ public class InfixExp extends AbstractFunctionExp {
         return lst;
     }
 
+    /**
+     * <p>This helper method checks to see if the current
+     * {@link InfixExp} only contains conjuncted expressions.</p>
+     *
+     * @return True if it is a conjuncted expression, false otherwise.
+     */
+    // TODO: Understand this and put more inline comments!
     private boolean onlyAndExps() {
+        boolean result = false;
         if ((myLeftHandSide instanceof InfixExp)) {
             if (((InfixExp) myLeftHandSide).onlyAndExps())
                 if (myRightHandSide instanceof InfixExp) {
                     if (((InfixExp) myRightHandSide).onlyAndExps()) {
-                        if (!myOperationName.equals("implies"))
-                            return true;
+                        if (!myOperationName.equals("implies")) {
+                            result = true;
+                        }
                     }
                 }
                 else {
-                    if (!myOperationName.equals("implies"))
-                        return true;
+                    if (!myOperationName.equals("implies")) {
+                        result = true;
+                    }
                 }
         }
         else {
             if (myRightHandSide instanceof InfixExp) {
                 if (((InfixExp) myRightHandSide).onlyAndExps()) {
-                    if (!myOperationName.equals("implies"))
-                        return true;
+                    if (!myOperationName.equals("implies")) {
+                        result = true;
+                    }
                 }
             }
             else {
-                if (!myOperationName.equals("implies"))
-                    return true;
+                if (!myOperationName.equals("implies")) {
+                    result = true;
+                }
             }
 
         }
-        return false;
+        return result;
     }
 
-    private InfixExp simplifyComponents() {
+    /**
+     * <p>This helper method first attempts to simplify the left and right hand
+     * side of this expression. The result is then stored in a
+     * new {@link InfixExp} and returned.</p>
+     *
+     * @return A {@link InfixExp} representation object.
+     */
+    private InfixExp applySimplification() {
         Exp leftSimplify = ((MathExp) myLeftHandSide).simplify();
         Exp rightSimplify = ((MathExp) myRightHandSide).simplify();
 
