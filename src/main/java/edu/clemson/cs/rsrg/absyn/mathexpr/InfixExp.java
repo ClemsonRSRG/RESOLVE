@@ -212,10 +212,21 @@ public class InfixExp extends AbstractFunctionExp {
     /**
      * <p>This method returns a deep copy of the operator name.</p>
      *
-     * @return The {@link PosSymbol} representation object.
+     * @return A {link PosSymbol} object containing the operator.
      */
-    public PosSymbol getOpName() {
+    @Override
+    public PosSymbol getOperatorAsPosSymbol() {
         return myOperationName.clone();
+    }
+
+    /**
+     * <p>This method returns a deep copy of the operator name.</p>
+     *
+     * @return The operator as a string.
+     */
+    @Override
+    public String getOperatorAsString() {
+        return myOperationName.toString();
     }
 
     /**

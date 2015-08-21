@@ -135,18 +135,18 @@ public abstract class AbstractFunctionExp extends MathExp {
     }*/
 
     /**
-     * <p>Returns the mathematical operator as a string.</p>
-     *
-     * @return The operator as a string.
-     */
-    public abstract String getOperatorAsString();
-
-    /**
      * <p>Returns the mathematical operator as a symbol.</p>
      *
      * @return A {link PosSymbol} object containing the operator.
      */
     public abstract PosSymbol getOperatorAsPosSymbol();
+
+    /**
+     * <p>Returns the mathematical operator as a string.</p>
+     *
+     * @return The operator as a string.
+     */
+    public abstract String getOperatorAsString();
 
     /**
      * <p>Returns the module qualifier for this expression.</p>
