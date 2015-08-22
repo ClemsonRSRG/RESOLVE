@@ -1,5 +1,5 @@
 /**
- * CharExp.java
+ * DoubleExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -19,19 +19,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical character expression
+ * <p>This is the class for all the mathematical double expression
  * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class CharExp extends MathExp {
+public class DoubleExp extends MathExp {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The character representing this mathematical character</p> */
-    private final Character myCharacter;
+    /** <p>The double representing this mathematical double</p> */
+    private final double myDouble;
 
     // ===========================================================
     // Constructors
@@ -41,11 +41,11 @@ public class CharExp extends MathExp {
      * <p>This constructs a character expression.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param c A {@link Character} expression.
+     * @param d A {@link double} value.
      */
-    public CharExp(Location l, Character c) {
+    public DoubleExp(Location l, double d) {
         super(l);
-        myCharacter = c;
+        myDouble = d;
     }
 
     // ===========================================================
@@ -67,12 +67,10 @@ public class CharExp extends MathExp {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("CharExp\n");
+        sb.append("DoubleExp\n");
 
-        if (myCharacter != null) {
-            printSpace(indentSize + innerIndentSize, sb);
-            sb.append(myCharacter.toString() + "\n");
-        }
+        printSpace(indentSize + innerIndentSize, sb);
+        sb.append(myDouble + "\n");
 
         return sb.toString();
     }
@@ -93,7 +91,8 @@ public class CharExp extends MathExp {
 
     /**
      * <p>This method attempts to find an expression with the given name in our
-     * subexpressions.</p>
+     * subexpressions. The result of this calling this method should
+     * always be false, because we can not contain an expression.</p>
      *
      * @param varName Expression name.
      * @param IsOldExp Flag to indicate if the given name is of the form
@@ -103,12 +102,12 @@ public class CharExp extends MathExp {
      */
     @Override
     public boolean containsVar(String varName, boolean IsOldExp) {
-        return stringEquivalent(varName, myCharacter.toString());
+        return false;
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link CharExp} class.</p>
+     * for the {@link DoubleExp} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -117,12 +116,12 @@ public class CharExp extends MathExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof CharExp) {
-            CharExp eAsCharExp = (CharExp) o;
-            result = myLoc.equals(eAsCharExp.myLoc);
+        if (o instanceof DoubleExp) {
+            DoubleExp eAsDoubleExp = (DoubleExp) o;
+            result = myLoc.equals(eAsDoubleExp.myLoc);
 
             if (result) {
-                result = myCharacter.equals(eAsCharExp.myCharacter);
+                result = (myDouble == eAsDoubleExp.myDouble);
             }
         }
 
@@ -143,22 +142,22 @@ public class CharExp extends MathExp {
      */
     @Override
     public boolean equivalent(Exp e) {
-        boolean retval = (e instanceof CharExp);
+        boolean retval = (e instanceof DoubleExp);
         if (retval) {
-            CharExp eAsCharExp = (CharExp) e;
-            retval = myCharacter.equals(eAsCharExp.myCharacter);
+            DoubleExp eAsDoubleExp = (DoubleExp) e;
+            retval = (myDouble == eAsDoubleExp.myDouble);
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns a deep copy of the character value.</p>
+     * <p>This method returns the double value.</p>
      *
-     * @return The {@link Character} value.
+     * @return The {@link double} value.
      */
-    public Character getValue() {
-        return new Character(myCharacter.charValue());
+    public double getValue() {
+        return myDouble;
     }
 
     /**
@@ -178,11 +177,11 @@ public class CharExp extends MathExp {
      * For all inherited programming expression classes, this method
      * should throw an exception.</p>
      *
-     * @return The resulting {@link CharExp} from applying the remember rule.
+     * @return The resulting {@link DoubleExp} from applying the remember rule.
      */
     @Override
-    public CharExp remember() {
-        return (CharExp) this.clone();
+    public DoubleExp remember() {
+        return (DoubleExp) this.clone();
     }
 
     /**
@@ -192,7 +191,7 @@ public class CharExp extends MathExp {
      * @param e The new {@link Exp} to be added.
      */
     // TODO: See the message in Exp.
-    //public void setSubExpression(int index, Exp e) {}
+    // public void setSubExpression(int index, Exp e) {}
 
     /**
      * <p>This method applies the VC Generator's simplification step.</p>
@@ -212,9 +211,7 @@ public class CharExp extends MathExp {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        if (myCharacter != null) {
-            sb.append(myCharacter.toString());
-        }
+        sb.append(myDouble);
 
         return sb.toString();
     }
@@ -231,7 +228,7 @@ public class CharExp extends MathExp {
      */
     @Override
     protected Exp copy() {
-        return new CharExp(new Location(myLoc), myCharacter.charValue());
+        return new DoubleExp(new Location(myLoc), myDouble);
     }
 
     /**
@@ -249,8 +246,8 @@ public class CharExp extends MathExp {
      *         the provided substitutions made.
      */
     @Override
-    protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new CharExp(new Location(myLoc), myCharacter.charValue());
+    public Exp substituteChildren(Map<Exp, Exp> substitutions) {
+        return new DoubleExp(new Location(myLoc), myDouble);
     }
 
 }

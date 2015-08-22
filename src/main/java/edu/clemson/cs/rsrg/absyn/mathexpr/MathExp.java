@@ -1,5 +1,5 @@
 /**
- * Exp.java
+ * MathExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
