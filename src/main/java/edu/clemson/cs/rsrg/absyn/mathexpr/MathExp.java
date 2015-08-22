@@ -12,8 +12,11 @@
  */
 package edu.clemson.cs.rsrg.absyn.mathexpr;
 
+import edu.clemson.cs.r2jt.init.CompilerException;
+import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.errorhandling.exception.NullMathTypeException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
@@ -54,6 +57,34 @@ public abstract class MathExp extends Exp {
     @Override
     public MathExp clone() {
         return (MathExp) super.clone();
+    }
+
+    /**
+     * <p>This static method makes sure that our types are set,
+     * before attempting to form a conjunct.</p>
+     *
+     * @param e1 The first {@link Exp} representation object.
+     * @param e2 The second {@link Exp} representation object.
+     *
+     * @return The resulting {@link Exp}.
+     */
+    public static final MathExp formConjunct(Exp e1, Exp e2) {
+        if (e1.getMathType() == null) {
+            throw new NullMathTypeException("The math type for "
+                    + e1.toString() + " is null.");
+        }
+        else if (e2.getMathType() == null) {
+            throw new NullMathTypeException("The math type for "
+                    + e2.toString() + " is null.");
+        }
+
+        TypeGraph typeGraph = e1.getMathType().getTypeGraph();
+        if (typeGraph == null) {
+            throw new MiscErrorException("The type graph is null.",
+                    new NullPointerException());
+        }
+
+        return (MathExp) typeGraph.formConjunct(e1, e2);
     }
 
     /**

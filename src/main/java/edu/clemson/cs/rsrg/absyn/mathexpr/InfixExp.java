@@ -312,7 +312,7 @@ public class InfixExp extends AbstractFunctionExp {
     public MathExp simplify() {
         Exp retVal;
         InfixExp simplified = applySimplification();
-        PosSymbol operatorName = simplified.getOpName();
+        PosSymbol operatorName = simplified.getOperatorAsPosSymbol();
 
         // Further simplification of the left hand side
         Exp leftHandSide = simplified.getLeft();
@@ -341,7 +341,7 @@ public class InfixExp extends AbstractFunctionExp {
         // Our right hand side is an InfixExp
         if (operatorName.equals("implies") && rightHandSide instanceof InfixExp) {
             PosSymbol innerOperaratorName =
-                    ((InfixExp) rightHandSide).getOpName();
+                    ((InfixExp) rightHandSide).getOperatorAsPosSymbol();
             Exp innerLeftSide = ((InfixExp) rightHandSide).getLeft();
             Exp innerRightSide = ((InfixExp) rightHandSide).getRight();
 
@@ -349,8 +349,7 @@ public class InfixExp extends AbstractFunctionExp {
             if (innerOperaratorName.equals("implies")) {
                 // Simplify A -> B -> C to (A ^ B) -> C
                 leftHandSide =
-                        myMathType.getTypeGraph().formConjunct(leftHandSide,
-                                innerLeftSide);
+                        MathExp.formConjunct(leftHandSide, innerLeftSide);
                 rightHandSide = innerRightSide;
             }
             // And
@@ -454,7 +453,7 @@ public class InfixExp extends AbstractFunctionExp {
             }
 
             if (assumpts != null) {
-                tmpLeft = myMathType.getTypeGraph().formConjunct(assumpts, tmpLeft);
+                tmpLeft = MathExp.formConjunct(assumpts, tmpLeft);
             }
 
             if (myRightHandSide instanceof InfixExp) {
