@@ -153,15 +153,6 @@ public class CharExp extends MathExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the character value.</p>
-     *
-     * @return The {@link Character} value.
-     */
-    public Character getValue() {
-        return new Character(myCharacter.charValue());
-    }
-
-    /**
      * <p>This method method returns a deep copy of the list of
      * subexpressions. The result of this calling this method should
      * always be an empty list, because we can not contain an expression.</p>
@@ -171,6 +162,15 @@ public class CharExp extends MathExp {
     @Override
     public List<Exp> getSubExpressions() {
         return new ArrayList<>();
+    }
+
+    /**
+     * <p>This method returns a deep copy of the character value.</p>
+     *
+     * @return The {@link Character} value.
+     */
+    public Character getValue() {
+        return new Character(myCharacter.charValue());
     }
 
     /**

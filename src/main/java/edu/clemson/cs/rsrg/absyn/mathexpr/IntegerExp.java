@@ -1,5 +1,5 @@
 /**
- * VarExp.java
+ * IntegerExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.rsrg.absyn.mathexpr;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -21,57 +20,38 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical variable expression
+ * <p>This is the class for all the mathematical integer expression
  * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class VarExp extends MathExp {
+public class IntegerExp extends MathExp {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's qualifier</p> */
-    private final PosSymbol myQualifier;
+    /** <p>The qualifier for this mathematical integer</p> */
+    private PosSymbol myQualifier;
 
-    /** <p>The expression's name</p> */
-    private final PosSymbol myName;
-
-    /** <p>The object's quantification (if any).</p> */
-    private final SymbolTableEntry.Quantification myQuantification;
+    /** <p>The integer representing this mathematical integer</p> */
+    private final Integer myInteger;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a variable expression with "None"
-     * as the default quantification.</p>
+     * <p>This constructs a integer expression.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param qualifier A {@link PosSymbol} qualifier object.
-     * @param name A {@link PosSymbol} name object.
+     * @param qualifier A {@link PosSymbol} representation object.
+     * @param i A {@link Integer} expression.
      */
-    public VarExp(Location l, PosSymbol qualifier, PosSymbol name) {
-        this(l, qualifier, name, SymbolTableEntry.Quantification.NONE);
-    }
-
-    /**
-     * <p>This constructs a variable expression with the
-     * passed in quantification.</p>
-     *
-     * @param l A {@link Location} representation object.
-     * @param qualifier A {@link PosSymbol} qualifier object.
-     * @param name A {@link PosSymbol} name object.
-     * @param quantifier A {@link SymbolTableEntry.Quantification} quantifier object.
-     */
-    public VarExp(Location l, PosSymbol qualifier, PosSymbol name,
-            SymbolTableEntry.Quantification quantifier) {
+    public IntegerExp(Location l, PosSymbol qualifier, int i) {
         super(l);
         myQualifier = qualifier;
-        myName = name;
-        myQuantification = quantifier;
+        myInteger = i;
     }
 
     // ===========================================================
@@ -90,21 +70,19 @@ public class VarExp extends MathExp {
      * @return A formatted text string of the class.
      */
     @Override
-    /** Returns a formatted text string of this class. */
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("VarExp\n");
+        sb.append("IntegerExp\n");
 
         if (myQualifier != null) {
             sb.append(myQualifier.asString(indentSize + innerIndentSize,
                     innerIndentSize));
+            sb.append("::");
         }
 
-        if (myName != null) {
-            sb.append(myName.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-        }
+        printSpace(indentSize + innerIndentSize, sb);
+        sb.append(myInteger + "\n");
 
         return sb.toString();
     }
@@ -124,7 +102,7 @@ public class VarExp extends MathExp {
     }
 
     /**
-     *  <p>This method attempts to find an expression with the given name in our
+     * <p>This method attempts to find an expression with the given name in our
      * subexpressions. The result of this calling this method should
      * always be false, because we can not contain an expression.</p>
      *
@@ -136,19 +114,12 @@ public class VarExp extends MathExp {
      */
     @Override
     public boolean containsVar(String varName, boolean IsOldExp) {
-        boolean retval = false;
-        if (myName != null) {
-            if (!IsOldExp && myName.equals(varName)) {
-                retval = true;
-            }
-        }
-
-        return retval;
+        return false;
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link VarExp} class.</p>
+     * for the {@link IntegerExp} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -157,14 +128,12 @@ public class VarExp extends MathExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof VarExp) {
-            VarExp eAsVarExp = (VarExp) o;
-            result = myLoc.equals(eAsVarExp.myLoc);
+        if (o instanceof IntegerExp) {
+            IntegerExp eAsIntegerExp = (IntegerExp) o;
+            result = myLoc.equals(eAsIntegerExp.myLoc);
 
             if (result) {
-                result =
-                        (posSymbolEquivalent(myQualifier, eAsVarExp.myQualifier) && (posSymbolEquivalent(
-                                myName, eAsVarExp.myName)));
+                result = myInteger.equals(eAsIntegerExp.myInteger);
             }
         }
 
@@ -185,24 +154,13 @@ public class VarExp extends MathExp {
      */
     @Override
     public boolean equivalent(Exp e) {
-        boolean retval = false;
-        if (e instanceof VarExp) {
-            VarExp eAsVarExp = (VarExp) e;
-            retval =
-                    (posSymbolEquivalent(myQualifier, eAsVarExp.myQualifier) && (posSymbolEquivalent(
-                            myName, eAsVarExp.myName)));
+        boolean retval = e instanceof IntegerExp;
+        if (retval) {
+            IntegerExp eAsIntegerExp = (IntegerExp) e;
+            retval = myInteger.equals(eAsIntegerExp.myInteger);
         }
 
         return retval;
-    }
-
-    /**
-     * <p>This method returns a deep copy of the name.</p>
-     *
-     * @return The {@link PosSymbol} representation object.
-     */
-    public PosSymbol getName() {
-        return myName.clone();
     }
 
     /**
@@ -212,15 +170,6 @@ public class VarExp extends MathExp {
      */
     public PosSymbol getQualifier() {
         return myQualifier.clone();
-    }
-
-    /**
-     * <p>This method returns this variable expression's quantification.</p>
-     *
-     * @return The {@link SymbolTableEntry.Quantification} object.
-     */
-    public SymbolTableEntry.Quantification getQuantification() {
-        return myQuantification;
     }
 
     /**
@@ -236,15 +185,24 @@ public class VarExp extends MathExp {
     }
 
     /**
+     * <p>This method returns a deep copy of the character value.</p>
+     *
+     * @return The {@link Integer} value.
+     */
+    public int getValue() {
+        return new Integer(myInteger);
+    }
+
+    /**
      * <p>This method applies VC Generator's remember rule.
      * For all inherited programming expression classes, this method
      * should throw an exception.</p>
      *
-     * @return The resulting {@link VarExp} from applying the remember rule.
+     * @return The resulting {@link IntegerExp} from applying the remember rule.
      */
     @Override
-    public VarExp remember() {
-        return (VarExp) this.clone();
+    public IntegerExp remember() {
+        return (IntegerExp) this.clone();
     }
 
     /**
@@ -274,29 +232,10 @@ public class VarExp extends MathExp {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append(myQuantification);
-
         if (myQualifier != null) {
-            sb.append(myQualifier);
-            sb.append("::");
+            sb.append(myQualifier + "::");
         }
-
-        if (myName != null) {
-            String strName = myName.toString();
-            int index = 0;
-            int num = 0;
-            while ((strName.charAt(index)) == '?') {
-                num++;
-                index++;
-            }
-            if (strName.substring(num).startsWith("Conc_")) {
-                strName = strName.replace("Conc_", "Conc.");
-            }
-            sb.append(strName.substring(index, strName.length()));
-            for (int i = 0; i < num; i++) {
-                sb.append("'");
-            }
-        }
+        sb.append(myInteger);
 
         return sb.toString();
     }
@@ -312,15 +251,9 @@ public class VarExp extends MathExp {
      * @return A new {@link Exp} that is a deep copy of the original.
      */
     @Override
-    protected Exp copy() {
-        PosSymbol newQualifier = null;
-        if (myQualifier != null) {
-            newQualifier = myQualifier.clone();
-        }
-        PosSymbol newName = myName.clone();
-
-        return new VarExp(new Location(myLoc), newQualifier, newName,
-                myQuantification);
+    public Exp copy() {
+        return new IntegerExp(new Location(myLoc), myQualifier.clone(),
+                myInteger);
     }
 
     /**
@@ -339,14 +272,8 @@ public class VarExp extends MathExp {
      */
     @Override
     protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        PosSymbol newQualifier = null;
-        if (myQualifier != null) {
-            newQualifier = myQualifier.clone();
-        }
-        PosSymbol newName = myName.clone();
-
-        return new VarExp(new Location(myLoc), newQualifier, newName,
-                myQuantification);
+        return new IntegerExp(new Location(myLoc), myQualifier.clone(),
+                myInteger);
     }
 
 }
