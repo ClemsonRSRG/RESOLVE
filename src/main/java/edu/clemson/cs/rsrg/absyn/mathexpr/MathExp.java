@@ -59,25 +59,37 @@ public abstract class MathExp extends Exp {
     /**
      * <p>This method returns the default behavior for an
      * arbitrary {@link Exp} when checking to see if we are
-     * simply the literal "true". The only class that needs
-     * to override this method is {@link VarExp}.</p>
+     * simply the literal "true".</p>
      *
-     * @return Always false, because we are not the right class.
+     * @return True if <code>exp</code> contains "true",
+     * false otherwise.
      */
-    public boolean isLiteralTrue() {
-        return false;
+    public static final boolean isLiteralTrue(Exp exp) {
+        boolean retval = (exp instanceof VarExp);
+        if (retval) {
+            VarExp eAsVarExp = (VarExp) exp;
+            retval = stringEquivalent(eAsVarExp.getName().getName(), "true");
+        }
+
+        return retval;
     }
 
     /**
      * <p>This method returns the default behavior for an
      * arbitrary {@link Exp} when checking to see if we are
-     * simply the literal "false". The only class that needs
-     * to override this method is {@link VarExp}.</p>
+     * simply the literal "false".</p>
      *
-     * @return Always false, because we are not the right class.
+     * @return True if <code>exp</code> contains "false",
+     * false otherwise.
      */
-    public boolean isLiteralFalse() {
-        return false;
+    public static final boolean isLiteralFalse(Exp exp) {
+        boolean retval = (exp instanceof VarExp);
+        if (retval) {
+            VarExp eAsVarExp = (VarExp) exp;
+            retval = stringEquivalent(eAsVarExp.getName().getName(), "false");
+        }
+
+        return retval;
     }
 
     /**

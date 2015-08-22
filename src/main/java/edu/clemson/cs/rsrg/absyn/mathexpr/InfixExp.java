@@ -397,12 +397,10 @@ public class InfixExp extends AbstractFunctionExp {
 
         //Simplify (A ^ true) to A or (true ^ A) to A
         if (operatorName.equals("and")) {
-            if (leftHandSide instanceof VarExp
-                    && ((VarExp) leftHandSide).isLiteralTrue()) {
+            if (MathExp.isLiteralTrue(leftHandSide)) {
                 retVal = rightHandSide.clone();
             }
-            else if (rightHandSide instanceof VarExp
-                    && ((VarExp) rightHandSide).isLiteralTrue()) {
+            else if (MathExp.isLiteralTrue(rightHandSide)) {
                 retVal = leftHandSide.clone();
             }
             else {
