@@ -199,7 +199,7 @@ public abstract class Exp extends ResolveConceptualElement {
      *
      * @param mathType The {@link MTType} type object.
      */
-    public void setMathType(MTType mathType) {
+    public final void setMathType(MTType mathType) {
         if (mathType == null) {
             System.err.println(this.toString());
             throw new RuntimeException("Null Math Type on: " + this.getClass());
@@ -215,7 +215,7 @@ public abstract class Exp extends ResolveConceptualElement {
      *
      * @param mathTypeValue The {@link MTType} type object.
      */
-    public void setMathTypeValue(MTType mathTypeValue) {
+    public final void setMathTypeValue(MTType mathTypeValue) {
         myMathTypeValue = mathTypeValue;
     }
 

@@ -54,7 +54,7 @@ public abstract class MathExp extends Exp {
      * @return A deep copy of the object.
      */
     @Override
-    public MathExp clone() {
+    public final MathExp clone() {
         return (MathExp) super.clone();
     }
 
