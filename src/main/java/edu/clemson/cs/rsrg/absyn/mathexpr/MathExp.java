@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.rsrg.absyn.mathexpr;
 
-import edu.clemson.cs.r2jt.init.CompilerException;
 import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;

@@ -16,10 +16,7 @@ import edu.clemson.cs.rsrg.absyn.declarations.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.misc.UsesItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**

@@ -15,7 +15,6 @@ package edu.clemson.cs.rsrg.absyn.mathexpr;
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
