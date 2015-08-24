@@ -18,7 +18,6 @@ import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.errorhandling.exception.NullMathTypeException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-
 import java.util.*;
 
 /**
@@ -67,7 +66,7 @@ public abstract class MathExp extends Exp {
      *
      * @return The resulting {@link Exp}.
      */
-    public static final MathExp formConjunct(Exp e1, Exp e2) {
+    public static MathExp formConjunct(Exp e1, Exp e2) {
         if (e1.getMathType() == null) {
             throw new NullMathTypeException("The math type for "
                     + e1.toString() + " is null.");
@@ -94,7 +93,7 @@ public abstract class MathExp extends Exp {
      * @return True if <code>exp</code> contains "true",
      * false otherwise.
      */
-    public static final boolean isLiteralTrue(Exp exp) {
+    public static boolean isLiteralTrue(Exp exp) {
         boolean retval = (exp instanceof VarExp);
         if (retval) {
             VarExp eAsVarExp = (VarExp) exp;
@@ -112,7 +111,7 @@ public abstract class MathExp extends Exp {
      * @return True if <code>exp</code> contains "false",
      * false otherwise.
      */
-    public static final boolean isLiteralFalse(Exp exp) {
+    public static boolean isLiteralFalse(Exp exp) {
         boolean retval = (exp instanceof VarExp);
         if (retval) {
             VarExp eAsVarExp = (VarExp) exp;

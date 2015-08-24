@@ -74,6 +74,26 @@ public abstract class Exp extends ResolveConceptualElement {
     }
 
     /**
+     * <p>Compares to see if the expression matches this object.</p>
+     *
+     * @param exp A {@link Exp} to compare.
+     *
+     * @return A {@link VarExp} containing "true" if it is exactly the same,
+     * otherwise just return a deep copy our ourselves.
+     */
+    public Exp compareWithAssumptions(Exp exp) {
+        Exp retExp;
+        if (this.equivalent(exp)) {
+            retExp = VarExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
+        }
+        else {
+            retExp = this.clone();
+        }
+
+        return retExp;
+    }
+
+    /**
      * <p>This method must be implemented by all inherited classes
      * to attempt to find the provided expression in our
      * subexpressions.</p>
@@ -302,26 +322,6 @@ public abstract class Exp extends ResolveConceptualElement {
     // ===========================================================
     // Protected Methods
     // ===========================================================
-
-    /**
-     * <p>Compares to see if the expression matches this object.</p>
-     *
-     * @param exp A {@link Exp} to compare.
-     *
-     * @return A {@link VarExp} containing "true" if it is exactly the same,
-     * otherwise just return a deep copy our ourselves.
-     */
-    protected Exp compareWithAssumptions(Exp exp) {
-        Exp retExp;
-        if (this.equivalent(exp)) {
-            retExp = myMathType.getTypeGraph().getTrueVarExp();
-        }
-        else {
-            retExp = this.clone();
-        }
-
-        return retExp;
-    }
 
     /**
      * <p>Implemented by concrete subclasses of {@link Exp} to manufacture

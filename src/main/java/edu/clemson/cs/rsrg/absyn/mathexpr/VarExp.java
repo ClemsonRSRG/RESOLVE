@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.absyn.mathexpr;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
+import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -232,6 +233,19 @@ public class VarExp extends MathExp {
     @Override
     public List<Exp> getSubExpressions() {
         return new ArrayList<>();
+    }
+
+    /**
+     * <p>This static method method creates a variable expression that
+     * matches the boolean "true".</p>
+     *
+     * @param l A {@link Location} where the representation object is created from.
+     * @param tg A {@link TypeGraph} to retrieve the mathematical boolean type.
+     *
+     * @return The {@link VarExp} representation object.
+     */
+    public static VarExp getTrueVarExp(Location l, TypeGraph tg) {
+        return (VarExp) tg.getTrueVarExp();
     }
 
     /**

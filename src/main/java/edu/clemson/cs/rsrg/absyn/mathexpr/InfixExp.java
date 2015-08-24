@@ -49,12 +49,14 @@ public class InfixExp extends AbstractFunctionExp {
      * <p>This constructs an infix expression.</p>
      *
      * @param l A {@link Location} representation object.
+     * @param qual A {@link PosSymbol} representing the expression's qualifier.
      * @param left A {@link Exp} representing the left hand side.
      * @param opName A {@link PosSymbol} representing the operator.
      * @param right A {@link Exp} representing the right hand side.
      */
-    public InfixExp(Location l, Exp left, PosSymbol opName, Exp right) {
-        super(l, null);
+    public InfixExp(Location l, PosSymbol qual, Exp left, PosSymbol opName,
+            Exp right) {
+        super(l, qual);
         myLeftHandSide = left;
         myOperationName = opName;
         myRightHandSide = right;
@@ -97,6 +99,35 @@ public class InfixExp extends AbstractFunctionExp {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * <p>Compares to see if the expression matches this object.</p>
+     *
+     * @param exp A {@link Exp} to compare.
+     *
+     * @return A {@link VarExp} containing "true" if it is exactly the same,
+     * otherwise just return a deep copy our ourselves.
+     */
+    @Override
+    public Exp compareWithAssumptions(Exp exp) {
+        Exp retExp;
+        if (this.equals(exp)) {
+            retExp = VarExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
+        }
+        else if (myOperationName.equals("and")) {
+            Exp newLeftSide = myLeftHandSide.compareWithAssumptions(exp);
+            Exp newRightSide = myRightHandSide.compareWithAssumptions(exp);
+
+            retExp =
+                    new InfixExp(new Location(myLoc), myQualifier.clone(),
+                            newLeftSide, myOperationName.clone(), newRightSide);
+        }
+        else {
+            retExp = this.clone();
+        }
+
+        return retExp;
     }
 
     /**
@@ -153,17 +184,12 @@ public class InfixExp extends AbstractFunctionExp {
             result = myLoc.equals(eAsInfixExp.myLoc);
 
             if (result) {
-                result = myOperationName.equals(eAsInfixExp.myOperationName);
-
-                if (result) {
-                    result = myLeftHandSide.equals(eAsInfixExp.myLeftHandSide);
-
-                    if (result) {
-                        result =
-                                myRightHandSide
+                result =
+                        myOperationName.equals(eAsInfixExp.myOperationName)
+                                && myLeftHandSide
+                                        .equals(eAsInfixExp.myLeftHandSide)
+                                && myRightHandSide
                                         .equals(eAsInfixExp.myRightHandSide);
-                    }
-                }
             }
         }
 
@@ -280,8 +306,13 @@ public class InfixExp extends AbstractFunctionExp {
             newRight = ((MathExp) newRight).remember();
         }
 
-        return new InfixExp(new Location(myLoc), newLeft, myOperationName
-                .clone(), newRight);
+        PosSymbol qualifier = null;
+        if (myQualifier != null) {
+            qualifier = myQualifier.clone();
+        }
+
+        return new InfixExp(new Location(myLoc), qualifier, newLeft,
+                myOperationName.clone(), newRight);
     }
 
     /**
@@ -319,7 +350,8 @@ public class InfixExp extends AbstractFunctionExp {
             leftHandSide = ((MathExp) leftHandSide).simplify();
         }
         else {
-            leftHandSide = myMathType.getTypeGraph().getTrueVarExp();
+            leftHandSide =
+                    VarExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
         }
 
         // Further simplification of the right hand side
@@ -328,13 +360,14 @@ public class InfixExp extends AbstractFunctionExp {
             rightHandSide = ((MathExp) rightHandSide).simplify();
         }
         else {
-            rightHandSide = myMathType.getTypeGraph().getTrueVarExp();
+            rightHandSide =
+                    VarExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
         }
 
         // Simplify A -> true to true
         if (operatorName.equals("implies") && rightHandSide instanceof VarExp
-                && ((VarExp) rightHandSide).isLiteralTrue()) {
-            retVal = myMathType.getTypeGraph().getTrueVarExp();
+                && MathExp.isLiteralTrue(rightHandSide)) {
+            retVal = VarExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
         }
 
         // Our right hand side is an InfixExp
@@ -394,6 +427,7 @@ public class InfixExp extends AbstractFunctionExp {
         }
 
         //Simplify (A ^ true) to A or (true ^ A) to A
+        PosSymbol qual = myQualifier.clone();
         if (operatorName.equals("and")) {
             if (MathExp.isLiteralTrue(leftHandSide)) {
                 retVal = rightHandSide.clone();
@@ -403,13 +437,13 @@ public class InfixExp extends AbstractFunctionExp {
             }
             else {
                 retVal =
-                        new InfixExp(new Location(myLoc), leftHandSide,
+                        new InfixExp(new Location(myLoc), qual, leftHandSide,
                                 operatorName, rightHandSide);
             }
         }
         else {
             retVal =
-                    new InfixExp(new Location(myLoc), leftHandSide,
+                    new InfixExp(new Location(myLoc), qual, leftHandSide,
                             operatorName, rightHandSide);
 
             if (retVal.equivalent(this)) {
@@ -487,6 +521,11 @@ public class InfixExp extends AbstractFunctionExp {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
+
+        if (myQualifier != null) {
+            sb.append(myQualifier.toString() + "::");
+        }
+
         if (myLeftHandSide != null) {
             sb.append("(" + myLeftHandSide.toString() + " ");
         }
@@ -506,27 +545,6 @@ public class InfixExp extends AbstractFunctionExp {
     // Protected Methods
     // ===========================================================
 
-    @Override
-    protected Exp compareWithAssumptions(Exp exp) {
-        Exp retExp;
-        if (this.equals(exp)) {
-            retExp = myMathType.getTypeGraph().getTrueVarExp();
-        }
-        else if (myOperationName.equals("and")) {
-            Exp newLeftSide = myLeftHandSide.compareWithAssumptions(exp);
-            Exp newRightSide = myRightHandSide.compareWithAssumptions(exp);
-
-            retExp =
-                    new InfixExp(new Location(myLoc), newLeftSide,
-                            myOperationName.clone(), newRightSide);
-        }
-        else {
-            retExp = this.clone();
-        }
-
-        return retExp;
-    }
-
     /**
      * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
      * a copy of themselves.</p>
@@ -535,8 +553,9 @@ public class InfixExp extends AbstractFunctionExp {
      */
     @Override
     protected Exp copy() {
-        return new InfixExp(new Location(myLoc), myLeftHandSide.clone(),
-                myOperationName.clone(), myRightHandSide.clone());
+        return new InfixExp(new Location(myLoc), myQualifier.clone(),
+                myLeftHandSide.clone(), myOperationName.clone(),
+                myRightHandSide.clone());
     }
 
     /**
@@ -555,9 +574,9 @@ public class InfixExp extends AbstractFunctionExp {
      */
     @Override
     protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new InfixExp(new Location(myLoc), substitute(myLeftHandSide,
-                substitutions), myOperationName.clone(), substitute(
-                myRightHandSide, substitutions));
+        return new InfixExp(new Location(myLoc), myQualifier.clone(),
+                substitute(myLeftHandSide, substitutions), myOperationName
+                        .clone(), substitute(myRightHandSide, substitutions));
     }
 
     // ===========================================================
@@ -680,8 +699,8 @@ public class InfixExp extends AbstractFunctionExp {
         Exp leftSimplify = ((MathExp) myLeftHandSide).simplify();
         Exp rightSimplify = ((MathExp) myRightHandSide).simplify();
 
-        return new InfixExp(new Location(myLoc), leftSimplify, myOperationName
-                .clone(), rightSimplify);
+        return new InfixExp(new Location(myLoc), myQualifier.clone(),
+                leftSimplify, myOperationName.clone(), rightSimplify);
     }
 
 }
