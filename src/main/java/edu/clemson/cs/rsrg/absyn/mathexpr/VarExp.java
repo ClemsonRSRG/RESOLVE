@@ -90,7 +90,6 @@ public class VarExp extends MathExp {
      * @return A formatted text string of the class.
      */
     @Override
-    /** Returns a formatted text string of this class. */
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
