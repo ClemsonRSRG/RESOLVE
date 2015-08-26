@@ -232,8 +232,8 @@ public abstract class MathExp extends Exp {
 
     /**
      * <p>This method is used to convert a {@link Exp} into the prover's
-     * version of {@link PExp}. The key to this method is figuring out
-     * where the different implications occur within the expression.</p>
+     * version of {@link PExp}. By default, this method throws an exception
+     * unless the concrete subclass overrides this method.</p>
      *
      * @param assumpts The assumption expressions for this expression.
      * @param single Boolean flag to indicate whether or not this is a
@@ -242,37 +242,8 @@ public abstract class MathExp extends Exp {
      * @return A list of {link Exp} objects.
      */
     public List<InfixExp> split(MathExp assumpts, boolean single) {
-        if (this instanceof InfixExp) {
-            if (((InfixExp) this).getOpName().toString().equals("implies"))
-                return this.split(null, false);
-            else
-                return this.split(null, single);
-        }
-        else if (single) {
-            List<InfixExp> lst = new ArrayList<>();
-            if (assumpts == null) {
-                lst.add(new InfixExp(null, null, new PosSymbol(this
-                        .getLocation(), "implies"), this));
-            }
-            else {
-                lst.add(new InfixExp(null, assumpts, new PosSymbol(this
-                        .getLocation(), "implies"), this));
-            }
-            return lst;
-        }
-        else
-            return new ArrayList<>();
-    }
-
-    /**
-     * <p>This method is used to convert a {@link Exp} into the prover's
-     * version of {@link PExp}. The key to this method is figuring out
-     * where the different implications occur within the expression.</p>
-     *
-     * @return A list of {@link Exp} objects.
-     */
-    public List<InfixExp> split() {
-        return this.split(null, true);
+        throw new UnsupportedOperationException("Split for classes of type "
+                + this.getClass() + " is not currently supported.");
     }
 
 }

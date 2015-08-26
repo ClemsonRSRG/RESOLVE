@@ -501,14 +501,12 @@ public class InfixExp extends AbstractFunctionExp {
                 tmpRight = (MathExp) myRightHandSide;
 
                 if (!(tmpLeft == null || tmpRight == null)) {
-                    lst.add(new InfixExp(new Location(myLoc), tmpLeft,
-                            new PosSymbol("implies"), tmpRight));
+                    lst.add((InfixExp) MathExp.formImplies(myLoc, tmpLeft, tmpRight));
                 }
             }
 
         } else if (single) {
-            lst.add(new InfixExp(new Location(myLoc), assumpts, new PosSymbol("implies"),
-                    this));
+            lst.add((InfixExp) MathExp.formImplies(myLoc, assumpts, this));
         }
 
         return lst;
