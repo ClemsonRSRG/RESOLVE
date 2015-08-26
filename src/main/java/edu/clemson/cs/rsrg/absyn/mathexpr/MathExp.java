@@ -86,6 +86,24 @@ public abstract class MathExp extends Exp {
     }
 
     /**
+     * <p>This static method method creates a variable expression that
+     * matches the boolean "true".</p>
+     *
+     * @param l A {@link Location} where the representation object is created from.
+     * @param tg A {@link TypeGraph} to retrieve the mathematical boolean type.
+     *
+     * @return The {@link VarExp} representation object.
+     */
+    public static VarExp getTrueVarExp(Location l, TypeGraph tg) {
+        VarExp retval =
+                new VarExp(new Location(l), null, new PosSymbol(
+                        new Location(l), "true"));
+        retval.setMathType(tg.BOOLEAN);
+
+        return retval;
+    }
+
+    /**
      * <p>This method returns the default behavior for an
      * arbitrary {@link Exp} when checking to see if we are
      * simply the literal "true".</p>

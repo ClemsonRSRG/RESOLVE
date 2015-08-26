@@ -338,7 +338,8 @@ public class EqualsExp extends AbstractFunctionExp {
     public MathExp simplify() {
         Exp simplified;
         if (myLeftHandSide.equivalent(myRightHandSide)) {
-            simplified = VarExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
+            simplified =
+                    MathExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
         }
         else {
             simplified = this.clone();

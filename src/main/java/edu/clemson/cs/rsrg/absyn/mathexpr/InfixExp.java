@@ -351,7 +351,7 @@ public class InfixExp extends AbstractFunctionExp {
         }
         else {
             leftHandSide =
-                    VarExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
+                    MathExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
         }
 
         // Further simplification of the right hand side
@@ -361,13 +361,13 @@ public class InfixExp extends AbstractFunctionExp {
         }
         else {
             rightHandSide =
-                    VarExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
+                    MathExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
         }
 
         // Simplify A -> true to true
         if (operatorName.equals("implies") && rightHandSide instanceof VarExp
                 && MathExp.isLiteralTrue(rightHandSide)) {
-            retVal = VarExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
+            retVal = MathExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
         }
 
         // Our right hand side is an InfixExp

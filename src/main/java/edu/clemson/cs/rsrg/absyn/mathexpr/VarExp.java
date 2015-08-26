@@ -236,19 +236,6 @@ public class VarExp extends MathExp {
     }
 
     /**
-     * <p>This static method method creates a variable expression that
-     * matches the boolean "true".</p>
-     *
-     * @param l A {@link Location} where the representation object is created from.
-     * @param tg A {@link TypeGraph} to retrieve the mathematical boolean type.
-     *
-     * @return The {@link VarExp} representation object.
-     */
-    public static VarExp getTrueVarExp(Location l, TypeGraph tg) {
-        return (VarExp) tg.getTrueVarExp();
-    }
-
-    /**
      * <p>This method applies VC Generator's remember rule.
      * For all inherited programming expression classes, this method
      * should throw an exception.</p>
