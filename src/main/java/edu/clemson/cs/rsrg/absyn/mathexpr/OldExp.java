@@ -156,6 +156,29 @@ public class OldExp extends MathExp {
     }
 
     /**
+     * <p>Shallow compare is too weak for many things, and equals() is too
+     * strict. This method returns <code>true</code> <strong>iff</code> this
+     * expression and the provided expression, <code>e</code>, are equivalent
+     * with respect to structure and all function and variable names.</p>
+     *
+     * @param e The expression to compare this one to.
+     *
+     * @return True <strong>iff</strong> this expression and the provided
+     *         expression are equivalent with respect to structure and all
+     *         function and variable names.
+     */
+    @Override
+    public boolean equivalent(Exp e) {
+        boolean retval = (e instanceof OldExp);
+        if (retval) {
+            OldExp eAsOldExp = (OldExp) e;
+            retval = myOrigExp.equivalent(eAsOldExp.myOrigExp);
+        }
+
+        return retval;
+    }
+
+    /**
      * <p>Returns a deep copy of this old expression's actual expression.</p>
      *
      * @return The assignment {@link Exp} object.
