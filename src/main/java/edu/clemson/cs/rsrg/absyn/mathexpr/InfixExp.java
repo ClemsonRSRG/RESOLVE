@@ -582,46 +582,112 @@ public class InfixExp extends AbstractFunctionExp {
     // Private Methods
     // ===========================================================
 
+    /**
+     * <p>This helper method first attempts to simplify the left and right hand
+     * side of this expression. The result is then stored in a
+     * new {@link InfixExp} and returned.</p>
+     *
+     * @return A {@link InfixExp} representation object.
+     */
+    private InfixExp applySimplification() {
+        Exp leftSimplify = ((MathExp) myLeftHandSide).simplify();
+        Exp rightSimplify = ((MathExp) myRightHandSide).simplify();
+
+        return new InfixExp(new Location(myLoc), myQualifier.clone(),
+                leftSimplify, myOperationName.clone(), rightSimplify);
+    }
+
+    /**
+     * <p>This helper method returns all the assertions in the current
+     * {@link InfixExp}.</p>
+     *
+     * @return The resulting {@link Exp} object.
+     */
     private Exp getAssertions() {
-        if (opName.toString().equals("and")) {
+        Exp retval = null;
+
+        // If we have a conjuncted expression
+        if (getOperatorAsString().equals("and")) {
+            // Get the assertion from the left hand side
+            // and from the right hand side.
             Exp tmpLeft, tmpRight;
-            if (left instanceof InfixExp)
-                tmpLeft = ((InfixExp) left).getAssertions();
-            else
-                tmpLeft = left;
+            if (myLeftHandSide instanceof InfixExp) {
+                tmpLeft = ((InfixExp) myLeftHandSide).getAssertions();
+            }
+            else {
+                tmpLeft = myLeftHandSide.clone();
+            }
 
-            if (right instanceof InfixExp)
-                tmpRight = ((InfixExp) right).getAssertions();
-            else
-                tmpRight = right;
+            if (myRightHandSide instanceof InfixExp) {
+                tmpRight = ((InfixExp) myRightHandSide).getAssertions();
+            }
+            else {
+                tmpRight = myRightHandSide.clone();
+            }
 
-            return getMathType().getTypeGraph().formConjunct(tmpLeft, tmpRight);
+            retval = MathExp.formConjunct(myLoc, tmpLeft, tmpRight);
         }
-        else if (!(opName.toString().equals("implies"))) {
-            return this;
+        // For all expressions that are not implications,
+        // we make a copy of ourselves.
+        else if (!(getOperatorAsString().equals("implies"))) {
+            retval = this.clone();
         }
-        return null;
+
+        // If it is an implication, then there are no assertions,
+        // so this method should return "null".
+        return retval;
     }
 
+    /**
+     * <p>This helper method returns all the assumptions in the current
+     * {@link InfixExp}.</p>
+     *
+     * @return The resulting {@link Exp} object.
+     */
     private Exp getAssumptions() {
-        if (this.opName.toString().equals("implies")
-                || this.opName.toString().equals("and")) {
-            if (left instanceof InfixExp) {
-                left = ((InfixExp) left).getAssumptions();
+        Exp retval;
+
+        // If we have an implication or a conjuncted expression
+        if (getOperatorAsString().equals("implies")
+                || getOperatorAsString().equals("and")) {
+            // Get the assumptions from the left hand side
+            // and from the right hand side.
+            Exp tmpLeft, tmpRight;
+            if (myLeftHandSide instanceof InfixExp) {
+                tmpLeft = ((InfixExp) myLeftHandSide).getAssumptions();
             }
-            if (right instanceof InfixExp) {
-                right = ((InfixExp) right).getAssumptions();
+            else {
+                tmpLeft = myLeftHandSide.clone();
             }
-            return new InfixExp(null, left, createPosSymbol("and"), right);
+
+            if (myRightHandSide instanceof InfixExp) {
+                tmpRight = ((InfixExp) myRightHandSide).getAssumptions();
+            }
+            else {
+                tmpRight = myRightHandSide.clone();
+            }
+
+            retval = MathExp.formConjunct(myLoc, tmpLeft, tmpRight);
         }
-        else
-            return this;
+        // Make a deep copy of ourselves since we couldn't find
+        // any assumptions.
+        else {
+            retval = this.clone();
+        }
+
+        return retval;
     }
 
+    /**
+     * <p>This helper method returns all the expressions in the current
+     * {@link InfixExp} in a {@link List}.</p>
+     *
+     * @return A list containing all the {@link Exp} object.
+     */
     private List<Exp> getExpressions() {
         List<Exp> lst = new ArrayList<>();
         if (!myOperationName.equals("and") && !myOperationName.equals("implies")) {
-            lst.add(this);
+            lst.add(this.clone());
         }
         if ((myLeftHandSide instanceof InfixExp)) {
             lst.addAll(((InfixExp) myLeftHandSide).getExpressions());
@@ -685,21 +751,6 @@ public class InfixExp extends AbstractFunctionExp {
 
         }
         return result;
-    }
-
-    /**
-     * <p>This helper method first attempts to simplify the left and right hand
-     * side of this expression. The result is then stored in a
-     * new {@link InfixExp} and returned.</p>
-     *
-     * @return A {@link InfixExp} representation object.
-     */
-    private InfixExp applySimplification() {
-        Exp leftSimplify = ((MathExp) myLeftHandSide).simplify();
-        Exp rightSimplify = ((MathExp) myRightHandSide).simplify();
-
-        return new InfixExp(new Location(myLoc), myQualifier.clone(),
-                leftSimplify, myOperationName.clone(), rightSimplify);
     }
 
 }
