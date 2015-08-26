@@ -91,6 +91,39 @@ public abstract class MathExp extends Exp {
     }
 
     /**
+     * <p>This static method makes sure that our types are set,
+     * before attempting to form a conjunct.</p>
+     *
+     * @param e1 The first {@link Exp} representation object.
+     * @param e2 The second {@link Exp} representation object.
+     *
+     * @return The resulting {@link Exp}.
+     */
+    public static MathExp formDisjunct(Location l, Exp e1, Exp e2) {
+        if (e1.getMathType() == null) {
+            throw new NullMathTypeException("The math type for "
+                    + e1.toString() + " is null.");
+        }
+        else if (e2.getMathType() == null) {
+            throw new NullMathTypeException("The math type for "
+                    + e2.toString() + " is null.");
+        }
+
+        TypeGraph typeGraph = e1.getMathType().getTypeGraph();
+        if (typeGraph == null) {
+            throw new MiscErrorException("The type graph is null.",
+                    new NullPointerException());
+        }
+
+        MathExp retval =
+                new InfixExp(new Location(l), null, e1.clone(), new PosSymbol(
+                        new Location(l), "or"), e2.clone());
+        retval.setMathType(typeGraph.BOOLEAN);
+
+        return retval;
+    }
+
+    /**
      * <p>This static method method creates a variable expression that
      * matches the boolean "true".</p>
      *
