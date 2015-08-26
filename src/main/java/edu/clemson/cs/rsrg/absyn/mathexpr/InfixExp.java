@@ -381,7 +381,8 @@ public class InfixExp extends AbstractFunctionExp {
             if (innerOperaratorName.equals("implies")) {
                 // Simplify A -> B -> C to (A ^ B) -> C
                 leftHandSide =
-                        MathExp.formConjunct(leftHandSide, innerLeftSide);
+                        MathExp.formConjunct(leftHandSide.getLocation(),
+                                leftHandSide, innerLeftSide);
                 rightHandSide = innerRightSide;
             }
             // And
@@ -486,7 +487,7 @@ public class InfixExp extends AbstractFunctionExp {
             }
 
             if (assumpts != null) {
-                tmpLeft = MathExp.formConjunct(assumpts, tmpLeft);
+                tmpLeft = MathExp.formConjunct(assumpts.getLocation(), assumpts, tmpLeft);
             }
 
             if (myRightHandSide instanceof InfixExp) {

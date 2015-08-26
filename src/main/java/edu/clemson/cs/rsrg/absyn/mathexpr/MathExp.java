@@ -66,7 +66,7 @@ public abstract class MathExp extends Exp {
      *
      * @return The resulting {@link Exp}.
      */
-    public static MathExp formConjunct(Exp e1, Exp e2) {
+    public static MathExp formConjunct(Location l, Exp e1, Exp e2) {
         if (e1.getMathType() == null) {
             throw new NullMathTypeException("The math type for "
                     + e1.toString() + " is null.");
@@ -82,7 +82,12 @@ public abstract class MathExp extends Exp {
                     new NullPointerException());
         }
 
-        return (MathExp) typeGraph.formConjunct(e1, e2);
+        MathExp retval =
+                new InfixExp(new Location(l), null, e1.clone(), new PosSymbol(
+                        new Location(l), "and"), e2.clone());
+        retval.setMathType(typeGraph.BOOLEAN);
+
+        return retval;
     }
 
     /**
