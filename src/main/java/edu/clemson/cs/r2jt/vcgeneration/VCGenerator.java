@@ -221,13 +221,15 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp typeConstraints =
                     getModuleTypeConstraint(dec.getLocation(), dec
                             .getParameters());
-            if (myGlobalConstraintExp.isLiteralTrue()) {
-                myGlobalConstraintExp = typeConstraints;
-            }
-            else {
-                myGlobalConstraintExp =
-                        myTypeGraph.formConjunct(typeConstraints,
-                                myGlobalConstraintExp);
+            if (!typeConstraints.isLiteralTrue()) {
+                if (myGlobalConstraintExp.isLiteralTrue()) {
+                    myGlobalConstraintExp = typeConstraints;
+                }
+                else {
+                    myGlobalConstraintExp =
+                            myTypeGraph.formConjunct(typeConstraints,
+                                    myGlobalConstraintExp);
+                }
             }
 
             // Store the global requires clause
@@ -257,13 +259,15 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp conceptTypeConstraints =
                     getModuleTypeConstraint(conceptModuleDec.getLocation(),
                             conceptModuleDec.getParameters());
-            if (myGlobalConstraintExp.isLiteralTrue()) {
-                myGlobalConstraintExp = conceptTypeConstraints;
-            }
-            else {
-                myGlobalConstraintExp =
-                        myTypeGraph.formConjunct(conceptTypeConstraints,
-                                myGlobalConstraintExp);
+            if (!conceptTypeConstraints.isLiteralTrue()) {
+                if (myGlobalConstraintExp.isLiteralTrue()) {
+                    myGlobalConstraintExp = conceptTypeConstraints;
+                }
+                else {
+                    myGlobalConstraintExp =
+                            myTypeGraph.formConjunct(conceptTypeConstraints,
+                                    myGlobalConstraintExp);
+                }
             }
         }
         catch (NoSuchSymbolException e) {
@@ -320,13 +324,15 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp typeConstraints =
                     getModuleTypeConstraint(dec.getLocation(), dec
                             .getParameters());
-            if (myGlobalConstraintExp.isLiteralTrue()) {
-                myGlobalConstraintExp = typeConstraints;
-            }
-            else {
-                myGlobalConstraintExp =
-                        myTypeGraph.formConjunct(typeConstraints,
-                                myGlobalConstraintExp);
+            if (!typeConstraints.isLiteralTrue()) {
+                if (myGlobalConstraintExp.isLiteralTrue()) {
+                    myGlobalConstraintExp = typeConstraints;
+                }
+                else {
+                    myGlobalConstraintExp =
+                            myTypeGraph.formConjunct(typeConstraints,
+                                    myGlobalConstraintExp);
+                }
             }
 
             // Store the global requires clause
@@ -356,13 +362,15 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp conceptTypeConstraints =
                     getModuleTypeConstraint(conceptModuleDec.getLocation(),
                             conceptModuleDec.getParameters());
-            if (myGlobalConstraintExp.isLiteralTrue()) {
-                myGlobalConstraintExp = conceptTypeConstraints;
-            }
-            else {
-                myGlobalConstraintExp =
-                        myTypeGraph.formConjunct(conceptTypeConstraints,
-                                myGlobalConstraintExp);
+            if (!conceptTypeConstraints.isLiteralTrue()) {
+                if (myGlobalConstraintExp.isLiteralTrue()) {
+                    myGlobalConstraintExp = conceptTypeConstraints;
+                }
+                else {
+                    myGlobalConstraintExp =
+                            myTypeGraph.formConjunct(conceptTypeConstraints,
+                                    myGlobalConstraintExp);
+                }
             }
 
             // Obtain the global requires clause from the Enhancement
@@ -388,13 +396,16 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp enhancementTypeConstraints =
                     getModuleTypeConstraint(enhancementModuleDec.getLocation(),
                             enhancementModuleDec.getParameters());
-            if (myGlobalConstraintExp.isLiteralTrue()) {
-                myGlobalConstraintExp = enhancementTypeConstraints;
-            }
-            else {
-                myGlobalConstraintExp =
-                        myTypeGraph.formConjunct(enhancementTypeConstraints,
-                                myGlobalConstraintExp);
+            if (!enhancementTypeConstraints.isLiteralTrue()) {
+                if (myGlobalConstraintExp.isLiteralTrue()) {
+                    myGlobalConstraintExp = enhancementTypeConstraints;
+                }
+                else {
+                    myGlobalConstraintExp =
+                            myTypeGraph.formConjunct(
+                                    enhancementTypeConstraints,
+                                    myGlobalConstraintExp);
+                }
             }
         }
         catch (NoSuchSymbolException e) {
@@ -1393,13 +1404,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                                         varDecExp);
 
                         // Conjunct to our other constraints (if any)
-                        if (retVal.isLiteralTrue()) {
-                            retVal = constraint;
-                        }
-                        else {
-                            retVal =
-                                    myTypeGraph
-                                            .formConjunct(retVal, constraint);
+                        if (!constraint.isLiteralTrue()) {
+                            if (retVal.isLiteralTrue()) {
+                                retVal = constraint;
+                            }
+                            else {
+                                retVal =
+                                        myTypeGraph.formConjunct(retVal,
+                                                constraint);
+                            }
                         }
                     }
                 }
