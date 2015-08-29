@@ -52,45 +52,59 @@ public class VerificationConditionCongruenceClosureImpl {
         m_consequent = vc.getConsequent();
         m_registry = new Registry(g);
         m_conjunction =
-                new ConjunctionOfNormalizedAtomicExpressions(m_registry,true);
+                new ConjunctionOfNormalizedAtomicExpressions(m_registry, true);
         m_goal = new ArrayList<String>();
         forAllQuantifiedPExps = new ArrayList<PExp>();
-        if(vc.m_liftedLambdaPredicates != null && vc.m_liftedLambdaPredicates.size()>0){
+        if (vc.m_liftedLambdaPredicates != null
+                && vc.m_liftedLambdaPredicates.size() > 0) {
             forAllQuantifiedPExps.addAll(vc.m_liftedLambdaPredicates);
             //addPExp(forAllQuantifiedPExps.iterator(),true);
             ArrayList<PExp> splitConditions = new ArrayList<PExp>();
-            for(PExp px : vc.m_conditions){
-                java.util.HashMap<PExp,PExp> substMap = new HashMap<PExp, PExp>();
+            for (PExp px : vc.m_conditions) {
+                java.util.HashMap<PExp, PExp> substMap =
+                        new HashMap<PExp, PExp>();
                 ArrayList<PExp> args = new ArrayList<PExp>();
                 // true branch
                 PSymbol tBSym = null;
-                 for(PSymbol pq : px.getQuantifiedVariables()){
-                     tBSym = new PSymbol(pq.getType(),pq.getTypeValue(),pq.getTopLevelOperation()+".T", PSymbol.Quantification.NONE);
-                    substMap.put(pq,tBSym);
+                for (PSymbol pq : px.getQuantifiedVariables()) {
+                    tBSym =
+                            new PSymbol(pq.getType(), pq.getTypeValue(), pq
+                                    .getTopLevelOperation()
+                                    + ".T", PSymbol.Quantification.NONE);
+                    substMap.put(pq, tBSym);
                 }
                 PExp pxTrue = px.substitute(substMap);
-                args.add(pxTrue);
-                args.add(new PSymbol(g.BOOLEAN,null,"true"));
-                splitConditions.add(new PSymbol(g.BOOLEAN,null,"=",args));
+                splitConditions.add(pxTrue);
+                //args.add(pxTrue);
+                //args.add(new PSymbol(g.BOOLEAN, null, "true"));
+                //splitConditions.add(new PSymbol(g.BOOLEAN, null, "=", args));
                 // false branch
                 PSymbol fBSym = null;
-                for(PSymbol pq : px.getQuantifiedVariables()){
-                    fBSym = new PSymbol(pq.getType(),pq.getTypeValue(),pq.getTopLevelOperation()+".F", PSymbol.Quantification.NONE);
-                    substMap.put(pq,fBSym);
+                for (PSymbol pq : px.getQuantifiedVariables()) {
+                    fBSym =
+                            new PSymbol(pq.getType(), pq.getTypeValue(), pq
+                                    .getTopLevelOperation()
+                                    + ".F", PSymbol.Quantification.NONE);
+                    substMap.put(pq, fBSym);
                 }
                 PExp pxFalse = px.substitute(substMap);
                 args.clear();
                 args.add(pxFalse);
-                PSymbol negatedCondition = new PSymbol(g.BOOLEAN,null,"not",args);
-                args.clear();
+                PSymbol negatedCondition =
+                        new PSymbol(g.BOOLEAN, null, "not", args);
+                splitConditions.add(negatedCondition);
+                /*args.clear();
                 args.add(negatedCondition);
-                args.add(new PSymbol(g.BOOLEAN,null,"true"));
+                args.add(new PSymbol(g.BOOLEAN, null, "true"));
                 splitConditions.add(new PSymbol(g.BOOLEAN, null, "=", args));
                 // AddisBinaryPartition (p1: Entity, p2: Entity) : B;
+                */
                 args.clear();
                 args.add(tBSym);
                 args.add(fBSym);
-                PSymbol assertion = new PSymbol(m_typegraph.BOOLEAN,null,"isBinaryPartition",args);
+                PSymbol assertion =
+                        new PSymbol(m_typegraph.BOOLEAN, null,
+                                "isBinaryPartition", args);
                 splitConditions.add(assertion);
             }
             addPExp(splitConditions.iterator(), true);
@@ -100,27 +114,6 @@ public class VerificationConditionCongruenceClosureImpl {
         addPExp(m_consequent.iterator(), false);
         m_conjunction.updateUseMap();
         //m_conjunction.mergeEquivalentFunctions();
-    }
-
-    protected void makeNumsN() {
-        if (m_registry.m_typeDictionary.containsKey("N")) {
-            MTType natType = m_registry.m_typeDictionary.get("N");
-
-            for (int i = 0; i < m_registry.m_indexToSymbol.size(); ++i) {
-                String s = m_registry.m_indexToSymbol.get(i);
-
-                if (s.matches("[0-9]+")) {
-                    MTType oldType = m_registry.m_indexToType.get(i);
-                    if (oldType != natType) {
-                        m_registry.m_indexToType.set(i, natType);
-                        m_registry.m_typeToSetOfOperators.get(oldType)
-                                .remove(s);
-                        m_registry.m_typeToSetOfOperators.get(natType).add(s);
-                    }
-
-                }
-            }
-        }
     }
 
     protected ConjunctionOfNormalizedAtomicExpressions getConjunct() {
@@ -178,25 +171,29 @@ public class VerificationConditionCongruenceClosureImpl {
         while (pit.hasNext()) {
             PExp curr = pit.next();
             if (curr.isEquality()) { // f(x,y) = z and g(a,b) = c ; then z is replaced by c
-                PExp lhs = curr.getSubExpressions().get(0);
-                PExp rhs = curr.getSubExpressions().get(1);
-                int lhsIndex = (m_conjunction.addFormula(lhs));
-                int rhsIndex = (m_conjunction.addFormula(rhs));
+
+
                 if (inAntecedent) {
-                    m_conjunction.mergeOperators(lhsIndex, rhsIndex);
+                    m_conjunction.addExpression(curr);
                 }
                 else {
+                    PExp lhs = curr.getSubExpressions().get(0);
+                    PExp rhs = curr.getSubExpressions().get(1);
+                    int lhsIndex = (m_conjunction.addFormula(lhs));
+                    int rhsIndex = (m_conjunction.addFormula(rhs));
                     addGoal(m_registry.getSymbolForIndex(lhsIndex), m_registry
                             .getSymbolForIndex(rhsIndex));
                 }
             }
             else { // P becomes P = true or P(x...) becomes P(x ...) = z and z is replaced by true
-                int intRepForExp = m_conjunction.addFormula(curr);
+
                 if (inAntecedent) {
-                    m_conjunction.mergeOperators(m_registry
-                            .getIndexForSymbol("true"), intRepForExp);
+                    m_conjunction.addExpression(curr);
+                    //m_conjunction.mergeOperators(m_registry
+                    //        .getIndexForSymbol("true"), intRepForExp);
                 }
                 else {
+                    int intRepForExp = m_conjunction.addFormula(curr);
                     addGoal(m_registry.getSymbolForIndex(intRepForExp), "true");
                 }
             }
@@ -213,7 +210,7 @@ public class VerificationConditionCongruenceClosureImpl {
     @Override
     public String toString() {
         String r = m_name + "\n" + m_conjunction;
-        for(PExp pq : forAllQuantifiedPExps){
+        for (PExp pq : forAllQuantifiedPExps) {
             r += pq.toString() + "\n";
         }
         r += "----------------------------------\n";

@@ -117,7 +117,7 @@ public class CongruenceClassProver {
             }
             else {
                 TheoremCongruenceClosureImpl t =
-                        new TheoremCongruenceClosureImpl(g, assertion);
+                        new TheoremCongruenceClosureImpl(g, assertion, false);
                 if (!t.m_unneeded) {
                     m_theorems.add(t);
                 }
@@ -149,7 +149,7 @@ public class CongruenceClassProver {
 
         TheoremCongruenceClosureImpl t =
                 new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
-                        false);
+                        false,false);
         if (!t.m_unneeded) {
             m_theorems.add(t);
         }
@@ -157,7 +157,7 @@ public class CongruenceClassProver {
         if (lhs.isEquality()) {
             t =
                     new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
-                            true);
+                            true, false);
             if (!t.m_unneeded) {
                 m_theorems.add(t);
             }
@@ -253,12 +253,13 @@ public class CongruenceClassProver {
         String div = divLine(vcc.m_name);
         String theseResults =
                 div + ("Before application of theorems: " + vcc + "\n");
-        ArrayList<TheoremCongruenceClosureImpl> theoremsForThisVC = new ArrayList<TheoremCongruenceClosureImpl>();
+        ArrayList<TheoremCongruenceClosureImpl> theoremsForThisVC =
+                new ArrayList<TheoremCongruenceClosureImpl>();
         theoremsForThisVC.addAll(m_theorems);
         // add quantified expressions local to the vc to theorems
         for (PExp p : vcc.forAllQuantifiedPExps) {
             TheoremCongruenceClosureImpl t =
-                    new TheoremCongruenceClosureImpl(m_typeGraph, p);
+                    new TheoremCongruenceClosureImpl(m_typeGraph, p, true);
             if (!t.m_unneeded) {
                 theoremsForThisVC.add(t);
             }
@@ -271,8 +272,9 @@ public class CongruenceClassProver {
             Map<String, Integer> vcSymbolRelevanceMap = vcc.getGoalSymbols();
             int threshold = 16 * vcSymbolRelevanceMap.keySet().size() + 1;
             TheoremPrioritizer rankedTheorems =
-                    new TheoremPrioritizer(theoremsForThisVC, vcSymbolRelevanceMap,
-                            threshold, theoremAppliedCount, vcc.getRegistry());
+                    new TheoremPrioritizer(theoremsForThisVC,
+                            vcSymbolRelevanceMap, threshold,
+                            theoremAppliedCount, vcc.getRegistry());
             //theseResults += "Iteration " + iteration++ + "\n";
             int max_Theorems_to_choose = 1;
             int num_Theorems_chosen = 0;

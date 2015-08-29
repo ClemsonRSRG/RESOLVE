@@ -37,7 +37,8 @@ public class Registry {
     protected Map<String, Set<Integer>> m_appliedTheoremDependencyGraph;
     protected Set<String> m_lambda_names;
     protected Set<String> m_partTypes;
-    protected Map<Integer,ArrayList<Integer>> m_partTypeParentArray;
+    protected Map<Integer, ArrayList<Integer>> m_partTypeParentArray;
+    protected Set<String> m_commutative_operators;
 
     public static enum Usage {
 
@@ -68,6 +69,11 @@ public class Registry {
         m_lambda_names = new HashSet<String>();
         m_partTypes = new HashSet<String>();
         m_partTypeParentArray = new HashMap<Integer, ArrayList<Integer>>();
+        // could look for these in theorems instead
+        m_commutative_operators = new HashSet<String>();
+        m_commutative_operators.add("+");
+        m_commutative_operators.add("=");
+        m_commutative_operators.add("and");
 
     }
 
@@ -117,13 +123,25 @@ public class Registry {
         if (bType.isSubtypeOf(aType)) {
             m_indexToType.set(opIndexA, bType);
         }
+        // set usage to most restricted: i.e literal over created over forall
+        // this is because the earliest now becomes the parent
+        String aS = getSymbolForIndex(opIndexA);
+        String bS = getSymbolForIndex(opIndexB);
+        Usage a_us = getUsage(aS);
+        Usage b_us = getUsage(bS);
+        if(a_us.equals(Usage.LITERAL) || b_us.equals(Usage.LITERAL)){
+            m_symbolToUsage.put(aS,Usage.LITERAL);
+        }
+        else if(a_us.equals(Usage.CREATED) || b_us.equals(Usage.CREATED)){
+            m_symbolToUsage.put(aS,Usage.CREATED);
+        }
         m_unusedIndices.push(opIndexB);
         m_symbolIndexParentArray.set(opIndexB, opIndexA);
     }
 
     public void addDependency(int opIndex, String justification,
             boolean sourceIsRootChange) {
-        if (justification.length()==0)
+        if (justification.length() == 0)
             return;
         //if(getUsage(getSymbolForIndex(opIndex)).equals(Usage.LITERAL)) return;
         //if(getSymbolForIndex(opIndex).equals("true") && sourceIsRootChange) return;
@@ -155,7 +173,8 @@ public class Registry {
 
     protected int findAndCompress(int index) {
         // early return for parent
-        if(m_symbolIndexParentArray.get(index) == index) return index;
+        if (m_symbolIndexParentArray.get(index) == index)
+            return index;
         Stack<Integer> needToUpdate = new Stack<Integer>();
         assert index < m_symbolIndexParentArray.size() : "findAndCompress error";
         int parent = m_symbolIndexParentArray.get(index);
@@ -173,14 +192,15 @@ public class Registry {
 
     public String getSymbolForIndex(int index) {
         String rS = m_indexToSymbol.get(findAndCompress(index));
-        assert rS.length()!=0 : "Blank symbol error";
+        assert rS.length() != 0 : "Blank symbol error";
         return rS;
     }
 
     public String getRootSymbolForSymbol(String sym) {
-        if(m_symbolToIndex.containsKey(sym))
+        if (m_symbolToIndex.containsKey(sym))
             return getSymbolForIndex(getIndexForSymbol(sym));
-        else return "";
+        else
+            return "";
     }
 
     public MTType getTypeByIndex(int index) {
@@ -217,19 +237,16 @@ public class Registry {
     // if symbol is new, it adds it, otherwise, it returns current int rep
     public int addSymbol(String symbolName, MTType symbolType, Usage usage) {
         symbolName = symbolName.replaceAll("\\p{Cc}", "");
-        if(symbolName.contains("lambda"))
+        if (symbolName.contains("lambda"))
             m_lambda_names.add(symbolName);
-        assert symbolName.length()!=0 : "blank symbol error in addSymbol";
+        assert symbolName.length() != 0 : "blank symbol error in addSymbol";
         if (isSymbolInTable(symbolName)) {
             return getIndexForSymbol(symbolName);
         }
-        if(symbolName.contains(".")){
+        if (symbolName.contains(".")) {
             m_partTypes.add(symbolName);
         }
-        // create unique name for f.a. quant vars.
-        if(usage.equals(Usage.FORALL)){
-            //symbolName = String.format(m_cvFormat, m_uniqueCounter++);
-        }
+
         if (m_typeToSetOfOperators.containsKey(symbolType)) {
             m_typeToSetOfOperators.get(symbolType).add(symbolName);
         }
@@ -270,22 +287,29 @@ public class Registry {
         return rSet;
     }
 
-    // Symbols that have common definitons
-    // this assumes this is called for a theorem registry
-    public Set<String> getCommonlyDefinedSymbols() {
-        HashSet<String> rSet = new HashSet<String>();
+    public boolean isCommutative(String op){
+        return m_commutative_operators.contains(op);
+    }
 
-        for (Entry<String, Usage> e : m_symbolToUsage.entrySet()) {
-            if ((!e.getValue().equals(Usage.FORALL) && (!e.getValue().equals(Usage.CREATED))) &&
-                    !e.getValue().equals(Usage.HASARGS_FORALL)){
-                rSet.add(e.getKey());
+    public boolean isCommutative(int opNum){
+        String root = getSymbolForIndex(opNum);
+        return isCommutative(root);
+    }
+
+    // use sparingly, call with a parent symbol.  assumes parent array is compressed
+    protected Set<String> getChildren(String parent){
+        int pInt = getIndexForSymbol(parent);
+        HashSet<Integer> ch = new HashSet<Integer>();
+        for(int i = 0; i < m_symbolIndexParentArray.size(); ++i){
+            if(i == pInt) continue;
+            if(m_symbolIndexParentArray.get(i) == pInt){
+                ch.add(i);
             }
         }
-        rSet.remove("true");
-        rSet.remove("false");
-        rSet.remove("=");
-        rSet.remove("implies");
-        rSet.remove("and");
+        HashSet<String> rSet = new HashSet<String>();
+        for(Integer i : ch){
+            rSet.add(m_indexToSymbol.get(i));
+        }
         return rSet;
     }
 }

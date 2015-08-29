@@ -12,11 +12,7 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 // todo: create array impl and compare.
 /**
@@ -73,7 +69,7 @@ public class NormalizedAtomicExpressionMapImpl
         }
         position = 1 << position;
         Set<Map.Entry<Integer, Integer>> entries = m_expression.entrySet();
-        // hangs here with some lambda formulae
+
         for (Map.Entry<Integer, Integer> e : entries) {
             if ((e.getValue() & position) != 0) {
                 return e.getKey();
@@ -98,12 +94,14 @@ public class NormalizedAtomicExpressionMapImpl
         }
         return -1;
     }
+
     /**
      * @param operator integer value of operator
      * @param position 0 denotes first position.
      */
     public void writeOnto(int operator, int position) {
-        if(position != m_maxPositions && position > arity) arity = position;
+        if (position != m_maxPositions && position > arity)
+            arity = position;
         position = 1 << position;
         Integer curValue = m_expression.get(operator);
         if (curValue != null) {
@@ -130,13 +128,31 @@ public class NormalizedAtomicExpressionMapImpl
         return false;
     }
 
+    public NormalizedAtomicExpressionMapImpl withOrderedArguments(){
+
+        Integer[] ord = new Integer[arity];
+        for(int i = 0; i < arity; ++i){
+            ord[i] = readPosition(i + 1);
+        }
+        Arrays.sort(ord);
+
+        NormalizedAtomicExpressionMapImpl rExpr = new NormalizedAtomicExpressionMapImpl();
+        rExpr.writeOnto(readPosition(0),0);
+        for(int i = 0; i < arity; ++i){
+            rExpr.writeOnto(ord[i], i + 1);
+        }
+        int root = readRoot();
+        if(root >= 0) {
+            rExpr.writeToRoot(root);
+        }
+        return rExpr;
+    }
     /**
      *
      * @param root
      */
     protected void writeToRoot(int root) {
-        int position = 1 << m_maxPositions;
-        m_expression.put(root, position);
+        writeOnto(root, m_maxPositions);
     }
 
     protected int readRoot() {
@@ -174,7 +190,6 @@ public class NormalizedAtomicExpressionMapImpl
         return arity;
     }
 
-
     public String toHumanReadableString(Registry registry) {
         if (m_expression.isEmpty()) {
             return "empty expression";
@@ -202,10 +217,12 @@ public class NormalizedAtomicExpressionMapImpl
 
         return r;
     }
+
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return m_expression.hashCode();
     }
+
     @Override
     public String toString() {
         return m_expression.toString();

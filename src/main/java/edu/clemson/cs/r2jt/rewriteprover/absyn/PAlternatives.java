@@ -12,13 +12,7 @@
  */
 package edu.clemson.cs.r2jt.rewriteprover.absyn;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 import edu.clemson.cs.r2jt.absyn.AltItemExp;
 import edu.clemson.cs.r2jt.absyn.AlternativeExp;
@@ -333,7 +327,14 @@ public class PAlternatives extends PExp {
             retval = substitutions.get(this);
         }
         else {
-            retval = this;
+            List<PExp> conditions = new ArrayList<PExp>();
+            List<PExp> results = new ArrayList<PExp>();
+            PExp otherwise = myOtherwiseClauseResult.substitute(substitutions);
+            for(Alternative a : myAlternatives){
+                conditions.add(a.condition.substitute(substitutions));
+                results.add(a.result.substitute(substitutions));
+            }
+            retval = new PAlternatives(conditions,results,otherwise,getType(),getTypeValue());
         }
 
         return retval;
