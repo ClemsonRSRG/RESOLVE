@@ -217,6 +217,21 @@ public class VCGenerator extends TreeWalkerVisitor {
                     getConstraints(dec.getLocation(), myCurrentModuleScope
                             .getImports());
 
+            // Obtain the global type constraints from the module parameters
+            Exp typeConstraints =
+                    getModuleTypeConstraint(dec.getLocation(), dec
+                            .getParameters());
+            if (!typeConstraints.isLiteralTrue()) {
+                if (myGlobalConstraintExp.isLiteralTrue()) {
+                    myGlobalConstraintExp = typeConstraints;
+                }
+                else {
+                    myGlobalConstraintExp =
+                            myTypeGraph.formConjunct(typeConstraints,
+                                    myGlobalConstraintExp);
+                }
+            }
+
             // Store the global requires clause
             myGlobalRequiresExp = getRequiresClause(dec.getLocation(), dec);
 
@@ -237,6 +252,21 @@ public class VCGenerator extends TreeWalkerVisitor {
                     myGlobalRequiresExp =
                             myTypeGraph.formConjunct(myGlobalRequiresExp,
                                     conceptRequires);
+                }
+            }
+
+            // Obtain the global type constraints from the Concept module parameters
+            Exp conceptTypeConstraints =
+                    getModuleTypeConstraint(conceptModuleDec.getLocation(),
+                            conceptModuleDec.getParameters());
+            if (!conceptTypeConstraints.isLiteralTrue()) {
+                if (myGlobalConstraintExp.isLiteralTrue()) {
+                    myGlobalConstraintExp = conceptTypeConstraints;
+                }
+                else {
+                    myGlobalConstraintExp =
+                            myTypeGraph.formConjunct(conceptTypeConstraints,
+                                    myGlobalConstraintExp);
                 }
             }
         }
@@ -290,6 +320,21 @@ public class VCGenerator extends TreeWalkerVisitor {
                     getConstraints(dec.getLocation(), myCurrentModuleScope
                             .getImports());
 
+            // Obtain the global type constraints from the module parameters
+            Exp typeConstraints =
+                    getModuleTypeConstraint(dec.getLocation(), dec
+                            .getParameters());
+            if (!typeConstraints.isLiteralTrue()) {
+                if (myGlobalConstraintExp.isLiteralTrue()) {
+                    myGlobalConstraintExp = typeConstraints;
+                }
+                else {
+                    myGlobalConstraintExp =
+                            myTypeGraph.formConjunct(typeConstraints,
+                                    myGlobalConstraintExp);
+                }
+            }
+
             // Store the global requires clause
             myGlobalRequiresExp = getRequiresClause(dec.getLocation(), dec);
 
@@ -313,6 +358,21 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
             }
 
+            // Obtain the global type constraints from the Concept module parameters
+            Exp conceptTypeConstraints =
+                    getModuleTypeConstraint(conceptModuleDec.getLocation(),
+                            conceptModuleDec.getParameters());
+            if (!conceptTypeConstraints.isLiteralTrue()) {
+                if (myGlobalConstraintExp.isLiteralTrue()) {
+                    myGlobalConstraintExp = conceptTypeConstraints;
+                }
+                else {
+                    myGlobalConstraintExp =
+                            myTypeGraph.formConjunct(conceptTypeConstraints,
+                                    myGlobalConstraintExp);
+                }
+            }
+
             // Obtain the global requires clause from the Enhancement
             EnhancementModuleDec enhancementModuleDec =
                     (EnhancementModuleDec) mySymbolTable.getModuleScope(
@@ -329,6 +389,22 @@ public class VCGenerator extends TreeWalkerVisitor {
                     myGlobalRequiresExp =
                             myTypeGraph.formConjunct(myGlobalRequiresExp,
                                     enhancementRequires);
+                }
+            }
+
+            // Obtain the global type constraints from the Concept module parameters
+            Exp enhancementTypeConstraints =
+                    getModuleTypeConstraint(enhancementModuleDec.getLocation(),
+                            enhancementModuleDec.getParameters());
+            if (!enhancementTypeConstraints.isLiteralTrue()) {
+                if (myGlobalConstraintExp.isLiteralTrue()) {
+                    myGlobalConstraintExp = enhancementTypeConstraints;
+                }
+                else {
+                    myGlobalConstraintExp =
+                            myTypeGraph.formConjunct(
+                                    enhancementTypeConstraints,
+                                    myGlobalConstraintExp);
                 }
             }
         }
@@ -1264,6 +1340,89 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         return retExp;
+    }
+
+    /**
+     * <p>Returns all the constraint clauses combined together for the
+     * for the list of module parameters.</p>
+     *
+     * @param loc The location of the <code>ModuleDec</code>.
+     * @param moduleParameterDecs The list of parameter for this module.
+     *
+     * @return The constraint clause <code>Exp</code>.
+     */
+    private Exp getModuleTypeConstraint(Location loc,
+            List<ModuleParameterDec> moduleParameterDecs) {
+        Exp retVal = myTypeGraph.getTrueVarExp();
+        for (ModuleParameterDec m : moduleParameterDecs) {
+            Dec wrappedDec = m.getWrappedDec();
+            if (wrappedDec instanceof ConstantParamDec) {
+                ConstantParamDec dec = (ConstantParamDec) wrappedDec;
+                ProgramTypeEntry typeEntry;
+
+                if (dec.getTy() instanceof NameTy) {
+                    NameTy pNameTy = (NameTy) dec.getTy();
+
+                    // Query for the type entry in the symbol table
+                    SymbolTableEntry ste =
+                            Utilities.searchProgramType(pNameTy.getLocation(),
+                                    pNameTy.getQualifier(), pNameTy.getName(),
+                                    myCurrentModuleScope);
+
+                    if (ste instanceof ProgramTypeEntry) {
+                        typeEntry =
+                                ste.toProgramTypeEntry(pNameTy.getLocation());
+                    }
+                    else {
+                        typeEntry =
+                                ste.toRepresentationTypeEntry(
+                                        pNameTy.getLocation())
+                                        .getDefiningTypeEntry();
+                    }
+
+                    // Make sure we don't have a generic type
+                    if (typeEntry.getDefiningElement() instanceof TypeDec) {
+                        // Obtain the original dec from the AST
+                        TypeDec type = (TypeDec) typeEntry.getDefiningElement();
+
+                        // Create a variable expression from the declared variable
+                        VarExp varDecExp =
+                                Utilities.createVarExp(dec.getLocation(), null,
+                                        dec.getName(),
+                                        typeEntry.getModelType(), null);
+
+                        // Create a variable expression from the type exemplar
+                        VarExp exemplar =
+                                Utilities.createVarExp(type.getLocation(),
+                                        null, type.getExemplar(), typeEntry
+                                                .getModelType(), null);
+
+                        // Deep copy the original constraint clause
+                        Exp constraint = Exp.copy(type.getConstraint());
+                        constraint =
+                                Utilities.replace(constraint, exemplar,
+                                        varDecExp);
+
+                        // Conjunct to our other constraints (if any)
+                        if (!constraint.isLiteralTrue()) {
+                            if (retVal.isLiteralTrue()) {
+                                retVal = constraint;
+                            }
+                            else {
+                                retVal =
+                                        myTypeGraph.formConjunct(retVal,
+                                                constraint);
+                            }
+                        }
+                    }
+                }
+                else {
+                    Utilities.tyNotHandled(dec.getTy(), loc);
+                }
+            }
+        }
+
+        return retVal;
     }
 
     /**
