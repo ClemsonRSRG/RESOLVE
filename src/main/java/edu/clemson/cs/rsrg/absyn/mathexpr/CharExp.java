@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical character expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical character expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
@@ -71,7 +71,8 @@ public class CharExp extends MathExp {
 
         if (myCharacter != null) {
             printSpace(indentSize + innerIndentSize, sb);
-            sb.append(myCharacter.toString() + "\n");
+            sb.append(myCharacter.toString());
+            sb.append("\n");
         }
 
         return sb.toString();
@@ -157,7 +158,7 @@ public class CharExp extends MathExp {
      * subexpressions. The result of this calling this method should
      * always be an empty list, because we can not contain an expression.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {
