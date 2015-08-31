@@ -14,7 +14,6 @@ package edu.clemson.cs.rsrg.absyn.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
-import edu.clemson.cs.rsrg.errorhandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
 import java.util.Iterator;

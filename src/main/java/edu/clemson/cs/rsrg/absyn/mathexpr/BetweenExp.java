@@ -21,7 +21,8 @@ import java.util.Map;
 
 /**
  * <p>This is the class for a list of mathematical expressions that
- * are joined together by the "and" operator.</p>
+ * are joined together by the "and" operator that the compiler builds
+ * from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
@@ -72,11 +73,9 @@ public class BetweenExp extends MathExp {
         sb.append("BetweenExp\n");
 
         if (myJoiningExps != null) {
-            Iterator<Exp> i = myJoiningExps.iterator();
-            while (i.hasNext()) {
-                Exp temp = i.next();
-                if (temp != null) {
-                    sb.append(temp.asString(indentSize + innerIndentSize,
+            for (Exp exp : myJoiningExps) {
+                if (exp != null) {
+                    sb.append(exp.asString(indentSize + innerIndentSize,
                             innerIndentSize));
                 }
             }
@@ -217,33 +216,21 @@ public class BetweenExp extends MathExp {
      * <p>This method returns a deep copy of the list of
      * joining subexpressions.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing joining {@link Exp}s.
      */
     public List<Exp> getJoiningExps() {
-        List<Exp> copyJoiningExps = new ArrayList<>();
-        Iterator<Exp> altIt = myJoiningExps.iterator();
-        while (altIt.hasNext()) {
-            copyJoiningExps.add(altIt.next().clone());
-        }
-
-        return copyJoiningExps;
+        return copyExps();
     }
 
     /**
      * <p>This method returns a deep copy of the list of
      * subexpressions.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {
-        List<Exp> copyJoiningExps = new ArrayList<>();
-        Iterator<Exp> altIt = myJoiningExps.iterator();
-        while (altIt.hasNext()) {
-            copyJoiningExps.add(altIt.next().clone());
-        }
-
-        return copyJoiningExps;
+        return copyExps();
     }
 
     /**
@@ -318,15 +305,7 @@ public class BetweenExp extends MathExp {
      */
     @Override
     protected Exp copy() {
-        Location newLoc = new Location(myLoc);
-
-        List<Exp> newJoiningExps = new ArrayList<>();
-        Iterator<Exp> it = myJoiningExps.iterator();
-        while (it.hasNext()) {
-            newJoiningExps.add(it.next().clone());
-        }
-
-        return new BetweenExp(newLoc, newJoiningExps);
+        return new BetweenExp(new Location(myLoc), copyExps());
     }
 
     /**
@@ -351,5 +330,24 @@ public class BetweenExp extends MathExp {
         }
 
         return new BetweenExp(new Location(myLoc), newJoiningExps);
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>This is a helper method that makes a copy of the
+     * list of between expressions.</p>
+     *
+     * @return A list containing {@link Exp}s.
+     */
+    private List<Exp> copyExps() {
+        List<Exp> copyJoiningExps = new ArrayList<>();
+        for (Exp exp : myJoiningExps) {
+            copyJoiningExps.add(exp.clone());
+        }
+
+        return copyJoiningExps;
     }
 }
