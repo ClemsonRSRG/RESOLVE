@@ -209,15 +209,15 @@ public class AltItemExp extends MathExp {
     /**
      * <p>This method returns the list of subexpressions.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {
-        List<Exp> list = new ArrayList<>();
-        list.add(myTestingExp.clone());
-        list.add(myAssignmentExp.clone());
+        List<Exp> subExpList = new ArrayList<>();
+        subExpList.add(myTestingExp.clone());
+        subExpList.add(myAssignmentExp.clone());
 
-        return list;
+        return subExpList;
     }
 
     /**
