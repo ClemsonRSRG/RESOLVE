@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical unary minus expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical unary minus expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
@@ -180,7 +180,7 @@ public class UnaryMinusExp extends MathExp {
     /**
      * <p>This method returns the list of subexpressions.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {

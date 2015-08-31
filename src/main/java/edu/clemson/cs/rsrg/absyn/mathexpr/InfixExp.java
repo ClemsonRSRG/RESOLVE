@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the abstract base class for all the mathematical infix expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the abstract base class for all the mathematical infix expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
@@ -267,7 +267,7 @@ public class InfixExp extends AbstractFunctionExp {
      * <p>This method method returns a deep copy of the list of
      * subexpressions.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {
@@ -364,12 +364,6 @@ public class InfixExp extends AbstractFunctionExp {
                     MathExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
         }
 
-        // Simplify A -> true to true
-        if (operatorName.equals("implies") && rightHandSide instanceof VarExp
-                && MathExp.isLiteralTrue(rightHandSide)) {
-            retVal = MathExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
-        }
-
         // Our right hand side is an InfixExp
         if (operatorName.equals("implies") && rightHandSide instanceof InfixExp) {
             PosSymbol innerOperaratorName =
@@ -441,6 +435,12 @@ public class InfixExp extends AbstractFunctionExp {
                         new InfixExp(new Location(myLoc), qual, leftHandSide,
                                 operatorName, rightHandSide);
             }
+        }
+        // Simplify A -> true to true
+        else if (operatorName.equals("implies")
+                && rightHandSide instanceof VarExp
+                && MathExp.isLiteralTrue(rightHandSide)) {
+            retVal = MathExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
         }
         else {
             retVal =
@@ -522,19 +522,24 @@ public class InfixExp extends AbstractFunctionExp {
         StringBuffer sb = new StringBuffer();
 
         if (myQualifier != null) {
-            sb.append(myQualifier.toString() + "::");
+            sb.append(myQualifier.toString());
+            sb.append("::");
         }
 
         if (myLeftHandSide != null) {
-            sb.append("(" + myLeftHandSide.toString() + " ");
+            sb.append("(");
+            sb.append(myLeftHandSide.toString());
+            sb.append(" ");
         }
 
         if (myOperationName != null) {
-            sb.append(myOperationName.toString() + " ");
+            sb.append(myOperationName.toString());
+            sb.append(" ");
         }
 
         if (myRightHandSide != null) {
-            sb.append(myRightHandSide.toString() + ")");
+            sb.append(myRightHandSide.toString());
+            sb.append(")");
         }
 
         return sb.toString();

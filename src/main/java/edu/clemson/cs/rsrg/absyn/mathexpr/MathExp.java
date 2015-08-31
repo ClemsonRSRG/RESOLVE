@@ -21,8 +21,8 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
 
 /**
- * <p>This is the abstract base class for all the mathematical expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the abstract base class for all the mathematical expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */

@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the "old" mathematical expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the "old" mathematical expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * <p>An "old" expression is an expression that refers to the
  * incoming value of the expression.</p>
@@ -181,7 +181,7 @@ public class OldExp extends MathExp {
     /**
      * <p>Returns a deep copy of this old expression's actual expression.</p>
      *
-     * @return The assignment {@link Exp} object.
+     * @return The {@link Exp} that we are applying the "old" operator to.
      */
     public Exp getExp() {
         return myOrigExp.clone();
@@ -190,7 +190,7 @@ public class OldExp extends MathExp {
     /**
      * <p>This method returns the list of subexpressions.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {
@@ -268,7 +268,8 @@ public class OldExp extends MathExp {
     public String toString() {
         StringBuffer sb = new StringBuffer();
         if (myOrigExp != null) {
-            sb.append("#" + myOrigExp.toString());
+            sb.append("#");
+            sb.append(myOrigExp.toString());
         }
 
         return sb.toString();

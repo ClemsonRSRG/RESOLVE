@@ -13,7 +13,6 @@
 package edu.clemson.cs.rsrg.absyn.mathexpr;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
-import edu.clemson.cs.r2jt.typereasoning2.TypeGraph;
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -22,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical variable expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical variable expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
@@ -228,7 +227,7 @@ public class VarExp extends MathExp {
      * subexpressions. The result of this calling this method should
      * always be an empty list, because we can not contain an expression.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {

@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the abstract base class for all the mathematical equality/inequality expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the abstract base class for all the mathematical equality/inequality expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
@@ -109,7 +109,8 @@ public class EqualsExp extends AbstractFunctionExp {
         }
 
         printSpace(indentSize + innerIndentSize, sb);
-        sb.append(myOperator.name() + "\n");
+        sb.append(myOperator.name());
+        sb.append("\n");
 
         if (myRightHandSide != null) {
             sb.append(myRightHandSide.asString(indentSize + innerIndentSize,
@@ -263,7 +264,7 @@ public class EqualsExp extends AbstractFunctionExp {
      * <p>This method method returns a deep copy of the list of
      * subexpressions.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {
@@ -358,17 +359,22 @@ public class EqualsExp extends AbstractFunctionExp {
         StringBuffer sb = new StringBuffer();
 
         if (myQualifier != null) {
-            sb.append(myQualifier.toString() + "::");
+            sb.append(myQualifier.toString());
+            sb.append("::");
         }
 
         if (myLeftHandSide != null) {
-            sb.append("(" + myLeftHandSide.toString() + " ");
+            sb.append("(");
+            sb.append(myLeftHandSide.toString());
+            sb.append(" ");
         }
 
-        sb.append(myOperator.toString() + " ");
+        sb.append(myOperator.toString());
+        sb.append(" ");
 
         if (myRightHandSide != null) {
-            sb.append(myRightHandSide.toString() + ")");
+            sb.append(myRightHandSide.toString());
+            sb.append(")");
         }
 
         return sb.toString();
