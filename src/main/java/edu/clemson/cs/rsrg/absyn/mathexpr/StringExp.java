@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical string expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical string expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
@@ -30,9 +30,7 @@ public class StringExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /**
-     * <p>The string representing this mathematical string</p>
-     */
+    /** <p>The inner representation for this mathematical string</p>*/
     private final String myString;
 
     // ===========================================================
@@ -40,7 +38,7 @@ public class StringExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a string expression.</p>
+     * <p>This constructs a mathematical string expression.</p>
      *
      * @param l A {@link Location} representation object.
      * @param s A {@link String} expression.
@@ -72,7 +70,8 @@ public class StringExp extends MathExp {
 
         if (myString != null) {
             printSpace(indentSize + innerIndentSize, sb);
-            sb.append(myString + "\n");
+            sb.append(myString);
+            sb.append("\n");
         }
 
         return sb.toString();
@@ -155,7 +154,7 @@ public class StringExp extends MathExp {
      * subexpressions. The result of this calling this method should
      * always be an empty list, because we can not contain an expression.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {
@@ -163,12 +162,12 @@ public class StringExp extends MathExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the character value.</p>
+     * <p>This method returns the string value.</p>
      *
      * @return The {@link String} value.
      */
     public String getValue() {
-        return new String(myString);
+        return myString;
     }
 
     /**
@@ -229,7 +228,7 @@ public class StringExp extends MathExp {
      */
     @Override
     protected Exp copy() {
-        return new StringExp(new Location(myLoc), new String(myString));
+        return new StringExp(new Location(myLoc), myString);
     }
 
     /**
@@ -248,7 +247,7 @@ public class StringExp extends MathExp {
      */
     @Override
     public Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new StringExp(new Location(myLoc), new String(myString));
+        return new StringExp(new Location(myLoc), myString);
     }
 
 }

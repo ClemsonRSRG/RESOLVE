@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical integer expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical integer expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
@@ -42,7 +42,7 @@ public class IntegerExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a integer expression.</p>
+     * <p>This constructs a mathematical integer expression.</p>
      *
      * @param l A {@link Location} representation object.
      * @param qualifier A {@link PosSymbol} representation object.
@@ -82,7 +82,8 @@ public class IntegerExp extends MathExp {
         }
 
         printSpace(indentSize + innerIndentSize, sb);
-        sb.append(myInteger + "\n");
+        sb.append(myInteger);
+        sb.append("\n");
 
         return sb.toString();
     }
@@ -177,7 +178,7 @@ public class IntegerExp extends MathExp {
      * subexpressions. The result of this calling this method should
      * always be an empty list, because we can not contain an expression.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {
@@ -185,7 +186,7 @@ public class IntegerExp extends MathExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the character value.</p>
+     * <p>This method returns a deep copy of the integer value.</p>
      *
      * @return The {@link Integer} value.
      */
@@ -233,7 +234,8 @@ public class IntegerExp extends MathExp {
     public String toString() {
         StringBuffer sb = new StringBuffer();
         if (myQualifier != null) {
-            sb.append(myQualifier + "::");
+            sb.append(myQualifier);
+            sb.append("::");
         }
         sb.append(myInteger);
 

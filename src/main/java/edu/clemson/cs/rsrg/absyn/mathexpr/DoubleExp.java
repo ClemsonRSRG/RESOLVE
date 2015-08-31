@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical double expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical double expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
@@ -38,7 +38,7 @@ public class DoubleExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a character expression.</p>
+     * <p>This constructs a mathematical character expression.</p>
      *
      * @param l A {@link Location} representation object.
      * @param d A {@link double} value.
@@ -70,7 +70,8 @@ public class DoubleExp extends MathExp {
         sb.append("DoubleExp\n");
 
         printSpace(indentSize + innerIndentSize, sb);
-        sb.append(myDouble + "\n");
+        sb.append(myDouble);
+        sb.append("\n");
 
         return sb.toString();
     }
@@ -156,7 +157,7 @@ public class DoubleExp extends MathExp {
      * subexpressions. The result of this calling this method should
      * always be an empty list, because we can not contain an expression.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {

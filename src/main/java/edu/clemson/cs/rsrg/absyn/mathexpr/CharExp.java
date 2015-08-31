@@ -38,7 +38,7 @@ public class CharExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a character expression.</p>
+     * <p>This constructs a mathematical character expression.</p>
      *
      * @param l A {@link Location} representation object.
      * @param c A {@link Character} expression.
