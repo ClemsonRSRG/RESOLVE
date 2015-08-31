@@ -13,6 +13,8 @@
 package edu.clemson.cs.rsrg.absyn.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.Exp;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.errorhandling.exception.SourceErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical alternative expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical alternative expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
@@ -53,7 +55,8 @@ public class AlternativeExp extends MathExp {
             foundOtherwise = foundOtherwise || (e.getTest() == null);
         }
         if (!foundOtherwise) {
-            throw new IllegalArgumentException("Must have otherwise.");
+            throw new MiscErrorException("Must have otherwise.",
+                    new IllegalArgumentException());
         }
     }
 
@@ -65,10 +68,10 @@ public class AlternativeExp extends MathExp {
      * <p>This method creates a special indented
      * text version of the class as a string.</p>
      *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
+     * @param indentSize        The base indentation to the first line
+     *                          of the text.
+     * @param innerIndentSize   The additional indentation increment
+     *                          for the subsequent lines.
      *
      * @return A formatted text string of the class.
      */
@@ -79,11 +82,9 @@ public class AlternativeExp extends MathExp {
         sb.append("AlternativeExp\n");
 
         if (myAlternatives != null) {
-            Iterator<AltItemExp> i = myAlternatives.iterator();
-            while (i.hasNext()) {
-                AltItemExp temp = i.next();
-                if (temp != null) {
-                    sb.append(temp.asString(indentSize + innerIndentSize,
+            for (AltItemExp exp : myAlternatives) {
+                if (exp != null) {
+                    sb.append(exp.asString(indentSize + innerIndentSize,
                             innerIndentSize));
                 }
             }
@@ -123,9 +124,9 @@ public class AlternativeExp extends MathExp {
      *  <p>This method attempts to find an expression with the given name in our
      * subexpressions.</p>
      *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
+     * @param varName   Expression name.
+     * @param IsOldExp  Flag to indicate if the given name is of the form
+     *                  "#[varName]"
      *
      * @return True if there is a {@link Exp} within this object's
      * subexpressions that matches <code>varName</code>. False otherwise.
@@ -216,34 +217,26 @@ public class AlternativeExp extends MathExp {
      * <p>This method returns a deep copy of the
      * list of alternative expressions.</p>
      *
-     * @return A list containing {@link AltItemExp} type objects.
+     * @return A list containing {@link AltItemExp}s.
      */
     public List<AltItemExp> getAlternatives() {
-        List<AltItemExp> copyAlternatives = new ArrayList<>();
-        Iterator<AltItemExp> altIt = myAlternatives.iterator();
-        while (altIt.hasNext()) {
-            AltItemExp copyItem = (AltItemExp) altIt.next().clone();
-            copyAlternatives.add(copyItem);
-        }
-
-        return copyAlternatives;
+        return copyAltItemList();
     }
 
     /**
      * <p>This method returns a deep copy of the list of
      * subexpressions.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {
-        List<Exp> list = new ArrayList<>();
-        Iterator<AltItemExp> altIt = myAlternatives.iterator();
-        while (altIt.hasNext()) {
-            list.add(altIt.next().clone());
+        List<Exp> subExpList = new ArrayList<>();
+        for (AltItemExp exp : myAlternatives) {
+            subExpList.add(exp.clone());
         }
 
-        return list;
+        return subExpList;
     }
 
     /**
@@ -294,11 +287,9 @@ public class AlternativeExp extends MathExp {
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("{{");
-        Iterator<AltItemExp> it = myAlternatives.iterator();
-        while (it.hasNext()) {
-            sb.append(it.next().toString());
+        for (AltItemExp exp : myAlternatives) {
+            sb.append(exp.toString());
             sb.append("\n");
-
         }
         sb.append("}}");
 
@@ -317,15 +308,7 @@ public class AlternativeExp extends MathExp {
      */
     @Override
     protected Exp copy() {
-        Location newLoc = new Location(myLoc);
-
-        List<AltItemExp> newAlternatives = new ArrayList<>();
-        Iterator<AltItemExp> it = myAlternatives.iterator();
-        while (it.hasNext()) {
-            newAlternatives.add((AltItemExp) it.next().clone());
-        }
-
-        return new AlternativeExp(newLoc, newAlternatives);
+        return new AlternativeExp(new Location(myLoc), copyAltItemList());
     }
 
     /**
@@ -350,5 +333,24 @@ public class AlternativeExp extends MathExp {
         }
 
         return new AlternativeExp(myLoc, newAlternatives);
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>This is a helper method that makes a copy of the
+     * list of alternative expressions.</p>
+     *
+     * @return A list containing {@link AltItemExp}s.
+     */
+    private List<AltItemExp> copyAltItemList() {
+        List<AltItemExp> copyAlternatives = new ArrayList<>();
+        for (AltItemExp exp : myAlternatives) {
+            copyAlternatives.add((AltItemExp) exp.clone());
+        }
+
+        return copyAlternatives;
     }
 }
