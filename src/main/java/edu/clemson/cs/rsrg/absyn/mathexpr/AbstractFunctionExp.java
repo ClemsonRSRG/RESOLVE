@@ -23,8 +23,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>This is the abstract base class for all the mathematical function expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the abstract base class for all the mathematical function expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
