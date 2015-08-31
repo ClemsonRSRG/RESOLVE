@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical dotted expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical dotted expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
@@ -221,16 +221,10 @@ public class DotExp extends MathExp {
     /**
      * <p>This method returns a deep copy of all the inner expressions.</p>
      *
-     * @return A list containing all the inner {@link Exp} representation objects.
+     * @return A list containing all the segmented {@link Exp}s.
      */
     public List<Exp> getSegments() {
-        List<Exp> copySegmentExps = new ArrayList<>();
-        Iterator<Exp> altIt = mySegmentExps.iterator();
-        while (altIt.hasNext()) {
-            copySegmentExps.add(altIt.next().clone());
-        }
-
-        return copySegmentExps;
+        return copyExps();
     }
 
     /**
@@ -238,7 +232,7 @@ public class DotExp extends MathExp {
      * subexpressions. This method will return the same result
      * as calling the {@link DotExp#getSegments()} method.</p>
      *
-     * @return A list containing {@link Exp} type objects.
+     * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {
@@ -330,13 +324,7 @@ public class DotExp extends MathExp {
      */
     @Override
     protected Exp copy() {
-        Iterator<Exp> it = mySegmentExps.iterator();
-        List<Exp> newSegments = new ArrayList<>();
-        while (it.hasNext()) {
-            newSegments.add(it.next().clone());
-        }
-
-        return new DotExp(new Location(myLoc), newSegments);
+        return new DotExp(new Location(myLoc), copyExps());
     }
 
     /**
@@ -361,5 +349,24 @@ public class DotExp extends MathExp {
         }
 
         return new DotExp(new Location(myLoc), newSegments);
+    }
+
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>This is a helper method that makes a copy of the
+     * list containing all the segment expressions.</p>
+     *
+     * @return A list containing {@link Exp}s.
+     */
+    private List<Exp> copyExps() {
+        List<Exp> copyJoiningExps = new ArrayList<>();
+        for (Exp exp : mySegmentExps) {
+            copyJoiningExps.add(exp.clone());
+        }
+
+        return copyJoiningExps;
     }
 }
