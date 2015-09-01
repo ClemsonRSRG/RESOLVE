@@ -1,5 +1,5 @@
 /**
- * EqualsExp.java
+ * OutfixExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -20,46 +20,151 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the abstract base class for all the mathematical equality/inequality expressions
+ * <p>This is the abstract base class for all the mathematical outfix expressions
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class EqualsExp extends AbstractFunctionExp {
+public class OutfixExp extends AbstractFunctionExp {
 
     // ===========================================================
     // Operators
     // ===========================================================
 
     public enum Operator {
-        EQUAL {
+        ANGLE {
+
+            @Override
+            public String getLeftDelimiterString() {
+                return "<";
+            }
+
+            @Override
+            public String getRightDelimiterString() {
+                return ">";
+            }
 
             @Override
             public String toString() {
-                return "=";
+                return "ANGLE";
             }
+
         },
-        NOT_EQUAL {
+        DBL_ANGLE {
+
+            @Override
+            public String getLeftDelimiterString() {
+                return "<<";
+            }
+
+            @Override
+            public String getRightDelimiterString() {
+                return ">>";
+            }
 
             @Override
             public String toString() {
-                return "/=";
+                return "DBL_ANGLE";
             }
-        }
+
+        },
+        SQUARE {
+
+            @Override
+            public String getLeftDelimiterString() {
+                return "[";
+            }
+
+            @Override
+            public String getRightDelimiterString() {
+                return "]";
+            }
+
+            @Override
+            public String toString() {
+                return "SQUARE";
+            }
+
+        },
+        DBL_SQUARE {
+
+            @Override
+            public String getLeftDelimiterString() {
+                return "[[";
+            }
+
+            @Override
+            public String getRightDelimiterString() {
+                return "]]";
+            }
+
+            @Override
+            public String toString() {
+                return "DBL_SQUARE";
+            }
+
+        },
+        BAR {
+
+            @Override
+            public String getLeftDelimiterString() {
+                return "|";
+            }
+
+            @Override
+            public String getRightDelimiterString() {
+                return "|";
+            }
+
+            @Override
+            public String toString() {
+                return "BAR";
+            }
+
+        },
+        DBL_BAR {
+
+            @Override
+            public String getLeftDelimiterString() {
+                return "||";
+            }
+
+            @Override
+            public String getRightDelimiterString() {
+                return "||";
+            }
+
+            @Override
+            public String toString() {
+                return "DBL_BAR";
+            }
+
+        };
+
+        /**
+         * <p>Returns the left delimiter as a string.</p>
+         *
+         * @return A string.
+         */
+        public abstract String getLeftDelimiterString();
+
+        /**
+         * <p>Returns the right delimiter as a string.</p>
+         *
+         * @return A string.
+         */
+        public abstract String getRightDelimiterString();
     }
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression on the left hand side.</p> */
-    private final Exp myLeftHandSide;
-
-    /** <p>The expression's operation.</p> */
+    /** <p>The expression's operator.</p> */
     private final Operator myOperator;
 
-    /** <p>The expression on the right hand side.</p> */
-    private final Exp myRightHandSide;
+    /** <p>The argument expression.</p> */
+    private final Exp myArgument;
 
     // ===========================================================
     // Constructors
@@ -70,16 +175,13 @@ public class EqualsExp extends AbstractFunctionExp {
      *
      * @param l A {@link Location} representation object.
      * @param qual A {@link PosSymbol} representing the expression's qualifier.
-     * @param left A {@link Exp} representing the left hand side.
      * @param operator A {@link Operator} representing the operator.
-     * @param right A {@link Exp} representing the right hand side.
+     * @param argument A {@link Exp} representing the right hand side.
      */
-    public EqualsExp(Location l, PosSymbol qual, Exp left, Operator operator,
-            Exp right) {
+    public OutfixExp(Location l, PosSymbol qual, Operator operator, Exp argument) {
         super(l, qual);
-        myLeftHandSide = left;
         myOperator = operator;
-        myRightHandSide = right;
+        myArgument = argument;
     }
 
     // ===========================================================
@@ -101,19 +203,14 @@ public class EqualsExp extends AbstractFunctionExp {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("EqualsExp\n");
-
-        if (myLeftHandSide != null) {
-            sb.append(myLeftHandSide.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-        }
+        sb.append("OutfixExp\n");
 
         printSpace(indentSize + innerIndentSize, sb);
-        sb.append(myOperator.name());
+        sb.append(myOperator.toString());
         sb.append("\n");
 
-        if (myRightHandSide != null) {
-            sb.append(myRightHandSide.asString(indentSize + innerIndentSize,
+        if (myArgument != null) {
+            sb.append(myArgument.asString(indentSize + innerIndentSize,
                     innerIndentSize));
         }
 
@@ -131,12 +228,7 @@ public class EqualsExp extends AbstractFunctionExp {
      */
     @Override
     public boolean containsExp(Exp exp) {
-        boolean found = myLeftHandSide.containsExp(exp);
-        if (!found) {
-            found = myRightHandSide.containsExp(exp);
-        }
-
-        return found;
+        return myArgument.containsExp(exp);
     }
 
     /**
@@ -152,17 +244,12 @@ public class EqualsExp extends AbstractFunctionExp {
      */
     @Override
     public boolean containsVar(String varName, boolean IsOldExp) {
-        boolean found = myLeftHandSide.containsVar(varName, IsOldExp);
-        if (!found) {
-            found = myRightHandSide.containsVar(varName, IsOldExp);
-        }
-
-        return found;
+        return myArgument.containsVar(varName, IsOldExp);
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link EqualsExp} class.</p>
+     * for the {@link OutfixExp} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -171,17 +258,14 @@ public class EqualsExp extends AbstractFunctionExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof EqualsExp) {
-            EqualsExp eAsEqualsExp = (EqualsExp) o;
-            result = myLoc.equals(eAsEqualsExp.myLoc);
+        if (o instanceof OutfixExp) {
+            OutfixExp eAsOutfixExp = (OutfixExp) o;
+            result = myLoc.equals(eAsOutfixExp.myLoc);
 
             if (result) {
                 result =
-                        (myOperator == eAsEqualsExp.myOperator)
-                                && myLeftHandSide
-                                        .equals(eAsEqualsExp.myLeftHandSide)
-                                && myRightHandSide
-                                        .equals(eAsEqualsExp.myRightHandSide);
+                        myOperator.equals(eAsOutfixExp.myOperator)
+                                && myArgument.equals(eAsOutfixExp.myArgument);
             }
         }
 
@@ -202,27 +286,25 @@ public class EqualsExp extends AbstractFunctionExp {
      */
     @Override
     public boolean equivalent(Exp e) {
-        boolean retval = e instanceof EqualsExp;
+        boolean retval = e instanceof OutfixExp;
+
         if (retval) {
-            EqualsExp eAsEquals = (EqualsExp) e;
+            OutfixExp eAsOutfix = (OutfixExp) e;
             retval =
-                    (myOperator == eAsEquals.myOperator)
-                            && (myLeftHandSide
-                                    .equivalent(eAsEquals.myLeftHandSide))
-                            && (myRightHandSide
-                                    .equivalent(eAsEquals.myRightHandSide));
+                    (myOperator == eAsOutfix.myOperator)
+                            && equivalent(myArgument, eAsOutfix.myArgument);
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns a deep copy of the left hand side expression.</p>
+     * <p>This method returns a deep copy of the argument expression.</p>
      *
      * @return The {@link Exp} representation object.
      */
-    public Exp getLeft() {
-        return myLeftHandSide.clone();
+    public Exp getArgument() {
+        return myArgument.clone();
     }
 
     /**
@@ -242,16 +324,8 @@ public class EqualsExp extends AbstractFunctionExp {
      */
     @Override
     public String getOperatorAsString() {
-        return myOperator.toString();
-    }
-
-    /**
-     * <p>This method returns a deep copy of the right hand side expression.</p>
-     *
-     * @return The {@link Exp} representation object.
-     */
-    public Exp getRight() {
-        return myRightHandSide.clone();
+        return myOperator.getLeftDelimiterString() + "_"
+                + myOperator.getRightDelimiterString();
     }
 
     /**
@@ -263,8 +337,7 @@ public class EqualsExp extends AbstractFunctionExp {
     @Override
     public List<Exp> getSubExpressions() {
         List<Exp> subExps = new ArrayList<>();
-        subExps.add(myLeftHandSide.clone());
-        subExps.add(myRightHandSide.clone());
+        subExps.add(myArgument.clone());
 
         return subExps;
     }
@@ -274,20 +347,19 @@ public class EqualsExp extends AbstractFunctionExp {
      * For all inherited programming expression classes, this method
      * should throw an exception.</p>
      *
-     * @return The resulting {@link EqualsExp} from applying the remember rule.
+     * @return The resulting {@link OutfixExp} from applying the remember rule.
      */
     @Override
-    public EqualsExp remember() {
-        Exp newLeft = ((MathExp) myLeftHandSide).remember();
-        Exp newRight = ((MathExp) myRightHandSide).remember();
+    public Exp remember() {
+        Exp newArgument = ((MathExp) myArgument).remember();
 
         PosSymbol qualifier = null;
         if (myQualifier != null) {
             qualifier = myQualifier.clone();
         }
 
-        return new EqualsExp(new Location(myLoc), qualifier, newLeft,
-                myOperator, newRight);
+        return new OutfixExp(new Location(myLoc), qualifier, myOperator,
+                newArgument);
     }
 
     /**
@@ -298,14 +370,7 @@ public class EqualsExp extends AbstractFunctionExp {
      */
     // TODO: See the message in Exp.
     /*public void setSubExpression(int index, Exp e) {
-        switch (index) {
-            case 0:
-                myLeftHandSide = e;
-                break;
-            case 1:
-                myRightHandSide = e;
-                break;
-        }
+        myArgument = e;
     }*/
 
     /**
@@ -315,16 +380,7 @@ public class EqualsExp extends AbstractFunctionExp {
      */
     @Override
     public MathExp simplify() {
-        Exp simplified;
-        if (myLeftHandSide.equivalent(myRightHandSide)) {
-            simplified =
-                    MathExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
-        }
-        else {
-            simplified = this.clone();
-        }
-
-        return (MathExp) simplified;
+        return this.clone();
     }
 
     /**
@@ -341,19 +397,15 @@ public class EqualsExp extends AbstractFunctionExp {
             sb.append("::");
         }
 
-        if (myLeftHandSide != null) {
-            sb.append("(");
-            sb.append(myLeftHandSide.toString());
-            sb.append(" ");
-        }
-
-        sb.append(myOperator.toString());
+        sb.append(myOperator.getLeftDelimiterString());
         sb.append(" ");
 
-        if (myRightHandSide != null) {
-            sb.append(myRightHandSide.toString());
-            sb.append(")");
+        if (myArgument != null) {
+            sb.append(myArgument.toString());
         }
+
+        sb.append(" ");
+        sb.append(myOperator.getRightDelimiterString());
 
         return sb.toString();
     }
@@ -375,8 +427,8 @@ public class EqualsExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
-        return new EqualsExp(new Location(myLoc), qualifier, myLeftHandSide
-                .clone(), myOperator, myRightHandSide.clone());
+        return new OutfixExp(new Location(myLoc), qualifier, myOperator,
+                myArgument.clone());
     }
 
     /**
@@ -400,9 +452,8 @@ public class EqualsExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
-        return new EqualsExp(new Location(myLoc), qualifier, substitute(
-                myLeftHandSide, substitutions), myOperator, substitute(
-                myRightHandSide, substitutions));
+        return new OutfixExp(new Location(myLoc), qualifier, myOperator,
+                substitute(myArgument, substitutions));
     }
 
 }

@@ -136,7 +136,8 @@ public class InfixExp extends AbstractFunctionExp {
      *
      * @param exp The expression we wish to locate.
      *
-     * @return False.
+     * @return True if there is an instance of <code>exp</code>
+     * within this object's subexpressions. False otherwise.
      */
     @Override
     public boolean containsExp(Exp exp) {
@@ -156,7 +157,8 @@ public class InfixExp extends AbstractFunctionExp {
      * @param IsOldExp Flag to indicate if the given name is of the form
      *                 "#[varName]"
      *
-     * @return False.
+     * @return True if there is a {@link Exp} within this object's
+     * subexpressions that matches <code>varName</code>. False otherwise.
      */
     @Override
     public boolean containsVar(String varName, boolean IsOldExp) {
@@ -272,8 +274,8 @@ public class InfixExp extends AbstractFunctionExp {
     @Override
     public List<Exp> getSubExpressions() {
         List<Exp> subExps = new ArrayList<>();
-        subExps.add(myLeftHandSide);
-        subExps.add(myRightHandSide);
+        subExps.add(myLeftHandSide.clone());
+        subExps.add(myRightHandSide.clone());
 
         return subExps;
     }
@@ -287,24 +289,8 @@ public class InfixExp extends AbstractFunctionExp {
      */
     @Override
     public InfixExp remember() {
-        Exp newLeft = myLeftHandSide;
-        if (myLeftHandSide instanceof OldExp) {
-            newLeft = ((MathExp) ((OldExp) myLeftHandSide).getExp()).remember();
-        }
-
-        Exp newRight = myRightHandSide;
-        if (myRightHandSide instanceof OldExp) {
-            newRight =
-                    ((MathExp) ((OldExp) myRightHandSide).getExp()).remember();
-        }
-
-        if (newLeft != null) {
-            newLeft = ((MathExp) newLeft).remember();
-        }
-
-        if (newRight != null) {
-            newRight = ((MathExp) newRight).remember();
-        }
+        Exp newLeft = ((MathExp) myLeftHandSide).remember();
+        Exp newRight = ((MathExp) myRightHandSide).remember();
 
         PosSymbol qualifier = null;
         if (myQualifier != null) {
@@ -557,9 +543,13 @@ public class InfixExp extends AbstractFunctionExp {
      */
     @Override
     protected Exp copy() {
-        return new InfixExp(new Location(myLoc), myQualifier.clone(),
-                myLeftHandSide.clone(), myOperationName.clone(),
-                myRightHandSide.clone());
+        PosSymbol qualifier = null;
+        if (myQualifier != null) {
+            qualifier = myQualifier.clone();
+        }
+
+        return new InfixExp(new Location(myLoc), qualifier, myLeftHandSide
+                .clone(), myOperationName.clone(), myRightHandSide.clone());
     }
 
     /**
@@ -578,9 +568,14 @@ public class InfixExp extends AbstractFunctionExp {
      */
     @Override
     protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new InfixExp(new Location(myLoc), myQualifier.clone(),
-                substitute(myLeftHandSide, substitutions), myOperationName
-                        .clone(), substitute(myRightHandSide, substitutions));
+        PosSymbol qualifier = null;
+        if (myQualifier != null) {
+            qualifier = myQualifier.clone();
+        }
+
+        return new InfixExp(new Location(myLoc), qualifier, substitute(
+                myLeftHandSide, substitutions), myOperationName.clone(),
+                substitute(myRightHandSide, substitutions));
     }
 
     // ===========================================================
