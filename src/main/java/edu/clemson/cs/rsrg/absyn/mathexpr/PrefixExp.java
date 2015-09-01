@@ -1,5 +1,5 @@
 /**
- * EqualsExp.java
+ * PrefixExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -20,66 +20,39 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the abstract base class for all the mathematical equality/inequality expressions
+ * <p>This is the abstract base class for all the mathematical prefix expressions
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class EqualsExp extends AbstractFunctionExp {
-
-    // ===========================================================
-    // Operators
-    // ===========================================================
-
-    public enum Operator {
-        EQUAL {
-
-            @Override
-            public String toString() {
-                return "=";
-            }
-        },
-        NOT_EQUAL {
-
-            @Override
-            public String toString() {
-                return "/=";
-            }
-        }
-    }
+public class PrefixExp extends AbstractFunctionExp {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression on the left hand side.</p> */
-    private final Exp myLeftHandSide;
-
     /** <p>The expression's operation.</p> */
-    private final Operator myOperator;
+    private final PosSymbol myOperationName;
 
-    /** <p>The expression on the right hand side.</p> */
-    private final Exp myRightHandSide;
+    /** <p>The argument expression.</p> */
+    private final Exp myArgument;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs an equality/inequality expression.</p>
+     * <p>This constructs an infix expression.</p>
      *
      * @param l A {@link Location} representation object.
      * @param qual A {@link PosSymbol} representing the expression's qualifier.
-     * @param left A {@link Exp} representing the left hand side.
-     * @param operator A {@link Operator} representing the operator.
-     * @param right A {@link Exp} representing the right hand side.
+     * @param opName A {@link PosSymbol} representing the operator.
+     * @param argument A {@link Exp} representing the right hand side.
      */
-    public EqualsExp(Location l, PosSymbol qual, Exp left, Operator operator,
-            Exp right) {
+    public PrefixExp(Location l, PosSymbol qual, PosSymbol opName, Exp argument) {
         super(l, qual);
-        myLeftHandSide = left;
-        myOperator = operator;
-        myRightHandSide = right;
+        myOperationName = opName;
+        myArgument = argument;
     }
 
     // ===========================================================
@@ -101,19 +74,15 @@ public class EqualsExp extends AbstractFunctionExp {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("EqualsExp\n");
+        sb.append("PrefixExp\n");
 
-        if (myLeftHandSide != null) {
-            sb.append(myLeftHandSide.asString(indentSize + innerIndentSize,
+        if (myOperationName != null) {
+            sb.append(myOperationName.asString(indentSize + innerIndentSize,
                     innerIndentSize));
         }
 
-        printSpace(indentSize + innerIndentSize, sb);
-        sb.append(myOperator.name());
-        sb.append("\n");
-
-        if (myRightHandSide != null) {
-            sb.append(myRightHandSide.asString(indentSize + innerIndentSize,
+        if (myArgument != null) {
+            sb.append(myArgument.asString(indentSize + innerIndentSize,
                     innerIndentSize));
         }
 
@@ -131,12 +100,7 @@ public class EqualsExp extends AbstractFunctionExp {
      */
     @Override
     public boolean containsExp(Exp exp) {
-        boolean found = myLeftHandSide.containsExp(exp);
-        if (!found) {
-            found = myRightHandSide.containsExp(exp);
-        }
-
-        return found;
+        return myArgument.containsExp(exp);
     }
 
     /**
@@ -152,17 +116,12 @@ public class EqualsExp extends AbstractFunctionExp {
      */
     @Override
     public boolean containsVar(String varName, boolean IsOldExp) {
-        boolean found = myLeftHandSide.containsVar(varName, IsOldExp);
-        if (!found) {
-            found = myRightHandSide.containsVar(varName, IsOldExp);
-        }
-
-        return found;
+        return myArgument.containsVar(varName, IsOldExp);
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link EqualsExp} class.</p>
+     * for the {@link PrefixExp} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -171,17 +130,14 @@ public class EqualsExp extends AbstractFunctionExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof EqualsExp) {
-            EqualsExp eAsEqualsExp = (EqualsExp) o;
-            result = myLoc.equals(eAsEqualsExp.myLoc);
+        if (o instanceof PrefixExp) {
+            PrefixExp eAsPrefixExp = (PrefixExp) o;
+            result = myLoc.equals(eAsPrefixExp.myLoc);
 
             if (result) {
                 result =
-                        (myOperator == eAsEqualsExp.myOperator)
-                                && myLeftHandSide
-                                        .equals(eAsEqualsExp.myLeftHandSide)
-                                && myRightHandSide
-                                        .equals(eAsEqualsExp.myRightHandSide);
+                        myOperationName.equals(eAsPrefixExp.myOperationName)
+                                && myArgument.equals(eAsPrefixExp.myArgument);
             }
         }
 
@@ -202,36 +158,27 @@ public class EqualsExp extends AbstractFunctionExp {
      */
     @Override
     public boolean equivalent(Exp e) {
-        boolean retval = e instanceof EqualsExp;
+        boolean retval = (e instanceof PrefixExp);
+
         if (retval) {
-            EqualsExp eAsEquals = (EqualsExp) e;
+            PrefixExp eAsPrefixExp = (PrefixExp) e;
             retval =
-                    (myOperator == eAsEquals.myOperator)
-                            && (myLeftHandSide
-                                    .equivalent(eAsEquals.myLeftHandSide))
-                            && (myRightHandSide
-                                    .equivalent(eAsEquals.myRightHandSide));
+                    Exp.posSymbolEquivalent(myOperationName,
+                            eAsPrefixExp.myOperationName)
+                            && Exp.equivalent(myArgument,
+                                    eAsPrefixExp.myArgument);
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns a deep copy of the left hand side expression.</p>
+     * <p>This method returns a deep copy of the argument expression.</p>
      *
      * @return The {@link Exp} representation object.
      */
-    public Exp getLeft() {
-        return myLeftHandSide.clone();
-    }
-
-    /**
-     * <p>This method returns the operator.</p>
-     *
-     * @return A {link Operator} object containing the operator.
-     */
-    public Operator getOperator() {
-        return myOperator;
+    public Exp getArgument() {
+        return myArgument.clone();
     }
 
     /**
@@ -241,7 +188,7 @@ public class EqualsExp extends AbstractFunctionExp {
      */
     @Override
     public PosSymbol getOperatorAsPosSymbol() {
-        return new PosSymbol(new Location(myLoc), getOperatorAsString());
+        return myOperationName.clone();
     }
 
     /**
@@ -251,16 +198,7 @@ public class EqualsExp extends AbstractFunctionExp {
      */
     @Override
     public String getOperatorAsString() {
-        return myOperator.toString();
-    }
-
-    /**
-     * <p>This method returns a deep copy of the right hand side expression.</p>
-     *
-     * @return The {@link Exp} representation object.
-     */
-    public Exp getRight() {
-        return myRightHandSide.clone();
+        return myOperationName.toString();
     }
 
     /**
@@ -272,8 +210,7 @@ public class EqualsExp extends AbstractFunctionExp {
     @Override
     public List<Exp> getSubExpressions() {
         List<Exp> subExps = new ArrayList<>();
-        subExps.add(myLeftHandSide.clone());
-        subExps.add(myRightHandSide.clone());
+        subExps.add(myArgument.clone());
 
         return subExps;
     }
@@ -283,20 +220,19 @@ public class EqualsExp extends AbstractFunctionExp {
      * For all inherited programming expression classes, this method
      * should throw an exception.</p>
      *
-     * @return The resulting {@link EqualsExp} from applying the remember rule.
+     * @return The resulting {@link PrefixExp} from applying the remember rule.
      */
     @Override
-    public EqualsExp remember() {
-        Exp newLeft = ((MathExp) myLeftHandSide).remember();
-        Exp newRight = ((MathExp) myRightHandSide).remember();
+    public Exp remember() {
+        Exp newArgument = ((MathExp) myArgument).remember();
 
         PosSymbol qualifier = null;
         if (myQualifier != null) {
             qualifier = myQualifier.clone();
         }
 
-        return new EqualsExp(new Location(myLoc), qualifier, newLeft,
-                myOperator, newRight);
+        return new PrefixExp(new Location(myLoc), qualifier, myOperationName
+                .clone(), newArgument);
     }
 
     /**
@@ -307,14 +243,7 @@ public class EqualsExp extends AbstractFunctionExp {
      */
     // TODO: See the message in Exp.
     /*public void setSubExpression(int index, Exp e) {
-        switch (index) {
-            case 0:
-                myLeftHandSide = e;
-                break;
-            case 1:
-                myRightHandSide = e;
-                break;
-        }
+        myArgument = e;
     }*/
 
     /**
@@ -323,17 +252,40 @@ public class EqualsExp extends AbstractFunctionExp {
      * @return The resulting {@link MathExp} from applying the simplification step.
      */
     @Override
-    public MathExp simplify() {
-        Exp simplified;
-        if (myLeftHandSide.equivalent(myRightHandSide)) {
-            simplified =
-                    MathExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
+    public Exp simplify() {
+        Exp newArgument;
+        if (myArgument instanceof EqualsExp) {
+            EqualsExp equalsExp = (EqualsExp) myArgument;
+
+            EqualsExp.Operator newOperator;
+            if (equalsExp.getOperator() == EqualsExp.Operator.EQUAL) {
+                newOperator = EqualsExp.Operator.NOT_EQUAL;
+            }
+            else {
+                newOperator = EqualsExp.Operator.EQUAL;
+            }
+
+            PosSymbol qualifier = equalsExp.getQualifier();
+            if (qualifier != null) {
+                qualifier = qualifier.clone();
+            }
+
+            newArgument =
+                    new EqualsExp(new Location(equalsExp.getLocation()),
+                            qualifier, equalsExp.getLeft(), newOperator,
+                            equalsExp.getRight());
         }
         else {
-            simplified = this.clone();
+            newArgument = this.clone();
         }
 
-        return (MathExp) simplified;
+        PosSymbol qualifier = null;
+        if (myQualifier != null) {
+            qualifier = myQualifier.clone();
+        }
+
+        return new PrefixExp(new Location(myLoc), qualifier, myOperationName
+                .clone(), newArgument);
     }
 
     /**
@@ -350,18 +302,14 @@ public class EqualsExp extends AbstractFunctionExp {
             sb.append("::");
         }
 
-        if (myLeftHandSide != null) {
-            sb.append("(");
-            sb.append(myLeftHandSide.toString());
-            sb.append(" ");
+        if (myOperationName != null) {
+            sb.append(getOperatorAsString());
         }
 
-        sb.append(myOperator.toString());
-        sb.append(" ");
-
-        if (myRightHandSide != null) {
-            sb.append(myRightHandSide.toString());
-            sb.append(")");
+        if (myArgument != null) {
+            sb.append("( ");
+            sb.append(myArgument.toString());
+            sb.append(" )");
         }
 
         return sb.toString();
@@ -384,8 +332,8 @@ public class EqualsExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
-        return new EqualsExp(new Location(myLoc), qualifier, myLeftHandSide
-                .clone(), myOperator, myRightHandSide.clone());
+        return new PrefixExp(new Location(myLoc), qualifier, myOperationName
+                .clone(), myArgument.clone());
     }
 
     /**
@@ -409,9 +357,8 @@ public class EqualsExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
-        return new EqualsExp(new Location(myLoc), qualifier, substitute(
-                myLeftHandSide, substitutions), myOperator, substitute(
-                myRightHandSide, substitutions));
+        return new PrefixExp(new Location(myLoc), qualifier, myOperationName
+                .clone(), substitute(myArgument, substitutions));
     }
 
 }

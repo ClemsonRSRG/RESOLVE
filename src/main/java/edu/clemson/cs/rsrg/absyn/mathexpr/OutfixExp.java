@@ -205,14 +205,12 @@ public class OutfixExp extends AbstractFunctionExp {
         printSpace(indentSize, sb);
         sb.append("OutfixExp\n");
 
-        printSpace(indentSize + innerIndentSize, sb);
-        sb.append(myOperator.toString());
-        sb.append("\n");
-
+        sb.append(myOperator.getLeftDelimiterString());
         if (myArgument != null) {
             sb.append(myArgument.asString(indentSize + innerIndentSize,
                     innerIndentSize));
         }
+        sb.append(myOperator.getRightDelimiterString());
 
         return sb.toString();
     }
@@ -305,6 +303,15 @@ public class OutfixExp extends AbstractFunctionExp {
      */
     public Exp getArgument() {
         return myArgument.clone();
+    }
+
+    /**
+     * <p>This method returns the operator.</p>
+     *
+     * @return A {link Operator} object containing the operator.
+     */
+    public Operator getOperator() {
+        return myOperator;
     }
 
     /**

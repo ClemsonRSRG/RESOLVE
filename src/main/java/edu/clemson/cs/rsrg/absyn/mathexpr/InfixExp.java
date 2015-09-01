@@ -519,7 +519,7 @@ public class InfixExp extends AbstractFunctionExp {
         }
 
         if (myOperationName != null) {
-            sb.append(myOperationName.toString());
+            sb.append(getOperatorAsString());
             sb.append(" ");
         }
 
