@@ -1,5 +1,5 @@
 /**
- * DotExp.java
+ * SetCollectionExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -13,43 +13,38 @@
 package edu.clemson.cs.rsrg.absyn.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.Exp;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import java.io.InvalidClassException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
- * <p>This is the class for all the mathematical dotted expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical set (as a collection)
+ * expressions that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class DotExp extends MathExp {
+public class SetCollectionExp extends MathExp {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's collection of inner expressions.</p> */
-    private final List<Exp> mySegmentExps;
+    /** <p>The list of member expressions in this set collection.</p> */
+    private Set<MathExp> myMembers;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a dotted expression to keep track
-     * of all the inner expressions.</p>
+     * <p>This constructs a mathematical set collection expression.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param segments A list of {@link Exp} object.
+     * @param vars A set of {@link MathExp}s where each one is a member
+     *             in this set.
      */
-    public DotExp(Location l, List<Exp> segments) {
+    public SetCollectionExp(Location l, Set<MathExp> vars) {
         super(l);
-        mySegmentExps = segments;
+        myMembers = vars;
     }
 
     // ===========================================================
@@ -60,25 +55,36 @@ public class DotExp extends MathExp {
      * <p>This method creates a special indented
      * text version of the class as a string.</p>
      *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
+     * @param indentSize      The base indentation to the first line
+     *                        of the text.
      * @param innerIndentSize The additional indentation increment
      *                        for the subsequent lines.
-     *
      * @return A formatted text string of the class.
      */
     @Override
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("DotExp\n");
+        sb.append("SetCollectionExp\n");
 
-        if (mySegmentExps != null) {
-            for (Exp e : mySegmentExps) {
-                sb.append(e.asString(indentSize + innerIndentSize,
-                        innerIndentSize));
+        sb.append("{");
+        if (myMembers != null) {
+            if (myMembers.isEmpty()) {
+                sb.append("");
+            }
+            else {
+                Iterator<MathExp> i = myMembers.iterator();
+                while (i.hasNext()) {
+                    MathExp m = i.next();
+                    sb.append(m.asString(indentSize, innerIndentSize));
+
+                    if (i.hasNext()) {
+                        sb.append(", ");
+                    }
+                }
             }
         }
+        sb.append("}");
 
         return sb.toString();
     }
@@ -95,15 +101,13 @@ public class DotExp extends MathExp {
     @Override
     public boolean containsExp(Exp exp) {
         boolean found = false;
-        if (mySegmentExps != null) {
-            Iterator<Exp> i = mySegmentExps.iterator();
-            while (i.hasNext() && !found) {
-                Exp temp = i.next();
-                if (temp != null) {
-                    if (temp.containsExp(exp)) {
-                        found = true;
-                    }
-                }
+
+        Iterator<MathExp> i = myMembers.iterator();
+        while (i.hasNext() && !found) {
+            MathExp m = i.next();
+
+            if (m != null) {
+                found = m.containsExp(exp);
             }
         }
 
@@ -111,28 +115,24 @@ public class DotExp extends MathExp {
     }
 
     /**
-     *  <p>This method attempts to find an expression with the given name in our
+     * <p>This method attempts to find an expression with the given name in our
      * subexpressions.</p>
      *
-     * @param varName Expression name.
+     * @param varName  Expression name.
      * @param IsOldExp Flag to indicate if the given name is of the form
      *                 "#[varName]"
-     *
-     * @return True if there is a {@link Exp} within this object's
-     * subexpressions that matches <code>varName</code>. False otherwise.
+     * @return False.
      */
     @Override
     public boolean containsVar(String varName, boolean IsOldExp) {
         boolean found = false;
-        if (mySegmentExps != null) {
-            Iterator<Exp> i = mySegmentExps.iterator();
-            while (i.hasNext() && !found) {
-                Exp temp = i.next();
-                if (temp != null) {
-                    if (temp.containsVar(varName, IsOldExp)) {
-                        found = true;
-                    }
-                }
+
+        Iterator<MathExp> i = myMembers.iterator();
+        while (i.hasNext() && !found) {
+            MathExp m = i.next();
+
+            if (m != null) {
+                found = m.containsVar(varName, IsOldExp);
             }
         }
 
@@ -141,7 +141,7 @@ public class DotExp extends MathExp {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link DotExp} class.</p>
+     * for the {@link SetCollectionExp} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -150,27 +150,26 @@ public class DotExp extends MathExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof DotExp) {
-            DotExp eAsDotExp = (DotExp) o;
-            result = myLoc.equals(eAsDotExp.myLoc);
+        if (o instanceof SetCollectionExp) {
+            SetCollectionExp eAsSetCollectionExp = (SetCollectionExp) o;
+            result = myLoc.equals(eAsSetCollectionExp.myLoc);
 
             if (result) {
-                if (mySegmentExps != null && eAsDotExp.mySegmentExps != null) {
-                    Iterator<Exp> thisSegmentExps = mySegmentExps.iterator();
-                    Iterator<Exp> eSegmentExps =
-                            eAsDotExp.mySegmentExps.iterator();
-
-                    while (result && thisSegmentExps.hasNext()
-                            && eSegmentExps.hasNext()) {
+                if (myMembers != null && eAsSetCollectionExp.myMembers != null) {
+                    Iterator<MathExp> thisMemberExps = myMembers.iterator();
+                    Iterator<MathExp> eMemberExps =
+                            eAsSetCollectionExp.myMembers.iterator();
+                    while (result && thisMemberExps.hasNext()
+                            && eMemberExps.hasNext()) {
                         result &=
-                                thisSegmentExps.next().equals(
-                                        eSegmentExps.next());
+                                thisMemberExps.next()
+                                        .equals(eMemberExps.next());
                     }
 
                     //Both had better have run out at the same time
                     result &=
-                            (!thisSegmentExps.hasNext())
-                                    && (!eSegmentExps.hasNext());
+                            (!thisMemberExps.hasNext())
+                                    && (!eMemberExps.hasNext());
                 }
             }
         }
@@ -192,26 +191,25 @@ public class DotExp extends MathExp {
      */
     @Override
     public boolean equivalent(Exp e) {
-        boolean result = (e instanceof DotExp);
+        boolean result = (e instanceof SetCollectionExp);
 
         if (result) {
-            DotExp eAsDotExp = (DotExp) e;
+            SetCollectionExp eAsSetCollectionExp = (SetCollectionExp) e;
 
-            if (mySegmentExps != null && eAsDotExp.mySegmentExps != null) {
-                Iterator<Exp> thisSegmentExps = mySegmentExps.iterator();
-                Iterator<Exp> eSegmentExps = eAsDotExp.mySegmentExps.iterator();
-                while (result && thisSegmentExps.hasNext()
-                        && eSegmentExps.hasNext()) {
-
+            if (myMembers != null && eAsSetCollectionExp.myMembers != null) {
+                Iterator<MathExp> thisMemberExps = myMembers.iterator();
+                Iterator<MathExp> eMemberExps =
+                        eAsSetCollectionExp.myMembers.iterator();
+                while (result && thisMemberExps.hasNext()
+                        && eMemberExps.hasNext()) {
                     result &=
-                            thisSegmentExps.next().equivalent(
-                                    eSegmentExps.next());
+                            thisMemberExps.next()
+                                    .equivalent(eMemberExps.next());
                 }
 
                 //Both had better have run out at the same time
                 result &=
-                        (!thisSegmentExps.hasNext())
-                                && (!eSegmentExps.hasNext());
+                        (!thisMemberExps.hasNext()) && (!eMemberExps.hasNext());
             }
         }
 
@@ -219,24 +217,29 @@ public class DotExp extends MathExp {
     }
 
     /**
-     * <p>This method returns a deep copy of all the inner expressions.</p>
-     *
-     * @return A list containing all the segmented {@link Exp}s.
-     */
-    public List<Exp> getSegments() {
-        return copyExps();
-    }
-
-    /**
      * <p>This method method returns a deep copy of the list of
-     * subexpressions. This method will return the same result
-     * as calling the {@link DotExp#getSegments()} method.</p>
+     * subexpressions.</p>
      *
      * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {
-        return getSegments();
+        List<Exp> subExpList = new ArrayList<>();
+        for (MathExp m : myMembers) {
+            subExpList.add(m.clone());
+        }
+
+        return subExpList;
+    }
+
+    /**
+     * <p>This method returns a deep copy of all the
+     * variable expressions in this set.</p>
+     *
+     * @return A set containing all the {@link MathExp}s.
+     */
+    public Set<MathExp> getVars() {
+        return copyExps();
     }
 
     /**
@@ -244,26 +247,16 @@ public class DotExp extends MathExp {
      * For all inherited programming expression classes, this method
      * should throw an exception.</p>
      *
-     * @return The resulting {@link DotExp} from applying the remember rule.
+     * @return The resulting {@link SetCollectionExp} from applying the remember rule.
      */
     @Override
-    public DotExp remember() {
-        List<Exp> newSegmentExps = new ArrayList<>();
-        for (Exp e : mySegmentExps) {
-            Exp copyExp;
-            if (e instanceof MathExp){
-                copyExp = ((MathExp) e).remember();
-            }
-            else {
-                throw new MiscErrorException("We encountered an expression of the type " +
-                        e.getClass().getName(),
-                        new InvalidClassException(""));
-            }
-
-            newSegmentExps.add(copyExp);
+    public SetCollectionExp remember() {
+        Set<MathExp> newVarExps = new HashSet<>();
+        for (MathExp m : myMembers) {
+            newVarExps.add((MathExp) m.remember());
         }
 
-        return new DotExp(new Location(myLoc), newSegmentExps);
+        return new SetCollectionExp(new Location(myLoc), newVarExps);
     }
 
     /**
@@ -273,9 +266,7 @@ public class DotExp extends MathExp {
      * @param e The new {@link Exp} to be added.
      */
     // TODO: See the message in Exp.
-    /*public void setSubExpression(int index, Exp e) {
-        segments.set(index, e);
-    }*/
+    //public void setSubExpression(int index, Exp e) {}
 
     /**
      * <p>This method applies the VC Generator's simplification step.</p>
@@ -295,16 +286,20 @@ public class DotExp extends MathExp {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        if (mySegmentExps != null) {
-            Iterator<Exp> i = mySegmentExps.iterator();
+
+        sb.append("{");
+        if (myMembers != null) {
+            Iterator<MathExp> i = myMembers.iterator();
 
             while (i.hasNext()) {
                 sb.append(i.next().toString());
+
                 if (i.hasNext()) {
-                    sb.append(".");
+                    sb.append(", ");
                 }
             }
         }
+        sb.append("}");
 
         return sb.toString();
     }
@@ -321,7 +316,7 @@ public class DotExp extends MathExp {
      */
     @Override
     protected Exp copy() {
-        return new DotExp(new Location(myLoc), copyExps());
+        return new SetCollectionExp(new Location(myLoc), copyExps());
     }
 
     /**
@@ -340,12 +335,12 @@ public class DotExp extends MathExp {
      */
     @Override
     public Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        List<Exp> newSegments = new ArrayList<>();
-        for (Exp e : mySegmentExps) {
-            newSegments.add(substitute(e, substitutions));
+        Set<MathExp> newMembers = new HashSet<>();
+        for (MathExp m : myMembers) {
+            newMembers.add((MathExp) substitute(m, substitutions));
         }
 
-        return new DotExp(new Location(myLoc), newSegments);
+        return new SetCollectionExp(new Location(myLoc), newMembers);
     }
 
     // ===========================================================
@@ -354,16 +349,16 @@ public class DotExp extends MathExp {
 
     /**
      * <p>This is a helper method that makes a copy of the
-     * list containing all the segment expressions.</p>
+     * list containing all the variable expressions.</p>
      *
-     * @return A list containing {@link Exp}s.
+     * @return A list containing {@link MathExp}s.
      */
-    private List<Exp> copyExps() {
-        List<Exp> copyJoiningExps = new ArrayList<>();
-        for (Exp exp : mySegmentExps) {
-            copyJoiningExps.add(exp.clone());
+    private Set<MathExp> copyExps() {
+        Set<MathExp> copyMathExps = new HashSet<>();
+        for (MathExp v : myMembers) {
+            copyMathExps.add(v.clone());
         }
 
-        return copyJoiningExps;
+        return copyMathExps;
     }
 }
