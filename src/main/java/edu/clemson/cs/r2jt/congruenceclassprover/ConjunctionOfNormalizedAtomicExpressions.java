@@ -69,7 +69,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         m_timeToEnd = Long.MAX_VALUE;
         m_current_justification = justification;
         String rString = "";
-        boolean haPart = false;
+        /*boolean haPart = false;
         for (String eS : expression.getSymbolNames()) {
             String root = m_registry.getRootSymbolForSymbol(eS);
             if (m_registry.m_partTypes.contains(root)) {
@@ -80,10 +80,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (haPart) {
             List<PExp> frs = makeFRestr(expression);
             for (PExp pf : frs) {
-                rString += addExpression(pf);
+                rString += "[forced] " + pf.toString() + "\n\t" + addExpression(pf);
                 System.err.println(pf.toString());
             }
-        }
+        }*/
         rString += addExpression(expression);
         m_current_justification = "";
         updateUseMap();
@@ -140,8 +140,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             return mergeOperators(lhs, rhs);
         }
         else if (name.equals("and")) {
-            addExpression(expression.getSubExpressions().get(0));
-            addExpression(expression.getSubExpressions().get(1));
+            String r = "";
+            r += addExpression(expression.getSubExpressions().get(0));
+            r += addExpression(expression.getSubExpressions().get(1));
+            return r;
         }
         else {
             MTType type = expression.getType();
@@ -260,7 +262,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      */
     private int addAtomicFormula(NormalizedAtomicExpressionMapImpl atomicFormula) {
         // Order terms if operator is commutative
-        if(m_registry.isCommutative(atomicFormula.readPosition(0))){
+        if (m_registry.isCommutative(atomicFormula.readPosition(0))) {
             atomicFormula = atomicFormula.withOrderedArguments();
         }
         int posIfFound = Collections.binarySearch(m_exprList, atomicFormula);
@@ -318,7 +320,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             int opA = m_registry.findAndCompress(holdingTank.pop());
             int opB = m_registry.findAndCompress(holdingTank.pop());
             // Want to replace quantified vars with constant if it is equal to the constant
-            if(opB < opA ){
+            int keeper = chooseSymbolToKeep(opA,opB);
+            if (keeper == opB) {
                 int temp = opA;
                 opA = opB;
                 opB = temp;
@@ -335,6 +338,16 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rString;
     }
 
+    // need to choose literals over vars for theorem matching purposes
+    // i.e. the theorem expression should keep the literals
+    protected int chooseSymbolToKeep(int a, int b){
+        String s = m_registry.m_indexToSymbol.get(a);
+        if(s.contains("¢"))
+            return b;
+        if(m_registry.getUsage(s).equals(Registry.Usage.FORALL))
+            return b;
+        return a;
+    }
     // look for =(x,y)=true in list.  If found call merge(x,y).
     //  = will always be at top of list.
     // These expression will not be removed by this function,
@@ -378,7 +391,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         while (it.hasNext()) {
             NormalizedAtomicExpressionMapImpl curr = it.next();
             if (curr.replaceOperator(b, a)) {
-                if(m_registry.isCommutative(curr.readPosition(0))){
+                if (m_registry.isCommutative(curr.readPosition(0))) {
                     curr = curr.withOrderedArguments();
                 }
                 modifiedEntries.push(curr);
@@ -447,20 +460,224 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
     }
 
+    protected Set<NormalizedAtomicExpressionMapImpl> multiKeyUseMapSearch(Set<String> keys){
+
+        Set<NormalizedAtomicExpressionMapImpl> resultSet = new HashSet<NormalizedAtomicExpressionMapImpl>();
+        boolean firstkey = true;
+        for(String k :keys){
+            int rKey = m_registry.getIndexForSymbol(k);
+            if(!m_useMap.containsKey(rKey)){
+                return null;
+            }
+            Set<NormalizedAtomicExpressionMapImpl> tResults =
+                    new HashSet<NormalizedAtomicExpressionMapImpl>(m_useMap.get(rKey));
+            if(tResults==null || tResults.isEmpty()) return null;
+            if(firstkey){
+                resultSet = tResults;
+                firstkey = false;
+            }
+            else{ // result is intersection
+                resultSet.retainAll(tResults);
+            }
+        }
+        return resultSet;
+    }
     protected Set<java.util.Map<String, String>> getMatchesForOverideSet(
             NormalizedAtomicExpressionMapImpl expr, Registry exprReg,
             Set<Map<String, String>> foreignSymbolOverideSet) {
         Set<java.util.Map<String, String>> rSet =
                 new HashSet<Map<String, String>>();
         for (Map<String, String> fs_m : foreignSymbolOverideSet) {
-            Set<java.util.Map<String, String>> results =
-                    getMatches(expr, exprReg, fs_m);
+            Set<java.util.Map<String, String>> results = getMatches(expr, exprReg, fs_m);
             if (results != null && results.size() != 0)
                 rSet.addAll(results);
         }
         return rSet;
     }
 
+    protected Set<Map<String,String>> getMatchesForEq(NormalizedAtomicExpressionMapImpl expr, Registry exprReg,
+                                                      Map<String, String> foreignSymbolOveride) {
+        // Identify the literals.
+        Set<String> literalsInexpr = new HashSet<String>();
+        Map<String,Integer> exprMMap = expr.getEquationOperatorsAsStrings(exprReg);
+        for(String s : exprMMap.keySet()){
+            String lit = "";
+            if(!foreignSymbolOveride.containsKey(s)){
+                lit = s;
+            } else if(!foreignSymbolOveride.get(s).equals("")){
+                // wildcard may have been bound in search for another expression
+                lit = foreignSymbolOveride.get(s);
+            }
+            if(!lit.equals("")) {
+                if (!m_registry.m_symbolToIndex.containsKey(lit)) return null;
+                literalsInexpr.add(lit);
+            }
+
+        }
+
+        Set<NormalizedAtomicExpressionMapImpl> vCNaemlsWithAllLiterals = multiKeyUseMapSearch(literalsInexpr);
+        String deleteme = toString();
+        if(vCNaemlsWithAllLiterals == null) return null;
+
+        Set<NormalizedAtomicExpressionMapImpl> filtered_vcNaemlsWithAllLiterals;
+        // std filter. opnum -> bitcode. means opnum must be used at each position indicated by the bitcode
+        NormalizedAtomicExpressionMapImpl filter = new NormalizedAtomicExpressionMapImpl();
+        for(String s : literalsInexpr){
+            // all literals in the search expr have to already be in the Vc.
+            // find all positions
+            int allPositionsLitIsUsedInSearchExpr = 0;
+            int vcInt = m_registry.getIndexForSymbol(s);
+            if(exprReg.m_symbolToIndex.containsKey(s)){
+                int sInt = exprReg.getIndexForSymbol(s);
+                filter.overwriteEntry(vcInt,expr.readOperator(sInt));
+            }
+            else {
+                for (String baseMapK : foreignSymbolOveride.keySet()) {
+                    if (foreignSymbolOveride.get(baseMapK).equals(s)) {
+                        allPositionsLitIsUsedInSearchExpr |= expr.getPositionBitCodeForStringOp(baseMapK, exprReg);
+                    }
+                }
+                filter.overwriteEntry(vcInt,allPositionsLitIsUsedInSearchExpr);
+            }
+
+        }
+        boolean isCommutOp = exprReg.isCommutative(expr.readPosition(0));
+
+        if(!isCommutOp){
+            filtered_vcNaemlsWithAllLiterals = nonCommutativeFilter(vCNaemlsWithAllLiterals,filter);
+            return getBindings_NonCommutative(filtered_vcNaemlsWithAllLiterals,foreignSymbolOveride,expr,exprReg);
+        }
+        else{
+            filtered_vcNaemlsWithAllLiterals = commutativeFilter(vCNaemlsWithAllLiterals, filter);
+            return getBindings_Commutative(filtered_vcNaemlsWithAllLiterals, foreignSymbolOveride, expr, exprReg);
+        }
+    }
+
+    Set<Map<String,String>> getBindings_Commutative(Set<NormalizedAtomicExpressionMapImpl> vcEquations, Map<String,String> basemap,
+                                                       NormalizedAtomicExpressionMapImpl searchExpr, Registry searchReg) {
+        // Argument sets
+        Map<String,Integer> thArgs = searchExpr.getArgumentsAsStrings(searchReg);
+        Set<Map<String,String>> bindings = new HashSet<Map<String, String>>();
+        bindToAVCEquation:
+        for(NormalizedAtomicExpressionMapImpl vc_r : vcEquations) {
+            Map<String,String> currentBind = new HashMap<String, String>(basemap);
+            Map<String,Integer> vcArgs = vc_r.getArgumentsAsStrings(m_registry);
+            for (String wild : basemap.keySet()) {
+                String wildVal = basemap.get(wild);
+                if (wildVal.equals("")) {
+                    // Basemap is used over a set of equations; ie wild may not even be used in this one
+                    if(searchExpr.readOperator(searchReg.getIndexForSymbol(wild)) <= 0) continue ;
+                    String localToBindTo = "";
+                    int wildOpCode = searchReg.getIndexForSymbol(wild);
+                    int wildPosBitCode = searchExpr.readOperator(wildOpCode);
+                    boolean isRoot = searchExpr.readRoot() == wildOpCode;
+                    boolean isFSymb = searchExpr.readPosition(0) == wildOpCode;
+                    if( isRoot || isFSymb){
+                        if((wildPosBitCode & (wildPosBitCode - 1)) == 0){ // Single use and is func symbol or root
+                            localToBindTo = m_registry.getSymbolForIndex(vc_r.readPositionBitcode(wildPosBitCode));
+                        } else{// used as (root or func symb) and as arg(s) in search
+                            // so reject if same not true of vcr
+                            String loc = "";
+                            if(isRoot && isFSymb){
+                                if(vc_r.readPosition(0) == vc_r.readRoot()) {
+                                    loc = m_registry.getSymbolForIndex(vc_r.readRoot());
+                                }
+                            } else if(isFSymb){
+                                loc = m_registry.getSymbolForIndex(vc_r.readPosition(0));
+                            }
+                            if(!loc.equals("")) {
+                                int thC = thArgs.get(wild);
+                                int vcC = vcArgs.get(loc);
+                                if (thC <= vcC) {
+                                    vcArgs.put(loc, vcC - thC);
+                                    localToBindTo = loc;
+                                }
+                            }
+                        }
+                    }
+                    // Only use is in arg list
+                    int thC = thArgs.get(wild);
+                    // Choose the first that has the min no. of uses.  (Going to potentially miss some matches)
+                    for(String vcA: vcArgs.keySet()){
+                        int vcACnt = vcArgs.get(vcA);
+                        if(thC <= vcACnt){
+                            localToBindTo = vcA;
+                            vcArgs.put(localToBindTo, vcACnt - thC);
+                            break;
+                        }
+                    }
+                    if(!localToBindTo.equals("")) {
+                        MTType wildType = searchReg.getTypeByIndex(searchReg.getIndexForSymbol(wild));
+                        MTType localType = m_registry.getTypeByIndex(m_registry.getIndexForSymbol(localToBindTo));
+                        if (!localType.isSubtypeOf(wildType)) continue bindToAVCEquation;
+                        currentBind.put(wild, localToBindTo);
+                    }
+                }
+            }
+            bindings.add(currentBind);
+        }
+        return bindings;
+    }
+
+    Set<Map<String,String>> getBindings_NonCommutative(Set<NormalizedAtomicExpressionMapImpl> vcEquations, Map<String,String> basemap,
+                                                     NormalizedAtomicExpressionMapImpl searchExpr, Registry searchReg){
+        Set<Map<String,String>> bindings = new HashSet<Map<String, String>>();
+        bindToAVCEquation:
+        for(NormalizedAtomicExpressionMapImpl vc_r : vcEquations) {
+            Map<String,String> currentBind = new HashMap<String, String>(basemap);
+            for (String wild : basemap.keySet()) {
+                String wildVal = basemap.get(wild);
+                if (wildVal.equals("")) {
+                    int wildP_BitCode = searchExpr.getPositionBitCodeForStringOp(wild, searchReg);
+                    int vc_eq_op = vc_r.readPositionBitcode(wildP_BitCode);
+                    if(vc_eq_op == -1) continue bindToAVCEquation; // non matching due to wildcard symbol used more places than found
+                    String localToBindTo = m_registry.getSymbolForIndex(vc_eq_op);
+                    MTType wildType = searchReg.getTypeByIndex(searchReg.getIndexForSymbol(wild));
+                    MTType localType = m_registry.getTypeByIndex(m_registry.getIndexForSymbol(localToBindTo));
+                    if(! localType.isSubtypeOf(wildType)) continue bindToAVCEquation;
+                    currentBind.put(wild,localToBindTo);
+                }
+            }
+            bindings.add(currentBind);
+        }
+        return bindings;
+    }
+
+    protected Set<NormalizedAtomicExpressionMapImpl> commutativeFilter(Set<NormalizedAtomicExpressionMapImpl> raw,
+                                                                          NormalizedAtomicExpressionMapImpl filter_criteria){
+        Set<NormalizedAtomicExpressionMapImpl> filteredSet = new HashSet<NormalizedAtomicExpressionMapImpl>();
+        Map<String,Integer> filterLitArgs = filter_criteria.getArgumentsAsStrings(m_registry);
+        nextExpr:
+        for(NormalizedAtomicExpressionMapImpl r_n : raw){
+            if( filter_criteria.readPosition(0) != r_n.readPosition(0) ||
+                    filter_criteria.readRoot() != r_n.readRoot() ) continue nextExpr;
+            Map<String,Integer> r_n_litArgs = r_n.getArgumentsAsStrings(m_registry);
+            for(String arg : filterLitArgs.keySet()) {
+                if(!r_n_litArgs.containsKey(arg)) continue nextExpr;
+                if(filterLitArgs.get(arg) > r_n_litArgs.get(arg) ) continue nextExpr;
+            }
+            filteredSet.add(r_n);
+        }
+        return filteredSet;
+    }
+    protected Set<NormalizedAtomicExpressionMapImpl> nonCommutativeFilter(Set<NormalizedAtomicExpressionMapImpl> raw,
+                                                                          NormalizedAtomicExpressionMapImpl filter_criteria){
+        Set<NormalizedAtomicExpressionMapImpl> filteredSet = new HashSet<NormalizedAtomicExpressionMapImpl>();
+        for(NormalizedAtomicExpressionMapImpl r_n : raw){
+            // r_n & filter_criteria ex. 1111 & 1001
+            boolean matches = true;
+            for(int litOp : filter_criteria.getKeys()){
+                int vcBitCodeForLitOp = r_n.readOperator(litOp);
+                int filterBitCodeForLitOp = filter_criteria.readOperator(litOp);
+                if((vcBitCodeForLitOp & filterBitCodeForLitOp) != filterBitCodeForLitOp){
+                    matches = false;
+                    break;
+                }
+            }
+            if(matches) filteredSet.add(r_n);
+        }
+        return filteredSet;
+    }
     // return map is expr Symbol -> this Symbol
     // returns null if no match found;
     // foreignSymbolOveride is expr Symbol -> this Symbol
@@ -470,22 +687,29 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         Set<NormalizedAtomicExpressionMapImpl> candidates =
                 new HashSet<NormalizedAtomicExpressionMapImpl>();
         boolean firstKey = true;
-        boolean orderOfArgsMatters = !m_registry.isCommutative(expr.readOperator(0));
+        String funSymb = exprReg.getSymbolForIndex(expr.readPosition(0));
+        boolean orderOfArgsMatters =
+                !m_registry.isCommutative(funSymb);
+        orderOfArgsMatters = true;
+        Map<String,Integer> expCounts = expr.getEquationOperatorsAsStrings(exprReg);
+        Map<String,Integer> foundSearchTerms = new HashMap<String, Integer>();
         for (Integer k : expr.getKeys()) {
             String eSymb = exprReg.getSymbolForIndex(k);
             // String equals does not work for ""
+            int exprKeyCount = 0;
             boolean isWild =
                     foreignSymbolOveride.containsKey(eSymb)
                             && foreignSymbolOveride.get(eSymb).length() == 0;
             if (isWild)
                 continue; // if it is wild, no point in looking for it here, go to next key
+            exprKeyCount = expCounts.get(eSymb);
             if (foreignSymbolOveride.containsKey(eSymb))
                 eSymb = foreignSymbolOveride.get(eSymb);
             // Early return for case where no possible match can occur
             if (!m_registry.m_symbolToIndex.containsKey(eSymb)) {
                 return null;
             }
-
+            eSymb = m_registry.getRootSymbolForSymbol(eSymb);
             // Either the symbol is a previously matched wildcard or it is a literal
             int symbolInConj = m_registry.getIndexForSymbol(eSymb);
             // Literal is in the registry, but it may not be in an expression. Some symbols added by default.
@@ -499,7 +723,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             // early return for no matches.
             if (results == null || results.isEmpty())
                 return null;
-
+            foundSearchTerms.put(eSymb, exprKeyCount); // Mark these as used for search so that we know not to bind a wild to them
             Set<NormalizedAtomicExpressionMapImpl> removalSet =
                     new HashSet<NormalizedAtomicExpressionMapImpl>();
             // remove equations with non matching length
@@ -512,11 +736,30 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             int exprPositions = expr.readOperator(k); // this is the bit code, 1 if used, 0 if not
             for (NormalizedAtomicExpressionMapImpl r_n : results) {
                 int conjPos = r_n.readOperator(symbolInConj);
-                // This rejects SOME good matches when the op is commutative
-                if((r_n.numOperators()!= expr.numOperators()) ||
-                        (conjPos & exprPositions)!= exprPositions){
+                if (r_n.numOperators() != expr.numOperators()){
                     removalSet.add(r_n);
+                } else if ( orderOfArgsMatters){
+                    if((conjPos & exprPositions) != exprPositions) {
+                        removalSet.add(r_n);
+                    }
                 }
+                else {
+                    // It is commut. We do not care about position, but about the number of uses
+                    if (exprKeyCount > r_n.getEquationOperatorsAsStrings(m_registry).get(eSymb)){ // eSymb should be a root
+                        // remove if we have more uses of the literal in the search terms than what is found
+                        removalSet.add(r_n);
+                    }
+
+                    // also: opName and RHS are not commut;
+                    // throw out if those positions don't match if we were looking for those
+                    else if(expr.readRoot() == k && !eSymb.equals(m_registry.getSymbolForIndex(r_n.readRoot()))){
+                        removalSet.add(r_n);
+                    }
+                    else if(expr.readPosition(0) == k && !eSymb.equals(m_registry.getSymbolForIndex(r_n.readPosition(0)))){
+                        removalSet.add(r_n);
+                    }
+                }
+
             }
             results.removeAll(removalSet);
             if (firstKey)
@@ -535,16 +778,38 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
         // At this point candidates is a set of all expressions that syntactically match,
         // also considering the wildcards already defined
-
+        // For commut's, all candidates have the min num of matching literals.
+        // ex. CO(1,1,0) is a candidate for CO(1,x,x)
         // Create collection of bindings to return
         Set<Map<String, String>> rSet = new HashSet<Map<String, String>>();
+        String rootSymb = exprReg.getSymbolForIndex(expr.readRoot());
+
         for (NormalizedAtomicExpressionMapImpl c_n : candidates) {
             // If a symbol in c_n is an undefined key in the overide map, define that key
             HashMap<String, String> binding =
                     new HashMap<String, String>(foreignSymbolOveride);
+            boolean rhsToBeBound = binding.containsKey(rootSymb) && binding.get(rootSymb).equals("");
             boolean validBinding = true;
-            // hopefully I don't need to deep copy Strings
+            Map<String,Integer> comArgs;
+            if(!orderOfArgsMatters) {
+                comArgs = c_n.getEquationOperatorsAsStrings(m_registry);
+                // mark as used the terms we searched for
+                for(String sKey : foundSearchTerms.keySet()){
+                    int remaining = comArgs.get(sKey) - foundSearchTerms.get(sKey);
+                    if(remaining < 0){
+                        throw new RuntimeException("Invalid arg count");
+                    }
+                    comArgs.put(sKey,remaining);
+                }
+            }
+            else{
+                comArgs = null;
+
+            }
+
             for (String exprKey : binding.keySet()) {
+
+                boolean isRHS = (rootSymb.equals(exprKey));
                 if (binding.get(exprKey).length() == 0) {
                     // We have found a wildcard
                     int posInSearchExpr =
@@ -554,15 +819,44 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                         continue; // meaning the wildcard is not a part of the equation
                     int localSymbolIndex =
                             c_n.readPositionBitcode(posInSearchExpr);
-                    if (localSymbolIndex == -1) {
+
+                    if (orderOfArgsMatters && localSymbolIndex == -1) {
                         // Occurs when wildcard used in multiple positions, but different symbols in matched expr.
                         // Throw it out.
                         validBinding = false;
                         break;
 
                     }
-                    String localSymbol =
-                            m_registry.getSymbolForIndex(localSymbolIndex);
+                    String localSymbol = "";
+                    if(orderOfArgsMatters)
+                            localSymbol = m_registry.getSymbolForIndex(localSymbolIndex);
+                    else{
+                        // choose the first one that type checks (discounting those that matched due to search keys)
+                        if(isRHS){ // A wildcard is used as the RHS.  It may also be used in other postions.  0 + j = j
+                            int numUses = expr.getEquationOperatorsAsStrings(exprReg).get(exprKey);
+                            localSymbol = m_registry.getSymbolForIndex(c_n.readRoot());
+                            int pc = comArgs.get(localSymbol);
+                            comArgs.put(localSymbol,pc - numUses);
+                            rhsToBeBound = false;
+                        }
+                        else {
+                            for (String l : comArgs.keySet()) {
+                                int c = comArgs.get(l);
+                                // Dont use if the only use is rhs
+                                if (c > 0) {
+                                    if(!(m_registry.getSymbolForIndex(c_n.readRoot()).equals(l) && c == 1 && rhsToBeBound) ) {
+                                        localSymbol = l;
+                                        comArgs.put(l, --c);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if(localSymbol == ""){
+                            throw new RuntimeException("Symbol count error");
+                        }
+
+                    }
                     // Type check here.  Incompatible types should invalidate the whole binding
                     MTType theoremSymbolType =
                             exprReg.getTypeByIndex(exprReg
@@ -575,10 +869,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     }
                     binding.put(exprKey, localSymbol);
                 }
+
             }
             if (validBinding) {
                 // At this point we have bound all the wildcards for a particular candidate
-
                 rSet.add(binding);
             }
 

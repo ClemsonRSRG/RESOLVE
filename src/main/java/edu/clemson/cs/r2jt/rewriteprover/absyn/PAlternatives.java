@@ -330,11 +330,13 @@ public class PAlternatives extends PExp {
             List<PExp> conditions = new ArrayList<PExp>();
             List<PExp> results = new ArrayList<PExp>();
             PExp otherwise = myOtherwiseClauseResult.substitute(substitutions);
-            for(Alternative a : myAlternatives){
+            for (Alternative a : myAlternatives) {
                 conditions.add(a.condition.substitute(substitutions));
                 results.add(a.result.substitute(substitutions));
             }
-            retval = new PAlternatives(conditions,results,otherwise,getType(),getTypeValue());
+            retval =
+                    new PAlternatives(conditions, results, otherwise,
+                            getType(), getTypeValue());
         }
 
         return retval;

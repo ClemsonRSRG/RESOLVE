@@ -48,7 +48,7 @@ public class VC {
 
     private java.util.HashMap<PLambda, String> m_liftedLamdas;
     // PLambda objects aren't hashing correctly.  would have to get into haschode/eq methods of PExp heirarchy
-    private java.util.HashMap<String,PLambda> m_lamdaCodes;
+    private java.util.HashMap<String, PLambda> m_lamdaCodes;
     public java.util.List<PSymbol> m_liftedLambdaPredicates;
     public java.util.Set<PExp> m_conditions;
     private int m_lambdaTag = 0;
@@ -94,7 +94,7 @@ public class VC {
     }
 
     // ensures conditions are unique
-    public void normalizeConditions(){
+    public void normalizeConditions() {
         java.util.HashSet<PExp> replacement = new java.util.HashSet<PExp>();
         java.util.HashSet<String> inSet = new java.util.HashSet<String>();
         for (PExp p : m_conditions) {
@@ -111,7 +111,7 @@ public class VC {
             if (!substMap.isEmpty()) {
                 p = (PSymbol) p.substitute(substMap);
             }
-            if(!inSet.contains(p.toString())) {
+            if (!inSet.contains(p.toString())) {
                 replacement.add(p);
                 inSet.add(p.toString());
             }
@@ -119,6 +119,7 @@ public class VC {
         }
         m_conditions = replacement;
     }
+
     public void uniquelyNameQuantifiers() {
         java.util.HashSet<PExp> replacement = new java.util.HashSet<PExp>();
         for (PExp p : m_conditions) {
@@ -127,7 +128,7 @@ public class VC {
             HashMap<PExp, PExp> substMap = new HashMap<PExp, PExp>();
             for (PSymbol pq : qVars) {
                 PSymbol repP =
-                        new PSymbol(pq.getType(), pq.getTypeValue(), pq
+                        new PSymbol(pq.getType(), pq.getTypeValue(), "¢vl" + pq
                                 .getType().toString()
                                 + m_qVarTag++, pq.quantification);
                 substMap.put(pq, repP);
@@ -281,7 +282,7 @@ public class VC {
             String lambdaCode = normP.toString();
             if (!m_lamdaCodes.containsKey(lambdaCode)) {
                 lname = "lambda" + m_lambdaTag++;
-                m_lamdaCodes.put(lambdaCode,(PLambda)normP);
+                m_lamdaCodes.put(lambdaCode, (PLambda) normP);
                 m_liftedLamdas.put((PLambda) normP, lname);
             }
             else {

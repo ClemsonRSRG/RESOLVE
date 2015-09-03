@@ -72,8 +72,9 @@ public class Registry {
         // could look for these in theorems instead
         m_commutative_operators = new HashSet<String>();
         m_commutative_operators.add("+");
-        m_commutative_operators.add("=");
-        m_commutative_operators.add("and");
+        //m_commutative_operators.add("=");
+        //m_commutative_operators.add("and");
+        m_commutative_operators.add("isBinaryPartition");
 
     }
 
@@ -129,12 +130,13 @@ public class Registry {
         String bS = getSymbolForIndex(opIndexB);
         Usage a_us = getUsage(aS);
         Usage b_us = getUsage(bS);
-        if(a_us.equals(Usage.LITERAL) || b_us.equals(Usage.LITERAL)){
-            m_symbolToUsage.put(aS,Usage.LITERAL);
+        if (a_us.equals(Usage.LITERAL) || b_us.equals(Usage.LITERAL)) {
+            m_symbolToUsage.put(aS, Usage.LITERAL);
         }
-        else if(a_us.equals(Usage.CREATED) || b_us.equals(Usage.CREATED)){
-            m_symbolToUsage.put(aS,Usage.CREATED);
+        else if (a_us.equals(Usage.CREATED) || b_us.equals(Usage.CREATED)) {
+            m_symbolToUsage.put(aS, Usage.CREATED);
         }
+        if(m_partTypes.contains(bS)) m_partTypes.add(aS);
         m_unusedIndices.push(opIndexB);
         m_symbolIndexParentArray.set(opIndexB, opIndexA);
     }
@@ -287,27 +289,28 @@ public class Registry {
         return rSet;
     }
 
-    public boolean isCommutative(String op){
+    public boolean isCommutative(String op) {
         return m_commutative_operators.contains(op);
     }
 
-    public boolean isCommutative(int opNum){
+    public boolean isCommutative(int opNum) {
         String root = getSymbolForIndex(opNum);
         return isCommutative(root);
     }
 
     // use sparingly, call with a parent symbol.  assumes parent array is compressed
-    protected Set<String> getChildren(String parent){
+    protected Set<String> getChildren(String parent) {
         int pInt = getIndexForSymbol(parent);
         HashSet<Integer> ch = new HashSet<Integer>();
-        for(int i = 0; i < m_symbolIndexParentArray.size(); ++i){
-            if(i == pInt) continue;
-            if(m_symbolIndexParentArray.get(i) == pInt){
+        for (int i = 0; i < m_symbolIndexParentArray.size(); ++i) {
+            if (i == pInt)
+                continue;
+            if (m_symbolIndexParentArray.get(i) == pInt) {
                 ch.add(i);
             }
         }
         HashSet<String> rSet = new HashSet<String>();
-        for(Integer i : ch){
+        for (Integer i : ch) {
             rSet.add(m_indexToSymbol.get(i));
         }
         return rSet;

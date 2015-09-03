@@ -42,7 +42,8 @@ public class TheoremCongruenceClosureImpl {
     protected boolean m_allowNewSymbols;
 
     // TODO: exclude statements with dummy variables not in matching component, or do another search/match with result
-    public TheoremCongruenceClosureImpl(TypeGraph g, PExp p, boolean allowNewSymbols) {
+    public TheoremCongruenceClosureImpl(TypeGraph g, PExp p,
+            boolean allowNewSymbols) {
         m_allowNewSymbols = allowNewSymbols;
         m_typeGraph = g;
         m_theorem = p;
@@ -93,7 +94,8 @@ public class TheoremCongruenceClosureImpl {
 
     // for theorems that are equations
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp toMatchAndBind,
-            PExp toInsert, boolean enterToMatchAndBindAsEquivalentToTrue, boolean allowNewSymbols) {
+            PExp toInsert, boolean enterToMatchAndBindAsEquivalentToTrue,
+            boolean allowNewSymbols) {
         m_allowNewSymbols = allowNewSymbols;
         m_typeGraph = g;
         m_theorem = toInsert;
@@ -108,9 +110,6 @@ public class TheoremCongruenceClosureImpl {
         else
             m_matchConj.addFormula(toMatchAndBind);
         m_insertExpr = toInsert;
-        if (m_theoremString.contains("Iterated")) {
-            int bp = 0;
-        }
     }
 
     public Set<String> getFunctionNames() {
@@ -134,8 +133,8 @@ public class TheoremCongruenceClosureImpl {
         // registry should only contain symbols from matching section
         if (m_matching_literals == null) {
             m_matching_literals = new HashSet<String>();
-            for(String s : getNonQuantifiedSymbols()){
-                if(m_theoremRegistry.m_symbolToIndex.containsKey(s)){
+            for (String s : getNonQuantifiedSymbols()) {
+                if (m_theoremRegistry.m_symbolToIndex.containsKey(s)) {
                     m_matching_literals.add(s);
                 }
             }
@@ -192,8 +191,10 @@ public class TheoremCongruenceClosureImpl {
         for (java.util.Map<String, String> curBinding : allValidBindings) {
             for (String thKey : curBinding.keySet()) {
 
-                if(m_theoremRegistry.m_indexToSymbol.contains(curBinding.get(thKey)) &&
-                        m_theoremRegistry.getUsage(curBinding.get(thKey)).equals(Registry.Usage.FORALL)){
+                if (m_theoremRegistry.m_indexToSymbol.contains(curBinding
+                        .get(thKey))
+                        && vc.getRegistry().getUsage(curBinding.get(thKey))
+                                .equals(Registry.Usage.FORALL)) {
                     throw new RuntimeException("Quantified var unbound");
                 }
                 MTType quanType =
@@ -203,11 +204,13 @@ public class TheoremCongruenceClosureImpl {
                 // there will be no literal match in the substitute call
                 // Check if any quantified var is a child.
                 // Make extra map entry for each one
-                for(PSymbol p : m_theorem.getQuantifiedVariables()){
+                for (PSymbol p : m_theorem.getQuantifiedVariables()) {
                     String pname = p.getTopLevelOperation();
-                    if(m_theoremRegistry.getRootSymbolForSymbol(pname).equals(thKey)){
-                        quantToLit.put(new PSymbol(quanType, null, pname), new PSymbol(
-                                quanType, null, curBinding.get(thKey)));
+                    if (m_theoremRegistry.getRootSymbolForSymbol(pname).equals(
+                            thKey)) {
+                        quantToLit.put(new PSymbol(quanType, null, pname),
+                                new PSymbol(quanType, null, curBinding
+                                        .get(thKey)));
                     }
                 }
                 quantToLit.put(new PSymbol(quanType, null, thKey), new PSymbol(
@@ -216,12 +219,12 @@ public class TheoremCongruenceClosureImpl {
 
             PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
             // Discard s = s
-            if(!(
-                    modifiedInsert.getTopLevelOperation().equals("=") &&
-                    modifiedInsert.getSubExpressions().get(0).toString().equals(
-                            modifiedInsert.getSubExpressions().get(1).toString()))){
+            if (!(modifiedInsert.getTopLevelOperation().equals("=") && modifiedInsert
+                    .getSubExpressions().get(0).toString().equals(
+                            modifiedInsert.getSubExpressions().get(1)
+                                    .toString()))) {
                 rList.add(new InsertExpWithJustification(modifiedInsert,
-                    m_theoremString));
+                        m_theoremString));
             }
             quantToLit.clear();
 
@@ -258,19 +261,21 @@ public class TheoremCongruenceClosureImpl {
                     new HashMap<String, String>();
             for (String wild : m_theoremRegistry.getForAlls()) {
 
-                String actual =
-                        m_theoremRegistry.getRootSymbolForSymbol(wild);
+                String actual = m_theoremRegistry.getRootSymbolForSymbol(wild);
                 // wildcard is not parent
-                if(!actual.equals(wild))
+                if (!actual.equals(wild))
                     wildToActual.put(wild, actual);
                 // wildcard is parent, bind to child
                 else {
-                   Set<String> ch = m_theoremRegistry.getChildren(wild);
+                    Set<String> ch = m_theoremRegistry.getChildren(wild);
                     // choose first non quantified symbol (they are all equal)
-                    if(ch.isEmpty()) return null;
-                    for(String c : ch){
-                        if(!m_theoremRegistry.getUsage(c).equals(Registry.Usage.FORALL) ||
-                                !m_theoremRegistry.getUsage(c).equals(Registry.Usage.CREATED)) {
+                    if (ch.isEmpty())
+                        return null;
+                    for (String c : ch) {
+                        if (!m_theoremRegistry.getUsage(c).equals(
+                                Registry.Usage.FORALL)
+                                || !m_theoremRegistry.getUsage(c).equals(
+                                        Registry.Usage.CREATED)) {
                             wildToActual.put(wild, c);
                             break;
                         }

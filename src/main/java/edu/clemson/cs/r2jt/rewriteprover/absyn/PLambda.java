@@ -261,19 +261,23 @@ public class PLambda extends PExp {
 
     }
 
-    public PLambda withNormalizedParameterNames(){
+    public PLambda withNormalizedParameterNames() {
         List<PExp> plist = getParameters();
-        HashMap<PExp,PExp> substMap = new HashMap<PExp, PExp>();
+        HashMap<PExp, PExp> substMap = new HashMap<PExp, PExp>();
         int argNum = 0;
         ArrayList<Parameter> normParams = new ArrayList<Parameter>();
-        for(PExp p: plist){
+        for (PExp p : plist) {
             String name = p.getType().toString().toLowerCase() + argNum++;
-            PExp norm = new PSymbol(p.getType(),p.getTypeValue(),name, PSymbol.Quantification.FOR_ALL);
-            substMap.put(p,norm);
-            normParams.add(new Parameter(name,p.getType()));
+            PExp norm =
+                    new PSymbol(p.getType(), p.getTypeValue(), name,
+                            PSymbol.Quantification.FOR_ALL);
+            substMap.put(p, norm);
+            normParams.add(new Parameter(name, p.getType()));
         }
-        return new PLambda(new ArrayBackedImmutableList<Parameter>(normParams), myBody.substitute(substMap));
+        return new PLambda(new ArrayBackedImmutableList<Parameter>(normParams),
+                myBody.substitute(substMap));
     }
+
     public static class Parameter {
 
         public final String name;

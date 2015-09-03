@@ -60,6 +60,7 @@ public class VerificationConditionCongruenceClosureImpl {
             forAllQuantifiedPExps.addAll(vc.m_liftedLambdaPredicates);
             //addPExp(forAllQuantifiedPExps.iterator(),true);
             ArrayList<PExp> splitConditions = new ArrayList<PExp>();
+            boolean allOverZ = true;
             for (PExp px : vc.m_conditions) {
                 java.util.HashMap<PExp, PExp> substMap =
                         new HashMap<PExp, PExp>();
@@ -67,6 +68,7 @@ public class VerificationConditionCongruenceClosureImpl {
                 // true branch
                 PSymbol tBSym = null;
                 for (PSymbol pq : px.getQuantifiedVariables()) {
+                    if(!pq.getType().toString().equals("Z")) allOverZ = false;
                     tBSym =
                             new PSymbol(pq.getType(), pq.getTypeValue(), pq
                                     .getTopLevelOperation()
@@ -98,14 +100,15 @@ public class VerificationConditionCongruenceClosureImpl {
                 args.add(new PSymbol(g.BOOLEAN, null, "true"));
                 splitConditions.add(new PSymbol(g.BOOLEAN, null, "=", args));
                 // AddisBinaryPartition (p1: Entity, p2: Entity) : B;
-                */
+                 */
                 args.clear();
                 args.add(tBSym);
                 args.add(fBSym);
                 PSymbol assertion =
                         new PSymbol(m_typegraph.BOOLEAN, null,
-                                "isBinaryPartition", args);
-                splitConditions.add(assertion);
+                                "isBinaryPartitionZ", args);
+                if(allOverZ)
+                    splitConditions.add(assertion);
             }
             addPExp(splitConditions.iterator(), true);
 
@@ -171,7 +174,6 @@ public class VerificationConditionCongruenceClosureImpl {
         while (pit.hasNext()) {
             PExp curr = pit.next();
             if (curr.isEquality()) { // f(x,y) = z and g(a,b) = c ; then z is replaced by c
-
 
                 if (inAntecedent) {
                     m_conjunction.addExpression(curr);

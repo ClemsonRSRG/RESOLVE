@@ -53,7 +53,7 @@ public class CongruenceClassProver {
     private final long DEFAULTTIMEOUT = 10000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
-    private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = true;
+    private boolean printVCEachStep = false;
 
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
@@ -149,7 +149,7 @@ public class CongruenceClassProver {
 
         TheoremCongruenceClosureImpl t =
                 new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
-                        false,false);
+                        false, false);
         if (!t.m_unneeded) {
             m_theorems.add(t);
         }
@@ -169,6 +169,8 @@ public class CongruenceClassProver {
         String summary = "";
         int i = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
+            //printVCEachStep = true;
+            //if(!vcc.m_name.equals("0_10"))continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             VerificationConditionCongruenceClosureImpl.STATUS proved =
@@ -320,6 +322,7 @@ public class CongruenceClassProver {
                                                 + "\n[" + theoremScore + "]"
                                                 + curP.toString() + "\t"
                                                 + substitutionMade + "\n\n";
+                                if(printVCEachStep) theseResults += vcc.toString();
                                 timeAtLastIter = System.currentTimeMillis();
                                 status = vcc.isProved();
                                 num_Instantiated_added++;
