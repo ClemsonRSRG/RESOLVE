@@ -1,5 +1,5 @@
 /**
- * AltItemExp.java
+ * IfExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -13,19 +13,18 @@
 package edu.clemson.cs.rsrg.absyn.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.Exp;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the individual mathematical alternative
- * items inside the {link AlternativeExp}s.</p>
+ * <p>This is the class for all the mathematical if-else expressions
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class AltItemExp extends MathExp {
+public class IfExp extends MathExp {
 
     // ===========================================================
     // Member Fields
@@ -34,30 +33,29 @@ public class AltItemExp extends MathExp {
     /** <p>The testing expression.</p> */
     private final Exp myTestingExp;
 
-    /** <p>The assignment expression.</p> */
-    private final Exp myAssignmentExp;
+    /** <p>The then expression.</p> */
+    private final Exp myThenExp;
+
+    /** <p>The else expression.</p> */
+    private final Exp myElseExp;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs an inner alternative expression for
-     * the {@link AlternativeExp} class.</p>
+     * <p>This constructs an if-else expression.</p>
      *
      * @param l A {@link Location} representation object.
      * @param test An {@link Exp} testing expression.
-     * @param assignment An {@link Exp} assignment expression.
+     * @param thenclause An {@link Exp} then clause expression.
+     * @param elseclause An {@link Exp} else clause expression.
      */
-    public AltItemExp(Location l, Exp test, Exp assignment) {
+    public IfExp(Location l, Exp test, Exp thenclause, Exp elseclause) {
         super(l);
-        if (assignment == null) {
-            throw new MiscErrorException("Cannot have null assignment.",
-                    new IllegalArgumentException());
-        }
-
         myTestingExp = test;
-        myAssignmentExp = assignment;
+        myThenExp = thenclause;
+        myElseExp = elseclause;
     }
 
     // ===========================================================
@@ -68,10 +66,10 @@ public class AltItemExp extends MathExp {
      * <p>This method creates a special indented
      * text version of the class as a string.</p>
      *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
+     * @param indentSize        The base indentation to the first line
+     *                          of the text.
+     * @param innerIndentSize   The additional indentation increment
+     *                          for the subsequent lines.
      *
      * @return A formatted text string of the class.
      */
@@ -79,15 +77,20 @@ public class AltItemExp extends MathExp {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("AltItemExp\n");
+        sb.append("IfExp\n");
 
         if (myTestingExp != null) {
             sb.append(myTestingExp.asString(indentSize + innerIndentSize,
                     innerIndentSize));
         }
 
-        if (myAssignmentExp != null) {
-            sb.append(myAssignmentExp.asString(indentSize + innerIndentSize,
+        if (myThenExp != null) {
+            sb.append(myThenExp.asString(indentSize + innerIndentSize,
+                    innerIndentSize));
+        }
+
+        if (myElseExp != null) {
+            sb.append(myElseExp.asString(indentSize + innerIndentSize,
                     innerIndentSize));
         }
 
@@ -109,8 +112,11 @@ public class AltItemExp extends MathExp {
         if (myTestingExp != null) {
             found = myTestingExp.containsExp(exp);
         }
-        if (!found && myAssignmentExp != null) {
-            found = myAssignmentExp.containsExp(exp);
+        if (!found && myThenExp != null) {
+            found = myThenExp.containsExp(exp);
+        }
+        if (!found && myElseExp != null) {
+            found = myElseExp.containsExp(exp);
         }
 
         return found;
@@ -129,12 +135,15 @@ public class AltItemExp extends MathExp {
      */
     @Override
     public boolean containsVar(String varName, boolean IsOldExp) {
-        boolean found = false;
+        Boolean found = false;
         if (myTestingExp != null) {
             found = myTestingExp.containsVar(varName, IsOldExp);
         }
-        if (!found && myAssignmentExp != null) {
-            found = myAssignmentExp.containsVar(varName, IsOldExp);
+        if (!found && myThenExp != null) {
+            found = myThenExp.containsVar(varName, IsOldExp);
+        }
+        if (!found && myElseExp != null) {
+            found = myElseExp.containsVar(varName, IsOldExp);
         }
 
         return found;
@@ -142,7 +151,7 @@ public class AltItemExp extends MathExp {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link AltItemExp} class.</p>
+     * for the {@link IfExp} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -151,21 +160,13 @@ public class AltItemExp extends MathExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof AltItemExp) {
-            AltItemExp eAsAltItemExp = (AltItemExp) o;
-            result = myLoc.equals(eAsAltItemExp.myLoc);
+        if (o instanceof IfExp) {
+            IfExp eAsIfExp = (IfExp) o;
 
-            if (result) {
-                if (myTestingExp != null) {
-                    result = myTestingExp.equals(eAsAltItemExp.myTestingExp);
-                }
-
-                if (result) {
-                    result =
-                            myAssignmentExp
-                                    .equals(eAsAltItemExp.myAssignmentExp);
-                }
-            }
+            result = myLoc.equals(eAsIfExp.myLoc);
+            result &= myTestingExp.equals(eAsIfExp.myTestingExp);
+            result &= myThenExp.equals(eAsIfExp.myThenExp);
+            result &= myElseExp.equals(eAsIfExp.myElseExp);
         }
 
         return result;
@@ -188,22 +189,23 @@ public class AltItemExp extends MathExp {
         boolean result = e instanceof AltItemExp;
 
         if (result) {
-            AltItemExp eAsAltItemExp = (AltItemExp) e;
+            IfExp eAsIfExp = (IfExp) e;
 
-            result = eAsAltItemExp.myTestingExp.equivalent(myTestingExp);
-            result &= eAsAltItemExp.myAssignmentExp.equivalent(myAssignmentExp);
+            result = myTestingExp.equivalent(eAsIfExp.myTestingExp);
+            result &= myThenExp.equivalent(eAsIfExp.myThenExp);
+            result &= myElseExp.equivalent(eAsIfExp.myElseExp);
         }
 
         return result;
     }
 
     /**
-     * <p>Returns a deep copy of this expression's assignment expression.</p>
+     * <p>Returns a deep copy of this expression's else clause expression.</p>
      *
      * @return The assignment {@link Exp} object.
      */
-    public Exp getAssignment() {
-        return myAssignmentExp.clone();
+    public Exp getElseclause() {
+        return myElseExp.clone();
     }
 
     /**
@@ -215,7 +217,8 @@ public class AltItemExp extends MathExp {
     public List<Exp> getSubExpressions() {
         List<Exp> subExpList = new ArrayList<>();
         subExpList.add(myTestingExp.clone());
-        subExpList.add(myAssignmentExp.clone());
+        subExpList.add(myThenExp.clone());
+        subExpList.add(myElseExp.clone());
 
         return subExpList;
     }
@@ -230,25 +233,39 @@ public class AltItemExp extends MathExp {
     }
 
     /**
+     * <p>Returns a deep copy of this expression's then clause expression.</p>
+     *
+     * @return The assignment {@link Exp} object.
+     */
+    public Exp getThenclause() {
+        return myThenExp.clone();
+    }
+
+    /**
      * <p>This method applies VC Generator's remember rule.
      * For all inherited programming expression classes, this method
      * should throw an exception.</p>
      *
-     * @return The resulting {@link AltItemExp} from applying the remember rule.
+     * @return The resulting {@link IfExp} from applying the remember rule.
      */
     @Override
-    public AltItemExp remember() {
+    public Exp remember() {
         Exp testingExp = myTestingExp;
         if (testingExp != null) {
             testingExp = ((MathExp) testingExp).remember();
         }
 
-        Exp assignmentExp = myAssignmentExp;
-        if (assignmentExp != null) {
-            assignmentExp = ((MathExp) assignmentExp).remember();
+        Exp thenExp = myThenExp;
+        if (thenExp != null) {
+            thenExp = ((MathExp) thenExp).remember();
         }
 
-        return new AltItemExp(new Location(myLoc), testingExp, assignmentExp);
+        Exp elseExp = myElseExp;
+        if (elseExp != null) {
+            elseExp = ((MathExp) elseExp).remember();
+        }
+
+        return new IfExp(new Location(myLoc), testingExp, thenExp, elseExp);
     }
 
     /**
@@ -258,25 +275,17 @@ public class AltItemExp extends MathExp {
      * @param e The new {@link Exp} to be added.
      */
     // TODO: See the message in Exp.
-    /*
-    @Override
-    public void setSubExpression(int index, Exp e) {
+    /*public void setSubExpression(int index, Exp e) {
         switch (index) {
-        case 0:
-            //edu.clemson.cs.r2jt.data.List was written by crazed monkies and
-            //silently ignores adding null elements (in violation of 
-            //java.util.List's contract), so if testingExp is null, index 0 is the
-            //assignment subexpression, otherwise it's the testingExp subexpression.
-            if (myTestingExp == null) {
-                setAssignment(e);
-            }
-            else {
-                setTest(e);
-            }
-            break;
-        case 1:
-            setAssignment(e);
-            break;
+            case 0:
+                myTestingExp = e;
+                break;
+            case 1:
+                myThenExp = e;
+                break;
+            case 2:
+                myElseExp = e;
+                break;
         }
     }*/
 
@@ -298,14 +307,19 @@ public class AltItemExp extends MathExp {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append(myAssignmentExp.toString());
+        sb.append("If ");
+        sb.append(myTestingExp.toString());
 
-        if (myTestingExp != null) {
-            sb.append(" if ");
-            sb.append(myTestingExp.toString());
-        }
-        else {
-            sb.append(" otherwise");
+        sb.append(" then ");
+        sb.append("(");
+        sb.append(myThenExp.toString());
+        sb.append(")");
+
+        if (myElseExp != null) {
+            sb.append("else ");
+            sb.append("(");
+            sb.append(myElseExp.toString());
+            sb.append(")");
         }
 
         return sb.toString();
@@ -328,12 +342,15 @@ public class AltItemExp extends MathExp {
             newTest = myTestingExp.clone();
         }
 
-        Exp newAssignment = null;
-        if (myAssignmentExp != null) {
-            newAssignment = myAssignmentExp.clone();
+        Exp newThenclause = myThenExp.clone();
+
+        Exp newElseclause = null;
+        if (myElseExp != null) {
+            newElseclause = myElseExp.clone();
         }
 
-        return new AltItemExp(new Location(myLoc), newTest, newAssignment);
+        return new IfExp(new Location(myLoc), newTest, newThenclause,
+                newElseclause);
     }
 
     /**
@@ -352,8 +369,9 @@ public class AltItemExp extends MathExp {
      */
     @Override
     protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new AltItemExp(myLoc, substitute(myTestingExp, substitutions),
-                substitute(myAssignmentExp, substitutions));
+        return new IfExp(new Location(myLoc), substitute(myTestingExp,
+                substitutions), substitute(myThenExp, substitutions),
+                substitute(myElseExp, substitutions));
     }
 
 }
