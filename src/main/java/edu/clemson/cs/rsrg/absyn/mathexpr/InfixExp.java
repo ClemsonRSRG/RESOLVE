@@ -266,7 +266,7 @@ public class InfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method method returns a deep copy of the list of
+     * <p>This method returns a deep copy of the list of
      * subexpressions.</p>
      *
      * @return A list containing subexpressions ({@link Exp}s).

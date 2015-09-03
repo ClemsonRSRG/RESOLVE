@@ -154,7 +154,7 @@ public class CharExp extends MathExp {
     }
 
     /**
-     * <p>This method method returns a deep copy of the list of
+     * <p>This method returns a deep copy of the list of
      * subexpressions. The result of this calling this method should
      * always be an empty list, because we can not contain an expression.</p>
      *

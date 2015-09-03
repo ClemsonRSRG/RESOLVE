@@ -1,5 +1,5 @@
 /**
- * DotExp.java
+ * TupleExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn.mathexpr;
 
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -19,37 +20,88 @@ import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical dotted expressions
+ * <p>This is the class for all the mathematical tuple expressions
  * that the compiler builds from the ANTLR4 AST tree.</p>
+ *
+ * <p>Making TupleExp extend from AbstractFunctionExp was considered and
+ * explicitly decided against during the great math-type-overhaul of 2012.
+ * If we chose to admit the presence of some function that builds tuples for us,
+ * how would we pass it its parameters if not via a tuple?  Thus, TupleExp is
+ * a built-in notion, and not imagined as the result of the application of a
+ * function.</p>
  *
  * @version 2.0
  */
-public class DotExp extends MathExp {
+public class TupleExp extends MathExp {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's collection of inner expressions.</p> */
-    private final List<Exp> mySegmentExps;
+    /** <p>The expression's cartesian product fields */
+    private final List<Exp> myFields;
+
+    /** <p>The number of cartesian product fields */
+    private final int mySize;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a dotted expression to keep track
-     * of all the inner expressions.</p>
+     * <p>This constructs a tuple expression that contains
+     * exactly two elements per field.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param segments A list of {@link Exp} object.
+     * @param fields A list of {@link Exp} object.
      */
-    public DotExp(Location l, List<Exp> segments) {
+    public TupleExp(Location l, List<Exp> fields) {
+        this(l, fields.toArray(new Exp[0]), fields.size());
+    }
+
+    /**
+     * <p>This helper method helps construct inner tuple representations
+     * if any.</p>
+     *
+     * @param l A {@link Location} representation object.
+     * @param fields A array of {@link Exp} objects.
+     * @param elementCount The number of elements in the array.
+     */
+    private TupleExp(Location l, Exp[] fields, int elementCount) {
         super(l);
-        mySegmentExps = segments;
+
+        //We assert this isn't possible, but who knows?
+        if (elementCount < 2) {
+            throw new MiscErrorException("Unexpected cartesian product size.", new IllegalArgumentException());
+        }
+
+        int workingSize = 0;
+
+        Exp first;
+        if (elementCount == 2) {
+            first = fields[0];
+        }
+        else {
+            first = new TupleExp(l, fields, elementCount - 1);
+        }
+
+        if (first instanceof TupleExp) {
+            workingSize += ((TupleExp) first).getSize();
+        }
+        else {
+            workingSize += 1;
+        }
+
+        Exp second = fields[elementCount - 1];
+        workingSize += 1;
+
+        myFields = new ArrayList<>();
+        myFields.add(first);
+        myFields.add(second);
+
+        mySize = workingSize;
     }
 
     // ===========================================================
@@ -71,10 +123,10 @@ public class DotExp extends MathExp {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("DotExp\n");
+        sb.append("TupleExp\n");
 
-        if (mySegmentExps != null) {
-            for (Exp e : mySegmentExps) {
+        if (myFields != null) {
+            for (Exp e : myFields) {
                 sb.append(e.asString(indentSize + innerIndentSize,
                         innerIndentSize));
             }
@@ -95,8 +147,8 @@ public class DotExp extends MathExp {
     @Override
     public boolean containsExp(Exp exp) {
         boolean found = false;
-        if (mySegmentExps != null) {
-            Iterator<Exp> i = mySegmentExps.iterator();
+        if (myFields != null) {
+            Iterator<Exp> i = myFields.iterator();
             while (i.hasNext() && !found) {
                 Exp temp = i.next();
                 if (temp != null) {
@@ -124,8 +176,8 @@ public class DotExp extends MathExp {
     @Override
     public boolean containsVar(String varName, boolean IsOldExp) {
         boolean found = false;
-        if (mySegmentExps != null) {
-            Iterator<Exp> i = mySegmentExps.iterator();
+        if (myFields != null) {
+            Iterator<Exp> i = myFields.iterator();
             while (i.hasNext() && !found) {
                 Exp temp = i.next();
                 if (temp != null) {
@@ -141,7 +193,7 @@ public class DotExp extends MathExp {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link DotExp} class.</p>
+     * for the {@link TupleExp} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -151,26 +203,24 @@ public class DotExp extends MathExp {
     public boolean equals(Object o) {
         boolean result = false;
         if (o instanceof DotExp) {
-            DotExp eAsDotExp = (DotExp) o;
-            result = myLoc.equals(eAsDotExp.myLoc);
+            TupleExp eAsTupleExp = (TupleExp) o;
+            result = myLoc.equals(eAsTupleExp.myLoc);
 
             if (result) {
-                if (mySegmentExps != null && eAsDotExp.mySegmentExps != null) {
-                    Iterator<Exp> thisSegmentExps = mySegmentExps.iterator();
-                    Iterator<Exp> eSegmentExps =
-                            eAsDotExp.mySegmentExps.iterator();
+                if (myFields != null && eAsTupleExp.myFields != null) {
+                    Iterator<Exp> thisFieldExps = myFields.iterator();
+                    Iterator<Exp> eFieldExps = eAsTupleExp.myFields.iterator();
 
-                    while (result && thisSegmentExps.hasNext()
-                            && eSegmentExps.hasNext()) {
+                    while (result && thisFieldExps.hasNext()
+                            && eFieldExps.hasNext()) {
                         result &=
-                                thisSegmentExps.next().equals(
-                                        eSegmentExps.next());
+                                thisFieldExps.next().equals(eFieldExps.next());
                     }
 
                     //Both had better have run out at the same time
                     result &=
-                            (!thisSegmentExps.hasNext())
-                                    && (!eSegmentExps.hasNext());
+                            (!thisFieldExps.hasNext())
+                                    && (!eFieldExps.hasNext());
                 }
             }
         }
@@ -195,23 +245,20 @@ public class DotExp extends MathExp {
         boolean result = (e instanceof DotExp);
 
         if (result) {
-            DotExp eAsDotExp = (DotExp) e;
+            TupleExp eAsTupleExp = (TupleExp) e;
 
-            if (mySegmentExps != null && eAsDotExp.mySegmentExps != null) {
-                Iterator<Exp> thisSegmentExps = mySegmentExps.iterator();
-                Iterator<Exp> eSegmentExps = eAsDotExp.mySegmentExps.iterator();
-                while (result && thisSegmentExps.hasNext()
-                        && eSegmentExps.hasNext()) {
+            if (myFields != null && eAsTupleExp.myFields != null) {
+                Iterator<Exp> thisFieldExps = myFields.iterator();
+                Iterator<Exp> eFieldExps = eAsTupleExp.myFields.iterator();
+                while (result && thisFieldExps.hasNext()
+                        && eFieldExps.hasNext()) {
 
                     result &=
-                            thisSegmentExps.next().equivalent(
-                                    eSegmentExps.next());
+                            thisFieldExps.next().equivalent(eFieldExps.next());
                 }
 
                 //Both had better have run out at the same time
-                result &=
-                        (!thisSegmentExps.hasNext())
-                                && (!eSegmentExps.hasNext());
+                result &= (!thisFieldExps.hasNext()) && (!eFieldExps.hasNext());
             }
         }
 
@@ -219,24 +266,90 @@ public class DotExp extends MathExp {
     }
 
     /**
-     * <p>This method returns a deep copy of all the inner expressions.</p>
+     * <p>This method returns a deep copy of the specified field expression.</p>
+     *
+     * @param index The index of the field expression.
+     *
+     * @return A {@link Exp} representation object.
+     */
+    public Exp getField(int index) {
+        Exp result;
+
+        if (index < 0 || index >= mySize) {
+            throw new MiscErrorException("Index out of bounds.",
+                    new IndexOutOfBoundsException("" + index));
+        }
+
+        if (index == (mySize - 1)) {
+            result = myFields.get(1);
+        }
+        else {
+            if (mySize == 2) {
+                //ASSERT: !(myElements.get(0) instanceof MTCartesian)
+                if (index != 0) {
+                    throw new IndexOutOfBoundsException("" + index);
+                }
+
+                result = myFields.get(0);
+            }
+            else {
+                //ASSERT: myElements.get(0) instanceof MTCartesian
+                result = ((TupleExp) myFields.get(0)).getField(index);
+            }
+        }
+
+        return result.clone();
+    }
+
+    /**
+     * <p>This method returns a deep copy of all the inner field expressions.</p>
      *
      * @return A list containing all the segmented {@link Exp}s.
      */
-    public List<Exp> getSegments() {
+    public List<Exp> getFields() {
         return copyExps();
     }
 
     /**
-     * <p>This method returns a deep copy of the list of
+     * <p>This method returns the number of field elements in this tuple.</p>
+     *
+     * @return The size of this {@link TupleExp}.
+     */
+    public int getSize() {
+        return mySize;
+    }
+
+    /**
+     * <p>This method method returns a deep copy of the list of
      * subexpressions. This method will return the same result
-     * as calling the {@link DotExp#getSegments()} method.</p>
+     * as calling the {@link TupleExp#getFields()} method.</p>
      *
      * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
     public List<Exp> getSubExpressions() {
-        return getSegments();
+        return getFields();
+    }
+
+    /**
+     * <p>This method checks to see if all the field expressions
+     * inside this tuple expression are universally quantified.</p>
+     *
+     * @return True if all {@link Exp}s are universally quantified,
+     * false otherwise.
+     */
+    public boolean isUniversallyQuantified() {
+        boolean soFar = true;
+
+        for (Exp field : myFields) {
+            soFar =
+                    soFar
+                            && ((field instanceof VarExp && ((VarExp) field)
+                                    .getQuantification() == SymbolTableEntry.Quantification.UNIVERSAL) || (field instanceof TupleExp && ((TupleExp) field)
+                                    .isUniversallyQuantified()));
+        }
+
+        return soFar;
     }
 
     /**
@@ -244,12 +357,12 @@ public class DotExp extends MathExp {
      * For all inherited programming expression classes, this method
      * should throw an exception.</p>
      *
-     * @return The resulting {@link DotExp} from applying the remember rule.
+     * @return The resulting {@link TupleExp} from applying the remember rule.
      */
     @Override
-    public DotExp remember() {
-        List<Exp> newSegmentExps = new ArrayList<>();
-        for (Exp e : mySegmentExps) {
+    public TupleExp remember() {
+        List<Exp> newFieldExps = new ArrayList<>();
+        for (Exp e : myFields) {
             Exp copyExp;
             if (e instanceof MathExp){
                 copyExp = ((MathExp) e).remember();
@@ -260,10 +373,10 @@ public class DotExp extends MathExp {
                         new InvalidClassException(""));
             }
 
-            newSegmentExps.add(copyExp);
+            newFieldExps.add(copyExp);
         }
 
-        return new DotExp(new Location(myLoc), newSegmentExps);
+        return new TupleExp(new Location(myLoc), newFieldExps);
     }
 
     /**
@@ -274,7 +387,7 @@ public class DotExp extends MathExp {
      */
     // TODO: See the message in Exp.
     /*public void setSubExpression(int index, Exp e) {
-        segments.set(index, e);
+        myFields.set(index, e);
     }*/
 
     /**
@@ -295,16 +408,20 @@ public class DotExp extends MathExp {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        if (mySegmentExps != null) {
-            Iterator<Exp> i = mySegmentExps.iterator();
+        sb.append("(");
 
-            while (i.hasNext()) {
-                sb.append(i.next().toString());
-                if (i.hasNext()) {
-                    sb.append(".");
-                }
+        boolean first = true;
+        for (Exp member : myFields) {
+            if (!first) {
+                sb.append(", ");
             }
+            else {
+                first = false;
+            }
+
+            sb.append(member.toString());
         }
+        sb.append(")");
 
         return sb.toString();
     }
@@ -321,7 +438,7 @@ public class DotExp extends MathExp {
      */
     @Override
     protected Exp copy() {
-        return new DotExp(new Location(myLoc), copyExps());
+        return new TupleExp(new Location(myLoc), copyExps());
     }
 
     /**
@@ -339,13 +456,13 @@ public class DotExp extends MathExp {
      *         the provided substitutions made.
      */
     @Override
-    public Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        List<Exp> newSegments = new ArrayList<>();
-        for (Exp e : mySegmentExps) {
-            newSegments.add(substitute(e, substitutions));
+    protected Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
+        List<Exp> newFields = new ArrayList<>();
+        for (Exp f : myFields) {
+            newFields.add(substitute(f, substitutions));
         }
 
-        return new DotExp(new Location(myLoc), newSegments);
+        return new TupleExp(new Location(myLoc), newFields);
     }
 
     // ===========================================================
@@ -354,16 +471,16 @@ public class DotExp extends MathExp {
 
     /**
      * <p>This is a helper method that makes a copy of the
-     * list containing all the segment expressions.</p>
+     * list containing all the field expressions.</p>
      *
      * @return A list containing {@link Exp}s.
      */
     private List<Exp> copyExps() {
-        List<Exp> copyJoiningExps = new ArrayList<>();
-        for (Exp exp : mySegmentExps) {
-            copyJoiningExps.add(exp.clone());
+        List<Exp> copyFieldExps = new ArrayList<>();
+        for (Exp exp : myFields) {
+            copyFieldExps.add(exp.clone());
         }
 
-        return copyJoiningExps;
+        return copyFieldExps;
     }
 }
