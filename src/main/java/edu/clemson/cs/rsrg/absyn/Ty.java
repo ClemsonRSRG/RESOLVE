@@ -15,10 +15,12 @@ package edu.clemson.cs.rsrg.absyn;
 import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.errorhandling.exception.NullMathTypeException;
+import edu.clemson.cs.rsrg.errorhandling.exception.NullProgramTypeException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>A <code>Ty</code> represents the <em>description</em> of a 
+ * <p>A {@link Ty} represents the <em>description</em> of a
  * <code>Type</code>, as it is found in the RESOLVE source code. That is, it is
  * representation of a type in the abstract syntax tree before it is translated 
  * into a true <code>Type</code>.</p>
@@ -114,9 +116,8 @@ public abstract class Ty extends ResolveConceptualElement {
      */
     public final void setMathType(MTType mathType) {
         if (mathType == null) {
-            System.err.println(this.toString());
-            throw new RuntimeException("Null Math Type on: " + this.getClass());
-
+            throw new NullMathTypeException("Null Math Type on: "
+                    + this.getClass());
         }
 
         myMathType = mathType;
@@ -140,8 +141,8 @@ public abstract class Ty extends ResolveConceptualElement {
      */
     public final void setProgramType(PTType progType) {
         if (progType == null) {
-            throw new IllegalArgumentException(
-                    "Attempt to set program type to null.");
+            throw new NullProgramTypeException("Null Program Type on: "
+                    + this.getClass());
         }
 
         myProgramTypeValue = progType;
