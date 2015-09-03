@@ -33,7 +33,7 @@ public class VarExp extends MathExp {
     // ===========================================================
 
     /** <p>The expression's qualifier</p> */
-    private final PosSymbol myQualifier;
+    private PosSymbol myQualifier;
 
     /** <p>The expression's name</p> */
     private final PosSymbol myName;
@@ -98,6 +98,7 @@ public class VarExp extends MathExp {
         if (myQualifier != null) {
             sb.append(myQualifier.asString(indentSize + innerIndentSize,
                     innerIndentSize));
+            sb.append("::");
         }
 
         if (myName != null) {
@@ -247,6 +248,15 @@ public class VarExp extends MathExp {
     }
 
     /**
+     * <p>Sets the qualifier for this expression.</p>
+     *
+     * @param qualifier The qualifier for this expression.
+     */
+    public final void setQualifier(PosSymbol qualifier) {
+        myQualifier = qualifier;
+    }
+
+    /**
      * <p>This method adds a new expression to our list of subexpressions.</p>
      *
      * @param index The index in our subexpression list.
@@ -276,7 +286,7 @@ public class VarExp extends MathExp {
         sb.append(myQuantification);
 
         if (myQualifier != null) {
-            sb.append(myQualifier);
+            sb.append(myQualifier.toString());
             sb.append("::");
         }
 

@@ -35,7 +35,7 @@ public abstract class AbstractFunctionExp extends MathExp {
     // ===========================================================
 
     /** <p>The object's qualifier.</p> */
-    protected final PosSymbol myQualifier;
+    protected PosSymbol myQualifier;
 
     /** <p>The object's quantification (if any).</p> */
     protected SymbolTableEntry.Quantification myQuantification;
@@ -153,7 +153,7 @@ public abstract class AbstractFunctionExp extends MathExp {
      *
      * @return A {@link PosSymbol} object containing the qualifier.
      */
-    public PosSymbol getQualifier() {
+    public final PosSymbol getQualifier() {
         return myQualifier;
     }
 
@@ -163,8 +163,17 @@ public abstract class AbstractFunctionExp extends MathExp {
      * @return An {@link SymbolTableEntry.Quantification} object representing
      * the quantification for this expression.
      */
-    public SymbolTableEntry.Quantification getQuantification() {
+    public final SymbolTableEntry.Quantification getQuantification() {
         return myQuantification;
+    }
+
+    /**
+     * <p>Sets the qualifier for this expression.</p>
+     *
+     * @param qualifier The qualifier for this expression.
+     */
+    public final void setQualifier(PosSymbol qualifier) {
+        myQualifier = qualifier;
     }
 
     /**
@@ -172,7 +181,7 @@ public abstract class AbstractFunctionExp extends MathExp {
      *
      * @param q The quantification for this expression.
      */
-    public void setQuantification(SymbolTableEntry.Quantification q) {
+    public final void setQuantification(SymbolTableEntry.Quantification q) {
         if (!q.equals(SymbolTableEntry.Quantification.NONE)) {
             throw new UnsupportedOperationException("The function "
                     + getOperatorAsString() + " does not support "
