@@ -87,7 +87,7 @@ public class TheoremPrioritizer {
         for (String s : theorem_symbols) {
             String c = m_vcReg.getRootSymbolForSymbol(s);
             if (m_vc_symbols.containsKey(c)) {
-                int c_score = 2* m_vc_symbols.get(c);
+                int c_score = 2 * m_vc_symbols.get(c);
                 if (c_score < score)
                     score = c_score;
             }

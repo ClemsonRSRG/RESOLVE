@@ -45,34 +45,38 @@ public class NormalizedAtomicExpressionMapImpl
     protected Set<Integer> getKeys() {
         return m_expression.keySet();
     }
+
     public int popcount(int x) {
         int count;
-        for (count=0; x > 0; count++)
-            x &= x-1;
+        for (count = 0; x > 0; count++)
+            x &= x - 1;
         return count;
     }
+
     // Returns a multiset
-    protected Map<String,Integer> getEquationOperatorsAsStrings(Registry reg) {
-        HashMap<String,Integer> rMap = new HashMap<String, Integer>();
+    protected Map<String, Integer> getEquationOperatorsAsStrings(Registry reg) {
+        HashMap<String, Integer> rMap = new HashMap<String, Integer>();
         for (Integer k : m_expression.keySet()) {
-            rMap.put(reg.getSymbolForIndex(k),popcount(m_expression.get(k)));
+            rMap.put(reg.getSymbolForIndex(k), popcount(m_expression.get(k)));
         }
         return rMap;
     }
+
     // Returns a multiset
-    protected Map<String,Integer> getArgumentsAsStrings(Registry reg) {
-        HashMap<String,Integer> rMap = new HashMap<String, Integer>();
+    protected Map<String, Integer> getArgumentsAsStrings(Registry reg) {
+        HashMap<String, Integer> rMap = new HashMap<String, Integer>();
         for (int i = 1; i < m_maxPositions; ++i) {
             int index = readPosition(i);
             if (index < 0)
                 break;
             String op = reg.getSymbolForIndex(index);
             int count;
-            if(rMap.containsKey(op)){
+            if (rMap.containsKey(op)) {
                 count = rMap.get(op) + 1;
             }
-            else count = 1;
-            rMap.put(op,count);
+            else
+                count = 1;
+            rMap.put(op, count);
         }
         return rMap;
     }
@@ -115,9 +119,10 @@ public class NormalizedAtomicExpressionMapImpl
     }
 
     // just overwrites entry
-    public void overwriteEntry(int operator, int positionBitCode){
+    public void overwriteEntry(int operator, int positionBitCode) {
         m_expression.put(operator, positionBitCode);
     }
+
     /**
      * @param operator integer value of operator
      * @param position 0 denotes first position.
@@ -195,11 +200,13 @@ public class NormalizedAtomicExpressionMapImpl
     }
 
     // can return neg result if op keys arent parents in reg
-    protected int getPositionBitCodeForStringOp(String op, Registry reg){
+    protected int getPositionBitCodeForStringOp(String op, Registry reg) {
         int opInt = reg.getIndexForSymbol(op);
-        if(!m_expression.containsKey(opInt)) return -1;
+        if (!m_expression.containsKey(opInt))
+            return -1;
         return m_expression.get(opInt);
     }
+
     // compare left sides of 2 expressions.  If this returns 0, you must compare right hand sides afterwards.
     @Override
     public int compareTo(NormalizedAtomicExpressionMapImpl o) {
