@@ -210,7 +210,7 @@ public class VarExp extends MathExp {
      *
      * @return The {@link PosSymbol} representation object.
      */
-    public PosSymbol getQualifier() {
+    public final PosSymbol getQualifier() {
         return myQualifier.clone();
     }
 

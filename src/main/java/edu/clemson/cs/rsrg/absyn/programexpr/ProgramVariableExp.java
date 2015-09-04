@@ -1,5 +1,5 @@
 /**
- * ProgramLiteralExp.java
+ * ProgramVariableExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -14,16 +14,24 @@ package edu.clemson.cs.rsrg.absyn.programexpr;
 
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the abstract base class for all the programming literal expressions
+ * <p>This is the abstract base class for all the programming variable expressions
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public abstract class ProgramLiteralExp extends ProgramExp {
+public abstract class ProgramVariableExp extends ProgramExp {
+
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    /** <p>The expression's qualifier</p> */
+    private PosSymbol myQualifier;
 
     // ===========================================================
     // Constructors
@@ -35,7 +43,7 @@ public abstract class ProgramLiteralExp extends ProgramExp {
      *
      * @param l A {@link Location} representation object.
      */
-    protected ProgramLiteralExp(Location l) {
+    protected ProgramVariableExp(Location l) {
         super(l);
     }
 
@@ -74,6 +82,15 @@ public abstract class ProgramLiteralExp extends ProgramExp {
     }
 
     /**
+     * <p>This method returns a deep copy of the qualifier name.</p>
+     *
+     * @return The {@link PosSymbol} representation object.
+     */
+    public final PosSymbol getQualifier() {
+        return myQualifier.clone();
+    }
+
+    /**
      * <p>This method returns a deep copy of the list of
      * subexpressions. The result of this calling this method should
      * always be an empty list, because we can not contain an expression.</p>
@@ -84,6 +101,16 @@ public abstract class ProgramLiteralExp extends ProgramExp {
     public final List<Exp> getSubExpressions() {
         return new ArrayList<>();
     }
+
+    /**
+     * <p>Sets the qualifier for this expression.</p>
+     *
+     * @param qualifier The qualifier for this expression.
+     */
+    public final void setQualifier(PosSymbol qualifier) {
+        myQualifier = qualifier;
+    }
+
     /**
      * <p>This method adds a new expression to our list of subexpressions.</p>
      *
