@@ -1,5 +1,5 @@
 /**
- * StringExp.java
+ * ProgramStringExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -10,25 +10,25 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.mathexpr;
+package edu.clemson.cs.rsrg.absyn.programexpr;
 
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical string expressions
+ * <p>This is the class for all the programming string expressions
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class StringExp extends LiteralExp {
+public class ProgramStringExp extends ProgramLiteralExp {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The inner representation for this mathematical string</p>*/
+    /** <p>The inner representation for this programming string</p>*/
     private final String myString;
 
     // ===========================================================
@@ -36,12 +36,12 @@ public class StringExp extends LiteralExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a mathematical string expression.</p>
+     * <p>This constructs a programming string expression.</p>
      *
      * @param l A {@link Location} representation object.
      * @param s A {@link String} expression.
      */
-    public StringExp(Location l, String s) {
+    public ProgramStringExp(Location l, String s) {
         super(l);
         myString = s;
     }
@@ -64,7 +64,7 @@ public class StringExp extends LiteralExp {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("StringExp\n");
+        sb.append("ProgramStringExp\n");
 
         if (myString != null) {
             printSpace(indentSize + innerIndentSize, sb);
@@ -77,7 +77,7 @@ public class StringExp extends LiteralExp {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link StringExp} class.</p>
+     * for the {@link ProgramStringExp} class.</p>
      *
      * @param o Object to be compared.
      * @return True if all the fields are equal, false otherwise.
@@ -85,12 +85,12 @@ public class StringExp extends LiteralExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof StringExp) {
-            StringExp eAsStringExp = (StringExp) o;
-            result = myLoc.equals(eAsStringExp.myLoc);
+        if (o instanceof ProgramStringExp) {
+            ProgramStringExp eAsProgramStringExp = (ProgramStringExp) o;
+            result = myLoc.equals(eAsProgramStringExp.myLoc);
 
             if (result) {
-                result = myString.equals(eAsStringExp.myString);
+                result = myString.equals(eAsProgramStringExp.myString);
             }
         }
 
@@ -111,10 +111,10 @@ public class StringExp extends LiteralExp {
      */
     @Override
     public boolean equivalent(Exp e) {
-        boolean retval = (e instanceof StringExp);
+        boolean retval = (e instanceof ProgramStringExp);
         if (retval) {
-            StringExp eAsStringExp = (StringExp) e;
-            retval = myString.equals(eAsStringExp.myString);
+            ProgramStringExp eAsProgramStringExp = (ProgramStringExp) e;
+            retval = myString.equals(eAsProgramStringExp.myString);
         }
 
         return retval;
@@ -127,28 +127,6 @@ public class StringExp extends LiteralExp {
      */
     public String getValue() {
         return myString;
-    }
-
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link StringExp} from applying the remember rule.
-     */
-    @Override
-    public StringExp remember() {
-        return (StringExp) this.clone();
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public MathExp simplify() {
-        return this.clone();
     }
 
     /**
@@ -178,7 +156,7 @@ public class StringExp extends LiteralExp {
      */
     @Override
     protected Exp copy() {
-        return new StringExp(new Location(myLoc), myString);
+        return new ProgramStringExp(new Location(myLoc), myString);
     }
 
     /**
@@ -197,7 +175,7 @@ public class StringExp extends LiteralExp {
      */
     @Override
     public Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new StringExp(new Location(myLoc), myString);
+        return new ProgramStringExp(new Location(myLoc), myString);
     }
 
 }
