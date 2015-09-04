@@ -14,8 +14,6 @@ package edu.clemson.cs.rsrg.absyn.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**

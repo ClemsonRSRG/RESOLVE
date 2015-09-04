@@ -14,8 +14,6 @@ package edu.clemson.cs.rsrg.absyn.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,7 +22,7 @@ import java.util.Map;
  *
  * @version 2.0
  */
-public class DoubleExp extends MathExp {
+public class DoubleExp extends LiteralExp {
 
     // ===========================================================
     // Member Fields
@@ -77,36 +75,6 @@ public class DoubleExp extends MathExp {
     }
 
     /**
-     * <p>This method attempts to find the provided expression in our
-     * subexpressions. The result of this calling this method should
-     * always be false, because we can not contain an expression.</p>
-     *
-     * @param exp The expression we wish to locate.
-     *
-     * @return False.
-     */
-    @Override
-    public boolean containsExp(Exp exp) {
-        return false;
-    }
-
-    /**
-     * <p>This method attempts to find an expression with the given name in our
-     * subexpressions. The result of this calling this method should
-     * always be false, because we can not contain a variable.</p>
-     *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
-     *
-     * @return False.
-     */
-    @Override
-    public boolean containsVar(String varName, boolean IsOldExp) {
-        return false;
-    }
-
-    /**
      * <p>This method overrides the default equals method implementation
      * for the {@link DoubleExp} class.</p>
      *
@@ -153,18 +121,6 @@ public class DoubleExp extends MathExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the list of
-     * subexpressions. The result of this calling this method should
-     * always be an empty list, because we can not contain an expression.</p>
-     *
-     * @return A list containing subexpressions ({@link Exp}s).
-     */
-    @Override
-    public List<Exp> getSubExpressions() {
-        return new ArrayList<>();
-    }
-
-    /**
      * <p>This method returns the double value.</p>
      *
      * @return The {@link double} value.
@@ -184,15 +140,6 @@ public class DoubleExp extends MathExp {
     public DoubleExp remember() {
         return (DoubleExp) this.clone();
     }
-
-    /**
-     * <p>This method adds a new expression to our list of subexpressions.</p>
-     *
-     * @param index The index in our subexpression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: See the message in Exp.
-    // public void setSubExpression(int index, Exp e) {}
 
     /**
      * <p>This method applies the VC Generator's simplification step.</p>
