@@ -15,6 +15,7 @@ package edu.clemson.cs.rsrg.absyn;
 import edu.clemson.cs.rsrg.absyn.mathexpr.VarExp;
 import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
+import edu.clemson.cs.rsrg.errorhandling.exception.NullMathTypeException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.Iterator;
@@ -221,9 +222,9 @@ public abstract class Exp extends ResolveConceptualElement {
      */
     public void setMathType(MTType mathType) {
         if (mathType == null) {
-            System.err.println(this.toString());
-            throw new RuntimeException("Null Math Type on: " + this.getClass());
-
+            throw new NullMathTypeException("Null Math Type on: "
+                    + this.getClass() + ". The causing expression is: "
+                    + this.toString());
         }
 
         myMathType = mathType;

@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.absyn.programexpr;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.rsrg.absyn.Exp;
+import edu.clemson.cs.rsrg.errorhandling.exception.NullProgramTypeException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
@@ -57,7 +58,10 @@ public abstract class ProgramExp extends Exp {
      */
     @Override
     public final ProgramExp clone() {
-        return (ProgramExp) super.clone();
+        ProgramExp newExp = (ProgramExp) super.clone();
+        newExp.setProgramType(myProgramType);
+
+        return newExp;
     }
 
     /**
@@ -78,8 +82,9 @@ public abstract class ProgramExp extends Exp {
      */
     public final void setProgramType(PTType progType) {
         if (progType == null) {
-            throw new IllegalArgumentException(
-                    "Attempt to set program type to null.");
+            throw new NullProgramTypeException("Null Program Type on: "
+                    + this.getClass() + ". The causing expression is: "
+                    + this.toString());
         }
 
         myProgramType = progType;

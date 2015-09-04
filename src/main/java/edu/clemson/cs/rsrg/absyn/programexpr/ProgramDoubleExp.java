@@ -1,5 +1,5 @@
 /**
- * ProgramCharExp.java
+ * ProgramDoubleExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -17,19 +17,19 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the programming character expressions
+ * <p>This is the class for all the programming double expressions
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class ProgramCharExp extends ProgramLiteralExp {
+public class ProgramDoubleExp extends ProgramLiteralExp {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The character representing this programming character</p> */
-    private final Character myCharacter;
+    /** <p>The double representing this programming double</p> */
+    private final double myDouble;
 
     // ===========================================================
     // Constructors
@@ -39,11 +39,11 @@ public class ProgramCharExp extends ProgramLiteralExp {
      * <p>This constructs a mathematical character expression.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param c A {@link Character} expression.
+     * @param d A {@link double} value.
      */
-    public ProgramCharExp(Location l, Character c) {
+    public ProgramDoubleExp(Location l, double d) {
         super(l);
-        myCharacter = c;
+        myDouble = d;
     }
 
     // ===========================================================
@@ -65,20 +65,18 @@ public class ProgramCharExp extends ProgramLiteralExp {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("ProgramCharExp\n");
+        sb.append("ProgramDoubleExp\n");
 
-        if (myCharacter != null) {
-            printSpace(indentSize + innerIndentSize, sb);
-            sb.append(myCharacter.toString());
-            sb.append("\n");
-        }
+        printSpace(indentSize + innerIndentSize, sb);
+        sb.append(myDouble);
+        sb.append("\n");
 
         return sb.toString();
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link ProgramCharExp} class.</p>
+     * for the {@link ProgramDoubleExp} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -87,12 +85,12 @@ public class ProgramCharExp extends ProgramLiteralExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof ProgramCharExp) {
-            ProgramCharExp eAsProgramCharExp = (ProgramCharExp) o;
-            result = myLoc.equals(eAsProgramCharExp.myLoc);
+        if (o instanceof ProgramDoubleExp) {
+            ProgramDoubleExp eAsProgramDoubleExp = (ProgramDoubleExp) o;
+            result = myLoc.equals(eAsProgramDoubleExp.myLoc);
 
             if (result) {
-                result = myCharacter.equals(eAsProgramCharExp.myCharacter);
+                result = (myDouble == eAsProgramDoubleExp.myDouble);
             }
         }
 
@@ -113,22 +111,22 @@ public class ProgramCharExp extends ProgramLiteralExp {
      */
     @Override
     public boolean equivalent(Exp e) {
-        boolean retval = (e instanceof ProgramCharExp);
+        boolean retval = (e instanceof ProgramDoubleExp);
         if (retval) {
-            ProgramCharExp eAsProgramCharExp = (ProgramCharExp) e;
-            retval = myCharacter.equals(eAsProgramCharExp.myCharacter);
+            ProgramDoubleExp eAsProgramDoubleExp = (ProgramDoubleExp) e;
+            retval = (myDouble == eAsProgramDoubleExp.myDouble);
         }
 
         return retval;
     }
 
     /**
-     * <p>This method returns a deep copy of the character value.</p>
+     * <p>This method returns the double value.</p>
      *
-     * @return The {@link Character} value.
+     * @return The {@link double} value.
      */
-    public Character getValue() {
-        return myCharacter;
+    public double getValue() {
+        return myDouble;
     }
 
     /**
@@ -139,9 +137,7 @@ public class ProgramCharExp extends ProgramLiteralExp {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        if (myCharacter != null) {
-            sb.append(myCharacter.toString());
-        }
+        sb.append(myDouble);
 
         return sb.toString();
     }
@@ -158,7 +154,7 @@ public class ProgramCharExp extends ProgramLiteralExp {
      */
     @Override
     protected Exp copy() {
-        return new ProgramCharExp(new Location(myLoc), myCharacter.charValue());
+        return new ProgramDoubleExp(new Location(myLoc), myDouble);
     }
 
     /**
@@ -176,8 +172,8 @@ public class ProgramCharExp extends ProgramLiteralExp {
      *         the provided substitutions made.
      */
     @Override
-    protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new ProgramCharExp(new Location(myLoc), myCharacter.charValue());
+    public Exp substituteChildren(Map<Exp, Exp> substitutions) {
+        return new ProgramDoubleExp(new Location(myLoc), myDouble);
     }
 
 }

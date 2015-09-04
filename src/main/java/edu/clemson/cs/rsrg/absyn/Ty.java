@@ -117,7 +117,8 @@ public abstract class Ty extends ResolveConceptualElement {
     public final void setMathType(MTType mathType) {
         if (mathType == null) {
             throw new NullMathTypeException("Null Math Type on: "
-                    + this.getClass());
+                    + this.getClass() + ". The causing raw type is: "
+                    + this.toString());
         }
 
         myMathType = mathType;
