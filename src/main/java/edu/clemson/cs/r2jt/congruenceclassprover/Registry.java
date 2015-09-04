@@ -136,7 +136,8 @@ public class Registry {
         else if (a_us.equals(Usage.CREATED) || b_us.equals(Usage.CREATED)) {
             m_symbolToUsage.put(aS, Usage.CREATED);
         }
-        if(m_partTypes.contains(bS)) m_partTypes.add(aS);
+        if (m_partTypes.contains(bS))
+            m_partTypes.add(aS);
         m_unusedIndices.push(opIndexB);
         m_symbolIndexParentArray.set(opIndexB, opIndexA);
     }

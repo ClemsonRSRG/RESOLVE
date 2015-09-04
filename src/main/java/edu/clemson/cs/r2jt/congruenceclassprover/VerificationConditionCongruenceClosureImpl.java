@@ -68,7 +68,8 @@ public class VerificationConditionCongruenceClosureImpl {
                 // true branch
                 PSymbol tBSym = null;
                 for (PSymbol pq : px.getQuantifiedVariables()) {
-                    if(!pq.getType().toString().equals("Z")) allOverZ = false;
+                    if (!pq.getType().toString().equals("Z"))
+                        allOverZ = false;
                     tBSym =
                             new PSymbol(pq.getType(), pq.getTypeValue(), pq
                                     .getTopLevelOperation()
@@ -107,7 +108,7 @@ public class VerificationConditionCongruenceClosureImpl {
                 PSymbol assertion =
                         new PSymbol(m_typegraph.BOOLEAN, null,
                                 "isBinaryPartitionZ", args);
-                if(allOverZ)
+                if (allOverZ)
                     splitConditions.add(assertion);
             }
             addPExp(splitConditions.iterator(), true);

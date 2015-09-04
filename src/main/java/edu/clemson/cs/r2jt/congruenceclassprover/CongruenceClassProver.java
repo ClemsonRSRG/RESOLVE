@@ -322,7 +322,8 @@ public class CongruenceClassProver {
                                                 + "\n[" + theoremScore + "]"
                                                 + curP.toString() + "\t"
                                                 + substitutionMade + "\n\n";
-                                if(printVCEachStep) theseResults += vcc.toString();
+                                if (printVCEachStep)
+                                    theseResults += vcc.toString();
                                 timeAtLastIter = System.currentTimeMillis();
                                 status = vcc.isProved();
                                 num_Instantiated_added++;
