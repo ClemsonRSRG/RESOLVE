@@ -21,12 +21,9 @@ import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.MTProper;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * Created by mike on 4/3/2014.
@@ -55,36 +52,71 @@ public class VerificationConditionCongruenceClosureImpl {
         m_consequent = vc.getConsequent();
         m_registry = new Registry(g);
         m_conjunction =
-                new ConjunctionOfNormalizedAtomicExpressions(m_registry);
+                new ConjunctionOfNormalizedAtomicExpressions(m_registry, true);
         m_goal = new ArrayList<String>();
         forAllQuantifiedPExps = new ArrayList<PExp>();
+        if (vc.m_liftedLambdaPredicates != null
+                && vc.m_liftedLambdaPredicates.size() > 0) {
+            forAllQuantifiedPExps.addAll(vc.m_liftedLambdaPredicates);
+            //addPExp(forAllQuantifiedPExps.iterator(),true);
+            ArrayList<PExp> splitConditions = new ArrayList<PExp>();
+            boolean allOverZ = true;
+            for (PExp px : vc.m_conditions) {
+                java.util.HashMap<PExp, PExp> substMap =
+                        new HashMap<PExp, PExp>();
+                ArrayList<PExp> args = new ArrayList<PExp>();
+                // true branch
+                PSymbol tBSym = null;
+                for (PSymbol pq : px.getQuantifiedVariables()) {
+                    if(!pq.getType().toString().equals("Z")) allOverZ = false;
+                    tBSym =
+                            new PSymbol(pq.getType(), pq.getTypeValue(), pq
+                                    .getTopLevelOperation()
+                                    + ".T", PSymbol.Quantification.NONE);
+                    substMap.put(pq, tBSym);
+                }
+                PExp pxTrue = px.substitute(substMap);
+                splitConditions.add(pxTrue);
+                //args.add(pxTrue);
+                //args.add(new PSymbol(g.BOOLEAN, null, "true"));
+                //splitConditions.add(new PSymbol(g.BOOLEAN, null, "=", args));
+                // false branch
+                PSymbol fBSym = null;
+                for (PSymbol pq : px.getQuantifiedVariables()) {
+                    fBSym =
+                            new PSymbol(pq.getType(), pq.getTypeValue(), pq
+                                    .getTopLevelOperation()
+                                    + ".F", PSymbol.Quantification.NONE);
+                    substMap.put(pq, fBSym);
+                }
+                PExp pxFalse = px.substitute(substMap);
+                args.clear();
+                args.add(pxFalse);
+                PSymbol negatedCondition =
+                        new PSymbol(g.BOOLEAN, null, "not", args);
+                splitConditions.add(negatedCondition);
+                /*args.clear();
+                args.add(negatedCondition);
+                args.add(new PSymbol(g.BOOLEAN, null, "true"));
+                splitConditions.add(new PSymbol(g.BOOLEAN, null, "=", args));
+                // AddisBinaryPartition (p1: Entity, p2: Entity) : B;
+                 */
+                args.clear();
+                args.add(tBSym);
+                args.add(fBSym);
+                PSymbol assertion =
+                        new PSymbol(m_typegraph.BOOLEAN, null,
+                                "isBinaryPartitionZ", args);
+                if(allOverZ)
+                    splitConditions.add(assertion);
+            }
+            addPExp(splitConditions.iterator(), true);
+
+        }
         addPExp(m_antecedent.iterator(), true);
         addPExp(m_consequent.iterator(), false);
-        makeNumsN();
-
-    }
-
-    protected void makeNumsN() {
-        if (m_registry.m_typeDictionary.containsKey("N")) {
-            MTType natType = m_registry.m_typeDictionary.get("N");
-            for (int i = 0; i < m_registry.m_indexToSymbol.size(); ++i) {
-                String s = m_registry.m_indexToSymbol.get(i);
-                if (s.matches("[0-9]+")) {
-                    m_registry.m_indexToType.set(i, natType);
-                }
-            }
-        }
-    }
-
-    protected void makeNZ() {
-        if (m_registry.m_typeDictionary.containsKey("N")) {
-            MTType natType = m_registry.m_typeDictionary.get("N");
-            Set<String> natSymbols = m_registry.getSetMatchingType(natType);
-
-            for (String s : natSymbols) {
-                m_conjunction.natToZ(s);
-            }
-        }
+        m_conjunction.updateUseMap();
+        //m_conjunction.mergeEquivalentFunctions();
     }
 
     protected ConjunctionOfNormalizedAtomicExpressions getConjunct() {
@@ -121,51 +153,49 @@ public class VerificationConditionCongruenceClosureImpl {
         return rMap;
     }
 
+    // updated for multiple pairs of goals (any match -- goals or'd)
     public STATUS isProved() {
         if (m_conjunction.m_evaluates_to_false)
             return STATUS.FALSE_ASSUMPTION; // this doesn't mean P->Q = False, it just means P = false
-        String goal1 = m_goal.get(0);
-        String goal2 = m_goal.get(1);
-        // check each goal has same root
-        if (!goal1.equals(goal2)) // diff symbols, same root?
-        {
-            if (m_registry.getIndexForSymbol(goal1) != m_registry
-                    .getIndexForSymbol(goal2)) // can avoid this check by updating goal on merges
-            {
-                return STATUS.STILL_EVALUATING; // not proved yet
+        for (int i = 0; i < m_goal.size(); i += 2) {
+            String goal1 = m_goal.get(i);
+            String goal2 = m_goal.get(i + 1);
+            int g1 = m_registry.getIndexForSymbol(goal1);
+            int g2 = m_registry.getIndexForSymbol(goal2);
+            // check each goal has same root
+            if (g1 == g2) {
+                return STATUS.PROVED;
             }
         }
-
-        return STATUS.PROVED;
+        return STATUS.STILL_EVALUATING;
     }
 
     private void addPExp(Iterator<PExp> pit, boolean inAntecedent) {
         while (pit.hasNext()) {
             PExp curr = pit.next();
-            if (!curr.getQuantifiedVariables().isEmpty()
-                    && !curr.getSymbolNames().contains("lambda")) {
-                forAllQuantifiedPExps.add(curr);
-            }
-            else if (curr.isEquality()) { // f(x,y) = z and g(a,b) = c ; then z is replaced by c
-                PExp lhs = curr.getSubExpressions().get(0);
-                PExp rhs = curr.getSubExpressions().get(1);
-                int lhsIndex = (m_conjunction.addFormula(lhs));
-                int rhsIndex = (m_conjunction.addFormula(rhs));
+            if (curr.isEquality()) { // f(x,y) = z and g(a,b) = c ; then z is replaced by c
+
                 if (inAntecedent) {
-                    m_conjunction.mergeOperators(lhsIndex, rhsIndex);
+                    m_conjunction.addExpression(curr);
                 }
                 else {
+                    PExp lhs = curr.getSubExpressions().get(0);
+                    PExp rhs = curr.getSubExpressions().get(1);
+                    int lhsIndex = (m_conjunction.addFormula(lhs));
+                    int rhsIndex = (m_conjunction.addFormula(rhs));
                     addGoal(m_registry.getSymbolForIndex(lhsIndex), m_registry
                             .getSymbolForIndex(rhsIndex));
                 }
             }
             else { // P becomes P = true or P(x...) becomes P(x ...) = z and z is replaced by true
-                int intRepForExp = m_conjunction.addFormula(curr);
+
                 if (inAntecedent) {
-                    m_conjunction.mergeOperators(m_registry
-                            .getIndexForSymbol("true"), intRepForExp);
+                    m_conjunction.addExpression(curr);
+                    //m_conjunction.mergeOperators(m_registry
+                    //        .getIndexForSymbol("true"), intRepForExp);
                 }
                 else {
+                    int intRepForExp = m_conjunction.addFormula(curr);
                     addGoal(m_registry.getSymbolForIndex(intRepForExp), "true");
                 }
             }
@@ -182,6 +212,9 @@ public class VerificationConditionCongruenceClosureImpl {
     @Override
     public String toString() {
         String r = m_name + "\n" + m_conjunction;
+        for (PExp pq : forAllQuantifiedPExps) {
+            r += pq.toString() + "\n";
+        }
         r += "----------------------------------\n";
 
         String ro0 =

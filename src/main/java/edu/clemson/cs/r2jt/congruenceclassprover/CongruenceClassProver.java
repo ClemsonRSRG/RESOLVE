@@ -22,12 +22,8 @@ import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.query.MultimatchSymbolQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.query.UnqualifiedNameQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
@@ -54,10 +50,10 @@ public class CongruenceClassProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
-    private final long DEFAULTTIMEOUT = 20000;
+    private final long DEFAULTTIMEOUT = 10000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
-    private final boolean DO_NOT_INTRODUCE_NEW_OPERATORS = true;
+    private boolean printVCEachStep = false;
 
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
@@ -100,9 +96,11 @@ public class CongruenceClassProver {
         int i = 0;
 
         for (VC vc : vcs) {
-            //if(!vc.getName().equals("3_1")) continue;
+            // make every PExp a PSymbol
+            vc.convertAllToPsymbols(m_typeGraph);
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc));
             myModels[i++] = (new PerVCProverModel(g, vc.getName(), vc, null));
+
         }
         m_theorems = new ArrayList<TheoremCongruenceClosureImpl>();
         List<TheoremEntry> theoremEntries =
@@ -119,7 +117,7 @@ public class CongruenceClassProver {
             }
             else {
                 TheoremCongruenceClosureImpl t =
-                        new TheoremCongruenceClosureImpl(g, assertion);
+                        new TheoremCongruenceClosureImpl(g, assertion, false);
                 if (!t.m_unneeded) {
                     m_theorems.add(t);
                 }
@@ -151,7 +149,7 @@ public class CongruenceClassProver {
 
         TheoremCongruenceClosureImpl t =
                 new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
-                        false);
+                        false, false);
         if (!t.m_unneeded) {
             m_theorems.add(t);
         }
@@ -159,7 +157,7 @@ public class CongruenceClassProver {
         if (lhs.isEquality()) {
             t =
                     new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
-                            true);
+                            true, false);
             if (!t.m_unneeded) {
                 m_theorems.add(t);
             }
@@ -171,6 +169,8 @@ public class CongruenceClassProver {
         String summary = "";
         int i = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
+            //printVCEachStep = true;
+            //if(!vcc.m_name.equals("0_10"))continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             VerificationConditionCongruenceClosureImpl.STATUS proved =
@@ -255,12 +255,15 @@ public class CongruenceClassProver {
         String div = divLine(vcc.m_name);
         String theseResults =
                 div + ("Before application of theorems: " + vcc + "\n");
+        ArrayList<TheoremCongruenceClosureImpl> theoremsForThisVC =
+                new ArrayList<TheoremCongruenceClosureImpl>();
+        theoremsForThisVC.addAll(m_theorems);
         // add quantified expressions local to the vc to theorems
         for (PExp p : vcc.forAllQuantifiedPExps) {
             TheoremCongruenceClosureImpl t =
-                    new TheoremCongruenceClosureImpl(m_typeGraph, p);
+                    new TheoremCongruenceClosureImpl(m_typeGraph, p, true);
             if (!t.m_unneeded) {
-                m_theorems.add(t);
+                theoremsForThisVC.add(t);
             }
         }
         int iteration = 0;
@@ -271,8 +274,9 @@ public class CongruenceClassProver {
             Map<String, Integer> vcSymbolRelevanceMap = vcc.getGoalSymbols();
             int threshold = 16 * vcSymbolRelevanceMap.keySet().size() + 1;
             TheoremPrioritizer rankedTheorems =
-                    new TheoremPrioritizer(m_theorems, vcSymbolRelevanceMap,
-                            threshold, theoremAppliedCount);
+                    new TheoremPrioritizer(theoremsForThisVC,
+                            vcSymbolRelevanceMap, threshold,
+                            theoremAppliedCount, vcc.getRegistry());
             //theseResults += "Iteration " + iteration++ + "\n";
             int max_Theorems_to_choose = 1;
             int num_Theorems_chosen = 0;
@@ -291,12 +295,13 @@ public class CongruenceClassProver {
                     InstantiatedTheoremPrioritizer instPQ =
                             new InstantiatedTheoremPrioritizer(
                                     instantiatedTheorems, vcSymbolRelevanceMap,
-                                    threshold);
+                                    threshold, vcc.getRegistry());
                     int max_Instantiated_to_Add = 1;
                     int num_Instantiated_added = 0;
                     while (num_Instantiated_added < max_Instantiated_to_Add
                             && !instPQ.m_pQueue.isEmpty()) {
                         PExpWithScore curP = instPQ.m_pQueue.poll();
+
                         if (!applied.contains(curP.m_theorem.toString())) {
                             String substitutionMade =
                                     vcc
@@ -317,6 +322,7 @@ public class CongruenceClassProver {
                                                 + "\n[" + theoremScore + "]"
                                                 + curP.toString() + "\t"
                                                 + substitutionMade + "\n\n";
+                                if(printVCEachStep) theseResults += vcc.toString();
                                 timeAtLastIter = System.currentTimeMillis();
                                 status = vcc.isProved();
                                 num_Instantiated_added++;
@@ -329,6 +335,7 @@ public class CongruenceClassProver {
                                 theoremAppliedCount.put(cur.m_theoremString,
                                         ++count);
                                 num_Theorems_chosen++;
+
                             }
                         }
                     }
