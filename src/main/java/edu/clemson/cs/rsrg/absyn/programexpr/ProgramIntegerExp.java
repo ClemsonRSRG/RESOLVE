@@ -1,5 +1,5 @@
 /**
- * IntegerExp.java
+ * ProgramIntegerExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -10,29 +10,25 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.mathexpr;
+package edu.clemson.cs.rsrg.absyn.programexpr;
 
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical integer expressions
+ * <p>This is the class for all the programming integer expressions
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class IntegerExp extends LiteralExp {
+public class ProgramIntegerExp extends ProgramLiteralExp {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The qualifier for this mathematical integer</p> */
-    private PosSymbol myQualifier;
-
-    /** <p>The integer representing this mathematical integer</p> */
+    /** <p>The integer representing this programming integer</p> */
     private final Integer myInteger;
 
     // ===========================================================
@@ -43,12 +39,10 @@ public class IntegerExp extends LiteralExp {
      * <p>This constructs a mathematical integer expression.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param qualifier A {@link PosSymbol} representation object.
      * @param i A {@link Integer} expression.
      */
-    public IntegerExp(Location l, PosSymbol qualifier, int i) {
+    public ProgramIntegerExp(Location l, int i) {
         super(l);
-        myQualifier = qualifier;
         myInteger = i;
     }
 
@@ -71,13 +65,7 @@ public class IntegerExp extends LiteralExp {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("IntegerExp\n");
-
-        if (myQualifier != null) {
-            sb.append(myQualifier.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-            sb.append("::");
-        }
+        sb.append("ProgramIntegerExp\n");
 
         printSpace(indentSize + innerIndentSize, sb);
         sb.append(myInteger);
@@ -88,7 +76,7 @@ public class IntegerExp extends LiteralExp {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link IntegerExp} class.</p>
+     * for the {@link ProgramIntegerExp} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -97,12 +85,12 @@ public class IntegerExp extends LiteralExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof IntegerExp) {
-            IntegerExp eAsIntegerExp = (IntegerExp) o;
-            result = myLoc.equals(eAsIntegerExp.myLoc);
+        if (o instanceof ProgramIntegerExp) {
+            ProgramIntegerExp eAsProgramIntegerExp = (ProgramIntegerExp) o;
+            result = myLoc.equals(eAsProgramIntegerExp.myLoc);
 
             if (result) {
-                result = myInteger.equals(eAsIntegerExp.myInteger);
+                result = myInteger.equals(eAsProgramIntegerExp.myInteger);
             }
         }
 
@@ -123,22 +111,13 @@ public class IntegerExp extends LiteralExp {
      */
     @Override
     public boolean equivalent(Exp e) {
-        boolean retval = e instanceof IntegerExp;
+        boolean retval = e instanceof ProgramIntegerExp;
         if (retval) {
-            IntegerExp eAsIntegerExp = (IntegerExp) e;
-            retval = myInteger.equals(eAsIntegerExp.myInteger);
+            ProgramIntegerExp eAsProgramIntegerExp = (ProgramIntegerExp) e;
+            retval = myInteger.equals(eAsProgramIntegerExp.myInteger);
         }
 
         return retval;
-    }
-
-    /**
-     * <p>This method returns a deep copy of the qualifier name.</p>
-     *
-     * @return The {@link PosSymbol} representation object.
-     */
-    public PosSymbol getQualifier() {
-        return myQualifier.clone();
     }
 
     /**
@@ -151,28 +130,6 @@ public class IntegerExp extends LiteralExp {
     }
 
     /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link IntegerExp} from applying the remember rule.
-     */
-    @Override
-    public IntegerExp remember() {
-        return (IntegerExp) this.clone();
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public MathExp simplify() {
-        return this.clone();
-    }
-
-    /**
      * <p>Returns the expression in string format.</p>
      *
      * @return Expression as a string.
@@ -180,10 +137,6 @@ public class IntegerExp extends LiteralExp {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        if (myQualifier != null) {
-            sb.append(myQualifier);
-            sb.append("::");
-        }
         sb.append(myInteger);
 
         return sb.toString();
@@ -201,12 +154,7 @@ public class IntegerExp extends LiteralExp {
      */
     @Override
     public Exp copy() {
-        PosSymbol newQualifier = null;
-        if (myQualifier != null) {
-            newQualifier = myQualifier.clone();
-        }
-
-        return new IntegerExp(new Location(myLoc), newQualifier, myInteger);
+        return new ProgramIntegerExp(new Location(myLoc), myInteger);
     }
 
     /**
@@ -225,12 +173,7 @@ public class IntegerExp extends LiteralExp {
      */
     @Override
     protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        PosSymbol newQualifier = null;
-        if (myQualifier != null) {
-            newQualifier = myQualifier.clone();
-        }
-
-        return new IntegerExp(new Location(myLoc), newQualifier, myInteger);
+        return new ProgramIntegerExp(new Location(myLoc), myInteger);
     }
 
 }
