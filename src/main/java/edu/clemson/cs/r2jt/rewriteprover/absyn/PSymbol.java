@@ -652,6 +652,23 @@ public class PSymbol extends PExp {
         return result;
     }
 
+    public Set<String> getNonQuantifiedSymbols() {
+        Set<String> result = new HashSet<String>();
+
+        if (quantification == Quantification.NONE) {
+            result.add(getTopLevelOperation());
+        }
+
+        Iterator<PExp> argumentIter = arguments.iterator();
+        while (argumentIter.hasNext()) {
+            Set<String> r =
+                    ((PSymbol) argumentIter.next()).getNonQuantifiedSymbols();
+            result.addAll(r);
+        }
+
+        return result;
+    }
+
     @Override
     public boolean containsExistential() {
         boolean retval = (quantification == Quantification.THERE_EXISTS);
@@ -763,7 +780,7 @@ public class PSymbol extends PExp {
             }
         }
         String combined = opString + " " + argsString;
-        if (!argsString.equals("")) {
+        if (argsString.length() != 0) {
             combined = "(" + combined + ")";
         }
         if (negate)
