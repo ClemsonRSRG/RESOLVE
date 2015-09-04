@@ -36,7 +36,7 @@ public class ProgramDoubleExp extends ProgramLiteralExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a mathematical character expression.</p>
+     * <p>This constructs a programming double expression.</p>
      *
      * @param l A {@link Location} representation object.
      * @param d A {@link double} value.

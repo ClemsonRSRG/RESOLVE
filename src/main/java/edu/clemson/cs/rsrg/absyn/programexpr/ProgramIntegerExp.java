@@ -36,7 +36,7 @@ public class ProgramIntegerExp extends ProgramLiteralExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a mathematical integer expression.</p>
+     * <p>This constructs a programing integer expression.</p>
      *
      * @param l A {@link Location} representation object.
      * @param i A {@link Integer} expression.

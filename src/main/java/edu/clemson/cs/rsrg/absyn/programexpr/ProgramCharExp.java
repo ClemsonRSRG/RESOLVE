@@ -36,7 +36,7 @@ public class ProgramCharExp extends ProgramLiteralExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a mathematical character expression.</p>
+     * <p>This constructs a programming character expression.</p>
      *
      * @param l A {@link Location} representation object.
      * @param c A {@link Character} expression.
