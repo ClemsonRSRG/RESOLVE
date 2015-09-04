@@ -92,7 +92,8 @@ public class StringExp extends MathExp {
 
     /**
      * <p>This method attempts to find an expression with the given name in our
-     * subexpressions.</p>
+     * subexpressions. The result of this calling this method should
+     * always be false, because we can not contain a variable.</p>
      *
      * @param varName  Expression name.
      * @param IsOldExp Flag to indicate if the given name is of the form
@@ -101,7 +102,7 @@ public class StringExp extends MathExp {
      */
     @Override
     public boolean containsVar(String varName, boolean IsOldExp) {
-        return stringEquivalent(varName, myString);
+        return false;
     }
 
     /**

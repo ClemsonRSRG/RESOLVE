@@ -1,5 +1,5 @@
 /**
- * CharExp.java
+ * ProgramCharExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -10,21 +10,19 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.mathexpr;
+package edu.clemson.cs.rsrg.absyn.programexpr;
 
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical character expressions
+ * <p>This is the class for all the programming character expressions
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class CharExp extends LiteralExp {
+public class ProgramCharExp extends ProgramLiteralExp {
 
     // ===========================================================
     // Member Fields
@@ -43,7 +41,7 @@ public class CharExp extends LiteralExp {
      * @param l A {@link Location} representation object.
      * @param c A {@link Character} expression.
      */
-    public CharExp(Location l, Character c) {
+    public ProgramCharExp(Location l, Character c) {
         super(l);
         myCharacter = c;
     }
@@ -67,7 +65,7 @@ public class CharExp extends LiteralExp {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("CharExp\n");
+        sb.append("ProgramCharExp\n");
 
         if (myCharacter != null) {
             printSpace(indentSize + innerIndentSize, sb);
@@ -80,7 +78,7 @@ public class CharExp extends LiteralExp {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link CharExp} class.</p>
+     * for the {@link ProgramCharExp} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -89,12 +87,12 @@ public class CharExp extends LiteralExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof CharExp) {
-            CharExp eAsCharExp = (CharExp) o;
-            result = myLoc.equals(eAsCharExp.myLoc);
+        if (o instanceof ProgramCharExp) {
+            ProgramCharExp eAsProgramCharExp = (ProgramCharExp) o;
+            result = myLoc.equals(eAsProgramCharExp.myLoc);
 
             if (result) {
-                result = myCharacter.equals(eAsCharExp.myCharacter);
+                result = myCharacter.equals(eAsProgramCharExp.myCharacter);
             }
         }
 
@@ -115,10 +113,10 @@ public class CharExp extends LiteralExp {
      */
     @Override
     public boolean equivalent(Exp e) {
-        boolean retval = (e instanceof CharExp);
+        boolean retval = (e instanceof ProgramCharExp);
         if (retval) {
-            CharExp eAsCharExp = (CharExp) e;
-            retval = myCharacter.equals(eAsCharExp.myCharacter);
+            ProgramCharExp eAsProgramCharExp = (ProgramCharExp) e;
+            retval = myCharacter.equals(eAsProgramCharExp.myCharacter);
         }
 
         return retval;
@@ -131,28 +129,6 @@ public class CharExp extends LiteralExp {
      */
     public Character getValue() {
         return myCharacter;
-    }
-
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link CharExp} from applying the remember rule.
-     */
-    @Override
-    public CharExp remember() {
-        return (CharExp) this.clone();
-    }
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public MathExp simplify() {
-        return this.clone();
     }
 
     /**
@@ -182,7 +158,7 @@ public class CharExp extends LiteralExp {
      */
     @Override
     protected Exp copy() {
-        return new CharExp(new Location(myLoc), myCharacter.charValue());
+        return new ProgramCharExp(new Location(myLoc), myCharacter.charValue());
     }
 
     /**
@@ -201,7 +177,7 @@ public class CharExp extends LiteralExp {
      */
     @Override
     protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new CharExp(new Location(myLoc), myCharacter.charValue());
+        return new ProgramCharExp(new Location(myLoc), myCharacter.charValue());
     }
 
 }

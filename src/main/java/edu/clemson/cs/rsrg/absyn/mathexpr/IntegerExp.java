@@ -105,7 +105,7 @@ public class IntegerExp extends MathExp {
     /**
      * <p>This method attempts to find an expression with the given name in our
      * subexpressions. The result of this calling this method should
-     * always be false, because we can not contain an expression.</p>
+     * always be false, because we can not contain a variable.</p>
      *
      * @param varName Expression name.
      * @param IsOldExp Flag to indicate if the given name is of the form
