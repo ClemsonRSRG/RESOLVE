@@ -128,9 +128,9 @@ public class VC {
             HashMap<PExp, PExp> substMap = new HashMap<PExp, PExp>();
             for (PSymbol pq : qVars) {
                 PSymbol repP =
-                        new PSymbol(pq.getType(), pq.getTypeValue(), "¢vl" + pq
-                                .getType().toString()
-                                + m_qVarTag++, pq.quantification);
+                        new PSymbol(pq.getType(), pq.getTypeValue(), "¢vl"
+                                + pq.getType().toString() + m_qVarTag++,
+                                pq.quantification);
                 substMap.put(pq, repP);
             }
             if (!substMap.isEmpty()) {
