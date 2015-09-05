@@ -176,6 +176,12 @@ public class ProgramFunctionExp extends ProgramExp {
             result = myLoc.equals(eAsProgramFunctionExp.myLoc);
 
             if (result) {
+                result =
+                        posSymbolEquivalent(myQualifier,
+                                eAsProgramFunctionExp.myQualifier)
+                                && posSymbolEquivalent(myOperationName,
+                                        eAsProgramFunctionExp.myOperationName);
+
                 if (myExpressionArgs != null
                         && eAsProgramFunctionExp.myExpressionArgs != null) {
                     Iterator<ProgramExp> thisExpArgs =
@@ -216,13 +222,18 @@ public class ProgramFunctionExp extends ProgramExp {
         if (result) {
             ProgramFunctionExp eAsProgramFunctionExp = (ProgramFunctionExp) e;
 
+            result =
+                    posSymbolEquivalent(myQualifier,
+                            eAsProgramFunctionExp.myQualifier)
+                            && posSymbolEquivalent(myOperationName,
+                                    eAsProgramFunctionExp.myOperationName);
+
             if (myExpressionArgs != null
                     && eAsProgramFunctionExp.myExpressionArgs != null) {
                 Iterator<ProgramExp> thisExpArgs = myExpressionArgs.iterator();
                 Iterator<ProgramExp> eExpArgs =
                         eAsProgramFunctionExp.myExpressionArgs.iterator();
                 while (result && thisExpArgs.hasNext() && eExpArgs.hasNext()) {
-
                     result &= thisExpArgs.next().equivalent(eExpArgs.next());
                 }
 
