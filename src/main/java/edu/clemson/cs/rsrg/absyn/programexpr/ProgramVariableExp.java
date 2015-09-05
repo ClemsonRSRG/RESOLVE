@@ -42,9 +42,11 @@ public abstract class ProgramVariableExp extends ProgramExp {
      * of the created object directly in the this class.</p>
      *
      * @param l A {@link Location} representation object.
+     * @param qual A {@link PosSymbol} representing the expression's qualifier.
      */
-    protected ProgramVariableExp(Location l) {
+    protected ProgramVariableExp(Location l, PosSymbol qual) {
         super(l);
+        myQualifier = qual;
     }
 
     // ===========================================================
