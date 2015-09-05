@@ -1,5 +1,5 @@
 /**
- * DotExp.java
+ * ProgramVariableDotExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -10,31 +10,30 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.mathexpr;
+package edu.clemson.cs.rsrg.absyn.programexpr;
 
 import edu.clemson.cs.rsrg.absyn.Exp;
-import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import java.io.InvalidClassException;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical dotted expressions
+ * <p>This is the class for all the programming dotted expressions
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class DotExp extends MathExp {
+public class ProgramVariableDotExp extends ProgramVariableExp {
 
-    // ===========================================================
+    /// ===========================================================
     // Member Fields
     // ===========================================================
 
     /** <p>The expression's collection of inner expressions.</p> */
-    private final List<Exp> mySegmentExps;
+    private final List<ProgramVariableExp> mySegmentExps;
 
     // ===========================================================
     // Constructors
@@ -45,10 +44,12 @@ public class DotExp extends MathExp {
      * of all the inner expressions.</p>
      *
      * @param l A {@link Location} representation object.
+     * @param qual A {@link PosSymbol} representing the expression's qualifier.
      * @param segments A list of {@link Exp} object.
      */
-    public DotExp(Location l, List<Exp> segments) {
-        super(l);
+    public ProgramVariableDotExp(Location l, PosSymbol qual,
+            List<ProgramVariableExp> segments) {
+        super(l, qual);
         mySegmentExps = segments;
     }
 
@@ -71,10 +72,16 @@ public class DotExp extends MathExp {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("DotExp\n");
+        sb.append("ProgramVariableDotExp\n");
+
+        if (getQualifier() != null) {
+            sb.append(getQualifier().asString(indentSize + innerIndentSize,
+                    innerIndentSize));
+            sb.append("::");
+        }
 
         if (mySegmentExps != null) {
-            for (Exp e : mySegmentExps) {
+            for (ProgramVariableExp e : mySegmentExps) {
                 sb.append(e.asString(indentSize + innerIndentSize,
                         innerIndentSize));
             }
@@ -84,64 +91,8 @@ public class DotExp extends MathExp {
     }
 
     /**
-     * <p>This method attempts to find the provided expression in our
-     * subexpressions.</p>
-     *
-     * @param exp The expression we wish to locate.
-     *
-     * @return True if there is an instance of <code>exp</code>
-     * within this object's subexpressions. False otherwise.
-     */
-    @Override
-    public boolean containsExp(Exp exp) {
-        boolean found = false;
-        if (mySegmentExps != null) {
-            Iterator<Exp> i = mySegmentExps.iterator();
-            while (i.hasNext() && !found) {
-                Exp temp = i.next();
-                if (temp != null) {
-                    if (temp.containsExp(exp)) {
-                        found = true;
-                    }
-                }
-            }
-        }
-
-        return found;
-    }
-
-    /**
-     *  <p>This method attempts to find an expression with the given name in our
-     * subexpressions.</p>
-     *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
-     *
-     * @return True if there is a {@link Exp} within this object's
-     * subexpressions that matches <code>varName</code>. False otherwise.
-     */
-    @Override
-    public boolean containsVar(String varName, boolean IsOldExp) {
-        boolean found = false;
-        if (mySegmentExps != null) {
-            Iterator<Exp> i = mySegmentExps.iterator();
-            while (i.hasNext() && !found) {
-                Exp temp = i.next();
-                if (temp != null) {
-                    if (temp.containsVar(varName, IsOldExp)) {
-                        found = true;
-                    }
-                }
-            }
-        }
-
-        return found;
-    }
-
-    /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link DotExp} class.</p>
+     * for the {@link ProgramVariableDotExp} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -150,15 +101,22 @@ public class DotExp extends MathExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof DotExp) {
-            DotExp eAsDotExp = (DotExp) o;
-            result = myLoc.equals(eAsDotExp.myLoc);
+        if (o instanceof ProgramVariableDotExp) {
+            ProgramVariableDotExp eAsProgramVariableDotExp =
+                    (ProgramVariableDotExp) o;
+            result = myLoc.equals(eAsProgramVariableDotExp.myLoc);
 
             if (result) {
-                if (mySegmentExps != null && eAsDotExp.mySegmentExps != null) {
-                    Iterator<Exp> thisSegmentExps = mySegmentExps.iterator();
-                    Iterator<Exp> eSegmentExps =
-                            eAsDotExp.mySegmentExps.iterator();
+                result =
+                        posSymbolEquivalent(getQualifier(),
+                                eAsProgramVariableDotExp.getQualifier());
+
+                if (mySegmentExps != null
+                        && eAsProgramVariableDotExp.mySegmentExps != null) {
+                    Iterator<ProgramVariableExp> thisSegmentExps =
+                            mySegmentExps.iterator();
+                    Iterator<ProgramVariableExp> eSegmentExps =
+                            eAsProgramVariableDotExp.mySegmentExps.iterator();
 
                     while (result && thisSegmentExps.hasNext()
                             && eSegmentExps.hasNext()) {
@@ -192,30 +150,38 @@ public class DotExp extends MathExp {
      */
     @Override
     public boolean equivalent(Exp e) {
-        boolean result = (e instanceof DotExp);
+        boolean retval = e instanceof ProgramVariableDotExp;
 
-        if (result) {
-            DotExp eAsDotExp = (DotExp) e;
+        if (retval) {
+            ProgramVariableDotExp eAsProgramVariableDotExp =
+                    (ProgramVariableDotExp) e;
 
-            if (mySegmentExps != null && eAsDotExp.mySegmentExps != null) {
-                Iterator<Exp> thisSegmentExps = mySegmentExps.iterator();
-                Iterator<Exp> eSegmentExps = eAsDotExp.mySegmentExps.iterator();
-                while (result && thisSegmentExps.hasNext()
+            retval =
+                    posSymbolEquivalent(getQualifier(),
+                            eAsProgramVariableDotExp.getQualifier());
+
+            if (mySegmentExps != null
+                    && eAsProgramVariableDotExp.mySegmentExps != null) {
+                Iterator<ProgramVariableExp> thisSegmentExps =
+                        mySegmentExps.iterator();
+                Iterator<ProgramVariableExp> eSegmentExps =
+                        eAsProgramVariableDotExp.mySegmentExps.iterator();
+
+                while (retval && thisSegmentExps.hasNext()
                         && eSegmentExps.hasNext()) {
-
-                    result &=
+                    retval &=
                             thisSegmentExps.next().equivalent(
                                     eSegmentExps.next());
                 }
 
                 //Both had better have run out at the same time
-                result &=
+                retval &=
                         (!thisSegmentExps.hasNext())
                                 && (!eSegmentExps.hasNext());
             }
         }
 
-        return result;
+        return retval;
     }
 
     /**
@@ -224,67 +190,12 @@ public class DotExp extends MathExp {
      * @return A list containing all the segmented {@link Exp}s.
      */
     public List<Exp> getSegments() {
-        return copyExps();
-    }
-
-    /**
-     * <p>This method returns a deep copy of the list of
-     * subexpressions. This method will return the same result
-     * as calling the {@link DotExp#getSegments()} method.</p>
-     *
-     * @return A list containing subexpressions ({@link Exp}s).
-     */
-    @Override
-    public List<Exp> getSubExpressions() {
-        return getSegments();
-    }
-
-    /**
-     * <p>This method applies VC Generator's remember rule.
-     * For all inherited programming expression classes, this method
-     * should throw an exception.</p>
-     *
-     * @return The resulting {@link DotExp} from applying the remember rule.
-     */
-    @Override
-    public DotExp remember() {
-        List<Exp> newSegmentExps = new ArrayList<>();
-        for (Exp e : mySegmentExps) {
-            Exp copyExp;
-            if (e instanceof MathExp){
-                copyExp = ((MathExp) e).remember();
-            }
-            else {
-                throw new MiscErrorException("We encountered an expression of the type " +
-                        e.getClass().getName(),
-                        new InvalidClassException(""));
-            }
-
-            newSegmentExps.add(copyExp);
+        List<Exp> copySegmentExps = new ArrayList<>();
+        for (ProgramExp exp : mySegmentExps) {
+            copySegmentExps.add(exp.clone());
         }
 
-        return new DotExp(new Location(myLoc), newSegmentExps);
-    }
-
-    /**
-     * <p>This method adds a new expression to our list of subexpressions.</p>
-     *
-     * @param index The index in our subexpression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: See the message in Exp.
-    /*public void setSubExpression(int index, Exp e) {
-        segments.set(index, e);
-    }*/
-
-    /**
-     * <p>This method applies the VC Generator's simplification step.</p>
-     *
-     * @return The resulting {@link MathExp} from applying the simplification step.
-     */
-    @Override
-    public MathExp simplify() {
-        return this.clone();
+        return copySegmentExps;
     }
 
     /**
@@ -295,8 +206,14 @@ public class DotExp extends MathExp {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
+
+        if (getQualifier() != null) {
+            sb.append(getQualifier().toString());
+            sb.append("::");
+        }
+
         if (mySegmentExps != null) {
-            Iterator<Exp> i = mySegmentExps.iterator();
+            Iterator<ProgramVariableExp> i = mySegmentExps.iterator();
 
             while (i.hasNext()) {
                 sb.append(i.next().toString());
@@ -321,7 +238,13 @@ public class DotExp extends MathExp {
      */
     @Override
     protected Exp copy() {
-        return new DotExp(new Location(myLoc), copyExps());
+        PosSymbol newQualifier = null;
+        if (getQualifier() != null) {
+            newQualifier = getQualifier().clone();
+        }
+
+        return new ProgramVariableDotExp(new Location(myLoc), newQualifier,
+                copyExps());
     }
 
     /**
@@ -340,12 +263,17 @@ public class DotExp extends MathExp {
      */
     @Override
     protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        List<Exp> newSegments = new ArrayList<>();
-        for (Exp e : mySegmentExps) {
-            newSegments.add(substitute(e, substitutions));
+        PosSymbol newQualifier = null;
+        if (getQualifier() != null) {
+            newQualifier = getQualifier().clone();
         }
 
-        return new DotExp(new Location(myLoc), newSegments);
+        List<ProgramVariableExp> newSegments = new ArrayList<>();
+        for (ProgramVariableExp e : mySegmentExps) {
+            newSegments.add((ProgramVariableExp) substitute(e, substitutions));
+        }
+
+        return new ProgramVariableDotExp(new Location(myLoc), newQualifier, newSegments);
     }
 
     // ===========================================================
@@ -358,10 +286,10 @@ public class DotExp extends MathExp {
      *
      * @return A list containing {@link Exp}s.
      */
-    private List<Exp> copyExps() {
-        List<Exp> copyJoiningExps = new ArrayList<>();
-        for (Exp exp : mySegmentExps) {
-            copyJoiningExps.add(exp.clone());
+    private List<ProgramVariableExp> copyExps() {
+        List<ProgramVariableExp> copyJoiningExps = new ArrayList<>();
+        for (ProgramVariableExp exp : mySegmentExps) {
+            copyJoiningExps.add((ProgramVariableExp) exp.clone());
         }
 
         return copyJoiningExps;
