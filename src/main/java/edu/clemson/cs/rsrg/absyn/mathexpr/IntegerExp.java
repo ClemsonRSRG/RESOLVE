@@ -138,7 +138,12 @@ public class IntegerExp extends LiteralExp {
      * @return The {@link PosSymbol} representation object.
      */
     public PosSymbol getQualifier() {
-        return myQualifier.clone();
+        PosSymbol qual = null;
+        if (myQualifier != null) {
+            qual = myQualifier.clone();
+        }
+
+        return qual;
     }
 
     /**

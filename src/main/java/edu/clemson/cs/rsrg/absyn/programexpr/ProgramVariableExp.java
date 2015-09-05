@@ -87,7 +87,12 @@ public abstract class ProgramVariableExp extends ProgramExp {
      * @return The {@link PosSymbol} representation object.
      */
     public final PosSymbol getQualifier() {
-        return myQualifier.clone();
+        PosSymbol qual = null;
+        if (myQualifier != null) {
+            qual = myQualifier.clone();
+        }
+
+        return qual;
     }
 
     /**

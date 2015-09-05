@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the abstract base class for all the mathematical equality/inequality expressions
+ * <p>This is the class for all the mathematical equality/inequality expressions
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
