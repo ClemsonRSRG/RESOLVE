@@ -199,14 +199,6 @@ public class NormalizedAtomicExpressionMapImpl
         return -1;
     }
 
-    // can return neg result if op keys arent parents in reg
-    protected int getPositionBitCodeForStringOp(String op, Registry reg) {
-        int opInt = reg.getIndexForSymbol(op);
-        if (!m_expression.containsKey(opInt))
-            return -1;
-        return m_expression.get(opInt);
-    }
-
     // compare left sides of 2 expressions.  If this returns 0, you must compare right hand sides afterwards.
     @Override
     public int compareTo(NormalizedAtomicExpressionMapImpl o) {
@@ -228,12 +220,14 @@ public class NormalizedAtomicExpressionMapImpl
         return arity;
     }
 
+    // Currently doesn't work if there are blanks in the equation (such as the fun symbol)
     public String toHumanReadableString(Registry registry) {
         if (m_expression.isEmpty()) {
             return "empty expression";
         }
         String r;
         String funcSymbol = registry.getSymbolForIndex(readPosition(0));
+
         String args = "";
         int cur;
         int i = 1;
