@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the abstract base class for all the mathematical infix expressions
+ * <p>This is the class for all the mathematical infix expressions
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
@@ -33,13 +33,13 @@ public class InfixExp extends AbstractFunctionExp {
     // ===========================================================
 
     /** <p>The expression on the left hand side.</p> */
-    private final Exp myLeftHandSide;
+    protected final Exp myLeftHandSide;
 
     /** <p>The expression's operation.</p> */
-    private final PosSymbol myOperationName;
+    protected final PosSymbol myOperationName;
 
     /** <p>The expression on the right hand side.</p> */
-    private final Exp myRightHandSide;
+    protected final Exp myRightHandSide;
 
     // ===========================================================
     // Constructors
@@ -78,7 +78,7 @@ public class InfixExp extends AbstractFunctionExp {
      * @return A formatted text string of the class.
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
         sb.append("InfixExp\n");
@@ -140,7 +140,7 @@ public class InfixExp extends AbstractFunctionExp {
      * within this object's subexpressions. False otherwise.
      */
     @Override
-    public boolean containsExp(Exp exp) {
+    public final boolean containsExp(Exp exp) {
         boolean found = myLeftHandSide.containsExp(exp);
         if (!found) {
             found = myRightHandSide.containsExp(exp);
@@ -161,7 +161,7 @@ public class InfixExp extends AbstractFunctionExp {
      * subexpressions that matches <code>varName</code>. False otherwise.
      */
     @Override
-    public boolean containsVar(String varName, boolean IsOldExp) {
+    public final boolean containsVar(String varName, boolean IsOldExp) {
         boolean found = myLeftHandSide.containsVar(varName, IsOldExp);
         if (!found) {
             found = myRightHandSide.containsVar(varName, IsOldExp);
@@ -232,7 +232,7 @@ public class InfixExp extends AbstractFunctionExp {
      *
      * @return The {@link Exp} representation object.
      */
-    public Exp getLeft() {
+    public final Exp getLeft() {
         return myLeftHandSide.clone();
     }
 
@@ -242,7 +242,7 @@ public class InfixExp extends AbstractFunctionExp {
      * @return A {link PosSymbol} object containing the operator.
      */
     @Override
-    public PosSymbol getOperatorAsPosSymbol() {
+    public final PosSymbol getOperatorAsPosSymbol() {
         return myOperationName.clone();
     }
 
@@ -252,7 +252,7 @@ public class InfixExp extends AbstractFunctionExp {
      * @return The operator as a string.
      */
     @Override
-    public String getOperatorAsString() {
+    public final String getOperatorAsString() {
         return myOperationName.toString();
     }
 
@@ -261,7 +261,7 @@ public class InfixExp extends AbstractFunctionExp {
      *
      * @return The {@link Exp} representation object.
      */
-    public Exp getRight() {
+    public final Exp getRight() {
         return myRightHandSide.clone();
     }
 
@@ -272,7 +272,7 @@ public class InfixExp extends AbstractFunctionExp {
      * @return A list containing subexpressions ({@link Exp}s).
      */
     @Override
-    public List<Exp> getSubExpressions() {
+    public final List<Exp> getSubExpressions() {
         List<Exp> subExps = new ArrayList<>();
         subExps.add(myLeftHandSide.clone());
         subExps.add(myRightHandSide.clone());
@@ -308,7 +308,7 @@ public class InfixExp extends AbstractFunctionExp {
      * @param e The new {@link Exp} to be added.
      */
     // TODO: See the message in Exp.
-    /*public void setSubExpression(int index, Exp e) {
+    /*public final void setSubExpression(int index, Exp e) {
         switch (index) {
             case 0:
                 myLeftHandSide = e;
@@ -504,7 +504,7 @@ public class InfixExp extends AbstractFunctionExp {
      * @return Expression as a string.
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
 
         if (myQualifier != null) {

@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.absyn.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.Exp;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import java.util.Map;
  *
  * @version 2.0
  */
-public class EqualsExp extends AbstractFunctionExp {
+public class EqualsExp extends InfixExp {
 
     // ===========================================================
     // Operators
@@ -38,6 +39,7 @@ public class EqualsExp extends AbstractFunctionExp {
             public String toString() {
                 return "=";
             }
+
         },
         NOT_EQUAL {
 
@@ -45,6 +47,18 @@ public class EqualsExp extends AbstractFunctionExp {
             public String toString() {
                 return "/=";
             }
+
+        };
+
+        /**
+         * <p>This method returns a deep copy of the operator name.</p>
+         *
+         * @param l A {@link Location} representation object.
+         *
+         * @return A {link PosSymbol} object containing the operator.
+         */
+        public PosSymbol getOperatorAsPosSymbol(Location l) {
+            return new PosSymbol(new Location(l), toString());
         }
     }
 
@@ -52,14 +66,8 @@ public class EqualsExp extends AbstractFunctionExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression on the left hand side.</p> */
-    private final Exp myLeftHandSide;
-
     /** <p>The expression's operation.</p> */
     private final Operator myOperator;
-
-    /** <p>The expression on the right hand side.</p> */
-    private final Exp myRightHandSide;
 
     // ===========================================================
     // Constructors
@@ -76,89 +84,13 @@ public class EqualsExp extends AbstractFunctionExp {
      */
     public EqualsExp(Location l, PosSymbol qual, Exp left, Operator operator,
             Exp right) {
-        super(l, qual);
-        myLeftHandSide = left;
+        super(l, qual, left, operator.getOperatorAsPosSymbol(l), right);
         myOperator = operator;
-        myRightHandSide = right;
     }
 
     // ===========================================================
     // Public Methods
     // ===========================================================
-
-    /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
-     */
-    @Override
-    public String asString(int indentSize, int innerIndentSize) {
-        StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
-        sb.append("EqualsExp\n");
-
-        if (myLeftHandSide != null) {
-            sb.append(myLeftHandSide.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-        }
-
-        printSpace(indentSize + innerIndentSize, sb);
-        sb.append(myOperator.name());
-        sb.append("\n");
-
-        if (myRightHandSide != null) {
-            sb.append(myRightHandSide.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * <p>This method attempts to find the provided expression in our
-     * subexpressions.</p>
-     *
-     * @param exp The expression we wish to locate.
-     *
-     * @return True if there is an instance of <code>exp</code>
-     * within this object's subexpressions. False otherwise.
-     */
-    @Override
-    public boolean containsExp(Exp exp) {
-        boolean found = myLeftHandSide.containsExp(exp);
-        if (!found) {
-            found = myRightHandSide.containsExp(exp);
-        }
-
-        return found;
-    }
-
-    /**
-     *  <p>This method attempts to find an expression with the given name in our
-     * subexpressions.</p>
-     *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
-     *
-     * @return True if there is a {@link Exp} within this object's
-     * subexpressions that matches <code>varName</code>. False otherwise.
-     */
-    @Override
-    public boolean containsVar(String varName, boolean IsOldExp) {
-        boolean found = myLeftHandSide.containsVar(varName, IsOldExp);
-        if (!found) {
-            found = myRightHandSide.containsVar(varName, IsOldExp);
-        }
-
-        return found;
-    }
 
     /**
      * <p>This method overrides the default equals method implementation
@@ -217,65 +149,12 @@ public class EqualsExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the left hand side expression.</p>
-     *
-     * @return The {@link Exp} representation object.
-     */
-    public Exp getLeft() {
-        return myLeftHandSide.clone();
-    }
-
-    /**
      * <p>This method returns the operator.</p>
      *
      * @return A {link Operator} object containing the operator.
      */
     public Operator getOperator() {
         return myOperator;
-    }
-
-    /**
-     * <p>This method returns a deep copy of the operator name.</p>
-     *
-     * @return A {link PosSymbol} object containing the operator.
-     */
-    @Override
-    public PosSymbol getOperatorAsPosSymbol() {
-        return new PosSymbol(new Location(myLoc), getOperatorAsString());
-    }
-
-    /**
-     * <p>This method returns a deep copy of the operator name.</p>
-     *
-     * @return The operator as a string.
-     */
-    @Override
-    public String getOperatorAsString() {
-        return myOperator.toString();
-    }
-
-    /**
-     * <p>This method returns a deep copy of the right hand side expression.</p>
-     *
-     * @return The {@link Exp} representation object.
-     */
-    public Exp getRight() {
-        return myRightHandSide.clone();
-    }
-
-    /**
-     * <p>This method returns a deep copy of the list of
-     * subexpressions.</p>
-     *
-     * @return A list containing subexpressions ({@link Exp}s).
-     */
-    @Override
-    public List<Exp> getSubExpressions() {
-        List<Exp> subExps = new ArrayList<>();
-        subExps.add(myLeftHandSide.clone());
-        subExps.add(myRightHandSide.clone());
-
-        return subExps;
     }
 
     /**
@@ -300,24 +179,6 @@ public class EqualsExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method adds a new expression to our list of subexpressions.</p>
-     *
-     * @param index The index in our subexpression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: See the message in Exp.
-    /*public void setSubExpression(int index, Exp e) {
-        switch (index) {
-            case 0:
-                myLeftHandSide = e;
-                break;
-            case 1:
-                myRightHandSide = e;
-                break;
-        }
-    }*/
-
-    /**
      * <p>This method applies the VC Generator's simplification step.</p>
      *
      * @return The resulting {@link MathExp} from applying the simplification step.
@@ -337,34 +198,37 @@ public class EqualsExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
+     * <p>This method is used to convert a {@link Exp} into the prover's
+     * version of {@link PExp}. The key to this method is figuring out
+     * where the different implications occur within the expression.</p>
      *
-     * @return Expression as a string.
+     * <p>However, for {@link EqualsExp}s, this will throw an
+     * exception if we have equality, because we should have dealt with
+     * simplifications before we attempt to split the VCs.</p>
+     *
+     * @param assumpts The assumption expressions for this expression.
+     * @param single Boolean flag to indicate whether or not this is a
+     *               standalone expression.
+     *
+     * @return A list of {link Exp} objects.
      */
     @Override
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
+    public List<InfixExp> split(MathExp assumpts, boolean single) {
+        List<InfixExp> lst = new ArrayList<>();
 
-        if (myQualifier != null) {
-            sb.append(myQualifier.toString());
-            sb.append("::");
+        if (myOperator == Operator.EQUAL) {
+            throw new MiscErrorException("Cannot split an EqualsExp!", new IllegalStateException());
+        }
+        else {
+            if (myLeftHandSide != null) {
+                lst.addAll(((MathExp) myLeftHandSide).split(assumpts, single));
+            }
+            if (myRightHandSide != null) {
+                lst.addAll(((MathExp) myRightHandSide).split(assumpts, single));
+            }
         }
 
-        if (myLeftHandSide != null) {
-            sb.append("(");
-            sb.append(myLeftHandSide.toString());
-            sb.append(" ");
-        }
-
-        sb.append(myOperator.toString());
-        sb.append(" ");
-
-        if (myRightHandSide != null) {
-            sb.append(myRightHandSide.toString());
-            sb.append(")");
-        }
-
-        return sb.toString();
+        return lst;
     }
 
     // ===========================================================
