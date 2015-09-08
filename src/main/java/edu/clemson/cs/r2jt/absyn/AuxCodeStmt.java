@@ -1,5 +1,5 @@
 /**
- * AuxCodeBlockStmt.java
+ * AuxCodeStmt.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group

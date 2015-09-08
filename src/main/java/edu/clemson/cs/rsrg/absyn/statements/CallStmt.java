@@ -1,5 +1,5 @@
 /**
- * AssumeStmt.java
+ * CallStmt.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -10,32 +10,26 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.vcgeneration.absyn;
+package edu.clemson.cs.rsrg.absyn.statements;
 
-import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.absyn.Statement;
+import edu.clemson.cs.rsrg.absyn.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 
 /**
- * <p>This is the class that builds the assume statements created by
- * the {@link VCGenerator}. Since the user cannot supply their own
- * assume clauses, any instances of this class will solely be created
- * by the {@link VCGenerator}.</p>
+ * <p>This is the class for all the call statements
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class AssumeStmt extends Statement {
+public class CallStmt extends Statement {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The assume assertion expression</p> */
-    private final Exp myAssertion;
-
-    /** <p>This flag indicates if this is an stipulate assume clause or not</p> */
-    private final boolean myIsStipulate;
+    /** <p>The programming function expression</p> */
+    private final ProgramFunctionExp myFunctionExp;
 
     // ===========================================================
     // Constructors
@@ -45,15 +39,12 @@ public class AssumeStmt extends Statement {
      * <p>This constructs a programming function call expression.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param assertion A {@link Exp} representing the assume statement's
-     *                  assertion expression.
-     * @param isStipulate A flag to indicate whether or not this is a
-     *                    stipulate assume statement.
+     * @param exp A {@link ProgramFunctionExp} representing the function
+     *            we are calling.
      */
-    public AssumeStmt(Location l, Exp assertion, boolean isStipulate) {
+    public CallStmt(Location l, ProgramFunctionExp exp) {
         super(l);
-        myAssertion = assertion;
-        myIsStipulate = isStipulate;
+        myFunctionExp = exp;
     }
 
     // ===========================================================
@@ -75,8 +66,8 @@ public class AssumeStmt extends Statement {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("AssumeStmt\n");
-        sb.append(myAssertion.asString(indentSize + innerIndentSize,
+        sb.append("CallStmt\n");
+        sb.append(myFunctionExp.asString(indentSize + innerIndentSize,
                 innerIndentSize));
 
         return sb.toString();
@@ -88,14 +79,14 @@ public class AssumeStmt extends Statement {
      *
      * @return A deep copy of the object.
      */
-    public AssumeStmt clone() {
-        return new AssumeStmt(new Location(myLoc), myAssertion.clone(),
-                myIsStipulate);
+    public CallStmt clone() {
+        return new CallStmt(new Location(myLoc),
+                (ProgramFunctionExp) myFunctionExp.clone());
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link AssumeStmt} class.</p>
+     * for the {@link CallStmt} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -104,13 +95,12 @@ public class AssumeStmt extends Statement {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof AssumeStmt) {
-            AssumeStmt eAsAssumeStmt = (AssumeStmt) o;
-            result = myLoc.equals(eAsAssumeStmt.myLoc);
+        if (o instanceof CallStmt) {
+            CallStmt eAsCallStmt = (CallStmt) o;
+            result = myLoc.equals(eAsCallStmt.myLoc);
 
             if (result) {
-                result = myAssertion.equals(eAsAssumeStmt.myAssertion);
-                result &= (myIsStipulate == eAsAssumeStmt.myIsStipulate);
+                result = myFunctionExp.equals(eAsCallStmt.myFunctionExp);
             }
         }
 
@@ -118,21 +108,13 @@ public class AssumeStmt extends Statement {
     }
 
     /**
-     * <p>This method returns a deep copy of the assume assertion expression.</p>
+     * <p>This method returns a deep copy of the function expression in
+     * this calling statement.</p>
      *
-     * @return The {@link Exp} representation object.
+     * @return The {@link ProgramFunctionExp} representation object.
      */
-    public final Exp getAssertion() {
-        return myAssertion.clone();
-    }
-
-    /**
-     * <p>This method checks to see if this is is a stipulate assume statement.</p>
-     *
-     * @return True if it is a stipulate assume statement, false otherwise.
-     */
-    public final boolean getIsStipulate() {
-        return myIsStipulate;
+    public ProgramFunctionExp getFunctionExp() {
+        return (ProgramFunctionExp) myFunctionExp.clone();
     }
 
     /**
@@ -143,15 +125,7 @@ public class AssumeStmt extends Statement {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-
-        if (myIsStipulate) {
-            sb.append("Stipulate ");
-        }
-        else {
-            sb.append("Assume ");
-        }
-        sb.append(myAssertion.toString());
-        sb.append(";");
+        sb.append(myFunctionExp.toString());
 
         return sb.toString();
     }

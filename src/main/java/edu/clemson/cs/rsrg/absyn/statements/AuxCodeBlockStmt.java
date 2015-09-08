@@ -72,7 +72,8 @@ public class AuxCodeBlockStmt extends Statement {
 
         if (myStatements != null) {
             for (Statement s : myStatements) {
-                sb.append(s.asString(indentSize + innerIndentSize, innerIndentSize));
+                sb.append(s.asString(indentSize + innerIndentSize,
+                        innerIndentSize));
                 sb.append("\n");
             }
         }
@@ -116,8 +117,8 @@ public class AuxCodeBlockStmt extends Statement {
                     while (result && thisStatements.hasNext()
                             && eStatements.hasNext()) {
                         result &=
-                                thisStatements.next().equals(
-                                        eStatements.next());
+                                thisStatements.next()
+                                        .equals(eStatements.next());
                     }
 
                     //Both had better have run out at the same time
