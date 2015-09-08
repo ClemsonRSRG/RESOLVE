@@ -342,8 +342,8 @@ public class CongruenceClassProver {
                     }
                 }
                 else {
-                    theseResults +=
-                            "Neg result on: " + cur.m_theoremString + "\n";
+                    //theseResults +=
+                    //        "Neg result on: " + cur.m_theoremString + "\n";
                 }
             }
         }
