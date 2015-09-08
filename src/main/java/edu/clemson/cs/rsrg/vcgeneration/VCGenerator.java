@@ -10,14 +10,9 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.vcgeneration2;
+package edu.clemson.cs.rsrg.vcgeneration;
 
-/*
- * Libraries
- */
-import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.misc.Flag;
-import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
+import edu.clemson.cs.rsrg.init.flag.Flag;
 
 /**
  * TODO: Write a description of this module
@@ -55,9 +50,9 @@ public class VCGenerator {
     // Constructors
     // ===========================================================
 
-    public VCGenerator(ScopeRepository table, final CompileEnvironment env) {
+    /*public VCGenerator(ScopeRepository table, final CompileEnvironment env) {
 
-    }
+    }*/
 
     // ===========================================================
     // Visitor Methods
@@ -82,4 +77,5 @@ public class VCGenerator {
     // -----------------------------------------------------------
     // Proof Rules
     // -----------------------------------------------------------
+
 }
