@@ -527,7 +527,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
         Set<NormalizedAtomicExpressionMapImpl> vCNaemlsWithAllLiterals =
                 multiKeyUseMapSearch(literalsInexpr);
-        String deleteme = toString();
         if (vCNaemlsWithAllLiterals == null)
             return null;
 
@@ -587,20 +586,32 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 searchExpr.getArgumentsAsStrings(searchReg);
         Map<String, Integer> thOps =
                 searchExpr.getEquationOperatorsAsStrings(searchReg);
+        Deque<String> thOpsLitFirst = new LinkedList<String>();
+        for (String thOp : thOps.keySet()) {
+            if (!basemap.containsKey(thOp) || !basemap.get(thOp).equals("")) {
+                thOpsLitFirst.addFirst(thOp);
+            }
+            else {
+                thOpsLitFirst.addLast(thOp);
+            }
+        }
         Set<Map<String, String>> bindings = new HashSet<Map<String, String>>();
         bindToAVCEquation: for (NormalizedAtomicExpressionMapImpl vc_r : vcEquations) {
             Map<String, String> currentBind =
                     new HashMap<String, String>(basemap);
             Map<String, Integer> vcArgs =
                     vc_r.getArgumentsAsStrings(m_registry);
-            for (String thOp : thOps.keySet()) {
+
+            for (String thOp : thOpsLitFirst) {
                 if (!basemap.containsKey(thOp) || !basemap.get(thOp).equals("")) {
                     // This is a literal
                     // Remove num uses as arg from arg count
                     if (basemap.containsKey(thOp) && thArgs.containsKey(thOp)) {
                         // Wildcard argument has already been bound
                         int numUses = thArgs.get(thOp);
-                        String lit = basemap.get(thOp);
+                        String lit =
+                                m_registry.getRootSymbolForSymbol(basemap
+                                        .get(thOp));
                         // May be in commutative section
                         if (vcArgs.containsKey(lit)) {
                             vcArgs.put(lit, vcArgs.get(lit) - numUses);
@@ -612,6 +623,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     else if (thArgs.containsKey(thOp)) {
                         // arg literal that exists in both places, not ever was wildcard
                         int numUses = thArgs.get(thOp);
+                        thOp = m_registry.getRootSymbolForSymbol(thOp);
                         if (vcArgs.containsKey(thOp)) {
                             vcArgs.put(thOp, vcArgs.get(thOp) - numUses);
                         }

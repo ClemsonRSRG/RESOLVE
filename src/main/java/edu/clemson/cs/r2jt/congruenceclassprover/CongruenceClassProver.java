@@ -50,7 +50,7 @@ public class CongruenceClassProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
-    private final long DEFAULTTIMEOUT = 10000;
+    private final long DEFAULTTIMEOUT = 15000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     private boolean printVCEachStep = false;
@@ -170,7 +170,7 @@ public class CongruenceClassProver {
         int i = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
             //printVCEachStep = true;
-            //if(!vcc.m_name.equals("0_2"))continue;
+            //if(!vcc.m_name.equals("0_8"))continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             VerificationConditionCongruenceClosureImpl.STATUS proved =
@@ -342,7 +342,8 @@ public class CongruenceClassProver {
                     }
                 }
                 else {
-                    //theseResults += "Neg result on: " + cur.m_theoremString + "\n";
+                    //theseResults +=
+                    //        "Neg result on: " + cur.m_theoremString + "\n";
                 }
             }
         }

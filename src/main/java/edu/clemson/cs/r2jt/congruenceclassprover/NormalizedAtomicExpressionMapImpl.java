@@ -68,7 +68,7 @@ public class NormalizedAtomicExpressionMapImpl
         for (int i = 1; i < m_maxPositions; ++i) {
             int index = readPosition(i);
             if (index < 0)
-                break;
+                continue;
             String op = reg.getSymbolForIndex(index);
             int count;
             if (rMap.containsKey(op)) {
