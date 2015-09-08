@@ -72,8 +72,8 @@ public class Registry {
         // could look for these in theorems instead
         m_commutative_operators = new HashSet<String>();
         m_commutative_operators.add("+");
-        //m_commutative_operators.add("=");
-        //m_commutative_operators.add("and");
+        m_commutative_operators.add("=");
+        m_commutative_operators.add("and");
         m_commutative_operators.add("isBinaryPartition");
 
     }
@@ -194,6 +194,8 @@ public class Registry {
     }
 
     public String getSymbolForIndex(int index) {
+        assert index >= 0 : "invalid index: " + index
+                + " in Registry.getSymbolForIndex";
         String rS = m_indexToSymbol.get(findAndCompress(index));
         assert rS.length() != 0 : "Blank symbol error";
         return rS;

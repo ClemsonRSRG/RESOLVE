@@ -34,7 +34,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     /**
      * @param registry the Registry symbols contained in the conjunction will
-     * reference. This class will add entries to the registry if needed.
+     *                 reference. This class will add entries to the registry if needed.
      */
     public ConjunctionOfNormalizedAtomicExpressions(Registry registry,
             boolean for_VC) {
@@ -166,7 +166,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (ps.isLiteral()) {
             usage = Registry.Usage.LITERAL;
         }
-
         else if (ps.isFunction()
                 || ps.getType().getClass().getSimpleName().equals("MTFunction")) {
             if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
@@ -256,8 +255,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     /**
      * @param atomicFormula one sided expression. (= new root) is appended and
-     * expression is inserted if no match of the side is found. Otherwise
-     * current root is returned.
+     *                      expression is inserted if no match of the side is found. Otherwise
+     *                      current root is returned.
      * @return current integer value of root symbol that represents the input.
      */
     private int addAtomicFormula(NormalizedAtomicExpressionMapImpl atomicFormula) {
@@ -495,7 +494,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 new HashSet<Map<String, String>>();
         for (Map<String, String> fs_m : foreignSymbolOverideSet) {
             Set<java.util.Map<String, String>> results =
-                    getMatches(expr, exprReg, fs_m);
+                    getMatchesForEq(expr, exprReg, fs_m);
             if (results != null && results.size() != 0)
                 rSet.addAll(results);
         }
@@ -528,7 +527,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
         Set<NormalizedAtomicExpressionMapImpl> vCNaemlsWithAllLiterals =
                 multiKeyUseMapSearch(literalsInexpr);
-        String deleteme = toString();
         if (vCNaemlsWithAllLiterals == null)
             return null;
 
@@ -541,6 +539,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             // find all positions
             int allPositionsLitIsUsedInSearchExpr = 0;
             int vcInt = m_registry.getIndexForSymbol(s);
+            assert vcInt >= 0 : s + " not in VC registry";
             if (exprReg.m_symbolToIndex.containsKey(s)) {
                 int sInt = exprReg.getIndexForSymbol(s);
                 filter.overwriteEntry(vcInt, expr.readOperator(sInt));
@@ -549,25 +548,30 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 for (String baseMapK : foreignSymbolOveride.keySet()) {
                     if (foreignSymbolOveride.get(baseMapK).equals(s)) {
                         allPositionsLitIsUsedInSearchExpr |=
-                                expr.getPositionBitCodeForStringOp(baseMapK,
-                                        exprReg);
+                                expr.readOperator(exprReg
+                                        .getIndexForSymbol(baseMapK));
                     }
                 }
                 filter.overwriteEntry(vcInt, allPositionsLitIsUsedInSearchExpr);
             }
 
         }
+
         boolean isCommutOp = exprReg.isCommutative(expr.readPosition(0));
 
         if (!isCommutOp) {
             filtered_vcNaemlsWithAllLiterals =
                     nonCommutativeFilter(vCNaemlsWithAllLiterals, filter);
+            if (filtered_vcNaemlsWithAllLiterals.isEmpty())
+                return null;
             return getBindings_NonCommutative(filtered_vcNaemlsWithAllLiterals,
                     foreignSymbolOveride, expr, exprReg);
         }
         else {
             filtered_vcNaemlsWithAllLiterals =
                     commutativeFilter(vCNaemlsWithAllLiterals, filter);
+            if (filtered_vcNaemlsWithAllLiterals.isEmpty())
+                return null;
             return getBindings_Commutative(filtered_vcNaemlsWithAllLiterals,
                     foreignSymbolOveride, expr, exprReg);
         }
@@ -580,57 +584,106 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         // Argument sets
         Map<String, Integer> thArgs =
                 searchExpr.getArgumentsAsStrings(searchReg);
+        Map<String, Integer> thOps =
+                searchExpr.getEquationOperatorsAsStrings(searchReg);
+        Deque<String> thOpsLitFirst = new LinkedList<String>();
+        for (String thOp : thOps.keySet()) {
+            if (!basemap.containsKey(thOp) || !basemap.get(thOp).equals("")) {
+                thOpsLitFirst.addFirst(thOp);
+            }
+            else {
+                thOpsLitFirst.addLast(thOp);
+            }
+        }
         Set<Map<String, String>> bindings = new HashSet<Map<String, String>>();
         bindToAVCEquation: for (NormalizedAtomicExpressionMapImpl vc_r : vcEquations) {
             Map<String, String> currentBind =
                     new HashMap<String, String>(basemap);
             Map<String, Integer> vcArgs =
                     vc_r.getArgumentsAsStrings(m_registry);
-            for (String wild : basemap.keySet()) {
-                String wildVal = basemap.get(wild);
-                if (wildVal.equals("")) {
-                    // Basemap is used over a set of equations; ie wild may not even be used in this one
-                    if (searchExpr.readOperator(searchReg
-                            .getIndexForSymbol(wild)) <= 0)
-                        continue;
-                    String localToBindTo = "";
-                    int wildOpCode = searchReg.getIndexForSymbol(wild);
-                    int wildPosBitCode = searchExpr.readOperator(wildOpCode);
-                    boolean isRoot = searchExpr.readRoot() == wildOpCode;
-                    boolean isFSymb = searchExpr.readPosition(0) == wildOpCode;
-                    if (isRoot || isFSymb) {
-                        if ((wildPosBitCode & (wildPosBitCode - 1)) == 0) { // Single use and is func symbol or root
-                            localToBindTo =
-                                    m_registry
-                                            .getSymbolForIndex(vc_r
-                                                    .readPositionBitcode(wildPosBitCode));
+
+            for (String thOp : thOpsLitFirst) {
+                if (!basemap.containsKey(thOp) || !basemap.get(thOp).equals("")) {
+                    // This is a literal
+                    // Remove num uses as arg from arg count
+                    if (basemap.containsKey(thOp) && thArgs.containsKey(thOp)) {
+                        // Wildcard argument has already been bound
+                        int numUses = thArgs.get(thOp);
+                        String lit =
+                                m_registry.getRootSymbolForSymbol(basemap
+                                        .get(thOp));
+                        // May be in commutative section
+                        if (vcArgs.containsKey(lit)) {
+                            vcArgs.put(lit, vcArgs.get(lit) - numUses);
                         }
-                        else {// used as (root or func symb) and as arg(s) in search
-                            // so reject if same not true of vcr
-                            String loc = "";
-                            if (isRoot && isFSymb) {
-                                if (vc_r.readPosition(0) == vc_r.readRoot()) {
-                                    loc =
-                                            m_registry.getSymbolForIndex(vc_r
-                                                    .readRoot());
-                                }
-                            }
-                            else if (isFSymb) {
-                                loc =
-                                        m_registry.getSymbolForIndex(vc_r
-                                                .readPosition(0));
-                            }
-                            if (!loc.equals("")) {
-                                int thC = thArgs.get(wild);
-                                int vcC = vcArgs.get(loc);
-                                if (thC <= vcC) {
-                                    vcArgs.put(loc, vcC - thC);
-                                    localToBindTo = loc;
-                                }
-                            }
+                        else { // lit is arg of theorem, but not arg of vcEq
+                            continue bindToAVCEquation;
                         }
                     }
-                    // Only use is in arg list
+                    else if (thArgs.containsKey(thOp)) {
+                        // arg literal that exists in both places, not ever was wildcard
+                        int numUses = thArgs.get(thOp);
+                        thOp = m_registry.getRootSymbolForSymbol(thOp);
+                        if (vcArgs.containsKey(thOp)) {
+                            vcArgs.put(thOp, vcArgs.get(thOp) - numUses);
+                        }
+                        else {
+                            continue bindToAVCEquation;
+                        }
+                    }
+                    continue; // go to next op
+                }
+                // thOp must be a wildcard
+                String wild = thOp;
+                int wildOpCode = searchReg.getIndexForSymbol(wild);
+                int wildPosBitCode = searchExpr.readOperator(wildOpCode);
+                // Basemap is used over a set of equations; ie wild may not even be used in this one
+                if (wildPosBitCode <= 0)
+                    continue;
+                String localToBindTo = "";
+
+                boolean isRoot = searchExpr.readRoot() == wildOpCode;
+                boolean isFSymb = searchExpr.readPosition(0) == wildOpCode;
+                if (isRoot || isFSymb) {
+                    if ((wildPosBitCode & (wildPosBitCode - 1)) == 0) { // Single use and is func symbol or root
+                        localToBindTo =
+                                m_registry.getSymbolForIndex(vc_r
+                                        .readPositionBitcode(wildPosBitCode));
+                    }
+                    else {// used as (root or func symb) and as arg(s) in search
+                        // so reject if same not true of vcr
+                        String loc = "";
+                        if (isRoot && isFSymb) {
+                            if (vc_r.readPosition(0) == vc_r.readRoot()) {
+                                loc =
+                                        m_registry.getSymbolForIndex(vc_r
+                                                .readRoot());
+                            }
+                        }
+                        else if (isFSymb) {
+                            loc =
+                                    m_registry.getSymbolForIndex(vc_r
+                                            .readPosition(0));
+                        }
+                        else if (isRoot) {
+                            loc = m_registry.getSymbolForIndex(vc_r.readRoot());
+                        }
+                        if (!loc.equals("")) {
+                            int thC = thArgs.get(wild);
+                            int vcC = vcArgs.get(loc);
+                            if (thC <= vcC) {
+                                vcArgs.put(loc, vcC - thC);
+                                localToBindTo = loc;
+                            }
+                            else
+                                continue bindToAVCEquation;
+                        }
+                        else
+                            continue bindToAVCEquation;
+                    }
+                }
+                // Only use is in arg list
+                else {
                     int thC = thArgs.get(wild);
                     // Choose the first that has the min no. of uses.  (Going to potentially miss some matches)
                     for (String vcA : vcArgs.keySet()) {
@@ -641,18 +694,21 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                             break;
                         }
                     }
-                    if (!localToBindTo.equals("")) {
-                        MTType wildType =
-                                searchReg.getTypeByIndex(searchReg
-                                        .getIndexForSymbol(wild));
-                        MTType localType =
-                                m_registry.getTypeByIndex(m_registry
-                                        .getIndexForSymbol(localToBindTo));
-                        if (!localType.isSubtypeOf(wildType))
-                            continue bindToAVCEquation;
-                        currentBind.put(wild, localToBindTo);
-                    }
                 }
+                if (!localToBindTo.equals("")) {
+                    MTType wildType =
+                            searchReg.getTypeByIndex(searchReg
+                                    .getIndexForSymbol(wild));
+                    MTType localType =
+                            m_registry.getTypeByIndex(m_registry
+                                    .getIndexForSymbol(localToBindTo));
+                    if (!localType.isSubtypeOf(wildType))
+                        continue bindToAVCEquation;
+                    currentBind.put(wild, localToBindTo);
+                }
+                else
+                    continue bindToAVCEquation;
+
             }
             bindings.add(currentBind);
         }
@@ -670,9 +726,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             for (String wild : basemap.keySet()) {
                 String wildVal = basemap.get(wild);
                 if (wildVal.equals("")) {
-                    int wildP_BitCode =
-                            searchExpr.getPositionBitCodeForStringOp(wild,
-                                    searchReg);
+                    int wildInt = searchReg.getIndexForSymbol(wild);
+                    int wildP_BitCode = searchExpr.readOperator(wildInt);
+                    if (wildP_BitCode <= 0)
+                        continue; // wild not used in this eq.
                     int vc_eq_op = vc_r.readPositionBitcode(wildP_BitCode);
                     if (vc_eq_op == -1)
                         continue bindToAVCEquation; // non matching due to wildcard symbol used more places than found
@@ -702,8 +759,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         Map<String, Integer> filterLitArgs =
                 filter_criteria.getArgumentsAsStrings(m_registry);
         nextExpr: for (NormalizedAtomicExpressionMapImpl r_n : raw) {
-            if (filter_criteria.readPosition(0) != r_n.readPosition(0)
-                    || filter_criteria.readRoot() != r_n.readRoot())
+            if ((filter_criteria.readPosition(0) != -1 && filter_criteria
+                    .readPosition(0) != r_n.readPosition(0))
+                    || (filter_criteria.readRoot() != -1 && filter_criteria
+                            .readRoot() != r_n.readRoot()))
                 continue nextExpr;
             Map<String, Integer> r_n_litArgs =
                     r_n.getArgumentsAsStrings(m_registry);
