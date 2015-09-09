@@ -341,8 +341,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // i.e. the theorem expression should keep the literals
     protected int chooseSymbolToKeep(int a, int b) {
         String s = m_registry.m_indexToSymbol.get(a);
-        if (s.contains("¢"))
-            return b;
+        if (s.contains("¢")) {
+            if (!m_registry.m_indexToSymbol.get(b).contains("¢"))
+                return b;
+            else
+                return a < b ? a : b;
+        }
         if (m_registry.getUsage(s).equals(Registry.Usage.FORALL))
             return b;
         return a;
@@ -489,12 +493,13 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     protected Set<java.util.Map<String, String>> getMatchesForOverideSet(
             NormalizedAtomicExpressionMapImpl expr, Registry exprReg,
-            Set<Map<String, String>> foreignSymbolOverideSet) {
+            Set<Map<String, String>> foreignSymbolOverideSet,
+            Set<String> multiUseWilds) {
         Set<java.util.Map<String, String>> rSet =
                 new HashSet<Map<String, String>>();
         for (Map<String, String> fs_m : foreignSymbolOverideSet) {
             Set<java.util.Map<String, String>> results =
-                    getMatchesForEq(expr, exprReg, fs_m);
+                    getMatchesForEq(expr, exprReg, fs_m, multiUseWilds);
             if (results != null && results.size() != 0)
                 rSet.addAll(results);
         }
@@ -503,7 +508,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     protected Set<Map<String, String>> getMatchesForEq(
             NormalizedAtomicExpressionMapImpl expr, Registry exprReg,
-            Map<String, String> foreignSymbolOveride) {
+            Map<String, String> foreignSymbolOveride, Set<String> multiUseWilds) {
         // Identify the literals.
         Set<String> literalsInexpr = new HashSet<String>();
         Map<String, Integer> exprMMap =
@@ -540,20 +545,21 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             int allPositionsLitIsUsedInSearchExpr = 0;
             int vcInt = m_registry.getIndexForSymbol(s);
             assert vcInt >= 0 : s + " not in VC registry";
+            // Have to handle case where the literal is part of the the theorem,
+            // AND a wildcard has been bound to the same symbol
             if (exprReg.m_symbolToIndex.containsKey(s)) {
                 int sInt = exprReg.getIndexForSymbol(s);
-                filter.overwriteEntry(vcInt, expr.readOperator(sInt));
+                allPositionsLitIsUsedInSearchExpr = expr.readOperator(sInt);
             }
-            else {
-                for (String baseMapK : foreignSymbolOveride.keySet()) {
-                    if (foreignSymbolOveride.get(baseMapK).equals(s)) {
-                        allPositionsLitIsUsedInSearchExpr |=
-                                expr.readOperator(exprReg
-                                        .getIndexForSymbol(baseMapK));
-                    }
+
+            for (String baseMapK : foreignSymbolOveride.keySet()) {
+                if (foreignSymbolOveride.get(baseMapK).equals(s)) {
+                    allPositionsLitIsUsedInSearchExpr |=
+                            expr.readOperator(exprReg
+                                    .getIndexForSymbol(baseMapK));
                 }
-                filter.overwriteEntry(vcInt, allPositionsLitIsUsedInSearchExpr);
             }
+            filter.overwriteEntry(vcInt, allPositionsLitIsUsedInSearchExpr);
 
         }
 
@@ -573,14 +579,17 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             if (filtered_vcNaemlsWithAllLiterals.isEmpty())
                 return null;
             return getBindings_Commutative(filtered_vcNaemlsWithAllLiterals,
-                    foreignSymbolOveride, expr, exprReg);
+                    foreignSymbolOveride, expr, exprReg, multiUseWilds);
         }
     }
 
+    // Should be able to assume literals in root/pos 0 match (else the filter didnt work)
+    // And lits that are args are at least used as many times as in the theorem
     Set<Map<String, String>> getBindings_Commutative(
             Set<NormalizedAtomicExpressionMapImpl> vcEquations,
             Map<String, String> basemap,
-            NormalizedAtomicExpressionMapImpl searchExpr, Registry searchReg) {
+            NormalizedAtomicExpressionMapImpl searchExpr, Registry searchReg,
+            Set<String> multiUseWilds) {
         // Argument sets
         Map<String, Integer> thArgs =
                 searchExpr.getArgumentsAsStrings(searchReg);
@@ -601,7 +610,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     new HashMap<String, String>(basemap);
             Map<String, Integer> vcArgs =
                     vc_r.getArgumentsAsStrings(m_registry);
-
+            Stack<String> comVCargsBound = new Stack<String>();
+            ArrayList<String> comTargsBound = new ArrayList<String>();
             for (String thOp : thOpsLitFirst) {
                 if (!basemap.containsKey(thOp) || !basemap.get(thOp).equals("")) {
                     // This is a literal
@@ -617,7 +627,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                             vcArgs.put(lit, vcArgs.get(lit) - numUses);
                         }
                         else { // lit is arg of theorem, but not arg of vcEq
-                            continue bindToAVCEquation;
+                            continue bindToAVCEquation; // shoulndt happen
                         }
                     }
                     else if (thArgs.containsKey(thOp)) {
@@ -628,7 +638,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                             vcArgs.put(thOp, vcArgs.get(thOp) - numUses);
                         }
                         else {
-                            continue bindToAVCEquation;
+                            continue bindToAVCEquation; // shouldnt happen
                         }
                     }
                     continue; // go to next op
@@ -644,7 +654,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
                 boolean isRoot = searchExpr.readRoot() == wildOpCode;
                 boolean isFSymb = searchExpr.readPosition(0) == wildOpCode;
+                boolean isArgOnly = false;
                 if (isRoot || isFSymb) {
+                    isArgOnly = false;
                     if ((wildPosBitCode & (wildPosBitCode - 1)) == 0) { // Single use and is func symbol or root
                         localToBindTo =
                                 m_registry.getSymbolForIndex(vc_r
@@ -684,6 +696,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 }
                 // Only use is in arg list
                 else {
+                    isArgOnly = true;
                     int thC = thArgs.get(wild);
                     // Choose the first that has the min no. of uses.  (Going to potentially miss some matches)
                     for (String vcA : vcArgs.keySet()) {
@@ -705,13 +718,36 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     if (!localType.isSubtypeOf(wildType))
                         continue bindToAVCEquation;
                     currentBind.put(wild, localToBindTo);
+                    if (isArgOnly) {
+                        comTargsBound.add(wild);
+                        comVCargsBound.push(localToBindTo);
+                    }
                 }
                 else
                     continue bindToAVCEquation;
 
             }
             bindings.add(currentBind);
+            Map<String, String> rotBind =
+                    new HashMap<String, String>(currentBind);
+            // if at least one arg is used in another theorem equation, we may need to permute
+            boolean multiFound = false;
+            for (String tArg : comTargsBound) {
+                if (multiUseWilds.contains(tArg))
+                    multiFound = true;
+                rotBind.put(tArg, comVCargsBound.pop());
+            }
+            if (!rotBind.isEmpty() && multiFound)
+                bindings.add(rotBind);
         }
+        // Have to permute commutative binds for completeness's sake.  Sometimes it matters.
+        // Commutative args bound in this call can be assumed to be the same type.
+        // Can assume each argument is accounted for by 1. being bound in this call,
+        // 2. bound in a previous call (if it was also used in another expression) or
+        // 3. was a literal in the theorem.  So just need to permute the args bound here.
+        // i + 0 = i.  Can't permute this.
+        // Just rotating.  Complete for 2 args bound, which is good enough for now.
+
         return bindings;
     }
 
