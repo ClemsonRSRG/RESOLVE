@@ -1120,27 +1120,27 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                         // Check to see if something has been replaced
                         if (!tmp.equals(currentConfirmExp)) {
-                            // Replace all instances of the left side in
-                            // the assume expressions we have already processed.
-                            for (int k = 0; k < remAssumeExpList.size(); k++) {
-                                Exp newAssumeExp =
-                                        Utilities.replace(remAssumeExpList
-                                                .get(k), equalsExp.getLeft(),
-                                                equalsExp.getRight());
-                                remAssumeExpList.set(k, newAssumeExp);
-                            }
-
-                            // Replace all instances of the left side in
-                            // the assume expressions we haven't processed.
-                            for (int k = j + 1; k < assumeExpCopyList.size(); k++) {
-                                Exp newAssumeExp =
-                                        Utilities.replace(assumeExpCopyList
-                                                .get(k), equalsExp.getLeft(),
-                                                equalsExp.getRight());
-                                assumeExpCopyList.set(k, newAssumeExp);
-                            }
-
                             doneReplacement = true;
+                        }
+
+                        // Replace all instances of the left side in
+                        // the assume expressions we have already processed.
+                        for (int k = 0; k < remAssumeExpList.size(); k++) {
+                            Exp newAssumeExp =
+                                    Utilities.replace(remAssumeExpList.get(k),
+                                            equalsExp.getLeft(), equalsExp
+                                                    .getRight());
+                            remAssumeExpList.set(k, newAssumeExp);
+                        }
+
+                        // Replace all instances of the left side in
+                        // the assume expressions we haven't processed.
+                        for (int k = j + 1; k < assumeExpCopyList.size(); k++) {
+                            Exp newAssumeExp =
+                                    Utilities.replace(assumeExpCopyList.get(k),
+                                            equalsExp.getLeft(), equalsExp
+                                                    .getRight());
+                            assumeExpCopyList.set(k, newAssumeExp);
                         }
                     }
                     // Only right hand side is replaceable
@@ -1152,27 +1152,27 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                         // Check to see if something has been replaced
                         if (!tmp.equals(currentConfirmExp)) {
-                            // Replace all instances of the right side in
-                            // the assume expressions we have already processed.
-                            for (int k = 0; k < remAssumeExpList.size(); k++) {
-                                Exp newAssumeExp =
-                                        Utilities.replace(remAssumeExpList
-                                                .get(k), equalsExp.getRight(),
-                                                equalsExp.getLeft());
-                                remAssumeExpList.set(k, newAssumeExp);
-                            }
-
-                            // Replace all instances of the right side in
-                            // the assume expressions we haven't processed.
-                            for (int k = j + 1; k < assumeExpCopyList.size(); k++) {
-                                Exp newAssumeExp =
-                                        Utilities.replace(assumeExpCopyList
-                                                .get(k), equalsExp.getRight(),
-                                                equalsExp.getLeft());
-                                assumeExpCopyList.set(k, newAssumeExp);
-                            }
-
                             doneReplacement = true;
+                        }
+
+                        // Replace all instances of the right side in
+                        // the assume expressions we have already processed.
+                        for (int k = 0; k < remAssumeExpList.size(); k++) {
+                            Exp newAssumeExp =
+                                    Utilities.replace(remAssumeExpList.get(k),
+                                            equalsExp.getRight(), equalsExp
+                                                    .getLeft());
+                            remAssumeExpList.set(k, newAssumeExp);
+                        }
+
+                        // Replace all instances of the right side in
+                        // the assume expressions we haven't processed.
+                        for (int k = j + 1; k < assumeExpCopyList.size(); k++) {
+                            Exp newAssumeExp =
+                                    Utilities.replace(assumeExpCopyList.get(k),
+                                            equalsExp.getRight(), equalsExp
+                                                    .getLeft());
+                            assumeExpCopyList.set(k, newAssumeExp);
                         }
                     }
                     // Both sides are not replaceable
@@ -4350,15 +4350,19 @@ public class VCGenerator extends TreeWalkerVisitor {
                     convention, false);
         }
 
-        // Add the correspondence as a given
-        if (myCorrespondenceExp != null && !isLocal) {
-            Exp correspondence = Exp.copy(myCorrespondenceExp);
-            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
-                    correspondence, false);
-        }
-
         // Add the requires clause
         if (requires != null) {
+            // Well_Def_Corr_Hyp rule: Conjunct the correspondence to
+            // the requires clause. This will ensure that the parsimonious
+            // vc step replaces the requires clause if possible.
+            if (myCorrespondenceExp != null && !isLocal) {
+                Location reqLoc = (Location) requires.getLocation().clone();
+                requires =
+                        myTypeGraph.formConjunct(Exp.copy(myCorrespondenceExp),
+                                requires);
+                requires.setLocation(reqLoc);
+            }
+
             myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
                     requires, false);
         }
@@ -4399,6 +4403,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // NY - Add any procedure duration clauses
+        InfixExp finalDurationExp = null;
         if (procDur != null) {
             // Add Cum_Dur as a free variable
             VarExp cumDur =
@@ -4442,16 +4447,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                             + name);
             Utilities.setLocation(durationExp, sumLoc);
 
-            InfixExp greaterEqExp =
+            finalDurationExp =
                     new InfixExp(null, durationExp, Utilities
                             .createPosSymbol("<="), procDur);
-            greaterEqExp.setMathType(BOOLEAN);
+            finalDurationExp.setMathType(BOOLEAN);
             Location andLoc = (Location) opLoc.clone();
             andLoc.setDetails("Duration Clause of " + name);
-            Utilities.setLocation(greaterEqExp, andLoc);
-
-            // Append the duration to the ensures clause
-            ensures = myTypeGraph.formConjunct(ensures, greaterEqExp);
+            Utilities.setLocation(finalDurationExp, andLoc);
         }
 
         // Add the facility type constraints
@@ -4499,21 +4501,32 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add the list of statements
         myCurrentAssertiveCode.addStatements(statementList);
 
-        // Add the correspondence as a given again
-        if (myCorrespondenceExp != null && !isLocal) {
-            Exp correspondence = Exp.copy(myCorrespondenceExp);
-            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
-                    correspondence, false);
+        // Add the finalization duration ensures (if any)
+        if (finalDurationExp != null) {
+            myCurrentAssertiveCode.addConfirm(finalDurationExp.getLocation(),
+                    finalDurationExp, false);
         }
 
-        // Add the convention as something we need to ensure
+        // Correct_Op_Hyp rule: Only applies to non-local operations
+        // in concept realizations.
         if (myConventionExp != null && !isLocal) {
             Exp convention = Exp.copy(myConventionExp);
             Location conventionLoc = (Location) opLoc.clone();
             conventionLoc.setDetails(convention.getLocation().getDetails()
                     + " generated by " + name);
             Utilities.setLocation(convention, conventionLoc);
-            ensures = myTypeGraph.formConjunct(convention, ensures);
+            myCurrentAssertiveCode.addConfirm(convention.getLocation(),
+                    convention, false);
+        }
+
+        // Well_Def_Corr_Hyp rule: Rather than doing direct replacement,
+        // we leave that logic to the parsimonious vc step. A replacement
+        // will occur if this is a correspondence function or an implies
+        // will be formed if this is a correspondence relation.
+        if (myCorrespondenceExp != null && !isLocal) {
+            Exp correspondence = Exp.copy(myCorrespondenceExp);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    correspondence, false);
         }
 
         // Add the final confirms clause
