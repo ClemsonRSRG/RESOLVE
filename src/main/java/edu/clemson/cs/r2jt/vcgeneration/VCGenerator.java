@@ -4350,15 +4350,19 @@ public class VCGenerator extends TreeWalkerVisitor {
                     convention, false);
         }
 
-        // Add the correspondence as a given
-        if (myCorrespondenceExp != null && !isLocal) {
-            Exp correspondence = Exp.copy(myCorrespondenceExp);
-            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
-                    correspondence, false);
-        }
-
         // Add the requires clause
         if (requires != null) {
+            // Well_Def_Corr_Hyp rule: Conjunct the correspondence to
+            // the requires clause. This will ensure that the parsimonious
+            // vc step replaces the requires clause if possible.
+            if (myCorrespondenceExp != null && !isLocal) {
+                Location reqLoc = (Location) requires.getLocation().clone();
+                requires =
+                        myTypeGraph.formConjunct(Exp.copy(myCorrespondenceExp),
+                                requires);
+                requires.setLocation(reqLoc);
+            }
+
             myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
                     requires, false);
         }
