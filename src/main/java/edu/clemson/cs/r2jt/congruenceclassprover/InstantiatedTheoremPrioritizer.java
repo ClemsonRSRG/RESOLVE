@@ -46,7 +46,11 @@ public class InstantiatedTheoremPrioritizer {
         for (String s : theorem_symbols) {
             String rS = m_vcReg.getRootSymbolForSymbol(s);
             if (m_vc_symbols.containsKey(rS)) {
-                score += m_vc_symbols.get(rS);
+                // older symbols take priority
+                // indices are the order of introduction
+                int i_score =
+                        m_vc_symbols.get(rS) * m_vcReg.getIndexForSymbol(rS);
+                score += i_score;
             }
             else
                 score += max;

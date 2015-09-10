@@ -41,7 +41,6 @@ public class TheoremCongruenceClosureImpl {
     private boolean partMatchedisConstantEquation = false;
     protected boolean m_allowNewSymbols;
 
-    // TODO: exclude statements with dummy variables not in matching component, or do another search/match with result
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp p,
             boolean allowNewSymbols) {
         m_allowNewSymbols = allowNewSymbols;
@@ -236,6 +235,7 @@ public class TheoremCongruenceClosureImpl {
     // and the created variables in the match conjunction
     private java.util.Map<String, String> getInitBindings() {
         HashMap<String, String> initBindings = new HashMap<String, String>();
+        // Created vars. that are parents of quantified vars can be a problem later
         for (int i = 0; i < m_theoremRegistry.m_indexToSymbol.size(); ++i) {
 
             String curSym = m_theoremRegistry.getSymbolForIndex(i);
@@ -247,6 +247,23 @@ public class TheoremCongruenceClosureImpl {
             }
         }
         return initBindings;
+    }
+
+    // returns list of wildcards that occur in more than one equation
+    // useful for determining when permutations of commutative arg wildcards are needed
+    private Set<String> usedInMoreThanOneEquation(Set<String> wilds) {
+        Set<String> rSet = new HashSet<String>();
+        for (String w : wilds) {
+            int wi = m_theoremRegistry.getIndexForSymbol(w);
+            int wiCnt = 0;
+            for (NormalizedAtomicExpressionMapImpl nm : m_matchConj.m_exprList) {
+                if (nm.readOperator(wi) > 0)
+                    wiCnt++;
+            }
+            if (wiCnt > 1)
+                rSet.add(w);
+        }
+        return rSet;
     }
 
     private Set<java.util.Map<String, String>> findValidBindingsByType(
@@ -312,11 +329,14 @@ public class TheoremCongruenceClosureImpl {
 
         Set<java.util.Map<String, String>> results =
                 new HashSet<java.util.Map<String, String>>();
-        results.add(getInitBindings());
+        java.util.Map<String, String> initBindings = getInitBindings();
+        results.add(initBindings);
+        Set<String> multiUseWilds =
+                usedInMoreThanOneEquation(initBindings.keySet());
         for (NormalizedAtomicExpressionMapImpl e_t : m_matchConj.m_exprList) {
             results =
                     vc.getConjunct().getMatchesForOverideSet(e_t,
-                            m_theoremRegistry, results);
+                            m_theoremRegistry, results, multiUseWilds);
         }
         return results;
     }
