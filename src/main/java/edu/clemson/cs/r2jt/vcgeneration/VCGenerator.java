@@ -4497,13 +4497,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Add the list of statements
         myCurrentAssertiveCode.addStatements(statementList);
 
-        // Add the correspondence as a given again
-        if (myCorrespondenceExp != null && !isLocal) {
-            Exp correspondence = Exp.copy(myCorrespondenceExp);
-            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
-                    correspondence, false);
-        }
-
         // Add the finalization duration ensures (if any)
         if (finalDurationExp != null) {
             myCurrentAssertiveCode.addConfirm(finalDurationExp.getLocation(),
@@ -4520,6 +4513,16 @@ public class VCGenerator extends TreeWalkerVisitor {
             Utilities.setLocation(convention, conventionLoc);
             myCurrentAssertiveCode.addConfirm(convention.getLocation(),
                     convention, false);
+        }
+
+        // Well_Def_Corr_Hyp rule: Rather than doing direct replacement,
+        // we leave that logic to the parsimonious vc step. A replacement
+        // will occur if this is a correspondence function or an implies
+        // will be formed if this is a correspondence relation.
+        if (myCorrespondenceExp != null && !isLocal) {
+            Exp correspondence = Exp.copy(myCorrespondenceExp);
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    correspondence, false);
         }
 
         // Add the final confirms clause
