@@ -4399,6 +4399,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // NY - Add any procedure duration clauses
+        InfixExp finalDurationExp = null;
         if (procDur != null) {
             // Add Cum_Dur as a free variable
             VarExp cumDur =
@@ -4442,16 +4443,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                             + name);
             Utilities.setLocation(durationExp, sumLoc);
 
-            InfixExp greaterEqExp =
+            finalDurationExp =
                     new InfixExp(null, durationExp, Utilities
                             .createPosSymbol("<="), procDur);
-            greaterEqExp.setMathType(BOOLEAN);
+            finalDurationExp.setMathType(BOOLEAN);
             Location andLoc = (Location) opLoc.clone();
             andLoc.setDetails("Duration Clause of " + name);
-            Utilities.setLocation(greaterEqExp, andLoc);
-
-            // Append the duration to the ensures clause
-            ensures = myTypeGraph.formConjunct(ensures, greaterEqExp);
+            Utilities.setLocation(finalDurationExp, andLoc);
         }
 
         // Add the facility type constraints
@@ -4504,6 +4502,12 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp correspondence = Exp.copy(myCorrespondenceExp);
             myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
                     correspondence, false);
+        }
+
+        // Add the finalization duration ensures (if any)
+        if (finalDurationExp != null) {
+            myCurrentAssertiveCode.addConfirm(finalDurationExp.getLocation(),
+                    finalDurationExp, false);
         }
 
         // Add the convention as something we need to ensure
