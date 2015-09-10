@@ -1120,27 +1120,27 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                         // Check to see if something has been replaced
                         if (!tmp.equals(currentConfirmExp)) {
-                            // Replace all instances of the left side in
-                            // the assume expressions we have already processed.
-                            for (int k = 0; k < remAssumeExpList.size(); k++) {
-                                Exp newAssumeExp =
-                                        Utilities.replace(remAssumeExpList
-                                                .get(k), equalsExp.getLeft(),
-                                                equalsExp.getRight());
-                                remAssumeExpList.set(k, newAssumeExp);
-                            }
-
-                            // Replace all instances of the left side in
-                            // the assume expressions we haven't processed.
-                            for (int k = j + 1; k < assumeExpCopyList.size(); k++) {
-                                Exp newAssumeExp =
-                                        Utilities.replace(assumeExpCopyList
-                                                .get(k), equalsExp.getLeft(),
-                                                equalsExp.getRight());
-                                assumeExpCopyList.set(k, newAssumeExp);
-                            }
-
                             doneReplacement = true;
+                        }
+
+                        // Replace all instances of the left side in
+                        // the assume expressions we have already processed.
+                        for (int k = 0; k < remAssumeExpList.size(); k++) {
+                            Exp newAssumeExp =
+                                    Utilities.replace(remAssumeExpList.get(k),
+                                            equalsExp.getLeft(), equalsExp
+                                                    .getRight());
+                            remAssumeExpList.set(k, newAssumeExp);
+                        }
+
+                        // Replace all instances of the left side in
+                        // the assume expressions we haven't processed.
+                        for (int k = j + 1; k < assumeExpCopyList.size(); k++) {
+                            Exp newAssumeExp =
+                                    Utilities.replace(assumeExpCopyList.get(k),
+                                            equalsExp.getLeft(), equalsExp
+                                                    .getRight());
+                            assumeExpCopyList.set(k, newAssumeExp);
                         }
                     }
                     // Only right hand side is replaceable
@@ -1152,27 +1152,27 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                         // Check to see if something has been replaced
                         if (!tmp.equals(currentConfirmExp)) {
-                            // Replace all instances of the right side in
-                            // the assume expressions we have already processed.
-                            for (int k = 0; k < remAssumeExpList.size(); k++) {
-                                Exp newAssumeExp =
-                                        Utilities.replace(remAssumeExpList
-                                                .get(k), equalsExp.getRight(),
-                                                equalsExp.getLeft());
-                                remAssumeExpList.set(k, newAssumeExp);
-                            }
-
-                            // Replace all instances of the right side in
-                            // the assume expressions we haven't processed.
-                            for (int k = j + 1; k < assumeExpCopyList.size(); k++) {
-                                Exp newAssumeExp =
-                                        Utilities.replace(assumeExpCopyList
-                                                .get(k), equalsExp.getRight(),
-                                                equalsExp.getLeft());
-                                assumeExpCopyList.set(k, newAssumeExp);
-                            }
-
                             doneReplacement = true;
+                        }
+
+                        // Replace all instances of the right side in
+                        // the assume expressions we have already processed.
+                        for (int k = 0; k < remAssumeExpList.size(); k++) {
+                            Exp newAssumeExp =
+                                    Utilities.replace(remAssumeExpList.get(k),
+                                            equalsExp.getRight(), equalsExp
+                                                    .getLeft());
+                            remAssumeExpList.set(k, newAssumeExp);
+                        }
+
+                        // Replace all instances of the right side in
+                        // the assume expressions we haven't processed.
+                        for (int k = j + 1; k < assumeExpCopyList.size(); k++) {
+                            Exp newAssumeExp =
+                                    Utilities.replace(assumeExpCopyList.get(k),
+                                            equalsExp.getRight(), equalsExp
+                                                    .getLeft());
+                            assumeExpCopyList.set(k, newAssumeExp);
                         }
                     }
                     // Both sides are not replaceable
