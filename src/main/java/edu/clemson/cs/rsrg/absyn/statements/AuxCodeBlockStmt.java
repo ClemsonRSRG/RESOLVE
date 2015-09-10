@@ -87,6 +87,7 @@ public class AuxCodeBlockStmt extends Statement {
      *
      * @return A deep copy of the object.
      */
+    @Override
     public AuxCodeBlockStmt clone() {
         return new AuxCodeBlockStmt(new Location(myLoc), getStatements());
     }

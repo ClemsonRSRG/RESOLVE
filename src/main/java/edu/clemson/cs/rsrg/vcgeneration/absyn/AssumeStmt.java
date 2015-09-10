@@ -152,7 +152,6 @@ public class AssumeStmt extends Statement {
             sb.append("Assume ");
         }
         sb.append(myAssertion.toString());
-        sb.append(";");
 
         return sb.toString();
     }

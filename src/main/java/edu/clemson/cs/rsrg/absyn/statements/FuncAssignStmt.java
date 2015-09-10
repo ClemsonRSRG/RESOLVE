@@ -1,5 +1,5 @@
 /**
- * CallStmt.java
+ * FuncAssignStmt.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -14,19 +14,23 @@ package edu.clemson.cs.rsrg.absyn.statements;
 
 import edu.clemson.cs.rsrg.absyn.Statement;
 import edu.clemson.cs.rsrg.absyn.programexpr.ProgramFunctionExp;
+import edu.clemson.cs.rsrg.absyn.programexpr.ProgramVariableExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the call statements
+ * <p>This is the class for all the function assignment statements
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class CallStmt extends Statement {
+public class FuncAssignStmt extends Statement {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
+
+    /** <p>The variable expression to be assigned</p> */
+    private final ProgramVariableExp myVariableExp;
 
     /** <p>The programming function expression</p> */
     private final ProgramFunctionExp myFunctionExp;
@@ -39,11 +43,15 @@ public class CallStmt extends Statement {
      * <p>This constructs a programming function call expression.</p>
      *
      * @param l A {@link Location} representation object.
+     * @param var A {@link ProgramVariableExp} representing the variable
+     *            expression we want to assign to.
      * @param exp A {@link ProgramFunctionExp} representing the function
      *            we are calling.
      */
-    public CallStmt(Location l, ProgramFunctionExp exp) {
+    public FuncAssignStmt(Location l, ProgramVariableExp var,
+            ProgramFunctionExp exp) {
         super(l);
+        myVariableExp = var;
         myFunctionExp = exp;
     }
 
@@ -66,9 +74,18 @@ public class CallStmt extends Statement {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("CallStmt\n");
-        sb.append(myFunctionExp.asString(indentSize + innerIndentSize,
-                innerIndentSize));
+        sb.append("FuncAssignStmt\n");
+
+        if (myVariableExp != null) {
+            sb.append(myVariableExp.asString(indentSize + innerIndentSize,
+                    innerIndentSize));
+            sb.append(" := ");
+        }
+
+        if (myFunctionExp != null) {
+            sb.append(myFunctionExp.asString(indentSize + innerIndentSize,
+                    innerIndentSize));
+        }
 
         return sb.toString();
     }
@@ -80,14 +97,15 @@ public class CallStmt extends Statement {
      * @return A deep copy of the object.
      */
     @Override
-    public CallStmt clone() {
-        return new CallStmt(new Location(myLoc),
+    public FuncAssignStmt clone() {
+        return new FuncAssignStmt(new Location(myLoc),
+                (ProgramVariableExp) myVariableExp.clone(),
                 (ProgramFunctionExp) myFunctionExp.clone());
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link CallStmt} class.</p>
+     * for the {@link FuncAssignStmt} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -96,12 +114,13 @@ public class CallStmt extends Statement {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof CallStmt) {
-            CallStmt eAsCallStmt = (CallStmt) o;
-            result = myLoc.equals(eAsCallStmt.myLoc);
+        if (o instanceof FuncAssignStmt) {
+            FuncAssignStmt eAsFuncAssignStmt = (FuncAssignStmt) o;
+            result = myLoc.equals(eAsFuncAssignStmt.myLoc);
 
             if (result) {
-                result = myFunctionExp.equals(eAsCallStmt.myFunctionExp);
+                result = myVariableExp.equals(eAsFuncAssignStmt.myVariableExp);
+                result &= myFunctionExp.equals(eAsFuncAssignStmt.myFunctionExp);
             }
         }
 
@@ -110,12 +129,22 @@ public class CallStmt extends Statement {
 
     /**
      * <p>This method returns a deep copy of the function expression in
-     * this calling statement.</p>
+     * this function assignment statement.</p>
      *
      * @return The {@link ProgramFunctionExp} representation object.
      */
     public ProgramFunctionExp getFunctionExp() {
         return (ProgramFunctionExp) myFunctionExp.clone();
+    }
+
+    /**
+     * <p>This method returns a deep copy of the variable expression in
+     * this function assignment statement.</p>
+     *
+     * @return The {@link ProgramVariableExp} representation object.
+     */
+    public ProgramVariableExp getVariableExp() {
+        return (ProgramVariableExp) myVariableExp.clone();
     }
 
     /**
@@ -126,7 +155,15 @@ public class CallStmt extends Statement {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append(myFunctionExp.toString());
+
+        if (myVariableExp != null) {
+            sb.append(myVariableExp.toString());
+            sb.append(" := ");
+        }
+
+        if (myFunctionExp != null) {
+            sb.append(myFunctionExp.toString());
+        }
 
         return sb.toString();
     }
