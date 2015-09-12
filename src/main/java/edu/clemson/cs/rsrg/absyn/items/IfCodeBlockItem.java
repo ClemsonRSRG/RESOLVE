@@ -1,5 +1,5 @@
 /**
- * ConditionItem.java
+ * IfCodeBlockItem.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -15,18 +15,19 @@ package edu.clemson.cs.rsrg.absyn.items;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.Statement;
 import edu.clemson.cs.rsrg.absyn.programexpr.ProgramExp;
+import edu.clemson.cs.rsrg.absyn.statements.IfStmt;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class stores an if (or else if) path that
- * an if statement can take.</p>
+ * <p>This is the class that stores a code block that gets executed
+ * if the condition is met. Used by the {@link IfStmt}.</p>
  *
  * @version 2.0
  */
-public class ConditionItem extends ResolveConceptualElement {
+public class IfCodeBlockItem extends ResolveConceptualElement {
 
     // ===========================================================
     // Member Fields
@@ -39,25 +40,27 @@ public class ConditionItem extends ResolveConceptualElement {
      * <p>The list of statements that gets executed
      * if the testing expression is met</p>
      */
-    private final List<Statement> myThenStatements;
+    private final List<Statement> myStatements;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a programming function call expression.</p>
+     * <p>This constructs a code block with a condition test.
+     * If the testing expression is met, then the code block is
+     * executed.</p>
      *
      * @param l A {@link Location} representation object.
      * @param test A {@link ProgramExp} testing expression.
-     * @param thenStatements The list of {@link Statement}s that are in
-     *                       the then block.
+     * @param statements The list of {@link Statement}s that are in
+     *                   this block.
      */
-    public ConditionItem(Location l, ProgramExp test,
-            List<Statement> thenStatements) {
+    public IfCodeBlockItem(Location l, ProgramExp test,
+            List<Statement> statements) {
         super(l);
         myTestingExp = test;
-        myThenStatements = thenStatements;
+        myStatements = statements;
     }
 
     // ===========================================================
@@ -79,17 +82,16 @@ public class ConditionItem extends ResolveConceptualElement {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("ConditionItem\n");
+        sb.append("IfCodeBlockItem\n");
 
         if (myTestingExp != null) {
-            sb.append("If ");
             sb.append(myTestingExp.asString(indentSize + innerIndentSize,
                     innerIndentSize));
             sb.append(" then\n");
         }
 
-        if (myThenStatements != null) {
-            for (Statement s : myThenStatements) {
+        if (myStatements != null) {
+            for (Statement s : myStatements) {
                 sb.append(s.asString(indentSize + innerIndentSize,
                         innerIndentSize));
                 sb.append("\n");
@@ -101,19 +103,19 @@ public class ConditionItem extends ResolveConceptualElement {
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for the {@link ConditionItem} class.</p>
+     * for the {@link IfCodeBlockItem} class.</p>
      *
      * @return A deep copy of the object.
      */
     @Override
-    public ConditionItem clone() {
-        return new ConditionItem(new Location(myLoc), myTestingExp.clone(),
-                getThenStatements());
+    public IfCodeBlockItem clone() {
+        return new IfCodeBlockItem(new Location(myLoc), myTestingExp.clone(),
+                getStatements());
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link ConditionItem} class.</p>
+     * for the {@link IfCodeBlockItem} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -122,22 +124,23 @@ public class ConditionItem extends ResolveConceptualElement {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof ConditionItem) {
-            ConditionItem eAsConditionItem = (ConditionItem) o;
-            result = myLoc.equals(eAsConditionItem.myLoc);
+        if (o instanceof IfCodeBlockItem) {
+            IfCodeBlockItem eAsIfCodeBlockItem = (IfCodeBlockItem) o;
+            result = myLoc.equals(eAsIfCodeBlockItem.myLoc);
 
             if (result) {
                 if (myTestingExp != null
-                        && eAsConditionItem.myTestingExp != null) {
+                        && eAsIfCodeBlockItem.myTestingExp != null) {
                     result &=
-                            myTestingExp.equals(eAsConditionItem.myTestingExp);
+                            myTestingExp
+                                    .equals(eAsIfCodeBlockItem.myTestingExp);
 
-                    if (myThenStatements != null
-                            && eAsConditionItem.myThenStatements != null) {
+                    if (myStatements != null
+                            && eAsIfCodeBlockItem.myStatements != null) {
                         Iterator<Statement> thisStatements =
-                                myThenStatements.iterator();
+                                myStatements.iterator();
                         Iterator<Statement> eStatements =
-                                eAsConditionItem.myThenStatements.iterator();
+                                eAsIfCodeBlockItem.myStatements.iterator();
 
                         while (result && thisStatements.hasNext()
                                 && eStatements.hasNext()) {
@@ -169,13 +172,13 @@ public class ConditionItem extends ResolveConceptualElement {
 
     /**
      * <p>This method returns a deep copy of the list of statements
-     * in the then code block.</p>
+     * in this code block.</p>
      *
      * @return The list of {@link Statement}s.
      */
-    public List<Statement> getThenStatements() {
+    public List<Statement> getStatements() {
         List<Statement> copyStatements = new ArrayList<>();
-        for (Statement s : myThenStatements) {
+        for (Statement s : myStatements) {
             copyStatements.add(s.clone());
         }
 
@@ -190,11 +193,10 @@ public class ConditionItem extends ResolveConceptualElement {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("If ");
         sb.append(myTestingExp.toString());
         sb.append(" then\n");
 
-        for (Statement s : myThenStatements) {
+        for (Statement s : myStatements) {
             sb.append("\t");
             sb.append(s.toString());
             sb.append("\n");
