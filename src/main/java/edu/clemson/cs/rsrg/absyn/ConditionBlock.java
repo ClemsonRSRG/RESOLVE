@@ -1,5 +1,5 @@
 /**
- * IfCodeBlockItem.java
+ * ConditionBlock.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -10,53 +10,54 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.items;
+package edu.clemson.cs.rsrg.absyn;
 
-import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
-import edu.clemson.cs.rsrg.absyn.Statement;
+import edu.clemson.cs.rsrg.absyn.blocks.IfConditionBlock;
 import edu.clemson.cs.rsrg.absyn.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.absyn.statements.IfStmt;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class that stores a code block that gets executed
- * if the condition is met. Used by the {@link IfStmt}.</p>
+ * <p>This is the abstract base class for all the condition blocks
+ * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class IfCodeBlockItem extends ResolveConceptualElement {
+public abstract class ConditionBlock extends ResolveConceptualElement {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The testing expression.</p> */
-    private final ProgramExp myTestingExp;
+    /**
+     * <p>The testing expression.</p>
+     */
+    protected final ProgramExp myTestingExp;
 
     /**
      * <p>The list of statements that gets executed
      * if the testing expression is met</p>
      */
-    private final List<Statement> myStatements;
+    protected final List<Statement> myStatements;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a code block with a condition test.
-     * If the testing expression is met, then the code block is
-     * executed.</p>
+     * <p>A helper constructor that allow us to store the location,
+     * of the created object, testing expression and list of statements
+     * directly in this class.</p>
      *
      * @param l A {@link Location} representation object.
      * @param test A {@link ProgramExp} testing expression.
      * @param statements The list of {@link Statement}s that are in
      *                   this block.
      */
-    public IfCodeBlockItem(Location l, ProgramExp test,
+    protected ConditionBlock(Location l, ProgramExp test,
             List<Statement> statements) {
         super(l);
         myTestingExp = test;
@@ -81,14 +82,6 @@ public class IfCodeBlockItem extends ResolveConceptualElement {
     @Override
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
-        sb.append("IfCodeBlockItem\n");
-
-        if (myTestingExp != null) {
-            sb.append(myTestingExp.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-            sb.append(" then\n");
-        }
 
         if (myStatements != null) {
             for (Statement s : myStatements) {
@@ -103,19 +96,18 @@ public class IfCodeBlockItem extends ResolveConceptualElement {
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for the {@link IfCodeBlockItem} class.</p>
+     * for all the classes that extend from {@link ConditionBlock}.</p>
      *
      * @return A deep copy of the object.
      */
     @Override
-    public IfCodeBlockItem clone() {
-        return new IfCodeBlockItem(new Location(myLoc), myTestingExp.clone(),
-                getStatements());
+    public final ConditionBlock clone() {
+        return this.copy();
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link IfCodeBlockItem} class.</p>
+     * for the {@link ConditionBlock} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -124,23 +116,22 @@ public class IfCodeBlockItem extends ResolveConceptualElement {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof IfCodeBlockItem) {
-            IfCodeBlockItem eAsIfCodeBlockItem = (IfCodeBlockItem) o;
-            result = myLoc.equals(eAsIfCodeBlockItem.myLoc);
+        if (o instanceof IfConditionBlock) {
+            ConditionBlock eAsConditionBlock = (ConditionBlock) o;
+            result = myLoc.equals(eAsConditionBlock.myLoc);
 
             if (result) {
                 if (myTestingExp != null
-                        && eAsIfCodeBlockItem.myTestingExp != null) {
+                        && eAsConditionBlock.myTestingExp != null) {
                     result &=
-                            myTestingExp
-                                    .equals(eAsIfCodeBlockItem.myTestingExp);
+                            myTestingExp.equals(eAsConditionBlock.myTestingExp);
 
                     if (myStatements != null
-                            && eAsIfCodeBlockItem.myStatements != null) {
+                            && eAsConditionBlock.myStatements != null) {
                         Iterator<Statement> thisStatements =
                                 myStatements.iterator();
                         Iterator<Statement> eStatements =
-                                eAsIfCodeBlockItem.myStatements.iterator();
+                                eAsConditionBlock.myStatements.iterator();
 
                         while (result && thisStatements.hasNext()
                                 && eStatements.hasNext()) {
@@ -166,7 +157,7 @@ public class IfCodeBlockItem extends ResolveConceptualElement {
      *
      * @return The testing {@link ProgramExp} object.
      */
-    public ProgramExp getTest() {
+    public final ProgramExp getTest() {
         return myTestingExp.clone();
     }
 
@@ -176,7 +167,7 @@ public class IfCodeBlockItem extends ResolveConceptualElement {
      *
      * @return The list of {@link Statement}s.
      */
-    public List<Statement> getStatements() {
+    public final List<Statement> getStatements() {
         List<Statement> copyStatements = new ArrayList<>();
         for (Statement s : myStatements) {
             copyStatements.add(s.clone());
@@ -193,8 +184,6 @@ public class IfCodeBlockItem extends ResolveConceptualElement {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append(myTestingExp.toString());
-        sb.append(" then\n");
 
         for (Statement s : myStatements) {
             sb.append("\t");
@@ -202,9 +191,23 @@ public class IfCodeBlockItem extends ResolveConceptualElement {
             sb.append("\n");
         }
 
-        sb.append("end");
-
         return sb.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>Implemented by concrete subclasses of {@link ConditionBlock} to manufacture
+     * a copy of themselves.</p>
+     *
+     * @return A new {@link ConditionBlock} that is a deep copy of the original.
+     */
+    protected ConditionBlock copy() {
+        throw new MiscErrorException(
+                "Shouldn't be calling copy() from code block "
+                        + this.getClass(), new CloneNotSupportedException());
     }
 
 }

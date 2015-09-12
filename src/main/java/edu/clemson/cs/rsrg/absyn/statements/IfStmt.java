@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.absyn.statements;
 
 import edu.clemson.cs.rsrg.absyn.Statement;
-import edu.clemson.cs.rsrg.absyn.items.IfCodeBlockItem;
+import edu.clemson.cs.rsrg.absyn.blocks.IfConditionBlock;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,10 +32,10 @@ public class IfStmt extends Statement {
     // ===========================================================
 
     /** <p>The if part of this statement</p> */
-    private final IfCodeBlockItem myIfClause;
+    private final IfConditionBlock myIfClause;
 
     /** <p>The else-if part of this statement</p> */
-    private final List<IfCodeBlockItem> myElseIfs;
+    private final List<IfConditionBlock> myElseIfs;
 
     /** <p>The else part of this statement</p> */
     private final List<Statement> myElseStatements;
@@ -48,14 +48,14 @@ public class IfStmt extends Statement {
      * <p>This constructs a programming function call expression.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param ifClause A {@link IfCodeBlockItem} representing if block.
-     * @param elseifpairs A list of {@link IfCodeBlockItem} representing all
+     * @param ifClause A {@link IfConditionBlock} representing if block.
+     * @param elseifpairs A list of {@link IfConditionBlock} representing all
      *                    the else-if pairs.
      * @param elseStatements The list of {@link Statement}s that are in
      *                       the else block.
      */
-    public IfStmt(Location l, IfCodeBlockItem ifClause,
-            List<IfCodeBlockItem> elseifpairs, List<Statement> elseStatements) {
+    public IfStmt(Location l, IfConditionBlock ifClause,
+            List<IfConditionBlock> elseifpairs, List<Statement> elseStatements) {
         super(l);
         myIfClause = ifClause;
         myElseIfs = elseifpairs;
@@ -90,7 +90,7 @@ public class IfStmt extends Statement {
         }
 
         if (myElseIfs != null) {
-            for (IfCodeBlockItem c : myElseIfs) {
+            for (IfConditionBlock c : myElseIfs) {
                 sb.append("Else ");
                 sb.append(c.asString(indentSize + innerIndentSize,
                         innerIndentSize));
@@ -130,9 +130,9 @@ public class IfStmt extends Statement {
                 result = myIfClause.equals(eAsIfStmt.myIfClause);
 
                 if (myElseIfs != null && eAsIfStmt.myElseIfs != null) {
-                    Iterator<IfCodeBlockItem> thiseIfCodeBlockItem =
+                    Iterator<IfConditionBlock> thiseIfCodeBlockItem =
                             myElseIfs.iterator();
-                    Iterator<IfCodeBlockItem> eIfCodeBlockItem =
+                    Iterator<IfConditionBlock> eIfCodeBlockItem =
                             eAsIfStmt.myElseIfs.iterator();
 
                     while (result && thiseIfCodeBlockItem.hasNext()
@@ -192,12 +192,12 @@ public class IfStmt extends Statement {
      * <p>This method returns a deep copy of all the else-if blocks in
      * this {@link IfStmt}.</p>
      *
-     * @return The list of {@link IfCodeBlockItem} representation objects.
+     * @return The list of {@link IfConditionBlock} representation objects.
      */
-    public List<IfCodeBlockItem> getElseifpairs() {
-        List<IfCodeBlockItem> newElseifpairs = new ArrayList<>();
-        for (IfCodeBlockItem item : myElseIfs) {
-            newElseifpairs.add(item.clone());
+    public List<IfConditionBlock> getElseifpairs() {
+        List<IfConditionBlock> newElseifpairs = new ArrayList<>();
+        for (IfConditionBlock item : myElseIfs) {
+            newElseifpairs.add((IfConditionBlock) item.clone());
         }
 
         return newElseifpairs;
@@ -207,10 +207,10 @@ public class IfStmt extends Statement {
      * <p>This method returns a deep copy of the if block in
      * this {@link IfStmt}.</p>
      *
-     * @return The {@link IfCodeBlockItem} representation object.
+     * @return The {@link IfConditionBlock} representation object.
      */
-    public IfCodeBlockItem getIfClause() {
-        return myIfClause.clone();
+    public IfConditionBlock getIfClause() {
+        return (IfConditionBlock) myIfClause.clone();
     }
 
     /**
@@ -223,7 +223,7 @@ public class IfStmt extends Statement {
         StringBuffer sb = new StringBuffer();
         sb.append(myIfClause.toString());
 
-        for (IfCodeBlockItem item : myElseIfs) {
+        for (IfConditionBlock item : myElseIfs) {
             sb.append("Else ");
             sb.append(item.toString());
         }

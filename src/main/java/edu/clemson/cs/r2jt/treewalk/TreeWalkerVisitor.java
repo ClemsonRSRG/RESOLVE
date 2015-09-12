@@ -455,7 +455,7 @@ public abstract class TreeWalkerVisitor {
 
     public void postConceptTypeParamDec(ConceptTypeParamDec data) {}
 
-    // IfCodeBlockItem
+    // IfConditionBlock
     public boolean walkConditionItem(ConditionItem data) {
         return false;
     }

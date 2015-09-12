@@ -258,7 +258,7 @@ public class PreProcessor extends TreeWalkerStackVisitor {
     }
 
     // -----------------------------------------------------------
-    // IfCodeBlockItem
+    // IfConditionBlock
     // -----------------------------------------------------------
 
     @Override
