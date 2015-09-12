@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.absyn.statements;
 
 import edu.clemson.cs.rsrg.absyn.Statement;
-import edu.clemson.cs.rsrg.absyn.blocks.WhenConditionBlock;
+import edu.clemson.cs.rsrg.absyn.codeblocks.WhenConditionBlock;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**

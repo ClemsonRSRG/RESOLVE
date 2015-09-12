@@ -1,5 +1,5 @@
 /**
- * IfConditionBlock.java
+ * WhenConditionBlock.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.blocks;
+package edu.clemson.cs.rsrg.absyn.codeblocks;
 
 import edu.clemson.cs.rsrg.absyn.ConditionBlock;
 import edu.clemson.cs.rsrg.absyn.Statement;
@@ -19,12 +19,12 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.List;
 
 /**
- * <p>This is the class for all the if/else-if condition block
+ * <p>This is the class for all the when condition block
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class IfConditionBlock extends ConditionBlock {
+public class WhenConditionBlock extends ConditionBlock {
 
     // ===========================================================
     // Constructors
@@ -40,7 +40,7 @@ public class IfConditionBlock extends ConditionBlock {
      * @param statements The list of {@link Statement}s that are in
      *                   this block.
      */
-    public IfConditionBlock(Location l, ProgramExp test,
+    public WhenConditionBlock(Location l, ProgramExp test,
             List<Statement> statements) {
         super(l, test, statements);
     }
@@ -64,18 +64,22 @@ public class IfConditionBlock extends ConditionBlock {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("IfConditionBlock\n");
+        sb.append("WhenConditionBlock\n");
 
         if (myTestingExp != null) {
-            sb.append(myTestingExp.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-            sb.append(" then\n");
+            printSpace(indentSize + innerIndentSize, sb);
+            sb.append("When ");
+            sb.append(myTestingExp.asString(0, innerIndentSize));
+            printSpace(indentSize + innerIndentSize, sb);
+            sb.append("\ndo\n");
         }
 
         // Print the statements
         sb
                 .append(super.asString(indentSize + innerIndentSize,
                         innerIndentSize));
+        printSpace(indentSize + innerIndentSize, sb);
+        sb.append("exit\n");
 
         return sb.toString();
     }
@@ -89,9 +93,9 @@ public class IfConditionBlock extends ConditionBlock {
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append(myTestingExp.toString());
-        sb.append(" then\n");
+        sb.append(" do\n");
         sb.append(super.toString());
-        sb.append("end");
+        sb.append("exit");
 
         return sb.toString();
     }
@@ -108,7 +112,7 @@ public class IfConditionBlock extends ConditionBlock {
      */
     @Override
     protected ConditionBlock copy() {
-        return new IfConditionBlock(myLoc, myTestingExp.clone(),
+        return new WhenConditionBlock(myLoc, myTestingExp.clone(),
                 getStatements());
     }
 

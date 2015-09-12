@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn;
 
-import edu.clemson.cs.rsrg.absyn.blocks.IfConditionBlock;
+import edu.clemson.cs.rsrg.absyn.codeblocks.IfConditionBlock;
 import edu.clemson.cs.rsrg.absyn.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
