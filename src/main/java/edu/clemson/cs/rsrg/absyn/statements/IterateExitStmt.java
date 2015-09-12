@@ -1,5 +1,5 @@
 /**
- * CallStmt.java
+ * IterateExitStmt.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -13,38 +13,37 @@
 package edu.clemson.cs.rsrg.absyn.statements;
 
 import edu.clemson.cs.rsrg.absyn.Statement;
-import edu.clemson.cs.rsrg.absyn.programexpr.ProgramFunctionExp;
+import edu.clemson.cs.rsrg.absyn.blocks.WhenConditionBlock;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the call statements
+ * <p>This is the class for all the when-do statements
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class CallStmt extends Statement {
+public class IterateExitStmt extends Statement {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The programming function expression</p> */
-    private final ProgramFunctionExp myFunctionExp;
+    /** <p>The condition part of this statement</p> */
+    private final WhenConditionBlock myConditionBlock;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a call statement.</p>
+     * <p>This constructs a when-do condition statement.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param exp A {@link ProgramFunctionExp} representing the function
-     *            we are calling.
+     * @param codeBlock A {@link WhenConditionBlock} representation object.
      */
-    public CallStmt(Location l, ProgramFunctionExp exp) {
+    public IterateExitStmt(Location l, WhenConditionBlock codeBlock) {
         super(l);
-        myFunctionExp = exp;
+        myConditionBlock = codeBlock;
     }
 
     // ===========================================================
@@ -66,16 +65,19 @@ public class CallStmt extends Statement {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("CallStmt\n");
-        sb.append(myFunctionExp.asString(indentSize + innerIndentSize,
-                innerIndentSize));
+        sb.append("IterateExitStmt\n");
+
+        if (myConditionBlock != null) {
+            sb.append(myConditionBlock.asString(indentSize + innerIndentSize,
+                    innerIndentSize));
+        }
 
         return sb.toString();
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link CallStmt} class.</p>
+     * for the {@link IterateExitStmt} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -84,12 +86,14 @@ public class CallStmt extends Statement {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof CallStmt) {
-            CallStmt eAsCallStmt = (CallStmt) o;
-            result = myLoc.equals(eAsCallStmt.myLoc);
+        if (o instanceof IfStmt) {
+            IterateExitStmt eAsIterateExitStmt = (IterateExitStmt) o;
+            result = myLoc.equals(eAsIterateExitStmt.myLoc);
 
             if (result) {
-                result = myFunctionExp.equals(eAsCallStmt.myFunctionExp);
+                result =
+                        myConditionBlock
+                                .equals(eAsIterateExitStmt.myConditionBlock);
             }
         }
 
@@ -97,13 +101,13 @@ public class CallStmt extends Statement {
     }
 
     /**
-     * <p>This method returns a deep copy of the function expression in
-     * this calling statement.</p>
+     * <p>This method returns a deep copy of the when-do code block in
+     * this {@link IterateExitStmt}.</p>
      *
-     * @return The {@link ProgramFunctionExp} representation object.
+     * @return The {@link WhenConditionBlock} representation object.
      */
-    public ProgramFunctionExp getFunctionExp() {
-        return (ProgramFunctionExp) myFunctionExp.clone();
+    public WhenConditionBlock getWhenBlock() {
+        return (WhenConditionBlock) myConditionBlock.clone();
     }
 
     /**
@@ -113,26 +117,7 @@ public class CallStmt extends Statement {
      */
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myFunctionExp.toString());
-
-        return sb.toString();
-    }
-
-    // ===========================================================
-    // Protected Methods
-    // ===========================================================
-
-    /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to
-     * manufacture a copy of themselves.</p>
-     *
-     * @return A new {@link Statement} that is a deep copy of the original.
-     */
-    @Override
-    protected Statement copy() {
-        return new CallStmt(new Location(myLoc),
-                (ProgramFunctionExp) myFunctionExp.clone());
+        return myConditionBlock.toString();
     }
 
 }

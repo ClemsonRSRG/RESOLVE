@@ -45,7 +45,7 @@ public class IfStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs a programming function call expression.</p>
+     * <p>This constructs an if-elseif-else statement.</p>
      *
      * @param l A {@link Location} representation object.
      * @param ifClause A {@link IfConditionBlock} representing if block.
@@ -91,9 +91,9 @@ public class IfStmt extends Statement {
 
         if (myElseIfs != null) {
             for (IfConditionBlock c : myElseIfs) {
+                printSpace(indentSize + innerIndentSize, sb);
                 sb.append("Else ");
-                sb.append(c.asString(indentSize + innerIndentSize,
-                        innerIndentSize));
+                sb.append(c.asString(0, innerIndentSize));
                 sb.append("\n");
             }
         }

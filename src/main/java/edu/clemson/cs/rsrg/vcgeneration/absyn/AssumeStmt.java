@@ -42,7 +42,7 @@ public class AssumeStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs a programming function call expression.</p>
+     * <p>This constructs an assume statement.</p>
      *
      * @param l A {@link Location} representation object.
      * @param assertion A {@link Exp} representing the assume statement's

@@ -67,8 +67,10 @@ public class WhenConditionBlock extends ConditionBlock {
         sb.append("WhenConditionBlock\n");
 
         if (myTestingExp != null) {
-            sb.append(myTestingExp.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            printSpace(indentSize + innerIndentSize, sb);
+            sb.append("When ");
+            sb.append(myTestingExp.asString(0, innerIndentSize));
+            printSpace(indentSize + innerIndentSize, sb);
             sb.append("\ndo\n");
         }
 
@@ -76,6 +78,8 @@ public class WhenConditionBlock extends ConditionBlock {
         sb
                 .append(super.asString(indentSize + innerIndentSize,
                         innerIndentSize));
+        printSpace(indentSize + innerIndentSize, sb);
+        sb.append("exit\n");
 
         return sb.toString();
     }
@@ -91,7 +95,7 @@ public class WhenConditionBlock extends ConditionBlock {
         sb.append(myTestingExp.toString());
         sb.append(" do\n");
         sb.append(super.toString());
-        sb.append("end");
+        sb.append("exit");
 
         return sb.toString();
     }

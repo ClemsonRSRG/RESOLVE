@@ -38,7 +38,7 @@ public class AuxCodeBlockStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs a programming function call expression.</p>
+     * <p>This constructs an auxiliary code block statement.</p>
      *
      * @param l A {@link Location} representation object.
      * @param statements The list of {@link Statement}s that are in

@@ -40,7 +40,7 @@ public class ConfirmStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs a programming function call expression.</p>
+     * <p>This constructs a confirm statement.</p>
      *
      * @param l A {@link Location} representation object.
      * @param assertion A {@link Exp} representing the assume statement's

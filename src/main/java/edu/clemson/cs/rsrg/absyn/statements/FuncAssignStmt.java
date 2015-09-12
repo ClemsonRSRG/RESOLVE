@@ -40,7 +40,7 @@ public class FuncAssignStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This constructs a programming function call expression.</p>
+     * <p>This constructs a function assignment statement.</p>
      *
      * @param l A {@link Location} representation object.
      * @param var A {@link ProgramVariableExp} representing the variable
