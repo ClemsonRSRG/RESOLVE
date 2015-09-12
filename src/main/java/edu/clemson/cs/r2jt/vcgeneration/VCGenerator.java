@@ -3000,6 +3000,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             assertiveCode.setFinalConfirm(constraint, simplify);
 
+            /*
+            TODO: Dan and I seem to think this isn't needed. Make sure we don't need it.
             // Add the constraints for the implementing facility
             // or for each of the fields inside the record.
             Exp fieldConstraints = myTypeGraph.getTrueVarExp();
@@ -3050,7 +3052,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Only add the field constraints if we don't have true
             if (!fieldConstraints.isLiteralTrue()) {
                 assertiveCode.addAssume(loc, fieldConstraints, false);
-            }
+            }*/
         }
 
         // Add this new assertive code to our incomplete assertive code stack
