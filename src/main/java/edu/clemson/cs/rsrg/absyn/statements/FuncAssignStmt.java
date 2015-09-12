@@ -91,19 +91,6 @@ public class FuncAssignStmt extends Statement {
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A deep copy of the object.
-     */
-    @Override
-    public FuncAssignStmt clone() {
-        return new FuncAssignStmt(new Location(myLoc),
-                (ProgramVariableExp) myVariableExp.clone(),
-                (ProgramFunctionExp) myFunctionExp.clone());
-    }
-
-    /**
      * <p>This method overrides the default equals method implementation
      * for the {@link FuncAssignStmt} class.</p>
      *
@@ -166,6 +153,23 @@ public class FuncAssignStmt extends Statement {
         }
 
         return sb.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>Implemented by this concrete subclass of {@link Statement} to
+     * manufacture a copy of themselves.</p>
+     *
+     * @return A new {@link Statement} that is a deep copy of the original.
+     */
+    @Override
+    protected Statement copy() {
+        return new FuncAssignStmt(new Location(myLoc),
+                (ProgramVariableExp) myVariableExp.clone(),
+                (ProgramFunctionExp) myFunctionExp.clone());
     }
 
 }

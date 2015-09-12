@@ -112,18 +112,6 @@ public class IfStmt extends Statement {
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A deep copy of the object.
-     */
-    @Override
-    public IfStmt clone() {
-        return new IfStmt(new Location(myLoc), getIfClause(), getElseifpairs(),
-                getElseclause());
-    }
-
-    /**
      * <p>This method overrides the default equals method implementation
      * for the {@link IfStmt} class.</p>
      *
@@ -249,6 +237,22 @@ public class IfStmt extends Statement {
         sb.append("end");
 
         return sb.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>Implemented by this concrete subclass of {@link Statement} to
+     * manufacture a copy of themselves.</p>
+     *
+     * @return A new {@link Statement} that is a deep copy of the original.
+     */
+    @Override
+    protected Statement copy() {
+        return new IfStmt(new Location(myLoc), getIfClause(), getElseifpairs(),
+                getElseclause());
     }
 
 }

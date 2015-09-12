@@ -74,18 +74,6 @@ public class CallStmt extends Statement {
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A deep copy of the object.
-     */
-    @Override
-    public CallStmt clone() {
-        return new CallStmt(new Location(myLoc),
-                (ProgramFunctionExp) myFunctionExp.clone());
-    }
-
-    /**
      * <p>This method overrides the default equals method implementation
      * for the {@link CallStmt} class.</p>
      *
@@ -129,6 +117,22 @@ public class CallStmt extends Statement {
         sb.append(myFunctionExp.toString());
 
         return sb.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>Implemented by this concrete subclass of {@link Statement} to
+     * manufacture a copy of themselves.</p>
+     *
+     * @return A new {@link Statement} that is a deep copy of the original.
+     */
+    @Override
+    protected Statement copy() {
+        return new CallStmt(new Location(myLoc),
+                (ProgramFunctionExp) myFunctionExp.clone());
     }
 
 }

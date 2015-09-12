@@ -83,18 +83,6 @@ public class ConfirmStmt extends Statement {
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A deep copy of the object.
-     */
-    @Override
-    public ConfirmStmt clone() {
-        return new ConfirmStmt(new Location(myLoc), myAssertion.clone(),
-                mySimplify);
-    }
-
-    /**
      * <p>This method overrides the default equals method implementation
      * for the {@link ConfirmStmt} class.</p>
      *
@@ -147,6 +135,22 @@ public class ConfirmStmt extends Statement {
         sb.append("Confirm " + myAssertion.toString());
 
         return sb.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>Implemented by this concrete subclass of {@link Statement} to
+     * manufacture a copy of themselves.</p>
+     *
+     * @return A new {@link Statement} that is a deep copy of the original.
+     */
+    @Override
+    protected Statement copy() {
+        return new ConfirmStmt(new Location(myLoc), myAssertion.clone(),
+                mySimplify);
     }
 
 }

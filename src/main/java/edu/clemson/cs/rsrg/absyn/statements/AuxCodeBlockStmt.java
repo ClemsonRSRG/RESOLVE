@@ -82,17 +82,6 @@ public class AuxCodeBlockStmt extends Statement {
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A deep copy of the object.
-     */
-    @Override
-    public AuxCodeBlockStmt clone() {
-        return new AuxCodeBlockStmt(new Location(myLoc), getStatements());
-    }
-
-    /**
      * <p>This method overrides the default equals method implementation
      * for the {@link AuxCodeBlockStmt} class.</p>
      *
@@ -167,6 +156,21 @@ public class AuxCodeBlockStmt extends Statement {
         sb.append("end");
 
         return sb.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>Implemented by this concrete subclass of {@link Statement} to
+     * manufacture a copy of themselves.</p>
+     *
+     * @return A new {@link Statement} that is a deep copy of the original.
+     */
+    @Override
+    protected Statement copy() {
+        return new AuxCodeBlockStmt(new Location(myLoc), getStatements());
     }
 
 }

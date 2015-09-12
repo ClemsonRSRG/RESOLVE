@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn;
 
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
@@ -41,12 +42,30 @@ public abstract class Statement extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This method must be implemented by all inherited classes
-     * to override the default clone method implementation.</p>
+     * <p>This method overrides the default clone method implementation
+     * for all the classes that extend from {@link Statement}.</p>
      *
      * @return A deep copy of the object.
      */
     @Override
-    public abstract Statement clone();
+    public final Statement clone() {
+        return this.copy();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>Implemented by concrete subclasses of {@link Statement} to manufacture
+     * a copy of themselves.</p>
+     *
+     * @return A new {@link Statement} that is a deep copy of the original.
+     */
+    protected Statement copy() {
+        throw new MiscErrorException(
+                "Shouldn't be calling copy() from statement " + this.getClass(),
+                new CloneNotSupportedException());
+    }
 
 }
