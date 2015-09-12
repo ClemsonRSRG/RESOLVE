@@ -214,9 +214,9 @@ public class IfStmt extends Statement {
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
+     * <p>Returns the statement in string format.</p>
      *
-     * @return Expression as a string.
+     * @return Statement as a string.
      */
     @Override
     public String toString() {

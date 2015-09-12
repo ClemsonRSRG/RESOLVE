@@ -1,5 +1,5 @@
 /**
- * CallStmt.java
+ * MemoryStmt.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -13,38 +13,61 @@
 package edu.clemson.cs.rsrg.absyn.statements;
 
 import edu.clemson.cs.rsrg.absyn.Statement;
-import edu.clemson.cs.rsrg.absyn.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the call statements
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the remember/forget statements
+ * that the compiler builds from the ANTLR4 AST tree or
+ * generated during the VC Generation step.</p>
  *
  * @version 2.0
  */
-public class CallStmt extends Statement {
+public class MemoryStmt extends Statement {
+
+    // ===========================================================
+    // StatementType
+    // ===========================================================
+
+    public enum StatementType {
+        FORGET {
+
+            @Override
+            public String toString() {
+                return "Forget";
+            }
+
+        },
+        REMEMBER {
+
+            @Override
+            public String toString() {
+                return "Remember";
+            }
+
+        }
+    }
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The programming function expression</p> */
-    private final ProgramFunctionExp myFunctionExp;
+    /** <p>This indicates if this is a remember or a forget</p> */
+    private final StatementType myType;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a call statement.</p>
+     * <p>This constructs a confirm statement.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param exp A {@link ProgramFunctionExp} representing the function
-     *            we are calling.
+     * @param type This enum indicates whether this is a remember
+     *                  or a forget statement.
      */
-    public CallStmt(Location l, ProgramFunctionExp exp) {
+    public MemoryStmt(Location l, StatementType type) {
         super(l);
-        myFunctionExp = exp;
+        myType = type;
     }
 
     // ===========================================================
@@ -66,16 +89,18 @@ public class CallStmt extends Statement {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("CallStmt\n");
-        sb.append(myFunctionExp.asString(indentSize + innerIndentSize,
-                innerIndentSize));
+        sb.append("MemoryStmt\n");
+
+        printSpace(indentSize + innerIndentSize, sb);
+        sb.append(myType.toString());
+        sb.append("\n");
 
         return sb.toString();
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link CallStmt} class.</p>
+     * for the {@link MemoryStmt} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -84,26 +109,22 @@ public class CallStmt extends Statement {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof CallStmt) {
-            CallStmt eAsCallStmt = (CallStmt) o;
-            result = myLoc.equals(eAsCallStmt.myLoc);
-
-            if (result) {
-                result = myFunctionExp.equals(eAsCallStmt.myFunctionExp);
-            }
+        if (o instanceof MemoryStmt) {
+            MemoryStmt eAsMemoryStmt = (MemoryStmt) o;
+            result = myLoc.equals(eAsMemoryStmt.myLoc);
+            result &= (myType == eAsMemoryStmt.myType);
         }
 
         return result;
     }
 
     /**
-     * <p>This method returns a deep copy of the function expression in
-     * this calling statement.</p>
+     * <p>This method returns the statement type.</p>
      *
-     * @return The {@link ProgramFunctionExp} representation object.
+     * @return A {@link StatementType} representation object.
      */
-    public ProgramFunctionExp getFunctionExp() {
-        return (ProgramFunctionExp) myFunctionExp.clone();
+    public final StatementType getStatementType() {
+        return myType;
     }
 
     /**
@@ -114,24 +135,9 @@ public class CallStmt extends Statement {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append(myFunctionExp.toString());
+        sb.append(myType.toString());
 
         return sb.toString();
-    }
-
-    // ===========================================================
-    // Protected Methods
-    // ===========================================================
-
-    /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to
-     * manufacture a copy of themselves.</p>
-     *
-     * @return A new {@link Statement} that is a deep copy of the original.
-     */
-    @Override
-    protected Statement copy() {
-        return new CallStmt(new Location(myLoc), getFunctionExp());
     }
 
 }

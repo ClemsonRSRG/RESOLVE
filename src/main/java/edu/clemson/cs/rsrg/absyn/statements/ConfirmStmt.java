@@ -125,9 +125,9 @@ public class ConfirmStmt extends Statement {
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
+     * <p>Returns the statement in string format.</p>
      *
-     * @return Expression as a string.
+     * @return Statement as a string.
      */
     @Override
     public String toString() {
@@ -149,8 +149,8 @@ public class ConfirmStmt extends Statement {
      */
     @Override
     protected Statement copy() {
-        return new ConfirmStmt(new Location(myLoc), myAssertion.clone(),
-                mySimplify);
+        return new ConfirmStmt(new Location(myLoc), getAssertion(),
+                getSimplify());
     }
 
 }

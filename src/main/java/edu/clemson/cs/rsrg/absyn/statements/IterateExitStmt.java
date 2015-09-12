@@ -111,13 +111,28 @@ public class IterateExitStmt extends Statement {
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
+     * <p>Returns the statement in string format.</p>
      *
-     * @return Expression as a string.
+     * @return Statement as a string.
      */
     @Override
     public String toString() {
         return myConditionBlock.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>Implemented by this concrete subclass of {@link Statement} to
+     * manufacture a copy of themselves.</p>
+     *
+     * @return A new {@link Statement} that is a deep copy of the original.
+     */
+    @Override
+    protected Statement copy() {
+        return new IterateExitStmt(new Location(myLoc), getWhenBlock());
     }
 
 }
