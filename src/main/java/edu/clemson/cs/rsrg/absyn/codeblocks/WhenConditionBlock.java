@@ -31,7 +31,7 @@ public class WhenConditionBlock extends ConditionBlock {
     // ===========================================================
 
     /**
-     * <p>This constructs a if/else-if code block with a condition test.
+     * <p>This constructs a when code block with a condition test.
      * If the testing expression is met, then the code block is
      * executed.</p>
      *
