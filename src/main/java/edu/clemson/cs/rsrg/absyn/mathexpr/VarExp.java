@@ -232,7 +232,7 @@ public class VarExp extends MathExp {
      */
     @Override
     public List<Exp> getSubExpressions() {
-        return new ArrayList<>();
+        return new ArrayList<Exp>();
     }
 
     /**
