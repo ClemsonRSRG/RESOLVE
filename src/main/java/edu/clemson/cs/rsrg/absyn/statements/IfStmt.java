@@ -130,21 +130,21 @@ public class IfStmt extends Statement {
                 result = myIfClause.equals(eAsIfStmt.myIfClause);
 
                 if (myElseIfs != null && eAsIfStmt.myElseIfs != null) {
-                    Iterator<IfConditionBlock> thiseIfCodeBlockItem =
+                    Iterator<IfConditionBlock> thisIfCodeBlockItem =
                             myElseIfs.iterator();
                     Iterator<IfConditionBlock> eIfCodeBlockItem =
                             eAsIfStmt.myElseIfs.iterator();
 
-                    while (result && thiseIfCodeBlockItem.hasNext()
+                    while (result && thisIfCodeBlockItem.hasNext()
                             && eIfCodeBlockItem.hasNext()) {
                         result &=
-                                thiseIfCodeBlockItem.next().equals(
+                                thisIfCodeBlockItem.next().equals(
                                         eIfCodeBlockItem.next());
                     }
 
                     //Both had better have run out at the same time
                     result &=
-                            (!thiseIfCodeBlockItem.hasNext())
+                            (!thisIfCodeBlockItem.hasNext())
                                     && (!eIfCodeBlockItem.hasNext());
                 }
 

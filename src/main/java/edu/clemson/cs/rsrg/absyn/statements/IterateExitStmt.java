@@ -17,7 +17,7 @@ import edu.clemson.cs.rsrg.absyn.codeblocks.WhenConditionBlock;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the when-do statements
+ * <p>This is the class for all the iterate exit statements
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
@@ -86,7 +86,7 @@ public class IterateExitStmt extends Statement {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof IfStmt) {
+        if (o instanceof IterateExitStmt) {
             IterateExitStmt eAsIterateExitStmt = (IterateExitStmt) o;
             result = myLoc.equals(eAsIterateExitStmt.myLoc);
 

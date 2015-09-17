@@ -153,15 +153,6 @@ public abstract class ConditionBlock extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns a deep copy this expression's testing expression.</p>
-     *
-     * @return The testing {@link ProgramExp} object.
-     */
-    public final ProgramExp getTest() {
-        return myTestingExp.clone();
-    }
-
-    /**
      * <p>This method returns a deep copy of the list of statements
      * in this code block.</p>
      *
@@ -174,6 +165,15 @@ public abstract class ConditionBlock extends ResolveConceptualElement {
         }
 
         return copyStatements;
+    }
+
+    /**
+     * <p>Returns a deep copy this expression's testing expression.</p>
+     *
+     * @return The testing {@link ProgramExp} object.
+     */
+    public final ProgramExp getTest() {
+        return myTestingExp.clone();
     }
 
     /**
