@@ -116,7 +116,7 @@ public abstract class ConditionBlock extends ResolveConceptualElement {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof IfConditionBlock) {
+        if (o instanceof ConditionBlock) {
             ConditionBlock eAsConditionBlock = (ConditionBlock) o;
             result = myLoc.equals(eAsConditionBlock.myLoc);
 
