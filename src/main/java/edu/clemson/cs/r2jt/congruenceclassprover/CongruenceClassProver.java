@@ -110,14 +110,14 @@ public class CongruenceClassProver {
 
         for (TheoremEntry e : theoremEntries) {
             PExp assertion = e.getAssertion();
-
+            String eName = e.getName();
             if (assertion.isEquality()) {
-                addEqualityTheorem(true, assertion);
-                addEqualityTheorem(false, assertion);
+                addEqualityTheorem(true, assertion, eName);
+                addEqualityTheorem(false, assertion, eName);
             }
             else {
                 TheoremCongruenceClosureImpl t =
-                        new TheoremCongruenceClosureImpl(g, assertion, false);
+                        new TheoremCongruenceClosureImpl(g, assertion, false, eName);
                 if (!t.m_unneeded) {
                     m_theorems.add(t);
                 }
@@ -129,7 +129,7 @@ public class CongruenceClassProver {
 
     }
 
-    private void addEqualityTheorem(boolean matchLeft, PExp theorem) {
+    private void addEqualityTheorem(boolean matchLeft, PExp theorem, String thName) {
         PExp lhs, rhs;
 
         if (matchLeft) {
@@ -149,7 +149,7 @@ public class CongruenceClassProver {
 
         TheoremCongruenceClosureImpl t =
                 new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
-                        false, false);
+                        false, false, thName);
         if (!t.m_unneeded) {
             m_theorems.add(t);
         }
@@ -157,7 +157,7 @@ public class CongruenceClassProver {
         if (lhs.isEquality()) {
             t =
                     new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
-                            true, false);
+                            true, false, thName);
             if (!t.m_unneeded) {
                 m_theorems.add(t);
             }
@@ -169,8 +169,8 @@ public class CongruenceClassProver {
         String summary = "";
         int i = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
-            //printVCEachStep = true;
-            //if(!vcc.m_name.equals("0_8"))continue;
+            printVCEachStep = true;
+            if(!vcc.m_name.equals("0_8"))continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             VerificationConditionCongruenceClosureImpl.STATUS proved =
@@ -261,7 +261,7 @@ public class CongruenceClassProver {
         // add quantified expressions local to the vc to theorems
         for (PExp p : vcc.forAllQuantifiedPExps) {
             TheoremCongruenceClosureImpl t =
-                    new TheoremCongruenceClosureImpl(m_typeGraph, p, true);
+                    new TheoremCongruenceClosureImpl(m_typeGraph, p, true, "Created from lamba exp in VC");
             if (!t.m_unneeded) {
                 theoremsForThisVC.add(t);
             }

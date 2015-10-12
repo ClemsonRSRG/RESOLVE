@@ -40,9 +40,11 @@ public class TheoremCongruenceClosureImpl {
     private Set<String> m_all_literals;
     private boolean partMatchedisConstantEquation = false;
     protected boolean m_allowNewSymbols;
+    protected String m_name;
 
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp p,
-            boolean allowNewSymbols) {
+            boolean allowNewSymbols, String name) {
+        m_name = name;
         m_allowNewSymbols = allowNewSymbols;
         m_typeGraph = g;
         m_theorem = p;
@@ -94,7 +96,8 @@ public class TheoremCongruenceClosureImpl {
     // for theorems that are equations
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp toMatchAndBind,
             PExp toInsert, boolean enterToMatchAndBindAsEquivalentToTrue,
-            boolean allowNewSymbols) {
+            boolean allowNewSymbols, String name) {
+        m_name = name;
         m_allowNewSymbols = allowNewSymbols;
         m_typeGraph = g;
         m_theorem = toInsert;
@@ -164,7 +167,7 @@ public class TheoremCongruenceClosureImpl {
         if (m_insertExpr.getQuantifiedVariables().isEmpty()) {
             String r = "\tinserting: " + m_insertExpr + "\n";
             rList.add(new InsertExpWithJustification(m_insertExpr,
-                    m_theoremString));
+                    m_name + "\n\t" + m_theoremString));
             return rList;
         }
         // Set flag if quantified variable was not in the matching part
@@ -175,7 +178,8 @@ public class TheoremCongruenceClosureImpl {
             }
         }
         Set<java.util.Map<String, String>> allValidBindings;
-        if (m_matchConj.size() == 0) {
+        if (m_matchConj.size() == 0 || ((m_allowNewSymbols && m_theorem.getQuantifiedVariables().size()==1)
+                && isEquality)) {
             allValidBindings = findValidBindingsByType(vc, endTime);
         }
         else
@@ -187,6 +191,7 @@ public class TheoremCongruenceClosureImpl {
         }
 
         HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
+        allValidBindings = discardBindings(allValidBindings);
         for (java.util.Map<String, String> curBinding : allValidBindings) {
             for (String thKey : curBinding.keySet()) {
 
@@ -223,7 +228,7 @@ public class TheoremCongruenceClosureImpl {
                             modifiedInsert.getSubExpressions().get(1)
                                     .toString()))) {
                 rList.add(new InsertExpWithJustification(modifiedInsert,
-                        m_theoremString));
+                        m_name + "\n\t" + m_theoremString));
             }
             quantToLit.clear();
 
@@ -231,6 +236,25 @@ public class TheoremCongruenceClosureImpl {
         return rList;
     }
 
+    // Discard bindings where all bind to same value
+    private java.util.Set<java.util.Map<String,String>> discardBindings(java.util.Set<java.util.Map<String,String>> b){
+        if(m_theorem.getQuantifiedVariables().size()<2) return b;
+        java.util.Set<java.util.Map<String,String>> rSet = new HashSet<java.util.Map<String, String>>();
+        for(java.util.Map<String,String> m : b){
+            String lastEntry = "";
+            for(PSymbol p : m_theorem.getQuantifiedVariables()){
+                String k = p.getTopLevelOperation();
+                k = m_theoremRegistry.getRootSymbolForSymbol(k);
+                String thisEntry = m.get(k);
+                if(!lastEntry.equals(thisEntry) && !lastEntry.equals("")){
+                    rSet.add(m);
+                    break;
+                }
+                else lastEntry = thisEntry;
+            }
+        }
+        return rSet;
+    }
     // variables to bind are the quantified vars the quantified statement
     // and the created variables in the match conjunction
     private java.util.Map<String, String> getInitBindings() {

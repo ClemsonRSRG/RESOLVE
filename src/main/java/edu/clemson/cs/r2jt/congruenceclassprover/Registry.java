@@ -74,7 +74,7 @@ public class Registry {
         m_commutative_operators.add("+");
         m_commutative_operators.add("=");
         m_commutative_operators.add("and");
-        m_commutative_operators.add("isBinaryPartition");
+        m_commutative_operators.add("unionMakesZ");
 
     }
 
