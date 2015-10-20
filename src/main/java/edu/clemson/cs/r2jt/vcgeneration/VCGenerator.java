@@ -3140,6 +3140,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                     + " in Facility Instantiation Rule");
             conceptReq.setLocation(conceptReqLoc);
 
+            // TODO: Change this! This is such a hack!
+            List<EqualsExp> formalToActualList = new LinkedList<EqualsExp>();
+            for (int i = 0; i < conceptActualArgList.size(); i++) {
+                EqualsExp formalEq =
+                        new EqualsExp(dec.getLocation(), conceptFormalArgList
+                                .get(i), 1, conceptActualArgList.get(i));
+                formalEq.setMathType(BOOLEAN);
+                formalToActualList.add(formalEq);
+            }
+            myFacilityFormalActualMap.put(dec, formalToActualList);
+
             // Set this as our final confirm statement for this assertive code
             assertiveCode.setFinalConfirm(conceptReq, false);
 
@@ -4352,23 +4363,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                     convention, false);
         }
 
-        // Add the requires clause
-        if (requires != null) {
-            // Well_Def_Corr_Hyp rule: Conjunct the correspondence to
-            // the requires clause. This will ensure that the parsimonious
-            // vc step replaces the requires clause if possible.
-            if (myCorrespondenceExp != null && !isLocal) {
-                Location reqLoc = (Location) requires.getLocation().clone();
-                requires =
-                        myTypeGraph.formConjunct(Exp.copy(myCorrespondenceExp),
-                                requires);
-                requires.setLocation(reqLoc);
-            }
-
-            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
-                    requires, false);
-        }
-
         // Add the facility formal to actuals
         Exp formalActualExp = myTypeGraph.getTrueVarExp();
         for (FacilityDec fDec : myFacilityFormalActualMap.keySet()) {
@@ -4402,6 +4396,23 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (!formalActualExp.isLiteralTrue()) {
             myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
                     formalActualExp, false);
+        }
+
+        // Add the requires clause
+        if (requires != null) {
+            // Well_Def_Corr_Hyp rule: Conjunct the correspondence to
+            // the requires clause. This will ensure that the parsimonious
+            // vc step replaces the requires clause if possible.
+            if (myCorrespondenceExp != null && !isLocal) {
+                Location reqLoc = (Location) requires.getLocation().clone();
+                requires =
+                        myTypeGraph.formConjunct(Exp.copy(myCorrespondenceExp),
+                                requires);
+                requires.setLocation(reqLoc);
+            }
+
+            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                    requires, false);
         }
 
         // NY - Add any procedure duration clauses
