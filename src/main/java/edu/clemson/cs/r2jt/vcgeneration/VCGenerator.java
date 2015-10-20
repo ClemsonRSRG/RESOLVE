@@ -5120,4 +5120,15 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
         myVCBuffer.append("\n_____________________ \n");
     }
+
+    private class FacilityFormalToActuals {
+
+        public final Map<Exp, Exp> conceptArgMap;
+
+        public FacilityFormalToActuals(Map<Exp, Exp> cArgMap) {
+            conceptArgMap = cArgMap;
+        }
+
+    }
+
 }
