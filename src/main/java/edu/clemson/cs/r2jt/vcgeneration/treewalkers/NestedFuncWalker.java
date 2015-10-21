@@ -413,7 +413,9 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                     Map<Exp, Exp> conceptMap =
                             formalToActuals.getConceptArgMap();
                     for (Exp e : conceptMap.keySet()) {
-                        Utilities.replace(clause, e, conceptMap.get(e));
+                        newClause =
+                                Utilities.replace(newClause, e, conceptMap
+                                        .get(e));
                     }
                 }
             }
