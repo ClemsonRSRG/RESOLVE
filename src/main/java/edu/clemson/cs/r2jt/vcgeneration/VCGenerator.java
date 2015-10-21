@@ -832,7 +832,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 if (p instanceof ProgramDotExp || p instanceof ProgramParamExp) {
                     NestedFuncWalker nfw =
                             new NestedFuncWalker(null, null, mySymbolTable,
-                                    myCurrentModuleScope, assertiveCode);
+                                    myCurrentModuleScope, assertiveCode,
+                                    myInstantiatedFacilityArgMap);
                     TreeWalker tw = new TreeWalker(nfw);
                     tw.visit(p);
 
@@ -1579,7 +1580,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 NestedFuncWalker nfw =
                         new NestedFuncWalker(myCurrentOperationEntry,
                                 myOperationDecreasingExp, mySymbolTable,
-                                myCurrentModuleScope, myCurrentAssertiveCode);
+                                myCurrentModuleScope, myCurrentAssertiveCode,
+                                myInstantiatedFacilityArgMap);
                 TreeWalker tw = new TreeWalker(nfw);
                 tw.visit(p);
 
@@ -5133,16 +5135,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append("\nWhile Rule Applied: \n");
         myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
         myVCBuffer.append("\n_____________________ \n");
-    }
-
-    private class FacilityFormalToActuals {
-
-        public final Map<Exp, Exp> conceptArgMap;
-
-        public FacilityFormalToActuals(Map<Exp, Exp> cArgMap) {
-            conceptArgMap = cArgMap;
-        }
-
     }
 
 }

@@ -16,6 +16,7 @@ import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.Location;
 import edu.clemson.cs.r2jt.data.Mode;
 import edu.clemson.cs.r2jt.data.PosSymbol;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PLambda;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
@@ -24,6 +25,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.vcgeneration.AssertiveCode;
+import edu.clemson.cs.r2jt.vcgeneration.FacilityFormalToActuals;
 import edu.clemson.cs.r2jt.vcgeneration.Utilities;
 
 import java.util.*;
@@ -56,6 +58,9 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
     // Decreasing clause (if any)
     private final Exp myOperationDecreasingExp;
 
+    // Facility Formal to Actual Map
+    private final Map<VarExp, FacilityFormalToActuals> myInstantiatedFacilityArgMap;
+
     // Requires/Ensures
     private Exp myRequiresClause;
     private Map<String, Exp> myEnsuresClauseMap;
@@ -69,7 +74,8 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
 
     public NestedFuncWalker(OperationEntry entry, Exp decreasingExp,
             ScopeRepository table, ModuleScope scope,
-            AssertiveCode assertiveCode) {
+            AssertiveCode assertiveCode,
+            Map<VarExp, FacilityFormalToActuals> instantiatedFacilityArgMap) {
         mySymbolTable = (MathSymbolTableBuilder) table;
         myTypeGraph = mySymbolTable.getTypeGraph();
         myRequiresClause = myTypeGraph.getTrueVarExp();
@@ -79,6 +85,7 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
         myCurrentModuleScope = scope;
         myCurrentOperationEntry = entry;
         myOperationDecreasingExp = decreasingExp;
+        myInstantiatedFacilityArgMap = instantiatedFacilityArgMap;
         myQualifier = null;
     }
 
@@ -132,6 +139,11 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
         opRequires =
                 replaceFormalWithActualReq(opRequires, opDec.getParameters(),
                         exp.getArguments());
+
+        // Replace facility actuals variables in the requires clause
+        opRequires =
+                replaceFacilityFormalWithActual(myCurrentLocation, opRequires,
+                        opDec.getParameters());
 
         // Append the name of the current procedure
         String details = "";
@@ -193,6 +205,12 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                                 replaceFormalWithActualEns(ensures, opDec
                                         .getParameters(), opDec.getStateVars(),
                                         exp.getArguments(), false);
+
+                        // Replace facility actuals variables in the ensures clause
+                        ensures =
+                                replaceFacilityFormalWithActual(
+                                        myCurrentLocation, ensures, opDec
+                                                .getParameters());
 
                         // Add this ensures clause to our map
                         myEnsuresClauseMap
@@ -338,6 +356,62 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
         }
 
         return opDec;
+    }
+
+    /**
+     * <p>Replace the formal with the actual variables from the facility declaration to
+     * the passed in clause.</p>
+     *
+     * @param opLoc Location of the calling statement.
+     * @param clause The requires/ensures clause.
+     * @param paramList The list of parameter variables.
+     *
+     * @return The clause in <code>Exp</code> form.
+     */
+    private Exp replaceFacilityFormalWithActual(Location opLoc, Exp clause,
+            List<ParameterVarDec> paramList) {
+        // Make a copy of the original clause
+        Exp newClause = Exp.copy(clause);
+
+        for (ParameterVarDec dec : paramList) {
+            if (dec.getTy() instanceof NameTy) {
+                NameTy ty = (NameTy) dec.getTy();
+                PosSymbol tyName = ty.getName().copy();
+                PosSymbol tyQualifier = null;
+                if (ty.getQualifier() != null) {
+                    tyQualifier = ty.getQualifier().copy();
+                }
+
+                FacilityFormalToActuals formalToActuals = null;
+                for (VarExp v : myInstantiatedFacilityArgMap.keySet()) {
+                    FacilityFormalToActuals temp = null;
+                    if (tyQualifier != null) {
+                        if (tyQualifier.getName().equals(
+                                v.getQualifier().getName())
+                                && tyName.getName().equals(
+                                        v.getName().getName())) {
+                            temp = myInstantiatedFacilityArgMap.get(v);
+                        }
+                    }
+                    else {
+                        if (tyName.getName().equals(v.getName().getName())) {
+                            temp = myInstantiatedFacilityArgMap.get(v);
+                        }
+                    }
+
+                    // Check to see if we already found one. If we did, it means that
+                    // the type is ambiguous and we can't be sure which one it is.
+                    if (formalToActuals == null) {
+                        formalToActuals = temp;
+                    }
+                    else {
+                        Utilities.ambiguousTy(ty, opLoc);
+                    }
+                }
+            }
+        }
+
+        return newClause;
     }
 
     /**
