@@ -351,6 +351,18 @@ public class VC {
             newArgList.add(recursiveLift(p_s));
         }
         if (p instanceof PLambda) {
+            // replace lam(x).F(x) wth F
+            PLambda pl = (PLambda)p;
+            PExp body = pl.getBody();
+            if((pl.getParameters().size() == 1 && body.getQuantifiedVariables().size() == 1) &&
+                    pl.getParameters().get(0).toString().equals(body.getQuantifiedVariables().iterator().next().toString())
+                    && body.getSubExpressions().size()==1
+                    ) {
+                PSymbol funName =
+                        new PSymbol(new MTFunction(m_typegraph, body.getType(), pl.getParameters().get(0).getType()),
+                                null, body.getTopLevelOperation());
+                return funName;
+            }
             String lname = "";
             // Normalize parameters here
             PLambda normP = ((PLambda) p).withNormalizedParameterNames();

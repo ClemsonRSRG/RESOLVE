@@ -125,7 +125,7 @@ public class TheoremCongruenceClosureImpl {
             rSet.remove("=");
             rSet.remove("implies");
             rSet.remove("and");
-            //rSet.remove("or");
+            rSet.remove("/=");
             m_function_names = rSet;
         }
         return m_function_names;
@@ -153,6 +153,7 @@ public class TheoremCongruenceClosureImpl {
             m_all_literals.remove("implies");
             m_all_literals.remove("true");
             m_all_literals.remove("false");
+            m_all_literals.remove("/=");
         }
 
         return m_all_literals;
@@ -173,6 +174,11 @@ public class TheoremCongruenceClosureImpl {
         // Set flag if quantified variable was not in the matching part
         for (PSymbol ps : m_insertExpr.getQuantifiedVariables()) {
             if (!m_theoremRegistry.getForAlls().contains(ps.toString())) {
+                /*if(m_insertExpr.getTopLevelOperation().equals("=")){
+                    PExp lhs = m_insertExpr.getSubExpressions().get(0);
+                    PExp rhs = m_insertExpr.getSubExpressions().get(1);
+                   // potential replacement of subexp
+                }*/
                 m_unneeded = true;
                 return null;
             }

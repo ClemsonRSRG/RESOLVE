@@ -146,6 +146,17 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             r += addExpression(expression.getSubExpressions().get(1));
             return r;
         }
+        else if (name.equals("/=")){
+            ArrayList<PExp> args = new ArrayList<PExp>();
+            args.add(expression.getSubExpressions().get(0));
+            args.add(expression.getSubExpressions().get(1));
+            PSymbol eqExp =
+                    new PSymbol(m_registry.m_typeGraph.BOOLEAN,null,"=",args);
+            args.clear();
+            args.add(eqExp);
+            PSymbol notEqExp = new PSymbol(m_registry.m_typeGraph.BOOLEAN,null,"not",args);
+            return addExpression(notEqExp);
+        }
         else {
             MTType type = expression.getType();
             PSymbol asPsymbol = (PSymbol) expression;
@@ -374,13 +385,13 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         // loop until end, function op is not =, or =(x,y)=true
         // when found do merge, start again.
         int eqQ = m_registry.getIndexForSymbol("=");
+        int t = m_registry.getIndexForSymbol("true");
         for (int i = 0; i < m_exprList.size(); ++i) {
             NormalizedAtomicExpressionMapImpl cur = m_exprList.get(i);
             int f = cur.readPosition(0);
             if (f != eqQ) {
                 break;
             }
-            int t = m_registry.getIndexForSymbol("true");
             int root = cur.readRoot();
             int op1 = cur.readPosition(1);
             int op2 = cur.readPosition(2);
@@ -396,7 +407,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 continue;
             }
         }
-        for(Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator(); it.hasNext();){
+ /*       for(Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator(); it.hasNext();){
             NormalizedAtomicExpressionMapImpl cur = it.next();
             int f = cur.readPosition(0);
             if(f != m_registry.getIndexForSymbol("=")) break;
@@ -404,7 +415,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             int op2 = cur.readPosition(2);
             if(op1==op2)
                 it.remove();
-        }
+        } */
     }
 
     // Return list of modified predicates by their position. Only these can cause new merges.
