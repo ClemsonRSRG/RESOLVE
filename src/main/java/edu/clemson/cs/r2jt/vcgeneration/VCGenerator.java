@@ -78,11 +78,11 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private Map<FacilityDec, Exp> myFacilityDeclarationMap;
 
-    // TODO: Change this!
     /**
      * <p>A map of facility declarations to a list of formal and actual constraints.</p>
      */
     private Map<FacilityDec, List<EqualsExp>> myFacilityFormalActualMap;
+    private Map<VarExp, FacilityFormalToActuals> myInstantiatedFacilityArgMap;
 
     /**
      * <p>A list that will be built up with <code>AssertiveCode</code>
@@ -176,6 +176,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         myFinalAssertiveCodeList = new LinkedList<AssertiveCode>();
         myIncAssertiveCodeStack = new Stack<AssertiveCode>();
         myIncAssertiveCodeStackInfo = new Stack<String>();
+        myInstantiatedFacilityArgMap =
+                new HashMap<VarExp, FacilityFormalToActuals>();
         myOutputGenerator = null;
         myVCBuffer = new StringBuffer();
     }
@@ -3138,25 +3140,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     + " in Facility Instantiation Rule");
             conceptReq.setLocation(conceptReqLoc);
 
-            // TODO: Change this! This is such a hack!
-            List<EqualsExp> formalToActualList = new LinkedList<EqualsExp>();
-            for (int i = 0; i < conceptActualArgList.size(); i++) {
-                EqualsExp formalEq =
-                        new EqualsExp(dec.getLocation(), conceptFormalArgList
-                                .get(i), 1, conceptActualArgList.get(i));
-                formalEq.setMathType(BOOLEAN);
-                formalToActualList.add(formalEq);
-            }
-            myFacilityFormalActualMap.put(dec, formalToActualList);
-
             // Set this as our final confirm statement for this assertive code
             assertiveCode.setFinalConfirm(conceptReq, false);
-
-            // Create a mapping from concept formal to actual arguments
-            Map<Exp, Exp> conceptArgMap = new HashMap<Exp, Exp>();
-            for (int i = 0; i < conceptFormalArgList.size(); i++) {
-                conceptArgMap.put(conceptFormalArgList.get(i), conceptActualArgList.get(i));
-            }
 
             // TODO: Need to add module argument constraints here.
 
@@ -3166,6 +3151,31 @@ public class VCGenerator extends TreeWalkerVisitor {
             List<EnhancementItem> enhancementList = dec.getEnhancements();
             for (EnhancementItem e : enhancementList) {
                 // Do something here.
+            }
+
+            // The code below stores a mapping between each of the concept/realization/enhancement
+            // formal arguments to the actual arguments instantiated by the facility.
+            // This is needed to replace the requires/ensures clauses from facility instantiated
+            // operations.
+
+            // Create a mapping from concept formal to actual arguments
+            Map<Exp, Exp> conceptArgMap = new HashMap<Exp, Exp>();
+            for (int i = 0; i < conceptFormalArgList.size(); i++) {
+                conceptArgMap.put(conceptFormalArgList.get(i),
+                        conceptActualArgList.get(i));
+            }
+
+            // Facility Formal to Actual structure
+            FacilityFormalToActuals formalToActuals =
+                    new FacilityFormalToActuals(conceptArgMap);
+            for (Dec d : facConceptDec.getDecs()) {
+                if (d instanceof TypeDec) {
+                    Location loc = (Location) dec.getLocation().clone();
+                    PosSymbol qual = dec.getName().copy();
+                    PosSymbol name = d.getName().copy();
+                    myInstantiatedFacilityArgMap.put(
+                            new VarExp(loc, qual, name), formalToActuals);
+                }
             }
         }
         catch (NoSuchSymbolException e) {
