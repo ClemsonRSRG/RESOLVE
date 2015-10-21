@@ -40,6 +40,11 @@ public class Utilities {
     // Error Handling
     // -----------------------------------------------------------
 
+    public static void ambiguousTy(Ty ty, Location location) {
+        String message = "Ty is ambiguous: " + ty.toString();
+        throw new SourceErrorException(message, location);
+    }
+
     public static void expNotHandled(Exp exp, Location l) {
         String message =
                 "Exp type not handled: " + exp.getClass().getCanonicalName();
