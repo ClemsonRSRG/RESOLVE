@@ -408,6 +408,14 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                         Utilities.ambiguousTy(ty, opLoc);
                     }
                 }
+
+                if (formalToActuals != null) {
+                    Map<Exp, Exp> conceptMap =
+                            formalToActuals.getConceptArgMap();
+                    for (Exp e : conceptMap.keySet()) {
+                        Utilities.replace(clause, e, conceptMap.get(e));
+                    }
+                }
             }
         }
 

@@ -30,8 +30,6 @@ import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.vcgeneration.treewalkers.NestedFuncWalker;
-import sun.security.pkcs11.Secmod;
-
 import java.io.File;
 import java.util.*;
 import java.util.List;
@@ -79,9 +77,8 @@ public class VCGenerator extends TreeWalkerVisitor {
     private Map<FacilityDec, Exp> myFacilityDeclarationMap;
 
     /**
-     * <p>A map of facility declarations to a list of formal and actual constraints.</p>
+     * <p>A map of facility instantiated types to a list of formal and actual constraints.</p>
      */
-    private Map<FacilityDec, List<EqualsExp>> myFacilityFormalActualMap;
     private Map<VarExp, FacilityFormalToActuals> myInstantiatedFacilityArgMap;
 
     /**
@@ -172,7 +169,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         // VCs + Debugging String
         myCurrentAssertiveCode = null;
         myFacilityDeclarationMap = new HashMap<FacilityDec, Exp>();
-        myFacilityFormalActualMap = new HashMap<FacilityDec, List<EqualsExp>>();
         myFinalAssertiveCodeList = new LinkedList<AssertiveCode>();
         myIncAssertiveCodeStack = new Stack<AssertiveCode>();
         myIncAssertiveCodeStackInfo = new Stack<String>();
@@ -2067,6 +2063,70 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
+     * <p>Replace the formal with the actual variables from the facility declaration to
+     * the passed in clause.</p>
+     *
+     * @param opLoc Location of the calling statement.
+     * @param clause The requires/ensures clause.
+     * @param paramList The list of parameter variables.
+     *
+     * @return The clause in <code>Exp</code> form.
+     */
+    private Exp replaceFacilityFormalWithActual(Location opLoc, Exp clause,
+            List<ParameterVarDec> paramList) {
+        // Make a copy of the original clause
+        Exp newClause = Exp.copy(clause);
+
+        for (ParameterVarDec dec : paramList) {
+            if (dec.getTy() instanceof NameTy) {
+                NameTy ty = (NameTy) dec.getTy();
+                PosSymbol tyName = ty.getName().copy();
+                PosSymbol tyQualifier = null;
+                if (ty.getQualifier() != null) {
+                    tyQualifier = ty.getQualifier().copy();
+                }
+
+                FacilityFormalToActuals formalToActuals = null;
+                for (VarExp v : myInstantiatedFacilityArgMap.keySet()) {
+                    FacilityFormalToActuals temp = null;
+                    if (tyQualifier != null) {
+                        if (tyQualifier.getName().equals(
+                                v.getQualifier().getName())
+                                && tyName.getName().equals(
+                                        v.getName().getName())) {
+                            temp = myInstantiatedFacilityArgMap.get(v);
+                        }
+                    }
+                    else {
+                        if (tyName.getName().equals(v.getName().getName())) {
+                            temp = myInstantiatedFacilityArgMap.get(v);
+                        }
+                    }
+
+                    // Check to see if we already found one. If we did, it means that
+                    // the type is ambiguous and we can't be sure which one it is.
+                    if (formalToActuals == null) {
+                        formalToActuals = temp;
+                    }
+                    else {
+                        Utilities.ambiguousTy(ty, opLoc);
+                    }
+                }
+
+                if (formalToActuals != null) {
+                    Map<Exp, Exp> conceptMap =
+                            formalToActuals.getConceptArgMap();
+                    for (Exp e : conceptMap.keySet()) {
+                        Utilities.replace(clause, e, conceptMap.get(e));
+                    }
+                }
+            }
+        }
+
+        return newClause;
+    }
+
+    /**
      * <p>Replace the formal with the actual variables
      * inside the ensures clause.</p>
      *
@@ -2677,6 +2737,16 @@ public class VCGenerator extends TreeWalkerVisitor {
         ensures =
                 replaceFormalWithActualEns(ensures, opDec.getParameters(),
                         opDec.getStateVars(), replaceArgs, false);
+
+        // Replace facility actuals variables in the requires clause
+        requires =
+                replaceFacilityFormalWithActual(stmt.getLocation(), requires,
+                        opDec.getParameters());
+
+        // Replace facility actuals variables in the ensures clause
+        ensures =
+                replaceFacilityFormalWithActual(stmt.getLocation(), ensures,
+                        opDec.getParameters());
 
         // NY YS
         // Duration for CallStmt
@@ -3528,6 +3598,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                     replaceFormalWithActualReq(requires, opDec.getParameters(),
                             replaceArgs);
 
+            // Replace facility actuals variables in the requires clause
+            requires =
+                    replaceFacilityFormalWithActual(assignParamExp
+                            .getLocation(), requires, opDec.getParameters());
+
             // Modify the location of the requires clause and add it to myCurrentAssertiveCode
             // Obtain the current location
             // Note: If we don't have a location, we create one
@@ -3591,6 +3666,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     replaceFormalWithActualEns(ensures, opDec
                                             .getParameters(), opDec
                                             .getStateVars(), replaceArgs, true);
+
+                            // Replace facility actuals variables in the ensures clause
+                            ensures =
+                                    replaceFacilityFormalWithActual(
+                                            assignParamExp.getLocation(),
+                                            ensures, opDec.getParameters());
 
                             // Replace all instances of the left hand side
                             // variable in the current final confirm statement.
@@ -4377,41 +4458,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp convention = Exp.copy(myConventionExp);
             myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
                     convention, false);
-        }
-
-        // Add the facility formal to actuals
-        Exp formalActualExp = myTypeGraph.getTrueVarExp();
-        for (FacilityDec fDec : myFacilityFormalActualMap.keySet()) {
-            List<EqualsExp> eList = myFacilityFormalActualMap.get(fDec);
-            for (EqualsExp e : eList) {
-                EqualsExp newEquals = (EqualsExp) Exp.copy(e);
-                VarExp oldLeft = (VarExp) Exp.copy(newEquals.getLeft());
-                VarExp newLeft;
-                if (formalActualExp.containsVar(oldLeft.getName().getName(),
-                        false)) {
-                    newLeft =
-                            Utilities.createQuestionMarkVariable(
-                                    formalActualExp, oldLeft);
-                }
-                else {
-                    newLeft = oldLeft;
-                }
-                newEquals.setLeft(newLeft);
-
-                // Get rid of true
-                if (formalActualExp.isLiteralTrue()) {
-                    formalActualExp = newEquals;
-                }
-                else {
-                    formalActualExp =
-                            myTypeGraph
-                                    .formConjunct(formalActualExp, newEquals);
-                }
-            }
-        }
-        if (!formalActualExp.isLiteralTrue()) {
-            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
-                    formalActualExp, false);
         }
 
         // Add the requires clause
