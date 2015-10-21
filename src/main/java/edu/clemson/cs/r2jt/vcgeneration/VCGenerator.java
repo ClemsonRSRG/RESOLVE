@@ -1779,6 +1779,11 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
         }
 
+        // Replace facility actuals variables in the ensures clause
+        ensures =
+                replaceFacilityFormalWithActual(opLocation, ensures,
+                        parameterVarDecList);
+
         return ensures;
     }
 
@@ -1990,6 +1995,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                 Utilities.tyNotHandled(p.getTy(), p.getLocation());
             }
         }
+
+        // Replace facility actuals variables in the requires clause
+        requires =
+                replaceFacilityFormalWithActual(opLocation, requires,
+                        parameterVarDecList);
 
         return requires;
     }
