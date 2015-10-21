@@ -3115,8 +3115,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     new ModuleIdentifier(dec.getConceptName()
                                             .getName())).getDefiningElement();
 
-            // TODO: Check to see if we can simply form equality expressions and add those as assumes
-
             // Convert the module arguments into mathematical expressions
             // Note that we could potentially have a nested function call
             // as one of the arguments, therefore we pass in the assertive
@@ -3153,6 +3151,12 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Set this as our final confirm statement for this assertive code
             assertiveCode.setFinalConfirm(conceptReq, false);
+
+            // Create a mapping from concept formal to actual arguments
+            Map<Exp, Exp> conceptArgMap = new HashMap<Exp, Exp>();
+            for (int i = 0; i < conceptFormalArgList.size(); i++) {
+                conceptArgMap.put(conceptFormalArgList.get(i), conceptActualArgList.get(i));
+            }
 
             // TODO: Need to add module argument constraints here.
 
