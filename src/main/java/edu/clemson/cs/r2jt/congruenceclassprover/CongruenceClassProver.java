@@ -268,7 +268,7 @@ public class CongruenceClassProver {
         int i = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
             //printVCEachStep = true;
-            //if(!vcc.m_name.equals("2_6"))continue;
+            //if(!vcc.m_name.equals("1_4"))continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             VerificationConditionCongruenceClosureImpl.STATUS proved =
