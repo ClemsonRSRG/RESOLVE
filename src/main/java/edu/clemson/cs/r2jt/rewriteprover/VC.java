@@ -61,7 +61,7 @@ public class VC {
     }
 
     public VC(String name, Antecedent antecedent, Consequent consequent,
-              boolean derived) {
+            boolean derived) {
 
         myName = name;
         myAntecedent = antecedent;
@@ -156,7 +156,8 @@ public class VC {
                 if (args0.isVariable() && args1.isVariable()) {
                     if (args0.getTopLevelOperation().contains("lambda")) {
                         substMap.put(args0, args1);
-                    } else if (args1.getTopLevelOperation().contains("lambda")) {
+                    }
+                    else if (args1.getTopLevelOperation().contains("lambda")) {
                         substMap.put(args1, args0);
                     }
                 }
@@ -178,41 +179,53 @@ public class VC {
         ArrayList<PSymbol> converted = new ArrayList<PSymbol>();
         ArrayList<PExp> noQuantConverted = new ArrayList<PExp>();
         for (PSymbol p : m_liftedLambdaPredicates) {
-            if (p.arguments.size() == 2 && p.arguments.get(1) instanceof PAlternatives) {
+            if (p.arguments.size() == 2
+                    && p.arguments.get(1) instanceof PAlternatives) {
                 // lhs can't be a PALT
                 PExp lhs = p.arguments.get(0);
                 PExp rhs = p.arguments.get(1);
                 ArrayList<PExp> args = new ArrayList<PExp>();
                 PAlternatives asPa = (PAlternatives) rhs;
-                if (asPa.myAlternatives.size() > 1) throw new RuntimeException("Only 1 alternative supported");
+                if (asPa.myAlternatives.size() > 1)
+                    throw new RuntimeException("Only 1 alternative supported");
                 PAlternatives.Alternative alt = asPa.myAlternatives.get(0);
                 PExp quantVar = lhs.getQuantifiedVariables().iterator().next();
                 PExp cond = alt.condition;
                 PExp conFunc = orderPlusOne(cond, quantVar, converted);
                 PExp posChoice = alt.result;
-                PExp posChoiceFun = orderPlusOne(posChoice, quantVar, converted);
+                PExp posChoiceFun =
+                        orderPlusOne(posChoice, quantVar, converted);
                 PExp negChoice = asPa.myOtherwiseClauseResult;
-                PExp negChoiceFun = orderPlusOne(negChoice, quantVar, converted);
+                PExp negChoiceFun =
+                        orderPlusOne(negChoice, quantVar, converted);
                 args.add(conFunc);
                 args.add(posChoiceFun);
                 args.add(negChoiceFun);
                 // remember to type this as Z->Entity
-                PSymbol cf = new PSymbol(posChoiceFun.getType(), null, "CF", args);
+                PSymbol cf =
+                        new PSymbol(posChoiceFun.getType(), null, "CF", args);
                 args.clear();
                 if (rhsOfLamPredsToLamPreds.containsKey(cf.toString())) {
 
-                } else {
-                    PSymbol lhsPsym = new PSymbol(m_typegraph.BOOLEAN, null, lhs.getTopLevelOperation(), PSymbol.Quantification.NONE);
+                }
+                else {
+                    PSymbol lhsPsym =
+                            new PSymbol(m_typegraph.BOOLEAN, null, lhs
+                                    .getTopLevelOperation(),
+                                    PSymbol.Quantification.NONE);
                     args.add(lhsPsym);
                     args.add(cf);
-                    PSymbol cfPred = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+                    PSymbol cfPred =
+                            new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
                     if (cfPred.getQuantifiedVariables().size() > 0)
                         converted.add(cfPred);
                     else
                         noQuantConverted.add(cfPred);
                 }
 
-            } else converted.add(p);
+            }
+            else
+                converted.add(p);
         }
         m_liftedLambdaPredicates = converted;
         java.util.List<PExp> aList = myAntecedent.getMutableCopy();
@@ -220,32 +233,49 @@ public class VC {
         myAntecedent = new Antecedent(aList);
     }
 
-    private PExp orderPlusOne(PExp thingToHigherOrder, PExp quantVar, ArrayList<PSymbol> sideList) {
-        java.util.Set<PSymbol> qVarSet = thingToHigherOrder.getQuantifiedVariables();
-        if (qVarSet.size() > 1) throw new RuntimeException("Only 1 quantified var. supported");
+    private PExp orderPlusOne(PExp thingToHigherOrder, PExp quantVar,
+            ArrayList<PSymbol> sideList) {
+        java.util.Set<PSymbol> qVarSet =
+                thingToHigherOrder.getQuantifiedVariables();
+        if (qVarSet.size() > 1)
+            throw new RuntimeException("Only 1 quantified var. supported");
         // no need to always make a new function
         String funStr = "";
-        if (qVarSet.size() == 1 && qVarSet.contains(quantVar) && thingToHigherOrder.getSubExpressions().size() == 1) {
-            MTFunction hoType = new MTFunction(m_typegraph,thingToHigherOrder.getType(),quantVar.getType());
-            return new PSymbol(hoType, null, thingToHigherOrder.getTopLevelOperation());
+        if (qVarSet.size() == 1 && qVarSet.contains(quantVar)
+                && thingToHigherOrder.getSubExpressions().size() == 1) {
+            MTFunction hoType =
+                    new MTFunction(m_typegraph, thingToHigherOrder.getType(),
+                            quantVar.getType());
+            return new PSymbol(hoType, null, thingToHigherOrder
+                    .getTopLevelOperation());
         }
         PSymbol funName;
         if (rhsOfLamPredsToLamPreds.containsKey(thingToHigherOrder.toString())) {
-            String fStr = rhsOfLamPredsToLamPreds.get(thingToHigherOrder.toString()).getSubExpressions().get(0).getTopLevelOperation();
-            return new PSymbol(new MTFunction(m_typegraph, thingToHigherOrder.getType(),
-                    quantVar.getType()), null, fStr);
-        } else {
-            funName = new PSymbol(new MTFunction(m_typegraph, thingToHigherOrder.getType(),
-                    quantVar.getType()), null, "lambda" + (m_lambdaTag++));
+            String fStr =
+                    rhsOfLamPredsToLamPreds.get(thingToHigherOrder.toString())
+                            .getSubExpressions().get(0).getTopLevelOperation();
+            return new PSymbol(new MTFunction(m_typegraph, thingToHigherOrder
+                    .getType(), quantVar.getType()), null, fStr);
+        }
+        else {
+            funName =
+                    new PSymbol(new MTFunction(m_typegraph, thingToHigherOrder
+                            .getType(), quantVar.getType()), null, "lambda"
+                            + (m_lambdaTag++));
             ArrayList<PExp> args = new ArrayList<PExp>();
             args.add(quantVar);
-            PSymbol funAppl = new PSymbol(thingToHigherOrder.getType(), null, funName.getTopLevelOperation(), args, PSymbol.Quantification.NONE);
+            PSymbol funAppl =
+                    new PSymbol(thingToHigherOrder.getType(), null, funName
+                            .getTopLevelOperation(), args,
+                            PSymbol.Quantification.NONE);
             args.clear();
             args.add(funAppl);
             args.add(thingToHigherOrder);
-            PSymbol conQuant = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+            PSymbol conQuant =
+                    new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
             sideList.add(conQuant);
-            rhsOfLamPredsToLamPreds.put(thingToHigherOrder.toString(), conQuant);
+            rhsOfLamPredsToLamPreds
+                    .put(thingToHigherOrder.toString(), conQuant);
         }
         return funName;
     }
@@ -284,7 +314,8 @@ public class VC {
                     // do otherwise clause
                     if (conditions.size() > 1) {
                         // make conjunction
-                    } else {
+                    }
+                    else {
                         ArrayList<PExp> args = new ArrayList<PExp>();
                         args.add(conditions.get(0));
                         PExp neg =
@@ -352,15 +383,18 @@ public class VC {
         }
         if (p instanceof PLambda) {
             // replace lam(x).F(x) wth F
-            PLambda pl = (PLambda)p;
+            PLambda pl = (PLambda) p;
             PExp body = pl.getBody();
-            if((pl.getParameters().size() == 1 && body.getQuantifiedVariables().size() == 1) &&
-                    pl.getParameters().get(0).toString().equals(body.getQuantifiedVariables().iterator().next().toString())
-                    && body.getSubExpressions().size()==1
-                    ) {
+            if ((pl.getParameters().size() == 1 && body
+                    .getQuantifiedVariables().size() == 1)
+                    && pl.getParameters().get(0).toString().equals(
+                            body.getQuantifiedVariables().iterator().next()
+                                    .toString())
+                    && body.getSubExpressions().size() == 1) {
                 PSymbol funName =
-                        new PSymbol(new MTFunction(m_typegraph, body.getType(), pl.getParameters().get(0).getType()),
-                                null, body.getTopLevelOperation());
+                        new PSymbol(new MTFunction(m_typegraph, body.getType(),
+                                pl.getParameters().get(0).getType()), null,
+                                body.getTopLevelOperation());
                 return funName;
             }
             String lname = "";
@@ -371,7 +405,8 @@ public class VC {
                 lname = "lambda" + m_lambdaTag++;
                 m_lamdaCodes.put(lambdaCode, (PLambda) normP);
                 m_liftedLamdas.put((PLambda) normP, lname);
-            } else {
+            }
+            else {
                 PLambda foundLamb = m_lamdaCodes.get(lambdaCode);
                 lname = m_liftedLamdas.get(foundLamb);
             }
@@ -417,7 +452,8 @@ public class VC {
             myAntecedent.processStringRepresentation(visitor, a);
             a.append("  -->\n");
             myConsequent.processStringRepresentation(visitor, a);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
