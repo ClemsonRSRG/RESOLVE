@@ -24,11 +24,13 @@ import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.misc.FlagManager;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
+import sun.plugin2.main.server.ProxySupport;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -50,7 +52,7 @@ public class CongruenceClassProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
-    private final long DEFAULTTIMEOUT = 15000;
+    private final long DEFAULTTIMEOUT = 5000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     private boolean printVCEachStep = false;
@@ -108,28 +110,124 @@ public class CongruenceClassProver {
                         MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
                         MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
 
+
         for (TheoremEntry e : theoremEntries) {
             PExp assertion = e.getAssertion();
-
+            String eName = e.getName();
             if (assertion.isEquality()) {
-                addEqualityTheorem(true, assertion);
-                addEqualityTheorem(false, assertion);
+                addEqualityTheorem(true, assertion, eName);
+                addEqualityTheorem(false, assertion, eName);
             }
             else {
                 TheoremCongruenceClosureImpl t =
-                        new TheoremCongruenceClosureImpl(g, assertion, false);
+                        new TheoremCongruenceClosureImpl(g, assertion, false, eName);
                 if (!t.m_unneeded) {
                     m_theorems.add(t);
                 }
+                //addContrapositive(assertion, eName);
             }
         }
+        insertDefaultTheorems();
         m_environment = environment;
         m_scope = scope;
         m_results = "";
 
     }
+    private void insertDefaultTheorems(){
+        MTType B = m_typeGraph.BOOLEAN;
+        PSymbol p = new PSymbol(B,null,"p", PSymbol.Quantification.FOR_ALL);
+        PSymbol q = new PSymbol(B,null,"q", PSymbol.Quantification.FOR_ALL);
+        ArrayList<PExp> args = new ArrayList<PExp>();
+        // p = not q implies q = not p
+        args.add(q);
+        PSymbol not_q = new PSymbol(B,null,"not",args);
+        args.clear();
+        args.add(p);
+        args.add(not_q);
+        PSymbol ant = new PSymbol(B,null,"=",args);
+        args.clear();
+        args.add(p);
+        PSymbol not_p = new PSymbol(B,null,"not",args);
+        args.clear();
+        args.add(q);
+        args.add(not_p);
+        PSymbol succ = new PSymbol(B,null,"=",args);
+        args.clear();
+        args.add(ant);
+        args.add(succ);
+        PSymbol th1 = new PSymbol(B,null,"implies",args);
+        m_theorems.add(new TheoremCongruenceClosureImpl(m_typeGraph,th1,false,"Default theorem 1"));
 
-    private void addEqualityTheorem(boolean matchLeft, PExp theorem) {
+        // not not p = p
+        args.clear();
+        args.add(not_p);
+        PSymbol nnp = new PSymbol(B,null,"not",args);
+        args.clear();
+        args.add(nnp);
+        args.add(p);
+        PSymbol th2 = new PSymbol(B,null,"=",args);
+        addEqualityTheorem(true,th2,"Default theorem 2");
+        // p and p = p
+        args.clear();
+        args.add(p);
+        args.add(p);
+        PSymbol lhs = new PSymbol(B,null,"and",args);
+        args.clear();
+        args.add(lhs);
+        args.add(p);
+        PSymbol th3 = new PSymbol(B,null,"=",args);
+        addEqualityTheorem(true,th3,"Default theorem 3");
+
+        // p and true = p
+        args.clear();
+        args.add(p);
+        PSymbol t = new PSymbol(B,null,"true");
+        args.add(t);
+        PSymbol pandt = new PSymbol(B,null,"and",args);
+        args.clear();
+        args.add(pandt);
+        args.add(p);
+        PSymbol th4 = new PSymbol(B,null,"=",args);
+        addEqualityTheorem(true,th4,"Default theorem 4");
+
+        // not p = true implies p = false
+        args.clear();
+        args.add(not_p);
+        args.add(t);
+        ant = new PSymbol(B,null,"=",args);
+        args.clear();
+        PSymbol f = new PSymbol(B,null,"false");
+        args.add(p);
+        args.add(f);
+        PSymbol suc = new PSymbol(B,null,"=",args);
+        args.clear();
+        args.add(ant);
+        args.add(suc);
+        PSymbol th5 = new PSymbol(B,null,"implies",args);
+        m_theorems.add(new TheoremCongruenceClosureImpl(m_typeGraph,th5,false,"Default theorem 5"));
+    }
+
+    private void addContrapositive(PExp theorem, String thName){
+        if(!theorem.getTopLevelOperation().equals("implies")) return;
+        PExp oldAnt = theorem.getSubExpressions().get(0);
+        PExp oldSuc = theorem.getSubExpressions().get(1);
+        ArrayList<PExp> args = new ArrayList<PExp>();
+        args.add(oldSuc);
+        PExp ant = new PSymbol(oldSuc.getType(),oldSuc.getTypeValue(),"not",args);
+        args.clear();
+        args.add(oldAnt);
+        PExp suc = new PSymbol(oldAnt.getType(),oldAnt.getTypeValue(),"not",args);
+        args.clear();
+        args.add(ant);
+        args.add(suc);
+        PExp contraP = new PSymbol(m_typeGraph.BOOLEAN,null,"implies",args);
+        TheoremCongruenceClosureImpl contra =
+                new TheoremCongruenceClosureImpl(
+                        m_typeGraph,contraP,false,"Contrapositive(" + thName + ")");
+        if(!contra.m_unneeded)
+            m_theorems.add(contra);
+    }
+    private void addEqualityTheorem(boolean matchLeft, PExp theorem, String thName) {
         PExp lhs, rhs;
 
         if (matchLeft) {
@@ -149,7 +247,7 @@ public class CongruenceClassProver {
 
         TheoremCongruenceClosureImpl t =
                 new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
-                        false, false);
+                        false, false, thName);
         if (!t.m_unneeded) {
             m_theorems.add(t);
         }
@@ -157,7 +255,7 @@ public class CongruenceClassProver {
         if (lhs.isEquality()) {
             t =
                     new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
-                            true, false);
+                            true, false, thName);
             if (!t.m_unneeded) {
                 m_theorems.add(t);
             }
@@ -170,7 +268,7 @@ public class CongruenceClassProver {
         int i = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
             //printVCEachStep = true;
-            //if(!vcc.m_name.equals("0_8"))continue;
+            //if(!vcc.m_name.equals("1_4"))continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             VerificationConditionCongruenceClosureImpl.STATUS proved =
@@ -259,12 +357,16 @@ public class CongruenceClassProver {
                 new ArrayList<TheoremCongruenceClosureImpl>();
         theoremsForThisVC.addAll(m_theorems);
         // add quantified expressions local to the vc to theorems
+
         for (PExp p : vcc.forAllQuantifiedPExps) {
             TheoremCongruenceClosureImpl t =
-                    new TheoremCongruenceClosureImpl(m_typeGraph, p, true);
+                    new TheoremCongruenceClosureImpl(m_typeGraph, p, true, "Created from lamba exp in VC");
             if (!t.m_unneeded) {
                 theoremsForThisVC.add(t);
             }
+            // make a setCons(x)
+            if(p.getSubExpressions().size()==2 &&
+                    p.getSubExpressions().get(1).getType().isBoolean()) vcc.assertSet(p,m_scope);
         }
         int iteration = 0;
         while (status
