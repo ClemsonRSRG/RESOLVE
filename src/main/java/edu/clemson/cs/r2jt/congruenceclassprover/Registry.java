@@ -14,6 +14,7 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 import java.util.*;
@@ -64,6 +65,8 @@ public class Registry {
         addSymbol("=", new MTFunction(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
                 Usage.LITERAL); // = as a predicate function, not as an assertion
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
+        addSymbol("false", g.BOOLEAN, Usage.LITERAL);
+        addSymbol("not", new MTFunction(g,g.BOOLEAN,g.BOOLEAN),Usage.HASARGS_SINGULAR);
         assert (getIndexForSymbol("=") == 0);
         m_appliedTheoremDependencyGraph = new HashMap<String, Set<Integer>>();
         m_lambda_names = new HashSet<String>();
@@ -74,7 +77,7 @@ public class Registry {
         m_commutative_operators.add("+");
         m_commutative_operators.add("=");
         m_commutative_operators.add("and");
-        m_commutative_operators.add("isBinaryPartition");
+        m_commutative_operators.add("unionMakesZ");
 
     }
 
