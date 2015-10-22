@@ -146,15 +146,17 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             r += addExpression(expression.getSubExpressions().get(1));
             return r;
         }
-        else if (name.equals("/=")){
+        else if (name.equals("/=")) {
             ArrayList<PExp> args = new ArrayList<PExp>();
             args.add(expression.getSubExpressions().get(0));
             args.add(expression.getSubExpressions().get(1));
             PSymbol eqExp =
-                    new PSymbol(m_registry.m_typeGraph.BOOLEAN,null,"=",args);
+                    new PSymbol(m_registry.m_typeGraph.BOOLEAN, null, "=", args);
             args.clear();
             args.add(eqExp);
-            PSymbol notEqExp = new PSymbol(m_registry.m_typeGraph.BOOLEAN,null,"not",args);
+            PSymbol notEqExp =
+                    new PSymbol(m_registry.m_typeGraph.BOOLEAN, null, "not",
+                            args);
             return addExpression(notEqExp);
         }
         else {
@@ -262,15 +264,15 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             newExpr.writeOnto(root, pos);
         }
         mergeArgsOfEqualityPredicateIfRootIsTrue(); // this may cause symbols in newExpr to merge to others
-        Map<Integer,Integer> changedOps = new HashMap<Integer, Integer>();
-        for(int k: newExpr.getKeys()){
+        Map<Integer, Integer> changedOps = new HashMap<Integer, Integer>();
+        for (int k : newExpr.getKeys()) {
             int kPar = m_registry.findAndCompress(k);
-            if(kPar != k){
-                changedOps.put(k,kPar);
+            if (kPar != k) {
+                changedOps.put(k, kPar);
             }
         }
-        for(int k: changedOps.keySet()){
-            newExpr.replaceOperator(k,changedOps.get(k));
+        for (int k : changedOps.keySet()) {
+            newExpr.replaceOperator(k, changedOps.get(k));
         }
         return addAtomicFormula(newExpr);
     }
@@ -401,21 +403,21 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 i = 0;
                 continue;
             }
-            else if((op1 == op2) && (root != t)){
-                mergeOperators(t,root);
+            else if ((op1 == op2) && (root != t)) {
+                mergeOperators(t, root);
                 i = 0;
                 continue;
             }
         }
- /*       for(Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator(); it.hasNext();){
-            NormalizedAtomicExpressionMapImpl cur = it.next();
-            int f = cur.readPosition(0);
-            if(f != m_registry.getIndexForSymbol("=")) break;
-            int op1 = cur.readPosition(1);
-            int op2 = cur.readPosition(2);
-            if(op1==op2)
-                it.remove();
-        } */
+        /*       for(Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator(); it.hasNext();){
+                   NormalizedAtomicExpressionMapImpl cur = it.next();
+                   int f = cur.readPosition(0);
+                   if(f != m_registry.getIndexForSymbol("=")) break;
+                   int op1 = cur.readPosition(1);
+                   int op2 = cur.readPosition(2);
+                   if(op1==op2)
+                       it.remove();
+               } */
     }
 
     // Return list of modified predicates by their position. Only these can cause new merges.
@@ -474,9 +476,16 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         assert m_useMap.size() == 0;
         for (NormalizedAtomicExpressionMapImpl e : m_exprList) {
             for (Integer k : e.getKeys()) {
-                assert m_registry.findAndCompress(k) == k : "child symbol in conj:" +
-                        m_registry.getSymbolForIndex(k) + " " + k + " " + m_registry.m_indexToSymbol.get(k) + " " +
-                        e.toHumanReadableString(m_registry) + " " + e.toString();
+                assert m_registry.findAndCompress(k) == k : "child symbol in conj:"
+                        + m_registry.getSymbolForIndex(k)
+                        + " "
+                        + k
+                        + " "
+                        + m_registry.m_indexToSymbol.get(k)
+                        + " "
+                        + e.toHumanReadableString(m_registry)
+                        + " "
+                        + e.toString();
                 if (m_useMap.containsKey(k))
                     m_useMap.get(k).add(e);
                 else {
