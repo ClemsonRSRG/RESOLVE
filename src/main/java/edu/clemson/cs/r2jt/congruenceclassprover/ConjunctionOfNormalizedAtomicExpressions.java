@@ -324,6 +324,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     protected String mergeOperators(int a, int b) {
+        int t = m_registry.getIndexForSymbol("true");
+        int f = m_registry.getIndexForSymbol("false");
+        if((a == t && b == f) || (a == f && b == t)){
+            m_evaluates_to_false = true;
+            return "contradiction detected";
+        }
         String rString = "";
         if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
             return rString;
@@ -388,10 +394,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         // when found do merge, start again.
         int eqQ = m_registry.getIndexForSymbol("=");
         int t = m_registry.getIndexForSymbol("true");
+        int numContinues = 0;
         for (int i = 0; i < m_exprList.size(); ++i) {
             NormalizedAtomicExpressionMapImpl cur = m_exprList.get(i);
             int f = cur.readPosition(0);
-            if (f != eqQ) {
+            if (f != eqQ || m_evaluates_to_false) {
                 break;
             }
             int root = cur.readRoot();
@@ -401,12 +408,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 mergeOperators(cur.readPosition(1), cur.readPosition(2));
                 // mergeOperators will do any other merges that arise.
                 i = 0;
-                continue;
+                numContinues++;
             }
             else if ((op1 == op2) && (root != t)) {
                 mergeOperators(t, root);
                 i = 0;
-                continue;
+                numContinues++;
             }
         }
         /*       for(Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator(); it.hasNext();){
