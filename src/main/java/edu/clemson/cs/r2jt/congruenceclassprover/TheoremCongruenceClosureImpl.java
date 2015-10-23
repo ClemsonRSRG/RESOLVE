@@ -126,6 +126,7 @@ public class TheoremCongruenceClosureImpl {
             rSet.remove("implies");
             rSet.remove("and");
             rSet.remove("/=");
+            rSet.remove("+"); // temporary
             m_function_names = rSet;
         }
         return m_function_names;
