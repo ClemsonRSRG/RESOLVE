@@ -326,7 +326,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     protected String mergeOperators(int a, int b) {
         int t = m_registry.getIndexForSymbol("true");
         int f = m_registry.getIndexForSymbol("false");
-        if((a == t && b == f) || (a == f && b == t)){
+        if ((a == t && b == f) || (a == f && b == t)) {
             m_evaluates_to_false = true;
             return "contradiction detected";
         }
