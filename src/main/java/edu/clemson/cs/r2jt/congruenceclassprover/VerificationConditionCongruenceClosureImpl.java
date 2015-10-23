@@ -68,71 +68,85 @@ public class VerificationConditionCongruenceClosureImpl {
         addPExp(m_consequent.iterator(), false);
         // seed with not(false)
         ArrayList<PExp> args = new ArrayList<PExp>();
-        args.add(new PSymbol(m_typegraph.BOOLEAN,null,"false"));
-        PSymbol nF = new PSymbol(m_typegraph.BOOLEAN,null,"not",args);
+        args.add(new PSymbol(m_typegraph.BOOLEAN, null, "false"));
+        PSymbol nF = new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
         m_conjunction.addExpression(nF);
         m_conjunction.updateUseMap();
         //m_conjunction.mergeEquivalentFunctions();
     }
 
-    protected void assertSet(PExp p, ModuleScope scope){
-        if(p.getQuantifiedVariables().size()!=1) return;
+    protected void assertSet(PExp p, ModuleScope scope) {
+        if (p.getQuantifiedVariables().size() != 1)
+            return;
         List<edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry> entries =
                 scope.query(new NameQuery(null, "ZSetCons",
                         MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
-                        MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE, false));
-        if(entries.isEmpty()) return;
-        MathSymbolEntry e = (MathSymbolEntry)entries.get(0);
+                        MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                        false));
+        if (entries.isEmpty())
+            return;
+        MathSymbolEntry e = (MathSymbolEntry) entries.get(0);
         MTType consT = e.getType();
         entries =
                 scope.query(new NameQuery(null, "ZSetConB",
                         MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
-                        MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE, false));
-        if(entries.isEmpty()) return;
-        e = (MathSymbolEntry)entries.get(0);
-        MTFunction conB = (MTFunction)e.getType();
+                        MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                        false));
+        if (entries.isEmpty())
+            return;
+        e = (MathSymbolEntry) entries.get(0);
+        MTFunction conB = (MTFunction) e.getType();
         MTType zSetT = conB.getRange();
         PSymbol arg = p.getQuantifiedVariables().iterator().next();
-        PSymbol fc = new PSymbol(arg.getType(),arg.getTypeValue(), "_sv" + m_fc_ctr++);
-        HashMap<PExp,PExp> subMap = new HashMap<PExp, PExp>();
-        subMap.put(arg,fc);
+        PSymbol fc =
+                new PSymbol(arg.getType(), arg.getTypeValue(), "_sv"
+                        + m_fc_ctr++);
+        HashMap<PExp, PExp> subMap = new HashMap<PExp, PExp>();
+        subMap.put(arg, fc);
         PExp toAdd = p.substitute(subMap);
         m_conjunction.addExpression(toAdd);
         ArrayList<PExp> args = new ArrayList<PExp>();
         // change to ensure always adding f of f(x)
         PExp fx = toAdd.getSubExpressions().get(0);
-        PSymbol lamName = new PSymbol(new MTFunction(m_typegraph,fx.getType(),fc.getType()),null,fx.getTopLevelOperation());
+        PSymbol lamName =
+                new PSymbol(new MTFunction(m_typegraph, fx.getType(), fc
+                        .getType()), null, fx.getTopLevelOperation());
         args.add(lamName);
-        PSymbol s1 = new PSymbol(conB,null,"ZSetConB",args);
+        PSymbol s1 = new PSymbol(conB, null, "ZSetConB", args);
         args.clear();
         args.add(fc);
-        PSymbol s2 = new PSymbol(consT,null, "ZSetCons", args);
+        PSymbol s2 = new PSymbol(consT, null, "ZSetCons", args);
         args.clear();
         args.add(s1);
         args.add(s2);
-        PSymbol setAsrt = new PSymbol(m_typegraph.BOOLEAN,null,"=",args);
+        PSymbol setAsrt = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
         m_conjunction.addExpression(setAsrt);
 
     }
-    private void makeSetAssertions(VC vc){
+
+    private void makeSetAssertions(VC vc) {
         ArrayList<PExp> splitConditions = new ArrayList<PExp>();
         boolean allOverZ = true;
         int c_count = 0;
         for (PExp px : vc.m_conditions) {
             // name it. add it to quantified expr list
-            if(px.getQuantifiedVariables().size()!=1) continue;
-            PSymbol qFun = new PSymbol(new MTFunction(m_typegraph,m_typegraph.BOOLEAN,
-                    px.getQuantifiedVariables().iterator().next().getType()),null,"ConFunc" + (++c_count),
-                    new ArrayList<PExp>(px.getQuantifiedVariables()));
+            if (px.getQuantifiedVariables().size() != 1)
+                continue;
+            PSymbol qFun =
+                    new PSymbol(new MTFunction(m_typegraph,
+                            m_typegraph.BOOLEAN, px.getQuantifiedVariables()
+                                    .iterator().next().getType()), null,
+                            "ConFunc" + (++c_count), new ArrayList<PExp>(px
+                                    .getQuantifiedVariables()));
             ArrayList<PExp> args = new ArrayList<PExp>();
             args.add(qFun);
             args.add(px);
-            PSymbol qFunAssrt = new PSymbol(m_typegraph.BOOLEAN,null,"=",args);
+            PSymbol qFunAssrt =
+                    new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
             args.clear();
             forAllQuantifiedPExps.add(qFunAssrt);
 
-            java.util.HashMap<PExp, PExp> substMap =
-                    new HashMap<PExp, PExp>();
+            java.util.HashMap<PExp, PExp> substMap = new HashMap<PExp, PExp>();
 
             // true branch
             PSymbol tBSym = null;
@@ -148,8 +162,10 @@ public class VerificationConditionCongruenceClosureImpl {
             PExp pxTrue = px.substitute(substMap);
             //splitConditions.add(pxTrue);
             args.add(pxTrue);
-            args.add(new PSymbol(m_typegraph.BOOLEAN, null, "conVal" + (++c_count)));
-            splitConditions.add(new PSymbol(m_typegraph.BOOLEAN, null, "=", args));
+            args.add(new PSymbol(m_typegraph.BOOLEAN, null, "conVal"
+                    + (++c_count)));
+            splitConditions.add(new PSymbol(m_typegraph.BOOLEAN, null, "=",
+                    args));
             // false branch
             PSymbol fBSym = null;
             for (PSymbol pq : px.getQuantifiedVariables()) {
@@ -165,30 +181,30 @@ public class VerificationConditionCongruenceClosureImpl {
             PSymbol negatedCondition =
                     new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
             //splitConditions.add(negatedCondition);
-                args.clear();
-                args.add(negatedCondition);
-                args.add(new PSymbol(m_typegraph.BOOLEAN, null, "conVal" + (++c_count)));
-                splitConditions.add(new PSymbol(m_typegraph.BOOLEAN, null, "=", args));
-
+            args.clear();
+            args.add(negatedCondition);
+            args.add(new PSymbol(m_typegraph.BOOLEAN, null, "conVal"
+                    + (++c_count)));
+            splitConditions.add(new PSymbol(m_typegraph.BOOLEAN, null, "=",
+                    args));
 
             args.clear();
             args.add(tBSym);
             args.add(fBSym);
             PSymbol assertion =
-                    new PSymbol(m_typegraph.BOOLEAN, null,
-                            "unionMakesZ", args);
+                    new PSymbol(m_typegraph.BOOLEAN, null, "unionMakesZ", args);
             if (allOverZ)
                 splitConditions.add(assertion);
         }
         addPExp(splitConditions.iterator(), true);
 
     }
-    private void makeSetAssertionsOld(VC vc){
+
+    private void makeSetAssertionsOld(VC vc) {
         ArrayList<PExp> splitConditions = new ArrayList<PExp>();
         boolean allOverZ = true;
         for (PExp px : vc.m_conditions) {
-            java.util.HashMap<PExp, PExp> substMap =
-                    new HashMap<PExp, PExp>();
+            java.util.HashMap<PExp, PExp> substMap = new HashMap<PExp, PExp>();
             ArrayList<PExp> args = new ArrayList<PExp>();
             // true branch
             PSymbol tBSym = null;
@@ -221,24 +237,24 @@ public class VerificationConditionCongruenceClosureImpl {
             PSymbol negatedCondition =
                     new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
             splitConditions.add(negatedCondition);
-                /*args.clear();
-                args.add(negatedCondition);
-                args.add(new PSymbol(g.BOOLEAN, null, "true"));
-                splitConditions.add(new PSymbol(g.BOOLEAN, null, "=", args));
-                // AddisBinaryPartition (p1: Entity, p2: Entity) : B;
-                 */
+            /*args.clear();
+            args.add(negatedCondition);
+            args.add(new PSymbol(g.BOOLEAN, null, "true"));
+            splitConditions.add(new PSymbol(g.BOOLEAN, null, "=", args));
+            // AddisBinaryPartition (p1: Entity, p2: Entity) : B;
+             */
             args.clear();
             args.add(tBSym);
             args.add(fBSym);
             PSymbol assertion =
-                    new PSymbol(m_typegraph.BOOLEAN, null,
-                            "unionMakesZ", args);
+                    new PSymbol(m_typegraph.BOOLEAN, null, "unionMakesZ", args);
             if (allOverZ)
                 splitConditions.add(assertion);
         }
         addPExp(splitConditions.iterator(), true);
 
     }
+
     protected ConjunctionOfNormalizedAtomicExpressions getConjunct() {
         return m_conjunction;
     }
@@ -296,7 +312,7 @@ public class VerificationConditionCongruenceClosureImpl {
             if (curr.isEquality() && inAntecedent) { // f(x,y) = z and g(a,b) = c ; then z is replaced by c
 
                 //if (inAntecedent) {
-                    m_conjunction.addExpression(curr);
+                m_conjunction.addExpression(curr);
                 //}
                 /*else {
                     PExp lhs = curr.getSubExpressions().get(0);
