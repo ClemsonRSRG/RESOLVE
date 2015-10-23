@@ -305,6 +305,7 @@ public final class CongruenceClassProver {
                             0, 0));
                 }
                 summary += vcc.m_name + " skipped\n";
+                ++i;
                 continue;
             }
             VerificationConditionCongruenceClosureImpl.STATUS proved =

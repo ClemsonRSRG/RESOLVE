@@ -45,7 +45,7 @@ public class TheoremCongruenceClosureImpl {
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp p,
             boolean allowNewSymbols, String name) {
         m_name = name;
-        m_allowNewSymbols = allowNewSymbols;
+        m_allowNewSymbols = false;
         m_typeGraph = g;
         m_theorem = p;
         m_theoremString = p.toString();
