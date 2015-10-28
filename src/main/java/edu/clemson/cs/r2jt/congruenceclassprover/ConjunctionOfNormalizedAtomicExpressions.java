@@ -806,6 +806,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return bindings;
     }
 
+    // Most self time in this entire package
     Set<Map<String, String>> getBindings_NonCommutative(
             Set<NormalizedAtomicExpressionMapImpl> vcEquations,
             Map<String, String> basemap,
@@ -832,7 +833,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     MTType localType =
                             m_registry.getTypeByIndex(m_registry
                                     .getIndexForSymbol(localToBindTo));
-                    if (!localType.isSubtypeOf(wildType))
+                    if (!m_registry.isSubtype(localType,wildType))//10_4 of Queue_Examples_Fac: 2.7 secs
+                    //if(!localType.isSubtypeOf(wildType)) // 10_4 of Queue_Examples_Fac: 4.8 secs
                         continue bindToAVCEquation;
                     currentBind.put(wild, localToBindTo);
                 }
