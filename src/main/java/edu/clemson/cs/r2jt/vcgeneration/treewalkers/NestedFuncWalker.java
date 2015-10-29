@@ -401,11 +401,13 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
 
                     // Check to see if we already found one. If we did, it means that
                     // the type is ambiguous and we can't be sure which one it is.
-                    if (formalToActuals == null) {
-                        formalToActuals = temp;
-                    }
-                    else {
-                        Utilities.ambiguousTy(ty, opLoc);
+                    if (temp != null) {
+                        if (formalToActuals == null) {
+                            formalToActuals = temp;
+                        }
+                        else {
+                            Utilities.ambiguousTy(ty, opLoc);
+                        }
                     }
                 }
 
