@@ -420,6 +420,10 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                                         .get(e));
                     }
                 }
+                else {
+                    Utilities
+                            .noSuchSymbol(tyQualifier, tyName.getName(), opLoc);
+                }
             }
         }
 

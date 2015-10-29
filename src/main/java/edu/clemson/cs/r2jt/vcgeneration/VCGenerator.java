@@ -2096,6 +2096,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                                         .get(e));
                     }
                 }
+                else {
+                    Utilities
+                            .noSuchSymbol(tyQualifier, tyName.getName(), opLoc);
+                }
             }
         }
 
