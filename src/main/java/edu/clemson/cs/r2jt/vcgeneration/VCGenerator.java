@@ -26,6 +26,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
@@ -194,38 +195,118 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append("======================================\n");
         myVCBuffer.append("\n");
 
-        // Set the current module scope
+        // From the list of imports, obtain the global constraints
+        // of the imported modules.
+        myGlobalConstraintExp =
+                getConstraints(dec.getLocation(), myCurrentModuleScope
+                        .getImports());
+
+        // Obtain the global type constraints from the module parameters
+        Exp typeConstraints =
+                getModuleTypeConstraint(dec.getLocation(), dec.getParameters());
+        if (!typeConstraints.isLiteralTrue()) {
+            if (myGlobalConstraintExp.isLiteralTrue()) {
+                myGlobalConstraintExp = typeConstraints;
+            }
+            else {
+                myGlobalConstraintExp =
+                        myTypeGraph.formConjunct(typeConstraints,
+                                myGlobalConstraintExp);
+            }
+        }
+
+        // Store the global requires clause
+        myGlobalRequiresExp = getRequiresClause(dec.getLocation(), dec);
+
         try {
-            myCurrentModuleScope =
-                    mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
+            // Obtain the global requires clause from the Concept
+            ConceptModuleDec conceptModuleDec =
+                    (ConceptModuleDec) mySymbolTable
+                            .getModuleScope(
+                                    new ModuleIdentifier(dec.getConceptName()
+                                            .getName())).getDefiningElement();
 
-            // Get "Z" from the TypeGraph
-            Z = Utilities.getMathTypeZ(dec.getLocation(), myCurrentModuleScope);
-
-            // From the list of imports, obtain the global constraints
-            // of the imported modules.
-            myGlobalConstraintExp =
-                    getConstraints(dec.getLocation(), myCurrentModuleScope
-                            .getImports());
-
-            // Obtain the global type constraints from the module parameters
-            Exp typeConstraints =
-                    getModuleTypeConstraint(dec.getLocation(), dec
-                            .getParameters());
-            if (!typeConstraints.isLiteralTrue()) {
-                if (myGlobalConstraintExp.isLiteralTrue()) {
-                    myGlobalConstraintExp = typeConstraints;
+            Exp conceptRequires =
+                    getRequiresClause(conceptModuleDec.getLocation(),
+                            conceptModuleDec);
+            if (!conceptRequires.isLiteralTrue()) {
+                if (myGlobalRequiresExp.isLiteralTrue()) {
+                    myGlobalRequiresExp = conceptRequires;
                 }
                 else {
-                    myGlobalConstraintExp =
-                            myTypeGraph.formConjunct(typeConstraints,
-                                    myGlobalConstraintExp);
+                    myGlobalRequiresExp =
+                            myTypeGraph.formConjunct(myGlobalRequiresExp,
+                                    conceptRequires);
                 }
             }
 
-            // Store the global requires clause
-            myGlobalRequiresExp = getRequiresClause(dec.getLocation(), dec);
+            // Obtain the global type constraints from the Concept module parameters
+            Exp conceptTypeConstraints =
+                    getModuleTypeConstraint(conceptModuleDec.getLocation(),
+                            conceptModuleDec.getParameters());
+            if (!conceptTypeConstraints.isLiteralTrue()) {
+                if (myGlobalConstraintExp.isLiteralTrue()) {
+                    myGlobalConstraintExp = conceptTypeConstraints;
+                }
+                else {
+                    myGlobalConstraintExp =
+                            myTypeGraph.formConjunct(conceptTypeConstraints,
+                                    myGlobalConstraintExp);
+                }
+            }
+        }
+        catch (NoSuchSymbolException e) {
+            System.err.println("Module " + dec.getConceptName().getName()
+                    + " does not exist or is not in scope.");
+            Utilities.noSuchModule(dec.getConceptName().getLocation());
+        }
+    }
 
+    // -----------------------------------------------------------
+    // EnhancementBodyModuleDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void preEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
+        // Verbose Mode Debug Messages
+        myVCBuffer.append("\n=========================");
+        myVCBuffer.append(" VC Generation Details ");
+        myVCBuffer.append(" =========================\n");
+        myVCBuffer.append("\n Enhancement Realization Name:\t");
+        myVCBuffer.append(dec.getName().getName());
+        myVCBuffer.append("\n Enhancement Name:\t");
+        myVCBuffer.append(dec.getEnhancementName().getName());
+        myVCBuffer.append("\n Concept Name:\t");
+        myVCBuffer.append(dec.getConceptName().getName());
+        myVCBuffer.append("\n");
+        myVCBuffer.append("\n====================================");
+        myVCBuffer.append("======================================\n");
+        myVCBuffer.append("\n");
+
+        // From the list of imports, obtain the global constraints
+        // of the imported modules.
+        myGlobalConstraintExp =
+                getConstraints(dec.getLocation(), myCurrentModuleScope
+                        .getImports());
+
+        // Obtain the global type constraints from the module parameters
+        Exp typeConstraints =
+                getModuleTypeConstraint(dec.getLocation(), dec.getParameters());
+        if (!typeConstraints.isLiteralTrue()) {
+            if (myGlobalConstraintExp.isLiteralTrue()) {
+                myGlobalConstraintExp = typeConstraints;
+            }
+            else {
+                myGlobalConstraintExp =
+                        myTypeGraph.formConjunct(typeConstraints,
+                                myGlobalConstraintExp);
+            }
+        }
+
+        // Store the global requires clause
+        myGlobalRequiresExp = getRequiresClause(dec.getLocation(), dec);
+
+        try {
             // Obtain the global requires clause from the Concept
             ConceptModuleDec conceptModuleDec =
                     (ConceptModuleDec) mySymbolTable
@@ -262,108 +343,12 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
         }
         catch (NoSuchSymbolException e) {
-            System.err.println("Module " + dec.getName()
+            System.err.println("Module " + dec.getConceptName().getName()
                     + " does not exist or is not in scope.");
-            Utilities.noSuchModule(dec.getLocation());
+            Utilities.noSuchModule(dec.getConceptName().getLocation());
         }
-    }
 
-    @Override
-    public void postConceptBodyModuleDec(ConceptBodyModuleDec dec) {
-        // Set the module level global variables to null
-        myCurrentModuleScope = null;
-        myGlobalConstraintExp = null;
-        myGlobalRequiresExp = null;
-    }
-
-    // -----------------------------------------------------------
-    // EnhancementBodyModuleDec
-    // -----------------------------------------------------------
-
-    @Override
-    public void preEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
-        // Verbose Mode Debug Messages
-        myVCBuffer.append("\n=========================");
-        myVCBuffer.append(" VC Generation Details ");
-        myVCBuffer.append(" =========================\n");
-        myVCBuffer.append("\n Enhancement Realization Name:\t");
-        myVCBuffer.append(dec.getName().getName());
-        myVCBuffer.append("\n Enhancement Name:\t");
-        myVCBuffer.append(dec.getEnhancementName().getName());
-        myVCBuffer.append("\n Concept Name:\t");
-        myVCBuffer.append(dec.getConceptName().getName());
-        myVCBuffer.append("\n");
-        myVCBuffer.append("\n====================================");
-        myVCBuffer.append("======================================\n");
-        myVCBuffer.append("\n");
-
-        // Set the current module scope
         try {
-            myCurrentModuleScope =
-                    mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
-
-            // Get "Z" from the TypeGraph
-            Z = Utilities.getMathTypeZ(dec.getLocation(), myCurrentModuleScope);
-
-            // From the list of imports, obtain the global constraints
-            // of the imported modules.
-            myGlobalConstraintExp =
-                    getConstraints(dec.getLocation(), myCurrentModuleScope
-                            .getImports());
-
-            // Obtain the global type constraints from the module parameters
-            Exp typeConstraints =
-                    getModuleTypeConstraint(dec.getLocation(), dec
-                            .getParameters());
-            if (!typeConstraints.isLiteralTrue()) {
-                if (myGlobalConstraintExp.isLiteralTrue()) {
-                    myGlobalConstraintExp = typeConstraints;
-                }
-                else {
-                    myGlobalConstraintExp =
-                            myTypeGraph.formConjunct(typeConstraints,
-                                    myGlobalConstraintExp);
-                }
-            }
-
-            // Store the global requires clause
-            myGlobalRequiresExp = getRequiresClause(dec.getLocation(), dec);
-
-            // Obtain the global requires clause from the Concept
-            ConceptModuleDec conceptModuleDec =
-                    (ConceptModuleDec) mySymbolTable
-                            .getModuleScope(
-                                    new ModuleIdentifier(dec.getConceptName()
-                                            .getName())).getDefiningElement();
-            Exp conceptRequires =
-                    getRequiresClause(conceptModuleDec.getLocation(),
-                            conceptModuleDec);
-            if (!conceptRequires.isLiteralTrue()) {
-                if (myGlobalRequiresExp.isLiteralTrue()) {
-                    myGlobalRequiresExp = conceptRequires;
-                }
-                else {
-                    myGlobalRequiresExp =
-                            myTypeGraph.formConjunct(myGlobalRequiresExp,
-                                    conceptRequires);
-                }
-            }
-
-            // Obtain the global type constraints from the Concept module parameters
-            Exp conceptTypeConstraints =
-                    getModuleTypeConstraint(conceptModuleDec.getLocation(),
-                            conceptModuleDec.getParameters());
-            if (!conceptTypeConstraints.isLiteralTrue()) {
-                if (myGlobalConstraintExp.isLiteralTrue()) {
-                    myGlobalConstraintExp = conceptTypeConstraints;
-                }
-                else {
-                    myGlobalConstraintExp =
-                            myTypeGraph.formConjunct(conceptTypeConstraints,
-                                    myGlobalConstraintExp);
-                }
-            }
-
             // Obtain the global requires clause from the Enhancement
             EnhancementModuleDec enhancementModuleDec =
                     (EnhancementModuleDec) mySymbolTable.getModuleScope(
@@ -400,18 +385,10 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
         }
         catch (NoSuchSymbolException e) {
-            System.err.println("Module " + dec.getName()
+            System.err.println("Module " + dec.getEnhancementName().getName()
                     + " does not exist or is not in scope.");
-            Utilities.noSuchModule(dec.getLocation());
+            Utilities.noSuchModule(dec.getEnhancementName().getLocation());
         }
-    }
-
-    @Override
-    public void postEnhancementBodyModuleDec(EnhancementBodyModuleDec dec) {
-        // Set the module level global variables to null
-        myCurrentModuleScope = null;
-        myGlobalConstraintExp = null;
-        myGlobalRequiresExp = null;
     }
 
     // -----------------------------------------------------------
@@ -444,36 +421,14 @@ public class VCGenerator extends TreeWalkerVisitor {
         myVCBuffer.append("======================================\n");
         myVCBuffer.append("\n");
 
-        // Set the current module scope
-        try {
-            myCurrentModuleScope =
-                    mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
+        // From the list of imports, obtain the global constraints
+        // of the imported modules.
+        myGlobalConstraintExp =
+                getConstraints(dec.getLocation(), myCurrentModuleScope
+                        .getImports());
 
-            // Get "Z" from the TypeGraph
-            Z = Utilities.getMathTypeZ(dec.getLocation(), myCurrentModuleScope);
-
-            // From the list of imports, obtain the global constraints
-            // of the imported modules.
-            myGlobalConstraintExp =
-                    getConstraints(dec.getLocation(), myCurrentModuleScope
-                            .getImports());
-
-            // Store the global requires clause
-            myGlobalRequiresExp = getRequiresClause(dec.getLocation(), dec);
-        }
-        catch (NoSuchSymbolException e) {
-            System.err.println("Module " + dec.getName()
-                    + " does not exist or is not in scope.");
-            Utilities.noSuchModule(dec.getLocation());
-        }
-    }
-
-    @Override
-    public void postFacilityModuleDec(FacilityModuleDec dec) {
-        // Set the module level global variables to null
-        myCurrentModuleScope = null;
-        myGlobalConstraintExp = null;
-        myGlobalRequiresExp = null;
+        // Store the global requires clause
+        myGlobalRequiresExp = getRequiresClause(dec.getLocation(), dec);
     }
 
     // -----------------------------------------------------------
@@ -576,6 +531,33 @@ public class VCGenerator extends TreeWalkerVisitor {
     // -----------------------------------------------------------
 
     @Override
+    public void preModuleDec(ModuleDec dec) {
+        // Set the current module scope
+        try {
+            myCurrentModuleScope =
+                    mySymbolTable.getModuleScope(new ModuleIdentifier(dec));
+
+            // Get "Z" from the TypeGraph
+            Z = Utilities.getMathTypeZ(dec.getLocation(), myCurrentModuleScope);
+
+            List<SymbolTableEntry> result =
+                    myCurrentModuleScope
+                            .query(new EntryTypeQuery<SymbolTableEntry>(
+                                    FacilityEntry.class,
+                                    MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                    MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE));
+            for (SymbolTableEntry s : result) {
+                System.out.println(s.getName());
+            }
+        }
+        catch (NoSuchSymbolException e) {
+            System.err.println("Module " + dec.getName()
+                    + " does not exist or is not in scope.");
+            Utilities.noSuchModule(dec.getLocation());
+        }
+    }
+
+    @Override
     public void postModuleDec(ModuleDec dec) {
         // Create the output generator and finalize output
         myOutputGenerator =
@@ -598,6 +580,11 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
             myOutputGenerator.outputToFile(filename);
         }
+
+        // Set the module level global variables to null
+        myCurrentModuleScope = null;
+        myGlobalConstraintExp = null;
+        myGlobalRequiresExp = null;
     }
 
     // -----------------------------------------------------------
