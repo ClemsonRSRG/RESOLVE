@@ -22,6 +22,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.vcgeneration.AssertiveCode;
@@ -421,8 +422,11 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                     }
                 }
                 else {
-                    Utilities
-                            .noSuchSymbol(tyQualifier, tyName.getName(), opLoc);
+                    // It is OK here, because it is a generic type
+                    if (!(ty.getProgramTypeValue() instanceof PTGeneric)) {
+                        Utilities.noSuchSymbol(tyQualifier, tyName.getName(),
+                                opLoc);
+                    }
                 }
             }
         }

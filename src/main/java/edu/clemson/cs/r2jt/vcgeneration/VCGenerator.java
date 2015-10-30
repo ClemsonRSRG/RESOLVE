@@ -2084,8 +2084,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
                 }
                 else {
-                    Utilities
-                            .noSuchSymbol(tyQualifier, tyName.getName(), opLoc);
+                    // It is OK here, because it is a generic type
+                    if (!(ty.getProgramTypeValue() instanceof PTGeneric)) {
+                        Utilities.noSuchSymbol(tyQualifier, tyName.getName(),
+                                opLoc);
+                    }
                 }
             }
         }
