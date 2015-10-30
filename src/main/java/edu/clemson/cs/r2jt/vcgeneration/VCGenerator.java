@@ -2085,12 +2085,59 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
                 }
                 else {
-                    // Only throw an exception if it is not a type famility or
-                    // a generic type.
-                    if (!(ty.getProgramTypeValue() instanceof PTGeneric)
-                            && !(ty.getProgramTypeValue() instanceof PTFamily)) {
-                        Utilities.noSuchSymbol(tyQualifier, tyName.getName(),
-                                opLoc);
+                    // Ignore all generic types
+                    if (!(ty.getProgramTypeValue() instanceof PTGeneric)) {
+                        boolean found = false;
+
+                        // Check to see if the type of this variable is from an imported
+                        // concept type family definition. If we find one, we simply ignore this type.
+                        Iterator<SymbolTableEntry> programTypeDefIt =
+                                myCurrentModuleScope
+                                        .query(
+                                                new EntryTypeQuery<SymbolTableEntry>(
+                                                        ProgramTypeDefinitionEntry.class,
+                                                        MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
+                                        .iterator();
+                        while (programTypeDefIt.hasNext() && !found) {
+                            ProgramTypeDefinitionEntry entry =
+                                    programTypeDefIt
+                                            .next()
+                                            .toProgramTypeDefinitionEntry(opLoc);
+
+                            if (entry.getName().equals(tyName.getName())) {
+                                found = true;
+                            }
+                        }
+
+                        if (!found) {
+                            // Check to see if the type of this variable is from an local
+                            // type representation. If we find one, we simply ignore this type.
+                            Iterator<SymbolTableEntry> representationTypeIt =
+                                    myCurrentModuleScope
+                                            .query(
+                                                    new EntryTypeQuery<SymbolTableEntry>(
+                                                            RepresentationTypeEntry.class,
+                                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
+                                            .iterator();
+                            while (representationTypeIt.hasNext() && !found) {
+                                RepresentationTypeEntry entry =
+                                        representationTypeIt.next()
+                                                .toRepresentationTypeEntry(
+                                                        opLoc);
+
+                                if (entry.getName().equals(tyName.getName())) {
+                                    found = true;
+                                }
+                            }
+
+                            // Throw an error if can't find one.
+                            if (!found) {
+                                Utilities.noSuchSymbol(tyQualifier, tyName
+                                        .getName(), opLoc);
+                            }
+                        }
                     }
                 }
             }

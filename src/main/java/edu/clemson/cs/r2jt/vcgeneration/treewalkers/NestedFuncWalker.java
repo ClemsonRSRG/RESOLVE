@@ -18,13 +18,18 @@ import edu.clemson.cs.r2jt.data.Mode;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PLambda;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTableBuilder;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
 import edu.clemson.cs.r2jt.typeandpopulate.ScopeRepository;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.OperationEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.ProgramTypeDefinitionEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.RepresentationTypeEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.vcgeneration.AssertiveCode;
 import edu.clemson.cs.r2jt.vcgeneration.FacilityFormalToActuals;
@@ -423,12 +428,59 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                     }
                 }
                 else {
-                    // Only throw an exception if it is not a type famility or
-                    // a generic type.
-                    if (!(ty.getProgramTypeValue() instanceof PTGeneric)
-                            && !(ty.getProgramTypeValue() instanceof PTFamily)) {
-                        Utilities.noSuchSymbol(tyQualifier, tyName.getName(),
-                                opLoc);
+                    // Ignore all generic types
+                    if (!(ty.getProgramTypeValue() instanceof PTGeneric)) {
+                        boolean found = false;
+
+                        // Check to see if the type of this variable is from an imported
+                        // concept type family definition. If we find one, we simply ignore this type.
+                        Iterator<SymbolTableEntry> programTypeDefIt =
+                                myCurrentModuleScope
+                                        .query(
+                                                new EntryTypeQuery<SymbolTableEntry>(
+                                                        ProgramTypeDefinitionEntry.class,
+                                                        MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
+                                        .iterator();
+                        while (programTypeDefIt.hasNext() && !found) {
+                            ProgramTypeDefinitionEntry entry =
+                                    programTypeDefIt
+                                            .next()
+                                            .toProgramTypeDefinitionEntry(opLoc);
+
+                            if (entry.getName().equals(tyName.getName())) {
+                                found = true;
+                            }
+                        }
+
+                        if (!found) {
+                            // Check to see if the type of this variable is from an local
+                            // type representation. If we find one, we simply ignore this type.
+                            Iterator<SymbolTableEntry> representationTypeIt =
+                                    myCurrentModuleScope
+                                            .query(
+                                                    new EntryTypeQuery<SymbolTableEntry>(
+                                                            RepresentationTypeEntry.class,
+                                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
+                                            .iterator();
+                            while (representationTypeIt.hasNext() && !found) {
+                                RepresentationTypeEntry entry =
+                                        representationTypeIt.next()
+                                                .toRepresentationTypeEntry(
+                                                        opLoc);
+
+                                if (entry.getName().equals(tyName.getName())) {
+                                    found = true;
+                                }
+                            }
+
+                            // Throw an error if can't find one.
+                            if (!found) {
+                                Utilities.noSuchSymbol(tyQualifier, tyName
+                                        .getName(), opLoc);
+                            }
+                        }
                     }
                 }
             }
