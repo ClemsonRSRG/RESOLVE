@@ -24,6 +24,7 @@ import edu.clemson.cs.r2jt.treewalk.TreeWalker;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
@@ -2084,8 +2085,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
                 }
                 else {
-                    // It is OK here, because it is a generic type
-                    if (!(ty.getProgramTypeValue() instanceof PTGeneric)) {
+                    // Only throw an exception if it is not a type famility or
+                    // a generic type.
+                    if (!(ty.getProgramTypeValue() instanceof PTGeneric)
+                            && !(ty.getProgramTypeValue() instanceof PTFamily)) {
                         Utilities.noSuchSymbol(tyQualifier, tyName.getName(),
                                 opLoc);
                     }
