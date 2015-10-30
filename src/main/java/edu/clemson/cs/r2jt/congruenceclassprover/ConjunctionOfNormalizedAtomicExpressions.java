@@ -455,11 +455,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             // If the modified one is already there, don't put it back
             if (indexToInsert < 0) {
                 indexToInsert = -(indexToInsert + 1);
-                // root of modified expression depends on the changed arg
-                //String fordebug = modifiedEntries.peek().toHumanReadableString(m_registry);
-                int rootOfChangedExpression = modifiedEntries.peek().readRoot();
-                m_registry.addDependency(rootOfChangedExpression,
-                        m_current_justification, false);
                 m_exprList.add(indexToInsert, modifiedEntries.pop());
             }
             else {
@@ -472,8 +467,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 }
             }
         }
-        //System.err.println(m_registry.getSymbolForIndex(a) + "/" + m_registry.getSymbolForIndex(b));
-        m_registry.addDependency(a, m_current_justification, true);
+
         m_registry.substitute(a, b);
         return coincidentalMergeHoldingTank;
     }

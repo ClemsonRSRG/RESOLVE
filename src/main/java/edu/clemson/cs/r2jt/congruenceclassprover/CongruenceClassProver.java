@@ -50,7 +50,7 @@ public final class CongruenceClassProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
-    private final long DEFAULTTIMEOUT = 15000;
+    private final long DEFAULTTIMEOUT = 120000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     private boolean printVCEachStep = false;
@@ -155,7 +155,7 @@ public final class CongruenceClassProver {
         PSymbol p = new PSymbol(B, null, "p", PSymbol.Quantification.FOR_ALL);
         PSymbol q = new PSymbol(B, null, "q", PSymbol.Quantification.FOR_ALL);
         ArrayList<PExp> args = new ArrayList<PExp>();
-        // p = not q implies q = not p
+        // (p = not q) = (q = not p)
         args.add(q);
         PSymbol not_q = new PSymbol(B, null, "not", args);
         args.clear();
@@ -172,9 +172,10 @@ public final class CongruenceClassProver {
         args.clear();
         args.add(ant);
         args.add(succ);
-        PSymbol th1 = new PSymbol(B, null, "implies", args);
+        PSymbol th1 = new PSymbol(B, null, "=", args);
         m_theorems.add(new TheoremCongruenceClosureImpl(m_typeGraph, th1,
                 false, "Default theorem 1"));
+        addEqualityTheorem(true, th1, "Default theorem 1");
         // not not p = p
         args.clear();
         args.add(not_p);
@@ -223,6 +224,9 @@ public final class CongruenceClassProver {
         PSymbol th5 = new PSymbol(B, null, "implies", args);
         m_theorems.add(new TheoremCongruenceClosureImpl(m_typeGraph, th5,
                 false, "Default theorem 5"));
+
+        // (p = q) = (not p = not q)?
+        // not(p = q) = (not p = q)?
     }
 
     private void addContrapositive(PExp theorem, String thName) {

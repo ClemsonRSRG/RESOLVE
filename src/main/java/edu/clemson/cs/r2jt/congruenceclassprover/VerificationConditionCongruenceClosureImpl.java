@@ -268,6 +268,10 @@ public class VerificationConditionCongruenceClosureImpl {
     }
 
     protected Map<String, Integer> getGoalSymbols() {
+        // even score if goal is true = false
+        if(m_goal.size()==2 && (m_goal.get(1).equals("false") || m_goal.get(0).equals("false"))){
+            return new HashMap<String, Integer>();
+        }
         HashSet<String> goalSymbolSet = new HashSet<String>();
         for (String goal : m_goal) {
             // true is the root of many expressions

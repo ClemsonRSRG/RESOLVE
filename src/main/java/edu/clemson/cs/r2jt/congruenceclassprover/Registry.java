@@ -158,38 +158,6 @@ public class Registry {
         m_symbolIndexParentArray.set(opIndexB, opIndexA);
     }
 
-    public void addDependency(int opIndex, String justification,
-            boolean sourceIsRootChange) {
-        if (justification.length() == 0)
-            return;
-        //if(getUsage(getSymbolForIndex(opIndex)).equals(Usage.LITERAL)) return;
-        //if(getSymbolForIndex(opIndex).equals("true") && sourceIsRootChange) return;
-        // Do not add a dependency if opIndex was the last symbol created
-        if (opIndex == m_symbolIndexParentArray.size() - 1)
-            return;
-        if (m_appliedTheoremDependencyGraph.containsKey(justification)) {
-            m_appliedTheoremDependencyGraph.get(justification).add(opIndex);
-        }
-        else {
-            HashSet<Integer> syms = new HashSet<Integer>();
-            syms.add(opIndex);
-            m_appliedTheoremDependencyGraph.put(justification, syms);
-        }
-    }
-
-    public void updateTheoremDependencyGraphKey(String oldKey, String newKey) {
-        Set<Integer> valSet = m_appliedTheoremDependencyGraph.get(oldKey);
-        m_appliedTheoremDependencyGraph.remove(oldKey);
-        m_appliedTheoremDependencyGraph.put(newKey, valSet);
-    }
-
-    public boolean areEqual(String symString, int symInt) {
-        int rootOfInt = findAndCompress(symInt);
-        int rootOfString = getIndexForSymbol(symString);
-        rootOfString = findAndCompress(rootOfString);
-        return rootOfInt == rootOfString;
-    }
-
     protected int findAndCompress(int index) {
         // early return for parent
         if (m_symbolIndexParentArray.get(index) == index)
