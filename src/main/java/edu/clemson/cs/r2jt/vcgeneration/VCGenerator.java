@@ -541,14 +541,20 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Get "Z" from the TypeGraph
             Z = Utilities.getMathTypeZ(dec.getLocation(), myCurrentModuleScope);
 
-            List<SymbolTableEntry> result =
+            // Obtain the list of imported facilities
+            List<SymbolTableEntry> results =
                     myCurrentModuleScope
                             .query(new EntryTypeQuery<SymbolTableEntry>(
                                     FacilityEntry.class,
                                     MathSymbolTable.ImportStrategy.IMPORT_NAMED,
                                     MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE));
-            for (SymbolTableEntry s : result) {
-                System.out.println(s.getName());
+            List<FacilityEntry> importFacilities =
+                    new ArrayList<FacilityEntry>();
+            for (SymbolTableEntry s : results) {
+                if (s.getSourceModuleIdentifier().compareTo(
+                        myCurrentModuleScope.getModuleIdentifier()) != 0) {
+                    importFacilities.add(s.toFacilityEntry(dec.getLocation()));
+                }
             }
         }
         catch (NoSuchSymbolException e) {
