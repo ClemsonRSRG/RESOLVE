@@ -18,14 +18,12 @@ package edu.clemson.cs.r2jt.vcgeneration;
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
-import edu.clemson.cs.r2jt.errors.Assert;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.treewalk.TreeWalker;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
@@ -399,8 +397,10 @@ public class VCGenerator extends TreeWalkerVisitor {
 
     @Override
     public void postFacilityDec(FacilityDec dec) {
-        // Applies the facility declaration rule
-        applyFacilityDeclRule(dec);
+        // Applies the facility declaration rule.
+        // Since this is a local facility, we will need to add
+        // it to our incomplete assertive code stack.
+        applyFacilityDeclRule(dec, true);
 
         // Loop through assertive code stack
         loopAssertiveCodeStack();
@@ -542,10 +542,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Get "Z" from the TypeGraph
             Z = Utilities.getMathTypeZ(dec.getLocation(), myCurrentModuleScope);
 
-            // We need to add all imported facility declarations to our instantiated
-            // facility formal to actual map. Notice that this excludes any local
-            // instantiated facilities, because the facility declaration rule will
-            // take care of them.
+            // Apply the facility declaration rule to imported facility declarations.
             List<SymbolTableEntry> results =
                     myCurrentModuleScope
                             .query(new EntryTypeQuery<SymbolTableEntry>(
@@ -555,13 +552,13 @@ public class VCGenerator extends TreeWalkerVisitor {
             for (SymbolTableEntry s : results) {
                 if (s.getSourceModuleIdentifier().compareTo(
                         myCurrentModuleScope.getModuleIdentifier()) != 0) {
-                    // Add this facility to our instantiated facility formal
-                    // to actual map.
+                    // Do all the facility declaration logic, but don't add this
+                    // to our incomplete assertive code stack. We shouldn't need to
+                    // verify facility declarations that are imported.
                     FacilityDec facDec =
                             (FacilityDec) s.toFacilityEntry(dec.getLocation())
                                     .getDefiningElement();
-                    addToInstantiatedFacilityArgMap(new AssertiveCode(
-                            myInstanceEnvironment, dec), facDec);
+                    applyFacilityDeclRule(facDec, false);
                 }
             }
         }
@@ -734,69 +731,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
     // Private Methods
     // ===========================================================
-
-    /**
-     * <p>The method stores a mapping between each of the concept/realization/enhancement
-     * formal arguments to the actual arguments instantiated by the facility.
-     * This is needed to replace the requires/ensures clauses from facility instantiated
-     * operations.</p>
-     *
-     * @param assertiveCode Current assertive code.
-     * @param dec The facility declaration.
-     */
-    private void addToInstantiatedFacilityArgMap(AssertiveCode assertiveCode,
-            FacilityDec dec) {
-        try {
-            // Obtain the concept module for the facility
-            ConceptModuleDec facConceptDec =
-                    (ConceptModuleDec) mySymbolTable
-                            .getModuleScope(
-                                    new ModuleIdentifier(dec.getConceptName()
-                                            .getName())).getDefiningElement();
-
-            // Convert the module arguments into mathematical expressions
-            // Note that we could potentially have a nested function call
-            // as one of the arguments, therefore we pass in the assertive
-            // code to store the confirm statement generated from all the
-            // requires clauses.
-            List<Exp> conceptFormalArgList =
-                    createModuleFormalArgExpList(facConceptDec.getParameters());
-            List<Exp> conceptActualArgList =
-                    createModuleActualArgExpList(assertiveCode, dec
-                            .getConceptParams());
-
-            // TODO: Need to see if the concept realization has anything we need to generate VCs
-
-            // TODO: Loop through every enhancement/enhancement realization declaration, if any.
-            List<EnhancementItem> enhancementList = dec.getEnhancements();
-            for (EnhancementItem e : enhancementList) {
-                // Do something here.
-            }
-
-            // Create a mapping from concept formal to actual arguments
-            Map<Exp, Exp> conceptArgMap = new HashMap<Exp, Exp>();
-            for (int i = 0; i < conceptFormalArgList.size(); i++) {
-                conceptArgMap.put(conceptFormalArgList.get(i),
-                        conceptActualArgList.get(i));
-            }
-
-            // Facility Formal to Actual structure
-            FacilityFormalToActuals formalToActuals =
-                    new FacilityFormalToActuals(conceptArgMap);
-            for (Dec d : facConceptDec.getDecs()) {
-                if (d instanceof TypeDec) {
-                    Location loc = (Location) dec.getLocation().clone();
-                    PosSymbol qual = dec.getName().copy();
-                    PosSymbol name = d.getName().copy();
-                    myInstantiatedFacilityArgMap.put(
-                            new VarExp(loc, qual, name), formalToActuals);
-                }
-            }
-        }
-        catch (NoSuchSymbolException e) {
-            Utilities.noSuchModule(dec.getLocation());
-        }
-    }
 
     /**
      * <p>Loop through the list of <code>VarDec</code>, search
@@ -3244,8 +3178,11 @@ public class VCGenerator extends TreeWalkerVisitor {
      * <p>Applies the facility declaration rule.</p>
      *
      * @param dec Facility declaration object.
+     * @param addToIncAssertiveCodeStack True if the created assertive code needs
+     *                                   to be added to our incomplete assertive code stack.
      */
-    private void applyFacilityDeclRule(FacilityDec dec) {
+    private void applyFacilityDeclRule(FacilityDec dec,
+            boolean addToIncAssertiveCodeStack) {
         // Create a new assertive code to hold the facility declaration VCs
         AssertiveCode assertiveCode =
                 new AssertiveCode(myInstanceEnvironment, dec);
@@ -3351,18 +3288,22 @@ public class VCGenerator extends TreeWalkerVisitor {
             Utilities.noSuchModule(dec.getLocation());
         }
 
-        // Add this new assertive code to our incomplete assertive code stack
-        myIncAssertiveCodeStack.push(assertiveCode);
+        // This is a local facility and we need to add it to our incomplete
+        // assertive code stack.
+        if (addToIncAssertiveCodeStack) {
+            // Add this new assertive code to our incomplete assertive code stack
+            myIncAssertiveCodeStack.push(assertiveCode);
 
-        // Verbose Mode Debug Messages
-        String newString =
-                "\n========================= Facility Dec Name:\t"
-                        + dec.getName().getName()
-                        + " =========================\n";
-        newString += "\nFacility Declaration Rule Applied: \n";
-        newString += assertiveCode.assertionToString();
-        newString += "\n_____________________ \n";
-        myIncAssertiveCodeStackInfo.push(newString);
+            // Verbose Mode Debug Messages
+            String newString =
+                    "\n========================= Facility Dec Name:\t"
+                            + dec.getName().getName()
+                            + " =========================\n";
+            newString += "\nFacility Declaration Rule Applied: \n";
+            newString += assertiveCode.assertionToString();
+            newString += "\n_____________________ \n";
+            myIncAssertiveCodeStackInfo.push(newString);
+        }
     }
 
     /**
