@@ -18,6 +18,7 @@ package edu.clemson.cs.r2jt.vcgeneration;
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
+import edu.clemson.cs.r2jt.errors.Assert;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.treewalk.TreeWalker;
@@ -541,19 +542,26 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Get "Z" from the TypeGraph
             Z = Utilities.getMathTypeZ(dec.getLocation(), myCurrentModuleScope);
 
-            // Obtain the list of imported facilities
+            // We need to add all imported facility declarations to our instantiated
+            // facility formal to actual map. Notice that this excludes any local
+            // instantiated facilities, because the facility declaration rule will
+            // take care of them.
             List<SymbolTableEntry> results =
                     myCurrentModuleScope
                             .query(new EntryTypeQuery<SymbolTableEntry>(
                                     FacilityEntry.class,
                                     MathSymbolTable.ImportStrategy.IMPORT_NAMED,
                                     MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE));
-            List<FacilityEntry> importFacilities =
-                    new ArrayList<FacilityEntry>();
             for (SymbolTableEntry s : results) {
                 if (s.getSourceModuleIdentifier().compareTo(
                         myCurrentModuleScope.getModuleIdentifier()) != 0) {
-                    importFacilities.add(s.toFacilityEntry(dec.getLocation()));
+                    // Add this facility to our instantiated facility formal
+                    // to actual map.
+                    FacilityDec facDec =
+                            (FacilityDec) s.toFacilityEntry(dec.getLocation())
+                                    .getDefiningElement();
+                    addToInstantiatedFacilityArgMap(new AssertiveCode(
+                            myInstanceEnvironment, dec), facDec);
                 }
             }
         }
@@ -726,6 +734,69 @@ public class VCGenerator extends TreeWalkerVisitor {
     // ===========================================================
     // Private Methods
     // ===========================================================
+
+    /**
+     * <p>The method stores a mapping between each of the concept/realization/enhancement
+     * formal arguments to the actual arguments instantiated by the facility.
+     * This is needed to replace the requires/ensures clauses from facility instantiated
+     * operations.</p>
+     *
+     * @param assertiveCode Current assertive code.
+     * @param dec The facility declaration.
+     */
+    private void addToInstantiatedFacilityArgMap(AssertiveCode assertiveCode,
+            FacilityDec dec) {
+        try {
+            // Obtain the concept module for the facility
+            ConceptModuleDec facConceptDec =
+                    (ConceptModuleDec) mySymbolTable
+                            .getModuleScope(
+                                    new ModuleIdentifier(dec.getConceptName()
+                                            .getName())).getDefiningElement();
+
+            // Convert the module arguments into mathematical expressions
+            // Note that we could potentially have a nested function call
+            // as one of the arguments, therefore we pass in the assertive
+            // code to store the confirm statement generated from all the
+            // requires clauses.
+            List<Exp> conceptFormalArgList =
+                    createModuleFormalArgExpList(facConceptDec.getParameters());
+            List<Exp> conceptActualArgList =
+                    createModuleActualArgExpList(assertiveCode, dec
+                            .getConceptParams());
+
+            // TODO: Need to see if the concept realization has anything we need to generate VCs
+
+            // TODO: Loop through every enhancement/enhancement realization declaration, if any.
+            List<EnhancementItem> enhancementList = dec.getEnhancements();
+            for (EnhancementItem e : enhancementList) {
+                // Do something here.
+            }
+
+            // Create a mapping from concept formal to actual arguments
+            Map<Exp, Exp> conceptArgMap = new HashMap<Exp, Exp>();
+            for (int i = 0; i < conceptFormalArgList.size(); i++) {
+                conceptArgMap.put(conceptFormalArgList.get(i),
+                        conceptActualArgList.get(i));
+            }
+
+            // Facility Formal to Actual structure
+            FacilityFormalToActuals formalToActuals =
+                    new FacilityFormalToActuals(conceptArgMap);
+            for (Dec d : facConceptDec.getDecs()) {
+                if (d instanceof TypeDec) {
+                    Location loc = (Location) dec.getLocation().clone();
+                    PosSymbol qual = dec.getName().copy();
+                    PosSymbol name = d.getName().copy();
+                    myInstantiatedFacilityArgMap.put(
+                            new VarExp(loc, qual, name), formalToActuals);
+                }
+            }
+        }
+        catch (NoSuchSymbolException e) {
+            Utilities.noSuchModule(dec.getLocation());
+        }
+    }
 
     /**
      * <p>Loop through the list of <code>VarDec</code>, search
