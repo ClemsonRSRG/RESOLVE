@@ -18,6 +18,7 @@ package edu.clemson.cs.r2jt.vcgeneration;
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
+import edu.clemson.cs.r2jt.errors.Assert;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.treewalk.TreeWalker;
@@ -967,10 +968,13 @@ public class VCGenerator extends TreeWalkerVisitor {
         return confirmExp;
     }
 
-    private Exp facilityDeclOperationParamHelper(Location loc,
+    private AssertiveCode facilityDeclOperationParamHelper(Location loc,
             AssertiveCode assertiveCode, List<ModuleParameterDec> formalParams,
-            List<ModuleArgumentItem> actualParams) {
-        Exp retExp = null;
+            List<ModuleArgumentItem> actualParams,
+            List<Exp> conceptFormalParamExp, List<Exp> conceptActualParamExp,
+            List<Exp> conceptRealizFormalParamExp,
+            List<Exp> conceptRealizActualParamExp) {
+        AssertiveCode copyAssertiveCode = new AssertiveCode(assertiveCode);
 
         Iterator<ModuleParameterDec> realizParameterIt =
                 formalParams.iterator();
@@ -996,7 +1000,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                 // Locate the corresponding actual operation
                 OperationDec actualOperationDec = null;
-                boolean isActualOpDecLocal = false;
+                List<Exp> actualParamAsExp = new ArrayList<Exp>();
                 try {
                     OperationEntry op =
                             myCurrentModuleScope.queryForOne(
@@ -1019,9 +1023,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                 .getEnsures());
                     }
 
-                    isActualOpDecLocal =
-                            Utilities.isLocationOperation(actualOperationDec
-                                    .getName().getName(), myCurrentModuleScope);
+                    // Construct a list of actual parameters as expressions
+                    // for substitution purposes.
+                    List<ParameterVarDec> parameterVarDecs =
+                            actualOperationDec.getParameters();
+                    for (ParameterVarDec varDec : parameterVarDecs) {
+                        Ty varDecTy = varDec.getTy();
+                        actualParamAsExp.add(Utilities.createVarExp(varDec
+                                .getLocation(), null, varDec.getName(),
+                                varDecTy.getMathType(), null));
+                    }
                 }
                 catch (NoSuchSymbolException nsse) {
                     Utilities.noSuchSymbol(moduleArgumentItem.getQualifier(),
@@ -1039,24 +1050,53 @@ public class VCGenerator extends TreeWalkerVisitor {
                         getEnsuresClause(moduleArgumentItem.getLocation(),
                                 actualOperationDec);
 
-                System.out.println(modifyRequiresClause(
-                        formalOperationRequires, moduleParameterDec
-                                .getLocation(), assertiveCode,
-                        formalOperationDec, isFormalOpDecLocal));
-                System.out.println(modifyRequiresClause(
-                        actualOperationRequires, moduleArgumentItem
-                                .getLocation(), assertiveCode,
-                        actualOperationDec, isActualOpDecLocal));
-                System.out.println(modifyEnsuresClause(formalOperationEnsures,
+                // Facility Decl Rule (Operations as Parameters):
+                // preRP [ rn ~> rn_exp, rx ~> irx ] implies preIRP
+                Exp formalRequires =
+                        modifyRequiresClause(formalOperationRequires,
+                                moduleParameterDec.getLocation(),
+                                copyAssertiveCode, formalOperationDec,
+                                isFormalOpDecLocal);
+                formalRequires =
+                        replaceFacilityDeclarationVariables(formalRequires,
+                                conceptFormalParamExp, conceptActualParamExp);
+                formalRequires =
+                        replaceFacilityDeclarationVariables(formalRequires,
+                                conceptRealizFormalParamExp,
+                                conceptRealizFormalParamExp);
+                formalRequires =
+                        replaceFormalWithActualReq(formalRequires,
+                                formalOperationDec.getParameters(),
+                                actualParamAsExp);
+
+                if (!actualOperationRequires
+                        .equals(myTypeGraph.getTrueVarExp())) {
+                    Location newLoc =
+                            (Location) actualOperationRequires.getLocation()
+                                    .clone();
+                    newLoc.setDetails("Requires Clause of "
+                            + formalOperationDec.getName().getName()
+                            + " implies the Requires Clause of "
+                            + actualOperationDec.getName().getName()
+                            + " in Facility Instantiation Rule");
+                    Utilities.setLocation(actualOperationRequires, newLoc);
+
+                    copyAssertiveCode.addAssume(moduleParameterDec
+                            .getLocation(), formalRequires, false);
+                    copyAssertiveCode.addConfirm(moduleArgumentItem
+                            .getLocation(), actualOperationRequires, false);
+                }
+
+                /*System.out.println(modifyEnsuresClause(formalOperationEnsures,
                         moduleParameterDec.getLocation(), formalOperationDec,
                         isFormalOpDecLocal));
                 System.out.println(modifyEnsuresClause(actualOperationEnsures,
                         moduleArgumentItem.getLocation(), actualOperationDec,
-                        isActualOpDecLocal));
+                        isActualOpDecLocal));*/
             }
         }
 
-        return retExp;
+        return copyAssertiveCode;
     }
 
     /**
@@ -3396,19 +3436,23 @@ public class VCGenerator extends TreeWalkerVisitor {
                         replaceFacilityDeclarationVariables(conceptRealizReq,
                                 conceptFormalArgList, conceptActualArgList);
 
-                // Facility Decl Rule (Operations as Concept Realization Parameters):
-                // preRP [ rn ~> rn_exp, rx ~> irx ] implies preIRP and
-                // postIRP implies postRP [ rn ~> rn_exp, #rx ~> #irx, rx ~> irx ]
-                facilityDeclOperationParamHelper(decLoc, assertiveCode,
-                        facConceptRealizDec.getParameters(), dec
-                                .getBodyParams());
-
                 // Create a mapping from concept realization formal to actual arguments
                 // for future use.
                 for (int i = 0; i < conceptRealizFormalArgList.size(); i++) {
                     conceptRealizArgMap.put(conceptRealizFormalArgList.get(i),
                             conceptRealizActualArgList.get(i));
                 }
+
+                // Facility Decl Rule (Operations as Concept Realization Parameters):
+                // preRP [ rn ~> rn_exp, rx ~> irx ] implies preIRP and
+                // postIRP implies postRP [ rn ~> rn_exp, #rx ~> #irx, rx ~> irx ]
+                assertiveCode =
+                        facilityDeclOperationParamHelper(decLoc, assertiveCode,
+                                facConceptRealizDec.getParameters(), dec
+                                        .getBodyParams(), conceptFormalArgList,
+                                conceptActualArgList,
+                                conceptRealizFormalArgList,
+                                conceptRealizActualArgList);
             }
             else {
                 conceptRealizReq = myTypeGraph.getTrueVarExp();
