@@ -478,8 +478,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 Utilities.isLocationOperation(dec.getName().getName(),
                         myCurrentModuleScope);
         Exp requires =
-                modifyRequiresClause(getRequiresClause(loc, dec), loc, name,
-                        isLocal);
+                modifyRequiresClause(getRequiresClause(loc, dec), loc,
+                        myCurrentAssertiveCode, opDec, isLocal);
         Exp ensures =
                 modifyEnsuresClause(getEnsuresClause(loc, dec), loc, opDec,
                         isLocal);
@@ -646,8 +646,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 Utilities.isLocationOperation(dec.getName().getName(),
                         myCurrentModuleScope);
         Exp requires =
-                modifyRequiresClause(getRequiresClause(loc, opDec), loc, name,
-                        isLocal);
+                modifyRequiresClause(getRequiresClause(loc, opDec), loc,
+                        myCurrentAssertiveCode, opDec, isLocal);
         Exp ensures =
                 modifyEnsuresClause(getEnsuresClause(loc, opDec), loc, opDec,
                         isLocal);
@@ -968,7 +968,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     private Exp facilityDeclOperationParamHelper(Location loc,
-            List<ModuleParameterDec> formalParams,
+            AssertiveCode assertiveCode, List<ModuleParameterDec> formalParams,
             List<ModuleArgumentItem> actualParams) {
         Exp retExp = null;
 
@@ -1039,8 +1039,14 @@ public class VCGenerator extends TreeWalkerVisitor {
                         getEnsuresClause(moduleArgumentItem.getLocation(),
                                 actualOperationDec);
 
-                System.out.println(formalOperationRequires);
-                System.out.println(actualOperationRequires);
+                System.out.println(modifyRequiresClause(
+                        formalOperationRequires, moduleParameterDec
+                                .getLocation(), assertiveCode,
+                        formalOperationDec, isFormalOpDecLocal));
+                System.out.println(modifyRequiresClause(
+                        actualOperationRequires, moduleArgumentItem
+                                .getLocation(), assertiveCode,
+                        actualOperationDec, isActualOpDecLocal));
                 System.out.println(modifyEnsuresClause(formalOperationEnsures,
                         moduleParameterDec.getLocation(), formalOperationDec,
                         isFormalOpDecLocal));
@@ -1877,25 +1883,18 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @param requires The <code>Exp</code> containing the requires clause.
      * @param opLocation The <code>Location</code> for the operation.
-     * @param opName The name for the operation.
+     * @param assertiveCode The current assertive code we are currently generating.
+     * @param operationDec The <code>OperationDec</code> that is modifying the requires clause.
      * @param isLocal True if it is a local operation, false otherwise.
      *
      * @return The modified requires clause <code>Exp</code>.
      */
     private Exp modifyRequiresByParameter(Exp requires, Location opLocation,
-            String opName, boolean isLocal) {
+            AssertiveCode assertiveCode, OperationDec operationDec,
+            boolean isLocal) {
         // Obtain the list of parameters
-        List<ParameterVarDec> parameterVarDecList;
-        if (myCurrentOperationEntry.getDefiningElement() instanceof FacilityOperationDec) {
-            parameterVarDecList =
-                    ((FacilityOperationDec) myCurrentOperationEntry
-                            .getDefiningElement()).getParameters();
-        }
-        else {
-            parameterVarDecList =
-                    ((OperationDec) myCurrentOperationEntry
-                            .getDefiningElement()).getParameters();
-        }
+        List<ParameterVarDec> parameterVarDecList =
+                operationDec.getParameters();
 
         // Loop through each parameter
         for (ParameterVarDec p : parameterVarDecList) {
@@ -1984,7 +1983,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                                     constLoc = ((Location) opLocation.clone());
                                     constLoc.setDetails("Requires Clause of "
-                                            + opName + details);
+                                            + operationDec.getName().getName()
+                                            + details);
                                 }
                                 constLoc.setDetails(constLoc.getDetails()
                                         + " (Constraint from \""
@@ -2026,9 +2026,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
 
                 // Add the current variable to our list of free variables
-                myCurrentAssertiveCode.addFreeVar(Utilities.createVarExp(p
-                        .getLocation(), null, p.getName(), pNameTy
-                        .getMathTypeValue(), null));
+                assertiveCode.addFreeVar(Utilities.createVarExp(
+                        p.getLocation(), null, p.getName(), pNameTy
+                                .getMathTypeValue(), null));
             }
             else {
                 // Ty not handled.
@@ -2049,17 +2049,20 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @param requires The <code>Exp</code> containing the requires clause.
      * @param opLocation The <code>Location</code> for the operation.
-     * @param opName The name of the operation.
+     * @param assertiveCode The current assertive code we are currently generating.
+     * @param operationDec The <code>OperationDec</code> that is modifying the requires clause.
      * @param isLocal True if it is a local operation, false otherwise.
      *
      * @return The modified requires clause <code>Exp</code>.
      */
     private Exp modifyRequiresClause(Exp requires, Location opLocation,
-            String opName, boolean isLocal) {
+            AssertiveCode assertiveCode, OperationDec operationDec,
+            boolean isLocal) {
         // Modifies the existing requires clause based on
         // the parameter modes.
         requires =
-                modifyRequiresByParameter(requires, opLocation, opName, isLocal);
+                modifyRequiresByParameter(requires, opLocation, assertiveCode,
+                        operationDec, isLocal);
 
         // Modifies the existing requires clause based on
         // the parameter modes.
@@ -3396,8 +3399,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Facility Decl Rule (Operations as Concept Realization Parameters):
                 // preRP [ rn ~> rn_exp, rx ~> irx ] implies preIRP and
                 // postIRP implies postRP [ rn ~> rn_exp, #rx ~> #irx, rx ~> irx ]
-                facilityDeclOperationParamHelper(decLoc, facConceptRealizDec
-                        .getParameters(), dec.getBodyParams());
+                facilityDeclOperationParamHelper(decLoc, assertiveCode,
+                        facConceptRealizDec.getParameters(), dec
+                                .getBodyParams());
 
                 // Create a mapping from concept realization formal to actual arguments
                 // for future use.
