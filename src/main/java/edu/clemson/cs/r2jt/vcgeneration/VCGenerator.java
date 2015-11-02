@@ -18,7 +18,6 @@ package edu.clemson.cs.r2jt.vcgeneration;
 import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
-import edu.clemson.cs.r2jt.errors.Assert;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.treewalk.TreeWalker;
@@ -3446,9 +3445,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         assertiveCode.addCode(new MemoryStmt((Location) decLoc.clone(), true));
 
         try {
-            // Final confirm clause
-            Exp finalConfirmExp;
-
             // Obtain the concept module for the facility
             ConceptModuleDec facConceptDec =
                     (ConceptModuleDec) mySymbolTable
@@ -3472,12 +3468,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                     replaceFacilityDeclarationVariables(getRequiresClause(
                             facConceptDec.getLocation(), facConceptDec),
                             conceptFormalArgList, conceptActualArgList);
-            Location conceptReqLoc =
-                    (Location) dec.getConceptName().getLocation().clone();
-            conceptReqLoc.setDetails("Requires Clause for "
-                    + dec.getConceptName().getName()
-                    + " in Facility Instantiation Rule");
-            conceptReq.setLocation(conceptReqLoc);
+            if (!conceptReq.equals(myTypeGraph.getTrueVarExp())) {
+                Location conceptReqLoc =
+                        (Location) dec.getConceptName().getLocation().clone();
+                conceptReqLoc.setDetails("Requires Clause for "
+                        + dec.getConceptName().getName()
+                        + " in Facility Instantiation Rule");
+                conceptReq.setLocation(conceptReqLoc);
+                assertiveCode.addConfirm(conceptReqLoc, conceptReq, false);
+            }
 
             // Create a mapping from concept formal to actual arguments
             // for future use.
@@ -3487,15 +3486,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                         conceptActualArgList.get(i));
             }
 
-            // Add the concept requires to the facility final confirm clause
-            finalConfirmExp = conceptReq;
-
             // Facility Decl Rule (Concept Realization Requires):
             //      (RPC[ rn ~> rn_exp, RR ~> IRR ])[ n ~> n_exp, R ~> IR ]
             //
             // Note: Only apply this part of the rule if the concept realization
             // is not externally realized.
-            Exp conceptRealizReq;
             Map<Exp, Exp> conceptRealizArgMap = new HashMap<Exp, Exp>();
             if (!dec.getExternallyRealizedFlag()) {
                 ConceptBodyModuleDec facConceptRealizDec =
@@ -3516,7 +3511,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 .getBodyParams());
 
                 // 1) Replace the concept realization formal with actuals
-                conceptRealizReq =
+                Exp conceptRealizReq =
                         replaceFacilityDeclarationVariables(getRequiresClause(
                                 facConceptRealizDec.getLocation(),
                                 facConceptRealizDec),
@@ -3527,6 +3522,18 @@ public class VCGenerator extends TreeWalkerVisitor {
                 conceptRealizReq =
                         replaceFacilityDeclarationVariables(conceptRealizReq,
                                 conceptFormalArgList, conceptActualArgList);
+
+                // Add this as a new confirm statement in our assertive code
+                if (!conceptRealizReq.equals(myTypeGraph.getTrueVarExp())) {
+                    Location conceptRealizReqLoc =
+                            (Location) dec.getBodyName().getLocation().clone();
+                    conceptRealizReqLoc.setDetails("Requires Clause for "
+                            + dec.getBodyName().getName()
+                            + " in Facility Instantiation Rule");
+                    conceptRealizReq.setLocation(conceptRealizReqLoc);
+                    assertiveCode.addConfirm(conceptRealizReqLoc,
+                            conceptRealizReq, false);
+                }
 
                 // Create a mapping from concept realization formal to actual arguments
                 // for future use.
@@ -3546,22 +3553,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 conceptRealizFormalArgList,
                                 conceptRealizActualArgList);
             }
-            else {
-                conceptRealizReq = myTypeGraph.getTrueVarExp();
-            }
-            Location conceptRealizReqLoc =
-                    (Location) dec.getBodyName().getLocation().clone();
-            conceptRealizReqLoc.setDetails("Requires Clause for "
-                    + dec.getBodyName().getName()
-                    + " in Facility Instantiation Rule");
-            conceptRealizReq.setLocation(conceptRealizReqLoc);
-
-            // Add the concept realization requires to the facility final confirm clause
-            finalConfirmExp =
-                    myTypeGraph.formConjunct(finalConfirmExp, conceptRealizReq);
-
-            // Set this as our final confirm statement for this assertive code
-            assertiveCode.setFinalConfirm(finalConfirmExp, false);
 
             // TODO: Loop through every enhancement/enhancement realization declaration, if any.
             List<EnhancementItem> enhancementList = dec.getEnhancements();
