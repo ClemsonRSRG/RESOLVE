@@ -27,6 +27,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
@@ -960,6 +961,80 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         return confirmExp;
+    }
+
+    private Exp facilityDeclOperationParamHelper(Location loc,
+            List<ModuleParameterDec> formalParams,
+            List<ModuleArgumentItem> actualParams) {
+        Exp retExp = null;
+
+        Iterator<ModuleParameterDec> realizParameterIt =
+                formalParams.iterator();
+        Iterator<ModuleArgumentItem> realizArgumentItemIt =
+                actualParams.iterator();
+        while (realizParameterIt.hasNext() && realizArgumentItemIt.hasNext()) {
+            ModuleParameterDec moduleParameterDec = realizParameterIt.next();
+            ModuleArgumentItem moduleArgumentItem = realizArgumentItemIt.next();
+
+            if (moduleParameterDec.getWrappedDec() instanceof OperationDec) {
+                // Formal operation
+                OperationDec formalOperationDec =
+                        (OperationDec) moduleParameterDec.getWrappedDec();
+                Exp formalOperationRequires =
+                        getRequiresClause(formalOperationDec.getLocation(),
+                                formalOperationDec);
+                Exp formalOperationEnsures =
+                        getEnsuresClause(formalOperationDec.getLocation(),
+                                formalOperationDec);
+
+                // Locate the corresponding actual operation
+                OperationDec actualOperationDec = null;
+                try {
+                    OperationEntry op =
+                            myCurrentModuleScope.queryForOne(
+                                    new NameQuery(moduleArgumentItem
+                                            .getQualifier(), moduleArgumentItem
+                                            .getName())).toOperationEntry(loc);
+
+                    if (op.getDefiningElement() instanceof OperationDec) {
+                        actualOperationDec =
+                                (OperationDec) op.getDefiningElement();
+                    }
+                    else {
+                        FacilityOperationDec fOpDec =
+                                (FacilityOperationDec) op.getDefiningElement();
+                        actualOperationDec =
+                                new OperationDec(fOpDec.getName(), fOpDec
+                                        .getParameters(), fOpDec.getReturnTy(),
+                                        fOpDec.getStateVars(), fOpDec
+                                                .getRequires(), fOpDec
+                                                .getEnsures());
+                    }
+                }
+                catch (NoSuchSymbolException nsse) {
+                    Utilities.noSuchSymbol(moduleArgumentItem.getQualifier(),
+                            moduleArgumentItem.getName().getName(), loc);
+                }
+                catch (DuplicateSymbolException dse) {
+                    //This should be caught earlier, when the duplicate operation is
+                    //created
+                    throw new RuntimeException(dse);
+                }
+                Exp actualOperationRequires =
+                        getRequiresClause(moduleArgumentItem.getLocation(),
+                                actualOperationDec);
+                Exp actualOperationEnsures =
+                        getEnsuresClause(moduleArgumentItem.getLocation(),
+                                actualOperationDec);
+
+                System.out.println(formalOperationRequires);
+                System.out.println(actualOperationRequires);
+                System.out.println(formalOperationEnsures);
+                System.out.println(actualOperationEnsures);
+            }
+        }
+
+        return retExp;
     }
 
     /**
@@ -3313,6 +3388,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                 conceptRealizReq =
                         replaceFacilityDeclarationVariables(conceptRealizReq,
                                 conceptFormalArgList, conceptActualArgList);
+
+                // Facility Decl Rule (Operations as Concept Realization Parameters):
+                // preRP [ rn ~> rn_exp, rx ~> irx ] implies preIRP and
+                // postIRP implies postRP [ rn ~> rn_exp, #rx ~> #irx, rx ~> irx ]
+                facilityDeclOperationParamHelper(decLoc, facConceptRealizDec
+                        .getParameters(), dec.getBodyParams());
 
                 // Create a mapping from concept realization formal to actual arguments
                 // for future use.
