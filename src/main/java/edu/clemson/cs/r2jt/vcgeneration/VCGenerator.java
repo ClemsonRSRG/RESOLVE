@@ -2087,12 +2087,22 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
 
                 if (formalToActuals != null) {
+                    // Replace all concept formal arguments with their actuals
                     Map<Exp, Exp> conceptMap =
                             formalToActuals.getConceptArgMap();
                     for (Exp e : conceptMap.keySet()) {
                         newClause =
                                 Utilities.replace(newClause, e, conceptMap
                                         .get(e));
+                    }
+
+                    // Replace all concept realization formal arguments with their actuals
+                    Map<Exp, Exp> conceptRealizMap =
+                            formalToActuals.getConceptRealizArgMap();
+                    for (Exp e : conceptRealizMap.keySet()) {
+                        newClause =
+                                Utilities.replace(newClause, e,
+                                        conceptRealizMap.get(e));
                     }
                 }
                 else {
@@ -3339,7 +3349,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             // This is needed to replace the requires/ensures clauses from facility instantiated
             // operations.
             FacilityFormalToActuals formalToActuals =
-                    new FacilityFormalToActuals(conceptArgMap);
+                    new FacilityFormalToActuals(conceptArgMap,
+                            conceptRealizArgMap);
             for (Dec d : facConceptDec.getDecs()) {
                 if (d instanceof TypeDec) {
                     Location loc = (Location) dec.getLocation().clone();

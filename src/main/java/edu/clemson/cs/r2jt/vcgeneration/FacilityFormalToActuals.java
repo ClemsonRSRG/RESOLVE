@@ -20,14 +20,35 @@ import java.util.Map;
  */
 public class FacilityFormalToActuals {
 
+    /** <p>This maps all concept formal arguments to their actuals</p> */
     private final Map<Exp, Exp> myConceptArgMap;
 
-    public FacilityFormalToActuals(Map<Exp, Exp> cArgMap) {
+    /** <p>This maps all concept realization formal arguments to their actuals</p> */
+    private final Map<Exp, Exp> myConceptRealizArgMap;
+
+    public FacilityFormalToActuals(Map<Exp, Exp> cArgMap, Map<Exp, Exp> crArgMap) {
         myConceptArgMap = cArgMap;
+        myConceptRealizArgMap = crArgMap;
     }
 
+    /**
+     * <p>Returns a map containing the concept formal and
+     * actual arguments.</p>
+     *
+     * @return A {@link Map}.
+     */
     public Map<Exp, Exp> getConceptArgMap() {
         return myConceptArgMap;
+    }
+
+    /**
+     * <p>Returns a map containing the concept realization formal and
+     * actual arguments.</p>
+     *
+     * @return A {@link Map}.
+     */
+    public Map<Exp, Exp> getConceptRealizArgMap() {
+        return myConceptRealizArgMap;
     }
 
 }
