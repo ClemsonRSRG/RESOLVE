@@ -1125,12 +1125,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                             + " implies the Requires Clause of "
                             + actualOperationDec.getName().getName()
                             + " in Facility Instantiation Rule");
-                    Utilities.setLocation(actualOperationRequires, newLoc);
 
-                    copyAssertiveCode.addAssume(moduleParameterDec
-                            .getLocation(), formalRequires, false);
-                    copyAssertiveCode.addConfirm(moduleArgumentItem
-                            .getLocation(), actualOperationRequires, false);
+                    Exp newConfirmExp =
+                            myTypeGraph.formImplies(formalRequires,
+                                    actualOperationRequires);
+                    Utilities.setLocation(newConfirmExp, newLoc);
+                    copyAssertiveCode.addConfirm(newLoc, newConfirmExp, false);
                 }
 
                 // Facility Decl Rule (Operations as Parameters):
@@ -1159,12 +1159,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                             + " implies the Ensures Clause of "
                             + formalOperationDec.getName().getName()
                             + " in Facility Instantiation Rule");
-                    Utilities.setLocation(formalEnsures, newLoc);
 
-                    copyAssertiveCode.addAssume(moduleParameterDec
-                            .getLocation(), actualOperationEnsures, false);
-                    copyAssertiveCode.addConfirm(moduleArgumentItem
-                            .getLocation(), formalEnsures, false);
+                    Exp newConfirmExp =
+                            myTypeGraph.formImplies(actualOperationEnsures,
+                                    formalEnsures);
+                    Utilities.setLocation(newConfirmExp, newLoc);
+                    copyAssertiveCode.addConfirm(newLoc, newConfirmExp, false);
                 }
             }
         }
@@ -3443,8 +3443,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Add a remember rule
-        assertiveCode.addCode(new MemoryStmt((Location) decLoc.clone(),
-                true));
+        assertiveCode.addCode(new MemoryStmt((Location) decLoc.clone(), true));
 
         try {
             // Final confirm clause
