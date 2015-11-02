@@ -1125,9 +1125,15 @@ public class VCGenerator extends TreeWalkerVisitor {
                             + actualOperationDec.getName().getName()
                             + " in Facility Instantiation Rule");
 
-                    Exp newConfirmExp =
-                            myTypeGraph.formImplies(formalRequires,
-                                    actualOperationRequires);
+                    Exp newConfirmExp;
+                    if (!formalRequires.equals(myTypeGraph.getTrueVarExp())) {
+                        newConfirmExp =
+                                myTypeGraph.formImplies(formalRequires,
+                                        actualOperationRequires);
+                    }
+                    else {
+                        newConfirmExp = actualOperationRequires;
+                    }
                     Utilities.setLocation(newConfirmExp, newLoc);
                     copyAssertiveCode.addConfirm(newLoc, newConfirmExp, false);
                 }
@@ -1159,9 +1165,16 @@ public class VCGenerator extends TreeWalkerVisitor {
                             + formalOperationDec.getName().getName()
                             + " in Facility Instantiation Rule");
 
-                    Exp newConfirmExp =
-                            myTypeGraph.formImplies(actualOperationEnsures,
-                                    formalEnsures);
+                    Exp newConfirmExp;
+                    if (!actualOperationEnsures.equals(myTypeGraph
+                            .getTrueVarExp())) {
+                        newConfirmExp =
+                                myTypeGraph.formImplies(actualOperationEnsures,
+                                        formalEnsures);
+                    }
+                    else {
+                        newConfirmExp = formalEnsures;
+                    }
                     Utilities.setLocation(newConfirmExp, newLoc);
                     copyAssertiveCode.addConfirm(newLoc, newConfirmExp, false);
                 }
