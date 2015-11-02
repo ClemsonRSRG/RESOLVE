@@ -470,6 +470,10 @@ public class VCGenerator extends TreeWalkerVisitor {
         // Obtains items from the current operation
         Location loc = dec.getLocation();
         String name = dec.getName().getName();
+        OperationDec opDec =
+                new OperationDec(dec.getName(), dec.getParameters(), dec
+                        .getReturnTy(), dec.getStateVars(), dec.getRequires(),
+                        dec.getEnsures());
         boolean isLocal =
                 Utilities.isLocationOperation(dec.getName().getName(),
                         myCurrentModuleScope);
@@ -477,7 +481,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 modifyRequiresClause(getRequiresClause(loc, dec), loc, name,
                         isLocal);
         Exp ensures =
-                modifyEnsuresClause(getEnsuresClause(loc, dec), loc, name,
+                modifyEnsuresClause(getEnsuresClause(loc, dec), loc, opDec,
                         isLocal);
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
@@ -645,7 +649,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 modifyRequiresClause(getRequiresClause(loc, opDec), loc, name,
                         isLocal);
         Exp ensures =
-                modifyEnsuresClause(getEnsuresClause(loc, opDec), loc, name,
+                modifyEnsuresClause(getEnsuresClause(loc, opDec), loc, opDec,
                         isLocal);
         List<Statement> statementList = dec.getStatements();
         List<VarDec> variableList = dec.getAllVariables();
@@ -980,6 +984,9 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Formal operation
                 OperationDec formalOperationDec =
                         (OperationDec) moduleParameterDec.getWrappedDec();
+                boolean isFormalOpDecLocal =
+                        Utilities.isLocationOperation(formalOperationDec
+                                .getName().getName(), myCurrentModuleScope);
                 Exp formalOperationRequires =
                         getRequiresClause(formalOperationDec.getLocation(),
                                 formalOperationDec);
@@ -989,6 +996,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                 // Locate the corresponding actual operation
                 OperationDec actualOperationDec = null;
+                boolean isActualOpDecLocal = false;
                 try {
                     OperationEntry op =
                             myCurrentModuleScope.queryForOne(
@@ -1010,6 +1018,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                 .getRequires(), fOpDec
                                                 .getEnsures());
                     }
+
+                    isActualOpDecLocal =
+                            Utilities.isLocationOperation(actualOperationDec
+                                    .getName().getName(), myCurrentModuleScope);
                 }
                 catch (NoSuchSymbolException nsse) {
                     Utilities.noSuchSymbol(moduleArgumentItem.getQualifier(),
@@ -1029,8 +1041,12 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                 System.out.println(formalOperationRequires);
                 System.out.println(actualOperationRequires);
-                System.out.println(formalOperationEnsures);
-                System.out.println(actualOperationEnsures);
+                System.out.println(modifyEnsuresClause(formalOperationEnsures,
+                        moduleParameterDec.getLocation(), formalOperationDec,
+                        isFormalOpDecLocal));
+                System.out.println(modifyEnsuresClause(actualOperationEnsures,
+                        moduleArgumentItem.getLocation(), actualOperationDec,
+                        isActualOpDecLocal));
             }
         }
 
@@ -1828,31 +1844,19 @@ public class VCGenerator extends TreeWalkerVisitor {
      *
      * @param ensures The <code>Exp</code> containing the ensures clause.
      * @param opLocation The <code>Location</code> for the operation.
-     * @param opName The name for the operation.
+     * @param operationDec The <code>OperationDec</code> that is modifying the ensures clause.
      * @param isLocal True if it is a local operation, false otherwise.
      *
      * @return The modified ensures clause <code>Exp</code>.
      */
     private Exp modifyEnsuresClause(Exp ensures, Location opLocation,
-            String opName, boolean isLocal) {
-        // Obtain the list of parameters for the current operation
-        List<ParameterVarDec> parameterVarDecList;
-        if (myCurrentOperationEntry.getDefiningElement() instanceof FacilityOperationDec) {
-            parameterVarDecList =
-                    ((FacilityOperationDec) myCurrentOperationEntry
-                            .getDefiningElement()).getParameters();
-        }
-        else {
-            parameterVarDecList =
-                    ((OperationDec) myCurrentOperationEntry
-                            .getDefiningElement()).getParameters();
-        }
-
+            OperationDec operationDec, boolean isLocal) {
         // Modifies the existing ensures clause based on
         // the parameter modes.
         ensures =
-                modifyEnsuresByParameter(ensures, opLocation, opName,
-                        parameterVarDecList, isLocal);
+                modifyEnsuresByParameter(ensures, opLocation, operationDec
+                        .getName().getName(), operationDec.getParameters(),
+                        isLocal);
 
         return ensures;
     }
