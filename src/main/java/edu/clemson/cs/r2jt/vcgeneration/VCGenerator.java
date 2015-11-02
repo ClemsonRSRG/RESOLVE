@@ -998,6 +998,35 @@ public class VCGenerator extends TreeWalkerVisitor {
                         getEnsuresClause(formalOperationDec.getLocation(),
                                 formalOperationDec);
 
+                // Construct a list of formal parameters as expressions
+                // for substitution purposes.
+                List<ParameterVarDec> formalParameterVarDecs =
+                        formalOperationDec.getParameters();
+                List<Exp> formalParamAsExp = new ArrayList<Exp>();
+                for (ParameterVarDec varDec : formalParameterVarDecs) {
+                    Ty varDecTy = varDec.getTy();
+
+                    // varDec as VarExp
+                    VarExp varDecExp =
+                            Utilities.createVarExp(varDec.getLocation(), null,
+                                    varDec.getName(), varDecTy.getMathType(),
+                                    null);
+                    formalParamAsExp.add(varDecExp);
+
+                    // #varDec as OldExp
+                    OldExp oldVarDecExp =
+                            new OldExp(varDec.getLocation(), Exp
+                                    .copy(varDecExp));
+                    formalParamAsExp.add(oldVarDecExp);
+                }
+
+                if (formalOperationDec.getReturnTy() != null) {
+                    Ty varDecTy = formalOperationDec.getReturnTy();
+                    formalParamAsExp.add(Utilities.createVarExp(varDecTy
+                            .getLocation(), null, formalOperationDec.getName(),
+                            varDecTy.getMathType(), null));
+                }
+
                 // Locate the corresponding actual operation
                 OperationDec actualOperationDec = null;
                 List<Exp> actualParamAsExp = new ArrayList<Exp>();
@@ -1029,9 +1058,27 @@ public class VCGenerator extends TreeWalkerVisitor {
                             actualOperationDec.getParameters();
                     for (ParameterVarDec varDec : parameterVarDecs) {
                         Ty varDecTy = varDec.getTy();
-                        actualParamAsExp.add(Utilities.createVarExp(varDec
-                                .getLocation(), null, varDec.getName(),
-                                varDecTy.getMathType(), null));
+
+                        // varDec as VarExp
+                        VarExp varDecExp =
+                                Utilities.createVarExp(varDec.getLocation(),
+                                        null, varDec.getName(), varDecTy
+                                                .getMathType(), null);
+                        actualParamAsExp.add(varDecExp);
+
+                        // #varDec as OldExp
+                        OldExp oldVarDecExp =
+                                new OldExp(varDec.getLocation(), Exp
+                                        .copy(varDecExp));
+                        actualParamAsExp.add(oldVarDecExp);
+                    }
+
+                    // Add any return types as something we need to replace
+                    if (actualOperationDec.getReturnTy() != null) {
+                        Ty varDecTy = actualOperationDec.getReturnTy();
+                        actualParamAsExp.add(Utilities.createVarExp(varDecTy
+                                .getLocation(), null, actualOperationDec
+                                .getName(), varDecTy.getMathType(), null));
                     }
                 }
                 catch (NoSuchSymbolException nsse) {
@@ -1063,11 +1110,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                 formalRequires =
                         replaceFacilityDeclarationVariables(formalRequires,
                                 conceptRealizFormalParamExp,
-                                conceptRealizFormalParamExp);
+                                conceptRealizActualParamExp);
                 formalRequires =
-                        replaceFormalWithActualReq(formalRequires,
-                                formalOperationDec.getParameters(),
-                                actualParamAsExp);
+                        replaceFacilityDeclarationVariables(formalRequires,
+                                formalParamAsExp, actualParamAsExp);
 
                 if (!actualOperationRequires
                         .equals(myTypeGraph.getTrueVarExp())) {
@@ -1087,12 +1133,39 @@ public class VCGenerator extends TreeWalkerVisitor {
                             .getLocation(), actualOperationRequires, false);
                 }
 
-                /*System.out.println(modifyEnsuresClause(formalOperationEnsures,
-                        moduleParameterDec.getLocation(), formalOperationDec,
-                        isFormalOpDecLocal));
-                System.out.println(modifyEnsuresClause(actualOperationEnsures,
-                        moduleArgumentItem.getLocation(), actualOperationDec,
-                        isActualOpDecLocal));*/
+                // Facility Decl Rule (Operations as Parameters):
+                // postIRP implies postRP [ rn ~> rn_exp, #rx ~> #irx, rx ~> irx ]
+                Exp formalEnsures =
+                        modifyEnsuresClause(formalOperationEnsures,
+                                moduleParameterDec.getLocation(),
+                                formalOperationDec, isFormalOpDecLocal);
+                formalEnsures =
+                        replaceFacilityDeclarationVariables(formalEnsures,
+                                conceptFormalParamExp, conceptActualParamExp);
+                formalEnsures =
+                        replaceFacilityDeclarationVariables(formalEnsures,
+                                conceptRealizFormalParamExp,
+                                conceptRealizActualParamExp);
+                formalEnsures =
+                        replaceFacilityDeclarationVariables(formalEnsures,
+                                formalParamAsExp, actualParamAsExp);
+
+                if (!formalEnsures.equals(myTypeGraph.getTrueVarExp())) {
+                    Location newLoc =
+                            (Location) actualOperationEnsures.getLocation()
+                                    .clone();
+                    newLoc.setDetails("Ensures Clause of "
+                            + actualOperationDec.getName().getName()
+                            + " implies the Ensures Clause of "
+                            + formalOperationDec.getName().getName()
+                            + " in Facility Instantiation Rule");
+                    Utilities.setLocation(formalEnsures, newLoc);
+
+                    copyAssertiveCode.addAssume(moduleParameterDec
+                            .getLocation(), actualOperationEnsures, false);
+                    copyAssertiveCode.addConfirm(moduleArgumentItem
+                            .getLocation(), formalEnsures, false);
+                }
             }
         }
 
@@ -2130,16 +2203,32 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Loop through the argument list
             for (int i = 0; i < formalParamList.size(); i++) {
                 // Concept variable
-                VarExp formalExp = (VarExp) formalParamList.get(i);
+                Exp formalExp = formalParamList.get(i);
 
                 if (formalExp != null) {
                     // Temporary replacement to avoid formal and actuals being the same
-                    VarExp newFormalExp =
-                            Utilities.createVarExp(null, null,
-                                    Utilities.createPosSymbol("_"
-                                            + formalExp.getName()), formalExp
-                                            .getMathType(), formalExp
-                                            .getMathTypeValue());
+                    Exp newFormalExp;
+                    if (formalExp instanceof VarExp) {
+                        VarExp formalExpAsVarExp = (VarExp) formalExp;
+                        newFormalExp =
+                                Utilities.createVarExp(null, null, Utilities
+                                        .createPosSymbol("_"
+                                                + formalExpAsVarExp.getName()),
+                                        formalExp.getMathType(), formalExp
+                                                .getMathTypeValue());
+                    }
+                    else {
+                        VarExp modifiedInnerVarExp =
+                                (VarExp) Exp
+                                        .copy(((OldExp) formalExp).getExp());
+                        modifiedInnerVarExp.setName(Utilities
+                                .createPosSymbol("_"
+                                        + modifiedInnerVarExp.getName()
+                                                .getName()));
+                        newFormalExp =
+                                new OldExp(modifiedInnerVarExp.getLocation(),
+                                        modifiedInnerVarExp);
+                    }
                     retExp = Utilities.replace(retExp, formalExp, newFormalExp);
 
                     // Actually perform the desired replacement
