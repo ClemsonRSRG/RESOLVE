@@ -3222,6 +3222,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         try {
+            // Final confirm clause
+            Exp finalConfirmExp;
+
             // Obtain the concept module for the facility
             ConceptModuleDec facConceptDec =
                     (ConceptModuleDec) mySymbolTable
@@ -3240,7 +3243,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                     createModuleActualArgExpList(assertiveCode, dec
                             .getConceptParams());
 
-            // Concept requires clause
+            // Facility Decl Rule (Concept Requires): CPC[ n ~> n_exp, R ~> IR ]
             Exp conceptReq =
                     replaceFacilityDeclarationVariables(getRequiresClause(
                             facConceptDec.getLocation(), facConceptDec),
@@ -3248,16 +3251,82 @@ public class VCGenerator extends TreeWalkerVisitor {
             Location conceptReqLoc =
                     (Location) dec.getConceptName().getLocation().clone();
             conceptReqLoc.setDetails("Requires Clause for "
-                    + facConceptDec.getName().getName()
+                    + dec.getConceptName().getName()
                     + " in Facility Instantiation Rule");
             conceptReq.setLocation(conceptReqLoc);
 
+            // Create a mapping from concept formal to actual arguments
+            // for future use.
+            Map<Exp, Exp> conceptArgMap = new HashMap<Exp, Exp>();
+            for (int i = 0; i < conceptFormalArgList.size(); i++) {
+                conceptArgMap.put(conceptFormalArgList.get(i),
+                        conceptActualArgList.get(i));
+            }
+
+            // Add the concept requires to the facility final confirm clause
+            finalConfirmExp = conceptReq;
+
+            // Facility Decl Rule (Concept Realization Requires):
+            //      (RPC[ rn ~> rn_exp, RR ~> IRR ])[ n ~> n_exp, R ~> IR ]
+            //
+            // Note: Only apply this part of the rule if the concept realization
+            // is not externally realized.
+            Exp conceptRealizReq;
+            Map<Exp, Exp> conceptRealizArgMap = new HashMap<Exp, Exp>();
+            if (!dec.getExternallyRealizedFlag()) {
+                ConceptBodyModuleDec facConceptRealizDec =
+                        (ConceptBodyModuleDec) mySymbolTable.getModuleScope(
+                                new ModuleIdentifier(dec.getBodyName()
+                                        .getName())).getDefiningElement();
+
+                // Convert the module arguments into mathematical expressions
+                // Note that we could potentially have a nested function call
+                // as one of the arguments, therefore we pass in the assertive
+                // code to store the confirm statement generated from all the
+                // requires clauses.
+                List<Exp> conceptRealizFormalArgList =
+                        createModuleFormalArgExpList(facConceptRealizDec
+                                .getParameters());
+                List<Exp> conceptRealizActualArgList =
+                        createModuleActualArgExpList(assertiveCode, dec
+                                .getBodyParams());
+
+                // 1) Replace the concept realization formal with actuals
+                conceptRealizReq =
+                        replaceFacilityDeclarationVariables(getRequiresClause(
+                                facConceptRealizDec.getLocation(),
+                                facConceptRealizDec),
+                                conceptRealizFormalArgList,
+                                conceptRealizActualArgList);
+
+                // 2) Replace the concept formal with actuals
+                conceptRealizReq =
+                        replaceFacilityDeclarationVariables(conceptRealizReq,
+                                conceptFormalArgList, conceptActualArgList);
+
+                // Create a mapping from concept realization formal to actual arguments
+                // for future use.
+                for (int i = 0; i < conceptRealizFormalArgList.size(); i++) {
+                    conceptRealizArgMap.put(conceptRealizFormalArgList.get(i),
+                            conceptRealizActualArgList.get(i));
+                }
+            }
+            else {
+                conceptRealizReq = myTypeGraph.getTrueVarExp();
+            }
+            Location conceptRealizReqLoc =
+                    (Location) dec.getBodyName().getLocation().clone();
+            conceptRealizReqLoc.setDetails("Requires Clause for "
+                    + dec.getBodyName().getName()
+                    + " in Facility Instantiation Rule");
+            conceptRealizReq.setLocation(conceptRealizReqLoc);
+
+            // Add the concept realization requires to the facility final confirm clause
+            finalConfirmExp =
+                    myTypeGraph.formConjunct(finalConfirmExp, conceptRealizReq);
+
             // Set this as our final confirm statement for this assertive code
-            assertiveCode.setFinalConfirm(conceptReq, false);
-
-            // TODO: Need to add module argument constraints here.
-
-            // TODO: Need to see if the concept realization has anything we need to generate VCs
+            assertiveCode.setFinalConfirm(finalConfirmExp, false);
 
             // TODO: Loop through every enhancement/enhancement realization declaration, if any.
             List<EnhancementItem> enhancementList = dec.getEnhancements();
@@ -3269,15 +3338,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             // formal arguments to the actual arguments instantiated by the facility.
             // This is needed to replace the requires/ensures clauses from facility instantiated
             // operations.
-
-            // Create a mapping from concept formal to actual arguments
-            Map<Exp, Exp> conceptArgMap = new HashMap<Exp, Exp>();
-            for (int i = 0; i < conceptFormalArgList.size(); i++) {
-                conceptArgMap.put(conceptFormalArgList.get(i),
-                        conceptActualArgList.get(i));
-            }
-
-            // Facility Formal to Actual structure
             FacilityFormalToActuals formalToActuals =
                     new FacilityFormalToActuals(conceptArgMap);
             for (Dec d : facConceptDec.getDecs()) {
