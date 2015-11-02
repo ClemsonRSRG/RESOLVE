@@ -3442,6 +3442,10 @@ public class VCGenerator extends TreeWalkerVisitor {
             assertiveCode.addAssume(gRequiresLoc, myGlobalRequiresExp, false);
         }
 
+        // Add a remember rule
+        assertiveCode.addCode(new MemoryStmt((Location) decLoc.clone(),
+                true));
+
         try {
             // Final confirm clause
             Exp finalConfirmExp;
