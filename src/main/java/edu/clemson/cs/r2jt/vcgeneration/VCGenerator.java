@@ -3481,15 +3481,13 @@ public class VCGenerator extends TreeWalkerVisitor {
                     replaceFacilityDeclarationVariables(getRequiresClause(
                             facConceptDec.getLocation(), facConceptDec),
                             conceptFormalArgList, conceptActualArgList);
-            if (!conceptReq.equals(myTypeGraph.getTrueVarExp())) {
-                Location conceptReqLoc =
-                        (Location) dec.getConceptName().getLocation().clone();
-                conceptReqLoc.setDetails("Requires Clause for "
-                        + dec.getConceptName().getName()
-                        + " in Facility Instantiation Rule");
-                conceptReq.setLocation(conceptReqLoc);
-                assertiveCode.addConfirm(conceptReqLoc, conceptReq, false);
-            }
+            Location conceptReqLoc =
+                    (Location) dec.getConceptName().getLocation().clone();
+            conceptReqLoc.setDetails("Requires Clause for "
+                    + dec.getConceptName().getName()
+                    + " in Facility Instantiation Rule");
+            conceptReq.setLocation(conceptReqLoc);
+            assertiveCode.addConfirm(conceptReqLoc, conceptReq, false);
 
             // Create a mapping from concept formal to actual arguments
             // for future use.
@@ -3537,16 +3535,14 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 conceptFormalArgList, conceptActualArgList);
 
                 // Add this as a new confirm statement in our assertive code
-                if (!conceptRealizReq.equals(myTypeGraph.getTrueVarExp())) {
-                    Location conceptRealizReqLoc =
-                            (Location) dec.getBodyName().getLocation().clone();
-                    conceptRealizReqLoc.setDetails("Requires Clause for "
-                            + dec.getBodyName().getName()
-                            + " in Facility Instantiation Rule");
-                    conceptRealizReq.setLocation(conceptRealizReqLoc);
-                    assertiveCode.addConfirm(conceptRealizReqLoc,
-                            conceptRealizReq, false);
-                }
+                Location conceptRealizReqLoc =
+                        (Location) dec.getBodyName().getLocation().clone();
+                conceptRealizReqLoc.setDetails("Requires Clause for "
+                        + dec.getBodyName().getName()
+                        + " in Facility Instantiation Rule");
+                conceptRealizReq.setLocation(conceptRealizReqLoc);
+                assertiveCode.addConfirm(conceptRealizReqLoc, conceptRealizReq,
+                        false);
 
                 // Create a mapping from concept realization formal to actual arguments
                 // for future use.
@@ -3602,16 +3598,14 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 facEnhancementDec.getLocation(),
                                 facEnhancementDec), enhancementFormalArgList,
                                 enhancementActualArgList);
-                if (!enhancementReq.equals(myTypeGraph.getTrueVarExp())) {
-                    Location enhancementReqLoc =
-                            (Location) ebi.getName().getLocation().clone();
-                    enhancementReqLoc.setDetails("Requires Clause for "
-                            + ebi.getName().getName()
-                            + " in Facility Instantiation Rule");
-                    enhancementReq.setLocation(enhancementReqLoc);
-                    assertiveCode.addConfirm(enhancementReqLoc, enhancementReq,
-                            false);
-                }
+                Location enhancementReqLoc =
+                        (Location) ebi.getName().getLocation().clone();
+                enhancementReqLoc.setDetails("Requires Clause for "
+                        + ebi.getName().getName()
+                        + " in Facility Instantiation Rule");
+                enhancementReq.setLocation(enhancementReqLoc);
+                assertiveCode.addConfirm(enhancementReqLoc, enhancementReq,
+                        false);
 
                 // Create a mapping from concept formal to actual arguments
                 // for future use.
