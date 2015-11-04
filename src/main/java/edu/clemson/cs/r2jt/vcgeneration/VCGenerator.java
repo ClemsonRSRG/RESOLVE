@@ -972,7 +972,11 @@ public class VCGenerator extends TreeWalkerVisitor {
             List<ModuleArgumentItem> actualParams,
             List<Exp> conceptFormalParamExp, List<Exp> conceptActualParamExp,
             List<Exp> conceptRealizFormalParamExp,
-            List<Exp> conceptRealizActualParamExp) {
+            List<Exp> conceptRealizActualParamExp,
+            List<Exp> enhancementFormalParamExp,
+            List<Exp> enhancementActualParamExp,
+            List<Exp> enhancementRealizFormalParamExp,
+            List<Exp> enhancementRealizActualParamExp) {
         AssertiveCode copyAssertiveCode = new AssertiveCode(assertiveCode);
 
         Iterator<ModuleParameterDec> realizParameterIt =
@@ -1112,6 +1116,14 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 conceptRealizActualParamExp);
                 formalRequires =
                         replaceFacilityDeclarationVariables(formalRequires,
+                                enhancementFormalParamExp,
+                                enhancementActualParamExp);
+                formalRequires =
+                        replaceFacilityDeclarationVariables(formalRequires,
+                                enhancementRealizFormalParamExp,
+                                enhancementRealizActualParamExp);
+                formalRequires =
+                        replaceFacilityDeclarationVariables(formalRequires,
                                 formalParamAsExp, actualParamAsExp);
 
                 if (!actualOperationRequires
@@ -1151,6 +1163,14 @@ public class VCGenerator extends TreeWalkerVisitor {
                         replaceFacilityDeclarationVariables(formalEnsures,
                                 conceptRealizFormalParamExp,
                                 conceptRealizActualParamExp);
+                formalEnsures =
+                        replaceFacilityDeclarationVariables(formalEnsures,
+                                enhancementFormalParamExp,
+                                enhancementActualParamExp);
+                formalEnsures =
+                        replaceFacilityDeclarationVariables(formalEnsures,
+                                enhancementRealizFormalParamExp,
+                                enhancementRealizActualParamExp);
                 formalEnsures =
                         replaceFacilityDeclarationVariables(formalEnsures,
                                 formalParamAsExp, actualParamAsExp);
@@ -3554,13 +3574,18 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Facility Decl Rule (Operations as Concept Realization Parameters):
                 // preRP [ rn ~> rn_exp, rx ~> irx ] implies preIRP and
                 // postIRP implies postRP [ rn ~> rn_exp, #rx ~> #irx, rx ~> irx ]
+                //
+                // Note: We need to pass in empty lists for enhancement/enhancement realization
+                // formal and actuals, because they are not needed here.
                 assertiveCode =
                         facilityDeclOperationParamHelper(decLoc, assertiveCode,
                                 facConceptRealizDec.getParameters(), dec
                                         .getBodyParams(), conceptFormalArgList,
                                 conceptActualArgList,
                                 conceptRealizFormalArgList,
-                                conceptRealizActualArgList);
+                                conceptRealizActualArgList,
+                                new ArrayList<Exp>(), new ArrayList<Exp>(),
+                                new ArrayList<Exp>(), new ArrayList<Exp>());
             }
 
             // TODO: Figure out how to apply the rule when there are enhancements for concept realizations
@@ -3682,14 +3707,18 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Facility Decl Rule (Operations as Enhancement Realization Parameters):
                 // preRP [ rn ~> rn_exp, rx ~> irx ] implies preIRP and
                 // postIRP implies postRP [ rn ~> rn_exp, #rx ~> #irx, rx ~> irx ]
-
-                /*    assertiveCode =
-                            facilityDeclOperationParamHelper(decLoc, assertiveCode,
-                                    facConceptRealizDec.getParameters(), dec
-                                            .getBodyParams(), conceptFormalArgList,
-                                    conceptActualArgList,
-                                    conceptRealizFormalArgList,
-                                    conceptRealizActualArgList);*/
+                //
+                // Note: We need to pass in empty lists for concept realization
+                // formal and actuals, because they are not needed here.
+                assertiveCode =
+                        facilityDeclOperationParamHelper(decLoc, assertiveCode,
+                                facEnhancementRealizDec.getParameters(), dec
+                                        .getBodyParams(), conceptFormalArgList,
+                                conceptActualArgList, new ArrayList<Exp>(),
+                                new ArrayList<Exp>(), enhancementFormalArgList,
+                                enhancementActualArgList,
+                                enhancementRealizFormalArgList,
+                                enhancementRealizActualArgList);
             }
 
             // The code below stores a mapping between each of the concept/realization/enhancement
