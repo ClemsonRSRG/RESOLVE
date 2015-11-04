@@ -3573,6 +3573,55 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Do something here.
             }
 
+            // Apply the facility declaration rules to regular enhancement/enhancement realizations
+            List<EnhancementBodyItem> enhancementBodyList =
+                    dec.getEnhancementBodies();
+            for (EnhancementBodyItem ebi : enhancementBodyList) {
+                // Obtain the enhancement module for the facility
+                EnhancementModuleDec facEnhancementDec =
+                        (EnhancementModuleDec) mySymbolTable.getModuleScope(
+                                new ModuleIdentifier(ebi.getName().getName()))
+                                .getDefiningElement();
+
+                // Convert the module arguments into mathematical expressions
+                // Note that we could potentially have a nested function call
+                // as one of the arguments, therefore we pass in the assertive
+                // code to store the confirm statement generated from all the
+                // requires clauses.
+                List<Exp> enhancementFormalArgList =
+                        createModuleFormalArgExpList(facEnhancementDec
+                                .getParameters());
+                List<Exp> enhancementActualArgList =
+                        createModuleActualArgExpList(assertiveCode, ebi
+                                .getParams());
+
+                // Facility Decl Rule (Enhancement Requires):
+                // CPC[ n ~> n_exp, R ~> IR ] (Use the enhancement equivalents)
+                Exp enhancementReq =
+                        replaceFacilityDeclarationVariables(getRequiresClause(
+                                facEnhancementDec.getLocation(),
+                                facEnhancementDec), enhancementFormalArgList,
+                                enhancementActualArgList);
+                if (!enhancementReq.equals(myTypeGraph.getTrueVarExp())) {
+                    Location enhancementReqLoc =
+                            (Location) ebi.getName().getLocation().clone();
+                    enhancementReqLoc.setDetails("Requires Clause for "
+                            + ebi.getName().getName()
+                            + " in Facility Instantiation Rule");
+                    enhancementReq.setLocation(enhancementReqLoc);
+                    assertiveCode.addConfirm(enhancementReqLoc, enhancementReq,
+                            false);
+                }
+
+                // Create a mapping from concept formal to actual arguments
+                // for future use.
+                Map<Exp, Exp> enhancementArgMap = new HashMap<Exp, Exp>();
+                for (int i = 0; i < enhancementFormalArgList.size(); i++) {
+                    enhancementArgMap.put(enhancementFormalArgList.get(i),
+                            enhancementActualArgList.get(i));
+                }
+            }
+
             // The code below stores a mapping between each of the concept/realization/enhancement
             // formal arguments to the actual arguments instantiated by the facility.
             // This is needed to replace the requires/ensures clauses from facility instantiated
