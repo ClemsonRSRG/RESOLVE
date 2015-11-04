@@ -3614,6 +3614,82 @@ public class VCGenerator extends TreeWalkerVisitor {
                     enhancementArgMap.put(enhancementFormalArgList.get(i),
                             enhancementActualArgList.get(i));
                 }
+
+                // Facility Decl Rule (Enhancement Realization Requires):
+                //      (RPC[ rn ~> rn_exp, RR ~> IRR ])[ n ~> n_exp, R ~> IR ]
+                //          (Use the enhancement realization equivalents and
+                //           also have to replace enhancement formals with actuals)
+                //
+                // Note: Only apply this part of the rule if the concept realization
+                // is not externally realized.
+                Map<Exp, Exp> enhancementRealizArgMap = new HashMap<Exp, Exp>();
+                EnhancementBodyModuleDec facEnhancementRealizDec =
+                        (EnhancementBodyModuleDec) mySymbolTable
+                                .getModuleScope(
+                                        new ModuleIdentifier(ebi.getBodyName()
+                                                .getName()))
+                                .getDefiningElement();
+
+                // Convert the module arguments into mathematical expressions
+                // Note that we could potentially have a nested function call
+                // as one of the arguments, therefore we pass in the assertive
+                // code to store the confirm statement generated from all the
+                // requires clauses.
+                List<Exp> enhancementRealizFormalArgList =
+                        createModuleFormalArgExpList(facEnhancementRealizDec
+                                .getParameters());
+                List<Exp> enhancementRealizActualArgList =
+                        createModuleActualArgExpList(assertiveCode, ebi
+                                .getBodyParams());
+
+                // 1) Replace the enhancement realization formal with actuals
+                Exp enhancementRealizReq =
+                        replaceFacilityDeclarationVariables(getRequiresClause(
+                                facEnhancementRealizDec.getLocation(),
+                                facEnhancementRealizDec),
+                                enhancementRealizFormalArgList,
+                                enhancementRealizActualArgList);
+
+                // 2) Replace the concept formal with actuals
+                enhancementRealizReq =
+                        replaceFacilityDeclarationVariables(
+                                enhancementRealizReq, conceptFormalArgList,
+                                conceptActualArgList);
+
+                // 3) Replace the enhancement formal with actuals
+                enhancementRealizReq =
+                        replaceFacilityDeclarationVariables(
+                                enhancementRealizReq, enhancementFormalArgList,
+                                enhancementActualArgList);
+
+                // Add this as a new confirm statement in our assertive code
+                Location enhancementRealizReqLoc =
+                        (Location) ebi.getBodyName().getLocation().clone();
+                enhancementRealizReqLoc.setDetails("Requires Clause for "
+                        + ebi.getBodyName().getName()
+                        + " in Facility Instantiation Rule");
+                enhancementRealizReq.setLocation(enhancementRealizReqLoc);
+                assertiveCode.addConfirm(enhancementRealizReqLoc,
+                        enhancementRealizReq, false);
+
+                // Create a mapping from enhancement realization formal to actual arguments
+                // for future use.
+                for (int i = 0; i < enhancementRealizFormalArgList.size(); i++) {
+                    conceptRealizArgMap.put(enhancementRealizFormalArgList
+                            .get(i), enhancementRealizActualArgList.get(i));
+                }
+
+                // Facility Decl Rule (Operations as Enhancement Realization Parameters):
+                // preRP [ rn ~> rn_exp, rx ~> irx ] implies preIRP and
+                // postIRP implies postRP [ rn ~> rn_exp, #rx ~> #irx, rx ~> irx ]
+
+                /*    assertiveCode =
+                            facilityDeclOperationParamHelper(decLoc, assertiveCode,
+                                    facConceptRealizDec.getParameters(), dec
+                                            .getBodyParams(), conceptFormalArgList,
+                                    conceptActualArgList,
+                                    conceptRealizFormalArgList,
+                                    conceptRealizActualArgList);*/
             }
 
             // The code below stores a mapping between each of the concept/realization/enhancement
