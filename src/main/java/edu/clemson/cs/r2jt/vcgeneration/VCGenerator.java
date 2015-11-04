@@ -3712,7 +3712,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // formal and actuals, because they are not needed here.
                 assertiveCode =
                         facilityDeclOperationParamHelper(decLoc, assertiveCode,
-                                facEnhancementRealizDec.getParameters(), dec
+                                facEnhancementRealizDec.getParameters(), ebi
                                         .getBodyParams(), conceptFormalArgList,
                                 conceptActualArgList, new ArrayList<Exp>(),
                                 new ArrayList<Exp>(), enhancementFormalArgList,
