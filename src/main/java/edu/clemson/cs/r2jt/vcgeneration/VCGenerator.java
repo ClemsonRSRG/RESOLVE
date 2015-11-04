@@ -3567,7 +3567,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 conceptRealizActualArgList);
             }
 
-            // TODO: Loop through every enhancement/enhancement realization declaration, if any.
+            // TODO: Figure out how to apply the rule when there are enhancements for concept realizations
             List<EnhancementItem> enhancementList = dec.getEnhancements();
             for (EnhancementItem e : enhancementList) {
                 // Do something here.
