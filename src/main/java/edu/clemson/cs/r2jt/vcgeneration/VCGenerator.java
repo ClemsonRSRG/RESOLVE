@@ -842,7 +842,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         for (ModuleParameterDec dec : formalParams) {
             Dec wrappedDec = dec.getWrappedDec();
 
-            // Only do this for constant parameter declarations
+            // Only do this for constant parameter and operation declarations
             // We don't really care about type declarations or definitions.
             Exp newExp;
             if (wrappedDec instanceof ConstantParamDec
@@ -851,6 +851,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                         Utilities.createVarExp(wrappedDec.getLocation(), null,
                                 wrappedDec.getName(), wrappedDec.getMathType(),
                                 null);
+            }
+            else if (wrappedDec instanceof OperationDec) {
+                OperationDec opDec = (OperationDec) wrappedDec;
+                newExp =
+                        Utilities.createVarExp(wrappedDec.getLocation(), null,
+                                opDec.getName(), dec.getMathType(), null);
             }
             else {
                 newExp = null;
@@ -1035,10 +1041,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                 List<Exp> actualParamAsExp = new ArrayList<Exp>();
                 try {
                     OperationEntry op =
-                            myCurrentModuleScope.queryForOne(
-                                    new NameQuery(moduleArgumentItem
-                                            .getQualifier(), moduleArgumentItem
-                                            .getName())).toOperationEntry(loc);
+                            myCurrentModuleScope
+                                    .queryForOne(
+                                            new NameQuery(
+                                                    moduleArgumentItem
+                                                            .getQualifier(),
+                                                    moduleArgumentItem
+                                                            .getName(),
+                                                    MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                                    MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                                                    true))
+                                    .toOperationEntry(loc);
 
                     if (op.getDefiningElement() instanceof OperationDec) {
                         actualOperationDec =
