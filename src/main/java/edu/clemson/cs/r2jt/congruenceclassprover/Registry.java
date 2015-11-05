@@ -38,7 +38,7 @@ public class Registry {
     protected Set<String> m_partTypes;
     protected Map<Integer, ArrayList<Integer>> m_partTypeParentArray;
     protected Set<String> m_commutative_operators;
-    protected Map<String,Boolean> m_cached_isSubtype;
+    protected Map<String, Boolean> m_cached_isSubtype;
 
     public static enum Usage {
 
@@ -78,21 +78,22 @@ public class Registry {
         m_commutative_operators.add("=");
         m_commutative_operators.add("and");
         m_commutative_operators.add("unionMakesZ");
-        m_cached_isSubtype = new HashMap<String,Boolean>();
+        m_cached_isSubtype = new HashMap<String, Boolean>();
 
     }
 
-    public boolean isSubtype(MTType a, MTType b){
-        String catKey = a.toString()+","+b.toString();
-        if(m_cached_isSubtype.containsKey(catKey)){
+    public boolean isSubtype(MTType a, MTType b) {
+        String catKey = a.toString() + "," + b.toString();
+        if (m_cached_isSubtype.containsKey(catKey)) {
             return m_cached_isSubtype.get(catKey);
         }
-        else{
+        else {
             boolean is = a.isSubtypeOf(b);
-            m_cached_isSubtype.put(catKey,is);
+            m_cached_isSubtype.put(catKey, is);
             return is;
         }
     }
+
     public Usage getUsage(String symbol) {
         return m_symbolToUsage.get(symbol);
     }

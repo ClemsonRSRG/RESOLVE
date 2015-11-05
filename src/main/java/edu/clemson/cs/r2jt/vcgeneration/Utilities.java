@@ -41,38 +41,42 @@ public class Utilities {
     // -----------------------------------------------------------
 
     public static void ambiguousTy(Ty ty, Location location) {
-        String message = "Ty is ambiguous: " + ty.toString();
+        String message = "(VCGenerator) Ty is ambiguous: " + ty.toString();
         throw new SourceErrorException(message, location);
     }
 
     public static void expNotHandled(Exp exp, Location l) {
         String message =
-                "Exp type not handled: " + exp.getClass().getCanonicalName();
+                "(VCGenerator) Exp type not handled: "
+                        + exp.getClass().getCanonicalName();
         throw new SourceErrorException(message, l);
     }
 
     public static void illegalOperationEnsures(Location l) {
         // TODO: Move this to sanity check.
         String message =
-                "Ensures clauses of operations that return a value should be of the form <OperationName> = <value>";
+                "(VCGenerator) Ensures clauses of operations that return a value should be of the form <OperationName> = <value>";
         throw new SourceErrorException(message, l);
     }
 
     public static void notAType(SymbolTableEntry entry, Location l) {
-        throw new SourceErrorException(entry.getSourceModuleIdentifier()
-                .fullyQualifiedRepresentation(entry.getName())
+        throw new SourceErrorException("(VCGenerator) "
+                + entry.getSourceModuleIdentifier()
+                        .fullyQualifiedRepresentation(entry.getName())
                 + " is not known to be a type.", l);
     }
 
     public static void notInFreeVarList(PosSymbol name, Location l) {
         String message =
-                "State variable " + name + " not in free variable list";
+                "(VCGenerator) State variable " + name
+                        + " not in free variable list";
         throw new SourceErrorException(message, l);
     }
 
     public static void noSuchModule(Location location) {
         throw new SourceErrorException(
-                "Module does not exist or is not in scope.", location);
+                "(VCGenerator) Module does not exist or is not in scope.",
+                location);
     }
 
     public static void noSuchSymbol(PosSymbol qualifier, String symbolName,
@@ -81,19 +85,19 @@ public class Utilities {
         String message;
 
         if (qualifier == null) {
-            message = "No such symbol: " + symbolName;
+            message = "(VCGenerator) No such symbol: " + symbolName;
         }
         else {
             message =
-                    "No such symbol in module: " + qualifier.getName() + "."
-                            + symbolName;
+                    "(VCGenerator) No such symbol in module: "
+                            + qualifier.getName() + "." + symbolName;
         }
 
         throw new SourceErrorException(message, l);
     }
 
     public static void tyNotHandled(Ty ty, Location location) {
-        String message = "Ty not handled: " + ty.toString();
+        String message = "(VCGenerator) Ty not handled: " + ty.toString();
         throw new SourceErrorException(message, location);
     }
 
