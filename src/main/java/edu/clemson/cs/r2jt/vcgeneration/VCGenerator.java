@@ -19,6 +19,7 @@ import edu.clemson.cs.r2jt.ResolveCompiler;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
+import edu.clemson.cs.r2jt.misc.SourceErrorException;
 import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.treewalk.TreeWalker;
 import edu.clemson.cs.r2jt.treewalk.TreeWalkerVisitor;
@@ -973,6 +974,23 @@ public class VCGenerator extends TreeWalkerVisitor {
         return confirmExp;
     }
 
+    /**
+     * <p>A helper method to deal with operations as parameters.</p>
+     *
+     * @param loc Location of some facility declaration.
+     * @param assertiveCode The current assertive code.
+     * @param formalParams The formal parameters.
+     * @param actualParams The actual parameters.
+     * @param conceptFormalParamExp The concept formal parameter expression.
+     * @param conceptActualParamExp The concept actual parameter expression.
+     * @param conceptRealizFormalParamExp The concept realization formal parameter expression.
+     * @param conceptRealizActualParamExp The concept realization actual parameter expression.
+     * @param enhancementFormalParamExp The enhancement formal parameter expression.
+     * @param enhancementActualParamExp The enhancement actual parameter expression.
+     * @param enhancementRealizFormalParamExp The enhancement realization formal parameter expression.
+     * @param enhancementRealizActualParamExp The enhancement realization actual parameter expression.
+     * @return
+     */
     private AssertiveCode facilityDeclOperationParamHelper(Location loc,
             AssertiveCode assertiveCode, List<ModuleParameterDec> formalParams,
             List<ModuleArgumentItem> actualParams,
@@ -1088,6 +1106,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                                         .copy(varDecExp));
                         actualParamAsExp.add(oldVarDecExp);
                     }
+
+                    // TODO: Move this to the populator
+                    opAsParameterSanityCheck(moduleArgumentItem.getLocation(),
+                            formalParameterVarDecs, parameterVarDecs);
 
                     // Add any return types as something we need to replace
                     if (actualOperationDec.getReturnTy() != null) {
@@ -2228,6 +2250,44 @@ public class VCGenerator extends TreeWalkerVisitor {
         requires = modifyRequiresByGlobalMode(requires);
 
         return requires;
+    }
+
+    /**
+     * <p>Basic sanity check for operations as parameters.</p>
+     *
+     * @param loc Location of the actual operation as parameter.
+     * @param formalParams Formal parameters.
+     * @param actualParams Actual parameters.
+     */
+    private void opAsParameterSanityCheck(Location loc,
+            List<ParameterVarDec> formalParams,
+            List<ParameterVarDec> actualParams) {
+        if (formalParams.size() != actualParams.size()) {
+            throw new SourceErrorException(
+                    "Actual operation parameter count "
+                            + "does not correspond to the formal operation parameter count."
+                            + "\n\tExpected count: " + formalParams.size()
+                            + "\n\tFound count: " + actualParams.size(), loc);
+        }
+
+        Iterator<ParameterVarDec> formalIt = formalParams.iterator();
+        Iterator<ParameterVarDec> actualIt = actualParams.iterator();
+        ParameterVarDec currFormalParam, currActualParam;
+        while (formalIt.hasNext()) {
+            currFormalParam = formalIt.next();
+            currActualParam = actualIt.next();
+
+            if (!currActualParam.getMode().getModeName().equals(
+                    currFormalParam.getMode().getModeName())) {
+                throw new SourceErrorException(
+                        "Operation parameter modes are not the same."
+                                + "\n\tExpecting: "
+                                + currFormalParam.getMode().getModeName() + " "
+                                + currFormalParam.getName() + "\n\tFound: "
+                                + currActualParam.getMode().getModeName() + " "
+                                + currActualParam.getName(), loc);
+            }
+        }
     }
 
     /**
