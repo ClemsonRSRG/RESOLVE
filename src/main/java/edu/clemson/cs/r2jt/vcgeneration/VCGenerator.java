@@ -2386,6 +2386,18 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 Utilities.replace(newClause, e,
                                         conceptRealizMap.get(e));
                     }
+
+                    // Replace all enhancement [realization] formal arguments with their actuals
+                    for (PosSymbol p : formalToActuals.getEnhancementKeys()) {
+                        Map<Exp, Exp> enhancementMap =
+                                formalToActuals.getEnhancementArgMap(p);
+
+                        for (Exp e : enhancementMap.keySet()) {
+                            newClause =
+                                    Utilities.replace(newClause, e,
+                                            enhancementMap.get(e));
+                        }
+                    }
                 }
                 else {
                     // Ignore all generic types
@@ -3645,6 +3657,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Apply the facility declaration rules to regular enhancement/enhancement realizations
             List<EnhancementBodyItem> enhancementBodyList =
                     dec.getEnhancementBodies();
+            Map<PosSymbol, Map<Exp, Exp>> enhancementArgMaps =
+                    new HashMap<PosSymbol, Map<Exp, Exp>>();
             for (EnhancementBodyItem ebi : enhancementBodyList) {
                 // Obtain the enhancement module for the facility
                 EnhancementModuleDec facEnhancementDec =
@@ -3690,6 +3704,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     enhancementArgMap.put(enhancementFormalArgList.get(i),
                             enhancementActualArgList.get(i));
                 }
+                enhancementArgMaps.put(facEnhancementDec.getName(),
+                        enhancementArgMap);
 
                 // Facility Decl Rule (Enhancement Realization Requires):
                 //      (RPC[ rn ~> rn_exp, RR ~> IRR ])[ n ~> n_exp, R ~> IR ]
@@ -3753,9 +3769,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Create a mapping from enhancement realization formal to actual arguments
                 // for future use.
                 for (int i = 0; i < enhancementRealizFormalArgList.size(); i++) {
-                    conceptRealizArgMap.put(enhancementRealizFormalArgList
+                    enhancementRealizArgMap.put(enhancementRealizFormalArgList
                             .get(i), enhancementRealizActualArgList.get(i));
                 }
+                enhancementArgMaps.put(facEnhancementRealizDec.getName(),
+                        enhancementRealizArgMap);
 
                 // Facility Decl Rule (Operations as Enhancement Realization Parameters):
                 // preRP [ rn ~> rn_exp, rx ~> irx ] implies preIRP and
@@ -3780,7 +3798,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             // operations.
             FacilityFormalToActuals formalToActuals =
                     new FacilityFormalToActuals(conceptArgMap,
-                            conceptRealizArgMap);
+                            conceptRealizArgMap, enhancementArgMaps);
             for (Dec d : facConceptDec.getDecs()) {
                 if (d instanceof TypeDec) {
                     Location loc = (Location) dec.getLocation().clone();
