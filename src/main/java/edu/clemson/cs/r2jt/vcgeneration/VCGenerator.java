@@ -27,6 +27,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTVoid;
 import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
@@ -3024,7 +3025,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (myCurrentOperationEntry != null
                 && myCurrentOperationEntry.getName().equals(
                         opDec.getName().getName())
-                && myCurrentOperationEntry.getReturnType() != null) {
+                && stmt.getQualifier() != null
+                && !PTVoid.getInstance(myTypeGraph).equals(
+                        myCurrentOperationEntry.getReturnType())) {
             // Create a new confirm statement using P_val and the decreasing clause
             VarExp pVal =
                     Utilities.createPValExp(myOperationDecreasingExp
@@ -3930,7 +3933,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             if (myCurrentOperationEntry != null
                     && myCurrentOperationEntry.getName().equals(
                             opDec.getName().getName())
-                    && myCurrentOperationEntry.getReturnType() != null) {
+                    && qualifier != null
+                    && !PTVoid.getInstance(myTypeGraph).equals(
+                            myCurrentOperationEntry.getReturnType())) {
                 // Create a new confirm statement using P_val and the decreasing clause
                 VarExp pVal =
                         Utilities.createPValExp(myOperationDecreasingExp
@@ -4313,7 +4318,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         if (myCurrentOperationEntry != null
                 && myCurrentOperationEntry.getName().equals(
                         opDec.getName().getName())
-                && myCurrentOperationEntry.getReturnType() != null) {
+                && qualifier != null
+                && !PTVoid.getInstance(myTypeGraph).equals(
+                        myCurrentOperationEntry.getReturnType())) {
             // Create a new confirm statement using P_val and the decreasing clause
             VarExp pVal =
                     Utilities.createPValExp(myOperationDecreasingExp
