@@ -1985,8 +1985,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Replace facility actuals variables in the ensures clause
         ensures =
-                replaceFacilityFormalWithActual(opLocation, ensures,
-                        parameterVarDecList);
+                Utilities.replaceFacilityFormalWithActual(opLocation, ensures,
+                        parameterVarDecList, myInstantiatedFacilityArgMap,
+                        myCurrentModuleScope);
 
         return ensures;
     }
@@ -2184,8 +2185,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Replace facility actuals variables in the requires clause
         requires =
-                replaceFacilityFormalWithActual(opLocation, requires,
-                        parameterVarDecList);
+                Utilities.replaceFacilityFormalWithActual(opLocation, requires,
+                        parameterVarDecList, myInstantiatedFacilityArgMap,
+                        myCurrentModuleScope);
 
         return requires;
     }
@@ -2313,152 +2315,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         return retExp;
-    }
-
-    /**
-     * <p>Replace the formal with the actual variables from the facility declaration to
-     * the passed in clause.</p>
-     *
-     * @param opLoc Location of the calling statement.
-     * @param clause The requires/ensures clause.
-     * @param paramList The list of parameter variables.
-     *
-     * @return The clause in <code>Exp</code> form.
-     */
-    private Exp replaceFacilityFormalWithActual(Location opLoc, Exp clause,
-            List<ParameterVarDec> paramList) {
-        // Make a copy of the original clause
-        Exp newClause = Exp.copy(clause);
-
-        for (ParameterVarDec dec : paramList) {
-            if (dec.getTy() instanceof NameTy) {
-                NameTy ty = (NameTy) dec.getTy();
-                PosSymbol tyName = ty.getName().copy();
-                PosSymbol tyQualifier = null;
-                if (ty.getQualifier() != null) {
-                    tyQualifier = ty.getQualifier().copy();
-                }
-
-                FacilityFormalToActuals formalToActuals = null;
-                for (VarExp v : myInstantiatedFacilityArgMap.keySet()) {
-                    FacilityFormalToActuals temp = null;
-                    if (tyQualifier != null) {
-                        if (tyQualifier.getName().equals(
-                                v.getQualifier().getName())
-                                && tyName.getName().equals(
-                                        v.getName().getName())) {
-                            temp = myInstantiatedFacilityArgMap.get(v);
-                        }
-                    }
-                    else {
-                        if (tyName.getName().equals(v.getName().getName())) {
-                            temp = myInstantiatedFacilityArgMap.get(v);
-                        }
-                    }
-
-                    // Check to see if we already found one. If we did, it means that
-                    // the type is ambiguous and we can't be sure which one it is.
-                    if (temp != null) {
-                        if (formalToActuals == null) {
-                            formalToActuals = temp;
-                        }
-                        else {
-                            Utilities.ambiguousTy(ty, opLoc);
-                        }
-                    }
-                }
-
-                if (formalToActuals != null) {
-                    // Replace all concept formal arguments with their actuals
-                    Map<Exp, Exp> conceptMap =
-                            formalToActuals.getConceptArgMap();
-                    for (Exp e : conceptMap.keySet()) {
-                        newClause =
-                                Utilities.replace(newClause, e, conceptMap
-                                        .get(e));
-                    }
-
-                    // Replace all concept realization formal arguments with their actuals
-                    Map<Exp, Exp> conceptRealizMap =
-                            formalToActuals.getConceptRealizArgMap();
-                    for (Exp e : conceptRealizMap.keySet()) {
-                        newClause =
-                                Utilities.replace(newClause, e,
-                                        conceptRealizMap.get(e));
-                    }
-
-                    // Replace all enhancement [realization] formal arguments with their actuals
-                    for (PosSymbol p : formalToActuals.getEnhancementKeys()) {
-                        Map<Exp, Exp> enhancementMap =
-                                formalToActuals.getEnhancementArgMap(p);
-
-                        for (Exp e : enhancementMap.keySet()) {
-                            newClause =
-                                    Utilities.replace(newClause, e,
-                                            enhancementMap.get(e));
-                        }
-                    }
-                }
-                else {
-                    // Ignore all generic types
-                    if (!(ty.getProgramTypeValue() instanceof PTGeneric)) {
-                        boolean found = false;
-
-                        // Check to see if the type of this variable is from an imported
-                        // concept type family definition. If we find one, we simply ignore this type.
-                        Iterator<SymbolTableEntry> programTypeDefIt =
-                                myCurrentModuleScope
-                                        .query(
-                                                new EntryTypeQuery<SymbolTableEntry>(
-                                                        ProgramTypeDefinitionEntry.class,
-                                                        MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                                                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
-                                        .iterator();
-                        while (programTypeDefIt.hasNext() && !found) {
-                            ProgramTypeDefinitionEntry entry =
-                                    programTypeDefIt
-                                            .next()
-                                            .toProgramTypeDefinitionEntry(opLoc);
-
-                            if (entry.getName().equals(tyName.getName())) {
-                                found = true;
-                            }
-                        }
-
-                        if (!found) {
-                            // Check to see if the type of this variable is from an local
-                            // type representation. If we find one, we simply ignore this type.
-                            Iterator<SymbolTableEntry> representationTypeIt =
-                                    myCurrentModuleScope
-                                            .query(
-                                                    new EntryTypeQuery<SymbolTableEntry>(
-                                                            RepresentationTypeEntry.class,
-                                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                                                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
-                                            .iterator();
-                            while (representationTypeIt.hasNext() && !found) {
-                                RepresentationTypeEntry entry =
-                                        representationTypeIt.next()
-                                                .toRepresentationTypeEntry(
-                                                        opLoc);
-
-                                if (entry.getName().equals(tyName.getName())) {
-                                    found = true;
-                                }
-                            }
-
-                            // Throw an error if can't find one.
-                            if (!found) {
-                                Utilities.noSuchSymbol(tyQualifier, tyName
-                                        .getName(), opLoc);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return newClause;
     }
 
     /**
@@ -3084,13 +2940,15 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Replace facility actuals variables in the requires clause
         requires =
-                replaceFacilityFormalWithActual(stmt.getLocation(), requires,
-                        opDec.getParameters());
+                Utilities.replaceFacilityFormalWithActual(stmt.getLocation(),
+                        requires, opDec.getParameters(),
+                        myInstantiatedFacilityArgMap, myCurrentModuleScope);
 
         // Replace facility actuals variables in the ensures clause
         ensures =
-                replaceFacilityFormalWithActual(stmt.getLocation(), ensures,
-                        opDec.getParameters());
+                Utilities.replaceFacilityFormalWithActual(stmt.getLocation(),
+                        ensures, opDec.getParameters(),
+                        myInstantiatedFacilityArgMap, myCurrentModuleScope);
 
         // NY YS
         // Duration for CallStmt
@@ -3992,8 +3850,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Replace facility actuals variables in the requires clause
             requires =
-                    replaceFacilityFormalWithActual(assignParamExp
-                            .getLocation(), requires, opDec.getParameters());
+                    Utilities.replaceFacilityFormalWithActual(assignParamExp
+                            .getLocation(), requires, opDec.getParameters(),
+                            myInstantiatedFacilityArgMap, myCurrentModuleScope);
 
             // Modify the location of the requires clause and add it to myCurrentAssertiveCode
             // Obtain the current location
@@ -4061,9 +3920,11 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                             // Replace facility actuals variables in the ensures clause
                             ensures =
-                                    replaceFacilityFormalWithActual(
+                                    Utilities.replaceFacilityFormalWithActual(
                                             assignParamExp.getLocation(),
-                                            ensures, opDec.getParameters());
+                                            ensures, opDec.getParameters(),
+                                            myInstantiatedFacilityArgMap,
+                                            myCurrentModuleScope);
 
                             // Replace all instances of the left hand side
                             // variable in the current final confirm statement.
