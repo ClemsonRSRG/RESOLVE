@@ -1664,46 +1664,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Locate and return the corresponding operation dec based on the qualifier,
-     * name, and arguments.</p>
-     *
-     * @param loc Location of the calling statement.
-     * @param qual Qualifier of the operation
-     * @param name Name of the operation.
-     * @param args List of arguments for the operation.
-     *
-     * @return The operation corresponding to the calling statement in <code>OperationDec</code> form.
-     */
-    private OperationDec getOperationDec(Location loc, PosSymbol qual,
-            PosSymbol name, List<ProgramExp> args) {
-        // Obtain the corresponding OperationEntry and OperationDec
-        List<PTType> argTypes = new LinkedList<PTType>();
-        for (ProgramExp arg : args) {
-            argTypes.add(arg.getProgramType());
-        }
-        OperationEntry opEntry =
-                Utilities.searchOperation(loc, qual, name, argTypes,
-                        myCurrentModuleScope);
-
-        // Obtain an OperationDec from the OperationEntry
-        ResolveConceptualElement element = opEntry.getDefiningElement();
-        OperationDec opDec;
-        if (element instanceof OperationDec) {
-            opDec = (OperationDec) opEntry.getDefiningElement();
-        }
-        else {
-            FacilityOperationDec fOpDec =
-                    (FacilityOperationDec) opEntry.getDefiningElement();
-            opDec =
-                    new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
-                            fOpDec.getReturnTy(), fOpDec.getStateVars(), fOpDec
-                                    .getRequires(), fOpDec.getEnsures());
-        }
-
-        return opDec;
-    }
-
-    /**
      * <p>Returns the requires clause for the current <code>Dec</code>.</p>
      *
      * @param location The location of the requires clause.
@@ -2996,9 +2956,15 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private void applyCallStmtRule(CallStmt stmt) {
         // Call a method to locate the operation dec for this call
-        OperationDec opDec =
-                getOperationDec(stmt.getLocation(), stmt.getQualifier(), stmt
-                        .getName(), stmt.getArguments());
+        List<PTType> argTypes = new LinkedList<PTType>();
+        for (ProgramExp arg : stmt.getArguments()) {
+            argTypes.add(arg.getProgramType());
+        }
+        OperationEntry opEntry =
+                Utilities.searchOperation(stmt.getLocation(), stmt
+                        .getQualifier(), stmt.getName(), argTypes,
+                        myCurrentModuleScope);
+        OperationDec opDec = Utilities.convertToOperationDec(opEntry);
         boolean isLocal =
                 Utilities.isLocationOperation(stmt.getName().getName(),
                         myCurrentModuleScope);
@@ -3023,11 +2989,12 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Check for recursive call of itself
         if (myCurrentOperationEntry != null
-                && myCurrentOperationEntry.getName().equals(
-                        opDec.getName().getName())
-                && stmt.getQualifier() != null
-                && !PTVoid.getInstance(myTypeGraph).equals(
-                        myCurrentOperationEntry.getReturnType())) {
+                && myOperationDecreasingExp != null
+                && myCurrentOperationEntry.getName().equals(opEntry.getName())
+                && myCurrentOperationEntry.getReturnType().equals(
+                        opEntry.getReturnType())
+                && myCurrentOperationEntry.getSourceModuleIdentifier().equals(
+                        opEntry.getSourceModuleIdentifier())) {
             // Create a new confirm statement using P_val and the decreasing clause
             VarExp pVal =
                     Utilities.createPValExp(myOperationDecreasingExp
@@ -3116,11 +3083,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp finalConfirmExp = finalConfirm.getAssertion();
 
             // Obtain the corresponding OperationProfileEntry
-            List<PTType> argTypes = new LinkedList<PTType>();
-            for (ProgramExp arg : stmt.getArguments()) {
-                argTypes.add(arg.getProgramType());
-            }
-
             OperationProfileEntry ope =
                     Utilities.searchOperationProfile(loc, stmt.getQualifier(),
                             stmt.getName(), argTypes, myCurrentModuleScope);
@@ -3924,18 +3886,25 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
 
             // Call a method to locate the operation dec for this call
-            OperationDec opDec =
-                    getOperationDec(stmt.getLocation(), qualifier,
-                            assignParamExp.getName(), assignParamExp
-                                    .getArguments());
+            List<PTType> argTypes = new LinkedList<PTType>();
+            for (ProgramExp arg : assignParamExp.getArguments()) {
+                argTypes.add(arg.getProgramType());
+            }
+            OperationEntry opEntry =
+                    Utilities.searchOperation(stmt.getLocation(), qualifier,
+                            assignParamExp.getName(), argTypes,
+                            myCurrentModuleScope);
+            OperationDec opDec = Utilities.convertToOperationDec(opEntry);
 
             // Check for recursive call of itself
             if (myCurrentOperationEntry != null
+                    && myOperationDecreasingExp != null
                     && myCurrentOperationEntry.getName().equals(
-                            opDec.getName().getName())
-                    && qualifier != null
-                    && !PTVoid.getInstance(myTypeGraph).equals(
-                            myCurrentOperationEntry.getReturnType())) {
+                            opEntry.getName())
+                    && myCurrentOperationEntry.getReturnType().equals(
+                            opEntry.getReturnType())
+                    && myCurrentOperationEntry.getSourceModuleIdentifier()
+                            .equals(opEntry.getSourceModuleIdentifier())) {
                 // Create a new confirm statement using P_val and the decreasing clause
                 VarExp pVal =
                         Utilities.createPValExp(myOperationDecreasingExp
@@ -4099,13 +4068,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                                         finalConfirm.getAssertion();
 
                                 // Obtain the corresponding OperationProfileEntry
-                                List<PTType> argTypes =
-                                        new LinkedList<PTType>();
-                                for (ProgramExp arg : assignParamExp
-                                        .getArguments()) {
-                                    argTypes.add(arg.getProgramType());
-                                }
-
                                 OperationProfileEntry ope =
                                         Utilities.searchOperationProfile(loc,
                                                 qualifier, assignParamExp
@@ -4310,17 +4272,25 @@ public class VCGenerator extends TreeWalkerVisitor {
             ifConditionLoc = (Location) stmt.getLocation().clone();
         }
 
-        OperationDec opDec =
-                getOperationDec(ifCondition.getLocation(), qualifier,
-                        testParamExp.getName(), testParamExp.getArguments());
+        // Search for the operation dec
+        List<PTType> argTypes = new LinkedList<PTType>();
+        List<ProgramExp> argsList = testParamExp.getArguments();
+        for (ProgramExp arg : argsList) {
+            argTypes.add(arg.getProgramType());
+        }
+        OperationEntry opEntry =
+                Utilities.searchOperation(ifCondition.getLocation(), qualifier,
+                        testParamExp.getName(), argTypes, myCurrentModuleScope);
+        OperationDec opDec = Utilities.convertToOperationDec(opEntry);
 
         // Check for recursive call of itself
         if (myCurrentOperationEntry != null
-                && myCurrentOperationEntry.getName().equals(
-                        opDec.getName().getName())
-                && qualifier != null
-                && !PTVoid.getInstance(myTypeGraph).equals(
-                        myCurrentOperationEntry.getReturnType())) {
+                && myOperationDecreasingExp != null
+                && myCurrentOperationEntry.getName().equals(opEntry.getName())
+                && myCurrentOperationEntry.getReturnType().equals(
+                        opEntry.getReturnType())
+                && myCurrentOperationEntry.getSourceModuleIdentifier().equals(
+                        opEntry.getSourceModuleIdentifier())) {
             // Create a new confirm statement using P_val and the decreasing clause
             VarExp pVal =
                     Utilities.createPValExp(myOperationDecreasingExp
@@ -4514,11 +4484,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
 
             // Search for operation profile
-            List<PTType> argTypes = new LinkedList<PTType>();
-            List<ProgramExp> argsList = testParamExp.getArguments();
-            for (ProgramExp arg : argsList) {
-                argTypes.add(arg.getProgramType());
-            }
             OperationProfileEntry ope =
                     Utilities.searchOperationProfile(loc, qualifier,
                             testParamExp.getName(), argTypes,

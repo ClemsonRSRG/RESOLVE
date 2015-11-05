@@ -232,6 +232,32 @@ public class Utilities {
     }
 
     /**
+     * <p>Convert an operation entry into the absyn node representation.</p>
+     *
+     * @param opEntry The operation entry in the symbol table.
+     *
+     * @return An <code>OperationDec</code>.
+     */
+    public static OperationDec convertToOperationDec(OperationEntry opEntry) {
+        // Obtain an OperationDec from the OperationEntry
+        ResolveConceptualElement element = opEntry.getDefiningElement();
+        OperationDec opDec;
+        if (element instanceof OperationDec) {
+            opDec = (OperationDec) opEntry.getDefiningElement();
+        }
+        else {
+            FacilityOperationDec fOpDec =
+                    (FacilityOperationDec) opEntry.getDefiningElement();
+            opDec =
+                    new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
+                            fOpDec.getReturnTy(), fOpDec.getStateVars(), fOpDec
+                                    .getRequires(), fOpDec.getEnsures());
+        }
+
+        return opDec;
+    }
+
+    /**
      * <p>Creates conceptual variable expression from the
      * given name.</p>
      *
