@@ -390,7 +390,8 @@ public class VC {
                     && pl.getParameters().get(0).toString().equals(
                             body.getQuantifiedVariables().iterator().next()
                                     .toString())
-                    && body.getSubExpressions().size() == 1) {
+                    && body.getSubExpressions().size() == 1
+                    && body.getSubExpressions().get(0).isVariable()) {
                 PSymbol funName =
                         new PSymbol(new MTFunction(m_typegraph, body.getType(),
                                 pl.getParameters().get(0).getType()), null,

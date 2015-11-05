@@ -77,9 +77,8 @@ public class Registry {
         m_commutative_operators.add("+");
         m_commutative_operators.add("=");
         m_commutative_operators.add("and");
-        m_commutative_operators.add("unionMakesZ");
-        m_cached_isSubtype = new HashMap<String, Boolean>();
-
+        m_commutative_operators.add("or");
+        m_cached_isSubtype = new HashMap<String,Boolean>();
     }
 
     public boolean isSubtype(MTType a, MTType b) {

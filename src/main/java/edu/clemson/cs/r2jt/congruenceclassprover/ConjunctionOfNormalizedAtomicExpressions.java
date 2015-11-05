@@ -326,10 +326,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     protected String mergeOperators(int a, int b) {
         int t = m_registry.getIndexForSymbol("true");
         int f = m_registry.getIndexForSymbol("false");
-        if ((a == t && b == f) || (a == f && b == t)) {
-            m_evaluates_to_false = true;
-            return "contradiction detected";
-        }
+
         String rString = "";
         if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
             return rString;
@@ -354,6 +351,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 int temp = opA;
                 opA = opB;
                 opB = temp;
+            }
+            if ((opA == t && opB == f) ) {
+                m_evaluates_to_false = true;
+                return "contradiction detected " + rString;
             }
             rString +=
                     m_registry.getSymbolForIndex(opA) + "/"
@@ -780,7 +781,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             Map<String, String> rotBind =
                     new HashMap<String, String>(currentBind);
             // if at least one arg is used in another theorem equation, we may need to permute
-            boolean multiFound = false;
+            boolean multiFound = true;
             for (String tArg : comTargsBound) {
                 if (multiUseWilds.contains(tArg))
                     multiFound = true;

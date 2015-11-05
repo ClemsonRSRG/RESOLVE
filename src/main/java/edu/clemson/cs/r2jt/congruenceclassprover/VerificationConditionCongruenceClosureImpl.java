@@ -12,7 +12,6 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.r2jt.rewriteprover.Antecedent;
 import edu.clemson.cs.r2jt.rewriteprover.Consequent;
@@ -20,11 +19,9 @@ import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -40,6 +37,7 @@ public class VerificationConditionCongruenceClosureImpl {
     private final ConjunctionOfNormalizedAtomicExpressions m_conjunction;
     protected final List<String> m_goal;
     private int m_fc_ctr = 0;
+    private final boolean DOCOMPLEMENTS = false;
 
     public static enum STATUS {
         FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE
@@ -75,6 +73,14 @@ public class VerificationConditionCongruenceClosureImpl {
         //m_conjunction.mergeEquivalentFunctions();
     }
 
+    /* Ex.: p is for all k:Z, lambda0(k) = (x <= k)
+    Adds these assertions:
+    lambda0(_sv0) = (x <= _sv0)
+    ZSetConB(lambda0) = ZSetCons(_sv0)
+    ------ Complements
+    lambda0(_sv0_Comp) = not(x <=_sv0_Comp)
+    ZSetComplement(ZSetCons(_sv0)) = ZSetCons(_sv0_Comp)
+    */
     protected void assertSet(PExp p, ModuleScope scope) {
         if (p.getQuantifiedVariables().size() != 1)
             return;
@@ -96,11 +102,10 @@ public class VerificationConditionCongruenceClosureImpl {
             return;
         e = (MathSymbolEntry) entries.get(0);
         MTFunction conB = (MTFunction) e.getType();
-        MTType zSetT = conB.getRange();
         PSymbol arg = p.getQuantifiedVariables().iterator().next();
         PSymbol fc =
                 new PSymbol(arg.getType(), arg.getTypeValue(), "_sv"
-                        + m_fc_ctr++);
+                        + ++m_fc_ctr);
         HashMap<PExp, PExp> subMap = new HashMap<PExp, PExp>();
         subMap.put(arg, fc);
         PExp toAdd = p.substitute(subMap);
@@ -122,6 +127,42 @@ public class VerificationConditionCongruenceClosureImpl {
         PSymbol setAsrt = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
         m_conjunction.addExpression(setAsrt);
 
+        // What follows enters set complement assertions
+        if (DOCOMPLEMENTS) {
+            entries =
+                    scope.query(new NameQuery(null, "ZSetComplement",
+                            MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
+                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                            false));
+            if (entries.isEmpty())
+                return;
+            MTType compT = ((MathSymbolEntry) entries.get(0)).getType();
+            args.clear();
+            args.add(p.getSubExpressions().get(1));
+            PSymbol notRhs = new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
+            args.clear();
+            args.add(p.getSubExpressions().get(0));
+            args.add(notRhs);
+            PExp notP = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+            PSymbol fc_comp =
+                    new PSymbol(arg.getType(), arg.getTypeValue(), "_sv"
+                            + m_fc_ctr + "_Comp");
+            subMap.clear();
+            subMap.put(arg, fc_comp);
+            notP = notP.substitute(subMap);
+            m_conjunction.addExpression(notP);
+            args.clear();
+            args.add(s2);
+            PSymbol compL = new PSymbol(compT, null, "ZSetComplement", args);
+            args.clear();
+            args.add(fc_comp);
+            PSymbol compR = new PSymbol(consT, null, "ZSetCons", args);
+            args.clear();
+            args.add(compL);
+            args.add(compR);
+            PSymbol compEq = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+            m_conjunction.addExpression(compEq);
+        }
     }
 
     private void makeSetAssertions(VC vc) {
@@ -135,9 +176,9 @@ public class VerificationConditionCongruenceClosureImpl {
             PSymbol qFun =
                     new PSymbol(new MTFunction(m_typegraph,
                             m_typegraph.BOOLEAN, px.getQuantifiedVariables()
-                                    .iterator().next().getType()), null,
+                            .iterator().next().getType()), null,
                             "ConFunc" + (++c_count), new ArrayList<PExp>(px
-                                    .getQuantifiedVariables()));
+                            .getQuantifiedVariables()));
             ArrayList<PExp> args = new ArrayList<PExp>();
             args.add(qFun);
             args.add(px);
@@ -269,7 +310,7 @@ public class VerificationConditionCongruenceClosureImpl {
 
     protected Map<String, Integer> getGoalSymbols() {
         // even score if goal is true = false
-        if(m_goal.size()==2 && (m_goal.get(1).equals("false") || m_goal.get(0).equals("false"))){
+        if (m_goal.size() == 2 && (m_goal.get(1).equals("false") || m_goal.get(0).equals("false"))) {
             return new HashMap<String, Integer>();
         }
         HashSet<String> goalSymbolSet = new HashSet<String>();
@@ -326,15 +367,13 @@ public class VerificationConditionCongruenceClosureImpl {
                     addGoal(m_registry.getSymbolForIndex(lhsIndex), m_registry
                             .getSymbolForIndex(rhsIndex));
                 }*/
-            }
-            else { // P becomes P = true or P(x...) becomes P(x ...) = z and z is replaced by true
+            } else { // P becomes P = true or P(x...) becomes P(x ...) = z and z is replaced by true
 
                 if (inAntecedent) {
                     m_conjunction.addExpression(curr);
                     //m_conjunction.mergeOperators(m_registry
                     //        .getIndexForSymbol("true"), intRepForExp);
-                }
-                else {
+                } else {
                     int intRepForExp = m_conjunction.addFormula(curr);
                     addGoal(m_registry.getSymbolForIndex(intRepForExp), "true");
                 }

@@ -127,6 +127,8 @@ public class TheoremCongruenceClosureImpl {
             rSet.remove("and");
             rSet.remove("/=");
             rSet.remove("+"); // temporary
+            //rSet.remove("-");
+            //rSet.remove("or"); // temporary this is really bad
             m_function_names = rSet;
         }
         return m_function_names;
@@ -199,7 +201,7 @@ public class TheoremCongruenceClosureImpl {
         }
 
         HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
-        allValidBindings = discardBindings(allValidBindings);
+        allValidBindings = discardBindingIfAllValuesNotUnique(allValidBindings);
         for (java.util.Map<String, String> curBinding : allValidBindings) {
             for (String thKey : curBinding.keySet()) {
 
@@ -243,7 +245,30 @@ public class TheoremCongruenceClosureImpl {
         }
         return rList;
     }
-
+    // Discard bindings where any 2 map to the same value
+    private java.util.Set<java.util.Map<String, String>> discardBindingIfAllValuesNotUnique(
+            java.util.Set<java.util.Map<String, String>> b) {
+        if (m_theorem.getQuantifiedVariables().size() < 2)
+            return b;
+        java.util.Set<java.util.Map<String, String>> rSet =
+                new HashSet<java.util.Map<String, String>>();
+        discard:
+        for (java.util.Map<String, String> m : b) {
+            HashSet<String> seenVals = new HashSet<String>();
+            for (PSymbol p : m_theorem.getQuantifiedVariables()) {
+                String k = p.getTopLevelOperation();
+                k = m_theoremRegistry.getRootSymbolForSymbol(k);
+                String thisVal = m.get(k);
+                if (seenVals.contains(thisVal)) {
+                    continue discard;
+                }
+                else
+                    seenVals.add(thisVal);
+            }
+            rSet.add(m);
+        }
+        return rSet;
+    }
     // Discard bindings where all bind to same value
     private java.util.Set<java.util.Map<String, String>> discardBindings(
             java.util.Set<java.util.Map<String, String>> b) {
