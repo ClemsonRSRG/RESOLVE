@@ -27,7 +27,6 @@ import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
-import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTVoid;
 import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
@@ -1279,6 +1278,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 Exp currentAssumeExp = assumeExpCopyList.get(j);
                 Exp tmp;
                 boolean hasVerificationVar = false;
+                boolean isConceptualVar = false;
                 boolean doneReplacement = false;
 
                 // Attempts to simplify equality expressions
@@ -1301,6 +1301,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                             hasVerificationVar = true;
                         }
                     }
+                    // Check to see if we have Conc.[expression]
+                    else if (equalsExp.getLeft() instanceof DotExp) {
+                        DotExp tempLeft = (DotExp) equalsExp.getLeft();
+                        isConceptualVar = tempLeft.containsVar("Conc", false);
+                    }
 
                     // Check if both the left and right are replaceable
                     if (isLeftReplaceable && isRightReplaceable) {
@@ -1309,7 +1314,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                         // right hand side is the only one that makes sense
                         // in the current context, therefore we do the
                         // substitution.
-                        if (hasVerificationVar) {
+                        if (hasVerificationVar || isConceptualVar) {
                             tmp =
                                     Utilities.replace(currentConfirmExp,
                                             equalsExp.getLeft(), equalsExp
@@ -4833,9 +4838,30 @@ public class VCGenerator extends TreeWalkerVisitor {
             // vc step replaces the requires clause if possible.
             if (myCorrespondenceExp != null && !isLocal) {
                 Location reqLoc = (Location) requires.getLocation().clone();
-                requires =
-                        myTypeGraph.formConjunct(Exp.copy(myCorrespondenceExp),
-                                requires);
+
+                // Attempt to replace the correspondence
+                Exp tmp = Exp.copy(requires);
+                if (myCorrespondenceExp instanceof EqualsExp) {
+                    tmp =
+                            Utilities
+                                    .replace(requires,
+                                            ((EqualsExp) myCorrespondenceExp)
+                                                    .getLeft(),
+                                            ((EqualsExp) myCorrespondenceExp)
+                                                    .getRight());
+                }
+
+                // If we are successful use the replaced version
+                if (tmp.equals(requires)) {
+                    requires =
+                            myTypeGraph.formConjunct(Exp
+                                    .copy(myCorrespondenceExp), requires);
+                }
+                else {
+                    myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                            Exp.copy(myCorrespondenceExp), false);
+                    requires = tmp;
+                }
                 requires.setLocation(reqLoc);
             }
 
