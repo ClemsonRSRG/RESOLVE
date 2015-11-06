@@ -352,7 +352,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 opA = opB;
                 opB = temp;
             }
-            if ((opA == t && opB == f) ) {
+            if ((opA == t && opB == f)) {
                 m_evaluates_to_false = true;
                 return "contradiction detected " + rString;
             }
@@ -543,13 +543,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     protected Set<java.util.Map<String, String>> getMatchesForOverideSet(
             NormalizedAtomicExpressionMapImpl expr, Registry exprReg,
-            Set<Map<String, String>> foreignSymbolOverideSet,
-            Set<String> multiUseWilds) {
+            Set<Map<String, String>> foreignSymbolOverideSet) {
         Set<java.util.Map<String, String>> rSet =
                 new HashSet<Map<String, String>>();
         for (Map<String, String> fs_m : foreignSymbolOverideSet) {
             Set<java.util.Map<String, String>> results =
-                    getMatchesForEq(expr, exprReg, fs_m, multiUseWilds);
+                    getMatchesForEq(expr, exprReg, fs_m);
             if (results != null && results.size() != 0)
                 rSet.addAll(results);
         }
@@ -558,7 +557,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     protected Set<Map<String, String>> getMatchesForEq(
             NormalizedAtomicExpressionMapImpl expr, Registry exprReg,
-            Map<String, String> foreignSymbolOveride, Set<String> multiUseWilds) {
+            Map<String, String> foreignSymbolOveride) {
         // Identify the literals.
         Set<String> literalsInexpr = new HashSet<String>();
         Map<String, Integer> exprMMap =
@@ -629,7 +628,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             if (filtered_vcNaemlsWithAllLiterals.isEmpty())
                 return null;
             return getBindings_Commutative(filtered_vcNaemlsWithAllLiterals,
-                    foreignSymbolOveride, expr, exprReg, multiUseWilds);
+                    foreignSymbolOveride, expr, exprReg);
         }
     }
 
@@ -638,8 +637,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     Set<Map<String, String>> getBindings_Commutative(
             Set<NormalizedAtomicExpressionMapImpl> vcEquations,
             Map<String, String> basemap,
-            NormalizedAtomicExpressionMapImpl searchExpr, Registry searchReg,
-            Set<String> multiUseWilds) {
+            NormalizedAtomicExpressionMapImpl searchExpr, Registry searchReg) {
         // Argument sets
         Map<String, Integer> thArgs =
                 searchExpr.getArgumentsAsStrings(searchReg);
@@ -780,14 +778,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             bindings.add(currentBind);
             Map<String, String> rotBind =
                     new HashMap<String, String>(currentBind);
-            // if at least one arg is used in another theorem equation, we may need to permute
-            boolean multiFound = true;
+            // do simple rotation permutations
             for (String tArg : comTargsBound) {
-                if (multiUseWilds.contains(tArg))
-                    multiFound = true;
                 rotBind.put(tArg, comVCargsBound.pop());
             }
-            if (!rotBind.isEmpty() && multiFound)
+            if (!rotBind.isEmpty())
                 bindings.add(rotBind);
         }
         // Have to permute commutative binds for completeness's sake.  Sometimes it matters.

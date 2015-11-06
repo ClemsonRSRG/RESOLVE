@@ -42,12 +42,13 @@ public class InstantiatedTheoremPrioritizer {
     public int calculateScore(Set<String> theorem_symbols) {
         int max = m_vcReg.m_indexToSymbol.size();
         int score = 0;
-        if(m_vc_symbols.isEmpty()){
-            for(String s : theorem_symbols){
-                if(m_vcReg.m_symbolToIndex.containsKey(s)){
+        if (m_vc_symbols.isEmpty()) {
+            for (String s : theorem_symbols) {
+                if (m_vcReg.m_symbolToIndex.containsKey(s)) {
                     score += m_vcReg.getIndexForSymbol(s);
                 }
-                else score += max;
+                else
+                    score += max;
             }
         }
         for (String s : theorem_symbols) {

@@ -66,10 +66,43 @@ public class VerificationConditionCongruenceClosureImpl {
         addPExp(m_consequent.iterator(), false);
         // seed with not(false)
         ArrayList<PExp> args = new ArrayList<PExp>();
-        args.add(new PSymbol(m_typegraph.BOOLEAN, null, "false"));
+        PSymbol fls = new PSymbol(m_typegraph.BOOLEAN, null, "false");
+        args.add(fls);
         PSymbol nF = new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
         m_conjunction.addExpression(nF);
+        // seed with true and true.  Need this for search: x and y, when x and y are both true
+        args.clear();
+        PSymbol tr = new PSymbol(m_typegraph.BOOLEAN, null, "true");
+        args.add(tr);
+        args.add(tr);
+        PSymbol tandt = new PSymbol(m_typegraph.BOOLEAN, null, "and", args);
+        args.clear();
+        args.add(tandt);
+        args.add(tr);
+        PSymbol tandteqt = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+        m_conjunction.addExpression(tandteqt);
+        args.clear();
+        // seed with true and false = false
+        args.add(tr);
+        args.add(fls);
+        PSymbol tandf = new PSymbol(m_typegraph.BOOLEAN, null, "and", args);
+        args.clear();
+        args.add(tandf);
+        args.add(fls);
+        PSymbol tandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+        m_conjunction.addExpression(tandfeqf);
+        // seed with false and false = false
+        args.clear();
+        args.add(fls);
+        args.add(fls);
+        PSymbol fandf = new PSymbol(m_typegraph.BOOLEAN, null, "and", args);
+        args.clear();
+        args.add(fandf);
+        args.add(fls);
+        PSymbol fandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+        m_conjunction.addExpression(fandfeqf);
         m_conjunction.updateUseMap();
+
         //m_conjunction.mergeEquivalentFunctions();
     }
 
@@ -80,7 +113,7 @@ public class VerificationConditionCongruenceClosureImpl {
     ------ Complements
     lambda0(_sv0_Comp) = not(x <=_sv0_Comp)
     ZSetComplement(ZSetCons(_sv0)) = ZSetCons(_sv0_Comp)
-    */
+     */
     protected void assertSet(PExp p, ModuleScope scope) {
         if (p.getQuantifiedVariables().size() != 1)
             return;
@@ -130,16 +163,20 @@ public class VerificationConditionCongruenceClosureImpl {
         // What follows enters set complement assertions
         if (DOCOMPLEMENTS) {
             entries =
-                    scope.query(new NameQuery(null, "ZSetComplement",
-                            MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
-                            MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
-                            false));
+                    scope
+                            .query(new NameQuery(
+                                    null,
+                                    "ZSetComplement",
+                                    MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
+                                    MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                                    false));
             if (entries.isEmpty())
                 return;
             MTType compT = ((MathSymbolEntry) entries.get(0)).getType();
             args.clear();
             args.add(p.getSubExpressions().get(1));
-            PSymbol notRhs = new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
+            PSymbol notRhs =
+                    new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
             args.clear();
             args.add(p.getSubExpressions().get(0));
             args.add(notRhs);
@@ -176,9 +213,9 @@ public class VerificationConditionCongruenceClosureImpl {
             PSymbol qFun =
                     new PSymbol(new MTFunction(m_typegraph,
                             m_typegraph.BOOLEAN, px.getQuantifiedVariables()
-                            .iterator().next().getType()), null,
+                                    .iterator().next().getType()), null,
                             "ConFunc" + (++c_count), new ArrayList<PExp>(px
-                            .getQuantifiedVariables()));
+                                    .getQuantifiedVariables()));
             ArrayList<PExp> args = new ArrayList<PExp>();
             args.add(qFun);
             args.add(px);
@@ -310,7 +347,9 @@ public class VerificationConditionCongruenceClosureImpl {
 
     protected Map<String, Integer> getGoalSymbols() {
         // even score if goal is true = false
-        if (m_goal.size() == 2 && (m_goal.get(1).equals("false") || m_goal.get(0).equals("false"))) {
+        if (m_goal.size() == 2
+                && (m_goal.get(1).equals("false") || m_goal.get(0).equals(
+                        "false"))) {
             return new HashMap<String, Integer>();
         }
         HashSet<String> goalSymbolSet = new HashSet<String>();
@@ -367,13 +406,15 @@ public class VerificationConditionCongruenceClosureImpl {
                     addGoal(m_registry.getSymbolForIndex(lhsIndex), m_registry
                             .getSymbolForIndex(rhsIndex));
                 }*/
-            } else { // P becomes P = true or P(x...) becomes P(x ...) = z and z is replaced by true
+            }
+            else { // P becomes P = true or P(x...) becomes P(x ...) = z and z is replaced by true
 
                 if (inAntecedent) {
                     m_conjunction.addExpression(curr);
                     //m_conjunction.mergeOperators(m_registry
                     //        .getIndexForSymbol("true"), intRepForExp);
-                } else {
+                }
+                else {
                     int intRepForExp = m_conjunction.addFormula(curr);
                     addGoal(m_registry.getSymbolForIndex(intRepForExp), "true");
                 }
