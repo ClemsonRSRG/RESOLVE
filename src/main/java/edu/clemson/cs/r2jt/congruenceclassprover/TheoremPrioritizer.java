@@ -51,7 +51,7 @@ public class TheoremPrioritizer {
                 if (!shouldExclude(t.getLiteralsInMatchingPart())
                         && !shouldExclude(t.getFunctionNames())) {
                     score =
-                            calculateScoreMinimum(t.getNonQuantifiedSymbols(),
+                            calculateScoreAverage(t.getNonQuantifiedSymbols(),
                                     m_vc_symbols.keySet().size());
                 }
 
@@ -94,7 +94,7 @@ public class TheoremPrioritizer {
             else
                 number_not_contained++;
         }
-        return score + number_not_contained;
+        return (score + 1) * number_not_contained;
     }
 
     // average of symbol scores

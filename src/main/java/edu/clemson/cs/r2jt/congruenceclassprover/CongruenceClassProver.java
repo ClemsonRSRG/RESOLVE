@@ -155,7 +155,7 @@ public final class CongruenceClassProver {
         PSymbol p = new PSymbol(B, null, "p", PSymbol.Quantification.FOR_ALL);
         PSymbol q = new PSymbol(B, null, "q", PSymbol.Quantification.FOR_ALL);
         ArrayList<PExp> args = new ArrayList<PExp>();
-        // p = not q implies q = not p
+        // (p = not q) = (q = not p)
         args.add(q);
         PSymbol not_q = new PSymbol(B, null, "not", args);
         args.clear();
@@ -172,9 +172,10 @@ public final class CongruenceClassProver {
         args.clear();
         args.add(ant);
         args.add(succ);
-        PSymbol th1 = new PSymbol(B, null, "implies", args);
+        PSymbol th1 = new PSymbol(B, null, "=", args);
         m_theorems.add(new TheoremCongruenceClosureImpl(m_typeGraph, th1,
                 false, "Default theorem 1"));
+        addEqualityTheorem(true, th1, "Default theorem 1");
         // not not p = p
         args.clear();
         args.add(not_p);
@@ -223,6 +224,9 @@ public final class CongruenceClassProver {
         PSymbol th5 = new PSymbol(B, null, "implies", args);
         m_theorems.add(new TheoremCongruenceClosureImpl(m_typeGraph, th5,
                 false, "Default theorem 5"));
+
+        // (p = q) = (not p = not q)?
+        // not(p = q) = (not p = q)?
     }
 
     private void addContrapositive(PExp theorem, String thName) {
@@ -295,7 +299,7 @@ public final class CongruenceClassProver {
         int numUnproved = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
             //printVCEachStep = true;
-            //if(!vcc.m_name.equals("2_12"))continue;
+            //if (!vcc.m_name.equals("1_7")) continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             // Skip proof loop
@@ -383,21 +387,10 @@ public final class CongruenceClassProver {
      */
     protected VerificationConditionCongruenceClosureImpl.STATUS prove(
             VerificationConditionCongruenceClosureImpl vcc) {
-        long startTime = System.currentTimeMillis();
-        long endTime = myTimeout + startTime;
-        HashSet<String> applied = new HashSet<String>();
-        Map<String, Integer> theoremAppliedCount =
-                new HashMap<String, Integer>();
-        VerificationConditionCongruenceClosureImpl.STATUS status =
-                vcc.isProved();
-        String div = divLine(vcc.m_name);
-        String theseResults =
-                div + ("Before application of theorems: " + vcc + "\n");
         ArrayList<TheoremCongruenceClosureImpl> theoremsForThisVC =
                 new ArrayList<TheoremCongruenceClosureImpl>();
         theoremsForThisVC.addAll(m_theorems);
         // add quantified expressions local to the vc to theorems
-
         for (PExp p : vcc.forAllQuantifiedPExps) {
             TheoremCongruenceClosureImpl t =
                     new TheoremCongruenceClosureImpl(m_typeGraph, p, true,
@@ -411,8 +404,19 @@ public final class CongruenceClassProver {
                 vcc.assertSet(p, m_scope);
 
         }
+        long startTime = System.currentTimeMillis();
+        long endTime = myTimeout + startTime;
+        HashSet<String> applied = new HashSet<String>();
+        Map<String, Integer> theoremAppliedCount =
+                new HashMap<String, Integer>();
+        VerificationConditionCongruenceClosureImpl.STATUS status =
+                vcc.isProved();
+        String div = divLine(vcc.m_name);
+        String theseResults =
+                div + ("Before application of theorems: " + vcc + "\n");
+
         int iteration = 0;
-        while (status
+        chooseNewTheorem: while (status
                 .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                 && System.currentTimeMillis() <= endTime) {
             // Rank theorems
@@ -422,7 +426,6 @@ public final class CongruenceClassProver {
                     new TheoremPrioritizer(theoremsForThisVC,
                             vcSymbolRelevanceMap, threshold,
                             theoremAppliedCount, vcc.getRegistry());
-            //theseResults += "Iteration " + iteration++ + "\n";
             int max_Theorems_to_choose = 1;
             int num_Theorems_chosen = 0;
             long timeAtLastIter = System.currentTimeMillis();
@@ -441,55 +444,49 @@ public final class CongruenceClassProver {
                             new InstantiatedTheoremPrioritizer(
                                     instantiatedTheorems, vcSymbolRelevanceMap,
                                     threshold, vcc.getRegistry());
-                    int max_Instantiated_to_Add = 1;
-                    int num_Instantiated_added = 0;
-                    while (num_Instantiated_added < max_Instantiated_to_Add
-                            && !instPQ.m_pQueue.isEmpty()) {
+                    String substitutionMade = "";
+                    while (!instPQ.m_pQueue.isEmpty() && substitutionMade == "") {
                         PExpWithScore curP = instPQ.m_pQueue.poll();
-
                         if (!applied.contains(curP.m_theorem.toString())) {
-                            String substitutionMade =
+                            substitutionMade =
                                     vcc
                                             .getConjunct()
                                             .addExpressionAndTrackChanges(
                                                     curP.m_theorem,
                                                     endTime,
                                                     curP.m_theoremDefinitionString);
-                            if (substitutionMade != "") {
-                                applied.add(curP.m_theorem.toString());
-                                theseResults +=
-                                        "Iter:"
-                                                + ++iteration
-                                                + " Iter Time: "
-                                                + (System.currentTimeMillis() - time_at_selection)
-                                                + " Elapsed Time: "
-                                                + (System.currentTimeMillis() - startTime)
-                                                + "\n[" + theoremScore + "]"
-                                                + curP.toString() + "\t"
-                                                + substitutionMade + "\n\n";
-                                if (printVCEachStep)
-                                    theseResults += vcc.toString();
-                                timeAtLastIter = System.currentTimeMillis();
-                                status = vcc.isProved();
-                                num_Instantiated_added++;
-                                int count = 0;
-                                if (theoremAppliedCount
-                                        .containsKey(cur.m_theoremString))
-                                    count =
-                                            theoremAppliedCount
-                                                    .get(cur.m_theoremString);
-                                theoremAppliedCount.put(cur.m_theoremString,
-                                        ++count);
-                                num_Theorems_chosen++;
-
-                            }
+                            applied.add(curP.m_theorem.toString());
                         }
+                        if (!substitutionMade.equals("")) {
+
+                            theseResults +=
+                                    "Iter:"
+                                            + ++iteration
+                                            + " Iter Time: "
+                                            + (System.currentTimeMillis() - time_at_selection)
+                                            + " Elapsed Time: "
+                                            + (System.currentTimeMillis() - startTime)
+                                            + "\n[" + theoremScore + "]"
+                                            + curP.toString() + "\t"
+                                            + substitutionMade + "\n\n";
+                            if (printVCEachStep)
+                                theseResults += vcc.toString();
+                            status = vcc.isProved();
+                            int count = 0;
+                            if (theoremAppliedCount
+                                    .containsKey(cur.m_theoremString))
+                                count =
+                                        theoremAppliedCount
+                                                .get(cur.m_theoremString);
+                            theoremAppliedCount.put(cur.m_theoremString,
+                                    ++count);
+                            num_Theorems_chosen++;
+                            continue chooseNewTheorem;
+                        }
+
                     }
                 }
-                else {
-                    //theseResults +=
-                    //        "Neg result on: " + cur.m_theoremString + "\n";
-                }
+
             }
         }
         m_results += theseResults + div;
