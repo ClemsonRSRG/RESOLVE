@@ -15,6 +15,7 @@ package edu.clemson.cs.r2jt.translation;
 import edu.clemson.cs.r2jt.absyn.*;
 import edu.clemson.cs.r2jt.data.PosSymbol;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
+import edu.clemson.cs.r2jt.misc.SourceErrorException;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
@@ -122,8 +123,9 @@ public class JavaTranslator extends AbstractTranslator {
         }
 
         if (invocationName == null && buildingJar) {
-            throw new NoSuchMethodError("Facility " + node.getName().getName()
-                    + " cannot be executed in Java. Specify a main!");
+            throw new SourceErrorException(
+                    "Cannot find the operation 'Main' in facility file "
+                            + node.getName().getName(), node.getLocation());
         }
 
         myActiveTemplates.peek().add("invoker", invocationName);

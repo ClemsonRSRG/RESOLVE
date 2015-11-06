@@ -1278,6 +1278,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 Exp currentAssumeExp = assumeExpCopyList.get(j);
                 Exp tmp;
                 boolean hasVerificationVar = false;
+                boolean isConceptualVar = false;
                 boolean doneReplacement = false;
 
                 // Attempts to simplify equality expressions
@@ -1300,6 +1301,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                             hasVerificationVar = true;
                         }
                     }
+                    // Check to see if we have Conc.[expression]
+                    else if (equalsExp.getLeft() instanceof DotExp) {
+                        DotExp tempLeft = (DotExp) equalsExp.getLeft();
+                        isConceptualVar = tempLeft.containsVar("Conc", false);
+                    }
 
                     // Check if both the left and right are replaceable
                     if (isLeftReplaceable && isRightReplaceable) {
@@ -1308,7 +1314,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                         // right hand side is the only one that makes sense
                         // in the current context, therefore we do the
                         // substitution.
-                        if (hasVerificationVar) {
+                        if (hasVerificationVar || isConceptualVar) {
                             tmp =
                                     Utilities.replace(currentConfirmExp,
                                             equalsExp.getLeft(), equalsExp
@@ -1663,46 +1669,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Locate and return the corresponding operation dec based on the qualifier,
-     * name, and arguments.</p>
-     *
-     * @param loc Location of the calling statement.
-     * @param qual Qualifier of the operation
-     * @param name Name of the operation.
-     * @param args List of arguments for the operation.
-     *
-     * @return The operation corresponding to the calling statement in <code>OperationDec</code> form.
-     */
-    private OperationDec getOperationDec(Location loc, PosSymbol qual,
-            PosSymbol name, List<ProgramExp> args) {
-        // Obtain the corresponding OperationEntry and OperationDec
-        List<PTType> argTypes = new LinkedList<PTType>();
-        for (ProgramExp arg : args) {
-            argTypes.add(arg.getProgramType());
-        }
-        OperationEntry opEntry =
-                Utilities.searchOperation(loc, qual, name, argTypes,
-                        myCurrentModuleScope);
-
-        // Obtain an OperationDec from the OperationEntry
-        ResolveConceptualElement element = opEntry.getDefiningElement();
-        OperationDec opDec;
-        if (element instanceof OperationDec) {
-            opDec = (OperationDec) opEntry.getDefiningElement();
-        }
-        else {
-            FacilityOperationDec fOpDec =
-                    (FacilityOperationDec) opEntry.getDefiningElement();
-            opDec =
-                    new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
-                            fOpDec.getReturnTy(), fOpDec.getStateVars(), fOpDec
-                                    .getRequires(), fOpDec.getEnsures());
-        }
-
-        return opDec;
-    }
-
-    /**
      * <p>Returns the requires clause for the current <code>Dec</code>.</p>
      *
      * @param location The location of the requires clause.
@@ -2019,8 +1985,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Replace facility actuals variables in the ensures clause
         ensures =
-                replaceFacilityFormalWithActual(opLocation, ensures,
-                        parameterVarDecList);
+                Utilities.replaceFacilityFormalWithActual(opLocation, ensures,
+                        parameterVarDecList, myInstantiatedFacilityArgMap,
+                        myCurrentModuleScope);
 
         return ensures;
     }
@@ -2218,8 +2185,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Replace facility actuals variables in the requires clause
         requires =
-                replaceFacilityFormalWithActual(opLocation, requires,
-                        parameterVarDecList);
+                Utilities.replaceFacilityFormalWithActual(opLocation, requires,
+                        parameterVarDecList, myInstantiatedFacilityArgMap,
+                        myCurrentModuleScope);
 
         return requires;
     }
@@ -2347,140 +2315,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         return retExp;
-    }
-
-    /**
-     * <p>Replace the formal with the actual variables from the facility declaration to
-     * the passed in clause.</p>
-     *
-     * @param opLoc Location of the calling statement.
-     * @param clause The requires/ensures clause.
-     * @param paramList The list of parameter variables.
-     *
-     * @return The clause in <code>Exp</code> form.
-     */
-    private Exp replaceFacilityFormalWithActual(Location opLoc, Exp clause,
-            List<ParameterVarDec> paramList) {
-        // Make a copy of the original clause
-        Exp newClause = Exp.copy(clause);
-
-        for (ParameterVarDec dec : paramList) {
-            if (dec.getTy() instanceof NameTy) {
-                NameTy ty = (NameTy) dec.getTy();
-                PosSymbol tyName = ty.getName().copy();
-                PosSymbol tyQualifier = null;
-                if (ty.getQualifier() != null) {
-                    tyQualifier = ty.getQualifier().copy();
-                }
-
-                FacilityFormalToActuals formalToActuals = null;
-                for (VarExp v : myInstantiatedFacilityArgMap.keySet()) {
-                    FacilityFormalToActuals temp = null;
-                    if (tyQualifier != null) {
-                        if (tyQualifier.getName().equals(
-                                v.getQualifier().getName())
-                                && tyName.getName().equals(
-                                        v.getName().getName())) {
-                            temp = myInstantiatedFacilityArgMap.get(v);
-                        }
-                    }
-                    else {
-                        if (tyName.getName().equals(v.getName().getName())) {
-                            temp = myInstantiatedFacilityArgMap.get(v);
-                        }
-                    }
-
-                    // Check to see if we already found one. If we did, it means that
-                    // the type is ambiguous and we can't be sure which one it is.
-                    if (temp != null) {
-                        if (formalToActuals == null) {
-                            formalToActuals = temp;
-                        }
-                        else {
-                            Utilities.ambiguousTy(ty, opLoc);
-                        }
-                    }
-                }
-
-                if (formalToActuals != null) {
-                    // Replace all concept formal arguments with their actuals
-                    Map<Exp, Exp> conceptMap =
-                            formalToActuals.getConceptArgMap();
-                    for (Exp e : conceptMap.keySet()) {
-                        newClause =
-                                Utilities.replace(newClause, e, conceptMap
-                                        .get(e));
-                    }
-
-                    // Replace all concept realization formal arguments with their actuals
-                    Map<Exp, Exp> conceptRealizMap =
-                            formalToActuals.getConceptRealizArgMap();
-                    for (Exp e : conceptRealizMap.keySet()) {
-                        newClause =
-                                Utilities.replace(newClause, e,
-                                        conceptRealizMap.get(e));
-                    }
-                }
-                else {
-                    // Ignore all generic types
-                    if (!(ty.getProgramTypeValue() instanceof PTGeneric)) {
-                        boolean found = false;
-
-                        // Check to see if the type of this variable is from an imported
-                        // concept type family definition. If we find one, we simply ignore this type.
-                        Iterator<SymbolTableEntry> programTypeDefIt =
-                                myCurrentModuleScope
-                                        .query(
-                                                new EntryTypeQuery<SymbolTableEntry>(
-                                                        ProgramTypeDefinitionEntry.class,
-                                                        MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                                                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
-                                        .iterator();
-                        while (programTypeDefIt.hasNext() && !found) {
-                            ProgramTypeDefinitionEntry entry =
-                                    programTypeDefIt
-                                            .next()
-                                            .toProgramTypeDefinitionEntry(opLoc);
-
-                            if (entry.getName().equals(tyName.getName())) {
-                                found = true;
-                            }
-                        }
-
-                        if (!found) {
-                            // Check to see if the type of this variable is from an local
-                            // type representation. If we find one, we simply ignore this type.
-                            Iterator<SymbolTableEntry> representationTypeIt =
-                                    myCurrentModuleScope
-                                            .query(
-                                                    new EntryTypeQuery<SymbolTableEntry>(
-                                                            RepresentationTypeEntry.class,
-                                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
-                                                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
-                                            .iterator();
-                            while (representationTypeIt.hasNext() && !found) {
-                                RepresentationTypeEntry entry =
-                                        representationTypeIt.next()
-                                                .toRepresentationTypeEntry(
-                                                        opLoc);
-
-                                if (entry.getName().equals(tyName.getName())) {
-                                    found = true;
-                                }
-                            }
-
-                            // Throw an error if can't find one.
-                            if (!found) {
-                                Utilities.noSuchSymbol(tyQualifier, tyName
-                                        .getName(), opLoc);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return newClause;
     }
 
     /**
@@ -2995,9 +2829,15 @@ public class VCGenerator extends TreeWalkerVisitor {
      */
     private void applyCallStmtRule(CallStmt stmt) {
         // Call a method to locate the operation dec for this call
-        OperationDec opDec =
-                getOperationDec(stmt.getLocation(), stmt.getQualifier(), stmt
-                        .getName(), stmt.getArguments());
+        List<PTType> argTypes = new LinkedList<PTType>();
+        for (ProgramExp arg : stmt.getArguments()) {
+            argTypes.add(arg.getProgramType());
+        }
+        OperationEntry opEntry =
+                Utilities.searchOperation(stmt.getLocation(), stmt
+                        .getQualifier(), stmt.getName(), argTypes,
+                        myCurrentModuleScope);
+        OperationDec opDec = Utilities.convertToOperationDec(opEntry);
         boolean isLocal =
                 Utilities.isLocationOperation(stmt.getName().getName(),
                         myCurrentModuleScope);
@@ -3022,9 +2862,12 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Check for recursive call of itself
         if (myCurrentOperationEntry != null
-                && myCurrentOperationEntry.getName().equals(
-                        opDec.getName().getName())
-                && myCurrentOperationEntry.getReturnType() != null) {
+                && myOperationDecreasingExp != null
+                && myCurrentOperationEntry.getName().equals(opEntry.getName())
+                && myCurrentOperationEntry.getReturnType().equals(
+                        opEntry.getReturnType())
+                && myCurrentOperationEntry.getSourceModuleIdentifier().equals(
+                        opEntry.getSourceModuleIdentifier())) {
             // Create a new confirm statement using P_val and the decreasing clause
             VarExp pVal =
                     Utilities.createPValExp(myOperationDecreasingExp
@@ -3097,13 +2940,15 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Replace facility actuals variables in the requires clause
         requires =
-                replaceFacilityFormalWithActual(stmt.getLocation(), requires,
-                        opDec.getParameters());
+                Utilities.replaceFacilityFormalWithActual(stmt.getLocation(),
+                        requires, opDec.getParameters(),
+                        myInstantiatedFacilityArgMap, myCurrentModuleScope);
 
         // Replace facility actuals variables in the ensures clause
         ensures =
-                replaceFacilityFormalWithActual(stmt.getLocation(), ensures,
-                        opDec.getParameters());
+                Utilities.replaceFacilityFormalWithActual(stmt.getLocation(),
+                        ensures, opDec.getParameters(),
+                        myInstantiatedFacilityArgMap, myCurrentModuleScope);
 
         // NY YS
         // Duration for CallStmt
@@ -3113,11 +2958,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             Exp finalConfirmExp = finalConfirm.getAssertion();
 
             // Obtain the corresponding OperationProfileEntry
-            List<PTType> argTypes = new LinkedList<PTType>();
-            for (ProgramExp arg : stmt.getArguments()) {
-                argTypes.add(arg.getProgramType());
-            }
-
             OperationProfileEntry ope =
                     Utilities.searchOperationProfile(loc, stmt.getQualifier(),
                             stmt.getName(), argTypes, myCurrentModuleScope);
@@ -3675,6 +3515,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Apply the facility declaration rules to regular enhancement/enhancement realizations
             List<EnhancementBodyItem> enhancementBodyList =
                     dec.getEnhancementBodies();
+            Map<PosSymbol, Map<Exp, Exp>> enhancementArgMaps =
+                    new HashMap<PosSymbol, Map<Exp, Exp>>();
             for (EnhancementBodyItem ebi : enhancementBodyList) {
                 // Obtain the enhancement module for the facility
                 EnhancementModuleDec facEnhancementDec =
@@ -3720,6 +3562,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                     enhancementArgMap.put(enhancementFormalArgList.get(i),
                             enhancementActualArgList.get(i));
                 }
+                enhancementArgMaps.put(facEnhancementDec.getName(),
+                        enhancementArgMap);
 
                 // Facility Decl Rule (Enhancement Realization Requires):
                 //      (RPC[ rn ~> rn_exp, RR ~> IRR ])[ n ~> n_exp, R ~> IR ]
@@ -3783,9 +3627,11 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Create a mapping from enhancement realization formal to actual arguments
                 // for future use.
                 for (int i = 0; i < enhancementRealizFormalArgList.size(); i++) {
-                    conceptRealizArgMap.put(enhancementRealizFormalArgList
+                    enhancementRealizArgMap.put(enhancementRealizFormalArgList
                             .get(i), enhancementRealizActualArgList.get(i));
                 }
+                enhancementArgMaps.put(facEnhancementRealizDec.getName(),
+                        enhancementRealizArgMap);
 
                 // Facility Decl Rule (Operations as Enhancement Realization Parameters):
                 // preRP [ rn ~> rn_exp, rx ~> irx ] implies preIRP and
@@ -3810,7 +3656,7 @@ public class VCGenerator extends TreeWalkerVisitor {
             // operations.
             FacilityFormalToActuals formalToActuals =
                     new FacilityFormalToActuals(conceptArgMap,
-                            conceptRealizArgMap);
+                            conceptRealizArgMap, enhancementArgMaps);
             for (Dec d : facConceptDec.getDecs()) {
                 if (d instanceof TypeDec) {
                     Location loc = (Location) dec.getLocation().clone();
@@ -3921,16 +3767,25 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
 
             // Call a method to locate the operation dec for this call
-            OperationDec opDec =
-                    getOperationDec(stmt.getLocation(), qualifier,
-                            assignParamExp.getName(), assignParamExp
-                                    .getArguments());
+            List<PTType> argTypes = new LinkedList<PTType>();
+            for (ProgramExp arg : assignParamExp.getArguments()) {
+                argTypes.add(arg.getProgramType());
+            }
+            OperationEntry opEntry =
+                    Utilities.searchOperation(stmt.getLocation(), qualifier,
+                            assignParamExp.getName(), argTypes,
+                            myCurrentModuleScope);
+            OperationDec opDec = Utilities.convertToOperationDec(opEntry);
 
             // Check for recursive call of itself
             if (myCurrentOperationEntry != null
+                    && myOperationDecreasingExp != null
                     && myCurrentOperationEntry.getName().equals(
-                            opDec.getName().getName())
-                    && myCurrentOperationEntry.getReturnType() != null) {
+                            opEntry.getName())
+                    && myCurrentOperationEntry.getReturnType().equals(
+                            opEntry.getReturnType())
+                    && myCurrentOperationEntry.getSourceModuleIdentifier()
+                            .equals(opEntry.getSourceModuleIdentifier())) {
                 // Create a new confirm statement using P_val and the decreasing clause
                 VarExp pVal =
                         Utilities.createPValExp(myOperationDecreasingExp
@@ -3995,8 +3850,9 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Replace facility actuals variables in the requires clause
             requires =
-                    replaceFacilityFormalWithActual(assignParamExp
-                            .getLocation(), requires, opDec.getParameters());
+                    Utilities.replaceFacilityFormalWithActual(assignParamExp
+                            .getLocation(), requires, opDec.getParameters(),
+                            myInstantiatedFacilityArgMap, myCurrentModuleScope);
 
             // Modify the location of the requires clause and add it to myCurrentAssertiveCode
             // Obtain the current location
@@ -4064,9 +3920,11 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                             // Replace facility actuals variables in the ensures clause
                             ensures =
-                                    replaceFacilityFormalWithActual(
+                                    Utilities.replaceFacilityFormalWithActual(
                                             assignParamExp.getLocation(),
-                                            ensures, opDec.getParameters());
+                                            ensures, opDec.getParameters(),
+                                            myInstantiatedFacilityArgMap,
+                                            myCurrentModuleScope);
 
                             // Replace all instances of the left hand side
                             // variable in the current final confirm statement.
@@ -4094,13 +3952,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                                         finalConfirm.getAssertion();
 
                                 // Obtain the corresponding OperationProfileEntry
-                                List<PTType> argTypes =
-                                        new LinkedList<PTType>();
-                                for (ProgramExp arg : assignParamExp
-                                        .getArguments()) {
-                                    argTypes.add(arg.getProgramType());
-                                }
-
                                 OperationProfileEntry ope =
                                         Utilities.searchOperationProfile(loc,
                                                 qualifier, assignParamExp
@@ -4305,15 +4156,25 @@ public class VCGenerator extends TreeWalkerVisitor {
             ifConditionLoc = (Location) stmt.getLocation().clone();
         }
 
-        OperationDec opDec =
-                getOperationDec(ifCondition.getLocation(), qualifier,
-                        testParamExp.getName(), testParamExp.getArguments());
+        // Search for the operation dec
+        List<PTType> argTypes = new LinkedList<PTType>();
+        List<ProgramExp> argsList = testParamExp.getArguments();
+        for (ProgramExp arg : argsList) {
+            argTypes.add(arg.getProgramType());
+        }
+        OperationEntry opEntry =
+                Utilities.searchOperation(ifCondition.getLocation(), qualifier,
+                        testParamExp.getName(), argTypes, myCurrentModuleScope);
+        OperationDec opDec = Utilities.convertToOperationDec(opEntry);
 
         // Check for recursive call of itself
         if (myCurrentOperationEntry != null
-                && myCurrentOperationEntry.getName().equals(
-                        opDec.getName().getName())
-                && myCurrentOperationEntry.getReturnType() != null) {
+                && myOperationDecreasingExp != null
+                && myCurrentOperationEntry.getName().equals(opEntry.getName())
+                && myCurrentOperationEntry.getReturnType().equals(
+                        opEntry.getReturnType())
+                && myCurrentOperationEntry.getSourceModuleIdentifier().equals(
+                        opEntry.getSourceModuleIdentifier())) {
             // Create a new confirm statement using P_val and the decreasing clause
             VarExp pVal =
                     Utilities.createPValExp(myOperationDecreasingExp
@@ -4507,11 +4368,6 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
 
             // Search for operation profile
-            List<PTType> argTypes = new LinkedList<PTType>();
-            List<ProgramExp> argsList = testParamExp.getArguments();
-            for (ProgramExp arg : argsList) {
-                argTypes.add(arg.getProgramType());
-            }
             OperationProfileEntry ope =
                     Utilities.searchOperationProfile(loc, qualifier,
                             testParamExp.getName(), argTypes,
@@ -4861,9 +4717,30 @@ public class VCGenerator extends TreeWalkerVisitor {
             // vc step replaces the requires clause if possible.
             if (myCorrespondenceExp != null && !isLocal) {
                 Location reqLoc = (Location) requires.getLocation().clone();
-                requires =
-                        myTypeGraph.formConjunct(Exp.copy(myCorrespondenceExp),
-                                requires);
+
+                // Attempt to replace the correspondence
+                Exp tmp = Exp.copy(requires);
+                if (myCorrespondenceExp instanceof EqualsExp) {
+                    tmp =
+                            Utilities
+                                    .replace(requires,
+                                            ((EqualsExp) myCorrespondenceExp)
+                                                    .getLeft(),
+                                            ((EqualsExp) myCorrespondenceExp)
+                                                    .getRight());
+                }
+
+                // If we are successful use the replaced version
+                if (tmp.equals(requires)) {
+                    requires =
+                            myTypeGraph.formConjunct(Exp
+                                    .copy(myCorrespondenceExp), requires);
+                }
+                else {
+                    myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
+                            Exp.copy(myCorrespondenceExp), false);
+                    requires = tmp;
+                }
                 requires.setLocation(reqLoc);
             }
 
