@@ -192,6 +192,23 @@ public class PostProcessor extends TreeWalkerStackVisitor {
     }
 
     // -----------------------------------------------------------
+    // RepresentationDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void postRepresentationDec(RepresentationDec dec) {
+        // Add in "true" for convention and correspondence
+        // if the user didn't fill those in
+        if (dec.getConvention() == null) {
+            dec.setConvention(myTypeGraph.getTrueVarExp());
+        }
+
+        if (dec.getCorrespondence() == null) {
+            dec.setCorrespondence(myTypeGraph.getTrueVarExp());
+        }
+    }
+
+    // -----------------------------------------------------------
     // WhileStmt
     // -----------------------------------------------------------
 

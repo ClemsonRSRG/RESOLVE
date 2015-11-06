@@ -141,8 +141,9 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
 
         // Replace facility actuals variables in the requires clause
         opRequires =
-                replaceFacilityFormalWithActual(myCurrentLocation, opRequires,
-                        opDec.getParameters());
+                Utilities.replaceFacilityFormalWithActual(myCurrentLocation,
+                        opRequires, opDec.getParameters(),
+                        myInstantiatedFacilityArgMap, myCurrentModuleScope);
 
         // Append the name of the current procedure
         String details = "";
@@ -207,9 +208,11 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
 
                         // Replace facility actuals variables in the ensures clause
                         ensures =
-                                replaceFacilityFormalWithActual(
+                                Utilities.replaceFacilityFormalWithActual(
                                         myCurrentLocation, ensures, opDec
-                                                .getParameters());
+                                                .getParameters(),
+                                        myInstantiatedFacilityArgMap,
+                                        myCurrentModuleScope);
 
                         // Add this ensures clause to our map
                         myEnsuresClauseMap
@@ -355,72 +358,6 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
         }
 
         return opDec;
-    }
-
-    /**
-     * <p>Replace the formal with the actual variables from the facility declaration to
-     * the passed in clause.</p>
-     *
-     * @param opLoc Location of the calling statement.
-     * @param clause The requires/ensures clause.
-     * @param paramList The list of parameter variables.
-     *
-     * @return The clause in <code>Exp</code> form.
-     */
-    private Exp replaceFacilityFormalWithActual(Location opLoc, Exp clause,
-            List<ParameterVarDec> paramList) {
-        // Make a copy of the original clause
-        Exp newClause = Exp.copy(clause);
-
-        for (ParameterVarDec dec : paramList) {
-            if (dec.getTy() instanceof NameTy) {
-                NameTy ty = (NameTy) dec.getTy();
-                PosSymbol tyName = ty.getName().copy();
-                PosSymbol tyQualifier = null;
-                if (ty.getQualifier() != null) {
-                    tyQualifier = ty.getQualifier().copy();
-                }
-
-                FacilityFormalToActuals formalToActuals = null;
-                for (VarExp v : myInstantiatedFacilityArgMap.keySet()) {
-                    FacilityFormalToActuals temp = null;
-                    if (tyQualifier != null) {
-                        if (tyQualifier.getName().equals(
-                                v.getQualifier().getName())
-                                && tyName.getName().equals(
-                                        v.getName().getName())) {
-                            temp = myInstantiatedFacilityArgMap.get(v);
-                        }
-                    }
-                    else {
-                        if (tyName.getName().equals(v.getName().getName())) {
-                            temp = myInstantiatedFacilityArgMap.get(v);
-                        }
-                    }
-
-                    // Check to see if we already found one. If we did, it means that
-                    // the type is ambiguous and we can't be sure which one it is.
-                    if (formalToActuals == null) {
-                        formalToActuals = temp;
-                    }
-                    else {
-                        Utilities.ambiguousTy(ty, opLoc);
-                    }
-                }
-
-                if (formalToActuals != null) {
-                    Map<Exp, Exp> conceptMap =
-                            formalToActuals.getConceptArgMap();
-                    for (Exp e : conceptMap.keySet()) {
-                        newClause =
-                                Utilities.replace(newClause, e, conceptMap
-                                        .get(e));
-                    }
-                }
-            }
-        }
-
-        return newClause;
     }
 
     /**
