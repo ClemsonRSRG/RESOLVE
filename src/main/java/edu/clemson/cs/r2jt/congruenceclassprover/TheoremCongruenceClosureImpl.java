@@ -127,6 +127,8 @@ public class TheoremCongruenceClosureImpl {
             rSet.remove("and");
             rSet.remove("/=");
             rSet.remove("+"); // temporary
+            //rSet.remove("-");
+            //rSet.remove("or"); // temporary this is really bad
             m_function_names = rSet;
         }
         return m_function_names;
@@ -155,6 +157,7 @@ public class TheoremCongruenceClosureImpl {
             m_all_literals.remove("true");
             m_all_literals.remove("false");
             m_all_literals.remove("/=");
+            m_all_literals.remove("Empty_String");
         }
 
         return m_all_literals;
@@ -199,7 +202,7 @@ public class TheoremCongruenceClosureImpl {
         }
 
         HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
-        allValidBindings = discardBindings(allValidBindings);
+        allValidBindings = discardBindingIfAllValuesNotUnique(allValidBindings);
         for (java.util.Map<String, String> curBinding : allValidBindings) {
             for (String thKey : curBinding.keySet()) {
 
@@ -244,6 +247,32 @@ public class TheoremCongruenceClosureImpl {
         return rList;
     }
 
+    // Discard bindings where any 2 map to the same value
+    private java.util.Set<java.util.Map<String, String>> discardBindingIfAllValuesNotUnique(
+            java.util.Set<java.util.Map<String, String>> b) {
+        if (m_theorem.getQuantifiedVariables().size() < 2)
+            return b;
+        java.util.Set<java.util.Map<String, String>> rSet =
+                new HashSet<java.util.Map<String, String>>();
+        discard: for (java.util.Map<String, String> m : b) {
+            HashSet<String> seenVals = new HashSet<String>();
+            for (String k : m.keySet()) {
+                if (k.contains("¢"))
+                    continue;
+                k = m_theoremRegistry.getRootSymbolForSymbol(k);
+                String thisVal = m.get(k);
+                if (seenVals.contains(thisVal)) {
+                    //System.err.println(m_name + m);
+                    continue discard;
+                }
+                else
+                    seenVals.add(thisVal);
+            }
+            rSet.add(m);
+        }
+        return rSet;
+    }
+
     // Discard bindings where all bind to same value
     private java.util.Set<java.util.Map<String, String>> discardBindings(
             java.util.Set<java.util.Map<String, String>> b) {
@@ -284,23 +313,6 @@ public class TheoremCongruenceClosureImpl {
             }
         }
         return initBindings;
-    }
-
-    // returns list of wildcards that occur in more than one equation
-    // useful for determining when permutations of commutative arg wildcards are needed
-    private Set<String> usedInMoreThanOneEquation(Set<String> wilds) {
-        Set<String> rSet = new HashSet<String>();
-        for (String w : wilds) {
-            int wi = m_theoremRegistry.getIndexForSymbol(w);
-            int wiCnt = 0;
-            for (NormalizedAtomicExpressionMapImpl nm : m_matchConj.m_exprList) {
-                if (nm.readOperator(wi) > 0)
-                    wiCnt++;
-            }
-            if (wiCnt > 1)
-                rSet.add(w);
-        }
-        return rSet;
     }
 
     private Set<java.util.Map<String, String>> findValidBindingsByType(
@@ -368,12 +380,10 @@ public class TheoremCongruenceClosureImpl {
                 new HashSet<java.util.Map<String, String>>();
         java.util.Map<String, String> initBindings = getInitBindings();
         results.add(initBindings);
-        Set<String> multiUseWilds =
-                usedInMoreThanOneEquation(initBindings.keySet());
         for (NormalizedAtomicExpressionMapImpl e_t : m_matchConj.m_exprList) {
             results =
                     vc.getConjunct().getMatchesForOverideSet(e_t,
-                            m_theoremRegistry, results, multiUseWilds);
+                            m_theoremRegistry, results);
         }
         return results;
     }
