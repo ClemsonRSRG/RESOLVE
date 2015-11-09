@@ -264,6 +264,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             newExpr.writeOnto(root, pos);
         }
         mergeArgsOfEqualityPredicateIfRootIsTrue(); // this may cause symbols in newExpr to merge to others
+        if (m_evaluates_to_false) {
+            return -1;
+        }
         Map<Integer, Integer> changedOps = new HashMap<Integer, Integer>();
         for (int k : newExpr.getKeys()) {
             int kPar = m_registry.findAndCompress(k);
@@ -395,6 +398,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         // when found do merge, start again.
         int eqQ = m_registry.getIndexForSymbol("=");
         int t = m_registry.getIndexForSymbol("true");
+        int fls = m_registry.getIndexForSymbol("false");
         int numContinues = 0;
         for (int i = 0; i < m_exprList.size(); ++i) {
             NormalizedAtomicExpressionMapImpl cur = m_exprList.get(i);
@@ -412,20 +416,17 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 numContinues++;
             }
             else if ((op1 == op2) && (root != t)) {
+                // (x = x) = false
+                if (root == fls) {
+                    m_evaluates_to_false = true;
+                    return;
+                }
                 mergeOperators(t, root);
                 i = 0;
                 numContinues++;
             }
         }
-        /*       for(Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator(); it.hasNext();){
-                   NormalizedAtomicExpressionMapImpl cur = it.next();
-                   int f = cur.readPosition(0);
-                   if(f != m_registry.getIndexForSymbol("=")) break;
-                   int op1 = cur.readPosition(1);
-                   int op2 = cur.readPosition(2);
-                   if(op1==op2)
-                       it.remove();
-               } */
+
     }
 
     // Return list of modified predicates by their position. Only these can cause new merges.
