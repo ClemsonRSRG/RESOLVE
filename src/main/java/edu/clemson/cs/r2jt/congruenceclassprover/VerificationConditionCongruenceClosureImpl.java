@@ -102,8 +102,6 @@ public class VerificationConditionCongruenceClosureImpl {
         PSymbol fandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
         m_conjunction.addExpression(fandfeqf);
         m_conjunction.updateUseMap();
-
-        //m_conjunction.mergeEquivalentFunctions();
     }
 
     /* Ex.: p is for all k:Z, lambda0(k) = (x <= k)
@@ -347,43 +345,25 @@ public class VerificationConditionCongruenceClosureImpl {
 
     protected Map<String, Integer> getGoalSymbols() {
         // even score if goal is true = false
-        if (m_goal.size() == 2
-                && (m_goal.get(1).equals("false") || m_goal.get(0).equals(
-                        "false"))) {
-            return new HashMap<String, Integer>();
-        }
         HashSet<String> goalSymbolSet = new HashSet<String>();
         for (String goal : m_goal) {
-            // true is the root of many expressions
-            if (goal.equals("true"))
-                continue;
             goalSymbolSet.add(goal);
 
         }
         Map<String, Integer> rMap =
                 m_conjunction.getSymbolProximity(goalSymbolSet);
-        /*HashMap<String,Integer> rMap = new HashMap<String, Integer>();
-        for(String s : tmpMap.keySet()){
-            if(!m_registry.getUsage(s).equals(Registry.Usage.HASARGS_SINGULAR)){
-                rMap.put(s,tmpMap.get(s));
-            }
-        }*/
-
-        // remove function names
         return rMap;
     }
 
-    // updated for multiple pairs of goals (any match -- goals or'd)
     public STATUS isProved() {
         if (m_conjunction.m_evaluates_to_false)
             return STATUS.FALSE_ASSUMPTION; // this doesn't mean P->Q = False, it just means P = false
-        for (int i = 0; i < m_goal.size(); i += 2) {
-            String goal1 = m_goal.get(i);
-            String goal2 = m_goal.get(i + 1);
-            int g1 = m_registry.getIndexForSymbol(goal1);
-            int g2 = m_registry.getIndexForSymbol(goal2);
+        int t = m_registry.getIndexForSymbol("true");
+        for (int i = 0; i < m_goal.size(); ++i) {
+            String goal = m_goal.get(i);
+            int g = m_registry.getIndexForSymbol(goal);
             // check each goal has same root
-            if (g1 == g2) {
+            if (g == t) {
                 return STATUS.PROVED;
             }
         }
@@ -393,40 +373,26 @@ public class VerificationConditionCongruenceClosureImpl {
     private void addPExp(Iterator<PExp> pit, boolean inAntecedent) {
         while (pit.hasNext()) {
             PExp curr = pit.next();
-            if (curr.isEquality() && inAntecedent) { // f(x,y) = z and g(a,b) = c ; then z is replaced by c
-
-                //if (inAntecedent) {
+            if (inAntecedent) {
                 m_conjunction.addExpression(curr);
-                //}
-                /*else {
-                    PExp lhs = curr.getSubExpressions().get(0);
-                    PExp rhs = curr.getSubExpressions().get(1);
-                    int lhsIndex = (m_conjunction.addFormula(lhs));
-                    int rhsIndex = (m_conjunction.addFormula(rhs));
-                    addGoal(m_registry.getSymbolForIndex(lhsIndex), m_registry
-                            .getSymbolForIndex(rhsIndex));
-                }*/
             }
-            else { // P becomes P = true or P(x...) becomes P(x ...) = z and z is replaced by true
-
-                if (inAntecedent) {
-                    m_conjunction.addExpression(curr);
-                    //m_conjunction.mergeOperators(m_registry
-                    //        .getIndexForSymbol("true"), intRepForExp);
-                }
-                else {
-                    int intRepForExp = m_conjunction.addFormula(curr);
-                    addGoal(m_registry.getSymbolForIndex(intRepForExp), "true");
-                }
+            else {
+                int intRepForExp = m_conjunction.addFormula(curr);
+                addGoal(m_registry.getSymbolForIndex(intRepForExp));
             }
-
         }
-
     }
 
-    private void addGoal(String a, String b) {
+    private void addGoal(String a) {
+        String r = m_registry.getRootSymbolForSymbol(a);
+        if (m_goal.size() == 1
+                && m_registry.getRootSymbolForSymbol(m_goal.get(0)).equals(
+                        "false")) {
+            m_goal.add(0, r);
+        }
+        if (m_goal.size() > 1 && r.equals("false"))
+            return;
         m_goal.add(a);
-        m_goal.add(b);
     }
 
     @Override
@@ -437,14 +403,14 @@ public class VerificationConditionCongruenceClosureImpl {
         }
         r += "----------------------------------\n";
 
-        String ro0 =
-                m_registry.getSymbolForIndex(m_registry
-                        .getIndexForSymbol(m_goal.get(0)));
-        String ro1 =
-                m_registry.getSymbolForIndex(m_registry
-                        .getIndexForSymbol(m_goal.get(1)));
-        r += ro0 + "=" + ro1 + "\n";
-
+        // Goals
+        if (m_goal.isEmpty())
+            return r;
+        r += m_registry.getRootSymbolForSymbol(m_goal.get(0));
+        for (int i = 1; i < m_goal.size(); ++i) {
+            r += ", " + m_registry.getRootSymbolForSymbol(m_goal.get(i)) + " ";
+        }
+        r += "\n";
         return r;
     }
 
