@@ -1,7 +1,7 @@
 /**
  * HardCoded.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -117,9 +117,6 @@ public class HardCoded {
                     g.ENTITY));
             b.addBinding("or", v, new MTFunction(g, g.BOOLEAN, g.BOOLEAN,
                     g.BOOLEAN));
-
-            b.addBinding("Z", v, g.CLS, g.Z);
-            b.addBinding("-", v, new MTFunction(g, g.Z, g.Z));
         }
         catch (DuplicateSymbolException dse) {
             //Not possible--we're the first ones to add anything

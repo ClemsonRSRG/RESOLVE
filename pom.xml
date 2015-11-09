@@ -4,7 +4,7 @@
 
     <artifactId>RESOLVE</artifactId>
     <groupId>edu.clemson.cs.rsrg</groupId>
-    <version>15.04.15a</version>
+    <version>15.06.01a</version>
     <packaging>jar</packaging>
 
     <name>RESOLVE</name>
@@ -160,6 +160,12 @@
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
                 <version>4.5</version>
+                <configuration>
+                    <sourceDirectory>src/main/antlr4</sourceDirectory>
+                    <arguments>
+                        <argument>-visitor</argument>
+                    </arguments>
+                </configuration>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -191,11 +197,7 @@
                     <header>${license.url}</header>
                     <excludes>
                         <exclude>.gitattributes</exclude>
-                        <exclude>nb-configuration.xml</exclude>
-                        <exclude>nbactions-RSRG-Global.xml</exclude>
-                        <exclude>nbactions.xml</exclude>
-                        <exclude>pom.xml</exclude>
-                        <exclude>rsrg-format.xml</exclude>
+                        <exclude>*.xml</exclude>
                         <exclude>LICENSE.txt</exclude>
                         <exclude>src/main/antlr3/**</exclude>
                         <exclude>src/main/antlr4/**</exclude>

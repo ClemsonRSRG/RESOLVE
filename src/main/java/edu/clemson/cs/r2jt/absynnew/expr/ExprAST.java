@@ -1,7 +1,7 @@
 /**
  * ExprAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -34,21 +34,21 @@ public abstract class ExprAST extends ResolveAST {
     public abstract boolean isLiteral();
 
     /**
-     * <p>Returns a <strong>deep copy</strong>of this expression, with all
-     * instances of <code>ExprAST</code>s that occur as keys in
-     * <code>substitutions</code> replaced with their corresponding values.</p>
+     * Returns a deep copy of this expression, with all instances of
+     * {@code ExprAST}s that occur as keys in {@code substitutions} replaced
+     * with their corresponding values.
      *
-     * <p>In general, a key <code>ExprAST</code> "occurs" in this
-     * <code>ExprAST</code> if either this <code>ExprAST</code> or some
-     * subexpression is {@link #equivalent}.  However, if the key is a
-     * <code>MathSymbolAST</code> function names are additionally matched, even
-     * though they would not ordinarily match via {@link #equivalent}, so
-     * function names can be substituted without affecting their arguments.</p>
+     * In general, a key {@code ExprAST} "occurs" in this {@code ExprAST} if
+     * either this {@code ExprAST} or some subexpression is {@link #equivalent}.
+     * However, if the key is a {@code MathSymbolAST} function names are
+     * additionally matched, even though they would not ordinarily match via
+     * {@link #equivalent}, so function names can be substituted without
+     * affecting their arguments.
      *
-     * @param substitutions A mapping from <code>ExprAST</code>s that should be
-     *                      substituted out to the <code>ExprAST</code> that
+     * @param substitutions A mapping from {@code ExprAST}s that should be
+     *                      substituted out to the {@code ExprAST} that
      *                      should replace them.
-     * @return A new <code>ExprAST</code> that is a deep copy of the original
+     * @return A new {@code ExprAST} that is a deep copy of the original
      *          with the provided substitutions made.
      */
     public final ExprAST substitute(Map<ExprAST, ExprAST> substitutions) {
@@ -80,17 +80,17 @@ public abstract class ExprAST extends ResolveAST {
     }
 
     /**
-     * <p>Implemented by concrete subclasses of <code>ExprAST</code> to
+     * Implemented by concrete subclasses of {@code ExprAST} to
      * manufacture a copy of themselves where all subexpressions have been
      * appropriately substituted.  The concrete subclass may assume that
-     * <code>this</code> does not match any key in <code>substitutions</code>
+     * {@code this} does not match any key in {@code substitutions}
      * and thus need only concern itself with performing substitutions in its
-     * children.</p>
+     * children.
      *
-     * @param substitutions A mapping from <code>ExprAST</code>s that should be
-     *                      substituted out to the <code>ExprAST</code> that
+     * @param substitutions A mapping from {@code ExprAST}s that should be
+     *                      substituted out to the {@code ExprAST} that
      *                      should replace them.
-     * @return A new <code>ExprAST</code> that is a deep copy of the original
+     * @return A new {@code ExprAST} that is a deep copy of the original
      *          with the provided substitutions made.
      */
     protected abstract ExprAST substituteChildren(
@@ -174,14 +174,13 @@ public abstract class ExprAST extends ResolveAST {
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and {@link #equals} is
-     * too strict. This method returns <code>true</code> <strong>iff</strong>
-     * this expression and the provided expression, <code>e</code>, are
-     * equivalent with respect to structure and all function and variable
-     * names.</p>
+     * Shallow compare is too weak for many things, and {@link #equals} is
+     * too strict. This method returns {@code true} iff this expression and the
+     * provided expression, {@code e}, are equivalent with respect to structure
+     * and all function and variable names.
      *
      * @param e The expression to compare this one to.
-     * @return True <strong>iff</strong> this expression and the provided
+     * @return {@code true} iff this expression and the provided
      *         expression are equivalent with respect to structure and all
      *         function and variable names.
      */

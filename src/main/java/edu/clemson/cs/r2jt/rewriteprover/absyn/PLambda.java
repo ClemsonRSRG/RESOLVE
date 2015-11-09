@@ -1,7 +1,7 @@
 /**
  * PLambda.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -12,11 +12,13 @@
  */
 package edu.clemson.cs.r2jt.rewriteprover.absyn;
 
+import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ArrayBackedImmutableList;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.ImmutableList;
 import edu.clemson.cs.r2jt.rewriteprover.immutableadts.SingletonImmutableList;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class PLambda extends PExp {
@@ -42,6 +44,19 @@ public class PLambda extends PExp {
         }
 
         return result;
+    }
+
+    public PExp getBody() {
+        return myBody;
+    }
+
+    public List<PExp> getParameters() {
+        ArrayList<PExp> rList = new ArrayList<PExp>();
+        for (Parameter p : parameters) {
+            rList.add(new PSymbol(p.type, null, p.name,
+                    PSymbol.Quantification.FOR_ALL));
+        }
+        return rList;
     }
 
     private static int parameterHash(Iterable<Parameter> parameters) {
@@ -244,6 +259,23 @@ public class PLambda extends PExp {
             return new PLambda(parameters, myBody);
         }
 
+    }
+
+    public PLambda withNormalizedParameterNames() {
+        List<PExp> plist = getParameters();
+        HashMap<PExp, PExp> substMap = new HashMap<PExp, PExp>();
+        int argNum = 0;
+        ArrayList<Parameter> normParams = new ArrayList<Parameter>();
+        for (PExp p : plist) {
+            String name = p.getType().toString().toLowerCase() + argNum++;
+            PExp norm =
+                    new PSymbol(p.getType(), p.getTypeValue(), name,
+                            PSymbol.Quantification.FOR_ALL);
+            substMap.put(p, norm);
+            normParams.add(new Parameter(name, p.getType()));
+        }
+        return new PLambda(new ArrayBackedImmutableList<Parameter>(normParams),
+                myBody.substitute(substMap));
     }
 
     public static class Parameter {

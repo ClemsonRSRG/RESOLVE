@@ -1,7 +1,7 @@
 /**
  * FlagDependencies.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -360,8 +360,8 @@ public class FlagDependencies {
             for (Flag f : flags) {
                 if (f.shouldDisplay(extended)) {
                     retval +=
-                            wordWrap("    -" + formatInto(f.getName(), 13)
-                                    + "  " + f.getDescription() + "\n", 80, 20);
+                            wordWrap("    -" + formatInto(f.getName(), 20)
+                                    + "  " + f.getDescription() + "\n", 80, 27);
                 }
             }
         }

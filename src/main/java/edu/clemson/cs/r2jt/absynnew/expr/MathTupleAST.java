@@ -1,7 +1,7 @@
 /**
  * MathTupleAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
-import edu.clemson.cs.r2jt.absynnew.TreeUtil;
+import edu.clemson.cs.r2jt.misc.Utils;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
@@ -20,15 +20,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>A <code>MathTupleAST</code> represents an ordered mathematical list of
- * elements of length at least two.</p>
+ * A {@code MathTupleAST} represents an ordered mathematical list of
+ * elements of length at least two.
  *
- * <p>Rolling <code>MathTupleAST</code> into <code>MathSymbolAST</code> was
- * considered and explicitly decided against during the great-math-type-overhaul
- * of 2012. If we chose to admit the presence of some function that builds
- * tuples for us, how would we pass it its parameters if not via a tuple? Thus,
- * <code>MathTupleAST</code> is now a built-in notion, and not imagined as the
- * result of the application of a function.</p>
+ * Rolling {@code MathTupleAST} into {@code MathSymbolAST} was considered and
+ * explicitly decided against during the great-math-type-overhaul of 2012. If
+ * we chose to admit the presence of some function that builds tuples for us,
+ * how would we pass it its parameters if not via a tuple? Thus,
+ * {@code MathTupleAST} is now a built-in notion, and not imagined as the
+ * result of the application of a function.
  */
 public class MathTupleAST extends ExprAST {
 
@@ -160,6 +160,6 @@ public class MathTupleAST extends ExprAST {
 
     @Override
     public String toString() {
-        return "(" + TreeUtil.join(myFields, ", ") + ")";
+        return "(" + Utils.join(myFields, ", ") + ")";
     }
 }

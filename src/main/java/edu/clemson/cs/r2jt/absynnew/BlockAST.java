@@ -1,7 +1,7 @@
 /**
  * BlockAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,11 +17,10 @@ import org.antlr.v4.runtime.Token;
 import java.util.*;
 
 /**
- * <p>A <code>BlockAST</code> is designed to contain some number
- * {@link ResolveAST}s. Due to the way in which this
- * ast hierarchy is currently traversed, it is extremely important that the
- * elements list maintained by this class reflects the exact order in which
- * constructs appeared in the original source.</p>
+ * A {@code BlockAST} is designed to contain some number {@link ResolveAST}s.
+ * Due to the way in which this ast hierarchy is currently traversed, it is
+ * extremely important that the elements list maintained by this class reflects
+ * the exact order in which constructs appeared in the original source.
  */
 public class BlockAST extends ResolveAST {
 
@@ -29,9 +28,9 @@ public class BlockAST extends ResolveAST {
             new BlockBuilder(null, null).build();
 
     /**
-     * <p>This is the key field we need the walker to traverse; it contains all
+     * This is the key field we need the walker to traverse; it contains all
      * elements within the scope of a module in the exact order they were
-     * written into the source file.</p>
+     * written into the source file.
      */
     protected final List<ResolveAST> myElements;
 
@@ -65,10 +64,10 @@ public class BlockAST extends ResolveAST {
     }
 
     /**
-     * <p>Constructs an {@link BlockAST}. The key to this particular
+     * Constructs an {@link BlockAST}. The key to this particular
      * {@link edu.clemson.cs.r2jt.misc.Utils.Builder} is that it allows users to
      * add various elements over the course a traversal when needed -- for
-     * example, over the course of a parsetree traversal.</p>
+     * example, over the course of a parsetree traversal.
      */
     public static class BlockBuilder extends AbstractNodeBuilder<BlockAST> {
 

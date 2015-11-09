@@ -1,7 +1,7 @@
 /**
  * Utilities.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -20,11 +20,12 @@ import edu.clemson.cs.r2jt.data.*;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTFamily;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
 import edu.clemson.cs.r2jt.typeandpopulate.query.*;
 import edu.clemson.cs.r2jt.misc.SourceErrorException;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * TODO: Write a description of this module
@@ -39,54 +40,64 @@ public class Utilities {
     // Error Handling
     // -----------------------------------------------------------
 
-    protected static void expNotHandled(Exp exp, Location l) {
-        String message = "Exp not handled: " + exp.toString();
+    public static void ambiguousTy(Ty ty, Location location) {
+        String message = "(VCGenerator) Ty is ambiguous: " + ty.toString();
+        throw new SourceErrorException(message, location);
+    }
+
+    public static void expNotHandled(Exp exp, Location l) {
+        String message =
+                "(VCGenerator) Exp type not handled: "
+                        + exp.getClass().getCanonicalName();
         throw new SourceErrorException(message, l);
     }
 
-    protected static void illegalOperationEnsures(Location l) {
+    public static void illegalOperationEnsures(Location l) {
         // TODO: Move this to sanity check.
         String message =
-                "Ensures clauses of operations that return a value should be of the form <OperationName> = <value>";
+                "(VCGenerator) Ensures clauses of operations that return a value should be of the form <OperationName> = <value>";
         throw new SourceErrorException(message, l);
     }
 
-    protected static void notAType(SymbolTableEntry entry, Location l) {
-        throw new SourceErrorException(entry.getSourceModuleIdentifier()
-                .fullyQualifiedRepresentation(entry.getName())
+    public static void notAType(SymbolTableEntry entry, Location l) {
+        throw new SourceErrorException("(VCGenerator) "
+                + entry.getSourceModuleIdentifier()
+                        .fullyQualifiedRepresentation(entry.getName())
                 + " is not known to be a type.", l);
     }
 
-    protected static void notInFreeVarList(PosSymbol name, Location l) {
+    public static void notInFreeVarList(PosSymbol name, Location l) {
         String message =
-                "State variable " + name + " not in free variable list";
+                "(VCGenerator) State variable " + name
+                        + " not in free variable list";
         throw new SourceErrorException(message, l);
     }
 
-    protected static void noSuchModule(Location location) {
+    public static void noSuchModule(Location location) {
         throw new SourceErrorException(
-                "Module does not exist or is not in scope.", location);
+                "(VCGenerator) Module does not exist or is not in scope.",
+                location);
     }
 
-    protected static void noSuchSymbol(PosSymbol qualifier, String symbolName,
+    public static void noSuchSymbol(PosSymbol qualifier, String symbolName,
             Location l) {
 
         String message;
 
         if (qualifier == null) {
-            message = "No such symbol: " + symbolName;
+            message = "(VCGenerator) No such symbol: " + symbolName;
         }
         else {
             message =
-                    "No such symbol in module: " + qualifier.getName() + "."
-                            + symbolName;
+                    "(VCGenerator) No such symbol in module: "
+                            + qualifier.getName() + "." + symbolName;
         }
 
         throw new SourceErrorException(message, l);
     }
 
-    protected static void tyNotHandled(Ty ty, Location location) {
-        String message = "Ty not handled: " + ty.toString();
+    public static void tyNotHandled(Ty ty, Location location) {
+        String message = "(VCGenerator) Ty not handled: " + ty.toString();
         throw new SourceErrorException(message, location);
     }
 
@@ -95,21 +106,64 @@ public class Utilities {
     // -----------------------------------------------------------
 
     /**
+     * <p>This method checks to see if this the expression we passed
+     * is either a variable expression or a dotted expression that
+     * contains a variable expression in the last position.</p>
+     *
+     * @param exp The checking expression.
+     *
+     * @return True if is an expression we can replace, false otherwise.
+     */
+    public static boolean containsReplaceableExp(Exp exp) {
+        boolean retVal = false;
+
+        // Case #1: VarExp
+        if (exp instanceof VarExp) {
+            retVal = true;
+        }
+        // Case #2: DotExp
+        else if (exp instanceof DotExp) {
+            DotExp dotExp = (DotExp) exp;
+            List<Exp> dotExpList = dotExp.getSegments();
+            retVal =
+                    containsReplaceableExp(dotExpList
+                            .get(dotExpList.size() - 1));
+        }
+
+        return retVal;
+    }
+
+    /**
      * <p>Converts the different types of <code>Exp</code> to the
      * ones used by the VC Generator.</p>
      *
      * @param oldExp The expression to be converted.
+     * @param scope The module scope to start our search.
      *
      * @return An <code>Exp</code>.
      */
-    protected static Exp convertExp(Exp oldExp) {
+    public static Exp convertExp(Exp oldExp, ModuleScope scope) {
         Exp retExp;
 
         // Case #1: ProgramIntegerExp
         if (oldExp instanceof ProgramIntegerExp) {
             IntegerExp exp = new IntegerExp();
             exp.setValue(((ProgramIntegerExp) oldExp).getValue());
-            exp.setMathType(oldExp.getMathType());
+
+            // At this point all programming integer expressions
+            // should be greater than or equals to 0. Negative
+            // numbers should have called the corresponding operation
+            // to convert it to a negative number. Therefore, we
+            // need to locate the type "N" (Natural Number)
+            MathSymbolEntry mse =
+                    searchMathSymbol(exp.getLocation(), "N", scope);
+            try {
+                exp.setMathType(mse.getTypeValue());
+            }
+            catch (SymbolNotOfKindTypeException e) {
+                notAType(mse, exp.getLocation());
+            }
+
             retExp = exp;
         }
         // Case #2: ProgramCharacterExp
@@ -178,6 +232,32 @@ public class Utilities {
     }
 
     /**
+     * <p>Convert an operation entry into the absyn node representation.</p>
+     *
+     * @param opEntry The operation entry in the symbol table.
+     *
+     * @return An <code>OperationDec</code>.
+     */
+    public static OperationDec convertToOperationDec(OperationEntry opEntry) {
+        // Obtain an OperationDec from the OperationEntry
+        ResolveConceptualElement element = opEntry.getDefiningElement();
+        OperationDec opDec;
+        if (element instanceof OperationDec) {
+            opDec = (OperationDec) opEntry.getDefiningElement();
+        }
+        else {
+            FacilityOperationDec fOpDec =
+                    (FacilityOperationDec) opEntry.getDefiningElement();
+            opDec =
+                    new OperationDec(fOpDec.getName(), fOpDec.getParameters(),
+                            fOpDec.getReturnTy(), fOpDec.getStateVars(), fOpDec
+                                    .getRequires(), fOpDec.getEnsures());
+        }
+
+        return opDec;
+    }
+
+    /**
      * <p>Creates conceptual variable expression from the
      * given name.</p>
      *
@@ -189,7 +269,7 @@ public class Utilities {
      *
      * @return The created conceptual variable as a <code>DotExp</code>.
      */
-    protected static DotExp createConcVarExp(Location location, VarExp name,
+    public static DotExp createConcVarExp(Location location, VarExp name,
             MTType concType, MTType booleanType) {
         // Create a variable that refers to the conceptual exemplar
         VarExp cName =
@@ -218,7 +298,7 @@ public class Utilities {
      *
      * @return The created <code>DotExp</code>.
      */
-    protected static DotExp createDotExp(Location location,
+    public static DotExp createDotExp(Location location,
             edu.clemson.cs.r2jt.collections.List<Exp> dotExpList, MTType dotType) {
         // Create the DotExp
         DotExp exp = new DotExp(location, dotExpList, null);
@@ -237,7 +317,7 @@ public class Utilities {
      *
      * @return The created <code>FunctionExp</code>.
      */
-    protected static FunctionExp createDurCallExp(Location loc, String numArg,
+    public static FunctionExp createDurCallExp(Location loc, String numArg,
             MTType integerType, MTType realType) {
         // Obtain the necessary information from the variable
         VarExp param =
@@ -266,7 +346,7 @@ public class Utilities {
      *
      * @return The created <code>FunctionExp</code>.
      */
-    protected static FunctionExp createFinalizAnyDur(VarDec var, MTType realType) {
+    public static FunctionExp createFinalizAnyDur(VarDec var, MTType realType) {
         // Obtain the necessary information from the variable
         Ty varTy = var.getTy();
         NameTy varNameTy = (NameTy) varTy;
@@ -298,14 +378,15 @@ public class Utilities {
      *
      * @param varExp A Variable Expression.
      * @param realType Mathematical real type.
+     * @param scope The module scope to start our search.
      *
      * @return The created <code>FunctionExp</code>.
      */
-    protected static FunctionExp createFinalizAnyDurExp(VariableExp varExp,
-            MTType realType) {
+    public static FunctionExp createFinalizAnyDurExp(VariableExp varExp,
+            MTType realType, ModuleScope scope) {
         if (varExp.getProgramType() instanceof PTFamily) {
             PTFamily type = (PTFamily) varExp.getProgramType();
-            Exp param = convertExp(varExp);
+            Exp param = convertExp(varExp, scope);
             VarExp param1 =
                     createVarExp(varExp.getLocation(), null,
                             createPosSymbol(type.getName()), varExp
@@ -342,7 +423,7 @@ public class Utilities {
      *
      * @return The created <code>FunctionExp</code>.
      */
-    protected static FunctionExp createFunctionExp(Location location,
+    public static FunctionExp createFunctionExp(Location location,
             PosSymbol qualifier, PosSymbol name,
             edu.clemson.cs.r2jt.collections.List<Exp> argExpList,
             MTType funcType) {
@@ -372,7 +453,7 @@ public class Utilities {
      *
      * @return The created <code>FunctionExp</code>.
      */
-    protected static FunctionExp createInitAnyDur(VarDec var, MTType realType) {
+    public static FunctionExp createInitAnyDur(VarDec var, MTType realType) {
         // Obtain the necessary information from the variable
         VarExp param =
                 createVarExp(var.getLocation(), null,
@@ -403,7 +484,7 @@ public class Utilities {
      *
      * @return The new <code>DotExp</code>.
      */
-    protected static DotExp createInitExp(VarDec var, MTType mType,
+    public static DotExp createInitExp(VarDec var, MTType mType,
             MTType booleanType) {
         // Convert the declared variable into a VarExp
         VarExp varExp =
@@ -452,7 +533,7 @@ public class Utilities {
      *
      * @return The new <code>InfixExp</code>.
      */
-    protected static InfixExp createLessThanEqExp(Location location, Exp left,
+    public static InfixExp createLessThanEqExp(Location location, Exp left,
             Exp right, MTType booleanType) {
         // Create the "Less Than Equal" InfixExp
         InfixExp exp =
@@ -472,7 +553,7 @@ public class Utilities {
      *
      * @return The new <code>InfixExp</code>.
      */
-    protected static InfixExp createLessThanExp(Location location, Exp left,
+    public static InfixExp createLessThanExp(Location location, Exp left,
             Exp right, MTType booleanType) {
         // Create the "Less Than" InfixExp
         InfixExp exp =
@@ -490,7 +571,7 @@ public class Utilities {
      *
      * @return The new <code>PosSymbol</code>.
      */
-    protected static PosSymbol createPosSymbol(String name) {
+    public static PosSymbol createPosSymbol(String name) {
         // Create the PosSymbol
         PosSymbol posSym = new PosSymbol();
         posSym.setSymbol(Symbol.symbol(name));
@@ -508,7 +589,7 @@ public class Utilities {
      *
      * @return The created <code>VarExp</code>.
      */
-    protected static VarExp createPValExp(Location location, ModuleScope scope) {
+    public static VarExp createPValExp(Location location, ModuleScope scope) {
         // Locate "N" (Natural Number)
         MathSymbolEntry mse = searchMathSymbol(location, "N", scope);
         try {
@@ -532,7 +613,7 @@ public class Utilities {
      *
      * @return A new variable with the question mark in <code>VarExp</code> form.
      */
-    protected static VarExp createQuestionMarkVariable(Exp exp, VarExp oldVar) {
+    public static VarExp createQuestionMarkVariable(Exp exp, VarExp oldVar) {
         // Add an extra question mark to the front of oldVar
         VarExp newOldVar =
                 new VarExp(null, null, createPosSymbol("?"
@@ -571,7 +652,7 @@ public class Utilities {
      *
      * @return The new <code>VarExp</code>.
      */
-    protected static VarExp createVarExp(Location loc, PosSymbol qualifier,
+    public static VarExp createVarExp(Location loc, PosSymbol qualifier,
             PosSymbol name, MTType type, MTType typeValue) {
         // Create the VarExp
         VarExp exp = new VarExp(loc, qualifier, name);
@@ -588,7 +669,7 @@ public class Utilities {
      *
      * @return The current "Cum_Dur".
      */
-    protected static String getCumDur(Exp searchingExp) {
+    public static String getCumDur(Exp searchingExp) {
         String cumDur = "Cum_Dur";
 
         // Loop until we find one
@@ -608,7 +689,7 @@ public class Utilities {
      *
      * @return The <code>MTType</code> for "Z".
      */
-    protected static MTType getMathTypeZ(Location location, ModuleScope scope) {
+    public static MTType getMathTypeZ(Location location, ModuleScope scope) {
         // Locate "Z" (Integer)
         MathSymbolEntry mse = searchMathSymbol(location, "Z", scope);
         MTType Z = null;
@@ -622,6 +703,169 @@ public class Utilities {
         return Z;
     }
 
+    public static Set<String> getSymbols(Exp exp) {
+        // Return value
+        Set<String> symbolsSet = new HashSet<String>();
+
+        // Not CharExp, DoubleExp, IntegerExp or StringExp
+        if (!(exp instanceof CharExp) && !(exp instanceof DoubleExp)
+                && !(exp instanceof IntegerExp) && !(exp instanceof StringExp)) {
+            // AlternativeExp
+            if (exp instanceof AlternativeExp) {
+                List<AltItemExp> alternativesList =
+                        ((AlternativeExp) exp).getAlternatives();
+
+                // Iterate through each of the alternatives
+                for (AltItemExp altExp : alternativesList) {
+                    Exp test = altExp.getTest();
+                    Exp assignment = altExp.getAssignment();
+
+                    // Don't loop if they are null
+                    if (test != null) {
+                        symbolsSet.addAll(getSymbols(altExp.getTest()));
+                    }
+
+                    if (assignment != null) {
+                        symbolsSet.addAll(getSymbols(altExp.getAssignment()));
+                    }
+                }
+            }
+            // DotExp
+            else if (exp instanceof DotExp) {
+                List<Exp> segExpList = ((DotExp) exp).getSegments();
+                StringBuffer currentStr = new StringBuffer();
+
+                // Iterate through each of the segment expressions
+                for (Exp e : segExpList) {
+                    // For each expression, obtain the set of symbols
+                    // and form a candidate expression.
+                    Set<String> retSet = getSymbols(e);
+                    for (String s : retSet) {
+                        if (currentStr.length() != 0) {
+                            currentStr.append(".");
+                        }
+                        currentStr.append(s);
+                    }
+                    symbolsSet.add(currentStr.toString());
+                }
+            }
+            // EqualsExp
+            else if (exp instanceof EqualsExp) {
+                symbolsSet.addAll(getSymbols(((EqualsExp) exp).getLeft()));
+                symbolsSet.addAll(getSymbols(((EqualsExp) exp).getRight()));
+            }
+            // FunctionExp
+            else if (exp instanceof FunctionExp) {
+                FunctionExp funcExp = (FunctionExp) exp;
+                StringBuffer funcName = new StringBuffer();
+
+                // Add the name of the function (including any qualifiers)
+                if (funcExp.getQualifier() != null) {
+                    funcName.append(funcExp.getQualifier().getName());
+                    funcName.append(".");
+                }
+                funcName.append(funcExp.getName());
+                symbolsSet.add(funcName.toString());
+
+                // Add all the symbols in the argument list
+                List<FunctionArgList> funcArgList = funcExp.getParamList();
+                for (FunctionArgList f : funcArgList) {
+                    List<Exp> funcArgExpList = f.getArguments();
+                    for (Exp e : funcArgExpList) {
+                        symbolsSet.addAll(getSymbols(e));
+                    }
+                }
+            }
+            // If Exp
+            else if (exp instanceof IfExp) {
+                symbolsSet.addAll(getSymbols(((IfExp) exp).getTest()));
+                symbolsSet.addAll(getSymbols(((IfExp) exp).getThenclause()));
+                symbolsSet.addAll(getSymbols(((IfExp) exp).getElseclause()));
+            }
+            // InfixExp
+            else if (exp instanceof InfixExp) {
+                symbolsSet.addAll(getSymbols(((InfixExp) exp).getLeft()));
+                symbolsSet.addAll(getSymbols(((InfixExp) exp).getRight()));
+            }
+            // LambdaExp
+            else if (exp instanceof LambdaExp) {
+                LambdaExp lambdaExp = (LambdaExp) exp;
+
+                // Add all the parameter variables
+                List<MathVarDec> paramList = lambdaExp.getParameters();
+                for (MathVarDec v : paramList) {
+                    symbolsSet.add(v.getName().getName());
+                }
+
+                // Add all the symbols in the body
+                symbolsSet.addAll(getSymbols(lambdaExp.getBody()));
+            }
+            // OldExp
+            else if (exp instanceof OldExp) {
+                symbolsSet.add(exp.toString(0));
+            }
+            // OutfixExp
+            else if (exp instanceof OutfixExp) {
+                symbolsSet.addAll(getSymbols(((OutfixExp) exp).getArgument()));
+            }
+            // PrefixExp
+            else if (exp instanceof PrefixExp) {
+                symbolsSet.addAll(getSymbols(((PrefixExp) exp).getArgument()));
+            }
+            // SetExp
+            else if (exp instanceof SetExp) {
+                SetExp setExp = (SetExp) exp;
+
+                // Add all the parts that form the set expression
+                symbolsSet.add(setExp.getVar().getName().getName());
+                symbolsSet.addAll(getSymbols(((SetExp) exp).getWhere()));
+                symbolsSet.addAll(getSymbols(((SetExp) exp).getBody()));
+            }
+            // SuppositionExp
+            else if (exp instanceof SuppositionExp) {
+                SuppositionExp suppositionExp = (SuppositionExp) exp;
+
+                // Add all the expressions
+                symbolsSet.addAll(getSymbols(suppositionExp.getExp()));
+
+                // Add all the variables
+                List<MathVarDec> varList = suppositionExp.getVars();
+                for (MathVarDec v : varList) {
+                    symbolsSet.add(v.getName().getName());
+                }
+            }
+            // TupleExp
+            else if (exp instanceof TupleExp) {
+                TupleExp tupleExp = (TupleExp) exp;
+
+                // Add all the expressions in the fields
+                List<Exp> fieldList = tupleExp.getFields();
+                for (Exp e : fieldList) {
+                    symbolsSet.addAll(getSymbols(e));
+                }
+            }
+            // VarExp
+            else if (exp instanceof VarExp) {
+                VarExp varExp = (VarExp) exp;
+                StringBuffer varName = new StringBuffer();
+
+                // Add the name of the variable (including any qualifiers)
+                if (varExp.getQualifier() != null) {
+                    varName.append(varExp.getQualifier().getName());
+                    varName.append(".");
+                }
+                varName.append(varExp.getName());
+                symbolsSet.add(varName.toString());
+            }
+            // Not Handled!
+            else {
+                expNotHandled(exp, exp.getLocation());
+            }
+        }
+
+        return symbolsSet;
+    }
+
     /**
      * <p>Get the <code>PosSymbol</code> associated with the
      * <code>VariableExp</code> left.</p>
@@ -630,7 +874,7 @@ public class Utilities {
      *
      * @return The <code>PosSymbol</code> of left.
      */
-    protected static PosSymbol getVarName(VariableExp left) {
+    public static PosSymbol getVarName(VariableExp left) {
         // Return value
         PosSymbol name;
 
@@ -668,7 +912,7 @@ public class Utilities {
      *
      * @return True if it is a local operation, false otherwise.
      */
-    protected static boolean isLocationOperation(String name, ModuleScope scope) {
+    public static boolean isLocationOperation(String name, ModuleScope scope) {
         boolean isIn;
 
         // Query for the corresponding operation
@@ -715,7 +959,7 @@ public class Utilities {
      *
      * @return True/False
      */
-    protected static boolean isVerificationVar(Exp name) {
+    public static boolean isVerificationVar(Exp name) {
         // VarExp
         if (name instanceof VarExp) {
             String strName = ((VarExp) name).getName().getName();
@@ -748,7 +992,7 @@ public class Utilities {
      *
      * @return Negated expression.
      */
-    protected static Exp negateExp(Exp exp, MTType booleanType) {
+    public static Exp negateExp(Exp exp, MTType booleanType) {
         Exp retExp = Exp.copy(exp);
         if (exp instanceof EqualsExp) {
             if (((EqualsExp) exp).getOperator() == EqualsExp.EQUAL)
@@ -782,9 +1026,9 @@ public class Utilities {
      *
      * @return The new <code>Exp</code>.
      */
-    protected static Exp replace(Exp exp, Exp old, Exp repl) {
+    public static Exp replace(Exp exp, Exp old, Exp repl) {
         // Clone old and repl and use the Exp replace to do all its work
-        Exp tmp = Exp.replace(exp, Exp.copy(old), Exp.copy(repl));
+        Exp tmp = Exp.replace(Exp.copy(exp), Exp.copy(old), Exp.copy(repl));
 
         // Return the corresponding Exp
         if (tmp != null)
@@ -794,96 +1038,153 @@ public class Utilities {
     }
 
     /**
-     * <p>Replace the formal with the actual variables
-     * from the facility declaration rule.</p>
+     * <p>Replace the formal with the actual variables from the facility declaration to
+     * the passed in clause.</p>
      *
-     * @param exp The expression to be replaced.
-     * @param facParam The list of facility declaration parameter variables.
-     * @param concParam The list of concept parameter variables.
+     * @param opLoc Location of the calling statement.
+     * @param clause The requires/ensures clause.
+     * @param paramList The list of parameter variables.
+     * @param instantiatedFacilityArgMap The map of facility formals to actuals.
+     * @param scope The module scope to start our search.
      *
-     * @return The modified expression.
+     * @return The clause in <code>Exp</code> form.
      */
-    protected static Exp replaceFacilityDeclarationVariables(Exp exp,
-            List facParam, List concParam) {
-        for (int i = 0; i < facParam.size(); i++) {
-            if (facParam.get(i) instanceof Dec
-                    && (concParam.get(i) instanceof Dec)) {
-                // Both are instances of Dec
-                Dec facDec = (Dec) facParam.get(i);
-                Dec concDec = (Dec) concParam.get(i);
+    public static Exp replaceFacilityFormalWithActual(Location opLoc,
+            Exp clause, List<ParameterVarDec> paramList,
+            Map<VarExp, FacilityFormalToActuals> instantiatedFacilityArgMap,
+            ModuleScope scope) {
+        // Make a copy of the original clause
+        Exp newClause = Exp.copy(clause);
 
-                // Variable to be replaced
-                VarExp expToReplace =
-                        createVarExp(facDec.getLocation(), null, facDec
-                                .getName(), facDec.getMathType(), null);
+        for (ParameterVarDec dec : paramList) {
+            if (dec.getTy() instanceof NameTy) {
+                NameTy ty = (NameTy) dec.getTy();
+                PosSymbol tyName = ty.getName().copy();
+                PosSymbol tyQualifier = null;
+                if (ty.getQualifier() != null) {
+                    tyQualifier = ty.getQualifier().copy();
+                }
 
-                // Concept variable
-                VarExp expToUse =
-                        createVarExp(concDec.getLocation(), null, concDec
-                                .getName(), concDec.getMathType(), null);
+                FacilityFormalToActuals formalToActuals = null;
+                for (VarExp v : instantiatedFacilityArgMap.keySet()) {
+                    FacilityFormalToActuals temp = null;
+                    if (tyQualifier != null) {
+                        if (tyQualifier.getName().equals(
+                                v.getQualifier().getName())
+                                && tyName.getName().equals(
+                                        v.getName().getName())) {
+                            temp = instantiatedFacilityArgMap.get(v);
+                        }
+                    }
+                    else {
+                        if (tyName.getName().equals(v.getName().getName())) {
+                            temp = instantiatedFacilityArgMap.get(v);
+                        }
+                    }
 
-                // Temporary replacement to avoid formal and actuals being the same
-                exp = replace(exp, expToReplace, expToUse);
+                    // Check to see if we already found one. If we did, it means that
+                    // the type is ambiguous and we can't be sure which one it is.
+                    if (temp != null) {
+                        if (formalToActuals == null) {
+                            formalToActuals = temp;
+                        }
+                        else {
+                            Utilities.ambiguousTy(ty, opLoc);
+                        }
+                    }
+                }
 
-                // Create a old exp from expToReplace
-                OldExp r = new OldExp(null, expToReplace);
-                r.setMathType(expToReplace.getMathType());
+                if (formalToActuals != null) {
+                    // Replace all concept formal arguments with their actuals
+                    Map<Exp, Exp> conceptMap =
+                            formalToActuals.getConceptArgMap();
+                    for (Exp e : conceptMap.keySet()) {
+                        newClause =
+                                Utilities.replace(newClause, e, conceptMap
+                                        .get(e));
+                    }
 
-                // Create a old exp from expToUse
-                OldExp u = new OldExp(null, expToUse);
-                u.setMathType(expToUse.getMathType());
+                    // Replace all concept realization formal arguments with their actuals
+                    Map<Exp, Exp> conceptRealizMap =
+                            formalToActuals.getConceptRealizArgMap();
+                    for (Exp e : conceptRealizMap.keySet()) {
+                        newClause =
+                                Utilities.replace(newClause, e,
+                                        conceptRealizMap.get(e));
+                    }
 
-                // Actually perform the desired replacement
-                exp = replace(exp, r, u);
-            }
-            else if (facParam.get(i) instanceof Dec
-                    && concParam.get(i) instanceof ModuleArgumentItem) {
-                // We have a ModuleArgumentItem
-                Dec facDec = (Dec) facParam.get(i);
-                ModuleArgumentItem concItem =
-                        (ModuleArgumentItem) concParam.get(i);
+                    // Replace all enhancement [realization] formal arguments with their actuals
+                    for (PosSymbol p : formalToActuals.getEnhancementKeys()) {
+                        Map<Exp, Exp> enhancementMap =
+                                formalToActuals.getEnhancementArgMap(p);
 
-                // Variable to be replaced
-                VarExp expToReplace =
-                        createVarExp(facDec.getLocation(), null, facDec
-                                .getName(), facDec.getMathType(), null);
-
-                // Concept variable
-                VarExp expToUse = new VarExp();
-                if (concItem.getName() != null) {
-                    expToUse.setName(concItem.getName());
+                        for (Exp e : enhancementMap.keySet()) {
+                            newClause =
+                                    Utilities.replace(newClause, e,
+                                            enhancementMap.get(e));
+                        }
+                    }
                 }
                 else {
-                    expToUse.setName(createPosSymbol(concItem.getEvalExp()
-                            .toString()));
+                    // Ignore all generic types
+                    if (!(ty.getProgramTypeValue() instanceof PTGeneric)) {
+                        boolean found = false;
+
+                        // Check to see if the type of this variable is from an imported
+                        // concept type family definition. If we find one, we simply ignore this type.
+                        Iterator<SymbolTableEntry> programTypeDefIt =
+                                scope
+                                        .query(
+                                                new EntryTypeQuery<SymbolTableEntry>(
+                                                        ProgramTypeDefinitionEntry.class,
+                                                        MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                                        MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
+                                        .iterator();
+                        while (programTypeDefIt.hasNext() && !found) {
+                            ProgramTypeDefinitionEntry entry =
+                                    programTypeDefIt
+                                            .next()
+                                            .toProgramTypeDefinitionEntry(opLoc);
+
+                            if (entry.getName().equals(tyName.getName())) {
+                                found = true;
+                            }
+                        }
+
+                        if (!found) {
+                            // Check to see if the type of this variable is from an local
+                            // type representation. If we find one, we simply ignore this type.
+                            Iterator<SymbolTableEntry> representationTypeIt =
+                                    scope
+                                            .query(
+                                                    new EntryTypeQuery<SymbolTableEntry>(
+                                                            RepresentationTypeEntry.class,
+                                                            MathSymbolTable.ImportStrategy.IMPORT_NAMED,
+                                                            MathSymbolTable.FacilityStrategy.FACILITY_IGNORE))
+                                            .iterator();
+                            while (representationTypeIt.hasNext() && !found) {
+                                RepresentationTypeEntry entry =
+                                        representationTypeIt.next()
+                                                .toRepresentationTypeEntry(
+                                                        opLoc);
+
+                                if (entry.getName().equals(tyName.getName())) {
+                                    found = true;
+                                }
+                            }
+
+                            // Throw an error if can't find one.
+                            if (!found) {
+                                Utilities.noSuchSymbol(tyQualifier, tyName
+                                        .getName(), opLoc);
+                            }
+                        }
+                    }
                 }
-
-                // Set the math type for the concept variable
-                if (concItem.getProgramTypeValue() != null) {
-                    expToUse.setMathType(concItem.getProgramTypeValue()
-                            .toMath());
-                }
-                else {
-                    expToUse.setMathType(concItem.getMathType());
-                }
-
-                // Temporary replacement to avoid formal and actuals being the same
-                exp = replace(exp, expToReplace, expToUse);
-
-                // Create a old exp from expToReplace
-                OldExp r = new OldExp(null, expToReplace);
-                r.setMathType(expToReplace.getMathType());
-
-                // Create a old exp from expToUse
-                OldExp u = new OldExp(null, expToUse);
-                u.setMathType(expToUse.getMathType());
-
-                // Actually perform the desired replacement
-                exp = replace(exp, r, u);
             }
         }
 
-        return exp;
+        return newClause;
     }
 
     /**
@@ -898,7 +1199,7 @@ public class Utilities {
      *
      * @return The constraint in <code>Exp</code> form if found, null otherwise.
      */
-    protected static Exp retrieveConstraint(Location location,
+    public static Exp retrieveConstraint(Location location,
             PosSymbol qualifier, PosSymbol name, Exp varName, ModuleScope scope) {
         Exp constraint = null;
 
@@ -949,8 +1250,8 @@ public class Utilities {
      * @return An <code>MathSymbolEntry</code> from the
      *         symbol table.
      */
-    protected static MathSymbolEntry searchMathSymbol(Location loc,
-            String name, ModuleScope scope) {
+    public static MathSymbolEntry searchMathSymbol(Location loc, String name,
+            ModuleScope scope) {
         // Query for the corresponding math symbol
         MathSymbolEntry ms = null;
         try {
@@ -990,7 +1291,7 @@ public class Utilities {
      * @return An <code>OperationEntry</code> from the
      *         symbol table.
      */
-    protected static OperationEntry searchOperation(Location loc,
+    public static OperationEntry searchOperation(Location loc,
             PosSymbol qualifier, PosSymbol name, List<PTType> argTypes,
             ModuleScope scope) {
         // Query for the corresponding operation
@@ -1027,7 +1328,7 @@ public class Utilities {
      * @return An <code>OperationProfileEntry</code> from the
      *         symbol table.
      */
-    protected static OperationProfileEntry searchOperationProfile(Location loc,
+    public static OperationProfileEntry searchOperationProfile(Location loc,
             PosSymbol qualifier, PosSymbol name, List<PTType> argTypes,
             ModuleScope scope) {
         // Query for the corresponding operation profile
@@ -1063,7 +1364,7 @@ public class Utilities {
      * @return A <code>SymbolTableEntry</code> from the
      *         symbol table.
      */
-    protected static SymbolTableEntry searchProgramType(Location loc,
+    public static SymbolTableEntry searchProgramType(Location loc,
             PosSymbol qualifier, PosSymbol name, ModuleScope scope) {
         SymbolTableEntry retEntry = null;
 
@@ -1109,7 +1410,7 @@ public class Utilities {
      * @param exp The <code>Exp</code> that needs to be modified.
      * @param loc The new <code>Location</code>.
      */
-    protected static void setLocation(Exp exp, Location loc) {
+    public static void setLocation(Exp exp, Location loc) {
         // Special handling for InfixExp
         if (exp instanceof InfixExp) {
             ((InfixExp) exp).setAllLocations(loc);
@@ -1117,5 +1418,28 @@ public class Utilities {
         else {
             exp.setLocation(loc);
         }
+    }
+
+    public static List<Exp> splitConjunctExp(Exp exp, List<Exp> expList) {
+        // Attempt to split the expression if it contains a conjunct
+        if (exp instanceof InfixExp) {
+            InfixExp infixExp = (InfixExp) exp;
+
+            // Split the expression if it is a conjunct
+            if (infixExp.getOpName().equals("and")) {
+                expList = splitConjunctExp(infixExp.getLeft(), expList);
+                expList = splitConjunctExp(infixExp.getRight(), expList);
+            }
+            // Otherwise simply add it to our list
+            else {
+                expList.add(infixExp);
+            }
+        }
+        // Otherwise it is an individual assume statement we need to deal with.
+        else {
+            expList.add(exp);
+        }
+
+        return expList;
     }
 }

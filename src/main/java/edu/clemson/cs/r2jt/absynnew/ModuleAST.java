@@ -1,7 +1,7 @@
 /**
  * ModuleAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,11 +16,10 @@ import edu.clemson.cs.r2jt.absynnew.decl.ModuleParameterAST;
 import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import org.antlr.v4.runtime.Token;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
- * <p>The parent class of all <tt>RESOLVE</tt> module types.</p>
+ * The parent class of all module types.
  */
 public abstract class ModuleAST extends ResolveAST {
 
@@ -35,7 +34,6 @@ public abstract class ModuleAST extends ResolveAST {
             ExprAST req, BlockAST block) {
         super(start, stop);
         myName = name;
-
         myModuleParams = params;
         myImports = imports;
         myRequires = req;
@@ -70,17 +68,32 @@ public abstract class ModuleAST extends ResolveAST {
         return true;
     }
 
-    public static class ImplModuleAST extends ModuleAST {
+    public static class ConceptImplModuleAST extends ModuleAST {
+
+        private final Token myConcept;
+
+        public ConceptImplModuleAST(Token start, Token stop, Token name,
+                Token concept, ImportCollectionAST imports,
+                List<ModuleParameterAST> params, ExprAST req, BlockAST block) {
+            super(start, stop, name, imports, params, req, block);
+            myConcept = concept;
+        }
+
+        public Token getConcept() {
+            return myConcept;
+        }
+    }
+
+    public static class EnhancementImplModuleAST extends ModuleAST {
 
         private final Token myConcept, myEnhancement;
 
-        private ImplModuleAST(ImplModuleBuilder builder) {
-            super(builder.getStart(), builder.getStop(), builder.getName(),
-                    builder.imports, Collections
-                            .<ModuleParameterAST> emptyList(),
-                    builder.requires, builder.block);
-            myConcept = builder.concept;
-            myEnhancement = builder.enhancement;
+        public EnhancementImplModuleAST(Token start, Token stop, Token name,
+                Token concept, Token enhancement, ImportCollectionAST imports,
+                List<ModuleParameterAST> params, ExprAST req, BlockAST block) {
+            super(start, stop, name, imports, params, req, block);
+            myConcept = concept;
+            myEnhancement = enhancement;
         }
 
         public Token getConcept() {
@@ -91,96 +104,35 @@ public abstract class ModuleAST extends ResolveAST {
             return myEnhancement;
         }
 
-        public static class ImplModuleBuilder
-                extends
-                    ModuleBuilderExtension<ImplModuleBuilder> {
-
-            protected Token concept, enhancement;
-
-            public ImplModuleBuilder(Token start, Token stop, Token name) {
-                super(start, stop, name);
-            }
-
-            public ImplModuleBuilder concept(Token e) {
-                concept = e;
-                return this;
-            }
-
-            public ImplModuleBuilder enhancement(Token e) {
-                concept = e;
-                return this;
-            }
-
-            @Override
-            public ImplModuleAST build() {
-                return new ImplModuleAST(this);
-            }
-        }
     }
 
     public static class PrecisAST extends ModuleAST {
 
-        private PrecisAST(PrecisBuilder builder) {
-            super(builder.getStart(), builder.getStop(), builder.getName(),
-                    builder.imports, Collections
-                            .<ModuleParameterAST> emptyList(), null,
-                    builder.block);
-        }
-
-        public static class PrecisBuilder
-                extends
-                    ModuleBuilderExtension<PrecisBuilder> {
-
-            public PrecisBuilder(Token start, Token stop, Token name) {
-                super(start, stop, name);
-            }
-
-            @Override
-            public PrecisAST build() {
-                return new PrecisAST(this);
-            }
+        public PrecisAST(Token start, Token stop, Token name,
+                ImportCollectionAST imports, List<ModuleParameterAST> params,
+                ExprAST req, BlockAST block) {
+            super(start, stop, name, imports, params, req, block);
         }
     }
 
-    /**
-     * <p>A <code>SpecModuleAST</code> is <tt>RESOLVE</tt>'s abstract syntax
-     * encapsulation of an 'interface-like-module' containing formal
-     * specifications for user defined types and operations.</p>
-     */
-    public static class SpecModuleAST extends ModuleAST {
+    public static class ConceptModuleAST extends ModuleAST {
 
-        private final Token myConceptName;
-
-        private SpecModuleAST(SpecModuleBuilder builder) {
-            super(builder.getStart(), builder.getStop(), builder.getName(),
-                    builder.imports, builder.moduleParameters,
-                    builder.requires, builder.block);
-            myConceptName = builder.conceptName;
+        public ConceptModuleAST(Token start, Token stop, Token name,
+                ImportCollectionAST imports, List<ModuleParameterAST> params,
+                ExprAST req, BlockAST block) {
+            super(start, stop, name, imports, params, req, block);
         }
+    }
 
-        public Token getConceptName() {
-            return myConceptName;
-        }
+    public static class EnhancementModuleAST extends ModuleAST {
 
-        public static class SpecModuleBuilder
-                extends
-                    ModuleBuilderExtension<SpecModuleBuilder> {
+        private final Token myConcept;
 
-            protected Token conceptName;
-
-            public SpecModuleBuilder(Token start, Token stop, Token name) {
-                super(start, stop, name);
-            }
-
-            public SpecModuleBuilder concept(Token t) {
-                this.conceptName = t;
-                return this;
-            }
-
-            @Override
-            public SpecModuleAST build() {
-                return new SpecModuleAST(this);
-            }
+        public EnhancementModuleAST(Token start, Token stop, Token name,
+                Token concept, ImportCollectionAST imports,
+                List<ModuleParameterAST> params, ExprAST req, BlockAST block) {
+            super(start, stop, name, imports, params, req, block);
+            myConcept = concept;
         }
     }
 }

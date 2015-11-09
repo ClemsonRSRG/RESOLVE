@@ -1,7 +1,7 @@
 /**
  * ResolveAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,7 +19,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
- * <p>The root of the <tt>RESOLVE</tt> ast hierarchy.</p>
+ * The root of the ast hierarchy.
  */
 public abstract class ResolveAST {
 

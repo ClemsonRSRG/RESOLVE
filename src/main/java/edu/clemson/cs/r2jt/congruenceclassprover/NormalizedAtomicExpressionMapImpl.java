@@ -1,7 +1,7 @@
 /**
  * NormalizedAtomicExpressionMapImpl.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -12,11 +12,7 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 // todo: create array impl and compare.
 /**
@@ -27,7 +23,8 @@ public class NormalizedAtomicExpressionMapImpl
             Comparable<NormalizedAtomicExpressionMapImpl> {
 
     private static final int m_maxPositions = 6;
-    private final Map<Integer, Integer> m_expression;
+    private final Map<Integer, Integer> m_expression; // opId -> positionBitCode
+    private int arity = 0; // number of arguments
 
     public NormalizedAtomicExpressionMapImpl() {
         m_expression = new TreeMap<Integer, Integer>();
@@ -49,16 +46,39 @@ public class NormalizedAtomicExpressionMapImpl
         return m_expression.keySet();
     }
 
-    protected Set<String> getArgumentsAsStrings(Registry reg) {
-        HashSet<String> rSet = new HashSet<String>();
+    public int popcount(int x) {
+        int count;
+        for (count = 0; x > 0; count++)
+            x &= x - 1;
+        return count;
+    }
+
+    // Returns a multiset
+    protected Map<String, Integer> getEquationOperatorsAsStrings(Registry reg) {
+        HashMap<String, Integer> rMap = new HashMap<String, Integer>();
+        for (Integer k : m_expression.keySet()) {
+            rMap.put(reg.getSymbolForIndex(k), popcount(m_expression.get(k)));
+        }
+        return rMap;
+    }
+
+    // Returns a multiset
+    protected Map<String, Integer> getArgumentsAsStrings(Registry reg) {
+        HashMap<String, Integer> rMap = new HashMap<String, Integer>();
         for (int i = 1; i < m_maxPositions; ++i) {
             int index = readPosition(i);
             if (index < 0)
-                break;
+                continue;
             String op = reg.getSymbolForIndex(index);
-            rSet.add(op);
+            int count;
+            if (rMap.containsKey(op)) {
+                count = rMap.get(op) + 1;
+            }
+            else
+                count = 1;
+            rMap.put(op, count);
         }
-        return rSet;
+        return rMap;
     }
 
     /**
@@ -72,7 +92,7 @@ public class NormalizedAtomicExpressionMapImpl
         }
         position = 1 << position;
         Set<Map.Entry<Integer, Integer>> entries = m_expression.entrySet();
-        // hangs here with some lambda formulae
+
         for (Map.Entry<Integer, Integer> e : entries) {
             if ((e.getValue() & position) != 0) {
                 return e.getKey();
@@ -84,11 +104,32 @@ public class NormalizedAtomicExpressionMapImpl
         return -1;
     }
 
+    // returns a key if it used everywhere in positionBitCode
+    public int readPositionBitcode(int positionBitCode) {
+        Set<Map.Entry<Integer, Integer>> entries = m_expression.entrySet();
+        for (Map.Entry<Integer, Integer> e : entries) {
+            if ((e.getValue() & positionBitCode) == positionBitCode) {
+                return e.getKey();
+            }
+            /* todo: possible use for map: multiple operators in a single position.
+             for use in binding quantified variables.
+             */
+        }
+        return -1;
+    }
+
+    // just overwrites entry
+    public void overwriteEntry(int operator, int positionBitCode) {
+        m_expression.put(operator, positionBitCode);
+    }
+
     /**
      * @param operator integer value of operator
      * @param position 0 denotes first position.
      */
     public void writeOnto(int operator, int position) {
+        if (position != m_maxPositions && position > arity)
+            arity = position;
         position = 1 << position;
         Integer curValue = m_expression.get(operator);
         if (curValue != null) {
@@ -115,13 +156,33 @@ public class NormalizedAtomicExpressionMapImpl
         return false;
     }
 
+    public NormalizedAtomicExpressionMapImpl withOrderedArguments() {
+
+        Integer[] ord = new Integer[arity];
+        for (int i = 0; i < arity; ++i) {
+            ord[i] = readPosition(i + 1);
+        }
+        Arrays.sort(ord);
+
+        NormalizedAtomicExpressionMapImpl rExpr =
+                new NormalizedAtomicExpressionMapImpl();
+        rExpr.writeOnto(readPosition(0), 0);
+        for (int i = 0; i < arity; ++i) {
+            rExpr.writeOnto(ord[i], i + 1);
+        }
+        int root = readRoot();
+        if (root >= 0) {
+            rExpr.writeToRoot(root);
+        }
+        return rExpr;
+    }
+
     /**
      *
      * @param root
      */
     protected void writeToRoot(int root) {
-        int position = 1 << m_maxPositions;
-        m_expression.put(root, position);
+        writeOnto(root, m_maxPositions);
     }
 
     protected int readRoot() {
@@ -156,74 +217,17 @@ public class NormalizedAtomicExpressionMapImpl
     }
 
     public int numOperators() {
-        return m_expression.keySet().size();
+        return arity;
     }
 
-    public NormalizedAtomicExpressionMapImpl translateFromRegParam1ToRegParam2(
-            Registry source, Registry destination,
-            HashMap<String, String> mapping) {
-
-        NormalizedAtomicExpressionMapImpl translated =
-                new NormalizedAtomicExpressionMapImpl();
-        Set<Integer> keys = m_expression.keySet();
-        for (Integer k : keys) {
-            String sourceName = source.getSymbolForIndex(k);
-            String destName = "";
-            switch (source.getUsage(sourceName)) {
-            case LITERAL:
-            case HASARGS_SINGULAR:// literals and func names should be in both
-                if (destination.isSymbolInTable(sourceName)) {
-                    destName = sourceName;
-                }
-                else {
-                    return translated.clear();
-                }
-                break;
-            case HASARGS_FORALL:
-            case FORALL:
-                if (mapping.containsKey(sourceName)) {
-                    destName = mapping.get(sourceName);
-                }
-                break;
-            }
-            if (!destName.equals("")) {
-                int trKey = destination.getIndexForSymbol(destName);
-                int positions = m_expression.get(k);
-                translated.m_expression.put(trKey, positions);
-            }
-
-        }
-        return translated;
-    }
-
-    public NormalizedAtomicExpressionMapImpl incrementLastKnown() {
-        NormalizedAtomicExpressionMapImpl incremented =
-                new NormalizedAtomicExpressionMapImpl();
-        int pos = 0;
-        int op = readPosition(pos);
-        if (op < 0) { // function operator unknown, upper bound is end of list
-            incremented.writeOnto(Integer.MAX_VALUE, 0);
-            incremented.writeToRoot(Integer.MAX_VALUE);
-            return incremented;
-        }
-        int opPrev = op;
-        while (op >= 0) {
-            incremented.writeOnto(opPrev, pos);
-            pos++;
-            opPrev = op;
-            op = readPosition(pos);
-        }
-        incremented.m_expression.remove(opPrev);
-        incremented.writeOnto(++opPrev, pos - 1);
-        return incremented;
-    }
-
+    // Currently doesn't work if there are blanks in the equation (such as the fun symbol)
     public String toHumanReadableString(Registry registry) {
         if (m_expression.isEmpty()) {
             return "empty expression";
         }
         String r;
         String funcSymbol = registry.getSymbolForIndex(readPosition(0));
+
         String args = "";
         int cur;
         int i = 1;
@@ -244,6 +248,11 @@ public class NormalizedAtomicExpressionMapImpl
         }
 
         return r;
+    }
+
+    @Override
+    public int hashCode() {
+        return m_expression.hashCode();
     }
 
     @Override

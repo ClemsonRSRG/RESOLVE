@@ -1,7 +1,7 @@
 /**
  * WalkerCodeGenerator.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absynnew;
 
+// import org.reflections.Reflections;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -23,9 +24,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * <p>This class generates a <tt>Java</tt> treewalking abstract class
- * containing dummy implementations for each node in <tt>RESOLVE</tt>s AST
- * hierarchy.</p>
+ * This class generates a Java abstract class containing dummy implementations
+ * for each node in the resolve AST hierarchy.
  */
 public class WalkerCodeGenerator {
 
@@ -59,11 +59,11 @@ public class WalkerCodeGenerator {
     }
 
     private static ST createClassTemplate(String className) {
-        /*Reflections reflections =
-                  new Reflections("edu.clemson.cs.r2jt.absynnew");
+        /* Reflections reflections =
+                   new Reflections("edu.clemson.cs.r2jt.absynnew");
 
-          Set<Class<? extends ResolveAST>> absynClasses =
-                  reflections.getSubTypesOf(ResolveAST.class);*/
+           Set<Class<? extends ResolveAST>> absynClasses =
+                   reflections.getSubTypesOf(ResolveAST.class);*/
         Set<Class<? extends ResolveAST>> absynClasses =
                 new HashSet<Class<? extends ResolveAST>>();
         ST walkerClass =

@@ -1,7 +1,7 @@
 /**
  * TreeWalkerVisitor.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -2210,18 +2210,6 @@ public abstract class TreeWalkerVisitor {
             ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
     public void postProgramIntegerExp(ProgramIntegerExp data) {}
-
-    // ProgramOpExp
-    public boolean walkProgramOpExp(ProgramOpExp data) {
-        return false;
-    }
-
-    public void preProgramOpExp(ProgramOpExp data) {}
-
-    public void midProgramOpExp(ProgramOpExp node,
-            ResolveConceptualElement previous, ResolveConceptualElement next) {}
-
-    public void postProgramOpExp(ProgramOpExp data) {}
 
     // ProgramParamExp
     public boolean walkProgramParamExp(ProgramParamExp data) {

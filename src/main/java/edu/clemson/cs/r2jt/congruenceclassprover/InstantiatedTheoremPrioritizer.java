@@ -1,7 +1,7 @@
 /**
  * InstantiatedTheoremPrioritizer.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,12 +23,14 @@ public class InstantiatedTheoremPrioritizer {
 
     protected PriorityQueue<PExpWithScore> m_pQueue;
     private Map<String, Integer> m_vc_symbols;
+    protected Registry m_vcReg;
 
     public InstantiatedTheoremPrioritizer(
             List<InsertExpWithJustification> theoremList,
-            Map<String, Integer> vcSymbols, int threshold) {
+            Map<String, Integer> vcSymbols, int threshold, Registry vcReg) {
         m_pQueue = new PriorityQueue<PExpWithScore>(theoremList.size());
         m_vc_symbols = vcSymbols;
+        m_vcReg = vcReg;
         for (InsertExpWithJustification p : theoremList) {
             PExpWithScore pes = new PExpWithScore(p.m_PExp, p.m_Justification);
             pes.m_score = calculateScore(pes.m_theorem_symbols);
@@ -38,15 +40,29 @@ public class InstantiatedTheoremPrioritizer {
     }
 
     public int calculateScore(Set<String> theorem_symbols) {
-        int max = m_vc_symbols.keySet().size();
+        int max = m_vcReg.m_indexToSymbol.size();
         int score = 0;
-
-        for (String s : theorem_symbols) {
-            if (m_vc_symbols.containsKey(s)) {
-                score += m_vc_symbols.get(s);
+        if (m_vc_symbols.isEmpty()) {
+            for (String s : theorem_symbols) {
+                if (m_vcReg.m_symbolToIndex.containsKey(s)) {
+                    score += m_vcReg.getIndexForSymbol(s);
+                }
+                else
+                    score += max;
             }
-            else
+        }
+        for (String s : theorem_symbols) {
+            String rS = m_vcReg.getRootSymbolForSymbol(s);
+            if (m_vc_symbols.containsKey(rS)) {
+                // older symbols take priority
+                // indices are the order of introduction
+                int i_score =
+                        m_vc_symbols.get(rS) * m_vcReg.getIndexForSymbol(rS);
+                score += i_score;
+            }
+            else {
                 score += max;
+            }
         }
         return score / theorem_symbols.size();
     }

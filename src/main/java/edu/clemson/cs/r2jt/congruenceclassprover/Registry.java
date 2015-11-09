@@ -1,7 +1,7 @@
 /**
  * Registry.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -15,7 +15,6 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
-
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -35,6 +34,11 @@ public class Registry {
     private int m_uniqueCounter = 0;
     protected TypeGraph m_typeGraph;
     protected Map<String, Set<Integer>> m_appliedTheoremDependencyGraph;
+    protected Set<String> m_lambda_names;
+    protected Set<String> m_partTypes;
+    protected Map<Integer, ArrayList<Integer>> m_partTypeParentArray;
+    protected Set<String> m_commutative_operators;
+    protected Map<String, Boolean> m_cached_isSubtype;
 
     public static enum Usage {
 
@@ -42,7 +46,7 @@ public class Registry {
         HASARGS_FORALL
     };
 
-    private final Map<String, Usage> m_symbolToUsage;
+    protected final Map<String, Usage> m_symbolToUsage;
     private final Set<String> m_foralls;
     protected Map<String, MTType> m_typeDictionary;
 
@@ -60,24 +64,33 @@ public class Registry {
         addSymbol("=", new MTFunction(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
                 Usage.LITERAL); // = as a predicate function, not as an assertion
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
+        addSymbol("false", g.BOOLEAN, Usage.LITERAL);
+        addSymbol("not", new MTFunction(g, g.BOOLEAN, g.BOOLEAN),
+                Usage.HASARGS_SINGULAR);
         assert (getIndexForSymbol("=") == 0);
         m_appliedTheoremDependencyGraph = new HashMap<String, Set<Integer>>();
-
+        m_lambda_names = new HashSet<String>();
+        m_partTypes = new HashSet<String>();
+        m_partTypeParentArray = new HashMap<Integer, ArrayList<Integer>>();
+        // could look for these in theorems instead
+        m_commutative_operators = new HashSet<String>();
+        m_commutative_operators.add("+");
+        m_commutative_operators.add("=");
+        m_commutative_operators.add("and");
+        m_commutative_operators.add("or");
+        m_cached_isSubtype = new HashMap<String, Boolean>();
     }
 
-    protected void makeZ(String symbol) {
-        MTType tN = m_typeDictionary.get("N");
-        MTType tZ = m_typeDictionary.get("Z");
-        if (tN == null || tZ == null)
-            return;
-        int sIdx = m_symbolToIndex.get(symbol);
-        if (sIdx < 0)
-            return;
-        Set<String> nSet = m_typeToSetOfOperators.get(tN);
-        nSet.remove(symbol);
-        m_typeToSetOfOperators.get(tZ).add(symbol);
-        m_indexToType.set(sIdx, tZ);
-
+    public boolean isSubtype(MTType a, MTType b) {
+        String catKey = a.toString() + "," + b.toString();
+        if (m_cached_isSubtype.containsKey(catKey)) {
+            return m_cached_isSubtype.get(catKey);
+        }
+        else {
+            boolean is = a.isSubtypeOf(b);
+            m_cached_isSubtype.put(catKey, is);
+            return is;
+        }
     }
 
     public Usage getUsage(String symbol) {
@@ -85,6 +98,7 @@ public class Registry {
     }
 
     public Set<String> getSetMatchingType(MTType t) {
+        assert t != null : "request for null type";
         Set<String> rSet = new HashSet<String>();
         Set<MTType> allTypesInSet = m_typeToSetOfOperators.keySet();
         assert !m_typeToSetOfOperators.isEmpty() : "empty m_typeToSetOfOperator.keySet()";
@@ -96,8 +110,22 @@ public class Registry {
                 rSet.addAll(m_typeToSetOfOperators.get(m));
             }
         }
-        rSet.addAll(m_typeToSetOfOperators.get(t));
+        if (m_typeToSetOfOperators.get(t) != null)
+            rSet.addAll(m_typeToSetOfOperators.get(t));
+
         return rSet;
+    }
+
+    public Set<String> getParentsByType(MTType t) {
+        Set<String> rSet = getSetMatchingType(t);
+        Set<String> fSet = new HashSet<String>();
+        for (String s : rSet) {
+            int id = getIndexForSymbol(s);
+            if (m_symbolIndexParentArray.get(id) == id) {
+                fSet.add(s);
+            }
+        }
+        return fSet;
     }
 
     /**
@@ -111,43 +139,28 @@ public class Registry {
         if (bType.isSubtypeOf(aType)) {
             m_indexToType.set(opIndexA, bType);
         }
+        // set usage to most restricted: i.e literal over created over forall
+        // this is because the earliest now becomes the parent
+        String aS = getSymbolForIndex(opIndexA);
+        String bS = getSymbolForIndex(opIndexB);
+        Usage a_us = getUsage(aS);
+        Usage b_us = getUsage(bS);
+        if (a_us.equals(Usage.LITERAL) || b_us.equals(Usage.LITERAL)) {
+            m_symbolToUsage.put(aS, Usage.LITERAL);
+        }
+        else if (a_us.equals(Usage.CREATED) || b_us.equals(Usage.CREATED)) {
+            m_symbolToUsage.put(aS, Usage.CREATED);
+        }
+        if (m_partTypes.contains(bS))
+            m_partTypes.add(aS);
         m_unusedIndices.push(opIndexB);
         m_symbolIndexParentArray.set(opIndexB, opIndexA);
     }
 
-    public void addDependency(int opIndex, String justification,
-            boolean sourceIsRootChange) {
-        if (justification.equals(""))
-            return;
-        //if(getUsage(getSymbolForIndex(opIndex)).equals(Usage.LITERAL)) return;
-        //if(getSymbolForIndex(opIndex).equals("true") && sourceIsRootChange) return;
-        // Do not add a dependency if opIndex was the last symbol created
-        if (opIndex == m_symbolIndexParentArray.size() - 1)
-            return;
-        if (m_appliedTheoremDependencyGraph.containsKey(justification)) {
-            m_appliedTheoremDependencyGraph.get(justification).add(opIndex);
-        }
-        else {
-            HashSet<Integer> syms = new HashSet<Integer>();
-            syms.add(opIndex);
-            m_appliedTheoremDependencyGraph.put(justification, syms);
-        }
-    }
-
-    public void updateTheoremDependencyGraphKey(String oldKey, String newKey) {
-        Set<Integer> valSet = m_appliedTheoremDependencyGraph.get(oldKey);
-        m_appliedTheoremDependencyGraph.remove(oldKey);
-        m_appliedTheoremDependencyGraph.put(newKey, valSet);
-    }
-
-    public boolean areEqual(String symString, int symInt) {
-        int rootOfInt = findAndCompress(symInt);
-        int rootOfString = getIndexForSymbol(symString);
-        rootOfString = findAndCompress(rootOfString);
-        return rootOfInt == rootOfString;
-    }
-
     protected int findAndCompress(int index) {
+        // early return for parent
+        if (m_symbolIndexParentArray.get(index) == index)
+            return index;
         Stack<Integer> needToUpdate = new Stack<Integer>();
         assert index < m_symbolIndexParentArray.size() : "findAndCompress error";
         int parent = m_symbolIndexParentArray.get(index);
@@ -164,11 +177,18 @@ public class Registry {
     }
 
     public String getSymbolForIndex(int index) {
-        return m_indexToSymbol.get(findAndCompress(index));
+        assert index >= 0 : "invalid index: " + index
+                + " in Registry.getSymbolForIndex";
+        String rS = m_indexToSymbol.get(findAndCompress(index));
+        assert rS.length() != 0 : "Blank symbol error";
+        return rS;
     }
 
     public String getRootSymbolForSymbol(String sym) {
-        return getSymbolForIndex(getIndexForSymbol(sym));
+        if (m_symbolToIndex.containsKey(sym))
+            return getSymbolForIndex(getIndexForSymbol(sym));
+        else
+            return "";
     }
 
     public MTType getTypeByIndex(int index) {
@@ -204,11 +224,15 @@ public class Registry {
 
     // if symbol is new, it adds it, otherwise, it returns current int rep
     public int addSymbol(String symbolName, MTType symbolType, Usage usage) {
-        // temporary until type system is fixed
-        if (symbolName.equals("Integer"))
-            symbolName = "Z";
+        symbolName = symbolName.replaceAll("\\p{Cc}", "");
+        if (symbolName.contains("lambda"))
+            m_lambda_names.add(symbolName);
+        assert symbolName.length() != 0 : "blank symbol error in addSymbol";
         if (isSymbolInTable(symbolName)) {
             return getIndexForSymbol(symbolName);
+        }
+        if (symbolName.contains(".")) {
+            m_partTypes.add(symbolName);
         }
 
         if (m_typeToSetOfOperators.containsKey(symbolType)) {
@@ -226,7 +250,7 @@ public class Registry {
         }
 
         m_symbolToUsage.put(symbolName, usage);
-        if (usage.equals(Usage.FORALL)) {
+        if (usage.equals(Usage.FORALL) || usage.equals(Usage.HASARGS_FORALL)) {
             m_foralls.add(symbolName);
         }
         int incomingsize = m_symbolToIndex.size();
@@ -244,10 +268,36 @@ public class Registry {
     public Set<String> getFunctionNames() {
         HashSet<String> rSet = new HashSet<String>();
         for (Entry<String, Usage> e : m_symbolToUsage.entrySet()) {
-            if (e.getValue().equals(Usage.HASARGS_SINGULAR)
-                    || e.getValue().equals(Usage.HASARGS_FORALL)) {
+            if (e.getValue().equals(Usage.HASARGS_SINGULAR)) {
                 rSet.add(e.getKey());
             }
+        }
+        return rSet;
+    }
+
+    public boolean isCommutative(String op) {
+        return m_commutative_operators.contains(op);
+    }
+
+    public boolean isCommutative(int opNum) {
+        String root = getSymbolForIndex(opNum);
+        return isCommutative(root);
+    }
+
+    // use sparingly, call with a parent symbol.  assumes parent array is compressed
+    protected Set<String> getChildren(String parent) {
+        int pInt = getIndexForSymbol(parent);
+        HashSet<Integer> ch = new HashSet<Integer>();
+        for (int i = 0; i < m_symbolIndexParentArray.size(); ++i) {
+            if (i == pInt)
+                continue;
+            if (m_symbolIndexParentArray.get(i) == pInt) {
+                ch.add(i);
+            }
+        }
+        HashSet<String> rSet = new HashSet<String>();
+        for (Integer i : ch) {
+            rSet.add(m_indexToSymbol.get(i));
         }
         return rSet;
     }

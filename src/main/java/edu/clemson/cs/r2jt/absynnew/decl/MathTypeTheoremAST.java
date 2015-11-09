@@ -1,7 +1,7 @@
 /**
  * MathTypeTheoremAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>A <code>MathTypeTheoremDeclAST</code> is a theorem that allows users to
- * statically establish relationships among <code>MTTypes</code> and other
+ * A {@code MathTypeTheoremAST} is a theorem that allows users to
+ * statically establish relationships among {@code MTType}s and other
  * classes/sets that are otherwise unable to be automatically inferred by
- * typechecking alone.</p>
+ * typechecking alone.
  */
 public class MathTypeTheoremAST extends DeclAST {
 

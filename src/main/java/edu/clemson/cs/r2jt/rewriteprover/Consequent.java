@@ -1,7 +1,7 @@
 /**
  * Consequent.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -72,7 +72,7 @@ public class Consequent extends ImmutableConjuncts {
         if (this.size() != 1) {
             throw new RuntimeException("Invalid Consequent");
         }
-        rString = "(assert (not ( " + this.get(0).toSMTLIB(typeMap) + ") ) )\n";
+        rString = "(assert(not " + this.get(0).toSMTLIB(typeMap) + "))\n";
         return rString;
     }
 }

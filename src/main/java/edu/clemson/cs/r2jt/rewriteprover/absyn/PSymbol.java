@@ -1,7 +1,7 @@
 /**
  * PSymbol.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -651,6 +651,23 @@ public class PSymbol extends PExp {
         return result;
     }
 
+    public Set<String> getNonQuantifiedSymbols() {
+        Set<String> result = new HashSet<String>();
+
+        if (quantification == Quantification.NONE) {
+            result.add(getTopLevelOperation());
+        }
+
+        Iterator<PExp> argumentIter = arguments.iterator();
+        while (argumentIter.hasNext()) {
+            Set<String> r =
+                    ((PSymbol) argumentIter.next()).getNonQuantifiedSymbols();
+            result.addAll(r);
+        }
+
+        return result;
+    }
+
     @Override
     public boolean containsExistential() {
         boolean retval = (quantification == Quantification.THERE_EXISTS);
@@ -747,7 +764,7 @@ public class PSymbol extends PExp {
             PExp cur = subIt.next();
 
             if (cur.getSubExpressions().size() > 0)
-                argsString += "( " + cur.toSMTLIB(typeMap) + " ) ";
+                argsString += cur.toSMTLIB(typeMap);
             else {
                 String op = cur.getTopLevelOperation();
                 if (op.contains("_"))
@@ -758,8 +775,11 @@ public class PSymbol extends PExp {
             }
         }
         String combined = opString + " " + argsString;
+        if (argsString.length() != 0) {
+            combined = "(" + combined + ")";
+        }
         if (negate)
-            return "not ( " + combined + ")";
+            return "(not " + combined + ")";
         else
             return combined;
     }

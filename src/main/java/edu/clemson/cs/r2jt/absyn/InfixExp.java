@@ -1,7 +1,7 @@
 /**
  * InfixExp.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -618,14 +618,8 @@ public class InfixExp extends AbstractFunctionExp {
 
         }
         else if (single) {
-            if (assumpts == null) {
-                lst.add(new InfixExp(null, getTrueVarExp(this.myMathType
-                        .getTypeGraph()), createPosSymbol("implies"), this));
-            }
-            else {
-                lst.add(new InfixExp(null, assumpts,
-                        createPosSymbol("implies"), this));
-            }
+            lst.add(new InfixExp(null, assumpts, createPosSymbol("implies"),
+                    this));
         }
 
         return lst;

@@ -1,7 +1,7 @@
 /**
  * ResolveConceptualVisitor.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -139,8 +139,6 @@ public class ResolveConceptualVisitor {
     public void visitModuleArgumentItem(ModuleArgumentItem data) {}
 
     public void visitAffectsItem(AffectsItem data) {}
-
-    public void visitProgramOpExp(ProgramOpExp data) {}
 
     public void visitVariableRecordExp(VariableRecordExp data) {}
 

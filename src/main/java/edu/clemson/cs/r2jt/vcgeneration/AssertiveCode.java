@@ -1,7 +1,7 @@
 /**
  * AssertiveCode.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -160,14 +160,6 @@ public class AssertiveCode {
     }
 
     /**
-     * <p>Add a Remember statement to the list</p>
-     */
-    public void addRemember() {
-        myVerificationStmtList.add(new VerificationStatement(
-                VerificationStatement.REMEMBER, null));
-    }
-
-    /**
      * <p>Loop through the list of <code>Statement</code> to the
      * list of verification statements</p>
      *
@@ -249,10 +241,6 @@ public class AssertiveCode {
                 retStr =
                         retStr.concat(((Statement) current.getAssertion())
                                 .toString(6));
-                break;
-            // Remember Verification Statements
-            case VerificationStatement.REMEMBER:
-                retStr = retStr.concat("      Remember");
                 break;
             // Variable Verification Statements
             case VerificationStatement.VARIABLE:

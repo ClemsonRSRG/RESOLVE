@@ -1,7 +1,7 @@
 /**
  * ResolveToken.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,16 +19,16 @@ import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.Pair;
 
 /**
- * <p>A special token that overrides the "equals" logic present in the default
+ * A special token that overrides the "equals" logic present in the default
  * implementation of {@link CommonToken}. Turns out this is functionally
- * equivalent to our now removed <tt>PosSymbol</tt> class.</p>
+ * equivalent to our now removed PosSymbol class.
  */
 public class ResolveToken extends CommonToken {
 
     public String mySourceName;
 
     public ResolveToken(String text) {
-        super(ResolveLexer.Identifier, text);
+        super(ResolveLexer.IDENTIFIER, text);
     }
 
     public ResolveToken(int type, String text) {

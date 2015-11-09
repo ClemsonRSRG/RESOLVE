@@ -1,7 +1,7 @@
 /**
  * ImmutableConjuncts.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -663,24 +663,25 @@ public class ImmutableConjuncts implements Iterable<PExp> {
             for (PSymbol ps : p.getQuantifiedVariables()) {
                 if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL))
                     forAllString +=
-                            "( " + ps.toSMTLIB(typeMap) + " "
-                                    + ps.getType().toString() + " )";
+                            "(" + ps.toSMTLIB(typeMap) + " "
+                                    + ps.getType().toString() + ")";
                 if (ps.quantification
                         .equals(PSymbol.Quantification.THERE_EXISTS))
                     thereExistsString +=
-                            "( " + ps.toSMTLIB(typeMap) + " "
-                                    + ps.getType().toString() + " )";
+                            "(" + ps.toSMTLIB(typeMap) + " "
+                                    + ps.getType().toString() + ")";
             }
             if (forAllString.length() > 0) {
-                forAllString = " forall ( " + forAllString + " ) ";
+                forAllString = "forall(" + forAllString + ")";
             }
             if (thereExistsString.length() > 0) {
-                thereExistsString = " exists ( " + thereExistsString + " ) ";
+                thereExistsString = "exists(" + thereExistsString + ")";
             }
-            rString +=
-                    "(assert( " + forAllString + " " + thereExistsString
-                            + p.toSMTLIB(typeMap) + "))" + ";" + p.toString()
-                            + "\n";
+            String body =
+                    forAllString + " " + thereExistsString
+                            + p.toSMTLIB(typeMap);
+            rString += "(assert " + body + ")" + ";" + p.toString() + "\n";
+
         }
         return rString;
     }

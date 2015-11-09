@@ -1,7 +1,7 @@
 /**
  * TheoremEntry.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -34,7 +34,10 @@ public class TheoremEntry extends SymbolTableEntry {
     public TheoremEntry(TypeGraph g, String name,
             MathAssertionDec definingElement, ModuleIdentifier sourceModule) {
         super(name, definingElement, sourceModule);
+<<<<<<< HEAD
 
+=======
+>>>>>>> optimizations
         myAssertionAsPExp = PExp.buildPExp(definingElement.getAssertion());
 
         myMathSymbolAlterEgo =
@@ -71,6 +74,7 @@ public class TheoremEntry extends SymbolTableEntry {
 
     public String toSMTLIB(Map<String, MTType> typeMap, boolean negate) {
         String forAllString = "";
+<<<<<<< HEAD
         String thereExistsString = "";
         for (PSymbol ps : myAssertionAsPExp.getQuantifiedVariables()) {
             if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL))
@@ -81,23 +85,65 @@ public class TheoremEntry extends SymbolTableEntry {
                 thereExistsString +=
                         "( " + ps.toSMTLIB(null) + " "
                                 + ps.getType().toString() + " )";
+=======
+        String typeRestrictionString = "";
+
+        int varCount = 0;
+        PExp asPExp = getAssertion();
+        for (PSymbol ps : asPExp.getQuantifiedVariables()) {
+            String nameSort = SMTProver.NameSort;
+            MTType type = ps.getType();
+            String typeString = ps.getType().toString();
+            if (type.getClass().getSimpleName().equals("MTFunction")) {
+                return "";
+            }
+            // TODO: add support for functions as types
+            if (typeString.equals("B")) {
+                nameSort = "B";
+            }
+            String name = ps.toSMTLIB(null);
+
+            if (ps.quantification.equals(PSymbol.Quantification.FOR_ALL)) {
+                forAllString += "(" + name + " " + nameSort + ")";
+                if (nameSort != "B") {
+                    typeRestrictionString +=
+                            "(" + "EleOf " + name + " " + type + ")";
+                    varCount++;
+                }
+            }
+            else
+                throw new UnsupportedOperationException(
+                        "Only universal quantification is supported.");
+>>>>>>> optimizations
         }
         if (forAllString.length() > 0) {
-            forAllString = " forall ( " + forAllString + " ) ";
+            forAllString = "forall(" + forAllString + ")";
         }
         if (forAllString.length() == 0 && thereExistsString.length() == 0) {
             if (!negate)
-                return "(assert ( " + myAssertionAsPExp.toSMTLIB(typeMap)
-                        + ") )";
+                return "(assert " + myAssertionAsPExp.toSMTLIB(typeMap) + ")";
             else
-                return "(assert ( not ( " + myAssertionAsPExp.toSMTLIB(typeMap)
-                        + ") ) )";
+                return "(assert(not " + myAssertionAsPExp.toSMTLIB(typeMap)
+                        + "))";
         }
+<<<<<<< HEAD
         if (!negate)
             return "(assert ( " + forAllString + " " + thereExistsString
                     + " ( " + myAssertionAsPExp.toSMTLIB(typeMap) + ") ) )";
         else
             return "(assert ( not ( " + forAllString + " " + thereExistsString
                     + " ( " + myAssertionAsPExp.toSMTLIB(typeMap) + ") ) ) )";
+=======
+        if (varCount > 1) {
+            typeRestrictionString = "(and " + typeRestrictionString + ")";
+        }
+        String assertion =
+                "(" + forAllString + " (=> " + typeRestrictionString
+                        + myAssertionAsPExp.toSMTLIB(typeMap) + "))";
+        if (!negate)
+            return "(assert " + assertion + ") ";
+        else
+            return "(assert(not " + assertion + "))";
+>>>>>>> optimizations
     }
 }

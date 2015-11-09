@@ -1,7 +1,7 @@
 /**
  * PostProcessor.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -189,6 +189,23 @@ public class PostProcessor extends TreeWalkerStackVisitor {
 
         // Clean up myUtilities
         myUtilities.finalOperationDec();
+    }
+
+    // -----------------------------------------------------------
+    // RepresentationDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void postRepresentationDec(RepresentationDec dec) {
+        // Add in "true" for convention and correspondence
+        // if the user didn't fill those in
+        if (dec.getConvention() == null) {
+            dec.setConvention(myTypeGraph.getTrueVarExp());
+        }
+
+        if (dec.getCorrespondence() == null) {
+            dec.setCorrespondence(myTypeGraph.getTrueVarExp());
+        }
     }
 
     // -----------------------------------------------------------

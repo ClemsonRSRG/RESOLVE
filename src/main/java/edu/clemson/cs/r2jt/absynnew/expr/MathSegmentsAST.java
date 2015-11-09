@@ -1,7 +1,7 @@
 /**
- * MathDotAST.java
+ * MathSegmentsAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -12,22 +12,19 @@
  */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
-import edu.clemson.cs.r2jt.absynnew.TreeUtil;
-import edu.clemson.cs.r2jt.misc.SrcErrorException;
+import edu.clemson.cs.r2jt.misc.Utils;
 import org.antlr.v4.runtime.Token;
-import org.stringtemplate.v4.ST;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class MathDotAST extends ExprAST {
+public class MathSegmentsAST extends ExprAST {
 
     private final List<MathSymbolAST> mySegments =
             new ArrayList<MathSymbolAST>();
 
-    public MathDotAST(Token start, Token stop, List<MathSymbolAST> segments) {
+    public MathSegmentsAST(Token start, Token stop, List<MathSymbolAST> segments) {
         super(start, stop);
         mySegments.addAll(segments);
     }
@@ -59,12 +56,12 @@ public class MathDotAST extends ExprAST {
         for (ExprAST e : mySegments) {
             newSegments.add((MathSymbolAST) substitute(e, substitutions));
         }
-        retval = new MathDotAST(getStart(), getStop(), newSegments);
+        retval = new MathSegmentsAST(getStart(), getStop(), newSegments);
         return retval;
     }
 
     @Override
     public String toString() {
-        return TreeUtil.join(mySegments, ".");
+        return Utils.join(mySegments, ".");
     }
 }

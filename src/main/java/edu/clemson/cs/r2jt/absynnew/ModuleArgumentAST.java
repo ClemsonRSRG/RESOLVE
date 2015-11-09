@@ -1,7 +1,7 @@
 /**
  * ModuleArgumentAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -21,7 +21,6 @@ import org.antlr.v4.runtime.Token;
 public class ModuleArgumentAST extends ResolveAST {
 
     private final ProgExprAST myArgumentExpr;
-
     private MTType myMathType;
     private PTType myProgramTypeValue;
 

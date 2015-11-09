@@ -1,7 +1,7 @@
 /**
  * TypeModelAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,19 +19,19 @@ import edu.clemson.cs.r2jt.absynnew.expr.ExprAST;
 import org.antlr.v4.runtime.Token;
 
 /**
- * <p>A <code>TypeModelAST</code> is RESOLVE's mechanism of allowing users to
+ * An {@code TypeModelAST} is RESOLVE's mechanism of allowing users to
  * abstractly model and specify their own types. Instances of this class are
  * permitted within the following modules:</p>
  *
- * {@link edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptAST} or
+ * {@link edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptModuleAST} or
  * {@link edu.clemson.cs.r2jt.absynnew.ModuleAST.PrecisAST}.
  */
 public class TypeModelAST extends DeclAST {
 
     /**
-     * <p>A <em>model</em>, in terms of a given type declaration, refers to the
+     * A model, in terms of a given type declaration, refers to the
      * user defined mathematical concept modeling that type. For
-     * instance, a <code>Stack</code> <pre>is modeled by Str(Entry)</pre>.</p>
+     * instance, {@code Stack is modeled by Str(Entry)}.
      */
     private final MathTypeAST myModelType;
 
@@ -62,8 +62,8 @@ public class TypeModelAST extends DeclAST {
     }
 
     /**
-     * <p>Returns the {@link InitFinalAST} associated with this
-     * <code>TypeModelAST</code>.</p>
+     * Returns the {@link InitFinalAST} associated with this
+     * {@code TypeModelAST}.
      *
      * @return An initialization item.
      */

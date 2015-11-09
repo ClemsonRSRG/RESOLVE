@@ -1,7 +1,7 @@
 /**
  * PExp.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -195,6 +195,7 @@ public abstract class PExp {
      * @param description
      * @return 
      */
+    /*
     public static PExp buildPExp(String description, TypeGraph g) {
         Deque<PExp> stack = new LinkedList<PExp>();
 
@@ -267,7 +268,9 @@ public abstract class PExp {
 
         return stack.pop();
     }
+     */
 
+    /*
     private static MTType typeFromDesc(String desc, TypeGraph g) {
         MTType result;
 
@@ -287,37 +290,7 @@ public abstract class PExp {
         return result;
     }
 
-    /**
-     * <p>Simply walks the tree represented by the given <code>Exp</code> and
-     * sounds the alarm if it or any sub-expression does not have a type.  As
-     * a convenience, returns the same expression it is given so that it can
-     * be used without introducing intermediate variables.</p>
-     * 
-     * @param e
      */
-    public static <E extends Exp> E sanityCheckExp(E e) {
-
-        if (e.getMathType() == null) {
-
-            String varExpAdditional = "";
-            if (e instanceof VarExp) {
-                varExpAdditional =
-                        " = \"" + ((VarExp) e).getName().getName() + "\", "
-                                + ((VarExp) e).getName().getLocation();
-            }
-
-            throw new UnsupportedOperationException(
-                    "Expression has null type.\n\n" + e + " (" + e.getClass()
-                            + ")" + varExpAdditional);
-        }
-
-        for (Exp subexp : e.getSubExpressions()) {
-            sanityCheckExp(subexp);
-        }
-
-        return e;
-    }
-
     public static PExp buildPExp(Exp e) {
         PExp retval;
 
@@ -505,7 +478,7 @@ public abstract class PExp {
         }
         else {
             throw new RuntimeException("Expressions of type " + e.getClass()
-                    + " are not accepted by the prover.");
+                    + " are not accepted by the prover." + e.getLocation());
         }
 
         //The Analyzer doesn't work consistently.  Fail early if we don't have

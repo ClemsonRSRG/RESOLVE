@@ -1,7 +1,7 @@
 /**
  * ParameterAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -17,9 +17,8 @@ import edu.clemson.cs.r2jt.typeandpopulate2.entry.ProgramParameterEntry;
 import org.antlr.v4.runtime.Token;
 
 /**
- * <p>A <code>ParameterAST</code> represents a formal parameter to an
- * {@link OperationAST}.  A <em>passing mode</em> on each parameter indicates
- * the affect of a call to said operation.</p>
+ * An {@code ParameterAST} represents a formal parameter to an
+ * {@link OperationAST}.
  */
 public class ParameterAST extends DeclAST {
 

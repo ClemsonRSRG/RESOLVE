@@ -1,7 +1,7 @@
 /**
  * MathSetAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.r2jt.absynnew.expr;
 
-import edu.clemson.cs.r2jt.absynnew.TreeUtil;
+import edu.clemson.cs.r2jt.misc.Utils;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
@@ -20,9 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>A <code>MathSetAST</code> allows users to construct mathematical sets
- * using <tt>RESOLVE</tt>s builtin curly brace <code>{ ... }</code>
- * set-notation.</p>
+ * A {@code MathSetAST} allows users to construct mathematical sets
+ * using resolve's builtin curly brace {@code { ... }} set-notation.
  */
 public class MathSetAST extends ExprAST {
 
@@ -61,6 +60,6 @@ public class MathSetAST extends ExprAST {
 
     @Override
     public String toString() {
-        return "{ " + TreeUtil.join(myElements, ", ") + " }";
+        return "{ " + Utils.join(myElements, ", ") + " }";
     }
 }

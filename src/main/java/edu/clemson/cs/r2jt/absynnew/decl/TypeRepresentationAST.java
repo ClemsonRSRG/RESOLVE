@@ -1,7 +1,7 @@
 /**
  * TypeRepresentationAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -29,7 +29,6 @@ public class TypeRepresentationAST extends DeclAST {
 
     private TypeRepresentationAST(RepresentationBuilder builder) {
         super(builder.getStart(), builder.getStop(), builder.name);
-
         myRepresentationType = builder.representation;
         myConvention = builder.convention;
         myCorrespondence = builder.correspondence;

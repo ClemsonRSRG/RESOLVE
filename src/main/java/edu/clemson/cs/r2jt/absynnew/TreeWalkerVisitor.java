@@ -1,7 +1,7 @@
 /**
  * TreeWalkerVisitor.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,26 +22,26 @@ public abstract class TreeWalkerVisitor {
 
     public void postAny(ResolveAST e) {}
 
-    public boolean walkMathDefinitionAST(MathDefinitionAST e) {
+    public boolean walkMathTypeAssertionAST(MathTypeAssertionAST e) {
         return false;
     }
 
-    public void preMathDefinitionAST(MathDefinitionAST e) {}
+    public void preMathTypeAssertionAST(MathTypeAssertionAST e) {}
 
-    public void midMathDefinitionAST(MathDefinitionAST e, ResolveAST previous,
-            ResolveAST next) {}
+    public void midMathTypeAssertionAST(MathTypeAssertionAST e,
+            ResolveAST previous, ResolveAST next) {}
 
-    public void postMathDefinitionAST(MathDefinitionAST e) {}
+    public void postMathTypeAssertionAST(MathTypeAssertionAST e) {}
 
-    public boolean walkProgDotAST(ProgDotAST e) {
+    public boolean walkStmtAST(StmtAST e) {
         return false;
     }
 
-    public void preProgDotAST(ProgDotAST e) {}
+    public void preStmtAST(StmtAST e) {}
 
-    public void midProgDotAST(ProgDotAST e, ResolveAST previous, ResolveAST next) {}
+    public void midStmtAST(StmtAST e, ResolveAST previous, ResolveAST next) {}
 
-    public void postProgDotAST(ProgDotAST e) {}
+    public void postStmtAST(StmtAST e) {}
 
     public boolean walkTypeAST(TypeAST e) {
         return false;
@@ -64,16 +64,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postMathTupleAST(MathTupleAST e) {}
 
-    public boolean walkInitFinalAST(InitFinalAST e) {
+    public boolean walkMathTypeAST(MathTypeAST e) {
         return false;
     }
 
-    public void preInitFinalAST(InitFinalAST e) {}
+    public void preMathTypeAST(MathTypeAST e) {}
 
-    public void midInitFinalAST(InitFinalAST e, ResolveAST previous,
+    public void midMathTypeAST(MathTypeAST e, ResolveAST previous,
             ResolveAST next) {}
 
-    public void postInitFinalAST(InitFinalAST e) {}
+    public void postMathTypeAST(MathTypeAST e) {}
 
     public boolean walkPrecisAST(
             edu.clemson.cs.r2jt.absynnew.ModuleAST.PrecisAST e) {
@@ -88,20 +88,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postPrecisAST(edu.clemson.cs.r2jt.absynnew.ModuleAST.PrecisAST e) {}
 
-    public boolean walkProgCharacterRefAST(
-            edu.clemson.cs.r2jt.absynnew.expr.ProgLiteralRefAST.ProgCharacterRefAST e) {
+    public boolean walkMathSegmentsAST(MathSegmentsAST e) {
         return false;
     }
 
-    public void preProgCharacterRefAST(
-            edu.clemson.cs.r2jt.absynnew.expr.ProgLiteralRefAST.ProgCharacterRefAST e) {}
+    public void preMathSegmentsAST(MathSegmentsAST e) {}
 
-    public void midProgCharacterRefAST(
-            edu.clemson.cs.r2jt.absynnew.expr.ProgLiteralRefAST.ProgCharacterRefAST e,
-            ResolveAST previous, ResolveAST next) {}
+    public void midMathSegmentsAST(MathSegmentsAST e, ResolveAST previous,
+            ResolveAST next) {}
 
-    public void postProgCharacterRefAST(
-            edu.clemson.cs.r2jt.absynnew.expr.ProgLiteralRefAST.ProgCharacterRefAST e) {}
+    public void postMathSegmentsAST(MathSegmentsAST e) {}
 
     public boolean walkTypeRepresentationAST(TypeRepresentationAST e) {
         return false;
@@ -114,15 +110,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postTypeRepresentationAST(TypeRepresentationAST e) {}
 
-    public boolean walkAssignAST(AssignAST e) {
+    public boolean walkProgNamedSegmentsAST(ProgNamedSegmentsAST e) {
         return false;
     }
 
-    public void preAssignAST(AssignAST e) {}
+    public void preProgNamedSegmentsAST(ProgNamedSegmentsAST e) {}
 
-    public void midAssignAST(AssignAST e, ResolveAST previous, ResolveAST next) {}
+    public void midProgNamedSegmentsAST(ProgNamedSegmentsAST e,
+            ResolveAST previous, ResolveAST next) {}
 
-    public void postAssignAST(AssignAST e) {}
+    public void postProgNamedSegmentsAST(ProgNamedSegmentsAST e) {}
 
     public boolean walkEnhancementPairAST(EnhancementPairAST e) {
         return false;
@@ -211,26 +208,26 @@ public abstract class TreeWalkerVisitor {
 
     public void postMathSetAST(MathSetAST e) {}
 
-    public boolean walkStmtAST(StmtAST e) {
+    public boolean walkModuleAST(ModuleAST e) {
         return false;
     }
 
-    public void preStmtAST(StmtAST e) {}
+    public void preModuleAST(ModuleAST e) {}
 
-    public void midStmtAST(StmtAST e, ResolveAST previous, ResolveAST next) {}
+    public void midModuleAST(ModuleAST e, ResolveAST previous, ResolveAST next) {}
 
-    public void postStmtAST(StmtAST e) {}
+    public void postModuleAST(ModuleAST e) {}
 
-    public boolean walkFacilityAST(FacilityAST e) {
+    public boolean walkProgLiteralRefAST(ProgLiteralRefAST e) {
         return false;
     }
 
-    public void preFacilityAST(FacilityAST e) {}
+    public void preProgLiteralRefAST(ProgLiteralRefAST e) {}
 
-    public void midFacilityAST(FacilityAST e, ResolveAST previous,
+    public void midProgLiteralRefAST(ProgLiteralRefAST e, ResolveAST previous,
             ResolveAST next) {}
 
-    public void postFacilityAST(FacilityAST e) {}
+    public void postProgLiteralRefAST(ProgLiteralRefAST e) {}
 
     public boolean walkOperationSigAST(OperationSigAST e) {
         return false;
@@ -243,15 +240,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postOperationSigAST(OperationSigAST e) {}
 
-    public boolean walkExprAST(ExprAST e) {
+    public boolean walkMathDefinitionAST(MathDefinitionAST e) {
         return false;
     }
 
-    public void preExprAST(ExprAST e) {}
+    public void preMathDefinitionAST(MathDefinitionAST e) {}
 
-    public void midExprAST(ExprAST e, ResolveAST previous, ResolveAST next) {}
+    public void midMathDefinitionAST(MathDefinitionAST e, ResolveAST previous,
+            ResolveAST next) {}
 
-    public void postExprAST(ExprAST e) {}
+    public void postMathDefinitionAST(MathDefinitionAST e) {}
 
     public boolean walkBlockAST(BlockAST e) {
         return false;
@@ -263,16 +261,16 @@ public abstract class TreeWalkerVisitor {
 
     public void postBlockAST(BlockAST e) {}
 
-    public boolean walkMathLambdaAST(MathLambdaAST e) {
+    public boolean walkInitFinalAST(InitFinalAST e) {
         return false;
     }
 
-    public void preMathLambdaAST(MathLambdaAST e) {}
+    public void preInitFinalAST(InitFinalAST e) {}
 
-    public void midMathLambdaAST(MathLambdaAST e, ResolveAST previous,
+    public void midInitFinalAST(InitFinalAST e, ResolveAST previous,
             ResolveAST next) {}
 
-    public void postMathLambdaAST(MathLambdaAST e) {}
+    public void postInitFinalAST(InitFinalAST e) {}
 
     public boolean walkMathQuantifiedAST(MathQuantifiedAST e) {
         return false;
@@ -285,42 +283,40 @@ public abstract class TreeWalkerVisitor {
 
     public void postMathQuantifiedAST(MathQuantifiedAST e) {}
 
-    public boolean walkMathTypeTheoremAST(MathTypeTheoremAST e) {
+    public boolean walkWhileAST(WhileAST e) {
         return false;
     }
 
-    public void preMathTypeTheoremAST(MathTypeTheoremAST e) {}
+    public void preWhileAST(WhileAST e) {}
 
-    public void midMathTypeTheoremAST(MathTypeTheoremAST e,
+    public void midWhileAST(WhileAST e, ResolveAST previous, ResolveAST next) {}
+
+    public void postWhileAST(WhileAST e) {}
+
+    public boolean walkEnhancementImplModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.EnhancementImplModuleAST e) {
+        return false;
+    }
+
+    public void preEnhancementImplModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.EnhancementImplModuleAST e) {}
+
+    public void midEnhancementImplModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.EnhancementImplModuleAST e,
             ResolveAST previous, ResolveAST next) {}
 
-    public void postMathTypeTheoremAST(MathTypeTheoremAST e) {}
+    public void postEnhancementImplModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.EnhancementImplModuleAST e) {}
 
-    public boolean walkSpecModuleAST(
-            edu.clemson.cs.r2jt.absynnew.ModuleAST.SpecModuleAST e) {
+    public boolean walkDeclAST(DeclAST e) {
         return false;
     }
 
-    public void preSpecModuleAST(
-            edu.clemson.cs.r2jt.absynnew.ModuleAST.SpecModuleAST e) {}
+    public void preDeclAST(DeclAST e) {}
 
-    public void midSpecModuleAST(
-            edu.clemson.cs.r2jt.absynnew.ModuleAST.SpecModuleAST e,
-            ResolveAST previous, ResolveAST next) {}
+    public void midDeclAST(DeclAST e, ResolveAST previous, ResolveAST next) {}
 
-    public void postSpecModuleAST(
-            edu.clemson.cs.r2jt.absynnew.ModuleAST.SpecModuleAST e) {}
-
-    public boolean walkMathTheoremAST(MathTheoremAST e) {
-        return false;
-    }
-
-    public void preMathTheoremAST(MathTheoremAST e) {}
-
-    public void midMathTheoremAST(MathTheoremAST e, ResolveAST previous,
-            ResolveAST next) {}
-
-    public void postMathTheoremAST(MathTheoremAST e) {}
+    public void postDeclAST(DeclAST e) {}
 
     public boolean walkTypeModelAST(TypeModelAST e) {
         return false;
@@ -333,16 +329,20 @@ public abstract class TreeWalkerVisitor {
 
     public void postTypeModelAST(TypeModelAST e) {}
 
-    public boolean walkMathTypeAssertionAST(MathTypeAssertionAST e) {
+    public boolean walkEnhancementModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.EnhancementModuleAST e) {
         return false;
     }
 
-    public void preMathTypeAssertionAST(MathTypeAssertionAST e) {}
+    public void preEnhancementModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.EnhancementModuleAST e) {}
 
-    public void midMathTypeAssertionAST(MathTypeAssertionAST e,
+    public void midEnhancementModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.EnhancementModuleAST e,
             ResolveAST previous, ResolveAST next) {}
 
-    public void postMathTypeAssertionAST(MathTypeAssertionAST e) {}
+    public void postEnhancementModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.EnhancementModuleAST e) {}
 
     public boolean walkVariableAST(VariableAST e) {
         return false;
@@ -355,58 +355,62 @@ public abstract class TreeWalkerVisitor {
 
     public void postVariableAST(VariableAST e) {}
 
-    public boolean walkCallAST(CallAST e) {
+    public boolean walkAssignAST(AssignAST e) {
         return false;
     }
 
-    public void preCallAST(CallAST e) {}
+    public void preAssignAST(AssignAST e) {}
 
-    public void midCallAST(CallAST e, ResolveAST previous, ResolveAST next) {}
+    public void midAssignAST(AssignAST e, ResolveAST previous, ResolveAST next) {}
 
-    public void postCallAST(CallAST e) {}
+    public void postAssignAST(AssignAST e) {}
 
-    public boolean walkImportCollectionAST(ImportCollectionAST e) {
+    public boolean walkMathLambdaAST(MathLambdaAST e) {
         return false;
     }
 
-    public void preImportCollectionAST(ImportCollectionAST e) {}
+    public void preMathLambdaAST(MathLambdaAST e) {}
 
-    public void midImportCollectionAST(ImportCollectionAST e,
-            ResolveAST previous, ResolveAST next) {}
-
-    public void postImportCollectionAST(ImportCollectionAST e) {}
-
-    public boolean walkOperationImplAST(OperationImplAST e) {
-        return false;
-    }
-
-    public void preOperationImplAST(OperationImplAST e) {}
-
-    public void midOperationImplAST(OperationImplAST e, ResolveAST previous,
+    public void midMathLambdaAST(MathLambdaAST e, ResolveAST previous,
             ResolveAST next) {}
 
-    public void postOperationImplAST(OperationImplAST e) {}
+    public void postMathLambdaAST(MathLambdaAST e) {}
 
-    public boolean walkWhileAST(WhileAST e) {
+    public boolean walkConceptImplModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptImplModuleAST e) {
         return false;
     }
 
-    public void preWhileAST(WhileAST e) {}
+    public void preConceptImplModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptImplModuleAST e) {}
 
-    public void midWhileAST(WhileAST e, ResolveAST previous, ResolveAST next) {}
-
-    public void postWhileAST(WhileAST e) {}
-
-    public boolean walkModuleParameterAST(ModuleParameterAST e) {
-        return false;
-    }
-
-    public void preModuleParameterAST(ModuleParameterAST e) {}
-
-    public void midModuleParameterAST(ModuleParameterAST e,
+    public void midConceptImplModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptImplModuleAST e,
             ResolveAST previous, ResolveAST next) {}
 
-    public void postModuleParameterAST(ModuleParameterAST e) {}
+    public void postConceptImplModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptImplModuleAST e) {}
+
+    public boolean walkExprAST(ExprAST e) {
+        return false;
+    }
+
+    public void preExprAST(ExprAST e) {}
+
+    public void midExprAST(ExprAST e, ResolveAST previous, ResolveAST next) {}
+
+    public void postExprAST(ExprAST e) {}
+
+    public boolean walkMathTheoremAST(MathTheoremAST e) {
+        return false;
+    }
+
+    public void preMathTheoremAST(MathTheoremAST e) {}
+
+    public void midMathTheoremAST(MathTheoremAST e, ResolveAST previous,
+            ResolveAST next) {}
+
+    public void postMathTheoremAST(MathTheoremAST e) {}
 
     public boolean walkModuleArgumentAST(ModuleArgumentAST e) {
         return false;
@@ -429,6 +433,21 @@ public abstract class TreeWalkerVisitor {
 
     public void postSwapAST(SwapAST e) {}
 
+    public boolean walkProgCharacterRefAST(
+            edu.clemson.cs.r2jt.absynnew.expr.ProgLiteralRefAST.ProgCharacterRefAST e) {
+        return false;
+    }
+
+    public void preProgCharacterRefAST(
+            edu.clemson.cs.r2jt.absynnew.expr.ProgLiteralRefAST.ProgCharacterRefAST e) {}
+
+    public void midProgCharacterRefAST(
+            edu.clemson.cs.r2jt.absynnew.expr.ProgLiteralRefAST.ProgCharacterRefAST e,
+            ResolveAST previous, ResolveAST next) {}
+
+    public void postProgCharacterRefAST(
+            edu.clemson.cs.r2jt.absynnew.expr.ProgLiteralRefAST.ProgCharacterRefAST e) {}
+
     public boolean walkProgExprAST(ProgExprAST e) {
         return false;
     }
@@ -440,31 +459,15 @@ public abstract class TreeWalkerVisitor {
 
     public void postProgExprAST(ProgExprAST e) {}
 
-    public boolean walkMathTypeAST(MathTypeAST e) {
+    public boolean walkCallAST(CallAST e) {
         return false;
     }
 
-    public void preMathTypeAST(MathTypeAST e) {}
+    public void preCallAST(CallAST e) {}
 
-    public void midMathTypeAST(MathTypeAST e, ResolveAST previous,
-            ResolveAST next) {}
+    public void midCallAST(CallAST e, ResolveAST previous, ResolveAST next) {}
 
-    public void postMathTypeAST(MathTypeAST e) {}
-
-    public boolean walkImplModuleAST(
-            edu.clemson.cs.r2jt.absynnew.ModuleAST.ImplModuleAST e) {
-        return false;
-    }
-
-    public void preImplModuleAST(
-            edu.clemson.cs.r2jt.absynnew.ModuleAST.ImplModuleAST e) {}
-
-    public void midImplModuleAST(
-            edu.clemson.cs.r2jt.absynnew.ModuleAST.ImplModuleAST e,
-            ResolveAST previous, ResolveAST next) {}
-
-    public void postImplModuleAST(
-            edu.clemson.cs.r2jt.absynnew.ModuleAST.ImplModuleAST e) {}
+    public void postCallAST(CallAST e) {}
 
     public boolean walkNamedTypeAST(NamedTypeAST e) {
         return false;
@@ -477,25 +480,27 @@ public abstract class TreeWalkerVisitor {
 
     public void postNamedTypeAST(NamedTypeAST e) {}
 
-    public boolean walkModuleAST(ModuleAST e) {
+    public boolean walkMathTypeTheoremAST(MathTypeTheoremAST e) {
         return false;
     }
 
-    public void preModuleAST(ModuleAST e) {}
+    public void preMathTypeTheoremAST(MathTypeTheoremAST e) {}
 
-    public void midModuleAST(ModuleAST e, ResolveAST previous, ResolveAST next) {}
+    public void midMathTypeTheoremAST(MathTypeTheoremAST e,
+            ResolveAST previous, ResolveAST next) {}
 
-    public void postModuleAST(ModuleAST e) {}
+    public void postMathTypeTheoremAST(MathTypeTheoremAST e) {}
 
-    public boolean walkDeclAST(DeclAST e) {
+    public boolean walkTypeParameterAST(TypeParameterAST e) {
         return false;
     }
 
-    public void preDeclAST(DeclAST e) {}
+    public void preTypeParameterAST(TypeParameterAST e) {}
 
-    public void midDeclAST(DeclAST e, ResolveAST previous, ResolveAST next) {}
+    public void midTypeParameterAST(TypeParameterAST e, ResolveAST previous,
+            ResolveAST next) {}
 
-    public void postDeclAST(DeclAST e) {}
+    public void postTypeParameterAST(TypeParameterAST e) {}
 
     public boolean walkIfAST(IfAST e) {
         return false;
@@ -544,26 +549,27 @@ public abstract class TreeWalkerVisitor {
     public void postProgStringRefAST(
             edu.clemson.cs.r2jt.absynnew.expr.ProgLiteralRefAST.ProgStringRefAST e) {}
 
-    public boolean walkMathDotAST(MathDotAST e) {
+    public boolean walkFacilityAST(FacilityAST e) {
         return false;
     }
 
-    public void preMathDotAST(MathDotAST e) {}
+    public void preFacilityAST(FacilityAST e) {}
 
-    public void midMathDotAST(MathDotAST e, ResolveAST previous, ResolveAST next) {}
-
-    public void postMathDotAST(MathDotAST e) {}
-
-    public boolean walkTypeParameterAST(TypeParameterAST e) {
-        return false;
-    }
-
-    public void preTypeParameterAST(TypeParameterAST e) {}
-
-    public void midTypeParameterAST(TypeParameterAST e, ResolveAST previous,
+    public void midFacilityAST(FacilityAST e, ResolveAST previous,
             ResolveAST next) {}
 
-    public void postTypeParameterAST(TypeParameterAST e) {}
+    public void postFacilityAST(FacilityAST e) {}
+
+    public boolean walkOperationImplAST(OperationImplAST e) {
+        return false;
+    }
+
+    public void preOperationImplAST(OperationImplAST e) {}
+
+    public void midOperationImplAST(OperationImplAST e, ResolveAST previous,
+            ResolveAST next) {}
+
+    public void postOperationImplAST(OperationImplAST e) {}
 
     public boolean walkProgIntegerRefAST(
             edu.clemson.cs.r2jt.absynnew.expr.ProgLiteralRefAST.ProgIntegerRefAST e) {
@@ -580,34 +586,40 @@ public abstract class TreeWalkerVisitor {
     public void postProgIntegerRefAST(
             edu.clemson.cs.r2jt.absynnew.expr.ProgLiteralRefAST.ProgIntegerRefAST e) {}
 
-    public boolean walkProgLiteralRefAST(ProgLiteralRefAST e) {
+    public boolean walkModuleParameterAST(ModuleParameterAST e) {
         return false;
     }
 
-    public void preProgLiteralRefAST(ProgLiteralRefAST e) {}
+    public void preModuleParameterAST(ModuleParameterAST e) {}
 
-    public void midProgLiteralRefAST(ProgLiteralRefAST e, ResolveAST previous,
-            ResolveAST next) {}
+    public void midModuleParameterAST(ModuleParameterAST e,
+            ResolveAST previous, ResolveAST next) {}
 
-    public void postProgLiteralRefAST(ProgLiteralRefAST e) {}
+    public void postModuleParameterAST(ModuleParameterAST e) {}
 
-    public boolean walkAssumeAST(AssumeAST e) {
+    public boolean walkConceptModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptModuleAST e) {
         return false;
     }
 
-    public void preAssumeAST(AssumeAST e) {}
+    public void preConceptModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptModuleAST e) {}
 
-    public void midAssumeAST(AssumeAST e, ResolveAST previous, ResolveAST next) {}
+    public void midConceptModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptModuleAST e,
+            ResolveAST previous, ResolveAST next) {}
 
-    public void postAssumeAST(AssumeAST e) {}
+    public void postConceptModuleAST(
+            edu.clemson.cs.r2jt.absynnew.ModuleAST.ConceptModuleAST e) {}
 
-    public boolean walkConfirmAST(ConfirmAST e) {
+    public boolean walkImportCollectionAST(ImportCollectionAST e) {
         return false;
     }
 
-    public void preConfirmAST(ConfirmAST e) {}
+    public void preImportCollectionAST(ImportCollectionAST e) {}
 
-    public void midConfirmAST(ConfirmAST e, ResolveAST previous, ResolveAST next) {}
+    public void midImportCollectionAST(ImportCollectionAST e,
+            ResolveAST previous, ResolveAST next) {}
 
-    public void postConfirmAST(ConfirmAST e) {}
+    public void postImportCollectionAST(ImportCollectionAST e) {}
 }

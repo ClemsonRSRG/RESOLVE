@@ -1,7 +1,7 @@
 /**
  * AssumeStmt.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -82,11 +82,6 @@ public class AssumeStmt extends Statement {
     /** Sets the right variable to the specified value. */
     public void setAssertion(Exp assertion) {
         myAssertion = assertion;
-    }
-
-    /** Sets whether we simplify the expression or not */
-    public void setSimplify(boolean isStipulate) {
-        myIsStipulate = isStipulate;
     }
 
     // ===========================================================

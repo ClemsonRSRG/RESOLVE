@@ -1,7 +1,7 @@
 /**
  * AbstractPipeline.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -10,22 +10,26 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.r2jt.init;
+package edu.clemson.cs.rsrg.init.pipeline;
 
-import edu.clemson.cs.r2jt.absynnew.ResolveCompiler;
+import edu.clemson.cs.rsrg.init.CompileEnvironment;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleIdentifier;
 import edu.clemson.cs.r2jt.typeandpopulate2.MathSymbolTableBuilder;
 
+/**
+ * TODO: Description for this class
+ */
 public abstract class AbstractPipeline {
 
-    protected final ResolveCompiler myCompiler;
+    protected final CompileEnvironment myCompileEnvironment;
     protected final MathSymbolTableBuilder mySymbolTable;
 
-    public AbstractPipeline(ResolveCompiler rc,
+    protected AbstractPipeline(CompileEnvironment ce,
             MathSymbolTableBuilder symbolTable) {
-        myCompiler = rc;
+        myCompileEnvironment = ce;
         mySymbolTable = symbolTable;
     }
 
     public abstract void process(ModuleIdentifier currentTarget);
+
 }

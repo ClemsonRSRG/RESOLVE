@@ -1,7 +1,7 @@
 /**
  * UnderliningErrorListener.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -16,8 +16,8 @@ import edu.clemson.cs.r2jt.misc.SrcErrorException;
 import org.antlr.v4.runtime.*;
 
 /**
- * <p>A custom listener class for the compiler that adds carrot-pointer style
- * reporting for syntax (and semantic) errors.</p>
+ * A custom listener class for the compiler that adds carrot-pointer style
+ * reporting for syntax (and semantic) errors.
  */
 public class UnderliningErrorListener extends BaseErrorListener {
 
@@ -39,8 +39,8 @@ public class UnderliningErrorListener extends BaseErrorListener {
     }
 
     /**
-     * <p>This is called mainly when an {@link SrcErrorException} is raised
-     * or caught.</p>
+     * This is called mainly when an {@link SrcErrorException} is raised
+     * or caught.
      *
      * @param offendingSymbol The token indicating a problem site.
      * @param msg The error message.
@@ -64,8 +64,8 @@ public class UnderliningErrorListener extends BaseErrorListener {
     }
 
     /**
-     * <p>Internal compiler errors for which there is no line or location
-     * information available.</p>
+     * Internal compiler errors for which there is no line or location
+     * information available.
      */
     public static void fatalInternalError(String error, Throwable e) {
         internalError(error, e);
@@ -90,7 +90,7 @@ public class UnderliningErrorListener extends BaseErrorListener {
         int i = 0;
         for (; i < stack.length; i++) {
             StackTraceElement t = stack[i];
-            if (!t.toString().contains("UnderliningErrorListener")) {
+            if (!t.toString().contains("AntlrErrorListener")) {
                 break;
             }
         }

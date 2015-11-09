@@ -1,7 +1,7 @@
 /**
  * MathSymbolAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -14,7 +14,7 @@ package edu.clemson.cs.r2jt.absynnew.expr;
 
 import edu.clemson.cs.r2jt.absynnew.AbstractNodeBuilder;
 import edu.clemson.cs.r2jt.absynnew.ResolveToken;
-import edu.clemson.cs.r2jt.absynnew.TreeUtil;
+import edu.clemson.cs.r2jt.misc.Utils;
 import edu.clemson.cs.r2jt.parsing.ResolveLexer;
 import edu.clemson.cs.r2jt.rewriteprover.absyn2.PSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate2.MTFunction;
@@ -27,10 +27,10 @@ import org.antlr.v4.runtime.Token;
 import java.util.*;
 
 /**
- * <p>A <code>MathSymbolAST</code> represents a reference to a named element such
+ * An {@code MathSymbolAST} represents a reference to a named element such
  * as a variable, constant, or function. More specifically, all three are
  * represented as function calls, with the former two represented as functions
- * with no arguments.</p>
+ * with no arguments.
  */
 public class MathSymbolAST extends ExprAST {
 
@@ -60,9 +60,9 @@ public class MathSymbolAST extends ExprAST {
     }
 
     /**
-     * <p>This class represents function <em>applications</em>.  The type of a
+     * This class represents function applications.  The type of a
      * function application is the type of the range of the function.  Often
-     * we'd like to think about the type of the <em>function itself</em>, not
+     * we'd like to think about the type of the function itself, not
      * the type of the result of its application.  Unfortunately our AST does
      * not consider that the 'function' part of a FunctionExp (as distinct from
      * its parameters) might be a first-class citizen with a type of its own.
@@ -73,10 +73,10 @@ public class MathSymbolAST extends ExprAST {
      * first-class function to consult (which, at the moment, is all of them),
      * this means that for the formal parameter types, we'll guess the types of
      * the actual parameters, and for the return type we'll guess
-     * <strong>Empty_Set</strong> (since we have no information about how the
+     * {@code Empty_Set} (since we have no information about how the
      * return value is used.)  This guarantees that the type we return will be
      * a subset of the actual type of the function the RESOLVE programmer
-     * intends (assuming she has called it correctly.)</p>
+     * intends (assuming she has called it correctly.)
      */
     public MTFunction getConservativePreApplicationType(TypeGraph g) {
         List<MTType> subTypes = new LinkedList<MTType>();
@@ -237,7 +237,7 @@ public class MathSymbolAST extends ExprAST {
             }
             else {
                 result.append(myName.getText()).append("(");
-                result.append(TreeUtil.join(myArguments, ", ")).append(")");
+                result.append(Utils.join(myArguments, ", ")).append(")");
             }
         }
         else {
@@ -247,10 +247,10 @@ public class MathSymbolAST extends ExprAST {
     }
 
     /**
-     * <p>A builder for {@link MathSymbolAST}s intended to ease construction of
+     * A builder for {@link MathSymbolAST}s intended to ease construction of
      * math symbols needed on-the-fly in both
      * {@link edu.clemson.cs.r2jt.absynnew.TreeBuildingVisitor} and
-     * {@link edu.clemson.cs.r2jt.typereasoning.TypeGraph}.</p>
+     * {@link edu.clemson.cs.r2jt.typereasoning.TypeGraph}.
      */
     public static class MathSymbolExprBuilder
             extends
@@ -268,7 +268,7 @@ public class MathSymbolAST extends ExprAST {
         protected final List<ExprAST> arguments = new ArrayList<ExprAST>();
 
         public MathSymbolExprBuilder(String name) {
-            this(null, null, new ResolveToken(ResolveLexer.Identifier, name),
+            this(null, null, new ResolveToken(ResolveLexer.IDENTIFIER, name),
                     null);
         }
 
@@ -286,7 +286,7 @@ public class MathSymbolAST extends ExprAST {
             }
             else {
                 this.name =
-                        new ResolveToken(ResolveLexer.Identifier, lprint
+                        new ResolveToken(ResolveLexer.IDENTIFIER, lprint
                                 .getText()
                                 + "..." + rprint.getText());
             }

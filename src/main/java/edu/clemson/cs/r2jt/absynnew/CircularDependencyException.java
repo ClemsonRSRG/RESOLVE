@@ -1,7 +1,7 @@
 /**
  * CircularDependencyException.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,17 +13,11 @@
 package edu.clemson.cs.r2jt.absynnew;
 
 /**
- * <p>A <code>CircularDependencyException</code> indicates an unresolvable
- * circular dependency between two (or more) modules.</p>
+ * An {@code CircularDependencyException} indicates an unresolvable
+ * circular dependency between two (or more) modules.
  */
 public class CircularDependencyException extends RuntimeException {
 
-    /**
-     * <p>Creates a new <code>CircularDependencyException</code> with the given
-     * message.</p>
-     *
-     * @param msg The message.
-     */
     public CircularDependencyException(String msg) {
         super(msg);
     }

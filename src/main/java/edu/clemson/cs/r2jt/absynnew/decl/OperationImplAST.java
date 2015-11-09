@@ -1,7 +1,7 @@
 /**
  * OperationImplAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -23,22 +23,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <p>An <code>OperationImplAST</code> represents the implementation of an
+ * An {@code OperationImplAST} represents the implementation of an
  * {@link OperationSigAST}. This means that both private facility operations and
  * procedures implementing a conceptual contract are represented by this
- * class.</p>
- *
- * <p>In case one needs to differentiate between the two, refer to the
- * <code>{@link #implementsContract()}</code> method.</p>
+ * class.
  */
 public class OperationImplAST extends OperationAST {
-
-    /**
-     * <p>If <code>true</code>, then we represent a procedure in a realization
-     * implementing an {@link OperationSigAST}; otherwise we're a private
-     * operation within some facility module.</p>
-     */
-    private final boolean myImplementsContractFlag;
 
     private final List<VariableAST> myVariables;
     private final List<StmtAST> myStatements;
@@ -47,22 +37,8 @@ public class OperationImplAST extends OperationAST {
         super(builder.getStart(), builder.getStop(), builder.name,
                 builder.parameters, builder.returnType, builder.requires,
                 builder.ensures);
-
-        myImplementsContractFlag = builder.implementsContract;
         myVariables = builder.variables;
         myStatements = builder.statements;
-    }
-
-    /**
-     * <p>Returns <code>true</code> iff this <code>OperationImplAST</code>
-     * implements an {@link OperationSigAST} declared elsewhere;
-     * <code>false</code> otherwise.</p>
-     * 
-     * @return <code>true</code> iff this implements a specification;
-     *         <code>false</code> otherwise.
-     */
-    public boolean implementsContract() {
-        return myImplementsContractFlag;
     }
 
     public List<VariableAST> getVariables() {

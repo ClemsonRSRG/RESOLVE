@@ -1,7 +1,7 @@
 /**
  * OperationAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -19,11 +19,8 @@ import org.antlr.v4.runtime.Token;
 import java.util.List;
 
 /**
- * <p>A general base class for all 'operation-like-thing' that might ever
- * appear in RESOLVE sourcecode.</p>
- *
- * @see edu.clemson.cs.r2jt.absynnew.decl.OperationImplAST
- * @see edu.clemson.cs.r2jt.absynnew.decl.OperationSigAST
+ * A general base class for all 'operation-like-thing' that might ever
+ * appear in sourcecode.
  */
 public abstract class OperationAST extends DeclAST {
 
@@ -37,7 +34,6 @@ public abstract class OperationAST extends DeclAST {
             ExprAST ensures) {
         super(start, stop, name);
         myParameters = params;
-
         myReturnType = type;
         myRequires = requires;
         myEnsures = ensures;

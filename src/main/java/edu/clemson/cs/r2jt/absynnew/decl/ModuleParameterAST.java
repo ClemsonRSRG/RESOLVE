@@ -1,7 +1,7 @@
 /**
  * ModuleParameterAST.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -13,10 +13,9 @@
 package edu.clemson.cs.r2jt.absynnew.decl;
 
 /**
- * <p>A <code>ModuleParameterAST</code> can be anything ranging from a
+ * A {@code ModuleParameterAST} can be anything ranging from a
  * generic type, to an operation, constant, or definition. This class simply
- * wraps the specific, base <code>DeclAST</code> representation
- * of each.</p>
+ * wraps the specific, base {@code DeclAST} representation of each.
  */
 public class ModuleParameterAST extends DeclAST {
 

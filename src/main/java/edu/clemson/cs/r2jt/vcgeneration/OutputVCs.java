@@ -1,7 +1,7 @@
 /**
  * OutputVCs.java
  * ---------------------------------
- * Copyright (c) 2014
+ * Copyright (c) 2015
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -206,7 +206,11 @@ public class OutputVCs {
 
             // Location details
             Location loc = locationList.get(0);
-            finalVCs += (loc.getDetails() + ": " + loc.toString() + "\n\n");
+            String details = loc.getDetails();
+            if (details == null) {
+                details = "Explicit Confirm Statement";
+            }
+            finalVCs += (details + ": " + loc.toString() + "\n\n");
 
             // Goals
             finalVCs +=
@@ -270,8 +274,12 @@ public class OutputVCs {
                     .webEncode(reformatOutputString(consequent.toString())));
 
             // VC Details
-            newVC.put("vcInfo", ResolveCompiler.webEncode(loc.getDetails()
-                    + ": " + loc.toString()));
+            String details = loc.getDetails();
+            if (details == null) {
+                details = "Explicit Confirm Statement";
+            }
+            newVC.put("vcInfo", ResolveCompiler.webEncode(details + ": "
+                    + loc.toString()));
 
             // Store this VC inside the array
             vcArray.put(newVC);
