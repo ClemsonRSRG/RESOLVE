@@ -417,7 +417,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
             else if ((op1 == op2) && (root != t)) {
                 // (x = x) = false
-                if(root == fls){
+                if (root == fls) {
                     m_evaluates_to_false = true;
                     return;
                 }

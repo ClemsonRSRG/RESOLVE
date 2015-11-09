@@ -211,9 +211,9 @@ public class VerificationConditionCongruenceClosureImpl {
             PSymbol qFun =
                     new PSymbol(new MTFunction(m_typegraph,
                             m_typegraph.BOOLEAN, px.getQuantifiedVariables()
-                            .iterator().next().getType()), null,
+                                    .iterator().next().getType()), null,
                             "ConFunc" + (++c_count), new ArrayList<PExp>(px
-                            .getQuantifiedVariables()));
+                                    .getQuantifiedVariables()));
             ArrayList<PExp> args = new ArrayList<PExp>();
             args.add(qFun);
             args.add(px);
@@ -375,7 +375,8 @@ public class VerificationConditionCongruenceClosureImpl {
             PExp curr = pit.next();
             if (inAntecedent) {
                 m_conjunction.addExpression(curr);
-            } else {
+            }
+            else {
                 int intRepForExp = m_conjunction.addFormula(curr);
                 addGoal(m_registry.getSymbolForIndex(intRepForExp));
             }
@@ -384,10 +385,13 @@ public class VerificationConditionCongruenceClosureImpl {
 
     private void addGoal(String a) {
         String r = m_registry.getRootSymbolForSymbol(a);
-        if(m_goal.size()==1 && m_registry.getRootSymbolForSymbol(m_goal.get(0)).equals("false")){
-            m_goal.add(0,r);
+        if (m_goal.size() == 1
+                && m_registry.getRootSymbolForSymbol(m_goal.get(0)).equals(
+                        "false")) {
+            m_goal.add(0, r);
         }
-        if(m_goal.size() > 1 && r.equals("false")) return;
+        if (m_goal.size() > 1 && r.equals("false"))
+            return;
         m_goal.add(a);
     }
 
@@ -400,7 +404,8 @@ public class VerificationConditionCongruenceClosureImpl {
         r += "----------------------------------\n";
 
         // Goals
-        if(m_goal.isEmpty()) return r;
+        if (m_goal.isEmpty())
+            return r;
         r += m_registry.getRootSymbolForSymbol(m_goal.get(0));
         for (int i = 1; i < m_goal.size(); ++i) {
             r += ", " + m_registry.getRootSymbolForSymbol(m_goal.get(i)) + " ";
