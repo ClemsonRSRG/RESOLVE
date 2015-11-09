@@ -158,6 +158,16 @@ public class TheoremCongruenceClosureImpl {
             m_all_literals.remove("false");
             m_all_literals.remove("/=");
             m_all_literals.remove("Empty_String");
+            m_all_literals.remove("0");
+            m_all_literals.remove("1");
+            m_all_literals.remove("2");
+            m_all_literals.remove("3");
+            m_all_literals.remove("4");
+            m_all_literals.remove("5");
+            m_all_literals.remove("6");
+            m_all_literals.remove("7");
+            m_all_literals.remove("8");
+            m_all_literals.remove("9");
         }
 
         return m_all_literals;
