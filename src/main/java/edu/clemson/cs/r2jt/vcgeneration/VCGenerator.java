@@ -4546,6 +4546,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 false);
 
         // Add any variable declarations for records
+        // TODO: Change this! The only variable we need to add is the exemplar
         if (dec.getRepresentation() instanceof RecordTy) {
             RecordTy ty = (RecordTy) dec.getRepresentation();
             assertiveCode.addVariableDecs(ty.getFields());
