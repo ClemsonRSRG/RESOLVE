@@ -2175,6 +2175,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                         parameterExp
                                                                 .getMathType(),
                                                         BOOLEAN));
+                        requires.setLocation((Location) opLocation.clone());
                     }
 
                     // If the type is a type representation, then we need to add
@@ -2196,6 +2197,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             requires =
                                     myTypeGraph.formConjunct(requires,
                                             repConstraintExp);
+                            requires.setLocation((Location) opLocation.clone());
                         }
                     }
                 }
