@@ -1192,20 +1192,20 @@ public class Utilities {
      * Symbol Table.</p>
      *
      * @param location Location for the searching type.
-     * @param qualifier Qualifier for the programming type.
-     * @param name Name for the programming type.
-     * @param varName Name of the variable of this type.
+     * @param typeAsExp The raw type as a variable expression.
+     * @param varName Name of the variable.
      * @param scope The module scope to start our search.
      *
      * @return The constraint in <code>Exp</code> form if found, null otherwise.
      */
-    public static Exp retrieveConstraint(Location location,
-            PosSymbol qualifier, PosSymbol name, Exp varName, ModuleScope scope) {
+    public static Exp retrieveConstraint(Location location, VarExp typeAsExp,
+            Exp varName, ModuleScope scope) {
         Exp constraint = null;
 
         // Query for the type entry in the symbol table
         SymbolTableEntry ste =
-                Utilities.searchProgramType(location, qualifier, name, scope);
+                Utilities.searchProgramType(location, typeAsExp.getQualifier(),
+                        typeAsExp.getName(), scope);
 
         ProgramTypeEntry typeEntry;
         if (ste instanceof ProgramTypeEntry) {

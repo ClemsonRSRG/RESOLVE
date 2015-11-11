@@ -76,7 +76,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     /**
      * <p>A map of facility instantiated types to a list of formal and actual constraints.</p>
      */
-    private Map<VarExp, FacilityFormalToActuals> myInstantiatedFacilityArgMap;
+    private final Map<VarExp, FacilityFormalToActuals> myInstantiatedFacilityArgMap;
 
     /**
      * <p>A list that will be built up with <code>AssertiveCode</code>
@@ -103,6 +103,11 @@ public class VCGenerator extends TreeWalkerVisitor {
      * the compiler.</p>
      */
     private CompileEnvironment myInstanceEnvironment;
+
+    /**
+     * <p>A map from representation types to their constraints.</p>
+     */
+    private final Map<String, Exp> myRepresentationConstraintMap;
 
     /**
      * <p>This object creates the different VC outputs.</p>
@@ -170,6 +175,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myIncAssertiveCodeStackInfo = new Stack<String>();
         myInstantiatedFacilityArgMap =
                 new HashMap<VarExp, FacilityFormalToActuals>();
+        myRepresentationConstraintMap = new HashMap<String, Exp>();
         myOutputGenerator = null;
         myVCBuffer = new StringBuffer();
     }
@@ -3662,8 +3668,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                     Location loc = (Location) dec.getLocation().clone();
                     PosSymbol qual = dec.getName().copy();
                     PosSymbol name = d.getName().copy();
-                    myInstantiatedFacilityArgMap.put(
-                            new VarExp(loc, qual, name), formalToActuals);
+                    Ty dTy = ((TypeDec) d).getModel();
+                    myInstantiatedFacilityArgMap.put(Utilities.createVarExp(
+                            loc, qual, name, dTy.getMathType(), dTy
+                                    .getMathTypeValue()), formalToActuals);
                 }
             }
         }
@@ -4545,19 +4553,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         assertiveCode.addAssume((Location) decLoc.clone(), myGlobalRequiresExp,
                 false);
 
-        // Add any variable declarations for records
-        // TODO: Change this! The only variable we need to add is the exemplar
-        if (dec.getRepresentation() instanceof RecordTy) {
-            RecordTy ty = (RecordTy) dec.getRepresentation();
-            assertiveCode.addVariableDecs(ty.getFields());
-        }
-
-        // Add any statements in the initialization block
-        if (dec.getInitialization() != null) {
-            InitItem initItem = dec.getInitialization();
-            assertiveCode.addStatements(initItem.getStatements());
-        }
-
         // Search for the type we are implementing
         SymbolTableEntry ste =
                 Utilities.searchProgramType(dec.getLocation(), null, dec
@@ -4582,6 +4577,96 @@ public class VCGenerator extends TreeWalkerVisitor {
             VarExp exemplar =
                     Utilities.createVarExp(type.getLocation(), null, type
                             .getExemplar(), typeEntry.getModelType(), null);
+
+            // Add any variable declarations for records
+            // TODO: Change this! The only variable we need to add is the exemplar
+            Exp representationConstraint = myTypeGraph.getTrueVarExp();
+            if (dec.getRepresentation() instanceof RecordTy) {
+                RecordTy ty = (RecordTy) dec.getRepresentation();
+                List<VarDec> decs = ty.getFields();
+                assertiveCode.addVariableDecs(decs);
+
+                for (VarDec v : decs) {
+                    Ty vTy = v.getTy();
+                    // Don't do anything if it is a generic type variable
+                    if (!(vTy.getProgramTypeValue() instanceof PTGeneric)) {
+                        // TODO: We could have a record ty here
+                        NameTy vTyAsNameTy = null;
+                        if (vTy instanceof NameTy) {
+                            vTyAsNameTy = (NameTy) v.getTy();
+                        }
+                        else {
+                            Utilities.tyNotHandled(v.getTy(), v.getLocation());
+                        }
+
+                        // Convert the raw type into a variable expression
+                        VarExp vTyAsVarExp = null;
+                        if (vTyAsNameTy.getQualifier() == null) {
+                            for (VarExp varExp : myInstantiatedFacilityArgMap
+                                    .keySet()) {
+                                if (varExp.getName().getName().equals(
+                                        vTyAsNameTy.getName().getName())) {
+                                    if (vTyAsVarExp == null) {
+                                        vTyAsVarExp = (VarExp) Exp.copy(varExp);
+                                    }
+                                    else {
+                                        Utilities.ambiguousTy(vTy, v
+                                                .getLocation());
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            vTyAsVarExp =
+                                    Utilities.createVarExp(vTyAsNameTy
+                                            .getLocation(), vTyAsNameTy
+                                            .getQualifier(), vTyAsNameTy
+                                            .getName(), vTyAsNameTy
+                                            .getMathType(), vTyAsNameTy
+                                            .getMathTypeValue());
+                        }
+
+                        // Create a dotted expression to represent the record field "v"
+                        VarExp vAsVarExp =
+                                Utilities.createVarExp(v.getLocation(), null, v
+                                        .getName(), vTyAsNameTy
+                                        .getMathTypeValue(), null);
+                        edu.clemson.cs.r2jt.collections.List<Exp> dotExpList =
+                                new edu.clemson.cs.r2jt.collections.List<Exp>();
+                        dotExpList.add(Exp.copy(exemplar));
+                        dotExpList.add(vAsVarExp);
+                        DotExp dotExp =
+                                Utilities.createDotExp(v.getLocation(),
+                                        dotExpList, vTyAsNameTy
+                                                .getMathTypeValue());
+
+                        // Obtain the constraint from this field
+                        Exp vConstraint =
+                                Utilities.retrieveConstraint(v.getLocation(),
+                                        vTyAsVarExp, dotExp,
+                                        myCurrentModuleScope);
+                        if (representationConstraint.isLiteralTrue()) {
+                            representationConstraint = vConstraint;
+                        }
+                        else {
+                            representationConstraint =
+                                    myTypeGraph.formConjunct(
+                                            representationConstraint,
+                                            vConstraint);
+                        }
+                    }
+                }
+            }
+
+            // Add the representation constraint to our global map
+            myRepresentationConstraintMap.put(dec.getName().getName(),
+                    representationConstraint);
+
+            // Add any statements in the initialization block
+            if (dec.getInitialization() != null) {
+                InitItem initItem = dec.getInitialization();
+                assertiveCode.addStatements(initItem.getStatements());
+            }
 
             // Make sure we have a convention
             if (dec.getConvention() == null) {
