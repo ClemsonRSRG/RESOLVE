@@ -3236,6 +3236,11 @@ public class VCGenerator extends TreeWalkerVisitor {
         assertiveCode.addAssume((Location) decLoc.clone(), dec.getConvention(),
                 false);
 
+        // Add the type representation constraint
+        assertiveCode.addAssume((Location) decLoc.clone(),
+                myRepresentationConstraintMap.get(dec.getName().getName()),
+                false);
+
         // Add the correspondence as given
         myCorrespondenceExp = dec.getCorrespondence();
         assertiveCode.addAssume((Location) decLoc.clone(), myCorrespondenceExp,
