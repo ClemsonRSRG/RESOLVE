@@ -952,7 +952,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                         }
                     }
                     else {
-                        tmpExpList.add(assumeExp);
+                        // Form implies if we have "Assume false"
+                        if (assumeExp.isLiteralFalse()) {
+                            confirmExp =
+                                    myTypeGraph.formImplies(
+                                            Exp.copy(assumeExp), Exp
+                                                    .copy(confirmExp));
+                            formedImplies = true;
+                        }
+                        else {
+                            tmpExpList.add(assumeExp);
+                        }
                     }
                 }
 
