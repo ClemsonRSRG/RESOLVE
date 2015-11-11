@@ -2176,6 +2176,28 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                                 .getMathType(),
                                                         BOOLEAN));
                     }
+
+                    // If the type is a type representation, then we need to add
+                    // all the type constraints from all the variable declarations
+                    // in the type representation.
+                    if (ste instanceof RepresentationTypeEntry) {
+                        Exp repConstraintExp =
+                                myRepresentationConstraintMap
+                                        .get(ste.getName());
+
+                        // Only do the following if the expression is not simply true
+                        if (!repConstraintExp.isLiteralTrue()) {
+                            // Replace the exemplar with the actual parameter variable expression
+                            repConstraintExp =
+                                    Utilities.replace(repConstraintExp,
+                                            exemplar, parameterExp);
+
+                            // Add this to our requires clause
+                            requires =
+                                    myTypeGraph.formConjunct(requires,
+                                            repConstraintExp);
+                        }
+                    }
                 }
 
                 // Add the current variable to our list of free variables
