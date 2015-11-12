@@ -209,6 +209,19 @@ public class PostProcessor extends TreeWalkerStackVisitor {
     }
 
     // -----------------------------------------------------------
+    // TypeDec
+    // -----------------------------------------------------------
+
+    @Override
+    public void postTypeDec(TypeDec dec) {
+        // Add in "true" for constraints
+        // if the user didn't fill those in
+        if (dec.getConstraint() == null) {
+            dec.setConstraint(myTypeGraph.getTrueVarExp());
+        }
+    }
+
+    // -----------------------------------------------------------
     // WhileStmt
     // -----------------------------------------------------------
 
