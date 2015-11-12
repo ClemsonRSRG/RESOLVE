@@ -876,7 +876,7 @@ public class Utilities {
      */
     public static PosSymbol getVarName(VariableExp left) {
         // Return value
-        PosSymbol name;
+        PosSymbol name = null;
 
         // Variable Name Expression
         if (left instanceof VariableNameExp) {
@@ -884,10 +884,19 @@ public class Utilities {
         }
         // Variable Dot Expression
         else if (left instanceof VariableDotExp) {
-            VariableRecordExp varRecExp =
-                    (VariableRecordExp) ((VariableDotExp) left)
-                            .getSemanticExp();
-            name = varRecExp.getName();
+            VariableDotExp varDotExp = (VariableDotExp) left;
+            for (VariableExp v : varDotExp.getSegments()) {
+                PosSymbol tempName = getVarName(v);
+                if (name == null) {
+                    name = tempName;
+                }
+                else {
+                    name =
+                            new PosSymbol(name.getLocation(), Symbol
+                                    .symbol(name.getName() + "_"
+                                            + tempName.getName()));
+                }
+            }
         }
         // Variable Record Expression
         else if (left instanceof VariableRecordExp) {
