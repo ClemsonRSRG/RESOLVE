@@ -1879,41 +1879,106 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     .getDefiningTypeEntry();
                 }
 
-                // Preserves or Restores mode
-                if (p.getMode() == Mode.PRESERVES
-                        || p.getMode() == Mode.RESTORES) {
-                    // Create an equals expression of the form "#parameterExp = parameterExp"
-                    EqualsExp equalsExp =
-                            new EqualsExp(opLocation, oldParameterExp,
-                                    EqualsExp.EQUAL, parameterExp);
-                    equalsExp.setMathType(BOOLEAN);
+                // Restores mode
+                // TODO: Preserves mode needs to be syntaticlly checked.
+                if (p.getMode() == Mode.RESTORES) {
+                    // Need to ensure here that the everything inside the type family
+                    // is restored at the end of the operation.
+                    Exp restoresConditionExp = null;
+                    if (typeEntry.getModelType() instanceof MTCartesian) {
+                        MTCartesian cartesian =
+                                (MTCartesian) typeEntry.getModelType();
+                        List<MTType> elementTypes =
+                                cartesian.getComponentTypes();
+                        for (int i = 0; i < cartesian.size(); i++) {
+                            // Retrieve the information on each cartesian product element
+                            PosSymbol name =
+                                    Utilities.createPosSymbol(cartesian
+                                            .getTag(i));
+                            MTType type = elementTypes.get(i);
 
-                    // Set the details for the new location
-                    Location equalLoc;
-                    if (ensures != null && ensures.getLocation() != null) {
-                        Location enLoc = ensures.getLocation();
-                        equalLoc = ((Location) enLoc.clone());
+                            // Create a list of segments. The first element should be the original
+                            // parameterExp and oldParameterExp and the second element the cartesian product element.
+                            edu.clemson.cs.r2jt.collections.List<Exp> segments =
+                                    new edu.clemson.cs.r2jt.collections.List<Exp>();
+                            edu.clemson.cs.r2jt.collections.List<Exp> oldSegments =
+                                    new edu.clemson.cs.r2jt.collections.List<Exp>();
+                            segments.add(Exp.copy(parameterExp));
+                            oldSegments.add(Exp.copy(oldParameterExp));
+                            segments.add(Utilities.createVarExp(
+                                    (Location) opLocation.clone(), null, name
+                                            .copy(), type, null));
+                            oldSegments.add(Utilities.createVarExp(
+                                    (Location) opLocation.clone(), null, name
+                                            .copy(), type, null));
+
+                            // Create the dotted expressions
+                            DotExp elementDotExp =
+                                    Utilities.createDotExp(
+                                            (Location) opLocation.clone(),
+                                            segments, type);
+                            DotExp oldElementDotExp =
+                                    Utilities.createDotExp(
+                                            (Location) opLocation.clone(),
+                                            segments, type);
+
+                            // Create an equality expression
+                            EqualsExp equalsExp =
+                                    new EqualsExp(opLocation, elementDotExp,
+                                            EqualsExp.EQUAL, oldElementDotExp);
+                            equalsExp.setMathType(BOOLEAN);
+
+                            // Add this to our final equals expression
+                            if (restoresConditionExp == null) {
+                                restoresConditionExp = equalsExp;
+                            }
+                            else {
+                                restoresConditionExp =
+                                        myTypeGraph
+                                                .formConjunct(
+                                                        restoresConditionExp,
+                                                        equalsExp);
+                            }
+                        }
                     }
                     else {
-                        equalLoc = ((Location) opLocation.clone());
-                        equalLoc.setDetails("Ensures Clause of " + opName);
+                        // Construct an expression using the expression and it's
+                        // old expression equivalent.
+                        restoresConditionExp =
+                                new EqualsExp(opLocation, Exp
+                                        .copy(parameterExp), EqualsExp.EQUAL,
+                                        Exp.copy(oldParameterExp));
+                        restoresConditionExp.setMathType(BOOLEAN);
                     }
-                    equalLoc.setDetails(equalLoc.getDetails()
+
+                    // Set the details for the new location
+                    Location restoresLoc;
+                    if (ensures != null && ensures.getLocation() != null) {
+                        Location enLoc = ensures.getLocation();
+                        restoresLoc = ((Location) enLoc.clone());
+                    }
+                    else {
+                        restoresLoc = ((Location) opLocation.clone());
+                        restoresLoc.setDetails("Ensures Clause of " + opName);
+                    }
+                    restoresLoc.setDetails(restoresLoc.getDetails()
                             + " (Condition from \"" + p.getMode().getModeName()
                             + "\" parameter mode)");
-                    equalsExp.setLocation(equalLoc);
+                    restoresConditionExp.setLocation(restoresLoc);
 
                     // Create an AND infix expression with the ensures clause
                     if (ensures != null
                             && !ensures.equals(myTypeGraph.getTrueVarExp())) {
                         Location newEnsuresLoc =
                                 (Location) ensures.getLocation().clone();
-                        ensures = myTypeGraph.formConjunct(ensures, equalsExp);
+                        ensures =
+                                myTypeGraph.formConjunct(ensures,
+                                        restoresConditionExp);
                         ensures.setLocation(newEnsuresLoc);
                     }
                     // Make new expression the ensures clause
                     else {
-                        ensures = equalsExp;
+                        ensures = restoresConditionExp;
                     }
                 }
                 // Clears mode
