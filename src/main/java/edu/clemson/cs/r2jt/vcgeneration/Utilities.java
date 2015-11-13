@@ -703,6 +703,13 @@ public class Utilities {
         return Z;
     }
 
+    /**
+     * <p>Gets all the unique symbols in an expression.</p>
+     *
+     * @param exp The searching <code>Exp</code>.
+     *
+     * @return The set of symbols.
+     */
     public static Set<String> getSymbols(Exp exp) {
         // Return value
         Set<String> symbolsSet = new HashSet<String>();
