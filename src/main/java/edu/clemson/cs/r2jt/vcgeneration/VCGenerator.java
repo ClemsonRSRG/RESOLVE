@@ -2002,24 +2002,20 @@ public class VCGenerator extends TreeWalkerVisitor {
                         init = Utilities.replace(init, exemplar, parameterExp);
 
                         // Set the details for the new location
-                        if (init.getLocation() != null) {
-                            Location initLoc;
-                            if (ensures != null
-                                    && ensures.getLocation() != null) {
-                                Location reqLoc = ensures.getLocation();
-                                initLoc = ((Location) reqLoc.clone());
-                            }
-                            else {
-                                initLoc = ((Location) opLocation.clone());
-                                initLoc.setDetails("Ensures Clause of "
-                                        + opName);
-                            }
-                            initLoc.setDetails(initLoc.getDetails()
-                                    + " (Condition from \""
-                                    + p.getMode().getModeName()
-                                    + "\" parameter mode)");
-                            init.setLocation(initLoc);
+                        Location initLoc;
+                        if (ensures != null && ensures.getLocation() != null) {
+                            Location reqLoc = ensures.getLocation();
+                            initLoc = ((Location) reqLoc.clone());
                         }
+                        else {
+                            initLoc = ((Location) opLocation.clone());
+                            initLoc.setDetails("Ensures Clause of " + opName);
+                        }
+                        initLoc.setDetails(initLoc.getDetails()
+                                + " (Condition from \""
+                                + p.getMode().getModeName()
+                                + "\" parameter mode)");
+                        Utilities.setLocation(init, initLoc);
                     }
                     // Since the type is generic, we can only use the is_initial predicate
                     // to ensure that the value is initial value.
