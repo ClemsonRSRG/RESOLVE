@@ -103,7 +103,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     /**
      * <p>A map from representation types to their constraints.</p>
      */
-    private final Map<String, Exp> myRepresentationConstraintMap;
+    private final Map<VarExp, Exp> myRepresentationConstraintMap;
 
     /**
      * <p>A map from representation types to their conventions.</p>
@@ -179,7 +179,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myIncAssertiveCodeStackInfo = new Stack<String>();
         myInstantiatedFacilityArgMap =
                 new HashMap<VarExp, FacilityFormalToActuals>();
-        myRepresentationConstraintMap = new HashMap<String, Exp>();
+        myRepresentationConstraintMap = new HashMap<VarExp, Exp>();
         myRepresentationConventionsMap = new HashMap<VarExp, Exp>();
         myRepresentationCorrespondenceMap = new HashMap<VarExp, Exp>();
         myOutputGenerator = null;
@@ -2202,9 +2202,24 @@ public class VCGenerator extends TreeWalkerVisitor {
                     // all the type constraints from all the variable declarations
                     // in the type representation.
                     if (ste instanceof RepresentationTypeEntry) {
-                        Exp repConstraintExp =
-                                myRepresentationConstraintMap
-                                        .get(ste.getName());
+                        Exp repConstraintExp = null;
+                        Set<VarExp> keys =
+                                myRepresentationConstraintMap.keySet();
+                        for (VarExp varExp : keys) {
+                            if (varExp.getQualifier() == null
+                                    && varExp.getName().getName().equals(
+                                            pNameTy.getName().getName())) {
+                                if (repConstraintExp == null) {
+                                    repConstraintExp =
+                                            myRepresentationConstraintMap
+                                                    .get(varExp);
+                                }
+                                else {
+                                    Utilities.ambiguousTy(pNameTy, pNameTy
+                                            .getLocation());
+                                }
+                            }
+                        }
 
                         // Only do the following if the expression is not simply true
                         if (!repConstraintExp.isLiteralTrue()) {
@@ -3257,8 +3272,23 @@ public class VCGenerator extends TreeWalkerVisitor {
                 false);
 
         // Add the type representation constraint
-        assertiveCode.addAssume((Location) decLoc.clone(),
-                myRepresentationConstraintMap.get(dec.getName().getName()),
+        Exp repConstraintExp = null;
+        Set<VarExp> keys = myRepresentationConstraintMap.keySet();
+        for (VarExp varExp : keys) {
+            if (varExp.getQualifier() == null
+                    && varExp.getName().getName().equals(
+                            dec.getName().getName())) {
+                if (repConstraintExp == null) {
+                    repConstraintExp =
+                            myRepresentationConstraintMap.get(varExp);
+                }
+                else {
+                    Utilities.ambiguousTy(dec.getRepresentation(), dec
+                            .getLocation());
+                }
+            }
+        }
+        assertiveCode.addAssume((Location) decLoc.clone(), repConstraintExp,
                 false);
 
         // Add the correspondence as given
@@ -4660,7 +4690,9 @@ public class VCGenerator extends TreeWalkerVisitor {
             }
 
             // Add the representation constraint to our global map
-            myRepresentationConstraintMap.put(dec.getName().getName(),
+            myRepresentationConstraintMap.put(Utilities.createVarExp(decLoc,
+                    null, dec.getName(), dec.getRepresentation()
+                            .getMathTypeValue(), null),
                     representationConstraint);
 
             // Add any statements in the initialization block
