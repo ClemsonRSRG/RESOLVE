@@ -4831,6 +4831,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         }
 
         // Only do this if this is not a local operation
+        // and we are in a concept realization
         Exp aggConventionExp = null;
         Exp aggCorrespondenceExp = null;
         if (!isLocal) {
@@ -5113,7 +5114,7 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Correct_Op_Hyp rule: Only applies to non-local operations
         // in concept realizations.
-        if (!isLocal) {
+        if (!isLocal && aggConventionExp != null) {
             Location conventionLoc = (Location) opLoc.clone();
             conventionLoc.setDetails(aggConventionExp.getLocation()
                     .getDetails()
@@ -5127,7 +5128,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         // we leave that logic to the parsimonious vc step. A replacement
         // will occur if this is a correspondence function or an implies
         // will be formed if this is a correspondence relation.
-        if (!isLocal) {
+        if (!isLocal && aggCorrespondenceExp != null) {
             myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
                     aggCorrespondenceExp, false);
         }
