@@ -1920,7 +1920,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                             DotExp oldElementDotExp =
                                     Utilities.createDotExp(
                                             (Location) opLocation.clone(),
-                                            segments, type);
+                                            oldSegments, type);
 
                             // Create an equality expression
                             EqualsExp equalsExp =
