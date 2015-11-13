@@ -1882,6 +1882,20 @@ public class VCGenerator extends TreeWalkerVisitor {
                 // Restores mode
                 // TODO: Preserves mode needs to be syntaticlly checked.
                 if (p.getMode() == Mode.RESTORES) {
+                    // Set the details for the new location
+                    Location restoresLoc;
+                    if (ensures != null && ensures.getLocation() != null) {
+                        Location enLoc = ensures.getLocation();
+                        restoresLoc = ((Location) enLoc.clone());
+                    }
+                    else {
+                        restoresLoc = ((Location) opLocation.clone());
+                        restoresLoc.setDetails("Ensures Clause of " + opName);
+                    }
+                    restoresLoc.setDetails(restoresLoc.getDetails()
+                            + " (Condition from \"" + p.getMode().getModeName()
+                            + "\" parameter mode)");
+
                     // Need to ensure here that the everything inside the type family
                     // is restored at the end of the operation.
                     Exp restoresConditionExp = null;
@@ -1927,6 +1941,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     new EqualsExp(opLocation, elementDotExp,
                                             EqualsExp.EQUAL, oldElementDotExp);
                             equalsExp.setMathType(BOOLEAN);
+                            equalsExp.setLocation((Location) restoresLoc
+                                    .clone());
 
                             // Add this to our final equals expression
                             if (restoresConditionExp == null) {
@@ -1949,22 +1965,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                                         .copy(parameterExp), EqualsExp.EQUAL,
                                         Exp.copy(oldParameterExp));
                         restoresConditionExp.setMathType(BOOLEAN);
+                        restoresConditionExp.setLocation(restoresLoc);
                     }
-
-                    // Set the details for the new location
-                    Location restoresLoc;
-                    if (ensures != null && ensures.getLocation() != null) {
-                        Location enLoc = ensures.getLocation();
-                        restoresLoc = ((Location) enLoc.clone());
-                    }
-                    else {
-                        restoresLoc = ((Location) opLocation.clone());
-                        restoresLoc.setDetails("Ensures Clause of " + opName);
-                    }
-                    restoresLoc.setDetails(restoresLoc.getDetails()
-                            + " (Condition from \"" + p.getMode().getModeName()
-                            + "\" parameter mode)");
-                    restoresConditionExp.setLocation(restoresLoc);
 
                     // Create an AND infix expression with the ensures clause
                     if (ensures != null
