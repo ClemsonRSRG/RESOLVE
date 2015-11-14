@@ -71,7 +71,6 @@ public class VerificationConditionCongruenceClosureImpl {
         args.clear();
         // seed with true and true.  Need this for search: x and y, when x and y are both true
         PSymbol tr = new PSymbol(m_typegraph.BOOLEAN, null, "true");
-        PSymbol fls = new PSymbol(m_typegraph.BOOLEAN, null, "false");
         args.add(tr);
         args.add(tr);
         PSymbol tandt = new PSymbol(m_typegraph.BOOLEAN, null, "and", args);

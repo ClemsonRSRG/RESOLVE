@@ -155,7 +155,36 @@ public final class CongruenceClassProver {
         PSymbol p = new PSymbol(B, null, "p", PSymbol.Quantification.FOR_ALL);
         PSymbol q = new PSymbol(B, null, "q", PSymbol.Quantification.FOR_ALL);
         ArrayList<PExp> args = new ArrayList<PExp>();
-
+        // (p = not q) = (q = not p)
+        args.add(q);
+        PSymbol not_q = new PSymbol(B, null, "not", args);
+        args.clear();
+        args.add(p);
+        args.add(not_q);
+        PSymbol ant = new PSymbol(B, null, "=", args);
+        args.clear();
+        args.add(p);
+        PSymbol not_p = new PSymbol(B, null, "not", args);
+        args.clear();
+        args.add(q);
+        args.add(not_p);
+        PSymbol succ = new PSymbol(B, null, "=", args);
+        args.clear();
+        args.add(ant);
+        args.add(succ);
+        PSymbol th1 = new PSymbol(B, null, "=", args);
+        m_theorems.add(new TheoremCongruenceClosureImpl(m_typeGraph, th1,
+                false, "Default theorem 1"));
+        addEqualityTheorem(true, th1, "Default theorem 1");
+        // not not p = p
+        args.clear();
+        args.add(not_p);
+        PSymbol nnp = new PSymbol(B, null, "not", args);
+        args.clear();
+        args.add(nnp);
+        args.add(p);
+        PSymbol th2 = new PSymbol(B, null, "=", args);
+        addEqualityTheorem(true, th2, "Default theorem 2");
         // p and p = p
         args.clear();
         args.add(p);
@@ -178,6 +207,26 @@ public final class CongruenceClassProver {
         args.add(p);
         PSymbol th4 = new PSymbol(B, null, "=", args);
         addEqualityTheorem(true, th4, "Default theorem 4");
+
+        // not p = true implies p = false
+        args.clear();
+        args.add(not_p);
+        args.add(t);
+        ant = new PSymbol(B, null, "=", args);
+        args.clear();
+        PSymbol f = new PSymbol(B, null, "false");
+        args.add(p);
+        args.add(f);
+        PSymbol suc = new PSymbol(B, null, "=", args);
+        args.clear();
+        args.add(ant);
+        args.add(suc);
+        PSymbol th5 = new PSymbol(B, null, "implies", args);
+        m_theorems.add(new TheoremCongruenceClosureImpl(m_typeGraph, th5,
+                false, "Default theorem 5"));
+
+        // (p = q) = (not p = not q)?
+        // not(p = q) = (not p = q)?
     }
 
     private void addContrapositive(PExp theorem, String thName) {
