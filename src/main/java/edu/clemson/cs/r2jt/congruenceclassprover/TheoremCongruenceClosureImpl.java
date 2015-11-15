@@ -126,6 +126,7 @@ public class TheoremCongruenceClosureImpl {
             rSet.remove("implies");
             rSet.remove("and");
             rSet.remove("/=");
+            rSet.remove("not"); // remove when not p ==> p = false
             rSet.remove("+"); // temporary
             //rSet.remove("-");
             //rSet.remove("or"); // temporary this is really bad
