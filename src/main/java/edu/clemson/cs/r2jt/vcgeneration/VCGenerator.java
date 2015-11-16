@@ -4675,6 +4675,8 @@ public class VCGenerator extends TreeWalkerVisitor {
             // Add any variable declarations for records
             // TODO: Change this! The only variable we need to add is the exemplar
             Exp representationConstraint = myTypeGraph.getTrueVarExp();
+            List<ParameterVarDec> fieldAsParameters =
+                    new ArrayList<ParameterVarDec>();
             if (dec.getRepresentation() instanceof RecordTy) {
                 RecordTy ty = (RecordTy) dec.getRepresentation();
                 List<VarDec> decs = ty.getFields();
@@ -4682,6 +4684,11 @@ public class VCGenerator extends TreeWalkerVisitor {
 
                 for (VarDec v : decs) {
                     Ty vTy = v.getTy();
+
+                    // Convert "v" into a parameter for substitution purposes
+                    fieldAsParameters.add(new ParameterVarDec(Mode.FIELD, v
+                            .getName(), vTy));
+
                     // Don't do anything if it is a generic type variable
                     if (!(vTy.getProgramTypeValue() instanceof PTGeneric)) {
                         // TODO: We could have a record ty here
@@ -4751,6 +4758,12 @@ public class VCGenerator extends TreeWalkerVisitor {
                     }
                 }
             }
+
+            // Replace facility actuals variables in the ensures clause
+            representationConstraint =
+                    Utilities.replaceFacilityFormalWithActual(decLoc,
+                            representationConstraint, fieldAsParameters,
+                            myInstantiatedFacilityArgMap, myCurrentModuleScope);
 
             // Add the representation constraint to our global map
             myRepresentationConstraintMap.put(Utilities.createVarExp(decLoc,
