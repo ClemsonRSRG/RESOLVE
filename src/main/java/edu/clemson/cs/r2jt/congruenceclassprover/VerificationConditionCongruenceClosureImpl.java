@@ -62,16 +62,14 @@ public class VerificationConditionCongruenceClosureImpl {
             //addPExp(forAllQuantifiedPExps.iterator(),true);
             makeSetAssertions(vc);
         }
-        addPExp(m_antecedent.iterator(), true);
-        addPExp(m_consequent.iterator(), false);
         // seed with not(false)
         ArrayList<PExp> args = new ArrayList<PExp>();
         PSymbol fls = new PSymbol(m_typegraph.BOOLEAN, null, "false");
         args.add(fls);
         PSymbol nF = new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
         m_conjunction.addExpression(nF);
-        // seed with true and true.  Need this for search: x and y, when x and y are both true
         args.clear();
+        // seed with true and true.  Need this for search: x and y, when x and y are both true
         PSymbol tr = new PSymbol(m_typegraph.BOOLEAN, null, "true");
         args.add(tr);
         args.add(tr);
@@ -101,6 +99,10 @@ public class VerificationConditionCongruenceClosureImpl {
         args.add(fls);
         PSymbol fandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
         m_conjunction.addExpression(fandfeqf);
+
+        addPExp(m_antecedent.iterator(), true);
+        addPExp(m_consequent.iterator(), false);
+        //m_goal.add("false");
         m_conjunction.updateUseMap();
     }
 

@@ -54,78 +54,17 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         m_exprList.clear();
     }
 
-    protected NormalizedAtomicExpressionMapImpl getExprAtPosition(int position) {
-        return m_exprList.get(position);
-    }
-
-    protected String addExpression(PExp expression, long timeToEnd) {
-        m_timeToEnd = timeToEnd;
-        return addExpression(expression);
-    }
-
     protected String addExpressionAndTrackChanges(PExp expression,
             long timeToEnd, String justification) {
         m_timeToEnd = timeToEnd;
         m_timeToEnd = Long.MAX_VALUE;
         m_current_justification = justification;
         String rString = "";
-        /*boolean haPart = false;
-        for (String eS : expression.getSymbolNames()) {
-            String root = m_registry.getRootSymbolForSymbol(eS);
-            if (m_registry.m_partTypes.contains(root)) {
-                haPart = true;
-                break;
-            }
-        }
-        if (haPart) {
-            List<PExp> frs = makeFRestr(expression);
-            for (PExp pf : frs) {
-                rString += "[forced] " + pf.toString() + "\n\t" + addExpression(pf);
-                System.err.println(pf.toString());
-            }
-        }*/
         rString += addExpression(expression);
         m_current_justification = "";
         mergeArgsOfEqualityPredicateIfRootIsTrue();
         updateUseMap();
         return rString;
-    }
-
-    private List<PExp> makeFRestr(PExp pf) {
-        ArrayList<PExp> rList = new ArrayList<PExp>();
-        if (!pf.getTopLevelOperation().equals("="))
-            return rList;
-        PExp lhs = pf.getSubExpressions().get(0);
-        PExp rhs = pf.getSubExpressions().get(1);
-        if (!(lhs.getSubExpressions().size() == 1 && rhs.getSubExpressions()
-                .size() == 1))
-            return rList;
-        PExp lhsArg = lhs.getSubExpressions().get(0);
-        PExp rhsArg = rhs.getSubExpressions().get(0);
-        if (!lhsArg.toString().equals(rhsArg.toString()))
-            return rList;
-        if (!m_registry.m_partTypes.contains(m_registry
-                .getRootSymbolForSymbol(lhsArg.getTopLevelOperation())))
-            return rList;
-        ArrayList<PExp> args = new ArrayList<PExp>();
-        args.add(new PSymbol(lhs.getType(), lhs.getTypeValue(), lhs
-                .getTopLevelOperation()));
-        args.add(lhsArg);
-        PExp fr1 =
-                new PSymbol(m_registry.m_typeGraph.BOOLEAN, null, "FRestr",
-                        args);
-        args.clear();
-        args.add(new PSymbol(lhs.getType(), rhs.getTypeValue(), rhs
-                .getTopLevelOperation()));
-        args.add(rhsArg);
-        PExp fr2 =
-                new PSymbol(m_registry.m_typeGraph.BOOLEAN, null, "FRestr",
-                        args);
-        args.clear();
-        args.add(fr1);
-        args.add(fr2);
-        rList.add(new PSymbol(m_registry.m_typeGraph.BOOLEAN, null, "=", args));
-        return rList;
     }
 
     // Top level
@@ -199,8 +138,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         // Building these here.
         // It would be far better to handle this upstream.
         // Currently PExps from theorems have correct type set already
-        if (ps.getSubExpressions().size() > 0
-                && !type.getClass().getSimpleName().equals("MTFunction")) {
+        if (ps.getSubExpressions().size() > 0) {
             List<MTType> paramList = new ArrayList<MTType>();
             for (PExp pParam : ps.getSubExpressions()) {
                 paramList.add(pParam.getType());
