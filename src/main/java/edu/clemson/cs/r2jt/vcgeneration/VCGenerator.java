@@ -4759,7 +4759,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 }
             }
 
-            // Replace facility actuals variables in the ensures clause
+            // Replace facility actuals variables in the representation constraint clause
             representationConstraint =
                     Utilities.replaceFacilityFormalWithActual(decLoc,
                             representationConstraint, fieldAsParameters,
@@ -5469,6 +5469,18 @@ public class VCGenerator extends TreeWalkerVisitor {
                         init = Utilities.replace(init, varDecExp, dotExp);
                     }
                 }
+
+                // Replace facility actuals variables in the init clause
+                List<ParameterVarDec> varDecAsParameter =
+                        new ArrayList<ParameterVarDec>();
+                varDecAsParameter.add(new ParameterVarDec(Mode.LOCAL, varDec
+                        .getName(), varDec.getTy()));
+                init =
+                        Utilities.replaceFacilityFormalWithActual(
+                                (Location) loc.clone(), init,
+                                varDecAsParameter,
+                                myInstantiatedFacilityArgMap,
+                                myCurrentModuleScope);
 
                 // Check if our confirm clause uses this variable
                 if (finalConfirm.containsVar(varName, false)) {
