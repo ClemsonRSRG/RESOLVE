@@ -78,6 +78,38 @@ public class QualifiedPath implements ScopeSearchPath {
                                     myFacilityStrategy == FacilityStrategy.FACILITY_INSTANTIATE);
 
             result = facilityScope.getMatches(searcher, SearchContext.FACILITY);
+
+            // YS Edits
+            // Search any enhancements in this facility declaration
+            if (result.size() == 0) {
+                List<ModuleParameterization> enhancementList =
+                        facility.getEnhancements();
+
+                List<E> tempResult;
+                for (ModuleParameterization facEnh : enhancementList) {
+                    // Obtain the scope for the enhancement
+                    facilityScope =
+                            facEnh
+                                    .getScope(myFacilityStrategy
+                                            .equals(FacilityStrategy.FACILITY_INSTANTIATE));
+
+                    // Search for matches
+                    tempResult =
+                            facilityScope.getMatches(searcher,
+                                    SearchContext.FACILITY);
+
+                    // Check to see if we have results or not
+                    if (tempResult.size() != 0) {
+                        if (result.size() == 0) {
+                            result = tempResult;
+                        }
+                        else {
+                            // Found more than one
+                            throw new DuplicateSymbolException();
+                        }
+                    }
+                }
+            }
         }
         catch (NoSuchSymbolException nsse) {
             //There's nothing by that name in local scope, so it must be the

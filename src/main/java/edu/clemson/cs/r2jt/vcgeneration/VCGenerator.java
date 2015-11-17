@@ -58,10 +58,6 @@ public class VCGenerator extends TreeWalkerVisitor {
     private Exp myGlobalRequiresExp;
     private Exp myGlobalConstraintExp;
 
-    // Conventions/Correspondence
-    private Exp myConventionExp;
-    private Exp myCorrespondenceExp;
-
     // Operation/Procedure level global variables
     private OperationEntry myCurrentOperationEntry;
     private OperationProfileEntry myCurrentOperationProfileEntry;
@@ -76,7 +72,7 @@ public class VCGenerator extends TreeWalkerVisitor {
     /**
      * <p>A map of facility instantiated types to a list of formal and actual constraints.</p>
      */
-    private Map<VarExp, FacilityFormalToActuals> myInstantiatedFacilityArgMap;
+    private final Map<VarExp, FacilityFormalToActuals> myInstantiatedFacilityArgMap;
 
     /**
      * <p>A list that will be built up with <code>AssertiveCode</code>
@@ -103,6 +99,21 @@ public class VCGenerator extends TreeWalkerVisitor {
      * the compiler.</p>
      */
     private CompileEnvironment myInstanceEnvironment;
+
+    /**
+     * <p>A map from representation types to their constraints.</p>
+     */
+    private final Map<VarExp, Exp> myRepresentationConstraintMap;
+
+    /**
+     * <p>A map from representation types to their conventions.</p>
+     */
+    private final Map<VarExp, Exp> myRepresentationConventionsMap;
+
+    /**
+     * <p>A map from representation types to their correspondence.</p>
+     */
+    private final Map<VarExp, Exp> myRepresentationCorrespondenceMap;
 
     /**
      * <p>This object creates the different VC outputs.</p>
@@ -151,8 +162,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         Z = null;
 
         // Current items
-        myConventionExp = null;
-        myCorrespondenceExp = null;
         myCurrentModuleScope = null;
         myCurrentOperationEntry = null;
         myCurrentOperationProfileEntry = null;
@@ -170,6 +179,9 @@ public class VCGenerator extends TreeWalkerVisitor {
         myIncAssertiveCodeStackInfo = new Stack<String>();
         myInstantiatedFacilityArgMap =
                 new HashMap<VarExp, FacilityFormalToActuals>();
+        myRepresentationConstraintMap = new HashMap<VarExp, Exp>();
+        myRepresentationConventionsMap = new HashMap<VarExp, Exp>();
+        myRepresentationCorrespondenceMap = new HashMap<VarExp, Exp>();
         myOutputGenerator = null;
         myVCBuffer = new StringBuffer();
     }
@@ -485,6 +497,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 modifyEnsuresClause(getEnsuresClause(loc, dec), loc, opDec,
                         isLocal);
         List<Statement> statementList = dec.getStatements();
+        List<ParameterVarDec> parameterVarList = dec.getParameters();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
         Exp procDur = null;
@@ -514,7 +527,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Apply the procedure declaration rule
         applyProcedureDeclRule(loc, name, requires, ensures, decreasing,
-                procDur, varFinalDur, variableList, statementList, isLocal);
+                procDur, varFinalDur, parameterVarList, variableList,
+                statementList, isLocal);
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
@@ -653,6 +667,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                 modifyEnsuresClause(getEnsuresClause(loc, opDec), loc, opDec,
                         isLocal);
         List<Statement> statementList = dec.getStatements();
+        List<ParameterVarDec> parameterVarList = dec.getParameters();
         List<VarDec> variableList = dec.getAllVariables();
         Exp decreasing = dec.getDecreasing();
         Exp procDur = null;
@@ -681,7 +696,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Apply the procedure declaration rule
         applyProcedureDeclRule(loc, name, requires, ensures, decreasing,
-                procDur, varFinalDur, variableList, statementList, isLocal);
+                procDur, varFinalDur, parameterVarList, variableList,
+                statementList, isLocal);
 
         // Add this to our stack of to be processed assertive codes.
         myIncAssertiveCodeStack.push(myCurrentAssertiveCode);
@@ -946,7 +962,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                         }
                     }
                     else {
-                        tmpExpList.add(assumeExp);
+                        // Form implies if we have "Assume false"
+                        if (assumeExp.isLiteralFalse()) {
+                            confirmExp =
+                                    myTypeGraph.formImplies(
+                                            Exp.copy(assumeExp), Exp
+                                                    .copy(confirmExp));
+                            formedImplies = true;
+                        }
+                        else {
+                            tmpExpList.add(assumeExp);
+                        }
                     }
                 }
 
@@ -1853,41 +1879,108 @@ public class VCGenerator extends TreeWalkerVisitor {
                                     .getDefiningTypeEntry();
                 }
 
-                // Preserves or Restores mode
-                if (p.getMode() == Mode.PRESERVES
-                        || p.getMode() == Mode.RESTORES) {
-                    // Create an equals expression of the form "#parameterExp = parameterExp"
-                    EqualsExp equalsExp =
-                            new EqualsExp(opLocation, oldParameterExp,
-                                    EqualsExp.EQUAL, parameterExp);
-                    equalsExp.setMathType(BOOLEAN);
-
+                // Restores mode
+                // TODO: Preserves mode needs to be syntaticlly checked.
+                if (p.getMode() == Mode.RESTORES) {
                     // Set the details for the new location
-                    Location equalLoc;
+                    Location restoresLoc;
                     if (ensures != null && ensures.getLocation() != null) {
                         Location enLoc = ensures.getLocation();
-                        equalLoc = ((Location) enLoc.clone());
+                        restoresLoc = ((Location) enLoc.clone());
                     }
                     else {
-                        equalLoc = ((Location) opLocation.clone());
-                        equalLoc.setDetails("Ensures Clause of " + opName);
+                        restoresLoc = ((Location) opLocation.clone());
+                        restoresLoc.setDetails("Ensures Clause of " + opName);
                     }
-                    equalLoc.setDetails(equalLoc.getDetails()
+                    restoresLoc.setDetails(restoresLoc.getDetails()
                             + " (Condition from \"" + p.getMode().getModeName()
                             + "\" parameter mode)");
-                    equalsExp.setLocation(equalLoc);
+
+                    // Need to ensure here that the everything inside the type family
+                    // is restored at the end of the operation.
+                    Exp restoresConditionExp = null;
+                    if (typeEntry.getModelType() instanceof MTCartesian) {
+                        MTCartesian cartesian =
+                                (MTCartesian) typeEntry.getModelType();
+                        List<MTType> elementTypes =
+                                cartesian.getComponentTypes();
+                        for (int i = 0; i < cartesian.size(); i++) {
+                            // Retrieve the information on each cartesian product element
+                            PosSymbol name =
+                                    Utilities.createPosSymbol(cartesian
+                                            .getTag(i));
+                            MTType type = elementTypes.get(i);
+
+                            // Create a list of segments. The first element should be the original
+                            // parameterExp and oldParameterExp and the second element the cartesian product element.
+                            edu.clemson.cs.r2jt.collections.List<Exp> segments =
+                                    new edu.clemson.cs.r2jt.collections.List<Exp>();
+                            edu.clemson.cs.r2jt.collections.List<Exp> oldSegments =
+                                    new edu.clemson.cs.r2jt.collections.List<Exp>();
+                            segments.add(Exp.copy(parameterExp));
+                            oldSegments.add(Exp.copy(oldParameterExp));
+                            segments.add(Utilities.createVarExp(
+                                    (Location) opLocation.clone(), null, name
+                                            .copy(), type, null));
+                            oldSegments.add(Utilities.createVarExp(
+                                    (Location) opLocation.clone(), null, name
+                                            .copy(), type, null));
+
+                            // Create the dotted expressions
+                            DotExp elementDotExp =
+                                    Utilities.createDotExp(
+                                            (Location) opLocation.clone(),
+                                            segments, type);
+                            DotExp oldElementDotExp =
+                                    Utilities.createDotExp(
+                                            (Location) opLocation.clone(),
+                                            oldSegments, type);
+
+                            // Create an equality expression
+                            EqualsExp equalsExp =
+                                    new EqualsExp(opLocation, elementDotExp,
+                                            EqualsExp.EQUAL, oldElementDotExp);
+                            equalsExp.setMathType(BOOLEAN);
+                            equalsExp.setLocation((Location) restoresLoc
+                                    .clone());
+
+                            // Add this to our final equals expression
+                            if (restoresConditionExp == null) {
+                                restoresConditionExp = equalsExp;
+                            }
+                            else {
+                                restoresConditionExp =
+                                        myTypeGraph
+                                                .formConjunct(
+                                                        restoresConditionExp,
+                                                        equalsExp);
+                            }
+                        }
+                    }
+                    else {
+                        // Construct an expression using the expression and it's
+                        // old expression equivalent.
+                        restoresConditionExp =
+                                new EqualsExp(opLocation, Exp
+                                        .copy(parameterExp), EqualsExp.EQUAL,
+                                        Exp.copy(oldParameterExp));
+                        restoresConditionExp.setMathType(BOOLEAN);
+                        restoresConditionExp.setLocation(restoresLoc);
+                    }
 
                     // Create an AND infix expression with the ensures clause
                     if (ensures != null
                             && !ensures.equals(myTypeGraph.getTrueVarExp())) {
                         Location newEnsuresLoc =
                                 (Location) ensures.getLocation().clone();
-                        ensures = myTypeGraph.formConjunct(ensures, equalsExp);
+                        ensures =
+                                myTypeGraph.formConjunct(ensures,
+                                        restoresConditionExp);
                         ensures.setLocation(newEnsuresLoc);
                     }
                     // Make new expression the ensures clause
                     else {
-                        ensures = equalsExp;
+                        ensures = restoresConditionExp;
                     }
                 }
                 // Clears mode
@@ -1909,24 +2002,20 @@ public class VCGenerator extends TreeWalkerVisitor {
                         init = Utilities.replace(init, exemplar, parameterExp);
 
                         // Set the details for the new location
-                        if (init.getLocation() != null) {
-                            Location initLoc;
-                            if (ensures != null
-                                    && ensures.getLocation() != null) {
-                                Location reqLoc = ensures.getLocation();
-                                initLoc = ((Location) reqLoc.clone());
-                            }
-                            else {
-                                initLoc = ((Location) opLocation.clone());
-                                initLoc.setDetails("Ensures Clause of "
-                                        + opName);
-                            }
-                            initLoc.setDetails(initLoc.getDetails()
-                                    + " (Condition from \""
-                                    + p.getMode().getModeName()
-                                    + "\" parameter mode)");
-                            init.setLocation(initLoc);
+                        Location initLoc;
+                        if (ensures != null && ensures.getLocation() != null) {
+                            Location reqLoc = ensures.getLocation();
+                            initLoc = ((Location) reqLoc.clone());
                         }
+                        else {
+                            initLoc = ((Location) opLocation.clone());
+                            initLoc.setDetails("Ensures Clause of " + opName);
+                        }
+                        initLoc.setDetails(initLoc.getDetails()
+                                + " (Condition from \""
+                                + p.getMode().getModeName()
+                                + "\" parameter mode)");
+                        Utilities.setLocation(init, initLoc);
                     }
                     // Since the type is generic, we can only use the is_initial predicate
                     // to ensure that the value is initial value.
@@ -2169,6 +2258,45 @@ public class VCGenerator extends TreeWalkerVisitor {
                                                         parameterExp
                                                                 .getMathType(),
                                                         BOOLEAN));
+                        requires.setLocation((Location) opLocation.clone());
+                    }
+
+                    // If the type is a type representation, then we need to add
+                    // all the type constraints from all the variable declarations
+                    // in the type representation.
+                    if (ste instanceof RepresentationTypeEntry) {
+                        Exp repConstraintExp = null;
+                        Set<VarExp> keys =
+                                myRepresentationConstraintMap.keySet();
+                        for (VarExp varExp : keys) {
+                            if (varExp.getQualifier() == null
+                                    && varExp.getName().getName().equals(
+                                            pNameTy.getName().getName())) {
+                                if (repConstraintExp == null) {
+                                    repConstraintExp =
+                                            myRepresentationConstraintMap
+                                                    .get(varExp);
+                                }
+                                else {
+                                    Utilities.ambiguousTy(pNameTy, pNameTy
+                                            .getLocation());
+                                }
+                            }
+                        }
+
+                        // Only do the following if the expression is not simply true
+                        if (!repConstraintExp.isLiteralTrue()) {
+                            // Replace the exemplar with the actual parameter variable expression
+                            repConstraintExp =
+                                    Utilities.replace(repConstraintExp,
+                                            exemplar, parameterExp);
+
+                            // Add this to our requires clause
+                            requires =
+                                    myTypeGraph.formConjunct(requires,
+                                            repConstraintExp);
+                            requires.setLocation((Location) opLocation.clone());
+                        }
                     }
                 }
 
@@ -3206,10 +3334,36 @@ public class VCGenerator extends TreeWalkerVisitor {
         assertiveCode.addAssume((Location) decLoc.clone(), dec.getConvention(),
                 false);
 
-        // Add the correspondence as given
-        myCorrespondenceExp = dec.getCorrespondence();
-        assertiveCode.addAssume((Location) decLoc.clone(), myCorrespondenceExp,
+        // Add the type representation constraint
+        Exp repConstraintExp = null;
+        Set<VarExp> keys = myRepresentationConstraintMap.keySet();
+        for (VarExp varExp : keys) {
+            if (varExp.getQualifier() == null
+                    && varExp.getName().getName().equals(
+                            dec.getName().getName())) {
+                if (repConstraintExp == null) {
+                    repConstraintExp =
+                            myRepresentationConstraintMap.get(varExp);
+                }
+                else {
+                    Utilities.ambiguousTy(dec.getRepresentation(), dec
+                            .getLocation());
+                }
+            }
+        }
+        assertiveCode.addAssume((Location) decLoc.clone(), repConstraintExp,
                 false);
+
+        // Add the correspondence as given
+        Exp correspondenceExp = Exp.copy(dec.getCorrespondence());
+        assertiveCode.addAssume((Location) decLoc.clone(), correspondenceExp,
+                false);
+
+        // Store the correspondence in our map
+        myRepresentationCorrespondenceMap.put(Utilities.createVarExp(decLoc,
+                null, dec.getName(),
+                dec.getRepresentation().getMathTypeValue(), null), Exp
+                .copy(correspondenceExp));
 
         // Search for the type we are implementing
         SymbolTableEntry ste =
@@ -3252,8 +3406,8 @@ public class VCGenerator extends TreeWalkerVisitor {
 
             // Set the location for the constraint
             Location loc;
-            if (myCorrespondenceExp.getLocation() != null) {
-                loc = (Location) myCorrespondenceExp.getLocation().clone();
+            if (correspondenceExp.getLocation() != null) {
+                loc = (Location) correspondenceExp.getLocation().clone();
             }
             else {
                 loc = (Location) type.getLocation().clone();
@@ -3270,60 +3424,6 @@ public class VCGenerator extends TreeWalkerVisitor {
                 simplify = true;
             }
             assertiveCode.setFinalConfirm(constraint, simplify);
-
-            /*
-            TODO: Dan and I seem to think this isn't needed. Make sure we don't need it.
-            // Add the constraints for the implementing facility
-            // or for each of the fields inside the record.
-            Exp fieldConstraints = myTypeGraph.getTrueVarExp();
-            if (dec.getRepresentation() instanceof NameTy) {
-                NameTy ty = (NameTy) dec.getRepresentation();
-                fieldConstraints =
-                        Utilities.retrieveConstraint(ty.getLocation(), ty
-                                .getQualifier(), ty.getName(), exemplar,
-                                myCurrentModuleScope);
-            }
-            else {
-                RecordTy ty = (RecordTy) dec.getRepresentation();
-
-                // Find the constraints for each field inside the record.
-                for (VarDec v : ty.getFields()) {
-                    NameTy vTy = (NameTy) v.getTy();
-
-                    // Create the name of the variable
-                    VarExp vName =
-                            Utilities.createVarExp(null, null, v.getName(), vTy
-                                    .getMathType(), vTy.getMathTypeValue());
-
-                    // Create [Exemplar].[v] dotted expression
-                    edu.clemson.cs.r2jt.collections.List<Exp> dotExpList =
-                            new edu.clemson.cs.r2jt.collections.List<Exp>();
-                    dotExpList.add(exemplar);
-                    dotExpList.add(vName);
-                    DotExp varNameExp =
-                            Utilities.createDotExp(v.getLocation(), dotExpList,
-                                    v.getMathType());
-
-                    Exp vConstraint =
-                            Utilities.retrieveConstraint(vTy.getLocation(), vTy
-                                    .getQualifier(), vTy.getName(), varNameExp,
-                                    myCurrentModuleScope);
-
-                    if (fieldConstraints.isLiteralTrue()) {
-                        fieldConstraints = vConstraint;
-                    }
-                    else {
-                        fieldConstraints =
-                                myTypeGraph.formConjunct(fieldConstraints,
-                                        vConstraint);
-                    }
-                }
-            }
-
-            // Only add the field constraints if we don't have true
-            if (!fieldConstraints.isLiteralTrue()) {
-                assertiveCode.addAssume(loc, fieldConstraints, false);
-            }*/
         }
 
         // Add this new assertive code to our incomplete assertive code stack
@@ -3662,8 +3762,10 @@ public class VCGenerator extends TreeWalkerVisitor {
                     Location loc = (Location) dec.getLocation().clone();
                     PosSymbol qual = dec.getName().copy();
                     PosSymbol name = d.getName().copy();
-                    myInstantiatedFacilityArgMap.put(
-                            new VarExp(loc, qual, name), formalToActuals);
+                    Ty dTy = ((TypeDec) d).getModel();
+                    myInstantiatedFacilityArgMap.put(Utilities.createVarExp(
+                            loc, qual, name, dTy.getMathType(), dTy
+                                    .getMathTypeValue()), formalToActuals);
                 }
             }
         }
@@ -4545,18 +4647,6 @@ public class VCGenerator extends TreeWalkerVisitor {
         assertiveCode.addAssume((Location) decLoc.clone(), myGlobalRequiresExp,
                 false);
 
-        // Add any variable declarations for records
-        if (dec.getRepresentation() instanceof RecordTy) {
-            RecordTy ty = (RecordTy) dec.getRepresentation();
-            assertiveCode.addVariableDecs(ty.getFields());
-        }
-
-        // Add any statements in the initialization block
-        if (dec.getInitialization() != null) {
-            InitItem initItem = dec.getInitialization();
-            assertiveCode.addStatements(initItem.getStatements());
-        }
-
         // Search for the type we are implementing
         SymbolTableEntry ste =
                 Utilities.searchProgramType(dec.getLocation(), null, dec
@@ -4582,38 +4672,149 @@ public class VCGenerator extends TreeWalkerVisitor {
                     Utilities.createVarExp(type.getLocation(), null, type
                             .getExemplar(), typeEntry.getModelType(), null);
 
+            // Add any variable declarations for records
+            // TODO: Change this! The only variable we need to add is the exemplar
+            Exp representationConstraint = myTypeGraph.getTrueVarExp();
+            List<ParameterVarDec> fieldAsParameters =
+                    new ArrayList<ParameterVarDec>();
+            if (dec.getRepresentation() instanceof RecordTy) {
+                RecordTy ty = (RecordTy) dec.getRepresentation();
+                List<VarDec> decs = ty.getFields();
+                assertiveCode.addVariableDecs(decs);
+
+                for (VarDec v : decs) {
+                    Ty vTy = v.getTy();
+
+                    // Convert "v" into a parameter for substitution purposes
+                    fieldAsParameters.add(new ParameterVarDec(Mode.FIELD, v
+                            .getName(), vTy));
+
+                    // Don't do anything if it is a generic type variable
+                    if (!(vTy.getProgramTypeValue() instanceof PTGeneric)) {
+                        // TODO: We could have a record ty here
+                        NameTy vTyAsNameTy = null;
+                        if (vTy instanceof NameTy) {
+                            vTyAsNameTy = (NameTy) v.getTy();
+                        }
+                        else {
+                            Utilities.tyNotHandled(v.getTy(), v.getLocation());
+                        }
+
+                        // Convert the raw type into a variable expression
+                        VarExp vTyAsVarExp = null;
+                        if (vTyAsNameTy.getQualifier() == null) {
+                            for (VarExp varExp : myInstantiatedFacilityArgMap
+                                    .keySet()) {
+                                if (varExp.getName().getName().equals(
+                                        vTyAsNameTy.getName().getName())) {
+                                    if (vTyAsVarExp == null) {
+                                        vTyAsVarExp = (VarExp) Exp.copy(varExp);
+                                    }
+                                    else {
+                                        Utilities.ambiguousTy(vTy, v
+                                                .getLocation());
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            vTyAsVarExp =
+                                    Utilities.createVarExp(vTyAsNameTy
+                                            .getLocation(), vTyAsNameTy
+                                            .getQualifier(), vTyAsNameTy
+                                            .getName(), vTyAsNameTy
+                                            .getMathType(), vTyAsNameTy
+                                            .getMathTypeValue());
+                        }
+
+                        // Create a dotted expression to represent the record field "v"
+                        VarExp vAsVarExp =
+                                Utilities.createVarExp(v.getLocation(), null, v
+                                        .getName(), vTyAsNameTy
+                                        .getMathTypeValue(), null);
+                        edu.clemson.cs.r2jt.collections.List<Exp> dotExpList =
+                                new edu.clemson.cs.r2jt.collections.List<Exp>();
+                        dotExpList.add(Exp.copy(exemplar));
+                        dotExpList.add(vAsVarExp);
+                        DotExp dotExp =
+                                Utilities.createDotExp(v.getLocation(),
+                                        dotExpList, vTyAsNameTy
+                                                .getMathTypeValue());
+
+                        // Obtain the constraint from this field
+                        Exp vConstraint =
+                                Utilities.retrieveConstraint(v.getLocation(),
+                                        vTyAsVarExp, dotExp,
+                                        myCurrentModuleScope);
+                        if (representationConstraint.isLiteralTrue()) {
+                            representationConstraint = vConstraint;
+                        }
+                        else {
+                            representationConstraint =
+                                    myTypeGraph.formConjunct(
+                                            representationConstraint,
+                                            vConstraint);
+                        }
+                    }
+                }
+            }
+
+            // Replace facility actuals variables in the representation constraint clause
+            representationConstraint =
+                    Utilities.replaceFacilityFormalWithActual(decLoc,
+                            representationConstraint, fieldAsParameters,
+                            myInstantiatedFacilityArgMap, myCurrentModuleScope);
+
+            // Add the representation constraint to our global map
+            myRepresentationConstraintMap.put(Utilities.createVarExp(decLoc,
+                    null, dec.getName(), dec.getRepresentation()
+                            .getMathTypeValue(), null),
+                    representationConstraint);
+
+            // Add any statements in the initialization block
+            if (dec.getInitialization() != null) {
+                InitItem initItem = dec.getInitialization();
+                assertiveCode.addStatements(initItem.getStatements());
+            }
+
             // Make sure we have a convention
+            Exp conventionExp;
             if (dec.getConvention() == null) {
-                myConventionExp = myTypeGraph.getTrueVarExp();
+                conventionExp = myTypeGraph.getTrueVarExp();
             }
             else {
-                myConventionExp = Exp.copy(dec.getConvention());
+                conventionExp = Exp.copy(dec.getConvention());
             }
 
             // Set the location for the constraint
             Location loc;
-            if (myConventionExp.getLocation() != null) {
-                loc = (Location) myConventionExp.getLocation().clone();
+            if (conventionExp.getLocation() != null) {
+                loc = (Location) conventionExp.getLocation().clone();
             }
             else {
                 loc = (Location) dec.getLocation().clone();
             }
             loc.setDetails("Convention for " + dec.getName().getName());
-            Utilities.setLocation(myConventionExp, loc);
+            Utilities.setLocation(conventionExp, loc);
 
             // Add the convention as something we need to confirm
             boolean simplify = false;
             // Simplify if we just have true
-            if (myConventionExp.isLiteralTrue()) {
+            if (conventionExp.isLiteralTrue()) {
                 simplify = true;
             }
-            Exp convention = Exp.copy(myConventionExp);
             Location conventionLoc =
-                    (Location) convention.getLocation().clone();
+                    (Location) conventionExp.getLocation().clone();
             conventionLoc.setDetails(conventionLoc.getDetails()
                     + " generated by Initialization Rule");
-            Utilities.setLocation(convention, conventionLoc);
-            assertiveCode.addConfirm(loc, convention, simplify);
+            Utilities.setLocation(conventionExp, conventionLoc);
+            assertiveCode.addConfirm(loc, conventionExp, simplify);
+
+            // Store the convention in our map
+            myRepresentationConventionsMap
+                    .put(Utilities.createVarExp(decLoc, null, dec.getName(),
+                            dec.getRepresentation().getMathTypeValue(), null),
+                            Exp.copy(conventionExp));
 
             // Add the correspondence as given
             Location corrLoc;
@@ -4683,14 +4884,16 @@ public class VCGenerator extends TreeWalkerVisitor {
      * @param decreasing Decreasing clause (if any)
      * @param procDur Procedure duration clause (if in performance mode)
      * @param varFinalDur Local variable finalization duration clause (if in performance mode)
+     * @param parameterVarList List of all parameter variables for this procedure
      * @param variableList List of all variables for this procedure
      * @param statementList List of statements for this procedure
      * @param isLocal True if the it is a local operation. False otherwise.
      */
     private void applyProcedureDeclRule(Location opLoc, String name,
             Exp requires, Exp ensures, Exp decreasing, Exp procDur,
-            Exp varFinalDur, List<VarDec> variableList,
-            List<Statement> statementList, boolean isLocal) {
+            Exp varFinalDur, List<ParameterVarDec> parameterVarList,
+            List<VarDec> variableList, List<Statement> statementList,
+            boolean isLocal) {
         // Add the global requires clause
         if (myGlobalRequiresExp != null) {
             myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
@@ -4703,50 +4906,188 @@ public class VCGenerator extends TreeWalkerVisitor {
                     myGlobalConstraintExp, false);
         }
 
-        // Add the convention as something we need to ensure
-        if (myConventionExp != null && !isLocal) {
-            Exp convention = Exp.copy(myConventionExp);
-            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
-                    convention, false);
-        }
+        // Only do this if this is not a local operation
+        // and we are in a concept realization
+        Exp aggConventionExp = null;
+        Exp aggCorrespondenceExp = null;
+        if (!isLocal) {
+            // Do this for all parameters that are type representations
+            for (ParameterVarDec parameterVarDec : parameterVarList) {
+                NameTy parameterVarDecTy = (NameTy) parameterVarDec.getTy();
+                Exp parameterAsVarExp =
+                        Utilities.createVarExp(parameterVarDec.getLocation(),
+                                null, parameterVarDec.getName(),
+                                parameterVarDecTy.getMathTypeValue(), null);
 
-        // Add the requires clause
-        if (requires != null) {
-            // Well_Def_Corr_Hyp rule: Conjunct the correspondence to
-            // the requires clause. This will ensure that the parsimonious
-            // vc step replaces the requires clause if possible.
-            if (myCorrespondenceExp != null && !isLocal) {
-                Location reqLoc = (Location) requires.getLocation().clone();
+                Set<VarExp> conventionKeys =
+                        myRepresentationConventionsMap.keySet();
+                for (VarExp varExp : conventionKeys) {
+                    // Make sure the qualifiers are the same
+                    PosSymbol varExpQual = varExp.getQualifier();
+                    PosSymbol parameterTyQual =
+                            parameterVarDecTy.getQualifier();
 
-                // Attempt to replace the correspondence
-                Exp tmp = Exp.copy(requires);
-                if (myCorrespondenceExp instanceof EqualsExp) {
-                    tmp =
-                            Utilities
-                                    .replace(requires,
-                                            ((EqualsExp) myCorrespondenceExp)
-                                                    .getLeft(),
-                                            ((EqualsExp) myCorrespondenceExp)
-                                                    .getRight());
+                    if ((varExpQual == null && parameterTyQual == null)
+                            || (varExpQual.getName().equals(parameterTyQual
+                                    .getName()))) {
+                        // Make sure that the type names are the same
+                        if (varExp.getName().getName().equals(
+                                parameterVarDecTy.getName().getName())) {
+                            // Check to see if this is a type representation
+                            SymbolTableEntry typeEntry =
+                                    Utilities.searchProgramType(opLoc, varExp
+                                            .getQualifier(), varExp.getName(),
+                                            myCurrentModuleScope);
+                            if (typeEntry instanceof RepresentationTypeEntry) {
+                                // Replacements
+                                MathSymbolEntry exemplarEntry =
+                                        typeEntry.toRepresentationTypeEntry(
+                                                opLoc).getDefiningTypeEntry()
+                                                .getExemplar();
+                                Exp exemplar =
+                                        Utilities
+                                                .createVarExp(
+                                                        opLoc,
+                                                        null,
+                                                        Utilities
+                                                                .createPosSymbol(exemplarEntry
+                                                                        .getName()),
+                                                        exemplarEntry.getType(),
+                                                        null);
+                                Map<Exp, Exp> replacementMap =
+                                        new HashMap<Exp, Exp>();
+                                replacementMap.put(exemplar, parameterAsVarExp);
+
+                                // Obtain the convention and substitute formal with actual
+                                Exp conventionExp =
+                                        Exp.copy(myRepresentationConventionsMap
+                                                .get(varExp));
+                                conventionExp =
+                                        conventionExp
+                                                .substitute(replacementMap);
+
+                                // Add the convention as something we need to ensure
+                                myCurrentAssertiveCode.addAssume(
+                                        (Location) opLoc.clone(),
+                                        conventionExp, false);
+
+                                // Store this convention in our aggregated convention exp
+                                if (aggConventionExp == null) {
+                                    aggConventionExp = Exp.copy(conventionExp);
+                                }
+                                else {
+                                    aggConventionExp =
+                                            myTypeGraph.formConjunct(
+                                                    aggConventionExp,
+                                                    conventionExp);
+                                }
+                                aggConventionExp.setLocation(conventionExp
+                                        .getLocation());
+                            }
+                        }
+                    }
                 }
 
-                // If we are successful use the replaced version
-                if (tmp.equals(requires)) {
-                    requires =
-                            myTypeGraph.formConjunct(Exp
-                                    .copy(myCorrespondenceExp), requires);
+                Set<VarExp> correspondencekeys =
+                        myRepresentationCorrespondenceMap.keySet();
+                for (VarExp varExp : correspondencekeys) {
+                    // Make sure the qualifiers are the same
+                    PosSymbol varExpQual = varExp.getQualifier();
+                    PosSymbol parameterTyQual =
+                            parameterVarDecTy.getQualifier();
+                    if ((varExpQual == null && parameterTyQual == null)
+                            || (varExpQual.getName().equals(parameterTyQual
+                                    .getName()))) {
+                        // Make sure that the type names are the same
+                        if (varExp.getName().getName().equals(
+                                parameterVarDecTy.getName().getName())) {
+                            // Check to see if this is a type representation
+                            SymbolTableEntry typeEntry =
+                                    Utilities.searchProgramType(opLoc, varExp
+                                            .getQualifier(), varExp.getName(),
+                                            myCurrentModuleScope);
+                            if (typeEntry instanceof RepresentationTypeEntry) {
+                                // Attempt to replace the correspondence for each parameter
+                                Location reqLoc =
+                                        (Location) requires.getLocation()
+                                                .clone();
+                                Exp tmp = Exp.copy(requires);
+                                MathSymbolEntry exemplarEntry =
+                                        typeEntry.toRepresentationTypeEntry(
+                                                opLoc).getDefiningTypeEntry()
+                                                .getExemplar();
+
+                                // Replacements
+                                Exp exemplar =
+                                        Utilities
+                                                .createVarExp(
+                                                        opLoc,
+                                                        null,
+                                                        Utilities
+                                                                .createPosSymbol(exemplarEntry
+                                                                        .getName()),
+                                                        exemplarEntry.getType(),
+                                                        null);
+                                Map<Exp, Exp> replacementMap =
+                                        new HashMap<Exp, Exp>();
+                                replacementMap.put(exemplar, parameterAsVarExp);
+
+                                // Obtain the correspondence and substitute formal with actual
+                                Exp corresponenceExp =
+                                        Exp
+                                                .copy(myRepresentationCorrespondenceMap
+                                                        .get(varExp));
+                                corresponenceExp =
+                                        corresponenceExp
+                                                .substitute(replacementMap);
+                                if (corresponenceExp instanceof EqualsExp) {
+                                    tmp =
+                                            Utilities
+                                                    .replace(
+                                                            requires,
+                                                            ((EqualsExp) corresponenceExp)
+                                                                    .getLeft(),
+                                                            ((EqualsExp) corresponenceExp)
+                                                                    .getRight());
+                                }
+
+                                // Well_Def_Corr_Hyp rule: Conjunct the correspondence to
+                                // the requires clause. This will ensure that the parsimonious
+                                // vc step replaces the requires clause if possible.
+                                if (tmp.equals(requires)) {
+                                    requires =
+                                            myTypeGraph.formConjunct(requires,
+                                                    Exp.copy(corresponenceExp));
+                                }
+                                else {
+                                    myCurrentAssertiveCode.addAssume(
+                                            (Location) opLoc.clone(), Exp
+                                                    .copy(corresponenceExp),
+                                            false);
+                                    requires = tmp;
+                                }
+                                requires.setLocation(reqLoc);
+
+                                // Store this correspondence in our aggregated correspondence exp
+                                if (aggCorrespondenceExp == null) {
+                                    aggCorrespondenceExp =
+                                            Exp.copy(corresponenceExp);
+                                }
+                                else {
+                                    aggCorrespondenceExp =
+                                            myTypeGraph.formConjunct(
+                                                    aggCorrespondenceExp,
+                                                    corresponenceExp);
+                                }
+                            }
+                        }
+                    }
                 }
-                else {
-                    myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
-                            Exp.copy(myCorrespondenceExp), false);
-                    requires = tmp;
-                }
-                requires.setLocation(reqLoc);
             }
-
-            myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
-                    requires, false);
         }
+
+        myCurrentAssertiveCode.addAssume((Location) opLoc.clone(), requires,
+                false);
 
         // NY - Add any procedure duration clauses
         InfixExp finalDurationExp = null;
@@ -4849,24 +5190,25 @@ public class VCGenerator extends TreeWalkerVisitor {
 
         // Correct_Op_Hyp rule: Only applies to non-local operations
         // in concept realizations.
-        if (myConventionExp != null && !isLocal) {
-            Exp convention = Exp.copy(myConventionExp);
-            Location conventionLoc = (Location) opLoc.clone();
-            conventionLoc.setDetails(convention.getLocation().getDetails()
-                    + " generated by " + name);
-            Utilities.setLocation(convention, conventionLoc);
-            myCurrentAssertiveCode.addConfirm(convention.getLocation(),
-                    convention, false);
+        if (!isLocal && aggConventionExp != null) {
+            if (!aggConventionExp.isLiteralTrue()) {
+                Location conventionLoc = (Location) opLoc.clone();
+                conventionLoc.setDetails(aggConventionExp.getLocation()
+                        .getDetails()
+                        + " generated by " + name);
+                Utilities.setLocation(aggConventionExp, conventionLoc);
+                myCurrentAssertiveCode.addConfirm(aggConventionExp
+                        .getLocation(), aggConventionExp, false);
+            }
         }
 
         // Well_Def_Corr_Hyp rule: Rather than doing direct replacement,
         // we leave that logic to the parsimonious vc step. A replacement
         // will occur if this is a correspondence function or an implies
         // will be formed if this is a correspondence relation.
-        if (myCorrespondenceExp != null && !isLocal) {
-            Exp correspondence = Exp.copy(myCorrespondenceExp);
+        if (!isLocal && aggCorrespondenceExp != null) {
             myCurrentAssertiveCode.addAssume((Location) opLoc.clone(),
-                    correspondence, false);
+                    aggCorrespondenceExp, false);
         }
 
         // Add the final confirms clause
@@ -5127,6 +5469,18 @@ public class VCGenerator extends TreeWalkerVisitor {
                         init = Utilities.replace(init, varDecExp, dotExp);
                     }
                 }
+
+                // Replace facility actuals variables in the init clause
+                List<ParameterVarDec> varDecAsParameter =
+                        new ArrayList<ParameterVarDec>();
+                varDecAsParameter.add(new ParameterVarDec(Mode.LOCAL, varDec
+                        .getName(), varDec.getTy()));
+                init =
+                        Utilities.replaceFacilityFormalWithActual(
+                                (Location) loc.clone(), init,
+                                varDecAsParameter,
+                                myInstantiatedFacilityArgMap,
+                                myCurrentModuleScope);
 
                 // Check if our confirm clause uses this variable
                 if (finalConfirm.containsVar(varName, false)) {
