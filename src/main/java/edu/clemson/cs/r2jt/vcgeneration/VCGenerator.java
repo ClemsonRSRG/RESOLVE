@@ -1161,6 +1161,28 @@ public class VCGenerator extends TreeWalkerVisitor {
                         getEnsuresClause(moduleArgumentItem.getLocation(),
                                 actualOperationDec);
 
+                // Add in the qualifier if there is one in the module argument
+                if (moduleArgumentItem.getQualifier() != null) {
+                    VarExp notQualifiedOp =
+                            Utilities.createVarExp(moduleArgumentItem
+                                    .getLocation(), null, moduleArgumentItem
+                                    .getName(), moduleArgumentItem
+                                    .getMathType(), null);
+                    VarExp qualifiedOp =
+                            Utilities.createVarExp(moduleArgumentItem
+                                    .getLocation(), moduleArgumentItem
+                                    .getQualifier(), moduleArgumentItem
+                                    .getName(), moduleArgumentItem
+                                    .getMathType(), null);
+
+                    actualOperationRequires =
+                            Utilities.replace(actualOperationRequires,
+                                    notQualifiedOp, qualifiedOp);
+                    actualOperationEnsures =
+                            Utilities.replace(actualOperationEnsures,
+                                    notQualifiedOp, qualifiedOp);
+                }
+
                 // Facility Decl Rule (Operations as Parameters):
                 // preRP [ rn ~> rn_exp, rx ~> irx ] implies preIRP
                 Exp formalRequires =
@@ -1240,8 +1262,17 @@ public class VCGenerator extends TreeWalkerVisitor {
                     Location newLoc =
                             (Location) actualOperationEnsures.getLocation()
                                     .clone();
-                    newLoc.setDetails("Ensures Clause of "
-                            + actualOperationDec.getName().getName()
+
+                    // Add qualification to the name (if needed)
+                    String actualOpName =
+                            actualOperationDec.getName().getName();
+                    if (moduleArgumentItem.getQualifier() != null) {
+                        actualOpName =
+                                moduleArgumentItem.getQualifier().getName()
+                                        + "." + actualOpName;
+                    }
+
+                    newLoc.setDetails("Ensures Clause of " + actualOpName
                             + " implies the Ensures Clause of "
                             + formalOperationDec.getName().getName()
                             + " in Facility Instantiation Rule");
