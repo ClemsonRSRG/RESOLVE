@@ -230,6 +230,9 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                 Utilities.illegalOperationEnsures(opDec.getLocation());
             }
         }
+        else {
+            Utilities.illegalOperationEnsures(opDec.getLocation());
+        }
 
         // Check for recursive call of itself
         if (myCurrentOperationEntry != null

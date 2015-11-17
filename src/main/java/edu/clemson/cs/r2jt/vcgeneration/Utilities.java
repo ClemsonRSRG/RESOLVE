@@ -703,6 +703,13 @@ public class Utilities {
         return Z;
     }
 
+    /**
+     * <p>Gets all the unique symbols in an expression.</p>
+     *
+     * @param exp The searching <code>Exp</code>.
+     *
+     * @return The set of symbols.
+     */
     public static Set<String> getSymbols(Exp exp) {
         // Return value
         Set<String> symbolsSet = new HashSet<String>();
@@ -876,7 +883,7 @@ public class Utilities {
      */
     public static PosSymbol getVarName(VariableExp left) {
         // Return value
-        PosSymbol name;
+        PosSymbol name = null;
 
         // Variable Name Expression
         if (left instanceof VariableNameExp) {
@@ -884,10 +891,19 @@ public class Utilities {
         }
         // Variable Dot Expression
         else if (left instanceof VariableDotExp) {
-            VariableRecordExp varRecExp =
-                    (VariableRecordExp) ((VariableDotExp) left)
-                            .getSemanticExp();
-            name = varRecExp.getName();
+            VariableDotExp varDotExp = (VariableDotExp) left;
+            for (VariableExp v : varDotExp.getSegments()) {
+                PosSymbol tempName = getVarName(v);
+                if (name == null) {
+                    name = tempName;
+                }
+                else {
+                    name =
+                            new PosSymbol(name.getLocation(), Symbol
+                                    .symbol(name.getName() + "_"
+                                            + tempName.getName()));
+                }
+            }
         }
         // Variable Record Expression
         else if (left instanceof VariableRecordExp) {
@@ -1192,20 +1208,20 @@ public class Utilities {
      * Symbol Table.</p>
      *
      * @param location Location for the searching type.
-     * @param qualifier Qualifier for the programming type.
-     * @param name Name for the programming type.
-     * @param varName Name of the variable of this type.
+     * @param typeAsExp The raw type as a variable expression.
+     * @param varName Name of the variable.
      * @param scope The module scope to start our search.
      *
      * @return The constraint in <code>Exp</code> form if found, null otherwise.
      */
-    public static Exp retrieveConstraint(Location location,
-            PosSymbol qualifier, PosSymbol name, Exp varName, ModuleScope scope) {
+    public static Exp retrieveConstraint(Location location, VarExp typeAsExp,
+            Exp varName, ModuleScope scope) {
         Exp constraint = null;
 
         // Query for the type entry in the symbol table
         SymbolTableEntry ste =
-                Utilities.searchProgramType(location, qualifier, name, scope);
+                Utilities.searchProgramType(location, typeAsExp.getQualifier(),
+                        typeAsExp.getName(), scope);
 
         ProgramTypeEntry typeEntry;
         if (ste instanceof ProgramTypeEntry) {
