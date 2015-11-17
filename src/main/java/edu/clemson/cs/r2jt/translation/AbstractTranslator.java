@@ -308,7 +308,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
                 getCallQualifier(myFacilityQualifier, node.getName(), node
                         .getArguments());
         if (operationParameterNames.contains(node.getName().getName())) {
-                        qualifier = node.getName().getName() + "Param";
+            qualifier = node.getName().getName() + "Param";
         }
 
         if (qualifier != null) {
