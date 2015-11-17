@@ -49,7 +49,8 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     protected ModuleScope myScope = null;
     protected final MathSymbolTableBuilder myBuilder;
-
+    protected final List<String> operationParameterNames =
+            new ArrayList<String>();
     /**
      * <p>A pointer to a <code>SymbolTableEntry</code> that corresponds to
      * the <code>FacilityDec</code> currently being walked.  If one isn't
@@ -306,6 +307,9 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         String qualifier =
                 getCallQualifier(myFacilityQualifier, node.getName(), node
                         .getArguments());
+        if (operationParameterNames.contains(node.getName().getName())) {
+                        qualifier = node.getName().getName() + "Param";
+        }
 
         if (qualifier != null) {
             paramExp =
