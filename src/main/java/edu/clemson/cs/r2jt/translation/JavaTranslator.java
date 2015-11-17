@@ -564,6 +564,7 @@ public class JavaTranslator extends AbstractTranslator {
 
             myActiveTemplates.peek().add("parameters", parameter);
             myActiveTemplates.push(operationInterface);
+            operationParameterNames.add(node.getName().getName());
         }
     }
 
@@ -892,7 +893,7 @@ public class JavaTranslator extends AbstractTranslator {
             }
 
             result.add("function", myActiveTemplates.pop()).add("realization",
-                    realization);
+                    realization).add("hasReturn", returnType != null);
         }
         catch (NoneProvidedException npe) {
 

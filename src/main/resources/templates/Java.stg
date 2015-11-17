@@ -154,11 +154,11 @@ enhanced_stmt(returns, name, arguments) ::= <%
     <if(returns)>return<endif> con.<name>(<arguments; separator = ", ">);%>
 
 operation_argument_item(realization, actualQualifier, actualName, type,
-function, castedArguments) ::= <<
+function, castedArguments, hasReturn) ::= <<
 
 new <realization>.<function.name>() {
     <function   :  {f | <function_def("public", f.type, f.name, f.parameters,
-                                  f.facilities, f.variables, { <if(actualQualifier)><actualQualifier>.<endif><actualName>(<castedArguments : {c | (<c.type>) <c.name>}; separator = ", ">); }
+                                  f.facilities, f.variables, { <if(hasReturn)>return <endif><if(actualQualifier)><actualQualifier>.<endif><actualName>(<castedArguments : {c | (<c.type>) <c.name>}; separator = ", ">); }
     )>}>
 }>>
 
