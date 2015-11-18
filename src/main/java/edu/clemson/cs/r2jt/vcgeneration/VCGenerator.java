@@ -27,6 +27,7 @@ import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.*;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTGeneric;
 import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTType;
+import edu.clemson.cs.r2jt.typeandpopulate.programtypes.PTVoid;
 import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
@@ -790,7 +791,8 @@ public class VCGenerator extends TreeWalkerVisitor {
         for (ModuleArgumentItem item : actualParams) {
             // Obtain the math type for the module argument item
             MTType type;
-            if (item.getProgramTypeValue() != null) {
+            if (item.getProgramTypeValue() != null
+                    && !(item.getProgramTypeValue() instanceof PTVoid)) {
                 type = item.getProgramTypeValue().toMath();
             }
             else {
