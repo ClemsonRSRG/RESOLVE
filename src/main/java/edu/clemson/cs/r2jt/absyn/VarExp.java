@@ -183,6 +183,9 @@ public class VarExp extends Exp {
         if (name != null)
             strName = name.toString();
 
+        if (qualifier != null)
+            strName = qualifier.toString() + "." + strName;
+
         printSpace(indent, sb);
         //    if (name != null) {
         //        sb.append(name.toString());
