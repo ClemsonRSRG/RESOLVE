@@ -104,8 +104,8 @@ public class HardCoded {
             b.addBinding("Powerclass", v, g.POWERCLASS);
             b.addBinding("true", v, g.BOOLEAN);
             b.addBinding("false", v, g.BOOLEAN);
-            b.addBinding("union", v, g.UNION);
-            b.addBinding("intersect", v, g.INTERSECT);
+            b.addBinding("cls_union", v, g.UNION);
+            b.addBinding("cls_intersection", v, g.INTERSECT);
             b.addBinding("->", v, g.FUNCTION);
             b.addBinding("and", v, g.AND);
             b.addBinding("not", v, g.NOT);
