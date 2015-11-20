@@ -334,7 +334,7 @@ INSTANTIATION
   ;
   
 INTERSECT
-  : 'intersect'
+  : 'intersection' | 'cls_intersection'
   ;
   
 INTRODUCES
@@ -618,7 +618,7 @@ TYPE_FAMILY
   ;
   
 UNION
-  : 'union'
+  : 'union' | 'cls_union'
   ;
   
 UNIQUE
