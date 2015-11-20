@@ -103,6 +103,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             PSymbol asPsymbol = (PSymbol) expression;
             int intRepOfOp = addPsymbol(asPsymbol);
             int root = addFormula(expression);
+            if (m_evaluates_to_false)
+                return "";
             if (type.isBoolean()) {
                 return mergeOperators(m_registry.getIndexForSymbol("true"),
                         root);
@@ -284,8 +286,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
                 return rString;
             }
-            int opA = m_registry.findAndCompress(holdingTank.pop());
             int opB = m_registry.findAndCompress(holdingTank.pop());
+            int opA = m_registry.findAndCompress(holdingTank.pop());
             // Want to replace quantified vars with constant if it is equal to the constant
             int keeper = chooseSymbolToKeep(opA, opB);
             if (keeper == opB) {
@@ -315,13 +317,13 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         String s = m_registry.m_indexToSymbol.get(a);
         if (s.contains("¢")) {
             if (!m_registry.m_indexToSymbol.get(b).contains("¢"))
-                return b;
+                return b; // a is created, b is not
             else
-                return a < b ? a : b;
+                return a < b ? a : b; // a is created, b is created
         }
         if (m_registry.getUsage(s).equals(Registry.Usage.FORALL))
-            return b;
-        return a;
+            return b; // a is quantified
+        return a < b ? a : b;
     }
 
     // look for =(x,y)=true in list.  If found call merge(x,y).
@@ -870,10 +872,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         String r = "";
         if (m_evaluates_to_false)
             r += "Conjunction evaluates to false" + "\n";
-        /*for (MTType key : m_registry.m_typeToSetOfOperators.keySet()) {
+        for (MTType key : m_registry.m_typeToSetOfOperators.keySet()) {
             r += key.toString() + ":\n";
             r += m_registry.m_typeToSetOfOperators.get(key) + "\n\n";
-        }*/
+        }
         for (NormalizedAtomicExpressionMapImpl cur : m_exprList) {
             r += cur.toHumanReadableString(m_registry) + "\n";
         }
