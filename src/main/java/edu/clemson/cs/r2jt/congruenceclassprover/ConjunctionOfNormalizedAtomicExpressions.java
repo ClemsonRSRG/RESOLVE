@@ -15,6 +15,7 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.*;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import edu.clemson.cs.r2jt.vcgeneration.vcs.VerificationCondition;
 
 import java.util.*;
 
@@ -30,20 +31,20 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     private int f_num = 0;
     private String m_current_justification = "";
     private final Map<Integer, Set<NormalizedAtomicExpressionMapImpl>> m_useMap;
-    protected final boolean m_forVC_flag;
+    protected final VerificationConditionCongruenceClosureImpl m_VC;
 
     /**
      * @param registry the Registry symbols contained in the conjunction will
      *                 reference. This class will add entries to the registry if needed.
      */
     public ConjunctionOfNormalizedAtomicExpressions(Registry registry,
-            boolean for_VC) {
+                                                    VerificationConditionCongruenceClosureImpl vc) {
         m_registry = registry;
         // Array list is much slower than LinkedList for this application
         m_exprList = new LinkedList<NormalizedAtomicExpressionMapImpl>();
         m_useMap =
                 new HashMap<Integer, Set<NormalizedAtomicExpressionMapImpl>>();
-        m_forVC_flag = for_VC;
+        m_VC = vc; // null if this is a theorem
     }
 
     protected int size() {
@@ -375,7 +376,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
             return null;
         }
-
+        boolean b_goal = false;
+        if(m_VC!=null && m_VC.getGoalSymbols().containsKey(m_registry.getSymbolForIndex(b))){
+            b_goal = true;
+        }
         Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator();
         Stack<NormalizedAtomicExpressionMapImpl> modifiedEntries =
                 new Stack<NormalizedAtomicExpressionMapImpl>();
@@ -397,7 +401,18 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             // If the modified one is already there, don't put it back
             if (indexToInsert < 0) {
                 indexToInsert = -(indexToInsert + 1);
+                NormalizedAtomicExpressionMapImpl nm = modifiedEntries.peek();
+                if(m_VC!=null && m_registry.getSymbolForIndex(nm.readPosition(0)).equals("or")){
+                    if(m_VC.getGoalSymbols().containsKey(m_registry.getSymbolForIndex(nm.readRoot()))){
+                        System.err.println("new goals");
+                        String g1 = m_registry.getSymbolForIndex(nm.readPosition(1));
+                        String g2 = m_registry.getSymbolForIndex(nm.readOperator(2));
+                        m_VC.addGoal(g1);
+                        m_VC.addGoal(g2);
+                    }
+                }
                 m_exprList.add(indexToInsert, modifiedEntries.pop());
+
             }
             else {
                 // the expr is in the list, but are the roots different?
@@ -863,7 +878,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         for (Integer i : relatedKeys.keySet()) {
             rMap.put(m_registry.getSymbolForIndex(i), relatedKeys.get(i));
         }
-
+        rMap.put("_most_distant",closeness); // for scaling
         return rMap;
     }
 

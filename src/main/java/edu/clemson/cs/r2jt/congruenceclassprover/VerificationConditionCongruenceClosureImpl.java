@@ -55,7 +55,7 @@ public class VerificationConditionCongruenceClosureImpl {
         m_consequent = vc.getConsequent();
         m_registry = new Registry(g);
         m_conjunction =
-                new ConjunctionOfNormalizedAtomicExpressions(m_registry, true);
+                new ConjunctionOfNormalizedAtomicExpressions(m_registry, this);
         m_goal = new ArrayList<String>();
         addPExp(m_antecedent.iterator(), true);
         addPExp(m_consequent.iterator(), false);
@@ -386,7 +386,7 @@ public class VerificationConditionCongruenceClosureImpl {
         }
     }
 
-    private void addGoal(String a) {
+    protected void addGoal(String a) {
         String r = m_registry.getRootSymbolForSymbol(a);
         if (m_goal.size() == 1
                 && m_registry.getRootSymbolForSymbol(m_goal.get(0)).equals(

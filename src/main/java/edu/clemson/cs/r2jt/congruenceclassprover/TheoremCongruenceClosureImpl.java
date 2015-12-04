@@ -42,6 +42,7 @@ public class TheoremCongruenceClosureImpl {
     protected boolean m_allowNewSymbols;
     protected String m_name;
     protected int m_insertCnt;
+    protected boolean m_noQuants = false;
 
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp p,
                                         boolean allowNewSymbols, String name) {
@@ -54,7 +55,7 @@ public class TheoremCongruenceClosureImpl {
         m_theoremRegistry = new Registry(g);
         m_matchConj =
                 new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,
-                        false);
+                        null);
         if (p.getTopLevelOperation().equals("implies")) {
             PExp matchingpart = p.getSubExpressions().get(0);
             m_matchConj.addExpression(matchingpart);
@@ -99,7 +100,7 @@ public class TheoremCongruenceClosureImpl {
         m_theoremRegistry = new Registry(g);
         m_matchConj =
                 new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,
-                        false);
+                        null);
         if (enterToMatchAndBindAsEquivalentToTrue)
             m_matchConj.addExpression(toMatchAndBind);
         else
@@ -112,7 +113,7 @@ public class TheoremCongruenceClosureImpl {
         if (m_function_names == null) {
             Registry tReg = new Registry(m_typeGraph);
             ConjunctionOfNormalizedAtomicExpressions temp =
-                    new ConjunctionOfNormalizedAtomicExpressions(tReg, false);
+                    new ConjunctionOfNormalizedAtomicExpressions(tReg, null);
             temp.addExpression(m_theorem);
 
             Set<String> rSet = tReg.getFunctionNames();
@@ -123,7 +124,7 @@ public class TheoremCongruenceClosureImpl {
             rSet.remove("not"); // remove when not p ==> p = false
             rSet.remove("+"); // temporary
             //rSet.remove("-");
-            //rSet.remove("or"); // temporary this is really bad
+            rSet.remove("or"); // temporary this is really bad
             m_function_names = rSet;
         }
         return m_function_names;
@@ -163,6 +164,7 @@ public class TheoremCongruenceClosureImpl {
             m_all_literals.remove("7");
             m_all_literals.remove("8");
             m_all_literals.remove("9");
+            m_all_literals.remove("or");
         }
 
         return m_all_literals;
@@ -175,6 +177,7 @@ public class TheoremCongruenceClosureImpl {
                 new ArrayList<InsertExpWithJustification>();
 
         if (m_insertExpr.getQuantifiedVariables().isEmpty()) {
+            m_noQuants = true;
             rList.add(new InsertExpWithJustification(m_insertExpr, m_name
                     + "\n\t" + m_theoremString, m_insertCnt));
             return rList;

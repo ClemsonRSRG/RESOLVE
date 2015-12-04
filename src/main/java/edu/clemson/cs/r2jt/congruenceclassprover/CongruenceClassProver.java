@@ -407,6 +407,7 @@ public final class CongruenceClassProver {
         chooseNewTheorem: while (status
                 .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                 && System.currentTimeMillis() <= endTime) {
+            long time_at_selection = System.currentTimeMillis();
             // Rank theorems
             Map<String, Integer> vcSymbolRelevanceMap = vcc.getGoalSymbols();
             int threshold = 16 * vcSymbolRelevanceMap.keySet().size() + 1;
@@ -416,7 +417,6 @@ public final class CongruenceClassProver {
                             theoremAppliedCount, vcc.getRegistry());
             int max_Theorems_to_choose = 1;
             int num_Theorems_chosen = 0;
-            long timeAtLastIter = System.currentTimeMillis();
             while (!rankedTheorems.m_pQueue.isEmpty()
                     && status
                             .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
@@ -433,7 +433,7 @@ public final class CongruenceClassProver {
                 theoremAppliedCount.put(cur.m_name,
                         ++count);
                 // We are using it, even if it makes no difference
-                long time_at_selection = System.currentTimeMillis();
+
                 ArrayList<InsertExpWithJustification> instantiatedTheorems =
                         cur.applyTo(vcc, endTime);
                 if (instantiatedTheorems != null
@@ -455,6 +455,9 @@ public final class CongruenceClassProver {
                                                     endTime,
                                                     curP.m_theoremDefinitionString);
                             applied.add(curP.m_theorem.toString());
+                            if(cur.m_noQuants){
+                                theoremsForThisVC.remove(cur);
+                            }
                         }
                         if (!substitutionMade.equals("")) {
 
@@ -476,7 +479,13 @@ public final class CongruenceClassProver {
                         }
 
                     }
+                    if(substitutionMade==""){
+                        theseResults += "Emptied queue for " + cur.m_name +
+                                " with no new results ["+ (System.currentTimeMillis()-time_at_selection) +"ms]\n\n";
+                    }
                 }
+                theseResults += "Could not find any matches for " + cur.m_name +
+                "["+ (System.currentTimeMillis()-time_at_selection) +"ms]\n\n";
 
             }
         }

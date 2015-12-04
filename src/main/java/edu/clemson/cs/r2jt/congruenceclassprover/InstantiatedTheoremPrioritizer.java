@@ -41,12 +41,13 @@ public class InstantiatedTheoremPrioritizer {
 
     public int calculateScore(Set<String> theorem_symbols, int symCnt) {
 
-        int max = m_vcReg.m_indexToSymbol.size();
-        float score = 0;
-        // penalty for duplicate bindings
-        int diff = symCnt - theorem_symbols.size();
-        float age = 0;
-        diff = diff > 0 ? diff : 0;
+        float max = m_vcReg.m_indexToSymbol.size();
+        float score = 0f;
+        float age = 0f;
+        float sSz = theorem_symbols.size();
+        assert sSz <= (float)symCnt;
+        float diff = 1f - (sSz/(float)symCnt);
+        //diff = diff > 0 ? diff : 0;
         if (m_vc_symbols.isEmpty()) {
             for (String s : theorem_symbols) {
                 if (m_vcReg.m_symbolToIndex.containsKey(s)) {
@@ -71,10 +72,17 @@ public class InstantiatedTheoremPrioritizer {
                 }
             }
         }
-        float avgAge = age/theorem_symbols.size();
+        float avgAge = age/sSz;
+        float avgScore = score/sSz;
+
+        // these range from [0,1], lower is better
+        float scaledScore = avgScore/(float)m_vc_symbols.get("_most_distant");
         float scaledAvgAge = avgAge/max;
-        float avgScore = score/theorem_symbols.size();
-        int r = (int)(scaledAvgAge * avgScore * (1 + diff));
+
+        scaledAvgAge += .01;
+        scaledScore += .01;
+        diff += .01;
+        int r = (int)((20f*scaledAvgAge) + (50f*scaledScore) + (30f*diff));
         return r;
     }
 
