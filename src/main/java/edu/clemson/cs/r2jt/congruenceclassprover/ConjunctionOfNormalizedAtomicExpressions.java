@@ -872,10 +872,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         String r = "";
         if (m_evaluates_to_false)
             r += "Conjunction evaluates to false" + "\n";
-        for (MTType key : m_registry.m_typeToSetOfOperators.keySet()) {
+/*        for (MTType key : m_registry.m_typeToSetOfOperators.keySet()) {
             r += key.toString() + ":\n";
             r += m_registry.m_typeToSetOfOperators.get(key) + "\n\n";
         }
+        */
         for (NormalizedAtomicExpressionMapImpl cur : m_exprList) {
             r += cur.toHumanReadableString(m_registry) + "\n";
         }

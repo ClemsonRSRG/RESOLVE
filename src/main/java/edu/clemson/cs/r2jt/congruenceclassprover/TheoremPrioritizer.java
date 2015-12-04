@@ -57,11 +57,10 @@ public class TheoremPrioritizer {
 
             }
 
-            if (m_theoremAppliedCount.containsKey(t.m_theoremString)
+            if (m_theoremAppliedCount.containsKey(t.m_name)
                     && score < Integer.MAX_VALUE) {
-                score += m_theoremAppliedCount.get(t.m_theoremString);
+                score += m_theoremAppliedCount.get(t.m_name);
             }
-            //if (score <= threshold) {
             tws.m_score = score;
             m_pQueue.add(tws);
             //}

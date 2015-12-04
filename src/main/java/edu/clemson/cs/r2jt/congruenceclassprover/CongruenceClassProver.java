@@ -50,7 +50,7 @@ public final class CongruenceClassProver {
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
     private String m_results;
-    private final long DEFAULTTIMEOUT = 5000;
+    private final long DEFAULTTIMEOUT = 15000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     private boolean printVCEachStep = false;
@@ -60,7 +60,7 @@ public final class CongruenceClassProver {
     private ProverListener myProverListener;
     private long myTimeout;
     private long totalTime = 0;
-    private int numUsesBeforeQuit;
+    private final int numUsesBeforeQuit; // weird bug if this isn't final
     private final int DEFAULTTRIES = -1;
     private static final String[] NUMTRIES_ARGS = { "numtries" };
     public static final Flag FLAG_NUMTRIES =
@@ -129,17 +129,16 @@ public final class CongruenceClassProver {
         for (TheoremEntry e : theoremEntries) {
             PExp assertion = e.getAssertion();
             String eName = e.getName();
-            if (assertion.isEquality()) {
-                addEqualityTheorem(true, assertion, eName);
-                addEqualityTheorem(false, assertion, eName);
+            if (assertion.isEquality() && assertion.getQuantifiedVariables().size()>0) {
+                addEqualityTheorem(true, assertion, eName + "_left"); // match left
+                addEqualityTheorem(false, assertion, eName + "_right"); // match right
+                m_theorems.add(new TheoremCongruenceClosureImpl(g,assertion,false,eName+"_whole")); // match whole
             }
             else {
                 TheoremCongruenceClosureImpl t =
                         new TheoremCongruenceClosureImpl(g, assertion, false,
                                 eName);
-                if (!t.m_unneeded) {
-                    m_theorems.add(t);
-                }
+                m_theorems.add(t);
                 //addContrapositive(assertion, eName);
             }
         }
@@ -278,18 +277,7 @@ public final class CongruenceClassProver {
         TheoremCongruenceClosureImpl t =
                 new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
                         false, false, thName);
-        if (!t.m_unneeded) {
-            m_theorems.add(t);
-        }
-
-        if (lhs.isEquality()) {
-            t =
-                    new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
-                            true, false, thName);
-            if (!t.m_unneeded) {
-                m_theorems.add(t);
-            }
-        }
+        m_theorems.add(t);
     }
 
     public void start() throws IOException {
@@ -435,6 +423,16 @@ public final class CongruenceClassProver {
                     && (num_Theorems_chosen < max_Theorems_to_choose)) {
                 int theoremScore = rankedTheorems.m_pQueue.peek().m_score;
                 TheoremCongruenceClosureImpl cur = rankedTheorems.poll();
+                // Mark as used
+                int count = 0;
+                if (theoremAppliedCount
+                        .containsKey(cur.m_name))
+                    count =
+                            theoremAppliedCount
+                                    .get(cur.m_name);
+                theoremAppliedCount.put(cur.m_name,
+                        ++count);
+                // We are using it, even if it makes no difference
                 long time_at_selection = System.currentTimeMillis();
                 ArrayList<InsertExpWithJustification> instantiatedTheorems =
                         cur.applyTo(vcc, endTime);
@@ -447,6 +445,7 @@ public final class CongruenceClassProver {
                     String substitutionMade = "";
                     while (!instPQ.m_pQueue.isEmpty() && substitutionMade == "") {
                         PExpWithScore curP = instPQ.m_pQueue.poll();
+
                         if (!applied.contains(curP.m_theorem.toString())) {
                             substitutionMade =
                                     vcc
@@ -472,14 +471,6 @@ public final class CongruenceClassProver {
                             if (printVCEachStep)
                                 theseResults += vcc.toString();
                             status = vcc.isProved();
-                            int count = 0;
-                            if (theoremAppliedCount
-                                    .containsKey(cur.m_theoremString))
-                                count =
-                                        theoremAppliedCount
-                                                .get(cur.m_theoremString);
-                            theoremAppliedCount.put(cur.m_theoremString,
-                                    ++count);
                             num_Theorems_chosen++;
                             continue chooseNewTheorem;
                         }

@@ -32,6 +32,7 @@ public class VerificationConditionCongruenceClosureImpl {
     private final Registry m_registry;
     private final TypeGraph m_typegraph;
     public final String m_name;
+    public final String m_VC_string;
     private final Antecedent m_antecedent;
     private final Consequent m_consequent;
     private final ConjunctionOfNormalizedAtomicExpressions m_conjunction;
@@ -49,12 +50,15 @@ public class VerificationConditionCongruenceClosureImpl {
     public VerificationConditionCongruenceClosureImpl(TypeGraph g, VC vc) {
         m_typegraph = g;
         m_name = vc.getName();
+        m_VC_string = vc.toString();
         m_antecedent = vc.getAntecedent();
         m_consequent = vc.getConsequent();
         m_registry = new Registry(g);
         m_conjunction =
                 new ConjunctionOfNormalizedAtomicExpressions(m_registry, true);
         m_goal = new ArrayList<String>();
+        addPExp(m_antecedent.iterator(), true);
+        addPExp(m_consequent.iterator(), false);
         forAllQuantifiedPExps = new ArrayList<PExp>();
         if (vc.m_liftedLambdaPredicates != null
                 && vc.m_liftedLambdaPredicates.size() > 0) {
@@ -99,9 +103,6 @@ public class VerificationConditionCongruenceClosureImpl {
         args.add(fls);
         PSymbol fandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
         m_conjunction.addExpression(fandfeqf);
-
-        addPExp(m_antecedent.iterator(), true);
-        addPExp(m_consequent.iterator(), false);
         //m_goal.add("false");
         m_conjunction.updateUseMap();
     }
@@ -399,7 +400,7 @@ public class VerificationConditionCongruenceClosureImpl {
 
     @Override
     public String toString() {
-        String r = m_name + "\n" + m_conjunction;
+        String r = "\n" + m_VC_string + "\n" + m_name + "\n" + m_conjunction;
         for (PExp pq : forAllQuantifiedPExps) {
             r += pq.toString() + "\n";
         }
