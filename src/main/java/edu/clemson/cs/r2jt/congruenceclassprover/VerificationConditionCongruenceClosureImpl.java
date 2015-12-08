@@ -36,7 +36,7 @@ public class VerificationConditionCongruenceClosureImpl {
     private final Antecedent m_antecedent;
     private final Consequent m_consequent;
     private final ConjunctionOfNormalizedAtomicExpressions m_conjunction;
-    protected final List<String> m_goal;
+    protected final Set<String> m_goal;
     private int m_fc_ctr = 0;
     private final boolean DOCOMPLEMENTS = false;
 
@@ -56,9 +56,11 @@ public class VerificationConditionCongruenceClosureImpl {
         m_registry = new Registry(g);
         m_conjunction =
                 new ConjunctionOfNormalizedAtomicExpressions(m_registry, this);
-        m_goal = new ArrayList<String>();
-        addPExp(m_antecedent.iterator(), true);
+        m_goal = new HashSet<String>();
+
         addPExp(m_consequent.iterator(), false);
+        addPExp(m_antecedent.iterator(), true);
+
         forAllQuantifiedPExps = new ArrayList<PExp>();
         if (vc.m_liftedLambdaPredicates != null
                 && vc.m_liftedLambdaPredicates.size() > 0) {
@@ -362,9 +364,8 @@ public class VerificationConditionCongruenceClosureImpl {
         if (m_conjunction.m_evaluates_to_false)
             return STATUS.FALSE_ASSUMPTION; // this doesn't mean P->Q = False, it just means P = false
         int t = m_registry.getIndexForSymbol("true");
-        for (int i = 0; i < m_goal.size(); ++i) {
-            String goal = m_goal.get(i);
-            int g = m_registry.getIndexForSymbol(goal);
+        for (String gS : m_goal) {
+            int g = m_registry.getIndexForSymbol(gS);
             // check each goal has same root
             if (g == t) {
                 return STATUS.PROVED;
@@ -388,14 +389,9 @@ public class VerificationConditionCongruenceClosureImpl {
 
     protected void addGoal(String a) {
         String r = m_registry.getRootSymbolForSymbol(a);
-        if (m_goal.size() == 1
-                && m_registry.getRootSymbolForSymbol(m_goal.get(0)).equals(
-                        "false")) {
-            m_goal.add(0, r);
-        }
-        if (m_goal.size() > 1 && r.equals("false"))
+        if (m_goal.contains(r))
             return;
-        m_goal.add(a);
+        m_goal.add(r);
     }
 
     @Override
@@ -409,9 +405,8 @@ public class VerificationConditionCongruenceClosureImpl {
         // Goals
         if (m_goal.isEmpty())
             return r;
-        r += m_registry.getRootSymbolForSymbol(m_goal.get(0));
-        for (int i = 1; i < m_goal.size(); ++i) {
-            r += ", " + m_registry.getRootSymbolForSymbol(m_goal.get(i)) + " ";
+        for (String gS : m_goal) {
+            r += m_registry.getRootSymbolForSymbol(gS) + " ";
         }
         r += "\n";
         return r;

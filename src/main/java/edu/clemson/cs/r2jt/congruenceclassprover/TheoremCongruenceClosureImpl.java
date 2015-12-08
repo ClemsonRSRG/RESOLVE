@@ -45,7 +45,7 @@ public class TheoremCongruenceClosureImpl {
     protected boolean m_noQuants = false;
 
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp p,
-                                        boolean allowNewSymbols, String name) {
+            boolean allowNewSymbols, String name) {
         m_name = name;
         m_allowNewSymbols = allowNewSymbols;
         m_typeGraph = g;
@@ -64,33 +64,37 @@ public class TheoremCongruenceClosureImpl {
                 if (matchingpart.getSubExpressions().get(0).getSubExpressions()
                         .size() == 0
                         && matchingpart.getSubExpressions().get(1)
-                        .getSubExpressions().size() == 0) {
+                                .getSubExpressions().size() == 0) {
                     partMatchedisConstantEquation = true;
                 }
             } //
-        } else if (p.getQuantifiedVariables().size() == 1) {
+        }
+        else if (p.getQuantifiedVariables().size() == 1) {
             // empty matchConj will trigger find by type
             m_matchConj.addFormula(p); // this adds symbols to reg
             m_matchConj.clear(); // will match based on types
             m_insertExpr = p;
-        } else {
-                /* experimental
-                
-                Is_Permutation((S o T), (T o S)) for example,
-                should go into matchConj as itself, but equal to a boolean variable.
-                .
-                 */
+        }
+        else {
+            /* experimental
+            
+            Is_Permutation((S o T), (T o S)) for example,
+            should go into matchConj as itself, but equal to a boolean variable.
+            .
+             */
             m_matchConj.addFormula(p);
             m_insertExpr = p; // this will add "= true"
         }
 
-        m_insertCnt = m_insertExpr.getSymbolNames().size() + m_insertExpr.getQuantifiedVariables().size();
+        m_insertCnt =
+                m_insertExpr.getSymbolNames().size()
+                        + m_insertExpr.getQuantifiedVariables().size();
     }
 
     // for theorems that are equations
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp toMatchAndBind,
-                                        PExp toInsert, boolean enterToMatchAndBindAsEquivalentToTrue,
-                                        boolean allowNewSymbols, String name) {
+            PExp toInsert, boolean enterToMatchAndBindAsEquivalentToTrue,
+            boolean allowNewSymbols, String name) {
         m_name = name;
         m_allowNewSymbols = allowNewSymbols;
         m_typeGraph = g;
@@ -106,7 +110,9 @@ public class TheoremCongruenceClosureImpl {
         else
             m_matchConj.addFormula(toMatchAndBind);
         m_insertExpr = toInsert;
-        m_insertCnt = m_insertExpr.getSymbolNames().size() + m_insertExpr.getQuantifiedVariables().size();
+        m_insertCnt =
+                m_insertExpr.getSymbolNames().size()
+                        + m_insertExpr.getQuantifiedVariables().size();
     }
 
     public Set<String> getFunctionNames() {
@@ -165,6 +171,7 @@ public class TheoremCongruenceClosureImpl {
             m_all_literals.remove("8");
             m_all_literals.remove("9");
             m_all_literals.remove("or");
+            m_all_literals.remove("+");
         }
 
         return m_all_literals;
@@ -197,9 +204,10 @@ public class TheoremCongruenceClosureImpl {
         Set<java.util.Map<String, String>> allValidBindings;
         if (m_matchConj.size() == 0
                 || ((m_allowNewSymbols && m_theorem.getQuantifiedVariables()
-                .size() == 1) && isEquality)) {
+                        .size() == 1) && isEquality)) {
             allValidBindings = findValidBindingsByType(vc, endTime);
-        } else
+        }
+        else
             allValidBindings = findValidBindings(vc, endTime);
 
         if (allValidBindings == null || allValidBindings.size() == 0) {
@@ -215,7 +223,7 @@ public class TheoremCongruenceClosureImpl {
                 if (m_theoremRegistry.m_indexToSymbol.contains(curBinding
                         .get(thKey))
                         && vc.getRegistry().getUsage(curBinding.get(thKey))
-                        .equals(Registry.Usage.FORALL)) {
+                                .equals(Registry.Usage.FORALL)) {
                     throw new RuntimeException("Quantified var unbound");
                 }
                 MTType quanType =
@@ -253,7 +261,6 @@ public class TheoremCongruenceClosureImpl {
         return rList;
     }
 
-
     // variables to bind are the quantified vars the quantified statement
     // and the created variables in the match conjunction
     private java.util.Map<String, String> getInitBindings() {
@@ -288,7 +295,7 @@ public class TheoremCongruenceClosureImpl {
                 // wildcard is not parent
                 if (!actual.equals(wild))
                     wildToActual.put(wild, actual);
-                    // wildcard is parent, bind to child
+                // wildcard is parent, bind to child
                 else {
                     Set<String> ch = m_theoremRegistry.getChildren(wild);
                     // choose first non quantified symbol (they are all equal)
@@ -298,7 +305,7 @@ public class TheoremCongruenceClosureImpl {
                         if (!m_theoremRegistry.getUsage(c).equals(
                                 Registry.Usage.FORALL)
                                 || !m_theoremRegistry.getUsage(c).equals(
-                                Registry.Usage.CREATED)) {
+                                        Registry.Usage.CREATED)) {
                             wildToActual.put(wild, c);
                             break;
                         }

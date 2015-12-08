@@ -38,7 +38,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      *                 reference. This class will add entries to the registry if needed.
      */
     public ConjunctionOfNormalizedAtomicExpressions(Registry registry,
-                                                    VerificationConditionCongruenceClosureImpl vc) {
+            VerificationConditionCongruenceClosureImpl vc) {
         m_registry = registry;
         // Array list is much slower than LinkedList for this application
         m_exprList = new LinkedList<NormalizedAtomicExpressionMapImpl>();
@@ -376,10 +376,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
             return null;
         }
-        boolean b_goal = false;
-        if(m_VC!=null && m_VC.getGoalSymbols().containsKey(m_registry.getSymbolForIndex(b))){
-            b_goal = true;
-        }
         Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator();
         Stack<NormalizedAtomicExpressionMapImpl> modifiedEntries =
                 new Stack<NormalizedAtomicExpressionMapImpl>();
@@ -402,13 +398,21 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             if (indexToInsert < 0) {
                 indexToInsert = -(indexToInsert + 1);
                 NormalizedAtomicExpressionMapImpl nm = modifiedEntries.peek();
-                if(m_VC!=null && m_registry.getSymbolForIndex(nm.readPosition(0)).equals("or")){
-                    if(m_VC.getGoalSymbols().containsKey(m_registry.getSymbolForIndex(nm.readRoot()))){
-                        System.err.println("new goals");
-                        String g1 = m_registry.getSymbolForIndex(nm.readPosition(1));
-                        String g2 = m_registry.getSymbolForIndex(nm.readOperator(2));
+                if (m_VC != null
+                        && m_registry.getSymbolForIndex(nm.readPosition(0))
+                                .equals("or")) {
+                    if (m_VC.m_goal.contains(m_registry.getSymbolForIndex(nm
+                            .readRoot()))) {
+                        //System.err.println("new goals");
+                        String g1 =
+                                m_registry
+                                        .getSymbolForIndex(nm.readPosition(1));
+                        String g2 =
+                                m_registry
+                                        .getSymbolForIndex(nm.readPosition(2));
                         m_VC.addGoal(g1);
                         m_VC.addGoal(g2);
+                        //System.err.println(nm.toHumanReadableString(m_registry) + " " + g1 + " " + g2);
                     }
                 }
                 m_exprList.add(indexToInsert, modifiedEntries.pop());
@@ -719,7 +723,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     MTType localType =
                             m_registry.getTypeByIndex(m_registry
                                     .getIndexForSymbol(localToBindTo));
-                    if (!localType.isSubtypeOf(wildType))
+                    if (!m_registry.isSubtype(localType, wildType))
                         continue bindToAVCEquation;
                     currentBind.put(wild, localToBindTo);
                     if (isArgOnly) {
@@ -736,17 +740,20 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     new HashMap<String, String>(currentBind);
             // do simple rotation permutations
             for (String tArg : comTargsBound) {
-                rotBind.put(tArg, comVCargsBound.pop());
+                String locSym = comVCargsBound.pop();
+                MTType wildType =
+                        searchReg.getTypeByIndex(searchReg
+                                .getIndexForSymbol(tArg));
+                MTType locType =
+                        m_registry.getTypeByIndex(m_registry
+                                .getIndexForSymbol(locSym));
+                if (m_registry.isSubtype(locType, wildType))
+                    rotBind.put(tArg, locSym);
             }
             if (!rotBind.isEmpty())
                 bindings.add(rotBind);
         }
-        // Have to permute commutative binds for completeness's sake.  Sometimes it matters.
-        // Commutative args bound in this call can be assumed to be the same type.
-        // Can assume each argument is accounted for by 1. being bound in this call,
-        // 2. bound in a previous call (if it was also used in another expression) or
-        // 3. was a literal in the theorem.  So just need to permute the args bound here.
-        // i + 0 = i.  Can't permute this.
+        // Have to typecheck again.  Might have 1 nat, 1 Z arg of + for ex.
         // Just rotating.  Complete for 2 args bound, which is good enough for now.
 
         return bindings;
@@ -878,7 +885,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         for (Integer i : relatedKeys.keySet()) {
             rMap.put(m_registry.getSymbolForIndex(i), relatedKeys.get(i));
         }
-        rMap.put("_most_distant",closeness); // for scaling
+        rMap.put("_most_distant", closeness); // for scaling
         return rMap;
     }
 
@@ -887,11 +894,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         String r = "";
         if (m_evaluates_to_false)
             r += "Conjunction evaluates to false" + "\n";
-/*        for (MTType key : m_registry.m_typeToSetOfOperators.keySet()) {
-            r += key.toString() + ":\n";
-            r += m_registry.m_typeToSetOfOperators.get(key) + "\n\n";
-        }
-        */
+        /*        for (MTType key : m_registry.m_typeToSetOfOperators.keySet()) {
+         r += key.toString() + ":\n";
+         r += m_registry.m_typeToSetOfOperators.get(key) + "\n\n";
+         }
+         */
         for (NormalizedAtomicExpressionMapImpl cur : m_exprList) {
             r += cur.toHumanReadableString(m_registry) + "\n";
         }

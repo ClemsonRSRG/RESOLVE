@@ -30,8 +30,8 @@ public class TheoremPrioritizer {
     private Registry m_vcReg;
 
     public TheoremPrioritizer(List<TheoremCongruenceClosureImpl> theoremList,
-            Map<String, Integer> vcSymbols, int threshold,
-            Map<String, Integer> appliedCount, Registry vcReg) {
+            Map<String, Integer> vcSymbols, Map<String, Integer> appliedCount,
+            Registry vcReg) {
         m_pQueue = new PriorityQueue<TheoremWithScore>(theoremList.size());
         m_vc_symbols = vcSymbols;
         m_theoremAppliedCount = appliedCount;
@@ -52,7 +52,7 @@ public class TheoremPrioritizer {
                         && !shouldExclude(t.getFunctionNames())) {
                     score =
                             calculateScoreAverage(t.getNonQuantifiedSymbols(),
-                                    m_vc_symbols.keySet().size());
+                                    m_vcReg.m_symbolToIndex.keySet().size());
                 }
 
             }
@@ -84,9 +84,9 @@ public class TheoremPrioritizer {
         int score = not_contained_penalty;
         int number_not_contained = 0;
         for (String s : theorem_symbols) {
-            String c = m_vcReg.getRootSymbolForSymbol(s);
-            if (m_vc_symbols.containsKey(c)) {
-                int c_score = 2 * m_vc_symbols.get(c);
+            if (m_vcReg.m_symbolToIndex.containsKey(s)) {
+                String c = m_vcReg.getRootSymbolForSymbol(s);
+                int c_score = 2 * m_vcReg.m_symbolToIndex.get(c);
                 if (c_score < score)
                     score = c_score;
             }

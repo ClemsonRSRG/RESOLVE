@@ -22,14 +22,11 @@ import java.util.*;
 public class InstantiatedTheoremPrioritizer {
 
     protected PriorityQueue<PExpWithScore> m_pQueue;
-    private Map<String, Integer> m_vc_symbols;
     protected Registry m_vcReg;
 
     public InstantiatedTheoremPrioritizer(
-            List<InsertExpWithJustification> theoremList,
-            Map<String, Integer> vcSymbols, int threshold, Registry vcReg) {
+            List<InsertExpWithJustification> theoremList, Registry vcReg) {
         m_pQueue = new PriorityQueue<PExpWithScore>(theoremList.size());
-        m_vc_symbols = vcSymbols;
         m_vcReg = vcReg;
         for (InsertExpWithJustification p : theoremList) {
             PExpWithScore pes = new PExpWithScore(p.m_PExp, p.m_Justification);
@@ -45,44 +42,28 @@ public class InstantiatedTheoremPrioritizer {
         float score = 0f;
         float age = 0f;
         float sSz = theorem_symbols.size();
-        assert sSz <= (float)symCnt;
-        float diff = 1f - (sSz/(float)symCnt);
+        assert sSz <= (float) symCnt;
+        float diff = 1f - (sSz / (float) symCnt);
         //diff = diff > 0 ? diff : 0;
-        if (m_vc_symbols.isEmpty()) {
-            for (String s : theorem_symbols) {
-                if (m_vcReg.m_symbolToIndex.containsKey(s)) {
-                    score += m_vcReg.getIndexForSymbol(s);
-                }
-                else
-                    score += max;
+        for (String s : theorem_symbols) {
+
+            String rS = m_vcReg.getRootSymbolForSymbol(s);
+            if (m_vcReg.m_symbolToIndex.containsKey(rS)) {
+                // Age
+                age += m_vcReg.getIndexForSymbol(s);
+            }
+            else {
+                score += max;
             }
         }
-        else {
-            for (String s : theorem_symbols) {
 
-                String rS = m_vcReg.getRootSymbolForSymbol(s);
-                if (m_vc_symbols.containsKey(rS)) {
-                    int i_score =
-                            m_vc_symbols.get(rS);
-                    score += i_score;
-                    // Age
-                    age += m_vcReg.getIndexForSymbol(s);
-                } else {
-                    score += max;
-                }
-            }
-        }
-        float avgAge = age/sSz;
-        float avgScore = score/sSz;
-
+        float avgAge = age / sSz;
         // these range from [0,1], lower is better
-        float scaledScore = avgScore/(float)m_vc_symbols.get("_most_distant");
-        float scaledAvgAge = avgAge/max;
+        float scaledAvgAge = avgAge / max;
 
         scaledAvgAge += .01;
-        scaledScore += .01;
         diff += .01;
-        int r = (int)((20f*scaledAvgAge) + (50f*scaledScore) + (30f*diff));
+        int r = (int) ((80f * scaledAvgAge) + (20f * diff));
         return r;
     }
 
