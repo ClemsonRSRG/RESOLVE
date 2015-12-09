@@ -41,6 +41,8 @@ public class TheoremCongruenceClosureImpl {
     private boolean partMatchedisConstantEquation = false;
     protected boolean m_allowNewSymbols;
     protected String m_name;
+    protected int m_insertCnt;
+    protected boolean m_noQuants = false;
 
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp p,
             boolean allowNewSymbols, String name) {
@@ -53,13 +55,8 @@ public class TheoremCongruenceClosureImpl {
         m_theoremRegistry = new Registry(g);
         m_matchConj =
                 new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,
-                        false);
-
-        if (isEquality) { // no longer used (goes to another constructor)
-            m_matchConj.addFormula(p.getSubExpressions().get(0));
-            m_insertExpr = p;
-        }
-        else if (p.getTopLevelOperation().equals("implies")) {
+                        null);
+        if (p.getTopLevelOperation().equals("implies")) {
             PExp matchingpart = p.getSubExpressions().get(0);
             m_matchConj.addExpression(matchingpart);
             m_insertExpr = p.getSubExpressions().get(1);
@@ -72,25 +69,26 @@ public class TheoremCongruenceClosureImpl {
                 }
             } //
         }
+        else if (p.getQuantifiedVariables().size() == 1) {
+            // empty matchConj will trigger find by type
+            m_matchConj.addFormula(p); // this adds symbols to reg
+            m_matchConj.clear(); // will match based on types
+            m_insertExpr = p;
+        }
         else {
-            if (p.getQuantifiedVariables().size() == 1) {
-                // empty matchConj will trigger find by type
-                m_matchConj.addFormula(p); // this adds symbols to reg
-                m_matchConj.clear(); // will match based on types
-                m_insertExpr = p;
-            }
-            else {
-                /* experimental
-                
-                Is_Permutation((S o T), (T o S)) for example,
-                should go into matchConj as itself, but equal to a boolean variable.
-                .
-                 */
-                m_matchConj.addFormula(p);
-                m_insertExpr = p; // this will add "= true"
-            }
+            /* experimental
+            
+            Is_Permutation((S o T), (T o S)) for example,
+            should go into matchConj as itself, but equal to a boolean variable.
+            .
+             */
+            m_matchConj.addFormula(p);
+            m_insertExpr = p; // this will add "= true"
         }
 
+        m_insertCnt =
+                m_insertExpr.getSymbolNames().size()
+                        + m_insertExpr.getQuantifiedVariables().size();
     }
 
     // for theorems that are equations
@@ -106,19 +104,22 @@ public class TheoremCongruenceClosureImpl {
         m_theoremRegistry = new Registry(g);
         m_matchConj =
                 new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,
-                        false);
+                        null);
         if (enterToMatchAndBindAsEquivalentToTrue)
             m_matchConj.addExpression(toMatchAndBind);
         else
             m_matchConj.addFormula(toMatchAndBind);
         m_insertExpr = toInsert;
+        m_insertCnt =
+                m_insertExpr.getSymbolNames().size()
+                        + m_insertExpr.getQuantifiedVariables().size();
     }
 
     public Set<String> getFunctionNames() {
         if (m_function_names == null) {
             Registry tReg = new Registry(m_typeGraph);
             ConjunctionOfNormalizedAtomicExpressions temp =
-                    new ConjunctionOfNormalizedAtomicExpressions(tReg, false);
+                    new ConjunctionOfNormalizedAtomicExpressions(tReg, null);
             temp.addExpression(m_theorem);
 
             Set<String> rSet = tReg.getFunctionNames();
@@ -129,7 +130,7 @@ public class TheoremCongruenceClosureImpl {
             rSet.remove("not"); // remove when not p ==> p = false
             rSet.remove("+"); // temporary
             //rSet.remove("-");
-            //rSet.remove("or"); // temporary this is really bad
+            rSet.remove("or"); // temporary this is really bad
             m_function_names = rSet;
         }
         return m_function_names;
@@ -169,6 +170,8 @@ public class TheoremCongruenceClosureImpl {
             m_all_literals.remove("7");
             m_all_literals.remove("8");
             m_all_literals.remove("9");
+            m_all_literals.remove("or");
+            m_all_literals.remove("+");
         }
 
         return m_all_literals;
@@ -181,9 +184,9 @@ public class TheoremCongruenceClosureImpl {
                 new ArrayList<InsertExpWithJustification>();
 
         if (m_insertExpr.getQuantifiedVariables().isEmpty()) {
-            String r = "\tinserting: " + m_insertExpr + "\n";
+            m_noQuants = true;
             rList.add(new InsertExpWithJustification(m_insertExpr, m_name
-                    + "\n\t" + m_theoremString));
+                    + "\n\t" + m_theoremString, m_insertCnt));
             return rList;
         }
         // Set flag if quantified variable was not in the matching part
@@ -213,7 +216,7 @@ public class TheoremCongruenceClosureImpl {
         }
 
         HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
-        allValidBindings = discardBindingIfAllValuesNotUnique(allValidBindings);
+        //allValidBindings = discardBindingIfAllValuesNotUnique(allValidBindings);
         for (java.util.Map<String, String> curBinding : allValidBindings) {
             for (String thKey : curBinding.keySet()) {
 
@@ -250,62 +253,12 @@ public class TheoremCongruenceClosureImpl {
                             modifiedInsert.getSubExpressions().get(1)
                                     .toString()))) {
                 rList.add(new InsertExpWithJustification(modifiedInsert, m_name
-                        + "\n\t" + m_theoremString));
+                        + "\n\t" + m_theoremString, m_insertCnt));
             }
             quantToLit.clear();
 
         }
         return rList;
-    }
-
-    // Discard bindings where any 2 map to the same value
-    private java.util.Set<java.util.Map<String, String>> discardBindingIfAllValuesNotUnique(
-            java.util.Set<java.util.Map<String, String>> b) {
-        if (m_theorem.getQuantifiedVariables().size() < 2)
-            return b;
-        java.util.Set<java.util.Map<String, String>> rSet =
-                new HashSet<java.util.Map<String, String>>();
-        discard: for (java.util.Map<String, String> m : b) {
-            HashSet<String> seenVals = new HashSet<String>();
-            for (String k : m.keySet()) {
-                if (k.contains("¢"))
-                    continue;
-                k = m_theoremRegistry.getRootSymbolForSymbol(k);
-                String thisVal = m.get(k);
-                if (seenVals.contains(thisVal)) {
-                    //System.err.println(m_name + m);
-                    continue discard;
-                }
-                else
-                    seenVals.add(thisVal);
-            }
-            rSet.add(m);
-        }
-        return rSet;
-    }
-
-    // Discard bindings where all bind to same value
-    private java.util.Set<java.util.Map<String, String>> discardBindings(
-            java.util.Set<java.util.Map<String, String>> b) {
-        if (m_theorem.getQuantifiedVariables().size() < 2)
-            return b;
-        java.util.Set<java.util.Map<String, String>> rSet =
-                new HashSet<java.util.Map<String, String>>();
-        for (java.util.Map<String, String> m : b) {
-            String lastEntry = "";
-            for (PSymbol p : m_theorem.getQuantifiedVariables()) {
-                String k = p.getTopLevelOperation();
-                k = m_theoremRegistry.getRootSymbolForSymbol(k);
-                String thisEntry = m.get(k);
-                if (!lastEntry.equals(thisEntry) && !lastEntry.equals("")) {
-                    rSet.add(m);
-                    break;
-                }
-                else
-                    lastEntry = thisEntry;
-            }
-        }
-        return rSet;
     }
 
     // variables to bind are the quantified vars the quantified statement

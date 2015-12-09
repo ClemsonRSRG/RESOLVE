@@ -22,49 +22,49 @@ import java.util.*;
 public class InstantiatedTheoremPrioritizer {
 
     protected PriorityQueue<PExpWithScore> m_pQueue;
-    private Map<String, Integer> m_vc_symbols;
     protected Registry m_vcReg;
 
     public InstantiatedTheoremPrioritizer(
-            List<InsertExpWithJustification> theoremList,
-            Map<String, Integer> vcSymbols, int threshold, Registry vcReg) {
+            List<InsertExpWithJustification> theoremList, Registry vcReg) {
         m_pQueue = new PriorityQueue<PExpWithScore>(theoremList.size());
-        m_vc_symbols = vcSymbols;
         m_vcReg = vcReg;
         for (InsertExpWithJustification p : theoremList) {
             PExpWithScore pes = new PExpWithScore(p.m_PExp, p.m_Justification);
-            pes.m_score = calculateScore(pes.m_theorem_symbols);
+            pes.m_score = calculateScore(pes.m_theorem_symbols, p.m_symCnt);
             //if (pes.m_score < threshold)
             m_pQueue.add(pes);
         }
     }
 
-    public int calculateScore(Set<String> theorem_symbols) {
-        int max = m_vcReg.m_indexToSymbol.size();
-        int score = 0;
-        if (m_vc_symbols.isEmpty()) {
-            for (String s : theorem_symbols) {
-                if (m_vcReg.m_symbolToIndex.containsKey(s)) {
-                    score += m_vcReg.getIndexForSymbol(s);
-                }
-                else
-                    score += max;
-            }
-        }
+    public int calculateScore(Set<String> theorem_symbols, int symCnt) {
+
+        float max = m_vcReg.m_indexToSymbol.size();
+        float score = 0f;
+        float age = 0f;
+        float sSz = theorem_symbols.size();
+        assert sSz <= (float) symCnt;
+        float diff = 1f - (sSz / (float) symCnt);
+        //diff = diff > 0 ? diff : 0;
         for (String s : theorem_symbols) {
+
             String rS = m_vcReg.getRootSymbolForSymbol(s);
-            if (m_vc_symbols.containsKey(rS)) {
-                // older symbols take priority
-                // indices are the order of introduction
-                int i_score =
-                        m_vc_symbols.get(rS) * m_vcReg.getIndexForSymbol(rS);
-                score += i_score;
+            if (m_vcReg.m_symbolToIndex.containsKey(rS)) {
+                // Age
+                age += m_vcReg.getIndexForSymbol(s);
             }
             else {
                 score += max;
             }
         }
-        return score / theorem_symbols.size();
+
+        float avgAge = age / sSz;
+        // these range from [0,1], lower is better
+        float scaledAvgAge = avgAge / max;
+
+        scaledAvgAge += .01;
+        diff += .01;
+        int r = (int) ((80f * scaledAvgAge) + (20f * diff));
+        return r;
     }
 
     public PExp poll() {
