@@ -22,10 +22,12 @@ public class InsertExpWithJustification {
 
     public PExp m_PExp;
     public String m_Justification;
+    public int m_symCnt;
 
-    public InsertExpWithJustification(PExp p, String j) {
+    public InsertExpWithJustification(PExp p, String j, int symCnt) {
         m_PExp = p;
         m_Justification = j;
+        m_symCnt = symCnt;
     }
 
     public String toString() {

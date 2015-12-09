@@ -106,7 +106,7 @@ public class Registry {
         // if there are subtypes of t, return those too
         for (MTType m : allTypesInSet) {
             assert m != null : "null entry in allTypesInSet";
-            if (m.isSubtypeOf(t)) {
+            if (isSubtype(m, t)) {
                 rSet.addAll(m_typeToSetOfOperators.get(m));
             }
         }
@@ -136,7 +136,7 @@ public class Registry {
     public void substitute(int opIndexA, int opIndexB) {
         MTType aType = getTypeByIndex(opIndexA);
         MTType bType = getTypeByIndex(opIndexB);
-        if (bType.isSubtypeOf(aType)) {
+        if (isSubtype(bType, aType)) {
             m_indexToType.set(opIndexA, bType);
         }
         // set usage to most restricted: i.e literal over created over forall
