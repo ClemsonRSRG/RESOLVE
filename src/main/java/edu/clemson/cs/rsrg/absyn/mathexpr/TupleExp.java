@@ -40,10 +40,10 @@ public class TupleExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    /** <p>The expression's cartesian product fields */
+    /** <p>The expression's cartesian product fields</p> */
     private final List<Exp> myFields;
 
-    /** <p>The number of cartesian product fields */
+    /** <p>The number of cartesian product fields</p> */
     private final int mySize;
 
     // ===========================================================
