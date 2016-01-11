@@ -1,5 +1,5 @@
 /**
- * NameTy.java
+ * RecordTy.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -13,42 +13,41 @@
 package edu.clemson.cs.rsrg.absyn.rawtypes;
 
 import edu.clemson.cs.rsrg.absyn.Ty;
+import edu.clemson.cs.rsrg.absyn.variables.VarDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
- * <p>This is the class for all the raw named types
+ * <p>This is the class for all the raw record types
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class NameTy extends Ty {
+public class RecordTy extends Ty {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The raw type's qualifier</p> */
-    private PosSymbol myQualifier;
-
-    /** <p>The raw type's name</p> */
-    private final PosSymbol myName;
+    /** <p>The raw type's fields</p> */
+    private final List<VarDec> myInnerFields;
 
     // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs a raw name type.</p>
+     * <p>This constructs a raw record type.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param qualifier A {@link PosSymbol} qualifier object.
-     * @param name A {@link PosSymbol} name object.
+     * @param fields A list of {@link VarDec} representing the fields
+     *               inside this raw record type.
      */
-    public NameTy(Location l, PosSymbol qualifier, PosSymbol name) {
+    public RecordTy(Location l, List<VarDec> fields) {
         super(l);
-        myQualifier = qualifier;
-        myName = name;
+        myInnerFields = fields;
     }
 
     // ===========================================================
@@ -70,17 +69,13 @@ public class NameTy extends Ty {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("NameTy\n");
+        sb.append("RecordTy\n");
 
-        if (myQualifier != null) {
-            sb.append(myQualifier.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-            sb.append("::");
-        }
-
-        if (myName != null) {
-            sb.append(myName.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+        for (VarDec v : myInnerFields) {
+            sb
+                    .append(v.asString(indentSize + innerIndentSize,
+                            innerIndentSize));
+            sb.append("\n");
         }
 
         return sb.toString();
@@ -88,7 +83,7 @@ public class NameTy extends Ty {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link NameTy} class.</p>
+     * for the {@link RecordTy} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -97,47 +92,42 @@ public class NameTy extends Ty {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof NameTy) {
-            NameTy eAsNameTy = (NameTy) o;
+        if (o instanceof RecordTy) {
+            RecordTy eAsRecordTy = (RecordTy) o;
 
-            if (myQualifier != null && eAsNameTy.myQualifier != null) {
-                result = myQualifier.equals(eAsNameTy.myQualifier);
-            }
-            else if (myQualifier == null && eAsNameTy.myQualifier == null) {
-                result = true;
-            }
+            if (myInnerFields != null && eAsRecordTy.myInnerFields != null) {
+                Iterator<VarDec> thisInnerFields = myInnerFields.iterator();
+                Iterator<VarDec> eInnerFields =
+                        eAsRecordTy.myInnerFields.iterator();
 
-            result &= myName.equals(eAsNameTy.myName);
+                while (result && thisInnerFields.hasNext()
+                        && eInnerFields.hasNext()) {
+                    result &=
+                            thisInnerFields.next().equals(eInnerFields.next());
+                }
+
+                //Both had better have run out at the same time
+                result &=
+                        (!thisInnerFields.hasNext())
+                                && (!eInnerFields.hasNext());
+            }
         }
 
         return result;
     }
 
     /**
-     * <p>This method returns a deep copy of the name.</p>
+     * <p>This method returns a deep copy of all the fields.</p>
      *
-     * @return The {@link PosSymbol} representation object.
+     * @return The {@link VarDec} representation object.
      */
-    public PosSymbol getName() {
-        return myName.clone();
-    }
+    public final List<VarDec> getFields() {
+        List<VarDec> copyFields = new ArrayList<>();
+        for (VarDec v : myInnerFields) {
+            copyFields.add(v.clone());
+        }
 
-    /**
-     * <p>This method returns a deep copy of the qualifier name.</p>
-     *
-     * @return The {@link PosSymbol} representation object.
-     */
-    public PosSymbol getQualifier() {
-        return myQualifier.clone();
-    }
-
-    /**
-     * <p>Sets the qualifier for this raw type.</p>
-     *
-     * @param qualifier The {@link PosSymbol} representation object.
-     */
-    public final void setQualifier(PosSymbol qualifier) {
-        myQualifier = qualifier;
+        return copyFields;
     }
 
     /**
@@ -149,13 +139,9 @@ public class NameTy extends Ty {
     public String toString() {
         StringBuffer sb = new StringBuffer();
 
-        if (myQualifier != null) {
-            sb.append(myQualifier.toString());
-            sb.append("::");
-        }
-
-        if (myName != null) {
-            sb.append(myName.toString());
+        for (VarDec v : myInnerFields) {
+            sb.append(v.toString());
+            sb.append("\n");
         }
 
         return sb.toString();
@@ -173,13 +159,7 @@ public class NameTy extends Ty {
      */
     @Override
     protected Ty copy() {
-        PosSymbol newQualifier = null;
-        if (myQualifier != null) {
-            newQualifier = myQualifier.clone();
-        }
-        PosSymbol newName = myName.clone();
-
-        return new NameTy(new Location(myLoc), newQualifier, newName);
+        return new RecordTy(new Location(myLoc), getFields());
     }
 
 }
