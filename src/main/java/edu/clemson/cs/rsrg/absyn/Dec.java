@@ -81,7 +81,7 @@ public abstract class Dec extends ResolveConceptualElement {
      * @return The name in {@link PosSymbol} format.
      */
     public PosSymbol getName() {
-        return myName;
+        return myName.clone();
     }
 
     /**
