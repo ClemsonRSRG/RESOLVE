@@ -64,9 +64,9 @@ public class IfConditionBlock extends ConditionBlock {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("IfConditionBlock\n");
 
         if (myTestingExp != null) {
+            sb.append("If ");
             sb.append(myTestingExp.asString(indentSize + innerIndentSize,
                     innerIndentSize));
             sb.append(" then\n");
@@ -88,6 +88,7 @@ public class IfConditionBlock extends ConditionBlock {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
+        sb.append("If ");
         sb.append(myTestingExp.toString());
         sb.append(" then\n");
         sb.append(super.toString());

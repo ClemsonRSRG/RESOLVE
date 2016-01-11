@@ -1,5 +1,5 @@
 /**
- * LoopConditionBlock.java
+ * WhileConditionBlock.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -23,12 +23,12 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the loop condition block
+ * <p>This is the class for all the while loop condition block
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class LoopConditionBlock extends ConditionBlock {
+public class WhileConditionBlock extends ConditionBlock {
 
     // ===========================================================
     // Member Fields
@@ -51,7 +51,7 @@ public class LoopConditionBlock extends ConditionBlock {
     // ===========================================================
 
     /**
-     * <p>This constructs a loop code block with a condition test.
+     * <p>This constructs a while loop code block with a condition test.
      * If the testing expression is met, then the code block is
      * executed.</p>
      *
@@ -60,7 +60,7 @@ public class LoopConditionBlock extends ConditionBlock {
      * @param statements The list of {@link Statement}s that are in
      *                   this block.
      */
-    public LoopConditionBlock(Location l, ProgramExp test,
+    public WhileConditionBlock(Location l, ProgramExp test,
             List<ProgramVariableExp> changingVars, Exp maintaining,
             Exp decreasing, Exp elapsedTime, List<Statement> statements) {
         super(l, test, statements);
@@ -89,9 +89,9 @@ public class LoopConditionBlock extends ConditionBlock {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("LoopConditionBlock\n");
 
         if (myTestingExp != null) {
+            sb.append("While ");
             sb.append(myTestingExp.asString(0, innerIndentSize));
             sb.append("\n");
         }
@@ -146,7 +146,7 @@ public class LoopConditionBlock extends ConditionBlock {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link LoopConditionBlock} class.</p>
+     * for the {@link WhileConditionBlock} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -155,20 +155,22 @@ public class LoopConditionBlock extends ConditionBlock {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof LoopConditionBlock) {
-            LoopConditionBlock eAsLoopConditionBlock = (LoopConditionBlock) o;
-            result = super.equals(eAsLoopConditionBlock);
+        if (o instanceof WhileConditionBlock) {
+            WhileConditionBlock eAsWhileConditionBlock =
+                    (WhileConditionBlock) o;
+            result = super.equals(eAsWhileConditionBlock);
 
             if (result) {
                 if (myChangingVars != null
-                        && eAsLoopConditionBlock.myChangingVars != null) {
+                        && eAsWhileConditionBlock.myChangingVars != null) {
 
                     if (myChangingVars != null
-                            && eAsLoopConditionBlock.myChangingVars != null) {
+                            && eAsWhileConditionBlock.myChangingVars != null) {
                         Iterator<ProgramVariableExp> thisChangingVars =
                                 myChangingVars.iterator();
                         Iterator<ProgramVariableExp> eChangingVars =
-                                eAsLoopConditionBlock.myChangingVars.iterator();
+                                eAsWhileConditionBlock.myChangingVars
+                                        .iterator();
 
                         while (result && thisChangingVars.hasNext()
                                 && eChangingVars.hasNext()) {
@@ -188,30 +190,30 @@ public class LoopConditionBlock extends ConditionBlock {
                 }
 
                 if (myMaintainingClause != null
-                        && eAsLoopConditionBlock.myMaintainingClause != null) {
+                        && eAsWhileConditionBlock.myMaintainingClause != null) {
                     result &=
                             myMaintainingClause
-                                    .equals(eAsLoopConditionBlock.myMaintainingClause);
+                                    .equals(eAsWhileConditionBlock.myMaintainingClause);
                 }
                 else {
                     result &= false;
                 }
 
                 if (myDecreasingClause != null
-                        && eAsLoopConditionBlock.myDecreasingClause != null) {
+                        && eAsWhileConditionBlock.myDecreasingClause != null) {
                     result &=
                             myDecreasingClause
-                                    .equals(eAsLoopConditionBlock.myDecreasingClause);
+                                    .equals(eAsWhileConditionBlock.myDecreasingClause);
                 }
                 else {
                     result &= false;
                 }
 
                 if (myElapsedTimeClause != null
-                        && eAsLoopConditionBlock.myElapsedTimeClause != null) {
+                        && eAsWhileConditionBlock.myElapsedTimeClause != null) {
                     result &=
                             myElapsedTimeClause
-                                    .equals(eAsLoopConditionBlock.myElapsedTimeClause);
+                                    .equals(eAsWhileConditionBlock.myElapsedTimeClause);
                 }
                 else {
                     result &= false;
@@ -330,6 +332,7 @@ public class LoopConditionBlock extends ConditionBlock {
 
         sb.append("do\n");
         sb.append(super.toString());
+        sb.append("end\n");
 
         return sb.toString();
     }
@@ -346,7 +349,7 @@ public class LoopConditionBlock extends ConditionBlock {
      */
     @Override
     protected ConditionBlock copy() {
-        return new LoopConditionBlock(myLoc, myTestingExp.clone(),
+        return new WhileConditionBlock(myLoc, myTestingExp.clone(),
                 getChangingVars(), getMaintainingClause(),
                 getDecreasingClause(), getElapsedTimeClause(), getStatements());
     }
