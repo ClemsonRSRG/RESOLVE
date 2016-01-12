@@ -1,5 +1,5 @@
 /**
- * SetExp.java
+ * LambdaExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -16,29 +16,20 @@ import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.absyn.variables.MathVarDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-/**
- * <p>This is the class for all the mathematical set expressions
- * of the kind {x : Z | x < y} that the compiler builds from
- * the ANTLR4 AST tree.</p>
- *
- * @version 2.0
- */
-public class SetExp extends MathExp {
+public class LambdaExp extends MathExp {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The mathematical variable in this set expression.</p> */
-    private final MathVarDec myVar;
+    /** <p>The list of mathematical variables in this lambda expression.</p> */
+    private final List<MathVarDec> myParameters;
 
-    /** <p>The set expression's where part.</p> */
-    private final Exp myWhereExp;
-
-    /** <p>The set expression's body.</p> */
+    /** <p>The lambda expression's body.</p> */
     private final Exp myBodyExp;
 
     // ===========================================================
@@ -46,17 +37,20 @@ public class SetExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a set expression.</p>
+     * <p>This constructs a lambda expression.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param var A {@link MathVarDec} representing the expression's variable.
-     * @param where A {@link Exp} representing the where clause.
+     * @param params A list of {@link MathVarDec} representing the expression's variables.
      * @param body A {@link Exp} representing the body of the expression.
      */
-    public SetExp(Location l, MathVarDec var, Exp where, Exp body) {
+    public LambdaExp(Location l, List<MathVarDec> params, Exp body) {
         super(l);
-        myVar = var;
-        myWhereExp = where;
+
+        if (params == null) {
+            throw new IllegalArgumentException("null LambdaExp params");
+        }
+
+        myParameters = params;
         myBodyExp = body;
     }
 
@@ -76,21 +70,19 @@ public class SetExp extends MathExp {
      * @return A formatted text string of the class.
      */
     @Override
-    public final String asString(int indentSize, int innerIndentSize) {
+    public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("SetExp\n");
-        sb
-                .append(myVar.asString(indentSize + innerIndentSize,
-                        innerIndentSize));
+        sb.append("LambdaExp\n");
 
-        if (myWhereExp != null) {
-            sb.append(myWhereExp.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+        for (MathVarDec v : myParameters) {
+            sb.append(v);
         }
 
-        sb.append(myBodyExp.asString(indentSize + innerIndentSize,
-                innerIndentSize));
+        if (myBodyExp != null) {
+            sb.append(myBodyExp.asString(indentSize + innerIndentSize,
+                    innerIndentSize));
+        }
 
         return sb.toString();
     }
@@ -106,12 +98,7 @@ public class SetExp extends MathExp {
      */
     @Override
     public final boolean containsExp(Exp exp) {
-        boolean found = myWhereExp.containsExp(exp);
-        if (!found) {
-            found = myBodyExp.containsExp(exp);
-        }
-
-        return found;
+        return myBodyExp.containsExp(exp);
     }
 
     /**
@@ -127,12 +114,18 @@ public class SetExp extends MathExp {
      */
     @Override
     public boolean containsVar(String varName, boolean IsOldExp) {
-        boolean found = myWhereExp.containsVar(varName, IsOldExp);
-        if (!found) {
-            found = myBodyExp.containsVar(varName, IsOldExp);
+        boolean result = false;
+
+        Iterator<MathVarDec> parameterIter = myParameters.iterator();
+        while (!result && parameterIter.hasNext()) {
+            result = parameterIter.next().getName().getName().equals(varName);
         }
 
-        return found;
+        if (!result && myBodyExp != null) {
+            result = myBodyExp.containsVar(varName, IsOldExp);
+        }
+
+        return result;
     }
 
     /**
@@ -146,19 +139,25 @@ public class SetExp extends MathExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof SetExp) {
-            SetExp eAsSetExp = (SetExp) o;
-            result = myLoc.equals(eAsSetExp.myLoc);
+        if (o instanceof LambdaExp) {
+            LambdaExp eAsLambdaExp = (LambdaExp) o;
+            result = myLoc.equals(eAsLambdaExp.myLoc);
 
             if (result) {
-                result = myVar.equals(eAsSetExp.myVar);
+                Iterator<MathVarDec> thisParameters = myParameters.iterator();
+                Iterator<MathVarDec> eParameters =
+                        eAsLambdaExp.myParameters.iterator();
+                while (result && thisParameters.hasNext()
+                        && eParameters.hasNext()) {
+                    result &= thisParameters.next().equals(eParameters.next());
+                }
+
+                //Both had better have run out at the same time
+                result &=
+                        (!thisParameters.hasNext()) && (!eParameters.hasNext());
 
                 if (result) {
-                    result = myWhereExp.equals(eAsSetExp.myWhereExp);
-
-                    if (result) {
-                        result = myBodyExp.equals(eAsSetExp.myBodyExp);
-                    }
+                    result = myBodyExp.equals(eAsLambdaExp.myBodyExp);
                 }
             }
         }
@@ -180,17 +179,27 @@ public class SetExp extends MathExp {
      */
     @Override
     public boolean equivalent(Exp e) {
-        boolean retval = e instanceof SetExp;
-        if (retval) {
-            SetExp eAsSetExp = (SetExp) e;
-            retval =
-                    myVar.getName().equals(eAsSetExp.myVar.getName())
-                            && myVar.getTy().equals(eAsSetExp.myVar.getTy());
-            retval &= myWhereExp.equivalent(eAsSetExp.myWhereExp);
-            retval &= myBodyExp.equivalent(eAsSetExp.myBodyExp);
+        boolean result = e instanceof LambdaExp;
+        if (result) {
+            LambdaExp eAsLambdaExp = (LambdaExp) e;
+
+            result = (myParameters.size() == eAsLambdaExp.myParameters.size());
+
+            Iterator<MathVarDec> parameterIterator = myParameters.iterator();
+            Iterator<MathVarDec> eParameterIterator =
+                    eAsLambdaExp.myParameters.iterator();
+            while (parameterIterator.hasNext() && result) {
+                result =
+                        parameterIterator.next().equals(
+                                eParameterIterator.next());
+            }
+
+            if (result) {
+                result = myBodyExp.equivalent(eAsLambdaExp.myBodyExp);
+            }
         }
 
-        return retval;
+        return result;
     }
 
     /**
@@ -203,6 +212,15 @@ public class SetExp extends MathExp {
     }
 
     /**
+     * <p>This method returns a deep copy of all the lambda parameter variables.</p>
+     *
+     * @return A list containing all the parameter {@link MathVarDec}s.
+     */
+    public List<MathVarDec> getParameters() {
+        return copyParameters();
+    }
+
+    /**
      * <p>This method returns a deep copy of the list of
      * subexpressions.</p>
      *
@@ -211,28 +229,9 @@ public class SetExp extends MathExp {
     @Override
     public List<Exp> getSubExpressions() {
         List<Exp> list = new ArrayList<>();
-        list.add(myWhereExp.clone());
         list.add(myBodyExp.clone());
 
         return list;
-    }
-
-    /**
-     * <p>This method returns a deep copy of the variable.</p>
-     *
-     * @return The {@link MathVarDec} representation object.
-     */
-    public MathVarDec getVar() {
-        return myVar.clone();
-    }
-
-    /**
-     * <p>This method returns a deep copy of the where expression.</p>
-     *
-     * @return The {@link Exp} representation object.
-     */
-    public Exp getWhere() {
-        return myWhereExp.clone();
     }
 
     /**
@@ -240,14 +239,13 @@ public class SetExp extends MathExp {
      * For all inherited programming expression classes, this method
      * should throw an exception.</p>
      *
-     * @return The resulting {@link SetExp} from applying the remember rule.
+     * @return The resulting {@link LambdaExp} from applying the remember rule.
      */
     @Override
-    public SetExp remember() {
-        Exp newWhere = ((MathExp) myWhereExp).remember();
+    public Exp remember() {
         Exp newBody = ((MathExp) myBodyExp).remember();
 
-        return new SetExp(new Location(myLoc), myVar.clone(), newWhere, newBody);
+        return new LambdaExp(new Location(myLoc), copyParameters(), newBody);
     }
 
     /**
@@ -258,14 +256,7 @@ public class SetExp extends MathExp {
      */
     // TODO: See the message in Exp.
     /*public void setSubExpression(int index, Exp e) {
-        switch (index) {
-        case 0:
-            where = e;
-            break;
-        case 1:
-            body = e;
-            break;
-        }
+        body = e;
     }*/
 
     /**
@@ -286,17 +277,20 @@ public class SetExp extends MathExp {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("{ ");
-        sb.append(myVar.toString());
-        sb.append(", ");
+        sb.append("lambda (");
 
-        if (myWhereExp != null) {
-            sb.append(myWhereExp.toString());
-            sb.append(", ");
+        Iterator<MathVarDec> it = myParameters.iterator();
+        while (it.hasNext()) {
+            sb.append(it.next().toString());
+
+            if (it.hasNext()) {
+                sb.append(", ");
+            }
         }
 
+        sb.append(").(");
         sb.append(myBodyExp.toString());
-        sb.append(" }");
+        sb.append(")");
 
         return sb.toString();
     }
@@ -313,13 +307,8 @@ public class SetExp extends MathExp {
      */
     @Override
     protected Exp copy() {
-        Exp newWhere = null;
-        if (myWhereExp != null) {
-            newWhere = myWhereExp.clone();
-        }
-
-        return new SetExp(new Location(myLoc), myVar.clone(), newWhere,
-                myBodyExp.clone());
+        return new LambdaExp(new Location(myLoc), copyParameters(), myBodyExp
+                .clone());
     }
 
     /**
@@ -338,9 +327,26 @@ public class SetExp extends MathExp {
      */
     @Override
     protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new SetExp(new Location(myLoc), myVar.clone(), substitute(
-                myWhereExp, substitutions),
-                substitute(myBodyExp, substitutions));
+        return new LambdaExp(new Location(myLoc), copyParameters(), substitute(
+                myBodyExp, substitutions));
     }
 
+    // ===========================================================
+    // Private Methods
+    // ===========================================================
+
+    /**
+     * <p>This is a helper method that makes a copy of the
+     * list containing all the parameter variables.</p>
+     *
+     * @return A list containing {@link MathVarDec}s.
+     */
+    private List<MathVarDec> copyParameters() {
+        List<MathVarDec> copyParameters = new ArrayList<>();
+        for (MathVarDec v : myParameters) {
+            copyParameters.add(v.clone());
+        }
+
+        return copyParameters;
+    }
 }

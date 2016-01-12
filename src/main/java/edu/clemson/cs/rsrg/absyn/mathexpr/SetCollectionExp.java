@@ -29,7 +29,7 @@ public class SetCollectionExp extends MathExp {
     // ===========================================================
 
     /** <p>The list of member expressions in this set collection.</p> */
-    private Set<MathExp> myMembers;
+    private final Set<MathExp> myMembers;
 
     // ===========================================================
     // Constructors
