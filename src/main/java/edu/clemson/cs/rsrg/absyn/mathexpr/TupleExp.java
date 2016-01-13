@@ -202,7 +202,7 @@ public class TupleExp extends MathExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof DotExp) {
+        if (o instanceof TupleExp) {
             TupleExp eAsTupleExp = (TupleExp) o;
             result = myLoc.equals(eAsTupleExp.myLoc);
 
