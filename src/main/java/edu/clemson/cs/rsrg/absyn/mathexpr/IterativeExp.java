@@ -1,5 +1,5 @@
 /**
- * QuantExp.java
+ * IterativeExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -12,43 +12,94 @@
  */
 package edu.clemson.cs.rsrg.absyn.mathexpr;
 
-import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.absyn.variables.MathVarDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical quantified expressions
+ * <p>This is the class for all the mathematical iterative expressions
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class QuantExp extends MathExp {
+public class IterativeExp extends MathExp {
 
-    /* TODO: Might need to revisit this
-    public static final int NONE = 0;
-    public static final int FORALL = 1;
-    public static final int EXISTS = 2;
-    public static final int UNIQUE = 3;*/
+    // ===========================================================
+    // Operators
+    // ===========================================================
+
+    public enum Operator {
+        SUM {
+
+            @Override
+            public String toString() {
+                return "SUM";
+            }
+
+        },
+        PRODUCT {
+
+            @Override
+            public String toString() {
+                return "PRODUCT";
+            }
+
+        },
+        CONCATENATION {
+
+            @Override
+            public String toString() {
+                return "CONCATENATION";
+            }
+
+        },
+        UNION {
+
+            @Override
+            public String toString() {
+                return "UNION";
+            }
+
+        },
+        INTERSECTION {
+
+            @Override
+            public String toString() {
+                return "INTERSECTION";
+            }
+
+        };
+
+        /**
+         * <p>This method returns a deep copy of the operator name.</p>
+         *
+         * @param l A {@link Location} representation object.
+         *
+         * @return A {link PosSymbol} object containing the operator.
+         */
+        public PosSymbol getOperatorAsPosSymbol(Location l) {
+            return new PosSymbol(new Location(l), toString());
+        }
+    }
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The object's quantification (if any).</p> */
-    private final SymbolTableEntry.Quantification myQuantification;
+    /** <p>The expression's operation.</p> */
+    private final Operator myOperator;
 
-    /** <p>The mathematical variables in this quantified expression.</p> */
-    private List<MathVarDec> myVars;
+    /** <p>The mathematical variable in this iterative expression.</p> */
+    private final MathVarDec myVar;
 
-    /** <p>The quantified expression's where part.</p> */
+    /** <p>The iterative expression's where part.</p> */
     private final Exp myWhereExp;
 
-    /** <p>The quantified expression's body.</p> */
+    /** <p>The iterative expression's body.</p> */
     private final Exp myBodyExp;
 
     // ===========================================================
@@ -56,19 +107,19 @@ public class QuantExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a quantified expression.</p>
+     * <p>This constructs a iterative expression.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param quantifier A {@link SymbolTableEntry.Quantification} quantifier object.
-     * @param vars A list of {@link MathVarDec}s representing the expression's variables.
+     * @param operator A {@link Operator} representing the operator.
+     * @param var A {@link MathVarDec} representing the expression's variable.
      * @param where A {@link Exp} representing the where clause.
      * @param body A {@link Exp} representing the body of the expression.
      */
-    public QuantExp(Location l, SymbolTableEntry.Quantification quantifier,
-            List<MathVarDec> vars, Exp where, Exp body) {
+    public IterativeExp(Location l, Operator operator, MathVarDec var,
+            Exp where, Exp body) {
         super(l);
-        myQuantification = quantifier;
-        myVars = vars;
+        myOperator = operator;
+        myVar = var;
         myWhereExp = where;
         myBodyExp = body;
     }
@@ -92,23 +143,15 @@ public class QuantExp extends MathExp {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("QuantExp\n");
+        sb.append("IterativeExp\n");
 
-        if (myQuantification != SymbolTableEntry.Quantification.NONE) {
-            sb.append(myQuantification);
-        }
+        printSpace(indentSize + innerIndentSize, sb);
+        sb.append(myOperator);
+        sb.append(" ");
 
-        if (myVars != null) {
-            Iterator<MathVarDec> i = myVars.iterator();
-            while (i.hasNext()) {
-                MathVarDec m = i.next();
-                sb.append(m.asString(indentSize, innerIndentSize));
-
-                if (i.hasNext()) {
-                    sb.append(", ");
-                }
-            }
-        }
+        sb
+                .append(myVar.asString(indentSize + innerIndentSize,
+                        innerIndentSize));
 
         if (myWhereExp != null) {
             sb.append(myWhereExp.asString(indentSize + innerIndentSize,
@@ -163,7 +206,7 @@ public class QuantExp extends MathExp {
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link QuantExp} class.</p>
+     * for the {@link IterativeExp} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -172,27 +215,22 @@ public class QuantExp extends MathExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof QuantExp) {
-            QuantExp eAsQuantExp = (QuantExp) o;
-            result = myLoc.equals(eAsQuantExp.myLoc);
+        if (o instanceof IterativeExp) {
+            IterativeExp eAsIterativeExp = (IterativeExp) o;
+            result = myLoc.equals(eAsIterativeExp.myLoc);
 
             if (result) {
-                if (myVars != null && eAsQuantExp.myVars != null) {
-                    Iterator<MathVarDec> thisVars = myVars.iterator();
-                    Iterator<MathVarDec> eVars = eAsQuantExp.myVars.iterator();
-                    while (result && thisVars.hasNext() && eVars.hasNext()) {
-                        result &= thisVars.next().equals(eVars.next());
-                    }
-
-                    //Both had better have run out at the same time
-                    result &= (!thisVars.hasNext()) && (!eVars.hasNext());
-                }
+                result =
+                        myOperator.getOperatorAsPosSymbol(myLoc).equals(
+                                eAsIterativeExp.myOperator
+                                        .getOperatorAsPosSymbol(myLoc));
+                result &= myVar.equals(eAsIterativeExp.myVar);
 
                 if (result) {
-                    result = myWhereExp.equals(eAsQuantExp.myWhereExp);
+                    result = myWhereExp.equals(eAsIterativeExp.myWhereExp);
 
                     if (result) {
-                        result = myBodyExp.equals(eAsQuantExp.myBodyExp);
+                        result = myBodyExp.equals(eAsIterativeExp.myBodyExp);
                     }
                 }
             }
@@ -215,27 +253,19 @@ public class QuantExp extends MathExp {
      */
     @Override
     public boolean equivalent(Exp e) {
-        boolean retval = e instanceof QuantExp;
+        boolean retval = e instanceof IterativeExp;
         if (retval) {
-            QuantExp eAsQuantExp = (QuantExp) e;
-
-            if (myVars != null && eAsQuantExp.myVars != null) {
-                Iterator<MathVarDec> thisVars = myVars.iterator();
-                Iterator<MathVarDec> eVars = eAsQuantExp.myVars.iterator();
-                while (retval && thisVars.hasNext() && eVars.hasNext()) {
-                    MathVarDec cThisVar = thisVars.next();
-                    MathVarDec cEVar = eVars.next();
-                    retval &=
-                            cThisVar.getName().equals(cEVar.getName())
-                                    && cThisVar.getTy().equals(cEVar.getTy());
-                }
-
-                //Both had better have run out at the same time
-                retval &= (!thisVars.hasNext()) && (!eVars.hasNext());
-            }
-
-            retval &= myWhereExp.equivalent(eAsQuantExp.myWhereExp);
-            retval &= myBodyExp.equivalent(eAsQuantExp.myBodyExp);
+            IterativeExp eAsIterativeExp = (IterativeExp) e;
+            retval =
+                    myOperator.getOperatorAsPosSymbol(myLoc).equals(
+                            eAsIterativeExp.myOperator
+                                    .getOperatorAsPosSymbol(myLoc));
+            retval &=
+                    myVar.getName().equals(eAsIterativeExp.myVar.getName())
+                            && myVar.getTy().equals(
+                                    eAsIterativeExp.myVar.getTy());
+            retval &= myWhereExp.equivalent(eAsIterativeExp.myWhereExp);
+            retval &= myBodyExp.equivalent(eAsIterativeExp.myBodyExp);
         }
 
         return retval;
@@ -251,12 +281,12 @@ public class QuantExp extends MathExp {
     }
 
     /**
-     * <p>This method returns this variable expression's quantification.</p>
+     * <p>This method returns the operator.</p>
      *
-     * @return The {@link SymbolTableEntry.Quantification} object.
+     * @return A {link Operator} object containing the operator.
      */
-    public SymbolTableEntry.Quantification getQuantification() {
-        return myQuantification;
+    public Operator getOperator() {
+        return myOperator;
     }
 
     /**
@@ -275,13 +305,12 @@ public class QuantExp extends MathExp {
     }
 
     /**
-     * <p>This method returns a deep copy of all the
-     * variable expressions in this quantified expression.</p>
+     * <p>This method returns a deep copy of the variable.</p>
      *
-     * @return A set containing all the {@link MathVarDec}s.
+     * @return The {@link MathVarDec} representation object.
      */
-    public List<MathVarDec> getVars() {
-        return copyVars();
+    public MathVarDec getVar() {
+        return myVar.clone();
     }
 
     /**
@@ -298,14 +327,14 @@ public class QuantExp extends MathExp {
      * For all inherited programming expression classes, this method
      * should throw an exception.</p>
      *
-     * @return The resulting {@link QuantExp} from applying the remember rule.
+     * @return The resulting {@link IterativeExp} from applying the remember rule.
      */
     @Override
-    public Exp remember() {
+    public IterativeExp remember() {
         Exp newWhere = ((MathExp) myWhereExp).remember();
         Exp newBody = ((MathExp) myBodyExp).remember();
 
-        return new QuantExp(new Location(myLoc), myQuantification, copyVars(),
+        return new IterativeExp(new Location(myLoc), myOperator, myVar.clone(),
                 newWhere, newBody);
     }
 
@@ -345,21 +374,9 @@ public class QuantExp extends MathExp {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        if (myQuantification != SymbolTableEntry.Quantification.NONE) {
-            sb.append(myQuantification);
-        }
-
-        if (myVars != null) {
-            Iterator<MathVarDec> i = myVars.iterator();
-            while (i.hasNext()) {
-                MathVarDec m = i.next();
-                sb.append(m.toString());
-
-                if (i.hasNext()) {
-                    sb.append(", ");
-                }
-            }
-        }
+        sb.append(myOperator.toString());
+        sb.append(" ");
+        sb.append(myVar.toString());
 
         if (myWhereExp != null) {
             sb.append(" where ");
@@ -367,10 +384,10 @@ public class QuantExp extends MathExp {
             sb.append(", ");
         }
 
-        sb.append(" such that ");
         sb.append(myBodyExp.toString());
 
         return sb.toString();
+
     }
 
     // ===========================================================
@@ -390,7 +407,7 @@ public class QuantExp extends MathExp {
             newWhere = myWhereExp.clone();
         }
 
-        return new QuantExp(new Location(myLoc), myQuantification, myVars,
+        return new IterativeExp(new Location(myLoc), myOperator, myVar.clone(),
                 newWhere, myBodyExp.clone());
     }
 
@@ -410,27 +427,9 @@ public class QuantExp extends MathExp {
      */
     @Override
     protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new QuantExp(new Location(myLoc), myQuantification, copyVars(),
+        return new IterativeExp(new Location(myLoc), myOperator, myVar.clone(),
                 substitute(myWhereExp, substitutions), substitute(myBodyExp,
                         substitutions));
     }
 
-    // ===========================================================
-    // Private Methods
-    // ===========================================================
-
-    /**
-     * <p>This is a helper method that makes a copy of the
-     * list containing all the variables in the expression.</p>
-     *
-     * @return A list containing {@link MathVarDec}s.
-     */
-    private List<MathVarDec> copyVars() {
-        List<MathVarDec> copyVars = new ArrayList<>();
-        for (MathVarDec v : myVars) {
-            copyVars.add(v.clone());
-        }
-
-        return copyVars;
-    }
 }

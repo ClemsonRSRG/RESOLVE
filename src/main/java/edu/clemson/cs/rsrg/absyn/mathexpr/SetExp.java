@@ -288,9 +288,9 @@ public class SetExp extends MathExp {
         StringBuffer sb = new StringBuffer();
         sb.append("{ ");
         sb.append(myVar.toString());
-        sb.append(", ");
 
         if (myWhereExp != null) {
+            sb.append(" where ");
             sb.append(myWhereExp.toString());
             sb.append(", ");
         }
