@@ -1,5 +1,5 @@
 /**
- * ConceptTypeParamDec.java
+ * RealizationParamDec.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -16,12 +16,19 @@ import edu.clemson.cs.rsrg.absyn.Dec;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class for all the concept module type parameter
+ * <p>This is the class for all the realization parameter
  * declarations that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class ConceptTypeParamDec extends Dec implements ModuleParameter {
+public class RealizationParamDec extends Dec implements ModuleParameter {
+
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    /** <p>The name of the concept.</p> */
+    private final PosSymbol myConceptName;
 
     // ===========================================================
     // Constructors
@@ -31,10 +38,12 @@ public class ConceptTypeParamDec extends Dec implements ModuleParameter {
      * <p>This constructs a type representation that is passed as a parameter
      * to a module.</p>
      *
-     * @param name A {@link PosSymbol} representing the type's name.
+     * @param name A {@link PosSymbol} representing the name of the realization.
+     * @param conceptName A {@link PosSymbol} representing the name of the concept.
      */
-    public ConceptTypeParamDec(PosSymbol name) {
+    public RealizationParamDec(PosSymbol name, PosSymbol conceptName) {
         super(name.getLocation(), name);
+        myConceptName = conceptName;
     }
 
     // ===========================================================
@@ -56,27 +65,29 @@ public class ConceptTypeParamDec extends Dec implements ModuleParameter {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("ConceptTypeParamDec\n");
+        sb.append("RealizationParamDec\n");
         sb.append(myName
                 .asString(indentSize + innerIndentSize, innerIndentSize));
+        sb.append(myConceptName.asString(indentSize + innerIndentSize,
+                innerIndentSize));
 
         return sb.toString();
     }
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for the {@link ConceptTypeParamDec} class.</p>
+     * for the {@link RealizationParamDec} class.</p>
      *
      * @return A deep copy of the object.
      */
     @Override
-    public final ConceptTypeParamDec clone() {
-        return new ConceptTypeParamDec(myName.clone());
+    public final RealizationParamDec clone() {
+        return new RealizationParamDec(myName.clone(), myConceptName.clone());
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link ConceptTypeParamDec} class.</p>
+     * for the {@link RealizationParamDec} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -85,17 +96,29 @@ public class ConceptTypeParamDec extends Dec implements ModuleParameter {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof ConceptTypeParamDec) {
-            ConceptTypeParamDec eAsConceptTypeParamDec =
-                    (ConceptTypeParamDec) o;
-            result = myLoc.equals(eAsConceptTypeParamDec.myLoc);
+        if (o instanceof RealizationParamDec) {
+            RealizationParamDec eAsRealizationParamDec =
+                    (RealizationParamDec) o;
+            result = myLoc.equals(eAsRealizationParamDec.myLoc);
 
             if (result) {
-                result = myName.equals(eAsConceptTypeParamDec.myName);
+                result =
+                        myName.equals(eAsRealizationParamDec.myName)
+                                && myConceptName
+                                        .equals(eAsRealizationParamDec.myConceptName);
             }
         }
 
         return result;
+    }
+
+    /**
+     * <p>Returns the symbol representation of the concept name.</p>
+     *
+     * @return The concept name in {@link PosSymbol} format.
+     */
+    public PosSymbol getConceptName() {
+        return myConceptName.clone();
     }
 
     /**
@@ -106,8 +129,9 @@ public class ConceptTypeParamDec extends Dec implements ModuleParameter {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("Type ");
         sb.append(myName.toString());
+        sb.append(" of ");
+        sb.append(myConceptName);
 
         return sb.toString();
     }
