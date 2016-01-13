@@ -16,7 +16,7 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class functions as a reference to the name of the
+ * <p>This is the class that functions as a reference to the name of the
  * imported module used by a module the compiler is currently compiling.</p>
  *
  * @version 2.0
@@ -64,10 +64,8 @@ public class UsesItem extends ResolveConceptualElement {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
         sb.append("UsesItem\n");
-        if (myName != null) {
-            sb.append(myName.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-        }
+        sb.append(myName
+                .asString(indentSize + innerIndentSize, innerIndentSize));
 
         return sb.toString();
     }
