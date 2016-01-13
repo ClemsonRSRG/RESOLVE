@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.variables;
+package edu.clemson.cs.rsrg.absyn.modules.parameters;
 
 /**
  * <p>This interface allows us to differentiate module parameter declarations from
