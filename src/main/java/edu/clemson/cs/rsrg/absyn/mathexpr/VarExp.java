@@ -95,6 +95,10 @@ public class VarExp extends MathExp {
         printSpace(indentSize, sb);
         sb.append("VarExp\n");
 
+        if (myQuantification != SymbolTableEntry.Quantification.NONE) {
+            sb.append(myQuantification);
+        }
+
         if (myQualifier != null) {
             sb.append(myQualifier.asString(indentSize + innerIndentSize,
                     innerIndentSize));
@@ -283,7 +287,10 @@ public class VarExp extends MathExp {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append(myQuantification);
+
+        if (myQuantification != SymbolTableEntry.Quantification.NONE) {
+            sb.append(myQuantification);
+        }
 
         if (myQualifier != null) {
             sb.append(myQualifier.toString());

@@ -1,5 +1,5 @@
 /**
- * LambdaExp.java
+ * QuantExp.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn.mathexpr;
 
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.absyn.variables.MathVarDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -21,21 +22,33 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical lambda expressions
+ * <p>This is the class for all the mathematical quantified expressions
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class LambdaExp extends MathExp {
+public class QuantExp extends MathExp {
+
+    /* TODO: Might need to revisit this
+    public static final int NONE = 0;
+    public static final int FORALL = 1;
+    public static final int EXISTS = 2;
+    public static final int UNIQUE = 3;*/
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
-    /** <p>The list of mathematical variables in this lambda expression.</p> */
-    private final List<MathVarDec> myParameters;
+    /** <p>The object's quantification (if any).</p> */
+    private final SymbolTableEntry.Quantification myQuantification;
 
-    /** <p>The lambda expression's body.</p> */
+    /** <p>The mathematical variables in this quantified expression.</p> */
+    private List<MathVarDec> myVars;
+
+    /** <p>The quantified expression's where part.</p> */
+    private final Exp myWhereExp;
+
+    /** <p>The quantified expression's body.</p> */
     private final Exp myBodyExp;
 
     // ===========================================================
@@ -43,20 +56,20 @@ public class LambdaExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This constructs a lambda expression.</p>
+     * <p>This constructs a quantified expression.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param params A list of {@link MathVarDec} representing the expression's variables.
+     * @param quantifier A {@link SymbolTableEntry.Quantification} quantifier object.
+     * @param vars A list of {@link MathVarDec}s representing the expression's variables.
+     * @param where A {@link Exp} representing the where clause.
      * @param body A {@link Exp} representing the body of the expression.
      */
-    public LambdaExp(Location l, List<MathVarDec> params, Exp body) {
+    public QuantExp(Location l, SymbolTableEntry.Quantification quantifier,
+            List<MathVarDec> vars, Exp where, Exp body) {
         super(l);
-
-        if (params == null) {
-            throw new IllegalArgumentException("null LambdaExp params");
-        }
-
-        myParameters = params;
+        myQuantification = quantifier;
+        myVars = vars;
+        myWhereExp = where;
         myBodyExp = body;
     }
 
@@ -79,16 +92,31 @@ public class LambdaExp extends MathExp {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("LambdaExp\n");
+        sb.append("QuantExp\n");
 
-        for (MathVarDec v : myParameters) {
-            sb.append(v);
+        if (myQuantification != SymbolTableEntry.Quantification.NONE) {
+            sb.append(myQuantification);
         }
 
-        if (myBodyExp != null) {
-            sb.append(myBodyExp.asString(indentSize + innerIndentSize,
+        if (myVars != null) {
+            Iterator<MathVarDec> i = myVars.iterator();
+            while (i.hasNext()) {
+                MathVarDec m = i.next();
+                sb.append(m.asString(indentSize, innerIndentSize));
+
+                if (i.hasNext()) {
+                    sb.append(", ");
+                }
+            }
+        }
+
+        if (myWhereExp != null) {
+            sb.append(myWhereExp.asString(indentSize + innerIndentSize,
                     innerIndentSize));
         }
+
+        sb.append(myBodyExp.asString(indentSize + innerIndentSize,
+                innerIndentSize));
 
         return sb.toString();
     }
@@ -104,7 +132,12 @@ public class LambdaExp extends MathExp {
      */
     @Override
     public final boolean containsExp(Exp exp) {
-        return myBodyExp.containsExp(exp);
+        boolean found = myWhereExp.containsExp(exp);
+        if (!found) {
+            found = myBodyExp.containsExp(exp);
+        }
+
+        return found;
     }
 
     /**
@@ -120,23 +153,17 @@ public class LambdaExp extends MathExp {
      */
     @Override
     public boolean containsVar(String varName, boolean IsOldExp) {
-        boolean result = false;
-
-        Iterator<MathVarDec> parameterIter = myParameters.iterator();
-        while (!result && parameterIter.hasNext()) {
-            result = parameterIter.next().getName().getName().equals(varName);
+        boolean found = myWhereExp.containsVar(varName, IsOldExp);
+        if (!found) {
+            found = myBodyExp.containsVar(varName, IsOldExp);
         }
 
-        if (!result && myBodyExp != null) {
-            result = myBodyExp.containsVar(varName, IsOldExp);
-        }
-
-        return result;
+        return found;
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link SetExp} class.</p>
+     * for the {@link QuantExp} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -145,25 +172,28 @@ public class LambdaExp extends MathExp {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof LambdaExp) {
-            LambdaExp eAsLambdaExp = (LambdaExp) o;
-            result = myLoc.equals(eAsLambdaExp.myLoc);
+        if (o instanceof QuantExp) {
+            QuantExp eAsQuantExp = (QuantExp) o;
+            result = myLoc.equals(eAsQuantExp.myLoc);
 
             if (result) {
-                Iterator<MathVarDec> thisParameters = myParameters.iterator();
-                Iterator<MathVarDec> eParameters =
-                        eAsLambdaExp.myParameters.iterator();
-                while (result && thisParameters.hasNext()
-                        && eParameters.hasNext()) {
-                    result &= thisParameters.next().equals(eParameters.next());
+                if (myVars != null && eAsQuantExp.myVars != null) {
+                    Iterator<MathVarDec> thisVars = myVars.iterator();
+                    Iterator<MathVarDec> eVars = eAsQuantExp.myVars.iterator();
+                    while (result && thisVars.hasNext() && eVars.hasNext()) {
+                        result &= thisVars.next().equals(eVars.next());
+                    }
+
+                    //Both had better have run out at the same time
+                    result &= (!thisVars.hasNext()) && (!eVars.hasNext());
                 }
 
-                //Both had better have run out at the same time
-                result &=
-                        (!thisParameters.hasNext()) && (!eParameters.hasNext());
-
                 if (result) {
-                    result = myBodyExp.equals(eAsLambdaExp.myBodyExp);
+                    result = myWhereExp.equals(eAsQuantExp.myWhereExp);
+
+                    if (result) {
+                        result = myBodyExp.equals(eAsQuantExp.myBodyExp);
+                    }
                 }
             }
         }
@@ -185,27 +215,30 @@ public class LambdaExp extends MathExp {
      */
     @Override
     public boolean equivalent(Exp e) {
-        boolean result = e instanceof LambdaExp;
-        if (result) {
-            LambdaExp eAsLambdaExp = (LambdaExp) e;
+        boolean retval = e instanceof QuantExp;
+        if (retval) {
+            QuantExp eAsQuantExp = (QuantExp) e;
 
-            result = (myParameters.size() == eAsLambdaExp.myParameters.size());
+            if (myVars != null && eAsQuantExp.myVars != null) {
+                Iterator<MathVarDec> thisVars = myVars.iterator();
+                Iterator<MathVarDec> eVars = eAsQuantExp.myVars.iterator();
+                while (retval && thisVars.hasNext() && eVars.hasNext()) {
+                    MathVarDec cThisVar = thisVars.next();
+                    MathVarDec cEVar = eVars.next();
+                    retval &=
+                            cThisVar.getName().equals(cEVar.getName())
+                                    && cThisVar.getTy().equals(cEVar.getTy());
+                }
 
-            Iterator<MathVarDec> parameterIterator = myParameters.iterator();
-            Iterator<MathVarDec> eParameterIterator =
-                    eAsLambdaExp.myParameters.iterator();
-            while (parameterIterator.hasNext() && result) {
-                result =
-                        parameterIterator.next().equals(
-                                eParameterIterator.next());
+                //Both had better have run out at the same time
+                retval &= (!thisVars.hasNext()) && (!eVars.hasNext());
             }
 
-            if (result) {
-                result = myBodyExp.equivalent(eAsLambdaExp.myBodyExp);
-            }
+            retval &= myWhereExp.equivalent(eAsQuantExp.myWhereExp);
+            retval &= myBodyExp.equivalent(eAsQuantExp.myBodyExp);
         }
 
-        return result;
+        return retval;
     }
 
     /**
@@ -218,12 +251,12 @@ public class LambdaExp extends MathExp {
     }
 
     /**
-     * <p>This method returns a deep copy of all the lambda parameter variables.</p>
+     * <p>This method returns this variable expression's quantification.</p>
      *
-     * @return A list containing all the parameter {@link MathVarDec}s.
+     * @return The {@link SymbolTableEntry.Quantification} object.
      */
-    public List<MathVarDec> getParameters() {
-        return copyParameters();
+    public SymbolTableEntry.Quantification getQuantification() {
+        return myQuantification;
     }
 
     /**
@@ -235,9 +268,29 @@ public class LambdaExp extends MathExp {
     @Override
     public List<Exp> getSubExpressions() {
         List<Exp> list = new ArrayList<>();
+        list.add(myWhereExp.clone());
         list.add(myBodyExp.clone());
 
         return list;
+    }
+
+    /**
+     * <p>This method returns a deep copy of all the
+     * variable expressions in this quantified expression.</p>
+     *
+     * @return A set containing all the {@link MathVarDec}s.
+     */
+    public List<MathVarDec> getVars() {
+        return copyVars();
+    }
+
+    /**
+     * <p>This method returns a deep copy of the where expression.</p>
+     *
+     * @return The {@link Exp} representation object.
+     */
+    public Exp getWhere() {
+        return myWhereExp.clone();
     }
 
     /**
@@ -245,13 +298,15 @@ public class LambdaExp extends MathExp {
      * For all inherited programming expression classes, this method
      * should throw an exception.</p>
      *
-     * @return The resulting {@link LambdaExp} from applying the remember rule.
+     * @return The resulting {@link QuantExp} from applying the remember rule.
      */
     @Override
     public Exp remember() {
+        Exp newWhere = ((MathExp) myWhereExp).remember();
         Exp newBody = ((MathExp) myBodyExp).remember();
 
-        return new LambdaExp(new Location(myLoc), copyParameters(), newBody);
+        return new QuantExp(new Location(myLoc), myQuantification, copyVars(),
+                newWhere, newBody);
     }
 
     /**
@@ -262,7 +317,14 @@ public class LambdaExp extends MathExp {
      */
     // TODO: See the message in Exp.
     /*public void setSubExpression(int index, Exp e) {
-        body = e;
+        switch (index) {
+            case 0:
+                where = e;
+                break;
+            case 1:
+                body = e;
+                break;
+        }
     }*/
 
     /**
@@ -283,20 +345,29 @@ public class LambdaExp extends MathExp {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("lambda (");
+        if (myQuantification != SymbolTableEntry.Quantification.NONE) {
+            sb.append(myQuantification);
+        }
 
-        Iterator<MathVarDec> it = myParameters.iterator();
-        while (it.hasNext()) {
-            sb.append(it.next().toString());
+        if (myVars != null) {
+            Iterator<MathVarDec> i = myVars.iterator();
+            while (i.hasNext()) {
+                MathVarDec m = i.next();
+                sb.append(m.toString());
 
-            if (it.hasNext()) {
-                sb.append(", ");
+                if (i.hasNext()) {
+                    sb.append(", ");
+                }
             }
         }
 
-        sb.append(").(");
+        if (myWhereExp != null) {
+            sb.append(myWhereExp.toString());
+            sb.append(", ");
+        }
+
+        sb.append(" such that ");
         sb.append(myBodyExp.toString());
-        sb.append(")");
 
         return sb.toString();
     }
@@ -313,8 +384,13 @@ public class LambdaExp extends MathExp {
      */
     @Override
     protected Exp copy() {
-        return new LambdaExp(new Location(myLoc), copyParameters(), myBodyExp
-                .clone());
+        Exp newWhere = null;
+        if (myWhereExp != null) {
+            newWhere = myWhereExp.clone();
+        }
+
+        return new QuantExp(new Location(myLoc), myQuantification, myVars,
+                newWhere, myBodyExp.clone());
     }
 
     /**
@@ -333,8 +409,9 @@ public class LambdaExp extends MathExp {
      */
     @Override
     protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new LambdaExp(new Location(myLoc), copyParameters(), substitute(
-                myBodyExp, substitutions));
+        return new QuantExp(new Location(myLoc), myQuantification, copyVars(),
+                substitute(myWhereExp, substitutions), substitute(myBodyExp,
+                        substitutions));
     }
 
     // ===========================================================
@@ -343,16 +420,16 @@ public class LambdaExp extends MathExp {
 
     /**
      * <p>This is a helper method that makes a copy of the
-     * list containing all the parameter variables.</p>
+     * list containing all the variables in the expression.</p>
      *
      * @return A list containing {@link MathVarDec}s.
      */
-    private List<MathVarDec> copyParameters() {
-        List<MathVarDec> copyParameters = new ArrayList<>();
-        for (MathVarDec v : myParameters) {
-            copyParameters.add(v.clone());
+    private List<MathVarDec> copyVars() {
+        List<MathVarDec> copyVars = new ArrayList<>();
+        for (MathVarDec v : myVars) {
+            copyVars.add(v.clone());
         }
 
-        return copyParameters;
+        return copyVars;
     }
 }
