@@ -1052,7 +1052,7 @@ statement
         |   remember_statement -> ^(STATEMENT remember_statement)
         |   forget_statement -> ^(STATEMENT forget_statement)
         |   confirm_statement -> ^(STATEMENT confirm_statement)
-        |   assume_statement -> ^(STATEMENT assume_statement)
+        |   pressume_statement -> ^(STATEMENT pressume_statement)
         |   aux_code_statement -> ^(STATEMENT aux_code_statement)
         )
     ;
@@ -1068,7 +1068,7 @@ in_aux_statement
         |   remember_statement -> ^(STATEMENT remember_statement)
         |   forget_statement -> ^(STATEMENT forget_statement)
         |   confirm_statement -> ^(STATEMENT confirm_statement)
-        |   assume_statement -> ^(STATEMENT assume_statement)
+        |   pressume_statement -> ^(STATEMENT pressume_statement)
         |   aux_code_statement -> ^(STATEMENT aux_code_statement)
         )
     ;
@@ -1201,10 +1201,10 @@ confirm_statement
     :   CONFIRM^ math_expression
     ;
     
-// Confirm statement ------------------------------------------------
+// Pressume statement ------------------------------------------------
 
-assume_statement
-    :   ASSUME^ math_expression
+pressume_statement
+    :   PRESSUME^ math_expression
     ;
 
 // While loop ----------------------------------------------------

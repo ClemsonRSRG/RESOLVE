@@ -22,6 +22,8 @@ public class ResolveConceptualVisitor {
 
     public void visitAssumeStmt(AssumeStmt data) {}
 
+    public void visitPressumeStmt(PressumeStmt data) {}
+
     public void visitAuxCodeStmt(AuxCodeStmt data) {}
 
     public void visitDoubleExp(DoubleExp data) {}

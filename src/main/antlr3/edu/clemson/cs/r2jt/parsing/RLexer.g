@@ -53,10 +53,6 @@ ARRAY
   : 'Array'
   ;
   
-ASSUME
-  : 'assume'
-  ;
-  
 AUX_CODE
   : 'Aux_Code'
   ;
@@ -467,6 +463,10 @@ PONENS
   
 PRESERVES
   : 'preserves' | 'pres'
+  ;
+
+PRESSUME
+  : 'Pressume'
   ;
   
 PROCEDURE
