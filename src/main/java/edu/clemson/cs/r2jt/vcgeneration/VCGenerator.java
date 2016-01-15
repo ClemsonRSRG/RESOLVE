@@ -4924,7 +4924,7 @@ public class VCGenerator extends TreeWalkerVisitor {
                         .getAssertion()), false);
         AssumeStmt assumeStmt =
                 new AssumeStmt(stmt.getLocation(), Exp
-                        .copy(stmt.getAssertion()));
+                        .copy(stmt.getAssertion()), true);
 
         // Add these statements to our assertive code
         myCurrentAssertiveCode.addCode(confirmStmt);
