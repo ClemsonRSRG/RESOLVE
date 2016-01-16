@@ -1,5 +1,5 @@
 /**
- * PressumeStmt.java
+ * PresumeStmt.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -14,7 +14,7 @@ package edu.clemson.cs.r2jt.absyn;
 
 import edu.clemson.cs.r2jt.data.Location;
 
-public class PressumeStmt extends Statement {
+public class PresumeStmt extends Statement {
 
     // ===========================================================
     // Variables
@@ -30,7 +30,7 @@ public class PressumeStmt extends Statement {
     // Constructors
     // ===========================================================
 
-    public PressumeStmt(Location location, Exp assertion) {
+    public PresumeStmt(Location location, Exp assertion) {
         myLocation = location;
         myAssertion = assertion;
     }
@@ -82,7 +82,7 @@ public class PressumeStmt extends Statement {
         StringBuffer sb = new StringBuffer();
 
         printSpace(indent, sb);
-        sb.append("PressumeStmt\n");
+        sb.append("PresumeStmt\n");
 
         if (myAssertion != null) {
             sb.append(myAssertion.asString(indent + increment, increment));
@@ -99,17 +99,18 @@ public class PressumeStmt extends Statement {
         printSpace(indent, sb);
 
         if (myAssertion != null) {
-            sb.append("Pressume " + myAssertion.toString(0));
+            sb.append("Presume " + myAssertion.toString(0));
         }
         else {
-            sb.append("Pressume true");
+            sb.append("Presume true");
         }
 
         return sb.toString();
     }
 
-    public PressumeStmt clone() {
-        return new PressumeStmt((Location) myLocation.clone(), Exp
+    public PresumeStmt clone() {
+        return new PresumeStmt((Location) myLocation.clone(), Exp
                 .copy(myAssertion));
     }
+
 }

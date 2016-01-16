@@ -22,7 +22,7 @@ public class ResolveConceptualVisitor {
 
     public void visitAssumeStmt(AssumeStmt data) {}
 
-    public void visitPressumeStmt(PressumeStmt data) {}
+    public void visitPressumeStmt(PresumeStmt data) {}
 
     public void visitAuxCodeStmt(AuxCodeStmt data) {}
 

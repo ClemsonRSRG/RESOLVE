@@ -3271,8 +3271,8 @@ public class VCGenerator extends TreeWalkerVisitor {
                 applyRememberRule();
             }
         }
-        else if (statement instanceof PressumeStmt) {
-            applyPressumeStmtRule((PressumeStmt) statement);
+        else if (statement instanceof PresumeStmt) {
+            applyPresumeStmtRule((PresumeStmt) statement);
         }
         else if (statement instanceof SwapStmt) {
             applySwapStmtRule((SwapStmt) statement);
@@ -4911,13 +4911,13 @@ public class VCGenerator extends TreeWalkerVisitor {
     }
 
     /**
-     * <p>Applies the pressume rule to the
+     * <p>Applies the presume rule to the
      * <code>Statement</code>.</p>
      *
-     * @param stmt Our current <code>PressumeStmt</code>.
+     * @param stmt Our current <code>PresumeStmt</code>.
      */
-    private void applyPressumeStmtRule(PressumeStmt stmt) {
-        // Convert the pressume statement into a confirm and
+    private void applyPresumeStmtRule(PresumeStmt stmt) {
+        // Convert the presume statement into a confirm and
         // a assume statement.
         ConfirmStmt confirmStmt =
                 new ConfirmStmt(stmt.getLocation(), Exp.copy(stmt
@@ -4931,7 +4931,7 @@ public class VCGenerator extends TreeWalkerVisitor {
         myCurrentAssertiveCode.addCode(assumeStmt);
 
         // Verbose Mode Debug Messages
-        myVCBuffer.append("\nPressume Rule Applied: \n");
+        myVCBuffer.append("\nPresume Rule Applied: \n");
         myVCBuffer.append(myCurrentAssertiveCode.assertionToString());
         myVCBuffer.append("\n_____________________ \n");
     }

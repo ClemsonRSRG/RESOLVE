@@ -2043,17 +2043,17 @@ public abstract class TreeWalkerVisitor {
 
     public void postPrefixExp(PrefixExp data) {}
 
-    // PressumeStmt
-    public boolean walkPressumeStmt(PressumeStmt data) {
+    // PresumeStmt
+    public boolean walkPresumeStmt(PresumeStmt data) {
         return false;
     }
 
-    public void prePressumeStmt(PressumeStmt data) {}
+    public void prePresumeStmt(PresumeStmt data) {}
 
-    public void midPressumeStmt(PressumeStmt node,
+    public void midPresumeStmt(PresumeStmt node,
             ResolveConceptualElement previous, ResolveConceptualElement next) {}
 
-    public void postPressumeStmt(PressumeStmt data) {}
+    public void postPresumeStmt(PresumeStmt data) {}
 
     // ProcedureDec
     public boolean walkProcedureDec(ProcedureDec data) {

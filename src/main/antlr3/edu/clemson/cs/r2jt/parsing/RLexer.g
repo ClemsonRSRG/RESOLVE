@@ -465,8 +465,8 @@ PRESERVES
   : 'preserves' | 'pres'
   ;
 
-PRESSUME
-  : 'Pressume'
+PRESUME
+  : 'Presume'
   ;
   
 PROCEDURE
