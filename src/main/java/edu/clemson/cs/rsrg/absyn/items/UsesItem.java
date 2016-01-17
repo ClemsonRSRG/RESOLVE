@@ -107,7 +107,7 @@ public class UsesItem extends ResolveConceptualElement {
      * @return A {@link PosSymbol} representation of the name.
      */
     public PosSymbol getName() {
-        return myName;
+        return myName.clone();
     }
 
     /**

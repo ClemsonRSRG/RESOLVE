@@ -38,7 +38,7 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     /** <p>The argument expression in this module argument.</p> */
     private final ProgramExp myArgumentExp;
 
-    /// ===========================================================
+    // ===========================================================
     // Constructors
     // ===========================================================
 
