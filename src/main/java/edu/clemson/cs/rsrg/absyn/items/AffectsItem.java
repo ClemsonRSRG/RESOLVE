@@ -31,9 +31,9 @@ public class AffectsItem extends ResolveConceptualElement {
     private PosSymbol myQualifier;
 
     /** <p>The name for the affected variable.</p> */
-    private PosSymbol myName;
+    private final PosSymbol myName;
 
-    /// ===========================================================
+    // ===========================================================
     // Constructors
     // ===========================================================
 
