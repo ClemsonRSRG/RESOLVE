@@ -1,5 +1,5 @@
 /**
- * PerformanceInitItem.java
+ * PerformanceFinalItem.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -14,23 +14,15 @@ package edu.clemson.cs.rsrg.absyn.items;
 
 import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
-import edu.clemson.cs.rsrg.absyn.Statement;
-import edu.clemson.cs.rsrg.absyn.declarations.FacilityDec;
-import edu.clemson.cs.rsrg.absyn.variables.AuxVarDec;
-import edu.clemson.cs.rsrg.absyn.variables.VarDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 /**
- * <p>This is the class for all the performance type initialization items
+ * <p>This is the class for all the performance type finalization items
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class PerformanceInitItem extends ResolveConceptualElement {
+public class PerformanceFinalItem extends ResolveConceptualElement {
 
     // ===========================================================
     // Member Fields
@@ -47,16 +39,16 @@ public class PerformanceInitItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs a performance type initialization block that happens
-     * when a variable of this type is initialized.</p>
+     * <p>This constructs a performance type finalization block that happens
+     * when a variable of this type is finalized.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param duration A {@link Exp} representing the initialization's
+     * @param duration A {@link Exp} representing the finalization's
      *                 duration clause.
-     * @param manip_disp A {@link Exp} representing the initialization's
+     * @param manip_disp A {@link Exp} representing the finalization's
      *                   manipulative displacement clause.
      */
-    public PerformanceInitItem(Location l, Exp duration, Exp manip_disp) {
+    public PerformanceFinalItem(Location l, Exp duration, Exp manip_disp) {
         super(l);
         myDuration = duration;
         myManipDisp = manip_disp;
@@ -81,10 +73,10 @@ public class PerformanceInitItem extends ResolveConceptualElement {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("PerformanceInitItem\n");
+        sb.append("PerformanceFinalItem\n");
 
         printSpace(indentSize, sb);
-        sb.append("initialization\n");
+        sb.append("finalization\n");
 
         printSpace(indentSize + innerIndentSize, sb);
         sb.append("duration  ");
@@ -101,19 +93,19 @@ public class PerformanceInitItem extends ResolveConceptualElement {
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for the {@link PerformanceInitItem} class.</p>
+     * for the {@link PerformanceFinalItem} class.</p>
      *
      * @return A deep copy of the object.
      */
     @Override
-    public PerformanceInitItem clone() {
-        return new PerformanceInitItem(new Location(myLoc),
-                myManipDisp.clone(), myDuration.clone());
+    public PerformanceFinalItem clone() {
+        return new PerformanceFinalItem(new Location(myLoc), myManipDisp
+                .clone(), myDuration.clone());
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link PerformanceInitItem} class.</p>
+     * for the {@link PerformanceFinalItem} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -122,12 +114,12 @@ public class PerformanceInitItem extends ResolveConceptualElement {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof PerformanceInitItem) {
-            PerformanceInitItem initItem = (PerformanceInitItem) o;
+        if (o instanceof PerformanceFinalItem) {
+            PerformanceFinalItem finalItem = (PerformanceFinalItem) o;
             result =
-                    myLoc.equals(initItem.myLoc)
-                            && myManipDisp.equals(initItem.myManipDisp)
-                            && myDuration.equals(initItem.myDuration);
+                    myLoc.equals(finalItem.myLoc)
+                            && myManipDisp.equals(finalItem.myManipDisp)
+                            && myDuration.equals(finalItem.myDuration);
         }
 
         return result;
@@ -160,7 +152,7 @@ public class PerformanceInitItem extends ResolveConceptualElement {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("initialization\n");
+        sb.append("finalization\n");
 
         sb.append("\tduration ");
         sb.append(myManipDisp.toString());
