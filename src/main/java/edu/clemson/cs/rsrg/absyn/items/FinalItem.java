@@ -1,5 +1,5 @@
 /**
- * InitItem.java
+ * FinalItem.java
  * ---------------------------------
  * Copyright (c) 2015
  * RESOLVE Software Research Group
@@ -24,12 +24,12 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the type initialization items
+ * <p>This is the class for all the type finalization items
  * that the compiler builds from the ANTLR4 AST tree.</p>
  *
  * @version 2.0
  */
-public class InitItem extends ResolveConceptualElement {
+public class FinalItem extends ResolveConceptualElement {
 
     // ===========================================================
     // Member Fields
@@ -61,21 +61,21 @@ public class InitItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs a type initialization block that happens
-     * when a variable of this type is initialized.</p>
+     * <p>This constructs a type finalization block that happens
+     * when a variable of this type is finalized.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param affectsVars List of state variables affected by initialization.
-     * @param requires A {@link Exp} representing the initialization's
+     * @param affectsVars List of state variables affected by finalization.
+     * @param requires A {@link Exp} representing the finalization's
      *                 requires clause.
-     * @param ensures A {@link Exp} representing the initialization's
+     * @param ensures A {@link Exp} representing the finalization's
      *                ensures clause.
      * @param facilities List of facility declarations in this block.
      * @param variables List of variables in this block.
      * @param aux_variables List of auxiliary variables in this block.
      * @param statements List of statements in this block.
      */
-    public InitItem(Location l, List<AffectsItem> affectsVars, Exp requires,
+    public FinalItem(Location l, List<AffectsItem> affectsVars, Exp requires,
             Exp ensures, List<FacilityDec> facilities, List<VarDec> variables,
             List<AuxVarDec> aux_variables, List<Statement> statements) {
         super(l);
@@ -107,10 +107,10 @@ public class InitItem extends ResolveConceptualElement {
     public String asString(int indentSize, int innerIndentSize) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("InitItem\n");
+        sb.append("FinalItem\n");
 
         printSpace(indentSize, sb);
-        sb.append("initialization\n");
+        sb.append("finalization\n");
 
         if (!myAffectedVars.isEmpty()) {
             printSpace(indentSize + innerIndentSize, sb);
@@ -170,20 +170,20 @@ public class InitItem extends ResolveConceptualElement {
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for the {@link InitItem} class.</p>
+     * for the {@link FinalItem} class.</p>
      *
      * @return A deep copy of the object.
      */
     @Override
-    public InitItem clone() {
-        return new InitItem(new Location(myLoc), copyAffectedItems(),
+    public FinalItem clone() {
+        return new FinalItem(new Location(myLoc), copyAffectedItems(),
                 myRequires.clone(), myEnsures.clone(), copyFacDecs(),
                 copyVars(), copyAuxVars(), copyStatements());
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {@link InitItem} class.</p>
+     * for the {@link FinalItem} class.</p>
      *
      * @param o Object to be compared.
      *
@@ -192,18 +192,18 @@ public class InitItem extends ResolveConceptualElement {
     @Override
     public boolean equals(Object o) {
         boolean result = false;
-        if (o instanceof InitItem) {
-            InitItem initItem = (InitItem) o;
+        if (o instanceof FinalItem) {
+            FinalItem finalItem = (FinalItem) o;
             result =
-                    myLoc.equals(initItem.myLoc)
-                            && myRequires.equals(initItem.myRequires)
-                            && myEnsures.equals(initItem.myEnsures);
+                    myLoc.equals(finalItem.myLoc)
+                            && myRequires.equals(finalItem.myRequires)
+                            && myEnsures.equals(finalItem.myEnsures);
 
             if (result) {
-                if (myAffectedVars != null && initItem.myAffectedVars != null) {
+                if (myAffectedVars != null && finalItem.myAffectedVars != null) {
                     Iterator<AffectsItem> thisVars = myAffectedVars.iterator();
                     Iterator<AffectsItem> eVars =
-                            initItem.myAffectedVars.iterator();
+                            finalItem.myAffectedVars.iterator();
 
                     while (result && thisVars.hasNext() && eVars.hasNext()) {
                         result &= thisVars.next().equals(eVars.next());
@@ -216,10 +216,10 @@ public class InitItem extends ResolveConceptualElement {
 
             if (result) {
                 if (myAuxVariableDecs != null
-                        && initItem.myAuxVariableDecs != null) {
+                        && finalItem.myAuxVariableDecs != null) {
                     Iterator<AuxVarDec> thisVars = myAuxVariableDecs.iterator();
                     Iterator<AuxVarDec> eVars =
-                            initItem.myAuxVariableDecs.iterator();
+                            finalItem.myAuxVariableDecs.iterator();
 
                     while (result && thisVars.hasNext() && eVars.hasNext()) {
                         result &= thisVars.next().equals(eVars.next());
@@ -231,10 +231,10 @@ public class InitItem extends ResolveConceptualElement {
             }
 
             if (result) {
-                if (myFacilityDecs != null && initItem.myFacilityDecs != null) {
+                if (myFacilityDecs != null && finalItem.myFacilityDecs != null) {
                     Iterator<FacilityDec> thisDecs = myFacilityDecs.iterator();
                     Iterator<FacilityDec> eDecs =
-                            initItem.myFacilityDecs.iterator();
+                            finalItem.myFacilityDecs.iterator();
 
                     while (result && thisDecs.hasNext() && eDecs.hasNext()) {
                         result &= thisDecs.next().equals(eDecs.next());
@@ -246,11 +246,11 @@ public class InitItem extends ResolveConceptualElement {
             }
 
             if (result) {
-                if (myStatements != null && initItem.myStatements != null) {
+                if (myStatements != null && finalItem.myStatements != null) {
                     Iterator<Statement> thisStatements =
                             myStatements.iterator();
                     Iterator<Statement> eStatements =
-                            initItem.myStatements.iterator();
+                            finalItem.myStatements.iterator();
 
                     while (result && thisStatements.hasNext()
                             && eStatements.hasNext()) {
@@ -267,9 +267,10 @@ public class InitItem extends ResolveConceptualElement {
             }
 
             if (result) {
-                if (myVariableDecs != null && initItem.myVariableDecs != null) {
+                if (myVariableDecs != null && finalItem.myVariableDecs != null) {
                     Iterator<VarDec> thisVars = myVariableDecs.iterator();
-                    Iterator<VarDec> eVars = initItem.myVariableDecs.iterator();
+                    Iterator<VarDec> eVars =
+                            finalItem.myVariableDecs.iterator();
 
                     while (result && thisVars.hasNext() && eVars.hasNext()) {
                         result &= thisVars.next().equals(eVars.next());
@@ -285,7 +286,7 @@ public class InitItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the list of affected state variables in this initialization
+     * <p>Returns the list of affected state variables in this finalization
      * block.</p>
      *
      * @return A list of {@link AffectsItem} representation objects.
@@ -295,7 +296,7 @@ public class InitItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the list of auxiliary variables in this initialization
+     * <p>Returns the list of auxiliary variables in this finalization
      * block.</p>
      *
      * @return A list of {@link AuxVarDec} representation objects.
@@ -314,7 +315,7 @@ public class InitItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the list of facility declarations in this initialization
+     * <p>Returns the list of facility declarations in this finalization
      * block.</p>
      *
      * @return A list of {@link FacilityDec} representation objects.
@@ -333,7 +334,7 @@ public class InitItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the list of statements in this initialization
+     * <p>Returns the list of statements in this finalization
      * block.</p>
      *
      * @return A list of {@link Statement} representation objects.
@@ -343,7 +344,7 @@ public class InitItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the list of variables in this initialization
+     * <p>Returns the list of variables in this finalization
      * block.</p>
      *
      * @return A list of {@link VarDec} representation objects.
@@ -360,7 +361,7 @@ public class InitItem extends ResolveConceptualElement {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("initialization\n");
+        sb.append("finalization\n");
 
         if (!myAffectedVars.isEmpty()) {
             sb.append("\taffects ");
