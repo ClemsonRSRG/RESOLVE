@@ -377,11 +377,11 @@ public class InitItem extends ResolveConceptualElement {
         }
 
         sb.append("\trequires ");
-        sb.append(myRequires.asString(0, 0));
+        sb.append(myRequires.toString());
         sb.append(";\n");
 
         sb.append("\tensures ");
-        sb.append(myEnsures.asString(0, 0));
+        sb.append(myEnsures.toString());
         sb.append(";\n");
 
         Iterator<FacilityDec> it1 = myFacilityDecs.iterator();
