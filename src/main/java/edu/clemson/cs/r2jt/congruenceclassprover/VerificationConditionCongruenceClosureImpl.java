@@ -106,7 +106,7 @@ public class VerificationConditionCongruenceClosureImpl {
         PSymbol fandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
         m_conjunction.addExpression(fandfeqf);
         //m_goal.add("false");
-        m_conjunction.updateUseMap();
+        m_conjunction.initializeUseMap();
     }
 
     /* Ex.: p is for all k:Z, lambda0(k) = (x <= k)

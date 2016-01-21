@@ -64,7 +64,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         rString += addExpression(expression);
         m_current_justification = "";
         mergeArgsOfEqualityPredicateIfRootIsTrue();
-        updateUseMap();
         return rString;
     }
 
@@ -264,6 +263,17 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         int rhs = m_registry.makeSymbol(rangeType, isVar);
         atomicFormula.writeToRoot(rhs);
         m_exprList.add(indexToInsert, atomicFormula);
+        for(int k : atomicFormula.getKeys()){
+            Set<NormalizedAtomicExpressionMapImpl> kUses = m_useMap.get(k);
+            if(kUses==null){
+                kUses = new HashSet<NormalizedAtomicExpressionMapImpl>();
+                kUses.add(atomicFormula);
+            }
+            else{
+                kUses.add(atomicFormula);
+            }
+            m_useMap.put(k,kUses);
+        }
         return rhs;
     }
 
@@ -332,6 +342,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     //  = will always be at top of list.
     // removes =(x,x)= true afterwards
     protected void mergeArgsOfEqualityPredicateIfRootIsTrue() {
+
         if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
             return;
         }
@@ -345,7 +356,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             NormalizedAtomicExpressionMapImpl cur = m_exprList.get(i);
             int f = cur.readPosition(0);
             if (f != eqQ || m_evaluates_to_false) {
-                break;
+                return;
             }
             int root = cur.readRoot();
             int op1 = cur.readPosition(1);
@@ -376,19 +387,21 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
             return null;
         }
-        Iterator<NormalizedAtomicExpressionMapImpl> it = m_exprList.iterator();
         Stack<NormalizedAtomicExpressionMapImpl> modifiedEntries =
                 new Stack<NormalizedAtomicExpressionMapImpl>();
         Stack<Integer> coincidentalMergeHoldingTank = new Stack<Integer>();
-        while (it.hasNext()) {
-            NormalizedAtomicExpressionMapImpl curr = it.next();
-            if (curr.replaceOperator(b, a)) {
-                if (m_registry.isCommutative(curr.readPosition(0))) {
-                    curr = curr.withOrderedArguments();
+        Set<NormalizedAtomicExpressionMapImpl> bUses = m_useMap.get(b);
+        if(bUses != null) {
+            for (NormalizedAtomicExpressionMapImpl nm : bUses) {
+                if (nm.replaceOperator(b, a)) {
+                    if (m_registry.isCommutative(nm.readPosition(0))) {
+                        nm = nm.withOrderedArguments();
+                    }
+                    modifiedEntries.push(nm);
+                    m_exprList.remove(nm);
                 }
-                modifiedEntries.push(curr);
-                it.remove();
             }
+            m_useMap.remove(b);
         }
         while (!modifiedEntries.empty()) {
             int indexToInsert =
@@ -415,6 +428,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                         //System.err.println(nm.toHumanReadableString(m_registry) + " " + g1 + " " + g2);
                     }
                 }
+                if(m_useMap.get(a)!=null) {
+                    m_useMap.get(a).add(modifiedEntries.peek());
+                }
+                else {
+                    HashSet<NormalizedAtomicExpressionMapImpl> aUses = new HashSet<NormalizedAtomicExpressionMapImpl>();
+                    aUses.add(modifiedEntries.peek());
+                    m_useMap.put(a,aUses);
+                }
                 m_exprList.add(indexToInsert, modifiedEntries.pop());
 
             }
@@ -433,7 +454,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return coincidentalMergeHoldingTank;
     }
 
-    protected void updateUseMap() {
+    protected void initializeUseMap() {
         m_useMap.clear();
         assert m_useMap.size() == 0;
         for (NormalizedAtomicExpressionMapImpl e : m_exprList) {
