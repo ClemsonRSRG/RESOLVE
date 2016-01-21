@@ -16,9 +16,25 @@ import edu.clemson.cs.rsrg.absyn.Dec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
-// Todo: Maybe change the name of this to MathTheoremDec
+/**
+ * <p>This is the class for all the mathematical assertion declarations
+ * that the compiler builds from the ANTLR4 AST tree.</p>
+ *
+ * @version 2.0
+ */
 public class MathAssertionDec extends Dec {
 
+    // ===========================================================
+    // Constructors
+    // ===========================================================
+
+    /**
+     * <p>This constructs either a mathematical axiom, theorem,
+     * corollary, lemma or property assertion.</p>
+     *
+     * @param l A {@link Location} representation object.
+     * @param name Name of the assertion declaration.
+     */
     public MathAssertionDec(Location l, PosSymbol name) {
         super(l, name);
     }
