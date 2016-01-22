@@ -39,6 +39,7 @@ public class Registry {
     protected Map<Integer, ArrayList<Integer>> m_partTypeParentArray;
     protected Set<String> m_commutative_operators;
     protected Map<String, Boolean> m_cached_isSubtype;
+    protected Map<NormalizedAtomicExpressionMapImpl,Integer> m_exprRootMap;
 
     public static enum Usage {
 
@@ -60,6 +61,7 @@ public class Registry {
         m_symbolToUsage = new HashMap<String, Usage>(); // entries won't change
         m_foralls = new HashSet<String>();
         m_typeGraph = g;
+        m_exprRootMap = new HashMap<NormalizedAtomicExpressionMapImpl, Integer>(1024,.75f);
         m_typeDictionary = new TreeMap<String, MTType>();
         addSymbol("=", new MTFunction(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
                 Usage.LITERAL); // = as a predicate function, not as an assertion

@@ -106,7 +106,6 @@ public class VerificationConditionCongruenceClosureImpl {
         PSymbol fandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
         m_conjunction.addExpression(fandfeqf);
         //m_goal.add("false");
-        m_conjunction.initializeUseMap();
     }
 
     /* Ex.: p is for all k:Z, lambda0(k) = (x <= k)
@@ -342,22 +341,6 @@ public class VerificationConditionCongruenceClosureImpl {
 
     public Registry getRegistry() {
         return m_registry;
-    }
-
-    protected Set<String> getFunctionNames() {
-        return m_registry.getFunctionNames();
-    }
-
-    protected Map<String, Integer> getGoalSymbols() {
-        // even score if goal is true = false
-        HashSet<String> goalSymbolSet = new HashSet<String>();
-        for (String goal : m_goal) {
-            goalSymbolSet.add(goal);
-
-        }
-        Map<String, Integer> rMap =
-                m_conjunction.getSymbolProximity(goalSymbolSet);
-        return rMap;
     }
 
     public STATUS isProved() {

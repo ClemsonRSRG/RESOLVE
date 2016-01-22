@@ -12,14 +12,11 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import edu.clemson.cs.r2jt.collections.Map;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
-import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
-import java.sql.PseudoColumnUsage;
 import java.util.*;
 
 /**
@@ -344,7 +341,7 @@ public class TheoremCongruenceClosureImpl {
                 new HashSet<java.util.Map<String, String>>();
         java.util.Map<String, String> initBindings = getInitBindings();
         results.add(initBindings);
-        for (NormalizedAtomicExpressionMapImpl e_t : m_matchConj.m_exprList) {
+        for (NormalizedAtomicExpressionMapImpl e_t : m_matchConj.m_expSet) {
             results =
                     vc.getConjunct().getMatchesForOverideSet(e_t,
                             m_theoremRegistry, results);

@@ -412,10 +412,8 @@ public final class CongruenceClassProver {
             long time_at_theorem_pq_creation = System.currentTimeMillis();
             iteration++;
             // ++++++ Creates new PQ with all the theorems
-            Map<String, Integer> vcSymbolRelevanceMap = vcc.getGoalSymbols();
             TheoremPrioritizer rankedTheorems =
-                    new TheoremPrioritizer(theoremsForThisVC,
-                            vcSymbolRelevanceMap, theoremAppliedCount, vcc
+                    new TheoremPrioritizer(theoremsForThisVC, theoremAppliedCount, vcc
                                     .getRegistry());
             int max_Theorems_to_choose = 1;
             int num_Theorems_chosen = 0;

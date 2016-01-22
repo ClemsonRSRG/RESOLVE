@@ -25,15 +25,12 @@ import java.util.Set;
 public class TheoremPrioritizer {
 
     protected PriorityQueue<TheoremWithScore> m_pQueue;
-    private Map<String, Integer> m_vc_symbols;
     private Map<String, Integer> m_theoremAppliedCount;
     private Registry m_vcReg;
 
-    public TheoremPrioritizer(List<TheoremCongruenceClosureImpl> theoremList,
-            Map<String, Integer> vcSymbols, Map<String, Integer> appliedCount,
+    public TheoremPrioritizer(List<TheoremCongruenceClosureImpl> theoremList, Map<String, Integer> appliedCount,
             Registry vcReg) {
         m_pQueue = new PriorityQueue<TheoremWithScore>(theoremList.size());
-        m_vc_symbols = vcSymbols;
         m_theoremAppliedCount = appliedCount;
         m_vcReg = vcReg;
         for (TheoremCongruenceClosureImpl t : theoremList) {
@@ -51,7 +48,7 @@ public class TheoremPrioritizer {
                 if (!shouldExclude(t.getLiteralsInMatchingPart())
                         && !shouldExclude(t.getFunctionNames())) {
                     score =
-                            calculateScoreAverage(t.getNonQuantifiedSymbols(),
+                            calculateScoreMinimum(t.getNonQuantifiedSymbols(),
                                     m_vcReg.m_symbolToIndex.keySet().size());
                 }
 
@@ -96,21 +93,6 @@ public class TheoremPrioritizer {
         return (score + 1) * number_not_contained;
     }
 
-    // average of symbol scores
-    public int calculateScoreAverage(Set<String> theorem_symbols,
-            int not_contained_penalty) {
-        float score = 0;
-        for (String s : theorem_symbols) {
-            String c = m_vcReg.getRootSymbolForSymbol(s);
-            if (m_vc_symbols.containsKey(c)) {
-                score += m_vc_symbols.get(c);
-            }
-            else
-                score += not_contained_penalty;
-        }
-
-        return (int) (score / (float) theorem_symbols.size());
-    }
 
     public TheoremCongruenceClosureImpl poll() {
         return m_pQueue.poll().m_theorem;
