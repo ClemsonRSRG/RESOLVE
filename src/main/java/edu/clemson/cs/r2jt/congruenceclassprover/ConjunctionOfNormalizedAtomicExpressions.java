@@ -15,6 +15,7 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.*;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
+import sun.security.krb5.internal.crypto.HmacSha1Aes128CksumType;
 
 import java.util.*;
 
@@ -111,7 +112,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // adds a particular symbol to the registry
     protected int addPsymbol(PSymbol ps) {
         String name = ps.getTopLevelOperation();
-        if(m_registry.m_symbolToIndex.containsKey(name))
+        if (m_registry.m_symbolToIndex.containsKey(name))
             return m_registry.m_symbolToIndex.get(name);
         MTType type = ps.getType();
         Registry.Usage usage = Registry.Usage.SINGULAR_VARIABLE;
@@ -252,25 +253,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         int rhs = m_registry.makeSymbol(rangeType, isVar);
         atomicFormula.writeToRoot(rhs);
-        m_expSet.add(atomicFormula);
-        for (int k : atomicFormula.getKeys()) {
-            Set<NormalizedAtomicExpressionMapImpl> kUses = m_useMap.get(k);
-            if (kUses == null) {
-                kUses = new HashSet<NormalizedAtomicExpressionMapImpl>();
-                kUses.add(atomicFormula);
-            } else {
-                kUses.add(atomicFormula);
-            }
-            m_useMap.put(k, kUses);
-        }
-        if(m_useMap.containsKey(rhs)){
-            m_useMap.get(rhs).add(atomicFormula);
-        }
-        else{
-            Set<NormalizedAtomicExpressionMapImpl> rhsUses = new HashSet<NormalizedAtomicExpressionMapImpl>();
-            rhsUses.add(atomicFormula);
-            m_useMap.put(rhs,rhsUses);
-        }
+        addExprToSet(atomicFormula);
         return rhs;
     }
 
@@ -334,6 +317,40 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return a < b ? a : b;
     }
 
+    private void addMapUse(int symk, NormalizedAtomicExpressionMapImpl nae) {
+        if (m_useMap.containsKey(symk)) {
+            m_useMap.get(symk).add(nae);
+        } else {
+            Set<NormalizedAtomicExpressionMapImpl> iUses = new HashSet<NormalizedAtomicExpressionMapImpl>();
+            iUses.add(nae);
+            m_useMap.put(symk, iUses);
+        }
+    }
+
+    private void addExprToSet(NormalizedAtomicExpressionMapImpl nae) {
+        for (int i : nae.getKeys()) {
+            addMapUse(i, nae);
+        }
+        int root = nae.readRoot();
+        assert root >= 0 : "adding unrooted expression to conj";
+        addMapUse(root, nae);
+        m_expSet.add(nae);
+    }
+
+    private void removeMapUse(int symK, NormalizedAtomicExpressionMapImpl nae) {
+        if (m_useMap.containsKey(symK)) {
+            m_useMap.get(symK).remove(nae);
+        }
+    }
+
+    private void removeExprFromSet(NormalizedAtomicExpressionMapImpl nae) {
+        for (int i : nae.getKeys()) {
+            removeMapUse(i, nae);
+        }
+        removeMapUse(nae.readRoot(), nae);
+        m_registry.m_exprRootMap.remove(nae);
+        m_expSet.remove(nae);
+    }
 
     // Return list of modified predicates by their position. Only these can cause new merges.
     // b is replaced by a
@@ -349,9 +366,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         Set<NormalizedAtomicExpressionMapImpl> bUses = m_useMap.get(b);
         m_useMap.remove(b);
         for (NormalizedAtomicExpressionMapImpl nm : bUses) {
-            m_expSet.remove(nm);
             int oldRoot = nm.readRoot();
-            m_registry.m_exprRootMap.remove(nm);
+            removeExprFromSet(nm);
             if (nm.replaceOperator(b, a)) {
                 // hashcode just changed
                 if (m_registry.isCommutative(nm.readPosition(0))) {
@@ -365,28 +381,17 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     }
                 } else {
                     // just changed an ezpr, and it is unique
-                    m_expSet.add(nm);
-                    if (m_useMap.containsKey(a)) {
-                        m_useMap.get(a).add(nm);
-                    } else {
-                        HashSet<NormalizedAtomicExpressionMapImpl> aUses = new HashSet<NormalizedAtomicExpressionMapImpl>();
-                        aUses.add(nm);
-                        m_useMap.put(a, aUses);
-                    }
+
                     int root = b == oldRoot ? a : oldRoot;
-                   nm.writeToRoot(root);
+                    nm.writeToRoot(root);
+                    addExprToSet(nm);
                 }
             } else {
                 // only root is b.  Expr is unchanged and unique.
-                m_expSet.add(nm);
                 nm.writeToRoot(a);
-                if (m_useMap.containsKey(a)) {
-                    m_useMap.get(a).add(nm);
-                } else {
-                    HashSet<NormalizedAtomicExpressionMapImpl> aUses = new HashSet<NormalizedAtomicExpressionMapImpl>();
-                    aUses.add(nm);
-                    m_useMap.put(a, aUses);
-                }
+                addExprToSet(nm);
+
+
             }
 
         }
@@ -488,6 +493,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 }
             }
             filter.overwriteEntry(vcInt, allPositionsLitIsUsedInSearchExpr);
+            if(s.equals(exprReg.getSymbolForIndex(expr.readRoot()))){
+                filter.writeToRoot(vcInt);
+            }
 
         }
 
