@@ -225,9 +225,16 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         int rhs = m_registry.makeSymbol(rangeType, isVar);
         atomicFormula.writeToRoot(rhs);
+        Stack<Integer> hTank = new Stack<Integer>();
+        applyBuiltInLogic(atomicFormula, hTank);
         addExprToSet(atomicFormula);
-        return rhs;
+        while (!hTank.isEmpty()) {
+            mergeOperators(hTank.pop(), hTank.pop());
+        }
+        return m_registry.findAndCompress(rhs);
+
     }
+
 
     protected String mergeOperators(int a, int b) {
         int t = m_registry.getIndexForSymbol("true");
@@ -251,6 +258,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
             int opB = m_registry.findAndCompress(holdingTank.pop());
             int opA = m_registry.findAndCompress(holdingTank.pop());
+            if(opA == opB) continue;
             // Want to replace quantified vars with constant if it is equal to the constant
             int keeper = chooseSymbolToKeep(opA, opB);
             if (keeper == opB) {
@@ -321,7 +329,188 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         m_registry.m_exprRootMap.remove(nae);
         m_expSet.remove(nae);
     }
+    private void applyBuiltInLogic(NormalizedAtomicExpression nm,
+                                   Stack<Integer> tank) {
+        int arity = nm.getArity();
+        if (arity < 1 || 2 < arity) return;
+        String op = nm.readSymbol(0);
+        int arg1 = nm.readPosition(1);
+        int rhs = nm.readRoot();
+        if (rhs < 0) return;
+        int tr = m_registry.getIndexForSymbol("true");
+        int fl = m_registry.getIndexForSymbol("false");
+        // =,true,false,not.  recorded first in reg. logic relation args (and, or, =) are ordered.
 
+        // arity 1 guard: return if all constant or all vars
+        if (arity == 1 && (arg1 == tr || arg1 == fl) && (rhs == tr || rhs == fl)) return;
+        if (arity == 1 && !(arg1 == tr || arg1 == fl) && !(rhs == tr || rhs == fl)) return;
+        if (op.equals("not")) {
+            // constant rhs
+            if (rhs == tr) {
+                // not p = true, false/p
+                tank.push(fl);
+                tank.push(arg1);
+                return;
+            }
+            if (rhs == fl) {
+                // not p = false, true/p
+                tank.push(tr);
+                tank.push(arg1);
+                return;
+            }
+            // constant arg
+            if (arg1 == tr) {
+                // not(tr) = p, false/p
+                tank.push(fl);
+                tank.push(rhs);
+                return;
+            }
+            if (arg1 == fl) {
+                // not(fl) = p, true/p
+                tank.push(tr);
+                tank.push(rhs);
+                return;
+            }
+        }
+        if(arity < 2) return;
+        int arg2 = nm.readPosition(2);
+        // arity 2 guard: return if all constant
+        if ((arg1 == tr || arg1 == fl) && (arg2 == tr || arg2 == fl)
+                && (rhs == tr || rhs == fl))
+            return;
+        // guard: return if all var
+        //if((arg1 != tr && arg1 != fl)&&(arg2 != tr && arg2 != fl) && (rhs != tr && rhs != fl) ) return;
+        // rules for and
+        if (op.equals("and")) {
+            // constant rhs
+            if (rhs == tr) {
+                // (p and q) = t |= t/p, t/q
+                if (tr != arg1) {
+                    tank.push(tr);
+                    tank.push(arg1);
+                }
+                if (tr != arg2) {
+                    tank.push(tr);
+                    tank.push(arg2);
+                }
+                return;
+            }
+            // constant t arg
+            if (arg1 == tr) {
+                // (t and p) = q |= p/q
+                if (rhs != arg2) {
+                    tank.push(rhs);
+                    tank.push(arg2);
+                }
+                return;
+            }
+            // constant f arg
+            if (arg1 == fl) {
+                // (f and p) = q |= f/q
+                if (fl != rhs) {
+                    tank.push(fl);
+                    tank.push(rhs);
+                }
+                return;
+            }
+            // all vars
+            if (arg1 == arg2) {
+                // (p = p) = q |= t/q
+                if (tr != rhs) {
+                    tank.push(tr);
+                    tank.push(rhs);
+                }
+                return;
+            }
+            return;
+        }
+        if (op.equals("or")) {
+            // constant f rhs
+            if (rhs == fl) {
+                // p or q = f |= f/p/q
+                if (fl != arg1) {
+                    tank.push(fl);
+                    tank.push(arg1);
+                }
+                if (fl != arg2) {
+                    tank.push(fl);
+                    tank.push(arg2);
+                }
+                return;
+            }
+            // constant t arg
+            if (arg1 == tr) {
+                // (t or p) = q |= t/q
+                if (tr != rhs) {
+                    tank.push(tr);
+                    tank.push(rhs);
+                }
+                return;
+            }
+            // constant f arg
+            if (arg1 == fl) {
+                // (f or p) = q |= p/q
+                if (arg2 != rhs) {
+                    tank.push(arg2);
+                    tank.push(rhs);
+                }
+                return;
+            }
+            // all vars.
+            // p or not p = q := t/q
+            return;
+        }
+        if (op.equals("=")) {
+            // constant t rhs
+            if (rhs == tr) {
+                // (p = q) = t |= p/q
+                if (arg1 != arg2) {
+                    tank.push(arg1);
+                    tank.push(arg2);
+                }
+                return;
+            }
+            // constant f rhs
+            if (rhs == fl) {
+                // constant t arg
+                if (arg1 == tr) {
+                    if (fl != arg2) {
+                        // (t = p) = f |= f/p
+                        tank.push(fl);
+                        tank.push(arg2);
+                    }
+                    return;
+                }
+                // constant f arg
+                if (arg1 == fl) {
+                    // (f = p) = f |= t/p
+                    if (tr != arg2) {
+                        tank.push(tr);
+                        tank.push(arg2);
+                    }
+                }
+                return;
+            }
+            // constant t arg
+            if (arg1 == tr) {
+                // (t = p) = q |= p/q
+                if (arg2 != rhs) {
+                    tank.push(arg2);
+                    tank.push(rhs);
+                }
+                return;
+            }
+            // all vars
+            if (arg1 == arg2) {
+                // (p = p) = q
+                tank.push(tr);
+                tank.push(rhs);
+            }
+            return;
+        }
+        return;
+
+    }
     // Return list of modified predicates by their position. Only these can cause new merges.
     // b is replaced by a
     protected Stack<Integer> mergeOnlyArgumentOperators(int a, int b) {
@@ -339,13 +528,16 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         for (NormalizedAtomicExpression nm : bUses) {
             int oldRoot = nm.readRoot();
             assert oldRoot > 0;
-            NormalizedAtomicExpression ne = nm.replaceOperator(b, a); // this may have remapped the root
+            NormalizedAtomicExpression ne = nm.replaceOperator(b, a); // also changes root if b
             assert ne.readRoot()==oldRoot || ne.readRoot()==a;
             if(nm == ne){
                 // no change in atom, so only root is b
                 addMapUse(a,nm);
+                applyBuiltInLogic(nm,coincidentalMergeHoldingTank);
             }
             else {
+                assert ne != nm;
+                assert ne.hashCode() != nm.hashCode();
                 assert ne.readRoot()==oldRoot || ne.readRoot()==a;
                 removeExprFromSet(nm);
                 assert ne.readRoot()==oldRoot || ne.readRoot()==a;
@@ -358,6 +550,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     }
                 } else {
                     addExprToSet(ne);
+                    applyBuiltInLogic(ne,coincidentalMergeHoldingTank);
                 }
             }
         }

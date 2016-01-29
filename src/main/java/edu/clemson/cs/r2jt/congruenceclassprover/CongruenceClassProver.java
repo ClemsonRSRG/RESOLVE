@@ -144,7 +144,7 @@ public final class CongruenceClassProver {
                 //addContrapositive(assertion, eName);
             }
         }
-        insertDefaultTheorems();
+        //insertDefaultTheorems();
         m_environment = environment;
         m_scope = scope;
         m_results = "";

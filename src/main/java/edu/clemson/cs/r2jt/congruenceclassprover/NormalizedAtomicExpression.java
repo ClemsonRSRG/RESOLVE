@@ -127,6 +127,8 @@ public class NormalizedAtomicExpression {
     }
 
     public NormalizedAtomicExpression replaceOperator(int orig, int repl) {
+        if(orig == repl)
+            return this;
         if (!getOpIds().contains(orig)) {
             return this;
         }
@@ -147,6 +149,8 @@ public class NormalizedAtomicExpression {
             rNa.writeToRoot(repl);
         }
         else rNa.writeToRoot(readRoot());
+        assert (changed == (rNa != this));
+        assert changed == (rNa.hashCode() != hashCode());
         return rNa;
     }
     protected void writeToRoot(int root) {
