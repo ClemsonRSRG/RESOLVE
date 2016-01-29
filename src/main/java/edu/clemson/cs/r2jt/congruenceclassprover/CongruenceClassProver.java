@@ -288,7 +288,7 @@ public final class CongruenceClassProver {
         int i = 0;
         int numUnproved = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
-            //printVCEachStep = true;
+            printVCEachStep = true;
             //if (!vcc.m_name.equals("1_7")) continue;
             long startTime = System.nanoTime();
             String whyQuit = "";

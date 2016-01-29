@@ -15,7 +15,6 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.*;
 import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
-import sun.security.krb5.internal.crypto.HmacSha1Aes128CksumType;
 
 import java.util.*;
 
@@ -25,12 +24,12 @@ import java.util.*;
 public class ConjunctionOfNormalizedAtomicExpressions {
 
     private final Registry m_registry;
-    protected final Set<NormalizedAtomicExpressionMapImpl> m_expSet;
+    protected final Set<NormalizedAtomicExpression> m_expSet;
     protected long m_timeToEnd = -1;
     protected boolean m_evaluates_to_false = false;
     private int f_num = 0;
     private String m_current_justification = "";
-    private final Map<Integer, Set<NormalizedAtomicExpressionMapImpl>> m_useMap;
+    private final Map<Integer, Set<NormalizedAtomicExpression>> m_useMap;
     protected final VerificationConditionCongruenceClosureImpl m_VC;
 
     /**
@@ -41,9 +40,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                                                     VerificationConditionCongruenceClosureImpl vc) {
         m_registry = registry;
         // Array list is much slower than LinkedList for this application
-        m_expSet = new HashSet<NormalizedAtomicExpressionMapImpl>();
+        m_expSet = new HashSet<NormalizedAtomicExpression>();
         m_useMap =
-                new HashMap<Integer, Set<NormalizedAtomicExpressionMapImpl>>();
+                new HashMap<Integer, Set<NormalizedAtomicExpression>>();
         m_VC = vc; // null if this is a theorem
     }
 
@@ -164,11 +163,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             else {*/
             // insert =(lhs,rhs) = someNewRoot
             int questEq = m_registry.getIndexForSymbol("=");
-            NormalizedAtomicExpressionMapImpl pred =
-                    new NormalizedAtomicExpressionMapImpl(m_registry);
-            pred.writeOnto(questEq, 0);
-            pred.writeOnto(lhs, 1);
-            pred.writeOnto(rhs, 2);
+            NormalizedAtomicExpression pred =
+                    new NormalizedAtomicExpression(m_registry, new int[]{questEq, lhs, rhs});
             return addAtomicFormula(pred);
             // }
         }
@@ -185,31 +181,21 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             return intRepOfOp;
         }
 
-        NormalizedAtomicExpressionMapImpl newExpr =
-                new NormalizedAtomicExpressionMapImpl(m_registry);
-        newExpr.writeOnto(intRepOfOp, 0);
-        int pos = 0;
+        int[] ne = new int[formula.getSubExpressions().size() + 1];
+        ne[0] = intRepOfOp;
+        int pos = 1;
         PExpSubexpressionIterator it = formula.getSubExpressionIterator();
         while (it.hasNext()) {
             PExp p = it.next();
-            pos++;
             int root = addFormula(p);
-            assert newExpr != null;
-            newExpr.writeOnto(root, pos);
+            ne[pos++] = root;
         }
+        NormalizedAtomicExpression newExpr =
+                new NormalizedAtomicExpression(m_registry, ne);
         if (m_evaluates_to_false) {
             return -1;
         }
-        Map<Integer, Integer> changedOps = new HashMap<Integer, Integer>();
-        for (int k : newExpr.getKeys()) {
-            int kPar = m_registry.findAndCompress(k);
-            if (kPar != k) {
-                changedOps.put(k, kPar);
-            }
-        }
-        for (int k : changedOps.keySet()) {
-            newExpr.replaceOperator(k, changedOps.get(k));
-        }
+        newExpr = newExpr.rootOps();
         return addAtomicFormula(newExpr);
     }
 
@@ -219,11 +205,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      *                      current root is returned.
      * @return current integer value of root symbol that represents the input.
      */
-    private int addAtomicFormula(NormalizedAtomicExpressionMapImpl atomicFormula) {
-        // Order terms if operator is commutative
-        if (m_registry.isCommutative(atomicFormula.readPosition(0))) {
-            atomicFormula = atomicFormula.withOrderedArguments();
-        }
+    private int addAtomicFormula(NormalizedAtomicExpression atomicFormula) {
         // Return root if atomic formula is present
         if (m_expSet.contains(atomicFormula))
             return m_registry.m_exprRootMap.get(atomicFormula);
@@ -238,18 +220,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         assert rangeType != null : symName + " has null type";
         // if any of the symbols in atomicFormula are variables (FORALL) make created symbol a variable
         boolean isVar = false;
-        for (Integer is : atomicFormula.getKeys()) {
-            String s = m_registry.getSymbolForIndex(is);
-            if (s.startsWith("¢v")) {
-                isVar = true;
-                break;
-            }
-            Registry.Usage us = m_registry.getUsage(s);
-            if (us == Registry.Usage.FORALL
-                    || us == Registry.Usage.HASARGS_FORALL) {
-                isVar = true;
-                break;
-            }
+        if (atomicFormula.hasVarOps()) {
+            isVar = true;
         }
         int rhs = m_registry.makeSymbol(rangeType, isVar);
         atomicFormula.writeToRoot(rhs);
@@ -312,23 +284,21 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             else
                 return a < b ? a : b; // a is created, b is created
         }
-        if (m_registry.getUsage(s).equals(Registry.Usage.FORALL))
-            return b; // a is quantified
         return a < b ? a : b;
     }
 
-    private void addMapUse(int symk, NormalizedAtomicExpressionMapImpl nae) {
+    private void addMapUse(int symk, NormalizedAtomicExpression nae) {
         if (m_useMap.containsKey(symk)) {
             m_useMap.get(symk).add(nae);
         } else {
-            Set<NormalizedAtomicExpressionMapImpl> iUses = new HashSet<NormalizedAtomicExpressionMapImpl>();
+            Set<NormalizedAtomicExpression> iUses = new HashSet<NormalizedAtomicExpression>();
             iUses.add(nae);
             m_useMap.put(symk, iUses);
         }
     }
 
-    private void addExprToSet(NormalizedAtomicExpressionMapImpl nae) {
-        for (int i : nae.getKeys()) {
+    private void addExprToSet(NormalizedAtomicExpression nae) {
+        for (int i : nae.getOpIds()) {
             addMapUse(i, nae);
         }
         int root = nae.readRoot();
@@ -337,14 +307,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         m_expSet.add(nae);
     }
 
-    private void removeMapUse(int symK, NormalizedAtomicExpressionMapImpl nae) {
+    private void removeMapUse(int symK, NormalizedAtomicExpression nae) {
         if (m_useMap.containsKey(symK)) {
             m_useMap.get(symK).remove(nae);
         }
     }
 
-    private void removeExprFromSet(NormalizedAtomicExpressionMapImpl nae) {
-        for (int i : nae.getKeys()) {
+    private void removeExprFromSet(NormalizedAtomicExpression nae) {
+        for (int i : nae.getOpIds()) {
             removeMapUse(i, nae);
         }
         removeMapUse(nae.readRoot(), nae);
@@ -363,56 +333,51 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         Stack<Integer> coincidentalMergeHoldingTank = new Stack<Integer>();
         // todo: make sure m_useMap reflects root usage of b
-        Set<NormalizedAtomicExpressionMapImpl> bUses = m_useMap.get(b);
+        Set<NormalizedAtomicExpression> bUses = m_useMap.get(b);
         m_useMap.remove(b);
-        for (NormalizedAtomicExpressionMapImpl nm : bUses) {
+        nextUse:
+        for (NormalizedAtomicExpression nm : bUses) {
             int oldRoot = nm.readRoot();
-            removeExprFromSet(nm);
-            if (nm.replaceOperator(b, a)) {
-                // hashcode just changed
-                if (m_registry.isCommutative(nm.readPosition(0))) {
-                    nm = nm.withOrderedArguments();
-                }
-                if (m_expSet.contains(nm)) { // may need to override hashfunc
-                    int newRoot = nm.readRoot();
-                    if (oldRoot != newRoot) {
+            assert oldRoot > 0;
+            NormalizedAtomicExpression ne = nm.replaceOperator(b, a); // this may have remapped the root
+            assert ne.readRoot()==oldRoot || ne.readRoot()==a;
+            if(nm == ne){
+                // no change in atom, so only root is b
+                addMapUse(a,nm);
+            }
+            else {
+                assert ne.readRoot()==oldRoot || ne.readRoot()==a;
+                removeExprFromSet(nm);
+                assert ne.readRoot()==oldRoot || ne.readRoot()==a;
+                // Check for existence of the rewritten atom in conj. Add new cong if roots are different.
+                if (m_expSet.contains(ne)) {
+                    int newRoot = ne.readRoot();
+                    if (oldRoot != newRoot && oldRoot != b) {
                         coincidentalMergeHoldingTank.push(oldRoot);
                         coincidentalMergeHoldingTank.push(newRoot);
                     }
                 } else {
-                    // just changed an ezpr, and it is unique
-
-                    int root = b == oldRoot ? a : oldRoot;
-                    nm.writeToRoot(root);
-                    addExprToSet(nm);
+                    addExprToSet(ne);
                 }
-            } else {
-                // only root is b.  Expr is unchanged and unique.
-                nm.writeToRoot(a);
-                addExprToSet(nm);
-
-
             }
-
         }
-
         return coincidentalMergeHoldingTank;
     }
 
 
-    protected Set<NormalizedAtomicExpressionMapImpl> multiKeyUseMapSearch(
+    protected Set<NormalizedAtomicExpression> multiKeyUseMapSearch(
             Set<String> keys) {
 
-        Set<NormalizedAtomicExpressionMapImpl> resultSet =
-                new HashSet<NormalizedAtomicExpressionMapImpl>();
+        Set<NormalizedAtomicExpression> resultSet =
+                new HashSet<NormalizedAtomicExpression>();
         boolean firstkey = true;
         for (String k : keys) {
             int rKey = m_registry.getIndexForSymbol(k);
             if (!m_useMap.containsKey(rKey)) {
                 return null;
             }
-            Set<NormalizedAtomicExpressionMapImpl> tResults =
-                    new HashSet<NormalizedAtomicExpressionMapImpl>(m_useMap
+            Set<NormalizedAtomicExpression> tResults =
+                    new HashSet<NormalizedAtomicExpression>(m_useMap
                             .get(rKey));
             if (tResults == null || tResults.isEmpty())
                 return null;
@@ -427,7 +392,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     protected Set<java.util.Map<String, String>> getMatchesForOverideSet(
-            NormalizedAtomicExpressionMapImpl expr, Registry exprReg,
+            NormalizedAtomicExpression expr, Registry exprReg,
             Set<Map<String, String>> foreignSymbolOverideSet) {
         Set<java.util.Map<String, String>> rSet =
                 new HashSet<Map<String, String>>();
@@ -441,12 +406,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     protected Set<Map<String, String>> getMatchesForEq(
-            NormalizedAtomicExpressionMapImpl expr, Registry exprReg,
+            NormalizedAtomicExpression expr, Registry exprReg,
             Map<String, String> foreignSymbolOveride) {
         // Identify the literals.
         Set<String> literalsInexpr = new HashSet<String>();
         Map<String, Integer> exprMMap =
-                expr.getOperatorsAsStrings();
+                expr.getOperatorsAsStrings(false);
         for (String s : exprMMap.keySet()) {
             String lit = "";
             if (!foreignSymbolOveride.containsKey(s)) {
@@ -463,40 +428,26 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
         }
 
-        Set<NormalizedAtomicExpressionMapImpl> vCNaemlsWithAllLiterals =
+        Set<NormalizedAtomicExpression> vCNaemlsWithAllLiterals =
                 multiKeyUseMapSearch(literalsInexpr);
         if (vCNaemlsWithAllLiterals == null)
             return null;
 
-        Set<NormalizedAtomicExpressionMapImpl> filtered_vcNaemlsWithAllLiterals;
-        // std filter. opnum -> bitcode. means opnum must be used at each position indicated by the bitcode
-        NormalizedAtomicExpressionMapImpl filter =
-                new NormalizedAtomicExpressionMapImpl(m_registry);
-        for (String s : literalsInexpr) {
-            // all literals in the search expr have to already be in the Vc.
-            // find all positions
-            int allPositionsLitIsUsedInSearchExpr = 0;
-            int vcInt = m_registry.getIndexForSymbol(s);
-            assert vcInt >= 0 : s + " not in VC registry";
-            // Have to handle case where the literal is part of the the theorem,
-            // AND a wildcard has been bound to the same symbol
-            if (exprReg.m_symbolToIndex.containsKey(s)) {
-                int sInt = exprReg.getIndexForSymbol(s);
-                allPositionsLitIsUsedInSearchExpr = expr.readOperator(sInt);
-            }
+        Set<NormalizedAtomicExpression> filtered_vcNaemlsWithAllLiterals;
 
-            for (String baseMapK : foreignSymbolOveride.keySet()) {
-                if (foreignSymbolOveride.get(baseMapK).equals(s)) {
-                    allPositionsLitIsUsedInSearchExpr |=
-                            expr.readOperator(exprReg
-                                    .getIndexForSymbol(baseMapK));
-                }
-            }
-            filter.overwriteEntry(vcInt, allPositionsLitIsUsedInSearchExpr);
-            if(s.equals(exprReg.getSymbolForIndex(expr.readRoot()))){
-                filter.writeToRoot(vcInt);
-            }
+        String[] filter = new String[expr.getArity() + 2];
+        for (int i = 0; i < filter.length; ++i) {
 
+            String symAtPos;
+            if (i == filter.length - 1) {
+                symAtPos = exprReg.getSymbolForIndex(expr.readRoot());
+
+            } else symAtPos = expr.readSymbol(i);
+            if (foreignSymbolOveride.containsKey(symAtPos))
+                symAtPos = foreignSymbolOveride.get(symAtPos);
+            if (literalsInexpr.contains(symAtPos)) {
+                filter[i] = symAtPos;
+            } else filter[i] = "_";
         }
 
         boolean isCommutOp = exprReg.isCommutative(expr.readPosition(0));
@@ -521,14 +472,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // Should be able to assume literals in root/pos 0 match (else the filter didnt work)
     // And lits that are args are at least used as many times as in the theorem
     Set<Map<String, String>> getBindings_Commutative(
-            Set<NormalizedAtomicExpressionMapImpl> vcEquations,
+            Set<NormalizedAtomicExpression> vcEquations,
             Map<String, String> basemap,
-            NormalizedAtomicExpressionMapImpl searchExpr, Registry searchReg) {
+            NormalizedAtomicExpression searchExpr, Registry searchReg) {
         // Argument sets
         Map<String, Integer> thArgs =
-                searchExpr.getArgumentsAsStrings();
+                searchExpr.getOperatorsAsStrings(true);
         Map<String, Integer> thOps =
-                searchExpr.getOperatorsAsStrings();
+                searchExpr.getOperatorsAsStrings(false);
         Deque<String> thOpsLitFirst = new LinkedList<String>();
         for (String thOp : thOps.keySet()) {
             if (!basemap.containsKey(thOp) || !basemap.get(thOp).equals("")) {
@@ -539,11 +490,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         Set<Map<String, String>> bindings = new HashSet<Map<String, String>>();
         bindToAVCEquation:
-        for (NormalizedAtomicExpressionMapImpl vc_r : vcEquations) {
+        for (NormalizedAtomicExpression vc_r : vcEquations) {
             Map<String, String> currentBind =
                     new HashMap<String, String>(basemap);
             Map<String, Integer> vcArgs =
-                    vc_r.getArgumentsAsStrings();
+                    vc_r.getOperatorsAsStrings(true);
             Stack<String> comVCargsBound = new Stack<String>();
             ArrayList<String> comTargsBound = new ArrayList<String>();
             for (String thOp : thOpsLitFirst) {
@@ -577,21 +528,22 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 // thOp must be a wildcard
                 String wild = thOp;
                 int wildOpCode = searchReg.getIndexForSymbol(wild);
-                int wildPosBitCode = searchExpr.readOperator(wildOpCode);
                 // Basemap is used over a set of equations; ie wild may not even be used in this one
-                if (wildPosBitCode <= 0)
+                if (!searchExpr.getOpIds().contains(wildOpCode))
                     continue;
                 String localToBindTo = "";
 
                 boolean isRoot = searchExpr.readRoot() == wildOpCode;
                 boolean isFSymb = searchExpr.readPosition(0) == wildOpCode;
-                boolean isArgOnly = false;
+                boolean isArg = searchExpr.getOperatorsAsStrings(true).containsKey(wild);
+                boolean isArgOnly = (isArg && !(isRoot || isFSymb));
                 if (isRoot || isFSymb) {
-                    isArgOnly = false;
-                    if ((wildPosBitCode & (wildPosBitCode - 1)) == 0) { // Single use and is func symbol or root
-                        localToBindTo =
-                                m_registry.getSymbolForIndex(vc_r
-                                        .readPositionBitcode(wildPosBitCode));
+                    if (!isArg && (isRoot != isFSymb)) { // Single use and is func symbol or root
+                        if (isRoot) {
+                            localToBindTo = m_registry.getSymbolForIndex(vc_r.readRoot());
+                        } else {
+                            localToBindTo = vc_r.readSymbol(0);
+                        }
                     } else {// used as (root or func symb) and as arg(s) in search
                         // so reject if same not true of vcr
                         String loc = "";
@@ -601,11 +553,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                                         m_registry.getSymbolForIndex(vc_r
                                                 .readRoot());
                             }
-                        } else if (isFSymb) {
+                        } else if (isFSymb) { // and an arg
                             loc =
                                     m_registry.getSymbolForIndex(vc_r
                                             .readPosition(0));
-                        } else if (isRoot) {
+                        } else if (isRoot) { // and an arg
                             loc = m_registry.getSymbolForIndex(vc_r.readRoot());
                         }
                         if (!loc.equals("")) {
@@ -676,25 +628,23 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return bindings;
     }
 
-    // Most self time in this entire package
     Set<Map<String, String>> getBindings_NonCommutative(
-            Set<NormalizedAtomicExpressionMapImpl> vcEquations,
+            Set<NormalizedAtomicExpression> vcEquations,
             Map<String, String> basemap,
-            NormalizedAtomicExpressionMapImpl searchExpr, Registry searchReg) {
+            NormalizedAtomicExpression searchExpr, Registry searchReg) {
         Set<Map<String, String>> bindings = new HashSet<Map<String, String>>();
         bindToAVCEquation:
-        for (NormalizedAtomicExpressionMapImpl vc_r : vcEquations) {
+        for (NormalizedAtomicExpression vc_r : vcEquations) {
             Map<String, String> currentBind =
                     new HashMap<String, String>(basemap);
             for (String wild : basemap.keySet()) {
                 String wildVal = basemap.get(wild);
                 if (wildVal.equals("")) {
                     int wildInt = searchReg.getIndexForSymbol(wild);
-                    int wildP_BitCode = searchExpr.readOperator(wildInt);
-                    if (wildP_BitCode <= 0)
+                    if (!searchExpr.getOpIds().contains(wildInt))
                         continue; // wild not used in this eq.
-                    int vc_eq_op = vc_r.readPositionBitcode(wildP_BitCode);
-                    if (vc_eq_op == -1)
+                    int vc_eq_op = vc_r.getOpIdUsedInAllPos(searchExpr, wildInt);
+                    if (vc_eq_op < 0)
                         continue bindToAVCEquation; // non matching due to wildcard symbol used more places than found
                     String localToBindTo =
                             m_registry.getSymbolForIndex(vc_eq_op);
@@ -704,8 +654,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     MTType localType =
                             m_registry.getTypeByIndex(m_registry
                                     .getIndexForSymbol(localToBindTo));
-                    if (!m_registry.isSubtype(localType, wildType))//10_4 of Queue_Examples_Fac: 2.7 secs
-                        //if(!localType.isSubtypeOf(wildType)) // 10_4 of Queue_Examples_Fac: 4.8 secs
+                    if (!m_registry.isSubtype(localType, wildType))
                         continue bindToAVCEquation;
                     currentBind.put(wild, localToBindTo);
                 }
@@ -715,51 +664,65 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return bindings;
     }
 
-    protected Set<NormalizedAtomicExpressionMapImpl> commutativeFilter(
-            Set<NormalizedAtomicExpressionMapImpl> raw,
-            NormalizedAtomicExpressionMapImpl filter_criteria) {
-        Set<NormalizedAtomicExpressionMapImpl> filteredSet =
-                new HashSet<NormalizedAtomicExpressionMapImpl>();
-        Map<String, Integer> filterLitArgs =
-                filter_criteria.getArgumentsAsStrings();
-        nextExpr:
-        for (NormalizedAtomicExpressionMapImpl r_n : raw) {
-            if ((filter_criteria.readPosition(0) != -1 && filter_criteria
-                    .readPosition(0) != r_n.readPosition(0))
-                    || (filter_criteria.readRoot() != -1 && filter_criteria
-                    .readRoot() != r_n.readRoot()))
-                continue nextExpr;
-            Map<String, Integer> r_n_litArgs =
-                    r_n.getArgumentsAsStrings();
-            for (String arg : filterLitArgs.keySet()) {
-                if (!r_n_litArgs.containsKey(arg))
-                    continue nextExpr;
-                if (filterLitArgs.get(arg) > r_n_litArgs.get(arg))
-                    continue nextExpr;
+    protected Set<NormalizedAtomicExpression> commutativeFilter(
+            Set<NormalizedAtomicExpression> raw,
+            String[] filter_criteria) {
+        Set<NormalizedAtomicExpression> filteredSet =
+                new HashSet<NormalizedAtomicExpression>();
+        Map<String, Integer> litMmapArgs = new HashMap<String, Integer>();
+        for (int i = 1; i < filter_criteria.length - 1; ++i) {
+            String s = filter_criteria[i];
+            if (s.equals("_")) continue;
+            if (litMmapArgs.containsKey(s)) {
+                litMmapArgs.put(s, litMmapArgs.get(s) + 1);
+            } else {
+                litMmapArgs.put(s, 1);
+            }
+        }
+
+        next_raw:
+        for (NormalizedAtomicExpression r_n : raw) {
+            if (r_n.getArity() != filter_criteria.length - 2) {
+                continue next_raw; // choose next in raw
+            }
+
+            String s = filter_criteria[0];
+            if (!s.equals("_") && !s.equals(r_n.readSymbol(0)))
+                continue next_raw;
+            s = filter_criteria[filter_criteria.length - 1];
+            if (!s.equals("_") && !s.equals(m_registry.getSymbolForIndex(r_n.readRoot())))
+                continue next_raw;
+            Map<String, Integer> cargs = r_n.getOperatorsAsStrings(true);
+            for (String k : litMmapArgs.keySet()) {
+                if (!cargs.containsKey(k)) continue next_raw;
+                if (litMmapArgs.get(k) > cargs.get(k)) continue next_raw;
+                ;
             }
             filteredSet.add(r_n);
         }
         return filteredSet;
     }
 
-    protected Set<NormalizedAtomicExpressionMapImpl> nonCommutativeFilter(
-            Set<NormalizedAtomicExpressionMapImpl> raw,
-            NormalizedAtomicExpressionMapImpl filter_criteria) {
-        Set<NormalizedAtomicExpressionMapImpl> filteredSet =
-                new HashSet<NormalizedAtomicExpressionMapImpl>();
-        for (NormalizedAtomicExpressionMapImpl r_n : raw) {
-            // r_n & filter_criteria ex. 1111 & 1001
-            boolean matches = true;
-            for (int litOp : filter_criteria.getKeys()) {
-                int vcBitCodeForLitOp = r_n.readOperator(litOp);
-                int filterBitCodeForLitOp = filter_criteria.readOperator(litOp);
-                if ((vcBitCodeForLitOp & filterBitCodeForLitOp) != filterBitCodeForLitOp) {
-                    matches = false;
-                    break;
-                }
+    protected Set<NormalizedAtomicExpression> nonCommutativeFilter(
+            Set<NormalizedAtomicExpression> raw,
+            String[] filter_criteria) {
+        Set<NormalizedAtomicExpression> filteredSet =
+                new HashSet<NormalizedAtomicExpression>();
+        next_raw:
+        for (NormalizedAtomicExpression r_n : raw) {
+            if (r_n.getArity() != filter_criteria.length - 2) {
+                continue next_raw; // choose next in raw
             }
-            if (matches)
-                filteredSet.add(r_n);
+            for (int i = 0; i < filter_criteria.length - 1; ++i) {
+                String s = filter_criteria[i];
+                if (s.equals("_")) continue;
+                if (!r_n.readSymbol(i).equals(s)) continue next_raw;
+                ;
+            }
+            String s = filter_criteria[filter_criteria.length - 1];
+            if (!s.equals("_") && !s.equals(m_registry.getSymbolForIndex(r_n.readRoot())))
+                continue next_raw;
+            filteredSet.add(r_n);
         }
         return filteredSet;
     }
@@ -774,7 +737,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
          r += m_registry.m_typeToSetOfOperators.get(key) + "\n\n";
          }
          */
-        for (NormalizedAtomicExpressionMapImpl cur : m_expSet) {
+        for (NormalizedAtomicExpression cur : m_expSet) {
             r += cur.toHumanReadableString() + "\n";
         }
         return r;

@@ -341,7 +341,7 @@ public class TheoremCongruenceClosureImpl {
                 new HashSet<java.util.Map<String, String>>();
         java.util.Map<String, String> initBindings = getInitBindings();
         results.add(initBindings);
-        for (NormalizedAtomicExpressionMapImpl e_t : m_matchConj.m_expSet) {
+        for (NormalizedAtomicExpression e_t : m_matchConj.m_expSet) {
             results =
                     vc.getConjunct().getMatchesForOverideSet(e_t,
                             m_theoremRegistry, results);
