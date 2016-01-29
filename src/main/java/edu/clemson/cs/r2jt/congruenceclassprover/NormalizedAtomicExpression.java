@@ -31,13 +31,13 @@ public class NormalizedAtomicExpression {
     public NormalizedAtomicExpression(Registry reg, int[] intArray) {
         m_registry = reg;
         arity = intArray.length - 1;
-        if(!m_registry.isCommutative(intArray[0])){
+        if (!m_registry.isCommutative(intArray[0])) {
             m_expression = intArray;
         }
-        else{
+        else {
             int[] ord = new int[arity];
             for (int i = 1; i < intArray.length; ++i) {
-                ord[i-1] = intArray[i];
+                ord[i - 1] = intArray[i];
             }
             Arrays.sort(ord);
             int[] ne = new int[intArray.length];
@@ -49,32 +49,35 @@ public class NormalizedAtomicExpression {
         }
     }
 
-    protected int getArity(){
+    protected int getArity() {
         return arity;
     }
 
-    protected int getOpIdUsedInAllPos(NormalizedAtomicExpression oe, int k){
+    protected int getOpIdUsedInAllPos(NormalizedAtomicExpression oe, int k) {
         int bid = -4;
-        for(int i = 0; i <= oe.arity; ++i){
-            if(oe.readPosition(i) == k && bid == -4){
+        for (int i = 0; i <= oe.arity; ++i) {
+            if (oe.readPosition(i) == k && bid == -4) {
                 bid = readPosition(i);
             }
-            else if(oe.readPosition(i)==k && readPosition(i)!=bid){
+            else if (oe.readPosition(i) == k && readPosition(i) != bid) {
                 return -1;
             }
         }
-        if(oe.readRoot() == k){
-            if(bid==-4) return readRoot();
-            else if(readRoot()!=bid) return -1;
+        if (oe.readRoot() == k) {
+            if (bid == -4)
+                return readRoot();
+            else if (readRoot() != bid)
+                return -1;
         }
         return bid;
     }
+
     protected Set<Integer> getOpIds() {
         if (m_opIdSet != null) {
             return m_opIdSet;
         }
         m_opIdSet = new HashSet<Integer>();
-        for (int i = 0; i < m_expression.length; ++ i) {
+        for (int i = 0; i < m_expression.length; ++i) {
             m_opIdSet.add(m_expression[i]);
         }
         int r = readRoot();
@@ -94,7 +97,8 @@ public class NormalizedAtomicExpression {
             String curOp = readSymbol(i);
             if (m_argMmap.containsKey(curOp)) {
                 m_argMmap.put(curOp, m_argMmap.get(curOp) + 1);
-            } else
+            }
+            else
                 m_argMmap.put(curOp, 1);
         }
         m_opMmap = new HashMap<String, Integer>(m_argMmap);
@@ -102,17 +106,20 @@ public class NormalizedAtomicExpression {
         String rSym = m_registry.getSymbolForIndex(readRoot());
         if (m_opMmap.containsKey(fSym)) {
             m_opMmap.put(fSym, m_opMmap.get(fSym) + 1);
-        } else {
+        }
+        else {
             m_opMmap.put(fSym, 1);
         }
         if (m_opMmap.containsKey(rSym)) {
             m_opMmap.put(rSym, m_opMmap.get(rSym) + 1);
-        } else {
+        }
+        else {
             m_opMmap.put(rSym, 1);
         }
         if (justArguments) {
             return m_argMmap;
-        } else {
+        }
+        else {
             return m_opMmap;
         }
 
@@ -127,7 +134,7 @@ public class NormalizedAtomicExpression {
     }
 
     public NormalizedAtomicExpression replaceOperator(int orig, int repl) {
-        if(orig == repl)
+        if (orig == repl)
             return this;
         if (!getOpIds().contains(orig)) {
             return this;
@@ -139,20 +146,24 @@ public class NormalizedAtomicExpression {
                 na[i] = repl;
                 changed = true;
             }
-            else na[i] = m_expression[i];
+            else
+                na[i] = m_expression[i];
         }
         NormalizedAtomicExpression rNa = this;
-        if(changed){
+        if (changed) {
             rNa = new NormalizedAtomicExpression(m_registry, na);
+            if (rNa.readRoot() < 0 && rNa.readRoot() != orig) {
+                rNa.writeToRoot(readRoot());
+            }
         }
-        if (readRoot() == orig) {
-            rNa.writeToRoot(repl);
+        else if (readRoot() == orig) {
+            writeToRoot(repl);
         }
-        else rNa.writeToRoot(readRoot());
         assert (changed == (rNa != this));
         assert changed == (rNa.hashCode() != hashCode());
         return rNa;
     }
+
     protected void writeToRoot(int root) {
         m_opMmap = null;
         m_opIdSet = null;
@@ -166,11 +177,12 @@ public class NormalizedAtomicExpression {
     }
 
     public NormalizedAtomicExpression rootOps() {
-        int[] roots = new int[arity+1];
+        int[] roots = new int[arity + 1];
         for (int i = 0; i < roots.length; ++i) {
             roots[i] = m_registry.findAndCompress(m_expression[i]);
         }
-        NormalizedAtomicExpression rn = new NormalizedAtomicExpression(m_registry, roots);
+        NormalizedAtomicExpression rn =
+                new NormalizedAtomicExpression(m_registry, roots);
         return rn;
     }
 
@@ -198,7 +210,7 @@ public class NormalizedAtomicExpression {
 
         String args = "";
 
-        for(int i = 1; i < m_expression.length; ++ i){
+        for (int i = 1; i < m_expression.length; ++i) {
             args += readSymbol(i) + ",";
         }
 
@@ -224,7 +236,9 @@ public class NormalizedAtomicExpression {
     public boolean equals(Object o) {
         if (o instanceof NormalizedAtomicExpression) {
             NormalizedAtomicExpression other = (NormalizedAtomicExpression) o;
-            if ( Arrays.equals(m_expression,other.m_expression) && other.m_registry == m_registry) return true;
+            if (Arrays.equals(m_expression, other.m_expression)
+                    && other.m_registry == m_registry)
+                return true;
         }
         return false;
     }

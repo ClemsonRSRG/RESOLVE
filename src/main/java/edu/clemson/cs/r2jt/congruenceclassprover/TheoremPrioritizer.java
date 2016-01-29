@@ -28,8 +28,8 @@ public class TheoremPrioritizer {
     private Map<String, Integer> m_theoremAppliedCount;
     private Registry m_vcReg;
 
-    public TheoremPrioritizer(List<TheoremCongruenceClosureImpl> theoremList, Map<String, Integer> appliedCount,
-            Registry vcReg) {
+    public TheoremPrioritizer(List<TheoremCongruenceClosureImpl> theoremList,
+            Map<String, Integer> appliedCount, Registry vcReg) {
         m_pQueue = new PriorityQueue<TheoremWithScore>(theoremList.size());
         m_theoremAppliedCount = appliedCount;
         m_vcReg = vcReg;
@@ -92,7 +92,6 @@ public class TheoremPrioritizer {
         }
         return (score + 1) * number_not_contained;
     }
-
 
     public TheoremCongruenceClosureImpl poll() {
         return m_pQueue.poll().m_theorem;
