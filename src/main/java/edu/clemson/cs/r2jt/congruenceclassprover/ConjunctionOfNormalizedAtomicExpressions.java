@@ -548,10 +548,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             int oldRoot = nm.readRoot();
             assert oldRoot > 0;
             NormalizedAtomicExpression ne = nm.replaceOperator(b, a); // also changes root if b
-            int newRoot = ne.readRoot();
-            assert ne.readRoot() == oldRoot || ne.readRoot() == a;
             if (nm == ne) {
                 // no change in atom, so only root is b
+                assert oldRoot== b;
+                nm.writeToRoot(a);
                 addMapUse(a, nm);
                 applyBuiltInLogic(nm, coincidentalMergeHoldingTank);
 
@@ -559,17 +559,19 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             else {
                 assert ne != nm;
                 assert ne.hashCode() != nm.hashCode();
-                assert ne.readRoot() == oldRoot || ne.readRoot() == a;
                 removeExprFromSet(nm);
-                assert ne.readRoot() == oldRoot || ne.readRoot() == a;
                 // Check for existence of the rewritten atom in conj. Add new cong if roots are different.
                 if (m_expSet.contains(ne)) {
-                    if (oldRoot != newRoot && oldRoot != b) {
+                    int neroot = ne.readRoot();
+                    if (oldRoot != neroot &&
+                            !((oldRoot == a || oldRoot ==b) && (neroot == a || neroot == b))) {
+                        // dont put a and b on stack, already doing a/b
                         coincidentalMergeHoldingTank.push(oldRoot);
-                        coincidentalMergeHoldingTank.push(newRoot);
+                        coincidentalMergeHoldingTank.push(neroot);
                     }
                 }
                 else {
+                    ne.writeToRoot(oldRoot);
                     addExprToSet(ne);
                     applyBuiltInLogic(ne, coincidentalMergeHoldingTank);
                 }
@@ -640,7 +642,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
 
         }
-
+        // everything is quantified:
+        if(literalsInexpr.isEmpty()){
+            return getBindings_NonCommutative(m_expSet,foreignSymbolOveride,expr,exprReg);
+        }
         Set<NormalizedAtomicExpression> vCNaemlsWithAllLiterals =
                 multiKeyUseMapSearch(literalsInexpr);
         if (vCNaemlsWithAllLiterals == null)

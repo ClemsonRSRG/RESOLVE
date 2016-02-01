@@ -341,6 +341,7 @@ public class TheoremCongruenceClosureImpl {
                 new HashSet<java.util.Map<String, String>>();
         java.util.Map<String, String> initBindings = getInitBindings();
         results.add(initBindings);
+        // todo: order by proportion of literal to quants
         for (NormalizedAtomicExpression e_t : m_matchConj.m_expSet) {
             results =
                     vc.getConjunct().getMatchesForOverideSet(e_t,

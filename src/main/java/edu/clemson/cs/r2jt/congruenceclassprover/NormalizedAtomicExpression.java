@@ -87,10 +87,10 @@ public class NormalizedAtomicExpression {
 
     protected Map<String, Integer> getOperatorsAsStrings(boolean justArguments) {
         if (justArguments && m_argMmap != null) {
-            return m_argMmap;
+            return new HashMap<String, Integer>(m_argMmap);
         }
         if (!justArguments && m_opMmap != null) {
-            return m_opMmap;
+            return new HashMap<String, Integer>(m_opMmap);
         }
         m_argMmap = new HashMap<String, Integer>();
         for (int i = 1; i < m_expression.length; ++i) {
@@ -117,10 +117,10 @@ public class NormalizedAtomicExpression {
             m_opMmap.put(rSym, 1);
         }
         if (justArguments) {
-            return m_argMmap;
+            return new HashMap<String, Integer>(m_argMmap);
         }
         else {
-            return m_opMmap;
+            return new HashMap<String, Integer>(m_opMmap);
         }
 
     }
@@ -152,12 +152,6 @@ public class NormalizedAtomicExpression {
         NormalizedAtomicExpression rNa = this;
         if (changed) {
             rNa = new NormalizedAtomicExpression(m_registry, na);
-            if (rNa.readRoot() < 0 && rNa.readRoot() != orig) {
-                rNa.writeToRoot(readRoot());
-            }
-        }
-        else if (readRoot() == orig) {
-            writeToRoot(repl);
         }
         assert (changed == (rNa != this));
         assert changed == (rNa.hashCode() != hashCode());
