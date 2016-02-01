@@ -82,23 +82,10 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             r += addExpression(expression.getSubExpressions().get(1));
             return r;
         }
-        else if (name.equals("/=")) {
-            ArrayList<PExp> args = new ArrayList<PExp>();
-            args.add(expression.getSubExpressions().get(0));
-            args.add(expression.getSubExpressions().get(1));
-            PSymbol eqExp =
-                    new PSymbol(m_registry.m_typeGraph.BOOLEAN, null, "=", args);
-            args.clear();
-            args.add(eqExp);
-            PSymbol notEqExp =
-                    new PSymbol(m_registry.m_typeGraph.BOOLEAN, null, "not",
-                            args);
-            return addExpression(notEqExp);
-        }
+
         else {
             MTType type = expression.getType();
             PSymbol asPsymbol = (PSymbol) expression;
-            int intRepOfOp = addPsymbol(asPsymbol);
             int root = addFormula(expression);
             if (m_evaluates_to_false)
                 return "";

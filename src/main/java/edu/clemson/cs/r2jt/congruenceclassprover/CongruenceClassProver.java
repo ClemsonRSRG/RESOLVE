@@ -14,12 +14,9 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.rewriteprover.Prover;
+import edu.clemson.cs.r2jt.rewriteprover.*;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
-import edu.clemson.cs.r2jt.rewriteprover.Metrics;
-import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
-import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
@@ -127,7 +124,7 @@ public final class CongruenceClassProver {
                         MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
 
         for (TheoremEntry e : theoremEntries) {
-            PExp assertion = e.getAssertion();
+            PExp assertion = Utilities.replacePExp(e.getAssertion(),m_typeGraph);
             String eName = e.getName();
             if (assertion.isEquality()
                     && assertion.getQuantifiedVariables().size() > 0) {

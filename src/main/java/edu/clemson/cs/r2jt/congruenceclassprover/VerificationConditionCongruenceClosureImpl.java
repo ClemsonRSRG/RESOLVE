@@ -12,10 +12,8 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
+import edu.clemson.cs.r2jt.rewriteprover.*;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
-import edu.clemson.cs.r2jt.rewriteprover.Antecedent;
-import edu.clemson.cs.r2jt.rewriteprover.Consequent;
-import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
@@ -359,7 +357,7 @@ public class VerificationConditionCongruenceClosureImpl {
 
     private void addPExp(Iterator<PExp> pit, boolean inAntecedent) {
         while (pit.hasNext() && !m_conjunction.m_evaluates_to_false) {
-            PExp curr = pit.next();
+            PExp curr = Utilities.replacePExp( pit.next(),m_typegraph);
             if (inAntecedent) {
                 m_conjunction.addExpression(curr);
             }
