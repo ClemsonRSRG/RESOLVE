@@ -39,9 +39,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     public ConjunctionOfNormalizedAtomicExpressions(Registry registry,
             VerificationConditionCongruenceClosureImpl vc) {
         m_registry = registry;
-        // Array list is much slower than LinkedList for this application
-        m_expSet = new HashSet<NormalizedAtomicExpression>();
-        m_useMap = new HashMap<Integer, Set<NormalizedAtomicExpression>>();
+        m_expSet = new HashSet<NormalizedAtomicExpression>(2048, .5f);
+        m_useMap =
+                new HashMap<Integer, Set<NormalizedAtomicExpression>>(2048, .5f);
         m_VC = vc; // null if this is a theorem
     }
 
@@ -537,7 +537,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             NormalizedAtomicExpression ne = nm.replaceOperator(b, a); // also changes root if b
             if (nm == ne) {
                 // no change in atom, so only root is b
-                assert oldRoot== b;
+                assert oldRoot == b;
                 nm.writeToRoot(a);
                 addMapUse(a, nm);
                 applyBuiltInLogic(nm, coincidentalMergeHoldingTank);
@@ -550,8 +550,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 // Check for existence of the rewritten atom in conj. Add new cong if roots are different.
                 if (m_expSet.contains(ne)) {
                     int neroot = ne.readRoot();
-                    if (oldRoot != neroot &&
-                            !((oldRoot == a || oldRoot ==b) && (neroot == a || neroot == b))) {
+                    if (oldRoot != neroot
+                            && !((oldRoot == a || oldRoot == b) && (neroot == a || neroot == b))) {
                         // dont put a and b on stack, already doing a/b
                         coincidentalMergeHoldingTank.push(oldRoot);
                         coincidentalMergeHoldingTank.push(neroot);
@@ -630,8 +630,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
         }
         // everything is quantified:
-        if(literalsInexpr.isEmpty()){
-            return getBindings_NonCommutative(m_expSet,foreignSymbolOveride,expr,exprReg);
+        if (literalsInexpr.isEmpty()) {
+            return getBindings_NonCommutative(m_expSet, foreignSymbolOveride,
+                    expr, exprReg);
         }
         Set<NormalizedAtomicExpression> vCNaemlsWithAllLiterals =
                 multiKeyUseMapSearch(literalsInexpr);

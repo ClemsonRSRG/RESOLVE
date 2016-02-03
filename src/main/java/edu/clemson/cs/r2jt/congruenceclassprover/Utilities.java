@@ -1,3 +1,15 @@
+/**
+ * Utilities.java
+ * ---------------------------------
+ * Copyright (c) 2015
+ * RESOLVE Software Research Group
+ * School of Computing
+ * Clemson University
+ * All rights reserved.
+ * ---------------------------------
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE.txt', which is part of this source code package.
+ */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
@@ -10,6 +22,7 @@ import java.util.ArrayList;
  * Created by Mike on 2/1/2016.
  */
 public class Utilities {
+
     final static boolean impliesToAndEq = true;
 
     public static PExp replacePExp(PExp p, TypeGraph g) {
@@ -38,27 +51,28 @@ public class Utilities {
             }
 
         }*/
-        return new PSymbol(p.getType(), null, p.getTopLevelOperation(), argList, ((PSymbol)p).quantification);
+        return new PSymbol(p.getType(), null, p.getTopLevelOperation(),
+                argList, ((PSymbol) p).quantification);
     }
 }
 
-        /*if (pTop.equals("implies")) {
-            ArrayList<PExp> args = new ArrayList<PExp>();
-            args.add(arg1);
-            args.add(arg2);
-            if(impliesToAndEq) {
-                PSymbol pAndq = new PSymbol(g.BOOLEAN, null, "and", args);
-                args.clear();
-                args.add(pAndq);
-                args.add(arg1);
-                PSymbol pAndqeqP = new PSymbol(g.BOOLEAN, null, "=", args);
-                return pAndqeqP;
-            } else {
-                PSymbol pOrQ = new PSymbol(g.BOOLEAN,null,"or", args);
-                args.clear();
-                args.add(pOrQ);
-                args.add(arg2);
-                PSymbol pOrQeqQ = new PSymbol(g.BOOLEAN,null,"=",args);
-                return pOrQeqQ;
-            }
-*/
+/*if (pTop.equals("implies")) {
+    ArrayList<PExp> args = new ArrayList<PExp>();
+    args.add(arg1);
+    args.add(arg2);
+    if(impliesToAndEq) {
+        PSymbol pAndq = new PSymbol(g.BOOLEAN, null, "and", args);
+        args.clear();
+        args.add(pAndq);
+        args.add(arg1);
+        PSymbol pAndqeqP = new PSymbol(g.BOOLEAN, null, "=", args);
+        return pAndqeqP;
+    } else {
+        PSymbol pOrQ = new PSymbol(g.BOOLEAN,null,"or", args);
+        args.clear();
+        args.add(pOrQ);
+        args.add(arg2);
+        PSymbol pOrQeqQ = new PSymbol(g.BOOLEAN,null,"=",args);
+        return pOrQeqQ;
+    }
+ */

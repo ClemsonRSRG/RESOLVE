@@ -124,7 +124,8 @@ public final class CongruenceClassProver {
                         MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
 
         for (TheoremEntry e : theoremEntries) {
-            PExp assertion = Utilities.replacePExp(e.getAssertion(),m_typeGraph);
+            PExp assertion =
+                    Utilities.replacePExp(e.getAssertion(), m_typeGraph);
             String eName = e.getName();
             if (assertion.isEquality()
                     && assertion.getQuantifiedVariables().size() > 0) {

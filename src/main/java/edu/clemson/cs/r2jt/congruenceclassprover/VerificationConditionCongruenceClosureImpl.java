@@ -357,7 +357,7 @@ public class VerificationConditionCongruenceClosureImpl {
 
     private void addPExp(Iterator<PExp> pit, boolean inAntecedent) {
         while (pit.hasNext() && !m_conjunction.m_evaluates_to_false) {
-            PExp curr = Utilities.replacePExp( pit.next(),m_typegraph);
+            PExp curr = Utilities.replacePExp(pit.next(), m_typegraph);
             if (inAntecedent) {
                 m_conjunction.addExpression(curr);
             }

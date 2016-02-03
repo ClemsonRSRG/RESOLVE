@@ -58,11 +58,11 @@ public class Registry {
         m_indexToType = new ArrayList<MTType>();
         m_symbolIndexParentArray = new ArrayList<Integer>();
         m_unusedIndices = new Stack<Integer>();
-        m_symbolToUsage = new HashMap<String, Usage>(); // entries won't change
+        m_symbolToUsage = new HashMap<String, Usage>(2048, .5f); // entries won't change
         m_foralls = new HashSet<String>();
         m_typeGraph = g;
         m_exprRootMap =
-                new HashMap<NormalizedAtomicExpression, Integer>(1024, .75f);
+                new HashMap<NormalizedAtomicExpression, Integer>(2048, .5f);
         m_typeDictionary = new TreeMap<String, MTType>();
         addSymbol("=", new MTFunction(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
                 Usage.LITERAL); // = as a predicate function, not as an assertion
