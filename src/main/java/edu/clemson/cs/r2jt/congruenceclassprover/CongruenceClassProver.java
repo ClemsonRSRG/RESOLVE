@@ -14,17 +14,21 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.data.ModuleID;
 import edu.clemson.cs.r2jt.init.CompileEnvironment;
-import edu.clemson.cs.r2jt.rewriteprover.*;
-import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
-import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
-import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
-import edu.clemson.cs.r2jt.typeandpopulate.*;
-import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
-import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
-import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
 import edu.clemson.cs.r2jt.misc.FlagManager;
+import edu.clemson.cs.r2jt.rewriteprover.Metrics;
+import edu.clemson.cs.r2jt.rewriteprover.Prover;
+import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
+import edu.clemson.cs.r2jt.rewriteprover.VC;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
+import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
+import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
+import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
+import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 
 import java.io.File;
@@ -41,46 +45,36 @@ public final class CongruenceClassProver {
     public static final Flag FLAG_PROVE =
             new Flag(Prover.FLAG_SECTION_NAME, "ccprove",
                     "congruence closure based prover");
+    private static final String[] NUMTRIES_ARGS = {"numtries"};
+    public static final Flag FLAG_NUMTRIES =
+            new Flag("Proving", "num_tries",
+                    "Prover will halt after this many timeouts.",
+                    NUMTRIES_ARGS, Flag.Type.HIDDEN);
     private final List<VerificationConditionCongruenceClosureImpl> m_ccVCs;
     private final List<TheoremCongruenceClosureImpl> m_theorems;
     private final int MAX_ITERATIONS = 1024;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
-    private String m_results;
     private final long DEFAULTTIMEOUT = 5000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
-    private boolean printVCEachStep = false;
-
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
+    private final int numUsesBeforeQuit; // weird bug if this isn't final
+    private final int DEFAULTTRIES = -1;
+    private String m_results;
+    private boolean printVCEachStep = false;
+    private long theoremSelectTime = 0;
+    private long resultSelectTime = 0;
+    private long searchTime = 0;
+    private long constructionTime = 0;
+    private long applyTime = 0;
     private ProverListener myProverListener;
     private long myTimeout;
     private long totalTime = 0;
-    private final int numUsesBeforeQuit; // weird bug if this isn't final
-    private final int DEFAULTTRIES = -1;
-    private static final String[] NUMTRIES_ARGS = { "numtries" };
-    public static final Flag FLAG_NUMTRIES =
-            new Flag("Proving", "num_tries",
-                    "Prover will halt after this many timeouts.",
-                    NUMTRIES_ARGS, Flag.Type.HIDDEN);
-
-    ///////////////////////////////////////////////////////
-    public static void setUpFlags() {
-        /*FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_PROVE);
-        FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_LEGACY_PROVE);
-        FlagDependencies.addImplies(FLAG_PROVE, Prover.FLAG_SOME_PROVER);
-         */
-
-        // for new vc gen
-        FlagDependencies.addImplies(CongruenceClassProver.FLAG_PROVE,
-                VCGenerator.FLAG_ALTVERIFY_VC);
-        FlagDependencies.addRequires(CongruenceClassProver.FLAG_NUMTRIES,
-                CongruenceClassProver.FLAG_PROVE);
-    }
 
     public CongruenceClassProver(TypeGraph g, List<VC> vcs, ModuleScope scope,
-            CompileEnvironment environment, ProverListener listener) {
+                                 CompileEnvironment environment, ProverListener listener) {
 
         // Only for web ide //////////////////////////////////////////
         myModels = new PerVCProverModel[vcs.size()];
@@ -91,16 +85,14 @@ public final class CongruenceClassProver {
             myTimeout =
                     Integer.parseInt(environment.flags.getFlagArgument(
                             Prover.FLAG_TIMEOUT, Prover.FLAG_TIMEOUT_ARG_NAME));
-        }
-        else {
+        } else {
             myTimeout = DEFAULTTIMEOUT;
         }
         if (environment.flags.isFlagSet(CongruenceClassProver.FLAG_NUMTRIES)) {
             numUsesBeforeQuit =
                     Integer.parseInt(environment.flags.getFlagArgument(
                             CongruenceClassProver.FLAG_NUMTRIES, "numtries"));
-        }
-        else {
+        } else {
             numUsesBeforeQuit = DEFAULTTRIES;
         }
 
@@ -133,8 +125,7 @@ public final class CongruenceClassProver {
                 addEqualityTheorem(false, assertion, eName + "_right"); // match right
                 /*m_theorems.add(new TheoremCongruenceClosureImpl(g, assertion,
                         false, eName + "_whole")); // match whole*/
-            }
-            else {
+            } else {
                 TheoremCongruenceClosureImpl t =
                         new TheoremCongruenceClosureImpl(g, assertion, false,
                                 eName);
@@ -145,7 +136,21 @@ public final class CongruenceClassProver {
         m_environment = environment;
         m_scope = scope;
         m_results = "";
+        constructionTime += System.currentTimeMillis() - totalTime;
+    }
 
+    ///////////////////////////////////////////////////////
+    public static void setUpFlags() {
+        /*FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_PROVE);
+        FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_LEGACY_PROVE);
+        FlagDependencies.addImplies(FLAG_PROVE, Prover.FLAG_SOME_PROVER);
+         */
+
+        // for new vc gen
+        FlagDependencies.addImplies(CongruenceClassProver.FLAG_PROVE,
+                VCGenerator.FLAG_ALTVERIFY_VC);
+        FlagDependencies.addRequires(CongruenceClassProver.FLAG_NUMTRIES,
+                CongruenceClassProver.FLAG_PROVE);
     }
 
     private void addEqualityTheorem(boolean matchLeft, PExp theorem,
@@ -229,7 +234,15 @@ public final class CongruenceClassProver {
         }
         totalTime = System.currentTimeMillis() - totalTime;
         summary +=
-                "Elapsed time from construction: " + totalTime + " ms" + "\n";
+                "Elapsed time from construction: " + totalTime + " ms" + "\n" +
+                        "constructionTime:\t" + 100 * (float) constructionTime / totalTime + "%\n" +
+                        "theoremSelectTime:\t" + 100 * (float) theoremSelectTime / totalTime + "%\n" +
+                        "resultSelectTime:\t" + 100 * (float) resultSelectTime / totalTime + "%\n" +
+                        "searchTime:\t\t\t" + 100 * (float) searchTime / totalTime + "%\n" +
+                        "applyTime:\t\t\t" + 100 * (float) applyTime / totalTime + "%\n" +
+                        "not counted:\t\t" +
+                        100 * (float) (totalTime - (constructionTime + theoremSelectTime + resultSelectTime + searchTime + applyTime)) / totalTime
+                        + "%\n";
         String div = divLine("Summary");
         summary = div + summary + div;
 
@@ -306,6 +319,7 @@ public final class CongruenceClassProver {
             TheoremPrioritizer rankedTheorems =
                     new TheoremPrioritizer(theoremsForThisVC,
                             theoremAppliedCount, vcc.getRegistry());
+            theoremSelectTime += System.currentTimeMillis() - time_at_theorem_pq_creation;
             int max_Theorems_to_choose = 1;
             int num_Theorems_chosen = 0;
             while (!rankedTheorems.m_pQueue.isEmpty()
@@ -322,19 +336,24 @@ public final class CongruenceClassProver {
                     count = theoremAppliedCount.get(cur.m_name);
                 theoremAppliedCount.put(cur.m_name, ++count);
                 // We are using it, even if it makes no difference
-
+                theoremSelectTime += System.currentTimeMillis() - time_at_selection;
+                long t0 = System.currentTimeMillis();
                 ArrayList<InsertExpWithJustification> instantiatedTheorems =
                         cur.applyTo(vcc, endTime);
+                searchTime += System.currentTimeMillis() - t0;
                 if (instantiatedTheorems != null
                         && instantiatedTheorems.size() != 0) {
+                    long t1 = System.currentTimeMillis();
                     InstantiatedTheoremPrioritizer instPQ =
                             new InstantiatedTheoremPrioritizer(
                                     instantiatedTheorems, vcc.getRegistry());
+                    resultSelectTime += System.currentTimeMillis() - t1;
                     String substitutionMade = "";
                     while (!instPQ.m_pQueue.isEmpty() && substitutionMade == "") {
                         PExpWithScore curP = instPQ.m_pQueue.poll();
 
                         if (!applied.contains(curP.m_theorem.toString())) {
+                            long t2 = System.currentTimeMillis();
                             substitutionMade =
                                     vcc
                                             .getConjunct()
@@ -342,6 +361,7 @@ public final class CongruenceClassProver {
                                                     curP.m_theorem,
                                                     endTime,
                                                     curP.m_theoremDefinitionString);
+                            applyTime += System.currentTimeMillis() - t2;
                             applied.add(curP.m_theorem.toString());
                             if (cur.m_noQuants) {
                                 theoremsForThisVC.remove(cur);
