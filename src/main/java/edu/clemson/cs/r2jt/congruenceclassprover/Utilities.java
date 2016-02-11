@@ -57,22 +57,22 @@ public class Utilities {
 }
 
 /*if (pTop.equals("implies")) {
-    ArrayList<PExp> args = new ArrayList<PExp>();
-    args.add(arg1);
-    args.add(arg2);
-    if(impliesToAndEq) {
-        PSymbol pAndq = new PSymbol(g.BOOLEAN, null, "and", args);
-        args.clear();
-        args.add(pAndq);
-        args.add(arg1);
-        PSymbol pAndqeqP = new PSymbol(g.BOOLEAN, null, "=", args);
-        return pAndqeqP;
-    } else {
-        PSymbol pOrQ = new PSymbol(g.BOOLEAN,null,"or", args);
-        args.clear();
-        args.add(pOrQ);
-        args.add(arg2);
-        PSymbol pOrQeqQ = new PSymbol(g.BOOLEAN,null,"=",args);
-        return pOrQeqQ;
-    }
+ ArrayList<PExp> args = new ArrayList<PExp>();
+ args.add(arg1);
+ args.add(arg2);
+ if(impliesToAndEq) {
+ PSymbol pAndq = new PSymbol(g.BOOLEAN, null, "and", args);
+ args.clear();
+ args.add(pAndq);
+ args.add(arg1);
+ PSymbol pAndqeqP = new PSymbol(g.BOOLEAN, null, "=", args);
+ return pAndqeqP;
+ } else {
+ PSymbol pOrQ = new PSymbol(g.BOOLEAN,null,"or", args);
+ args.clear();
+ args.add(pOrQ);
+ args.add(arg2);
+ PSymbol pOrQeqQ = new PSymbol(g.BOOLEAN,null,"=",args);
+ return pOrQeqQ;
+ }
  */

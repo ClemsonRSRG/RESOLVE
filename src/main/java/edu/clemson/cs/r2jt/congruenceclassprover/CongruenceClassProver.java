@@ -234,15 +234,40 @@ public final class CongruenceClassProver {
         }
         totalTime = System.currentTimeMillis() - totalTime;
         summary +=
-                "Elapsed time from construction: " + totalTime + " ms" + "\n" +
-                        "constructionTime:\t" + 100 * (float) constructionTime / totalTime + "%\n" +
-                        "theoremSelectTime:\t" + 100 * (float) theoremSelectTime / totalTime + "%\n" +
-                        "resultSelectTime:\t" + 100 * (float) resultSelectTime / totalTime + "%\n" +
-                        "searchTime:\t\t\t" + 100 * (float) searchTime / totalTime + "%\n" +
-                        "applyTime:\t\t\t" + 100 * (float) applyTime / totalTime + "%\n" +
-                        "not counted:\t\t" +
-                        100 * (float) (totalTime - (constructionTime + theoremSelectTime + resultSelectTime + searchTime + applyTime)) / totalTime
-                        + "%\n";
+                "Elapsed time from construction: "
+                        + totalTime
+                        + " ms"
+                        + "\n"
+                        + "constructionTime:\t"
+                        + 100
+                        * (float) constructionTime
+                        / totalTime
+                        + "%\n"
+                        + "theoremSelectTime:\t"
+                        + 100
+                        * (float) theoremSelectTime
+                        / totalTime
+                        + "%\n"
+                        + "resultSelectTime:\t"
+                        + 100
+                        * (float) resultSelectTime
+                        / totalTime
+                        + "%\n"
+                        + "searchTime:\t\t\t"
+                        + 100
+                        * (float) searchTime
+                        / totalTime
+                        + "%\n"
+                        + "applyTime:\t\t\t"
+                        + 100
+                        * (float) applyTime
+                        / totalTime
+                        + "%\n"
+                        + "not counted:\t\t"
+                        + 100
+                        * (float) (totalTime - (constructionTime
+                        + theoremSelectTime + resultSelectTime
+                        + searchTime + applyTime)) / totalTime + "%\n";
         String div = divLine("Summary");
         summary = div + summary + div;
 
@@ -319,7 +344,8 @@ public final class CongruenceClassProver {
             TheoremPrioritizer rankedTheorems =
                     new TheoremPrioritizer(theoremsForThisVC,
                             theoremAppliedCount, vcc.getRegistry());
-            theoremSelectTime += System.currentTimeMillis() - time_at_theorem_pq_creation;
+            theoremSelectTime +=
+                    System.currentTimeMillis() - time_at_theorem_pq_creation;
             int max_Theorems_to_choose = 1;
             int num_Theorems_chosen = 0;
             while (!rankedTheorems.m_pQueue.isEmpty()
@@ -336,7 +362,8 @@ public final class CongruenceClassProver {
                     count = theoremAppliedCount.get(cur.m_name);
                 theoremAppliedCount.put(cur.m_name, ++count);
                 // We are using it, even if it makes no difference
-                theoremSelectTime += System.currentTimeMillis() - time_at_selection;
+                theoremSelectTime +=
+                        System.currentTimeMillis() - time_at_selection;
                 long t0 = System.currentTimeMillis();
                 ArrayList<InsertExpWithJustification> instantiatedTheorems =
                         cur.applyTo(vcc, endTime);
