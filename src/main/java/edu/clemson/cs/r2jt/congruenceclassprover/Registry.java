@@ -205,10 +205,11 @@ public class Registry {
     public int getIndexForSymbol(String symbol) {
         assert m_symbolToIndex.get(symbol) != null : symbol + " not found"
                 + m_symbolToIndex.toString();
-        int r = m_symbolToIndex.get(symbol);
-        if (r < 0) {
-            System.err.println(symbol + " has no current index");
+
+        if (!m_symbolToIndex.containsKey(symbol)) {
+            return -1;
         }
+        int r = m_symbolToIndex.get(symbol);
         return findAndCompress(r);
     }
 

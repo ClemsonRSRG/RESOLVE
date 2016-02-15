@@ -244,6 +244,7 @@ public class TheoremCongruenceClosureImpl {
             }
 
             PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
+            modifiedInsert = vc.getConjunct().find(modifiedInsert);
             // Discard s = s
             if (!(modifiedInsert.getTopLevelOperation().equals("=") && modifiedInsert
                     .getSubExpressions().get(0).toString().equals(

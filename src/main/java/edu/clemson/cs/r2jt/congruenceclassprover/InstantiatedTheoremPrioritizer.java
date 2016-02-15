@@ -13,6 +13,9 @@
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
+import edu.clemson.cs.r2jt.vcgeneration.vcs.VerificationCondition;
+import sun.plugin.dom.exception.NoModificationAllowedException;
+
 import java.util.*;
 
 /**
@@ -22,12 +25,14 @@ import java.util.*;
 public class InstantiatedTheoremPrioritizer {
 
     protected PriorityQueue<PExpWithScore> m_pQueue;
+    protected VerificationConditionCongruenceClosureImpl m_vc;
     protected Registry m_vcReg;
 
     public InstantiatedTheoremPrioritizer(
-            List<InsertExpWithJustification> theoremList, Registry vcReg) {
+            List<InsertExpWithJustification> theoremList, VerificationConditionCongruenceClosureImpl vc) {
         m_pQueue = new PriorityQueue<PExpWithScore>(theoremList.size());
-        m_vcReg = vcReg;
+        m_vc = vc;
+        m_vcReg = vc.getRegistry();
         for (InsertExpWithJustification p : theoremList) {
             PExpWithScore pes = new PExpWithScore(p.m_PExp, p.m_Justification);
             pes.m_score = calculateScore(pes.m_theorem_symbols, p.m_symCnt);
@@ -36,9 +41,26 @@ public class InstantiatedTheoremPrioritizer {
         }
     }
 
+    private int goalArg(String s){
+        int max = 3;
+        int si  = m_vcReg.getIndexForSymbol(s);
+        if(si<0 || m_vcReg.getUsage(s).equals(Registry.Usage.HASARGS_SINGULAR)) return max;
+        String sc = m_vcReg.getRootSymbolForSymbol(s);
+        for(String g: m_vc.m_goal){
+            int gi = m_vcReg.getIndexForSymbol(g);
+            if(si==gi) return 0;
+            String gc = m_vcReg.getSymbolForIndex(gi);
+            for(NormalizedAtomicExpression ng : m_vc.getConjunct().m_useMap.get(gi)){
+                if(ng.readRoot()!= gi) continue;
+                if(ng.getOperatorsAsStrings(true).containsKey(sc))
+                    return 1;
+            }
+        }
+        return max;
+    }
     public int calculateScore(Set<String> theorem_symbols, int symCnt) {
 
-        float max = m_vcReg.m_indexToSymbol.size();
+        float max = m_vc.getRegistry().m_indexToSymbol.size();
         float score = 0f;
         float age = 0f;
         float sSz = theorem_symbols.size();
@@ -48,6 +70,8 @@ public class InstantiatedTheoremPrioritizer {
         for (String s : theorem_symbols) {
 
             String rS = m_vcReg.getRootSymbolForSymbol(s);
+            int gr = goalArg(rS);
+            if(gr < 2) return 0;
             if (m_vcReg.m_symbolToIndex.containsKey(rS)) {
                 // Age
                 age += m_vcReg.getIndexForSymbol(s);

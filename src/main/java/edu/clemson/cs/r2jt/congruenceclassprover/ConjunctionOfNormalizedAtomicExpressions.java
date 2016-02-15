@@ -29,7 +29,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     protected boolean m_evaluates_to_false = false;
     private int f_num = 0;
     private String m_current_justification = "";
-    private final Map<Integer, Set<NormalizedAtomicExpression>> m_useMap;
+    protected final Map<Integer, Set<NormalizedAtomicExpression>> m_useMap;
     protected final VerificationConditionCongruenceClosureImpl m_VC;
 
     /**
@@ -64,6 +64,46 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rString;
     }
 
+    protected PExp find(PExp exp){
+        if(exp.getSubExpressions().size()==0){
+            String s = m_registry.getRootSymbolForSymbol(exp.getTopLevelOperation());
+            if(s.equals("")) {
+                return exp;
+            }
+            else{
+                 return  new PSymbol(exp.getType(),exp.getTypeValue(),s);
+            }
+        }
+        PExpSubexpressionIterator it = exp.getSubExpressionIterator();
+        ArrayList<PExp> args = new ArrayList<PExp>();
+        boolean irreducable = false;
+        while(it.hasNext()){
+            PExp cur = it.next();
+            PExp fcur = find(cur);
+            if(fcur.getSubExpressions().size()>0 ||
+                    !m_registry.m_symbolToIndex.containsKey(fcur.getTopLevelOperation()))
+                irreducable = true;
+            args.add(fcur);
+        }
+        String op = m_registry.getRootSymbolForSymbol(exp.getTopLevelOperation());
+        if(!irreducable && !op.equals("")){
+            int[] ia;
+            ia = new int[args.size()+1];
+            ia[0] = m_registry.getIndexForSymbol(op);
+            for(int i = 1; i < ia.length; ++i){
+                ia[i] = m_registry.getIndexForSymbol(args.get(i-1).getTopLevelOperation());
+            }
+            NormalizedAtomicExpression na = new NormalizedAtomicExpression(m_registry,ia);
+            if(m_registry.m_exprRootMap.containsKey(na)){
+                int r = m_registry.m_exprRootMap.get(na);
+                String rs = m_registry.getSymbolForIndex(r);
+                return new PSymbol(m_registry.getTypeByIndex(r),null,rs);
+            }
+            else return new PSymbol(exp.getType(), exp.getTypeValue(), exp.getTopLevelOperation(), args);
+        }else {
+            return new PSymbol(exp.getType(), exp.getTypeValue(), exp.getTopLevelOperation(), args);
+        }
+    }
     // Top level
     protected String addExpression(PExp expression) {
         if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {

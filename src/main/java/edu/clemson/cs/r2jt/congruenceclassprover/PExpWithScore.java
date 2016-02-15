@@ -29,6 +29,7 @@ public class PExpWithScore implements Comparable<PExpWithScore> {
         m_theorem = theorem;
         m_theoremDefinitionString = justification;
         m_theorem_symbols = m_theorem.getSymbolNames();
+        int nop = 0;
     }
 
     @Override

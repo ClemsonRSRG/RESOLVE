@@ -373,10 +373,10 @@ public final class CongruenceClassProver {
                     long t1 = System.currentTimeMillis();
                     InstantiatedTheoremPrioritizer instPQ =
                             new InstantiatedTheoremPrioritizer(
-                                    instantiatedTheorems, vcc.getRegistry());
+                                    instantiatedTheorems, vcc);
                     resultSelectTime += System.currentTimeMillis() - t1;
                     String substitutionMade = "";
-                    while (!instPQ.m_pQueue.isEmpty() && substitutionMade == "") {
+                    while (!instPQ.m_pQueue.isEmpty() && (instPQ.m_pQueue.peek().m_score==0 || substitutionMade.equals(""))) {
                         PExpWithScore curP = instPQ.m_pQueue.poll();
 
                         if (!applied.contains(curP.m_theorem.toString())) {
@@ -412,7 +412,7 @@ public final class CongruenceClassProver {
                                 theseResults += vcc.toString();
                             status = vcc.isProved();
                             num_Theorems_chosen++;
-                            continue chooseNewTheorem;
+                            //continue chooseNewTheorem;
                         }
 
                     }
