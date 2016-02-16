@@ -1502,7 +1502,7 @@ statement returns [Statement stmt = null]
             |   stmt8=swap_statement { $stmt = $stmt8.stmt; }
             |   stmt9=while_loop_statement { $stmt = $stmt9.stmt; }
             |   stmt10=confirm_statement { $stmt = $stmt10.stmt; }
-            |   stmt11=assume_statement { $stmt = $stmt11.stmt; }
+            |   stmt11=presume_statement { $stmt = $stmt11.stmt; }
             |   stmt12=aux_code_statement { $stmt = $stmt12.stmt; }
             )
         )
@@ -1520,7 +1520,7 @@ in_aux_statement returns [Statement stmt = null]
             |   stmt8=swap_statement { $stmt = $stmt8.stmt; }
             |   stmt9=while_loop_statement { $stmt = $stmt9.stmt; }
             |   stmt10=confirm_statement { $stmt = $stmt10.stmt; }
-            |   stmt11=assume_statement { $stmt = $stmt11.stmt; }
+            |   stmt11=presume_statement { $stmt = $stmt11.stmt; }
             |   stmt12=aux_code_statement { $stmt = $stmt12.stmt; }
             )
         )
@@ -1735,11 +1735,11 @@ confirm_statement returns [ConfirmStmt stmt = null]
         { $stmt = new ConfirmStmt(getLocation($CONFIRM), $exp2.exp); }
     ;
 
-// Assume statement ------------------------------------------------
+// Presume statement ------------------------------------------------
 
-assume_statement returns [AssumeStmt stmt = null]
-    :   ^(ASSUME exp2=math_expression)
-        { $stmt = new AssumeStmt(getLocation($ASSUME), $exp2.exp); }
+presume_statement returns [PresumeStmt stmt = null]
+    :   ^(PRESUME exp2=math_expression)
+        { $stmt = new PresumeStmt(getLocation($PRESUME), $exp2.exp); }
     ;
 
 // While loop ----------------------------------------------------
