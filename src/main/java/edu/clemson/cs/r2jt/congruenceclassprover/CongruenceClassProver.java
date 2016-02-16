@@ -184,8 +184,8 @@ public final class CongruenceClassProver {
         int i = 0;
         int numUnproved = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
-            //printVCEachStep = true;
-            //if (!vcc.m_name.equals("0_18")) continue;
+            printVCEachStep = true;
+            if (!vcc.m_name.equals("3_7")) continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             // Skip proof loop
