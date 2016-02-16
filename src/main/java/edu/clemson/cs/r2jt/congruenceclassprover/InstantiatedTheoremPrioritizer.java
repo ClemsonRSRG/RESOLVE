@@ -71,7 +71,7 @@ public class InstantiatedTheoremPrioritizer {
 
             String rS = m_vcReg.getRootSymbolForSymbol(s);
             int gr = goalArg(rS);
-            if(gr < 2) return 0;
+            if(gr < 2) return gr;
             if (m_vcReg.m_symbolToIndex.containsKey(rS)) {
                 // Age
                 age += m_vcReg.getIndexForSymbol(s);
