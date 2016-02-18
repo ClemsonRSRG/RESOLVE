@@ -22,8 +22,10 @@ import edu.clemson.cs.r2jt.rewriteprover.ProverListener;
 import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
+import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.misc.Flag;
 import edu.clemson.cs.r2jt.misc.FlagDependencies;
@@ -113,21 +115,53 @@ public final class CongruenceClassProver {
         m_ccVCs = new ArrayList<VerificationConditionCongruenceClosureImpl>();
         int i = 0;
 
-        for (VC vc : vcs) {
-            // make every PExp a PSymbol
-            vc.convertAllToPsymbols(m_typeGraph);
-            m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc));
-            myModels[i++] = (new PerVCProverModel(g, vc.getName(), vc, null));
-
-        }
         m_theorems = new ArrayList<TheoremCongruenceClosureImpl>();
         List<TheoremEntry> theoremEntries =
                 scope.query(new EntryTypeQuery(TheoremEntry.class,
                         MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
                         MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
+        List<edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry> z_entries =
+                scope.query(new NameQuery(null, "Z",
+                        MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
+                        MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                        false));
+        MTType z = null;
+        if (z_entries != null && z_entries.size() > 0) {
+            MathSymbolEntry z_e = (MathSymbolEntry) z_entries.get(0);
+            try {
+                z = z_e.getTypeValue();
+            }
+            catch (SymbolNotOfKindTypeException e) {
+                e.printStackTrace();
+            }
+        }
 
+        List<edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry> n_entries =
+                scope.query(new NameQuery(null, "N",
+                        MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
+                        MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                        false));
+        MTType n = null;
+        if (n_entries != null && n_entries.size() > 0) {
+            MathSymbolEntry n_e = (MathSymbolEntry) n_entries.get(0);
+            try {
+                n = n_e.getTypeValue();
+            }
+            catch (SymbolNotOfKindTypeException e) {
+                e.printStackTrace();
+            }
+        }
+        for (VC vc : vcs) {
+            // make every PExp a PSymbol
+            vc.convertAllToPsymbols(m_typeGraph);
+            m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc,
+                    z, n));
+            myModels[i++] = (new PerVCProverModel(g, vc.getName(), vc, null));
+
+        }
         for (TheoremEntry e : theoremEntries) {
-            PExp assertion = e.getAssertion();
+            PExp assertion =
+                    Utilities.replacePExp(e.getAssertion(), m_typeGraph, z, n);
             String eName = e.getName();
             if (assertion.isEquality()
                     && assertion.getQuantifiedVariables().size() > 0) {
