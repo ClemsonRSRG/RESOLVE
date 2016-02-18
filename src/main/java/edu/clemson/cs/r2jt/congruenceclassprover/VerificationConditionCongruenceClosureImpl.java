@@ -39,6 +39,8 @@ public class VerificationConditionCongruenceClosureImpl {
     protected final Set<String> m_goal;
     private int m_fc_ctr = 0;
     private final boolean DOCOMPLEMENTS = false;
+    private final MTType m_z;
+    private final MTType m_n;
 
     public static enum STATUS {
         FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE
@@ -47,13 +49,16 @@ public class VerificationConditionCongruenceClosureImpl {
     public List<PExp> forAllQuantifiedPExps; // trap constraints, can create Theorems externally from this
 
     // currently support only unchained equalities, so each sublist is size 2.
-    public VerificationConditionCongruenceClosureImpl(TypeGraph g, VC vc) {
+    public VerificationConditionCongruenceClosureImpl(TypeGraph g, VC vc,
+            MTType z, MTType n) {
         m_typegraph = g;
         m_name = vc.getName();
         m_VC_string = vc.toString();
         m_antecedent = vc.getAntecedent();
         m_consequent = vc.getConsequent();
         m_registry = new Registry(g);
+        m_z = z;
+        m_n = n;
         m_conjunction =
                 new ConjunctionOfNormalizedAtomicExpressions(m_registry, this);
         m_goal = new HashSet<String>();
@@ -376,7 +381,8 @@ public class VerificationConditionCongruenceClosureImpl {
 
     private void addPExp(Iterator<PExp> pit, boolean inAntecedent) {
         while (pit.hasNext() && !m_conjunction.m_evaluates_to_false) {
-            PExp curr = pit.next();
+            PExp curr =
+                    Utilities.replacePExp(pit.next(), m_typegraph, m_z, m_n);
             if (inAntecedent) {
                 m_conjunction.addExpression(curr);
             }
