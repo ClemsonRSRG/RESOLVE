@@ -24,10 +24,14 @@ import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
 import edu.clemson.cs.r2jt.rewriteprover.model.PerVCProverModel;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typeandpopulate.MathSymbolTable;
 import edu.clemson.cs.r2jt.typeandpopulate.ModuleScope;
+import edu.clemson.cs.r2jt.typeandpopulate.SymbolNotOfKindTypeException;
+import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.TheoremEntry;
 import edu.clemson.cs.r2jt.typeandpopulate.query.EntryTypeQuery;
+import edu.clemson.cs.r2jt.typeandpopulate.query.NameQuery;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 import edu.clemson.cs.r2jt.vcgeneration.VCGenerator;
 
@@ -85,14 +89,16 @@ public final class CongruenceClassProver {
             myTimeout =
                     Integer.parseInt(environment.flags.getFlagArgument(
                             Prover.FLAG_TIMEOUT, Prover.FLAG_TIMEOUT_ARG_NAME));
-        } else {
+        }
+        else {
             myTimeout = DEFAULTTIMEOUT;
         }
         if (environment.flags.isFlagSet(CongruenceClassProver.FLAG_NUMTRIES)) {
             numUsesBeforeQuit =
                     Integer.parseInt(environment.flags.getFlagArgument(
                             CongruenceClassProver.FLAG_NUMTRIES, "numtries"));
-        } else {
+        }
+        else {
             numUsesBeforeQuit = DEFAULTTRIES;
         }
 
@@ -102,22 +108,53 @@ public final class CongruenceClassProver {
         m_ccVCs = new ArrayList<VerificationConditionCongruenceClosureImpl>();
         int i = 0;
 
-        for (VC vc : vcs) {
-            // make every PExp a PSymbol
-            vc.convertAllToPsymbols(m_typeGraph);
-            m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc));
-            myModels[i++] = (new PerVCProverModel(g, vc.getName(), vc, null));
-
-        }
         m_theorems = new ArrayList<TheoremCongruenceClosureImpl>();
         List<TheoremEntry> theoremEntries =
                 scope.query(new EntryTypeQuery(TheoremEntry.class,
                         MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
                         MathSymbolTable.FacilityStrategy.FACILITY_IGNORE));
+        List<edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry> z_entries =
+                scope.query(new NameQuery(null, "Z",
+                        MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
+                        MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                        false));
+        MTType z = null;
+        if (z_entries != null && z_entries.size() > 0) {
+            MathSymbolEntry z_e = (MathSymbolEntry) z_entries.get(0);
+            try {
+                z = z_e.getTypeValue();
+            }
+            catch (SymbolNotOfKindTypeException e) {
+                e.printStackTrace();
+            }
+        }
 
+        List<edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry> n_entries =
+                scope.query(new NameQuery(null, "N",
+                        MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
+                        MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
+                        false));
+        MTType n = null;
+        if (n_entries != null && n_entries.size() > 0) {
+            MathSymbolEntry n_e = (MathSymbolEntry) n_entries.get(0);
+            try {
+                n = n_e.getTypeValue();
+            }
+            catch (SymbolNotOfKindTypeException e) {
+                e.printStackTrace();
+            }
+        }
+        for (VC vc : vcs) {
+            // make every PExp a PSymbol
+            vc.convertAllToPsymbols(m_typeGraph);
+            m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc,
+                    z, n));
+            myModels[i++] = (new PerVCProverModel(g, vc.getName(), vc, null));
+
+        }
         for (TheoremEntry e : theoremEntries) {
             PExp assertion =
-                    Utilities.replacePExp(e.getAssertion(), m_typeGraph);
+                    Utilities.replacePExp(e.getAssertion(), m_typeGraph, z, n);
             String eName = e.getName();
             if (assertion.isEquality()
                     && assertion.getQuantifiedVariables().size() > 0) {
@@ -125,18 +162,19 @@ public final class CongruenceClassProver {
                 addEqualityTheorem(false, assertion, eName + "_right"); // match right
                 /*m_theorems.add(new TheoremCongruenceClosureImpl(g, assertion,
                         false, eName + "_whole")); // match whole*/
-            } else {
+            }
+            else {
                 TheoremCongruenceClosureImpl t =
                         new TheoremCongruenceClosureImpl(g, assertion, false,
                                 eName);
                 m_theorems.add(t);
+                //addContrapositive(assertion, eName);
             }
         }
-
         m_environment = environment;
         m_scope = scope;
         m_results = "";
-        constructionTime += System.currentTimeMillis() - totalTime;
+
     }
 
     ///////////////////////////////////////////////////////
@@ -184,8 +222,8 @@ public final class CongruenceClassProver {
         int i = 0;
         int numUnproved = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
-            printVCEachStep = true;
-            if (!vcc.m_name.equals("3_7")) continue;
+            //printVCEachStep = true;
+            //if (!vcc.m_name.equals("3_7")) continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             // Skip proof loop

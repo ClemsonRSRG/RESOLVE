@@ -74,8 +74,7 @@ public class Utilities {
             // x - y to x + (-y)
             argsTemp.add(argList.get(1));
             PSymbol minusY =
-                    new PSymbol(argList.get(1).getType(), argList.get(1)
-                            .getTypeValue(), "-", argsTemp);
+                    new PSymbol(z, null, "-", argsTemp);
             argsTemp.clear();
             argsTemp.add(argList.get(0));
             argsTemp.add(minusY);
