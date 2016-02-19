@@ -14,6 +14,7 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
+import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
 import java.util.ArrayList;
@@ -23,12 +24,11 @@ import java.util.ArrayList;
  */
 public class Utilities {
 
-    final static boolean impliesToAndEq = true;
-
-    public static PExp replacePExp(PExp p, TypeGraph g) {
+    public static PExp replacePExp(PExp p, TypeGraph g, MTType z, MTType n) {
         ArrayList<PExp> argList = new ArrayList<PExp>();
+        ArrayList<PExp> argsTemp = new ArrayList<PExp>();
         for (PExp pa : p.getSubExpressions()) {
-            argList.add(replacePExp(pa, g));
+            argList.add(replacePExp(pa, g, z, n));
         }
         String pTop = p.getTopLevelOperation();
         if (pTop.equals("/=")) {
@@ -38,41 +38,50 @@ public class Utilities {
             PSymbol notEqExp = new PSymbol(g.BOOLEAN, null, "not", argList);
             return notEqExp;
         }
-        /*else if(pTop.equals("implies")){
-            if(impliesToAndEq){
-                PSymbol pAndq = new PSymbol(g.BOOLEAN, null, "and", argList);
-                PSymbol antc = (PSymbol)argList.get(0);
-                argList.clear();
-                argList.add(pAndq);
-                argList.add(antc);
-                PSymbol pAndqeqP = new PSymbol(g.BOOLEAN, null, "=", argList);
-                return pAndqeqP;
-
-            }
-
-        }*/
-        return new PSymbol(p.getType(), null, p.getTopLevelOperation(),
-                argList, ((PSymbol) p).quantification);
+        else if (pTop.equals(">=")) {
+            argsTemp.add(argList.get(1));
+            argsTemp.add(argList.get(0));
+            return new PSymbol(g.BOOLEAN, null, "<=", argsTemp);
+        }
+        else if (pTop.equals("<") && z != null && n != null
+                && argList.get(0).getType().isSubtypeOf(z)
+                && argList.get(1).getType().isSubtypeOf(z)) {
+            // x < y to x + 1 <= y
+            argsTemp.add(argList.get(0));
+            argsTemp.add(new PSymbol(n, null, "1"));
+            PSymbol plus1 =
+                    new PSymbol(p.getType(), p.getTypeValue(), "+", argsTemp);
+            argsTemp.clear();
+            argsTemp.add(plus1);
+            argsTemp.add(argList.get(1));
+            return new PSymbol(p.getType(), p.getTypeValue(), "<=", argsTemp);
+        }
+        else if (pTop.equals(">") && z != null && n != null
+                && argList.get(0).getType().isSubtypeOf(z)
+                && argList.get(1).getType().isSubtypeOf(z)) {
+            // x > y to y + 1 <= x
+            argsTemp.add(argList.get(1));
+            argsTemp.add(new PSymbol(n, null, "1"));
+            PSymbol plus1 =
+                    new PSymbol(p.getType(), p.getTypeValue(), "+", argsTemp);
+            argsTemp.clear();
+            argsTemp.add(plus1);
+            argsTemp.add(argList.get(0));
+            return new PSymbol(p.getType(), p.getTypeValue(), "<=", argsTemp);
+        }
+        else if (z != null && pTop.equals("-")
+                && p.getSubExpressions().size() == 2) {
+            // x - y to x + (-y)
+            argsTemp.add(argList.get(1));
+            PSymbol minusY =
+                    new PSymbol(argList.get(1).getType(), argList.get(1)
+                            .getTypeValue(), "-", argsTemp);
+            argsTemp.clear();
+            argsTemp.add(argList.get(0));
+            argsTemp.add(minusY);
+            return new PSymbol(z, null, "+", argsTemp);
+        }
+        return new PSymbol(p.getType(), p.getTypeValue(), p
+                .getTopLevelOperation(), argList, ((PSymbol) p).quantification);
     }
 }
-
-/*if (pTop.equals("implies")) {
- ArrayList<PExp> args = new ArrayList<PExp>();
- args.add(arg1);
- args.add(arg2);
- if(impliesToAndEq) {
- PSymbol pAndq = new PSymbol(g.BOOLEAN, null, "and", args);
- args.clear();
- args.add(pAndq);
- args.add(arg1);
- PSymbol pAndqeqP = new PSymbol(g.BOOLEAN, null, "=", args);
- return pAndqeqP;
- } else {
- PSymbol pOrQ = new PSymbol(g.BOOLEAN,null,"or", args);
- args.clear();
- args.add(pOrQ);
- args.add(arg2);
- PSymbol pOrQeqQ = new PSymbol(g.BOOLEAN,null,"=",args);
- return pOrQeqQ;
- }
- */
