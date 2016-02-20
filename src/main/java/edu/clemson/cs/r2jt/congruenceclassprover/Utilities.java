@@ -73,12 +73,11 @@ public class Utilities {
                 && p.getSubExpressions().size() == 2) {
             // x - y to x + (-y)
             argsTemp.add(argList.get(1));
-            PSymbol minusY =
-                    new PSymbol(z, null, "-", argsTemp);
+            PSymbol minusY = new PSymbol(p.getType(), null, "-", argsTemp);
             argsTemp.clear();
             argsTemp.add(argList.get(0));
             argsTemp.add(minusY);
-            return new PSymbol(z, null, "+", argsTemp);
+            return new PSymbol(p.getType(), null, "+", argsTemp);
         }
         return new PSymbol(p.getType(), p.getTypeValue(), p
                 .getTopLevelOperation(), argList, ((PSymbol) p).quantification);

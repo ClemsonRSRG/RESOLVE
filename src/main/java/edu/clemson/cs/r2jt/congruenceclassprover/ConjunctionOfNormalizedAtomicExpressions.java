@@ -308,6 +308,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     m_registry.getSymbolForIndex(opA) + "/"
                             + m_registry.getSymbolForIndex(opB) + ",";
             Stack<Integer> mResult = mergeOnlyArgumentOperators(opA, opB);
+            String bstring = m_registry.getSymbolForIndex(opB);
+            if(m_VC.m_goal.contains(bstring)){
+                m_VC.m_goal.remove(bstring);
+                m_VC.m_goal.add(m_registry.getSymbolForIndex(opA));
+            }
             m_registry.substitute(opA, opB);
             if (mResult != null)
                 holdingTank.addAll(mResult);
@@ -482,6 +487,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     tank.push(fl);
                     tank.push(arg2);
                 }
+                return;
+            }
+            // rhs = some goal
+            if(m_VC.m_goal.contains(m_registry.getSymbolForIndex(rhs))){
+                m_VC.addGoal(m_registry.getSymbolForIndex(arg1));
+                m_VC.addGoal(m_registry.getSymbolForIndex(arg2));
                 return;
             }
             // constant t arg
