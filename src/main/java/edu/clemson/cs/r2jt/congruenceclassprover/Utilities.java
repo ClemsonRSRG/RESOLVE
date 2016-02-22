@@ -50,7 +50,7 @@ public class Utilities {
             argsTemp.add(argList.get(0));
             argsTemp.add(new PSymbol(n, null, "1"));
             PSymbol plus1 =
-                    new PSymbol(p.getType(), p.getTypeValue(), "+", argsTemp);
+                    new PSymbol(argList.get(0).getType(), null, "+", argsTemp);
             argsTemp.clear();
             argsTemp.add(plus1);
             argsTemp.add(argList.get(1));
@@ -63,7 +63,7 @@ public class Utilities {
             argsTemp.add(argList.get(1));
             argsTemp.add(new PSymbol(n, null, "1"));
             PSymbol plus1 =
-                    new PSymbol(p.getType(), p.getTypeValue(), "+", argsTemp);
+                    new PSymbol(argList.get(1).getType(), null, "+", argsTemp);
             argsTemp.clear();
             argsTemp.add(plus1);
             argsTemp.add(argList.get(0));
@@ -73,13 +73,11 @@ public class Utilities {
                 && p.getSubExpressions().size() == 2) {
             // x - y to x + (-y)
             argsTemp.add(argList.get(1));
-            PSymbol minusY =
-                    new PSymbol(argList.get(1).getType(), argList.get(1)
-                            .getTypeValue(), "-", argsTemp);
+            PSymbol minusY = new PSymbol(p.getType(), null, "-", argsTemp);
             argsTemp.clear();
             argsTemp.add(argList.get(0));
             argsTemp.add(minusY);
-            return new PSymbol(z, null, "+", argsTemp);
+            return new PSymbol(p.getType(), null, "+", argsTemp);
         }
         return new PSymbol(p.getType(), p.getTypeValue(), p
                 .getTopLevelOperation(), argList, ((PSymbol) p).quantification);
