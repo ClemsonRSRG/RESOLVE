@@ -89,16 +89,14 @@ public final class CongruenceClassProver {
             myTimeout =
                     Integer.parseInt(environment.flags.getFlagArgument(
                             Prover.FLAG_TIMEOUT, Prover.FLAG_TIMEOUT_ARG_NAME));
-        }
-        else {
+        } else {
             myTimeout = DEFAULTTIMEOUT;
         }
         if (environment.flags.isFlagSet(CongruenceClassProver.FLAG_NUMTRIES)) {
             numUsesBeforeQuit =
                     Integer.parseInt(environment.flags.getFlagArgument(
                             CongruenceClassProver.FLAG_NUMTRIES, "numtries"));
-        }
-        else {
+        } else {
             numUsesBeforeQuit = DEFAULTTRIES;
         }
 
@@ -123,8 +121,7 @@ public final class CongruenceClassProver {
             MathSymbolEntry z_e = (MathSymbolEntry) z_entries.get(0);
             try {
                 z = z_e.getTypeValue();
-            }
-            catch (SymbolNotOfKindTypeException e) {
+            } catch (SymbolNotOfKindTypeException e) {
                 e.printStackTrace();
             }
         }
@@ -139,8 +136,7 @@ public final class CongruenceClassProver {
             MathSymbolEntry n_e = (MathSymbolEntry) n_entries.get(0);
             try {
                 n = n_e.getTypeValue();
-            }
-            catch (SymbolNotOfKindTypeException e) {
+            } catch (SymbolNotOfKindTypeException e) {
                 e.printStackTrace();
             }
         }
@@ -162,8 +158,10 @@ public final class CongruenceClassProver {
                 addEqualityTheorem(false, assertion, eName + "_right"); // match right
                 /*m_theorems.add(new TheoremCongruenceClosureImpl(g, assertion,
                         false, eName + "_whole")); // match whole*/
-            }
-            else {
+            } else {
+                if (assertion.getTopLevelOperation().equals("implies")) {
+                    addGoalSearchingTheorem(assertion, eName);
+                }
                 TheoremCongruenceClosureImpl t =
                         new TheoremCongruenceClosureImpl(g, assertion, false,
                                 eName);
@@ -192,14 +190,13 @@ public final class CongruenceClassProver {
     }
 
     private void addEqualityTheorem(boolean matchLeft, PExp theorem,
-            String thName) {
+                                    String thName) {
         PExp lhs, rhs;
 
         if (matchLeft) {
             lhs = theorem.getSubExpressions().get(0);
             rhs = theorem.getSubExpressions().get(1);
-        }
-        else {
+        } else {
             lhs = theorem.getSubExpressions().get(1);
             rhs = theorem.getSubExpressions().get(0);
         }
@@ -215,50 +212,81 @@ public final class CongruenceClassProver {
                         false, false, thName);
         m_theorems.add(t);
     }
+
     // forall x. p(x) -> q(x) to
-    // forall x,y.((q(x) = _g) and p(x) = y)
+    // forall x,y,_g.((q(x) = _g) and p(x) = y)
     //              -> (_g = (y or _g)) :: y -> g with or and =
-    private void addGoalSearchingTheorem(PExp theorem, String name){
+    // the above is too restrictive
+    // forall x. p(x) -> q(x) to
+    // forall x,y,_g.((q(x) = _g) )
+    //              -> (_g = (p(x) or _g))
+    // the idea is to find q(x) = g, then add all p(x,y) we can find to goal
+/*    private void addGoalSearchingTheorem(PExp theorem, String name) {
         // search method will do a search for each current goal, replacing _g with goal in the binding map
         ArrayList<PExp> args = new ArrayList<PExp>();
-        PSymbol goal = new PSymbol(m_typeGraph.BOOLEAN,null,"_g", PSymbol.Quantification.NONE);
+        PSymbol goal = new PSymbol(m_typeGraph.BOOLEAN, null, "_g", PSymbol.Quantification.FOR_ALL);
         args.add(theorem.getSubExpressions().get(1));
         args.add(goal);
-        PSymbol qEqG = new PSymbol(m_typeGraph.BOOLEAN,null,"=",args);
-        args.clear();
-        PSymbol y = new PSymbol(m_typeGraph.BOOLEAN,null,"_y", PSymbol.Quantification.FOR_ALL);
-        args.add(theorem.getSubExpressions().get(0));
-        args.add(y);
-        PSymbol pEqY = new PSymbol(m_typeGraph.BOOLEAN,null,"=",args);
-        args.clear();
-        args.add(qEqG);
-        args.add(pEqY);
-        PSymbol ant = new PSymbol(m_typeGraph.BOOLEAN,null,"and",args);
+        PSymbol qEqG = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
         args.clear();
         args.add(y);
         args.add(goal);
-        PSymbol yOrG = new PSymbol(m_typeGraph.BOOLEAN,null,"or",args);
+        PSymbol pOrG = new PSymbol(m_typeGraph.BOOLEAN, null, "or", args);
         args.clear();
         args.add(yOrG);
         args.add(y);
-        PSymbol consq = new PSymbol(m_typeGraph.BOOLEAN,null,"=",args);
+        PSymbol consq = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
         args.clear();
         args.add(ant);
         args.add(consq);
-        PSymbol gSTheorem = new PSymbol(m_typeGraph.BOOLEAN,null,"implies",args);
+        PSymbol gSTheorem = new PSymbol(m_typeGraph.BOOLEAN, null, "implies", args);
+        TheoremCongruenceClosureImpl t =
+                new TheoremCongruenceClosureImpl(m_typeGraph, gSTheorem, false,
+                        name + "_goalSearch");
+        m_theorems.add(t);
+    }*/
+    private void addGoalSearchingTheorem(PExp theorem, String name) {
+        // search method will do a search for each current goal, replacing _g with goal in the binding map
+        ArrayList<PExp> args = new ArrayList<PExp>();
+        PSymbol goal = new PSymbol(m_typeGraph.BOOLEAN, null, "_g", PSymbol.Quantification.FOR_ALL);
+        args.add(theorem.getSubExpressions().get(1));
+        args.add(goal);
+        PSymbol qEqG = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
+        args.clear();
+        PSymbol y = new PSymbol(m_typeGraph.BOOLEAN, null, "_y", PSymbol.Quantification.FOR_ALL);
+        args.add(theorem.getSubExpressions().get(0));
+        args.add(y);
+        PSymbol pEqY = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
+        args.clear();
+        args.add(qEqG);
+        args.add(pEqY);
+        PSymbol ant = new PSymbol(m_typeGraph.BOOLEAN, null, "and", args);
+        args.clear();
+        args.add(y);
+        args.add(goal);
+        PSymbol yOrG = new PSymbol(m_typeGraph.BOOLEAN, null, "or", args);
+        args.clear();
+        args.add(yOrG);
+        args.add(y);
+        PSymbol consq = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
+        args.clear();
+        args.add(ant);
+        args.add(consq);
+        PSymbol gSTheorem = new PSymbol(m_typeGraph.BOOLEAN, null, "implies", args);
         TheoremCongruenceClosureImpl t =
                 new TheoremCongruenceClosureImpl(m_typeGraph, gSTheorem, false,
                         name + "_goalSearch");
         m_theorems.add(t);
     }
+
     public void start() throws IOException {
 
         String summary = "";
         int i = 0;
         int numUnproved = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
-            //printVCEachStep = true;
-            //if (!vcc.m_name.equals("3_7")) continue;
+            printVCEachStep = true;
+            if (!vcc.m_name.equals("0_2")) continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             // Skip proof loop
@@ -276,17 +304,14 @@ public final class CongruenceClassProver {
             if (proved
                     .equals(VerificationConditionCongruenceClosureImpl.STATUS.PROVED)) {
                 whyQuit += " Proved ";
-            }
-            else if (proved
+            } else if (proved
                     .equals(VerificationConditionCongruenceClosureImpl.STATUS.FALSE_ASSUMPTION)) {
                 whyQuit += " Proved (Assumption(s) false) ";
-            }
-            else if (proved
+            } else if (proved
                     .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)) {
                 whyQuit += " Out of theorems, or timed out ";
                 numUnproved++;
-            }
-            else
+            } else
                 whyQuit += " Goal false "; // this isn't currently reachable
 
             long endTime = System.nanoTime();
@@ -408,7 +433,8 @@ public final class CongruenceClassProver {
                 div + ("Before application of theorems: " + vcc + "\n");
 
         int iteration = 0;
-        chooseNewTheorem: while (status
+        chooseNewTheorem:
+        while (status
                 .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                 && System.currentTimeMillis() <= endTime) {
             long time_at_theorem_pq_creation = System.currentTimeMillis();
@@ -423,7 +449,7 @@ public final class CongruenceClassProver {
             int num_Theorems_chosen = 0;
             while (!rankedTheorems.m_pQueue.isEmpty()
                     && status
-                            .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
+                    .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                     && (num_Theorems_chosen < max_Theorems_to_choose)) {
                 // +++++++ Chooses top of uninstantiated theorem PQ
                 long time_at_selection = System.currentTimeMillis();
@@ -449,7 +475,7 @@ public final class CongruenceClassProver {
                                     instantiatedTheorems, vcc);
                     resultSelectTime += System.currentTimeMillis() - t1;
                     String substitutionMade = "";
-                    while (!instPQ.m_pQueue.isEmpty() && (instPQ.m_pQueue.peek().m_score==0 || substitutionMade.equals(""))) {
+                    while (!instPQ.m_pQueue.isEmpty() && (instPQ.m_pQueue.peek().m_score == 0 || substitutionMade.equals(""))) {
                         PExpWithScore curP = instPQ.m_pQueue.poll();
 
                         if (!applied.contains(curP.m_theorem.toString())) {
@@ -497,8 +523,7 @@ public final class CongruenceClassProver {
                                         + (System.currentTimeMillis() - time_at_selection)
                                         + "ms]\n\n";
                     }
-                }
-                else {
+                } else {
                     theseResults +=
                             "Could not find any matches for "
                                     + cur.m_name
