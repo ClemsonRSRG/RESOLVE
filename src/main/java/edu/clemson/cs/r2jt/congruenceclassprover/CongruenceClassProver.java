@@ -221,20 +221,20 @@ public final class CongruenceClassProver {
     // forall x,y,_g.((q(x) = _g) )
     //              -> (_g = (p(x) or _g))
     // the idea is to find q(x) = g, then add all p(x,y) we can find to goal
-/*    private void addGoalSearchingTheorem(PExp theorem, String name) {
+    private void addGoalSearchingTheorem(PExp theorem, String name) {
         // search method will do a search for each current goal, replacing _g with goal in the binding map
         ArrayList<PExp> args = new ArrayList<PExp>();
         PSymbol goal = new PSymbol(m_typeGraph.BOOLEAN, null, "_g", PSymbol.Quantification.FOR_ALL);
         args.add(theorem.getSubExpressions().get(1));
         args.add(goal);
-        PSymbol qEqG = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
+        PSymbol ant = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
         args.clear();
-        args.add(y);
+        args.add(theorem.getSubExpressions().get(0));
         args.add(goal);
         PSymbol pOrG = new PSymbol(m_typeGraph.BOOLEAN, null, "or", args);
         args.clear();
-        args.add(yOrG);
-        args.add(y);
+        args.add(pOrG);
+        args.add(goal);
         PSymbol consq = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
         args.clear();
         args.add(ant);
@@ -244,8 +244,11 @@ public final class CongruenceClassProver {
                 new TheoremCongruenceClosureImpl(m_typeGraph, gSTheorem, false,
                         name + "_goalSearch");
         m_theorems.add(t);
-    }*/
-    private void addGoalSearchingTheorem(PExp theorem, String name) {
+    }
+    // forall x. p(x) -> q(x) to
+    // forall x,y,_g.((q(x) = _g) and p(x) = y)
+    //              -> (_g = (p(x) or _g)) :: p(x) -> g with or and =
+/*    private void addGoalSearchingTheorem(PExp theorem, String name) {
         // search method will do a search for each current goal, replacing _g with goal in the binding map
         ArrayList<PExp> args = new ArrayList<PExp>();
         PSymbol goal = new PSymbol(m_typeGraph.BOOLEAN, null, "_g", PSymbol.Quantification.FOR_ALL);
@@ -262,12 +265,12 @@ public final class CongruenceClassProver {
         args.add(pEqY);
         PSymbol ant = new PSymbol(m_typeGraph.BOOLEAN, null, "and", args);
         args.clear();
-        args.add(y);
+        args.add(theorem.getSubExpressions().get(0));
         args.add(goal);
-        PSymbol yOrG = new PSymbol(m_typeGraph.BOOLEAN, null, "or", args);
+        PSymbol pOrG = new PSymbol(m_typeGraph.BOOLEAN, null, "or", args);
         args.clear();
-        args.add(yOrG);
-        args.add(y);
+        args.add(pOrG);
+        args.add(goal);
         PSymbol consq = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
         args.clear();
         args.add(ant);
@@ -278,15 +281,15 @@ public final class CongruenceClassProver {
                         name + "_goalSearch");
         m_theorems.add(t);
     }
-
+*/
     public void start() throws IOException {
 
         String summary = "";
         int i = 0;
         int numUnproved = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
-            printVCEachStep = true;
-            if (!vcc.m_name.equals("0_2")) continue;
+            //printVCEachStep = true;
+            //if (!vcc.m_name.equals("0_3")) continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             // Skip proof loop

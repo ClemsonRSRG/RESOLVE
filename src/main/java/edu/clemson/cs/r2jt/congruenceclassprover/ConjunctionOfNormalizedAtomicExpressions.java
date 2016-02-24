@@ -427,8 +427,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if ((arg1 == tr || arg1 == fl) && (arg2 == tr || arg2 == fl)
                 && (rhs == tr || rhs == fl))
             return;
-        // guard: return if all var and op is not equals
-        if (!op.equals("=") && arg1 != tr && arg1 != fl
+        // guard: return if all var and op is not equals or or
+        if (!(op.equals("=")||op.equals("or")) && arg1 != tr && arg1 != fl
                 && (arg2 != tr && arg2 != fl) && (rhs != tr && rhs != fl))
             return;
         // rules for and
@@ -489,10 +489,14 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 }
                 return;
             }
-            // rhs = some goal
+            // x or some goal = some goal
             if(m_VC != null && m_VC.m_goal.contains(m_registry.getSymbolForIndex(rhs))){
-                m_VC.addGoal(m_registry.getSymbolForIndex(arg1));
-                m_VC.addGoal(m_registry.getSymbolForIndex(arg2));
+                if(rhs==arg1) {
+                    m_VC.addGoal(m_registry.getSymbolForIndex(arg2));
+                }
+                else if(rhs==arg2){
+                    m_VC.addGoal(m_registry.getSymbolForIndex(arg1));
+                }
                 return;
             }
             // constant t arg
