@@ -47,6 +47,7 @@ public class InstantiatedTheoremPrioritizer {
         if(si<0 || m_vcReg.getUsage(s).equals(Registry.Usage.HASARGS_SINGULAR)) return max;
         String sc = m_vcReg.getRootSymbolForSymbol(s);
         for(String g: m_vc.m_goal){
+            if(g.equals("false")) continue;
             int gi = m_vcReg.getIndexForSymbol(g);
             if(si==gi) return 0;
             String gc = m_vcReg.getSymbolForIndex(gi);
@@ -66,12 +67,13 @@ public class InstantiatedTheoremPrioritizer {
         float sSz = theorem_symbols.size();
         assert sSz <= (float) symCnt;
         float diff = 1f - (sSz / (float) symCnt);
+        int minGr = Integer.MAX_VALUE;
         //diff = diff > 0 ? diff : 0;
         for (String s : theorem_symbols) {
 
             String rS = m_vcReg.getRootSymbolForSymbol(s);
             int gr = goalArg(rS);
-            if(gr < 2) return gr;
+            if(gr < minGr) minGr = gr;
             if (m_vcReg.m_symbolToIndex.containsKey(rS)) {
                 // Age
                 age += m_vcReg.getIndexForSymbol(s);
@@ -80,7 +82,7 @@ public class InstantiatedTheoremPrioritizer {
                 score += max;
             }
         }
-
+        if(minGr < 2) return minGr;
         float avgAge = age / sSz;
         // these range from [0,1], lower is better
         float scaledAvgAge = avgAge / max;

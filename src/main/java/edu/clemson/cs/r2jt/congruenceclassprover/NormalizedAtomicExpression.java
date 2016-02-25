@@ -53,6 +53,8 @@ public class NormalizedAtomicExpression {
         return arity;
     }
 
+    protected Registry getRegistry() {return m_registry;}
+
     protected int getOpIdUsedInAllPos(NormalizedAtomicExpression oe, int k) {
         int bid = -4;
         for (int i = 0; i <= oe.arity; ++i) {

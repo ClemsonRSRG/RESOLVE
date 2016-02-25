@@ -59,7 +59,7 @@ public final class CongruenceClassProver {
     private final int MAX_ITERATIONS = 1024;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
-    private final long DEFAULTTIMEOUT = 5000;
+    private final long DEFAULTTIMEOUT = 1000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     // only for webide ////////////////////////////////////
@@ -213,10 +213,7 @@ public final class CongruenceClassProver {
         m_theorems.add(t);
     }
 
-    // forall x. p(x) -> q(x) to
-    // forall x,y,_g.((q(x) = _g) and p(x) = y)
-    //              -> (_g = (y or _g)) :: y -> g with or and =
-    // the above is too restrictive
+
     // forall x. p(x) -> q(x) to
     // forall x,y,_g.((q(x) = _g) )
     //              -> (_g = (p(x) or _g))
@@ -245,43 +242,7 @@ public final class CongruenceClassProver {
                         name + "_goalSearch");
         m_theorems.add(t);
     }
-    // forall x. p(x) -> q(x) to
-    // forall x,y,_g.((q(x) = _g) and p(x) = y)
-    //              -> (_g = (p(x) or _g)) :: p(x) -> g with or and =
-/*    private void addGoalSearchingTheorem(PExp theorem, String name) {
-        // search method will do a search for each current goal, replacing _g with goal in the binding map
-        ArrayList<PExp> args = new ArrayList<PExp>();
-        PSymbol goal = new PSymbol(m_typeGraph.BOOLEAN, null, "_g", PSymbol.Quantification.FOR_ALL);
-        args.add(theorem.getSubExpressions().get(1));
-        args.add(goal);
-        PSymbol qEqG = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
-        args.clear();
-        PSymbol y = new PSymbol(m_typeGraph.BOOLEAN, null, "_y", PSymbol.Quantification.FOR_ALL);
-        args.add(theorem.getSubExpressions().get(0));
-        args.add(y);
-        PSymbol pEqY = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
-        args.clear();
-        args.add(qEqG);
-        args.add(pEqY);
-        PSymbol ant = new PSymbol(m_typeGraph.BOOLEAN, null, "and", args);
-        args.clear();
-        args.add(theorem.getSubExpressions().get(0));
-        args.add(goal);
-        PSymbol pOrG = new PSymbol(m_typeGraph.BOOLEAN, null, "or", args);
-        args.clear();
-        args.add(pOrG);
-        args.add(goal);
-        PSymbol consq = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
-        args.clear();
-        args.add(ant);
-        args.add(consq);
-        PSymbol gSTheorem = new PSymbol(m_typeGraph.BOOLEAN, null, "implies", args);
-        TheoremCongruenceClosureImpl t =
-                new TheoremCongruenceClosureImpl(m_typeGraph, gSTheorem, false,
-                        name + "_goalSearch");
-        m_theorems.add(t);
-    }
-*/
+
     public void start() throws IOException {
 
         String summary = "";
@@ -478,9 +439,9 @@ public final class CongruenceClassProver {
                                     instantiatedTheorems, vcc);
                     resultSelectTime += System.currentTimeMillis() - t1;
                     String substitutionMade = "";
+                    int innerctr = 0;
                     while (!instPQ.m_pQueue.isEmpty() && (instPQ.m_pQueue.peek().m_score == 0 || substitutionMade.equals(""))) {
                         PExpWithScore curP = instPQ.m_pQueue.poll();
-
                         if (!applied.contains(curP.m_theorem.toString())) {
                             long t2 = System.currentTimeMillis();
                             substitutionMade =
@@ -495,27 +456,28 @@ public final class CongruenceClassProver {
                             if (cur.m_noQuants) {
                                 theoremsForThisVC.remove(cur);
                             }
+                            if (!substitutionMade.equals("")) {
+                                long curTime = System.currentTimeMillis();
+                                theseResults +=
+                                        "Iter:"
+                                                + iteration + "." +(innerctr++)
+                                                + " Iter Time: "
+                                                + (curTime - time_at_theorem_pq_creation)
+                                                + " Search Time for this theorem: "
+                                                + (curTime - time_at_selection)
+                                                + " Elapsed Time: "
+                                                + (curTime - startTime) + "\n["
+                                                + theoremScore + "]"
+                                                + curP.toString() + "\t"
+                                                + substitutionMade + "\n\n";
+                                if (printVCEachStep)
+                                    theseResults += vcc.toString();
+                                status = vcc.isProved();
+                                num_Theorems_chosen++;
+                                //continue chooseNewTheorem;
+                            }
                         }
-                        if (!substitutionMade.equals("")) {
-                            long curTime = System.currentTimeMillis();
-                            theseResults +=
-                                    "Iter:"
-                                            + iteration
-                                            + " Iter Time: "
-                                            + (curTime - time_at_theorem_pq_creation)
-                                            + " Search Time for this theorem: "
-                                            + (curTime - time_at_selection)
-                                            + " Elapsed Time: "
-                                            + (curTime - startTime) + "\n["
-                                            + theoremScore + "]"
-                                            + curP.toString() + "\t"
-                                            + substitutionMade + "\n\n";
-                            if (printVCEachStep)
-                                theseResults += vcc.toString();
-                            status = vcc.isProved();
-                            num_Theorems_chosen++;
-                            //continue chooseNewTheorem;
-                        }
+
 
                     }
                     if (substitutionMade == "") {

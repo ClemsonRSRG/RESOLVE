@@ -373,6 +373,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     private void applyBuiltInLogic(NormalizedAtomicExpression nm,
             Stack<Integer> tank) {
+        // turn off if this is not part of a VC
+        if(m_VC==null) return;
         int arity = nm.getArity();
         if (arity < 1 || 2 < arity)
             return;
@@ -649,13 +651,13 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     protected Set<java.util.Map<String, String>> getMatchesForOverideSet(
-            NormalizedAtomicExpression expr, Registry exprReg,
+            NormalizedAtomicExpression expr,
             Set<Map<String, String>> foreignSymbolOverideSet) {
         Set<java.util.Map<String, String>> rSet =
                 new HashSet<Map<String, String>>();
         for (Map<String, String> fs_m : foreignSymbolOverideSet) {
             Set<java.util.Map<String, String>> results =
-                    getMatchesForEq(expr, exprReg, fs_m);
+                    getMatchesForEq(expr, fs_m);
             if (results != null && results.size() != 0)
                 rSet.addAll(results);
         }
@@ -663,11 +665,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     protected Set<Map<String, String>> getMatchesForEq(
-            NormalizedAtomicExpression expr, Registry exprReg,
+            NormalizedAtomicExpression expr,
             Map<String, String> foreignSymbolOveride) {
         // Identify the literals.
         Set<String> literalsInexpr = new HashSet<String>();
         Map<String, Integer> exprMMap = expr.getOperatorsAsStrings(false);
+        Registry exprReg = expr.getRegistry();
         for (String s : exprMMap.keySet()) {
             String lit = "";
             if (!foreignSymbolOveride.containsKey(s)) {
@@ -687,7 +690,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         // everything is quantified:
         if (literalsInexpr.isEmpty()) {
             return getBindings_NonCommutative(m_expSet, foreignSymbolOveride,
-                    expr, exprReg);
+                    expr);
         }
         Set<NormalizedAtomicExpression> vCNaemlsWithAllLiterals =
                 multiKeyUseMapSearch(literalsInexpr);
@@ -723,7 +726,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             if (filtered_vcNaemlsWithAllLiterals.isEmpty())
                 return null;
             return getBindings_NonCommutative(filtered_vcNaemlsWithAllLiterals,
-                    foreignSymbolOveride, expr, exprReg);
+                    foreignSymbolOveride, expr);
         }
         else {
             filtered_vcNaemlsWithAllLiterals =
@@ -907,9 +910,9 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     Set<Map<String, String>> getBindings_NonCommutative(
             Set<NormalizedAtomicExpression> vcEquations,
-            Map<String, String> basemap, NormalizedAtomicExpression searchExpr,
-            Registry searchReg) {
+            Map<String, String> basemap, NormalizedAtomicExpression searchExpr) {
         Set<Map<String, String>> bindings = new HashSet<Map<String, String>>();
+        Registry searchReg = searchExpr.getRegistry();
         bindToAVCEquation: for (NormalizedAtomicExpression vc_r : vcEquations) {
             Map<String, String> currentBind =
                     new HashMap<String, String>(basemap);
@@ -1013,11 +1016,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         String r = "";
         if (m_evaluates_to_false)
             r += "Conjunction evaluates to false" + "\n";
-        /*        for (MTType key : m_registry.m_typeToSetOfOperators.keySet()) {
+                for (MTType key : m_registry.m_typeToSetOfOperators.keySet()) {
          r += key.toString() + ":\n";
          r += m_registry.m_typeToSetOfOperators.get(key) + "\n\n";
          }
-         */
+
         for (NormalizedAtomicExpression cur : m_expSet) {
             r += cur.toHumanReadableString() + "\n";
         }

@@ -45,8 +45,7 @@ public class TheoremPrioritizer {
                 }
             }
             else {
-                if (!shouldExclude(t.getLiteralsInMatchingPart())
-                        && !shouldExclude(t.getFunctionNames())) {
+                if (!shouldExclude(t.getFunctionNames())) {
                     score =
                             calculateScoreMinimum(t.getNonQuantifiedSymbols(),
                                     m_vcReg.m_symbolToIndex.keySet().size());

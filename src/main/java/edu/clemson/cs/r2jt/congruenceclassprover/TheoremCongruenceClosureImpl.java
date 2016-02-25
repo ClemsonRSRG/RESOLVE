@@ -59,7 +59,7 @@ public class TheoremCongruenceClosureImpl {
                 new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,
                         null);
         m_insertConj =
-                new ConjunctionOfNormalizedAtomicExpressions(m_insertReg,
+                new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,
                         null);
         if (p.getTopLevelOperation().equals("implies")) {
             PExp matchingpart = p.getSubExpressions().get(0);
@@ -216,28 +216,27 @@ public class TheoremCongruenceClosureImpl {
         HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
         //allValidBindings = discardBindingIfAllValuesNotUnique(allValidBindings);
         nextMap: for (java.util.Map<String, String> curBinding : allValidBindings) {
-            for (String thKey : curBinding.keySet()) {
+            for (PSymbol p : m_insertExpr.getQuantifiedVariables()) {
+
+                String thKey = p.getTopLevelOperation();
+                String thVal = "";
+                if(curBinding.containsKey(thKey)){
+                    thVal =curBinding.get(thKey);
+                }
+                else if(curBinding.containsKey(m_theoremRegistry.getRootSymbolForSymbol(thKey))){
+                    thVal = curBinding.get(m_theoremRegistry.getRootSymbolForSymbol(thKey));
+                }
+                if(thVal.equals(""))
+                    continue nextMap;
                 MTType quanType =
                         m_theoremRegistry.getTypeByIndex(m_theoremRegistry
                                 .getIndexForSymbol(thKey));
-                // thKey may be a parent of the symbol in the theorem
-                // there will be no literal match in the substitute call
-                // Check if any quantified var is a child.
-                // Make extra map entry for each one
-                for (PSymbol p : m_theorem.getQuantifiedVariables()) {
-                    String pname = p.getTopLevelOperation();
-                    if (m_theoremRegistry.getRootSymbolForSymbol(pname).equals(
-                            thKey)) {
-                        quantToLit.put(new PSymbol(quanType, null, pname),
-                                new PSymbol(quanType, null, curBinding
-                                        .get(thKey)));
-                    }
-                }
-                quantToLit.put(new PSymbol(quanType, null, thKey), new PSymbol(
-                        quanType, null, curBinding.get(thKey)));
+                quantToLit.put(new PSymbol(quanType, null, thKey, PSymbol.Quantification.FOR_ALL), new PSymbol(
+                        quanType, null, thVal, PSymbol.Quantification.NONE));
             }
 
             PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
+            modifiedInsert = vc.getConjunct().find(modifiedInsert);
             // Discard s = s
             if (!(modifiedInsert.getTopLevelOperation().equals("=") && modifiedInsert
                     .getSubExpressions().get(0).toString().equals(
@@ -338,8 +337,7 @@ public class TheoremCongruenceClosureImpl {
         // todo: order by proportion of literal to quants
         for (NormalizedAtomicExpression e_t : m_matchConj.m_expSet) {
             results =
-                    vc.getConjunct().getMatchesForOverideSet(e_t,
-                            m_theoremRegistry, results);
+                    vc.getConjunct().getMatchesForOverideSet(e_t, results);
         }
         return results;
     }
@@ -357,8 +355,7 @@ public class TheoremCongruenceClosureImpl {
             gResults.add(gBinds);
             for (NormalizedAtomicExpression e_t : m_matchConj.m_expSet) {
                 gResults =
-                        vc.getConjunct().getMatchesForOverideSet(e_t,
-                                m_theoremRegistry, gResults);
+                        vc.getConjunct().getMatchesForOverideSet(e_t, gResults);
             }
             results.addAll(gResults);
         }
@@ -386,8 +383,7 @@ public class TheoremCongruenceClosureImpl {
         if(!blankResults.isEmpty()) {
             for (NormalizedAtomicExpression e_t : m_insertConj.m_expSet) {
                 tResults =
-                        vc.getConjunct().getMatchesForOverideSet(e_t,
-                                m_insertReg, blankResults);
+                        vc.getConjunct().getMatchesForOverideSet(e_t, blankResults);
                 if (!tResults.isEmpty())
                     blankResults = tResults;
             }
