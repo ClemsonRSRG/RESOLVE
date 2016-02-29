@@ -29,7 +29,16 @@ public class InsertExpWithJustification {
         m_Justification = j;
         m_symCnt = symCnt;
     }
-
+    public boolean equals(Object o){
+        if(o instanceof InsertExpWithJustification){
+            if(((InsertExpWithJustification) o).m_PExp.toString().equals(m_PExp.toString()))
+                return true;
+        }
+        return false;
+    }
+    public int hashCode(){
+        return m_PExp.toString().hashCode();
+    }
     public String toString() {
         return m_Justification + "\n\t" + m_PExp.toString();
     }

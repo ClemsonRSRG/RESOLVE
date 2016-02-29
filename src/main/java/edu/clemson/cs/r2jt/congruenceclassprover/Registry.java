@@ -39,8 +39,6 @@ public class Registry {
     protected Map<Integer, ArrayList<Integer>> m_partTypeParentArray;
     protected Set<String> m_commutative_operators;
     protected Map<String, Boolean> m_cached_isSubtype;
-    protected Map<NormalizedAtomicExpression, Integer> m_exprRootMap;
-
     public static enum Usage {
 
         LITERAL, FORALL, SINGULAR_VARIABLE, CREATED, HASARGS_SINGULAR,
@@ -61,8 +59,6 @@ public class Registry {
         m_symbolToUsage = new HashMap<String, Usage>(2048, .5f); // entries won't change
         m_foralls = new HashSet<String>();
         m_typeGraph = g;
-        m_exprRootMap =
-                new HashMap<NormalizedAtomicExpression, Integer>(2048, .5f);
         m_typeDictionary = new TreeMap<String, MTType>();
         addSymbol("=", new MTFunction(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
                 Usage.LITERAL); // = as a predicate function, not as an assertion
@@ -139,15 +135,16 @@ public class Registry {
     public void substitute(int opIndexA, int opIndexB) {
         MTType aType = getTypeByIndex(opIndexA);
         MTType bType = getTypeByIndex(opIndexB);
-        if (isSubtype(bType, aType)) {
-            m_indexToType.set(opIndexA, bType);
-        }
+
         // set usage to most restricted: i.e literal over created over forall
         // this is because the earliest now becomes the parent
         String aS = getSymbolForIndex(opIndexA);
         String bS = getSymbolForIndex(opIndexB);
         Usage a_us = getUsage(aS);
         Usage b_us = getUsage(bS);
+        if (!a_us.equals(Usage.FORALL) && isSubtype(bType, aType)) {
+            m_indexToType.set(opIndexA, bType);
+        }
         if (a_us.equals(Usage.LITERAL) || b_us.equals(Usage.LITERAL)) {
             m_symbolToUsage.put(aS, Usage.LITERAL);
         }

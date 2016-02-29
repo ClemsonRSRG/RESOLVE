@@ -200,12 +200,6 @@ public final class CongruenceClassProver {
             lhs = theorem.getSubExpressions().get(1);
             rhs = theorem.getSubExpressions().get(0);
         }
-        // Because only lhs is matched, all quantified variables used must be in lhs
-        Set<PSymbol> lhsQuants = lhs.getQuantifiedVariables();
-        Set<PSymbol> rhsQuants = rhs.getQuantifiedVariables();
-        if (!lhsQuants.containsAll(rhsQuants)) {
-            return;
-        }
 
         TheoremCongruenceClosureImpl t =
                 new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
@@ -250,7 +244,7 @@ public final class CongruenceClassProver {
         int numUnproved = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
             //printVCEachStep = true;
-            //if (!vcc.m_name.equals("0_3")) continue;
+            //if (!vcc.m_name.equals("3_4")) continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             // Skip proof loop
@@ -428,7 +422,7 @@ public final class CongruenceClassProver {
                 theoremSelectTime +=
                         System.currentTimeMillis() - time_at_selection;
                 long t0 = System.currentTimeMillis();
-                ArrayList<InsertExpWithJustification> instantiatedTheorems =
+                Set<InsertExpWithJustification> instantiatedTheorems =
                         cur.applyTo(vcc, endTime);
                 searchTime += System.currentTimeMillis() - t0;
                 if (instantiatedTheorems != null

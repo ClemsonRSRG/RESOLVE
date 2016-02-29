@@ -381,7 +381,7 @@ public class VerificationConditionCongruenceClosureImpl {
 
     @Override
     public String toString() {
-        String r = "\n" + m_VC_string + "\n" + m_name + "\n" + m_conjunction;
+        String r = "\n" + "\n" + m_name + "\n" + m_conjunction;
         for (PExp pq : forAllQuantifiedPExps) {
             r += pq.toString() + "\n";
         }

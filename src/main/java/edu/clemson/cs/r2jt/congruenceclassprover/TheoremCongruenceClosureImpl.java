@@ -31,6 +31,30 @@ public class TheoremCongruenceClosureImpl {
     private final Registry m_insertReg;
     private final ConjunctionOfNormalizedAtomicExpressions m_matchConj;
     private final ConjunctionOfNormalizedAtomicExpressions m_insertConj;
+    /*
+    Problems with type inference.  See
+    	Theorem Iterated_Concat_of_Prime_Str_Length_2:
+		For all m,n:Z,
+		For all F:Z->Prime_Str,
+			(0 <= n) implies (|Iterated_Concatenation(m,n,F)| = n);
+			n is promoted to N with Registry sharing.
+			Registry sharing means the same map can be used for both searches.
+			Would equiv subexp. have same value? Would that matter?
+
+		For all m,n:
+			G(F(m)) implies H(n,F(m))
+
+			S:
+			F(m) = c0
+			G(c0) = true
+			m:
+			n:
+			c0:
+
+			I:
+			F(m) = c1
+			H(n,c1) = c2
+     */
     public final String m_theoremString;
     private final PExp m_insertExpr;
     private final PExp m_theorem;
@@ -65,7 +89,7 @@ public class TheoremCongruenceClosureImpl {
             PExp matchingpart = p.getSubExpressions().get(0);
             m_matchConj.addExpression(matchingpart);
             m_insertExpr = p.getSubExpressions().get(1);
-            m_insertConj.addExpression(m_insertExpr);
+            m_insertConj.addFormula(m_insertExpr);
             if (matchingpart.getTopLevelOperation().equals("=")) {
                 if (matchingpart.getSubExpressions().get(0).getSubExpressions()
                         .size() == 0
@@ -114,7 +138,8 @@ public class TheoremCongruenceClosureImpl {
         else
             m_matchConj.addFormula(toMatchAndBind);
         m_insertExpr = toInsert;
-        m_insertConj = null;
+        m_insertConj = new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry, null);
+        m_insertConj.addFormula(m_insertExpr);
         m_insertReg = null;
         m_insertCnt =
                 m_insertExpr.getSymbolNames().size()
@@ -184,10 +209,10 @@ public class TheoremCongruenceClosureImpl {
 
     }
 
-    public ArrayList<InsertExpWithJustification> applyTo(
+    public Set<InsertExpWithJustification> applyTo(
             VerificationConditionCongruenceClosureImpl vc, long endTime) {
-        ArrayList<InsertExpWithJustification> rList =
-                new ArrayList<InsertExpWithJustification>();
+        HashSet<InsertExpWithJustification> rList =
+                new HashSet<InsertExpWithJustification>();
 
         if (m_insertExpr.getQuantifiedVariables().isEmpty()) {
             m_noQuants = true;
@@ -210,23 +235,23 @@ public class TheoremCongruenceClosureImpl {
             //m_unneeded = true;
             return null;
         }
-        if(m_insertConj!=null){
-            allValidBindings = bindInsertExp(vc,allValidBindings,endTime);
+        if (m_insertConj != null) {
+            allValidBindings = bindInsertExp(vc, allValidBindings, endTime);
         }
         HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
         //allValidBindings = discardBindingIfAllValuesNotUnique(allValidBindings);
-        nextMap: for (java.util.Map<String, String> curBinding : allValidBindings) {
+        nextMap:
+        for (java.util.Map<String, String> curBinding : allValidBindings) {
             for (PSymbol p : m_insertExpr.getQuantifiedVariables()) {
 
                 String thKey = p.getTopLevelOperation();
                 String thVal = "";
-                if(curBinding.containsKey(thKey)){
-                    thVal =curBinding.get(thKey);
-                }
-                else if(curBinding.containsKey(m_theoremRegistry.getRootSymbolForSymbol(thKey))){
+                if (curBinding.containsKey(thKey)) {
+                    thVal = curBinding.get(thKey);
+                } else if (curBinding.containsKey(m_theoremRegistry.getRootSymbolForSymbol(thKey))) {
                     thVal = curBinding.get(m_theoremRegistry.getRootSymbolForSymbol(thKey));
                 }
-                if(thVal.equals(""))
+                if (thVal.equals(""))
                     continue nextMap;
                 MTType quanType =
                         m_theoremRegistry.getTypeByIndex(m_theoremRegistry
@@ -368,11 +393,11 @@ public class TheoremCongruenceClosureImpl {
         Set<java.util.Map<String, String>> tResults;
         Set<java.util.Map<String, String>> blankResults = new HashSet<Map<String, String>>();
         // Move full results to fullResults, merge them back in after search
-        Iterator<java.util.Map<String,String>> rit = results.iterator();
-        while(rit.hasNext()){
-            java.util.Map<String,String> cur = rit.next();
-            for(java.util.Map.Entry<String,String> e : cur.entrySet()){
-                if(e.getValue().equals("")){
+        Iterator<java.util.Map<String, String>> rit = results.iterator();
+        while (rit.hasNext()) {
+            java.util.Map<String, String> cur = rit.next();
+            for (java.util.Map.Entry<String, String> e : cur.entrySet()) {
+                if (e.getValue().equals("")) {
                     rit.remove();
                     blankResults.add(cur);
                     break;
@@ -380,15 +405,19 @@ public class TheoremCongruenceClosureImpl {
             }
 
         }
-        if(!blankResults.isEmpty()) {
+        if (!blankResults.isEmpty()) {
+
+            Set<java.util.Map<String, String>> tSet = new HashSet<java.util.Map<String, String>>();
             for (NormalizedAtomicExpression e_t : m_insertConj.m_expSet) {
-                tResults =
+                tSet =
                         vc.getConjunct().getMatchesForOverideSet(e_t, blankResults);
-                if (!tResults.isEmpty())
-                    blankResults = tResults;
             }
-            results.addAll(blankResults);
+            if (!tSet.isEmpty()) {
+                blankResults = tSet;
+            }
+
         }
+        results.addAll(blankResults);
         return results;
     }
 

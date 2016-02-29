@@ -29,7 +29,7 @@ public class InstantiatedTheoremPrioritizer {
     protected Registry m_vcReg;
 
     public InstantiatedTheoremPrioritizer(
-            List<InsertExpWithJustification> theoremList, VerificationConditionCongruenceClosureImpl vc) {
+            Set<InsertExpWithJustification> theoremList, VerificationConditionCongruenceClosureImpl vc) {
         m_pQueue = new PriorityQueue<PExpWithScore>(theoremList.size());
         m_vc = vc;
         m_vcReg = vc.getRegistry();
@@ -50,12 +50,12 @@ public class InstantiatedTheoremPrioritizer {
             if(g.equals("false")) continue;
             int gi = m_vcReg.getIndexForSymbol(g);
             if(si==gi) return 0;
-            String gc = m_vcReg.getSymbolForIndex(gi);
+            /*String gc = m_vcReg.getSymbolForIndex(gi);
             for(NormalizedAtomicExpression ng : m_vc.getConjunct().m_useMap.get(gi)){
                 if(ng.readRoot()!= gi) continue;
                 if(ng.getOperatorsAsStrings(true).containsKey(sc))
                     return 1;
-            }
+            }*/
         }
         return max;
     }

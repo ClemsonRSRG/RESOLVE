@@ -23,13 +23,15 @@ public class NormalizedAtomicExpression {
 
     private final int[] m_expression;
     private int arity; // number of arguments
+    private final ConjunctionOfNormalizedAtomicExpressions m_conj;
     private final Registry m_registry;
     private Map<String, Integer> m_opMmap;
     private Set<Integer> m_opIdSet;
     private Map<String, Integer> m_argMmap;
 
-    public NormalizedAtomicExpression(Registry reg, int[] intArray) {
-        m_registry = reg;
+    public NormalizedAtomicExpression(ConjunctionOfNormalizedAtomicExpressions conj, int[] intArray) {
+        m_conj = conj;
+        m_registry = m_conj.getRegistry();
         arity = intArray.length - 1;
         if (!m_registry.isCommutative(intArray[0])) {
             m_expression = intArray;
@@ -153,7 +155,7 @@ public class NormalizedAtomicExpression {
         }
         NormalizedAtomicExpression rNa = this;
         if (changed) {
-            rNa = new NormalizedAtomicExpression(m_registry, na);
+            rNa = new NormalizedAtomicExpression(m_conj, na);
         }
         assert (changed == (rNa != this));
         assert changed == (rNa.hashCode() != hashCode());
@@ -163,12 +165,12 @@ public class NormalizedAtomicExpression {
     protected void writeToRoot(int root) {
         m_opMmap = null;
         m_opIdSet = null;
-        m_registry.m_exprRootMap.put(this, root);
+        m_conj.m_exprRootMap.put(this, root);
     }
 
     protected int readRoot() {
-        if (m_registry.m_exprRootMap.containsKey(this))
-            return m_registry.m_exprRootMap.get(this);
+        if (m_conj.m_exprRootMap.containsKey(this))
+            return m_conj.m_exprRootMap.get(this);
         return -2;
     }
 
@@ -178,7 +180,7 @@ public class NormalizedAtomicExpression {
             roots[i] = m_registry.findAndCompress(m_expression[i]);
         }
         NormalizedAtomicExpression rn =
-                new NormalizedAtomicExpression(m_registry, roots);
+                new NormalizedAtomicExpression(m_conj, roots);
         return rn;
     }
 
