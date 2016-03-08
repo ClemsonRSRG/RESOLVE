@@ -1007,7 +1007,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
 
         for (NormalizedAtomicExpression cur : m_expSet) {
-            r += cur.toHumanReadableString() + "\n";
+            r += cur.toString() + "\n";
         }
         return r;
     }

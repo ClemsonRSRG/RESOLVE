@@ -159,12 +159,16 @@ public final class CongruenceClassProver {
                 /*m_theorems.add(new TheoremCongruenceClosureImpl(g, assertion,
                         false, eName + "_whole")); // match whole*/
             } else {
+                TheoremCongruenceClosureImpl t;
                 if (assertion.getTopLevelOperation().equals("implies")) {
                     addGoalSearchingTheorem(assertion, eName);
+
+                    t = new TheoremCongruenceClosureImpl(g, assertion.getSubExpressions().get(0),
+                            assertion.getSubExpressions().get(1), true, false, eName);
                 }
-                TheoremCongruenceClosureImpl t =
-                        new TheoremCongruenceClosureImpl(g, assertion, false,
-                                eName);
+                else{
+                    t = new TheoremCongruenceClosureImpl(g,assertion,assertion,false,false,eName);
+                }
                 m_theorems.add(t);
                 //addContrapositive(assertion, eName);
             }
@@ -227,12 +231,8 @@ public final class CongruenceClassProver {
         args.add(pOrG);
         args.add(goal);
         PSymbol consq = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
-        args.clear();
-        args.add(ant);
-        args.add(consq);
-        PSymbol gSTheorem = new PSymbol(m_typeGraph.BOOLEAN, null, "implies", args);
         TheoremCongruenceClosureImpl t =
-                new TheoremCongruenceClosureImpl(m_typeGraph, gSTheorem, false,
+                new TheoremCongruenceClosureImpl(m_typeGraph,ant,consq, false,false,
                         name + "_goalSearch");
         m_theorems.add(t);
     }
@@ -243,8 +243,8 @@ public final class CongruenceClassProver {
         int i = 0;
         int numUnproved = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
-            //printVCEachStep = true;
-            //if (!vcc.m_name.equals("3_4")) continue;
+            printVCEachStep = true;
+            if (!vcc.m_name.equals("3_7")) continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             // Skip proof loop
@@ -368,7 +368,7 @@ public final class CongruenceClassProver {
         // add quantified expressions local to the vc to theorems
         for (PExp p : vcc.forAllQuantifiedPExps) {
             TheoremCongruenceClosureImpl t =
-                    new TheoremCongruenceClosureImpl(m_typeGraph, p, true,
+                    new TheoremCongruenceClosureImpl(m_typeGraph, p, p,true,true,
                             "Created from lamba exp in VC");
             if (!t.m_unneeded) {
                 theoremsForThisVC.add(t);

@@ -202,7 +202,7 @@ public class NormalizedAtomicExpression {
         return isVar;
     }
 
-    public String toHumanReadableString() {
+    public String toString() {
         String r;
         String funcSymbol = readSymbol(0);
 
@@ -241,8 +241,4 @@ public class NormalizedAtomicExpression {
         return false;
     }
 
-    @Override
-    public String toString() {
-        return m_expression.toString();
-    }
 }
