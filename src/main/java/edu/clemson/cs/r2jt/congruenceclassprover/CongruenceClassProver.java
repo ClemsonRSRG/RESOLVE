@@ -59,7 +59,7 @@ public final class CongruenceClassProver {
     private final int MAX_ITERATIONS = 1024;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
-    private final long DEFAULTTIMEOUT = 1000;
+    private final long DEFAULTTIMEOUT = 500;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     // only for webide ////////////////////////////////////
@@ -162,12 +162,11 @@ public final class CongruenceClassProver {
                 TheoremCongruenceClosureImpl t;
                 if (assertion.getTopLevelOperation().equals("implies")) {
                     addGoalSearchingTheorem(assertion, eName);
-
                     t = new TheoremCongruenceClosureImpl(g, assertion.getSubExpressions().get(0),
-                            assertion.getSubExpressions().get(1), true, false, eName);
+                            assertion.getSubExpressions().get(1), assertion.getSubExpressions().get(1),true, false, eName);
                 }
                 else{
-                    t = new TheoremCongruenceClosureImpl(g,assertion,assertion,false,false,eName);
+                    t = new TheoremCongruenceClosureImpl(g,assertion,assertion,assertion,false,false,eName);
                 }
                 m_theorems.add(t);
                 //addContrapositive(assertion, eName);
@@ -206,7 +205,7 @@ public final class CongruenceClassProver {
         }
 
         TheoremCongruenceClosureImpl t =
-                new TheoremCongruenceClosureImpl(m_typeGraph, lhs, theorem,
+                new TheoremCongruenceClosureImpl(m_typeGraph, lhs, rhs, theorem,
                         false, false, thName);
         m_theorems.add(t);
     }
@@ -232,7 +231,7 @@ public final class CongruenceClassProver {
         args.add(goal);
         PSymbol consq = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
         TheoremCongruenceClosureImpl t =
-                new TheoremCongruenceClosureImpl(m_typeGraph,ant,consq, false,false,
+                new TheoremCongruenceClosureImpl(m_typeGraph,ant,consq, consq,true,false,
                         name + "_goalSearch");
         m_theorems.add(t);
     }
@@ -243,8 +242,8 @@ public final class CongruenceClassProver {
         int i = 0;
         int numUnproved = 0;
         for (VerificationConditionCongruenceClosureImpl vcc : m_ccVCs) {
-            printVCEachStep = true;
-            if (!vcc.m_name.equals("3_7")) continue;
+            //printVCEachStep = true;
+            //if (!vcc.m_name.equals("0_2")) continue;
             long startTime = System.nanoTime();
             String whyQuit = "";
             // Skip proof loop
@@ -368,7 +367,7 @@ public final class CongruenceClassProver {
         // add quantified expressions local to the vc to theorems
         for (PExp p : vcc.forAllQuantifiedPExps) {
             TheoremCongruenceClosureImpl t =
-                    new TheoremCongruenceClosureImpl(m_typeGraph, p, p,true,true,
+                    new TheoremCongruenceClosureImpl(m_typeGraph, p, p,p,true,true,
                             "Created from lamba exp in VC");
             if (!t.m_unneeded) {
                 theoremsForThisVC.add(t);

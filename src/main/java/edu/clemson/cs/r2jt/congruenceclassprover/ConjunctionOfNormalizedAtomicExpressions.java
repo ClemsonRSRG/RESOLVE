@@ -983,13 +983,13 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 String s = filter_criteria[i];
                 if (s.equals("_"))
                     continue;
+                s = m_registry.getRootSymbolForSymbol(s);
                 if (!r_n.readSymbol(i).equals(s))
                     continue next_raw;
-                ;
             }
             String s = filter_criteria[filter_criteria.length - 1];
             if (!s.equals("_")
-                    && !s.equals(m_registry.getSymbolForIndex(r_n.readRoot())))
+                    && !m_registry.getRootSymbolForSymbol(s).equals(m_registry.getSymbolForIndex(r_n.readRoot())))
                 continue next_raw;
             filteredSet.add(r_n);
         }
