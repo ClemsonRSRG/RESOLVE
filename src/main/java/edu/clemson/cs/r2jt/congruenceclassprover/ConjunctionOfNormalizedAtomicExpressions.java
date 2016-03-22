@@ -489,7 +489,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 }
                 return;
             }
-            // x or some goal = some goal
+            // x or some goal g = some goal g
             if (m_VC != null && m_VC.m_goal.contains(m_registry.getSymbolForIndex(rhs))) {
                 if (rhs == arg1) {
                     m_VC.addGoal(m_registry.getSymbolForIndex(arg2));
@@ -1001,11 +1001,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         String r = "";
         if (m_evaluates_to_false)
             r += "Conjunction evaluates to false" + "\n";
-        for (MTType key : m_registry.m_typeToSetOfOperators.keySet()) {
+        /*for (MTType key : m_registry.m_typeToSetOfOperators.keySet()) {
             r += key.toString() + ":\n";
             r += m_registry.m_typeToSetOfOperators.get(key) + "\n\n";
         }
-
+        */
         for (NormalizedAtomicExpression cur : m_expSet) {
             r += cur.toString() + "\n";
         }

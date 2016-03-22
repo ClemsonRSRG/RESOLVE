@@ -57,14 +57,18 @@ public class TheoremCongruenceClosureImpl {
         m_matchConj =
                 new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,
                         null);
-        if (enterToMatchAndBindAsEquivalentToTrue)
-            m_matchConj.addExpression(mustMatch);
-        else
-            m_matchConj.addFormula(mustMatch);
+        if(mustMatch.getSubExpressions().size()>0) {
+            if (enterToMatchAndBindAsEquivalentToTrue)
+                m_matchConj.addExpression(mustMatch);
+            else
+                m_matchConj.addFormula(mustMatch);
+        }
         m_matchRequired = new HashSet<NormalizedAtomicExpression>(m_matchConj.m_expSet);
         m_insertExpr = toInsert;
-        if (!m_matchConj.equals(restOfExp) && restOfExp.getSubExpressions().size() > 1)
+        if (!m_matchConj.equals(restOfExp) && restOfExp.getSubExpressions().size() > 1 &&
+                !mustMatch.getQuantifiedVariablesNoCache().containsAll(restOfExp.getQuantifiedVariablesNoCache())) {
             m_matchConj.addFormula(restOfExp);
+        }
         m_insertCnt =
                 m_insertExpr.getSymbolNames().size()
                         + m_insertExpr.getQuantifiedVariables().size();
@@ -72,17 +76,12 @@ public class TheoremCongruenceClosureImpl {
 
     public Set<String> getFunctionNames() {
         if (m_function_names == null) {
-            Registry tReg = new Registry(m_typeGraph);
-            ConjunctionOfNormalizedAtomicExpressions temp =
-                    new ConjunctionOfNormalizedAtomicExpressions(tReg, null);
-            temp.addExpression(m_theorem);
-
-            Set<String> rSet = tReg.getFunctionNames();
+            Set<String> rSet = m_theoremRegistry.getFunctionNames();
             rSet.remove("=");
             rSet.remove("implies");
             rSet.remove("and");
             rSet.remove("/=");
-            rSet.remove("not"); // remove when not p ==> p = false
+            //rSet.remove("not"); // remove when not p ==> p = false
             rSet.remove("+"); // temporary
             //rSet.remove("-");
             rSet.remove("or"); // temporary this is really bad
@@ -291,37 +290,24 @@ public class TheoremCongruenceClosureImpl {
         Set<NormalizedAtomicExpression> postSet = new HashSet<NormalizedAtomicExpression>();
         for (NormalizedAtomicExpression e_t : m_matchConj.m_expSet) {
             if (!m_matchRequired.contains(e_t)) {
-                postSet.add(e_t);
-                continue;
+                for (PSymbol pq : m_insertExpr.getQuantifiedVariables()) {
+                    if(pq.toString().equals("_g")) continue;
+                    if (e_t.getOperatorsAsStrings(false).containsKey(pq.toString())) {
+                        postSet.add(e_t);
+                        break;
+                    }
+                }
+            } else {
+                results =
+                        vc.getConjunct().getMatchesForOverideSet(e_t, results);
             }
-            results =
-                    vc.getConjunct().getMatchesForOverideSet(e_t, results);
         }
         Set<java.util.Map<String, String>> t_results;
         for (NormalizedAtomicExpression p_t : postSet) {
             t_results = vc.getConjunct().getMatchesForOverideSet(p_t, results);
             if (t_results.isEmpty()) continue;
             else results = t_results;
-        }
-        return results;
-    }
-
-    private Set<java.util.Map<String, String>> findValidBindings_GS(
-            VerificationConditionCongruenceClosureImpl vc, long endTime) {
-        Set<java.util.Map<String, String>> results =
-                new HashSet<java.util.Map<String, String>>();
-        java.util.Map<String, String> initBindings = getInitBindings();
-        for (String g : vc.m_goal) {
-            java.util.Map<String, String> gBinds = new HashMap<String, String>(initBindings);
-            gBinds.put("_g", g);
-            Set<java.util.Map<String, String>> gResults =
-                    new HashSet<java.util.Map<String, String>>();
-            gResults.add(gBinds);
-            for (NormalizedAtomicExpression e_t : m_matchConj.m_expSet) {
-                gResults =
-                        vc.getConjunct().getMatchesForOverideSet(e_t, gResults);
-            }
-            results.addAll(gResults);
+            //results.addAll(t_results);
         }
         return results;
     }

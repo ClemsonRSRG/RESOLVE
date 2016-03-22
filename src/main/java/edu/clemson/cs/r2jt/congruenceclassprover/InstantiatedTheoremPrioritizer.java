@@ -28,19 +28,21 @@ public class InstantiatedTheoremPrioritizer {
     protected VerificationConditionCongruenceClosureImpl m_vc;
     protected Registry m_vcReg;
 
-    public InstantiatedTheoremPrioritizer(
-            Set<InsertExpWithJustification> theoremList, VerificationConditionCongruenceClosureImpl vc) {
-        m_pQueue = new PriorityQueue<PExpWithScore>(theoremList.size());
+    public InstantiatedTheoremPrioritizer(VerificationConditionCongruenceClosureImpl vc) {
+        m_pQueue = new PriorityQueue<PExpWithScore>(4096);
         m_vc = vc;
         m_vcReg = vc.getRegistry();
-        for (InsertExpWithJustification p : theoremList) {
+
+    }
+
+    public void add(Set<InsertExpWithJustification> theoremSet){
+        for (InsertExpWithJustification p : theoremSet) {
             PExpWithScore pes = new PExpWithScore(p.m_PExp, p.m_Justification);
             pes.m_score = calculateScore(pes.m_theorem_symbols, p.m_symCnt);
             //if (pes.m_score < threshold)
             m_pQueue.add(pes);
         }
     }
-
     private int goalArg(String s){
         int max = 3;
         int si  = m_vcReg.getIndexForSymbol(s);
@@ -72,8 +74,8 @@ public class InstantiatedTheoremPrioritizer {
         for (String s : theorem_symbols) {
 
             String rS = m_vcReg.getRootSymbolForSymbol(s);
-            int gr = goalArg(rS);
-            if(gr < minGr) minGr = gr;
+            //int gr = goalArg(rS);
+            //if(gr < minGr) minGr = gr;
             if (m_vcReg.m_symbolToIndex.containsKey(rS)) {
                 // Age
                 age += m_vcReg.getIndexForSymbol(s);
@@ -82,7 +84,7 @@ public class InstantiatedTheoremPrioritizer {
                 score += max;
             }
         }
-        if(minGr < 2) return minGr;
+        //if(minGr < 2) return minGr;
         float avgAge = age / sSz;
         // these range from [0,1], lower is better
         float scaledAvgAge = avgAge / max;

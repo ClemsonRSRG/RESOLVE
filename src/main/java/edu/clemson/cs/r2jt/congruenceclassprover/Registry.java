@@ -64,8 +64,6 @@ public class Registry {
                 Usage.LITERAL); // = as a predicate function, not as an assertion
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
         addSymbol("false", g.BOOLEAN, Usage.LITERAL);
-        addSymbol("not", new MTFunction(g, g.BOOLEAN, g.BOOLEAN),
-                Usage.HASARGS_SINGULAR);
         assert (getIndexForSymbol("=") == 0);
         m_appliedTheoremDependencyGraph = new HashMap<String, Set<Integer>>();
         m_lambda_names = new HashSet<String>();

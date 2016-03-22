@@ -217,9 +217,9 @@ public class VerificationConditionCongruenceClosureImpl {
             PSymbol qFun =
                     new PSymbol(new MTFunction(m_typegraph,
                             m_typegraph.BOOLEAN, px.getQuantifiedVariables()
-                                    .iterator().next().getType()), null,
+                            .iterator().next().getType()), null,
                             "ConFunc" + (++c_count), new ArrayList<PExp>(px
-                                    .getQuantifiedVariables()));
+                            .getQuantifiedVariables()));
             ArrayList<PExp> args = new ArrayList<PExp>();
             args.add(qFun);
             args.add(px);
@@ -346,17 +346,13 @@ public class VerificationConditionCongruenceClosureImpl {
     }
 
     public STATUS isProved() {
-        if (m_conjunction.m_evaluates_to_false)
+        if (m_conjunction.m_evaluates_to_false) {
             return STATUS.FALSE_ASSUMPTION; // this doesn't mean P->Q = False, it just means P = false
-        int t = m_registry.getIndexForSymbol("true");
-        for (String gS : m_goal) {
-            int g = m_registry.getIndexForSymbol(gS);
-            // check each goal has same root
-            if (g == t) {
-                return STATUS.PROVED;
-            }
+        } else if (m_goal.contains("true")) {
+            return STATUS.PROVED;
+        } else {
+            return STATUS.STILL_EVALUATING;
         }
-        return STATUS.STILL_EVALUATING;
     }
 
     private void addPExp(Iterator<PExp> pit, boolean inAntecedent) {
@@ -364,8 +360,7 @@ public class VerificationConditionCongruenceClosureImpl {
             PExp curr = Utilities.replacePExp(pit.next(), m_typegraph, m_z, m_n);
             if (inAntecedent) {
                 m_conjunction.addExpression(curr);
-            }
-            else {
+            } else {
                 int intRepForExp = m_conjunction.addFormula(curr);
                 addGoal(m_registry.getSymbolForIndex(intRepForExp));
             }
