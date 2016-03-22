@@ -29,7 +29,7 @@ public class InstantiatedTheoremPrioritizer {
     protected Registry m_vcReg;
 
     public InstantiatedTheoremPrioritizer(VerificationConditionCongruenceClosureImpl vc) {
-        m_pQueue = new PriorityQueue<PExpWithScore>(4096);
+        m_pQueue = new PriorityQueue<PExpWithScore>(1024);
         m_vc = vc;
         m_vcReg = vc.getRegistry();
 
@@ -43,8 +43,11 @@ public class InstantiatedTheoremPrioritizer {
             m_pQueue.add(pes);
         }
     }
+    public void clear(){
+        m_pQueue.clear();
+    }
     private int goalArg(String s){
-        int max = 3;
+        int max = Integer.MAX_VALUE;
         int si  = m_vcReg.getIndexForSymbol(s);
         if(si<0 || m_vcReg.getUsage(s).equals(Registry.Usage.HASARGS_SINGULAR)) return max;
         String sc = m_vcReg.getRootSymbolForSymbol(s);
@@ -74,17 +77,17 @@ public class InstantiatedTheoremPrioritizer {
         for (String s : theorem_symbols) {
 
             String rS = m_vcReg.getRootSymbolForSymbol(s);
-            //int gr = goalArg(rS);
-            //if(gr < minGr) minGr = gr;
             if (m_vcReg.m_symbolToIndex.containsKey(rS)) {
+                int gr = goalArg(rS);
+                int indexVal = m_vcReg.getIndexForSymbol(s);
                 // Age
-                age += m_vcReg.getIndexForSymbol(s);
+                age += gr < indexVal ? gr : indexVal;
             }
             else {
                 score += max;
             }
         }
-        //if(minGr < 2) return minGr;
+        if(minGr < 2) return minGr;
         float avgAge = age / sSz;
         // these range from [0,1], lower is better
         float scaledAvgAge = avgAge / max;

@@ -59,7 +59,7 @@ public final class CongruenceClassProver {
     private final int MAX_ITERATIONS = 1024;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
-    private final long DEFAULTTIMEOUT = 1000;
+    private final long DEFAULTTIMEOUT = 5000;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     // only for webide ////////////////////////////////////
@@ -398,6 +398,7 @@ public final class CongruenceClassProver {
         while (status
                 .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                 && System.currentTimeMillis() <= endTime) {
+            instPQ.clear();
             long time_at_theorem_pq_creation = System.currentTimeMillis();
             iteration++;
             // ++++++ Creates new PQ with all the theorems
@@ -411,7 +412,7 @@ public final class CongruenceClassProver {
             while (!rankedTheorems.m_pQueue.isEmpty()
                     && status
                     .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
-                    && (num_Theorems_chosen < max_Theorems_to_choose)) {
+                    && (num_Theorems_chosen < max_Theorems_to_choose || rankedTheorems.m_pQueue.peek().m_score <= 1)) {
                 // +++++++ Chooses top of uninstantiated theorem PQ
                 long time_at_selection = System.currentTimeMillis();
                 int theoremScore = rankedTheorems.m_pQueue.peek().m_score;

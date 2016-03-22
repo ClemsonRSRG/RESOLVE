@@ -307,7 +307,6 @@ public class TheoremCongruenceClosureImpl {
             t_results = vc.getConjunct().getMatchesForOverideSet(p_t, results);
             if (t_results.isEmpty()) continue;
             else results = t_results;
-            //results.addAll(t_results);
         }
         return results;
     }
