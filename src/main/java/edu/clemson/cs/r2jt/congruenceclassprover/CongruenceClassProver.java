@@ -59,7 +59,7 @@ public final class CongruenceClassProver {
     private final int MAX_ITERATIONS = 1024;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
-    private final long DEFAULTTIMEOUT = 5000;
+    private final long DEFAULTTIMEOUT = 500;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     // only for webide ////////////////////////////////////
@@ -154,8 +154,16 @@ public final class CongruenceClassProver {
             String eName = e.getName();
             if (assertion.isEquality()
                     && assertion.getQuantifiedVariables().size() > 0) {
-                addEqualityTheorem(true, assertion, eName + "_left"); // match left
-                addEqualityTheorem(false, assertion, eName + "_right"); // match right
+                if(assertion.getSubExpressions().get(0).getSymbolNames().size() > assertion.getSubExpressions().get(1).getSymbolNames().size()) {
+                    addEqualityTheorem(true, assertion, eName + "_left"); // match left
+                }
+                else if(assertion.getSubExpressions().get(0).getSymbolNames().size() < assertion.getSubExpressions().get(1).getSymbolNames().size()){
+                    addEqualityTheorem(false, assertion, eName + "_right"); // match right
+                }
+                else{
+                    addEqualityTheorem(true, assertion, eName + "_left"); // match left
+                    addEqualityTheorem(false, assertion, eName + "_right"); // match right
+                }
                 //m_theorems.add(new TheoremCongruenceClosureImpl(g, assertion, assertion, assertion, false,
                         //false, eName + "_whole")); // match whole*/
             } else {
