@@ -15,10 +15,7 @@ package edu.clemson.cs.r2jt.congruenceclassprover;
 import edu.clemson.cs.r2jt.absyn.StringExp;
 import edu.clemson.cs.r2jt.vcgeneration.vcs.VerificationCondition;
 
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by nabilkabbani on 12/10/14.
@@ -29,18 +26,28 @@ public class TheoremPrioritizer {
     private Map<String, Integer> m_theoremAppliedCount;
     private Registry m_vcReg;
     private VerificationConditionCongruenceClosureImpl m_vc;
+    private Map<String, Integer> m_nonQuantMap;
 
     public TheoremPrioritizer(List<TheoremCongruenceClosureImpl> theoremList,
-                              Map<String, Integer> appliedCount, VerificationConditionCongruenceClosureImpl vc) {
+                              Map<String, Integer> appliedCount, VerificationConditionCongruenceClosureImpl vc,
+                              Set<String> nonQuantifiedTheoremSymbols) {
         m_pQueue = new PriorityQueue<TheoremWithScore>(theoremList.size());
         m_theoremAppliedCount = appliedCount;
         m_vcReg = vc.getRegistry();
         m_vc = vc;
+        m_nonQuantMap = new HashMap<String, Integer>();
+        int count = 0;
+        for(String s : m_vcReg.m_indexToSymbol){
+            if(nonQuantifiedTheoremSymbols.contains(s)){
+               m_nonQuantMap.put(s,count++);
+            }
+        }
         for (TheoremCongruenceClosureImpl t : theoremList) {
             TheoremWithScore tws = new TheoremWithScore(t);
             //int score = calculateScore(t.getFunctionNames());
             int score;
-            if (!shouldExclude(t.getFunctionNames())) {
+            //if (!shouldExclude(t.getFunctionNames())) {
+            if (!shouldExclude(t.getNonQuantifiedSymbols())) {
                 score =
                         calculateScoreMinimum(t.getNonQuantifiedSymbols(),
                                 m_vcReg.m_symbolToIndex.keySet().size());
@@ -69,17 +76,16 @@ public class TheoremPrioritizer {
         int score = not_contained_penalty;
         int number_not_contained = 1;
         for (String s : theorem_symbols) {
-            if (m_vcReg.m_symbolToIndex.containsKey(s)) {
-                String c = m_vcReg.getRootSymbolForSymbol(s);
+            if (m_nonQuantMap.containsKey(s)) {
                 int c_score = goalArg(s);
-                //if(c_score < 0)
-                    c_score = m_vcReg.m_symbolToIndex.get(c);
+                if(c_score < 0)
+                    c_score = m_nonQuantMap.get(s);
                 if (c_score < score)
                     score = c_score;
             } else
                 number_not_contained++;
         }
-        return score;//(score + 1) * number_not_contained;
+        return (score + 1) * number_not_contained;
     }
     private int goalArg(String s){
         int si  = m_vcReg.getIndexForSymbol(s);

@@ -44,13 +44,13 @@ public class TheoremCongruenceClosureImpl {
     protected int m_insertCnt;
     protected boolean m_noQuants = false;
 
-    public TheoremCongruenceClosureImpl(TypeGraph g, PExp mustMatch, PExp restOfExp,
+    public TheoremCongruenceClosureImpl(TypeGraph g, PExp entireTheorem, PExp mustMatch, PExp restOfExp,
                                         PExp toInsert, boolean enterToMatchAndBindAsEquivalentToTrue,
                                         boolean allowNewSymbols, String name) {
         m_name = name;
         m_allowNewSymbols = allowNewSymbols;
         m_typeGraph = g;
-        m_theorem = toInsert;
+        m_theorem = entireTheorem;
         m_theoremString = toInsert.toString();
         isEquality = true;
         m_theoremRegistry = new Registry(g);
@@ -106,6 +106,7 @@ public class TheoremCongruenceClosureImpl {
     public Set<String> getNonQuantifiedSymbols() {
         if (m_all_literals == null) {
             m_all_literals = ((PSymbol) m_theorem).getNonQuantifiedSymbols();
+
 
             m_all_literals.remove("=");
             m_all_literals.remove("and");

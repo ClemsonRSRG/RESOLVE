@@ -59,9 +59,10 @@ public final class CongruenceClassProver {
     private final int MAX_ITERATIONS = 1024;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
-    private final long DEFAULTTIMEOUT = 500;
+    private final long DEFAULTTIMEOUT = 200;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
+    private final Set<String> m_nonQuantifiedTheoremSymbols;
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
     private final int numUsesBeforeQuit; // weird bug if this isn't final
@@ -148,6 +149,7 @@ public final class CongruenceClassProver {
             myModels[i++] = (new PerVCProverModel(g, vc.getName(), vc, null));
 
         }
+        m_nonQuantifiedTheoremSymbols = new HashSet<String>();
         for (TheoremEntry e : theoremEntries) {
             PExp assertion =
                     Utilities.replacePExp(e.getAssertion(), m_typeGraph, z, n);
@@ -170,12 +172,13 @@ public final class CongruenceClassProver {
                 TheoremCongruenceClosureImpl t;
                 if (assertion.getTopLevelOperation().equals("implies")) {
                     addGoalSearchingTheorem(assertion, eName);
-                    t = new TheoremCongruenceClosureImpl(g, assertion.getSubExpressions().get(0),
+                    t = new TheoremCongruenceClosureImpl(g, assertion, assertion.getSubExpressions().get(0),
                             assertion.getSubExpressions().get(1), assertion.getSubExpressions().get(1), true, false, eName);
                 } else {
-                    t = new TheoremCongruenceClosureImpl(g, assertion, assertion, assertion, false, false, eName);
+                    t = new TheoremCongruenceClosureImpl(g, assertion, assertion, assertion, assertion, false, false, eName);
                 }
                 m_theorems.add(t);
+                m_nonQuantifiedTheoremSymbols.addAll(t.getNonQuantifiedSymbols());
                 //addContrapositive(assertion, eName);
             }
         }
@@ -213,7 +216,7 @@ public final class CongruenceClassProver {
 
         if(lhs.getSubExpressions().size()>0 || rhs.getSubExpressions().size()>0) {
             TheoremCongruenceClosureImpl t =
-                    new TheoremCongruenceClosureImpl(m_typeGraph, lhs, rhs, theorem,
+                    new TheoremCongruenceClosureImpl(m_typeGraph, theorem, lhs, rhs, theorem,
                             false, false, thName);
             m_theorems.add(t);
         }
@@ -240,7 +243,7 @@ public final class CongruenceClassProver {
         args.add(goal);
         PSymbol consq = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
         TheoremCongruenceClosureImpl t =
-                new TheoremCongruenceClosureImpl(m_typeGraph, ant, consq, consq, true, false,
+                new TheoremCongruenceClosureImpl(m_typeGraph, theorem, ant, consq, consq, true, false,
                         name + "_goalSearch");
         m_theorems.add(t);
     }
@@ -376,7 +379,7 @@ public final class CongruenceClassProver {
         // add quantified expressions local to the vc to theorems
         for (PExp p : vcc.forAllQuantifiedPExps) {
             TheoremCongruenceClosureImpl t =
-                    new TheoremCongruenceClosureImpl(m_typeGraph, p, p, p, true, true,
+                    new TheoremCongruenceClosureImpl(m_typeGraph, p, p, p, p, true, true,
                             "Created from lamba exp in VC");
             if (!t.m_unneeded) {
                 theoremsForThisVC.add(t);
@@ -412,7 +415,7 @@ public final class CongruenceClassProver {
             // ++++++ Creates new PQ with all the theorems
             TheoremPrioritizer rankedTheorems =
                     new TheoremPrioritizer(theoremsForThisVC,
-                            theoremAppliedCount, vcc);
+                            theoremAppliedCount, vcc, m_nonQuantifiedTheoremSymbols);
             theoremSelectTime +=
                     System.currentTimeMillis() - time_at_theorem_pq_creation;
             int max_Theorems_to_choose = 1;
