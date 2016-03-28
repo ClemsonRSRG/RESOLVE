@@ -59,10 +59,11 @@ public final class CongruenceClassProver {
     private final int MAX_ITERATIONS = 1024;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
-    private final long DEFAULTTIMEOUT = 200;
+    private final long DEFAULTTIMEOUT = 500;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     private final Set<String> m_nonQuantifiedTheoremSymbols;
+    private final Set<TheoremCongruenceClosureImpl> m_smallEndEquations;
     // only for webide ////////////////////////////////////
     private final PerVCProverModel[] myModels;
     private final int numUsesBeforeQuit; // weird bug if this isn't final
@@ -108,6 +109,7 @@ public final class CongruenceClassProver {
         int i = 0;
 
         m_theorems = new ArrayList<TheoremCongruenceClosureImpl>();
+        m_smallEndEquations = new HashSet<TheoremCongruenceClosureImpl>();
         List<TheoremEntry> theoremEntries =
                 scope.query(new EntryTypeQuery(TheoremEntry.class,
                         MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
@@ -156,16 +158,8 @@ public final class CongruenceClassProver {
             String eName = e.getName();
             if (assertion.isEquality()
                     && assertion.getQuantifiedVariables().size() > 0) {
-                if(assertion.getSubExpressions().get(0).getSymbolNames().size() > assertion.getSubExpressions().get(1).getSymbolNames().size()) {
-                    addEqualityTheorem(true, assertion, eName + "_left"); // match left
-                }
-                else if(assertion.getSubExpressions().get(0).getSymbolNames().size() < assertion.getSubExpressions().get(1).getSymbolNames().size()){
-                    addEqualityTheorem(false, assertion, eName + "_right"); // match right
-                }
-                else{
                     addEqualityTheorem(true, assertion, eName + "_left"); // match left
                     addEqualityTheorem(false, assertion, eName + "_right"); // match right
-                }
                 //m_theorems.add(new TheoremCongruenceClosureImpl(g, assertion, assertion, assertion, false,
                         //false, eName + "_whole")); // match whole*/
             } else {
@@ -218,7 +212,12 @@ public final class CongruenceClassProver {
             TheoremCongruenceClosureImpl t =
                     new TheoremCongruenceClosureImpl(m_typeGraph, theorem, lhs, rhs, theorem,
                             false, false, thName);
+
             m_theorems.add(t);
+            if(lhs.getSymbolNames().size() < rhs.getSymbolNames().size()){
+                m_smallEndEquations.add(t);
+
+            }
         }
     }
 
@@ -415,7 +414,7 @@ public final class CongruenceClassProver {
             // ++++++ Creates new PQ with all the theorems
             TheoremPrioritizer rankedTheorems =
                     new TheoremPrioritizer(theoremsForThisVC,
-                            theoremAppliedCount, vcc, m_nonQuantifiedTheoremSymbols);
+                            theoremAppliedCount, vcc, m_nonQuantifiedTheoremSymbols, m_smallEndEquations);
             theoremSelectTime +=
                     System.currentTimeMillis() - time_at_theorem_pq_creation;
             int max_Theorems_to_choose = 1;

@@ -51,7 +51,7 @@ public class TheoremCongruenceClosureImpl {
         m_allowNewSymbols = allowNewSymbols;
         m_typeGraph = g;
         m_theorem = entireTheorem;
-        m_theoremString = toInsert.toString();
+        m_theoremString = entireTheorem.toString();
         isEquality = true;
         m_theoremRegistry = new Registry(g);
         m_matchConj =

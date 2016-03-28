@@ -27,15 +27,17 @@ public class TheoremPrioritizer {
     private Registry m_vcReg;
     private VerificationConditionCongruenceClosureImpl m_vc;
     private Map<String, Integer> m_nonQuantMap;
+    private Set<TheoremCongruenceClosureImpl> m_smallEndEquations;
 
     public TheoremPrioritizer(List<TheoremCongruenceClosureImpl> theoremList,
                               Map<String, Integer> appliedCount, VerificationConditionCongruenceClosureImpl vc,
-                              Set<String> nonQuantifiedTheoremSymbols) {
+                              Set<String> nonQuantifiedTheoremSymbols, Set<TheoremCongruenceClosureImpl> smallEndEquations) {
         m_pQueue = new PriorityQueue<TheoremWithScore>(theoremList.size());
         m_theoremAppliedCount = appliedCount;
         m_vcReg = vc.getRegistry();
         m_vc = vc;
         m_nonQuantMap = new HashMap<String, Integer>();
+        m_smallEndEquations =smallEndEquations;
         int count = 0;
         for(String s : m_vcReg.m_indexToSymbol){
             if(nonQuantifiedTheoremSymbols.contains(s)){
@@ -53,6 +55,9 @@ public class TheoremPrioritizer {
                                 m_vcReg.m_symbolToIndex.keySet().size());
                 if (m_theoremAppliedCount.containsKey(t.m_name)) {
                     score += m_theoremAppliedCount.get(t.m_name);
+                }
+                if(m_smallEndEquations.contains(t)){
+                    score += 4;
                 }
                 tws.m_score = score;
                 m_pQueue.add(tws);
