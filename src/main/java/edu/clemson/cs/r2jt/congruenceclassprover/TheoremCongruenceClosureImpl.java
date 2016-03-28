@@ -65,8 +65,10 @@ public class TheoremCongruenceClosureImpl {
         }
         m_matchRequired = new HashSet<NormalizedAtomicExpression>(m_matchConj.m_expSet);
         m_insertExpr = toInsert;
-        if (!m_matchConj.equals(restOfExp) && restOfExp.getSubExpressions().size() > 1 &&
-                !mustMatch.getQuantifiedVariablesNoCache().containsAll(restOfExp.getQuantifiedVariablesNoCache())) {
+        if (!mustMatch.equals(restOfExp) && restOfExp.getSubExpressions().size() > 1 &&
+                (!mustMatch.getQuantifiedVariablesNoCache().containsAll(restOfExp.getQuantifiedVariablesNoCache())
+                    || mustMatch.getSubExpressions().size()==0
+                )) {
             m_matchConj.addFormula(restOfExp);
         }
         m_insertCnt =
@@ -146,7 +148,7 @@ public class TheoremCongruenceClosureImpl {
         }
 
         Set<java.util.Map<String, String>> allValidBindings;
-        if (m_matchConj.size() == 0
+        if (m_matchRequired.size() == 0
                 || ((m_allowNewSymbols && m_theorem.getQuantifiedVariables()
                 .size() == 1) && isEquality)) {
             allValidBindings = findValidBindingsByType(vc, endTime);

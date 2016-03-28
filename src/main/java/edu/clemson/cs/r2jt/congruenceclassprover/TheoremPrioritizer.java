@@ -57,7 +57,7 @@ public class TheoremPrioritizer {
                     score += m_theoremAppliedCount.get(t.m_name);
                 }
                 if(m_smallEndEquations.contains(t)){
-                    score += 4;
+                    score += 1;
                 }
                 tws.m_score = score;
                 m_pQueue.add(tws);
@@ -78,6 +78,7 @@ public class TheoremPrioritizer {
     //  minimum of symbol scores in both vc and theorem
     public int calculateScoreMinimum(Set<String> theorem_symbols,
                                      int not_contained_penalty) {
+        if(theorem_symbols.isEmpty()) return 0;
         int score = not_contained_penalty;
         int number_not_contained = 1;
         for (String s : theorem_symbols) {

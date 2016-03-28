@@ -59,7 +59,7 @@ public final class CongruenceClassProver {
     private final int MAX_ITERATIONS = 1024;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
-    private final long DEFAULTTIMEOUT = 500;
+    private final long DEFAULTTIMEOUT = 700;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     private final Set<String> m_nonQuantifiedTheoremSymbols;
@@ -410,7 +410,6 @@ public final class CongruenceClassProver {
                 && System.currentTimeMillis() <= endTime) {
             instPQ.clear();
             long time_at_theorem_pq_creation = System.currentTimeMillis();
-            iteration++;
             // ++++++ Creates new PQ with all the theorems
             TheoremPrioritizer rankedTheorems =
                     new TheoremPrioritizer(theoremsForThisVC,
@@ -465,7 +464,7 @@ public final class CongruenceClassProver {
                             long curTime = System.currentTimeMillis();
                             theseResults +=
                                     "Iter:"
-                                            + iteration + "." + (innerctr++)
+                                            + iteration++ + "." + (innerctr++)
                                             + " Iter Time: "
                                             + (curTime - time_at_theorem_pq_creation)
                                             + " Search Time for this theorem: "
