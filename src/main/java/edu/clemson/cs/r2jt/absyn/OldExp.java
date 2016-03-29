@@ -60,7 +60,7 @@ public class OldExp extends Exp {
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        return new OldExp(location, substitute(exp, substitutions));
+        return new OldExp(location, Exp.copy(exp));
     }
 
     // ===========================================================
