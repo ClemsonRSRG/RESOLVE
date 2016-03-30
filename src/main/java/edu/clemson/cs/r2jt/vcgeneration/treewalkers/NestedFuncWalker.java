@@ -636,6 +636,9 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
             oSpecVar = new OldExp(null, Exp.copy(oldExp));
             oRealVar = new OldExp(null, Exp.copy(repl));
 
+            // Replacement map to use substitute.
+            Map<Exp, Exp> replacementMap = new HashMap<Exp, Exp>();
+
             // Nothing can be null!
             if (oldExp != null && quesRep != null && oSpecVar != null
                     && repl != null && oRealVar != null) {
@@ -700,8 +703,9 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                     if (ensures.containsVar(VDName.getName(), true)
                             || ensures.containsVar(VDName.getName(), false)) {
                         // Replace the ensures clause
-                        ensures = Utilities.replace(ensures, oldExp, undqRep);
-                        ensures = Utilities.replace(ensures, oSpecVar, repl);
+                        replacementMap.put(oldExp, undqRep);
+                        replacementMap.put(oSpecVar, repl);
+                        ensures = ensures.substitute(replacementMap);
 
                         // Add it to our list of variables to be replaced later
                         undRepList.add(undqRep);
@@ -709,8 +713,9 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                     }
                     else {
                         // Replace the ensures clause
-                        ensures = Utilities.replace(ensures, oldExp, quesRep);
-                        ensures = Utilities.replace(ensures, oSpecVar, repl);
+                        replacementMap.put(oldExp, quesRep);
+                        replacementMap.put(oSpecVar, repl);
+                        ensures = ensures.substitute(replacementMap);
                     }
 
                     // Update our final confirm with the parameter argument
@@ -724,8 +729,9 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                     if (ensures.containsVar(VDName.getName(), true)
                             || ensures.containsVar(VDName.getName(), false)) {
                         // Replace the ensures clause
-                        ensures = Utilities.replace(ensures, oldExp, undqRep);
-                        ensures = Utilities.replace(ensures, oSpecVar, undqRep);
+                        replacementMap.put(oldExp, undqRep);
+                        replacementMap.put(oSpecVar, undqRep);
+                        ensures = ensures.substitute(replacementMap);
 
                         // Add it to our list of variables to be replaced later
                         undRepList.add(undqRep);
@@ -733,19 +739,20 @@ public class NestedFuncWalker extends TreeWalkerVisitor {
                     }
                     else {
                         // Replace the ensures clause
-                        ensures = Utilities.replace(ensures, oldExp, repl);
-                        ensures = Utilities.replace(ensures, oSpecVar, repl);
+                        replacementMap.put(oldExp, repl);
+                        replacementMap.put(oSpecVar, repl);
+                        ensures = ensures.substitute(replacementMap);
                     }
                 }
             }
         }
 
         // Replace the temp values with the actual values
+        Map<Exp, Exp> replacementMap = new HashMap<Exp, Exp>();
         for (int i = 0; i < undRepList.size(); i++) {
-            ensures =
-                    Utilities.replace(ensures, undRepList.get(i), replList
-                            .get(i));
+            replacementMap.put(undRepList.get(i), replList.get(i));
         }
+        ensures = ensures.substitute(replacementMap);
 
         return ensures;
     }
