@@ -60,7 +60,7 @@ public class OldExp extends Exp {
     }
 
     public Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
-        return new OldExp(location, substitute(exp, substitutions));
+        return new OldExp(location, Exp.copy(exp));
     }
 
     // ===========================================================
@@ -230,5 +230,28 @@ public class OldExp extends Exp {
         Exp newExp = Exp.copy(exp);
         newExp = new OldExp(getLocation(), newExp);
         return newExp;
+    }
+
+    /**
+     * <p>Shallow compare is too weak for many things, and equals() is too
+     * strict. This method returns <code>true</code> <strong>iff</code> this
+     * expression and the provided expression, <code>e</code>, are equivalent
+     * with respect to structure and all function and variable names.</p>
+     *
+     * @param e The expression to compare this one to.
+     *
+     * @return True <strong>iff</strong> this expression and the provided
+     *         expression are equivalent with respect to structure and all
+     *         function and variable names.
+     */
+    @Override
+    public boolean equivalent(Exp e) {
+        boolean retval = (e instanceof OldExp);
+        if (retval) {
+            OldExp eAsOldExp = (OldExp) e;
+            retval = exp.equivalent(eAsOldExp.exp);
+        }
+
+        return retval;
     }
 }

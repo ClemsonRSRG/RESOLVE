@@ -112,7 +112,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
 
     // Top level
     protected String addExpression(PExp expression) {
-        if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
+        if (m_evaluates_to_false
+                || (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd)) {
             return "";
         }
         String name = expression.getTopLevelOperation();
@@ -273,7 +274,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         int f = m_registry.getIndexForSymbol("false");
 
         String rString = "";
-        if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
+        if (m_evaluates_to_false
+                || (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd)) {
             return rString;
         }
         a = m_registry.findAndCompress(a);
@@ -285,7 +287,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         holdingTank.push(b);
 
         while (holdingTank != null && !holdingTank.empty()) {
-            if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
+            if (m_evaluates_to_false
+                    || (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd)) {
                 return rString;
             }
             int opB = m_registry.findAndCompress(holdingTank.pop());
@@ -575,7 +578,8 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     // Return list of modified predicates by their position. Only these can cause new merges.
     // b is replaced by a
     protected Stack<Integer> mergeOnlyArgumentOperators(int a, int b) {
-        if (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd) {
+        if (m_evaluates_to_false
+                || (m_timeToEnd > 0 && System.currentTimeMillis() > m_timeToEnd)) {
             return null;
         }
         if (m_useMap.get(b) == null) {

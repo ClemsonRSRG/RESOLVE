@@ -39,6 +39,8 @@ public class VerificationConditionCongruenceClosureImpl {
     protected final Set<String> m_goal;
     private int m_fc_ctr = 0;
     private final boolean DOCOMPLEMENTS = false;
+    private final MTType m_z;
+    private final MTType m_n;
 
     public static enum STATUS {
         FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE

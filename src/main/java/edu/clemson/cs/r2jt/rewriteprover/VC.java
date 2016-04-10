@@ -91,7 +91,6 @@ public class VC {
         replaceLambdaSymbols();
         normalizeConditions();
         uniquelyNameQuantifiers();
-
     }
 
     // ensures conditions are unique

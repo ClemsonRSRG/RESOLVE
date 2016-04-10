@@ -129,10 +129,6 @@ public class Utilities {
                     containsReplaceableExp(dotExpList
                             .get(dotExpList.size() - 1));
         }
-        // Case #3: OldExp
-        else if (exp instanceof OldExp) {
-            retVal = containsReplaceableExp(((OldExp) exp).getExp());
-        }
 
         return retVal;
     }
