@@ -241,4 +241,20 @@ public class NormalizedAtomicExpression {
         return false;
     }
 
+    public int numberOfNonQuants(){
+        int c = 0;
+        for(String k: getOperatorsAsStrings(false).keySet()){
+            if(m_registry.getUsage(k).equals(Registry.Usage.HASARGS_SINGULAR) ||
+                    m_registry.getUsage(k).equals(Registry.Usage.LITERAL) ||
+                    m_registry.getUsage(k).equals(Registry.Usage.SINGULAR_VARIABLE)){
+                c++;
+            }
+        }
+        return c;
+    }
+    public static class nonQuantComparator implements Comparator<NormalizedAtomicExpression>{
+        public int compare(NormalizedAtomicExpression nae1, NormalizedAtomicExpression nae2){
+            return nae1.numberOfNonQuants() - nae2.numberOfNonQuants();
+        }
+    }
 }

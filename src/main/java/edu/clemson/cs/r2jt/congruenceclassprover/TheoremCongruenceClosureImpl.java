@@ -29,14 +29,12 @@ public class TheoremCongruenceClosureImpl {
     private final boolean isEquality;
     private final Registry m_theoremRegistry;
     private final ConjunctionOfNormalizedAtomicExpressions m_matchConj;
-    private final Set<NormalizedAtomicExpression> m_matchRequired;
+    private final List<NormalizedAtomicExpression> m_matchRequired;
+    private final List<NormalizedAtomicExpression> m_noMatchRequired;
     public final String m_theoremString;
     private final PExp m_insertExpr;
     private final PExp m_theorem;
-    private final TypeGraph m_typeGraph;
     protected boolean m_unneeded = false;
-    private Set<String> m_function_names;
-    private Set<String> m_matching_literals;
     private Set<String> m_all_literals;
     private boolean partMatchedisConstantEquation = false;
     protected boolean m_allowNewSymbols;
@@ -49,7 +47,6 @@ public class TheoremCongruenceClosureImpl {
                                         boolean allowNewSymbols, String name) {
         m_name = name;
         m_allowNewSymbols = allowNewSymbols;
-        m_typeGraph = g;
         m_theorem = entireTheorem;
         m_theoremString = entireTheorem.toString();
         isEquality = true;
@@ -63,7 +60,8 @@ public class TheoremCongruenceClosureImpl {
             else
                 m_matchConj.addFormula(mustMatch);
         }
-        m_matchRequired = new HashSet<NormalizedAtomicExpression>(m_matchConj.m_expSet);
+        m_matchRequired = new ArrayList<NormalizedAtomicExpression>(m_matchConj.m_expSet);
+        Collections.sort(m_matchRequired,new NormalizedAtomicExpression.nonQuantComparator());
         m_insertExpr = toInsert;
         if (!mustMatch.equals(restOfExp) && restOfExp.getSubExpressions().size() > 1 &&
                 (!mustMatch.getQuantifiedVariablesNoCache().containsAll(restOfExp.getQuantifiedVariablesNoCache())
@@ -71,38 +69,17 @@ public class TheoremCongruenceClosureImpl {
                 )) {
             m_matchConj.addFormula(restOfExp);
         }
+        m_noMatchRequired = new ArrayList<NormalizedAtomicExpression>();
+        for(NormalizedAtomicExpression n : m_matchConj.m_expSet){
+            if(!m_matchRequired.contains(n) &&
+                    !n.getOperatorsAsStrings(false).containsKey("_g")){
+                m_noMatchRequired.add(n);
+            }
+        }
+        Collections.sort(m_noMatchRequired,new NormalizedAtomicExpression.nonQuantComparator());
         m_insertCnt =
                 m_insertExpr.getSymbolNames().size()
                         + m_insertExpr.getQuantifiedVariables().size();
-    }
-
-    public Set<String> getFunctionNames() {
-        if (m_function_names == null) {
-            Set<String> rSet = m_theoremRegistry.getFunctionNames();
-            rSet.remove("=");
-            rSet.remove("implies");
-            rSet.remove("and");
-            rSet.remove("/=");
-            //rSet.remove("not"); // remove when not p ==> p = false
-            rSet.remove("+"); // temporary
-            //rSet.remove("-");
-            rSet.remove("or"); // temporary this is really bad
-            m_function_names = rSet;
-        }
-        return m_function_names;
-    }
-
-    public Set<String> getLiteralsInMatchingPart() {
-        // registry should only contain symbols from matching section
-        if (m_matching_literals == null) {
-            m_matching_literals = new HashSet<String>();
-            for (String s : getNonQuantifiedSymbols()) {
-                if (m_theoremRegistry.m_symbolToIndex.containsKey(s)) {
-                    m_matching_literals.add(s);
-                }
-            }
-        }
-        return m_matching_literals;
     }
 
     public Set<String> getNonQuantifiedSymbols() {
@@ -289,10 +266,20 @@ public class TheoremCongruenceClosureImpl {
         } else {
             results.add(initBindings);
         }
-        // todo: order by proportion of literal to quants
-        Set<NormalizedAtomicExpression> postSet = new HashSet<NormalizedAtomicExpression>();
+        for(NormalizedAtomicExpression e_t : m_matchRequired){
+            results = vc.getConjunct().getMatchesForOverideSet(e_t,results);
+        }
+        Set<java.util.Map<String, String>> t_results;
+        for(NormalizedAtomicExpression e_t : m_noMatchRequired){
+            t_results = vc.getConjunct().getMatchesForOverideSet(e_t,results);
+            if(t_results.isEmpty()) continue;
+            else results = t_results;
+        }
+
+/*        Set<NormalizedAtomicExpression> postSet = new HashSet<NormalizedAtomicExpression>();
         for (NormalizedAtomicExpression e_t : m_matchConj.m_expSet) {
             if (!m_matchRequired.contains(e_t)) {
+            // Not in match required.  Doesn't contain _g.  Must have quantified argument.
                 for (PSymbol pq : m_insertExpr.getQuantifiedVariables()) {
                     if(pq.toString().equals("_g")) continue;
                     if (e_t.getOperatorsAsStrings(false).containsKey(pq.toString())) {
@@ -311,6 +298,7 @@ public class TheoremCongruenceClosureImpl {
             if (t_results.isEmpty()) continue;
             else results = t_results;
         }
+        */
         return results;
     }
 
