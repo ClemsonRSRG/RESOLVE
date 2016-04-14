@@ -158,10 +158,10 @@ public final class CongruenceClassProver {
             String eName = e.getName();
             if (assertion.isEquality()
                     && assertion.getQuantifiedVariables().size() > 0) {
-                    addEqualityTheorem(true, assertion, eName + "_left"); // match left
-                    addEqualityTheorem(false, assertion, eName + "_right"); // match right
+                addEqualityTheorem(true, assertion, eName + "_left"); // match left
+                addEqualityTheorem(false, assertion, eName + "_right"); // match right
                 //m_theorems.add(new TheoremCongruenceClosureImpl(g, assertion, assertion, assertion, false,
-                        //false, eName + "_whole")); // match whole*/
+                //false, eName + "_whole")); // match whole*/
             } else {
                 TheoremCongruenceClosureImpl t;
                 if (assertion.getTopLevelOperation().equals("implies")) {
@@ -208,13 +208,13 @@ public final class CongruenceClassProver {
             rhs = theorem.getSubExpressions().get(0);
         }
 
-        if(lhs.getSubExpressions().size()>0 || rhs.getSubExpressions().size()>0) {
+        if (lhs.getSubExpressions().size() > 0 || rhs.getSubExpressions().size() > 0) {
             TheoremCongruenceClosureImpl t =
                     new TheoremCongruenceClosureImpl(m_typeGraph, theorem, lhs, rhs, theorem,
                             false, false, thName);
 
             m_theorems.add(t);
-            if(lhs.getSymbolNames().size() < rhs.getSymbolNames().size()){
+            if (lhs.getSymbolNames().size() < rhs.getSymbolNames().size()) {
                 m_smallEndEquations.add(t);
 
             }
@@ -391,7 +391,6 @@ public final class CongruenceClassProver {
         }
         long startTime = System.currentTimeMillis();
         long endTime = myTimeout + startTime;
-        HashSet<String> applied = new HashSet<String>();
         Map<String, Integer> theoremAppliedCount =
                 new HashMap<String, Integer>();
         VerificationConditionCongruenceClosureImpl.STATUS status =
@@ -402,13 +401,10 @@ public final class CongruenceClassProver {
 
         int iteration = 0;
         // ++++++ Create new PQ for instantiated theorems
-        InstantiatedTheoremPrioritizer instPQ =
-                new InstantiatedTheoremPrioritizer(vcc);
         chooseNewTheorem:
         while (status
                 .equals(VerificationConditionCongruenceClosureImpl.STATUS.STILL_EVALUATING)
                 && System.currentTimeMillis() <= endTime) {
-            instPQ.clear();
             long time_at_theorem_pq_creation = System.currentTimeMillis();
             // ++++++ Creates new PQ with all the theorems
             TheoremPrioritizer rankedTheorems =
@@ -435,51 +431,46 @@ public final class CongruenceClassProver {
                 theoremSelectTime +=
                         System.currentTimeMillis() - time_at_selection;
                 long t0 = System.currentTimeMillis();
-                Set<InsertExpWithJustification> instantiatedTheorems =
+                int instThMatches =
                         cur.applyTo(vcc, endTime);
                 searchTime += System.currentTimeMillis() - t0;
-                if (instantiatedTheorems != null
-                        && instantiatedTheorems.size() != 0) {
+                PExpWithScore tMatch = cur.getNext();
+                if (tMatch!= null) {
                     long t1 = System.currentTimeMillis();
-                    instPQ.add(instantiatedTheorems);
                     resultSelectTime += System.currentTimeMillis() - t1;
                     String substitutionMade = "";
                     int innerctr = 0;
-                    PExpWithScore curP = instPQ.m_pQueue.poll();
-                    if (!applied.contains(curP.m_theorem.toString())) {
-                        long t2 = System.currentTimeMillis();
-                        substitutionMade =
-                                vcc
-                                        .getConjunct()
-                                        .addExpressionAndTrackChanges(
-                                                curP.m_theorem,
-                                                endTime,
-                                                curP.m_theoremDefinitionString);
-                        applyTime += System.currentTimeMillis() - t2;
-                        applied.add(curP.m_theorem.toString());
-                        if (cur.m_noQuants) {
-                            theoremsForThisVC.remove(cur);
-                        }
-                        if (!substitutionMade.equals("")) {
-                            long curTime = System.currentTimeMillis();
-                            theseResults +=
-                                    "Iter:"
-                                            + iteration++ + "." + (innerctr++)
-                                            + " Iter Time: "
-                                            + (curTime - time_at_theorem_pq_creation)
-                                            + " Search Time for this theorem: "
-                                            + (curTime - time_at_selection)
-                                            + " Elapsed Time: "
-                                            + (curTime - startTime) + "\n["
-                                            + theoremScore + "]"
-                                            + curP.toString() + "\t"
-                                            + substitutionMade + "\n\n";
-                            if (printVCEachStep)
-                                theseResults += vcc.toString();
-                            status = vcc.isProved();
-                            num_Theorems_chosen++;
-                            //continue chooseNewTheorem;
-                        }
+                    long t2 = System.currentTimeMillis();
+                    substitutionMade =
+                            vcc
+                                    .getConjunct()
+                                    .addExpressionAndTrackChanges(
+                                            tMatch.m_theorem,
+                                            endTime,
+                                            tMatch.m_theoremDefinitionString);
+                    applyTime += System.currentTimeMillis() - t2;
+                    if (cur.m_noQuants) {
+                        theoremsForThisVC.remove(cur);
+                    }
+                    if (!substitutionMade.equals("")) {
+                        long curTime = System.currentTimeMillis();
+                        theseResults +=
+                                "Iter:"
+                                        + iteration++ + "." + (innerctr++)
+                                        + " Iter Time: "
+                                        + (curTime - time_at_theorem_pq_creation)
+                                        + " Search Time for this theorem: "
+                                        + (curTime - time_at_selection)
+                                        + " Elapsed Time: "
+                                        + (curTime - startTime) + "\n["
+                                        + theoremScore + "]"
+                                        + tMatch.toString() + "\t"
+                                        + substitutionMade + "\n\n";
+                        if (printVCEachStep)
+                            theseResults += vcc.toString();
+                        status = vcc.isProved();
+                        num_Theorems_chosen++;
+                        //continue chooseNewTheorem;
                     }
                     if (substitutionMade == "") {
                         theseResults +=

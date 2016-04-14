@@ -39,8 +39,12 @@ public class TheoremCongruenceClosureImpl {
     private boolean partMatchedisConstantEquation = false;
     protected boolean m_allowNewSymbols;
     protected String m_name;
-    protected int m_insertCnt;
     protected boolean m_noQuants = false;
+    protected VerificationConditionCongruenceClosureImpl m_lastVC;
+    protected Set<String> m_insert_qvars;
+    // clear these when starting new VC
+    protected List<Map<String,String>> m_bindings;
+    protected Set<Map<String,String>> m_selectedBindings;
 
     public TheoremCongruenceClosureImpl(TypeGraph g, PExp entireTheorem, PExp mustMatch, PExp restOfExp,
                                         PExp toInsert, boolean enterToMatchAndBindAsEquivalentToTrue,
@@ -51,6 +55,8 @@ public class TheoremCongruenceClosureImpl {
         m_theoremString = entireTheorem.toString();
         isEquality = true;
         m_theoremRegistry = new Registry(g);
+        m_bindings = new ArrayList<Map<String, String>>(128);
+        m_selectedBindings = new HashSet<Map<String, String>>(128);
         m_matchConj =
                 new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,
                         null);
@@ -61,8 +67,12 @@ public class TheoremCongruenceClosureImpl {
                 m_matchConj.addFormula(mustMatch);
         }
         m_matchRequired = new ArrayList<NormalizedAtomicExpression>(m_matchConj.m_expSet);
-        Collections.sort(m_matchRequired,new NormalizedAtomicExpression.nonQuantComparator());
+        Collections.sort(m_matchRequired,new NormalizedAtomicExpression.numQuantsComparator());
         m_insertExpr = toInsert;
+        m_insert_qvars = new HashSet<String>();
+        for(PSymbol p: m_insertExpr.getQuantifiedVariables()){
+            m_insert_qvars.add(p.toString());
+        }
         if (!mustMatch.equals(restOfExp) && restOfExp.getSubExpressions().size() > 1 &&
                 (!mustMatch.getQuantifiedVariablesNoCache().containsAll(restOfExp.getQuantifiedVariablesNoCache())
                     || mustMatch.getSubExpressions().size()==0
@@ -76,10 +86,10 @@ public class TheoremCongruenceClosureImpl {
                 m_noMatchRequired.add(n);
             }
         }
-        Collections.sort(m_noMatchRequired,new NormalizedAtomicExpression.nonQuantComparator());
-        m_insertCnt =
-                m_insertExpr.getSymbolNames().size()
-                        + m_insertExpr.getQuantifiedVariables().size();
+        Collections.sort(m_noMatchRequired,new NormalizedAtomicExpression.numQuantsComparator());
+        if(m_theorem.getQuantifiedVariables().isEmpty()){
+            m_noQuants = true;
+        }
     }
 
     public Set<String> getNonQuantifiedSymbols() {
@@ -112,45 +122,87 @@ public class TheoremCongruenceClosureImpl {
 
     }
 
-    public Set<InsertExpWithJustification> applyTo(
+    public int applyTo(
             VerificationConditionCongruenceClosureImpl vc, long endTime) {
-        HashSet<InsertExpWithJustification> rList =
-                new HashSet<InsertExpWithJustification>();
-
-        if (m_insertExpr.getQuantifiedVariables().isEmpty()) {
-            m_noQuants = true;
-            rList.add(new InsertExpWithJustification(m_insertExpr, m_name
-                    + "\n\t" + m_theoremString, m_insertCnt));
-            return rList;
+        Set<Map<String,String>> sResults;
+        m_bindings.clear();
+        if(m_lastVC== null || !m_lastVC.equals(vc)){
+            m_selectedBindings.clear();
+            m_lastVC = vc;
         }
-
-        Set<java.util.Map<String, String>> allValidBindings;
+        if(m_noQuants) return 1;
         if (m_matchRequired.size() == 0
                 || ((m_allowNewSymbols && m_theorem.getQuantifiedVariables()
                 .size() == 1) && isEquality)) {
-            allValidBindings = findValidBindingsByType(vc, endTime);
+            sResults = findValidBindingsByType(vc, endTime);
         } else
-            allValidBindings = findValidBindings(vc, endTime);
-
-        if (allValidBindings == null || allValidBindings.size() == 0) {
-            //m_unneeded = true;
-            return null;
-        }
-        HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
-        //allValidBindings = discardBindingIfAllValuesNotUnique(allValidBindings);
+            sResults = findValidBindings(vc, endTime);
+        if(sResults == null || sResults.isEmpty()) return 0;
         nextMap:
-        for (java.util.Map<String, String> curBinding : allValidBindings) {
-            for (PSymbol p : m_insertExpr.getQuantifiedVariables()) {
+        for(Map<String,String> s : sResults){
+            if (!m_selectedBindings.contains(s)){
+                for(String k: s.keySet()){
+                    String v = s.get(k);
+                    if(!m_insert_qvars.contains(v)) {
+                        continue;
+                    }
+                    if(s.get(k).equals(""))
+                        continue nextMap;
+                }
+                m_bindings.add(s);
+            }
+        }
+        Collections.sort(m_bindings, new Comparator<Map<String, String>>() {
+            @Override
+            public int compare(Map<String, String> o1, Map<String, String> o2) {
+                return calculateScore(o1) - calculateScore(o2);
+            }
+        });
+        return m_bindings.size();
+    }
+    public int calculateScore(Map<String,String> bmap) {
+        HashSet<String> seen = new HashSet<String>(bmap.keySet().size());
+        float max = m_lastVC.getRegistry().m_indexToSymbol.size();
+        float age = 0f;
+        float sSz = bmap.keySet().size();
+        for (String k : bmap.keySet()) {
+            String rS = m_lastVC.getRegistry().getRootSymbolForSymbol(bmap.get(k));
+            seen.add(rS);
+            if (m_lastVC.getRegistry().m_symbolToIndex.containsKey(rS)) {
+                int indexVal =m_lastVC.getRegistry().getIndexForSymbol(rS);
+                // Age
+                age +=  indexVal ;
+            }
+        }
+        float diff = 1.0f - seen.size()/sSz;
+        float avgAge = age / sSz;
+        // these range from [0,1], lower is better
+        float scaledAvgAge = avgAge / max;
 
-                String thKey = p.getTopLevelOperation();
-                String thVal = "";
+        scaledAvgAge += .01;
+        diff += .01;
+        int r = (int) ((80f * scaledAvgAge) + (20f * diff));
+        return r;
+    }
+
+    public PExpWithScore getNext(){
+        if(m_noQuants && m_selectedBindings.isEmpty()){
+            m_selectedBindings.add(new HashMap<String, String>());
+            return new PExpWithScore(m_insertExpr,m_theorem.toString());
+        }
+        if(m_bindings.isEmpty()) return null;
+        HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
+        Map<String,String> curBinding = m_bindings.remove(0);
+        m_selectedBindings.add(curBinding);
+        for (PSymbol p : m_insertExpr.getQuantifiedVariables()) {
+            String thKey = p.getTopLevelOperation();
+            String thVal = "";
                 if (curBinding.containsKey(thKey)) {
                     thVal = curBinding.get(thKey);
                 } else if (curBinding.containsKey(m_theoremRegistry.getRootSymbolForSymbol(thKey))) {
                     thVal = curBinding.get(m_theoremRegistry.getRootSymbolForSymbol(thKey));
                 }
-                if (thVal.equals(""))
-                    continue nextMap;
+                if(thVal.equals("")) return getNext();
                 MTType quanType =
                         m_theoremRegistry.getTypeByIndex(m_theoremRegistry
                                 .getIndexForSymbol(thKey));
@@ -159,19 +211,15 @@ public class TheoremCongruenceClosureImpl {
             }
 
             PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
-            modifiedInsert = vc.getConjunct().find(modifiedInsert);
+            modifiedInsert = m_lastVC.getConjunct().find(modifiedInsert);
             // Discard s = s
-            if (!(modifiedInsert.getTopLevelOperation().equals("=") && modifiedInsert
+            if ((modifiedInsert.getTopLevelOperation().equals("=") && modifiedInsert
                     .getSubExpressions().get(0).toString().equals(
                             modifiedInsert.getSubExpressions().get(1)
                                     .toString()))) {
-                rList.add(new InsertExpWithJustification(modifiedInsert, m_name
-                        + "\n\t" + m_theoremString, m_insertCnt));
+                return getNext();
             }
-            quantToLit.clear();
-
-        }
-        return rList;
+        return new PExpWithScore(modifiedInsert,m_theorem.toString());
     }
 
     // variables to bind are the quantified vars the quantified statement
