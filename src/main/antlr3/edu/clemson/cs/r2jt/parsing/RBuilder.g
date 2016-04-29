@@ -1069,14 +1069,13 @@ operation_procedure_declaration returns [FacilityOperationDec dec = null]
             (items2=affects_clause { items.addAll($items2.items); })*
             (req=requires_clause)?
             (ens=ensures_clause)?
-            (decr=decreasing_clause)?
             (fac2=facility_declaration { facs.add($fac2.dec); })*
             (vars2=variable_declaration { vars.addAll($vars2.decs); })*
             (aux_vars2=aux_variable_declaration { aux_vars.addAll($aux_vars2.decs); })*
             (sts=statement_sequence)
         )
         {   $dec = new FacilityOperationDec($ps.ps, $pars.decs, $ty.ty, items,
-                $req.exp, $ens.exp, $decr.exp, facs, vars, aux_vars, $sts.stmts);
+                $req.exp, $ens.exp, null, facs, vars, aux_vars, $sts.stmts);
         }
     ;
     
