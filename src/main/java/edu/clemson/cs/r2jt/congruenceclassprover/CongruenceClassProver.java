@@ -483,6 +483,7 @@ public final class CongruenceClassProver {
                                         + " Elapsed Time: "
                                         + (curTime - startTime) + "\n["
                                         + theoremScore + "]"
+                                        + cur.m_name + "\n"
                                         + tMatch.toString() + "\t"
                                         + substitutionMade + "\n\n";
                         if (printVCEachStep)
