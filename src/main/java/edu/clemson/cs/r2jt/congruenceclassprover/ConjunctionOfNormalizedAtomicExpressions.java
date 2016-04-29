@@ -825,7 +825,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         return rSet;
 
     }
-    
+
     @Override
     public String toString() {
         String r = "";

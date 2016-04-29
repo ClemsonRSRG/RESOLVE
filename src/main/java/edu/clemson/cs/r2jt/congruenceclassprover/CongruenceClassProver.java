@@ -56,10 +56,9 @@ public final class CongruenceClassProver {
                     NUMTRIES_ARGS, Flag.Type.HIDDEN);
     private final List<VerificationConditionCongruenceClosureImpl> m_ccVCs;
     private final List<TheoremCongruenceClosureImpl> m_theorems;
-    private final int MAX_ITERATIONS = 1024;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
-    private final long DEFAULTTIMEOUT = 5000;
+    private final long DEFAULTTIMEOUT = 500;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     private final Set<String> m_nonQuantifiedTheoremSymbols;
@@ -70,11 +69,6 @@ public final class CongruenceClassProver {
     private final int DEFAULTTRIES = -1;
     private String m_results;
     private boolean printVCEachStep = false;
-    private long theoremSelectTime = 0;
-    private long resultSelectTime = 0;
-    private long searchTime = 0;
-    private long constructionTime = 0;
-    private long applyTime = 0;
     private ProverListener myProverListener;
     private long myTimeout;
     private long totalTime = 0;
@@ -320,40 +314,7 @@ public final class CongruenceClassProver {
         }
         totalTime = System.currentTimeMillis() - totalTime;
         summary +=
-                "Elapsed time from construction: "
-                        + totalTime
-                        + " ms"
-                        + "\n"
-                        + "constructionTime:\t"
-                        + 100
-                        * (float) constructionTime
-                        / totalTime
-                        + "%\n"
-                        + "theoremSelectTime:\t"
-                        + 100
-                        * (float) theoremSelectTime
-                        / totalTime
-                        + "%\n"
-                        + "resultSelectTime:\t"
-                        + 100
-                        * (float) resultSelectTime
-                        / totalTime
-                        + "%\n"
-                        + "searchTime:\t\t\t"
-                        + 100
-                        * (float) searchTime
-                        / totalTime
-                        + "%\n"
-                        + "applyTime:\t\t\t"
-                        + 100
-                        * (float) applyTime
-                        / totalTime
-                        + "%\n"
-                        + "not counted:\t\t"
-                        + 100
-                        * (float) (totalTime - (constructionTime
-                                + theoremSelectTime + resultSelectTime
-                                + searchTime + applyTime)) / totalTime + "%\n";
+                "Elapsed time from construction: " + totalTime + " ms" + "\n";
         String div = divLine("Summary");
         summary = div + summary + div;
 
@@ -430,8 +391,6 @@ public final class CongruenceClassProver {
                     new TheoremPrioritizer(theoremsForThisVC,
                             theoremAppliedCount, vcc,
                             m_nonQuantifiedTheoremSymbols, m_smallEndEquations);
-            theoremSelectTime +=
-                    System.currentTimeMillis() - time_at_theorem_pq_creation;
             int max_Theorems_to_choose = 1;
             int num_Theorems_chosen = 0;
             while (!rankedTheorems.m_pQueue.isEmpty()
@@ -449,15 +408,9 @@ public final class CongruenceClassProver {
                     count = theoremAppliedCount.get(cur.m_name);
                 theoremAppliedCount.put(cur.m_name, ++count);
                 // We are using it, even if it makes no difference
-                theoremSelectTime +=
-                        System.currentTimeMillis() - time_at_selection;
-                long t0 = System.currentTimeMillis();
                 int instThMatches = cur.applyTo(vcc, endTime);
-                searchTime += System.currentTimeMillis() - t0;
                 PExpWithScore tMatch = cur.getNext();
                 if (tMatch != null) {
-                    long t1 = System.currentTimeMillis();
-                    resultSelectTime += System.currentTimeMillis() - t1;
                     String substitutionMade = "";
                     int innerctr = 0;
                     long t2 = System.currentTimeMillis();
@@ -465,7 +418,6 @@ public final class CongruenceClassProver {
                             vcc.getConjunct().addExpressionAndTrackChanges(
                                     tMatch.m_theorem, endTime,
                                     tMatch.m_theoremDefinitionString);
-                    applyTime += System.currentTimeMillis() - t2;
                     if (cur.m_noQuants) {
                         theoremsForThisVC.remove(cur);
                     }
@@ -482,9 +434,8 @@ public final class CongruenceClassProver {
                                         + (curTime - time_at_selection)
                                         + " Elapsed Time: "
                                         + (curTime - startTime) + "\n["
-                                        + theoremScore + "]"
-                                        + cur.m_name + "\n"
-                                        + tMatch.toString() + "\t"
+                                        + theoremScore + "]" + cur.m_name
+                                        + "\n" + tMatch.toString() + "\t"
                                         + substitutionMade + "\n\n";
                         if (printVCEachStep)
                             theseResults += vcc.toString();
