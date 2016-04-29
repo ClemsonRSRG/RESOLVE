@@ -783,7 +783,6 @@ procedure_declaration
         (operation_formal_param_section)
         (COLON! program_type_expression)? SEMICOLON!
         (affects_clause)*
-        (decreasing_clause)?
         (facility_declaration)*
         (variable_declaration)*
         (aux_variable_declaration)*
@@ -796,22 +795,22 @@ recursive_procedure_declaration
     :   RECURSIVE PROCEDURE id1=ident
         operation_formal_param_section
         (COLON program_type_expression)? SEMICOLON
-        affects_clause*
-        decreasing_clause?
-        facility_declaration*
-        variable_declaration*
-        aux_variable_declaration*       
+        (affects_clause)*
+        decreasing_clause
+        (facility_declaration)*
+        (variable_declaration)*
+        (aux_variable_declaration)*
         statement_sequence
         END (id2=ident { matchOperationIdent(id2, id1); })?
         SEMICOLON ->
         ^(RECURSIVE_PROCEDURE ident
         operation_formal_param_section
         program_type_expression?
-        affects_clause*
-        decreasing_clause?
-        facility_declaration*
-        variable_declaration*
-        aux_variable_declaration*       
+        (affects_clause)*
+        decreasing_clause
+        (facility_declaration)*
+        (variable_declaration)*
+        (aux_variable_declaration)*
         statement_sequence)
     ;
 

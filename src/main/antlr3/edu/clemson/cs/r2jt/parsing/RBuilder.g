@@ -1158,13 +1158,12 @@ procedure_declaration returns [ProcedureDec dec = null]
             pars=operation_formal_param_section
             (ty=program_type_expression)?
             (items2=affects_clause { items.addAll($items2.items); })*
-            (decr=decreasing_clause)?
             (fac2=facility_declaration { facs.add($fac2.dec); })*
             (vars2=variable_declaration { vars.addAll($vars2.decs); })*
             (aux_vars2=aux_variable_declaration { aux_vars.addAll($aux_vars2.decs); })*
             (sts=statement_sequence)
         )
-        {   $dec = new ProcedureDec($ps.ps, $pars.decs, $ty.ty, items, $decr.exp,
+        {   $dec = new ProcedureDec($ps.ps, $pars.decs, $ty.ty, items, null,
                 facs, vars, aux_vars, $sts.stmts);
         }
     ;
