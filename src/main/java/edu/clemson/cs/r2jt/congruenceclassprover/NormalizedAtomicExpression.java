@@ -22,6 +22,7 @@ import java.util.*;
 public class NormalizedAtomicExpression {
 
     private final int[] m_expression;
+    private int m_classConstant;
     private int arity; // number of arguments
     private final ConjunctionOfNormalizedAtomicExpressions m_conj;
     private final Registry m_registry;
@@ -29,7 +30,8 @@ public class NormalizedAtomicExpression {
     private Set<Integer> m_opIdSet;
     private Map<String, Integer> m_argMmap;
 
-    public NormalizedAtomicExpression(ConjunctionOfNormalizedAtomicExpressions conj, int[] intArray) {
+    public NormalizedAtomicExpression(
+            ConjunctionOfNormalizedAtomicExpressions conj, int[] intArray) {
         m_conj = conj;
         m_registry = m_conj.getRegistry();
         arity = intArray.length - 1;
@@ -49,13 +51,16 @@ public class NormalizedAtomicExpression {
             }
             m_expression = ne;
         }
+        m_classConstant = -1;
     }
 
     protected int getArity() {
         return arity;
     }
 
-    protected Registry getRegistry() {return m_registry;}
+    protected Registry getRegistry() {
+        return m_registry;
+    }
 
     protected int getOpIdUsedInAllPos(NormalizedAtomicExpression oe, int k) {
         int bid = -4;
@@ -137,6 +142,63 @@ public class NormalizedAtomicExpression {
         return m_registry.getSymbolForIndex(m_expression[position]);
     }
 
+    // return array contains 'n' if sint is an arg used at position 'n', 0 denotes operator, -1 denotes cong class
+    public int[] getPositionsFor(int sint) {
+        int[] rArray = new int[arity + 2];
+        int count = 0;
+        for (int i = 0; i <= arity; ++i) {
+            if (m_expression[i] == sint) {
+                rArray[count++] = i;
+            }
+        }
+        if (readRoot() == sint)
+            rArray[count++] = -1;
+
+        return Arrays.copyOf(rArray, count);
+    }
+
+    // -1 meaning wildcard.
+    public int[] rootedLiterals(Map<String, String> overMap, Registry vc_Reg) {
+        int[] rArray = new int[m_expression.length + 1];
+        for (int i = 0; i <= m_expression.length; ++i) {
+            int expI =
+                    (i < m_expression.length) ? m_expression[i]
+                            : m_classConstant;
+            String k = m_registry.getSymbolForIndex(expI);
+            String v = (overMap.containsKey(k)) ? overMap.get(k) : k;
+            if (v.equals("")) {
+                rArray[i] = -1;
+            }
+            else if (!vc_Reg.m_symbolToIndex.containsKey(v)) {
+                return null;
+            }
+            else {
+                rArray[i] = vc_Reg.getIndexForSymbol(v);
+            }
+        }
+        return rArray;
+    }
+
+    // "" meaning mapped.
+    public String[] unMappedWildcards(Map<String, String> overMap) {
+        String[] rArray = new String[m_expression.length + 1];
+        for (int i = 0; i < m_expression.length; ++i) {
+            String ks = m_registry.getSymbolForIndex(m_expression[i]);
+            if (overMap.containsKey(ks) && overMap.get(ks).equals("")) {
+                rArray[i] = ks;
+            }
+            else
+                rArray[i] = "";
+        }
+        String ks = m_registry.getSymbolForIndex(m_classConstant);
+        if (overMap.containsKey(ks) && overMap.get(ks).equals("")) {
+            rArray[m_expression.length] = ks;
+        }
+        else
+            rArray[m_expression.length] = "";
+        return rArray;
+    }
+
     public NormalizedAtomicExpression replaceOperator(int orig, int repl) {
         if (orig == repl)
             return this;
@@ -153,9 +215,13 @@ public class NormalizedAtomicExpression {
             else
                 na[i] = m_expression[i];
         }
+        if (readRoot() == orig) {
+            writeToRoot(repl);
+        }
         NormalizedAtomicExpression rNa = this;
         if (changed) {
             rNa = new NormalizedAtomicExpression(m_conj, na);
+            rNa.writeToRoot(readRoot());
         }
         assert (changed == (rNa != this));
         assert changed == (rNa.hashCode() != hashCode());
@@ -165,13 +231,11 @@ public class NormalizedAtomicExpression {
     protected void writeToRoot(int root) {
         m_opMmap = null;
         m_opIdSet = null;
-        m_conj.m_exprRootMap.put(this, root);
+        m_classConstant = root;
     }
 
     protected int readRoot() {
-        if (m_conj.m_exprRootMap.containsKey(this))
-            return m_conj.m_exprRootMap.get(this);
-        return -2;
+        return m_classConstant;
     }
 
     public NormalizedAtomicExpression rootOps() {
@@ -241,19 +305,25 @@ public class NormalizedAtomicExpression {
         return false;
     }
 
-    public int numberOfQuants(){
+    public int numberOfQuants() {
         int c = 0;
-        for(String k: getOperatorsAsStrings(false).keySet()){
-            if(m_registry.getUsage(k).equals(Registry.Usage.FORALL) ||
-                    m_registry.getUsage(k).equals(Registry.Usage.HASARGS_FORALL) ||
-                    m_registry.getUsage(k).equals(Registry.Usage.CREATED)){
+        for (String k : getOperatorsAsStrings(false).keySet()) {
+            if (m_registry.getUsage(k).equals(Registry.Usage.FORALL)
+                    || m_registry.getUsage(k).equals(
+                            Registry.Usage.HASARGS_FORALL)
+                    || m_registry.getUsage(k).equals(Registry.Usage.CREATED)) {
                 c++;
             }
         }
         return c;
     }
-    public static class numQuantsComparator implements Comparator<NormalizedAtomicExpression>{
-        public int compare(NormalizedAtomicExpression nae1, NormalizedAtomicExpression nae2){
+
+    public static class numQuantsComparator
+            implements
+                Comparator<NormalizedAtomicExpression> {
+
+        public int compare(NormalizedAtomicExpression nae1,
+                NormalizedAtomicExpression nae2) {
             return nae1.numberOfQuants() - nae2.numberOfQuants();
         }
     }

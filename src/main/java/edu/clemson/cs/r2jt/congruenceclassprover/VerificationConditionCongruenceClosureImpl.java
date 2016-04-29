@@ -47,7 +47,8 @@ public class VerificationConditionCongruenceClosureImpl {
     public List<PExp> forAllQuantifiedPExps; // trap constraints, can create Theorems externally from this
 
     // currently support only unchained equalities, so each sublist is size 2.
-    public VerificationConditionCongruenceClosureImpl(TypeGraph g, VC vc, MTType z, MTType n) {
+    public VerificationConditionCongruenceClosureImpl(TypeGraph g, VC vc,
+            MTType z, MTType n) {
         m_typegraph = g;
         m_name = vc.getName();
         m_VC_string = vc.toString();
@@ -217,9 +218,9 @@ public class VerificationConditionCongruenceClosureImpl {
             PSymbol qFun =
                     new PSymbol(new MTFunction(m_typegraph,
                             m_typegraph.BOOLEAN, px.getQuantifiedVariables()
-                            .iterator().next().getType()), null,
+                                    .iterator().next().getType()), null,
                             "ConFunc" + (++c_count), new ArrayList<PExp>(px
-                            .getQuantifiedVariables()));
+                                    .getQuantifiedVariables()));
             ArrayList<PExp> args = new ArrayList<PExp>();
             args.add(qFun);
             args.add(px);
@@ -348,19 +349,23 @@ public class VerificationConditionCongruenceClosureImpl {
     public STATUS isProved() {
         if (m_conjunction.m_evaluates_to_false) {
             return STATUS.FALSE_ASSUMPTION; // this doesn't mean P->Q = False, it just means P = false
-        } else if (m_goal.contains("true")) {
+        }
+        else if (m_goal.contains("true")) {
             return STATUS.PROVED;
-        } else {
+        }
+        else {
             return STATUS.STILL_EVALUATING;
         }
     }
 
     private void addPExp(Iterator<PExp> pit, boolean inAntecedent) {
         while (pit.hasNext() && !m_conjunction.m_evaluates_to_false) {
-            PExp curr = Utilities.replacePExp(pit.next(), m_typegraph, m_z, m_n);
+            PExp curr =
+                    Utilities.replacePExp(pit.next(), m_typegraph, m_z, m_n);
             if (inAntecedent) {
                 m_conjunction.addExpression(curr);
-            } else {
+            }
+            else {
                 int intRepForExp = m_conjunction.addFormula(curr);
                 addGoal(m_registry.getSymbolForIndex(intRepForExp));
             }

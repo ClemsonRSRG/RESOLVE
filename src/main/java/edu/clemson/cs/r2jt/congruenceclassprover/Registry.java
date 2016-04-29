@@ -39,6 +39,7 @@ public class Registry {
     protected Map<Integer, ArrayList<Integer>> m_partTypeParentArray;
     protected Set<String> m_commutative_operators;
     protected Map<String, Boolean> m_cached_isSubtype;
+
     public static enum Usage {
 
         LITERAL, FORALL, SINGULAR_VARIABLE, CREATED, HASARGS_SINGULAR,
