@@ -57,7 +57,7 @@ public class Registry {
         m_indexToType = new ArrayList<MTType>();
         m_symbolIndexParentArray = new ArrayList<Integer>();
         m_unusedIndices = new Stack<Integer>();
-        m_symbolToUsage = new HashMap<String, Usage>(); // entries won't change
+        m_symbolToUsage = new HashMap<String, Usage>(2048, .5f); // entries won't change
         m_foralls = new HashSet<String>();
         m_typeGraph = g;
         m_typeDictionary = new TreeMap<String, MTType>();
@@ -65,8 +65,6 @@ public class Registry {
                 Usage.LITERAL); // = as a predicate function, not as an assertion
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
         addSymbol("false", g.BOOLEAN, Usage.LITERAL);
-        addSymbol("not", new MTFunction(g, g.BOOLEAN, g.BOOLEAN),
-                Usage.HASARGS_SINGULAR);
         assert (getIndexForSymbol("=") == 0);
         m_appliedTheoremDependencyGraph = new HashMap<String, Set<Integer>>();
         m_lambda_names = new HashSet<String>();
@@ -136,15 +134,16 @@ public class Registry {
     public void substitute(int opIndexA, int opIndexB) {
         MTType aType = getTypeByIndex(opIndexA);
         MTType bType = getTypeByIndex(opIndexB);
-        if (isSubtype(bType, aType)) {
-            m_indexToType.set(opIndexA, bType);
-        }
+
         // set usage to most restricted: i.e literal over created over forall
         // this is because the earliest now becomes the parent
         String aS = getSymbolForIndex(opIndexA);
         String bS = getSymbolForIndex(opIndexB);
         Usage a_us = getUsage(aS);
         Usage b_us = getUsage(bS);
+        if (!a_us.equals(Usage.FORALL) && isSubtype(bType, aType)) {
+            m_indexToType.set(opIndexA, bType);
+        }
         if (a_us.equals(Usage.LITERAL) || b_us.equals(Usage.LITERAL)) {
             m_symbolToUsage.put(aS, Usage.LITERAL);
         }
@@ -202,10 +201,11 @@ public class Registry {
     public int getIndexForSymbol(String symbol) {
         assert m_symbolToIndex.get(symbol) != null : symbol + " not found"
                 + m_symbolToIndex.toString();
-        int r = m_symbolToIndex.get(symbol);
-        if (r < 0) {
-            System.err.println(symbol + " has no current index");
+
+        if (!m_symbolToIndex.containsKey(symbol)) {
+            return -1;
         }
+        int r = m_symbolToIndex.get(symbol);
         return findAndCompress(r);
     }
 

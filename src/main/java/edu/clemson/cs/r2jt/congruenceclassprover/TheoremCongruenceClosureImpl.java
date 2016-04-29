@@ -12,14 +12,11 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
-import edu.clemson.cs.r2jt.collections.Map;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
-import edu.clemson.cs.r2jt.typeandpopulate.MTFunction;
 import edu.clemson.cs.r2jt.typeandpopulate.MTType;
 import edu.clemson.cs.r2jt.typereasoning.TypeGraph;
 
-import java.sql.PseudoColumnUsage;
 import java.util.*;
 
 /**
@@ -30,123 +27,73 @@ public class TheoremCongruenceClosureImpl {
     private final boolean isEquality;
     private final Registry m_theoremRegistry;
     private final ConjunctionOfNormalizedAtomicExpressions m_matchConj;
+    private final List<NormalizedAtomicExpression> m_matchRequired;
+    private final List<NormalizedAtomicExpression> m_noMatchRequired;
     public final String m_theoremString;
     private final PExp m_insertExpr;
     private final PExp m_theorem;
-    private final TypeGraph m_typeGraph;
     protected boolean m_unneeded = false;
-    private Set<String> m_function_names;
-    private Set<String> m_matching_literals;
     private Set<String> m_all_literals;
     private boolean partMatchedisConstantEquation = false;
     protected boolean m_allowNewSymbols;
     protected String m_name;
-    protected int m_insertCnt;
     protected boolean m_noQuants = false;
+    protected VerificationConditionCongruenceClosureImpl m_lastVC;
+    protected Set<String> m_insert_qvars;
+    // clear these when starting new VC
+    protected List<Map<String, String>> m_bindings;
+    protected Set<Map<String, String>> m_selectedBindings;
 
-    public TheoremCongruenceClosureImpl(TypeGraph g, PExp p,
+    public TheoremCongruenceClosureImpl(TypeGraph g, PExp entireTheorem,
+            PExp mustMatch, PExp restOfExp, PExp toInsert,
+            boolean enterToMatchAndBindAsEquivalentToTrue,
             boolean allowNewSymbols, String name) {
         m_name = name;
         m_allowNewSymbols = allowNewSymbols;
-        m_typeGraph = g;
-        m_theorem = p;
-        m_theoremString = p.toString();
-        isEquality = p.getTopLevelOperation().equals("=");
-        m_theoremRegistry = new Registry(g);
-        m_matchConj =
-                new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,
-                        null);
-        if (p.getTopLevelOperation().equals("implies")) {
-            PExp matchingpart = p.getSubExpressions().get(0);
-            m_matchConj.addExpression(matchingpart);
-            m_insertExpr = p.getSubExpressions().get(1);
-            if (matchingpart.getTopLevelOperation().equals("=")) {
-                if (matchingpart.getSubExpressions().get(0).getSubExpressions()
-                        .size() == 0
-                        && matchingpart.getSubExpressions().get(1)
-                                .getSubExpressions().size() == 0) {
-                    partMatchedisConstantEquation = true;
-                }
-            } //
-        }
-        else if (p.getQuantifiedVariables().size() == 1) {
-            // empty matchConj will trigger find by type
-            m_matchConj.addFormula(p); // this adds symbols to reg
-            m_matchConj.clear(); // will match based on types
-            m_insertExpr = p;
-        }
-        else {
-            /* experimental
-            
-            Is_Permutation((S o T), (T o S)) for example,
-            should go into matchConj as itself, but equal to a boolean variable.
-            .
-             */
-            m_matchConj.addFormula(p);
-            m_insertExpr = p; // this will add "= true"
-        }
-
-        m_insertCnt =
-                m_insertExpr.getSymbolNames().size()
-                        + m_insertExpr.getQuantifiedVariables().size();
-    }
-
-    // for theorems that are equations
-    public TheoremCongruenceClosureImpl(TypeGraph g, PExp toMatchAndBind,
-            PExp toInsert, boolean enterToMatchAndBindAsEquivalentToTrue,
-            boolean allowNewSymbols, String name) {
-        m_name = name;
-        m_allowNewSymbols = allowNewSymbols;
-        m_typeGraph = g;
-        m_theorem = toInsert;
-        m_theoremString = toInsert.toString();
+        m_theorem = entireTheorem;
+        m_theoremString = entireTheorem.toString();
         isEquality = true;
         m_theoremRegistry = new Registry(g);
+        m_bindings = new ArrayList<Map<String, String>>(128);
+        m_selectedBindings = new HashSet<Map<String, String>>(128);
         m_matchConj =
                 new ConjunctionOfNormalizedAtomicExpressions(m_theoremRegistry,
                         null);
-        if (enterToMatchAndBindAsEquivalentToTrue)
-            m_matchConj.addExpression(toMatchAndBind);
-        else
-            m_matchConj.addFormula(toMatchAndBind);
-        m_insertExpr = toInsert;
-        m_insertCnt =
-                m_insertExpr.getSymbolNames().size()
-                        + m_insertExpr.getQuantifiedVariables().size();
-    }
-
-    public Set<String> getFunctionNames() {
-        if (m_function_names == null) {
-            Registry tReg = new Registry(m_typeGraph);
-            ConjunctionOfNormalizedAtomicExpressions temp =
-                    new ConjunctionOfNormalizedAtomicExpressions(tReg, null);
-            temp.addExpression(m_theorem);
-
-            Set<String> rSet = tReg.getFunctionNames();
-            rSet.remove("=");
-            rSet.remove("implies");
-            rSet.remove("and");
-            rSet.remove("/=");
-            rSet.remove("not"); // remove when not p ==> p = false
-            rSet.remove("+"); // temporary
-            //rSet.remove("-");
-            rSet.remove("or"); // temporary this is really bad
-            m_function_names = rSet;
+        if (mustMatch.getSubExpressions().size() > 0) {
+            if (enterToMatchAndBindAsEquivalentToTrue)
+                m_matchConj.addExpression(mustMatch);
+            else
+                m_matchConj.addFormula(mustMatch);
         }
-        return m_function_names;
-    }
-
-    public Set<String> getLiteralsInMatchingPart() {
-        // registry should only contain symbols from matching section
-        if (m_matching_literals == null) {
-            m_matching_literals = new HashSet<String>();
-            for (String s : getNonQuantifiedSymbols()) {
-                if (m_theoremRegistry.m_symbolToIndex.containsKey(s)) {
-                    m_matching_literals.add(s);
-                }
+        m_matchRequired =
+                new ArrayList<NormalizedAtomicExpression>(m_matchConj.m_expSet
+                        .keySet());
+        Collections.sort(m_matchRequired,
+                new NormalizedAtomicExpression.numQuantsComparator());
+        m_insertExpr = toInsert;
+        m_insert_qvars = new HashSet<String>();
+        for (PSymbol p : m_insertExpr.getQuantifiedVariables()) {
+            m_insert_qvars.add(p.toString());
+        }
+        if (!mustMatch.equals(restOfExp)
+                && restOfExp.getSubExpressions().size() > 1
+                && (!mustMatch.getQuantifiedVariablesNoCache().containsAll(
+                        restOfExp.getQuantifiedVariablesNoCache()) || mustMatch
+                        .getSubExpressions().size() == 0)) {
+            m_matchConj.addFormula(restOfExp);
+        }
+        m_noMatchRequired = new ArrayList<NormalizedAtomicExpression>();
+        for (NormalizedAtomicExpression n : m_matchConj.m_expSet.keySet()) {
+            if (!m_matchRequired.contains(n)
+                    && !n.getOperatorsAsStrings(false).containsKey("_g")) {
+                m_noMatchRequired.add(n);
             }
         }
-        return m_matching_literals;
+        Collections.sort(m_noMatchRequired,
+                new NormalizedAtomicExpression.numQuantsComparator());
+        if (m_theorem.getQuantifiedVariables().isEmpty()) {
+            m_noQuants = true;
+        }
     }
 
     public Set<String> getNonQuantifiedSymbols() {
@@ -178,87 +125,115 @@ public class TheoremCongruenceClosureImpl {
 
     }
 
-    public ArrayList<InsertExpWithJustification> applyTo(
-            VerificationConditionCongruenceClosureImpl vc, long endTime) {
-        ArrayList<InsertExpWithJustification> rList =
-                new ArrayList<InsertExpWithJustification>();
-
-        if (m_insertExpr.getQuantifiedVariables().isEmpty()) {
-            m_noQuants = true;
-            rList.add(new InsertExpWithJustification(m_insertExpr, m_name
-                    + "\n\t" + m_theoremString, m_insertCnt));
-            return rList;
+    public int applyTo(VerificationConditionCongruenceClosureImpl vc,
+            long endTime) {
+        Set<Map<String, String>> sResults;
+        m_bindings.clear();
+        if (m_lastVC == null || !m_lastVC.equals(vc)) {
+            m_selectedBindings.clear();
+            m_lastVC = vc;
         }
-        // Set flag if quantified variable was not in the matching part
-        for (PSymbol ps : m_insertExpr.getQuantifiedVariables()) {
-            if (!m_theoremRegistry.getForAlls().contains(ps.toString())) {
-                /*if(m_insertExpr.getTopLevelOperation().equals("=")){
-                    PExp lhs = m_insertExpr.getSubExpressions().get(0);
-                    PExp rhs = m_insertExpr.getSubExpressions().get(1);
-                   // potential replacement of subexp
-                }*/
-                m_unneeded = true;
-                return null;
-            }
-        }
-        Set<java.util.Map<String, String>> allValidBindings;
-        if (m_matchConj.size() == 0
+        if (m_noQuants)
+            return 1;
+        if (m_matchRequired.size() == 0
                 || ((m_allowNewSymbols && m_theorem.getQuantifiedVariables()
                         .size() == 1) && isEquality)) {
-            allValidBindings = findValidBindingsByType(vc, endTime);
+            sResults = findValidBindingsByType(vc, endTime);
         }
         else
-            allValidBindings = findValidBindings(vc, endTime);
-
-        if (allValidBindings == null || allValidBindings.size() == 0) {
-            //m_unneeded = true;
-            return null;
-        }
-
-        HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
-        //allValidBindings = discardBindingIfAllValuesNotUnique(allValidBindings);
-        for (java.util.Map<String, String> curBinding : allValidBindings) {
-            for (String thKey : curBinding.keySet()) {
-
-                if (m_theoremRegistry.m_indexToSymbol.contains(curBinding
-                        .get(thKey))
-                        && vc.getRegistry().getUsage(curBinding.get(thKey))
-                                .equals(Registry.Usage.FORALL)) {
-                    throw new RuntimeException("Quantified var unbound");
-                }
-                MTType quanType =
-                        m_theoremRegistry.getTypeByIndex(m_theoremRegistry
-                                .getIndexForSymbol(thKey));
-                // thKey may be a parent of the symbol in the theorem
-                // there will be no literal match in the substitute call
-                // Check if any quantified var is a child.
-                // Make extra map entry for each one
-                for (PSymbol p : m_theorem.getQuantifiedVariables()) {
-                    String pname = p.getTopLevelOperation();
-                    if (m_theoremRegistry.getRootSymbolForSymbol(pname).equals(
-                            thKey)) {
-                        quantToLit.put(new PSymbol(quanType, null, pname),
-                                new PSymbol(quanType, null, curBinding
-                                        .get(thKey)));
+            sResults = findValidBindings(vc, endTime);
+        if (sResults == null || sResults.isEmpty())
+            return 0;
+        nextMap: for (Map<String, String> s : sResults) {
+            if (!m_selectedBindings.contains(s)) {
+                for (String k : s.keySet()) {
+                    String v = s.get(k);
+                    if (!m_insert_qvars.contains(v)) {
+                        continue;
                     }
+                    if (s.get(k).equals(""))
+                        continue nextMap;
                 }
-                quantToLit.put(new PSymbol(quanType, null, thKey), new PSymbol(
-                        quanType, null, curBinding.get(thKey)));
+                m_bindings.add(s);
             }
-
-            PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
-            // Discard s = s
-            if (!(modifiedInsert.getTopLevelOperation().equals("=") && modifiedInsert
-                    .getSubExpressions().get(0).toString().equals(
-                            modifiedInsert.getSubExpressions().get(1)
-                                    .toString()))) {
-                rList.add(new InsertExpWithJustification(modifiedInsert, m_name
-                        + "\n\t" + m_theoremString, m_insertCnt));
-            }
-            quantToLit.clear();
-
         }
-        return rList;
+        Collections.sort(m_bindings, new Comparator<Map<String, String>>() {
+
+            @Override
+            public int compare(Map<String, String> o1, Map<String, String> o2) {
+                return calculateScore(o1) - calculateScore(o2);
+            }
+        });
+        return m_bindings.size();
+    }
+
+    public int calculateScore(Map<String, String> bmap) {
+        HashSet<String> seen = new HashSet<String>(bmap.keySet().size());
+        float max = m_lastVC.getRegistry().m_indexToSymbol.size();
+        float age = 0f;
+        float sSz = bmap.keySet().size();
+        for (String k : bmap.keySet()) {
+            String rS =
+                    m_lastVC.getRegistry().getRootSymbolForSymbol(bmap.get(k));
+            seen.add(rS);
+            if (m_lastVC.getRegistry().m_symbolToIndex.containsKey(rS)) {
+                int indexVal = m_lastVC.getRegistry().getIndexForSymbol(rS);
+                // Age
+                age += indexVal;
+            }
+        }
+        float diff = 1.0f - seen.size() / sSz;
+        float avgAge = age / sSz;
+        // these range from [0,1], lower is better
+        float scaledAvgAge = avgAge / max;
+
+        scaledAvgAge += .01;
+        diff += .01;
+        int r = (int) ((80f * scaledAvgAge) + (20f * diff));
+        return r;
+    }
+
+    public PExpWithScore getNext() {
+        if (m_noQuants && m_selectedBindings.isEmpty()) {
+            m_selectedBindings.add(new HashMap<String, String>());
+            return new PExpWithScore(m_insertExpr, m_theorem.toString());
+        }
+        if (m_bindings.isEmpty())
+            return null;
+        HashMap<PExp, PExp> quantToLit = new HashMap<PExp, PExp>();
+        Map<String, String> curBinding = m_bindings.remove(0);
+        m_selectedBindings.add(curBinding);
+        for (PSymbol p : m_insertExpr.getQuantifiedVariables()) {
+            String thKey = p.getTopLevelOperation();
+            String thVal = "";
+            if (curBinding.containsKey(thKey)) {
+                thVal = curBinding.get(thKey);
+            }
+            else if (curBinding.containsKey(m_theoremRegistry
+                    .getRootSymbolForSymbol(thKey))) {
+                thVal =
+                        curBinding.get(m_theoremRegistry
+                                .getRootSymbolForSymbol(thKey));
+            }
+            if (thVal.equals(""))
+                return getNext();
+            MTType quanType =
+                    m_theoremRegistry.getTypeByIndex(m_theoremRegistry
+                            .getIndexForSymbol(thKey));
+            quantToLit.put(new PSymbol(quanType, null, thKey,
+                    PSymbol.Quantification.FOR_ALL), new PSymbol(quanType,
+                    null, thVal, PSymbol.Quantification.NONE));
+        }
+
+        PExp modifiedInsert = m_insertExpr.substitute(quantToLit);
+        modifiedInsert = m_lastVC.getConjunct().find(modifiedInsert);
+        // Discard s = s
+        if ((modifiedInsert.getTopLevelOperation().equals("=") && modifiedInsert
+                .getSubExpressions().get(0).toString().equals(
+                        modifiedInsert.getSubExpressions().get(1).toString()))) {
+            return getNext();
+        }
+        return new PExpWithScore(modifiedInsert, m_theorem.toString());
     }
 
     // variables to bind are the quantified vars the quantified statement
@@ -343,12 +318,53 @@ public class TheoremCongruenceClosureImpl {
         Set<java.util.Map<String, String>> results =
                 new HashSet<java.util.Map<String, String>>();
         java.util.Map<String, String> initBindings = getInitBindings();
-        results.add(initBindings);
-        for (NormalizedAtomicExpressionMapImpl e_t : m_matchConj.m_exprList) {
-            results =
-                    vc.getConjunct().getMatchesForOverideSet(e_t,
-                            m_theoremRegistry, results);
+        if (m_theoremRegistry.m_symbolToIndex.containsKey("_g")) {
+            // each goal gets a new map with _g bound to the goal
+            for (String g : vc.m_goal) {
+                java.util.Map<String, String> gBinds =
+                        new HashMap<String, String>(initBindings);
+                gBinds.put("_g", g);
+                results.add(gBinds);
+            }
         }
+        else {
+            results.add(initBindings);
+        }
+        for (NormalizedAtomicExpression e_t : m_matchRequired) {
+            results = vc.getConjunct().getMatchesForOverrideSet(e_t, results);
+        }
+        Set<java.util.Map<String, String>> t_results;
+        for (NormalizedAtomicExpression e_t : m_noMatchRequired) {
+            t_results = vc.getConjunct().getMatchesForOverrideSet(e_t, results);
+            if (t_results.isEmpty())
+                continue;
+            else
+                results = t_results;
+        }
+
+        /*        Set<NormalizedAtomicExpression> postSet = new HashSet<NormalizedAtomicExpression>();
+         for (NormalizedAtomicExpression e_t : m_matchConj.m_expSet) {
+         if (!m_matchRequired.contains(e_t)) {
+         // Not in match required.  Doesn't contain _g.  Must have quantified argument.
+         for (PSymbol pq : m_insertExpr.getQuantifiedVariables()) {
+         if(pq.toString().equals("_g")) continue;
+         if (e_t.getOperatorsAsStrings(false).containsKey(pq.toString())) {
+         postSet.add(e_t);
+         break;
+         }
+         }
+         } else {
+         results =
+         vc.getConjunct().getMatchesForOverrideSet(e_t, results);
+         }
+         }
+         Set<java.util.Map<String, String>> t_results;
+         for (NormalizedAtomicExpression p_t : postSet) {
+         t_results = vc.getConjunct().getMatchesForOverrideSet(p_t, results);
+         if (t_results.isEmpty()) continue;
+         else results = t_results;
+         }
+         */
         return results;
     }
 

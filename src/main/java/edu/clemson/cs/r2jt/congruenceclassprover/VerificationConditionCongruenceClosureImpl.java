@@ -12,10 +12,8 @@
  */
 package edu.clemson.cs.r2jt.congruenceclassprover;
 
+import edu.clemson.cs.r2jt.rewriteprover.*;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PExp;
-import edu.clemson.cs.r2jt.rewriteprover.Antecedent;
-import edu.clemson.cs.r2jt.rewriteprover.Consequent;
-import edu.clemson.cs.r2jt.rewriteprover.VC;
 import edu.clemson.cs.r2jt.rewriteprover.absyn.PSymbol;
 import edu.clemson.cs.r2jt.typeandpopulate.*;
 import edu.clemson.cs.r2jt.typeandpopulate.entry.MathSymbolEntry;
@@ -36,11 +34,11 @@ public class VerificationConditionCongruenceClosureImpl {
     private final Antecedent m_antecedent;
     private final Consequent m_consequent;
     private final ConjunctionOfNormalizedAtomicExpressions m_conjunction;
+    private final MTType m_z;
+    private final MTType m_n;
     protected final Set<String> m_goal;
     private int m_fc_ctr = 0;
     private final boolean DOCOMPLEMENTS = false;
-    private final MTType m_z;
-    private final MTType m_n;
 
     public static enum STATUS {
         FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE
@@ -111,7 +109,6 @@ public class VerificationConditionCongruenceClosureImpl {
         PSymbol fandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
         m_conjunction.addExpression(fandfeqf);
         //m_goal.add("false");
-        m_conjunction.updateUseMap();
     }
 
     /* Ex.: p is for all k:Z, lambda0(k) = (x <= k)
@@ -349,34 +346,16 @@ public class VerificationConditionCongruenceClosureImpl {
         return m_registry;
     }
 
-    protected Set<String> getFunctionNames() {
-        return m_registry.getFunctionNames();
-    }
-
-    protected Map<String, Integer> getGoalSymbols() {
-        // even score if goal is true = false
-        HashSet<String> goalSymbolSet = new HashSet<String>();
-        for (String goal : m_goal) {
-            goalSymbolSet.add(goal);
-
-        }
-        Map<String, Integer> rMap =
-                m_conjunction.getSymbolProximity(goalSymbolSet);
-        return rMap;
-    }
-
     public STATUS isProved() {
-        if (m_conjunction.m_evaluates_to_false)
+        if (m_conjunction.m_evaluates_to_false) {
             return STATUS.FALSE_ASSUMPTION; // this doesn't mean P->Q = False, it just means P = false
-        int t = m_registry.getIndexForSymbol("true");
-        for (String gS : m_goal) {
-            int g = m_registry.getIndexForSymbol(gS);
-            // check each goal has same root
-            if (g == t) {
-                return STATUS.PROVED;
-            }
         }
-        return STATUS.STILL_EVALUATING;
+        else if (m_goal.contains("true")) {
+            return STATUS.PROVED;
+        }
+        else {
+            return STATUS.STILL_EVALUATING;
+        }
     }
 
     private void addPExp(Iterator<PExp> pit, boolean inAntecedent) {
@@ -402,7 +381,7 @@ public class VerificationConditionCongruenceClosureImpl {
 
     @Override
     public String toString() {
-        String r = "\n" + m_VC_string + "\n" + m_name + "\n" + m_conjunction;
+        String r = "\n" + "\n" + m_name + "\n" + m_conjunction;
         for (PExp pq : forAllQuantifiedPExps) {
             r += pq.toString() + "\n";
         }
