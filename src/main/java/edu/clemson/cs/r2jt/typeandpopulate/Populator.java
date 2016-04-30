@@ -115,6 +115,13 @@ public class Populator extends TreeWalkerVisitor {
     private ScopeBuilder myPreFacilityOperationDecScope;
 
     /**
+     * <p>While we walk the children of a FacilityOperationDec or ProcedureDec, this will
+     * initially be set to null. If we detect a recursive call to itself, this will
+     * be set to the location of the first recursive call.</p>
+     */
+    private Location myRecursiveCallLocation;
+
+    /**
      * <p>While we walk the children of a direct definition, this will be set
      * with a pointer to the definition declaration we are walking, otherwise
      * it will be null.  Note that definitions cannot be nested, so there's
@@ -407,10 +414,17 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preFacilityOperationDec(FacilityOperationDec dec) {
+        // Store the innermost active scope for future use.
         myPreFacilityOperationDecScope = myBuilder.getInnermostActiveScope();
+
         myBuilder.startScope(dec);
         myCurrentParameters = new LinkedList<ProgramParameterEntry>();
         myCurrentPrivateProcedure = dec;
+
+        // This will be set to a location if we are recursively calling ourselves.
+        // Once we finish walking all the children, we will make sure this dec
+        // is declared as recursive.
+        myRecursiveCallLocation = null;
     }
 
     @Override
@@ -451,6 +465,13 @@ public class Populator extends TreeWalkerVisitor {
             OperationEntry op =
                     myBuilder.getInnermostActiveScope().queryForOne(
                             new OperationQuery(null, name, argTypes));
+
+            // Check to see if we are recursively calling ourselves
+            if (myCorrespondingOperation != null
+                    && myCorrespondingOperation.equals(op)
+                    && myRecursiveCallLocation == null) {
+                myRecursiveCallLocation = stmt.getName().getLocation();
+            }
         }
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException("No operation found corresponding "
@@ -512,6 +533,11 @@ public class Populator extends TreeWalkerVisitor {
             myBuilder.startScope(dec);
 
             myCurrentParameters = new LinkedList<ProgramParameterEntry>();
+
+            // This will be set to a location if we are recursively calling ourselves.
+            // Once we finish walking all the children, we will make sure this dec
+            // is declared as recursive.
+            myRecursiveCallLocation = null;
         }
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException("Procedure "
@@ -624,20 +650,14 @@ public class Populator extends TreeWalkerVisitor {
             }
         }
 
-        // If there is a decreasing clause, check to see if it is an "N"
-        /*if (dec.getRecursive()) {
-            MathSymbolEntry intendedEntry =
-                    getIntendedEntry(null, "N", dec.getDecreasing());
-            try {
-                if (!dec.getDecreasing().getMathType().isSubtypeOf(
-                        intendedEntry.getTypeValue())) {
-                    expected(dec.getDecreasing(), intendedEntry.getTypeValue());
-                }
-            }
-            catch (SymbolNotOfKindTypeException e) {
-                notAType(intendedEntry, dec.getLocation());
-            }
-        }*/
+        // If the procedure has not been declared as recursive, we need to
+        // make sure that none of the statements is a recursive call to itself.
+        if (!dec.getRecursive() && myRecursiveCallLocation != null) {
+            throw new SourceErrorException(
+                    "Procedure not declared as recursive, "
+                            + "but makes a recursive call to itself.",
+                    myRecursiveCallLocation);
+        }
 
         try {
             myBuilder.getInnermostActiveScope().addProcedure(
@@ -649,6 +669,7 @@ public class Populator extends TreeWalkerVisitor {
         }
 
         myCurrentParameters = null;
+        myRecursiveCallLocation = null;
     }
 
     @Override
@@ -782,15 +803,59 @@ public class Populator extends TreeWalkerVisitor {
             putOperationLikeThingInSymbolTable(dec.getName(),
                     dec.getReturnTy(), myCurrentPrivateProcedure,
                     myPreFacilityOperationDecScope);
+
+            // Similar to preProcedureDec, need to store the OperationEntry for
+            // walking the statements.
+            try {
+                //Figure out what Operation we correspond to (we don't use
+                //OperationQuery because we want to check parameter types
+                //separately in postProcedureDec)
+                myCorrespondingOperation =
+                        myBuilder
+                                .getInnermostActiveScope()
+                                .queryForOne(
+                                        new NameAndEntryTypeQuery(
+                                                null,
+                                                dec.getName(),
+                                                OperationEntry.class,
+                                                ImportStrategy.IMPORT_NAMED,
+                                                FacilityStrategy.FACILITY_IGNORE,
+                                                false)).toOperationEntry(
+                                        dec.getLocation());
+            }
+            catch (NoSuchSymbolException nsse) {
+                //We just added this, so this is not possible.
+                throw new RuntimeException(
+                        "Cannot find an Operation with name "
+                                + dec.getName().getName() + "?");
+            }
+            catch (DuplicateSymbolException dse) {
+                //We should have caught this before now, like when we defined the
+                //duplicate Operation
+                throw new RuntimeException("Duplicate Operations for "
+                        + dec.getName().getName() + "?");
+            }
         }
     }
 
     @Override
     public void postFacilityOperationDec(FacilityOperationDec dec) {
         myBuilder.endScope();
+
+        // If the facility operation has not been declared as recursive,
+        // we need to make sure that none of the statements is
+        // a recursive call to itself.
+        if (!dec.getRecursive() && myRecursiveCallLocation != null) {
+            throw new SourceErrorException(
+                    "Facility operation not declared as recursive, "
+                            + "but makes a recursive call to itself.",
+                    myRecursiveCallLocation);
+        }
+
         myPreFacilityOperationDecScope = null;
         myCurrentParameters = null;
         myCurrentPrivateProcedure = null;
+        myRecursiveCallLocation = null;
     }
 
     private void putOperationLikeThingInSymbolTable(PosSymbol name,
@@ -1189,6 +1254,13 @@ public class Populator extends TreeWalkerVisitor {
 
             node.setProgramType(op.getReturnType());
             node.setMathType(op.getReturnType().toMath());
+
+            // Check to see if we are recursively calling ourselves
+            if (myCorrespondingOperation != null
+                    && myCorrespondingOperation.equals(op)
+                    && myRecursiveCallLocation == null) {
+                myRecursiveCallLocation = node.getName().getLocation();
+            }
         }
         catch (NoSuchSymbolException nsse) {
             throw new SourceErrorException("No operation found corresponding "
