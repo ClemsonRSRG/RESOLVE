@@ -1,7 +1,7 @@
 #
 # Continuous integration settings for Travis CI
 #
-sudo: true
+sudo: false
 branches:
   only:
     - master
@@ -21,6 +21,8 @@ env:
   - SCRIPT=runFormatter
   - SCRIPT=runLicensePlugin
   - SCRIPT=runJUnitTests
+before_script:
+ - chmod +x bin/$SCRIPT
 script:
   - bin/$SCRIPT
 cache:
