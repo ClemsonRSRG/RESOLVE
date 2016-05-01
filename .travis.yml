@@ -1,7 +1,7 @@
 #
 # Continuous integration settings for Travis CI
 #
-sudo: required
+sudo: true
 branches:
   only:
     - master
@@ -10,6 +10,9 @@ branches:
 language: java
 jdk:
   - oraclejdk7
+
+# Don't run the initial maven install
+install: true
 
 # The following settings allow us to run concurrent tests using the scripts in the "bin" folder.
 # It also caches things related to Maven. If caching errors occur, please clear the cache on the
