@@ -1,0 +1,12 @@
+#! /bin/bash
+# This script runs the license plugin to make sure all source files have the appropriate license header.
+
+# Run the check goal for the license plugin
+mvn clean license:check
+
+# Use git-diff to ensure there are no more changes
+git diff --exit-code || (
+  echo "[ERROR]: There are differences in the files listed above."
+  echo "Please run the license plugin before submitting a pull request."
+  false
+)
