@@ -4,6 +4,9 @@
 # Run the format goal for the java-formatter plugin
 mvn clean java-formatter:format
 
+# Change the permission of this file back to 644
+chmod 644 bin/runFormatter
+
 # Use git-diff to ensure there are no more changes
 git diff --exit-code || (
   echo "[ERROR]: There are differences in the files listed above."
