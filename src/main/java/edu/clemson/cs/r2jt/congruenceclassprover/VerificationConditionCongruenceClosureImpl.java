@@ -48,7 +48,7 @@ public class VerificationConditionCongruenceClosureImpl {
 
     // currently support only unchained equalities, so each sublist is size 2.
     public VerificationConditionCongruenceClosureImpl(TypeGraph g, VC vc,
-            MTType z, MTType n) {
+                                                      MTType z, MTType n) {
         m_typegraph = g;
         m_name = vc.getName();
         m_VC_string = vc.toString();
@@ -71,15 +71,21 @@ public class VerificationConditionCongruenceClosureImpl {
             //addPExp(forAllQuantifiedPExps.iterator(),true);
             makeSetAssertions(vc);
         }
-        // seed with not(false)
+        // seed with (true = false) = false
         ArrayList<PExp> args = new ArrayList<PExp>();
         PSymbol fls = new PSymbol(m_typegraph.BOOLEAN, null, "false");
-        args.add(fls);
-        PSymbol nF = new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
-        m_conjunction.addExpression(nF);
-        args.clear();
-        // seed with true and true.  Need this for search: x and y, when x and y are both true
         PSymbol tr = new PSymbol(m_typegraph.BOOLEAN, null, "true");
+        args.add(tr);
+        args.add(fls);
+        PSymbol trEqF = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+        args.clear();
+        args.add(trEqF);
+        args.add(fls);
+        PSymbol trEqFEqF = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+        args.clear();
+        m_conjunction.addExpression(trEqFEqF);
+
+        // seed with true and true.  Need this for search: x and y, when x and y are both true
         args.add(tr);
         args.add(tr);
         PSymbol tandt = new PSymbol(m_typegraph.BOOLEAN, null, "and", args);
@@ -218,9 +224,9 @@ public class VerificationConditionCongruenceClosureImpl {
             PSymbol qFun =
                     new PSymbol(new MTFunction(m_typegraph,
                             m_typegraph.BOOLEAN, px.getQuantifiedVariables()
-                                    .iterator().next().getType()), null,
+                            .iterator().next().getType()), null,
                             "ConFunc" + (++c_count), new ArrayList<PExp>(px
-                                    .getQuantifiedVariables()));
+                            .getQuantifiedVariables()));
             ArrayList<PExp> args = new ArrayList<PExp>();
             args.add(qFun);
             args.add(px);

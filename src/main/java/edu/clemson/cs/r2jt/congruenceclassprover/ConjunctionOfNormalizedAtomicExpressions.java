@@ -37,7 +37,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      *                 reference. This class will add entries to the registry if needed.
      */
     public ConjunctionOfNormalizedAtomicExpressions(Registry registry,
-            VerificationConditionCongruenceClosureImpl vc) {
+                                                    VerificationConditionCongruenceClosureImpl vc) {
         m_registry = registry;
         m_expSet =
                 new HashMap<NormalizedAtomicExpression, NormalizedAtomicExpression>(
@@ -61,7 +61,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     protected String addExpressionAndTrackChanges(PExp expression,
-            long timeToEnd, String justification) {
+                                                  long timeToEnd, String justification) {
         m_timeToEnd = timeToEnd;
         m_timeToEnd = Long.MAX_VALUE;
         m_current_justification = justification;
@@ -91,7 +91,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             PExp fcur = find(cur);
             if (fcur.getSubExpressions().size() > 0
                     || !m_registry.m_symbolToIndex.containsKey(fcur
-                            .getTopLevelOperation()))
+                    .getTopLevelOperation()))
                 irreducable = true;
             args.add(fcur);
         }
@@ -395,12 +395,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     private void applyBuiltInLogic(NormalizedAtomicExpression nm,
-            Stack<Integer> tank) {
+                                   Stack<Integer> tank) {
         // turn off if this is not part of a VC
         if (m_VC == null)
             return;
         int arity = nm.getArity();
-        if (arity < 1 || 2 < arity)
+        if (arity != 2)
             return;
         String op = nm.readSymbol(0);
         int arg1 = nm.readPosition(1);
@@ -411,43 +411,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         int fl = m_registry.getIndexForSymbol("false");
         // =,true,false,not.  recorded first in reg. logic relation args (and, or, =) are ordered.
 
-        // arity 1 guard: return if all constant or all vars
-        if (arity == 1 && (arg1 == tr || arg1 == fl)
-                && (rhs == tr || rhs == fl))
-            return;
-        if (arity == 1 && !(arg1 == tr || arg1 == fl)
-                && !(rhs == tr || rhs == fl))
-            return;
-        if (op.equals("not")) {
-            // constant rhs
-            if (rhs == tr) {
-                // not p = true, false/p
-                tank.push(fl);
-                tank.push(arg1);
-                return;
-            }
-            if (rhs == fl) {
-                // not p = false, true/p
-                tank.push(tr);
-                tank.push(arg1);
-                return;
-            }
-            // constant arg
-            if (arg1 == tr) {
-                // not(tr) = p, false/p
-                tank.push(fl);
-                tank.push(rhs);
-                return;
-            }
-            if (arg1 == fl) {
-                // not(fl) = p, true/p
-                tank.push(tr);
-                tank.push(rhs);
-                return;
-            }
-        }
-        if (arity < 2)
-            return;
         int arg2 = nm.readPosition(2);
         // arity 2 guard: return if all constant
         if ((arg1 == tr || arg1 == fl) && (arg2 == tr || arg2 == fl)
