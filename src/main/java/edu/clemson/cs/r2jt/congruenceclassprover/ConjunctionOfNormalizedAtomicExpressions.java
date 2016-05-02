@@ -400,7 +400,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (m_VC == null)
             return;
         int arity = nm.getArity();
-        if (arity < 1 || 2 < arity)
+        if (arity!=2)
             return;
         String op = nm.readSymbol(0);
         int arg1 = nm.readPosition(1);
@@ -411,43 +411,6 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         int fl = m_registry.getIndexForSymbol("false");
         // =,true,false,not.  recorded first in reg. logic relation args (and, or, =) are ordered.
 
-        // arity 1 guard: return if all constant or all vars
-        if (arity == 1 && (arg1 == tr || arg1 == fl)
-                && (rhs == tr || rhs == fl))
-            return;
-        if (arity == 1 && !(arg1 == tr || arg1 == fl)
-                && !(rhs == tr || rhs == fl))
-            return;
-        if (op.equals("not")) {
-            // constant rhs
-            if (rhs == tr) {
-                // not p = true, false/p
-                tank.push(fl);
-                tank.push(arg1);
-                return;
-            }
-            if (rhs == fl) {
-                // not p = false, true/p
-                tank.push(tr);
-                tank.push(arg1);
-                return;
-            }
-            // constant arg
-            if (arg1 == tr) {
-                // not(tr) = p, false/p
-                tank.push(fl);
-                tank.push(rhs);
-                return;
-            }
-            if (arg1 == fl) {
-                // not(fl) = p, true/p
-                tank.push(tr);
-                tank.push(rhs);
-                return;
-            }
-        }
-        if (arity < 2)
-            return;
         int arg2 = nm.readPosition(2);
         // arity 2 guard: return if all constant
         if ((arg1 == tr || arg1 == fl) && (arg2 == tr || arg2 == fl)
