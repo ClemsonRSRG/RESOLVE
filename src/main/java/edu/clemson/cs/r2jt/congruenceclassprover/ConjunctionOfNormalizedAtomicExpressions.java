@@ -37,7 +37,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      *                 reference. This class will add entries to the registry if needed.
      */
     public ConjunctionOfNormalizedAtomicExpressions(Registry registry,
-                                                    VerificationConditionCongruenceClosureImpl vc) {
+            VerificationConditionCongruenceClosureImpl vc) {
         m_registry = registry;
         m_expSet =
                 new HashMap<NormalizedAtomicExpression, NormalizedAtomicExpression>(
@@ -61,7 +61,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     protected String addExpressionAndTrackChanges(PExp expression,
-                                                  long timeToEnd, String justification) {
+            long timeToEnd, String justification) {
         m_timeToEnd = timeToEnd;
         m_timeToEnd = Long.MAX_VALUE;
         m_current_justification = justification;
@@ -91,7 +91,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             PExp fcur = find(cur);
             if (fcur.getSubExpressions().size() > 0
                     || !m_registry.m_symbolToIndex.containsKey(fcur
-                    .getTopLevelOperation()))
+                            .getTopLevelOperation()))
                 irreducable = true;
             args.add(fcur);
         }
@@ -395,7 +395,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
     }
 
     private void applyBuiltInLogic(NormalizedAtomicExpression nm,
-                                   Stack<Integer> tank) {
+            Stack<Integer> tank) {
         // turn off if this is not part of a VC
         if (m_VC == null)
             return;

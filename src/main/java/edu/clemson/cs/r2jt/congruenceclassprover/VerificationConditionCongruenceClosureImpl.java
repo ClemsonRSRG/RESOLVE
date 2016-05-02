@@ -48,7 +48,7 @@ public class VerificationConditionCongruenceClosureImpl {
 
     // currently support only unchained equalities, so each sublist is size 2.
     public VerificationConditionCongruenceClosureImpl(TypeGraph g, VC vc,
-                                                      MTType z, MTType n) {
+            MTType z, MTType n) {
         m_typegraph = g;
         m_name = vc.getName();
         m_VC_string = vc.toString();
@@ -224,9 +224,9 @@ public class VerificationConditionCongruenceClosureImpl {
             PSymbol qFun =
                     new PSymbol(new MTFunction(m_typegraph,
                             m_typegraph.BOOLEAN, px.getQuantifiedVariables()
-                            .iterator().next().getType()), null,
+                                    .iterator().next().getType()), null,
                             "ConFunc" + (++c_count), new ArrayList<PExp>(px
-                            .getQuantifiedVariables()));
+                                    .getQuantifiedVariables()));
             ArrayList<PExp> args = new ArrayList<PExp>();
             args.add(qFun);
             args.add(px);
