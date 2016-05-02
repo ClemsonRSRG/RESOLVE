@@ -1,7 +1,7 @@
 /**
  * TypeFunctionExp.java
  * ---------------------------------
- * Copyright (c) 2015
+ * Copyright (c) 2016
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University

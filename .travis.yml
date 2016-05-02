@@ -1,0 +1,30 @@
+#
+# Continuous integration settings for Travis CI
+#
+sudo: false
+branches:
+  only:
+    - master
+
+# Make sure we compile using Java JDK7, because the RESOLVE WebIDE does not support JDK8.
+language: java
+jdk:
+  - oraclejdk7
+
+# Don't run the initial maven install
+install: true
+
+# The following settings allow us to run concurrent tests using the scripts in the "bin" folder.
+# It also caches things related to Maven. If caching errors occur, please clear the cache on the
+# Travis CI website.
+env:
+  - SCRIPT=runFormatter
+  - SCRIPT=runLicensePlugin
+  - SCRIPT=runJUnitTests
+before_script:
+ - chmod +x bin/$SCRIPT
+script:
+  - bin/$SCRIPT
+cache:
+  directories:
+      - $HOME/.m2
