@@ -35,14 +35,8 @@ public class Utilities {
             PSymbol eqExp = new PSymbol(g.BOOLEAN, null, "=", argList);
             argList.clear();
             argList.add(eqExp);
-            argList.add(new PSymbol(g.BOOLEAN, null, "false"));
-            PSymbol pEqFalse = new PSymbol(g.BOOLEAN, null, "=", argList);
-            return pEqFalse;
-        }
-        else if (pTop.equals("not")) {
-            argList.add(new PSymbol(g.BOOLEAN, null, "false"));
-            PSymbol pEqFalse = new PSymbol(g.BOOLEAN, null, "=", argList);
-            return pEqFalse;
+            PSymbol notEqExp = new PSymbol(g.BOOLEAN, null, "not", argList);
+            return notEqExp;
         }
         else if (pTop.equals(">=")) {
             argsTemp.add(argList.get(1));

@@ -71,21 +71,15 @@ public class VerificationConditionCongruenceClosureImpl {
             //addPExp(forAllQuantifiedPExps.iterator(),true);
             makeSetAssertions(vc);
         }
-        // seed with (true = false) = false
+        // seed with not(false)
         ArrayList<PExp> args = new ArrayList<PExp>();
         PSymbol fls = new PSymbol(m_typegraph.BOOLEAN, null, "false");
-        PSymbol tr = new PSymbol(m_typegraph.BOOLEAN, null, "true");
-        args.add(tr);
         args.add(fls);
-        PSymbol trEqF = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+        PSymbol nF = new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
+        m_conjunction.addExpression(nF);
         args.clear();
-        args.add(trEqF);
-        args.add(fls);
-        PSymbol trEqFEqF = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
-        args.clear();
-        m_conjunction.addExpression(trEqFEqF);
-
         // seed with true and true.  Need this for search: x and y, when x and y are both true
+        PSymbol tr = new PSymbol(m_typegraph.BOOLEAN, null, "true");
         args.add(tr);
         args.add(tr);
         PSymbol tandt = new PSymbol(m_typegraph.BOOLEAN, null, "and", args);

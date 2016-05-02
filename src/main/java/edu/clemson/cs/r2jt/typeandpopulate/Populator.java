@@ -101,18 +101,7 @@ public class Populator extends TreeWalkerVisitor {
      * to the ProcedureDec.  Otherwise it will be null.</p>
      */
     private ProcedureDec myCurrentProcedure;
-
-    /**
-     * <p>While we walk the children of a FacilityOperationDec, this will be set
-     * to the FacilityOperationDec.  Otherwise it will be null.</p>
-     */
     private FacilityOperationDec myCurrentPrivateProcedure;
-
-    /**
-     * <p>While we walk the children of a FacilityOperationDec, this will be set
-     * to the scope prior to the FacilityOperationDec scope.  Otherwise it will be null.</p>
-     */
-    private ScopeBuilder myPreFacilityOperationDecScope;
 
     /**
      * <p>While we walk the children of a direct definition, this will be set
@@ -407,10 +396,31 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preFacilityOperationDec(FacilityOperationDec dec) {
-        myPreFacilityOperationDecScope = myBuilder.getInnermostActiveScope();
         myBuilder.startScope(dec);
         myCurrentParameters = new LinkedList<ProgramParameterEntry>();
         myCurrentPrivateProcedure = dec;
+    }
+
+    @Override
+    public void midFacilityOperationDec(FacilityOperationDec node,
+            ResolveConceptualElement prevChild,
+            ResolveConceptualElement nextChild) {
+
+        if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
+            try {
+                //Inside the operation's assertions, the name of the operation
+                //refers to its return value
+                myBuilder.getInnermostActiveScope().addProgramVariable(
+                        node.getName().getName(), node,
+                        node.getReturnTy().getProgramTypeValue());
+            }
+            catch (DuplicateSymbolException dse) {
+                //This shouldn't be possible--the operation declaration has a 
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                throw new RuntimeException(dse);
+            }
+        }
     }
 
     @Override
@@ -653,12 +663,9 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void preOperationDec(OperationDec dec) {
-        // If this is not an OperationDec wrapped inside a FacilityOperationDec,
-        // then we need to start a new scope and create a new list for parameter entries.
-        if (myCurrentPrivateProcedure == null) {
-            myBuilder.startScope(dec);
-            myCurrentParameters = new LinkedList<ProgramParameterEntry>();
-        }
+        myBuilder.startScope(dec);
+
+        myCurrentParameters = new LinkedList<ProgramParameterEntry>();
     }
 
     // hampton
@@ -701,41 +708,19 @@ public class Populator extends TreeWalkerVisitor {
             ResolveConceptualElement prevChild,
             ResolveConceptualElement nextChild) {
 
-        // If this is not an OperationDec wrapped inside a FacilityOperationDec,
-        // then we need to add the return variable as a mathematical symbol to the OperationDec scope.
-        if (myCurrentPrivateProcedure == null) {
-            if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
-                try {
-                    //Inside the operation's assertions, the name of the operation
-                    //refers to its return value
-                    myBuilder.getInnermostActiveScope().addBinding(
-                            node.getName().getName(), node,
-                            node.getReturnTy().getMathTypeValue());
-                }
-                catch (DuplicateSymbolException dse) {
-                    //This shouldn't be possible--the operation declaration has a
-                    //scope all its own and we're the first ones to get to
-                    //introduce anything
-                    throw new RuntimeException(dse);
-                }
+        if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
+            try {
+                //Inside the operation's assertions, the name of the operation
+                //refers to its return value
+                myBuilder.getInnermostActiveScope().addBinding(
+                        node.getName().getName(), node,
+                        node.getReturnTy().getMathTypeValue());
             }
-        }
-        // Else we need to add the return variable as a programming variable to the FacilityOperationDec scope.
-        else {
-            if (prevChild == node.getReturnTy() && node.getReturnTy() != null) {
-                try {
-                    //Inside the operation's assertions, the name of the operation
-                    //refers to its return value
-                    myBuilder.getInnermostActiveScope().addProgramVariable(
-                            node.getName().getName(), node,
-                            node.getReturnTy().getProgramTypeValue());
-                }
-                catch (DuplicateSymbolException dse) {
-                    //This shouldn't be possible--the operation declaration has a
-                    //scope all its own and we're the first ones to get to
-                    //introduce anything
-                    throw new RuntimeException(dse);
-                }
+            catch (DuplicateSymbolException dse) {
+                //This shouldn't be possible--the operation declaration has a 
+                //scope all its own and we're the first ones to get to
+                //introduce anything
+                throw new RuntimeException(dse);
             }
         }
     }
@@ -765,37 +750,27 @@ public class Populator extends TreeWalkerVisitor {
 
     @Override
     public void postOperationDec(OperationDec dec) {
-        // If this is not an OperationDec wrapped inside a FacilityOperationDec,
-        // we need to end the current scope, add the operation declaration using
-        // the inner most active scope and set the parameter list to null.
-        if (myCurrentPrivateProcedure == null) {
-            myBuilder.endScope();
+        myBuilder.endScope();
 
-            putOperationLikeThingInSymbolTable(dec.getName(),
-                    dec.getReturnTy(), dec, myBuilder.getInnermostActiveScope());
+        putOperationLikeThingInSymbolTable(dec.getName(), dec.getReturnTy(),
+                dec);
 
-            myCurrentParameters = null;
-        }
-        // Else we need to add the FacilityOperationDec to the SymbolTable
-        // using the stored pre-FacilityOperationDec scope.
-        else {
-            putOperationLikeThingInSymbolTable(dec.getName(),
-                    dec.getReturnTy(), myCurrentPrivateProcedure,
-                    myPreFacilityOperationDecScope);
-        }
+        myCurrentParameters = null;
     }
 
     @Override
     public void postFacilityOperationDec(FacilityOperationDec dec) {
         myBuilder.endScope();
-        myPreFacilityOperationDecScope = null;
+
+        putOperationLikeThingInSymbolTable(dec.getName(), dec.getReturnTy(),
+                dec);
+
         myCurrentParameters = null;
         myCurrentPrivateProcedure = null;
     }
 
     private void putOperationLikeThingInSymbolTable(PosSymbol name,
-            Ty returnTy, ResolveConceptualElement dec,
-            ScopeBuilder innermostActiveScope) {
+            Ty returnTy, ResolveConceptualElement dec) {
         try {
             PTType returnType;
             if (returnTy == null) {
@@ -805,8 +780,8 @@ public class Populator extends TreeWalkerVisitor {
                 returnType = returnTy.getProgramTypeValue();
             }
 
-            innermostActiveScope.addOperation(name.getName(), dec,
-                    myCurrentParameters, returnType);
+            myBuilder.getInnermostActiveScope().addOperation(name.getName(),
+                    dec, myCurrentParameters, returnType);
         }
         catch (DuplicateSymbolException dse) {
             duplicateSymbol(name.getName(), name.getLocation());
