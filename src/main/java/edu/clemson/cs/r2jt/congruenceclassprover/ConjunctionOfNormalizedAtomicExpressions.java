@@ -400,7 +400,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         if (m_VC == null)
             return;
         int arity = nm.getArity();
-        if (arity!=2)
+        if (arity != 2)
             return;
         String op = nm.readSymbol(0);
         int arg1 = nm.readPosition(1);

@@ -77,11 +77,11 @@ public class VerificationConditionCongruenceClosureImpl {
         PSymbol tr = new PSymbol(m_typegraph.BOOLEAN, null, "true");
         args.add(tr);
         args.add(fls);
-        PSymbol trEqF = new PSymbol(m_typegraph.BOOLEAN,null,"=",args);
+        PSymbol trEqF = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
         args.clear();
         args.add(trEqF);
         args.add(fls);
-        PSymbol trEqFEqF = new PSymbol(m_typegraph.BOOLEAN,null,"=", args);
+        PSymbol trEqFEqF = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
         args.clear();
         m_conjunction.addExpression(trEqFEqF);
 

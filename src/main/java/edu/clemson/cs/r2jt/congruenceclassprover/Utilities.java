@@ -39,7 +39,7 @@ public class Utilities {
             PSymbol pEqFalse = new PSymbol(g.BOOLEAN, null, "=", argList);
             return pEqFalse;
         }
-        else if(pTop.equals("not")){
+        else if (pTop.equals("not")) {
             argList.add(new PSymbol(g.BOOLEAN, null, "false"));
             PSymbol pEqFalse = new PSymbol(g.BOOLEAN, null, "=", argList);
             return pEqFalse;
