@@ -1,7 +1,7 @@
 /**
  * FacilityOperationDec.java
  * ---------------------------------
- * Copyright (c) 2015
+ * Copyright (c) 2016
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -22,23 +22,8 @@ public class FacilityOperationDec extends Dec {
     // Variables
     // ===========================================================
 
-    /** The name member. */
-    private PosSymbol name;
-
-    /** The parameters member. */
-    private List<ParameterVarDec> parameters;
-
-    /** The returnTy member. */
-    private Ty returnTy;
-
-    /** The stateVars member. */
-    private List<AffectsItem> stateVars;
-
-    /** The requires member. */
-    private Exp requires;
-
-    /** The ensures member. */
-    private Exp ensures;
+    /** The operation declaration member. */
+    private OperationDec operationDec;
 
     /** The decreasing member. */
     private Exp decreasing;
@@ -70,12 +55,9 @@ public class FacilityOperationDec extends Dec {
             Exp decreasing, List<FacilityDec> facilities,
             List<VarDec> variables, List<AuxVarDec> aux_variables,
             List<Statement> statements) {
-        this.name = name;
-        this.parameters = parameters;
-        this.returnTy = returnTy;
-        this.stateVars = stateVars;
-        this.requires = requires;
-        this.ensures = ensures;
+        this.operationDec =
+                new OperationDec(name, parameters, returnTy, stateVars,
+                        requires, ensures);
         this.decreasing = decreasing;
         this.facilities = facilities;
         this.variables = variables;
@@ -90,12 +72,9 @@ public class FacilityOperationDec extends Dec {
             Exp decreasing, List<FacilityDec> facilities,
             List<VarDec> variables, List<AuxVarDec> aux_variables,
             List<Statement> statements, boolean recursive) {
-        this.name = name;
-        this.parameters = parameters;
-        this.returnTy = returnTy;
-        this.stateVars = stateVars;
-        this.requires = requires;
-        this.ensures = ensures;
+        this.operationDec =
+                new OperationDec(name, parameters, returnTy, stateVars,
+                        requires, ensures);
         this.decreasing = decreasing;
         this.facilities = facilities;
         this.variables = variables;
@@ -114,32 +93,32 @@ public class FacilityOperationDec extends Dec {
 
     /** Returns the value of the name variable. */
     public PosSymbol getName() {
-        return name;
+        return operationDec.getName();
     }
 
     /** Returns the value of the parameters variable. */
     public List<ParameterVarDec> getParameters() {
-        return parameters;
+        return operationDec.getParameters();
     }
 
     /** Returns the value of the returnTy variable. */
     public Ty getReturnTy() {
-        return returnTy;
+        return operationDec.getReturnTy();
     }
 
     /** Returns the value of the stateVars variable. */
     public List<AffectsItem> getStateVars() {
-        return stateVars;
+        return operationDec.getStateVars();
     }
 
     /** Returns the value of the requires variable. */
     public Exp getRequires() {
-        return requires;
+        return operationDec.getRequires();
     }
 
     /** Returns the value of the ensures variable. */
     public Exp getEnsures() {
-        return ensures;
+        return operationDec.getEnsures();
     }
 
     /** Returns the value of the decreasing variable. */
@@ -198,32 +177,32 @@ public class FacilityOperationDec extends Dec {
 
     /** Sets the name variable to the specified value. */
     public void setName(PosSymbol name) {
-        this.name = name;
+        this.operationDec.setName(name);
     }
 
     /** Sets the parameters variable to the specified value. */
     public void setParameters(List<ParameterVarDec> parameters) {
-        this.parameters = parameters;
+        this.operationDec.setParameters(parameters);
     }
 
     /** Sets the returnTy variable to the specified value. */
     public void setReturnTy(Ty returnTy) {
-        this.returnTy = returnTy;
+        this.operationDec.setReturnTy(returnTy);
     }
 
     /** Sets the stateVars variable to the specified value. */
     public void setStateVars(List<AffectsItem> stateVars) {
-        this.stateVars = stateVars;
+        this.operationDec.setStateVars(stateVars);
     }
 
     /** Sets the requires variable to the specified value. */
     public void setRequires(Exp requires) {
-        this.requires = requires;
+        this.operationDec.setRequires(requires);
     }
 
     /** Sets the ensures variable to the specified value. */
     public void setEnsures(Exp ensures) {
-        this.ensures = ensures;
+        this.operationDec.setEnsures(ensures);
     }
 
     /** Sets the decreasing variable to the specified value. */
@@ -268,26 +247,32 @@ public class FacilityOperationDec extends Dec {
         printSpace(indent, sb);
         sb.append("FacilityOperationDec\n");
 
+        PosSymbol name = operationDec.getName();
         if (name != null) {
             sb.append(name.asString(indent + increment, increment));
         }
 
+        List<ParameterVarDec> parameters = operationDec.getParameters();
         if (parameters != null) {
             sb.append(parameters.asString(indent + increment, increment));
         }
 
+        Ty returnTy = operationDec.getReturnTy();
         if (returnTy != null) {
             sb.append(returnTy.asString(indent + increment, increment));
         }
 
+        List<AffectsItem> stateVars = operationDec.getStateVars();
         if (stateVars != null) {
             sb.append(stateVars.asString(indent + increment, increment));
         }
 
+        Exp requires = operationDec.getRequires();
         if (requires != null) {
             sb.append(requires.asString(indent + increment, increment));
         }
 
+        Exp ensures = operationDec.getEnsures();
         if (ensures != null) {
             sb.append(ensures.asString(indent + increment, increment));
         }

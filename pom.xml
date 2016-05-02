@@ -197,8 +197,12 @@
                     <header>${license.url}</header>
                     <excludes>
                         <exclude>.gitattributes</exclude>
+                        <exclude>.gitignore</exclude>
+                        <exclude>*.md</exclude>
                         <exclude>*.xml</exclude>
+                        <exclude>*.yml</exclude>
                         <exclude>LICENSE.txt</exclude>
+                        <exclude>bin/**</exclude>
                         <exclude>src/main/antlr3/**</exclude>
                         <exclude>src/main/antlr4/**</exclude>
                         <exclude>src/main/java/edu/clemson/cs/r2jt/parsing/.makify</exclude>

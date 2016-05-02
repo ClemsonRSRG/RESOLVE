@@ -1,6 +1,7 @@
 ###################
 # Compiled source #
 ###################
+
 target/
 *.class
 
@@ -27,7 +28,6 @@ target/
 
 # Netbeans
 nbactions*.xml
-!nbactions-RSRG-Global.xml
 
 # IntelliJ
 *.iml
@@ -39,6 +39,7 @@ nbactions*.xml
 #######################
 # Per-Developer Files #
 #######################
+
 developer.properties
 
 
