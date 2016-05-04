@@ -30,12 +30,13 @@ echo "---- DONE WITH PRE-EXECUTION SETUP ----"
 echo ""
 
 # Analyze the theory files
+# (Note: Only "Boolean_Theory" and "Integer_Theory" are checkable at the moment)
 echo ""
 echo "---- ANALYZING THEORY FILES ----"
 echo ""
 java -jar resolve.jar -nodebug Math_Units/Boolean_Theory.mt
 java -jar resolve.jar -nodebug Math_Units/Integer_Theory.mt
-java -jar resolve.jar -nodebug Math_Units/String_Theory.mt
+#java -jar resolve.jar -nodebug Math_Units/String_Theory.mt
 echo ""
 echo "---- DONE ANALYZING THEORY FILES ----"
 echo ""
