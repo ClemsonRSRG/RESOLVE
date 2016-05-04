@@ -1,0 +1,30 @@
+#! /bin/bash
+# This script runs the compiler with RESOLVE files
+
+# -e Terminates the script if a command fails
+# -u Treats unset enviroment variables as error
+# -f Disable filename expansion
+set -euf
+
+# Run the install goal
+mvn clean install
+
+# Clone the latest RESOLVE-Workspace from GitHub
+git clone https://github.com/ClemsonRSRG/RESOLVE-Workspace.git
+
+# Copy the compiler to the workspace
+cp target/RESOLVE-15.06.01a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/
+
+# Change to "Main"
+cd RESOLVE-Workspace/RESOLVE/Main/
+
+# Analyze the theory files
+echo ""
+echo "---- ANALYZING THEORY FILES ----"
+echo ""
+java -jar RESOLVE-15.01a-jar-with-dependencies.jar -nodebug Math_Units/Boolean_Theory.mt
+java -jar RESOLVE-15.01a-jar-with-dependencies.jar -nodebug Math_Units/Integer_Theory.mt
+java -jar RESOLVE-15.01a-jar-with-dependencies.jar -nodebug Math_Units/String_Theory.mt
+echo ""
+echo "---- DONE ANALYZING THEORY FILES ----"
+echo ""

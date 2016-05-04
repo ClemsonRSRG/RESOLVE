@@ -21,8 +21,9 @@ env:
   - SCRIPT=runFormatter
   - SCRIPT=runLicensePlugin
   - SCRIPT=runJUnitTests
+  - SCRIPT=runComilerTests
 before_script:
- - chmod +x bin/$SCRIPT
+  - chmod +x bin/$SCRIPT
 script:
   - bin/$SCRIPT
 cache:
