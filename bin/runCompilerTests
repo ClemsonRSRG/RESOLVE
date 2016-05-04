@@ -10,13 +10,24 @@ set -euf
 mvn clean install
 
 # Clone the latest RESOLVE-Workspace from GitHub
+echo ""
+echo "---- RETRIEVING RESOLVE WORKSPACE ----"
+echo ""
+cd ..
 git clone https://github.com/ClemsonRSRG/RESOLVE-Workspace.git
+echo ""
+echo "---- DONE RETRIEVING RESOLVE WORKSPACE ----"
+echo ""
 
-# Copy the compiler to the workspace
-cp target/RESOLVE-15.06.01a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/
-
-# Change to "Main"
+# Prepare to launch tests
+echo ""
+echo "---- PRE-EXECUTION SETUP ----"
+echo ""
+cp RESOLVE/target/RESOLVE-15.06.01a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/
 cd RESOLVE-Workspace/RESOLVE/Main/
+echo ""
+echo "---- DONE WITH PRE-EXECUTION SETUP ----"
+echo ""
 
 # Analyze the theory files
 echo ""
