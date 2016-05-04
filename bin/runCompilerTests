@@ -23,7 +23,7 @@ echo ""
 echo ""
 echo "---- PRE-EXECUTION SETUP ----"
 echo ""
-cp RESOLVE/target/RESOLVE-15.06.01a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/
+cp RESOLVE/target/RESOLVE-15.06.01a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/resolve.jar
 cd RESOLVE-Workspace/RESOLVE/Main/
 echo ""
 echo "---- DONE WITH PRE-EXECUTION SETUP ----"
@@ -33,9 +33,9 @@ echo ""
 echo ""
 echo "---- ANALYZING THEORY FILES ----"
 echo ""
-java -jar RESOLVE-15.01a-jar-with-dependencies.jar -nodebug Math_Units/Boolean_Theory.mt
-java -jar RESOLVE-15.01a-jar-with-dependencies.jar -nodebug Math_Units/Integer_Theory.mt
-java -jar RESOLVE-15.01a-jar-with-dependencies.jar -nodebug Math_Units/String_Theory.mt
+java -jar resolve.jar -nodebug Math_Units/Boolean_Theory.mt
+java -jar resolve.jar -nodebug Math_Units/Integer_Theory.mt
+java -jar resolve.jar -nodebug Math_Units/String_Theory.mt
 echo ""
 echo "---- DONE ANALYZING THEORY FILES ----"
 echo ""
