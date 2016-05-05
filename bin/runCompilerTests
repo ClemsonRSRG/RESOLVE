@@ -4,12 +4,13 @@
 # -e Terminates the script if a command fails
 # -u Treats unset enviroment variables as error
 # -f Disable filename expansion
-set -euf
+# -o pipefail Prints all pipe errors to console
+set -euf -o pipefail
 
 # Arrays containing the files we are going to run
 # the compile tests on.
-FILESTOANALYZE=$(cat bin/tests/filesToAnalyze.txt)
-FILESTOPROVE=$(cat bin/tests/filesToProve.txt)
+FILESTOANALYZE=($(cat bin/tests/filesToAnalyze.txt | tr "\n" " "))
+FILESTOPROVE=($(cat bin/tests/filesToProve.txt | tr "\n" " "))
 
 # Run the install goal
 mvn clean install
