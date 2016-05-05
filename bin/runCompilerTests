@@ -40,3 +40,13 @@ java -jar resolve.jar -nodebug Math_Units/Integer_Theory.mt
 echo ""
 echo "---- DONE ANALYZING THEORY FILES ----"
 echo ""
+
+# Generate proves the following files
+echo ""
+echo "---- GENERATING PROVES ----"
+echo ""
+java -jar resolve.jar -ccprove -nodebug -timeout 7000 -num_tries 3 Facilities/Stack_Examples/Alt_Rev_Stack.fa
+java -jar resolve.jar -ccprove -nodebug -timeout 7000 -num_tries 3 Facilities/Stack_Examples/RevStack.fa
+echo ""
+echo "---- DONE GENERATING PROVES ----"
+echo ""
