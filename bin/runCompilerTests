@@ -8,8 +8,8 @@ set -euf
 
 # Arrays containing the files we are going to run
 # the compile tests on.
-FILESTOANALYZE=(Math_Units/Boolean_Theory.mt Math_Units/Integer_Theory.mt)
-FILESTOPROVE=(Facilities/Stack_Examples/Alt_Rev_Stack.fa Facilities/Stack_Examples/RevStack.fa)
+FILESTOANALYZE=$(cat bin/tests/filesToAnalyze.txt)
+FILESTOPROVE=$(cat bin/tests/filesToProve.txt)
 
 # Run the install goal
 mvn clean install
