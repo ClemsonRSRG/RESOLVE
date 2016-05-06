@@ -138,9 +138,12 @@ public class Main {
 
                 if (!compileEnvironment.flags
                         .isFlagSet(ResolveCompiler.FLAG_WEB)) {
-                    System.out.println("RESOLVE Compiler/Verifier - " + VERSION
-                            + " Version.");
-                    System.out.println("  Use -help flag for options.");
+                    if (!compileEnvironment.flags
+                            .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+                        System.out.println("RESOLVE Compiler/Verifier - "
+                                + VERSION + " Version.");
+                        System.out.println("  Use -help flag for options.");
+                    }
                 }
                 if (compileEnvironment.flags
                         .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
@@ -250,9 +253,12 @@ public class Main {
 
                 if (!compileEnvironment.flags
                         .isFlagSet(ResolveCompiler.FLAG_WEB)) {
-                    System.out.println("RESOLVE Compiler/Verifier - " + VERSION
-                            + " Version.");
-                    System.out.println("  Use -help flag for options.");
+                    if (!compileEnvironment.flags
+                            .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
+                        System.out.println("RESOLVE Compiler/Verifier - "
+                                + VERSION + " Version.");
+                        System.out.println("  Use -help flag for options.");
+                    }
                 }
                 if (compileEnvironment.flags
                         .isFlagSet(ResolveCompiler.FLAG_NO_DEBUG)) {
