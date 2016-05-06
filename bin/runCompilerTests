@@ -10,6 +10,7 @@ set -euf -o pipefail
 # Arrays containing the files we are going to run
 # the compile tests on.
 FILESTOANALYZE=($(cat bin/tests/filesToAnalyze.txt | tr "\n" " "))
+FILESTOBUILDJAR=($(cat bin/tests/filesToBuildJar.txt | tr "\n" " "))
 FILESTOPROVE=($(cat bin/tests/filesToProve.txt | tr "\n" " "))
 
 # Run the install goal
@@ -60,4 +61,17 @@ do
 done
 echo ""
 echo "---- DONE GENERATING PROVES ----"
+echo ""
+
+# Build jars for the following files
+echo ""
+echo "---- BUILDING JARS ----"
+echo ""
+for i in "${FILESTOBUILDJAR[@]}"
+do
+   echo "Analyzing $i"
+   java -jar resolve.jar -createJar -verboseJar -nodebug $i
+done
+echo ""
+echo "---- DONE BUILDING JARS ----"
 echo ""
