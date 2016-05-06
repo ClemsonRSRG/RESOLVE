@@ -178,7 +178,6 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
     @Override
     public void postCallStmt(CallStmt node) {
         ST callStmt = myActiveTemplates.pop();
-        System.out.println(myActiveTemplates);
         myActiveTemplates.peek().add("stmts", callStmt);
     }
 
