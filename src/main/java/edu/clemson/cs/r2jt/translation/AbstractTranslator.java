@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
-    protected static final boolean PRINT_DEBUG = true;
+    protected static final boolean PRINT_DEBUG = false;
 
     protected final CompileEnvironment myInstanceEnvironment;
 
@@ -403,11 +403,18 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
 
     @Override
     public void preOperationDec(OperationDec node) {
+        // Check to see if we are an OperationDec
+        // inside a FacilityOperationDec. If we are,
+        // then we have a body.
+        boolean hasBody = false;
+        if (myCurrentPrivateProcedure != null) {
+            hasBody = true;
+        }
 
         ST operation =
                 getOperationLikeTemplate((node.getReturnTy() != null) ? node
                         .getReturnTy().getProgramTypeValue() : null, node
-                        .getName().getName(), false);
+                        .getName().getName(), hasBody);
 
         myActiveTemplates.push(operation);
     }
@@ -433,7 +440,7 @@ public abstract class AbstractTranslator extends TreeWalkerStackVisitor {
         // Perform different actions depending if we are
         // a standalone OperationDec or if we are an
         // OperationDec inside a FacilityOperationDec
-        if (myCurrentPrivateProcedure != null) {
+        if (myCurrentPrivateProcedure == null) {
             ST operation = myActiveTemplates.pop();
             myActiveTemplates.peek().add("functions", operation);
         }
