@@ -154,7 +154,7 @@ public final class CongruenceClassProver {
             PExp assertion =
                     Utilities.replacePExp(e.getAssertion(), m_typeGraph, z, n);
             String eName = e.getName();
-            if (assertion.isEquality()
+            if (assertion.getTopLevelOperation().equals("=B")
                     && assertion.getQuantifiedVariables().size() > 0) {
                 addEqualityTheorem(true, assertion, eName + "_left"); // match left
                 addEqualityTheorem(false, assertion, eName + "_right"); // match right
@@ -163,7 +163,7 @@ public final class CongruenceClassProver {
             }
             else {
                 TheoremCongruenceClosureImpl t;
-                if (assertion.getTopLevelOperation().equals("implies")) {
+                if (assertion.getTopLevelOperation().equals("impliesB")) {
                     addGoalSearchingTheorem(assertion, eName);
                     t =
                             new TheoremCongruenceClosureImpl(g, assertion,
@@ -243,15 +243,15 @@ public final class CongruenceClassProver {
                         PSymbol.Quantification.FOR_ALL);
         args.add(theorem.getSubExpressions().get(1));
         args.add(goal);
-        PSymbol ant = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
+        PSymbol ant = new PSymbol(m_typeGraph.BOOLEAN, null, "=B", args);
         args.clear();
         args.add(theorem.getSubExpressions().get(0));
         args.add(goal);
-        PSymbol pOrG = new PSymbol(m_typeGraph.BOOLEAN, null, "or", args);
+        PSymbol pOrG = new PSymbol(m_typeGraph.BOOLEAN, null, "orB", args);
         args.clear();
         args.add(pOrG);
         args.add(goal);
-        PSymbol consq = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
+        PSymbol consq = new PSymbol(m_typeGraph.BOOLEAN, null, "=B", args);
         TheoremCongruenceClosureImpl t =
                 new TheoremCongruenceClosureImpl(m_typeGraph, theorem, ant,
                         consq, consq, true, false, name + "_goalSearch");

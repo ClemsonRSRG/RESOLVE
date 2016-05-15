@@ -77,42 +77,42 @@ public class VerificationConditionCongruenceClosureImpl {
         PSymbol tr = new PSymbol(m_typegraph.BOOLEAN, null, "true");
         args.add(tr);
         args.add(fls);
-        PSymbol trEqF = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+        PSymbol trEqF = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
         args.clear();
         args.add(trEqF);
         args.add(fls);
-        PSymbol trEqFEqF = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+        PSymbol trEqFEqF = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
         args.clear();
         m_conjunction.addExpression(trEqFEqF);
 
         // seed with true and true.  Need this for search: x and y, when x and y are both true
         args.add(tr);
         args.add(tr);
-        PSymbol tandt = new PSymbol(m_typegraph.BOOLEAN, null, "and", args);
+        PSymbol tandt = new PSymbol(m_typegraph.BOOLEAN, null, "andB", args);
         args.clear();
         args.add(tandt);
         args.add(tr);
-        PSymbol tandteqt = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+        PSymbol tandteqt = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
         m_conjunction.addExpression(tandteqt);
         args.clear();
         // seed with true and false = false
         args.add(tr);
         args.add(fls);
-        PSymbol tandf = new PSymbol(m_typegraph.BOOLEAN, null, "and", args);
+        PSymbol tandf = new PSymbol(m_typegraph.BOOLEAN, null, "andB", args);
         args.clear();
         args.add(tandf);
         args.add(fls);
-        PSymbol tandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+        PSymbol tandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
         m_conjunction.addExpression(tandfeqf);
         // seed with false and false = false
         args.clear();
         args.add(fls);
         args.add(fls);
-        PSymbol fandf = new PSymbol(m_typegraph.BOOLEAN, null, "and", args);
+        PSymbol fandf = new PSymbol(m_typegraph.BOOLEAN, null, "andB", args);
         args.clear();
         args.add(fandf);
         args.add(fls);
-        PSymbol fandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
+        PSymbol fandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
         m_conjunction.addExpression(fandfeqf);
         //m_goal.add("false");
     }

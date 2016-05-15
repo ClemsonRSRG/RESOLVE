@@ -32,22 +32,22 @@ public class Utilities {
         }
         String pTop = p.getTopLevelOperation();
         if (pTop.equals("/=")) {
-            PSymbol eqExp = new PSymbol(g.BOOLEAN, null, "=", argList);
+            PSymbol eqExp = new PSymbol(g.BOOLEAN, null, "=B", argList);
             argList.clear();
             argList.add(eqExp);
             argList.add(new PSymbol(g.BOOLEAN, null, "false"));
-            PSymbol pEqFalse = new PSymbol(g.BOOLEAN, null, "=", argList);
+            PSymbol pEqFalse = new PSymbol(g.BOOLEAN, null, "=B", argList);
             return pEqFalse;
         }
         else if (pTop.equals("not")) {
             argList.add(new PSymbol(g.BOOLEAN, null, "false"));
-            PSymbol pEqFalse = new PSymbol(g.BOOLEAN, null, "=", argList);
+            PSymbol pEqFalse = new PSymbol(g.BOOLEAN, null, "=B", argList);
             return pEqFalse;
         }
         else if (pTop.equals(">=")) {
             argsTemp.add(argList.get(1));
             argsTemp.add(argList.get(0));
-            return new PSymbol(g.BOOLEAN, null, "<=", argsTemp);
+            return new PSymbol(g.BOOLEAN, null, "<=B", argsTemp);
         }
         else if (pTop.equals("<") && z != null && n != null
                 && argList.get(0).getType().isSubtypeOf(z)
@@ -56,11 +56,11 @@ public class Utilities {
             argsTemp.add(argList.get(0));
             argsTemp.add(new PSymbol(n, null, "1"));
             PSymbol plus1 =
-                    new PSymbol(argList.get(0).getType(), null, "+", argsTemp);
+                    new PSymbol(argList.get(0).getType(), null, "+" + argList.get(0).getType().toString(), argsTemp);
             argsTemp.clear();
             argsTemp.add(plus1);
             argsTemp.add(argList.get(1));
-            return new PSymbol(p.getType(), p.getTypeValue(), "<=", argsTemp);
+            return new PSymbol(p.getType(), p.getTypeValue(), "<=B", argsTemp);
         }
         else if (pTop.equals(">") && z != null && n != null
                 && argList.get(0).getType().isSubtypeOf(z)
@@ -69,23 +69,27 @@ public class Utilities {
             argsTemp.add(argList.get(1));
             argsTemp.add(new PSymbol(n, null, "1"));
             PSymbol plus1 =
-                    new PSymbol(argList.get(1).getType(), null, "+", argsTemp);
+                    new PSymbol(argList.get(1).getType(), null, "+" + argList.get(1).getType().toString(), argsTemp);
             argsTemp.clear();
             argsTemp.add(plus1);
             argsTemp.add(argList.get(0));
-            return new PSymbol(p.getType(), p.getTypeValue(), "<=", argsTemp);
+            return new PSymbol(p.getType(), p.getTypeValue(), "<=B", argsTemp);
         }
         else if (z != null && pTop.equals("-")
                 && p.getSubExpressions().size() == 2) {
             // x - y to x + (-y)
             argsTemp.add(argList.get(1));
-            PSymbol minusY = new PSymbol(p.getType(), null, "-", argsTemp);
+            PSymbol minusY = new PSymbol(p.getType(), null, "-"+p.getType().toString(), argsTemp);
             argsTemp.clear();
             argsTemp.add(argList.get(0));
             argsTemp.add(minusY);
-            return new PSymbol(p.getType(), null, "+", argsTemp);
+            return new PSymbol(p.getType(), null, "+"+p.getType().toString(), argsTemp);
         }
-        return new PSymbol(p.getType(), p.getTypeValue(), p
-                .getTopLevelOperation(), argList, ((PSymbol) p).quantification);
+        // New: 5/8/16. Tag operators with range type.
+        else if(argList.size()>0){
+            return new PSymbol(p.getType(), p.getTypeValue(), p
+                    .getTopLevelOperation()+p.getType().toString(), argList, ((PSymbol) p).quantification);
+        }
+        return p;
     }
 }
