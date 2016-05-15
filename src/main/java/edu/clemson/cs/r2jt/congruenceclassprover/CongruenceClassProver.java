@@ -184,12 +184,32 @@ public final class CongruenceClassProver {
                 //addContrapositive(assertion, eName);
             }
         }
+        if(n!=null && z!=null){
+            sumConversion(n,z);
+        }
         m_environment = environment;
         m_scope = scope;
         m_results = "";
 
     }
-
+    // Temporarily coding conversion theorem for natural / integer addition
+    // forall x,y:N, +N(x,y) = +Z(x,y) match left only
+    void sumConversion(MTType n, MTType z){
+        PSymbol x = new PSymbol(n,null,"x", PSymbol.Quantification.FOR_ALL);
+        PSymbol y = new PSymbol(n, null, "y", PSymbol.Quantification.FOR_ALL);
+        ArrayList<PExp> args = new ArrayList<PExp>();
+        args.add(x);
+        args.add(y);
+        PSymbol nPlus = new PSymbol(n,null,"+N",args);
+        PSymbol zPlus = new PSymbol(z,null,"+Z",args);
+        args.clear();
+        args.add(nPlus);
+        args.add(zPlus);
+        PSymbol eq = new PSymbol(m_typeGraph.BOOLEAN,null,"=B",args);
+        String name = "Integer / Natural Sum Conversion";
+        addEqualityTheorem(true,eq,name + "_left");
+        addEqualityTheorem(false, eq, name + "_right");
+    }
     ///////////////////////////////////////////////////////
     public static void setUpFlags() {
         /*FlagDependencies.addExcludes(FLAG_PROVE, Prover.FLAG_PROVE);
