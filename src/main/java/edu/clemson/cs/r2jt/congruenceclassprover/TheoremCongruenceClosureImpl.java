@@ -197,7 +197,8 @@ public class TheoremCongruenceClosureImpl {
     public PExpWithScore getNext() {
         if (m_noQuants && m_selectedBindings.isEmpty()) {
             m_selectedBindings.add(new HashMap<String, String>());
-            return new PExpWithScore(m_insertExpr, new HashMap<String, String>(), m_theorem.toString());
+            return new PExpWithScore(m_insertExpr,
+                    new HashMap<String, String>(), m_theorem.toString());
         }
         if (m_bindings.isEmpty())
             return null;
@@ -234,7 +235,8 @@ public class TheoremCongruenceClosureImpl {
                         modifiedInsert.getSubExpressions().get(1).toString()))) {
             return getNext();
         }
-        return new PExpWithScore(modifiedInsert, curBinding, m_theorem.toString());
+        return new PExpWithScore(modifiedInsert, curBinding, m_theorem
+                .toString());
     }
 
     // variables to bind are the quantified vars the quantified statement
