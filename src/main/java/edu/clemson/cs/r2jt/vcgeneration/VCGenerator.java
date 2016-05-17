@@ -1,7 +1,7 @@
 /**
  * VCGenerator.java
  * ---------------------------------
- * Copyright (c) 2015
+ * Copyright (c) 2016
  * RESOLVE Software Research Group
  * School of Computing
  * Clemson University
@@ -4434,6 +4434,14 @@ public class VCGenerator extends TreeWalkerVisitor {
                                 replaceFormalWithActualEns(ensures, opDec
                                         .getParameters(), opDec.getStateVars(),
                                         replaceArgs, false);
+
+                        // Replace facility actuals variables in the ensures clause
+                        ensures =
+                                Utilities.replaceFacilityFormalWithActual(loc,
+                                        ensures, opDec.getParameters(),
+                                        myInstantiatedFacilityArgMap,
+                                        myCurrentModuleScope);
+
                         myCurrentAssertiveCode.addAssume(loc, ensures, true);
 
                         // Negation of the condition

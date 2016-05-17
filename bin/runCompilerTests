@@ -1,0 +1,77 @@
+#! /bin/bash
+# This script runs the compiler with RESOLVE files
+
+# -e Terminates the script if a command fails
+# -u Treats unset enviroment variables as error
+# -f Disable filename expansion
+# -o pipefail Prints all pipe errors to console
+set -euf -o pipefail
+
+# Arrays containing the files we are going to run
+# the compile tests on.
+FILESTOANALYZE=($(cat bin/tests/filesToAnalyze.txt | tr "\n" " "))
+FILESTOBUILDJAR=($(cat bin/tests/filesToBuildJar.txt | tr "\n" " "))
+FILESTOPROVE=($(cat bin/tests/filesToProve.txt | tr "\n" " "))
+
+# Run the install goal
+mvn clean install
+
+# Clone the latest RESOLVE-Workspace from GitHub
+echo ""
+echo "---- RETRIEVING RESOLVE WORKSPACE ----"
+echo ""
+cd ..
+git clone https://github.com/ClemsonRSRG/RESOLVE-Workspace.git
+echo ""
+echo "---- DONE RETRIEVING RESOLVE WORKSPACE ----"
+echo ""
+
+# Prepare to launch tests
+echo ""
+echo "---- PRE-EXECUTION SETUP ----"
+echo ""
+cp RESOLVE/target/RESOLVE-15.06.01a-jar-with-dependencies.jar RESOLVE-Workspace/RESOLVE/Main/resolve.jar
+cd RESOLVE-Workspace/RESOLVE/Main/
+echo ""
+echo "---- DONE WITH PRE-EXECUTION SETUP ----"
+echo ""
+
+# Analyze the theory files
+# (Note: Only "Boolean_Theory" and "Integer_Theory" are checkable at the moment)
+echo ""
+echo "---- ANALYZING THEORY FILES ----"
+echo ""
+for i in "${FILESTOANALYZE[@]}"
+do
+   echo "Analyzing $i"
+   java -jar resolve.jar -nodebug $i
+done
+echo ""
+echo "---- DONE ANALYZING THEORY FILES ----"
+echo ""
+
+# Generate proves the following files
+echo ""
+echo "---- GENERATING PROVES ----"
+echo ""
+for i in "${FILESTOPROVE[@]}"
+do
+   echo "Proving $i"
+   java -jar resolve.jar -ccprove -nodebug -timeout 7000 -num_tries 3 $i
+done
+echo ""
+echo "---- DONE GENERATING PROVES ----"
+echo ""
+
+# Build jars for the following files
+echo ""
+echo "---- BUILDING JARS ----"
+echo ""
+for i in "${FILESTOBUILDJAR[@]}"
+do
+   echo "Analyzing $i"
+   java -jar resolve.jar -createJar -verboseJar -nodebug $i
+done
+echo ""
+echo "---- DONE BUILDING JARS ----"
+echo ""
