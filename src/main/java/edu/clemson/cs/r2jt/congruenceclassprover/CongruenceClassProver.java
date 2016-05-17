@@ -154,7 +154,7 @@ public final class CongruenceClassProver {
             PExp assertion =
                     Utilities.replacePExp(e.getAssertion(), m_typeGraph, z, n);
             String eName = e.getName();
-            if (assertion.isEquality()
+            if (assertion.getTopLevelOperation().equals("=B")
                     && assertion.getQuantifiedVariables().size() > 0) {
                 addEqualityTheorem(true, assertion, eName + "_left"); // match left
                 addEqualityTheorem(false, assertion, eName + "_right"); // match right
@@ -163,7 +163,7 @@ public final class CongruenceClassProver {
             }
             else {
                 TheoremCongruenceClosureImpl t;
-                if (assertion.getTopLevelOperation().equals("implies")) {
+                if (assertion.getTopLevelOperation().equals("impliesB")) {
                     addGoalSearchingTheorem(assertion, eName);
                     t =
                             new TheoremCongruenceClosureImpl(g, assertion,
@@ -184,10 +184,32 @@ public final class CongruenceClassProver {
                 //addContrapositive(assertion, eName);
             }
         }
+        if (n != null && z != null) {
+            sumConversion(n, z);
+        }
         m_environment = environment;
         m_scope = scope;
         m_results = "";
 
+    }
+
+    // Temporarily coding conversion theorem for natural / integer addition
+    // forall x,y:N, +N(x,y) = +Z(x,y) match left only
+    void sumConversion(MTType n, MTType z) {
+        PSymbol x = new PSymbol(n, null, "x", PSymbol.Quantification.FOR_ALL);
+        PSymbol y = new PSymbol(n, null, "y", PSymbol.Quantification.FOR_ALL);
+        ArrayList<PExp> args = new ArrayList<PExp>();
+        args.add(x);
+        args.add(y);
+        PSymbol nPlus = new PSymbol(n, null, "+N", args);
+        PSymbol zPlus = new PSymbol(z, null, "+Z", args);
+        args.clear();
+        args.add(nPlus);
+        args.add(zPlus);
+        PSymbol eq = new PSymbol(m_typeGraph.BOOLEAN, null, "=B", args);
+        String name = "Integer / Natural Sum Conversion";
+        addEqualityTheorem(true, eq, name + "_left");
+        addEqualityTheorem(false, eq, name + "_right");
     }
 
     ///////////////////////////////////////////////////////
@@ -243,15 +265,15 @@ public final class CongruenceClassProver {
                         PSymbol.Quantification.FOR_ALL);
         args.add(theorem.getSubExpressions().get(1));
         args.add(goal);
-        PSymbol ant = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
+        PSymbol ant = new PSymbol(m_typeGraph.BOOLEAN, null, "=B", args);
         args.clear();
         args.add(theorem.getSubExpressions().get(0));
         args.add(goal);
-        PSymbol pOrG = new PSymbol(m_typeGraph.BOOLEAN, null, "or", args);
+        PSymbol pOrG = new PSymbol(m_typeGraph.BOOLEAN, null, "orB", args);
         args.clear();
         args.add(pOrG);
         args.add(goal);
-        PSymbol consq = new PSymbol(m_typeGraph.BOOLEAN, null, "=", args);
+        PSymbol consq = new PSymbol(m_typeGraph.BOOLEAN, null, "=B", args);
         TheoremCongruenceClosureImpl t =
                 new TheoremCongruenceClosureImpl(m_typeGraph, theorem, ant,
                         consq, consq, true, false, name + "_goalSearch");

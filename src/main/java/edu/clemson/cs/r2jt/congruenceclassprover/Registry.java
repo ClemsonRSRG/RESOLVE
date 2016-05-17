@@ -61,21 +61,22 @@ public class Registry {
         m_foralls = new HashSet<String>();
         m_typeGraph = g;
         m_typeDictionary = new TreeMap<String, MTType>();
-        addSymbol("=", new MTFunction(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
+        addSymbol("=B", new MTFunction(g, g.BOOLEAN, g.ENTITY, g.ENTITY),
                 Usage.LITERAL); // = as a predicate function, not as an assertion
         addSymbol("true", g.BOOLEAN, Usage.LITERAL);
         addSymbol("false", g.BOOLEAN, Usage.LITERAL);
-        assert (getIndexForSymbol("=") == 0);
+        assert (getIndexForSymbol("=B") == 0);
         m_appliedTheoremDependencyGraph = new HashMap<String, Set<Integer>>();
         m_lambda_names = new HashSet<String>();
         m_partTypes = new HashSet<String>();
         m_partTypeParentArray = new HashMap<Integer, ArrayList<Integer>>();
         // could look for these in theorems instead
         m_commutative_operators = new HashSet<String>();
-        m_commutative_operators.add("+");
-        m_commutative_operators.add("=");
-        m_commutative_operators.add("and");
-        m_commutative_operators.add("or");
+        m_commutative_operators.add("+N");
+        m_commutative_operators.add("+Z");
+        m_commutative_operators.add("=B");
+        m_commutative_operators.add("andB");
+        m_commutative_operators.add("orB");
         m_cached_isSubtype = new HashMap<String, Boolean>();
     }
 

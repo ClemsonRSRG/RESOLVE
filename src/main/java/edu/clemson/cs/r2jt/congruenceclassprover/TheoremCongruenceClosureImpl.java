@@ -100,12 +100,12 @@ public class TheoremCongruenceClosureImpl {
         if (m_all_literals == null) {
             m_all_literals = ((PSymbol) m_theorem).getNonQuantifiedSymbols();
 
-            m_all_literals.remove("=");
-            m_all_literals.remove("and");
-            m_all_literals.remove("implies");
+            m_all_literals.remove("=B");
+            m_all_literals.remove("andB");
+            m_all_literals.remove("impliesB");
             m_all_literals.remove("true");
             m_all_literals.remove("false");
-            m_all_literals.remove("/=");
+            m_all_literals.remove("/=B");
             m_all_literals.remove("Empty_String");
             m_all_literals.remove("0");
             m_all_literals.remove("1");
@@ -117,8 +117,9 @@ public class TheoremCongruenceClosureImpl {
             m_all_literals.remove("7");
             m_all_literals.remove("8");
             m_all_literals.remove("9");
-            m_all_literals.remove("or");
-            m_all_literals.remove("+");
+            m_all_literals.remove("orB");
+            m_all_literals.remove("+Z");
+            m_all_literals.remove("+N");
         }
 
         return m_all_literals;
@@ -196,7 +197,8 @@ public class TheoremCongruenceClosureImpl {
     public PExpWithScore getNext() {
         if (m_noQuants && m_selectedBindings.isEmpty()) {
             m_selectedBindings.add(new HashMap<String, String>());
-            return new PExpWithScore(m_insertExpr, m_theorem.toString());
+            return new PExpWithScore(m_insertExpr,
+                    new HashMap<String, String>(), m_theorem.toString());
         }
         if (m_bindings.isEmpty())
             return null;
@@ -233,7 +235,8 @@ public class TheoremCongruenceClosureImpl {
                         modifiedInsert.getSubExpressions().get(1).toString()))) {
             return getNext();
         }
-        return new PExpWithScore(modifiedInsert, m_theorem.toString());
+        return new PExpWithScore(modifiedInsert, curBinding, m_theorem
+                .toString());
     }
 
     // variables to bind are the quantified vars the quantified statement

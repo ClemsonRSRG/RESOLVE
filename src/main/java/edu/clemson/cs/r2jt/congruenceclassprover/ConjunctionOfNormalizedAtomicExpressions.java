@@ -131,12 +131,12 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         }
         String name = expression.getTopLevelOperation();
 
-        if (expression.isEquality()) {
+        if (name.equals("=B")) {
             int lhs = addFormula(expression.getSubExpressions().get(0));
             int rhs = addFormula(expression.getSubExpressions().get(1));
             return mergeOperators(lhs, rhs);
         }
-        else if (name.equals("and")) {
+        else if (name.equals("andB")) {
             String r = "";
             r += addExpression(expression.getSubExpressions().get(0));
             r += addExpression(expression.getSubExpressions().get(1));
@@ -201,7 +201,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
      should return int for true if known to be equal, otherwise return root representative. 
      */
     protected int addFormula(PExp formula) {
-        if (formula.isEquality()) {
+        if (formula.getTopLevelOperation().equals("=B")) {
             int lhs = addFormula(formula.getSubExpressions().get(0));
             PExp r = formula.getSubExpressions().get(1);
             int rhs = addFormula(r);
@@ -213,7 +213,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
             else {*/
             // insert =(lhs,rhs) = someNewRoot
-            int questEq = m_registry.getIndexForSymbol("=");
+            int questEq = m_registry.getIndexForSymbol("=B");
             NormalizedAtomicExpression pred =
                     new NormalizedAtomicExpression(this, new int[] { questEq,
                             lhs, rhs });
@@ -417,11 +417,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                 && (rhs == tr || rhs == fl))
             return;
         // guard: return if all var and op is not equals or or
-        if (!(op.equals("=") || op.equals("or")) && arg1 != tr && arg1 != fl
+        if (!(op.equals("=B") || op.equals("orB")) && arg1 != tr && arg1 != fl
                 && (arg2 != tr && arg2 != fl) && (rhs != tr && rhs != fl))
             return;
         // rules for and
-        if (op.equals("and")) {
+        if (op.equals("andB")) {
             // constant rhs
             if (rhs == tr) {
                 // (p and q) = t |= t/p, t/q
@@ -464,7 +464,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             }
             return;
         }
-        if (op.equals("or")) {
+        if (op.equals("orB")) {
             // constant f rhs
             if (rhs == fl) {
                 // p or q = f |= f/p/q
@@ -511,7 +511,7 @@ public class ConjunctionOfNormalizedAtomicExpressions {
             // p or not p = q := t/q
             return;
         }
-        if (op.equals("=")) {
+        if (op.equals("=B")) {
             // constant t rhs
             if (rhs == tr) {
                 // (p = q) = t |= p/q
@@ -696,39 +696,37 @@ public class ConjunctionOfNormalizedAtomicExpressions {
                     searchKeys[2] = t;
                     return computeBindings(
                             getExprsMatchingAtPosition(searchKeys),
-                            foreignSymbolOverride, searchKeys,
-                            unMappedWildCards, expr.getRegistry());
+                            foreignSymbolOverride, unMappedWildCards, expr
+                                    .getRegistry());
                 }
-                else {
-                    // only one blank. 2 searches
-                    rSet =
-                            computeBindings(
-                                    getExprsMatchingAtPosition(searchKeys),
-                                    foreignSymbolOverride, searchKeys,
-                                    unMappedWildCards, expr.getRegistry());
-                    int t = searchKeys[1];
-                    String s = unMappedWildCards[1];
-                    searchKeys[1] = searchKeys[2];
-                    unMappedWildCards[1] = unMappedWildCards[2];
-                    searchKeys[2] = t;
-                    unMappedWildCards[2] = s;
-                    rSet.addAll(computeBindings(
-                            getExprsMatchingAtPosition(searchKeys),
-                            foreignSymbolOverride, searchKeys,
-                            unMappedWildCards, expr.getRegistry()));
-                    return rSet;
-                }
+            }
+            else {
+                // only one blank. 2 searches
+                rSet =
+                        computeBindings(getExprsMatchingAtPosition(searchKeys),
+                                foreignSymbolOverride, unMappedWildCards, expr
+                                        .getRegistry());
+                int t = searchKeys[1];
+                String s = unMappedWildCards[1];
+                searchKeys[1] = searchKeys[2];
+                unMappedWildCards[1] = unMappedWildCards[2];
+                searchKeys[2] = t;
+                unMappedWildCards[2] = s;
+                rSet.addAll(computeBindings(
+                        getExprsMatchingAtPosition(searchKeys),
+                        foreignSymbolOverride, unMappedWildCards, expr
+                                .getRegistry()));
+                return rSet;
             }
         }
         return computeBindings(getExprsMatchingAtPosition(searchKeys),
-                foreignSymbolOverride, searchKeys, unMappedWildCards, expr
-                        .getRegistry());
+                foreignSymbolOverride, unMappedWildCards, expr.getRegistry());
     }
 
     private Set<Map<String, String>> computeBindings(
             Set<NormalizedAtomicExpression> filteredSet,
-            Map<String, String> baseMap, int[] searchKey,
-            String[] unmappedWildcards, Registry searchReg) {
+            Map<String, String> baseMap, String[] unmappedWildcards,
+            Registry searchReg) {
 
         Set<Map<String, String>> rSet =
                 new HashSet<Map<String, String>>(filteredSet.size(), .5f);
@@ -794,11 +792,11 @@ public class ConjunctionOfNormalizedAtomicExpressions {
         String r = "";
         if (m_evaluates_to_false)
             r += "Conjunction evaluates to false" + "\n";
-        /*for (MTType key : m_registry.m_typeToSetOfOperators.keySet()) {
+        for (MTType key : m_registry.m_typeToSetOfOperators.keySet()) {
             r += key.toString() + ":\n";
             r += m_registry.m_typeToSetOfOperators.get(key) + "\n\n";
         }
-         */
+
         for (NormalizedAtomicExpression cur : m_expSet.keySet()) {
             r += cur.toString() + "\n";
         }
