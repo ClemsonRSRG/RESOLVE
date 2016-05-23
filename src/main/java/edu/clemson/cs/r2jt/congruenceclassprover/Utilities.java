@@ -90,11 +90,11 @@ public class Utilities {
             return new PSymbol(p.getType(), null, "+" + p.getType().toString(),
                     argsTemp);
         }
-        // New: 5/8/16. Tag operators with range type.
-        else if (argList.size() > 0) {
-            return new PSymbol(p.getType(), p.getTypeValue(), p
-                    .getTopLevelOperation()
-                    + p.getType().toString(), argList,
+        // New: 5/8/16. Tag operators with range type if they aren't quantified.
+        else if (argList.size() > 0){
+            if ( ((PSymbol)p).quantification.equals(PSymbol.Quantification.NONE))
+                pTop += p.getType().toString();
+            return new PSymbol(p.getType(), p.getTypeValue(), pTop, argList,
                     ((PSymbol) p).quantification);
         }
         return p;
