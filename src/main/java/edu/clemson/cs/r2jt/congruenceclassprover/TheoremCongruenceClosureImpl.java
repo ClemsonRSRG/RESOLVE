@@ -83,9 +83,16 @@ public class TheoremCongruenceClosureImpl {
             m_matchConj.addFormula(restOfExp);
         }
         m_noMatchRequired = new ArrayList<NormalizedAtomicExpression>();
+        Set<String> insert_quants = new HashSet<String>();
+        for (PSymbol p : toInsert.getQuantifiedVariables()) {
+            insert_quants.add(p.toString());
+        }
         for (NormalizedAtomicExpression n : m_matchConj.m_expSet.keySet()) {
-            if (!m_matchRequired.contains(n)
-                    && !n.getOperatorsAsStrings(false).containsKey("_g")) {
+            Map<String, Integer> ops = n.getOperatorsAsStrings(false);
+            Set<String> intersection = new HashSet<String>(insert_quants);
+            intersection.retainAll(ops.keySet());
+            if (!m_matchRequired.contains(n) && !ops.containsKey("_g")
+                    && !intersection.isEmpty()) {
                 m_noMatchRequired.add(n);
             }
         }
@@ -342,7 +349,7 @@ public class TheoremCongruenceClosureImpl {
             if (t_results.isEmpty())
                 continue;
             else
-                results = t_results;
+                results.addAll(t_results);
         }
 
         /*        Set<NormalizedAtomicExpression> postSet = new HashSet<NormalizedAtomicExpression>();
