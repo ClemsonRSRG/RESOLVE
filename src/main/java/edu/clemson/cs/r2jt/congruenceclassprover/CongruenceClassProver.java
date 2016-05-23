@@ -58,7 +58,7 @@ public final class CongruenceClassProver {
     private final List<TheoremCongruenceClosureImpl> m_theorems;
     private final CompileEnvironment m_environment;
     private final ModuleScope m_scope;
-    private final long DEFAULTTIMEOUT = 500;
+    private final long DEFAULTTIMEOUT = 1500;
     private final boolean SHOWRESULTSIFNOTPROVED = true;
     private final TypeGraph m_typeGraph;
     private final Set<String> m_nonQuantifiedTheoremSymbols;
@@ -141,7 +141,9 @@ public final class CongruenceClassProver {
                 e.printStackTrace();
             }
         }
+        //printVCEachStep = true;
         for (VC vc : vcs) {
+            //if(!vc.getName().equals("3_2"))continue;
             // make every PExp a PSymbol
             vc.convertAllToPsymbols(m_typeGraph);
             m_ccVCs.add(new VerificationConditionCongruenceClosureImpl(g, vc,
