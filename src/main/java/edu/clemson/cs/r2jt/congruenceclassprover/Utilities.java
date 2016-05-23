@@ -91,8 +91,9 @@ public class Utilities {
                     argsTemp);
         }
         // New: 5/8/16. Tag operators with range type if they aren't quantified.
-        else if (argList.size() > 0){
-            if ( ((PSymbol)p).quantification.equals(PSymbol.Quantification.NONE))
+        else if (argList.size() > 0) {
+            if (((PSymbol) p).quantification
+                    .equals(PSymbol.Quantification.NONE))
                 pTop += p.getType().toString();
             return new PSymbol(p.getType(), p.getTypeValue(), pTop, argList,
                     ((PSymbol) p).quantification);
