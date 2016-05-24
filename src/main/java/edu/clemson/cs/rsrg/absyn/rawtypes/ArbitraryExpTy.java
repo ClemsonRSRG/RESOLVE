@@ -16,8 +16,8 @@ import edu.clemson.cs.rsrg.absyn.Exp;
 import edu.clemson.cs.rsrg.absyn.Ty;
 
 /**
- * <p>This is the class for all the raw arbitrary types
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the raw arbitrary type objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * <p>A syntactic type based on an arbitrary mathematical {@link Exp}.  All
  * math expressions should have this {@link Ty}. Ultimately their
@@ -56,65 +56,58 @@ public class ArbitraryExpTy extends Ty {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize        The base indentation to the first line
-     *                          of the text.
-     * @param innerIndentSize   The additional indentation increment
-     *                          for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("ArbitraryTy\n");
 
         if (myArbitraryExp != null) {
-            sb.append(myArbitraryExp.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myArbitraryExp.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
         }
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link ArbitraryExpTy} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof ArbitraryExpTy) {
-            ArbitraryExpTy eAsArbitraryExpTy = (ArbitraryExpTy) o;
-            result = myArbitraryExp.equals(eAsArbitraryExpTy.myArbitraryExp);
-        }
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-        return result;
+        ArbitraryExpTy that = (ArbitraryExpTy) o;
+
+        return myArbitraryExp.equals(that.myArbitraryExp);
     }
 
     /**
-     * <p>Returns a deep copy of this raw type's inner expression.</p>
+     * <p>Returns this raw type's inner expression.</p>
      *
      * @return The inner (arbitrary) {@link Exp} representation object.
      */
-    public Exp getArbitraryExp() {
+    public final Exp getArbitraryExp() {
         return myArbitraryExp;
     }
 
     /**
-     * <p>Returns the raw type in string format.</p>
-     *
-     * @return Raw type as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final int hashCode() {
+        return myArbitraryExp.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
         return myArbitraryExp.toString();
     }
 
@@ -123,13 +116,10 @@ public class ArbitraryExpTy extends Ty {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Ty} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Ty} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Ty copy() {
+    protected final Ty copy() {
         Exp newArbitraryExp = null;
         if (myArbitraryExp != null) {
             newArbitraryExp = myArbitraryExp.clone();

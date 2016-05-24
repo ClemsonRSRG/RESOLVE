@@ -17,8 +17,8 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class for all the raw named types
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the raw named type objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -56,79 +56,72 @@ public class NameTy extends Ty {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("NameTy\n");
 
         if (myQualifier != null) {
-            sb.append(myQualifier.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myQualifier.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
             sb.append("::");
         }
 
         if (myName != null) {
-            sb.append(myName.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myName.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
         }
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link NameTy} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof NameTy) {
-            NameTy eAsNameTy = (NameTy) o;
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (myQualifier != null && eAsNameTy.myQualifier != null) {
-                result = myQualifier.equals(eAsNameTy.myQualifier);
-            }
-            else if (myQualifier == null && eAsNameTy.myQualifier == null) {
-                result = true;
-            }
+        NameTy nameTy = (NameTy) o;
 
-            result &= myName.equals(eAsNameTy.myName);
-        }
+        if (myQualifier != null ? !myQualifier.equals(nameTy.myQualifier)
+                : nameTy.myQualifier != null)
+            return false;
+        return myName.equals(nameTy.myName);
 
+    }
+
+    /**
+     * <p>This method returns the name.</p>
+     *
+     * @return The {@link PosSymbol} representation object.
+     */
+    public final PosSymbol getName() {
+        return myName;
+    }
+
+    /**
+     * <p>This method returns the qualifier name.</p>
+     *
+     * @return The {@link PosSymbol} representation object.
+     */
+    public final PosSymbol getQualifier() {
+        return myQualifier;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = myQualifier != null ? myQualifier.hashCode() : 0;
+        result = 31 * result + myName.hashCode();
         return result;
-    }
-
-    /**
-     * <p>This method returns a deep copy of the name.</p>
-     *
-     * @return The {@link PosSymbol} representation object.
-     */
-    public PosSymbol getName() {
-        return myName.clone();
-    }
-
-    /**
-     * <p>This method returns a deep copy of the qualifier name.</p>
-     *
-     * @return The {@link PosSymbol} representation object.
-     */
-    public PosSymbol getQualifier() {
-        return myQualifier.clone();
     }
 
     /**
@@ -141,12 +134,10 @@ public class NameTy extends Ty {
     }
 
     /**
-     * <p>Returns the raw type in string format.</p>
-     *
-     * @return Raw type as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
 
         if (myQualifier != null) {
@@ -166,13 +157,10 @@ public class NameTy extends Ty {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Ty} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Ty} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Ty copy() {
+    protected final Ty copy() {
         PosSymbol newQualifier = null;
         if (myQualifier != null) {
             newQualifier = myQualifier.clone();

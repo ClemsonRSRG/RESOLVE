@@ -20,8 +20,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the raw record types
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the raw record type objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -55,26 +55,15 @@ public class RecordTy extends Ty {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("RecordTy\n");
 
         for (VarDec v : myInnerFields) {
-            sb
-                    .append(v.asString(indentSize + innerIndentSize,
-                            innerIndentSize));
+            sb.append(v.asString(indentSize + innerIndentInc, innerIndentInc));
             sb.append("\n");
         }
 
@@ -82,61 +71,44 @@ public class RecordTy extends Ty {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link RecordTy} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof RecordTy) {
-            RecordTy eAsRecordTy = (RecordTy) o;
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (myInnerFields != null && eAsRecordTy.myInnerFields != null) {
-                Iterator<VarDec> thisInnerFields = myInnerFields.iterator();
-                Iterator<VarDec> eInnerFields =
-                        eAsRecordTy.myInnerFields.iterator();
+        RecordTy recordTy = (RecordTy) o;
 
-                while (result && thisInnerFields.hasNext()
-                        && eInnerFields.hasNext()) {
-                    result &=
-                            thisInnerFields.next().equals(eInnerFields.next());
-                }
+        return myInnerFields.equals(recordTy.myInnerFields);
 
-                //Both had better have run out at the same time
-                result &=
-                        (!thisInnerFields.hasNext())
-                                && (!eInnerFields.hasNext());
-            }
-        }
-
-        return result;
     }
 
     /**
-     * <p>This method returns a deep copy of all the fields.</p>
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        return myInnerFields.hashCode();
+    }
+
+    /**
+     * <p>This method returns list containing all the field
+     * elements.</p>
      *
-     * @return The {@link VarDec} representation object.
+     * @return A list of {@link VarDec} representation objects.
      */
     public final List<VarDec> getFields() {
-        List<VarDec> copyFields = new ArrayList<>();
-        for (VarDec v : myInnerFields) {
-            copyFields.add(v.clone());
-        }
-
-        return copyFields;
+        return myInnerFields;
     }
 
     /**
-     * <p>Returns the raw type in string format.</p>
-     *
-     * @return Raw type as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
 
         for (VarDec v : myInnerFields) {
@@ -152,13 +124,10 @@ public class RecordTy extends Ty {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Ty} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Ty} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Ty copy() {
+    protected final Ty copy() {
         return new RecordTy(new Location(myLoc), getFields());
     }
 

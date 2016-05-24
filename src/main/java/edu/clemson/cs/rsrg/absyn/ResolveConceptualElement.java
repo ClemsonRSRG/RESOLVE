@@ -89,7 +89,7 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
      *
      * @param o Object to be compared.
      *
-     * @return True if all the fields are equal, false otherwise.
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
      */
     @Override
     public abstract boolean equals(Object o);
@@ -191,6 +191,15 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
     public Location getLocation() {
         return myLoc;
     }
+
+    /**
+     * <p>This method must be implemented by all inherited classes
+     * to override the default {@code hashCode} method implementation.</p>
+     *
+     * @return The hash code associated with the object.
+     */
+    @Override
+    public abstract int hashCode();
 
     /**
      * <p>This method must be implemented by all inherited classes
