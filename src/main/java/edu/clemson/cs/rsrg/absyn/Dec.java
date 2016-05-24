@@ -18,8 +18,8 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the abstract base class for all the declaration type
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the abstract base class for all the declaration objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -40,8 +40,9 @@ public abstract class Dec extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>A helper constructor that allow us to store the location
-     * of the created object directly in the this class.</p>
+     * <p>An helper constructor that allow us to store the location
+     * of any objects created from a class that inherits from
+     * {@code Dec}.</p>
      *
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
@@ -56,8 +57,8 @@ public abstract class Dec extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This method must be implemented by all inherited classes
-     * to override the default clone method implementation.</p>
+     * <p>This method overrides the default clone method implementation
+     * for all the classes that extend from {@link Dec}.</p>
      *
      * @return A deep copy of the object.
      */
@@ -81,7 +82,7 @@ public abstract class Dec extends ResolveConceptualElement {
      * @return The name in {@link PosSymbol} format.
      */
     public PosSymbol getName() {
-        return myName.clone();
+        return myName;
     }
 
     /**
@@ -100,9 +101,7 @@ public abstract class Dec extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns this object in string format.</p>
-     *
-     * @return This class as a string.
+     * {@inheritDoc}
      */
     @Override
     public String toString() {

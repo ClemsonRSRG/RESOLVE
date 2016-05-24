@@ -71,18 +71,10 @@ public class VirtualListNode extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public String asString(int indentSize, int innerIndentInc) {
         throw new MiscErrorException("Not supported yet.",
                 new UnsupportedOperationException());
     }
@@ -106,7 +98,7 @@ public class VirtualListNode extends ResolveConceptualElement {
      *
      * @param o Object to be compared.
      *
-     * @return True if all the fields are equal, false otherwise.
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
      */
     @Override
     public boolean equals(Object o) {
@@ -169,9 +161,7 @@ public class VirtualListNode extends ResolveConceptualElement {
     }
 
     /**
-     * <p>Returns the node in string format.</p>
-     *
-     * @return Object as a string.
+     * {@inheritDoc}
      */
     @Override
     public String toString() {

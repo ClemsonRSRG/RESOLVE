@@ -10,8 +10,10 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn;
+package edu.clemson.cs.rsrg.absyn.statements.codeblocks;
 
+import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.Statement;
 import edu.clemson.cs.rsrg.absyn.programexpr.ProgramExp;
 import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -21,7 +23,7 @@ import java.util.List;
 
 /**
  * <p>This is the abstract base class for all the condition blocks
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */

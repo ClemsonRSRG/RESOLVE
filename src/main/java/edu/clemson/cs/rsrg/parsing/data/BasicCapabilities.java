@@ -23,15 +23,15 @@ public interface BasicCapabilities {
 
     /**
      * <p>This method creates a special indented
-     * text version of the class as a string.</p>
+     * text version of the instantiated object.</p>
      *
      * @param indentSize The base indentation to the first line
      *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
+     * @param innerIndentInc The additional indentation increment
+     *                       for the subsequent lines.
      *
      * @return A formatted text string of the class.
      */
-    String asString(int indentSize, int innerIndentSize);
+    String asString(int indentSize, int innerIndentInc);
 
 }

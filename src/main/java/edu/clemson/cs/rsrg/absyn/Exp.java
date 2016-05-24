@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <p>This is the abstract base class for all the expression
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the abstract base class for all the expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -46,8 +46,9 @@ public abstract class Exp extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>A helper constructor that allow us to store the location
-     * of the created object directly in the this class.</p>
+     * <p>An helper constructor that allow us to store the location
+     * of any objects created from a class that inherits from
+     * {@code Exp}.</p>
      *
      * @param l A {@link Location} representation object.
      */
@@ -79,7 +80,7 @@ public abstract class Exp extends ResolveConceptualElement {
      *
      * @param exp A {@link Exp} to compare.
      *
-     * @return A {@link VarExp} containing "true" if it is exactly the same,
+     * @return A {@link VarExp} containing {@code true} if it is exactly the same,
      * otherwise just return a deep copy our ourselves.
      */
     public Exp compareWithAssumptions(Exp exp) {
@@ -97,18 +98,18 @@ public abstract class Exp extends ResolveConceptualElement {
     /**
      * <p>This method must be implemented by all inherited classes
      * to attempt to find the provided expression in our
-     * subexpressions.</p>
+     * sub-expressions.</p>
      *
      * @param exp The expression we wish to locate.
      *
-     * @return True if there is an instance of <code>exp</code>
-     * within this object's subexpressions. False otherwise.
+     * @return {@code true} if there is an instance of {@code exp}
+     * within this object's sub-expressions. {@code false} otherwise.
      */
     public abstract boolean containsExp(Exp exp);
 
     /**
      * <p>This method attempts to find an expression with the given name in our
-     * subexpressions. This method is only invoked by a mathematical expression,
+     * sub-expressions. This method is only invoked by a mathematical expression,
      * but since we could have either mathematical or programming
      * expressions, the default behavior is to return false.</p>
      *
@@ -117,7 +118,7 @@ public abstract class Exp extends ResolveConceptualElement {
      *
      * @param varName Expression name.
      * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
+     *                 {@code #[varName]}
      *
      * @return False.
      */
@@ -127,8 +128,8 @@ public abstract class Exp extends ResolveConceptualElement {
 
     /**
      * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict.  This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
+     * strict. This method returns {@code true} <strong>iff</code> this
+     * expression and the provided expression, {@code e}, are equivalent
      * with respect to structure and all function and variable names.</p>
      *
      * @param e The expression to compare this one to.
@@ -146,15 +147,15 @@ public abstract class Exp extends ResolveConceptualElement {
 
     /**
      * <p>Helper method to deal with {@link Exp}s that need to be
-     * compared but might be null.  Returns true <strong>iff</strong>
-     * <code>e1</code> and <code>e2</code> are both <code>null</code> or both
-     * are not <code>null</code> and equivalent.</p>
+     * compared but might be {@code null}. Returns {@code true} <strong>iff</strong>
+     * {@code e1} and {@code e2} are both {@code null} or both
+     * are not {@code null} and equivalent.</p>
      *
-     * @param e1 The first <code>Exp</code>.
-     * @param e2 The second <code>Exp</code>.
+     * @param e1 The first {@link Exp}.
+     * @param e2 The second {@link Exp}.
      *
-     * @return <code>true</code> <strong>iff</strong> both
-     * 		   {link Exp}ss are null; or both are not null and are
+     * @return {@code true} <strong>iff</strong> both
+     * 		   {@link Exp}s are {@code null}; or both are not {@code null} and are
      *         equivalent.
      */
     public static boolean equivalent(Exp e1, Exp e2) {
@@ -166,7 +167,7 @@ public abstract class Exp extends ResolveConceptualElement {
      * <p>This method gets the mathematical type associated
      * with this object.</p>
      *
-     * @return The {link MTType} type object.
+     * @return The {@link MTType} type object.
      */
     public final MTType getMathType() {
         return myMathType;
@@ -184,25 +185,25 @@ public abstract class Exp extends ResolveConceptualElement {
 
     /**
      * <p>This method must be implemented by all inherited classes
-     * to return the list of subexpressions.</p>
+     * to return the list of sub-expressions.</p>
      *
-     * @return A list containing {link Exp} type objects.
+     * @return A list containing {@link Exp} type objects.
      */
     public abstract List<Exp> getSubExpressions();
 
     /**
      * <p>Helper method to deal with {@link PosSymbol}s that need to be
-     * compared but might be null. Returns true <strong>iff</strong>
-     * <code>s1</code> and <code>s2</code> are both <code>null</code> or both
-     * are not <code>null</code> and have names that are equivalent strings (see
-     * <code>stringEquivalent</code>())</p>
+     * compared but might be {@code null}. Returns {@code true} <strong>iff</strong>
+     * {@code s1} and {@code s2} are both {@code null} or both
+     * are not {@code null} and have names that are equivalent strings (see
+     * {@link Exp#stringEquivalent(String, String)})</p>
      *
      * @param s1 The first {@link PosSymbol}.
      * @param s2 The second {@link PosSymbol}.
      *
-     * @return <code>true</code> <strong>iff</strong> both
-     * {link PosSymbol}s are null; or both are not null and have names
-     * that are equivalent strings (see {@link Exp#stringEquivalent}).
+     * @return {@code true} <strong>iff</strong> both
+     * {@link PosSymbol}s are null; or both are not null and have names
+     * that are equivalent strings (see {@link Exp#stringEquivalent(String, String)}).
      */
     public static boolean posSymbolEquivalent(PosSymbol s1, PosSymbol s2) {
         //The first line makes sure that either both s1 and s2 are null or
@@ -242,25 +243,25 @@ public abstract class Exp extends ResolveConceptualElement {
 
     /**
      *  <p>This method must be implemented by all inherited classes
-     * to add a new expression to our list of subexpressions.</p>
+     * to add a new expression to our list of sub-expressions.</p>
      *
-     * @param index The index in our subexpression list.
-     * @param e The new {link Exp} to be added.
+     * @param index The index in our sub-expression list.
+     * @param e The new {@link Exp} to be added.
      */
     // TODO: Most of the time this is called after we make a copy. See if we can use substitute() instead
     //public abstract void setSubExpression(int index, Exp e);
 
     /**
      * <p>Helper method to deal with strings that need to be compared but might
-     * be null.  Returns true <strong>iff</strong> <code>s1</code> and
-     * <code>s2</code> are both <code>null</code> or both are not null and
+     * be {@code null}. Returns {@code true} <strong>iff</strong> {@code s1} and
+     * {@code s2} are both {@code null} or both are not {@code null} and
      * represent the same string (case sensitive).</p>
      *
      * @param s1 The first string.
      * @param s2 The second string.
      *
-     * @return <code>true</code> <strong>iff</strong> both string are null;
-     * or both are not null and represent the same string.
+     * @return {@code true} <strong>iff</strong> both string are {@code null};
+     * or both are not {@code null} and represent the same string.
      */
     public static boolean stringEquivalent(String s1, String s2) {
         //The first line makes sure that either both s1 and s2 are null or
@@ -273,14 +274,14 @@ public abstract class Exp extends ResolveConceptualElement {
 
     /**
      * <p>Returns a DEEP COPY of this expression, with all instances of 
-     * {@link Exp}s that occur as keys in <code>substitutions</code>
+     * {@link Exp}s that occur as keys in {@code substitutions}
      * replaced with their corresponding values.</p>
      * 
      * <p>In general, a key {@link Exp} "occurs" in this {@link Exp}
-     * if either this {@link Exp} or some subexpression is
-     * <code>equivalent()</code>. However, if the key is a {@link VarExp}
+     * if either this {@link Exp} or some sub-expression is
+     * {@link Exp#equivalent(Exp)}. However, if the key is a {@link VarExp}
      * function names are additionally matched, even though they would not
-     * ordinarily match via <code>equivalent()</code>, so function names can
+     * ordinarily match via {@link Exp#equivalent(Exp)}, so function names can
      * be substituted without affecting their arguments.</p>
      *   
      * @param substitutions A mapping from {@link Exp}s that should be
@@ -363,9 +364,9 @@ public abstract class Exp extends ResolveConceptualElement {
 
     /**
      * <p>Implemented by concrete subclasses of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted.  The concrete subclass may assume that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
+     * a copy of themselves where all sub-expressions have been appropriately
+     * substituted. The concrete subclass may assume that {@code this}
+     * does not match any key in {@code substitutions} and thus need only
      * concern itself with performing substitutions in its children.</p>
      * 
      * @param substitutions A mapping from {@link Exp}s that should be

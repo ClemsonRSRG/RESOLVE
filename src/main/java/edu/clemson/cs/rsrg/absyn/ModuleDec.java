@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the abstract base class for all the module declaration type
- * intermediate objects that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the abstract base class for all the module declaration objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -45,9 +45,9 @@ public abstract class ModuleDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>A helper constructor that allow us to store the parameter
-     * uses and general declarations of the created object directly
-     * in the this class.</p>
+     * <p>A helper constructor that allow us to store common member fields
+     * for objects created from a class that inherits from
+     * {@code ModuleDec}.</p>
      *
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
@@ -68,8 +68,8 @@ public abstract class ModuleDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This method must be implemented by all inherited classes
-     * to override the default clone method implementation.</p>
+     * <p>This method overrides the default clone method implementation
+     * for all the classes that extend from {@link ModuleDec}.</p>
      *
      * @return A deep copy of the object.
      */
@@ -80,9 +80,9 @@ public abstract class ModuleDec extends Dec {
      * <p>This method gets all the object declarations associated
      * with this module.</p>
      *
-     * @return A list of {link Dec} objects.
+     * @return A list of {@link Dec} objects.
      */
-    public List<Dec> getDecList() {
+    public final List<Dec> getDecList() {
         return myDecs;
     }
 
@@ -92,7 +92,7 @@ public abstract class ModuleDec extends Dec {
      *
      * @return A list of {@link ModuleParameterDec} objects.
      */
-    public List<ModuleParameterDec> getParameterDecs() {
+    public final List<ModuleParameterDec> getParameterDecs() {
         return myParameterDecs;
     }
 
@@ -102,7 +102,7 @@ public abstract class ModuleDec extends Dec {
      *
      * @return A list of {@link UsesItem} objects.
      */
-    public List<UsesItem> getUsesItems() {
+    public final List<UsesItem> getUsesItems() {
         return myUsesItems;
     }
 

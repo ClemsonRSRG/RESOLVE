@@ -21,11 +21,11 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
  * <p>A {@link Ty} represents the <em>description</em> of a
- * <code>Type</code>, as it is found in the RESOLVE source code. That is, it is
+ * {@code Type}, as it is found in the RESOLVE source code. That is, it is
  * representation of a type in the abstract syntax tree before it is translated 
- * into a true <code>Type</code>.</p>
+ * into a true {@code Type}.</p>
  * 
- * <p>It can be converted into a <code>Type</code> by a type.TypeConverter.</p>
+ * <p>It can be converted into a {@code Type} by a type.TypeConverter.</p>
  *
  * @version 2.0
  */
@@ -49,8 +49,9 @@ public abstract class Ty extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>A helper constructor that allow us to store the location
-     * of the created object directly in the this class.</p>
+     * <p>An helper constructor that allow us to store the location
+     * of any objects created from a class that inherits from
+     * {@code Ty}.</p>
      *
      * @param l A {@link Location} representation object.
      */
@@ -82,7 +83,7 @@ public abstract class Ty extends ResolveConceptualElement {
      * <p>This method gets the mathematical type associated
      * with this object.</p>
      *
-     * @return The {link MTType} type object.
+     * @return The {@link MTType} type object.
      */
     public final MTType getMathType() {
         return myMathType;
@@ -102,7 +103,7 @@ public abstract class Ty extends ResolveConceptualElement {
      * <p>This method gets the programming type associated
      * with this object.</p>
      *
-     * @return The {link PTType} type object.
+     * @return The {@link PTType} type object.
      */
     public final PTType getProgramType() {
         return myProgramTypeValue;

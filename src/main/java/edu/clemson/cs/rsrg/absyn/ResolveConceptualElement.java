@@ -21,7 +21,7 @@ import java.util.*;
 
 /**
  * <p>This is the abstract base class for all the intermediate objects
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -33,7 +33,7 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
 
     /**
      * <p>Refers to the starting position of this {@code ResolveConceptualElement}
-     * in the sourcefile.</p>
+     * in the source file.</p>
      *
      * <p>Note that this is <em>not</em> the starting position
      * of the name or anything like that -- but the actual start of the
@@ -46,8 +46,9 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
     // ===========================================================
 
     /**
-     * <p>A helper constructor that allow us to store the location
-     * of the created object directly in the this class.</p>
+     * <p>An helper constructor that allow us to store the location
+     * of any objects created from a class that inherits from
+     * {@code ResolveConceptualElement}.</p>
      *
      * @param l A {@link Location} representation object.
      */
@@ -61,16 +62,17 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
 
     /**
      * <p>This method must be implemented by all inherited classes
-     * to create a special indented text version of the class as a string.</p>
+     * to create a special indented text version of the instantiated
+     * object.</p>
      *
      * @param indentSize The base indentation to the first line
      *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
+     * @param innerIndentInc The additional indentation increment
+     *                       for the subsequent lines.
      *
      * @return A formatted text string of the class.
      */
-    public abstract String asString(int indentSize, int innerIndentSize);
+    public abstract String asString(int indentSize, int innerIndentInc);
 
     /**
      * <p>This method must be implemented by all inherited classes
@@ -193,6 +195,10 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
     /**
      * <p>This method must be implemented by all inherited classes
      * to return the object in string format.</p>
+     *
+     * <p><strong>Note:</strong> The {@code toString} method is intended
+     * for printing debugging messages. Do not use its value to perform
+     * compiler actions.</p>
      *
      * @return Object as a string.
      */
