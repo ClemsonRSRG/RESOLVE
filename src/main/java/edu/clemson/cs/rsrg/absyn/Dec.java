@@ -41,8 +41,8 @@ public abstract class Dec extends ResolveConceptualElement {
 
     /**
      * <p>An helper constructor that allow us to store the location
-     * of any objects created from a class that inherits from
-     * {@code Dec}.</p>
+     * and name of any objects created from a class that inherits
+     * from {@code Dec}.</p>
      *
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.

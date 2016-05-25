@@ -17,8 +17,8 @@ import edu.clemson.cs.rsrg.absyn.Ty;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class for all the programming parameter variable declarations
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the programming parameter variable declaration objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -29,7 +29,7 @@ public class ParameterVarDec extends AbstractVarDec {
     // ===========================================================
 
     /** <p>The object's mode representation.</p> */
-    private ProgramParameterEntry.ParameterMode myMode;
+    private final ProgramParameterEntry.ParameterMode myMode;
 
     // ===========================================================
     // Constructors
@@ -53,34 +53,22 @@ public class ParameterVarDec extends AbstractVarDec {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("ParameterVarDec\n");
 
-        printSpace(indentSize + innerIndentSize, sb);
+        printSpace(indentSize + innerIndentInc, sb);
         sb.append(myMode.toString());
-        sb.append(super.asString(indentSize, innerIndentSize));
+        sb.append(super.asStringVarDec(indentSize, innerIndentInc));
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for the {@link ParameterVarDec} class.</p>
-     *
-     * @return A deep copy of the object.
+     * {@inheritDoc}
      */
     @Override
     public final ParameterVarDec clone() {
@@ -88,26 +76,21 @@ public class ParameterVarDec extends AbstractVarDec {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link ParameterVarDec} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof ParameterVarDec) {
-            ParameterVarDec eAsParameterVarDec = (ParameterVarDec) o;
-            result = super.equals(eAsParameterVarDec);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
-            if (result) {
-                result = myMode.equals(eAsParameterVarDec.myMode);
-            }
-        }
+        ParameterVarDec that = (ParameterVarDec) o;
 
-        return result;
+        return myMode == that.myMode;
+
     }
 
     /**
@@ -115,17 +98,25 @@ public class ParameterVarDec extends AbstractVarDec {
      *
      * @return The mode in {@link ProgramParameterEntry.ParameterMode} format.
      */
-    public ProgramParameterEntry.ParameterMode getMode() {
+    public final ProgramParameterEntry.ParameterMode getMode() {
         return myMode;
     }
 
     /**
-     * <p>Returns this object in string format.</p>
-     *
-     * @return This class as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + myMode.hashCode();
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append(myMode);
         sb.append("\t");
