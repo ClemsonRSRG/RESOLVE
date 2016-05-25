@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.items;
+package edu.clemson.cs.rsrg.absyn.modules;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -49,74 +49,63 @@ public class UsesItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("UsesItem\n");
-        sb.append(myName
-                .asString(indentSize + innerIndentSize, innerIndentSize));
+        sb.append(myName.asString(indentSize + innerIndentInc, innerIndentInc));
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for the {@link UsesItem} class.</p>
-     *
-     * @return A deep copy of the object.
+     * {@inheritDoc}
      */
     @Override
-    public UsesItem clone() {
+    public final UsesItem clone() {
         return new UsesItem(myName.clone());
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link UsesItem} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof UsesItem) {
-            UsesItem usesItem = (UsesItem) o;
-            result = myName.equals(usesItem.myName);
-        }
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-        return result;
+        UsesItem usesItem = (UsesItem) o;
+
+        return myName.equals(usesItem.myName);
+
     }
 
     /**
-     * <p>Returns the symbol representation
-     * of this class.</p>
+     * <p>Returns the symbol representation of this class.</p>
      *
      * @return A {@link PosSymbol} representation of the name.
      */
-    public PosSymbol getName() {
+    public final PosSymbol getName() {
         return myName.clone();
     }
 
     /**
-     * <p>Returns the symbol in string format.</p>
-     *
-     * @return Symbol as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final int hashCode() {
+        return myName.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
         return myName.toString();
     }
 

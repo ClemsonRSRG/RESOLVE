@@ -17,7 +17,7 @@ import edu.clemson.cs.rsrg.absyn.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.MathAssertionDec;
 import edu.clemson.cs.rsrg.absyn.modules.parameters.ModuleParameterDec;
-import edu.clemson.cs.rsrg.absyn.items.UsesItem;
+import edu.clemson.cs.rsrg.absyn.modules.UsesItem;
 import edu.clemson.cs.rsrg.absyn.modules.PrecisModuleDec;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.misc.Utilities;

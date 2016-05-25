@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.absyn;
 
 import edu.clemson.cs.rsrg.absyn.modules.parameters.ModuleParameterDec;
-import edu.clemson.cs.rsrg.absyn.items.UsesItem;
+import edu.clemson.cs.rsrg.absyn.modules.UsesItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.ArrayList;
@@ -77,6 +77,23 @@ public abstract class ModuleDec extends Dec {
     public abstract ModuleDec clone();
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        ModuleDec moduleDec = (ModuleDec) o;
+
+        if (!myDecs.equals(moduleDec.myDecs)) return false;
+        if (!myParameterDecs.equals(moduleDec.myParameterDecs)) return false;
+        return myUsesItems.equals(moduleDec.myUsesItems);
+
+    }
+
+    /**
      * <p>This method gets all the object declarations associated
      * with this module.</p>
      *
@@ -104,6 +121,18 @@ public abstract class ModuleDec extends Dec {
      */
     public final List<UsesItem> getUsesItems() {
         return myUsesItems;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + myDecs.hashCode();
+        result = 31 * result + myParameterDecs.hashCode();
+        result = 31 * result + myUsesItems.hashCode();
+        return result;
     }
 
 }
