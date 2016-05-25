@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>This is the abstract base class for all the programming literal expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the abstract base class for all the programming literal expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -30,8 +30,9 @@ public abstract class ProgramLiteralExp extends ProgramExp {
     // ===========================================================
 
     /**
-     * <p>A helper constructor that allow us to store the location
-     * of the created object directly in the this class.</p>
+     * <p>An helper constructor that allow us to store the location
+     * of any objects created from a class that inherits from
+     * {@code ProgramLiteralExp}.</p>
      *
      * @param l A {@link Location} representation object.
      */
@@ -44,13 +45,7 @@ public abstract class ProgramLiteralExp extends ProgramExp {
     // ===========================================================
 
     /**
-     * <p>This method attempts to find the provided expression in our
-     * subexpressions. The result of this calling this method should
-     * always be false, because we can not contain an expression.</p>
-     *
-     * @param exp The expression we wish to locate.
-     *
-     * @return False.
+     * {@inheritDoc}
      */
     @Override
     public final boolean containsExp(Exp exp) {
@@ -58,15 +53,7 @@ public abstract class ProgramLiteralExp extends ProgramExp {
     }
 
     /**
-     * <p>This method attempts to find an expression with the given name in our
-     * subexpressions. The result of this calling this method should
-     * always be false, because we can not contain a variable.</p>
-     *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
-     *
-     * @return False.
+     * {@inheritDoc}
      */
     @Override
     public final boolean containsVar(String varName, boolean IsOldExp) {
@@ -74,23 +61,10 @@ public abstract class ProgramLiteralExp extends ProgramExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the list of
-     * subexpressions. The result of this calling this method should
-     * always be an empty list, because we can not contain an expression.</p>
-     *
-     * @return A list containing subexpressions ({@link Exp}s).
+     * {@inheritDoc}
      */
     @Override
     public final List<Exp> getSubExpressions() {
         return new ArrayList<>();
     }
-    /**
-     * <p>This method adds a new expression to our list of subexpressions.</p>
-     *
-     * @param index The index in our subexpression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: See the message in Exp.
-    //public void setSubExpression(int index, Exp e) {}
-
 }

@@ -18,8 +18,8 @@ import edu.clemson.cs.rsrg.errorhandling.exception.NullProgramTypeException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the abstract base class for all the programming expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the abstract base class for all the programming expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -37,8 +37,9 @@ public abstract class ProgramExp extends Exp {
     // ===========================================================
 
     /**
-     * <p>A helper constructor that allow us to store the location
-     * of the created object directly in the this class.</p>
+     * <p>An helper constructor that allow us to store the location
+     * of any objects created from a class that inherits from
+     * {@code ProgramExp}.</p>
      *
      * @param l A {@link Location} representation object.
      */
@@ -52,7 +53,7 @@ public abstract class ProgramExp extends Exp {
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for all the classes that extend from {@link Exp}.</p>
+     * for all the classes that extend from {@link ProgramExp}.</p>
      *
      * @return A deep copy of the object.
      */
@@ -68,7 +69,7 @@ public abstract class ProgramExp extends Exp {
      * <p>This method gets the programming type associated
      * with this object.</p>
      *
-     * @return The {link PTType} type object.
+     * @return The {@link PTType} type object.
      */
     public final PTType getProgramType() {
         return myProgramType;

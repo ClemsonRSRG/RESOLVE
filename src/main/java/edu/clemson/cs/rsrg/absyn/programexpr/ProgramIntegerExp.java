@@ -17,8 +17,8 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the programming integer expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the programming integer expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -51,23 +51,14 @@ public class ProgramIntegerExp extends ProgramLiteralExp {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("ProgramIntegerExp\n");
 
-        printSpace(indentSize + innerIndentSize, sb);
+        printSpace(indentSize + innerIndentInc, sb);
         sb.append(myInteger);
         sb.append("\n");
 
@@ -75,42 +66,26 @@ public class ProgramIntegerExp extends ProgramLiteralExp {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link ProgramIntegerExp} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof ProgramIntegerExp) {
-            ProgramIntegerExp eAsProgramIntegerExp = (ProgramIntegerExp) o;
-            result = myLoc.equals(eAsProgramIntegerExp.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result = myInteger.equals(eAsProgramIntegerExp.myInteger);
-            }
-        }
+        ProgramIntegerExp that = (ProgramIntegerExp) o;
 
-        return result;
+        return myInteger.equals(that.myInteger);
+
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
-     *
-     * @param e The expression to compare this one to.
-     *
-     * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equivalent(Exp e) {
+    public final boolean equivalent(Exp e) {
         boolean retval = e instanceof ProgramIntegerExp;
         if (retval) {
             ProgramIntegerExp eAsProgramIntegerExp = (ProgramIntegerExp) e;
@@ -121,21 +96,27 @@ public class ProgramIntegerExp extends ProgramLiteralExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the integer value.</p>
+     * <p>This method returns the integer value.</p>
      *
      * @return The {@link Integer} value.
      */
-    public int getValue() {
+    public final int getValue() {
         return myInteger;
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
-     *
-     * @return Expression as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final int hashCode() {
+        return myInteger.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append(myInteger);
 
@@ -147,32 +128,18 @@ public class ProgramIntegerExp extends ProgramLiteralExp {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Exp} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    public Exp copy() {
+    protected final Exp copy() {
         return new ProgramIntegerExp(new Location(myLoc), myInteger);
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted. This class is assuming that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
-     *
-     * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
-     *
-     * @return A new {@link Exp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
+    protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         return new ProgramIntegerExp(new Location(myLoc), myInteger);
     }
 
