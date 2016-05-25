@@ -17,18 +17,18 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
  * <p>This is a wrapper class for all the different module parameter
- * declarations that the compiler builds from the ANTLR4 AST tree.</p>
+ * declaration objects that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
-public class ModuleParameterDec extends Dec {
+public class ModuleParameterDec<T extends Dec & ModuleParameter> extends Dec {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
     /** <p>The actual module parameter declaration</p> */
-    private final Dec myWrappedDec;
+    private final T myWrappedDec;
 
     // ===========================================================
     // Constructors
@@ -39,9 +39,8 @@ public class ModuleParameterDec extends Dec {
      * is a module level parameter declaration.</p>
      *
      * @param dec The declaration to be wrapped.
-     * @param <T> The type of declaration.
      */
-    public <T extends Dec> ModuleParameterDec(T dec) {
+    public ModuleParameterDec(T dec) {
         super(dec.getLocation(), dec.getName());
         myWrappedDec = dec;
     }
@@ -51,19 +50,11 @@ public class ModuleParameterDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
-        return myWrappedDec.asString(indentSize, innerIndentSize);
+    public final String asString(int indentSize, int innerIndentInc) {
+        return myWrappedDec.asString(indentSize, innerIndentInc);
     }
 
     /**
@@ -73,37 +64,36 @@ public class ModuleParameterDec extends Dec {
      * @return A deep copy of the object.
      */
     @Override
-    public ModuleParameterDec clone() {
+    @SuppressWarnings("unchecked")
+    public final ModuleParameterDec clone() {
         return new ModuleParameterDec(myWrappedDec.clone());
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {link @ModuleParameterDec} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof ModuleParameterDec) {
-            ModuleParameterDec moduleParameterDec = (ModuleParameterDec) o;
-            result = myWrappedDec.equals(moduleParameterDec);
-        }
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
-        return result;
+        ModuleParameterDec<?> that = (ModuleParameterDec<?>) o;
+
+        return myWrappedDec.equals(that.myWrappedDec);
+
     }
 
     /**
-     * <p>Returns the symbol representation
-     * of this class.</p>
+     * <p>Returns the symbol representation of this class.</p>
      *
-     * @return A {link PosSymbol} representation of the name.
+     * @return A {@link PosSymbol} representation of the name.
      */
     @Override
-    public PosSymbol getName() {
+    public final PosSymbol getName() {
         return myWrappedDec.getName();
     }
 
@@ -112,8 +102,26 @@ public class ModuleParameterDec extends Dec {
      *
      * @return A {@link Dec} object.
      */
-    public Dec getWrappedDec() {
+    public final Dec getWrappedDec() {
         return myWrappedDec;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + myWrappedDec.hashCode();
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
+        return myWrappedDec.toString();
     }
 
 }

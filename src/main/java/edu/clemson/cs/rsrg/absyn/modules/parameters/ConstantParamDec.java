@@ -17,8 +17,8 @@ import edu.clemson.cs.rsrg.absyn.variables.AbstractVarDec;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class for all the constant parameter declarations
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the constant parameter declaration objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -44,31 +44,19 @@ public class ConstantParamDec extends AbstractVarDec implements ModuleParameter 
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public final String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("ConstantParamDec\n");
-        sb.append(super.asString(indentSize, innerIndentSize));
+        sb.append(super.asStringVarDec(indentSize, innerIndentInc));
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for the {@link ConstantParamDec} class.</p>
-     *
-     * @return A deep copy of the object.
+     * {@inheritDoc}
      */
     @Override
     public final ConstantParamDec clone() {

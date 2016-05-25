@@ -66,6 +66,25 @@ public abstract class Dec extends ResolveConceptualElement {
     public abstract Dec clone();
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        Dec dec = (Dec) o;
+
+        if (myMathType != null ? !myMathType.equals(dec.myMathType)
+                : dec.myMathType != null)
+            return false;
+        return myName.equals(dec.myName);
+
+    }
+
+    /**
      * <p>This method gets the mathematical type associated
      * with this object.</p>
      *
@@ -83,6 +102,16 @@ public abstract class Dec extends ResolveConceptualElement {
      */
     public PosSymbol getName() {
         return myName;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = myMathType != null ? myMathType.hashCode() : 0;
+        result = 31 * result + myName.hashCode();
+        return result;
     }
 
     /**

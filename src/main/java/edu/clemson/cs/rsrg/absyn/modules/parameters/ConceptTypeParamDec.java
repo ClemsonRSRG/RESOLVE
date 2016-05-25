@@ -17,7 +17,7 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
  * <p>This is the class for all the concept module type parameter
- * declarations that the compiler builds from the ANTLR4 AST tree.</p>
+ * declaration objects that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -42,32 +42,19 @@ public class ConceptTypeParamDec extends Dec implements ModuleParameter {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("ConceptTypeParamDec\n");
-        sb.append(myName
-                .asString(indentSize + innerIndentSize, innerIndentSize));
+        sb.append(myName.asString(indentSize + innerIndentInc, innerIndentInc));
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for the {@link ConceptTypeParamDec} class.</p>
-     *
-     * @return A deep copy of the object.
+     * {@inheritDoc}
      */
     @Override
     public final ConceptTypeParamDec clone() {
@@ -75,36 +62,10 @@ public class ConceptTypeParamDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link ConceptTypeParamDec} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof ConceptTypeParamDec) {
-            ConceptTypeParamDec eAsConceptTypeParamDec =
-                    (ConceptTypeParamDec) o;
-            result = myLoc.equals(eAsConceptTypeParamDec.myLoc);
-
-            if (result) {
-                result = myName.equals(eAsConceptTypeParamDec.myName);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * <p>Returns this object in string format.</p>
-     *
-     * @return This class as a string.
-     */
-    @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Type ");
         sb.append(myName.toString());

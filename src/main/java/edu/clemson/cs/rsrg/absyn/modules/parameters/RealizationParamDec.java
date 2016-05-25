@@ -16,8 +16,8 @@ import edu.clemson.cs.rsrg.absyn.Dec;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
- * <p>This is the class for all the realization parameter
- * declarations that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the realization parameter declaration objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -51,34 +51,21 @@ public class RealizationParamDec extends Dec implements ModuleParameter {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("RealizationParamDec\n");
-        sb.append(myName
-                .asString(indentSize + innerIndentSize, innerIndentSize));
-        sb.append(myConceptName.asString(indentSize + innerIndentSize,
-                innerIndentSize));
+        sb.append(myName.asString(indentSize + innerIndentInc, innerIndentInc));
+        sb.append(" of ");
+        sb.append(myConceptName.asString(0, innerIndentInc));
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for the {@link RealizationParamDec} class.</p>
-     *
-     * @return A deep copy of the object.
+     * {@inheritDoc}
      */
     @Override
     public final RealizationParamDec clone() {
@@ -86,30 +73,21 @@ public class RealizationParamDec extends Dec implements ModuleParameter {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link RealizationParamDec} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof RealizationParamDec) {
-            RealizationParamDec eAsRealizationParamDec =
-                    (RealizationParamDec) o;
-            result = myLoc.equals(eAsRealizationParamDec.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
-            if (result) {
-                result =
-                        myName.equals(eAsRealizationParamDec.myName)
-                                && myConceptName
-                                        .equals(eAsRealizationParamDec.myConceptName);
-            }
-        }
+        RealizationParamDec that = (RealizationParamDec) o;
 
-        return result;
+        return myConceptName.equals(that.myConceptName);
+
     }
 
     /**
@@ -117,17 +95,25 @@ public class RealizationParamDec extends Dec implements ModuleParameter {
      *
      * @return The concept name in {@link PosSymbol} format.
      */
-    public PosSymbol getConceptName() {
-        return myConceptName.clone();
+    public final PosSymbol getConceptName() {
+        return myConceptName;
     }
 
     /**
-     * <p>Returns this object in string format.</p>
-     *
-     * @return This class as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + myConceptName.hashCode();
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append(myName.toString());
         sb.append(" of ");
