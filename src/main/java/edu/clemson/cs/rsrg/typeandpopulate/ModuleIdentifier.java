@@ -95,12 +95,12 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for the {link UsesItem} class.</p>
+     * for the {link ModuleIdentifier} class.</p>
      *
      * @return A deep copy of the object.
      */
     @Override
-    public ModuleIdentifier clone() {
+    public final ModuleIdentifier clone() {
         return new ModuleIdentifier(myName);
     }
 
@@ -113,7 +113,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
      *         is less than, equal to, or greater than the specified object.
      */
     @Override
-    public int compareTo(ModuleIdentifier o) {
+    public final int compareTo(ModuleIdentifier o) {
         return myName.compareTo(o.myName);
     }
 
@@ -126,7 +126,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
      * @return True if all the fields are equal, false otherwise.
      */
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         boolean result = (o instanceof ModuleIdentifier);
         if (result) {
             result = ((ModuleIdentifier) o).myName.equals(myName);
@@ -140,8 +140,8 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
      *
      * @return Qualified symbol as a string.
      */
-    public String fullyQualifiedRepresentation(String symbol) {
-        return myName + "." + symbol;
+    public final String fullyQualifiedRepresentation(String symbol) {
+        return myName + "::" + symbol;
     }
 
     /**
@@ -151,7 +151,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
      * @return The hash code value of the object.
      */
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return myName.hashCode();
     }
 
@@ -161,7 +161,7 @@ public class ModuleIdentifier implements Comparable<ModuleIdentifier> {
      * @return Symbol as a string.
      */
     @Override
-    public String toString() {
+    public final String toString() {
         return myName;
     }
 
