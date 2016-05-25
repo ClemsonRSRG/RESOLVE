@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical function expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical function expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -36,10 +36,10 @@ public class FunctionExp extends AbstractFunctionExp {
     // ===========================================================
 
     /** <p>The mathematical name expression for this function.</p> */
-    private Exp myFuncNameExp;
+    private final Exp myFuncNameExp;
 
     /** <p>The expression's argument fields</p> */
-    private List<Exp> myArguments;
+    private final List<Exp> myArguments;
 
     // ===========================================================
     // Constructors
@@ -68,43 +68,34 @@ public class FunctionExp extends AbstractFunctionExp {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("FunctionExp\n");
 
         if (myQuantification != SymbolTableEntry.Quantification.NONE) {
-            printSpace(indentSize + innerIndentSize, sb);
+            printSpace(indentSize + innerIndentInc, sb);
             sb.append(myQuantification.toString());
             sb.append(" ");
         }
 
         if (myQualifier != null) {
-            sb.append(myQualifier.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myQualifier.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
             sb.append("::");
         }
 
-        sb.append(myFuncNameExp.asString(indentSize + innerIndentSize,
-                innerIndentSize));
+        sb.append(myFuncNameExp.asString(indentSize + innerIndentInc,
+                innerIndentInc));
 
         if (myArguments != null) {
             sb.append("(");
             Iterator<Exp> it = myArguments.iterator();
             while (it.hasNext()) {
-                sb.append(it.next().asString(indentSize + innerIndentSize,
-                        innerIndentSize));
+                sb.append(it.next().asString(indentSize + innerIndentInc,
+                        innerIndentInc));
 
                 if (it.hasNext()) {
                     sb.append(", ");
@@ -117,16 +108,10 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method attempts to find the provided expression in our
-     * subexpressions.</p>
-     *
-     * @param exp The expression we wish to locate.
-     *
-     * @return True if there is an instance of <code>exp</code>
-     * within this object's subexpressions. False otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsExp(Exp exp) {
+    public final boolean containsExp(Exp exp) {
         boolean found = myFuncNameExp.containsExp(exp);
         if (!found && myArguments != null) {
             Iterator<Exp> i = myArguments.iterator();
@@ -144,18 +129,10 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     *  <p>This method attempts to find an expression with the given name in our
-     * subexpressions.</p>
-     *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
-     *
-     * @return True if there is a {@link Exp} within this object's
-     * subexpressions that matches <code>varName</code>. False otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsVar(String varName, boolean IsOldExp) {
+    public final boolean containsVar(String varName, boolean IsOldExp) {
         boolean found = myFuncNameExp.containsVar(varName, IsOldExp);
         if (!found && myArguments != null) {
             Iterator<Exp> i = myArguments.iterator();
@@ -173,66 +150,28 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link FunctionExp} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof FunctionExp) {
-            FunctionExp eAsFunctionExp = (FunctionExp) o;
-            result = myLoc.equals(eAsFunctionExp.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result =
-                        posSymbolEquivalent(myQualifier,
-                                eAsFunctionExp.myQualifier)
-                                && myFuncNameExp
-                                        .equals(eAsFunctionExp.myFuncNameExp)
-                                && myQuantification
-                                        .equals(eAsFunctionExp.myQuantification);
+        FunctionExp that = (FunctionExp) o;
 
-                if (myArguments != null && eAsFunctionExp.myArguments != null) {
-                    Iterator<Exp> thisArgumentsExps = myArguments.iterator();
-                    Iterator<Exp> eArgumentsExps =
-                            eAsFunctionExp.myArguments.iterator();
+        if (!myFuncNameExp.equals(that.myFuncNameExp))
+            return false;
+        return myArguments.equals(that.myArguments);
 
-                    while (result && thisArgumentsExps.hasNext()
-                            && eArgumentsExps.hasNext()) {
-                        result &=
-                                thisArgumentsExps.next().equals(
-                                        eArgumentsExps.next());
-                    }
-
-                    //Both had better have run out at the same time
-                    result &=
-                            (!thisArgumentsExps.hasNext())
-                                    && (!eArgumentsExps.hasNext());
-                }
-            }
-        }
-
-        return result;
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
-     *
-     * @param e The expression to compare this one to.
-     *
-     * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equivalent(Exp e) {
+    public final boolean equivalent(Exp e) {
         boolean retval = e instanceof FunctionExp;
 
         if (retval) {
@@ -250,21 +189,21 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the function name expression.</p>
+     * <p>This method returns the function name expression.</p>
      *
      * @return The {@link Exp} representation object.
      */
-    public Exp getName() {
-        return myFuncNameExp.clone();
+    public final Exp getName() {
+        return myFuncNameExp;
     }
 
     /**
-     * <p>This method returns a deep copy of the operator name.</p>
+     * <p>This method returns the operator name.</p>
      *
-     * @return A {link PosSymbol} object containing the operator.
+     * @return A {@link PosSymbol} object containing the operator.
      */
     @Override
-    public PosSymbol getOperatorAsPosSymbol() {
+    public final PosSymbol getOperatorAsPosSymbol() {
         if (!(myFuncNameExp instanceof VarExp)) {
             throw new MiscErrorException(
                     "We encountered an expression of the type "
@@ -276,12 +215,12 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the operator name.</p>
+     * <p>This method returns the operator name.</p>
      *
      * @return The operator as a string.
      */
     @Override
-    public String getOperatorAsString() {
+    public final String getOperatorAsString() {
         if (!(myFuncNameExp instanceof VarExp)) {
             throw new MiscErrorException(
                     "We encountered an expression of the type "
@@ -293,27 +232,34 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns a deep copy of all the argument expressions.</p>
+     * <p>This method returns all the argument expressions.</p>
      *
      * @return A list containing all the argument {@link Exp}s.
      */
-    public List<Exp> getArguments() {
-        return copyExps();
+    public final List<Exp> getArguments() {
+        return myArguments;
     }
 
     /**
-     * <p>This method returns a deep copy of the list of
-     * subexpressions.</p>
-     *
-     * @return A list containing subexpressions ({@link Exp}s).
+     * {@inheritDoc}
      */
     @Override
-    public List<Exp> getSubExpressions() {
+    public final List<Exp> getSubExpressions() {
         List<Exp> list = new ArrayList<>();
         list.add(myFuncNameExp);
-        list.addAll(getArguments());
+        list.addAll(copyExps());
 
         return list;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = myFuncNameExp.hashCode();
+        result = 31 * result + myArguments.hashCode();
+        return result;
     }
 
     /**
@@ -324,7 +270,7 @@ public class FunctionExp extends AbstractFunctionExp {
      * @return The resulting {@link FunctionExp} from applying the remember rule.
      */
     @Override
-    public FunctionExp remember() {
+    public final FunctionExp remember() {
         PosSymbol qualifier = null;
         if (myQualifier != null) {
             qualifier = myQualifier.clone();
@@ -359,49 +305,20 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method adds a new expression to our list of subexpressions.</p>
-     *
-     * @param index The index in our subexpression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: See the message in Exp.
-    /*public void setSubExpression(int index, Exp e) {
-        if (natural == null) {
-            //List--for whatever reason--will not add null elements, so in
-            //getSubExpression, the returned list will have "natural" (whatever
-            //THAT means...) as its 0th element ONLY IF NATURAL IS NOT NULL,
-            //otherwise the parameters will start immediately
-            paramList.get(0).getArguments().set(index, e);
-        }
-        else {
-            switch (index) {
-                case 0:
-                    natural = e;
-                    break;
-                default:
-                    paramList.get(0).getArguments().set(index - 1, e);
-                    break;
-            }
-        }
-    }*/
-
-    /**
      * <p>This method applies the VC Generator's simplification step.</p>
      *
      * @return The resulting {@link MathExp} from applying the simplification step.
      */
     @Override
-    public MathExp simplify() {
+    public final MathExp simplify() {
         return this.clone();
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
-     *
-     * @return Expression as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
 
         if (myQuantification != SymbolTableEntry.Quantification.NONE) {
@@ -434,13 +351,10 @@ public class FunctionExp extends AbstractFunctionExp {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Exp} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp copy() {
+    protected final Exp copy() {
         PosSymbol qualifier = null;
         if (myQualifier != null) {
             qualifier = myQualifier.clone();
@@ -451,21 +365,10 @@ public class FunctionExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted. This class is assuming that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
-     *
-     * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
-     *
-     * @return A new {@link Exp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
+    protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         PosSymbol qualifier = null;
         if (myQualifier != null) {
             qualifier = myQualifier.clone();

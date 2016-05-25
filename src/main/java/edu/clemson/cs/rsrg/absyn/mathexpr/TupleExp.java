@@ -22,10 +22,10 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the mathematical tuple expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical tuple expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
- * <p>Making TupleExp extend from AbstractFunctionExp was considered and
+ * <p>Making {@code TupleExp} extend from {@link AbstractFunctionExp} was considered and
  * explicitly decided against during the great math-type-overhaul of 2012.
  * If we chose to admit the presence of some function that builds tuples for us,
  * how would we pass it its parameters if not via a tuple?  Thus, TupleExp is
@@ -109,26 +109,17 @@ public class TupleExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("TupleExp\n");
 
         if (myFields != null) {
             for (Exp e : myFields) {
-                sb.append(e.asString(indentSize + innerIndentSize,
-                        innerIndentSize));
+                sb.append(e.asString(indentSize + innerIndentInc,
+                        innerIndentInc));
             }
         }
 
@@ -136,16 +127,10 @@ public class TupleExp extends MathExp {
     }
 
     /**
-     * <p>This method attempts to find the provided expression in our
-     * subexpressions.</p>
-     *
-     * @param exp The expression we wish to locate.
-     *
-     * @return True if there is an instance of <code>exp</code>
-     * within this object's subexpressions. False otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsExp(Exp exp) {
+    public final boolean containsExp(Exp exp) {
         boolean found = false;
         if (myFields != null) {
             Iterator<Exp> i = myFields.iterator();
@@ -163,18 +148,10 @@ public class TupleExp extends MathExp {
     }
 
     /**
-     *  <p>This method attempts to find an expression with the given name in our
-     * subexpressions.</p>
-     *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
-     *
-     * @return True if there is a {@link Exp} within this object's
-     * subexpressions that matches <code>varName</code>. False otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsVar(String varName, boolean IsOldExp) {
+    public final boolean containsVar(String varName, boolean IsOldExp) {
         boolean found = false;
         if (myFields != null) {
             Iterator<Exp> i = myFields.iterator();
@@ -192,56 +169,28 @@ public class TupleExp extends MathExp {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link TupleExp} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof TupleExp) {
-            TupleExp eAsTupleExp = (TupleExp) o;
-            result = myLoc.equals(eAsTupleExp.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                if (myFields != null && eAsTupleExp.myFields != null) {
-                    Iterator<Exp> thisFieldExps = myFields.iterator();
-                    Iterator<Exp> eFieldExps = eAsTupleExp.myFields.iterator();
+        TupleExp tupleExp = (TupleExp) o;
 
-                    while (result && thisFieldExps.hasNext()
-                            && eFieldExps.hasNext()) {
-                        result &=
-                                thisFieldExps.next().equals(eFieldExps.next());
-                    }
+        if (mySize != tupleExp.mySize)
+            return false;
+        return myFields.equals(tupleExp.myFields);
 
-                    //Both had better have run out at the same time
-                    result &=
-                            (!thisFieldExps.hasNext())
-                                    && (!eFieldExps.hasNext());
-                }
-            }
-        }
-
-        return result;
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
-     *
-     * @param e The expression to compare this one to.
-     *
-     * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equivalent(Exp e) {
+    public final boolean equivalent(Exp e) {
         boolean result = (e instanceof DotExp);
 
         if (result) {
@@ -266,13 +215,13 @@ public class TupleExp extends MathExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the specified field expression.</p>
+     * <p>This method returns the specified field expression.</p>
      *
      * @param index The index of the field expression.
      *
      * @return A {@link Exp} representation object.
      */
-    public Exp getField(int index) {
+    public final Exp getField(int index) {
         Exp result;
 
         if (index < 0 || index >= mySize) {
@@ -298,16 +247,16 @@ public class TupleExp extends MathExp {
             }
         }
 
-        return result.clone();
+        return result;
     }
 
     /**
-     * <p>This method returns a deep copy of all the inner field expressions.</p>
+     * <p>This method returns all the inner field expressions.</p>
      *
      * @return A list containing all the segmented {@link Exp}s.
      */
-    public List<Exp> getFields() {
-        return copyExps();
+    public final List<Exp> getFields() {
+        return myFields;
     }
 
     /**
@@ -315,30 +264,36 @@ public class TupleExp extends MathExp {
      *
      * @return The size of this {@link TupleExp}.
      */
-    public int getSize() {
+    public final int getSize() {
         return mySize;
     }
 
     /**
-     * <p>This method method returns a deep copy of the list of
-     * subexpressions. This method will return the same result
-     * as calling the {@link TupleExp#getFields()} method.</p>
-     *
-     * @return A list containing subexpressions ({@link Exp}s).
+     * {@inheritDoc}
      */
     @Override
-    public List<Exp> getSubExpressions() {
+    public final List<Exp> getSubExpressions() {
         return getFields();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = myFields.hashCode();
+        result = 31 * result + mySize;
+        return result;
     }
 
     /**
      * <p>This method checks to see if all the field expressions
      * inside this tuple expression are universally quantified.</p>
      *
-     * @return True if all {@link Exp}s are universally quantified,
-     * false otherwise.
+     * @return {@code true} if all {@link Exp}s are universally quantified,
+     * {@code false} otherwise.
      */
-    public boolean isUniversallyQuantified() {
+    public final boolean isUniversallyQuantified() {
         boolean soFar = true;
 
         for (Exp field : myFields) {
@@ -360,7 +315,7 @@ public class TupleExp extends MathExp {
      * @return The resulting {@link TupleExp} from applying the remember rule.
      */
     @Override
-    public TupleExp remember() {
+    public final TupleExp remember() {
         List<Exp> newFieldExps = new ArrayList<>();
         for (Exp e : myFields) {
             Exp copyExp;
@@ -380,33 +335,20 @@ public class TupleExp extends MathExp {
     }
 
     /**
-     * <p>This method adds a new expression to our list of subexpressions.</p>
-     *
-     * @param index The index in our subexpression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: See the message in Exp.
-    /*public void setSubExpression(int index, Exp e) {
-        myFields.set(index, e);
-    }*/
-
-    /**
      * <p>This method applies the VC Generator's simplification step.</p>
      *
      * @return The resulting {@link MathExp} from applying the simplification step.
      */
     @Override
-    public MathExp simplify() {
+    public final MathExp simplify() {
         return this.clone();
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
-     *
-     * @return Expression as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("(");
 
@@ -431,32 +373,18 @@ public class TupleExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Exp} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp copy() {
+    protected final Exp copy() {
         return new TupleExp(new Location(myLoc), copyExps());
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted. This class is assuming that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
-     *
-     * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
-     *
-     * @return A new {@link Exp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
+    protected final Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
         List<Exp> newFields = new ArrayList<>();
         for (Exp f : myFields) {
             newFields.add(substitute(f, substitutions));

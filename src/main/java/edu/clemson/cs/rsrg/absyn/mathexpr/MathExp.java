@@ -21,10 +21,10 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
 
 /**
- * <p>This is the abstract base class for all the mathematical expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the abstract base class for all the mathematical expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
- * @version 2.0
+ * @version 1.0
  */
 public abstract class MathExp extends Exp {
 
@@ -33,8 +33,9 @@ public abstract class MathExp extends Exp {
     // ===========================================================
 
     /**
-     * <p>A helper constructor that allow us to store the location
-     * of the created object directly in the this class.</p>
+     * <p>An helper constructor that allow us to store the location
+     * of any objects created from a class that inherits from
+     * {@code MathExp}.</p>
      *
      * @param l A {@link Location} representation object.
      */
@@ -48,7 +49,7 @@ public abstract class MathExp extends Exp {
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for all the classes that extend from {@link Exp}.</p>
+     * for all the classes that extend from {@link MathExp}.</p>
      *
      * @return A deep copy of the object.
      */
@@ -66,7 +67,7 @@ public abstract class MathExp extends Exp {
      *
      * @return The resulting {@link Exp}.
      */
-    public static MathExp formConjunct(Location l, Exp e1, Exp e2) {
+    public final static MathExp formConjunct(Location l, Exp e1, Exp e2) {
         if (e1.getMathType() == null) {
             throw new NullMathTypeException("The math type for "
                     + e1.toString() + " is null.");
@@ -99,7 +100,7 @@ public abstract class MathExp extends Exp {
      *
      * @return The resulting {@link Exp}.
      */
-    public static MathExp formDisjunct(Location l, Exp e1, Exp e2) {
+    public final static MathExp formDisjunct(Location l, Exp e1, Exp e2) {
         if (e1.getMathType() == null) {
             throw new NullMathTypeException("The math type for "
                     + e1.toString() + " is null.");
@@ -132,7 +133,7 @@ public abstract class MathExp extends Exp {
      *
      * @return The resulting {@link Exp}.
      */
-    public static MathExp formImplies(Location l, Exp e1, Exp e2) {
+    public final static MathExp formImplies(Location l, Exp e1, Exp e2) {
         if (e1.getMathType() == null) {
             throw new NullMathTypeException("The math type for "
                     + e1.toString() + " is null.");
@@ -158,14 +159,14 @@ public abstract class MathExp extends Exp {
 
     /**
      * <p>This static method method creates a variable expression that
-     * matches the boolean "true".</p>
+     * matches the boolean {@code true}.</p>
      *
      * @param l A {@link Location} where the representation object is created from.
      * @param tg A {@link TypeGraph} to retrieve the mathematical boolean type.
      *
      * @return The {@link VarExp} representation object.
      */
-    public static VarExp getTrueVarExp(Location l, TypeGraph tg) {
+    public final static VarExp getTrueVarExp(Location l, TypeGraph tg) {
         VarExp retval =
                 new VarExp(new Location(l), null, new PosSymbol(
                         new Location(l), "true"));
@@ -177,9 +178,9 @@ public abstract class MathExp extends Exp {
     /**
      * <p>This method returns the default behavior for an
      * arbitrary {@link Exp} when checking to see if we are
-     * simply the literal "true".</p>
+     * simply the literal {@code true}.</p>
      *
-     * @return True if <code>exp</code> contains "true",
+     * @return True if {@code exp}contains {@code true},
      * false otherwise.
      */
     public static boolean isLiteralTrue(Exp exp) {
@@ -195,9 +196,9 @@ public abstract class MathExp extends Exp {
     /**
      * <p>This method returns the default behavior for an
      * arbitrary {@link Exp} when checking to see if we are
-     * simply the literal "false".</p>
+     * simply the literal {@code false}.</p>
      *
-     * @return True if <code>exp</code> contains "false",
+     * @return True if {@code exp} contains {@code false},
      * false otherwise.
      */
     public static boolean isLiteralFalse(Exp exp) {

@@ -21,7 +21,7 @@ import java.util.Map;
 
 /**
  * <p>This is the class for all the individual mathematical alternative
- * items inside the {link AlternativeExp}s.</p>
+ * items inside the {@link AlternativeExp}s.</p>
  *
  * @version 2.0
  */
@@ -65,46 +65,31 @@ public class AltItemExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("AltItemExp\n");
 
         if (myTestingExp != null) {
-            sb.append(myTestingExp.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myTestingExp.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
         }
 
         if (myAssignmentExp != null) {
-            sb.append(myAssignmentExp.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myAssignmentExp.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
         }
 
         return sb.toString();
     }
 
     /**
-     * <p>This method attempts to find the provided expression in our
-     * subexpressions.</p>
-     *
-     * @param exp The expression we wish to locate.
-     *
-     * @return True if there is an instance of <code>exp</code>
-     * within this object's subexpressions. False otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsExp(Exp exp) {
+    public final boolean containsExp(Exp exp) {
         boolean found = false;
         if (myTestingExp != null) {
             found = myTestingExp.containsExp(exp);
@@ -117,18 +102,10 @@ public class AltItemExp extends MathExp {
     }
 
     /**
-     *  <p>This method attempts to find an expression with the given name in our
-     * subexpressions.</p>
-     *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
-     *
-     * @return True if there is a {@link Exp} within this object's
-     * subexpressions that matches <code>varName</code>. False otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsVar(String varName, boolean IsOldExp) {
+    public final boolean containsVar(String varName, boolean IsOldExp) {
         boolean found = false;
         if (myTestingExp != null) {
             found = myTestingExp.containsVar(varName, IsOldExp);
@@ -141,50 +118,28 @@ public class AltItemExp extends MathExp {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link AltItemExp} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof AltItemExp) {
-            AltItemExp eAsAltItemExp = (AltItemExp) o;
-            result = myLoc.equals(eAsAltItemExp.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                if (myTestingExp != null) {
-                    result = myTestingExp.equals(eAsAltItemExp.myTestingExp);
-                }
+        AltItemExp that = (AltItemExp) o;
 
-                if (result) {
-                    result =
-                            myAssignmentExp
-                                    .equals(eAsAltItemExp.myAssignmentExp);
-                }
-            }
-        }
+        if (!myTestingExp.equals(that.myTestingExp))
+            return false;
+        return myAssignmentExp.equals(that.myAssignmentExp);
 
-        return result;
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
-     *
-     * @param e The expression to compare this one to.
-     *
-     * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equivalent(Exp e) {
+    public final boolean equivalent(Exp e) {
         boolean result = e instanceof AltItemExp;
 
         if (result) {
@@ -198,21 +153,19 @@ public class AltItemExp extends MathExp {
     }
 
     /**
-     * <p>Returns a deep copy of this expression's assignment expression.</p>
+     * <p>Returns this expression's assignment expression.</p>
      *
      * @return The assignment {@link Exp} object.
      */
-    public Exp getAssignment() {
-        return myAssignmentExp.clone();
+    public final Exp getAssignment() {
+        return myAssignmentExp;
     }
 
     /**
-     * <p>This method returns the list of subexpressions.</p>
-     *
-     * @return A list containing subexpressions ({@link Exp}s).
+     * {@inheritDoc}
      */
     @Override
-    public List<Exp> getSubExpressions() {
+    public final List<Exp> getSubExpressions() {
         List<Exp> subExpList = new ArrayList<>();
         subExpList.add(myTestingExp.clone());
         subExpList.add(myAssignmentExp.clone());
@@ -221,12 +174,22 @@ public class AltItemExp extends MathExp {
     }
 
     /**
-     * <p>Returns a deep copy this expression's testing expression.</p>
+     * <p>Returns this expression's testing expression.</p>
      *
      * @return The testing {@link Exp} object.
      */
-    public Exp getTest() {
-        return myTestingExp.clone();
+    public final Exp getTest() {
+        return myTestingExp;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = myTestingExp.hashCode();
+        result = 31 * result + myAssignmentExp.hashCode();
+        return result;
     }
 
     /**
@@ -237,7 +200,7 @@ public class AltItemExp extends MathExp {
      * @return The resulting {@link AltItemExp} from applying the remember rule.
      */
     @Override
-    public AltItemExp remember() {
+    public final AltItemExp remember() {
         Exp testingExp = myTestingExp;
         if (testingExp != null) {
             testingExp = ((MathExp) testingExp).remember();
@@ -252,51 +215,20 @@ public class AltItemExp extends MathExp {
     }
 
     /**
-     *  <p>This method adds a new expression to our list of subexpressions.</p>
-     *
-     * @param index The index in our subexpression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: See the message in Exp.
-    /*
-    @Override
-    public void setSubExpression(int index, Exp e) {
-        switch (index) {
-        case 0:
-            //edu.clemson.cs.r2jt.data.List was written by crazed monkies and
-            //silently ignores adding null elements (in violation of 
-            //java.util.List's contract), so if testingExp is null, index 0 is the
-            //assignment subexpression, otherwise it's the testingExp subexpression.
-            if (myTestingExp == null) {
-                setAssignment(e);
-            }
-            else {
-                setTest(e);
-            }
-            break;
-        case 1:
-            setAssignment(e);
-            break;
-        }
-    }*/
-
-    /**
      * <p>This method applies the VC Generator's simplification step.</p>
      *
      * @return The resulting {@link MathExp} from applying the simplification step.
      */
     @Override
-    public MathExp simplify() {
+    public final MathExp simplify() {
         return this.clone();
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
-     *
-     * @return Expression as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append(myAssignmentExp.toString());
 
@@ -316,13 +248,10 @@ public class AltItemExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Exp} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp copy() {
+    protected final Exp copy() {
         Exp newTest = null;
         if (myTestingExp != null) {
             newTest = myTestingExp.clone();
@@ -337,21 +266,10 @@ public class AltItemExp extends MathExp {
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted. This class is assuming that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
-     *
-     * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
-     *
-     * @return A new {@link Exp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
+    protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         return new AltItemExp(myLoc, substitute(myTestingExp, substitutions),
                 substitute(myAssignmentExp, substitutions));
     }

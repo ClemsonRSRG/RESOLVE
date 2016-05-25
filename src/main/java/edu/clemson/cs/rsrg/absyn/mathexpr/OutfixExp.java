@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the abstract base class for all the mathematical outfix expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the abstract base class for all the mathematical outfix expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -189,26 +189,17 @@ public class OutfixExp extends AbstractFunctionExp {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("OutfixExp\n");
 
         sb.append(myOperator.getLeftDelimiterString());
         if (myArgument != null) {
-            sb.append(myArgument.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myArgument.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
         }
         sb.append(myOperator.getRightDelimiterString());
 
@@ -216,74 +207,44 @@ public class OutfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method attempts to find the provided expression in our
-     * subexpressions.</p>
-     *
-     * @param exp The expression we wish to locate.
-     *
-     * @return True if there is an instance of <code>exp</code>
-     * within this object's subexpressions. False otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsExp(Exp exp) {
+    public final boolean containsExp(Exp exp) {
         return myArgument.containsExp(exp);
     }
 
     /**
-     *  <p>This method attempts to find an expression with the given name in our
-     * subexpressions.</p>
-     *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
-     *
-     * @return True if there is a {@link Exp} within this object's
-     * subexpressions that matches <code>varName</code>. False otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsVar(String varName, boolean IsOldExp) {
+    public final boolean containsVar(String varName, boolean IsOldExp) {
         return myArgument.containsVar(varName, IsOldExp);
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link OutfixExp} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof OutfixExp) {
-            OutfixExp eAsOutfixExp = (OutfixExp) o;
-            result = myLoc.equals(eAsOutfixExp.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result =
-                        myOperator.equals(eAsOutfixExp.myOperator)
-                                && myArgument.equals(eAsOutfixExp.myArgument);
-            }
-        }
+        OutfixExp outfixExp = (OutfixExp) o;
 
-        return result;
+        if (myOperator != outfixExp.myOperator)
+            return false;
+        return myArgument.equals(outfixExp.myArgument);
+
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
-     *
-     * @param e The expression to compare this one to.
-     *
-     * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equivalent(Exp e) {
+    public final boolean equivalent(Exp e) {
         boolean retval = e instanceof OutfixExp;
 
         if (retval) {
@@ -297,56 +258,63 @@ public class OutfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the argument expression.</p>
+     * <p>This method returns the argument expression.</p>
      *
      * @return The {@link Exp} representation object.
      */
-    public Exp getArgument() {
-        return myArgument.clone();
+    public final Exp getArgument() {
+        return myArgument;
     }
 
     /**
      * <p>This method returns the operator.</p>
      *
-     * @return A {link Operator} object containing the operator.
+     * @return A {@link Operator} object containing the operator.
      */
-    public Operator getOperator() {
+    public final Operator getOperator() {
         return myOperator;
     }
 
     /**
      * <p>This method returns a deep copy of the operator name.</p>
      *
-     * @return A {link PosSymbol} object containing the operator.
+     * @return A {@link PosSymbol} object containing the operator.
      */
     @Override
-    public PosSymbol getOperatorAsPosSymbol() {
+    public final PosSymbol getOperatorAsPosSymbol() {
         return new PosSymbol(new Location(myLoc), getOperatorAsString());
     }
 
     /**
-     * <p>This method returns a deep copy of the operator name.</p>
+     * <p>This method returns operator name in string format.</p>
      *
      * @return The operator as a string.
      */
     @Override
-    public String getOperatorAsString() {
+    public final String getOperatorAsString() {
         return myOperator.getLeftDelimiterString() + "_"
                 + myOperator.getRightDelimiterString();
     }
 
     /**
-     * <p>This method returns a deep copy of the list of
-     * subexpressions.</p>
-     *
-     * @return A list containing subexpressions ({@link Exp}s).
+     * {@inheritDoc}
      */
     @Override
-    public List<Exp> getSubExpressions() {
+    public final List<Exp> getSubExpressions() {
         List<Exp> subExps = new ArrayList<>();
         subExps.add(myArgument.clone());
 
         return subExps;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = myOperator.hashCode();
+        result = 31 * result + myArgument.hashCode();
+        return result;
     }
 
     /**
@@ -357,7 +325,7 @@ public class OutfixExp extends AbstractFunctionExp {
      * @return The resulting {@link OutfixExp} from applying the remember rule.
      */
     @Override
-    public Exp remember() {
+    public final Exp remember() {
         Exp newArgument = ((MathExp) myArgument).remember();
 
         PosSymbol qualifier = null;
@@ -370,33 +338,20 @@ public class OutfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method adds a new expression to our list of subexpressions.</p>
-     *
-     * @param index The index in our subexpression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: See the message in Exp.
-    /*public void setSubExpression(int index, Exp e) {
-        myArgument = e;
-    }*/
-
-    /**
      * <p>This method applies the VC Generator's simplification step.</p>
      *
      * @return The resulting {@link MathExp} from applying the simplification step.
      */
     @Override
-    public MathExp simplify() {
+    public final MathExp simplify() {
         return this.clone();
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
-     *
-     * @return Expression as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
 
         if (myQualifier != null) {
@@ -422,13 +377,10 @@ public class OutfixExp extends AbstractFunctionExp {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Exp} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp copy() {
+    protected final Exp copy() {
         PosSymbol qualifier = null;
         if (myQualifier != null) {
             qualifier = myQualifier.clone();
@@ -439,21 +391,10 @@ public class OutfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted. This class is assuming that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
-     *
-     * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
-     *
-     * @return A new {@link Exp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
+    protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         PosSymbol qualifier = null;
         if (myQualifier != null) {
             qualifier = myQualifier.clone();

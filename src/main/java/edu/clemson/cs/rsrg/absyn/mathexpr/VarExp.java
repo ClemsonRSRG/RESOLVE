@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical variable expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical variable expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -79,67 +79,44 @@ public class VarExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("VarExp\n");
 
         if (myQuantification != SymbolTableEntry.Quantification.NONE) {
             sb.append(myQuantification);
         }
 
         if (myQualifier != null) {
-            sb.append(myQualifier.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myQualifier.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
             sb.append("::");
         }
 
         if (myName != null) {
-            sb.append(myName.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myName.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
         }
 
         return sb.toString();
     }
 
     /**
-     * <p>This method attempts to find the provided expression in our
-     * subexpressions. The result of this calling this method should
-     * always be false, because we can not contain an expression.</p>
-     *
-     * @param exp The expression we wish to locate.
-     *
-     * @return False.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsExp(Exp exp) {
+    public final boolean containsExp(Exp exp) {
         return false;
     }
 
     /**
-     *  <p>This method attempts to find an expression with the given name in our
-     * subexpressions. The result of this calling this method should
-     * always be false, because we can not contain an expression.</p>
-     *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
-     *
-     * @return False.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsVar(String varName, boolean IsOldExp) {
+    public final boolean containsVar(String varName, boolean IsOldExp) {
         boolean retval = false;
         if (myName != null) {
             if (!IsOldExp && myName.equals(varName)) {
@@ -151,44 +128,31 @@ public class VarExp extends MathExp {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link VarExp} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof VarExp) {
-            VarExp eAsVarExp = (VarExp) o;
-            result = myLoc.equals(eAsVarExp.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result =
-                        (posSymbolEquivalent(myQualifier, eAsVarExp.myQualifier) && (posSymbolEquivalent(
-                                myName, eAsVarExp.myName)));
-            }
-        }
+        VarExp varExp = (VarExp) o;
 
-        return result;
+        if (myQualifier != null ? !myQualifier.equals(varExp.myQualifier)
+                : varExp.myQualifier != null)
+            return false;
+        if (!myName.equals(varExp.myName))
+            return false;
+        return myQuantification == varExp.myQuantification;
+
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
-     *
-     * @param e The expression to compare this one to.
-     *
-     * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equivalent(Exp e) {
+    public final boolean equivalent(Exp e) {
         boolean retval = false;
         if (e instanceof VarExp) {
             VarExp eAsVarExp = (VarExp) e;
@@ -201,21 +165,21 @@ public class VarExp extends MathExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the name.</p>
+     * <p>This method returns the name.</p>
      *
      * @return The {@link PosSymbol} representation object.
      */
-    public PosSymbol getName() {
-        return myName.clone();
+    public final PosSymbol getName() {
+        return myName;
     }
 
     /**
-     * <p>This method returns a deep copy of the qualifier name.</p>
+     * <p>This method returns the qualifier name.</p>
      *
      * @return The {@link PosSymbol} representation object.
      */
     public final PosSymbol getQualifier() {
-        return myQualifier.clone();
+        return myQualifier;
     }
 
     /**
@@ -223,20 +187,27 @@ public class VarExp extends MathExp {
      *
      * @return The {@link SymbolTableEntry.Quantification} object.
      */
-    public SymbolTableEntry.Quantification getQuantification() {
+    public final SymbolTableEntry.Quantification getQuantification() {
         return myQuantification;
     }
 
     /**
-     * <p>This method returns a deep copy of the list of
-     * subexpressions. The result of this calling this method should
-     * always be an empty list, because we can not contain an expression.</p>
-     *
-     * @return A list containing subexpressions ({@link Exp}s).
+     * {@inheritDoc}
      */
     @Override
-    public List<Exp> getSubExpressions() {
-        return new ArrayList<Exp>();
+    public final List<Exp> getSubExpressions() {
+        return new ArrayList<>();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = myQualifier != null ? myQualifier.hashCode() : 0;
+        result = 31 * result + myName.hashCode();
+        result = 31 * result + myQuantification.hashCode();
+        return result;
     }
 
     /**
@@ -247,7 +218,7 @@ public class VarExp extends MathExp {
      * @return The resulting {@link VarExp} from applying the remember rule.
      */
     @Override
-    public VarExp remember() {
+    public final VarExp remember() {
         return (VarExp) this.clone();
     }
 
@@ -261,31 +232,20 @@ public class VarExp extends MathExp {
     }
 
     /**
-     * <p>This method adds a new expression to our list of subexpressions.</p>
-     *
-     * @param index The index in our subexpression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: See the message in Exp.
-    //public void setSubExpression(int index, Exp e) {}
-
-    /**
      * <p>This method applies the VC Generator's simplification step.</p>
      *
      * @return The resulting {@link MathExp} from applying the simplification step.
      */
     @Override
-    public MathExp simplify() {
+    public final MathExp simplify() {
         return this.clone();
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
-     *
-     * @return Expression as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
 
         if (myQuantification != SymbolTableEntry.Quantification.NONE) {
@@ -322,13 +282,10 @@ public class VarExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Exp} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp copy() {
+    protected final Exp copy() {
         PosSymbol newQualifier = null;
         if (myQualifier != null) {
             newQualifier = myQualifier.clone();
@@ -340,21 +297,10 @@ public class VarExp extends MathExp {
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted. This class is assuming that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
-     *
-     * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
-     *
-     * @return A new {@link Exp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
+    protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         PosSymbol newQualifier = null;
         if (myQualifier != null) {
             newQualifier = myQualifier.clone();

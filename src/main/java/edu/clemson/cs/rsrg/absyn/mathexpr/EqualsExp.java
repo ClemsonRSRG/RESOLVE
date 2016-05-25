@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical equality/inequality expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical equality/inequality expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -55,7 +55,7 @@ public class EqualsExp extends InfixExp {
          *
          * @param l A {@link Location} representation object.
          *
-         * @return A {link PosSymbol} object containing the operator.
+         * @return A {@link PosSymbol} object containing the operator.
          */
         public PosSymbol getOperatorAsPosSymbol(Location l) {
             return new PosSymbol(new Location(l), toString());
@@ -93,47 +93,28 @@ public class EqualsExp extends InfixExp {
     // ===========================================================
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link EqualsExp} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof EqualsExp) {
-            EqualsExp eAsEqualsExp = (EqualsExp) o;
-            result = myLoc.equals(eAsEqualsExp.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
-            if (result) {
-                result =
-                        (myOperator == eAsEqualsExp.myOperator)
-                                && myLeftHandSide
-                                        .equals(eAsEqualsExp.myLeftHandSide)
-                                && myRightHandSide
-                                        .equals(eAsEqualsExp.myRightHandSide);
-            }
-        }
+        EqualsExp equalsExp = (EqualsExp) o;
 
-        return result;
+        return myOperator == equalsExp.myOperator;
+
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
-     *
-     * @param e The expression to compare this one to.
-     *
-     * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equivalent(Exp e) {
+    public final boolean equivalent(Exp e) {
         boolean retval = e instanceof EqualsExp;
         if (retval) {
             EqualsExp eAsEquals = (EqualsExp) e;
@@ -151,10 +132,18 @@ public class EqualsExp extends InfixExp {
     /**
      * <p>This method returns the operator.</p>
      *
-     * @return A {link Operator} object containing the operator.
+     * @return A {@link Operator} object containing the operator.
      */
-    public Operator getOperator() {
+    public final Operator getOperator() {
         return myOperator;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        return myOperator.hashCode();
     }
 
     /**
@@ -165,7 +154,7 @@ public class EqualsExp extends InfixExp {
      * @return The resulting {@link EqualsExp} from applying the remember rule.
      */
     @Override
-    public EqualsExp remember() {
+    public final EqualsExp remember() {
         Exp newLeft = ((MathExp) myLeftHandSide).remember();
         Exp newRight = ((MathExp) myRightHandSide).remember();
 
@@ -184,7 +173,7 @@ public class EqualsExp extends InfixExp {
      * @return The resulting {@link MathExp} from applying the simplification step.
      */
     @Override
-    public MathExp simplify() {
+    public final MathExp simplify() {
         Exp simplified;
         if (myLeftHandSide.equivalent(myRightHandSide)) {
             simplified =
@@ -198,22 +187,10 @@ public class EqualsExp extends InfixExp {
     }
 
     /**
-     * <p>This method is used to convert a {@link Exp} into the prover's
-     * version of {@link PExp}. The key to this method is figuring out
-     * where the different implications occur within the expression.</p>
-     *
-     * <p>However, for {@link EqualsExp}s, this will throw an
-     * exception if we have equality, because we should have dealt with
-     * simplifications before we attempt to split the VCs.</p>
-     *
-     * @param assumpts The assumption expressions for this expression.
-     * @param single Boolean flag to indicate whether or not this is a
-     *               standalone expression.
-     *
-     * @return A list of {link Exp} objects.
+     * {@inheritDoc}
      */
     @Override
-    public List<InfixExp> split(MathExp assumpts, boolean single) {
+    public final List<InfixExp> split(MathExp assumpts, boolean single) {
         List<InfixExp> lst = new ArrayList<>();
 
         if (myOperator == Operator.EQUAL) {
@@ -236,13 +213,10 @@ public class EqualsExp extends InfixExp {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Exp} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp copy() {
+    protected final Exp copy() {
         PosSymbol qualifier = null;
         if (myQualifier != null) {
             qualifier = myQualifier.clone();
@@ -253,21 +227,10 @@ public class EqualsExp extends InfixExp {
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted. This class is assuming that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
-     *
-     * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
-     *
-     * @return A new {@link Exp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
+    protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         PosSymbol qualifier = null;
         if (myQualifier != null) {
             qualifier = myQualifier.clone();

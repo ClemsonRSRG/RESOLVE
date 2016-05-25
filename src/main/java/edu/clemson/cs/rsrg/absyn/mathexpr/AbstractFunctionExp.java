@@ -23,8 +23,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>This is the abstract base class for all the mathematical function expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the abstract base class for all the mathematical function expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -45,8 +45,9 @@ public abstract class AbstractFunctionExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>A helper constructor that allow us to store the location
-     * of the created object directly in the this class.</p>
+     * <p>An helper constructor that allow us to store the location
+     * of any objects created from a class that inherits from
+     * {@code AbstractFunctionExp}.</p>
      *
      * @param l A {@link Location} representation object.
      * @param qualifier A {@link PosSymbol} name object.
@@ -137,7 +138,7 @@ public abstract class AbstractFunctionExp extends MathExp {
     /**
      * <p>Returns the mathematical operator as a symbol.</p>
      *
-     * @return A {link PosSymbol} object containing the operator.
+     * @return A {@link PosSymbol} object containing the operator.
      */
     public abstract PosSymbol getOperatorAsPosSymbol();
 
@@ -199,8 +200,8 @@ public abstract class AbstractFunctionExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This method sets <code>t</code> as the type for an
-     * expression and it's subexpressions.</p>
+     * <p>This method sets {@code t} as the type for an
+     * expression and it's sub-expressions.</p>
      *
      * @param e The expression we wish to change the type.
      * @param t The new mathematical type.

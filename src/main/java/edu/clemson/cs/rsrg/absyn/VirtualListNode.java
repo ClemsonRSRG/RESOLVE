@@ -160,6 +160,12 @@ public class VirtualListNode extends ResolveConceptualElement {
         return myParent;
     }
 
+    @Override
+    public int hashCode() {
+        throw new MiscErrorException("Not supported yet.",
+                new UnsupportedOperationException());
+    }
+
     /**
      * {@inheritDoc}
      */

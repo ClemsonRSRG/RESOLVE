@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical unary minus expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical unary minus expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -54,41 +54,26 @@ public class UnaryMinusExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("UnaryMinusExp\n");
 
         if (myInnerArgumentExp != null) {
-            sb.append(myInnerArgumentExp.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myInnerArgumentExp.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
         }
 
         return sb.toString();
     }
 
     /**
-     * <p>This method attempts to find the provided expression in our
-     * subexpressions.</p>
-     *
-     * @param exp The expression we wish to locate.
-     *
-     * @return True if there is an instance of <code>exp</code>
-     * within this object's subexpressions. False otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsExp(Exp exp) {
+    public final boolean containsExp(Exp exp) {
         boolean found = false;
         if (myInnerArgumentExp != null) {
             found = myInnerArgumentExp.containsExp(exp);
@@ -98,18 +83,10 @@ public class UnaryMinusExp extends MathExp {
     }
 
     /**
-     *  <p>This method attempts to find an expression with the given name in our
-     * subexpressions.</p>
-     *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
-     *
-     * @return True if there is a {@link Exp} within this object's
-     * subexpressions that matches <code>varName</code>. False otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsVar(String varName, boolean IsOldExp) {
+    public final boolean containsVar(String varName, boolean IsOldExp) {
         boolean found = false;
         if (myInnerArgumentExp != null) {
             found = myInnerArgumentExp.containsVar(varName, IsOldExp);
@@ -119,44 +96,26 @@ public class UnaryMinusExp extends MathExp {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link UnaryMinusExp} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof UnaryMinusExp) {
-            UnaryMinusExp eAsUnaryMinusExp = (UnaryMinusExp) o;
-            result = myLoc.equals(eAsUnaryMinusExp.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result =
-                        myInnerArgumentExp
-                                .equals(eAsUnaryMinusExp.myInnerArgumentExp);
-            }
-        }
+        UnaryMinusExp that = (UnaryMinusExp) o;
 
-        return result;
+        return myInnerArgumentExp.equals(that.myInnerArgumentExp);
+
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
-     *
-     * @param e The expression to compare this one to.
-     *
-     * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equivalent(Exp e) {
+    public final boolean equivalent(Exp e) {
         boolean retval = (e instanceof UnaryMinusExp);
         if (retval) {
             UnaryMinusExp eAsUnaryMinusExp = (UnaryMinusExp) e;
@@ -169,25 +128,31 @@ public class UnaryMinusExp extends MathExp {
     }
 
     /**
-     * <p>Returns a deep copy of this expression's inner argument expression.</p>
+     * <p>Returns the expression's inner argument expression.</p>
      *
      * @return The assignment {@link Exp} object.
      */
-    public Exp getArgument() {
-        return myInnerArgumentExp.clone();
+    public final Exp getArgument() {
+        return myInnerArgumentExp;
     }
 
     /**
-     * <p>This method returns the list of subexpressions.</p>
-     *
-     * @return A list containing subexpressions ({@link Exp}s).
+     * {@inheritDoc}
      */
     @Override
-    public List<Exp> getSubExpressions() {
+    public final List<Exp> getSubExpressions() {
         List<Exp> list = new ArrayList<>();
-        list.add(myInnerArgumentExp.clone());
+        list.add(myInnerArgumentExp);
 
         return list;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        return myInnerArgumentExp.hashCode();
     }
 
     /**
@@ -195,23 +160,12 @@ public class UnaryMinusExp extends MathExp {
      * For all inherited programming expression classes, this method
      * should throw an exception.</p>
      *
-     * @return The resulting {@link Exp} from applying the remember rule.
+     * @return The resulting {@link UnaryMinusExp} from applying the remember rule.
      */
     @Override
-    public Exp remember() {
-        return this.clone();
+    public final UnaryMinusExp remember() {
+        return (UnaryMinusExp) this.clone();
     }
-
-    /**
-     *  <p>This method adds a new expression to our list of subexpressions.</p>
-     *
-     * @param index The index in our subexpression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: See the message in Exp.
-    /*public void setSubExpression(int index, Exp e) {
-        myInnerArgumentExp = e;
-    }*/
 
     /**
      * <p>This method applies the VC Generator's simplification step.</p>
@@ -219,17 +173,15 @@ public class UnaryMinusExp extends MathExp {
      * @return The resulting {@link Exp} from applying the simplification step.
      */
     @Override
-    public Exp simplify() {
+    public final Exp simplify() {
         return this.clone();
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
-     *
-     * @return Expression as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         if (myInnerArgumentExp != null) {
             sb.append("-(");
@@ -245,37 +197,19 @@ public class UnaryMinusExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Exp} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp copy() {
-        Exp newArgumentExp = null;
-        if (myInnerArgumentExp != null) {
-            newArgumentExp = myInnerArgumentExp.clone();
-        }
-
-        return new UnaryMinusExp(new Location(myLoc), newArgumentExp);
+    protected final Exp copy() {
+        return new UnaryMinusExp(new Location(myLoc), myInnerArgumentExp
+                .clone());
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted. This class is assuming that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
-     *
-     * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
-     *
-     * @return A new {@link Exp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * {@inheritDoc}
      */
     @Override
-    public Exp substituteChildren(Map<Exp, Exp> substitutions) {
+    protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         return new UnaryMinusExp(new Location(myLoc), substitute(
                 myInnerArgumentExp, substitutions));
     }

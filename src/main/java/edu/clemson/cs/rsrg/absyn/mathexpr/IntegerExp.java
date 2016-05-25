@@ -18,8 +18,8 @@ import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical integer expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical integer expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -57,29 +57,20 @@ public class IntegerExp extends LiteralExp {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("IntegerExp\n");
 
         if (myQualifier != null) {
-            sb.append(myQualifier.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myQualifier.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
             sb.append("::");
         }
 
-        printSpace(indentSize + innerIndentSize, sb);
+        printSpace(indentSize + innerIndentInc, sb);
         sb.append(myInteger);
         sb.append("\n");
 
@@ -87,42 +78,29 @@ public class IntegerExp extends LiteralExp {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link IntegerExp} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof IntegerExp) {
-            IntegerExp eAsIntegerExp = (IntegerExp) o;
-            result = myLoc.equals(eAsIntegerExp.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result = myInteger.equals(eAsIntegerExp.myInteger);
-            }
-        }
+        IntegerExp that = (IntegerExp) o;
 
-        return result;
+        if (myQualifier != null ? !myQualifier.equals(that.myQualifier)
+                : that.myQualifier != null)
+            return false;
+        return myInteger.equals(that.myInteger);
+
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
-     *
-     * @param e The expression to compare this one to.
-     *
-     * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equivalent(Exp e) {
+    public final boolean equivalent(Exp e) {
         boolean retval = e instanceof IntegerExp;
         if (retval) {
             IntegerExp eAsIntegerExp = (IntegerExp) e;
@@ -133,26 +111,31 @@ public class IntegerExp extends LiteralExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the qualifier name.</p>
+     * <p>This method returns the qualifier name.</p>
      *
      * @return The {@link PosSymbol} representation object.
      */
-    public PosSymbol getQualifier() {
-        PosSymbol qual = null;
-        if (myQualifier != null) {
-            qual = myQualifier.clone();
-        }
-
-        return qual;
+    public final PosSymbol getQualifier() {
+        return myQualifier;
     }
 
     /**
-     * <p>This method returns a deep copy of the integer value.</p>
+     * <p>This method returns the integer value.</p>
      *
      * @return The {@link Integer} value.
      */
-    public int getValue() {
+    public final int getValue() {
         return myInteger;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = myQualifier != null ? myQualifier.hashCode() : 0;
+        result = 31 * result + myInteger.hashCode();
+        return result;
     }
 
     /**
@@ -163,7 +146,7 @@ public class IntegerExp extends LiteralExp {
      * @return The resulting {@link IntegerExp} from applying the remember rule.
      */
     @Override
-    public IntegerExp remember() {
+    public final IntegerExp remember() {
         return (IntegerExp) this.clone();
     }
 
@@ -173,17 +156,15 @@ public class IntegerExp extends LiteralExp {
      * @return The resulting {@link MathExp} from applying the simplification step.
      */
     @Override
-    public MathExp simplify() {
+    public final MathExp simplify() {
         return this.clone();
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
-     *
-     * @return Expression as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         if (myQualifier != null) {
             sb.append(myQualifier);
@@ -199,13 +180,10 @@ public class IntegerExp extends LiteralExp {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Exp} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    public Exp copy() {
+    protected final Exp copy() {
         PosSymbol newQualifier = null;
         if (myQualifier != null) {
             newQualifier = myQualifier.clone();
@@ -215,21 +193,10 @@ public class IntegerExp extends LiteralExp {
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted. This class is assuming that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
-     *
-     * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
-     *
-     * @return A new {@link Exp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
+    protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         PosSymbol newQualifier = null;
         if (myQualifier != null) {
             newQualifier = myQualifier.clone();

@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical infix expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical infix expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -67,50 +67,36 @@ public class InfixExp extends AbstractFunctionExp {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public final String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("InfixExp\n");
 
         if (myLeftHandSide != null) {
-            sb.append(myLeftHandSide.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myLeftHandSide.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
         }
 
         if (myOperationName != null) {
-            sb.append(myOperationName.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myOperationName.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
         }
 
         if (myRightHandSide != null) {
-            sb.append(myRightHandSide.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myRightHandSide.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
         }
 
         return sb.toString();
     }
 
     /**
-     * <p>Compares to see if the expression matches this object.</p>
-     *
-     * @param exp A {@link Exp} to compare.
-     *
-     * @return A {@link VarExp} containing "true" if it is exactly the same,
-     * otherwise just return a deep copy our ourselves.
+     * {@inheritDoc}
      */
     @Override
-    public Exp compareWithAssumptions(Exp exp) {
+    public final Exp compareWithAssumptions(Exp exp) {
         Exp retExp;
         if (this.equals(exp)) {
             retExp = VarExp.getTrueVarExp(myLoc, myMathType.getTypeGraph());
@@ -131,13 +117,7 @@ public class InfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method attempts to find the provided expression in our
-     * subexpressions.</p>
-     *
-     * @param exp The expression we wish to locate.
-     *
-     * @return True if there is an instance of <code>exp</code>
-     * within this object's subexpressions. False otherwise.
+     * {@inheritDoc}
      */
     @Override
     public final boolean containsExp(Exp exp) {
@@ -150,15 +130,7 @@ public class InfixExp extends AbstractFunctionExp {
     }
 
     /**
-     *  <p>This method attempts to find an expression with the given name in our
-     * subexpressions.</p>
-     *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
-     *
-     * @return True if there is a {@link Exp} within this object's
-     * subexpressions that matches <code>varName</code>. False otherwise.
+     * {@inheritDoc}
      */
     @Override
     public final boolean containsVar(String varName, boolean IsOldExp) {
@@ -171,44 +143,27 @@ public class InfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link InfixExp} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
     public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof InfixExp) {
-            InfixExp eAsInfixExp = (InfixExp) o;
-            result = myLoc.equals(eAsInfixExp.myLoc);
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result =
-                        myOperationName.equals(eAsInfixExp.myOperationName)
-                                && myLeftHandSide
-                                        .equals(eAsInfixExp.myLeftHandSide)
-                                && myRightHandSide
-                                        .equals(eAsInfixExp.myRightHandSide);
-            }
-        }
+        InfixExp infixExp = (InfixExp) o;
 
-        return result;
+        if (!myLeftHandSide.equals(infixExp.myLeftHandSide))
+            return false;
+        if (!myOperationName.equals(infixExp.myOperationName))
+            return false;
+        return myRightHandSide.equals(infixExp.myRightHandSide);
+
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
-     *
-     * @param e The expression to compare this one to.
-     *
-     * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * {@inheritDoc}
      */
     @Override
     public boolean equivalent(Exp e) {
@@ -228,26 +183,26 @@ public class InfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the left hand side expression.</p>
+     * <p>This method returns the left hand side expression.</p>
      *
      * @return The {@link Exp} representation object.
      */
     public final Exp getLeft() {
-        return myLeftHandSide.clone();
+        return myLeftHandSide;
     }
 
     /**
-     * <p>This method returns a deep copy of the operator name.</p>
+     * <p>This method returns the operator name.</p>
      *
-     * @return A {link PosSymbol} object containing the operator.
+     * @return A {@link PosSymbol} object containing the operator.
      */
     @Override
     public final PosSymbol getOperatorAsPosSymbol() {
-        return myOperationName.clone();
+        return myOperationName;
     }
 
     /**
-     * <p>This method returns a deep copy of the operator name.</p>
+     * <p>This method returns the operator name in string format.</p>
      *
      * @return The operator as a string.
      */
@@ -257,19 +212,16 @@ public class InfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method returns a deep copy of the right hand side expression.</p>
+     * <p>This method returns the right hand side expression.</p>
      *
      * @return The {@link Exp} representation object.
      */
     public final Exp getRight() {
-        return myRightHandSide.clone();
+        return myRightHandSide;
     }
 
     /**
-     * <p>This method returns a deep copy of the list of
-     * subexpressions.</p>
-     *
-     * @return A list containing subexpressions ({@link Exp}s).
+     * {@inheritDoc}
      */
     @Override
     public final List<Exp> getSubExpressions() {
@@ -278,6 +230,17 @@ public class InfixExp extends AbstractFunctionExp {
         subExps.add(myRightHandSide.clone());
 
         return subExps;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = myLeftHandSide.hashCode();
+        result = 31 * result + myOperationName.hashCode();
+        result = 31 * result + myRightHandSide.hashCode();
+        return result;
     }
 
     /**
@@ -300,24 +263,6 @@ public class InfixExp extends AbstractFunctionExp {
         return new InfixExp(new Location(myLoc), qualifier, newLeft,
                 myOperationName.clone(), newRight);
     }
-
-    /**
-     * <p>This method adds a new expression to our list of subexpressions.</p>
-     *
-     * @param index The index in our subexpression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: See the message in Exp.
-    /*public final void setSubExpression(int index, Exp e) {
-        switch (index) {
-            case 0:
-                myLeftHandSide = e;
-                break;
-            case 1:
-                myRightHandSide = e;
-                break;
-        }
-    }*/
 
     /**
      * <p>This method applies the VC Generator's simplification step.</p>
@@ -442,15 +387,7 @@ public class InfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>This method is used to convert a {@link Exp} into the prover's
-     * version of {@link PExp}. The key to this method is figuring out
-     * where the different implications occur within the expression.</p>
-     *
-     * @param assumpts The assumption expressions for this expression.
-     * @param single Boolean flag to indicate whether or not this is a
-     *               standalone expression.
-     *
-     * @return A list of {link Exp} objects.
+     * {@inheritDoc}
      */
     // TODO: Understand this and put more inline comments!
     @Override
@@ -499,9 +436,7 @@ public class InfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
-     *
-     * @return Expression as a string.
+     * {@inheritDoc}
      */
     @Override
     public final String toString() {
@@ -536,10 +471,7 @@ public class InfixExp extends AbstractFunctionExp {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Exp} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
     protected Exp copy() {
@@ -553,18 +485,7 @@ public class InfixExp extends AbstractFunctionExp {
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted. This class is assuming that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
-     *
-     * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
-     *
-     * @return A new {@link Exp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * {@inheritDoc}
      */
     @Override
     protected Exp substituteChildren(Map<Exp, Exp> substitutions) {

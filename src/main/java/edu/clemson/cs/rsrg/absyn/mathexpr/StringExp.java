@@ -17,8 +17,8 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the mathematical string expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the mathematical string expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -51,23 +51,15 @@ public class StringExp extends LiteralExp {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize      The base indentation to the first line
-     *                        of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("StringExp\n");
 
         if (myString != null) {
-            printSpace(indentSize + innerIndentSize, sb);
+            printSpace(indentSize + innerIndentInc, sb);
             sb.append(myString);
             sb.append("\n");
         }
@@ -76,38 +68,23 @@ public class StringExp extends LiteralExp {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link StringExp} class.</p>
-     *
-     * @param o Object to be compared.
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof StringExp) {
-            StringExp eAsStringExp = (StringExp) o;
-            result = myLoc.equals(eAsStringExp.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result = myString.equals(eAsStringExp.myString);
-            }
-        }
+        StringExp stringExp = (StringExp) o;
 
-        return result;
+        return myString.equals(stringExp.myString);
+
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
-     *
-     * @param e The expression to compare this one to.
-     *
-     * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * {@inheritDoc}
      */
     @Override
     public boolean equivalent(Exp e) {
@@ -125,8 +102,16 @@ public class StringExp extends LiteralExp {
      *
      * @return The {@link String} value.
      */
-    public String getValue() {
+    public final String getValue() {
         return myString;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        return myString.hashCode();
     }
 
     /**
@@ -137,7 +122,7 @@ public class StringExp extends LiteralExp {
      * @return The resulting {@link StringExp} from applying the remember rule.
      */
     @Override
-    public StringExp remember() {
+    public final StringExp remember() {
         return (StringExp) this.clone();
     }
 
@@ -147,17 +132,15 @@ public class StringExp extends LiteralExp {
      * @return The resulting {@link MathExp} from applying the simplification step.
      */
     @Override
-    public MathExp simplify() {
+    public final MathExp simplify() {
         return this.clone();
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
-     *
-     * @return Expression as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         if (myString != null) {
             sb.append(myString);
@@ -171,32 +154,18 @@ public class StringExp extends LiteralExp {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Exp} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp copy() {
+    protected final Exp copy() {
         return new StringExp(new Location(myLoc), myString);
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted. This class is assuming that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
-     *
-     * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
-     *
-     * @return A new {@link Exp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * {@inheritDoc}
      */
     @Override
-    public Exp substituteChildren(Map<Exp, Exp> substitutions) {
+    protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         return new StringExp(new Location(myLoc), myString);
     }
 

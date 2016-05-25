@@ -18,6 +18,7 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>A <code>TypeAssertionExp</code>, generally, allows a sub-expression to be
@@ -96,32 +97,18 @@ public class TypeAssertionExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
-        return myExp.asString(indentSize + innerIndentSize, innerIndentSize)
+    public final String asString(int indentSize, int innerIndentInc) {
+        return myExp.asString(indentSize + innerIndentInc, innerIndentInc)
                 + " : "
-                + myAssertedTy.asString(indentSize + innerIndentSize,
-                        innerIndentSize);
+                + myAssertedTy.asString(indentSize + innerIndentInc,
+                        innerIndentInc);
     }
 
     /**
-     * <p>This method attempts to find the provided expression in our
-     * subexpressions. The result of this calling this method should
-     * always be false, because we can not contain an expression.</p>
-     *
-     * @param exp The expression we wish to locate.
-     *
-     * @return False.
+     * {@inheritDoc}
      */
     @Override
     public final boolean containsExp(Exp exp) {
@@ -129,58 +116,36 @@ public class TypeAssertionExp extends MathExp {
     }
 
     /**
-     *  <p>This method attempts to find an expression with the given name in our
-     * subexpressions.</p>
-     *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
-     *
-     * @return True if there is a {@link Exp} within this object's
-     * subexpressions that matches <code>varName</code>. False otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsVar(String varName, boolean IsOldExp) {
+    public final boolean containsVar(String varName, boolean IsOldExp) {
         return myExp.containsVar(varName, IsOldExp);
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link TypeAssertionExp} class.</p>
-     *
-     * @param o Object to be compared.
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof TypeAssertionExp) {
-            TypeAssertionExp eAsTypeAssertionExp = (TypeAssertionExp) o;
-            result = myLoc.equals(eAsTypeAssertionExp.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result = myExp.equals(eAsTypeAssertionExp.myExp);
-                result &= myAssertedTy.equals(eAsTypeAssertionExp.myAssertedTy);
-            }
-        }
+        TypeAssertionExp that = (TypeAssertionExp) o;
 
-        return result;
+        if (!myExp.equals(that.myExp))
+            return false;
+        return myAssertedTy.equals(that.myAssertedTy);
+
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
-     *
-     * @param e The expression to compare this one to.
-     *
-     * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equivalent(Exp e) {
+    public final boolean equivalent(Exp e) {
         boolean retval = (e instanceof TypeAssertionExp);
         if (retval) {
             TypeAssertionExp eAsTypeAssertionExp = (TypeAssertionExp) e;
@@ -197,7 +162,7 @@ public class TypeAssertionExp extends MathExp {
      * @return The {@link ArbitraryExpTy} raw type.
      */
     public final ArbitraryExpTy getAssertedTy() {
-        return (ArbitraryExpTy) myAssertedTy.clone();
+        return myAssertedTy;
     }
 
     /**
@@ -206,18 +171,25 @@ public class TypeAssertionExp extends MathExp {
      * @return The {@link Exp} object.
      */
     public final Exp getExp() {
-        return myExp.clone();
+        return myExp;
     }
 
     /**
-     * <p>This method method returns a deep copy of the list of
-     * subexpressions.</p>
-     *
-     * @return A list containing subexpressions ({@link Exp}s).
+     * {@inheritDoc}
      */
     @Override
-    public List<Exp> getSubExpressions() {
+    public final List<Exp> getSubExpressions() {
         return new ArrayList(Collections.singletonList(myExp));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = myExp.hashCode();
+        result = 31 * result + myAssertedTy.hashCode();
+        return result;
     }
 
     /**
@@ -228,20 +200,9 @@ public class TypeAssertionExp extends MathExp {
      * @return The resulting {@link TypeAssertionExp} from applying the remember rule.
      */
     @Override
-    public TypeAssertionExp remember() {
+    public final TypeAssertionExp remember() {
         return (TypeAssertionExp) this.clone();
     }
-
-    /**
-     * <p>This method adds a new expression to our list of subexpressions.</p>
-     *
-     * @param index The index in our subexpression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: See the message in Exp.
-    /*public void setSubExpression(int index, Exp e) {
-        myExp = e;
-    }*/
 
     /**
      * <p>This method applies the VC Generator's simplification step.</p>
@@ -249,17 +210,15 @@ public class TypeAssertionExp extends MathExp {
      * @return The resulting {@link MathExp} from applying the simplification step.
      */
     @Override
-    public MathExp simplify() {
+    public final MathExp simplify() {
         return this.clone();
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
-     *
-     * @return Expression as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append(myExp.toString());
         sb.append("\t");
@@ -273,33 +232,19 @@ public class TypeAssertionExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Exp} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp copy() {
-        return new TypeAssertionExp(new Location(myLoc), getExp(),
+    protected final Exp copy() {
+        return new TypeAssertionExp(new Location(myLoc), myExp.clone(),
                 getAssertedTy());
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted. This class is assuming that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
-     *
-     * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
-     *
-     * @return A new {@link Exp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp substituteChildren(java.util.Map<Exp, Exp> substitutions) {
+    protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         return new TypeAssertionExp(new Location(myLoc), substitute(myExp,
                 substitutions), new ArbitraryExpTy(myAssertedTy
                 .getArbitraryExp().substitute(substitutions)));

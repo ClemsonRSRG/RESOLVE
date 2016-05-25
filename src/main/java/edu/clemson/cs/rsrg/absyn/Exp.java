@@ -111,7 +111,7 @@ public abstract class Exp extends ResolveConceptualElement {
      * <p>This method attempts to find an expression with the given name in our
      * sub-expressions. This method is only invoked by a mathematical expression,
      * but since we could have either mathematical or programming
-     * expressions, the default behavior is to return false.</p>
+     * expressions, the default behavior is to return {@code false}.</p>
      *
      * <p>Any inherited mathematical expressions must override this method
      * to make this method work.</p>
@@ -158,7 +158,7 @@ public abstract class Exp extends ResolveConceptualElement {
      * 		   {@link Exp}s are {@code null}; or both are not {@code null} and are
      *         equivalent.
      */
-    public static boolean equivalent(Exp e1, Exp e2) {
+    public final static boolean equivalent(Exp e1, Exp e2) {
         return !((e1 == null ^ e2 == null))
                 && ((e1 == null && e2 == null) || e1.equivalent(e2));
     }
@@ -202,7 +202,7 @@ public abstract class Exp extends ResolveConceptualElement {
      * @param s2 The second {@link PosSymbol}.
      *
      * @return {@code true} <strong>iff</strong> both
-     * {@link PosSymbol}s are null; or both are not null and have names
+     * {@link PosSymbol}s are {@code null}; or both are not {@code null} and have names
      * that are equivalent strings (see {@link Exp#stringEquivalent(String, String)}).
      */
     public static boolean posSymbolEquivalent(PosSymbol s1, PosSymbol s2) {
@@ -242,16 +242,6 @@ public abstract class Exp extends ResolveConceptualElement {
     }
 
     /**
-     *  <p>This method must be implemented by all inherited classes
-     * to add a new expression to our list of sub-expressions.</p>
-     *
-     * @param index The index in our sub-expression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: Most of the time this is called after we make a copy. See if we can use substitute() instead
-    //public abstract void setSubExpression(int index, Exp e);
-
-    /**
      * <p>Helper method to deal with strings that need to be compared but might
      * be {@code null}. Returns {@code true} <strong>iff</strong> {@code s1} and
      * {@code s2} are both {@code null} or both are not {@code null} and
@@ -263,7 +253,7 @@ public abstract class Exp extends ResolveConceptualElement {
      * @return {@code true} <strong>iff</strong> both string are {@code null};
      * or both are not {@code null} and represent the same string.
      */
-    public static boolean stringEquivalent(String s1, String s2) {
+    public final static boolean stringEquivalent(String s1, String s2) {
         //The first line makes sure that either both s1 and s2 are null or
         //neither is.  If not, we short circuit with "false".
         //The second line short circuits and returns "true" if both are null.

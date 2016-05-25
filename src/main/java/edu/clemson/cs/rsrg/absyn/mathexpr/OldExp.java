@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>This is the class for all the "old" mathematical expressions
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the "old" mathematical expression objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * <p>An "old" expression is an expression that refers to the
  * incoming value of the expression.</p>
@@ -66,41 +66,27 @@ public class OldExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
         sb.append("OldExp\n");
 
         if (myOrigExp != null) {
-            sb.append(myOrigExp.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+            sb.append(myOrigExp.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
         }
 
         return sb.toString();
     }
 
     /**
-     * <p>This method attempts to find the provided expression in our
-     * subexpressions.</p>
-     *
-     * @param exp The expression we wish to locate.
-     *
-     * @return True if there is an instance of <code>exp</code>
-     * within this object's subexpressions. False otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsExp(Exp exp) {
+    public final boolean containsExp(Exp exp) {
         boolean found = false;
         if (myOrigExp != null) {
             found = myOrigExp.containsExp(exp);
@@ -110,18 +96,10 @@ public class OldExp extends MathExp {
     }
 
     /**
-     *  <p>This method attempts to find an expression with the given name in our
-     * subexpressions.</p>
-     *
-     * @param varName Expression name.
-     * @param IsOldExp Flag to indicate if the given name is of the form
-     *                 "#[varName]"
-     *
-     * @return True if there is a {@link Exp} within this object's
-     * subexpressions that matches <code>varName</code>. False otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean containsVar(String varName, boolean IsOldExp) {
+    public final boolean containsVar(String varName, boolean IsOldExp) {
         boolean found = false;
         if (myOrigExp != null) {
             if (IsOldExp) {
@@ -133,42 +111,26 @@ public class OldExp extends MathExp {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link OldExp} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof OldExp) {
-            OldExp eAsOldExp = (OldExp) o;
-            result = myLoc.equals(eAsOldExp.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result = myOrigExp.equals(eAsOldExp.myOrigExp);
-            }
-        }
+        OldExp oldExp = (OldExp) o;
 
-        return result;
+        return myOrigExp.equals(oldExp.myOrigExp);
+
     }
 
     /**
-     * <p>Shallow compare is too weak for many things, and equals() is too
-     * strict. This method returns <code>true</code> <strong>iff</code> this
-     * expression and the provided expression, <code>e</code>, are equivalent
-     * with respect to structure and all function and variable names.</p>
-     *
-     * @param e The expression to compare this one to.
-     *
-     * @return True <strong>iff</strong> this expression and the provided
-     *         expression are equivalent with respect to structure and all
-     *         function and variable names.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equivalent(Exp e) {
+    public final boolean equivalent(Exp e) {
         boolean retval = (e instanceof OldExp);
         if (retval) {
             OldExp eAsOldExp = (OldExp) e;
@@ -179,25 +141,31 @@ public class OldExp extends MathExp {
     }
 
     /**
-     * <p>Returns a deep copy of this old expression's actual expression.</p>
+     * <p>Returns this old expression's actual expression.</p>
      *
      * @return The {@link Exp} that we are applying the "old" operator to.
      */
-    public Exp getExp() {
-        return myOrigExp.clone();
+    public final Exp getExp() {
+        return myOrigExp;
     }
 
     /**
-     * <p>This method returns the list of subexpressions.</p>
-     *
-     * @return A list containing subexpressions ({@link Exp}s).
+     * {@inheritDoc}
      */
     @Override
-    public List<Exp> getSubExpressions() {
+    public final List<Exp> getSubExpressions() {
         List<Exp> list = new ArrayList<>();
-        list.add(myOrigExp.clone());
+        list.add(myOrigExp);
 
         return list;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        return myOrigExp.hashCode();
     }
 
     /**
@@ -208,22 +176,9 @@ public class OldExp extends MathExp {
      * @return The resulting {@link Exp} from applying the remember rule.
      */
     @Override
-    public Exp remember() {
+    public final Exp remember() {
         return myOrigExp.clone();
     }
-
-    /**
-     *  <p>This method adds a new expression to our list of subexpressions.</p>
-     *
-     * @param index The index in our subexpression list.
-     * @param e The new {@link Exp} to be added.
-     */
-    // TODO: See the message in Exp.
-    /*
-    @Override
-    public void setSubExpression(int index, Exp e) {
-        exp = e;
-    }*/
 
     /**
      * <p>This method sets the mathematical type associated
@@ -232,7 +187,7 @@ public class OldExp extends MathExp {
      * @param mathType The {@link MTType} type object.
      */
     @Override
-    public void setMathType(MTType mathType) {
+    public final void setMathType(MTType mathType) {
         super.setMathType(mathType);
         myOrigExp.setMathType(mathType);
     }
@@ -244,7 +199,7 @@ public class OldExp extends MathExp {
      * @param mathTypeValue The {@link MTType} type object.
      */
     @Override
-    public void setMathTypeValue(MTType mathTypeValue) {
+    public final void setMathTypeValue(MTType mathTypeValue) {
         super.setMathTypeValue(mathTypeValue);
         myOrigExp.setMathTypeValue(mathTypeValue);
     }
@@ -255,17 +210,15 @@ public class OldExp extends MathExp {
      * @return The resulting {@link Exp} from applying the simplification step.
      */
     @Override
-    public Exp simplify() {
+    public final Exp simplify() {
         return this.clone();
     }
 
     /**
-     * <p>Returns the expression in string format.</p>
-     *
-     * @return Expression as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         if (myOrigExp != null) {
             sb.append("#");
@@ -280,13 +233,10 @@ public class OldExp extends MathExp {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves.</p>
-     *
-     * @return A new {@link Exp} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp copy() {
+    protected final Exp copy() {
         Location newLoc = new Location(myLoc);
         Exp newOrigExp = null;
         if (myOrigExp != null) {
@@ -297,21 +247,10 @@ public class OldExp extends MathExp {
     }
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Exp} to manufacture
-     * a copy of themselves where all subexpressions have been appropriately
-     * substituted. This class is assuming that <code>this</code>
-     * does not match any key in <code>substitutions</code> and thus need only
-     * concern itself with performing substitutions in its children.</p>
-     *
-     * @param substitutions A mapping from {@link Exp}s that should be
-     *                      substituted out to the {@link Exp} that should
-     *                      replace them.
-     *
-     * @return A new {@link Exp} that is a deep copy of the original with
-     *         the provided substitutions made.
+     * {@inheritDoc}
      */
     @Override
-    protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
+    protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         return new OldExp(new Location(myLoc), substitute(myOrigExp,
                 substitutions));
     }
