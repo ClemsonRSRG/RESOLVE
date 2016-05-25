@@ -17,8 +17,8 @@ import edu.clemson.cs.rsrg.absyn.Statement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the presume statements
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the presume statement objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -52,66 +52,56 @@ public class PresumeStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("PresumeStmt\n");
-        sb.append(myAssertion.asString(indentSize + innerIndentSize,
-                innerIndentSize));
+        sb.append("Presume ");
+        sb.append(myAssertion.asString(0, innerIndentInc));
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link PresumeStmt} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof PresumeStmt) {
-            PresumeStmt eAsPresumeStmt = (PresumeStmt) o;
-            result = myLoc.equals(eAsPresumeStmt.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result = myAssertion.equals(eAsPresumeStmt.myAssertion);
-            }
-        }
+        PresumeStmt that = (PresumeStmt) o;
 
-        return result;
+        return myAssertion.equals(that.myAssertion);
+
     }
 
     /**
-     * <p>This method returns a deep copy of the presume assertion expression.</p>
+     * <p>This method returns the presumed assertion expression.</p>
      *
      * @return The {@link Exp} representation object.
      */
     public final Exp getAssertion() {
-        return myAssertion.clone();
+        return myAssertion;
     }
 
     /**
-     * <p>Returns the statement in string format.</p>
-     *
-     * @return Statement as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final int hashCode() {
+        return myAssertion.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Presume " + myAssertion.toString());
 
@@ -123,14 +113,11 @@ public class PresumeStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to
-     * manufacture a copy of themselves.</p>
-     *
-     * @return A new {@link Statement} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Statement copy() {
-        return new PresumeStmt(new Location(myLoc), getAssertion());
+    protected final Statement copy() {
+        return new PresumeStmt(new Location(myLoc), myAssertion.clone());
     }
 
 }

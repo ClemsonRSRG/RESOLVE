@@ -18,8 +18,8 @@ import edu.clemson.cs.rsrg.absyn.programexpr.ProgramVariableExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the function assignment statements
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the function assignment statement objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -60,97 +60,76 @@ public class FuncAssignStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
-        sb.append("FuncAssignStmt\n");
 
-        if (myVariableExp != null) {
-            sb.append(myVariableExp.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-            sb.append(" := ");
-        }
-
-        if (myFunctionExp != null) {
-            sb.append(myFunctionExp.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-        }
+        sb.append(myVariableExp.asString(indentSize, innerIndentInc));
+        sb.append(" := ");
+        sb.append(myFunctionExp.asString(0, innerIndentInc));
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link FuncAssignStmt} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof FuncAssignStmt) {
-            FuncAssignStmt eAsFuncAssignStmt = (FuncAssignStmt) o;
-            result = myLoc.equals(eAsFuncAssignStmt.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result = myVariableExp.equals(eAsFuncAssignStmt.myVariableExp);
-                result &= myFunctionExp.equals(eAsFuncAssignStmt.myFunctionExp);
-            }
-        }
+        FuncAssignStmt that = (FuncAssignStmt) o;
 
-        return result;
+        if (!myVariableExp.equals(that.myVariableExp))
+            return false;
+        return myFunctionExp.equals(that.myFunctionExp);
+
     }
 
     /**
-     * <p>This method returns a deep copy of the function expression in
+     * <p>This method returns the function expression in
      * this function assignment statement.</p>
      *
      * @return The {@link ProgramFunctionExp} representation object.
      */
-    public ProgramFunctionExp getFunctionExp() {
-        return (ProgramFunctionExp) myFunctionExp.clone();
+    public final ProgramFunctionExp getFunctionExp() {
+        return myFunctionExp;
     }
 
     /**
-     * <p>This method returns a deep copy of the variable expression in
+     * <p>This method returns the variable expression in
      * this function assignment statement.</p>
      *
      * @return The {@link ProgramVariableExp} representation object.
      */
-    public ProgramVariableExp getVariableExp() {
-        return (ProgramVariableExp) myVariableExp.clone();
+    public final ProgramVariableExp getVariableExp() {
+        return myVariableExp;
     }
 
     /**
-     * <p>Returns the statement in string format.</p>
-     *
-     * @return Statement as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final int hashCode() {
+        int result = myVariableExp.hashCode();
+        result = 31 * result + myFunctionExp.hashCode();
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
-
-        if (myVariableExp != null) {
-            sb.append(myVariableExp.toString());
-            sb.append(" := ");
-        }
-
-        if (myFunctionExp != null) {
-            sb.append(myFunctionExp.toString());
-        }
+        sb.append(myVariableExp.toString());
+        sb.append(" := ");
+        sb.append(myFunctionExp.toString());
 
         return sb.toString();
     }
@@ -160,15 +139,13 @@ public class FuncAssignStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to
-     * manufacture a copy of themselves.</p>
-     *
-     * @return A new {@link Statement} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Statement copy() {
-        return new FuncAssignStmt(new Location(myLoc), getVariableExp(),
-                getFunctionExp());
+    protected final Statement copy() {
+        return new FuncAssignStmt(new Location(myLoc),
+                (ProgramVariableExp) myVariableExp.clone(),
+                (ProgramFunctionExp) myFunctionExp.clone());
     }
 
 }

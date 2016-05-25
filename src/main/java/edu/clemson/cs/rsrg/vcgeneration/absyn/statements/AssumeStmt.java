@@ -61,76 +61,75 @@ public class AssumeStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("AssumeStmt\n");
-        sb.append(myAssertion.asString(indentSize + innerIndentSize,
-                innerIndentSize));
+
+        if (myIsStipulate) {
+            sb.append("Stipulate ");
+        }
+        else {
+            sb.append("Assume ");
+        }
+        sb.append(myAssertion.asString(0, innerIndentInc));
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link AssumeStmt} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof AssumeStmt) {
-            AssumeStmt eAsAssumeStmt = (AssumeStmt) o;
-            result = myLoc.equals(eAsAssumeStmt.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result = myAssertion.equals(eAsAssumeStmt.myAssertion);
-                result &= (myIsStipulate == eAsAssumeStmt.myIsStipulate);
-            }
-        }
+        AssumeStmt that = (AssumeStmt) o;
 
-        return result;
+        if (myIsStipulate != that.myIsStipulate)
+            return false;
+        return myAssertion.equals(that.myAssertion);
+
     }
 
     /**
-     * <p>This method returns a deep copy of the assume assertion expression.</p>
+     * <p>This method returns the assumed assertion expression.</p>
      *
      * @return The {@link Exp} representation object.
      */
     public final Exp getAssertion() {
-        return myAssertion.clone();
+        return myAssertion;
     }
 
     /**
      * <p>This method checks to see if this is is a stipulate assume statement.</p>
      *
-     * @return True if it is a stipulate assume statement, false otherwise.
+     * @return {@code true} if it is a stipulate assume statement, {@code false} otherwise.
      */
     public final boolean getIsStipulate() {
         return myIsStipulate;
     }
 
     /**
-     * <p>Returns the statement in string format.</p>
-     *
-     * @return Statement as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final int hashCode() {
+        int result = myAssertion.hashCode();
+        result = 31 * result + (myIsStipulate ? 1 : 0);
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
 
         if (myIsStipulate) {
@@ -139,6 +138,7 @@ public class AssumeStmt extends Statement {
         else {
             sb.append("Assume ");
         }
+
         sb.append(myAssertion.toString());
 
         return sb.toString();
@@ -149,15 +149,12 @@ public class AssumeStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to
-     * manufacture a copy of themselves.</p>
-     *
-     * @return A new {@link Statement} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Statement copy() {
-        return new AssumeStmt(new Location(myLoc), getAssertion(),
-                getIsStipulate());
+    protected final Statement copy() {
+        return new AssumeStmt(new Location(myLoc), myAssertion.clone(),
+                myIsStipulate);
     }
 
 }

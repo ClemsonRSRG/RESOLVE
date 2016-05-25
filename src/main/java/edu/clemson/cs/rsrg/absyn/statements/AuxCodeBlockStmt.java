@@ -19,8 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <p>This is the class for all the auxiliary code block statement
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the auxiliary code block statement objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -54,96 +54,63 @@ public class AuxCodeBlockStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("AuxCode\n");
+        sb.append("Aux_Code\n");
 
-        if (myStatements != null) {
-            for (Statement s : myStatements) {
-                sb.append(s.asString(indentSize + innerIndentSize,
-                        innerIndentSize));
-                sb.append("\n");
-            }
+        for (Statement s : myStatements) {
+            sb.append(s.asString(indentSize + innerIndentInc, innerIndentInc));
+            sb.append("\n");
         }
+
+        sb.append("end\n");
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link AuxCodeBlockStmt} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof AuxCodeBlockStmt) {
-            AuxCodeBlockStmt eAsAuxCodeBlockStmt = (AuxCodeBlockStmt) o;
-            result = myLoc.equals(eAsAuxCodeBlockStmt.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                if (myStatements != null
-                        && eAsAuxCodeBlockStmt.myStatements != null) {
-                    Iterator<Statement> thisStatements =
-                            myStatements.iterator();
-                    Iterator<Statement> eStatements =
-                            eAsAuxCodeBlockStmt.myStatements.iterator();
+        AuxCodeBlockStmt that = (AuxCodeBlockStmt) o;
 
-                    while (result && thisStatements.hasNext()
-                            && eStatements.hasNext()) {
-                        result &=
-                                thisStatements.next()
-                                        .equals(eStatements.next());
-                    }
+        return myStatements.equals(that.myStatements);
 
-                    //Both had better have run out at the same time
-                    result &=
-                            (!thisStatements.hasNext())
-                                    && (!eStatements.hasNext());
-                }
-            }
-        }
-
-        return result;
     }
 
     /**
-     * <p>This method returns a deep copy of the list of statements
+     * <p>This method returns the list of statements
      * in this auxiliary code block.</p>
      *
      * @return The list of {@link Statement}s.
      */
-    public List<Statement> getStatements() {
-        List<Statement> copyStatements = new ArrayList<>();
-        for (Statement s : myStatements) {
-            copyStatements.add(s.clone());
-        }
-
-        return copyStatements;
+    public final List<Statement> getStatements() {
+        return myStatements;
     }
 
     /**
-     * <p>Returns the statement in string format.</p>
-     *
-     * @return Statement as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final int hashCode() {
+        return myStatements.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Aux_Code\n");
 
@@ -163,14 +130,15 @@ public class AuxCodeBlockStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to
-     * manufacture a copy of themselves.</p>
-     *
-     * @return A new {@link Statement} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Statement copy() {
-        return new AuxCodeBlockStmt(new Location(myLoc), getStatements());
-    }
+    protected final Statement copy() {
+        List<Statement> copyStatements = new ArrayList<>();
+        for (Statement s : myStatements) {
+            copyStatements.add(s.clone());
+        }
 
+        return new AuxCodeBlockStmt(new Location(myLoc), copyStatements);
+    }
 }

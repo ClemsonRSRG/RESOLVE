@@ -17,8 +17,8 @@ import edu.clemson.cs.rsrg.absyn.programexpr.ProgramFunctionExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the call statements
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the call statement objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -52,67 +52,56 @@ public class CallStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
-        sb.append("CallStmt\n");
-        sb.append(myFunctionExp.asString(indentSize + innerIndentSize,
-                innerIndentSize));
+        sb.append(myFunctionExp.asString(indentSize + innerIndentInc,
+                innerIndentInc));
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link CallStmt} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof CallStmt) {
-            CallStmt eAsCallStmt = (CallStmt) o;
-            result = myLoc.equals(eAsCallStmt.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result = myFunctionExp.equals(eAsCallStmt.myFunctionExp);
-            }
-        }
+        CallStmt callStmt = (CallStmt) o;
 
-        return result;
+        return myFunctionExp.equals(callStmt.myFunctionExp);
+
     }
 
     /**
-     * <p>This method returns a deep copy of the function expression in
+     * <p>This method returns the function expression in
      * this calling statement.</p>
      *
      * @return The {@link ProgramFunctionExp} representation object.
      */
-    public ProgramFunctionExp getFunctionExp() {
-        return (ProgramFunctionExp) myFunctionExp.clone();
+    public final ProgramFunctionExp getFunctionExp() {
+        return myFunctionExp;
     }
 
     /**
-     * <p>Returns the statement in string format.</p>
-     *
-     * @return Statement as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final int hashCode() {
+        return myFunctionExp.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append(myFunctionExp.toString());
 
@@ -124,14 +113,12 @@ public class CallStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to
-     * manufacture a copy of themselves.</p>
-     *
-     * @return A new {@link Statement} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Statement copy() {
-        return new CallStmt(new Location(myLoc), getFunctionExp());
+    protected final Statement copy() {
+        return new CallStmt(new Location(myLoc),
+                (ProgramFunctionExp) myFunctionExp.clone());
     }
 
 }

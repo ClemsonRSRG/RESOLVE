@@ -17,8 +17,8 @@ import edu.clemson.cs.rsrg.absyn.programexpr.ProgramVariableExp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the swap statements
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the swap statement objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -59,97 +59,77 @@ public class SwapStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
-        sb.append("SwapStmt\n");
 
-        if (myLeftHandSide != null) {
-            sb.append(myLeftHandSide.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-            sb.append(" :=: ");
-        }
+        sb.append(myLeftHandSide.asString(indentSize + innerIndentInc,
+                innerIndentInc));
+        sb.append(" :=: ");
 
-        if (myRightHandSide != null) {
-            sb.append(myRightHandSide.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
-        }
+        sb.append(myRightHandSide.asString(0, innerIndentInc));
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link SwapStmt} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof SwapStmt) {
-            SwapStmt eAsSwapStmt = (SwapStmt) o;
-            result = myLoc.equals(eAsSwapStmt.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result = myLeftHandSide.equals(eAsSwapStmt.myLeftHandSide);
-                result &= myRightHandSide.equals(eAsSwapStmt.myRightHandSide);
-            }
-        }
+        SwapStmt swapStmt = (SwapStmt) o;
 
-        return result;
+        if (!myLeftHandSide.equals(swapStmt.myLeftHandSide))
+            return false;
+        return myRightHandSide.equals(swapStmt.myRightHandSide);
+
     }
 
     /**
-     * <p>This method returns a deep copy of the left hand side
-     * variable expression.</p>
+     * <p>This method returns the left hand side variable expression.</p>
      *
      * @return The {@link ProgramVariableExp} representation object.
      */
     public final ProgramVariableExp getLeft() {
-        return (ProgramVariableExp) myLeftHandSide.clone();
+        return myLeftHandSide;
     }
 
     /**
-     * <p>This method returns a deep copy of the right hand side
-     * variable expression.</p>
+     * <p>This method returns the right hand side variable expression.</p>
      *
      * @return The {@link ProgramVariableExp} representation object.
      */
     public final ProgramVariableExp getRight() {
-        return (ProgramVariableExp) myRightHandSide.clone();
+        return myRightHandSide;
     }
 
     /**
-     * <p>Returns the statement in string format.</p>
-     *
-     * @return Statement as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final int hashCode() {
+        int result = myLeftHandSide.hashCode();
+        result = 31 * result + myRightHandSide.hashCode();
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
 
-        if (myLeftHandSide != null) {
-            sb.append(myLeftHandSide.toString());
-            sb.append(" :=: ");
-        }
-
-        if (myRightHandSide != null) {
-            sb.append(myRightHandSide.toString());
-        }
+        sb.append(myLeftHandSide.toString());
+        sb.append(" :=: ");
+        sb.append(myRightHandSide.toString());
 
         return sb.toString();
     }
@@ -159,14 +139,13 @@ public class SwapStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to
-     * manufacture a copy of themselves.</p>
-     *
-     * @return A new {@link Statement} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Statement copy() {
-        return new SwapStmt(new Location(myLoc), getLeft(), getRight());
+    protected final Statement copy() {
+        return new SwapStmt(new Location(myLoc),
+                (ProgramVariableExp) myLeftHandSide.clone(),
+                (ProgramVariableExp) myRightHandSide.clone());
     }
 
 }

@@ -17,8 +17,8 @@ import edu.clemson.cs.rsrg.absyn.Statement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the confirm statements
- * that the compiler builds from the ANTLR4 AST tree or
+ * <p>This is the class for all the confirm statement objects
+ * that the compiler builds using the ANTLR4 AST nodes or
  * generated during the VC Generation step.</p>
  *
  * @version 2.0
@@ -33,7 +33,7 @@ public class ConfirmStmt extends Statement {
     private final Exp myAssertion;
 
     /** <p>This flag indicates if this confirm can be simplified or not</p> */
-    private boolean mySimplify;
+    private final boolean mySimplify;
 
     // ===========================================================
     // Constructors
@@ -61,76 +61,69 @@ public class ConfirmStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("ConfirmStmt\n");
-        sb.append(myAssertion.asString(indentSize + innerIndentSize,
-                innerIndentSize));
+        sb.append("Confirm ");
+        sb.append(myAssertion.asString(0, innerIndentInc));
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link ConfirmStmt} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof ConfirmStmt) {
-            ConfirmStmt eAsConfirmStmt = (ConfirmStmt) o;
-            result = myLoc.equals(eAsConfirmStmt.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result = myAssertion.equals(eAsConfirmStmt.myAssertion);
-                result &= (mySimplify == eAsConfirmStmt.mySimplify);
-            }
-        }
+        ConfirmStmt that = (ConfirmStmt) o;
 
-        return result;
+        if (mySimplify != that.mySimplify)
+            return false;
+        return myAssertion.equals(that.myAssertion);
+
     }
 
     /**
-     * <p>This method returns a deep copy of the confirm assertion expression.</p>
+     * <p>This method returns the confirming assertion expression.</p>
      *
      * @return The {@link Exp} representation object.
      */
     public final Exp getAssertion() {
-        return myAssertion.clone();
+        return myAssertion;
     }
 
     /**
      * <p>This method returns whether this confirm statement can be simplified.</p>
      *
-     * @return True if it is a confirm statement we can simplify, false otherwise.
+     * @return {@code true} if it is a confirm statement we can simplify, {@code false} otherwise.
      */
     public final boolean getSimplify() {
         return mySimplify;
     }
 
     /**
-     * <p>Returns the statement in string format.</p>
-     *
-     * @return Statement as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final int hashCode() {
+        int result = myAssertion.hashCode();
+        result = 31 * result + (mySimplify ? 1 : 0);
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Confirm " + myAssertion.toString());
 
@@ -142,15 +135,12 @@ public class ConfirmStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to
-     * manufacture a copy of themselves.</p>
-     *
-     * @return A new {@link Statement} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Statement copy() {
-        return new ConfirmStmt(new Location(myLoc), getAssertion(),
-                getSimplify());
+    protected final Statement copy() {
+        return new ConfirmStmt(new Location(myLoc), myAssertion.clone(),
+                mySimplify);
     }
 
 }
