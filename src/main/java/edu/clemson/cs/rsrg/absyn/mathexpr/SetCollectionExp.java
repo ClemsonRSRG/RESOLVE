@@ -128,6 +128,8 @@ public class SetCollectionExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         SetCollectionExp that = (SetCollectionExp) o;
 
@@ -193,7 +195,9 @@ public class SetCollectionExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        return myMembers.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myMembers.hashCode();
+        return result;
     }
 
     /**

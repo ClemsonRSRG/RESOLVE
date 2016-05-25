@@ -74,6 +74,8 @@ public class DoubleExp extends LiteralExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         DoubleExp doubleExp = (DoubleExp) o;
 
@@ -109,8 +111,11 @@ public class DoubleExp extends LiteralExp {
      */
     @Override
     public final int hashCode() {
-        long temp = Double.doubleToLongBits(myDouble);
-        return (int) (temp ^ (temp >>> 32));
+        int result = super.hashCode();
+        long temp;
+        temp = Double.doubleToLongBits(myDouble);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
     }
 
     /**

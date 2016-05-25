@@ -63,6 +63,27 @@ public abstract class AbstractFunctionExp extends MathExp {
     // ===========================================================
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        AbstractFunctionExp that = (AbstractFunctionExp) o;
+
+        if (myQualifier != null ? !myQualifier.equals(that.myQualifier)
+                : that.myQualifier != null)
+            return false;
+        return myQuantification == that.myQuantification;
+
+    }
+
+    /**
      * <p>This class represents function <em>applications</em>. The type of a
      * function application is the type of the range of the function. Often
      * we'd like to think about the type of the <em>function itself</em>, not 
@@ -171,6 +192,23 @@ public abstract class AbstractFunctionExp extends MathExp {
      */
     public final SymbolTableEntry.Quantification getQuantification() {
         return myQuantification;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result =
+                31 * result
+                        + (myQualifier != null ? myQualifier.hashCode() : 0);
+        result =
+                31
+                        * result
+                        + (myQuantification != null ? myQuantification
+                                .hashCode() : 0);
+        return result;
     }
 
     /**

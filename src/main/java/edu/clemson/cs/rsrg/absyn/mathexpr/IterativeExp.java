@@ -188,6 +188,8 @@ public class IterativeExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         IterativeExp that = (IterativeExp) o;
 
@@ -195,7 +197,8 @@ public class IterativeExp extends MathExp {
             return false;
         if (!myVar.equals(that.myVar))
             return false;
-        if (!myWhereExp.equals(that.myWhereExp))
+        if (myWhereExp != null ? !myWhereExp.equals(that.myWhereExp)
+                : that.myWhereExp != null)
             return false;
         return myBodyExp.equals(that.myBodyExp);
 
@@ -277,7 +280,8 @@ public class IterativeExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        int result = myOperator.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myOperator.hashCode();
         result = 31 * result + myVar.hashCode();
         result = 31 * result + (myWhereExp != null ? myWhereExp.hashCode() : 0);
         result = 31 * result + myBodyExp.hashCode();
@@ -357,7 +361,7 @@ public class IterativeExp extends MathExp {
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         Exp newWhere = null;
         if (myWhereExp != null) {
-            substitute(myWhereExp, substitutions);
+            newWhere = substitute(myWhereExp, substitutions);
         }
 
         return new IterativeExp(new Location(myLoc), myOperator, myVar.clone(),

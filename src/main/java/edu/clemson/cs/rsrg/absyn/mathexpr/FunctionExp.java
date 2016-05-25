@@ -158,6 +158,8 @@ public class FunctionExp extends AbstractFunctionExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         FunctionExp that = (FunctionExp) o;
 
@@ -257,7 +259,8 @@ public class FunctionExp extends AbstractFunctionExp {
      */
     @Override
     public final int hashCode() {
-        int result = myFuncNameExp.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myFuncNameExp.hashCode();
         result = 31 * result + myArguments.hashCode();
         return result;
     }

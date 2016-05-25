@@ -125,6 +125,8 @@ public class DotExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         DotExp dotExp = (DotExp) o;
 
@@ -185,7 +187,9 @@ public class DotExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        return mySegmentExps.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + mySegmentExps.hashCode();
+        return result;
     }
 
     /**

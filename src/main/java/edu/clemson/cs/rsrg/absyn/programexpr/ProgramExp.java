@@ -66,6 +66,25 @@ public abstract class ProgramExp extends Exp {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        ProgramExp that = (ProgramExp) o;
+
+        return myProgramType != null ? myProgramType.equals(that.myProgramType)
+                : that.myProgramType == null;
+
+    }
+
+    /**
      * <p>This method gets the programming type associated
      * with this object.</p>
      *
@@ -73,6 +92,19 @@ public abstract class ProgramExp extends Exp {
      */
     public final PTType getProgramType() {
         return myProgramType;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result =
+                31
+                        * result
+                        + (myProgramType != null ? myProgramType.hashCode() : 0);
+        return result;
     }
 
     /**

@@ -132,6 +132,8 @@ public class TypeAssertionExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         TypeAssertionExp that = (TypeAssertionExp) o;
 
@@ -187,7 +189,8 @@ public class TypeAssertionExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        int result = myExp.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myExp.hashCode();
         result = 31 * result + myAssertedTy.hashCode();
         return result;
     }

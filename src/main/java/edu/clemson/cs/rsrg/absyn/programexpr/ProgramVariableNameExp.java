@@ -83,6 +83,8 @@ public class ProgramVariableNameExp extends ProgramVariableExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         ProgramVariableNameExp that = (ProgramVariableNameExp) o;
 
@@ -133,7 +135,9 @@ public class ProgramVariableNameExp extends ProgramVariableExp {
      */
     @Override
     public final int hashCode() {
-        return myVarName.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myVarName.hashCode();
+        return result;
     }
 
     /**

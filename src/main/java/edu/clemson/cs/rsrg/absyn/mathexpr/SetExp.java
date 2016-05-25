@@ -118,12 +118,15 @@ public class SetExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         SetExp setExp = (SetExp) o;
 
         if (!myVar.equals(setExp.myVar))
             return false;
-        if (!myWhereExp.equals(setExp.myWhereExp))
+        if (myWhereExp != null ? !myWhereExp.equals(setExp.myWhereExp)
+                : setExp.myWhereExp != null)
             return false;
         return myBodyExp.equals(setExp.myBodyExp);
 
@@ -191,7 +194,8 @@ public class SetExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        int result = myVar.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myVar.hashCode();
         result = 31 * result + (myWhereExp != null ? myWhereExp.hashCode() : 0);
         result = 31 * result + myBodyExp.hashCode();
         return result;
@@ -268,7 +272,7 @@ public class SetExp extends MathExp {
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         Exp newWhere = null;
         if (myWhereExp != null) {
-            substitute(myWhereExp, substitutions);
+            newWhere = substitute(myWhereExp, substitutions);
         }
 
         return new SetExp(new Location(myLoc), myVar.clone(), newWhere,

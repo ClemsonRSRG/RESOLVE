@@ -125,6 +125,8 @@ public class BetweenExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         BetweenExp that = (BetweenExp) o;
 
@@ -184,7 +186,9 @@ public class BetweenExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        return myJoiningExps.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myJoiningExps.hashCode();
+        return result;
     }
 
     /**

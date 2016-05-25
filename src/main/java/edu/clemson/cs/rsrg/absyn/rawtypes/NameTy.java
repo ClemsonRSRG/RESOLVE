@@ -86,6 +86,8 @@ public class NameTy extends Ty {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         NameTy nameTy = (NameTy) o;
 
@@ -119,7 +121,10 @@ public class NameTy extends Ty {
      */
     @Override
     public final int hashCode() {
-        int result = myQualifier != null ? myQualifier.hashCode() : 0;
+        int result = super.hashCode();
+        result =
+                31 * result
+                        + (myQualifier != null ? myQualifier.hashCode() : 0);
         result = 31 * result + myName.hashCode();
         return result;
     }

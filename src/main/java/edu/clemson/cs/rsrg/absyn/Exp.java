@@ -127,6 +127,26 @@ public abstract class Exp extends ResolveConceptualElement {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        Exp exp = (Exp) o;
+
+        if (myMathType != null ? !myMathType.equals(exp.myMathType)
+                : exp.myMathType != null)
+            return false;
+        return myMathTypeValue != null ? myMathTypeValue
+                .equals(exp.myMathTypeValue) : exp.myMathTypeValue == null;
+
+    }
+
+    /**
      * <p>Shallow compare is too weak for many things, and equals() is too
      * strict. This method returns {@code true} <strong>iff</code> this
      * expression and the provided expression, {@code e}, are equivalent
@@ -190,6 +210,20 @@ public abstract class Exp extends ResolveConceptualElement {
      * @return A list containing {@link Exp} type objects.
      */
     public abstract List<Exp> getSubExpressions();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = myMathType != null ? myMathType.hashCode() : 0;
+        result =
+                31
+                        * result
+                        + (myMathTypeValue != null ? myMathTypeValue.hashCode()
+                                : 0);
+        return result;
+    }
 
     /**
      * <p>Helper method to deal with {@link PosSymbol}s that need to be

@@ -86,6 +86,8 @@ public class IntegerExp extends LiteralExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         IntegerExp that = (IntegerExp) o;
 
@@ -133,7 +135,10 @@ public class IntegerExp extends LiteralExp {
      */
     @Override
     public final int hashCode() {
-        int result = myQualifier != null ? myQualifier.hashCode() : 0;
+        int result = super.hashCode();
+        result =
+                31 * result
+                        + (myQualifier != null ? myQualifier.hashCode() : 0);
         result = 31 * result + myInteger.hashCode();
         return result;
     }

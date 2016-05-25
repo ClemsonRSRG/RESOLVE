@@ -76,6 +76,8 @@ public class CharExp extends LiteralExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         CharExp charExp = (CharExp) o;
 
@@ -111,7 +113,9 @@ public class CharExp extends LiteralExp {
      */
     @Override
     public final int hashCode() {
-        return myCharacter.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myCharacter.hashCode();
+        return result;
     }
 
     /**
@@ -132,7 +136,7 @@ public class CharExp extends LiteralExp {
      * @return The resulting {@link MathExp} from applying the simplification step.
      */
     @Override
-    public MathExp simplify() {
+    public final MathExp simplify() {
         return this.clone();
     }
 
@@ -157,7 +161,7 @@ public class CharExp extends LiteralExp {
      * {@inheritDoc}
      */
     @Override
-    protected Exp copy() {
+    protected final Exp copy() {
         return new CharExp(new Location(myLoc), myCharacter.charValue());
     }
 
@@ -165,7 +169,7 @@ public class CharExp extends LiteralExp {
      * {@inheritDoc}
      */
     @Override
-    protected Exp substituteChildren(Map<Exp, Exp> substitutions) {
+    protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         return new CharExp(new Location(myLoc), myCharacter.charValue());
     }
 

@@ -71,12 +71,43 @@ public abstract class ProgramVariableExp extends ProgramExp {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        ProgramVariableExp that = (ProgramVariableExp) o;
+
+        return myQualifier != null ? myQualifier.equals(that.myQualifier)
+                : that.myQualifier == null;
+
+    }
+
+    /**
      * <p>This method returns the qualifier name.</p>
      *
      * @return The {@link PosSymbol} representation object.
      */
     public final PosSymbol getQualifier() {
         return myQualifier;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result =
+                31 * result
+                        + (myQualifier != null ? myQualifier.hashCode() : 0);
+        return result;
     }
 
     /**

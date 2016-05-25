@@ -76,6 +76,8 @@ public class StringExp extends LiteralExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         StringExp stringExp = (StringExp) o;
 
@@ -111,7 +113,9 @@ public class StringExp extends LiteralExp {
      */
     @Override
     public final int hashCode() {
-        return myString.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myString.hashCode();
+        return result;
     }
 
     /**

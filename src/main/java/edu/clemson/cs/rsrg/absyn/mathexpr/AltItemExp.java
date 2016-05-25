@@ -126,12 +126,16 @@ public class AltItemExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         AltItemExp that = (AltItemExp) o;
 
-        if (!myTestingExp.equals(that.myTestingExp))
+        if (myTestingExp != null ? !myTestingExp.equals(that.myTestingExp)
+                : that.myTestingExp != null)
             return false;
-        return myAssignmentExp.equals(that.myAssignmentExp);
+        return myAssignmentExp != null ? myAssignmentExp
+                .equals(that.myAssignmentExp) : that.myAssignmentExp == null;
 
     }
 
@@ -187,8 +191,15 @@ public class AltItemExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        int result = myTestingExp.hashCode();
-        result = 31 * result + myAssignmentExp.hashCode();
+        int result = super.hashCode();
+        result =
+                31 * result
+                        + (myTestingExp != null ? myTestingExp.hashCode() : 0);
+        result =
+                31
+                        * result
+                        + (myAssignmentExp != null ? myAssignmentExp.hashCode()
+                                : 0);
         return result;
     }
 

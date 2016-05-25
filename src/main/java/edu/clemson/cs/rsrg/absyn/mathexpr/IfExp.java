@@ -135,6 +135,8 @@ public class IfExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         IfExp ifExp = (IfExp) o;
 
@@ -170,7 +172,7 @@ public class IfExp extends MathExp {
      *
      * @return The assignment {@link Exp} object.
      */
-    public final Exp getElseclause() {
+    public final Exp getElse() {
         return myElseExp;
     }
 
@@ -201,7 +203,7 @@ public class IfExp extends MathExp {
      *
      * @return The assignment {@link Exp} object.
      */
-    public final Exp getThenclause() {
+    public final Exp getThen() {
         return myThenExp;
     }
 
@@ -210,7 +212,8 @@ public class IfExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        int result = myTestingExp.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myTestingExp.hashCode();
         result = 31 * result + myThenExp.hashCode();
         result = 31 * result + (myElseExp != null ? myElseExp.hashCode() : 0);
         return result;
@@ -291,15 +294,14 @@ public class IfExp extends MathExp {
             newTest = myTestingExp.clone();
         }
 
-        Exp newThenclause = myThenExp.clone();
+        Exp newThenExp = myThenExp.clone();
 
-        Exp newElseclause = null;
+        Exp newElseExp = null;
         if (myElseExp != null) {
-            newElseclause = myElseExp.clone();
+            newElseExp = myElseExp.clone();
         }
 
-        return new IfExp(new Location(myLoc), newTest, newThenclause,
-                newElseclause);
+        return new IfExp(new Location(myLoc), newTest, newThenExp, newElseExp);
     }
 
     /**
@@ -307,9 +309,13 @@ public class IfExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
+        Exp newElseExp = null;
+        if (myElseExp != null) {
+            newElseExp = substitute(myElseExp, substitutions);
+        }
+
         return new IfExp(new Location(myLoc), substitute(myTestingExp,
                 substitutions), substitute(myThenExp, substitutions),
-                substitute(myElseExp, substitutions));
+                newElseExp);
     }
-
 }

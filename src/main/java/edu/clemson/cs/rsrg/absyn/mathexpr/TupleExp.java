@@ -177,6 +177,8 @@ public class TupleExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         TupleExp tupleExp = (TupleExp) o;
 
@@ -273,7 +275,7 @@ public class TupleExp extends MathExp {
      */
     @Override
     public final List<Exp> getSubExpressions() {
-        return getFields();
+        return copyExps();
     }
 
     /**
@@ -281,7 +283,8 @@ public class TupleExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        int result = myFields.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myFields.hashCode();
         result = 31 * result + mySize;
         return result;
     }

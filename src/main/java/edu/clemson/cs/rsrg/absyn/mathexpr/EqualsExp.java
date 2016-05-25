@@ -143,7 +143,9 @@ public class EqualsExp extends InfixExp {
      */
     @Override
     public final int hashCode() {
-        return myOperator.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myOperator.hashCode();
+        return result;
     }
 
     /**

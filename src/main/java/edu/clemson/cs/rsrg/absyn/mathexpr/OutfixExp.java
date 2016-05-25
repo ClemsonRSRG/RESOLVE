@@ -231,6 +231,8 @@ public class OutfixExp extends AbstractFunctionExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         OutfixExp outfixExp = (OutfixExp) o;
 
@@ -312,7 +314,8 @@ public class OutfixExp extends AbstractFunctionExp {
      */
     @Override
     public final int hashCode() {
-        int result = myOperator.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myOperator.hashCode();
         result = 31 * result + myArgument.hashCode();
         return result;
     }

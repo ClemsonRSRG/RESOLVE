@@ -74,6 +74,8 @@ public class ProgramCharExp extends ProgramLiteralExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         ProgramCharExp that = (ProgramCharExp) o;
 
@@ -109,7 +111,9 @@ public class ProgramCharExp extends ProgramLiteralExp {
      */
     @Override
     public final int hashCode() {
-        return myCharacter.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myCharacter.hashCode();
+        return result;
     }
 
     /**
@@ -134,7 +138,7 @@ public class ProgramCharExp extends ProgramLiteralExp {
      */
     @Override
     protected final Exp copy() {
-        return new ProgramCharExp(new Location(myLoc), myCharacter.charValue());
+        return new ProgramCharExp(new Location(myLoc), myCharacter);
     }
 
     /**
@@ -142,7 +146,7 @@ public class ProgramCharExp extends ProgramLiteralExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new ProgramCharExp(new Location(myLoc), myCharacter.charValue());
+        return new ProgramCharExp(new Location(myLoc), myCharacter);
     }
 
 }

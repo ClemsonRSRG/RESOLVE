@@ -119,6 +119,8 @@ public class OldExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         OldExp oldExp = (OldExp) o;
 
@@ -165,7 +167,9 @@ public class OldExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        return myOrigExp.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myOrigExp.hashCode();
+        return result;
     }
 
     /**

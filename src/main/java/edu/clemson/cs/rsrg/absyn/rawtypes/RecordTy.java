@@ -79,19 +79,13 @@ public class RecordTy extends Ty {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         RecordTy recordTy = (RecordTy) o;
 
         return myInnerFields.equals(recordTy.myInnerFields);
 
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final int hashCode() {
-        return myInnerFields.hashCode();
     }
 
     /**
@@ -102,6 +96,16 @@ public class RecordTy extends Ty {
      */
     public final List<VarDec> getFields() {
         return myInnerFields;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + myInnerFields.hashCode();
+        return result;
     }
 
     /**

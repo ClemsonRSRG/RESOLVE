@@ -120,6 +120,8 @@ public class LambdaExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         LambdaExp lambdaExp = (LambdaExp) o;
 
@@ -191,7 +193,8 @@ public class LambdaExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        int result = myParameters.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myParameters.hashCode();
         result = 31 * result + myBodyExp.hashCode();
         return result;
     }

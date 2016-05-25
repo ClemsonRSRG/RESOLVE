@@ -147,6 +147,8 @@ public class QuantExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         QuantExp quantExp = (QuantExp) o;
 
@@ -154,7 +156,8 @@ public class QuantExp extends MathExp {
             return false;
         if (!myVars.equals(quantExp.myVars))
             return false;
-        if (!myWhereExp.equals(quantExp.myWhereExp))
+        if (myWhereExp != null ? !myWhereExp.equals(quantExp.myWhereExp)
+                : quantExp.myWhereExp != null)
             return false;
         return myBodyExp.equals(quantExp.myBodyExp);
 
@@ -245,7 +248,8 @@ public class QuantExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        int result = myQuantification.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myQuantification.hashCode();
         result = 31 * result + myVars.hashCode();
         result = 31 * result + (myWhereExp != null ? myWhereExp.hashCode() : 0);
         result = 31 * result + myBodyExp.hashCode();
@@ -337,7 +341,7 @@ public class QuantExp extends MathExp {
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
         Exp newWhere = null;
         if (myWhereExp != null) {
-            substitute(myWhereExp, substitutions);
+            newWhere = substitute(myWhereExp, substitutions);
         }
 
         return new QuantExp(new Location(myLoc), myQuantification, copyVars(),

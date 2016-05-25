@@ -104,6 +104,8 @@ public class UnaryMinusExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         UnaryMinusExp that = (UnaryMinusExp) o;
 
@@ -152,7 +154,9 @@ public class UnaryMinusExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        return myInnerArgumentExp.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myInnerArgumentExp.hashCode();
+        return result;
     }
 
     /**

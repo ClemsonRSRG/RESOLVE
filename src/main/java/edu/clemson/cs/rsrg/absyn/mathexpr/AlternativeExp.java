@@ -132,6 +132,8 @@ public class AlternativeExp extends MathExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         AlternativeExp that = (AlternativeExp) o;
 
@@ -191,7 +193,9 @@ public class AlternativeExp extends MathExp {
      */
     @Override
     public final int hashCode() {
-        return myAlternatives.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myAlternatives.hashCode();
+        return result;
     }
 
     /**

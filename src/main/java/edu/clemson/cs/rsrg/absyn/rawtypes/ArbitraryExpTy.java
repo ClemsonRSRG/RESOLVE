@@ -80,10 +80,13 @@ public class ArbitraryExpTy extends Ty {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         ArbitraryExpTy that = (ArbitraryExpTy) o;
 
         return myArbitraryExp.equals(that.myArbitraryExp);
+
     }
 
     /**
@@ -100,7 +103,9 @@ public class ArbitraryExpTy extends Ty {
      */
     @Override
     public final int hashCode() {
-        return myArbitraryExp.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myArbitraryExp.hashCode();
+        return result;
     }
 
     /**

@@ -74,6 +74,8 @@ public class ProgramStringExp extends ProgramLiteralExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         ProgramStringExp that = (ProgramStringExp) o;
 
@@ -109,7 +111,9 @@ public class ProgramStringExp extends ProgramLiteralExp {
      */
     @Override
     public final int hashCode() {
-        return myString.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myString.hashCode();
+        return result;
     }
 
     /**

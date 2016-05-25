@@ -151,6 +151,8 @@ public class InfixExp extends AbstractFunctionExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         InfixExp infixExp = (InfixExp) o;
 
@@ -237,7 +239,8 @@ public class InfixExp extends AbstractFunctionExp {
      */
     @Override
     public int hashCode() {
-        int result = myLeftHandSide.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myLeftHandSide.hashCode();
         result = 31 * result + myOperationName.hashCode();
         result = 31 * result + myRightHandSide.hashCode();
         return result;

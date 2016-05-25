@@ -146,6 +146,8 @@ public class ProgramFunctionExp extends ProgramExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         ProgramFunctionExp that = (ProgramFunctionExp) o;
 
@@ -236,7 +238,10 @@ public class ProgramFunctionExp extends ProgramExp {
      */
     @Override
     public final int hashCode() {
-        int result = myQualifier != null ? myQualifier.hashCode() : 0;
+        int result = super.hashCode();
+        result =
+                31 * result
+                        + (myQualifier != null ? myQualifier.hashCode() : 0);
         result = 31 * result + myOperationName.hashCode();
         result = 31 * result + myExpressionArgs.hashCode();
         return result;

@@ -80,6 +80,29 @@ public abstract class Ty extends ResolveConceptualElement {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        Ty ty = (Ty) o;
+
+        if (myMathType != null ? !myMathType.equals(ty.myMathType)
+                : ty.myMathType != null)
+            return false;
+        if (myMathTypeValue != null ? !myMathTypeValue
+                .equals(ty.myMathTypeValue) : ty.myMathTypeValue != null)
+            return false;
+        return myProgramTypeValue != null ? myProgramTypeValue
+                .equals(ty.myProgramTypeValue) : ty.myProgramTypeValue == null;
+
+    }
+
+    /**
      * <p>This method gets the mathematical type associated
      * with this object.</p>
      *
@@ -107,6 +130,25 @@ public abstract class Ty extends ResolveConceptualElement {
      */
     public final PTType getProgramType() {
         return myProgramTypeValue;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = myMathType != null ? myMathType.hashCode() : 0;
+        result =
+                31
+                        * result
+                        + (myMathTypeValue != null ? myMathTypeValue.hashCode()
+                                : 0);
+        result =
+                31
+                        * result
+                        + (myProgramTypeValue != null ? myProgramTypeValue
+                                .hashCode() : 0);
+        return result;
     }
 
     /**

@@ -105,6 +105,8 @@ public class PrefixExp extends AbstractFunctionExp {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
+        if (!super.equals(o))
+            return false;
 
         PrefixExp prefixExp = (PrefixExp) o;
 
@@ -178,7 +180,8 @@ public class PrefixExp extends AbstractFunctionExp {
      */
     @Override
     public final int hashCode() {
-        int result = myOperationName.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + myOperationName.hashCode();
         result = 31 * result + myArgument.hashCode();
         return result;
     }
