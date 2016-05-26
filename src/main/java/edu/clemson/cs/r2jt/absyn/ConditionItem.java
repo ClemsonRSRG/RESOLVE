@@ -89,7 +89,7 @@ public class ConditionItem extends ResolveConceptualElement {
         StringBuffer sb = new StringBuffer();
 
         printSpace(indent, sb);
-        sb.append("IfConditionBlock\n");
+        sb.append("IfConditionBlockItem\n");
 
         if (test != null) {
             sb.append(test.asString(indent + increment, increment));
