@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn.items;
 
+import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
@@ -36,7 +37,7 @@ public class FinalItem extends ResolveConceptualElement {
     // ===========================================================
 
     /** <p>List of affected state variables.</p> */
-    private final List<AffectsItem> myAffectedVars;
+    private final List<AffectsClause> myAffectedVars;
 
     /** <p>List of auxiliary variable declarations.</p> */
     private final List<AuxVarDec> myAuxVariableDecs;
@@ -75,7 +76,7 @@ public class FinalItem extends ResolveConceptualElement {
      * @param aux_variables List of auxiliary variables in this block.
      * @param statements List of statements in this block.
      */
-    public FinalItem(Location l, List<AffectsItem> affectsVars, Exp requires,
+    public FinalItem(Location l, List<AffectsClause> affectsVars, Exp requires,
             Exp ensures, List<FacilityDec> facilities, List<VarDec> variables,
             List<AuxVarDec> aux_variables, List<Statement> statements) {
         super(l);
@@ -116,7 +117,7 @@ public class FinalItem extends ResolveConceptualElement {
             printSpace(indentSize + innerIndentSize, sb);
             sb.append("affects ");
 
-            Iterator<AffectsItem> it = myAffectedVars.iterator();
+            Iterator<AffectsClause> it = myAffectedVars.iterator();
             while (it.hasNext()) {
                 sb.append(it.next());
 
@@ -201,8 +202,9 @@ public class FinalItem extends ResolveConceptualElement {
 
             if (result) {
                 if (myAffectedVars != null && finalItem.myAffectedVars != null) {
-                    Iterator<AffectsItem> thisVars = myAffectedVars.iterator();
-                    Iterator<AffectsItem> eVars =
+                    Iterator<AffectsClause> thisVars =
+                            myAffectedVars.iterator();
+                    Iterator<AffectsClause> eVars =
                             finalItem.myAffectedVars.iterator();
 
                     while (result && thisVars.hasNext() && eVars.hasNext()) {
@@ -289,9 +291,9 @@ public class FinalItem extends ResolveConceptualElement {
      * <p>Returns the list of affected state variables in this finalization
      * block.</p>
      *
-     * @return A list of {@link AffectsItem} representation objects.
+     * @return A list of {@link AffectsClause} representation objects.
      */
-    public List<AffectsItem> getAffectedItems() {
+    public List<AffectsClause> getAffectedItems() {
         return copyAffectedItems();
     }
 
@@ -366,7 +368,7 @@ public class FinalItem extends ResolveConceptualElement {
         if (!myAffectedVars.isEmpty()) {
             sb.append("\taffects ");
 
-            Iterator<AffectsItem> it = myAffectedVars.iterator();
+            Iterator<AffectsClause> it = myAffectedVars.iterator();
             while (it.hasNext()) {
                 sb.append(it.next());
 
@@ -424,11 +426,11 @@ public class FinalItem extends ResolveConceptualElement {
      * <p>This is a helper method that makes a copy of the
      * list containing all the affected items.</p>
      *
-     * @return A list containing {@link AffectsItem}s.
+     * @return A list containing {@link AffectsClause}s.
      */
-    private List<AffectsItem> copyAffectedItems() {
-        List<AffectsItem> copyArgs = new ArrayList<>();
-        for (AffectsItem a : myAffectedVars) {
+    private List<AffectsClause> copyAffectedItems() {
+        List<AffectsClause> copyArgs = new ArrayList<>();
+        for (AffectsClause a : myAffectedVars) {
             copyArgs.add(a.clone());
         }
 

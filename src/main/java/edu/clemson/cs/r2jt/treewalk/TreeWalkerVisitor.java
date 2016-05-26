@@ -65,7 +65,7 @@ public abstract class TreeWalkerVisitor {
     public void postAbstractParameterizedModuleDecParameters(
             AbstractParameterizedModuleDec data) {}
 
-    // AffectsItem
+    // AffectsClause
     public boolean walkAffectsItem(AffectsItem data) {
         return false;
     }
