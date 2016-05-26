@@ -13,12 +13,15 @@
 package edu.clemson.cs.rsrg.absyn.statements;
 
 import edu.clemson.cs.rsrg.absyn.Statement;
-import edu.clemson.cs.rsrg.absyn.statements.codeblocks.WhileConditionBlock;
+import edu.clemson.cs.rsrg.absyn.programexpr.ProgramExp;
+import edu.clemson.cs.rsrg.absyn.statements.verificationblock.LoopVerificationBlockItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * <p>This is the class for all the while loop statements
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * <p>This is the class for all the while loop statement objects
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -28,8 +31,14 @@ public class WhileStmt extends Statement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The while loop block of this statement</p> */
-    private final WhileConditionBlock myWhileLoopBlock;
+    /**<p>The testing expression.</p> */
+    private final ProgramExp myTestingExp;
+
+    /** <p>The verification block for this while loop</p> */
+    private final LoopVerificationBlockItem myVerificationBlock;
+
+    /** <p>The list of statements for this while loop</p> */
+    private final List<Statement> myWhileStatements;
 
     // ===========================================================
     // Constructors
@@ -39,11 +48,19 @@ public class WhileStmt extends Statement {
      * <p>This constructs a while loop statement.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param whileLoopBlock A {@link WhileConditionBlock} representing while block.
+     * @param test A {@link ProgramExp} testing expression.
+     * @param verificationBlock A {@link LoopVerificationBlockItem} containing
+     *                          the assertions needed for verification purposes.
+     * @param statements The list of {@link Statement}s that are in
+     *                   the while loop.
      */
-    public WhileStmt(Location l, WhileConditionBlock whileLoopBlock) {
+    public WhileStmt(Location l, ProgramExp test,
+            LoopVerificationBlockItem verificationBlock,
+            List<Statement> statements) {
         super(l);
-        myWhileLoopBlock = whileLoopBlock;
+        myTestingExp = test;
+        myVerificationBlock = verificationBlock;
+        myWhileStatements = statements;
     }
 
     // ===========================================================
@@ -51,73 +68,126 @@ public class WhileStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("WhileStmt\n");
 
-        if (myWhileLoopBlock != null) {
-            sb.append(myWhileLoopBlock.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+        // loop condition
+        sb.append("While ( ");
+        sb.append(myTestingExp.asString(0, innerIndentInc));
+        sb.append(" )\n");
+
+        // verification assertions
+        sb.append(myVerificationBlock.asString(indentSize + innerIndentInc,
+                innerIndentInc));
+        sb.append("\n");
+
+        printSpace(indentSize, sb);
+        sb.append("do\n");
+
+        // list of statements in the loop
+        for (Statement statement : myWhileStatements) {
+            sb.append(statement.asString(indentSize + innerIndentInc,
+                    innerIndentInc));
             sb.append("\n");
         }
+
+        printSpace(indentSize, sb);
+        sb.append("end\n");
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link WhileStmt} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof WhileStmt) {
-            WhileStmt eAsWhileStmt = (WhileStmt) o;
-            result = myLoc.equals(eAsWhileStmt.myLoc);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                result = myWhileLoopBlock.equals(eAsWhileStmt.myWhileLoopBlock);
-            }
-        }
+        WhileStmt whileStmt = (WhileStmt) o;
 
+        if (!myTestingExp.equals(whileStmt.myTestingExp))
+            return false;
+        if (!myVerificationBlock.equals(whileStmt.myVerificationBlock))
+            return false;
+        return myWhileStatements.equals(whileStmt.myWhileStatements);
+
+    }
+
+    /**
+     * <p>This method returns the verification block in
+     * this {@code WhileStmt}.</p>
+     *
+     * @return The {@link LoopVerificationBlockItem} representation object.
+     */
+    public final LoopVerificationBlockItem getLoopVerificationBlock() {
+        return myVerificationBlock;
+    }
+
+    /**
+     * <p>This method returns the list of statements in
+     * this {@code WhileStmt}.</p>
+     *
+     * @return The list of {@link Statement}s.
+     */
+    public final List<Statement> getStatements() {
+        return myWhileStatements;
+    }
+
+    /**
+     * <p>This method returns the testing expression for
+     * this {@code WhileStmt}.</p>
+     *
+     * @return The testing {@link ProgramExp} object.
+     */
+    public final ProgramExp getTest() {
+        return myTestingExp;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = myTestingExp.hashCode();
+        result = 31 * result + myVerificationBlock.hashCode();
+        result = 31 * result + myWhileStatements.hashCode();
         return result;
     }
 
     /**
-     * <p>This method returns a deep copy of the while loop block in
-     * this {@link WhileStmt}.</p>
-     *
-     * @return The {@link WhileConditionBlock} representation object.
-     */
-    public WhileConditionBlock getWhileLoopBlock() {
-        return (WhileConditionBlock) myWhileLoopBlock.clone();
-    }
-
-    /**
-     * <p>Returns the statement in string format.</p>
-     *
-     * @return Statement as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append(myWhileLoopBlock.toString());
+
+        // loop condition
+        sb.append("While ( ");
+        sb.append(myTestingExp.toString());
+        sb.append(" )\n");
+
+        // verification assertions
+        sb.append(myVerificationBlock.toString());
+        sb.append("\n");
+
+        sb.append("do\n");
+
+        // list of statements in the loop
+        for (Statement statement : myWhileStatements) {
+            sb.append("\t");
+            sb.append(statement.toString());
+            sb.append("\n");
+        }
+
+        sb.append("end\n");
 
         return sb.toString();
     }
@@ -127,14 +197,15 @@ public class WhileStmt extends Statement {
     // ===========================================================
 
     /**
-     * <p>Implemented by this concrete subclass of {@link Statement} to
-     * manufacture a copy of themselves.</p>
-     *
-     * @return A new {@link Statement} that is a deep copy of the original.
+     * {@inheritDoc}
      */
     @Override
-    protected Statement copy() {
-        return new WhileStmt(new Location(myLoc), getWhileLoopBlock());
-    }
+    protected final Statement copy() {
+        List<Statement> copyWhileStatements = new ArrayList<>();
+        for (Statement s : myWhileStatements) {
+            copyWhileStatements.add(s.clone());
+        }
 
+        return new WhileStmt(new Location(myLoc), myTestingExp.clone(), myVerificationBlock.clone(), copyWhileStatements);
+    }
 }

@@ -93,8 +93,8 @@ public class IfConditionBlockItem extends ResolveConceptualElement {
      */
     @Override
     public final IfConditionBlockItem clone() {
-        return new IfConditionBlockItem(myLoc, myTestingExp.clone(),
-                copyStatements());
+        return new IfConditionBlockItem(new Location(myLoc), myTestingExp
+                .clone(), copyStatements());
     }
 
     /**
