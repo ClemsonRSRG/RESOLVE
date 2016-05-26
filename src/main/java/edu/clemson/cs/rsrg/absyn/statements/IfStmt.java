@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn.statements;
 
-import edu.clemson.cs.rsrg.absyn.codeblocks.IfConditionBlockItem;
+import edu.clemson.cs.rsrg.absyn.blocks.code.IfConditionItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +30,10 @@ public class IfStmt extends Statement {
     // ===========================================================
 
     /** <p>The if part of this statement</p> */
-    private final IfConditionBlockItem myIfClause;
+    private final IfConditionItem myIfClause;
 
     /** <p>The else-if part of this statement</p> */
-    private final List<IfConditionBlockItem> myElseIfs;
+    private final List<IfConditionItem> myElseIfs;
 
     /** <p>The else part of this statement</p> */
     private final List<Statement> myElseStatements;
@@ -46,15 +46,14 @@ public class IfStmt extends Statement {
      * <p>This constructs an if-elseif-else statement.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param ifClause A {@link IfConditionBlockItem} representing if block.
-     * @param elseifpairs A list of {@link IfConditionBlockItem} representing all
+     * @param ifClause A {@link IfConditionItem} representing if block.
+     * @param elseifpairs A list of {@link IfConditionItem} representing all
      *                    the else-if pairs.
      * @param elseStatements The list of {@link Statement}s that are in
      *                       the else block.
      */
-    public IfStmt(Location l, IfConditionBlockItem ifClause,
-            List<IfConditionBlockItem> elseifpairs,
-            List<Statement> elseStatements) {
+    public IfStmt(Location l, IfConditionItem ifClause,
+            List<IfConditionItem> elseifpairs, List<Statement> elseStatements) {
         super(l);
         myIfClause = ifClause;
         myElseIfs = elseifpairs;
@@ -78,7 +77,7 @@ public class IfStmt extends Statement {
         sb.append("\n");
 
         // Else-if
-        for (IfConditionBlockItem c : myElseIfs) {
+        for (IfConditionItem c : myElseIfs) {
             printSpace(indentSize, sb);
             sb.append("Else ");
             sb.append(c.asString(0, innerIndentInc));
@@ -134,9 +133,9 @@ public class IfStmt extends Statement {
      * <p>This method returns all the else-if blocks in
      * this {@link IfStmt}.</p>
      *
-     * @return The list of {@link IfConditionBlockItem} representation objects.
+     * @return The list of {@link IfConditionItem} representation objects.
      */
-    public final List<IfConditionBlockItem> getElseifpairs() {
+    public final List<IfConditionItem> getElseifpairs() {
         return myElseIfs;
     }
 
@@ -144,9 +143,9 @@ public class IfStmt extends Statement {
      * <p>This method returns the if block in
      * this {@link IfStmt}.</p>
      *
-     * @return The {@link IfConditionBlockItem} representation object.
+     * @return The {@link IfConditionItem} representation object.
      */
-    public final IfConditionBlockItem getIfClause() {
+    public final IfConditionItem getIfClause() {
         return myIfClause;
     }
 
@@ -169,7 +168,7 @@ public class IfStmt extends Statement {
         StringBuffer sb = new StringBuffer();
         sb.append(myIfClause.toString());
 
-        for (IfConditionBlockItem item : myElseIfs) {
+        for (IfConditionItem item : myElseIfs) {
             sb.append("Else ");
             sb.append(item.toString());
         }
@@ -198,8 +197,8 @@ public class IfStmt extends Statement {
     @Override
     protected final Statement copy() {
         // Copy any else-ifs
-        List<IfConditionBlockItem> newElseIfs = new ArrayList<>();
-        for (IfConditionBlockItem item : myElseIfs) {
+        List<IfConditionItem> newElseIfs = new ArrayList<>();
+        for (IfConditionItem item : myElseIfs) {
             newElseIfs.add(item.clone());
         }
 

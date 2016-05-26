@@ -98,6 +98,7 @@ public abstract class AbstractVarDec extends Dec {
         sb.append(super.toString());
         sb.append("\t");
         sb.append(myTy.toString());
+        sb.append("\n");
 
         return sb.toString();
     }
@@ -121,6 +122,7 @@ public abstract class AbstractVarDec extends Dec {
         StringBuffer sb = new StringBuffer();
         sb.append(myName.asString(indentSize + innerIndentInc, innerIndentInc));
         sb.append(myTy.asString(indentSize + innerIndentInc, innerIndentInc));
+        sb.append("\n");
 
         return sb.toString();
     }

@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.items;
+package edu.clemson.cs.rsrg.absyn.blocks.code;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
@@ -18,8 +18,8 @@ import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 
 /**
  * <p>This is the class for all the facility declaration arguments
- * for Concept/Enhancement modules that the compiler builds from
- * the ANTLR4 AST tree.</p>
+ * for Concept/Enhancement modules that the compiler builds using
+ * the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -57,35 +57,21 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
-        sb.append("ModuleArgumentItem\n");
-        sb.append(myArgumentExp.asString(indentSize + innerIndentSize,
-                innerIndentSize));
+        sb.append(myArgumentExp.asString(0, innerIndentInc));
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for the {@link ModuleArgumentItem} class.</p>
-     *
-     * @return A deep copy of the object.
+     * {@inheritDoc}
      */
     @Override
-    public ModuleArgumentItem clone() {
+    public final ModuleArgumentItem clone() {
         ModuleArgumentItem newItem =
                 new ModuleArgumentItem(myArgumentExp.clone());
         newItem.setProgramTypeValue(myTypeValue);
@@ -94,32 +80,22 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link ModuleArgumentItem} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof ModuleArgumentItem) {
-            ModuleArgumentItem moduleArgumentItem = (ModuleArgumentItem) o;
-            result = myArgumentExp.equals(moduleArgumentItem.myArgumentExp);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                if (myTypeValue != null
-                        && moduleArgumentItem.myTypeValue != null) {
-                    result = myTypeValue.equals(moduleArgumentItem.myTypeValue);
-                }
-                else {
-                    result = false;
-                }
-            }
-        }
+        ModuleArgumentItem that = (ModuleArgumentItem) o;
 
-        return result;
+        if (myTypeValue != null ? !myTypeValue.equals(that.myTypeValue)
+                : that.myTypeValue != null)
+            return false;
+        return myArgumentExp.equals(that.myArgumentExp);
+
     }
 
     /**
@@ -128,8 +104,8 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
      *
      * @return A {@link ProgramExp} representation of the expression.
      */
-    public ProgramExp getArgumentExp() {
-        return myArgumentExp.clone();
+    public final ProgramExp getArgumentExp() {
+        return myArgumentExp;
     }
 
     /**
@@ -137,8 +113,18 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
      *
      * @return A {@link PTType} type representation.
      */
-    public PTType getProgramTypeValue() {
+    public final PTType getProgramTypeValue() {
         return myTypeValue;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = myTypeValue != null ? myTypeValue.hashCode() : 0;
+        result = 31 * result + myArgumentExp.hashCode();
+        return result;
     }
 
     /**
@@ -146,17 +132,15 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
      *
      * @param type A {@link PTType} type representation.
      */
-    public void setProgramTypeValue(PTType type) {
+    public final void setProgramTypeValue(PTType type) {
         myTypeValue = type;
     }
 
     /**
-     * <p>Returns the symbol in string format.</p>
-     *
-     * @return Symbol as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         return myArgumentExp.toString();
     }
 

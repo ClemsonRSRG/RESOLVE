@@ -1,5 +1,5 @@
 /**
- * EnhancementItem.java
+ * EnhancementSpecItem.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.items;
+package edu.clemson.cs.rsrg.absyn.blocks.code;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -20,12 +20,12 @@ import java.util.List;
 
 /**
  * <p>This is the class for all the facility declaration arguments
- * for Enhancement extension modules that the compiler builds from
- * the ANTLR4 AST tree.</p>
+ * for Enhancement extension modules that the compiler builds using
+ * the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
-public class EnhancementItem extends ResolveConceptualElement {
+public class EnhancementSpecItem extends ResolveConceptualElement {
 
     // ===========================================================
     // Member Fields
@@ -47,7 +47,7 @@ public class EnhancementItem extends ResolveConceptualElement {
      * @param name Name of the extended enhancement module.
      * @param params The parameter arguments that are passed to instantiate this enhancement.
      */
-    public EnhancementItem(PosSymbol name, List<ModuleArgumentItem> params) {
+    public EnhancementSpecItem(PosSymbol name, List<ModuleArgumentItem> params) {
         super(name.getLocation());
         myName = name;
         myParams = params;
@@ -58,87 +58,63 @@ public class EnhancementItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("EnhancementItem\n");
-        sb.append(myName
-                .asString(indentSize + innerIndentSize, innerIndentSize));
+        sb.append("enhanced by ");
+        sb.append(myName.asString(0, innerIndentInc));
 
-        for (ModuleArgumentItem m : myParams) {
-            sb
-                    .append(m.asString(indentSize + innerIndentSize,
-                            innerIndentSize));
+        sb.append("( ");
+        Iterator<ModuleArgumentItem> it = myParams.iterator();
+        while (it.hasNext()) {
+            ModuleArgumentItem m = it.next();
+            sb.append(m.asString(0, innerIndentInc));
+
+            if (it.hasNext()) {
+                sb.append(", ");
+            }
         }
+        sb.append(" )\n");
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for the {@link EnhancementItem} class.</p>
-     *
-     * @return A deep copy of the object.
+     * {@inheritDoc}
      */
     @Override
-    public EnhancementItem clone() {
-        return new EnhancementItem(myName.clone(), copyArgs());
+    public final EnhancementSpecItem clone() {
+        return new EnhancementSpecItem(myName.clone(), copyArgs());
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link EnhancementItem} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof EnhancementItem) {
-            EnhancementItem enhancementItem = (EnhancementItem) o;
-            result = myName.equals(enhancementItem.myName);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                if (myParams != null && enhancementItem.myParams != null) {
-                    Iterator<ModuleArgumentItem> thisParams =
-                            myParams.iterator();
-                    Iterator<ModuleArgumentItem> eParams =
-                            enhancementItem.myParams.iterator();
+        EnhancementSpecItem that = (EnhancementSpecItem) o;
 
-                    while (result && thisParams.hasNext() && eParams.hasNext()) {
-                        result &= thisParams.next().equals(eParams.next());
-                    }
+        if (!myName.equals(that.myName))
+            return false;
+        return myParams.equals(that.myParams);
 
-                    //Both had better have run out at the same time
-                    result &= (!thisParams.hasNext()) && (!eParams.hasNext());
-                }
-            }
-        }
-
-        return result;
     }
 
     /**
-     * <p>Returns the symbol representation
-     * of this class.</p>
+     * <p>Returns the symbol representation of the enhancement extension.</p>
      *
      * @return A {@link PosSymbol} representation of the name.
      */
-    public PosSymbol getName() {
-        return myName.clone();
+    public final PosSymbol getName() {
+        return myName;
     }
 
     /**
@@ -147,30 +123,40 @@ public class EnhancementItem extends ResolveConceptualElement {
      *
      * @return A list of {@link ModuleArgumentItem} representation objects.
      */
-    public List<ModuleArgumentItem> getParams() {
-        return copyArgs();
+    public final List<ModuleArgumentItem> getParams() {
+        return myParams;
     }
 
     /**
-     * <p>Returns the symbol in string format.</p>
-     *
-     * @return Symbol as a string.
+     * {@inheritDoc}
      */
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(myName.toString());
-        sb.append("(");
+    public final int hashCode() {
+        int result = myName.hashCode();
+        result = 31 * result + myParams.hashCode();
+        return result;
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("enhanced by ");
+        sb.append(myName.toString());
+
+        sb.append("( ");
         Iterator<ModuleArgumentItem> it = myParams.iterator();
         while (it.hasNext()) {
-            sb.append(it.next().toString());
+            ModuleArgumentItem m = it.next();
+            sb.append(m.toString());
 
             if (it.hasNext()) {
                 sb.append(", ");
             }
         }
-        sb.append(")");
+        sb.append(" )\n");
 
         return sb.toString();
     }

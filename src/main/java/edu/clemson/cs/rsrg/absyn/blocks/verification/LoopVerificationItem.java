@@ -1,5 +1,5 @@
 /**
- * LoopVerificationBlockItem.java
+ * LoopVerificationItem.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.verificationblock;
+package edu.clemson.cs.rsrg.absyn.blocks.verification;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
@@ -27,7 +27,7 @@ import java.util.List;
  * @author Yu-Shan Sun
  * @version 1.0
  */
-public class LoopVerificationBlockItem extends ResolveConceptualElement {
+public class LoopVerificationItem extends ResolveConceptualElement {
 
     // ===========================================================
     // Member Fields
@@ -58,7 +58,7 @@ public class LoopVerificationBlockItem extends ResolveConceptualElement {
      * @param decreasing The termination metric.
      * @param elapsedTime The total elapsed time for this loop.
      */
-    public LoopVerificationBlockItem(Location l,
+    public LoopVerificationItem(Location l,
             List<ProgramVariableExp> changingVars, AssertionClause maintaining,
             AssertionClause decreasing, AssertionClause elapsedTime) {
         super(l);
@@ -111,7 +111,7 @@ public class LoopVerificationBlockItem extends ResolveConceptualElement {
      * {@inheritDoc}
      */
     @Override
-    public final LoopVerificationBlockItem clone() {
+    public final LoopVerificationItem clone() {
         List<ProgramVariableExp> newChangingVars = new ArrayList<>();
         for (ProgramVariableExp exp : myChangingVars) {
             newChangingVars.add((ProgramVariableExp) exp.clone());
@@ -122,7 +122,7 @@ public class LoopVerificationBlockItem extends ResolveConceptualElement {
             newElapsedTimeClause = myElapsedTimeClause.clone();
         }
 
-        return new LoopVerificationBlockItem(new Location(myLoc),
+        return new LoopVerificationItem(new Location(myLoc),
                 newChangingVars,
                 myMaintainingClause.clone(),
                 myDecreasingClause.clone(),
@@ -139,7 +139,7 @@ public class LoopVerificationBlockItem extends ResolveConceptualElement {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        LoopVerificationBlockItem that = (LoopVerificationBlockItem) o;
+        LoopVerificationItem that = (LoopVerificationItem) o;
 
         if (!myChangingVars.equals(that.myChangingVars))
             return false;
@@ -155,7 +155,7 @@ public class LoopVerificationBlockItem extends ResolveConceptualElement {
 
     /**
      * <p>This method returns the list of changing variables
-     * in this loo verification block.</p>
+     * in this loop verification block.</p>
      *
      * @return The list of {@link ProgramVariableExp}s.
      */

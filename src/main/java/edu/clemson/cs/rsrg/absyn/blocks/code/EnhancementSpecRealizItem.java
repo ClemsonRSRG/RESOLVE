@@ -1,5 +1,5 @@
 /**
- * EnhancementBodyItem.java
+ * EnhancementSpecRealizItem.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.items;
+package edu.clemson.cs.rsrg.absyn.blocks.code;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -20,12 +20,12 @@ import java.util.List;
 
 /**
  * <p>This is the class for all the facility declaration arguments
- * for Enhancement Realization extension modules that the compiler builds from
- * the ANTLR4 AST tree.</p>
+ * for Enhancement and its associated Realization extension modules
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
-public class EnhancementBodyItem extends ResolveConceptualElement {
+public class EnhancementSpecRealizItem extends ResolveConceptualElement {
 
     // ===========================================================
     // Member Fields
@@ -51,7 +51,7 @@ public class EnhancementBodyItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This constructs a enhancement implementation extension argument
+     * <p>This constructs a enhancement and realization extension argument
      * for facility declarations.</p>
      *
      * @param name Name of the extended enhancement module.
@@ -60,9 +60,9 @@ public class EnhancementBodyItem extends ResolveConceptualElement {
      * @param bodyParams The parameter arguments that are passed to instantiate the enhancement implementation.
      * @param profileName Performance profile name for the extended enhancement module.
      */
-    public EnhancementBodyItem(PosSymbol name, List<ModuleArgumentItem> params,
-            PosSymbol bodyName, List<ModuleArgumentItem> bodyParams,
-            PosSymbol profileName) {
+    public EnhancementSpecRealizItem(PosSymbol name,
+            List<ModuleArgumentItem> params, PosSymbol bodyName,
+            List<ModuleArgumentItem> bodyParams, PosSymbol profileName) {
         super(name.getLocation());
         myEnhancementName = name;
         myEnhancementParams = params;
@@ -76,136 +76,92 @@ public class EnhancementBodyItem extends ResolveConceptualElement {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("EnhancementBodyItem\n");
-
-        printSpace(indentSize + innerIndentSize, sb);
         sb.append("enhanced by ");
-        sb.append(myEnhancementName.asString(0, innerIndentSize));
-        sb.append("(");
+        sb.append(myEnhancementName.asString(0, innerIndentInc));
+
+        sb.append("( ");
         Iterator<ModuleArgumentItem> it = myEnhancementParams.iterator();
         while (it.hasNext()) {
-            sb.append(it.next().asString(0, innerIndentSize));
+            ModuleArgumentItem m = it.next();
+            sb.append(m.asString(0, innerIndentInc));
 
             if (it.hasNext()) {
                 sb.append(", ");
             }
         }
-        sb.append(")\n");
+        sb.append(" )\n");
 
-        printSpace(indentSize + innerIndentSize, sb);
+        printSpace(indentSize, sb);
         sb.append("realized by ");
-        sb.append(myEnhancementRealizName.asString(0, innerIndentSize));
+        sb.append(myEnhancementRealizName.asString(0, innerIndentInc));
         sb.append("(");
         Iterator<ModuleArgumentItem> it2 = myEnhancementRealizParams.iterator();
-        while (it2.hasNext()) {
-            sb.append(it2.next().asString(0, innerIndentSize));
+        while (it.hasNext()) {
+            ModuleArgumentItem m = it.next();
+            sb.append(m.asString(0, innerIndentInc));
 
-            if (it2.hasNext()) {
+            if (it.hasNext()) {
                 sb.append(", ");
             }
         }
-        sb.append(")\n");
+        sb.append(" )\n");
 
         return sb.toString();
     }
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for the {@link EnhancementBodyItem} class.</p>
-     *
-     * @return A deep copy of the object.
+     * {@inheritDoc}
      */
     @Override
-    public EnhancementBodyItem clone() {
+    public final EnhancementSpecRealizItem clone() {
         PosSymbol profileName = null;
         if (myProfileName != null) {
             profileName = myProfileName.clone();
         }
 
-        return new EnhancementBodyItem(myEnhancementName.clone(),
+        return new EnhancementSpecRealizItem(myEnhancementName.clone(),
                 copyEnhArgs(), myEnhancementRealizName.clone(),
                 copyEnhRealizArgs(), profileName);
     }
 
     /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link EnhancementBodyItem} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
+     * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof EnhancementBodyItem) {
-            EnhancementBodyItem enhancementBodyItem = (EnhancementBodyItem) o;
-            result =
-                    myEnhancementName
-                            .equals(enhancementBodyItem.myEnhancementName)
-                            && myEnhancementRealizName
-                                    .equals(enhancementBodyItem.myEnhancementRealizName);
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-            if (result) {
-                if (myEnhancementParams != null
-                        && enhancementBodyItem.myEnhancementParams != null) {
-                    Iterator<ModuleArgumentItem> thisParams =
-                            myEnhancementParams.iterator();
-                    Iterator<ModuleArgumentItem> eParams =
-                            enhancementBodyItem.myEnhancementParams.iterator();
+        EnhancementSpecRealizItem that = (EnhancementSpecRealizItem) o;
 
-                    while (result && thisParams.hasNext() && eParams.hasNext()) {
-                        result &= thisParams.next().equals(eParams.next());
-                    }
+        if (!myEnhancementName.equals(that.myEnhancementName))
+            return false;
+        if (!myEnhancementParams.equals(that.myEnhancementParams))
+            return false;
+        if (myProfileName != null ? !myProfileName.equals(that.myProfileName)
+                : that.myProfileName != null)
+            return false;
+        if (!myEnhancementRealizName.equals(that.myEnhancementRealizName))
+            return false;
+        return myEnhancementRealizParams.equals(that.myEnhancementRealizParams);
 
-                    //Both had better have run out at the same time
-                    result &= (!thisParams.hasNext()) && (!eParams.hasNext());
-                }
-            }
-
-            if (result) {
-                if (myEnhancementRealizParams != null
-                        && enhancementBodyItem.myEnhancementRealizParams != null) {
-                    Iterator<ModuleArgumentItem> thisParams =
-                            myEnhancementRealizParams.iterator();
-                    Iterator<ModuleArgumentItem> eParams =
-                            enhancementBodyItem.myEnhancementRealizParams
-                                    .iterator();
-
-                    while (result && thisParams.hasNext() && eParams.hasNext()) {
-                        result &= thisParams.next().equals(eParams.next());
-                    }
-
-                    //Both had better have run out at the same time
-                    result &= (!thisParams.hasNext()) && (!eParams.hasNext());
-                }
-            }
-        }
-
-        return result;
     }
 
     /**
-     * <p>Returns the symbol representation for the enhancement name.</p>
+     * <p>Returns the symbol representation of the enhancement extension.</p>
      *
      * @return A {@link PosSymbol} representation of the enhancement name.
      */
-    public PosSymbol getEnhancementName() {
-        return myEnhancementName.clone();
+    public final PosSymbol getEnhancementName() {
+        return myEnhancementName;
     }
 
     /**
@@ -214,26 +170,27 @@ public class EnhancementBodyItem extends ResolveConceptualElement {
      *
      * @return A list of {@link ModuleArgumentItem} representation objects.
      */
-    public List<ModuleArgumentItem> getEnhancementParams() {
-        return copyEnhArgs();
+    public final List<ModuleArgumentItem> getEnhancementParams() {
+        return myEnhancementParams;
     }
 
     /**
-     * <p>Returns the symbol representation for the enhancement realization name.</p>
+     * <p>Returns the symbol representation of the associated realization extension.</p>
      *
      * @return A {@link PosSymbol} representation of the enhancement realization name.
      */
-    public PosSymbol getEnhancementRealizName() {
-        return myEnhancementRealizName.clone();
+    public final PosSymbol getEnhancementRealizName() {
+        return myEnhancementRealizName;
     }
 
     /**
-     * <p>Returns the list of arguments for the enhancement realization.</p>
+     * <p>Returns the list of arguments of arguments for the associated realization
+     * extension.</p>
      *
      * @return A list of {@link ModuleArgumentItem} representation objects.
      */
-    public List<ModuleArgumentItem> getEnhancementRealizParams() {
-        return copyEnhRealizArgs();
+    public final List<ModuleArgumentItem> getEnhancementRealizParams() {
+        return myEnhancementRealizParams;
     }
 
     /**
@@ -241,21 +198,35 @@ public class EnhancementBodyItem extends ResolveConceptualElement {
      *
      * @return A {@link PosSymbol} representation of the performance profile name.
      */
-    public PosSymbol getProfileName() {
-        return myProfileName.clone();
+    public final PosSymbol getProfileName() {
+        return myProfileName;
     }
 
     /**
-     * <p>Returns the symbol in string format.</p>
-     *
-     * @return Symbol as a string.
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = myEnhancementName.hashCode();
+        result = 31 * result + myEnhancementParams.hashCode();
+        result =
+                31
+                        * result
+                        + (myProfileName != null ? myProfileName.hashCode() : 0);
+        result = 31 * result + myEnhancementRealizName.hashCode();
+        result = 31 * result + myEnhancementRealizParams.hashCode();
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
      */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
         sb.append(myEnhancementName.toString());
-        sb.append("(");
+        sb.append("( ");
         Iterator<ModuleArgumentItem> it = myEnhancementParams.iterator();
         while (it.hasNext()) {
             sb.append(it.next().toString());
@@ -264,11 +235,10 @@ public class EnhancementBodyItem extends ResolveConceptualElement {
                 sb.append(", ");
             }
         }
-        sb.append(")\n");
+        sb.append(" )\n");
 
         sb.append(myEnhancementRealizName.toString());
-        sb.append("(");
-
+        sb.append("( ");
         Iterator<ModuleArgumentItem> it2 = myEnhancementRealizParams.iterator();
         while (it2.hasNext()) {
             sb.append(it2.next().toString());
@@ -277,7 +247,7 @@ public class EnhancementBodyItem extends ResolveConceptualElement {
                 sb.append(", ");
             }
         }
-        sb.append(")");
+        sb.append(" )\n");
 
         return sb.toString();
     }

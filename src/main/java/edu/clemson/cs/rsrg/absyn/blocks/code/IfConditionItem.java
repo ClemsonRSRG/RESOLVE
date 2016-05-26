@@ -1,5 +1,5 @@
 /**
- * IfConditionBlockItem.java
+ * IfConditionItem.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.codeblocks;
+package edu.clemson.cs.rsrg.absyn.blocks.code;
 
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
@@ -25,7 +25,7 @@ import java.util.List;
  *
  * @version 2.0
  */
-public class IfConditionBlockItem extends ResolveConceptualElement {
+public class IfConditionItem extends ResolveConceptualElement {
 
     // ===========================================================
     // Member Fields
@@ -56,7 +56,7 @@ public class IfConditionBlockItem extends ResolveConceptualElement {
      * @param statements The list of {@link Statement}s that are in
      *                   this block.
      */
-    public IfConditionBlockItem(Location l, ProgramExp test,
+    public IfConditionItem(Location l, ProgramExp test,
             List<Statement> statements) {
         super(l);
         myTestingExp = test;
@@ -92,9 +92,9 @@ public class IfConditionBlockItem extends ResolveConceptualElement {
      * {@inheritDoc}
      */
     @Override
-    public final IfConditionBlockItem clone() {
-        return new IfConditionBlockItem(new Location(myLoc), myTestingExp
-                .clone(), copyStatements());
+    public final IfConditionItem clone() {
+        return new IfConditionItem(new Location(myLoc), myTestingExp.clone(),
+                copyStatements());
     }
 
     /**
@@ -107,7 +107,7 @@ public class IfConditionBlockItem extends ResolveConceptualElement {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        IfConditionBlockItem that = (IfConditionBlockItem) o;
+        IfConditionItem that = (IfConditionItem) o;
 
         if (!myTestingExp.equals(that.myTestingExp))
             return false;

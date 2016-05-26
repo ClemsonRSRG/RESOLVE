@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.absyn.statements;
 
 import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.absyn.verificationblock.LoopVerificationBlockItem;
+import edu.clemson.cs.rsrg.absyn.blocks.verification.LoopVerificationItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class WhileStmt extends Statement {
     private final ProgramExp myTestingExp;
 
     /** <p>The verification block for this while loop</p> */
-    private final LoopVerificationBlockItem myVerificationBlock;
+    private final LoopVerificationItem myVerificationBlock;
 
     /** <p>The list of statements for this while loop</p> */
     private final List<Statement> myWhileStatements;
@@ -48,14 +48,13 @@ public class WhileStmt extends Statement {
      *
      * @param l A {@link Location} representation object.
      * @param test A {@link ProgramExp} testing expression.
-     * @param verificationBlock A {@link LoopVerificationBlockItem} containing
+     * @param verificationBlock A {@link LoopVerificationItem} containing
      *                          the assertions needed for verification purposes.
      * @param statements The list of {@link Statement}s that are in
      *                   the while loop.
      */
     public WhileStmt(Location l, ProgramExp test,
-            LoopVerificationBlockItem verificationBlock,
-            List<Statement> statements) {
+            LoopVerificationItem verificationBlock, List<Statement> statements) {
         super(l);
         myTestingExp = test;
         myVerificationBlock = verificationBlock;
@@ -124,9 +123,9 @@ public class WhileStmt extends Statement {
      * <p>This method returns the verification block in
      * this {@code WhileStmt}.</p>
      *
-     * @return The {@link LoopVerificationBlockItem} representation object.
+     * @return The {@link LoopVerificationItem} representation object.
      */
-    public final LoopVerificationBlockItem getLoopVerificationBlock() {
+    public final LoopVerificationItem getLoopVerificationBlock() {
         return myVerificationBlock;
     }
 
