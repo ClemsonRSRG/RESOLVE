@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn.clauses;
 
-import edu.clemson.cs.rsrg.absyn.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 

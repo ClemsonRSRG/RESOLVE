@@ -12,13 +12,13 @@
  */
 package edu.clemson.cs.rsrg.parsing;
 
-import edu.clemson.cs.rsrg.absyn.Dec;
-import edu.clemson.cs.rsrg.absyn.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
-import edu.clemson.cs.rsrg.absyn.declarations.MathAssertionDec;
-import edu.clemson.cs.rsrg.absyn.modules.parameters.ModuleParameterDec;
-import edu.clemson.cs.rsrg.absyn.modules.UsesItem;
-import edu.clemson.cs.rsrg.absyn.modules.PrecisModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathAssertionDec;
+import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.UsesItem;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;

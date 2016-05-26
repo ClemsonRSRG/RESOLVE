@@ -12,11 +12,8 @@
  */
 package edu.clemson.cs.rsrg.absyn.rawtypes;
 
-import edu.clemson.cs.rsrg.absyn.Ty;
-import edu.clemson.cs.rsrg.absyn.variables.VarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**

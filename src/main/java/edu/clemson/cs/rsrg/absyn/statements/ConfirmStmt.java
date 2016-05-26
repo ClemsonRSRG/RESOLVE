@@ -12,8 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn.statements;
 
-import edu.clemson.cs.rsrg.absyn.Exp;
-import edu.clemson.cs.rsrg.absyn.Statement;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**

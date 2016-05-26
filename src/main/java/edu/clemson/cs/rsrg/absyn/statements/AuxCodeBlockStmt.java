@@ -12,10 +12,8 @@
  */
 package edu.clemson.cs.rsrg.absyn.statements;
 
-import edu.clemson.cs.rsrg.absyn.Statement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**

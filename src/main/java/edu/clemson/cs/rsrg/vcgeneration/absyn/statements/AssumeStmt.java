@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.rsrg.vcgeneration.absyn.statements;
 
-import edu.clemson.cs.rsrg.absyn.Exp;
-import edu.clemson.cs.rsrg.absyn.Statement;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.statements.Statement;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.vcgeneration.VCGenerator;
 

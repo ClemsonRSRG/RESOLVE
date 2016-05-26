@@ -12,8 +12,8 @@
  */
 package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.rsrg.absyn.ModuleDec;
-import edu.clemson.cs.rsrg.absyn.modules.UsesItem;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.UsesItem;
 import edu.clemson.cs.rsrg.errorhandling.StdErrHandler;
 import edu.clemson.cs.rsrg.errorhandling.AntlrErrorListener;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;

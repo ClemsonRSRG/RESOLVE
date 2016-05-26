@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.init;
 
-import edu.clemson.cs.rsrg.absyn.ModuleDec;
+import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import edu.clemson.cs.rsrg.errorhandling.WriterErrorHandler;
 import edu.clemson.cs.rsrg.errorhandling.exception.FlagDependencyException;

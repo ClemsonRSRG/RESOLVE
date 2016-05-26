@@ -12,8 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn.rawtypes;
 
-import edu.clemson.cs.rsrg.absyn.Exp;
-import edu.clemson.cs.rsrg.absyn.Ty;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 
 /**
  * <p>This is the class for all the raw arbitrary type objects

@@ -12,17 +12,9 @@
  */
 package edu.clemson.cs.rsrg.absyn.items;
 
-import edu.clemson.cs.rsrg.absyn.Exp;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
-import edu.clemson.cs.rsrg.absyn.Statement;
-import edu.clemson.cs.rsrg.absyn.declarations.FacilityDec;
-import edu.clemson.cs.rsrg.absyn.variables.AuxVarDec;
-import edu.clemson.cs.rsrg.absyn.variables.VarDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * <p>This is the class for all the performance type initialization items

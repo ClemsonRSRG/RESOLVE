@@ -12,9 +12,8 @@
  */
 package edu.clemson.cs.rsrg.absyn.statements;
 
-import edu.clemson.cs.rsrg.absyn.Statement;
-import edu.clemson.cs.rsrg.absyn.programexpr.ProgramExp;
-import edu.clemson.cs.rsrg.absyn.statements.verificationblock.LoopVerificationBlockItem;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
+import edu.clemson.cs.rsrg.absyn.verificationblock.LoopVerificationBlockItem;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import java.util.ArrayList;
 import java.util.List;

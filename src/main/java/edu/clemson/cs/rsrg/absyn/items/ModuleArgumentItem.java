@@ -14,7 +14,7 @@ package edu.clemson.cs.rsrg.absyn.items;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
-import edu.clemson.cs.rsrg.absyn.programexpr.ProgramExp;
+import edu.clemson.cs.rsrg.absyn.expressions.programexpr.ProgramExp;
 
 /**
  * <p>This is the class for all the facility declaration arguments
