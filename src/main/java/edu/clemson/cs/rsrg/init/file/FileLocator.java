@@ -89,7 +89,7 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      *
      * @return The matching file.
      */
-    public File getFile() throws IOException {
+    public final File getFile() throws IOException {
         if (myMatches.size() == 0) {
             throw new NoSuchFileException("File matching name '" + myPattern
                     + "' could not be found");
@@ -105,7 +105,7 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      *
      * @return The matching file.
      */
-    public List<File> getFiles() {
+    public final List<File> getFiles() {
         return myMatches;
     }
 
@@ -119,7 +119,7 @@ public class FileLocator extends SimpleFileVisitor<Path> {
      * @return Always continue searching until done.
      */
     @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attr) {
+    public final FileVisitResult visitFile(Path file, BasicFileAttributes attr) {
         Path name = file.getFileName();
         if (name != null && myPathMatcher.matches(name)) {
             myMatches.add(file.toFile());

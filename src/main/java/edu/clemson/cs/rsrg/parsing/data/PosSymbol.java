@@ -60,47 +60,46 @@ public class PosSymbol implements BasicCapabilities {
 
     /**
      * <p>This method creates a special indented
-     * text version of the class as a string.</p>
+     * text version of the instantiated object.</p>
      *
      * @param indentSize The base indentation to the first line
      *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
+     * @param innerIndentInc The additional indentation increment
+     *                       for the subsequent lines.
      *
      * @return A formatted text string of the class.
      */
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < indentSize; i++) {
             sb.append(" ");
         }
         sb.append(mySymbol.toString());
-        sb.append("\n");
 
         return sb.toString();
     }
 
     /**
      * <p>This method overrides the default clone method implementation
-     * for the {link PosSymbol} class.</p>
+     * for the {@code PosSymbol} class.</p>
      *
      * @return A deep copy of the object.
      */
     @Override
-    public PosSymbol clone() {
-        return new PosSymbol(myLocation, mySymbol.getName());
+    public final PosSymbol clone() {
+        return new PosSymbol(new Location(myLocation), mySymbol.getName());
     }
 
     /**
      * <p>This method overrides the default equals method implementation
-     * for the {link PosSymbol} class.</p>
+     * for the {@code PosSymbol} class.</p>
      *
      * @param o Object to be compared.
      *
-     * @return True if all the fields are equal, false otherwise.
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
      */
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         boolean result = false;
         if (o instanceof String) {
             String str = (String) o;
@@ -118,9 +117,9 @@ public class PosSymbol implements BasicCapabilities {
      * <p>Returns of the location where this object
      * originated from.</p>
      *
-     * @return A {link Location} representation object.
+     * @return A {@link Location} representation object.
      */
-    public Location getLocation() {
+    public final Location getLocation() {
         return myLocation;
     }
 
@@ -130,8 +129,21 @@ public class PosSymbol implements BasicCapabilities {
      *
      * @return Name as a string.
      */
-    public String getName() {
+    public final String getName() {
         return mySymbol.getName();
+    }
+
+    /**
+     * <p>This method overrides the default {@code hashCode} method implementation
+     * for the {@code PosSymbol} class.</p>
+     *
+     * @return The hash code associated with the object.
+     */
+    @Override
+    public final int hashCode() {
+        int result = myLocation.hashCode();
+        result = 31 * result + mySymbol.hashCode();
+        return result;
     }
 
     /**
@@ -140,7 +152,7 @@ public class PosSymbol implements BasicCapabilities {
      * @return Symbol as a string.
      */
     @Override
-    public String toString() {
+    public final String toString() {
         return mySymbol.toString();
     }
 
@@ -207,21 +219,21 @@ public class PosSymbol implements BasicCapabilities {
 
         /**
          * <p>This method creates a special indented
-         * text version of the class as a string.</p>
+         * text version of the instantiated object.</p>
          *
          * @param indentSize The base indentation to the first line
          *                   of the text.
-         * @param innerIndentSize The additional indentation increment
-         *                        for the subsequent lines.
+         * @param innerIndentInc The additional indentation increment
+         *                       for the subsequent lines.
          *
          * @return A formatted text string of the class.
          */
-        public String asString(int indentSize, int innerIndentSize) {
+        public final String asString(int indentSize, int innerIndentInc) {
             StringBuffer sb = new StringBuffer();
             for (int i = 0; i < indentSize; i++) {
                 sb.append(" ");
             }
-            sb.append(this.toString() + "\n");
+            sb.append(this.toString());
 
             return sb.toString();
         }
@@ -233,32 +245,32 @@ public class PosSymbol implements BasicCapabilities {
          * @return Nothing. This throws an exception.
          */
         @Override
-        public Object clone() {
+        public final Object clone() {
             throw new MiscErrorException("Can't make copies of a Symbol.", new IllegalAccessException());
         }
 
         /**
-         * <p>This method implements the method in {link Comparable}.</p>
+         * <p>This method implements the method in {@link Comparable#compareTo(Object)}.</p>
          *
          * @param o Object to be compared.
          *
          * @return A negative integer, zero, or a positive integer as this object
          *         is less than, equal to, or greater than the specified object.
          */
-        public int compareTo(Symbol o) {
+        public final int compareTo(Symbol o) {
             return myName.compareTo(o.myName);
         }
 
         /**
          * <p>This method overrides the default equals method implementation
-         * for the {link Symbol} class.</p>
+         * for the {@code Symbol} class.</p>
          *
          * @param o Object to be compared.
          *
-         * @return True if all the fields are equal, false otherwise.
+         * @return {@code true} if all the fields are equal, {@code false} otherwise.
          */
         @Override
-        public boolean equals(Object o) {
+        public final boolean equals(Object o) {
             boolean result = false;
             if (o instanceof String) {
                 String str = (String) o;
@@ -278,8 +290,19 @@ public class PosSymbol implements BasicCapabilities {
          *
          * @return Name as a string.
          */
-        public String getName() {
+        public final String getName() {
             return myName;
+        }
+
+        /**
+         * <p>This method overrides the default {@code hashCode} method implementation
+         * for the {@code Symbol} class.</p>
+         *
+         * @return The hash code associated with the object.
+         */
+        @Override
+        public final int hashCode() {
+            return myName.hashCode();
         }
 
         /**
@@ -288,7 +311,7 @@ public class PosSymbol implements BasicCapabilities {
          * @return Symbol as a string.
          */
         @Override
-        public String toString() {
+        public final String toString() {
             return myName;
         }
 

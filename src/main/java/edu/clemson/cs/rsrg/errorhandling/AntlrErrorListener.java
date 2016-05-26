@@ -64,7 +64,7 @@ public class AntlrErrorListener extends BaseErrorListener {
      * @param e The exception thrown.
      */
     @Override
-    public void syntaxError(Recognizer<?, ?> recognizer,
+    public final void syntaxError(Recognizer<?, ?> recognizer,
             Object offendingSymbol, int line, int charPositionInLine,
             String msg, RecognitionException e) {
         ResolveToken offendingToken = (ResolveToken) offendingSymbol;

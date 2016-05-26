@@ -78,22 +78,25 @@ public class Location {
     /**
      * <p>Equals method to compare two locations.</p>
      *
-     * @param loc The location object to compare.
+     * @param o Object to be compared.
      *
-     * @return True if all the fields are equal, false otherwise.
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
      */
-    public boolean equals(Location loc) {
-        boolean result;
-        if (loc == null) {
-            result = false;
-        }
-        else {
-            result =
-                    (myFile.equals(loc.myFile)
-                            && myPosition.equals(loc.myPosition) && myLocationDetails
-                            .equals(loc.myLocationDetails));
-        }
-        return result;
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        Location location = (Location) o;
+
+        if (!myFile.equals(location.myFile))
+            return false;
+        if (!myPosition.equals(location.myPosition))
+            return false;
+        return myLocationDetails.equals(location.myLocationDetails);
+
     }
 
     /**
@@ -101,7 +104,7 @@ public class Location {
      *
      * @return Column number
      */
-    public int getColumn() {
+    public final int getColumn() {
         return myPosition.myCurrColumn;
     }
 
@@ -110,7 +113,7 @@ public class Location {
      *
      * @return Location details
      */
-    public String getDetails() {
+    public final String getDetails() {
         return myLocationDetails;
     }
 
@@ -119,7 +122,7 @@ public class Location {
      *
      * @return <code>ResolveFile</code> object
      */
-    public ResolveFile getFile() {
+    public final ResolveFile getFile() {
         return myFile;
     }
 
@@ -128,7 +131,7 @@ public class Location {
      *
      * @return Filename as a String.
      */
-    public String getFilename() {
+    public final String getFilename() {
         return myFile.getName();
     }
 
@@ -137,8 +140,22 @@ public class Location {
      *
      * @return Line number
      */
-    public int getLine() {
+    public final int getLine() {
         return myPosition.myCurrline;
+    }
+
+    /**
+     * <p>This method overrides the default {@code hashCode} method implementation
+     * for the {@code Location} class.</p>
+     *
+     * @return The hash code associated with the object.
+     */
+    @Override
+    public final int hashCode() {
+        int result = myFile.hashCode();
+        result = 31 * result + myPosition.hashCode();
+        result = 31 * result + myLocationDetails.hashCode();
+        return result;
     }
 
     /**
@@ -146,7 +163,8 @@ public class Location {
      *
      * @return Location as a string.
      */
-    public String toString() {
+    @Override
+    public final String toString() {
         StringBuffer sb = new StringBuffer();
 
         // Append the name of the file and the extension
@@ -217,19 +235,35 @@ public class Location {
         /**
          * <p>Equals method to compare two positions.</p>
          *
-         * @param pos The position object to compare.
+         * @param o Object to be compared.
          *
-         * @return True if all the fields are equal, false otherwise.
+         * @return {@code true} if all the fields are equal, {@code false} otherwise.
          */
-        public boolean equals(Pos pos) {
-            boolean result;
-            if (pos == null) {
-                result = false;
-            }
-            else {
-                result =
-                        (myCurrline == pos.myCurrline && myCurrColumn == pos.myCurrColumn);
-            }
+        @Override
+        public final boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+
+            Pos pos = (Pos) o;
+
+            if (myCurrline != pos.myCurrline)
+                return false;
+            return myCurrColumn == pos.myCurrColumn;
+
+        }
+
+        /**
+         * <p>This method overrides the default {@code hashCode} method implementation
+         * for the {@code Pos} class.</p>
+         *
+         * @return The hash code associated with the object.
+         */
+        @Override
+        public final int hashCode() {
+            int result = myCurrline;
+            result = 31 * result + myCurrColumn;
             return result;
         }
 
@@ -238,7 +272,8 @@ public class Location {
          *
          * @return Position as a string.
          */
-        public String toString() {
+        @Override
+        public final String toString() {
             return "(" + myCurrline + "," + myCurrColumn + ")";
         }
 

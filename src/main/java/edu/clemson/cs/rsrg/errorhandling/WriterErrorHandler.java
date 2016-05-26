@@ -61,7 +61,7 @@ public class WriterErrorHandler implements ErrorHandler {
      * @param l The location where we encountered the error.
      * @param msg Message to be displayed.
      */
-    public void error(Location l, String msg) {
+    public final void error(Location l, String msg) {
         try {
             if (!stopLogging) {
                 StringBuilder sb = new StringBuilder();
@@ -92,7 +92,7 @@ public class WriterErrorHandler implements ErrorHandler {
      *
      * @return True if we are done logging, false otherwise.
      */
-    public boolean hasStopped() {
+    public final boolean hasStopped() {
         return stopLogging;
     }
 
@@ -102,7 +102,7 @@ public class WriterErrorHandler implements ErrorHandler {
      * @param l The location where we encountered the error.
      * @param msg A compilation message.
      */
-    public void info(Location l, String msg) {
+    public final void info(Location l, String msg) {
         try {
             if (!stopLogging) {
                 StringBuilder sb = new StringBuilder();
@@ -150,7 +150,7 @@ public class WriterErrorHandler implements ErrorHandler {
      * @param l The location where we encountered the error.
      * @param msg Message to be displayed.
      */
-    public void warning(Location l, String msg) {
+    public final void warning(Location l, String msg) {
         try {
             if (!stopLogging) {
                 StringBuilder sb = new StringBuilder();

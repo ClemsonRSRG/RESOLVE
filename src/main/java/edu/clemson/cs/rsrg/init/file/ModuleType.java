@@ -101,7 +101,7 @@ public class ModuleType {
      *
      * @return The extension's description.
      */
-    public String getDescription() {
+    public final String getDescription() {
         return myDescription;
     }
 
@@ -111,7 +111,7 @@ public class ModuleType {
      *
      * @return The extension's name.
      */
-    public String getExtension() {
+    public final String getExtension() {
         return myExtension;
     }
 

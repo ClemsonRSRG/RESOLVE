@@ -47,7 +47,7 @@ public class StdErrHandler extends WriterErrorHandler implements ErrorHandler {
      * is over or has been aborted due to an error.)</p>
      */
     @Override
-    public void stopLogging() {
+    public final void stopLogging() {
         stopLogging = true;
     }
 

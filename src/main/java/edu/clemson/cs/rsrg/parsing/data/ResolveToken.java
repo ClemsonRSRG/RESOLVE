@@ -79,10 +79,10 @@ public class ResolveToken extends CommonToken {
      *
      * @param o The object to compare.
      *
-     * @return True if all the fields are equal, false otherwise.
+     * @return {@code true} if all the fields are equal, {@code false} otherwise.
      */
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         boolean result;
         if (o == this) {
             result = true;
@@ -102,7 +102,7 @@ public class ResolveToken extends CommonToken {
      *
      * @return Location as a String.
      */
-    public String getLocation() {
+    public final String getLocation() {
         StringBuilder sb = new StringBuilder();
         sb.append(groomFileName(mySourceName));
         sb.append(" ");
@@ -123,7 +123,7 @@ public class ResolveToken extends CommonToken {
      * @return A hash code value for this object.
      */
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return getText().hashCode();
     }
 
@@ -133,7 +133,7 @@ public class ResolveToken extends CommonToken {
      * @return Token as a string.
      */
     @Override
-    public String toString() {
+    public final String toString() {
         return getText();
     }
 

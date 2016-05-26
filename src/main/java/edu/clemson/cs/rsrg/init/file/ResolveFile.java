@@ -74,7 +74,7 @@ public class ResolveFile {
     // Public Methods
     // ===========================================================
 
-    public boolean equals(ResolveFile f) {
+    public final boolean equals(ResolveFile f) {
         boolean result;
         if (f == null) {
             result = false;
@@ -96,7 +96,7 @@ public class ResolveFile {
      *
      * @return A path in our current system.
      */
-    public String getCreatedJarPath() {
+    public final String getCreatedJarPath() {
         return myCreatedJarPath;
     }
 
@@ -105,7 +105,7 @@ public class ResolveFile {
      *
      * @return An input stream for ANTLR4.
      */
-    public ANTLRInputStream getInputStream() {
+    public final ANTLRInputStream getInputStream() {
         return myInputStream;
     }
 
@@ -114,7 +114,7 @@ public class ResolveFile {
      *
      * @return Filename
      */
-    public String getName() {
+    public final String getName() {
         return myModuleFileName;
     }
 
@@ -124,7 +124,7 @@ public class ResolveFile {
      *
      * @return File's extension.
      */
-    public ModuleType getModuleType() {
+    public final ModuleType getModuleType() {
         return myModuleFileType;
     }
 
@@ -135,7 +135,7 @@ public class ResolveFile {
      *
      * @return List of directory names that form the package.
      */
-    public List<String> getPkgList() {
+    public final List<String> getPkgList() {
         return myPkgList;
     }
 
@@ -145,7 +145,7 @@ public class ResolveFile {
      * @return File as a string.
      */
     @Override
-    public String toString() {
+    public final String toString() {
         return myModuleFileName + "." + myModuleFileType.getExtension();
     }
 

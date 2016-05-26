@@ -68,7 +68,7 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
      * @return A token object.
      */
     @Override
-    public ResolveToken create(int type, String text) {
+    public final ResolveToken create(int type, String text) {
         ResolveToken t = new ResolveToken(type, text);
         t.mySourceName = myFile.toString();
 
@@ -84,8 +84,8 @@ public class ResolveTokenFactory implements TokenFactory<ResolveToken> {
      * @return A token object.
      */
     @Override
-    public ResolveToken create(Pair<TokenSource, CharStream> source, int type,
-            String text, int channel, int start, int stop, int line,
+    public final ResolveToken create(Pair<TokenSource, CharStream> source,
+            int type, String text, int channel, int start, int stop, int line,
             int charPositionInLine) {
         ResolveToken t = new ResolveToken(source, type, channel, start, stop);
         t.setLine(line);
