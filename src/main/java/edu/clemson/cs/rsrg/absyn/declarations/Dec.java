@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.absyn.declarations;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.MTType;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.errorhandling.exception.NullMathTypeException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
@@ -64,7 +65,12 @@ public abstract class Dec extends ResolveConceptualElement {
      * @return A deep copy of the object.
      */
     @Override
-    public abstract Dec clone();
+    public final Dec clone() {
+        Dec result = this.copy();
+        result.setMathType(myMathType);
+
+        return result;
+    }
 
     /**
      * {@inheritDoc}
@@ -137,6 +143,21 @@ public abstract class Dec extends ResolveConceptualElement {
     public String toString() {
         return "<" + this.getClass().getSimpleName() + "@" + myLoc + ">:"
                 + getName();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>Implemented by concrete subclasses of {@link Dec}
+     * to manufacture a copy of themselves.</p>
+     *
+     * @return A new {@link Dec} that is a deep copy of the original.
+     */
+    protected Dec copy() {
+        throw new MiscErrorException("Shouldn't be calling copy()!  Type: "
+                + this.getClass(), new CloneNotSupportedException());
     }
 
 }
