@@ -520,6 +520,8 @@ operationDecl
 
 performanceOperationDecl
     :   OPERATION name=IDENTIFIER operationParameterList (COLON type)? SEMICOLON
+        (affectsClause)*
+        (requiresClause)?
         (ensuresClause)?
         (durationClause)?
         (manipulationDispClause)?
