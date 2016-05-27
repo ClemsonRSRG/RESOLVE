@@ -13,7 +13,7 @@
 package edu.clemson.cs.rsrg.typeandpopulate;
 
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
-import edu.clemson.cs.rsrg.absyn.items.UsesItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 
 /**
  * <p>Identifies a particular module unambiguously.</p>

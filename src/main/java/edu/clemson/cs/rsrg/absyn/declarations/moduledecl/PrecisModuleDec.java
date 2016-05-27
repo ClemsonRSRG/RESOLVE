@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.moduledecl;
 
-import edu.clemson.cs.rsrg.absyn.items.UsesItem;
+import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;

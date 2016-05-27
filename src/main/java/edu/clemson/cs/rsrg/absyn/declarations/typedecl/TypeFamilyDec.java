@@ -12,7 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.typedecl;
 
-import edu.clemson.cs.rsrg.absyn.items.verification.TypeInitFinalVerificationItem;
+import edu.clemson.cs.rsrg.absyn.items.mathitems.TypeInitFinalVerificationItem;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;

@@ -1,5 +1,5 @@
 /**
- * TypeInitFinalVerificationItem.java
+ * PerfTypeInitFinalVerificationItem.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -10,20 +10,19 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.items.verification;
+package edu.clemson.cs.rsrg.absyn.items.mathitems;
 
-import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
-import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
+import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 
 /**
- * <p>This is the class for all the type initialization/finalization
+ * <p>This is the class for all the performance profile's type initialization/finalization
  * verification block objects that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
-public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
+public class PerfTypeInitFinalVerificationItem extends ResolveConceptualElement {
 
     // ===========================================================
     // ItemType
@@ -52,14 +51,14 @@ public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
     // Member Fields
     // ===========================================================
 
-    /** <p>The affects clause.</p> */
-    private final AffectsClause myAffects;
-
     /** <p>The type of clause</p> */
     private final ItemType myItemType;
 
-    /** <p>The ensures expression</p> */
-    private final AssertionClause myEnsures;
+    /** <p>The duration expression</p> */
+    private final AssertionClause myDuration;
+
+    /** <p>The manipulative displacement expression</p> */
+    private final AssertionClause myManipDisp;
 
     // ===========================================================
     // Constructors
@@ -71,17 +70,17 @@ public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
      *
      * @param l A {@link Location} representation object.
      * @param type Indicates if it is an initialization or finalization block.
-     * @param affects A {@link AffectsClause} representing the initialization's/finalization's
-     *                affects clause.
-     * @param ensures A {@link AssertionClause} representing the initialization's/finalization's
-     *                ensures clause.
+     * @param duration A {@link AssertionClause} representing the initialization's/finalization's
+     *                 duration clause.
+     * @param manip_disp A {@link AssertionClause} representing the initialization's/finalization's
+     *                   manipulative displacement clause.
      */
-    public TypeInitFinalVerificationItem(Location l, ItemType type,
-            AffectsClause affects, AssertionClause ensures) {
+    public PerfTypeInitFinalVerificationItem(Location l, ItemType type,
+            AssertionClause duration, AssertionClause manip_disp) {
         super(l);
-        myAffects = affects;
         myItemType = type;
-        myEnsures = ensures;
+        myDuration = duration;
+        myManipDisp = manip_disp;
     }
 
     // ===========================================================
@@ -98,15 +97,15 @@ public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
         sb.append(myItemType.toString());
         sb.append("\n");
 
-        // affects clause
-        if (myAffects != null) {
-            sb.append(myAffects.asString(indentSize + innerIndentInc,
+        // duration clause
+        sb.append(myDuration.asString(indentSize + innerIndentInc,
+                innerIndentInc));
+
+        // manipulative displacement clause
+        if (myManipDisp != null) {
+            sb.append(myManipDisp.asString(indentSize + innerIndentInc,
                     innerIndentInc));
         }
-
-        // ensures clause
-        sb.append(myEnsures.asString(indentSize + innerIndentInc,
-                innerIndentInc));
 
         return sb.toString();
     }
@@ -115,14 +114,14 @@ public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
      * {@inheritDoc}
      */
     @Override
-    public final TypeInitFinalVerificationItem clone() {
-        AffectsClause newAffects = null;
-        if (myAffects != null) {
-            newAffects = myAffects.clone();
+    public final PerfTypeInitFinalVerificationItem clone() {
+        AssertionClause newManipDisp = null;
+        if (myManipDisp != null) {
+            newManipDisp = myManipDisp.clone();
         }
 
-        return new TypeInitFinalVerificationItem(new Location(myLoc),
-                myItemType, newAffects, myEnsures.clone());
+        return new PerfTypeInitFinalVerificationItem(new Location(myLoc),
+                myItemType, myDuration.clone(), newManipDisp);
     }
 
     /**
@@ -135,30 +134,22 @@ public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        TypeInitFinalVerificationItem that = (TypeInitFinalVerificationItem) o;
+        PerfTypeInitFinalVerificationItem that =
+                (PerfTypeInitFinalVerificationItem) o;
 
-        if (myAffects != null ? !myAffects.equals(that.myAffects)
-                : that.myAffects != null)
-            return false;
         if (myItemType != that.myItemType)
             return false;
-        return myEnsures.equals(that.myEnsures);
+        if (!myDuration.equals(that.myDuration))
+            return false;
+        return myManipDisp != null ? myManipDisp.equals(that.myManipDisp)
+                : that.myManipDisp == null;
 
-    }
-
-    /**
-     * <p>This method returns the affects clause
-     * in this type initialization/finalization verification block.</p>
-     *
-     * @return The {@link AffectsClause} representation object.
-     */
-    public final AffectsClause getAffectedVars() {
-        return myAffects;
     }
 
     /**
      * <p>This method returns the type that indicates
-     * if this is an initialization or finalization verification block.</p>
+     * if this is a performance profile's
+     * initialization or finalization verification block.</p>
      *
      * @return The {@link ItemType} object.
      */
@@ -167,13 +158,25 @@ public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
     }
 
     /**
-     * <p>This method returns the ensures clause
-     * in this type initialization/finalization verification block.</p>
+     * <p>This method returns the duration clause
+     * in this performance profile's
+     * type initialization/finalization verification block.</p>
      *
      * @return The {@link AssertionClause} representation object.
      */
-    public final AssertionClause getEnsures() {
-        return myEnsures;
+    public final AssertionClause getDuration() {
+        return myDuration;
+    }
+
+    /**
+     * <p>This method returns the manipulative displacement clause
+     * in this performance profile's
+     * type initialization/finalization verification block.</p>
+     *
+     * @return The {@link AssertionClause} representation object.
+     */
+    public final AssertionClause getManipDisp() {
+        return myManipDisp;
     }
 
     /**
@@ -181,9 +184,11 @@ public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
      */
     @Override
     public final int hashCode() {
-        int result = myAffects != null ? myAffects.hashCode() : 0;
-        result = 31 * result + myItemType.hashCode();
-        result = 31 * result + myEnsures.hashCode();
+        int result = myItemType.hashCode();
+        result = 31 * result + myDuration.hashCode();
+        result =
+                31 * result
+                        + (myManipDisp != null ? myManipDisp.hashCode() : 0);
         return result;
     }
 
@@ -196,15 +201,15 @@ public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
         sb.append(myItemType.toString());
         sb.append("\n");
 
-        // affects clause
-        if (myAffects != null) {
-            sb.append("\t");
-            sb.append(myAffects.toString());
-        }
-
-        // ensures clause
+        // duration clause
         sb.append("\t");
-        sb.append(myEnsures.toString());
+        sb.append(myDuration.toString());
+
+        // manipulative displacement clause
+        if (myManipDisp != null) {
+            sb.append("\t");
+            sb.append(myManipDisp.toString());
+        }
 
         return sb.toString();
     }
