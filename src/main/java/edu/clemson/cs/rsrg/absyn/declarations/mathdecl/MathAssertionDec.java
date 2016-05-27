@@ -13,45 +13,272 @@
 package edu.clemson.cs.rsrg.absyn.declarations.mathdecl;
 
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
-import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
  * <p>This is the class for all the mathematical assertion declarations
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
 public class MathAssertionDec extends Dec {
 
     // ===========================================================
+    // TheoremSubtype
+    // ===========================================================
+
+    public enum TheoremSubtype {
+        NONE {
+
+            @Override
+            public String toString() {
+                return "";
+            }
+
+        },
+        ASSOCIATIVITY {
+
+            @Override
+            public String toString() {
+                return "(Associative)";
+            }
+
+        },
+        COMMUTATIVITY {
+
+            @Override
+            public String toString() {
+                return "(Commutative)";
+            }
+
+        }
+    }
+
+    // ===========================================================
+    // AssertionType
+    // ===========================================================
+
+    public enum AssertionType {
+        AXIOM {
+
+            @Override
+            public String toString() {
+                return "AXIOM ";
+            }
+
+        },
+        THEOREM {
+
+            @Override
+            public String toString() {
+                return "THEOREM ";
+            }
+
+        },
+        PROPERTY {
+
+            @Override
+            public String toString() {
+                return "PROPERTY ";
+            }
+
+        },
+        LEMMA {
+
+            @Override
+            public String toString() {
+                return "LEMMA ";
+            }
+
+        },
+        COROLLARY {
+
+            @Override
+            public String toString() {
+                return "COROLLARY ";
+            }
+
+        }
+    }
+
+    // ===========================================================
+    // Member Fields
+    // ===========================================================
+
+    /** <p>The type of assertion</p> */
+    private final AssertionType myAssertionType;
+
+    /** <p>The mathematical assertion expression</p> */
+    private final Exp myAssertion;
+
+    /**
+     * <p>For <em>theorem</em>s only, defines any special properties of the
+     * theorem, such as if it is flagged as an associativity or commutativity
+     * theorem in the definition.</p>
+     */
+    private final TheoremSubtype myTheoremSubtype;
+
+    // ===========================================================
     // Constructors
     // ===========================================================
 
     /**
-     * <p>This constructs either a mathematical axiom, theorem,
+     * <p>This constructs either a mathematical axiom,
      * corollary, lemma or property assertion.</p>
      *
-     * @param l A {@link Location} representation object.
      * @param name Name of the assertion declaration.
+     * @param assertionType Type of assertion declaration.
+     * @param assertion The assertion expression.
      */
-    public MathAssertionDec(Location l, PosSymbol name) {
-        super(l, name);
+    public MathAssertionDec(PosSymbol name, AssertionType assertionType,
+            Exp assertion) {
+        super(name.getLocation(), name);
+        myAssertion = assertion;
+        myAssertionType = assertionType;
+        myTheoremSubtype = null;
     }
 
-    //In the future:
-    //public MathAssertionDec(Location l, PosSymbol name, Exp assertion) {
-    //    super(l, name);
-    //    this.assertion = assertion;
-    //}
+    /**
+     * <p>This constructs either a mathematical theorem
+     * assertion.</p>
+     *
+     * @param name Name of the assertion declaration.
+     * @param theoremSubtype Theorem subtype properties.
+     * @param assertion The assertion expression.
+     */
+    public MathAssertionDec(PosSymbol name, TheoremSubtype theoremSubtype,
+            Exp assertion) {
+        super(name.getLocation(), name);
+        myAssertion = assertion;
+        myAssertionType = AssertionType.THEOREM;
+        myTheoremSubtype = theoremSubtype;
+    }
 
+    // ===========================================================
+    // Public Methods
+    // ===========================================================
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
-        return null;
+    public final String asString(int indentSize, int innerIndentInc) {
+        StringBuffer sb = new StringBuffer();
+        printSpace(indentSize, sb);
+        sb.append(myAssertionType.toString());
+        sb.append(" ");
+        sb.append(myName.asString(0, innerIndentInc));
+        sb.append(":\n");
+
+        sb.append(myAssertion.asString(indentSize + innerIndentInc,
+                innerIndentInc));
+        sb.append(";\n");
+
+        return sb.toString();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean equals(Object o) {
-        return false;
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        MathAssertionDec that = (MathAssertionDec) o;
+
+        if (myAssertionType != that.myAssertionType)
+            return false;
+        if (!myAssertion.equals(that.myAssertion))
+            return false;
+        return myTheoremSubtype == that.myTheoremSubtype;
+
     }
+
+    /**
+     * <p>Returns the assertion expression for this math assertion declaration.</p>
+     *
+     * @return The {@link Exp} representation object.
+     */
+    public final Exp getAssertion() {
+        return myAssertion;
+    }
+
+    /**
+     * <p>Returns the assertion type for this math assertion declaration.</p>
+     */
+    public final AssertionType getAssertionType() {
+        return myAssertionType;
+    }
+
+    /**
+     * <p>Returns the specific subtype of the theorem represented by this
+     * math assertion declaration.</p>
+     */
+    public final TheoremSubtype getTheoremSubtype() {
+        return myTheoremSubtype;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + myAssertionType.hashCode();
+        result = 31 * result + myAssertion.hashCode();
+        result =
+                31
+                        * result
+                        + (myTheoremSubtype != null ? myTheoremSubtype
+                                .hashCode() : 0);
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append(myAssertionType.toString());
+        sb.append(" ");
+        sb.append(myName.toString());
+        sb.append(":\n");
+
+        sb.append(myAssertion.toString());
+        sb.append(";\n");
+
+        return sb.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final MathAssertionDec copy() {
+        MathAssertionDec copyDec;
+        if (myTheoremSubtype != null) {
+            copyDec =
+                    new MathAssertionDec(myName.clone(), myTheoremSubtype,
+                            myAssertion.clone());
+        }
+        else {
+            copyDec =
+                    new MathAssertionDec(myName.clone(), myAssertionType,
+                            myAssertion.clone());
+        }
+
+        return copyDec;
+    }
+
 }

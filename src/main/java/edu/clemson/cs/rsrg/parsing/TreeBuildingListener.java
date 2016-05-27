@@ -134,10 +134,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitMathAssertionDecl(
             ResolveParser.MathAssertionDeclContext ctx) {
-        MathAssertionDec theorem = new MathAssertionDec(
+        /*MathAssertionDec theorem = new MathAssertionDec(
                 createLocation(ctx.getStart()), createPosSymbol(
                 ctx.name.getStart())); //Todo: Add the actual assertion once exprs are represented.
-        myNodes.put(ctx, theorem);
+        myNodes.put(ctx, theorem);*/
     }
 
     // ===========================================================
