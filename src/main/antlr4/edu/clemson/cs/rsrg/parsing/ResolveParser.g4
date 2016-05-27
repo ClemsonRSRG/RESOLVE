@@ -667,7 +667,7 @@ mathDefinitionDecl
     ;
 
 mathCategoricalDecl
-    :   CATEGORICAL DEFINITION INTRODUCES categoricalDefinitionSignature
+    :   CATEGORICAL DEFINITION name=IDENTIFIER INTRODUCES categoricalDefinitionSignature
         RELATED BY mathExp SEMICOLON
     ;
 

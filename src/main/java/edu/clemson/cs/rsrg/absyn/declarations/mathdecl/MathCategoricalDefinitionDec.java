@@ -41,6 +41,13 @@ public class MathCategoricalDefinitionDec extends Dec {
     // Constructors
     // ===========================================================
 
+    /**
+     * <p>This constructs a mathematical categorical definition.</p>
+     *
+     * @param name Name of the categorical definition.
+     * @param definitions List of definitions inside this categorical definition.
+     * @param relatedByExp The relation between the definitions.
+     */
     public MathCategoricalDefinitionDec(PosSymbol name,
             List<MathDefinitionDec> definitions, Exp relatedByExp) {
         super(name.getLocation(), name);
