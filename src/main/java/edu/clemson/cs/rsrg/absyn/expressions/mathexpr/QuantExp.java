@@ -361,7 +361,7 @@ public class QuantExp extends MathExp {
     private List<MathVarDec> copyVars() {
         List<MathVarDec> copyVars = new ArrayList<>();
         for (MathVarDec v : myVars) {
-            copyVars.add(v.clone());
+            copyVars.add((MathVarDec) v.clone());
         }
 
         return copyVars;

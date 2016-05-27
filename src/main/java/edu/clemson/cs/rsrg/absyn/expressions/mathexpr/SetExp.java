@@ -213,7 +213,8 @@ public class SetExp extends MathExp {
         Exp newWhere = ((MathExp) myWhereExp).remember();
         Exp newBody = ((MathExp) myBodyExp).remember();
 
-        return new SetExp(new Location(myLoc), myVar.clone(), newWhere, newBody);
+        return new SetExp(new Location(myLoc), (MathVarDec) myVar.clone(),
+                newWhere, newBody);
     }
 
     /**
@@ -261,8 +262,8 @@ public class SetExp extends MathExp {
             newWhere = myWhereExp.clone();
         }
 
-        return new SetExp(new Location(myLoc), myVar.clone(), newWhere,
-                myBodyExp.clone());
+        return new SetExp(new Location(myLoc), (MathVarDec) myVar.clone(),
+                newWhere, myBodyExp.clone());
     }
 
     /**
@@ -275,8 +276,8 @@ public class SetExp extends MathExp {
             newWhere = substitute(myWhereExp, substitutions);
         }
 
-        return new SetExp(new Location(myLoc), myVar.clone(), newWhere,
-                substitute(myBodyExp, substitutions));
+        return new SetExp(new Location(myLoc), (MathVarDec) myVar.clone(),
+                newWhere, substitute(myBodyExp, substitutions));
     }
 
 }

@@ -282,7 +282,7 @@ public class LambdaExp extends MathExp {
     private List<MathVarDec> copyParameters() {
         List<MathVarDec> copyParameters = new ArrayList<>();
         for (MathVarDec v : myParameters) {
-            copyParameters.add(v.clone());
+            copyParameters.add((MathVarDec) v.clone());
         }
 
         return copyParameters;

@@ -300,8 +300,8 @@ public class IterativeExp extends MathExp {
         Exp newWhere = ((MathExp) myWhereExp).remember();
         Exp newBody = ((MathExp) myBodyExp).remember();
 
-        return new IterativeExp(new Location(myLoc), myOperator, myVar.clone(),
-                newWhere, newBody);
+        return new IterativeExp(new Location(myLoc), myOperator,
+                (MathVarDec) myVar.clone(), newWhere, newBody);
     }
 
     /**
@@ -350,8 +350,8 @@ public class IterativeExp extends MathExp {
             newWhere = myWhereExp.clone();
         }
 
-        return new IterativeExp(new Location(myLoc), myOperator, myVar.clone(),
-                newWhere, myBodyExp.clone());
+        return new IterativeExp(new Location(myLoc), myOperator,
+                (MathVarDec) myVar.clone(), newWhere, myBodyExp.clone());
     }
 
     /**
@@ -364,8 +364,9 @@ public class IterativeExp extends MathExp {
             newWhere = substitute(myWhereExp, substitutions);
         }
 
-        return new IterativeExp(new Location(myLoc), myOperator, myVar.clone(),
-                newWhere, substitute(myBodyExp, substitutions));
+        return new IterativeExp(new Location(myLoc), myOperator,
+                (MathVarDec) myVar.clone(), newWhere, substitute(myBodyExp,
+                        substitutions));
     }
 
 }

@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.blocks.code;
+package edu.clemson.cs.rsrg.absyn.items.code;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.programtypes.PTType;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;

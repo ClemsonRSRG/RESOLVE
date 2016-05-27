@@ -10,7 +10,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE.txt', which is part of this source code package.
  */
-package edu.clemson.cs.rsrg.absyn.blocks.code;
+package edu.clemson.cs.rsrg.absyn.items.code;
 
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
@@ -316,7 +316,7 @@ public class TypeInitFinalItem extends ResolveConceptualElement {
     private List<AuxVarDec> copyAuxVars() {
         List<AuxVarDec> copyArgs = new ArrayList<>();
         for (AuxVarDec a : myAuxVariableDecs) {
-            copyArgs.add(a.clone());
+            copyArgs.add((AuxVarDec) a.clone());
         }
 
         return copyArgs;
@@ -331,7 +331,7 @@ public class TypeInitFinalItem extends ResolveConceptualElement {
     private List<FacilityDec> copyFacDecs() {
         List<FacilityDec> copyArgs = new ArrayList<>();
         for (FacilityDec f : myFacilityDecs) {
-            copyArgs.add(f.clone());
+            copyArgs.add((FacilityDec) f.clone());
         }
 
         return copyArgs;
@@ -361,7 +361,7 @@ public class TypeInitFinalItem extends ResolveConceptualElement {
     private List<VarDec> copyVars() {
         List<VarDec> copyArgs = new ArrayList<>();
         for (VarDec v : myVariableDecs) {
-            copyArgs.add(v.clone());
+            copyArgs.add((VarDec) v.clone());
         }
 
         return copyArgs;
