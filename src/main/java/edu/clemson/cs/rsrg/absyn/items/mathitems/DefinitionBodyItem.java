@@ -175,6 +175,15 @@ public class DefinitionBodyItem extends ResolveConceptualElement {
     }
 
     /**
+     * <p>This method returns whether or not this is an inductive definition.</p>
+     *
+     * @return {@code true} if it is inductive, {@code false} otherwise.
+     */
+    public final boolean getIsInductiveFlag() {
+        return myIsInductiveFlag;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

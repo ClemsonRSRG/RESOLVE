@@ -312,7 +312,6 @@ public class ProcedureDec extends Dec {
     }
 
     /**
-     * /**
      * <p>This method returns whether or not this is an recursive procedure.</p>
      *
      * @return {@code true} if it is recursive, {@code false} otherwise.
