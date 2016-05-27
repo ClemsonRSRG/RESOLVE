@@ -31,6 +31,30 @@ public class AssertionClause extends ResolveConceptualElement {
     // ===========================================================
 
     public enum ClauseType {
+        CONSTRAINT {
+
+            @Override
+            public String toString() {
+                return "constraint ";
+            }
+
+        },
+        CONVENTION {
+
+            @Override
+            public String toString() {
+                return "convention ";
+            }
+
+        },
+        CORRESPONDENCE {
+
+            @Override
+            public String toString() {
+                return "correspondence ";
+            }
+
+        },
         DECREASING {
 
             @Override
