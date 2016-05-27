@@ -51,7 +51,10 @@ facilityItems
 facilityItem
     :   stateVariableDecl
     |   facilityDecl
+    |   facilityTypeRepresentationDecl
+    |   recursiveOperationProcedureDecl
     |   operationProcedureDecl
+    |   recursiveProcedureDecl
     |   mathDefinitionDecl
     |   moduleFacilityInit
     |   moduleFacilityFinal
@@ -146,9 +149,11 @@ implItems
 
 implItem
     :   stateVariableDecl
-    |   operationProcedureDecl
     |   facilityDecl
+    |   recursiveOperationProcedureDecl
+    |   operationProcedureDecl
     |   procedureDecl
+    |   recursiveProcedureDecl
     |   mathDefinitionDecl
     |   typeRepresentationDecl
     |   conventionClause
@@ -164,6 +169,7 @@ conceptPerformanceModule
         SHORT_FOR fullName=IDENTIFIER FOR concept=IDENTIFIER SEMICOLON
         (usesList)?
         (requiresClause)?
+        (conceptPerformanceItems)?
         END closename=IDENTIFIER SEMICOLON EOF
     ;
 
@@ -191,6 +197,7 @@ enhancementPerformanceModule
         WITH_PROFILE conceptProfile=IDENTIFIER SEMICOLON
         (usesList)?
         (requiresClause)?
+        (enhancementPerformanceItems)?
         END closename=IDENTIFIER SEMICOLON EOF
     ;
 
@@ -453,10 +460,21 @@ performanceModuleSpecFinal
 // functions
 
 procedureDecl
-    :   (recursive=RECURSIVE)? PROCEDURE name=IDENTIFIER
+    :   PROCEDURE name=IDENTIFIER
         operationParameterList (COLON type)? SEMICOLON
         (affectsClause)*
-        (decreasingClause)?
+        (facilityDecl)*
+        (variableDecl)*
+        (auxVariableDecl)*
+        (stmt)*
+        END closename=IDENTIFIER SEMICOLON
+    ;
+
+recursiveProcedureDecl
+    :   RECURSIVE PROCEDURE name=IDENTIFIER
+        operationParameterList (COLON type)? SEMICOLON
+        (affectsClause)*
+        decreasingClause
         (facilityDecl)*
         (variableDecl)*
         (auxVariableDecl)*
@@ -470,8 +488,22 @@ operationProcedureDecl
         (affectsClause)*
         (requiresClause)?
         (ensuresClause)?
-        (recursive=RECURSIVE)? PROCEDURE
-        (decreasingClause)?
+        PROCEDURE
+        (facilityDecl)*
+        (variableDecl)*
+        (auxVariableDecl)*
+        (stmt)*
+        END closename=IDENTIFIER SEMICOLON
+    ;
+
+recursiveOperationProcedureDecl
+    :   OPERATION
+        name=IDENTIFIER operationParameterList SEMICOLON
+        (affectsClause)*
+        (requiresClause)?
+        (ensuresClause)?
+        RECURSIVE PROCEDURE
+        decreasingClause
         (facilityDecl)*
         (variableDecl)*
         (auxVariableDecl)*
