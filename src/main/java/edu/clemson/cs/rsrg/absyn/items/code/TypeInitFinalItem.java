@@ -15,7 +15,7 @@ package edu.clemson.cs.rsrg.absyn.items.code;
 import edu.clemson.cs.rsrg.absyn.clauses.AffectsClause;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.statements.Statement;
-import edu.clemson.cs.rsrg.absyn.declarations.programdecl.FacilityDec;
+import edu.clemson.cs.rsrg.absyn.declarations.facilitydecl.FacilityDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.AuxVarDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
