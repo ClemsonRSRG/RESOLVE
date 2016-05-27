@@ -111,16 +111,6 @@ public class TypeFamilyDec extends Dec {
      * {@inheritDoc}
      */
     @Override
-    public final TypeFamilyDec clone() {
-        return new TypeFamilyDec(myName.clone(), myTy.clone(), myExemplar
-                .clone(), myConstraint.clone(), myTypeInitItem.clone(),
-                myTypeFinalItem.clone());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public final boolean equals(Object o) {
         if (this == o)
             return true;
@@ -235,6 +225,20 @@ public class TypeFamilyDec extends Dec {
         sb.append("end\n");
 
         return sb.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final TypeFamilyDec copy() {
+        return new TypeFamilyDec(myName.clone(), myTy.clone(), myExemplar
+                .clone(), myConstraint.clone(), myTypeInitItem.clone(),
+                myTypeFinalItem.clone());
     }
 
 }

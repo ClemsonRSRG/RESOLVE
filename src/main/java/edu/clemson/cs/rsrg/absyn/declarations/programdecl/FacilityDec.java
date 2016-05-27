@@ -194,17 +194,6 @@ public class FacilityDec extends Dec {
      * {@inheritDoc}
      */
     @Override
-    public final FacilityDec clone() {
-        return new FacilityDec(myName.clone(), getConceptName(),
-                getConceptParams(), getEnhancements(), getConceptRealizName(),
-                getConceptRealizParams(), getEnhancementRealizPairs(),
-                getProfileName(), myExternallyRealizedFlag);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public final boolean equals(Object o) {
         if (this == o)
             return true;
@@ -374,6 +363,21 @@ public class FacilityDec extends Dec {
         sb.append("\n");
 
         return sb.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final FacilityDec copy() {
+        return new FacilityDec(myName.clone(), getConceptName(),
+                getConceptParams(), getEnhancements(), getConceptRealizName(),
+                getConceptRealizParams(), getEnhancementRealizPairs(),
+                getProfileName(), myExternallyRealizedFlag);
     }
 
     // ===========================================================

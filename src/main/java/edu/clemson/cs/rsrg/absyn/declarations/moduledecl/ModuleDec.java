@@ -12,8 +12,10 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.moduledecl;
 
+import edu.clemson.cs.rsrg.absyn.blocks.UsesItem;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.ArrayList;
@@ -32,13 +34,13 @@ public abstract class ModuleDec extends Dec {
     // ===========================================================
 
     /** <p>The current module's declaration objects.</p> */
-    protected final List<Dec> myDecs = new ArrayList<>();
+    protected final List<Dec> myDecs;
 
     /** <p>The current module's parameter declaration objects.</p> */
-    protected final List<ModuleParameterDec> myParameterDecs = new ArrayList<>();
+    protected final List<ModuleParameterDec> myParameterDecs;
 
     /** <p>The current module's import objects.</p> */
-    protected final List<UsesItem> myUsesItems = new ArrayList<>();
+    protected final List<UsesItem> myUsesItems;
 
     // ===========================================================
     // Constructor
@@ -55,12 +57,13 @@ public abstract class ModuleDec extends Dec {
      * @param usesItems The list of {@link UsesItem} objects.
      * @param decs The list of {@link Dec} objects.
      */
-    protected ModuleDec(Location l, PosSymbol name, List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
+    protected ModuleDec(Location l, PosSymbol name,
+            List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
             List<Dec> decs) {
         super(l, name);
-        myParameterDecs.addAll(parameterDecs);
-        myUsesItems.addAll(usesItems);
-        myDecs.addAll(decs);
+        myParameterDecs = parameterDecs;
+        myUsesItems = usesItems;
+        myDecs = decs;
     }
 
     // ===========================================================
@@ -68,27 +71,23 @@ public abstract class ModuleDec extends Dec {
     // ===========================================================
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for all the classes that extend from {@link ModuleDec}.</p>
-     *
-     * @return A deep copy of the object.
-     */
-    @Override
-    public abstract ModuleDec clone();
-
-    /**
      * {@inheritDoc}
      */
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
 
         ModuleDec moduleDec = (ModuleDec) o;
 
-        if (!myDecs.equals(moduleDec.myDecs)) return false;
-        if (!myParameterDecs.equals(moduleDec.myParameterDecs)) return false;
+        if (!myDecs.equals(moduleDec.myDecs))
+            return false;
+        if (!myParameterDecs.equals(moduleDec.myParameterDecs))
+            return false;
         return myUsesItems.equals(moduleDec.myUsesItems);
 
     }
@@ -133,6 +132,21 @@ public abstract class ModuleDec extends Dec {
         result = 31 * result + myParameterDecs.hashCode();
         result = 31 * result + myUsesItems.hashCode();
         return result;
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>Implemented by concrete subclasses of {@link ModuleDec}
+     * to manufacture a copy of themselves.</p>
+     *
+     * @return A new {@link ModuleDec} that is a deep copy of the original.
+     */
+    protected ModuleDec copy() {
+        throw new MiscErrorException("Shouldn't be calling copy()!  Type: "
+                + this.getClass(), new CloneNotSupportedException());
     }
 
 }

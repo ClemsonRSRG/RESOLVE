@@ -53,11 +53,15 @@ public class AuxVarDec extends AbstractVarDec {
         return sb.toString();
     }
 
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public final AuxVarDec clone() {
+    protected final AuxVarDec copy() {
         return new AuxVarDec(myName.clone(), myTy.clone());
     }
 

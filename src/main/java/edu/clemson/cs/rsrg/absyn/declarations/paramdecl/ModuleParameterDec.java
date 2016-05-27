@@ -58,18 +58,6 @@ public class ModuleParameterDec<T extends Dec & ModuleParameter> extends Dec {
     }
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for the {@link ModuleParameterDec} class.</p>
-     *
-     * @return A deep copy of the object.
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public final ModuleParameterDec clone() {
-        return new ModuleParameterDec(myWrappedDec.clone());
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
@@ -122,6 +110,19 @@ public class ModuleParameterDec<T extends Dec & ModuleParameter> extends Dec {
     @Override
     public final String toString() {
         return myWrappedDec.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    protected final ModuleParameterDec copy() {
+        return new ModuleParameterDec(myWrappedDec.clone());
     }
 
 }

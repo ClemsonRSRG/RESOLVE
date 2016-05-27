@@ -16,6 +16,7 @@ import edu.clemson.cs.rsrg.absyn.blocks.code.TypeInitFinalItem;
 import edu.clemson.cs.rsrg.absyn.clauses.AssertionClause;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
 /**
@@ -147,6 +148,22 @@ public abstract class AbstractTypeRepresentationDec extends Dec {
         result = 31 * result + myTypeInitItem.hashCode();
         result = 31 * result + myTypeFinalItem.hashCode();
         return result;
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * <p>Implemented by concrete subclasses of {@link AbstractTypeRepresentationDec}
+     * to manufacture a copy of themselves.</p>
+     *
+     * @return A new {@link AbstractTypeRepresentationDec} that is a
+     * deep copy of the original.
+     */
+    protected AbstractTypeRepresentationDec copy() {
+        throw new MiscErrorException("Shouldn't be calling copy()!  Type: "
+                + this.getClass(), new CloneNotSupportedException());
     }
 
 }

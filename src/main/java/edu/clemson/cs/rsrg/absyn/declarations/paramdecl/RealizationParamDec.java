@@ -68,14 +68,6 @@ public class RealizationParamDec extends Dec implements ModuleParameter {
      * {@inheritDoc}
      */
     @Override
-    public final RealizationParamDec clone() {
-        return new RealizationParamDec(myName.clone(), myConceptName.clone());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public final boolean equals(Object o) {
         if (this == o)
             return true;
@@ -120,6 +112,18 @@ public class RealizationParamDec extends Dec implements ModuleParameter {
         sb.append(myConceptName);
 
         return sb.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final RealizationParamDec copy() {
+        return new RealizationParamDec(myName.clone(), myConceptName.clone());
     }
 
 }

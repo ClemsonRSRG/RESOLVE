@@ -51,11 +51,6 @@ public class MathAssertionDec extends Dec {
     }
 
     @Override
-    public MathAssertionDec clone() {
-        return null;
-    }
-
-    @Override
     public boolean equals(Object o) {
         return false;
     }

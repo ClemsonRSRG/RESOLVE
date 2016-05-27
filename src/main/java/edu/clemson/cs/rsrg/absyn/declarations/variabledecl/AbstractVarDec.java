@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.absyn.declarations.variabledecl;
 
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.rawtypes.Ty;
+import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
@@ -125,6 +126,17 @@ public abstract class AbstractVarDec extends Dec {
         sb.append("\n");
 
         return sb.toString();
+    }
+
+    /**
+     * <p>Implemented by concrete subclasses of {@link AbstractVarDec}
+     * to manufacture a copy of themselves.</p>
+     *
+     * @return A new {@link AbstractVarDec} that is a deep copy of the original.
+     */
+    protected AbstractVarDec copy() {
+        throw new MiscErrorException("Shouldn't be calling copy()!  Type: "
+                + this.getClass(), new CloneNotSupportedException());
     }
 
 }

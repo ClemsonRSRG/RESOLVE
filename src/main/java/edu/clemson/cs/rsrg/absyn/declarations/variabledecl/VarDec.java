@@ -53,11 +53,15 @@ public class VarDec extends AbstractVarDec {
         return sb.toString();
     }
 
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public final VarDec clone() {
+    protected final VarDec copy() {
         return new VarDec(myName.clone(), myTy.clone());
     }
 

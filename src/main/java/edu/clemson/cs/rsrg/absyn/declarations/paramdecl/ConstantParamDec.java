@@ -55,11 +55,15 @@ public class ConstantParamDec extends AbstractVarDec implements ModuleParameter 
         return sb.toString();
     }
 
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public final ConstantParamDec clone() {
+    protected final ConstantParamDec copy() {
         return new ConstantParamDec(myName.clone(), myTy.clone());
     }
 

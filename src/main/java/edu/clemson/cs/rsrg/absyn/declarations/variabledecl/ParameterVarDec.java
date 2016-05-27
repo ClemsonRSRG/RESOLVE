@@ -71,14 +71,6 @@ public class ParameterVarDec extends AbstractVarDec {
      * {@inheritDoc}
      */
     @Override
-    public final ParameterVarDec clone() {
-        return new ParameterVarDec(myMode, myName.clone(), myTy.clone());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public final boolean equals(Object o) {
         if (this == o)
             return true;
@@ -123,6 +115,18 @@ public class ParameterVarDec extends AbstractVarDec {
         sb.append(super.toString());
 
         return sb.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final ParameterVarDec copy() {
+        return new ParameterVarDec(myMode, myName.clone(), myTy.clone());
     }
 
 }

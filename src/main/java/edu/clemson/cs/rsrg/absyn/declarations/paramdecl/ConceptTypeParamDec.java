@@ -57,20 +57,24 @@ public class ConceptTypeParamDec extends Dec implements ModuleParameter {
      * {@inheritDoc}
      */
     @Override
-    public final ConceptTypeParamDec clone() {
-        return new ConceptTypeParamDec(myName.clone());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public final String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Type ");
         sb.append(myName.toString());
 
         return sb.toString();
+    }
+
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final ConceptTypeParamDec copy() {
+        return new ConceptTypeParamDec(myName.clone());
     }
 
 }

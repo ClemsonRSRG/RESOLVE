@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.absyn.declarations.moduledecl;
 
+import edu.clemson.cs.rsrg.absyn.blocks.UsesItem;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -102,25 +103,6 @@ public class PrecisModuleDec extends ModuleDec {
     }
 
     /**
-     * <p>This method overrides the default clone method implementation
-     * for the {@link PrecisModuleDec} class.</p>
-     *
-     * @return A deep copy of the object.
-     */
-    @Override
-    public PrecisModuleDec clone() {
-        // Copy all the items in the lists
-        List<ModuleParameterDec> newParameterDecs = new ArrayList<>(myParameterDecs.size());
-        Collections.copy(newParameterDecs, myParameterDecs);
-        List<UsesItem> newUsesItems = new ArrayList<>(myUsesItems.size());
-        Collections.copy(newUsesItems, myUsesItems);
-        List<Dec> newDecs = new ArrayList<>(myDecs.size());
-        Collections.copy(newDecs, myDecs);
-
-        return new PrecisModuleDec(new Location(myLoc), myName.clone(), newParameterDecs, newUsesItems, newDecs);
-    }
-
-    /**
      * <p>This method overrides the default equals method implementation
      * for the {@link PrecisModuleDec} class.</p>
      *
@@ -193,4 +175,23 @@ public class PrecisModuleDec extends ModuleDec {
         return sb.toString();
     }
 
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final PrecisModuleDec copy() {
+        // Copy all the items in the lists
+        List<ModuleParameterDec> newParameterDecs = new ArrayList<>(myParameterDecs.size());
+        Collections.copy(newParameterDecs, myParameterDecs);
+        List<UsesItem> newUsesItems = new ArrayList<>(myUsesItems.size());
+        Collections.copy(newUsesItems, myUsesItems);
+        List<Dec> newDecs = new ArrayList<>(myDecs.size());
+        Collections.copy(newDecs, myDecs);
+
+        return new PrecisModuleDec(new Location(myLoc), myName.clone(), newParameterDecs, newUsesItems, newDecs);
+    }
 }

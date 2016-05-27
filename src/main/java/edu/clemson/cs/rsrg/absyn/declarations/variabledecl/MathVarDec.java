@@ -53,11 +53,15 @@ public class MathVarDec extends AbstractVarDec {
         return sb.toString();
     }
 
+    // ===========================================================
+    // Protected Methods
+    // ===========================================================
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public final MathVarDec clone() {
+    protected final MathVarDec copy() {
         return new MathVarDec(myName.clone(), myTy.clone());
     }
 
