@@ -19,11 +19,12 @@ import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * <p>This is the class for the precis module declarations
- * that the compiler builds from the ANTLR4 AST tree.</p>
+ * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
@@ -53,88 +54,52 @@ public class PrecisModuleDec extends ModuleDec {
     // ===========================================================
 
     /**
-     * <p>This method creates a special indented
-     * text version of the class as a string.</p>
-     *
-     * @param indentSize The base indentation to the first line
-     *                   of the text.
-     * @param innerIndentSize The additional indentation increment
-     *                        for the subsequent lines.
-     *
-     * @return A formatted text string of the class.
+     * {@inheritDoc}
      */
     @Override
-    public String asString(int indentSize, int innerIndentSize) {
+    public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append("PrecisModuleDec\n");
+        sb.append("Precis ");
+        sb.append(myName.asString(0, innerIndentInc));
 
-        if (myName != null) {
-            sb.append(myName.asString(indentSize + innerIndentSize,
-                    innerIndentSize));
+        if (myParameterDecs.size() > 0) {
+            sb.append("( ");
+            Iterator<ModuleParameterDec> it = myParameterDecs.iterator();
+            while (it.hasNext()) {
+                ModuleParameterDec m = it.next();
+                sb.append(m.asString(0, innerIndentInc));
+
+                if (it.hasNext()) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(" )\n");
+        }
+
+        if (myUsesItems.size() > 0) {
+            printSpace(indentSize + innerIndentInc, sb);
+            sb.append("uses ");
+            Iterator<UsesItem> it = myUsesItems.iterator();
+            while (it.hasNext()) {
+                UsesItem u = it.next();
+                sb.append(u.asString(0, innerIndentInc));
+
+                if (it.hasNext()) {
+                    sb.append(", ");
+                }
+            }
             sb.append("\n");
         }
 
-        if (myParameterDecs != null) {
-            for (ModuleParameterDec m : myParameterDecs) {
-                sb.append(m.asString(indentSize + innerIndentSize,
-                        innerIndentSize));
-                sb.append("\n");
-            }
+        for (Dec d : myDecs) {
+            sb.append(d.asString(indentSize + innerIndentInc, innerIndentInc));
+            sb.append("\n");
         }
-
-        if (myUsesItems != null) {
-            for (UsesItem u : myUsesItems) {
-                sb.append(u.asString(indentSize + innerIndentSize,
-                        innerIndentSize));
-                sb.append("\n");
-            }
-        }
-
-        if (myDecs != null) {
-            for (Dec d : myDecs) {
-                sb.append(d.asString(indentSize + innerIndentSize,
-                        innerIndentSize));
-                sb.append("\n");
-            }
-        }
+        sb.append("\nend ");
+        sb.append(myName.asString(0, innerIndentInc));
 
         return sb.toString();
-    }
-
-    /**
-     * <p>This method overrides the default equals method implementation
-     * for the {@link PrecisModuleDec} class.</p>
-     *
-     * @param o Object to be compared.
-     *
-     * @return True if all the fields are equal, false otherwise.
-     */
-    @Override
-    public boolean equals(Object o) {
-        boolean result = false;
-        if (o instanceof PrecisModuleDec) {
-            PrecisModuleDec moduleDec = (PrecisModuleDec) o;
-            result = myLoc.equals(moduleDec.myLoc);
-
-            if (result) {
-                result = myName.equals(moduleDec.myName);
-
-                if (result) {
-                    result = myParameterDecs.equals(moduleDec.myParameterDecs);
-
-                    if (result) {
-                        result = myUsesItems.equals(moduleDec.myUsesItems);
-
-                        if (result) {
-                            result = myDecs.equals(moduleDec.myDecs);
-                        }
-                    }
-                }
-            }
-        }
-
-        return result;
     }
 
     /**
@@ -145,32 +110,44 @@ public class PrecisModuleDec extends ModuleDec {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
+        sb.append("Precis ");
+        sb.append(myName.toString());
 
-        if (myName != null) {
-            sb.append(myName.toString());
+        if (myParameterDecs.size() > 0) {
+            sb.append("( ");
+            Iterator<ModuleParameterDec> it = myParameterDecs.iterator();
+            while (it.hasNext()) {
+                ModuleParameterDec m = it.next();
+                sb.append(m.toString());
+
+                if (it.hasNext()) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(" )\n");
+        }
+
+        if (myUsesItems.size() > 0) {
+            sb.append("\tuses ");
+            Iterator<UsesItem> it = myUsesItems.iterator();
+            while (it.hasNext()) {
+                UsesItem u = it.next();
+                sb.append(u.toString());
+
+                if (it.hasNext()) {
+                    sb.append(", ");
+                }
+            }
             sb.append("\n");
         }
 
-        if (myParameterDecs != null) {
-            for (ModuleParameterDec m : myParameterDecs) {
-                sb.append(m.toString());
-                sb.append("\n");
-            }
+        for (Dec d : myDecs) {
+            sb.append("\t");
+            sb.append(d.toString());
+            sb.append("\n");
         }
-
-        if (myUsesItems != null) {
-            for (UsesItem u : myUsesItems) {
-                sb.append(u.toString());
-                sb.append("\n");
-            }
-        }
-
-        if (myDecs != null) {
-            for (Dec d : myDecs) {
-                sb.append(d.toString());
-                sb.append("\n");
-            }
-        }
+        sb.append("\nend ");
+        sb.append(myName.toString());
 
         return sb.toString();
     }
