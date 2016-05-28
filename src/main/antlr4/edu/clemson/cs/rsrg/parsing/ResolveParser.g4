@@ -84,8 +84,6 @@ conceptItem
     :   moduleStateVariableDecl
     |   confirmMathTypeDecl
     |   constraintClause
-    |   moduleSpecInit
-    |   moduleSpecFinal
     |   operationDecl
     |   typeModelDecl
     |   mathDefinitionDecl

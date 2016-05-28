@@ -19,6 +19,7 @@ import edu.clemson.cs.rsrg.errorhandling.exception.MiscErrorException;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -134,6 +135,16 @@ public abstract class ModuleDec extends Dec {
         return result;
     }
 
+    /**
+     * <p>Returns the module in string format.</p>
+     *
+     * @return Module as a string.
+     */
+    @Override
+    public final String toString() {
+        return this.asString(0, 4);
+    }
+
     // ===========================================================
     // Protected Methods
     // ===========================================================
@@ -147,6 +158,76 @@ public abstract class ModuleDec extends Dec {
     protected ModuleDec copy() {
         throw new MiscErrorException("Shouldn't be calling copy()!  Type: "
                 + this.getClass(), new CloneNotSupportedException());
+    }
+
+    /**
+     * <p>A helper method to form the string with
+     * the declaration list and the end of module.</p>
+     *
+     * @param indentSize The base indentation to the first line
+     *                   of the text.
+     * @param innerIndentInc The additional indentation increment
+     *                       for the subsequent lines.
+     *
+     * @return A formatted text string.
+     */
+    protected final String formDecEnd(int indentSize, int innerIndentInc) {
+        StringBuffer sb = new StringBuffer();
+        for (Dec d : myDecs) {
+            sb.append(d.asString(indentSize + innerIndentInc, innerIndentInc));
+            sb.append("\n");
+        }
+        sb.append("\nend ");
+        sb.append(myName.asString(0, innerIndentInc));
+
+        return sb.toString();
+    }
+
+    /**
+     * <p>A helper method to form the string with
+     * the module name, args and uses items.</p>
+     *
+     * @param indentSize The base indentation to the first line
+     *                   of the text.
+     * @param innerIndentInc The additional indentation increment
+     *                       for the subsequent lines.
+     *
+     * @return A formatted text string.
+     */
+    protected final String formNameArgsUses(int indentSize, int innerIndentInc) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(myName.asString(0, innerIndentInc));
+
+        if (myParameterDecs.size() > 0) {
+            sb.append("( ");
+            Iterator<ModuleParameterDec> it = myParameterDecs.iterator();
+            while (it.hasNext()) {
+                ModuleParameterDec m = it.next();
+                sb.append(m.asString(0, innerIndentInc));
+
+                if (it.hasNext()) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(" )\n");
+        }
+
+        if (myUsesItems.size() > 0) {
+            printSpace(indentSize + innerIndentInc, sb);
+            sb.append("uses ");
+            Iterator<UsesItem> it = myUsesItems.iterator();
+            while (it.hasNext()) {
+                UsesItem u = it.next();
+                sb.append(u.asString(0, innerIndentInc));
+
+                if (it.hasNext()) {
+                    sb.append(", ");
+                }
+            }
+            sb.append("\n");
+        }
+
+        return sb.toString();
     }
 
 }

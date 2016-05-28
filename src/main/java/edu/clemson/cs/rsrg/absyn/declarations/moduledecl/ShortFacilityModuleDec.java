@@ -74,21 +74,6 @@ public class ShortFacilityModuleDec extends ModuleDec {
         return (FacilityDec) myDecs.get(0);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        FacilityDec dec = (FacilityDec) myDecs.get(0);
-        sb.append("\t");
-        sb.append(dec.toString());
-        sb.append("\n");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================
