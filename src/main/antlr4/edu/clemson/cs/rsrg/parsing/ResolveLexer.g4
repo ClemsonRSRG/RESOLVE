@@ -4,6 +4,10 @@ ABS
     :   'abs'
     ;
 
+ABSTRACT_VAR
+    :   'Abstract_Var'
+    ;
+
 ALL
     :   'all'
     ;
@@ -437,8 +441,16 @@ RESTORES
     |   'restores'
     ;
 
+SHARED
+    :   'Shared'
+    ;
+
 SHORT_FOR
     :   'short_for'
+    ;
+
+STATE
+    :   'State'
     ;
 
 SUBSET

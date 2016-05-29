@@ -81,10 +81,10 @@ conceptItems
     ;
 
 conceptItem
-    :   moduleStateVariableDecl
-    |   confirmMathTypeDecl
+    :   confirmMathTypeDecl
     |   constraintClause
     |   operationDecl
+    |   sharedStateDecl
     |   typeModelDecl
     |   mathDefinitionDecl
     |   mathDefinesDecl
@@ -119,8 +119,7 @@ enhancementItems
     ;
 
 enhancementItem
-    :   moduleStateVariableDecl
-    |   operationDecl
+    :   operationDecl
     |   typeModelDecl
     |   mathDefinitionDecl
     |   mathDefinesDecl
@@ -176,8 +175,7 @@ conceptPerformanceItems
     ;
 
 conceptPerformanceItem
-    :   moduleStateVariableDecl
-    |   confirmMathTypeDecl
+    :   confirmMathTypeDecl
     |   constraintClause
     |   performanceModuleSpecInit
     |   performanceModuleSpecFinal
@@ -319,6 +317,17 @@ performanceTypeModelDecl
         (constraintClause)?
         (performanceTypeModelInit)?
         (performanceTypeModelFinal)?
+        END SEMICOLON
+    ;
+
+// shared state rules
+
+sharedStateDecl
+    :   SHARED STATE name=IDENTIFIER
+        (moduleStateVariableDecl)+
+        (constraintClause)?
+        (typeModelInit)?
+        (typeModelFinal)?
         END SEMICOLON
     ;
 
@@ -584,7 +593,7 @@ auxVariableDecl
 // state variable declaration
 
 moduleStateVariableDecl
-    :   VAR mathVariableDeclGroup SEMICOLON
+    :   ABSTRACT_VAR mathVariableDeclGroup SEMICOLON
     ;
 
 stateVariableDecl
