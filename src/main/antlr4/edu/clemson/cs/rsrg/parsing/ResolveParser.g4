@@ -79,8 +79,7 @@ conceptItems
     ;
 
 conceptItem
-    :   confirmMathTypeDecl
-    |   constraintClause
+    :   constraintClause
     |   operationDecl
     |   sharedStateDecl
     |   typeModelDecl
@@ -421,7 +420,7 @@ performanceSpecModelFinal
 procedureDecl
     :   PROCEDURE name=IDENTIFIER
         operationParameterList (COLON type)? SEMICOLON
-        (affectsClause)*
+        (affectsClause)?
         (facilityDecl)*
         (variableDecl)*
         (auxVariableDecl)*
@@ -432,7 +431,7 @@ procedureDecl
 recursiveProcedureDecl
     :   RECURSIVE PROCEDURE name=IDENTIFIER
         operationParameterList (COLON type)? SEMICOLON
-        (affectsClause)*
+        (affectsClause)?
         decreasingClause
         (facilityDecl)*
         (variableDecl)*
@@ -444,7 +443,7 @@ recursiveProcedureDecl
 operationProcedureDecl
     :   OPERATION
         name=IDENTIFIER operationParameterList SEMICOLON
-        (affectsClause)*
+        (affectsClause)?
         (requiresClause)?
         (ensuresClause)?
         PROCEDURE
@@ -458,7 +457,7 @@ operationProcedureDecl
 recursiveOperationProcedureDecl
     :   OPERATION
         name=IDENTIFIER operationParameterList SEMICOLON
-        (affectsClause)*
+        (affectsClause)?
         (requiresClause)?
         (ensuresClause)?
         RECURSIVE PROCEDURE
@@ -472,14 +471,14 @@ recursiveOperationProcedureDecl
 
 operationDecl
     :   OPERATION name=IDENTIFIER operationParameterList (COLON type)? SEMICOLON
-        (affectsClause)*
+        (affectsClause)?
         (requiresClause)?
         (ensuresClause)?
     ;
 
 performanceOperationDecl
     :   OPERATION name=IDENTIFIER operationParameterList (COLON type)? SEMICOLON
-        (affectsClause)*
+        (affectsClause)?
         (requiresClause)?
         (ensuresClause)?
         (durationClause)?
@@ -558,6 +557,7 @@ stmt
     :   assignStmt
     |   swapStmt
     |   callStmt
+    |	presumeStmt
     |   confirmStmt
     |   ifStmt
     |   whileStmt
@@ -573,6 +573,10 @@ swapStmt
 
 callStmt
     :   progParamExp SEMICOLON
+    ;
+
+presumeStmt
+    :	PRESUME	mathExp SEMICOLON
     ;
 
 confirmStmt
@@ -690,7 +694,7 @@ definitionParameterList
 // mathematical clauses
 
 affectsClause
-    :   parameterMode progNamedExp (COMMA progNamedExp)* SEMICOLON
+    :   AFFECTS progNamedExp (COMMA progNamedExp)* SEMICOLON
     ;
 
 requiresClause
@@ -735,12 +739,6 @@ durationClause
 
 manipulationDispClause
     :   MAINP_DISP mathAddingExp SEMICOLON
-    ;
-
-// mathematical type declarations
-
-confirmMathTypeDecl
-    :   CONFIRM MATH TYPE mathVariableDecl SEMICOLON
     ;
 
 // mathematical expressions

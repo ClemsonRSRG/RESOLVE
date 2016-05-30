@@ -8,6 +8,10 @@ ABSTRACT_VAR
     :   'Abstract_Var'
     ;
 
+AFFECTS
+    :	"affects"
+    ;
+
 ALL
     :   'all'
     ;
@@ -296,10 +300,6 @@ MAINTAINING
     :   'maintaining'
     ;
 
-MATH
-    :   'Math'
-    ;
-
 MOD
     :   'mod'
     ;
@@ -376,6 +376,10 @@ PRECIS
 PRESERVES
     :   'pres'
     |   'preserves'
+    ;
+
+PRESUME
+    :	'Presume'
     ;
 
 PROFILE
