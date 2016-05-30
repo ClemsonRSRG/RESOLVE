@@ -49,15 +49,13 @@ facilityItems
     ;
 
 facilityItem
-    :   stateVariableDecl
-    |   facilityDecl
+    :   facilityDecl
+    |   facilitySharedStateRepresentationDecl
     |   facilityTypeRepresentationDecl
     |   recursiveOperationProcedureDecl
     |   operationProcedureDecl
     |   recursiveProcedureDecl
     |   mathDefinitionDecl
-    |   moduleFacilityInit
-    |   moduleFacilityFinal
     ;
 
 // short facility module
@@ -145,18 +143,14 @@ implItems
     ;
 
 implItem
-    :   stateVariableDecl
-    |   facilityDecl
+    :   facilityDecl
     |   recursiveOperationProcedureDecl
     |   operationProcedureDecl
     |   procedureDecl
     |   recursiveProcedureDecl
     |   mathDefinitionDecl
+    |   sharedStateRepresentationDecl
     |   typeRepresentationDecl
-    |   conventionClause
-    |   correspondenceClause
-    |   moduleImplInit
-    |   moduleImplFinal
     ;
 
 // concept performance module
@@ -177,8 +171,6 @@ conceptPerformanceItems
 conceptPerformanceItem
     :   confirmMathTypeDecl
     |   constraintClause
-    |   performanceModuleSpecInit
-    |   performanceModuleSpecFinal
     |   performanceOperationDecl
     |   performanceTypeModelDecl
     |   mathDefinitionDecl
@@ -290,8 +282,8 @@ typeModelDecl
     :   TYPE FAMILY name=IDENTIFIER IS MODELED BY mathTypeExp SEMICOLON
         EXEMPLAR exemplar=IDENTIFIER SEMICOLON
         (constraintClause)?
-        (typeModelInit)?
-        (typeModelFinal)?
+        (specModelInit)?
+        (specModelFinal)?
         END SEMICOLON
     ;
 
@@ -299,24 +291,24 @@ typeRepresentationDecl
     :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (record|type) SEMICOLON
         (conventionClause)?
         (correspondenceClause)?
-        (typeRepresentationInit)?
-        (typeRepresentationFinal)?
+        (representationInit)?
+        (representationFinal)?
         END SEMICOLON
     ;
 
 facilityTypeRepresentationDecl
     :   TYPE name=IDENTIFIER (EQL | IS REPRESENTED BY) (record|type) SEMICOLON
         (conventionClause)?
-        (facilityTypeRepresentationInit)?
-        (facilityTypeRepresentationFinal)?
+        (facilityRepresentationInit)?
+        (facilityRepresentationFinal)?
         END SEMICOLON
     ;
 
 performanceTypeModelDecl
     :   TYPE FAMILY IS MODELED BY mathTypeExp SEMICOLON
         (constraintClause)?
-        (performanceTypeModelInit)?
-        (performanceTypeModelFinal)?
+        (performanceSpecModelInit)?
+        (performanceSpecModelFinal)?
         END SEMICOLON
     ;
 
@@ -326,28 +318,49 @@ sharedStateDecl
     :   SHARED STATE name=IDENTIFIER
         (moduleStateVariableDecl)+
         (constraintClause)?
-        (typeModelInit)?
-        (typeModelFinal)?
+        (specModelInit)?
+        (specModelFinal)?
+        END SEMICOLON
+    ;
+
+sharedStateRepresentationDecl
+    :   SHARED STATE name=IDENTIFIER IS REALIZED BY
+        (stateVariableDecl)+
+        (conventionClause)?
+        (correspondenceClause)?
+        (representationInit)?
+        (representationFinal)?
+        END SEMICOLON
+    ;
+
+facilitySharedStateRepresentationDecl
+    :   SHARED STATE name=IDENTIFIER IS REALIZED BY
+        (stateVariableDecl)+
+        (conventionClause)?
+        (facilityRepresentationInit)?
+        (facilityRepresentationFinal)?
         END SEMICOLON
     ;
 
 // initialization, finalization rules
 
-typeModelInit
+specModelInit
     :   INITIALIZATION
+        (affectsClause)?
         (requiresClause)?
         (ensuresClause)?
     ;
 
-typeModelFinal
+specModelFinal
     :   FINALIZATION
+        (affectsClause)?
         (requiresClause)?
         (ensuresClause)?
     ;
 
-typeRepresentationInit
+representationInit
     :   INITIALIZATION
-        (affectsClause)*
+        (affectsClause)?
         (facilityDecl)*
         (variableDecl)*
         (auxVariableDecl)*
@@ -355,111 +368,50 @@ typeRepresentationInit
         END SEMICOLON
     ;
 
-typeRepresentationFinal
+representationFinal
     :   FINALIZATION
-        (affectsClause)*
+        (affectsClause)?
         (facilityDecl)*
         (variableDecl)*
         (auxVariableDecl)*
         (stmt)*
         END SEMICOLON
-    ;
-
-facilityTypeRepresentationInit
-    :   INITIALIZATION
-        (affectsClause)*
-        (facilityDecl)*
-        (variableDecl)*
-        (auxVariableDecl)*
-        (stmt)*
-        END SEMICOLON
-    ;
-
-facilityTypeRepresentationFinal
-    :   FINALIZATION
-        (affectsClause)*
-        (requiresClause)?
-        (ensuresClause)?
-        (facilityDecl)*
-        (variableDecl)*
-        (auxVariableDecl)*
-        (stmt)*
-        END SEMICOLON
-    ;
-
-performanceTypeModelInit
-    :   INITIALIZATION
-        (durationClause)?
-        (manipulationDispClause)?
-    ;
-
-performanceTypeModelFinal
-    :   FINALIZATION
-        (durationClause)?
-        (manipulationDispClause)?
     ;
 
 //We use special rules for facility module init and final to allow requires
 //and ensures clauses (which aren't allowed in normal impl modules)...
-moduleFacilityInit
-    :   FAC_INIT
-        (affectsClause)*
-        (requiresClause)?
-        (ensuresClause)?
-        (facilityDecl)*
-        (variableDecl)*
-        (auxVariableDecl)*
-        (stmt)*
-    ;
-
-moduleFacilityFinal
-    :   FAC_FINAL
-        (affectsClause)*
-        (requiresClause)?
-        (ensuresClause)?
-        (facilityDecl)*
-        (variableDecl)*
-        (auxVariableDecl)*
-        (stmt)*
-    ;
-
-moduleSpecInit
+facilityRepresentationInit
     :   INITIALIZATION
+        (affectsClause)?
         (requiresClause)?
         (ensuresClause)?
-    ;
-
-moduleSpecFinal
-    :   FAC_FINAL
-        (requiresClause)?
-        (ensuresClause)?
-    ;
-
-moduleImplInit
-    :   FAC_INIT
-        (affectsClause)*
         (facilityDecl)*
         (variableDecl)*
         (auxVariableDecl)*
         (stmt)*
+        END SEMICOLON
     ;
 
-moduleImplFinal
-    :   FAC_FINAL
+facilityRepresentationFinal
+    :   FINALIZATION
+        (affectsClause)?
+        (requiresClause)?
+        (ensuresClause)?
         (facilityDecl)*
         (variableDecl)*
         (auxVariableDecl)*
         (stmt)*
+        END SEMICOLON
     ;
 
-performanceModuleSpecInit
-    :   PERF_INIT
+performanceSpecModelInit
+    :   INITIALIZATION
         (durationClause)?
         (manipulationDispClause)?
     ;
 
-performanceModuleSpecFinal
-    :   PERF_FINAL
+performanceSpecModelFinal
+    :   FINALIZATION
         (durationClause)?
         (manipulationDispClause)?
     ;
