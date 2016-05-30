@@ -168,8 +168,7 @@ conceptPerformanceItems
     ;
 
 conceptPerformanceItem
-    :   confirmMathTypeDecl
-    |   constraintClause
+    :   constraintClause
     |   performanceOperationDecl
     |   performanceTypeModelDecl
     |   mathDefinitionDecl
@@ -193,8 +192,7 @@ enhancementPerformanceItems
     ;
 
 enhancementPerformanceItem
-    :   confirmMathTypeDecl
-    |   performanceOperationDecl
+    :   performanceOperationDecl
     |   performanceTypeModelDecl
     |   mathDefinitionDecl
     |   mathDefinesDecl

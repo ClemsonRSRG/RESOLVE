@@ -9,7 +9,7 @@ ABSTRACT_VAR
     ;
 
 AFFECTS
-    :	"affects"
+    :	'affects'
     ;
 
 ALL
