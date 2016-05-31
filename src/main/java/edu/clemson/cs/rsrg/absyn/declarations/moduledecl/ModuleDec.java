@@ -185,7 +185,7 @@ public abstract class ModuleDec extends Dec {
 
     /**
      * <p>A helper method to form the string with
-     * the module name, args and uses items.</p>
+     * the module's name and args.</p>
      *
      * @param indentSize The base indentation to the first line
      *                   of the text.
@@ -194,23 +194,40 @@ public abstract class ModuleDec extends Dec {
      *
      * @return A formatted text string.
      */
-    protected final String formNameArgsUses(int indentSize, int innerIndentInc) {
+    protected final String formNameArgs(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        sb.append(myName.asString(0, innerIndentInc));
+        sb.append(myName.asString(indentSize, innerIndentInc));
 
         if (myParameterDecs.size() > 0) {
             sb.append("( ");
             Iterator<ModuleParameterDec> it = myParameterDecs.iterator();
             while (it.hasNext()) {
                 ModuleParameterDec m = it.next();
-                sb.append(m.asString(0, innerIndentInc));
+                sb.append(m.asString(indentSize, innerIndentInc));
 
                 if (it.hasNext()) {
                     sb.append(", ");
                 }
             }
-            sb.append(" )\n");
+            sb.append(" )");
         }
+
+        return sb.toString();
+    }
+
+    /**
+     * <p>A helper method to form the string with
+     * the module's uses items.</p>
+     *
+     * @param indentSize The base indentation to the first line
+     *                   of the text.
+     * @param innerIndentInc The additional indentation increment
+     *                       for the subsequent lines.
+     *
+     * @return A formatted text string.
+     */
+    protected final String formUses(int indentSize, int innerIndentInc) {
+        StringBuffer sb = new StringBuffer();
 
         if (myUsesItems.size() > 0) {
             printSpace(indentSize + innerIndentInc, sb);
@@ -224,7 +241,6 @@ public abstract class ModuleDec extends Dec {
                     sb.append(", ");
                 }
             }
-            sb.append("\n");
         }
 
         return sb.toString();

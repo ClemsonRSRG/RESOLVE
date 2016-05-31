@@ -1,5 +1,5 @@
 /**
- * ConceptModuleDec.java
+ * EnhancementModuleDec.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -23,52 +23,44 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * <p>This is the class for the concept module declarations
+ * <p>This is the class for the enhancement module declarations
  * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
-public class ConceptModuleDec extends ModuleDec {
+public class EnhancementModuleDec extends ModuleDec {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
 
+    /** <p>The concept module associated with this module</p> */
+    private final PosSymbol myConceptName;
+
     /** <p>The requires expression</p> */
     private final AssertionClause myRequires;
-
-    /**
-     * <p>The list of concept level constraints.</p>
-     *
-     * <p>Note that placing this down here means it is processed last by the
-     * treewalker, and so we will have access to any definitions in the
-     * body of the concept.</p>
-     */
-    private final List<AssertionClause> myConstraints;
 
     // ===========================================================
     // Constructor
     // ===========================================================
 
     /**
-     * <p>This constructor creates a "Concept" module representation.</p>
+     * <p>This constructor creates a "Enhancement" module representation.</p>
      *
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
      * @param parameterDecs The list of {@link ModuleParameterDec} objects.
+     * @param conceptName The concept name in {@link PosSymbol} format.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param requires A {@link AssertionClause} representing the concept's
      *                 requires clause.
-     * @param constraints The list of {@link AssertionClause} representing the concept
-     *                    level constraints.
      * @param decs The list of {@link Dec} objects.
      */
-    public ConceptModuleDec(Location l, PosSymbol name,
-            List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
-            AssertionClause requires, List<AssertionClause> constraints,
-            List<Dec> decs) {
+    public EnhancementModuleDec(Location l, PosSymbol name,
+            List<ModuleParameterDec> parameterDecs, PosSymbol conceptName,
+            List<UsesItem> usesItems, AssertionClause requires, List<Dec> decs) {
         super(l, name, parameterDecs, usesItems, decs);
-        myConstraints = constraints;
+        myConceptName = conceptName;
         myRequires = requires;
     }
 
@@ -84,32 +76,48 @@ public class ConceptModuleDec extends ModuleDec {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
 
-        sb.append("Concept ");
+        sb.append("Enhancement ");
         sb.append(formNameArgs(0, innerIndentInc));
+        sb.append(" for ");
+        sb.append(myConceptName.asString(0, innerIndentInc));
         sb.append("\n");
         sb.append(formUses(indentSize, innerIndentInc));
         sb.append("\n");
         sb.append(myRequires.asString(indentSize, innerIndentInc));
         sb.append("\n");
-
-        for (AssertionClause constraint : myConstraints) {
-            sb.append("\n");
-            sb.append(constraint.asString(0, innerIndentInc));
-            sb.append("\n");
-        }
-
         sb.append(formDecEnd(indentSize, innerIndentInc));
 
         return sb.toString();
     }
 
     /**
-     * <p>This method returns the concept level constraints.</p>
-     *
-     * @return A list of {@link AssertionClause} representation objects.
+     * {@inheritDoc}
      */
-    public final List<AssertionClause> getConstraints() {
-        return myConstraints;
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        EnhancementModuleDec that = (EnhancementModuleDec) o;
+
+        if (!myConceptName.equals(that.myConceptName))
+            return false;
+        return myRequires.equals(that.myRequires);
+
+    }
+
+    /**
+     * <p>This method returns the symbol representation
+     * of for the concept name.</p>
+     *
+     * @return The name in {@link PosSymbol} format.
+     */
+    public final PosSymbol getConceptName() {
+        return myConceptName;
     }
 
     /**
@@ -122,6 +130,17 @@ public class ConceptModuleDec extends ModuleDec {
         return myRequires;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + myConceptName.hashCode();
+        result = 31 * result + myRequires.hashCode();
+        return result;
+    }
+
     // ===========================================================
     // Protected Methods
     // ===========================================================
@@ -130,7 +149,7 @@ public class ConceptModuleDec extends ModuleDec {
      * {@inheritDoc}
      */
     @Override
-    protected final ConceptModuleDec copy() {
+    protected final EnhancementModuleDec copy() {
         // Copy all the items in the lists
         List<ModuleParameterDec> newParameterDecs = new ArrayList<>(myParameterDecs.size());
         Collections.copy(newParameterDecs, myParameterDecs);
@@ -138,10 +157,8 @@ public class ConceptModuleDec extends ModuleDec {
         Collections.copy(newUsesItems, myUsesItems);
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
-        List<AssertionClause> newConstraints = new ArrayList<>(myConstraints.size());
-        Collections.copy(newConstraints, myConstraints);
 
-        return new ConceptModuleDec(new Location(myLoc), myName.clone(), newParameterDecs,
-                newUsesItems, myRequires.clone(), newConstraints, newDecs);
+        return new EnhancementModuleDec(new Location(myLoc), myName.clone(), newParameterDecs,
+                myConceptName.clone(), newUsesItems, myRequires.clone(), newDecs);
     }
 }
