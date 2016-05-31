@@ -1,5 +1,5 @@
 /**
- * EnhancementModuleDec.java
+ * FacilityModuleDec.java
  * ---------------------------------
  * Copyright (c) 2016
  * RESOLVE Software Research Group
@@ -23,19 +23,16 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * <p>This is the class for the enhancement module declarations
+ * <p>This is the class for the facility module declarations
  * that the compiler builds using the ANTLR4 AST nodes.</p>
  *
  * @version 2.0
  */
-public class EnhancementModuleDec extends ModuleDec {
+public class FacilityModuleDec extends ModuleDec {
 
     // ===========================================================
     // Member Fields
     // ===========================================================
-
-    /** <p>The concept module associated with this module</p> */
-    private final PosSymbol myConceptName;
 
     /** <p>The requires expression</p> */
     private final AssertionClause myRequires;
@@ -45,22 +42,20 @@ public class EnhancementModuleDec extends ModuleDec {
     // ===========================================================
 
     /**
-     * <p>This constructor creates a "Enhancement" module representation.</p>
+     * <p>This constructor creates a "Facility" module representation.</p>
      *
      * @param l A {@link Location} representation object.
      * @param name The name in {@link PosSymbol} format.
      * @param parameterDecs The list of {@link ModuleParameterDec} objects.
-     * @param conceptName The concept name in {@link PosSymbol} format.
      * @param usesItems The list of {@link UsesItem} objects.
      * @param requires A {@link AssertionClause} representing the concept's
      *                 requires clause.
      * @param decs The list of {@link Dec} objects.
      */
-    public EnhancementModuleDec(Location l, PosSymbol name,
-            List<ModuleParameterDec> parameterDecs, PosSymbol conceptName,
-            List<UsesItem> usesItems, AssertionClause requires, List<Dec> decs) {
+    public FacilityModuleDec(Location l, PosSymbol name,
+            List<ModuleParameterDec> parameterDecs, List<UsesItem> usesItems,
+            AssertionClause requires, List<Dec> decs) {
         super(l, name, parameterDecs, usesItems, decs);
-        myConceptName = conceptName;
         myRequires = requires;
     }
 
@@ -76,10 +71,8 @@ public class EnhancementModuleDec extends ModuleDec {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
 
-        sb.append("Enhancement ");
+        sb.append("Facility ");
         sb.append(formNameArgs(0, innerIndentInc));
-        sb.append(" for ");
-        sb.append(myConceptName.asString(0, innerIndentInc));
         sb.append("\n");
         sb.append(formUses(indentSize, innerIndentInc));
         sb.append("\n");
@@ -102,27 +95,15 @@ public class EnhancementModuleDec extends ModuleDec {
         if (!super.equals(o))
             return false;
 
-        EnhancementModuleDec that = (EnhancementModuleDec) o;
+        FacilityModuleDec that = (FacilityModuleDec) o;
 
-        if (!myConceptName.equals(that.myConceptName))
-            return false;
         return myRequires.equals(that.myRequires);
 
     }
 
     /**
-     * <p>This method returns the symbol representation
-     * of for the concept name.</p>
-     *
-     * @return The name in {@link PosSymbol} format.
-     */
-    public final PosSymbol getConceptName() {
-        return myConceptName;
-    }
-
-    /**
      * <p>This method returns the requires clause
-     * for this enhancement declaration.</p>
+     * for this facility declaration.</p>
      *
      * @return The {@link AssertionClause} representation object.
      */
@@ -136,7 +117,6 @@ public class EnhancementModuleDec extends ModuleDec {
     @Override
     public final int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + myConceptName.hashCode();
         result = 31 * result + myRequires.hashCode();
         return result;
     }
@@ -149,7 +129,7 @@ public class EnhancementModuleDec extends ModuleDec {
      * {@inheritDoc}
      */
     @Override
-    protected final EnhancementModuleDec copy() {
+    protected final FacilityModuleDec copy() {
         // Copy all the items in the lists
         List<ModuleParameterDec> newParameterDecs = new ArrayList<>(myParameterDecs.size());
         Collections.copy(newParameterDecs, myParameterDecs);
@@ -158,7 +138,7 @@ public class EnhancementModuleDec extends ModuleDec {
         List<Dec> newDecs = new ArrayList<>(myDecs.size());
         Collections.copy(newDecs, myDecs);
 
-        return new EnhancementModuleDec(new Location(myLoc), myName.clone(), newParameterDecs,
-                myConceptName.clone(), newUsesItems, myRequires.clone(), newDecs);
+        return new FacilityModuleDec(new Location(myLoc), myName.clone(), newParameterDecs,
+                newUsesItems, myRequires.clone(), newDecs);
     }
 }

@@ -104,6 +104,26 @@ public class ConceptModuleDec extends ModuleDec {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        ConceptModuleDec that = (ConceptModuleDec) o;
+
+        if (!myRequires.equals(that.myRequires))
+            return false;
+        return myConstraints.equals(that.myConstraints);
+
+    }
+
+    /**
      * <p>This method returns the concept level constraints.</p>
      *
      * @return A list of {@link AssertionClause} representation objects.
@@ -120,6 +140,17 @@ public class ConceptModuleDec extends ModuleDec {
      */
     public final AssertionClause getRequires() {
         return myRequires;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + myRequires.hashCode();
+        result = 31 * result + myConstraints.hashCode();
+        return result;
     }
 
     // ===========================================================
