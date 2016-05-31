@@ -4,7 +4,7 @@
 
     <artifactId>RESOLVE</artifactId>
     <groupId>edu.clemson.cs.rsrg</groupId>
-    <version>15.08.31a</version>
+    <version>16.05.31a</version>
     <packaging>jar</packaging>
 
     <name>RESOLVE</name>
@@ -19,6 +19,7 @@
 
         <developer>
             <name>Yu-Shan Sun</name>
+            <email>yushans@g.clemson.edu</email>
             <roles>
                 <role>Project lead - RESOLVE</role>
             </roles>
@@ -237,6 +238,16 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Plugin to generate Javadoc.
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.3</version>
+                <configuration>
+                    <outputDirectory>${project.basedir}/docs/javadoc</outputDirectory>
+                    <sourcepath>${project.basedir}/src/main/java/edu/clemson/cs/rsrg</sourcepath>
+                </configuration>
+            </plugin> -->
             <!-- Plugin to build a RESOLVE jar with dependencies. -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
