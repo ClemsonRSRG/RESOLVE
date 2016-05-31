@@ -76,52 +76,63 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     // Visitor Methods
     // ===========================================================
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterModule(ResolveParser.ModuleContext ctx) {
-        super.enterModule(ctx);
-    }
+    // -----------------------------------------------------------
+    // Module Declaration
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates and saves the complete
+     * module declaration.</p>
      *
-     * @param ctx
+     * @param ctx The complete module declaration.
      */
     @Override
     public void exitModule(ResolveParser.ModuleContext ctx) {
-        super.exitModule(ctx);
+        myNodes.put(ctx, myNodes.get(ctx.getChild(0)));
+        myFinalModule = (ModuleDec) myNodes.get(ctx.getChild(0));
     }
+
+    // -----------------------------------------------------------
+    // Precis Module
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>Checks to see if the {@link ResolveFile} name matches the
+     * open and close names given in the file.</p>
      *
      * @param ctx
      */
     @Override
     public void enterPrecisModule(ResolveParser.PrecisModuleContext ctx) {
-        super.enterPrecisModule(ctx);
+    // TODO: Implement this. Throw an error when it doesn't match
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a {@code Precis}
+     * module declaration.</p>
      *
      * @param ctx
      */
     @Override
     public void exitPrecisModule(ResolveParser.PrecisModuleContext ctx) {
-        super.exitPrecisModule(ctx);
+        List<Dec> decls =
+                Utilities.collect(Dec.class,
+                        ctx.precisItems() != null ? ctx.precisItems().precisItem() : new ArrayList<ParseTree>(),
+                        myNodes);
+        List<ModuleParameterDec> parameterDecls = new ArrayList<>();
+        List<UsesItem> uses = Utilities.collect(UsesItem.class,
+                ctx.usesList() != null ? ctx.usesList().usesItem() : new ArrayList<ParseTree>(),
+                myNodes);
+        PrecisModuleDec precis = new PrecisModuleDec(createLocation(ctx),
+                createPosSymbol(ctx.name), parameterDecls, uses, decls);
+
+        myNodes.put(ctx, precis);
     }
 
     /**
@@ -3954,38 +3965,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         super.visitErrorNode(node);
     }
 
-    // -----------------------------------------------------------
-    // Module Declaration
-    // -----------------------------------------------------------
-
-    //    @Override
-    //    public void exitModule(ResolveParser.ModuleContext ctx) {
-    //        myNodes.put(ctx, myNodes.get(ctx.getChild(0)));
-    //        myFinalModule = (ModuleDec) myNodes.get(ctx.getChild(0));
-    //    }
-
-    // -----------------------------------------------------------
-    // Precis Module
-    // -----------------------------------------------------------
-
-    //    @Override
-    //    public void exitPrecisModule(
-    //            ResolveParser.PrecisModuleContext ctx) {
-    //        List<Dec> decls =
-    //                Utilities.collect(Dec.class, ctx.precisItems() != null ?
-    //                        ctx.precisItems().precisItem() :
-    //                        new ArrayList<ParseTree>(), myNodes);
-    //        List<ModuleParameterDec> parameterDecls = new ArrayList<>();
-    //        List<UsesItem> uses =
-    //                Utilities.collect(UsesItem.class, ctx.usesList() != null ?
-    //                        ctx.usesList().usesItem() :
-    //                        new ArrayList<ParseTree>(), myNodes);
-    //        PrecisModuleDec precis =
-    //                new PrecisModuleDec(createLocation(ctx), createPosSymbol(ctx.name),
-    //                        parameterDecls, uses, decls);
-    //        myNodes.put(ctx, precis);
-    //    }
-    //
     //    @Override
     //    public void exitPrecisItem(ResolveParser.PrecisItemContext ctx) {
     //        //this node at any given time has at most one child. if you're unsure,
