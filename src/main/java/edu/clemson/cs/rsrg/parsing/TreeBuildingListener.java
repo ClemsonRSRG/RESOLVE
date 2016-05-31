@@ -18,6 +18,7 @@ import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.PrecisModuleDec;
+import edu.clemson.cs.rsrg.errorhandling.ErrorHandler;
 import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
@@ -55,6 +56,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /** <p>The current file we are compiling.</p> */
     private final ResolveFile myFile;
 
+    /** <p>The error listener.</p> */
+    private final ErrorHandler myErrorHandler;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -66,7 +70,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      *
      * @param file The current file we are compiling.
      */
-    public TreeBuildingListener(ResolveFile file) {
+    public TreeBuildingListener(ResolveFile file, ErrorHandler errorHandler) {
+        myErrorHandler = errorHandler;
         myFile = file;
         myFinalModule = null;
         myNodes = new ParseTreeProperty<>();
@@ -108,7 +113,15 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void enterPrecisModule(ResolveParser.PrecisModuleContext ctx) {
-    // TODO: Implement this. Throw an error when it doesn't match
+        if (!myFile.getName().equals(ctx.name.getText())) {
+            myErrorHandler.error(createLocation(ctx.name),
+                    "Module name does not match filename.");
+        }
+
+        if (!myFile.getName().equals(ctx.closename.getText())) {
+            myErrorHandler.error(createLocation(ctx.closename),
+                    "End module name does not match the filename.");
+        }
     }
 
     /**

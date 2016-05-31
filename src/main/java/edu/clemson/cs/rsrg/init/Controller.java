@@ -240,17 +240,17 @@ public class Controller {
         parser.addErrorListener(myAntlrErrorListener);
         parser.setTokenFactory(factory);
         ParserRuleContext rootModuleCtx = parser.module();
-
-        // Build the intermediate representation
-        TreeBuildingListener v = new TreeBuildingListener(file);
-        ParseTreeWalker.DEFAULT.walk(v, rootModuleCtx);
-        ModuleDec result = v.getModule();
-        int numErrors = parser.getNumberOfSyntaxErrors();
-        if (numErrors != 0) {
-            throw new MiscErrorException("Found " + numErrors
+        int numParserErrors = parser.getNumberOfSyntaxErrors();
+        if (numParserErrors != 0) {
+            throw new MiscErrorException("Found " + numParserErrors
                     + " errors while parsing " + file.toString(),
                     new IllegalStateException());
         }
+
+        // Build the intermediate representation
+        TreeBuildingListener v = new TreeBuildingListener(file, myErrorHandler);
+        ParseTreeWalker.DEFAULT.walk(v, rootModuleCtx);
+        ModuleDec result = v.getModule();
 
         return result;
     }

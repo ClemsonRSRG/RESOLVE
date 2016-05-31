@@ -69,9 +69,10 @@ public class WriterErrorHandler implements ErrorHandler {
                 if (l != null) {
                     sb.append(l.toString());
                 }
-                sb.append("\n");
+                sb.append("\n\n");
+                sb.append("\t");
                 sb.append(msg);
-                sb.append("\n");
+                sb.append("\n\n");
 
                 myOutputWriter.write(sb.toString());
                 myOutputWriter.flush();
