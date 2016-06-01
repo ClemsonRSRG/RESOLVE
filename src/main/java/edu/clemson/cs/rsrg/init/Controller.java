@@ -138,6 +138,13 @@ public class Controller {
             //AnalysisPipeline analysisPipe =
             //        new AnalysisPipeline(myCompileEnvironment, mySymbolTable);
             for (ModuleIdentifier m : getCompileOrder(g)) {
+                // DEBUG: Print the entire ModuleDec.
+                if (myCompileEnvironment.flags.isFlagSet(ResolveCompiler.FLAG_DEBUG)) {
+                    myErrorHandler.info(null, "\n-----------------------------\n");
+                    myErrorHandler.info(null, myCompileEnvironment.getModuleAST(m).asString(0, 4));
+                    myErrorHandler.info(null, "\n-----------------------------\n");
+                }
+
                 //analysisPipe.process(m);
 
                 // Complete compilation for this module

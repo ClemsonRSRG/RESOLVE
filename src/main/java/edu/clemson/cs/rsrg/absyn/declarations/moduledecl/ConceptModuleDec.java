@@ -86,7 +86,7 @@ public class ConceptModuleDec extends ModuleDec {
 
         sb.append("Concept ");
         sb.append(formNameArgs(0, innerIndentInc));
-        sb.append("\n");
+        sb.append(";\n");
         sb.append(formUses(indentSize, innerIndentInc));
         sb.append("\n");
         sb.append(myRequires.asString(indentSize, innerIndentInc));

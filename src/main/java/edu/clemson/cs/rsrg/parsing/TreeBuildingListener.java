@@ -134,16 +134,16 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitPrecisModule(ResolveParser.PrecisModuleContext ctx) {
-        List<Dec> decls =
+        /*List<Dec> decls =
                 Utilities.collect(Dec.class,
                         ctx.precisItems() != null ? ctx.precisItems().precisItem() : new ArrayList<ParseTree>(),
-                        myNodes);
+                        myNodes);*/
         List<ModuleParameterDec> parameterDecls = new ArrayList<>();
         List<UsesItem> uses = Utilities.collect(UsesItem.class,
                 ctx.usesList() != null ? ctx.usesList().usesItem() : new ArrayList<ParseTree>(),
                 myNodes);
         PrecisModuleDec precis = new PrecisModuleDec(createLocation(ctx),
-                createPosSymbol(ctx.name), parameterDecls, uses, decls);
+                createPosSymbol(ctx.name), parameterDecls, uses, new ArrayList<Dec>());
 
         myNodes.put(ctx, precis);
     }
@@ -694,41 +694,9 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         super.exitEnhancementPerformanceItem(ctx);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterUsesList(ResolveParser.UsesListContext ctx) {
-        super.enterUsesList(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitUsesList(ResolveParser.UsesListContext ctx) {
-        super.exitUsesList(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterUsesItem(ResolveParser.UsesItemContext ctx) {
-        super.enterUsesItem(ctx);
-    }
+    // -----------------------------------------------------------
+    // Uses Items (Imports)
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
@@ -739,7 +707,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitUsesItem(ResolveParser.UsesItemContext ctx) {
-        super.exitUsesItem(ctx);
+        myNodes.put(ctx, new UsesItem(createPosSymbol(ctx.getStart())));
     }
 
     /**
@@ -3990,14 +3958,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     //        myNodes.put(ctx, myNodes.get(ctx.getChild(0)));
     //    }
     //
-    //    // -----------------------------------------------------------
-    //    // Uses Items (Imports)
-    //    // -----------------------------------------------------------
-    //
-    //    @Override
-    //    public void exitUsesItem(ResolveParser.UsesItemContext ctx) {
-    //        myNodes.put(ctx, new UsesItem(createPosSymbol(ctx.getStart())));
-    //    }
     //
     //    // -----------------------------------------------------------
     //    // Mathematical theorems, corollaries, etc

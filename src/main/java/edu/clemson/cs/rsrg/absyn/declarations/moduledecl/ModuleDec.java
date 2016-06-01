@@ -179,6 +179,7 @@ public abstract class ModuleDec extends Dec {
         }
         sb.append("\nend ");
         sb.append(myName.asString(0, innerIndentInc));
+        sb.append(";");
 
         return sb.toString();
     }
@@ -241,6 +242,7 @@ public abstract class ModuleDec extends Dec {
                     sb.append(", ");
                 }
             }
+            sb.append(";");
         }
 
         return sb.toString();

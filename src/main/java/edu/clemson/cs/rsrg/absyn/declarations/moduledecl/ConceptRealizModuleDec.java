@@ -93,7 +93,7 @@ public class ConceptRealizModuleDec extends ModuleDec {
 
         sb.append(" for ");
         sb.append(myConceptName.asString(0, innerIndentInc));
-        sb.append("\n");
+        sb.append(";\n");
         sb.append(formUses(indentSize, innerIndentInc));
         sb.append("\n");
         sb.append(myRequires.asString(indentSize, innerIndentInc));

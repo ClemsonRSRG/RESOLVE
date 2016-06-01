@@ -54,8 +54,7 @@ public class UsesItem extends ResolveConceptualElement {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
-        sb.append(myName.asString(indentSize + innerIndentInc, innerIndentInc));
+        sb.append(myName.asString(indentSize, innerIndentInc));
 
         return sb.toString();
     }
