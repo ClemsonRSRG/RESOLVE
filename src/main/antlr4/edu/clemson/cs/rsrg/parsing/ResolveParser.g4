@@ -805,13 +805,13 @@ mathFunctionTypeExp
 
 mathAddingExp
     :   mathMultiplyingExp
-        (op=(PLUS | MINUS | CONCAT | UNION | INTERSECT | WITHOUT | TILDE)
+        (qualifier=IDENTIFIER QUALIFIER)? (op=(PLUS | MINUS | CONCAT | UNION | INTERSECT | WITHOUT | TILDE)
          mathMultiplyingExp)*
     ;
 
 mathMultiplyingExp
     :   mathExponentialExp
-        (op=(MULTIPLY | DIVIDE | MOD | REM | DIV)
+        (qualifier=IDENTIFIER QUALIFIER)? (op=(MULTIPLY | DIVIDE | MOD | REM | DIV)
          mathExponentialExp)*
     ;
 
