@@ -29,12 +29,6 @@ import java.util.Map;
  */
 public class QuantExp extends MathExp {
 
-    /* TODO: Might need to revisit this
-    public static final int NONE = 0;
-    public static final int FORALL = 1;
-    public static final int EXISTS = 2;
-    public static final int UNIQUE = 3;*/
-
     // ===========================================================
     // Member Fields
     // ===========================================================
@@ -83,29 +77,33 @@ public class QuantExp extends MathExp {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
 
+        printSpace(indentSize, sb);
         if (myQuantification != SymbolTableEntry.Quantification.NONE) {
             sb.append(myQuantification);
+            sb.append(" ");
         }
 
-        if (myVars != null) {
-            Iterator<MathVarDec> i = myVars.iterator();
-            while (i.hasNext()) {
-                MathVarDec m = i.next();
-                sb.append(m.asString(indentSize, innerIndentInc));
+        Iterator<MathVarDec> i = myVars.iterator();
+        while (i.hasNext()) {
+            MathVarDec m = i.next();
+            sb.append(m.getName().asString(0, innerIndentInc));
 
-                if (i.hasNext()) {
-                    sb.append(", ");
-                }
+            if (i.hasNext()) {
+                sb.append(", ");
+            }
+            else {
+                sb.append(" : ");
+                sb.append(m.getTy().asString(0, innerIndentInc));
             }
         }
 
         if (myWhereExp != null) {
-            sb.append(myWhereExp.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+            sb.append(" where ");
+            sb.append(myWhereExp.asString(0, innerIndentInc));
         }
 
+        sb.append(",\n");
         sb.append(myBodyExp.asString(indentSize + innerIndentInc,
                 innerIndentInc));
 
@@ -287,33 +285,7 @@ public class QuantExp extends MathExp {
      */
     @Override
     public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        if (myQuantification != SymbolTableEntry.Quantification.NONE) {
-            sb.append(myQuantification);
-        }
-
-        if (myVars != null) {
-            Iterator<MathVarDec> i = myVars.iterator();
-            while (i.hasNext()) {
-                MathVarDec m = i.next();
-                sb.append(m.toString());
-
-                if (i.hasNext()) {
-                    sb.append(", ");
-                }
-            }
-        }
-
-        if (myWhereExp != null) {
-            sb.append(" where ");
-            sb.append(myWhereExp.toString());
-            sb.append(", ");
-        }
-
-        sb.append(" such that ");
-        sb.append(myBodyExp.toString());
-
-        return sb.toString();
+        return asString(0, 4);
     }
 
     // ===========================================================

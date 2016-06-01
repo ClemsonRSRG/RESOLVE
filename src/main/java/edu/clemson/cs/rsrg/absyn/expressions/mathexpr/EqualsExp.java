@@ -77,14 +77,14 @@ public class EqualsExp extends InfixExp {
      * <p>This constructs an equality/inequality expression.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param qual A {@link PosSymbol} representing the expression's qualifier.
      * @param left A {@link Exp} representing the left hand side.
+     * @param opQual A {@link PosSymbol} representing the operator's qualifier.
      * @param operator A {@link Operator} representing the operator.
      * @param right A {@link Exp} representing the right hand side.
      */
-    public EqualsExp(Location l, PosSymbol qual, Exp left, Operator operator,
+    public EqualsExp(Location l, Exp left, PosSymbol opQual, Operator operator,
             Exp right) {
-        super(l, qual, left, operator.getOperatorAsPosSymbol(l), right);
+        super(l, left, opQual, operator.getOperatorAsPosSymbol(l), right);
         myOperator = operator;
     }
 
@@ -160,12 +160,12 @@ public class EqualsExp extends InfixExp {
         Exp newLeft = ((MathExp) myLeftHandSide).remember();
         Exp newRight = ((MathExp) myRightHandSide).remember();
 
-        PosSymbol qualifier = null;
+        PosSymbol newOpQualifier = null;
         if (myQualifier != null) {
-            qualifier = myQualifier.clone();
+            newOpQualifier = myQualifier.clone();
         }
 
-        return new EqualsExp(new Location(myLoc), qualifier, newLeft,
+        return new EqualsExp(new Location(myLoc), newLeft, newOpQualifier,
                 myOperator, newRight);
     }
 
@@ -219,13 +219,13 @@ public class EqualsExp extends InfixExp {
      */
     @Override
     protected final Exp copy() {
-        PosSymbol qualifier = null;
+        PosSymbol newOpQualifier = null;
         if (myQualifier != null) {
-            qualifier = myQualifier.clone();
+            newOpQualifier = myQualifier.clone();
         }
 
-        return new EqualsExp(new Location(myLoc), qualifier, myLeftHandSide
-                .clone(), myOperator, myRightHandSide.clone());
+        return new EqualsExp(new Location(myLoc), myLeftHandSide,
+                newOpQualifier, myOperator, myRightHandSide.clone());
     }
 
     /**
@@ -233,13 +233,13 @@ public class EqualsExp extends InfixExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        PosSymbol qualifier = null;
+        PosSymbol newOpQualifier = null;
         if (myQualifier != null) {
-            qualifier = myQualifier.clone();
+            newOpQualifier = myQualifier.clone();
         }
 
-        return new EqualsExp(new Location(myLoc), qualifier, substitute(
-                myLeftHandSide, substitutions), myOperator, substitute(
+        return new EqualsExp(new Location(myLoc), substitute(myLeftHandSide,
+                substitutions), newOpQualifier, myOperator, substitute(
                 myRightHandSide, substitutions));
     }
 

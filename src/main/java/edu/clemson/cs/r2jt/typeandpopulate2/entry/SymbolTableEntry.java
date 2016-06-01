@@ -45,6 +45,13 @@ public abstract class SymbolTableEntry {
             public String toString() {
                 return "Existential";
             }
+        },
+        UNIQUE {
+
+            @Override
+            public String toString() {
+                return "Unique";
+            }
         }
     }
 

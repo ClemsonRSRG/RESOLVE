@@ -68,19 +68,18 @@ public class IfExp extends MathExp {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
+
         printSpace(indentSize, sb);
+        sb.append("if ");
+        sb.append(myTestingExp.asString(0, innerIndentInc));
 
-        if (myTestingExp != null) {
-            sb.append(myTestingExp.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-        }
-
-        if (myThenExp != null) {
-            sb.append(myThenExp.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-        }
+        printSpace(indentSize + innerIndentInc, sb);
+        sb.append("then ");
+        sb.append(myThenExp.asString(0, innerIndentInc));
 
         if (myElseExp != null) {
+            printSpace(indentSize + innerIndentInc, sb);
+            sb.append("else ");
             sb.append(myElseExp.asString(indentSize + innerIndentInc,
                     innerIndentInc));
         }
@@ -261,23 +260,7 @@ public class IfExp extends MathExp {
      */
     @Override
     public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("if ");
-        sb.append(myTestingExp.toString());
-
-        sb.append(" then ");
-        sb.append("(");
-        sb.append(myThenExp.toString());
-        sb.append(")");
-
-        if (myElseExp != null) {
-            sb.append("else ");
-            sb.append("(");
-            sb.append(myElseExp.toString());
-            sb.append(")");
-        }
-
-        return sb.toString();
+        return asString(0, 4);
     }
 
     // ===========================================================
@@ -289,19 +272,13 @@ public class IfExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        Exp newTest = null;
-        if (myTestingExp != null) {
-            newTest = myTestingExp.clone();
-        }
-
-        Exp newThenExp = myThenExp.clone();
-
         Exp newElseExp = null;
         if (myElseExp != null) {
             newElseExp = myElseExp.clone();
         }
 
-        return new IfExp(new Location(myLoc), newTest, newThenExp, newElseExp);
+        return new IfExp(new Location(myLoc), myTestingExp.clone(), myThenExp
+                .clone(), newElseExp);
     }
 
     /**

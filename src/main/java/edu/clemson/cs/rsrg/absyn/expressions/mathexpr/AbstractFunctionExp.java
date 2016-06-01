@@ -176,12 +176,7 @@ public abstract class AbstractFunctionExp extends MathExp {
      * @return A {@link PosSymbol} object containing the qualifier.
      */
     public final PosSymbol getQualifier() {
-        PosSymbol qual = null;
-        if (myQualifier != null) {
-            qual = myQualifier.clone();
-        }
-
-        return qual;
+        return myQualifier;
     }
 
     /**

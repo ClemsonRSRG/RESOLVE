@@ -14,6 +14,8 @@ package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.parsing.data.Location;
+import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
+
 import java.util.Map;
 
 /**
@@ -57,10 +59,7 @@ public class DoubleExp extends LiteralExp {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-
-        printSpace(indentSize + innerIndentInc, sb);
         sb.append(myDouble);
-        sb.append("\n");
 
         return sb.toString();
     }
@@ -145,10 +144,7 @@ public class DoubleExp extends LiteralExp {
      */
     @Override
     public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myDouble);
-
-        return sb.toString();
+        return asString(0, 4);
     }
 
     // ===========================================================

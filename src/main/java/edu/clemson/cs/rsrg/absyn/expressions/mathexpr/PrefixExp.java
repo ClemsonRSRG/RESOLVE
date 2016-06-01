@@ -45,12 +45,13 @@ public class PrefixExp extends AbstractFunctionExp {
      * <p>This constructs an infix expression.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param qual A {@link PosSymbol} representing the expression's qualifier.
+     * @param opQual A {@link PosSymbol} representing the operator's qualifier.
      * @param opName A {@link PosSymbol} representing the operator.
      * @param argument A {@link Exp} representing the right hand side.
      */
-    public PrefixExp(Location l, PosSymbol qual, PosSymbol opName, Exp argument) {
-        super(l, qual);
+    public PrefixExp(Location l, PosSymbol opQual, PosSymbol opName,
+            Exp argument) {
+        super(l, opQual);
         myOperationName = opName;
         myArgument = argument;
     }
@@ -225,14 +226,14 @@ public class PrefixExp extends AbstractFunctionExp {
                 newOperator = EqualsExp.Operator.EQUAL;
             }
 
-            PosSymbol qualifier = equalsExp.getQualifier();
-            if (qualifier != null) {
-                qualifier = qualifier.clone();
+            PosSymbol newOpQualifier = equalsExp.getQualifier();
+            if (myQualifier != null) {
+                newOpQualifier = myQualifier.clone();
             }
 
             newArgument =
                     new EqualsExp(new Location(equalsExp.getLocation()),
-                            qualifier, equalsExp.getLeft(), newOperator,
+                            equalsExp.getLeft(), newOpQualifier, newOperator,
                             equalsExp.getRight());
         }
         else {

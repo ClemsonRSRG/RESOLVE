@@ -62,17 +62,13 @@ public class IntegerExp extends LiteralExp {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
 
+        printSpace(indentSize, sb);
         if (myQualifier != null) {
-            sb.append(myQualifier.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+            sb.append(myQualifier.asString(0, innerIndentInc));
             sb.append("::");
         }
-
-        printSpace(indentSize + innerIndentInc, sb);
         sb.append(myInteger);
-        sb.append("\n");
 
         return sb.toString();
     }
@@ -170,14 +166,7 @@ public class IntegerExp extends LiteralExp {
      */
     @Override
     public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        if (myQualifier != null) {
-            sb.append(myQualifier);
-            sb.append("::");
-        }
-        sb.append(myInteger);
-
-        return sb.toString();
+        return asString(0, 4);
     }
 
     // ===========================================================

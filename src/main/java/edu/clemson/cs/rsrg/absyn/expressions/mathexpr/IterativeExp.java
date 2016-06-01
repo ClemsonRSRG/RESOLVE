@@ -134,19 +134,21 @@ public class IterativeExp extends MathExp {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
 
-        printSpace(indentSize + innerIndentInc, sb);
+        printSpace(indentSize, sb);
         sb.append(myOperator);
         sb.append(" ");
 
-        sb.append(myVar.asString(indentSize + innerIndentInc, innerIndentInc));
+        sb.append(myVar.getName().asString(0, innerIndentInc));
+        sb.append(" : ");
+        sb.append(myVar.getTy().asString(0, innerIndentInc));
 
         if (myWhereExp != null) {
-            sb.append(myWhereExp.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+            sb.append(" where ");
+            sb.append(myWhereExp.asString(0, innerIndentInc));
         }
 
+        sb.append(",\n");
         sb.append(myBodyExp.asString(indentSize + innerIndentInc,
                 innerIndentInc));
 
@@ -319,21 +321,7 @@ public class IterativeExp extends MathExp {
      */
     @Override
     public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myOperator.toString());
-        sb.append(" ");
-        sb.append(myVar.toString());
-
-        if (myWhereExp != null) {
-            sb.append(" where ");
-            sb.append(myWhereExp.toString());
-            sb.append(", ");
-        }
-
-        sb.append(myBodyExp.toString());
-
-        return sb.toString();
-
+        return asString(0, 4);
     }
 
     // ===========================================================

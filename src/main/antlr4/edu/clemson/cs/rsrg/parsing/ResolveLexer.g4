@@ -12,10 +12,6 @@ AFFECTS
     :	'affects'
     ;
 
-ALL
-    :   'all'
-    ;
-
 ALTERS
     :   'alt'
     |   'alters'
@@ -188,7 +184,13 @@ EXEMPLAR
     ;
 
 EXISTS
-    :   'exists'
+    :   'There exists'
+    |   'there exists'
+    ;
+
+EXISTS_UNIQUE
+    :   'There exists unique'
+    |   'there exists unique'
     ;
 
 EXTERNALLY
@@ -215,13 +217,18 @@ FINALIZATION
     :   'finalization'
     ;
 
-FROM
-    :   'from'
-    ;
-
 FOR
     :   'For'
     |   'for'
+    ;
+
+FORALL
+    :   'For all'
+    |   'for all'
+    ;
+
+FROM
+    :   'from'
     ;
 
 IF
@@ -445,16 +452,12 @@ RESTORES
     |   'restores'
     ;
 
-SHARED
-    :   'Shared'
+SHAREDSTATE
+    :   'Shared State'
     ;
 
 SHORT_FOR
     :   'short_for'
-    ;
-
-STATE
-    :   'State'
     ;
 
 SUBSET
@@ -465,12 +468,8 @@ SUBSTR
     :   'is_substring_of'
     ;
 
-SUCH
-    :   'such'
-    ;
-
-THAT
-    :   'that'
+SUCHTHAT
+    :   'such that'
     ;
 
 THEN
@@ -481,11 +480,6 @@ THEOREM
     :   'Theorem'
     ;
 
-THERE
-    :   'There'
-    |   'there'
-    ;
-
 TYPE
     :   'Type'
     |   'type'
@@ -493,11 +487,6 @@ TYPE
 
 UNION
     :   'union'
-    ;
-
-UNIQUE
-    :   'Unique'
-    |   'unique'
     ;
 
 UPDATES

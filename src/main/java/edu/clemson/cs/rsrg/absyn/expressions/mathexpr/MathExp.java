@@ -84,7 +84,7 @@ public abstract class MathExp extends Exp {
         }
 
         MathExp retval =
-                new InfixExp(new Location(l), null, e1.clone(), new PosSymbol(
+                new InfixExp(new Location(l), e1.clone(), null, new PosSymbol(
                         new Location(l), "and"), e2.clone());
         retval.setMathType(typeGraph.BOOLEAN);
 
@@ -117,7 +117,7 @@ public abstract class MathExp extends Exp {
         }
 
         MathExp retval =
-                new InfixExp(new Location(l), null, e1.clone(), new PosSymbol(
+                new InfixExp(new Location(l), e1.clone(), null, new PosSymbol(
                         new Location(l), "or"), e2.clone());
         retval.setMathType(typeGraph.BOOLEAN);
 
@@ -150,7 +150,7 @@ public abstract class MathExp extends Exp {
         }
 
         MathExp retval =
-                new InfixExp(new Location(l), null, e1.clone(), new PosSymbol(
+                new InfixExp(new Location(l), e1.clone(), null, new PosSymbol(
                         new Location(l), "implies"), e2.clone());
         retval.setMathType(typeGraph.BOOLEAN);
 

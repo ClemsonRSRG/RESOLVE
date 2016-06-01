@@ -312,7 +312,7 @@ performanceTypeModelDecl
 // shared state rules
 
 sharedStateDecl
-    :   SHARED STATE name=IDENTIFIER
+    :   SHAREDSTATE name=IDENTIFIER
         (moduleStateVariableDecl)+
         (constraintClause)?
         (specModelInit)?
@@ -321,7 +321,7 @@ sharedStateDecl
     ;
 
 sharedStateRepresentationDecl
-    :   SHARED STATE name=IDENTIFIER IS REALIZED BY
+    :   SHAREDSTATE name=IDENTIFIER IS REALIZED BY
         (stateVariableDecl)+
         (conventionClause)?
         (correspondenceClause)?
@@ -331,7 +331,7 @@ sharedStateRepresentationDecl
     ;
 
 facilitySharedStateRepresentationDecl
-    :   SHARED STATE name=IDENTIFIER IS REALIZED BY
+    :   SHAREDSTATE name=IDENTIFIER IS REALIZED BY
         (stateVariableDecl)+
         (conventionClause)?
         (facilityRepresentationInit)?
@@ -598,7 +598,7 @@ whileStmt
 
 mathTypeTheoremDecl
     :   TYPE THEOREM name=IDENTIFIER COLON
-        (FOR ALL mathVariableDeclGroup COMMA)+ mathImpliesExp SEMICOLON
+        (FORALL mathVariableDeclGroup COMMA)+ mathImpliesExp SEMICOLON
     ;
 
 // mathematical theorems, corollaries, etc
@@ -752,18 +752,18 @@ mathExp
 
 mathIteratedExp
     :   op=(BIG_CONCAT | BIG_INTERSECT | BIG_PRODUCT | BIG_SUM | BIG_UNION)
-        IDENTIFIER COLON mathTypeExp
+        mathVariableDecl
         (whereClause)?
         (COMMA | OF) LBRACE mathExp RBRACE
     ;
 
 mathQuantifiedExp
     :   mathImpliesExp
-    |   FOR ALL mathVariableDeclGroup (whereClause)? COMMA
+    |   FORALL mathVariableDeclGroup (whereClause)? (SUCHTHAT | COMMA)
         mathQuantifiedExp
-    |   THERE EXISTS UNIQUE mathVariableDeclGroup (whereClause)? (SUCH THAT | COMMA)
+    |   EXISTS_UNIQUE mathVariableDeclGroup (whereClause)? (SUCHTHAT | COMMA)
         mathQuantifiedExp
-    |   THERE EXISTS mathVariableDeclGroup (whereClause)? (SUCH THAT | COMMA)
+    |   EXISTS mathVariableDeclGroup (whereClause)? (SUCHTHAT | COMMA)
         mathQuantifiedExp
     ;
 
@@ -849,11 +849,11 @@ mathAlternativeExpItem
     ;
 
 mathLiteralExp
-    :   BOOLEAN_LITERAL         #mathBooleanExp
-    |   INTEGER_LITERAL         #mathIntegerExp
-    |   REAL_LITERAL            #mathRealExp
-    |   CHARACTER_LITERAL       #mathCharacterExp
-    |   STRING_LITERAL          #mathStringExp
+    :   BOOLEAN_LITERAL                                     #mathBooleanExp
+    |   (qualifier=IDENTIFIER QUALIFIER)? INTEGER_LITERAL   #mathIntegerExp
+    |   REAL_LITERAL                                        #mathRealExp
+    |   CHARACTER_LITERAL                                   #mathCharacterExp
+    |   STRING_LITERAL                                      #mathStringExp
     ;
 
 mathDotExp
