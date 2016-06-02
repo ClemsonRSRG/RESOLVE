@@ -60,11 +60,10 @@ public class ArbitraryExpTy extends Ty {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
 
+        printSpace(indentSize, sb);
         if (myArbitraryExp != null) {
-            sb.append(myArbitraryExp.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+            sb.append(myArbitraryExp.asString(0, innerIndentInc));
         }
 
         return sb.toString();
@@ -112,7 +111,7 @@ public class ArbitraryExpTy extends Ty {
      */
     @Override
     public final String toString() {
-        return myArbitraryExp.toString();
+        return asString(0, 4);
     }
 
     // ===========================================================

@@ -71,15 +71,20 @@ public class LambdaExp extends MathExp {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
+        sb.append("lambda (");
 
-        for (MathVarDec v : myParameters) {
-            sb.append(v);
-        }
+        Iterator<MathVarDec> it = myParameters.iterator();
+        while (it.hasNext()) {
+            sb.append(it.next().asString(0, innerIndentInc));
 
-        if (myBodyExp != null) {
-            sb.append(myBodyExp.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+            if (it.hasNext()) {
+                sb.append(", ");
+            }
         }
+        sb.append(").(\n");
+        sb.append(myBodyExp.asString(indentSize + innerIndentInc,
+                innerIndentInc));
+        sb.append(")");
 
         return sb.toString();
     }
@@ -228,23 +233,7 @@ public class LambdaExp extends MathExp {
      */
     @Override
     public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("lambda (");
-
-        Iterator<MathVarDec> it = myParameters.iterator();
-        while (it.hasNext()) {
-            sb.append(it.next().toString());
-
-            if (it.hasNext()) {
-                sb.append(", ");
-            }
-        }
-
-        sb.append(").(");
-        sb.append(myBodyExp.toString());
-        sb.append(")");
-
-        return sb.toString();
+        return asString(0, 4);
     }
 
     // ===========================================================

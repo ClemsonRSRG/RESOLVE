@@ -46,11 +46,7 @@ public class MathVarDec extends AbstractVarDec {
      */
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
-        StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
-        sb.append(super.asStringVarDec(indentSize, innerIndentInc));
-
-        return sb.toString();
+        return super.asStringVarDec(indentSize, innerIndentInc);
     }
 
     // ===========================================================

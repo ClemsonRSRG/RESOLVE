@@ -58,50 +58,16 @@ public class TupleExp extends MathExp {
      * @param fields A list of {@link Exp} object.
      */
     public TupleExp(Location l, List<Exp> fields) {
-        this(l, fields.toArray(new Exp[0]), fields.size());
-    }
-
-    /**
-     * <p>This helper method helps construct inner tuple representations
-     * if any.</p>
-     *
-     * @param l A {@link Location} representation object.
-     * @param fields A array of {@link Exp} objects.
-     * @param elementCount The number of elements in the array.
-     */
-    private TupleExp(Location l, Exp[] fields, int elementCount) {
         super(l);
 
         //We assert this isn't possible, but who knows?
-        if (elementCount < 2) {
-            throw new MiscErrorException("Unexpected cartesian product size.", new IllegalArgumentException());
+        if (fields.size() != 2) {
+            throw new MiscErrorException("Unexpected cartesian product size.",
+                    new IllegalArgumentException());
         }
 
-        int workingSize = 0;
-
-        Exp first;
-        if (elementCount == 2) {
-            first = fields[0];
-        }
-        else {
-            first = new TupleExp(l, fields, elementCount - 1);
-        }
-
-        if (first instanceof TupleExp) {
-            workingSize += ((TupleExp) first).getSize();
-        }
-        else {
-            workingSize += 1;
-        }
-
-        Exp second = fields[elementCount - 1];
-        workingSize += 1;
-
-        myFields = new ArrayList<>();
-        myFields.add(first);
-        myFields.add(second);
-
-        mySize = workingSize;
+        myFields = fields;
+        mySize = fields.size();
     }
 
     // ===========================================================
@@ -115,13 +81,11 @@ public class TupleExp extends MathExp {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-
-        if (myFields != null) {
-            for (Exp e : myFields) {
-                sb.append(e.asString(indentSize + innerIndentInc,
-                        innerIndentInc));
-            }
-        }
+        sb.append("(");
+        sb.append(myFields.get(0).asString(0, innerIndentInc));
+        sb.append(", ");
+        sb.append(myFields.get(1).asString(0, innerIndentInc));
+        sb.append(")");
 
         return sb.toString();
     }
@@ -352,23 +316,7 @@ public class TupleExp extends MathExp {
      */
     @Override
     public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("(");
-
-        boolean first = true;
-        for (Exp member : myFields) {
-            if (!first) {
-                sb.append(", ");
-            }
-            else {
-                first = false;
-            }
-
-            sb.append(member.toString());
-        }
-        sb.append(")");
-
-        return sb.toString();
+        return asString(0, 4);
     }
 
     // ===========================================================

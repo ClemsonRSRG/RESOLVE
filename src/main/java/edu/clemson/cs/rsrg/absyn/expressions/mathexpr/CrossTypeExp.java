@@ -13,6 +13,7 @@
 package edu.clemson.cs.rsrg.absyn.expressions.mathexpr;
 
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
+import edu.clemson.cs.rsrg.absyn.rawtypes.ArbitraryExpTy;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
 import java.util.*;
@@ -40,7 +41,8 @@ public class CrossTypeExp extends MathExp {
     // Member Fields
     // ===========================================================
 
-    private final Map<PosSymbol, Exp> myTagsToFields;
+    /** <p>A map from names to raw types.</p> */
+    private final Map<PosSymbol, ArbitraryExpTy> myTagsToFields;
 
     // ===========================================================
     // Constructors
@@ -52,7 +54,8 @@ public class CrossTypeExp extends MathExp {
      * @param l A {@link Location} representation object.
      * @param tagsToFieldsMap A map containing all the tags to fields mapping.
      */
-    public CrossTypeExp(Location l, Map<PosSymbol, Exp> tagsToFieldsMap) {
+    public CrossTypeExp(Location l,
+            Map<PosSymbol, ArbitraryExpTy> tagsToFieldsMap) {
         super(l);
         myTagsToFields = tagsToFieldsMap;
     }
@@ -95,7 +98,8 @@ public class CrossTypeExp extends MathExp {
         Set<PosSymbol> tags = myTagsToFields.keySet();
         Iterator<PosSymbol> it = tags.iterator();
         while (it.hasNext() && !found) {
-            Exp fieldExp = myTagsToFields.get(it.next());
+            ArbitraryExpTy fieldTy = myTagsToFields.get(it.next());
+            Exp fieldExp = fieldTy.getArbitraryExp();
             found = fieldExp.containsExp(exp);
         }
 
@@ -112,7 +116,8 @@ public class CrossTypeExp extends MathExp {
         Set<PosSymbol> tags = myTagsToFields.keySet();
         Iterator<PosSymbol> it = tags.iterator();
         while (it.hasNext() && !found) {
-            Exp fieldExp = myTagsToFields.get(it.next());
+            ArbitraryExpTy fieldTy = myTagsToFields.get(it.next());
+            Exp fieldExp = fieldTy.getArbitraryExp();
             found = fieldExp.containsVar(varName, IsOldExp);
         }
 
@@ -154,9 +159,12 @@ public class CrossTypeExp extends MathExp {
             Iterator<PosSymbol> thisTagsIt = tags.iterator();
             Iterator<PosSymbol> eTagsIt = eTags.iterator();
             while (result && thisTagsIt.hasNext() && eTagsIt.hasNext()) {
-                Exp thisExp = myTagsToFields.get(thisTagsIt.next());
-                Exp eExp = eAsCrossTypeExp.myTagsToFields.get(eTagsIt.next());
-                result &= thisExp.equivalent(eExp);
+                ArbitraryExpTy thisTy = myTagsToFields.get(thisTagsIt.next());
+                ArbitraryExpTy eTy =
+                        eAsCrossTypeExp.myTagsToFields.get(eTagsIt.next());
+                result &=
+                        thisTy.getArbitraryExp().equivalent(
+                                eTy.getArbitraryExp());
             }
 
             //Both had better have run out at the same time
@@ -190,7 +198,7 @@ public class CrossTypeExp extends MathExp {
      *
      * @return The {@link Map} containing the tags to field pairs.
      */
-    public final Map<PosSymbol, Exp> getTagsToFieldsMap() {
+    public final Map<PosSymbol, ArbitraryExpTy> getTagsToFieldsMap() {
         return myTagsToFields;
     }
 
@@ -233,21 +241,7 @@ public class CrossTypeExp extends MathExp {
      */
     @Override
     public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Cart_Prod\n");
-
-        Set<PosSymbol> tags = myTagsToFields.keySet();
-        for (PosSymbol tag : tags) {
-            sb.append("\t");
-            sb.append(tag.toString());
-            sb.append(": ");
-            sb.append(myTagsToFields.get(tag).toString());
-            sb.append("\n");
-        }
-
-        sb.append("end\n");
-
-        return sb.toString();
+        return asString(0, 4);
     }
 
     // ===========================================================
@@ -259,13 +253,13 @@ public class CrossTypeExp extends MathExp {
      */
     @Override
     protected final Exp copy() {
-        Map<PosSymbol, Exp> newTagsToFields = new HashMap<>();
+        Map<PosSymbol, ArbitraryExpTy> newTagsToFields = new HashMap<>();
         Set<PosSymbol> tags = myTagsToFields.keySet();
         for (PosSymbol tag : tags) {
             PosSymbol newTag = tag.clone();
-            Exp field = myTagsToFields.get(tag);
+            ArbitraryExpTy field = myTagsToFields.get(tag);
 
-            newTagsToFields.put(newTag, field.clone());
+            newTagsToFields.put(newTag, (ArbitraryExpTy) field.clone());
         }
 
         return new CrossTypeExp(new Location(myLoc), newTagsToFields);

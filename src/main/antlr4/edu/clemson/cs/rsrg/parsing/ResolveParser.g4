@@ -886,7 +886,7 @@ mathSetExp
     ;
 
 mathTupleExp
-    :   LPAREN mathExp (COMMA mathExp)+ RPAREN
+    :   LPAREN mathExp COMMA mathExp RPAREN
     ;
 
 //NOTE: Allows only very rudimentary lambda expressions.
