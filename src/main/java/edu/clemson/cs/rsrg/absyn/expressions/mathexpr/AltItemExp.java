@@ -70,16 +70,17 @@ public class AltItemExp extends MathExp {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
+        sb.append(myAssignmentExp.asString(indentSize, innerIndentInc));
 
+        // Check for if/otherwise
         if (myTestingExp != null) {
-            sb.append(myTestingExp.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+            printSpace(innerIndentInc, sb);
+            sb.append("if ");
+            sb.append(myTestingExp.asString(0, innerIndentInc));
         }
-
-        if (myAssignmentExp != null) {
-            sb.append(myAssignmentExp.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+        else {
+            printSpace(innerIndentInc, sb);
+            sb.append("otherwise");
         }
 
         return sb.toString();
@@ -90,12 +91,9 @@ public class AltItemExp extends MathExp {
      */
     @Override
     public final boolean containsExp(Exp exp) {
-        boolean found = false;
-        if (myTestingExp != null) {
+        boolean found = myAssignmentExp.containsExp(exp);
+        if (!found && myTestingExp != null) {
             found = myTestingExp.containsExp(exp);
-        }
-        if (!found && myAssignmentExp != null) {
-            found = myAssignmentExp.containsExp(exp);
         }
 
         return found;
@@ -106,12 +104,9 @@ public class AltItemExp extends MathExp {
      */
     @Override
     public final boolean containsVar(String varName, boolean IsOldExp) {
-        boolean found = false;
-        if (myTestingExp != null) {
+        boolean found = myAssignmentExp.containsVar(varName, IsOldExp);
+        if (!found && myTestingExp != null) {
             found = myTestingExp.containsVar(varName, IsOldExp);
-        }
-        if (!found && myAssignmentExp != null) {
-            found = myAssignmentExp.containsVar(varName, IsOldExp);
         }
 
         return found;
@@ -149,8 +144,14 @@ public class AltItemExp extends MathExp {
         if (result) {
             AltItemExp eAsAltItemExp = (AltItemExp) e;
 
-            result = eAsAltItemExp.myTestingExp.equivalent(myTestingExp);
-            result &= eAsAltItemExp.myAssignmentExp.equivalent(myAssignmentExp);
+            result = eAsAltItemExp.myAssignmentExp.equivalent(myAssignmentExp);
+
+            if (myTestingExp != null && eAsAltItemExp.myTestingExp != null) {
+                result &= eAsAltItemExp.myTestingExp.equivalent(myTestingExp);
+            }
+            else {
+                result = false;
+            }
         }
 
         return result;
@@ -171,7 +172,10 @@ public class AltItemExp extends MathExp {
     @Override
     public final List<Exp> getSubExpressions() {
         List<Exp> subExpList = new ArrayList<>();
-        subExpList.add(myTestingExp.clone());
+
+        if (myTestingExp != null) {
+            subExpList.add(myTestingExp.clone());
+        }
         subExpList.add(myAssignmentExp.clone());
 
         return subExpList;
@@ -217,10 +221,7 @@ public class AltItemExp extends MathExp {
             testingExp = ((MathExp) testingExp).remember();
         }
 
-        Exp assignmentExp = myAssignmentExp;
-        if (assignmentExp != null) {
-            assignmentExp = ((MathExp) assignmentExp).remember();
-        }
+        Exp assignmentExp = ((MathExp) myAssignmentExp).remember();
 
         return new AltItemExp(new Location(myLoc), testingExp, assignmentExp);
     }
@@ -249,12 +250,8 @@ public class AltItemExp extends MathExp {
             newTest = myTestingExp.clone();
         }
 
-        Exp newAssignment = null;
-        if (myAssignmentExp != null) {
-            newAssignment = myAssignmentExp.clone();
-        }
-
-        return new AltItemExp(new Location(myLoc), newTest, newAssignment);
+        return new AltItemExp(new Location(myLoc), newTest, myAssignmentExp
+                .clone());
     }
 
     /**
@@ -262,8 +259,13 @@ public class AltItemExp extends MathExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        return new AltItemExp(myLoc, substitute(myTestingExp, substitutions),
-                substitute(myAssignmentExp, substitutions));
+        Exp newTest = null;
+        if (myTestingExp != null) {
+            newTest = substitute(myTestingExp, substitutions);
+        }
+
+        return new AltItemExp(myLoc, newTest, substitute(myAssignmentExp,
+                substitutions));
     }
 
 }

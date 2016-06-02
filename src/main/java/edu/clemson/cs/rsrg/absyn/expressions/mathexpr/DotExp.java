@@ -64,10 +64,12 @@ public class DotExp extends MathExp {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
 
-        if (mySegmentExps != null) {
-            for (Exp e : mySegmentExps) {
-                sb.append(e.asString(indentSize + innerIndentInc,
-                        innerIndentInc));
+        Iterator<Exp> it = mySegmentExps.iterator();
+        while (it.hasNext()) {
+            sb.append(it.next().asString(0, innerIndentInc));
+
+            if (it.hasNext()) {
+                sb.append(".");
             }
         }
 

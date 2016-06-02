@@ -66,17 +66,9 @@ public class PrefixExp extends AbstractFunctionExp {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
 
-        if (myOperationName != null) {
-            sb.append(myOperationName.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-        }
-
-        if (myArgument != null) {
-            sb.append(myArgument.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-        }
+        sb.append(myOperationName.asString(indentSize, innerIndentInc));
+        sb.append(myArgument.asString(0, innerIndentInc));
 
         return sb.toString();
     }

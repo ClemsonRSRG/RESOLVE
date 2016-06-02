@@ -676,7 +676,7 @@ standardPrefixSignature
     ;
 
 prefixOp
-    :   (PLUS | MINUS | NOT | ABS | COMPLEMENT)
+    :   op=(PLUS | MINUS | NOT | ABS | COMPLEMENT)
     ;
 
 infixOp
@@ -820,7 +820,7 @@ mathExponentialExp
     ;
 
 mathPrefixExp
-    :   prefixOp mathPrimaryExp
+    :   (qualifier=IDENTIFIER QUALIFIER)? prefixOp mathPrimaryExp
     |   mathPrimaryExp
     ;
 
@@ -871,7 +871,8 @@ mathCleanFunctionExp
         name=IDENTIFIER (CARAT mathNestedExp)?
         LPAREN mathExp (COMMA mathExp)* RPAREN                  #mathFunctionExp
     |   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER       #mathVarExp
-    |   OP (infixOp | op=NOT | op=ABS | op=COMPLEMENT)          #mathOpNameExp
+    |   OP (qualifier=IDENTIFIER QUALIFIER)?
+        (infixOp | op=NOT | op=ABS | op=COMPLEMENT)             #mathOpNameExp
     ;
 
 mathOutfixExp
