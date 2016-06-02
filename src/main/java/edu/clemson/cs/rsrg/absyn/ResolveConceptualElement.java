@@ -202,8 +202,7 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
     public abstract int hashCode();
 
     /**
-     * <p>This method must be implemented by all inherited classes
-     * to return the object in string format.</p>
+     * <p>This method returns the object in string format.</p>
      *
      * <p><strong>Note:</strong> The {@code toString} method is intended
      * for printing debugging messages. Do not use its value to perform
@@ -212,7 +211,9 @@ public abstract class ResolveConceptualElement implements BasicCapabilities {
      * @return Object as a string.
      */
     @Override
-    public abstract String toString();
+    public final String toString() {
+        return asString(0, 4);
+    }
 
     // ===========================================================
     // Protected Methods

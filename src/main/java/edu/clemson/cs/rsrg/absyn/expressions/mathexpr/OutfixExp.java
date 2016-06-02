@@ -350,31 +350,6 @@ public class OutfixExp extends AbstractFunctionExp {
         return this.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        if (myQualifier != null) {
-            sb.append(myQualifier.toString());
-            sb.append("::");
-        }
-
-        sb.append(myOperator.getLeftDelimiterString());
-        sb.append(" ");
-
-        if (myArgument != null) {
-            sb.append(myArgument.toString());
-        }
-
-        sb.append(" ");
-        sb.append(myOperator.getRightDelimiterString());
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

@@ -224,55 +224,6 @@ public class OperationDec extends Dec implements ModuleParameter {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Operation ");
-        sb.append(myName.toString());
-
-        // parameters
-        sb.append("( ");
-        Iterator<ParameterVarDec> paraIt = myParameters.iterator();
-        while (paraIt.hasNext()) {
-            sb.append(paraIt.next().toString());
-
-            if (paraIt.hasNext()) {
-                sb.append("; ");
-            }
-        }
-        sb.append(" )");
-
-        // return value
-        if (myReturnTy != null) {
-            sb.append(" : ");
-            sb.append(myReturnTy.toString());
-        }
-
-        sb.append(";\n");
-
-        // affects clause
-        if (myAffects != null) {
-            sb.append("\t");
-            sb.append(myAffects.toString());
-            sb.append("\n");
-        }
-
-        // requires clause
-        sb.append("\t");
-        sb.append(myRequires.toString());
-        sb.append("\n");
-
-        // ensures clause
-        sb.append("\t");
-        sb.append(myEnsures.toString());
-        sb.append("\n");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

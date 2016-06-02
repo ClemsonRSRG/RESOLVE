@@ -125,25 +125,6 @@ public class AssumeStmt extends Statement {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        if (myIsStipulate) {
-            sb.append("Stipulate ");
-        }
-        else {
-            sb.append("Assume ");
-        }
-
-        sb.append(myAssertion.toString());
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

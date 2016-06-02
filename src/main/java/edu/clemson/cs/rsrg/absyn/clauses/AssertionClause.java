@@ -262,24 +262,4 @@ public class AssertionClause extends ResolveConceptualElement {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myClauseType.toString());
-        sb.append(myAssertionExp.toString());
-
-        // Print any which_entails assertions
-        if (myWhichEntailsExp != null) {
-            sb.append(" which_entails ");
-            sb.append(myWhichEntailsExp.toString());
-        }
-
-        sb.append("\n");
-
-        return sb.toString();
-    }
-
 }

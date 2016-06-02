@@ -160,30 +160,6 @@ public class IfStmt extends Statement {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myIfClause.toString());
-
-        for (IfConditionItem item : myElseIfs) {
-            sb.append("Else ");
-            sb.append(item.toString());
-        }
-
-        sb.append("Else\n");
-        for (Statement s : myElseStatements) {
-            sb.append("\t");
-            sb.append(s.toString());
-            sb.append("\n");
-        }
-        sb.append("end");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

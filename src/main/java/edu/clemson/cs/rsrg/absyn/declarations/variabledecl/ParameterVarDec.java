@@ -104,19 +104,6 @@ public class ParameterVarDec extends AbstractVarDec {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myMode);
-        sb.append("\t");
-        sb.append(super.toString());
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

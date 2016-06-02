@@ -225,22 +225,6 @@ public class AlternativeExp extends MathExp {
         return this.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("{{");
-        for (AltItemExp exp : myAlternatives) {
-            sb.append(exp.toString());
-            sb.append("\n");
-        }
-        sb.append("}}");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

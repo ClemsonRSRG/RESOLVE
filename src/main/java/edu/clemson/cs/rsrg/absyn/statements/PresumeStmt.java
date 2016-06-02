@@ -96,17 +96,6 @@ public class PresumeStmt extends Statement {
         return myAssertion.hashCode();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Presume " + myAssertion.toString());
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

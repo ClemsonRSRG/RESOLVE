@@ -104,14 +104,6 @@ public class ModuleParameterDec<T extends Dec & ModuleParameter> extends Dec {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        return myWrappedDec.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

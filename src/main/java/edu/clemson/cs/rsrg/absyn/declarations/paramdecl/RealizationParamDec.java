@@ -101,19 +101,6 @@ public class RealizationParamDec extends Dec implements ModuleParameter {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myName.toString());
-        sb.append(" of ");
-        sb.append(myConceptName);
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

@@ -136,12 +136,4 @@ public class ModuleArgumentItem extends ResolveConceptualElement {
         myTypeValue = type;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        return myArgumentExp.toString();
-    }
-
 }

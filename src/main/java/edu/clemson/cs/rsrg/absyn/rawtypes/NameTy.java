@@ -137,25 +137,6 @@ public class NameTy extends Ty {
         myQualifier = qualifier;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        if (myQualifier != null) {
-            sb.append(myQualifier.toString());
-            sb.append("::");
-        }
-
-        if (myName != null) {
-            sb.append(myName.toString());
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

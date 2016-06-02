@@ -256,33 +256,6 @@ public class ProgramFunctionExp extends ProgramExp {
         myQualifier = qualifier;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        if (myQualifier != null) {
-            sb.append(myQualifier.toString());
-            sb.append("::");
-        }
-
-        if (myOperationName != null) {
-            sb.append(myOperationName.toString());
-        }
-
-        if (myExpressionArgs != null) {
-            sb.append("(");
-            for (ProgramExp exp : myExpressionArgs) {
-                sb.append(exp.toString());
-            }
-            sb.append(")");
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

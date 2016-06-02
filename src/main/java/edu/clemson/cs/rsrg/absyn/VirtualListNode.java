@@ -166,15 +166,6 @@ public class VirtualListNode extends ResolveConceptualElement {
                 new UnsupportedOperationException());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        throw new MiscErrorException("Not supported yet.",
-                new UnsupportedOperationException());
-    }
-
     // ===========================================================
     // Private Methods
     // ===========================================================

@@ -195,60 +195,6 @@ public class PerformanceOperationDec extends Dec implements ModuleParameter {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Operation ");
-        sb.append(myName.toString());
-
-        // parameters
-        sb.append("( ");
-        Iterator<ParameterVarDec> paraIt =
-                myWrappedOpDec.getParameters().iterator();
-        while (paraIt.hasNext()) {
-            sb.append(paraIt.next().toString());
-
-            if (paraIt.hasNext()) {
-                sb.append("; ");
-            }
-        }
-        sb.append(" )");
-
-        // return value
-        Ty returnTy = myWrappedOpDec.getReturnTy();
-        if (returnTy != null) {
-            sb.append(" : ");
-            sb.append(returnTy.toString());
-        }
-
-        sb.append(";\n");
-
-        // affects clause
-        AffectsClause affects = myWrappedOpDec.getAffectedVars();
-        if (affects != null) {
-            sb.append(affects.toString());
-        }
-
-        // requires clause
-        AssertionClause requires = myWrappedOpDec.getRequires();
-        sb.append(requires.toString());
-
-        // ensures clause
-        AssertionClause ensures = myWrappedOpDec.getEnsures();
-        sb.append(ensures.toString());
-
-        // duration clause
-        sb.append(myDuration.toString());
-
-        // manip_disp clause
-        sb.append(myManipDisp.toString());
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

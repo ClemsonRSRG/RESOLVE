@@ -217,19 +217,6 @@ public class TypeAssertionExp extends MathExp {
         return this.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myExp.toString());
-        sb.append("\t");
-        sb.append(myAssertedTy.toString());
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

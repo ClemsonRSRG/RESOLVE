@@ -236,14 +236,6 @@ public class CrossTypeExp extends MathExp {
                 "Remember rule application is currently not supported.");
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        return asString(0, 4);
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

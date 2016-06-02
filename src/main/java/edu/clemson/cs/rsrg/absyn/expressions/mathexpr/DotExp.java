@@ -229,26 +229,6 @@ public class DotExp extends MathExp {
         return this.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        if (mySegmentExps != null) {
-            Iterator<Exp> i = mySegmentExps.iterator();
-
-            while (i.hasNext()) {
-                sb.append(i.next().toString());
-                if (i.hasNext()) {
-                    sb.append(".");
-                }
-            }
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

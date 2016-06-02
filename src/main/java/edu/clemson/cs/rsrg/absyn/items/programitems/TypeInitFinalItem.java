@@ -259,50 +259,6 @@ public class TypeInitFinalItem extends ResolveConceptualElement {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myItemType.toString());
-        sb.append("\n");
-
-        // affects clause
-        if (myAffects != null) {
-            sb.append("\t");
-            sb.append(myAffects.toString());
-        }
-
-        Iterator<FacilityDec> it1 = myFacilityDecs.iterator();
-        while (it1.hasNext()) {
-            sb.append("\t");
-            sb.append(it1.next().toString());
-        }
-
-        Iterator<VarDec> it2 = myVariableDecs.iterator();
-        while (it2.hasNext()) {
-            sb.append("\t");
-            sb.append(it2.next().toString());
-        }
-
-        Iterator<AuxVarDec> it3 = myAuxVariableDecs.iterator();
-        while (it3.hasNext()) {
-            sb.append("\t");
-            sb.append(it3.next().toString());
-        }
-
-        Iterator<Statement> it4 = myStatements.iterator();
-        while (it4.hasNext()) {
-            sb.append("\t");
-            sb.append(it4.next().toString());
-        }
-
-        sb.append("end\n");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Private Methods
     // ===========================================================

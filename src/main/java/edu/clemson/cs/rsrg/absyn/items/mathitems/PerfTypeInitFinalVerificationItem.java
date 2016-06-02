@@ -192,26 +192,4 @@ public class PerfTypeInitFinalVerificationItem extends ResolveConceptualElement 
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myItemType.toString());
-        sb.append("\n");
-
-        // duration clause
-        sb.append("\t");
-        sb.append(myDuration.toString());
-
-        // manipulative displacement clause
-        if (myManipDisp != null) {
-            sb.append("\t");
-            sb.append(myManipDisp.toString());
-        }
-
-        return sb.toString();
-    }
-
 }

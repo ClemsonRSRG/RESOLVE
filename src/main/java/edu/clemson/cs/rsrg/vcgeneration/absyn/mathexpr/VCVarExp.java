@@ -190,18 +190,6 @@ public class VCVarExp extends MathExp {
         return this.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myOrigExp.toString());
-        sb.append("'");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

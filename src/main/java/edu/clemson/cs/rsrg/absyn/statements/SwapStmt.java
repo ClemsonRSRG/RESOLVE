@@ -119,20 +119,6 @@ public class SwapStmt extends Statement {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        sb.append(myLeftHandSide.toString());
-        sb.append(" :=: ");
-        sb.append(myRightHandSide.toString());
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

@@ -105,21 +105,6 @@ public class RecordTy extends Ty {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        for (VarDec v : myInnerFields) {
-            sb.append(v.toString());
-            sb.append("\n");
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

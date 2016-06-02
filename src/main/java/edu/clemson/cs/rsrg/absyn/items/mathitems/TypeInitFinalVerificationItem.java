@@ -187,26 +187,4 @@ public class TypeInitFinalVerificationItem extends ResolveConceptualElement {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myItemType.toString());
-        sb.append("\n");
-
-        // affects clause
-        if (myAffects != null) {
-            sb.append("\t");
-            sb.append(myAffects.toString());
-        }
-
-        // ensures clause
-        sb.append("\t");
-        sb.append(myEnsures.toString());
-
-        return sb.toString();
-    }
-
 }

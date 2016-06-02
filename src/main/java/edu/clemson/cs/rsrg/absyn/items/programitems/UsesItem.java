@@ -100,12 +100,4 @@ public class UsesItem extends ResolveConceptualElement {
         return myName.hashCode();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        return myName.toString();
-    }
-
 }

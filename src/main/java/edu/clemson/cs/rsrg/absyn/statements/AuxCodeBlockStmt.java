@@ -104,25 +104,6 @@ public class AuxCodeBlockStmt extends Statement {
         return myStatements.hashCode();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Aux_Code\n");
-
-        for (Statement s : myStatements) {
-            sb.append("\t");
-            sb.append(s.toString());
-            sb.append("\n");
-        }
-
-        sb.append("end");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

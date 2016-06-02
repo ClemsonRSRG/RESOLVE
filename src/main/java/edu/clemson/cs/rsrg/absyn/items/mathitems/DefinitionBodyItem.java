@@ -199,35 +199,4 @@ public class DefinitionBodyItem extends ResolveConceptualElement {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        if (myIsInductiveFlag) {
-            sb.append(" is\n");
-
-            // base case
-            sb.append("\t");
-            sb.append("(i) ");
-            sb.append(myBase.toString());
-            sb.append("\n");
-
-            // inductive hypothesis
-            sb.append("\t");
-            sb.append("(ii) ");
-            sb.append(myHypothesis.toString());
-            sb.append("\n");
-        }
-        else {
-            sb.append(" =\n");
-            sb.append(myHypothesis.toString());
-            sb.append("\n");
-        }
-
-        return sb.toString();
-    }
-
 }

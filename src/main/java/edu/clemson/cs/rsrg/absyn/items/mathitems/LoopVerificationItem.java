@@ -209,40 +209,4 @@ public class LoopVerificationItem extends ResolveConceptualElement {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        // Changing clause
-        sb.append("\tchanging ");
-        Iterator<ProgramVariableExp> expIterator = myChangingVars.iterator();
-        while (expIterator.hasNext()) {
-            sb.append(expIterator.next().toString());
-
-            if (expIterator.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        sb.append("\n");
-
-        // Maintaining clause
-        sb.append("\t");
-        sb.append(myMaintainingClause.toString());
-
-        // Decreasing clause
-        sb.append("\t");
-        sb.append(myDecreasingClause.toString());
-
-        // Elapsed time clause (if any)
-        if (myElapsedTimeClause != null) {
-            sb.append("\t");
-            sb.append(myElapsedTimeClause.toString());
-        }
-
-        return sb.toString();
-    }
-
 }

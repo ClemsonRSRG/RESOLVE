@@ -137,30 +137,6 @@ public class EnhancementSpecItem extends ResolveConceptualElement {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("enhanced by ");
-        sb.append(myName.toString());
-
-        sb.append("( ");
-        Iterator<ModuleArgumentItem> it = myParams.iterator();
-        while (it.hasNext()) {
-            ModuleArgumentItem m = it.next();
-            sb.append(m.toString());
-
-            if (it.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        sb.append(" )\n");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Private Methods
     // ===========================================================

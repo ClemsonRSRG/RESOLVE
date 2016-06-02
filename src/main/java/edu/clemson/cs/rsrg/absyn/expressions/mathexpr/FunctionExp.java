@@ -317,38 +317,6 @@ public class FunctionExp extends AbstractFunctionExp {
         return this.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        if (myQuantification != SymbolTableEntry.Quantification.NONE) {
-            sb.append(myQuantification);
-            sb.append(" ");
-        }
-
-        if (myQualifier != null) {
-            sb.append(myQualifier.toString());
-            sb.append("::");
-        }
-
-        sb.append(myFuncNameExp.toString());
-        sb.append("(");
-        Iterator<Exp> it = myArguments.iterator();
-        while (it.hasNext()) {
-            sb.append(it.next().toString());
-
-            if (it.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        sb.append(")");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

@@ -90,14 +90,6 @@ public abstract class AbstractVarDec extends Dec {
         return myTy;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return asString(0, 4);
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

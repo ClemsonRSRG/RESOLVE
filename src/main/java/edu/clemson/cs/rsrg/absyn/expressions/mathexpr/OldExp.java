@@ -218,20 +218,6 @@ public class OldExp extends MathExp {
         return this.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        if (myOrigExp != null) {
-            sb.append("#");
-            sb.append(myOrigExp.toString());
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

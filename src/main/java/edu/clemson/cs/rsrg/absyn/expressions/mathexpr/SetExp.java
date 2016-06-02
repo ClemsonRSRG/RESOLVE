@@ -227,27 +227,6 @@ public class SetExp extends MathExp {
         return this.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("{ ");
-        sb.append(myVar.toString());
-
-        if (myWhereExp != null) {
-            sb.append(" where ");
-            sb.append(myWhereExp.toString());
-            sb.append(", ");
-        }
-
-        sb.append(myBodyExp.toString());
-        sb.append(" }");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

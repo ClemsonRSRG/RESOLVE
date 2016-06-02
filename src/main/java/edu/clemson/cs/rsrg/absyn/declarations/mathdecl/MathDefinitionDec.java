@@ -215,44 +215,6 @@ public class MathDefinitionDec extends Dec {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        if (myIsImplicitFlag) {
-            sb.append("Implicit ");
-        }
-        sb.append("Definition ");
-        sb.append(myName.toString());
-
-        // any parameters
-        if (myParameters.size() > 0) {
-            sb.append("( ");
-            Iterator<MathVarDec> it = myParameters.iterator();
-            while (it.hasNext()) {
-                sb.append(it.next().toString());
-
-                if (it.hasNext()) {
-                    sb.append(", ");
-                }
-            }
-            sb.append(" )");
-        }
-
-        // return type
-        sb.append(" : ");
-        sb.append(myReturnTy.toString());
-
-        // any definition body
-        if (myBodyItem != null) {
-            myBodyItem.toString();
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

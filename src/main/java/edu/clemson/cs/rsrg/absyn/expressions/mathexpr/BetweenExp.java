@@ -220,23 +220,6 @@ public class BetweenExp extends MathExp {
         return this.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        Iterator<Exp> i = myJoiningExps.iterator();
-        while (i.hasNext()) {
-            sb.append(i.next().toString());
-            if (i.hasNext()) {
-                sb.append(" and ");
-            }
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

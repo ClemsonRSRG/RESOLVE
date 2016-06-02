@@ -53,18 +53,6 @@ public class ConceptTypeParamDec extends Dec implements ModuleParameter {
         return sb.toString();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Type ");
-        sb.append(myName.toString());
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

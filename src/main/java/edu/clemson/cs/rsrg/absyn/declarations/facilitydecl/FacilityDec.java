@@ -318,53 +318,6 @@ public class FacilityDec extends Dec {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Facility ");
-        sb.append(myName.toString());
-        sb.append(" is ");
-
-        sb.append(myConceptName.toString());
-        sb.append("( ");
-        Iterator<ModuleArgumentItem> cArgIt = myConceptParams.iterator();
-        while (cArgIt.hasNext()) {
-            sb.append(cArgIt.next().toString());
-
-            if (cArgIt.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        sb.append(" )\n");
-
-        for (EnhancementSpecItem eItem : myEnhancements) {
-            sb.append(eItem.toString());
-        }
-
-        sb.append(myConceptRealizName.toString());
-        sb.append("( ");
-        Iterator<ModuleArgumentItem> cRealizArgIt =
-                myConceptRealizParams.iterator();
-        while (cRealizArgIt.hasNext()) {
-            sb.append(cRealizArgIt.next().toString());
-
-            if (cRealizArgIt.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        sb.append(" )\n");
-
-        for (EnhancementSpecRealizItem bodyItem : myEnhancementRealizPairs) {
-            sb.append(bodyItem.toString());
-        }
-        sb.append("\n");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================
@@ -374,10 +327,15 @@ public class FacilityDec extends Dec {
      */
     @Override
     protected final FacilityDec copy() {
-        return new FacilityDec(myName.clone(), getConceptName(),
-                getConceptParams(), getEnhancements(), getConceptRealizName(),
-                getConceptRealizParams(), getEnhancementRealizPairs(),
-                getProfileName(), myExternallyRealizedFlag);
+        PosSymbol newProfileName = null;
+        if (myProfileName != null) {
+            newProfileName = myProfileName.clone();
+        }
+
+        return new FacilityDec(myName.clone(), myConceptName.clone(),
+                copyConceptArgs(), copyEnhItems(), myConceptRealizName.clone(),
+                copyConceptRealizArgs(), copyEnhBodyItems(), newProfileName,
+                myExternallyRealizedFlag);
     }
 
     // ===========================================================

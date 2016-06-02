@@ -77,32 +77,6 @@ public class FacilityTypeRepresentationDec
         return sb.toString();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Type ");
-        sb.append(myName.toString());
-        sb.append(" = ");
-        sb.append(myTy.toString());
-
-        // convention
-        sb.append("\t");
-        sb.append(myConvention.toString());
-
-        // initialization/finalization
-        sb.append("\t");
-        sb.append(myTypeInitItem.toString());
-        sb.append("\t");
-        sb.append(myTypeFinalItem.toString());
-
-        sb.append("end\n");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

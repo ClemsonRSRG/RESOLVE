@@ -116,19 +116,6 @@ public class ProgramCharExp extends ProgramLiteralExp {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        if (myCharacter != null) {
-            sb.append(myCharacter.toString());
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

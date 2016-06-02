@@ -161,14 +161,6 @@ public class IntegerExp extends LiteralExp {
         return this.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        return asString(0, 4);
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

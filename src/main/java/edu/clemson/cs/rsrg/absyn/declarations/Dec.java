@@ -136,15 +136,6 @@ public abstract class Dec extends ResolveConceptualElement {
         myMathType = mt;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return "<" + this.getClass().getSimpleName() + "@" + myLoc + ">:"
-                + getName();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

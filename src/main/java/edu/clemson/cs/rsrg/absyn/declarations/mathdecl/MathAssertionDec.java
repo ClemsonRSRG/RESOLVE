@@ -240,23 +240,6 @@ public class MathAssertionDec extends Dec {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myAssertionType.toString());
-        sb.append(" ");
-        sb.append(myName.toString());
-        sb.append(":\n");
-
-        sb.append(myAssertion.toString());
-        sb.append(";\n");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

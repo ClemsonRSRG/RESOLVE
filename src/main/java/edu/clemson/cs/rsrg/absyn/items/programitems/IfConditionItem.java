@@ -145,26 +145,6 @@ public class IfConditionItem extends ResolveConceptualElement {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("If ");
-        sb.append(myTestingExp.toString());
-        sb.append(" then\n");
-
-        // Print the statements
-        for (Statement s : myStatements) {
-            sb.append("\t");
-            sb.append(s.toString());
-            sb.append("\n");
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Private Methods
     // ===========================================================

@@ -306,65 +306,6 @@ public class OperationProcedureDec extends Dec {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        // operation declaration
-        sb.append(myWrappedOpDec.toString());
-
-        sb.append("\t");
-        if (myRecursiveFlag) {
-            sb.append("Recursive ");
-        }
-        sb.append("Procedure\n");
-
-        // decreasing clause
-        if (myDecreasing != null) {
-            sb.append("\t");
-            sb.append(myDecreasing.toString());
-        }
-
-        // facility declarations
-        sb.append("\n");
-        for (FacilityDec facilityDec : myFacilityDecs) {
-            sb.append("\t");
-            sb.append(facilityDec.toString());
-            sb.append("\n");
-        }
-
-        // variable declarations
-        sb.append("\n");
-        for (VarDec varDec : myVariableDecs) {
-            sb.append("\t");
-            sb.append(varDec.toString());
-            sb.append("\n");
-        }
-
-        // auxiliary variable declarations
-        sb.append("\n");
-        for (AuxVarDec varDec : myAuxVariableDecs) {
-            sb.append("\t");
-            sb.append(varDec.toString());
-            sb.append("\n");
-        }
-
-        // statements
-        sb.append("\n");
-        for (Statement statement : myStatements) {
-            sb.append("\t");
-            sb.append(statement.toString());
-            sb.append("\n");
-        }
-
-        sb.append("\tend\n");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

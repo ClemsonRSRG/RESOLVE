@@ -120,19 +120,6 @@ public class FuncAssignStmt extends Statement {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myVariableExp.toString());
-        sb.append(" := ");
-        sb.append(myFunctionExp.toString());
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

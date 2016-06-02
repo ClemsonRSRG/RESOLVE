@@ -116,19 +116,6 @@ public class ProgramStringExp extends ProgramLiteralExp {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        if (myString != null) {
-            sb.append(myString);
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

@@ -135,16 +135,6 @@ public abstract class ModuleDec extends Dec {
         return result;
     }
 
-    /**
-     * <p>Returns the module in string format.</p>
-     *
-     * @return Module as a string.
-     */
-    @Override
-    public final String toString() {
-        return this.asString(0, 4);
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

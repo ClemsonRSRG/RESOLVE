@@ -124,27 +124,4 @@ public class AffectsClause extends ResolveConceptualElement {
         return myAffectedExps.hashCode();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("affects ");
-
-        Iterator<Exp> it = myAffectedExps.iterator();
-        while (it.hasNext()) {
-            Exp exp = it.next();
-            sb.append(exp.toString());
-
-            if (it.hasNext()) {
-                sb.append(", ");
-            }
-        }
-
-        sb.append("\n");
-
-        return sb.toString();
-    }
-
 }

@@ -246,42 +246,6 @@ public class VarExp extends MathExp {
         return this.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        if (myQuantification != SymbolTableEntry.Quantification.NONE) {
-            sb.append(myQuantification);
-        }
-
-        if (myQualifier != null) {
-            sb.append(myQualifier.toString());
-            sb.append("::");
-        }
-
-        if (myName != null) {
-            String strName = myName.toString();
-            int index = 0;
-            int num = 0;
-            while ((strName.charAt(index)) == '?') {
-                num++;
-                index++;
-            }
-            if (strName.substring(num).startsWith("Conc_")) {
-                strName = strName.replace("Conc_", "Conc.");
-            }
-            sb.append(strName.substring(index, strName.length()));
-            for (int i = 0; i < num; i++) {
-                sb.append("'");
-            }
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

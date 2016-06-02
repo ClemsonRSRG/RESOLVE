@@ -170,32 +170,6 @@ public class ProgramVariableDotExp extends ProgramVariableExp {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        if (getQualifier() != null) {
-            sb.append(getQualifier().toString());
-            sb.append("::");
-        }
-
-        if (mySegmentExps != null) {
-            Iterator<ProgramVariableExp> i = mySegmentExps.iterator();
-
-            while (i.hasNext()) {
-                sb.append(i.next().toString());
-                if (i.hasNext()) {
-                    sb.append(".");
-                }
-            }
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

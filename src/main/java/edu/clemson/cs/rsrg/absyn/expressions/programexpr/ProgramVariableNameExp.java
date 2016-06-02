@@ -140,25 +140,6 @@ public class ProgramVariableNameExp extends ProgramVariableExp {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        if (getQualifier() != null) {
-            sb.append(getQualifier().toString());
-            sb.append("::");
-        }
-
-        if (myVarName != null) {
-            sb.append(myVarName.toString());
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

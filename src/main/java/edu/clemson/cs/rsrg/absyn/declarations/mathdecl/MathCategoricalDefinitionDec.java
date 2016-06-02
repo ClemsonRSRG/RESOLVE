@@ -144,38 +144,6 @@ public class MathCategoricalDefinitionDec extends Dec {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Categorical Definition ");
-        sb.append(myName.toString());
-        sb.append(" introduces\n");
-
-        Iterator<MathDefinitionDec> it = myDefinitions.iterator();
-        while (it.hasNext()) {
-            MathDefinitionDec definitionDec = it.next();
-            sb.append("\t");
-            sb.append(definitionDec.getName().toString());
-            sb.append(" : ");
-            sb.append(definitionDec.getReturnTy().toString());
-
-            if (it.hasNext()) {
-                sb.append(",\n");
-            }
-        }
-        sb.append("\n");
-
-        sb.append("related by\n");
-        sb.append("\t");
-        sb.append(myRelatedByExp.toString());
-        sb.append("\n");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

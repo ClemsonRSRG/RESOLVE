@@ -160,36 +160,6 @@ public class WhileStmt extends Statement {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        // loop condition
-        sb.append("While ( ");
-        sb.append(myTestingExp.toString());
-        sb.append(" )\n");
-
-        // verification assertions
-        sb.append(myVerificationBlock.toString());
-        sb.append("\n");
-
-        sb.append("do\n");
-
-        // list of statements in the loop
-        for (Statement statement : myWhileStatements) {
-            sb.append("\t");
-            sb.append(statement.toString());
-            sb.append("\n");
-        }
-
-        sb.append("end\n");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

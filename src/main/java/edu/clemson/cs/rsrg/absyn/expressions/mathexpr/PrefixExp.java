@@ -249,31 +249,6 @@ public class PrefixExp extends AbstractFunctionExp {
                 .clone(), newArgument);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        if (myQualifier != null) {
-            sb.append(myQualifier.toString());
-            sb.append("::");
-        }
-
-        if (myOperationName != null) {
-            sb.append(getOperatorAsString());
-        }
-
-        if (myArgument != null) {
-            sb.append("( ");
-            sb.append(myArgument.toString());
-            sb.append(" )");
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

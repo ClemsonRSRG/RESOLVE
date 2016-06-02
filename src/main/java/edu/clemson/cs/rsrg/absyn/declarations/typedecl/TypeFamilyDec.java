@@ -195,38 +195,6 @@ public class TypeFamilyDec extends Dec {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Type Family ");
-        sb.append(myName.toString());
-        sb.append(" is modeled by ");
-        sb.append(myTy.toString());
-
-        // exemplar
-        sb.append("\t");
-        sb.append("exemplar ");
-        sb.append(myExemplar.toString());
-        sb.append("\n");
-
-        // constraint
-        sb.append("\t");
-        sb.append(myConstraint.toString());
-
-        // initialization/finalization
-        sb.append("\t");
-        sb.append(myTypeInitItem.toString());
-        sb.append("\t");
-        sb.append(myTypeFinalItem.toString());
-
-        sb.append("end\n");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

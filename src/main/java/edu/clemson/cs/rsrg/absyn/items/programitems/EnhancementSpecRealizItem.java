@@ -218,40 +218,6 @@ public class EnhancementSpecRealizItem extends ResolveConceptualElement {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(myEnhancementName.toString());
-        sb.append("( ");
-        Iterator<ModuleArgumentItem> it = myEnhancementParams.iterator();
-        while (it.hasNext()) {
-            sb.append(it.next().toString());
-
-            if (it.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        sb.append(" )\n");
-
-        sb.append(myEnhancementRealizName.toString());
-        sb.append("( ");
-        Iterator<ModuleArgumentItem> it2 = myEnhancementRealizParams.iterator();
-        while (it2.hasNext()) {
-            sb.append(it2.next().toString());
-
-            if (it2.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        sb.append(" )\n");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Private Methods
     // ===========================================================

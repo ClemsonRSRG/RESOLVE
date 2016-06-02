@@ -235,25 +235,6 @@ public class AltItemExp extends MathExp {
         return this.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(myAssignmentExp.toString());
-
-        if (myTestingExp != null) {
-            sb.append(" if ");
-            sb.append(myTestingExp.toString());
-        }
-        else {
-            sb.append(" otherwise");
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

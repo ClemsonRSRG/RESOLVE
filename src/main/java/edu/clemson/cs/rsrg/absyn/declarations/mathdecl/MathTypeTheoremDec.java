@@ -154,35 +154,6 @@ public class MathTypeTheoremDec extends Dec {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Type Theorem ");
-        sb.append(myName.toString());
-        sb.append(":\n");
-
-        Iterator<MathVarDec> it = myUniversalVars.iterator();
-        while (it.hasNext()) {
-            sb.append("\t");
-            sb.append("For all ");
-            sb.append(it.next().toString());
-
-            if (it.hasNext()) {
-                sb.append(",\n");
-            }
-        }
-        sb.append("\n");
-
-        sb.append("\t\t");
-        sb.append(myAssertion.toString());
-        sb.append("\n");
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================

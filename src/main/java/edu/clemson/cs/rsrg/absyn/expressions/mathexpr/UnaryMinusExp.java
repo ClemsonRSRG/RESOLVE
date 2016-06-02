@@ -181,21 +181,6 @@ public class UnaryMinusExp extends MathExp {
         return this.clone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        if (myInnerArgumentExp != null) {
-            sb.append("-(");
-            sb.append(myInnerArgumentExp.toString());
-            sb.append(")");
-        }
-
-        return sb.toString();
-    }
-
     // ===========================================================
     // Protected Methods
     // ===========================================================
