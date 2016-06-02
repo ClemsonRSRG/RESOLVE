@@ -680,7 +680,7 @@ prefixOp
     ;
 
 infixOp
-    :   (IMPLIES | PLUS | CONCAT | MINUS | DIVIDE | MULTIPLY | EXP | MOD | REM | DIV |
+    :   op=(IMPLIES | PLUS | CONCAT | MINUS | DIVIDE | MULTIPLY | EXP | MOD | REM | DIV |
          IMPLIES | IFF | RANGE | AND | OR | UNION | INTERSECT | IN | NOT_IN | GT | LT |
          GT_EQL | LT_EQL | EQL | NOT_EQL)
     ;
@@ -867,22 +867,21 @@ mathFunctionApplicationExp
     ;
 
 mathCleanFunctionExp
-    :   name=IDENTIFIER (CARAT mathNestedExp)? LPAREN mathExp (COMMA mathExp)* RPAREN
-    |   name=IDENTIFIER
-    |   OP (infixOp | NOT | ABS | COMPLEMENT)
+    :   name=IDENTIFIER (CARAT mathNestedExp)? LPAREN mathExp (COMMA mathExp)* RPAREN   #mathFunctionExp
+    |   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER                               #mathVarExp
+    |   OP (infixOp | op=NOT | op=ABS | op=COMPLEMENT)                                  #mathOpNameExp
     ;
-
 
 mathOutfixExp
     :   lop=LT mathInfixExp rop=GT
-    |   lop=LL mathExp rop=GT
+    |   lop=LL mathExp rop=GG
     |   lop=BAR mathExp rop=BAR
     |   lop=DBL_BAR mathExp rop=DBL_BAR
     ;
 
 mathSetExp
-    :   LBRACE mathVariableDecl BAR mathExp RBRACE          #mathSetBuilderExp
-    |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE           #mathSetCollectionExp
+    :   LBRACE mathVariableDecl (whereClause)? BAR mathExp RBRACE       #mathSetBuilderExp
+    |   LBRACE (mathExp (COMMA mathExp)*)? RBRACE                       #mathSetCollectionExp
     ;
 
 mathTupleExp

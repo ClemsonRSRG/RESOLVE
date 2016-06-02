@@ -70,15 +70,17 @@ public class SetExp extends MathExp {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
-        sb.append(myVar.asString(indentSize + innerIndentInc, innerIndentInc));
+
+        sb.append("{");
+        sb.append(myVar.asString(0, innerIndentInc));
 
         if (myWhereExp != null) {
-            sb.append(myWhereExp.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+            sb.append(" where ");
+            sb.append(myWhereExp.asString(0, innerIndentInc));
         }
 
-        sb.append(myBodyExp.asString(indentSize + innerIndentInc,
-                innerIndentInc));
+        sb.append(" | ");
+        sb.append(myBodyExp.asString(0, innerIndentInc));
 
         return sb.toString();
     }

@@ -174,12 +174,11 @@ public class OutfixExp extends AbstractFunctionExp {
      * <p>This constructs an equality/inequality expression.</p>
      *
      * @param l A {@link Location} representation object.
-     * @param qual A {@link PosSymbol} representing the expression's qualifier.
      * @param operator A {@link Operator} representing the operator.
      * @param argument A {@link Exp} representing the right hand side.
      */
-    public OutfixExp(Location l, PosSymbol qual, Operator operator, Exp argument) {
-        super(l, qual);
+    public OutfixExp(Location l, Operator operator, Exp argument) {
+        super(l, null);
         myOperator = operator;
         myArgument = argument;
     }
@@ -197,10 +196,7 @@ public class OutfixExp extends AbstractFunctionExp {
         printSpace(indentSize, sb);
 
         sb.append(myOperator.getLeftDelimiterString());
-        if (myArgument != null) {
-            sb.append(myArgument.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-        }
+        sb.append(myArgument.asString(0, innerIndentInc));
         sb.append(myOperator.getRightDelimiterString());
 
         return sb.toString();
@@ -331,13 +327,7 @@ public class OutfixExp extends AbstractFunctionExp {
     public final Exp remember() {
         Exp newArgument = ((MathExp) myArgument).remember();
 
-        PosSymbol qualifier = null;
-        if (myQualifier != null) {
-            qualifier = myQualifier.clone();
-        }
-
-        return new OutfixExp(new Location(myLoc), qualifier, myOperator,
-                newArgument);
+        return new OutfixExp(new Location(myLoc), myOperator, newArgument);
     }
 
     /**
@@ -359,13 +349,8 @@ public class OutfixExp extends AbstractFunctionExp {
      */
     @Override
     protected final Exp copy() {
-        PosSymbol qualifier = null;
-        if (myQualifier != null) {
-            qualifier = myQualifier.clone();
-        }
-
-        return new OutfixExp(new Location(myLoc), qualifier, myOperator,
-                myArgument.clone());
+        return new OutfixExp(new Location(myLoc), myOperator, myArgument
+                .clone());
     }
 
     /**
@@ -373,13 +358,8 @@ public class OutfixExp extends AbstractFunctionExp {
      */
     @Override
     protected final Exp substituteChildren(Map<Exp, Exp> substitutions) {
-        PosSymbol qualifier = null;
-        if (myQualifier != null) {
-            qualifier = myQualifier.clone();
-        }
-
-        return new OutfixExp(new Location(myLoc), qualifier, myOperator,
-                substitute(myArgument, substitutions));
+        return new OutfixExp(new Location(myLoc), myOperator, substitute(
+                myArgument, substitutions));
     }
 
 }

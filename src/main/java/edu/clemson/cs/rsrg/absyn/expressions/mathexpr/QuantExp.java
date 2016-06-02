@@ -92,10 +92,6 @@ public class QuantExp extends MathExp {
             if (i.hasNext()) {
                 sb.append(", ");
             }
-            else {
-                sb.append(" : ");
-                sb.append(m.getTy().asString(0, innerIndentInc));
-            }
         }
 
         if (myWhereExp != null) {

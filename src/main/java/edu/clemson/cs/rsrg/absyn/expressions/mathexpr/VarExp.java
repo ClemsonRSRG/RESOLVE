@@ -91,15 +91,11 @@ public class VarExp extends MathExp {
         }
 
         if (myQualifier != null) {
-            sb.append(myQualifier.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+            sb.append(myQualifier.asString(0, innerIndentInc));
             sb.append("::");
         }
 
-        if (myName != null) {
-            sb.append(myName.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
-        }
+        sb.append(myName.asString(0, innerIndentInc));
 
         return sb.toString();
     }
