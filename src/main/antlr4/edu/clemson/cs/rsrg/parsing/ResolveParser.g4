@@ -800,7 +800,7 @@ mathTypeAssertionExp
     ;
 
 mathFunctionTypeExp
-    :   mathAddingExp (FUNCARROW mathAddingExp)*
+    :   mathAddingExp (FUNCARROW mathAddingExp)?
     ;
 
 mathAddingExp
