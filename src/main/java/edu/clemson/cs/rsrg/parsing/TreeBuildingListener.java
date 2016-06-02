@@ -63,7 +63,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * <p>Stores the information gathered from the children nodes of
      * {@code ResolveParser.DefinitionSignatureContext}</p>
      */
-    private List<DefinitionMembers> myDefinitionMembers;
+    private List<DefinitionMembers> myDefinitionMemberList;
 
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
@@ -90,7 +90,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myFile = file;
         myFinalModule = null;
         myNodes = new ParseTreeProperty<>();
-        myDefinitionMembers = null;
+        myDefinitionMemberList = null;
     }
 
     // ===========================================================
@@ -2174,25 +2174,32 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method creates a temporary list to store all the
+     * temporary definition members</p>
      *
-     * @param ctx
+     * @param ctx Defines declaration node in ANTLR4 AST.
      */
     @Override
     public void enterMathDefinesDecl(ResolveParser.MathDefinesDeclContext ctx) {
-        super.enterMathDefinesDecl(ctx);
+        myDefinitionMemberList = new ArrayList<>();
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a defines declaration.</p>
      *
-     * @param ctx
+     * @param ctx Defines declaration node in ANTLR4 AST.
      */
     @Override
     public void exitMathDefinesDecl(ResolveParser.MathDefinesDeclContext ctx) {
-        super.exitMathDefinesDecl(ctx);
+        DefinitionMembers members = myDefinitionMemberList.remove(0);
+        MathDefinitionDec definitionDec =
+                new MathDefinitionDec(members.name, members.params,
+                        members.rawType, null, false);
+        myDefinitionMemberList = null;
+
+        myNodes.put(ctx, definitionDec);
     }
 
     /**
@@ -2206,7 +2213,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void exitMathDefinitionDecl(
             ResolveParser.MathDefinitionDeclContext ctx) {
-    //myNodes.put(ctx, myNodes.get(ctx.getChild(0)));
+        myNodes.put(ctx, myNodes.get(ctx.getChild(0)));
     }
 
     /**
@@ -2220,7 +2227,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     @Override
     public void enterMathCategoricalDecl(
             ResolveParser.MathCategoricalDeclContext ctx) {
-        myDefinitionMembers = new ArrayList<>();
+        myDefinitionMemberList = new ArrayList<>();
     }
 
     /**
@@ -2236,10 +2243,10 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         // Create all the definition declarations inside
         // the categorical definition
         List<MathDefinitionDec> definitionDecls = new ArrayList<>();
-        for (DefinitionMembers members : myDefinitionMembers) {
+        for (DefinitionMembers members : myDefinitionMemberList) {
             definitionDecls.add(new MathDefinitionDec(members.name, members.params, members.rawType, null, false));
         }
-        myDefinitionMembers = null;
+        myDefinitionMemberList = null;
 
         myNodes.put(ctx, new MathCategoricalDefinitionDec(createPosSymbol(ctx.name), definitionDecls, (Exp) myNodes.removeFrom(ctx.mathExp())));
     }
@@ -2310,7 +2317,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         varDecls.add((MathVarDec) myNodes.removeFrom(ctx.mathVariableDecl(0)));
         varDecls.add((MathVarDec) myNodes.removeFrom(ctx.mathVariableDecl(1)));
 
-        myDefinitionMembers.add(new DefinitionMembers(name, varDecls, (Ty) myNodes.removeFrom(ctx.mathTypeExp())));
+        myDefinitionMemberList.add(new DefinitionMembers(name, varDecls, (Ty) myNodes.removeFrom(ctx.mathTypeExp())));
     }
 
     /**
@@ -2329,7 +2336,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         List<MathVarDec> varDecls = new ArrayList<>();
         varDecls.add((MathVarDec) myNodes.removeFrom(ctx.mathVariableDecl()));
 
-        myDefinitionMembers.add(new DefinitionMembers(name, varDecls, (Ty) myNodes.removeFrom(ctx.mathTypeExp())));
+        myDefinitionMemberList.add(new DefinitionMembers(name, varDecls, (Ty) myNodes.removeFrom(ctx.mathTypeExp())));
     }
 
     /**
@@ -2358,7 +2365,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
                         .definitionParameterList().mathVariableDeclGroup()
                         : new ArrayList<ParseTree>(), myNodes);
 
-        myDefinitionMembers.add(new DefinitionMembers(name, varDecls,
+        myDefinitionMemberList.add(new DefinitionMembers(name, varDecls,
                 (Ty) myNodes.removeFrom(ctx.mathTypeExp())));
     }
 
