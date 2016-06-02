@@ -862,14 +862,16 @@ mathDotExp
     ;
 
 mathFunctionApplicationExp
-    :   HASH mathCleanFunctionExp
-    |   mathCleanFunctionExp
+    :   HASH mathCleanFunctionExp   #mathOldExp
+    |   mathCleanFunctionExp        #mathFunctOrVarExp
     ;
 
 mathCleanFunctionExp
-    :   name=IDENTIFIER (CARAT mathNestedExp)? LPAREN mathExp (COMMA mathExp)* RPAREN   #mathFunctionExp
-    |   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER                               #mathVarExp
-    |   OP (infixOp | op=NOT | op=ABS | op=COMPLEMENT)                                  #mathOpNameExp
+    :   (qualifier=IDENTIFIER QUALIFIER)?
+        name=IDENTIFIER (CARAT mathNestedExp)?
+        LPAREN mathExp (COMMA mathExp)* RPAREN                  #mathFunctionExp
+    |   (qualifier=IDENTIFIER QUALIFIER)? name=IDENTIFIER       #mathVarExp
+    |   OP (infixOp | op=NOT | op=ABS | op=COMPLEMENT)          #mathOpNameExp
     ;
 
 mathOutfixExp

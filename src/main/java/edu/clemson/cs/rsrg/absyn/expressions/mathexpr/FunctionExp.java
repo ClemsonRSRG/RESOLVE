@@ -36,7 +36,10 @@ public class FunctionExp extends AbstractFunctionExp {
     // ===========================================================
 
     /** <p>The mathematical name expression for this function.</p> */
-    private final Exp myFuncNameExp;
+    private final VarExp myFuncNameExp;
+
+    /** <p>Some functions have an exponent-like part to the name.</p> */
+    private final Exp myFuncNameCaratExp;
 
     /** <p>The expression's argument fields</p> */
     private final List<Exp> myArguments;
@@ -51,16 +54,26 @@ public class FunctionExp extends AbstractFunctionExp {
      *
      * @param l A {@link Location} representation object.
      * @param qualifier A {@link PosSymbol} qualifier name object.
-     * @param name A {@link Exp} name expression object.
+     * @param name A {@link VarExp} name expression object.
+     * @param caratExp A {@link Exp} indicating the exponent-like part to the name.
      * @param argList A list of {@link Exp} argument objects.
-     * @param quantification The object's quantification (if any)
      */
-    public FunctionExp(Location l, PosSymbol qualifier, Exp name,
-            List<Exp> argList, SymbolTableEntry.Quantification quantification) {
+    public FunctionExp(Location l, PosSymbol qualifier, VarExp name,
+            Exp caratExp, List<Exp> argList) {
         super(l, qualifier);
+
+        // The qualifier should be part of the function expression
+        // and not part of the variable name.
+        if (name.getQualifier() != null) {
+            throw new MiscErrorException(
+                    "The qualifier should be part of the function expression",
+                    new IllegalArgumentException());
+        }
+
         myFuncNameExp = name;
+        myFuncNameCaratExp = caratExp;
         myArguments = argList;
-        setQuantification(quantification);
+        myQuantification = SymbolTableEntry.Quantification.NONE;
     }
 
     // ===========================================================
@@ -76,33 +89,33 @@ public class FunctionExp extends AbstractFunctionExp {
         printSpace(indentSize, sb);
 
         if (myQuantification != SymbolTableEntry.Quantification.NONE) {
-            printSpace(indentSize + innerIndentInc, sb);
-            sb.append(myQuantification.toString());
+            sb.append(myQuantification);
             sb.append(" ");
         }
 
         if (myQualifier != null) {
-            sb.append(myQualifier.asString(indentSize + innerIndentInc,
-                    innerIndentInc));
+            sb.append(myQualifier.asString(0, innerIndentInc));
             sb.append("::");
         }
 
-        sb.append(myFuncNameExp.asString(indentSize + innerIndentInc,
-                innerIndentInc));
+        sb.append(myFuncNameExp.asString(0, innerIndentInc));
 
-        if (myArguments != null) {
-            sb.append("(");
-            Iterator<Exp> it = myArguments.iterator();
-            while (it.hasNext()) {
-                sb.append(it.next().asString(indentSize + innerIndentInc,
-                        innerIndentInc));
-
-                if (it.hasNext()) {
-                    sb.append(", ");
-                }
-            }
-            sb.append(")");
+        if (myFuncNameCaratExp != null) {
+            sb.append("^");
+            sb.append(myFuncNameCaratExp.asString(0, innerIndentInc));
         }
+
+        sb.append("(");
+        Iterator<Exp> it = myArguments.iterator();
+        while (it.hasNext()) {
+            sb.append(it.next().asString(indentSize + innerIndentInc,
+                    innerIndentInc));
+
+            if (it.hasNext()) {
+                sb.append(", ");
+            }
+        }
+        sb.append(")");
 
         return sb.toString();
     }
@@ -112,7 +125,9 @@ public class FunctionExp extends AbstractFunctionExp {
      */
     @Override
     public final boolean containsExp(Exp exp) {
-        boolean found = myFuncNameExp.containsExp(exp);
+        boolean found =
+                myFuncNameExp.containsExp(exp)
+                        && myFuncNameCaratExp.containsExp(exp);
         if (!found && myArguments != null) {
             Iterator<Exp> i = myArguments.iterator();
             while (i.hasNext() && !found) {
@@ -133,7 +148,9 @@ public class FunctionExp extends AbstractFunctionExp {
      */
     @Override
     public final boolean containsVar(String varName, boolean IsOldExp) {
-        boolean found = myFuncNameExp.containsVar(varName, IsOldExp);
+        boolean found =
+                myFuncNameExp.containsVar(varName, IsOldExp)
+                        && myFuncNameCaratExp.containsVar(varName, IsOldExp);
         if (!found && myArguments != null) {
             Iterator<Exp> i = myArguments.iterator();
             while (i.hasNext() && !found) {
@@ -165,6 +182,10 @@ public class FunctionExp extends AbstractFunctionExp {
 
         if (!myFuncNameExp.equals(that.myFuncNameExp))
             return false;
+        if (myFuncNameCaratExp != null ? !myFuncNameCaratExp
+                .equals(that.myFuncNameCaratExp)
+                : that.myFuncNameCaratExp != null)
+            return false;
         return myArguments.equals(that.myArguments);
 
     }
@@ -182,12 +203,24 @@ public class FunctionExp extends AbstractFunctionExp {
                     posSymbolEquivalent(myQualifier, eAsFunction.myQualifier)
                             && equivalent(myFuncNameExp,
                                     eAsFunction.myFuncNameExp)
+                            && equivalent(myFuncNameCaratExp,
+                                    eAsFunction.myFuncNameCaratExp)
                             && argsEquivalent(myArguments,
                                     eAsFunction.myArguments)
                             && myQuantification == eAsFunction.myQuantification;
         }
 
         return retval;
+    }
+
+    /**
+     * <p>This method returns the exponent-like expression for the
+     * function name.</p>
+     *
+     * @return The {@link Exp} representation object.
+     */
+    public final Exp getCaratExp() {
+        return myFuncNameCaratExp;
     }
 
     /**
@@ -206,14 +239,7 @@ public class FunctionExp extends AbstractFunctionExp {
      */
     @Override
     public final PosSymbol getOperatorAsPosSymbol() {
-        if (!(myFuncNameExp instanceof VarExp)) {
-            throw new MiscErrorException(
-                    "We encountered an expression of the type "
-                            + myFuncNameExp.getClass().getName(),
-                    new InvalidClassException(""));
-        }
-
-        return ((VarExp) myFuncNameExp).getName();
+        return myFuncNameExp.getName();
     }
 
     /**
@@ -223,14 +249,7 @@ public class FunctionExp extends AbstractFunctionExp {
      */
     @Override
     public final String getOperatorAsString() {
-        if (!(myFuncNameExp instanceof VarExp)) {
-            throw new MiscErrorException(
-                    "We encountered an expression of the type "
-                            + myFuncNameExp.getClass().getName(),
-                    new InvalidClassException(""));
-        }
-
-        return ((VarExp) myFuncNameExp).getName().getName();
+        return myFuncNameExp.getName().getName();
     }
 
     /**
@@ -249,6 +268,7 @@ public class FunctionExp extends AbstractFunctionExp {
     public final List<Exp> getSubExpressions() {
         List<Exp> list = new ArrayList<>();
         list.add(myFuncNameExp);
+        list.add(myFuncNameCaratExp);
         list.addAll(copyExps());
 
         return list;
@@ -261,6 +281,11 @@ public class FunctionExp extends AbstractFunctionExp {
     public final int hashCode() {
         int result = super.hashCode();
         result = 31 * result + myFuncNameExp.hashCode();
+        result =
+                31
+                        * result
+                        + (myFuncNameCaratExp != null ? myFuncNameCaratExp
+                                .hashCode() : 0);
         result = 31 * result + myArguments.hashCode();
         return result;
     }
@@ -279,14 +304,19 @@ public class FunctionExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
-        Exp newNameExp;
-        if (myFuncNameExp instanceof MathExp){
-            newNameExp = ((MathExp) myFuncNameExp).remember();
+        VarExp newNameExp;
+        if (myFuncNameExp instanceof VarExp){
+            newNameExp = myFuncNameExp.remember();
         }
         else {
             throw new MiscErrorException("We encountered an expression of the type " +
                     myFuncNameExp.getClass().getName(),
                     new InvalidClassException(""));
+        }
+
+        Exp newCaratExp = null;
+        if (myFuncNameCaratExp != null) {
+            newCaratExp = myFuncNameCaratExp.clone();
         }
 
         List<Exp> newArgs = new ArrayList<>();
@@ -304,7 +334,7 @@ public class FunctionExp extends AbstractFunctionExp {
             newArgs.add(copyExp);
         }
 
-        return new FunctionExp(new Location(myLoc), qualifier, newNameExp, newArgs, myQuantification);
+        return new FunctionExp(new Location(myLoc), qualifier, newNameExp, newCaratExp, newArgs);
     }
 
     /**
@@ -331,8 +361,13 @@ public class FunctionExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
-        return new FunctionExp(new Location(myLoc), qualifier, myFuncNameExp
-                .clone(), copyExps(), myQuantification);
+        Exp newCaratExp = null;
+        if (myFuncNameCaratExp != null) {
+            newCaratExp = myFuncNameCaratExp.clone();
+        }
+
+        return new FunctionExp(new Location(myLoc), qualifier,
+                (VarExp) myFuncNameExp.clone(), newCaratExp, copyExps());
     }
 
     /**
@@ -345,13 +380,20 @@ public class FunctionExp extends AbstractFunctionExp {
             qualifier = myQualifier.clone();
         }
 
+        // YS: I don't think we ever need to substitute this.
+        Exp newCaratExp = null;
+        if (myFuncNameCaratExp != null) {
+            newCaratExp = myFuncNameCaratExp.clone();
+        }
+
         List<Exp> newArgs = new ArrayList<>();
         for (Exp f : myArguments) {
             newArgs.add(substitute(f, substitutions));
         }
 
-        return new FunctionExp(new Location(myLoc), qualifier, substitute(
-                myFuncNameExp, substitutions), newArgs, myQuantification);
+        return new FunctionExp(new Location(myLoc), qualifier,
+                (VarExp) substitute(myFuncNameExp, substitutions),
+                newCaratExp, newArgs);
     }
 
     // ===========================================================

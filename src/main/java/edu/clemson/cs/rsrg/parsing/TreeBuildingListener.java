@@ -3286,9 +3286,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
-    public void enterMathFunctionApplicationExp(
-            ResolveParser.MathFunctionApplicationExpContext ctx) {
-        super.enterMathFunctionApplicationExp(ctx);
+    public void exitMathFunctOrVarExp(ResolveParser.MathFunctOrVarExpContext ctx) {
+        super.exitMathFunctOrVarExp(ctx);
     }
 
     /**
@@ -3299,9 +3298,8 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      * @param ctx
      */
     @Override
-    public void exitMathFunctionApplicationExp(
-            ResolveParser.MathFunctionApplicationExpContext ctx) {
-        super.exitMathFunctionApplicationExp(ctx);
+    public void exitMathOldExp(ResolveParser.MathOldExpContext ctx) {
+        super.exitMathOldExp(ctx);
     }
 
     /**
@@ -3313,7 +3311,25 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitMathFunctionExp(ResolveParser.MathFunctionExpContext ctx) {
-        super.exitMathFunctionExp(ctx);
+        PosSymbol qualifier = null;
+        if (ctx.qualifier != null) {
+            qualifier = createPosSymbol(ctx.qualifier);
+        }
+
+        // function name
+        VarExp functionNameExp = new VarExp(createLocation(ctx.name), null, createPosSymbol(ctx.name));
+
+        // exponent-like part to the name
+        Exp caratExp = (Exp) myNodes.removeFrom(ctx.mathNestedExp());
+
+        // function arguments
+        List<ResolveParser.MathExpContext> mathExps = ctx.mathExp();
+        List<Exp> functionArgs = new ArrayList<>();
+        for (ResolveParser.MathExpContext context : mathExps) {
+            functionArgs.add((Exp) myNodes.removeFrom(context));
+        }
+
+        myNodes.put(ctx, new FunctionExp(createLocation(ctx), qualifier, functionNameExp, caratExp, functionArgs));
     }
 
     /**
