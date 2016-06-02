@@ -101,10 +101,12 @@ public class TypeAssertionExp extends MathExp {
      */
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
-        return myExp.asString(indentSize + innerIndentInc, innerIndentInc)
-                + " : "
-                + myAssertedTy.asString(indentSize + innerIndentInc,
-                        innerIndentInc);
+        StringBuffer sb = new StringBuffer();
+        sb.append(myExp.asString(indentSize, innerIndentInc));
+        sb.append(" : ");
+        sb.append(myAssertedTy.asString(0, innerIndentInc));
+
+        return sb.toString();
     }
 
     /**

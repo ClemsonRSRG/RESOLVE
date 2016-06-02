@@ -61,15 +61,14 @@ public class BetweenExp extends MathExp {
     @Override
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
-        printSpace(indentSize, sb);
-        sb.append("BetweenExp\n");
 
-        if (myJoiningExps != null) {
-            for (Exp exp : myJoiningExps) {
-                if (exp != null) {
-                    sb.append(exp.asString(indentSize + innerIndentInc,
-                            innerIndentInc));
-                }
+        printSpace(indentSize, sb);
+        Iterator<Exp> it = myJoiningExps.iterator();
+        while (it.hasNext()) {
+            sb.append(it.next().asString(0, innerIndentInc));
+
+            if (it.hasNext()) {
+                sb.append(" and ");
             }
         }
 

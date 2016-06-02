@@ -12,6 +12,7 @@
  */
 package edu.clemson.cs.rsrg.parsing;
 
+import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
@@ -28,9 +29,7 @@ import edu.clemson.cs.rsrg.init.file.ResolveFile;
 import edu.clemson.cs.rsrg.misc.Utilities;
 import edu.clemson.cs.rsrg.parsing.data.Location;
 import edu.clemson.cs.rsrg.parsing.data.PosSymbol;
-
 import java.util.*;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -2755,7 +2754,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitMathTypeExp(ResolveParser.MathTypeExpContext ctx) {
-    //myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
+        myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
     }
 
     /**
@@ -2768,7 +2767,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitMathExp(ResolveParser.MathExpContext ctx) {
-    //myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
+        myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
     }
 
     /**
@@ -2781,32 +2780,32 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitMathIteratedExp(ResolveParser.MathIteratedExpContext ctx) {
-    /*IterativeExp.Operator operator;
-    switch (ctx.op.getType()) {
-    case ResolveLexer.BIG_CONCAT:
-        operator = IterativeExp.Operator.CONCATENATION;
-        break;
-    case ResolveLexer.BIG_INTERSECT:
-        operator = IterativeExp.Operator.INTERSECTION;
-        break;
-    case ResolveLexer.BIG_PRODUCT:
-        operator = IterativeExp.Operator.PRODUCT;
-        break;
-    case ResolveLexer.BIG_SUM:
-        operator = IterativeExp.Operator.SUM;
-        break;
-    default:
-        operator = IterativeExp.Operator.UNION;
-        break;
-    }
+        IterativeExp.Operator operator;
+        switch (ctx.op.getType()) {
+        case ResolveLexer.BIG_CONCAT:
+            operator = IterativeExp.Operator.CONCATENATION;
+            break;
+        case ResolveLexer.BIG_INTERSECT:
+            operator = IterativeExp.Operator.INTERSECTION;
+            break;
+        case ResolveLexer.BIG_PRODUCT:
+            operator = IterativeExp.Operator.PRODUCT;
+            break;
+        case ResolveLexer.BIG_SUM:
+            operator = IterativeExp.Operator.SUM;
+            break;
+        default:
+            operator = IterativeExp.Operator.UNION;
+            break;
+        }
 
-    MathVarDec varDecl =
-            (MathVarDec) myNodes.removeFrom(ctx.mathVariableDecl());
-    Exp whereExp = (Exp) myNodes.removeFrom(ctx.whereClause());
-    Exp bodyExp = (Exp) myNodes.removeFrom(ctx.mathExp());
+        MathVarDec varDecl =
+                (MathVarDec) myNodes.removeFrom(ctx.mathVariableDecl());
+        Exp whereExp = (Exp) myNodes.removeFrom(ctx.whereClause());
+        Exp bodyExp = (Exp) myNodes.removeFrom(ctx.mathExp());
 
-    myNodes.put(ctx, new IterativeExp(createLocation(ctx), operator,
-            varDecl, whereExp, bodyExp));*/
+        myNodes.put(ctx, new IterativeExp(createLocation(ctx), operator,
+                varDecl, whereExp, bodyExp));
     }
 
     /**
@@ -2819,42 +2818,42 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitMathQuantifiedExp(ResolveParser.MathQuantifiedExpContext ctx) {
-    /*ResolveConceptualElement newElement;
-    ParseTree child = ctx.getChild(0);
+        ResolveConceptualElement newElement;
+        ParseTree child = ctx.getChild(0);
 
-    // Only need to construct a new ResolveConceptualElement if
-    // it is a quantified expression.
-    if (child instanceof ResolveParser.MathImpliesExpContext) {
-        newElement = myNodes.removeFrom(child);
-    }
-    else {
-        SymbolTableEntry.Quantification quantification;
-        switch (ctx.getStart().getType()) {
-        case ResolveLexer.FORALL:
-            quantification = SymbolTableEntry.Quantification.UNIVERSAL;
-            break;
-        case ResolveLexer.EXISTS:
-            quantification = SymbolTableEntry.Quantification.EXISTENTIAL;
-            break;
-        default:
-            quantification = SymbolTableEntry.Quantification.UNIQUE;
-            break;
+        // Only need to construct a new ResolveConceptualElement if
+        // it is a quantified expression.
+        if (child instanceof ResolveParser.MathImpliesExpContext) {
+            newElement = myNodes.removeFrom(child);
+        }
+        else {
+            SymbolTableEntry.Quantification quantification;
+            switch (ctx.getStart().getType()) {
+            case ResolveLexer.FORALL:
+                quantification = SymbolTableEntry.Quantification.UNIVERSAL;
+                break;
+            case ResolveLexer.EXISTS:
+                quantification = SymbolTableEntry.Quantification.EXISTENTIAL;
+                break;
+            default:
+                quantification = SymbolTableEntry.Quantification.UNIQUE;
+                break;
+            }
+
+            List<MathVarDec> mathVarDecls =
+                    Utilities.collect(MathVarDec.class, ctx
+                            .mathVariableDeclGroup() != null ? ctx
+                            .mathVariableDeclGroup().IDENTIFIER()
+                            : new ArrayList<ParseTree>(), myNodes);
+            Exp whereExp = (Exp) myNodes.removeFrom(ctx.whereClause());
+            Exp bodyExp = (Exp) myNodes.removeFrom(ctx.mathQuantifiedExp());
+
+            newElement =
+                    new QuantExp(createLocation(ctx), quantification,
+                            mathVarDecls, whereExp, bodyExp);
         }
 
-        List<MathVarDec> mathVarDecls =
-                Utilities.collect(MathVarDec.class, ctx
-                        .mathVariableDeclGroup() != null ? ctx
-                        .mathVariableDeclGroup().IDENTIFIER()
-                        : new ArrayList<ParseTree>(), myNodes);
-        Exp whereExp = (Exp) myNodes.removeFrom(ctx.whereClause());
-        Exp bodyExp = (Exp) myNodes.removeFrom(ctx.mathQuantifiedExp());
-
-        newElement =
-                new QuantExp(createLocation(ctx), quantification,
-                        mathVarDecls, whereExp, bodyExp);
-    }
-
-    myNodes.put(ctx, newElement);*/
+        myNodes.put(ctx, newElement);
     }
 
     /**
@@ -2867,31 +2866,31 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitMathImpliesExp(ResolveParser.MathImpliesExpContext ctx) {
-    /*ResolveConceptualElement newElement;
+        ResolveConceptualElement newElement;
 
-    // if-then-else expressions
-    if (ctx.getStart().getType() == ResolveLexer.IF) {
-        Exp testExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(0));
-        Exp thenExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(1));
-        Exp elseExp = null;
-        if (ctx.mathLogicalExp().size() > 2) {
-            elseExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(2));
+        // if-then-else expressions
+        if (ctx.getStart().getType() == ResolveLexer.IF) {
+            Exp testExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(0));
+            Exp thenExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(1));
+            Exp elseExp = null;
+            if (ctx.mathLogicalExp().size() > 2) {
+                elseExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(2));
+            }
+
+            newElement =
+                    new IfExp(createLocation(ctx), testExp, thenExp, elseExp);
+        }
+        // iff and implies expressions
+        else {
+            Exp leftExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(0));
+            Exp rightExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(1));
+
+            newElement =
+                    new InfixExp(createLocation(ctx), leftExp, null,
+                            createPosSymbol(ctx.op), rightExp);
         }
 
-        newElement =
-                new IfExp(createLocation(ctx), testExp, thenExp, elseExp);
-    }
-    // iff and implies expressions
-    else {
-        Exp leftExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(0));
-        Exp rightExp = (Exp) myNodes.removeFrom(ctx.mathLogicalExp(1));
-
-        newElement =
-                new InfixExp(createLocation(ctx), leftExp, null,
-                        createPosSymbol(ctx.op), rightExp);
-    }
-
-    myNodes.put(ctx, newElement);*/
+        myNodes.put(ctx, newElement);
     }
 
     /**
@@ -2904,81 +2903,176 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     @Override
     public void exitMathLogicalExp(ResolveParser.MathLogicalExpContext ctx) {
-    /*ResolveConceptualElement newElement;
-    List<ResolveParser.MathRelationalExpContext> relationalExpContexts = ctx.mathRelationalExp();
+        ResolveConceptualElement newElement;
+        List<ResolveParser.MathRelationalExpContext> relationalExpContexts = ctx.mathRelationalExp();
 
-    // relational expressions
-    if (relationalExpContexts.size() == 1) {
-        newElement = myNodes.removeFrom(ctx.mathRelationalExp(0));
-    }
-    // build logical expressions
-    else {
-        List<Exp> exps = new ArrayList<>();
-        for (ResolveParser.MathRelationalExpContext context : relationalExpContexts) {
-            exps.add((Exp) myNodes.removeFrom(context));
+        // relational expressions
+        if (relationalExpContexts.size() == 1) {
+            newElement = myNodes.removeFrom(ctx.mathRelationalExp(0));
+        }
+        // build logical expressions
+        else {
+            List<Exp> exps = new ArrayList<>();
+            for (ResolveParser.MathRelationalExpContext context : relationalExpContexts) {
+                exps.add((Exp) myNodes.removeFrom(context));
+            }
+
+            while (exps.size() != 1) {
+                int lastIndex = exps.size() - 1;
+                Exp leftExp = exps.remove(lastIndex - 1);
+                Exp rightExp = exps.remove(lastIndex);
+                exps.add(new InfixExp(leftExp.getLocation(), leftExp, null, createPosSymbol(ctx.op), rightExp));
+            }
+
+            newElement = exps.get(0);
         }
 
-        while (exps.size() != 1) {
-            int lastIndex = exps.size() - 1;
-            Exp leftExp = exps.remove(lastIndex - 1);
-            Exp rightExp = exps.remove(lastIndex);
-            exps.add(new InfixExp(leftExp.getLocation(), leftExp, null, createPosSymbol(ctx.op), rightExp));
-        }
-
-        newElement = exps.get(0);
-    }
-
-    myNodes.put(ctx, newElement);*/
+        myNodes.put(ctx, newElement);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method either stores the math expression representation
+     * generated by its child rules, generates a new math between expression
+     * or generates a new math infix expression with the specified
+     * operators.</p>
      *
-     * @param ctx
+     * @param ctx Math relational expression node in ANTLR4 AST.
      */
     @Override
     public void exitMathRelationalExp(ResolveParser.MathRelationalExpContext ctx) {
-        super.exitMathRelationalExp(ctx);
+        ResolveConceptualElement newElement;
+
+        // Check to see if this a between expression
+        if (ctx.op1 != null && ctx.op2 != null) {
+            // Obtain the 3 expressions
+            Exp exp1 = (Exp) myNodes.removeFrom(ctx.mathInfixExp(0));
+            Exp exp2 = (Exp) myNodes.removeFrom(ctx.mathInfixExp(1));
+            Exp exp3 = (Exp) myNodes.removeFrom(ctx.mathInfixExp(2));
+
+            List<Exp> joiningExps = new ArrayList<>();
+            joiningExps.add(new InfixExp(new Location(exp1.getLocation()), exp1.clone(), null, createPosSymbol(ctx.op1), exp2.clone()));
+            joiningExps.add(new InfixExp(new Location(exp1.getLocation()), exp2.clone(), null, createPosSymbol(ctx.op2), exp3.clone()));
+
+            newElement = new BetweenExp(createLocation(ctx), joiningExps);
+        }
+        else {
+            // Create a math infix expression with the specified operator if needed
+            if (ctx.mathInfixExp().size() > 1) {
+                // Obtain the 2 expressions
+                Exp exp1 = (Exp) myNodes.removeFrom(ctx.mathInfixExp(0));
+                Exp exp2 = (Exp) myNodes.removeFrom(ctx.mathInfixExp(1));
+
+                switch (ctx.op.getType()) {
+                    case ResolveLexer.EQL:
+                    case ResolveLexer.NOT_EQL:
+                        EqualsExp.Operator op;
+                        if (ctx.op.getType() == ResolveLexer.EQL) {
+                            op = EqualsExp.Operator.EQUAL;
+                        }
+                        else {
+                            op = EqualsExp.Operator.NOT_EQUAL;
+                        }
+
+                        newElement = new EqualsExp(createLocation(ctx), exp1, null, op, exp2);
+                        break;
+                    default:
+                        newElement = new InfixExp(createLocation(ctx), exp1, null, createPosSymbol(ctx.op), exp2);
+                        break;
+                }
+            }
+            else {
+                newElement = myNodes.removeFrom(ctx.mathInfixExp(0));
+            }
+        }
+
+        myNodes.put(ctx, newElement);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method either stores the math expression representation
+     * generated by its child rules or generates a new math infix expression
+     * with a range operator.</p>
      *
-     * @param ctx
+     * @param ctx Math infix expression node in ANTLR4 AST.
      */
     @Override
     public void exitMathInfixExp(ResolveParser.MathInfixExpContext ctx) {
-        super.exitMathInfixExp(ctx);
+        ResolveConceptualElement newElement;
+
+        // Create a math infix expression with a range operator if needed
+        if (ctx.mathTypeAssertionExp().size() > 1) {
+            newElement =
+                    new InfixExp(createLocation(ctx), (Exp) myNodes
+                            .removeFrom(ctx.mathTypeAssertionExp(0)), null,
+                            createPosSymbol(ctx.RANGE().getSymbol()),
+                            (Exp) myNodes.removeFrom(ctx
+                                    .mathTypeAssertionExp(1)));
+        }
+        else {
+            newElement = myNodes.removeFrom(ctx.mathTypeAssertionExp(0));
+        }
+
+        myNodes.put(ctx, newElement);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method either stores the math expression representation
+     * generated by its child rules or generates a new math type assertion expression.</p>
      *
-     * @param ctx
+     * @param ctx Math type assertion expression node in ANTLR4 AST.
      */
     @Override
     public void exitMathTypeAssertionExp(
             ResolveParser.MathTypeAssertionExpContext ctx) {
-        super.exitMathTypeAssertionExp(ctx);
+        ResolveConceptualElement newElement;
+
+        // Create a math type assertion expression if needed
+        if (ctx.mathTypeExp() != null) {
+            newElement =
+                    new TypeAssertionExp(createLocation(ctx), (Exp) myNodes
+                            .removeFrom(ctx.mathFunctionTypeExp()),
+                            (ArbitraryExpTy) myNodes.removeFrom(ctx
+                                    .mathTypeExp()));
+        }
+        else {
+            newElement = myNodes.removeFrom(ctx.mathFunctionTypeExp());
+        }
+
+        myNodes.put(ctx, newElement);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method either stores the math expression representation
+     * generated by its child rules or generates a new math function type expression.</p>
      *
-     * @param ctx
+     * @param ctx Math function type expression node in ANTLR4 AST.
      */
     @Override
     public void exitMathFunctionTypeExp(
             ResolveParser.MathFunctionTypeExpContext ctx) {
-        super.exitMathFunctionTypeExp(ctx);
+        ResolveConceptualElement newElement;
+
+        // Create an function type expression if needed
+        if (ctx.mathAddingExp().size() > 1) {
+            newElement =
+                    new InfixExp(createLocation(ctx), (Exp) myNodes
+                            .removeFrom(ctx.mathAddingExp(0)), null,
+                            createPosSymbol(ctx.FUNCARROW().getSymbol()),
+                            (Exp) myNodes.removeFrom(ctx.mathAddingExp(1)));
+        }
+        else {
+            newElement = myNodes.removeFrom(ctx.mathAddingExp(0));
+        }
+
+        myNodes.put(ctx, newElement);
     }
 
     /**
