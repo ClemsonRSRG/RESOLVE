@@ -15,11 +15,14 @@ package edu.clemson.cs.rsrg.parsing;
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathAssertionDec;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathCategoricalDefinitionDec;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathDefinitionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
 import edu.clemson.cs.rsrg.absyn.declarations.paramdecl.ModuleParameterDec;
 import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.MathVarDec;
+import edu.clemson.cs.rsrg.absyn.declarations.variabledecl.VarDec;
 import edu.clemson.cs.rsrg.absyn.expressions.Exp;
 import edu.clemson.cs.rsrg.absyn.expressions.mathexpr.*;
 import edu.clemson.cs.rsrg.absyn.items.programitems.UsesItem;
@@ -56,6 +59,12 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /** <p>Stores all the parser nodes we have encountered.</p> */
     private final ParseTreeProperty<ResolveConceptualElement> myNodes;
 
+    /**
+     * <p>Stores the information gathered from the children nodes of
+     * {@code ResolveParser.DefinitionSignatureContext}</p>
+     */
+    private List<DefinitionMembers> myDefinitionMembers;
+
     /** <p>The complete module representation.</p> */
     private ModuleDec myFinalModule;
 
@@ -81,6 +90,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         myFile = file;
         myFinalModule = null;
         myNodes = new ParseTreeProperty<>();
+        myDefinitionMembers = null;
     }
 
     // ===========================================================
@@ -2202,14 +2212,36 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method creates a temporary list to store all the
+     * temporary definition members</p>
      *
-     * @param ctx
+     * @param ctx Categorical definition declaration node in ANTLR4 AST.
+     */
+    @Override
+    public void enterMathCategoricalDecl(
+            ResolveParser.MathCategoricalDeclContext ctx) {
+        myDefinitionMembers = new ArrayList<>();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <p>This method generates a categorical definition declaration.</p>
+     *
+     * @param ctx Categorical definition declaration node in ANTLR4 AST.
      */
     @Override
     public void exitMathCategoricalDecl(
             ResolveParser.MathCategoricalDeclContext ctx) {
-        super.exitMathCategoricalDecl(ctx);
+        // Create all the definition declarations inside
+        // the categorical definition
+        List<MathDefinitionDec> definitionDecls = new ArrayList<>();
+        for (DefinitionMembers members : myDefinitionMembers) {
+            definitionDecls.add(new MathDefinitionDec(members.name, members.params, members.rawType, null, false));
+        }
+        myDefinitionMembers = null;
+
+        myNodes.put(ctx, new MathCategoricalDefinitionDec(createPosSymbol(ctx.name), definitionDecls, (Exp) myNodes.removeFrom(ctx.mathExp())));
     }
 
     /**
@@ -2251,209 +2283,88 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         super.exitMathStandardDefinitionDecl(ctx);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterCategoricalDefinitionSignature(
-            ResolveParser.CategoricalDefinitionSignatureContext ctx) {
-        super.enterCategoricalDefinitionSignature(ctx);
-    }
+    // -----------------------------------------------------------
+    // Standard definition signatures
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a temporary definition member object that stores
+     * all the relevant information needed by the parent rule.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void exitCategoricalDefinitionSignature(
-            ResolveParser.CategoricalDefinitionSignatureContext ctx) {
-        super.exitCategoricalDefinitionSignature(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterDefinitionSignature(
-            ResolveParser.DefinitionSignatureContext ctx) {
-        super.enterDefinitionSignature(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitDefinitionSignature(
-            ResolveParser.DefinitionSignatureContext ctx) {
-        super.exitDefinitionSignature(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterStandardInfixSignature(
-            ResolveParser.StandardInfixSignatureContext ctx) {
-        super.enterStandardInfixSignature(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Infix definition signature node in ANTLR4 AST.
      */
     @Override
     public void exitStandardInfixSignature(
             ResolveParser.StandardInfixSignatureContext ctx) {
-        super.exitStandardInfixSignature(ctx);
+        PosSymbol name;
+        if (ctx.IDENTIFIER() != null) {
+            name = createPosSymbol(ctx.IDENTIFIER().getSymbol());
+        }
+        else {
+            name = createPosSymbol(ctx.infixOp().op);
+        }
+
+        List<MathVarDec> varDecls = new ArrayList<>();
+        varDecls.add((MathVarDec) myNodes.removeFrom(ctx.mathVariableDecl(0)));
+        varDecls.add((MathVarDec) myNodes.removeFrom(ctx.mathVariableDecl(1)));
+
+        myDefinitionMembers.add(new DefinitionMembers(name, varDecls, (Ty) myNodes.removeFrom(ctx.mathTypeExp())));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a temporary definition member object that stores
+     * all the relevant information needed by the parent rule.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterStandardOutfixSignature(
-            ResolveParser.StandardOutfixSignatureContext ctx) {
-        super.enterStandardOutfixSignature(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Outfix definition signature node in ANTLR4 AST.
      */
     @Override
     public void exitStandardOutfixSignature(
             ResolveParser.StandardOutfixSignatureContext ctx) {
-        super.exitStandardOutfixSignature(ctx);
+        PosSymbol name = new PosSymbol(createLocation(ctx.lOp), ctx.lOp.getText() + "_" + ctx.rOp.getText());
+
+        List<MathVarDec> varDecls = new ArrayList<>();
+        varDecls.add((MathVarDec) myNodes.removeFrom(ctx.mathVariableDecl()));
+
+        myDefinitionMembers.add(new DefinitionMembers(name, varDecls, (Ty) myNodes.removeFrom(ctx.mathTypeExp())));
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a temporary definition member object that stores
+     * all the relevant information needed by the parent rule.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterStandardPrefixSignature(
-            ResolveParser.StandardPrefixSignatureContext ctx) {
-        super.enterStandardPrefixSignature(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Prefix definition signature node in ANTLR4 AST.
      */
     @Override
     public void exitStandardPrefixSignature(
             ResolveParser.StandardPrefixSignatureContext ctx) {
-        super.exitStandardPrefixSignature(ctx);
+        Token nameToken;
+        if (ctx.getStart() == ctx.prefixOp()) {
+            nameToken = ctx.prefixOp().getStart();
+        }
+        else {
+            nameToken = ctx.getStart();
+        }
+        PosSymbol name = createPosSymbol(nameToken);
+
+        List<MathVarDec> varDecls =
+                Utilities.collect(MathVarDec.class, ctx
+                        .definitionParameterList() != null ? ctx
+                        .definitionParameterList().mathVariableDeclGroup()
+                        : new ArrayList<ParseTree>(), myNodes);
+
+        myDefinitionMembers.add(new DefinitionMembers(name, varDecls,
+                (Ty) myNodes.removeFrom(ctx.mathTypeExp())));
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterPrefixOp(ResolveParser.PrefixOpContext ctx) {
-        super.enterPrefixOp(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitPrefixOp(ResolveParser.PrefixOpContext ctx) {
-        super.exitPrefixOp(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterInfixOp(ResolveParser.InfixOpContext ctx) {
-        super.enterInfixOp(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitInfixOp(ResolveParser.InfixOpContext ctx) {
-        super.exitInfixOp(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterDefinitionParameterList(
-            ResolveParser.DefinitionParameterListContext ctx) {
-        super.enterDefinitionParameterList(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitDefinitionParameterList(
-            ResolveParser.DefinitionParameterListContext ctx) {
-        super.exitDefinitionParameterList(ctx);
-    }
+    // -----------------------------------------------------------
+    // Different Types of Clauses
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
@@ -2749,21 +2660,26 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     }
 
     // -----------------------------------------------------------
-    // Mathematical expressions
+    // Arbitrary raw type built from a math expression
     // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
      * <p>
-     * <p>This method stores the math type expression representation
-     * generated by its child rules.</p>
+     * <p>This method generates a new arbitrary type with
+     * the math type expression generated by its child rules.</p>
      *
      * @param ctx Math type expression node in ANTLR4 AST.
      */
     @Override
     public void exitMathTypeExp(ResolveParser.MathTypeExpContext ctx) {
-        myNodes.put(ctx, myNodes.removeFrom(ctx.getChild(0)));
+        myNodes.put(ctx, new ArbitraryExpTy((Exp) myNodes.removeFrom(ctx
+                .getChild(0))));
     }
+
+    // -----------------------------------------------------------
+    // Mathematical expressions
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
@@ -3937,6 +3853,37 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
      */
     private PosSymbol createPosSymbol(Token t) {
         return new PosSymbol(createLocation(t), t.getText());
+    }
+
+    // ===========================================================
+    // Temporary Definition Construct
+    // ===========================================================
+
+    /**
+     * <p>This holds items that are needed to build a
+     * {@link MathDefinitionDec}</p>
+     */
+    private class DefinitionMembers {
+
+        public PosSymbol name;
+        public List<MathVarDec> params;
+        public Ty rawType;
+
+        /**
+         * <p>This constructs a temporary structure to store all the relevant
+         * items to build a {@link MathDefinitionDec}.</p>
+         *
+         * @param name Definition name.
+         * @param params Definition parameters.
+         * @param rawType Definition return type.
+         */
+        public DefinitionMembers(PosSymbol name, List<MathVarDec> params,
+                Ty rawType) {
+            this.name = name;
+            this.params = params;
+            this.rawType = rawType;
+        }
+
     }
 
 }

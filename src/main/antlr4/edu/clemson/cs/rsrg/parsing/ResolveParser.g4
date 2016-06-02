@@ -661,7 +661,7 @@ definitionSignature
 
 standardInfixSignature
     :   LPAREN mathVariableDecl RPAREN
-        infixOp
+        (IDENTIFIER | infixOp)
         LPAREN mathVariableDecl RPAREN COLON mathTypeExp
     ;
 
