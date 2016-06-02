@@ -604,7 +604,9 @@ mathTypeTheoremDecl
 // mathematical theorems, corollaries, etc
 
 mathAssertionDecl
-    :   (AXIOM | COROLLARY | LEMMA | PROPERTY | THEOREM ) name=mathTheoremIdent
+    :   assertionType=(AXIOM | COROLLARY | LEMMA | PROPERTY |
+            THEOREM | THEOREM_ASSOCIATIVE | THEOREM_COMMUTATIVE)
+        name=mathTheoremIdent
         COLON mathExp SEMICOLON
     ;
 

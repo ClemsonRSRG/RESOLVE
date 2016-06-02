@@ -166,8 +166,12 @@ public class MathAssertionDec extends Dec {
     public final String asString(int indentSize, int innerIndentInc) {
         StringBuffer sb = new StringBuffer();
         printSpace(indentSize, sb);
+
         sb.append(myAssertionType.toString());
-        sb.append(" ");
+        if (myTheoremSubtype != null) {
+            sb.append(myTheoremSubtype.toString());
+            sb.append(" ");
+        }
         sb.append(myName.asString(0, innerIndentInc));
         sb.append(":\n");
 

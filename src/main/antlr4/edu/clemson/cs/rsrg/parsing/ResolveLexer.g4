@@ -480,6 +480,14 @@ THEOREM
     :   'Theorem'
     ;
 
+THEOREM_ASSOCIATIVE
+    :   'Theorem (Associative)'
+    ;
+
+THEOREM_COMMUTATIVE
+    :   'Theorem (Commutative)'
+    ;
+
 TYPE
     :   'Type'
     |   'type'

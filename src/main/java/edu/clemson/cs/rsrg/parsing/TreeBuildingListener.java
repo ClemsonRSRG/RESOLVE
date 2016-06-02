@@ -14,6 +14,7 @@ package edu.clemson.cs.rsrg.parsing;
 
 import edu.clemson.cs.r2jt.typeandpopulate2.entry.SymbolTableEntry;
 import edu.clemson.cs.rsrg.absyn.declarations.Dec;
+import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathAssertionDec;
 import edu.clemson.cs.rsrg.absyn.declarations.mathdecl.MathTypeTheoremDec;
 import edu.clemson.cs.rsrg.absyn.declarations.moduledecl.ModuleDec;
 import edu.clemson.cs.rsrg.absyn.ResolveConceptualElement;
@@ -2102,51 +2103,63 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     /**
      * {@inheritDoc}
      * <p>
-     * <p>The default implementation does nothing.</p>
+     * <p>This method generates a representation of a math assertion
+     * declaration.</p>
      *
-     * @param ctx
-     */
-    @Override
-    public void enterMathAssertionDecl(
-            ResolveParser.MathAssertionDeclContext ctx) {
-        super.enterMathAssertionDecl(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
+     * @param ctx Math assertion declaration node in ANTLR4 AST.
      */
     @Override
     public void exitMathAssertionDecl(ResolveParser.MathAssertionDeclContext ctx) {
-        super.exitMathAssertionDecl(ctx);
+        ResolveConceptualElement newElement;
+
+        Exp mathExp = (Exp) myNodes.removeFrom(ctx.mathExp());
+        switch (ctx.assertionType.getType()) {
+        case ResolveLexer.THEOREM:
+        case ResolveLexer.THEOREM_ASSOCIATIVE:
+        case ResolveLexer.THEOREM_COMMUTATIVE:
+            MathAssertionDec.TheoremSubtype theoremSubtype;
+            if (ctx.assertionType.getType() == ResolveLexer.THEOREM_ASSOCIATIVE) {
+                theoremSubtype = MathAssertionDec.TheoremSubtype.ASSOCIATIVITY;
+            }
+            else if (ctx.assertionType.getType() == ResolveLexer.THEOREM_COMMUTATIVE) {
+                theoremSubtype = MathAssertionDec.TheoremSubtype.COMMUTATIVITY;
+            }
+            else {
+                theoremSubtype = MathAssertionDec.TheoremSubtype.NONE;
+            }
+
+            newElement =
+                    new MathAssertionDec(createPosSymbol(ctx.name.getStart()),
+                            theoremSubtype, mathExp);
+            break;
+        case ResolveLexer.AXIOM:
+            newElement =
+                    new MathAssertionDec(createPosSymbol(ctx.name.getStart()),
+                            MathAssertionDec.AssertionType.AXIOM, mathExp);
+            break;
+        case ResolveLexer.COROLLARY:
+            newElement =
+                    new MathAssertionDec(createPosSymbol(ctx.name.getStart()),
+                            MathAssertionDec.AssertionType.COROLLARY, mathExp);
+            break;
+        case ResolveLexer.LEMMA:
+            newElement =
+                    new MathAssertionDec(createPosSymbol(ctx.name.getStart()),
+                            MathAssertionDec.AssertionType.LEMMA, mathExp);
+            break;
+        default:
+            newElement =
+                    new MathAssertionDec(createPosSymbol(ctx.name.getStart()),
+                            MathAssertionDec.AssertionType.PROPERTY, mathExp);
+            break;
+        }
+
+        myNodes.put(ctx, newElement);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void enterMathTheoremIdent(ResolveParser.MathTheoremIdentContext ctx) {
-        super.enterMathTheoremIdent(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * <p>The default implementation does nothing.</p>
-     *
-     * @param ctx
-     */
-    @Override
-    public void exitMathTheoremIdent(ResolveParser.MathTheoremIdentContext ctx) {
-        super.exitMathTheoremIdent(ctx);
-    }
+    // -----------------------------------------------------------
+    // Mathematical definitions
+    // -----------------------------------------------------------
 
     /**
      * {@inheritDoc}
@@ -3870,32 +3883,6 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
     public void exitProgStringExp(ResolveParser.ProgStringExpContext ctx) {
         super.exitProgStringExp(ctx);
     }
-
-    //    @Override
-    //    public void exitPrecisItem(ResolveParser.PrecisItemContext ctx) {
-    //        //this node at any given time has at most one child. if you're unsure,
-    //        //go back to the grammar and check: is it  a rule that only refers to
-    //        //other rules? The absence of these types of middle rules in the parse
-    //        //tree would effectively result in a more traditional ast -- and is
-    //        //consequently the sort of thing you're doing here by hand, but w/ your own objects
-    //
-    //        //In other words, you're going to be the thing below quite a bit, so understand it:
-    //        myNodes.put(ctx, myNodes.get(ctx.getChild(0)));
-    //    }
-    //
-    //
-    //    // -----------------------------------------------------------
-    //    // Mathematical theorems, corollaries, etc
-    //    // -----------------------------------------------------------
-    //
-    //    @Override
-    //    public void exitMathAssertionDecl(
-    //            ResolveParser.MathAssertionDeclContext ctx) {
-    //        /*MathAssertionDec theorem = new MathAssertionDec(
-    //                createLocation(ctx.getStart()), createPosSymbol(
-    //                ctx.name.getStart())); //Todo: Add the actual assertion once exprs are represented.
-    //        myNodes.put(ctx, theorem);*/
-    //    }
 
     // ===========================================================
     // Public Methods
