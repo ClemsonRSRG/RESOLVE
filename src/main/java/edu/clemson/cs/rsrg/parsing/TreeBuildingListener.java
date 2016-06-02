@@ -1686,7 +1686,7 @@ public class TreeBuildingListener extends ResolveParserBaseListener {
         List<TerminalNode> varNames = ctx.IDENTIFIER();
         for (TerminalNode varName : varNames) {
             myNodes.put(ctx, new MathVarDec(
-                    createPosSymbol(varName.getSymbol()), rawType));
+                    createPosSymbol(varName.getSymbol()), rawType.clone()));
         }
     }
 
